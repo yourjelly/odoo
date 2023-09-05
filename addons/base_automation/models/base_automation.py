@@ -72,9 +72,7 @@ class BaseAutomation(models.Model):
         "ir.model", string="Model", required=True, ondelete="cascade", help="Model on which the automation rule runs."
     )
     model_name = fields.Char(related="model_id.model", string="Model Name", readonly=True)
-    action_server_ids = fields.One2many(
-        comodel_name="base.automation.action.link",
-        inverse_name="base_automation_id",
+    action_server_ids = fields.One2many("ir.actions.server", "base_automation_id",
         context={'default_usage': 'base_automation'},
         string="Actions",
         compute="_compute_action_server_ids",
@@ -325,7 +323,7 @@ class BaseAutomation(models.Model):
 
     @api.onchange('model_id')
     def _onchange_model(self):
-        if len(self.action_server_ids) > 0:
+        if self.action_server_ids:
             return {
                 'warning': {
                     'title': _("Warning"),
@@ -335,8 +333,7 @@ class BaseAutomation(models.Model):
 
     @api.onchange('trigger', 'action_server_ids')
     def _onchange_trigger_or_actions(self):
-        self_sudo = self.sudo()
-        no_code_actions = self_sudo.action_server_ids.filtered(lambda a: a.state != 'code')
+        no_code_actions = self.action_server_ids.filtered(lambda a: a.state != 'code')
         if self.trigger == 'on_change' and len(no_code_actions) > 0:
             trigger_field = self._fields['trigger']
             action_states = dict(self.action_server_ids._fields['state']._description_selection(self.env))
@@ -353,7 +350,7 @@ class BaseAutomation(models.Model):
             }}
 
         MAIL_STATES = ('mail_post', 'followers', 'next_activity')
-        mail_actions = self_sudo.action_server_ids.filtered(lambda a: a.state in MAIL_STATES)
+        mail_actions = self.action_server_ids.filtered(lambda a: a.state in MAIL_STATES)
         if self.trigger == 'on_unlink' and len(mail_actions) > 0:
             return {'warning': {
                 'title': _("Warning"),

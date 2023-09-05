@@ -18,7 +18,7 @@ class TestAutomation(TransactionCase):
             "model_id": model.id,
             "trigger_field_ids": [(6, 0, [self.env.ref("base.field_res_partner__name").id])],
         })
-        action = self.env["base.automation.action.link"].create({
+        action = self.env["ir.actions.server"].create({
             "name": "Set Active To False",
             "base_automation_id": automation.id,
             "state": "object_write",
@@ -46,7 +46,7 @@ class TestAutomation(TransactionCase):
             "model_id": model.id,
             "trigger_field_ids": [(6, 0, [self.env.ref("base.field_ir_filters__name").id])],
         })
-        action = self.env["base.automation.action.link"].create({
+        action = self.env["ir.actions.server"].create({
             "name": "Set Active To False",
             "base_automation_id": automation.id,
             "model_id": model.id,
@@ -85,7 +85,7 @@ class TestAutomation(TransactionCase):
             "model_id": model.id,
             "on_change_field_ids": [(6, 0, [self.env.ref("base.field_ir_filters__name").id])],
         })
-        action = self.env["base.automation.action.link"].create({
+        action = self.env["ir.actions.server"].create({
             "name": "Set Active To False",
             "base_automation_id": automation.id,
             "model_id": model.id,

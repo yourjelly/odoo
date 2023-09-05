@@ -32,7 +32,7 @@ class TestMailFullComposer(HttpCase):
             'on_change_field_ids': (4, self.ref('mail.field_mail_compose_message__template_id'),),
             'model_id': self.env.ref('mail.model_mail_compose_message').id,
         })
-        server_action = self.env['base.automation.action.link'].create({
+        server_action = self.env['ir.actions.server'].create({
             'name': 'Test',
             'base_automation_id': automation.id,
             'state': 'code',

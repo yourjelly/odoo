@@ -88,7 +88,7 @@
                                     name="action_server_ids"
                                     widget="one2many"
                                     class="o_base_automation_actions_field"
-                                    context="{'default_model_id': model_id, 'default_state': False, 'automatic_action_name': True}"
+                                    context="{'default_model_id': model_id, 'default_state': False, 'automatic_action_name': True, 'form_view_ref': 'base_automation.view_server_action_form'}"
                                 >
                                     <kanban>
                                         <control>
@@ -135,7 +135,7 @@
         <!-- Automation: Server Action Form View -->
         <record id="view_server_action_form" model="ir.ui.view">
             <field name="name">base.automation.server.action.form</field>
-            <field name="model">base.automation.action.link</field>
+            <field name="model">ir.actions.server</field>
             <field name="mode">primary</field>
             <field name="inherit_id" ref="base.view_server_action_form"/>
             <field name="arch" type="xml">

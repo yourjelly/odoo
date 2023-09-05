@@ -425,7 +425,6 @@ env['res.partner'].create({'name': partner_name})
             <field name="model">ir.actions.server</field>
             <field name="arch" type="xml">
                 <tree string="Server Actions">
-                    <field name="sequence" widget="handle"/>
                     <field name="name"/>
                     <field name="state"/>
                     <field name="model_id"/>

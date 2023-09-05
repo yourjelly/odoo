@@ -10,3 +10,5 @@ class ServerAction(models.Model):
     usage = fields.Selection(selection_add=[
         ('base_automation', 'Automation Rule')
     ], ondelete={'base_automation': 'cascade'})
+    base_automation_id = fields.Many2one('base.automation', string='Automation Rule', ondelete='cascade')
+
