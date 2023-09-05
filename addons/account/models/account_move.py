@@ -3571,7 +3571,6 @@ class AccountMove(models.Model):
                     lines.with_context(move_reverse_cancel=move_reverse_cancel).reconcile()
         return reverse_moves
 
-
     def _reverse_moves(self, default_values_list=None, cancel=False):
         ''' Reverse a recordset of account.move.
         If cancel parameter is true, the reconcilable or liquidity lines
@@ -4010,8 +4009,8 @@ class AccountMove(models.Model):
             exchange_move_ids = set([row[0] for row in self._cr.fetchall()])
 
         for move in self:
-            if move.id in exchange_move_ids:
-                raise UserError(_('You cannot reset to draft an exchange difference journal entry.'))
+            # if move.id in exchange_move_ids:
+            #     raise UserError(_('You cannot reset to draft an exchange difference journal entry.'))
             if move.tax_cash_basis_rec_id or move.tax_cash_basis_origin_move_id:
                 # If the reconciliation was undone, move.tax_cash_basis_rec_id will be empty;
                 # but we still don't want to allow setting the caba entry to draft

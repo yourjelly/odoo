@@ -6,6 +6,7 @@ from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 from odoo.tests import tagged
 from odoo.tests.common import Form
 from odoo import fields, Command
+# from freezegun import freeze_time
 
 
 @tagged('post_install', '-at_install')
@@ -619,6 +620,36 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
             {'amount_residual': 0.0,        'amount_residual_currency': 0.0,    'reconciled': True},
             {'amount_residual': -40.0,      'amount_residual_currency': -120.0, 'reconciled': False},
         ])
+
+    # @freeze_time('2017-01-01')
+    # def test_reconcile_inv_with_rinv_foreign_currency_fully_reconcile_same_accounts(self):
+    #     currency = self.currency_data['currency']
+    #
+    #     move = self.init_invoice('out_invoice', amounts=[1200], post=True, currency=currency, invoice_date='2016-01-01', taxes=[self.tax_purchase_a])
+    #     reverse_move = move._reverse_moves()
+    #     reverse_move.date = '2017-01-01'
+    #     reverse_move._post(soft=False)
+    #     exchange_diff_move = self._get_partials(move.line_ids).exchange_move_id
+    #
+    #     self.assertInvoiceValues(exchange_diff_move, [
+    #         {
+    #             'currency_id': self.currency_data['currency'].id,
+    #             'debit': 230.0,
+    #             'credit': 0.0,
+    #         },
+    #         {
+    #             'currency_id': self.currency_data['currency'].id,
+    #             'debit': 0.0,
+    #             'credit': 200.0,
+    #         },
+    #         {
+    #             'currency_id': self.currency_data['currency'].id,
+    #             'debit': 0.0,
+    #             'credit': 30.0,
+    #         },
+    #     ], {
+    #         'date': '2017-01-01',
+    #     })
 
     def test_reconcile_exchange_difference_on_partial_same_foreign_currency_debit_income_partial_payment(self):
         currency = self.currency_data['currency']

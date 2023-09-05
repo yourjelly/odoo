@@ -1946,8 +1946,11 @@ class AccountMoveLine(models.Model):
                             remaining_credit_amount_curr -= credit_exchange_amount
 
             if exchange_lines_to_fix:
-                res['exchange_values'] = exchange_lines_to_fix._prepare_exchange_difference_move_vals(
+                res['exchange_values'] = self._prepare_exchange_difference_move_vals(
                     amounts_list,
+                    exchange_lines_to_fix,
+                    debit_values,
+                    credit_values,
                     exchange_date=max(
                         debit_aml._get_reconciliation_aml_field_value('date', shadowed_aml_values),
                         credit_aml._get_reconciliation_aml_field_value('date', shadowed_aml_values),
@@ -2387,8 +2390,9 @@ class AccountMoveLine(models.Model):
                         exchange_lines_to_fix += aml
                         amounts_list.append({'amount_residual_currency': aml.amount_residual_currency})
                     exchange_max_date = max(exchange_max_date, aml.date)
-                exchange_diff_values = exchange_lines_to_fix._prepare_exchange_difference_move_vals(
+                exchange_diff_values = self._prepare_exchange_difference_move_vals(
                     amounts_list,
+                    exchange_lines_to_fix,
                     company=involved_amls.company_id,
                     exchange_date=exchange_max_date,
                 )
@@ -2483,7 +2487,8 @@ class AccountMoveLine(models.Model):
 
         return partials
 
-    def _prepare_exchange_difference_move_vals(self, amounts_list, company=None, exchange_date=None):
+    @api.model
+    def _prepare_exchange_difference_move_vals(self, amounts_list, exchange_lines_to_fix, debit_values=None, credit_values=None, company=None, exchange_date=None):
         """ Prepare values to create later the exchange difference journal entry.
         The exchange difference journal entry is there to fix the debit/credit of lines when the journal items are
         fully reconciled in foreign currency.
@@ -2515,7 +2520,7 @@ class AccountMoveLine(models.Model):
         }
         to_reconcile = []
 
-        for line, amounts in zip(self, amounts_list):
+        for line, amounts in zip(exchange_lines_to_fix, amounts_list):
             move_vals['date'] = max(move_vals['date'], line.date)
 
             if 'amount_residual' in amounts:
@@ -2541,6 +2546,9 @@ class AccountMoveLine(models.Model):
                 exchange_line_account = income_exchange_account
 
             sequence = len(move_vals['line_ids'])
+
+            both_move_are_invoices = debit_values['aml'].move_id.is_invoice(include_receipts=True) and credit_values['aml'].move_id.is_invoice(include_receipts=True)
+
             move_vals['line_ids'] += [
                 Command.create({
                     'name': _('Currency exchange rate difference'),
@@ -2552,17 +2560,55 @@ class AccountMoveLine(models.Model):
                     'partner_id': line.partner_id.id,
                     'sequence': sequence,
                 }),
-                Command.create({
-                    'name': _('Currency exchange rate difference'),
-                    'debit': amount_residual if amount_residual > 0.0 else 0.0,
-                    'credit': -amount_residual if amount_residual < 0.0 else 0.0,
-                    'amount_currency': amount_residual_currency,
-                    'account_id': exchange_line_account.id,
-                    'currency_id': line.currency_id.id,
-                    'partner_id': line.partner_id.id,
-                    'sequence': sequence + 1,
-                }),
             ]
+
+            if not both_move_are_invoices:
+                move_vals['line_ids'] += [
+                    Command.create({
+                        'name': _('Currency exchange rate difference'),
+                        'debit': amount_residual if amount_residual > 0.0 else 0.0,
+                        'credit': -amount_residual if amount_residual < 0.0 else 0.0,
+                        'amount_currency': amount_residual_currency,
+                        'account_id': exchange_line_account.id,
+                        'currency_id': line.currency_id.id,
+                        'partner_id': line.partner_id.id,
+                        'sequence': sequence + 1,
+                    }),
+                ]
+            else:
+                if debit_values['aml'] == line:
+                    # move = debit_values['aml'].move_id
+                    reverse_move = credit_values['aml'].move_id
+                else:
+                    # move = credit_values['aml'].move_id
+                    reverse_move = debit_values['aml'].move_id
+
+                groups = reverse_move.line_ids \
+                    .filtered(lambda l: l.display_type in ['product', 'tax'] and not l.reconciled) \
+                    .grouped(lambda l: (l.account_id, l.tax_ids))
+
+                for group in groups:
+                    proportion = abs(sum(groups[group].mapped('amount_currency'))) / reverse_move.amount_total
+                    # proportion = abs(sum(groups[group].mapped('amount_currency'))) / reverse_move.amount_residual
+                    # proportion = abs(sum(groups[group].mapped('amount_currency'))) / group[2].amount_residual
+
+                    groups[group] = {'lines': groups[group], 'proportion': proportion,
+                                     'balance': proportion * amounts['amount_residual']}
+
+                for group in groups:
+                    move_vals['line_ids'] += [
+                        Command.create({
+                            'name': _('Currency exchange rate difference'),
+                            'debit': groups[group]['balance'] if groups[group]['balance'] > 0.0 else 0.0,
+                            'credit': -groups[group]['balance'] if groups[group]['balance'] < 0.0 else 0.0,
+                            'account_id': group[0].id,
+                            'currency_id': line.currency_id.id,
+                            'tax_tag_invert': bool(groups[group]["balance"] < 0.0),
+                            'tax_tag_ids': groups[group]['lines'][0].tax_tag_ids,
+                            'partner_id': line.partner_id.id,
+                            'sequence': sequence + 1,
+                        }),
+                    ]
             to_reconcile.append((line, sequence))
 
         return {'move_values': move_vals, 'to_reconcile': to_reconcile}
