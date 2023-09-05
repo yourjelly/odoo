@@ -123,24 +123,6 @@ class ServerActions(models.Model):
         if other:
             other.mail_post_method = 'comment'
 
-    @api.depends('mail_post_method')
-    def _compute_mail_post_method_helper(self):
-        for action in self:
-            if action.mail_post_method == 'email':
-                action.mail_post_method_helper = _(
-                    'The message will be sent as an email to the recipients of '
-                    'the template and will not appear in the messaging history.')
-            elif action.mail_post_method == 'note':
-                action.mail_post_method_helper = _(
-                    'The message will be posted as an internal note '
-                    'visible to internal users in the messaging history.')
-            elif action.mail_post_method == 'comment':
-                action.mail_post_method_helper = _(
-                    'The message will be posted as a message on the record, '
-                    'notifying all followers. It will appear in the messaging history.')
-            else:
-                action.mail_post_method_helper = False
-
     @api.depends('state')
     def _compute_partner_ids(self):
         to_reset = self.filtered(lambda act: act.state != 'followers')
