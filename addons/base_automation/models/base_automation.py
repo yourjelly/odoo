@@ -146,8 +146,8 @@ class BaseAutomation(models.Model):
         "resource.calendar", string='Use Calendar',
         compute='_compute_trg_date_calendar_id',
         readonly=False, store=True,
-        help="""When calculating a day-based timed condition, it is possible
-                to use a calendar to compute the date based on working days.""")
+        help="When calculating a day-based timed condition, it is possible"
+             "to use a calendar to compute the date based on working days.")
     filter_pre_domain = fields.Char(
         string='Before Update Domain',
         compute='_compute_filter_pre_domain',
