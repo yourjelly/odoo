@@ -31,7 +31,15 @@ class IrActionsReport(models.Model):
                 header = record.header
                 footer = record.footer
 
-                if not footer and not header:
+                included_product_docs = self.env['product.document']
+                for line in order.order_line:
+                    document = line.product_id.product_document_ids or line.product_template_id.product_document_ids
+                    included_product_docs += document.filtered(lambda d: d.attached_on == 'inside')
+                    # TODO edm: this code makes me bleed, working for now
+
+                # TODO edm: constraint if not PDF, either on the product document or filter here
+
+                if not header and not included_product_docs and not footer:
                     continue
 
                 IrBinary = self.env['ir.binary']
@@ -39,6 +47,9 @@ class IrActionsReport(models.Model):
                 pdf_data = []
                 if header:
                     pdf_data.append(IrBinary._record_to_stream(record, 'header').read())
+
+                for included_product_doc in included_product_docs:
+                    pdf_data.append(IrBinary._record_to_stream(included_product_doc, 'datas').read())
 
                 pdf_data.append((initial_stream).getvalue())
 
