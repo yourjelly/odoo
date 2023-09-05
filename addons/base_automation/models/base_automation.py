@@ -509,7 +509,7 @@ class BaseAutomation(models.Model):
         for action in self.sudo().action_server_ids:
             for ctx in contexts:
                 try:
-                    action.sudo().with_context(**ctx).run()
+                    action.with_context(**ctx).run()
                 except Exception as e:
                     self._add_postmortem_automation(e)
                     raise
