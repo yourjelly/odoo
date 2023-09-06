@@ -20,6 +20,9 @@ addons/*
 # BlackList libs
 addons/web/static/lib
 
+# BlackList emoji_data
+addons/web/static/src/core/emoji_picker/emoji_data.js
+
 # Ignore everything in web legacy but the top level (adapters)
 addons/web/static/src/legacy/**/*
 !addons/web/static/src/legacy

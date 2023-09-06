@@ -1,6 +1,7 @@
 #!/bin/bash
 community=$(cd -- "$(dirname "$0")" &> /dev/null && cd ../../.. && pwd)
 tooling="$community/addons/web/tooling"
+test_lint="$community/addons/test_lint/tests"
 testRealPath="$(realpath --relative-to=. "$tooling/hooks")"
 if [[ $testRealPath == "" ]]; then
     echo "Please install realpath"
@@ -11,8 +12,8 @@ enableInDir () {
     cd "$1" || exit
     hooksPath="$(realpath --relative-to=. "$tooling/hooks")"
     git config core.hooksPath "$hooksPath"
-    cp "$tooling/_eslintignore" .eslintignore
-    cp "$tooling/_eslintrc.json" .eslintrc.json
+    cp "$test_lint/whitelist_ignore" .eslintignore
+    cp "$test_lint/whitelist_eslintrc" .eslintrc.json
     cp "$tooling/_jsconfig.json" jsconfig.json
     cp "$tooling/_package.json" package.json
     if [[ $2 == "copy" ]]; then
