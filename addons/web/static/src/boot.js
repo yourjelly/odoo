@@ -307,6 +307,47 @@
             unloaded: unloaded ? unloaded.map((mod) => mod.name) : [],
             cycle,
         };
+
+        odoo._errors = moduleInfo;
+        odoo._jobs = {};
+        for (const job of jobs) {
+            odoo._jobs[job.name] = job;
+        }
+        for (const job of missing) {
+            odoo._jobs[job] = { name: job, missing: true };
+        }
+        for (const job of jobs) {
+            for (const dep of job.deps) {
+                if (odoo._jobs[dep]) {
+                    odoo._jobs[dep].dependent ||= {}
+                    odoo._jobs[dep].dependent[job.name] = job;
+                }
+            }
+        }
+
+        const unloadedFromMissingStrings = [];
+        const unloadedJobs = unloaded || [];
+        for (const unloadedJob of unloadedJobs) {
+            const reallyMissing = unloadedJob.missing.filter(dep => missing.includes(dep));
+            if (reallyMissing.length) {
+                unloadedFromMissingStrings.push(`${unloadedJob.name}:\n${reallyMissing.map(x => `  ${x}`).join('\n')}\n`);
+            }
+        }
+        if (unloadedFromMissingStrings.length) {
+            console.error(`Some modules are missing dependencies:\n\n${unloadedFromMissingStrings.join('\n')}`);
+        }
+        const unloadedString = [];
+        const allFailed = new Set([...moduleInfo.missing, ...moduleInfo.failed, ...moduleInfo.unloaded, ...(moduleInfo.cycle || [])]);
+        for (const unloadedJob of unloadedJobs) {
+            const failedDeps = unloadedJob.dependencies.filter( dep => allFailed.has(dep));
+            unloadedString.push(`${unloadedJob.name}:\n${failedDeps.map(x => `  ${x}`).join('\n')}\n`);
+        }
+        if (unloadedString.length) {
+            console.error(`Unmet dependencies:\n\n${unloadedString.join('\n')}`);
+        }
+        if (unloadedJobs.length) {
+            console.error(`unloaded modules:\n`, unloadedJobs);
+        }
         odoo.__DEBUG__.jsModules = moduleInfo;
         displayModuleErrors(moduleInfo);
 
