@@ -18,6 +18,7 @@ export const matchMedia = window.matchMedia;
 export const navigator = window.navigator;
 export const Number = window.Number;
 export const Object = window.Object;
+export const ontouchstart = window.ontouchstart;
 export const Promise = window.Promise;
 export const Proxy = window.Proxy;
 export const RegExp = window.RegExp;

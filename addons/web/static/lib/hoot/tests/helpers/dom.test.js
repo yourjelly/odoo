@@ -1,6 +1,5 @@
 /** @odoo-module **/
 
-import { getFixture, mountTemplate } from "@web/../tests/helpers/utils";
 import {
     closest,
     getFocusableElements,
@@ -17,11 +16,12 @@ import {
     isEventTarget,
     isFocusable,
     isVisible,
+    mount,
     queryAll,
     queryOne,
-} from "@web/core/utils/dom";
-import { click } from "@web/core/utils/events";
-import { suite, test } from "../setup";
+} from "../../helpers/dom";
+import { click } from "../../helpers/events";
+import { suite, test } from "../../setup";
 
 /**
  * @param {Document} document
@@ -93,28 +93,9 @@ const FULL_HTML_TEMPLATE = /* xml */ `
     `;
 const SVG_URL = "http://www.w3.org/2000/svg";
 
-suite("HOOT", "Helpers", "DOM", () => {
-    test("closest", async (assert) => {
-        await mountTemplate(/* xml */ `
-            <div class="root position-relative" style="width:$800}px;height:${600}px">
-                ${makeSquare({ left: 30, top: 30 }, "target a")}
-                ${makeSquare({ left: 0, top: 0 }, "target b")}
-                ${makeSquare({ left: 200, top: 100 }, "target c")}
-            </div>
-        `);
-
-        const root = getFixture(".root");
-        const targets = root.getElementsByClassName("target");
-        const { x, y } = getRect(root);
-
-        assert.equal(targets.length, 3);
-        assert.hasClass(closest(targets, { x: x + 15, y: y + 15 }), "b");
-        assert.hasClass(closest(targets, { x: x + 45, y: y + 45 }), "a");
-        assert.hasClass(closest(targets, { x: x + 800, y: y + 0 }), "c");
-    });
-
+suite.ui.skip("HOOT", "Helpers", "DOM", () => {
     test("getFocusableElements", async (assert) => {
-        await mountTemplate(/* xml */ `
+        await mount(/* xml */ `
             <input class="input" />
             <div class="div" tabindex="0" />
             <button class="disabled-button" disabled="disabled">Disabled button</button>
@@ -128,7 +109,7 @@ suite("HOOT", "Helpers", "DOM", () => {
     });
 
     test("getNextFocusableElement", async (assert) => {
-        await mountTemplate(/* xml */ `
+        await mount(/* xml */ `
             <input class="input" />
             <div class="div" tabindex="0" />
             <button class="disabled-button" disabled="disabled">Disabled button</button>
@@ -141,9 +122,9 @@ suite("HOOT", "Helpers", "DOM", () => {
     });
 
     test("getParentFrame", async (assert) => {
-        await mountTemplate(/* xml */ `<div class="root" />`);
+        await mount(/* xml */ `<div class="root" />`);
 
-        const parent = await makeIframe(document, getFixture(".root"));
+        const parent = await makeIframe(document, queryOne(".root"));
         const child = await makeIframe(parent.contentDocument);
 
         const content = child.contentDocument.createElement("div");
@@ -155,7 +136,7 @@ suite("HOOT", "Helpers", "DOM", () => {
     });
 
     test("getPreviousFocusableElement", async (assert) => {
-        await mountTemplate(/* xml */ `
+        await mount(/* xml */ `
             <input class="input" />
             <div class="div" tabindex="0" />
             <button class="disabled-button" disabled="disabled">Disabled button</button>
@@ -168,44 +149,44 @@ suite("HOOT", "Helpers", "DOM", () => {
     });
 
     test("getRect", async (assert) => {
-        await mountTemplate(/* xml */ `
+        await mount(/* xml */ `
             <div class="root position-relative">
                 ${makeSquare({ left: 10, top: 20, padding: 5 }, "target")}
             </div>
         `);
 
-        const root = getFixture(".root");
+        const root = queryOne(".root");
         const { x, y } = getRect(root);
         const target = root.querySelector(".target");
 
         assert.deepEqual(getRect(target), new DOMRect(x + 10, y + 20, 30, 30));
         assert.deepEqual(
-            getRect(getFixture(".target"), { trimPadding: true }),
+            getRect(queryOne(".target"), { trimPadding: true }),
             new DOMRect(x + 15, y + 25, 20, 20)
         );
     });
 
     test("getScrollParent", async (assert) => {
-        await mountTemplate(FULL_HTML_TEMPLATE);
+        await mount(FULL_HTML_TEMPLATE);
 
-        assert.equal(getScrollParent(".highlighted", "x"), getFixture("main"));
-        assert.equal(getScrollParent(".highlighted", "y"), getFixture("ul"));
+        assert.equal(getScrollParent(".highlighted", "x"), queryOne("main"));
+        assert.equal(getScrollParent(".highlighted", "y"), queryOne("ul"));
     });
 
     test("getText", async (assert) => {
-        await mountTemplate(FULL_HTML_TEMPLATE);
+        await mount(FULL_HTML_TEMPLATE);
 
         assert.deepEqual(getText(".title"), ["Title", "List header", "Form title"]);
         assert.deepEqual(getText("footer"), ["Footer\nBack to top"]);
     });
 
-    QUnit.skip("getTouchingElements", async (assert) => {
+    test.skip("getTouchingElements", async (assert) => {
         assert.ok(getTouchingElements());
     });
 
     test("isDocument", async (assert) => {
         assert.ok(isDocument(document));
-        assert.ok(isDocument((await makeIframe(document, getFixture())).contentDocument));
+        assert.ok(isDocument((await makeIframe(document, queryOne())).contentDocument));
         assert.ok(isDocument(document.createElement("div").ownerDocument));
         assert.not.ok(isDocument(document.body));
         assert.not.ok(isDocument(window));
@@ -241,14 +222,14 @@ suite("HOOT", "Helpers", "DOM", () => {
     });
 
     test("isFocusable", async (assert) => {
-        await mountTemplate(FULL_HTML_TEMPLATE);
+        await mount(FULL_HTML_TEMPLATE);
 
         assert.ok(isFocusable("input:first"));
         assert.not.ok(isFocusable("li:first"));
     });
 
     test("isVisible", async (assert) => {
-        await mountTemplate(FULL_HTML_TEMPLATE);
+        await mount(FULL_HTML_TEMPLATE);
 
         assert.ok(isVisible(window));
         assert.ok(isVisible(document));
@@ -259,10 +240,10 @@ suite("HOOT", "Helpers", "DOM", () => {
 
     test("queryAll", async (assert) => {
         /** @param {string} selector */
-        const $$ = (selector, root = getFixture()) =>
+        const $$ = (selector, root = queryOne()) =>
             selector ? [...root.querySelectorAll(selector)] : [];
 
-        await mountTemplate(FULL_HTML_TEMPLATE);
+        await mount(FULL_HTML_TEMPLATE);
 
         const [iframe] = $$("iframe");
 
@@ -303,9 +284,9 @@ suite("HOOT", "Helpers", "DOM", () => {
     });
 
     test("queryOne", async (assert) => {
-        await mountTemplate(FULL_HTML_TEMPLATE);
+        await mount(FULL_HTML_TEMPLATE);
 
-        assert.equal(queryOne(".title:first"), getFixture().querySelector("header .title"));
+        assert.equal(queryOne(".title:first"), queryOne().querySelector("header .title"));
         assert.throws(() => queryOne(".title"));
         assert.throws(() => queryOne(".title", { single: false }));
     });

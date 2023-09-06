@@ -1,7 +1,6 @@
 /** @odoo-module **/
 
-import { App } from "@odoo/owl";
-import { config as domConfig } from "../helpers/dom";
+import { mount } from "../helpers/dom";
 import { registerCleanup } from "../setup";
 import { Main } from "../ui/main";
 
@@ -18,8 +17,7 @@ export function mockLocation(href) {
  * @param {ReturnType<import("../core/runner").makeTestRunner>} runner
  */
 export async function mountRunner(runner) {
-    const app = new App(Main, { env: { runner }, test: true });
-    await app.mount(domConfig.defaultRoot);
+    const app = await mount(Main, { env: { runner } });
 
     registerCleanup(() => app.destroy());
 }

@@ -3,7 +3,7 @@
 import { Component, useExternalListener, useRef, useState } from "@odoo/owl";
 import { Tag } from "../core/tag";
 import { Object } from "../globals";
-import { compactXML, debounce, isRegExpFilter, lookup, title } from "../utils";
+import { compactXML, debounce, isRegExpFilter, lookup, normalize, title } from "../utils";
 import { ICONS } from "./icons";
 import { TagButton } from "./tag_button";
 
@@ -22,12 +22,12 @@ export class Search extends Component {
 
     static template = compactXML/* xml */ `
         <div class="hoot-search hoot-relative" t-ref="root" t-on-keydown="onKeyDown">
-            <form class="hoot-row hoot-gap-1" t-on-submit.prevent="onSubmit">
-                <div class="hoot-search-bar hoot-row hoot-gap-1">
+            <form class="hoot-search-group hoot-row" t-on-submit.prevent="onSubmit">
+                <div class="hoot-search-bar hoot-row hoot-p-1 hoot-gap-1">
                     <t t-foreach="getCategoryCounts()" t-as="count" t-key="count.id">
                         <button
                             type="submit"
-                            class="hoot-btn hoot-row hoot-gap-1 hoot-px-1 hoot-py-0.5"
+                            class="hoot-btn hoot-row hoot-gap-1 hoot-px-1 hoot-p-1"
                             title="Remove all"
                             t-on-click="() => this.uncheckCategory(count.id)"
                         >
@@ -37,7 +37,7 @@ export class Search extends Component {
                     </t>
                     <input
                         type="text"
-                        class="hoot-px-1"
+                        class="hoot-p-1"
                         autofocus="autofocus"
                         placeholder="Filter suites, tests or tags"
                         t-ref="search-input"
@@ -47,7 +47,7 @@ export class Search extends Component {
                 </div>
                 <button
                     type="submit"
-                    class="hoot-btn hoot-py-1 hoot-px-2"
+                    class="hoot-btn-go hoot-btn hoot-p-2 hoot-px-2"
                     t-att-disabled="state.buttonDisabled"
                 >
                     Go
@@ -60,11 +60,11 @@ export class Search extends Component {
                             <span class="hoot-dropdown-title">Filter using <t t-esc="filterType" /></span>
                         </h5>
                         <ul class="hoot-dropdown-lines hoot-col">
-                            <li tabindex="0" t-on-keydown="onLineKeyDown">
+                            <li tabindex="0" t-on-keydown="(ev) => this.onLineKeyDown(ev, null)">
                                 <button
                                     class="hoot-dropdown-line"
                                     title="Run this filter"
-                                    t-on-click="() => this.reload({ withFilter: true })"
+                                    t-on-click="() => this.reload({ useTextFilter: true })"
                                 >
                                     "<span t-esc="state.query" />"
                                 </button>
@@ -165,7 +165,7 @@ export class Search extends Component {
         }, 16);
 
         useExternalListener(window, "click", (ev) => {
-            this.state.showDropdown = this.rootRef.el.contains(ev.target);
+            this.state.showDropdown = this.rootRef.el?.contains(ev.target);
         });
     }
 
@@ -173,9 +173,9 @@ export class Search extends Component {
         const { runner } = this.env;
         const { query } = this.state;
         return {
-            suites: lookup(query, runner.suites, (suite) => suite.fullName),
-            tests: lookup(query, runner.tests, (test) => test.fullName),
-            tags: lookup(query, runner.tags, (tag) => tag.name),
+            suites: lookup(query, runner.suites, (suite) => normalize(suite.fullName)),
+            tests: lookup(query, runner.tests, (test) => normalize(test.fullName)),
+            tags: lookup(query, runner.tags, (tag) => normalize(tag.name)),
         };
     }
 
@@ -199,7 +199,9 @@ export class Search extends Component {
     }
 
     onSubmit() {
-        this.reload();
+        this.reload({
+            useTextFilter: document.activeElement === this.searchInputRef.el && this.state.query,
+        });
     }
 
     onInput() {
@@ -235,10 +237,6 @@ export class Search extends Component {
                 this.state.showDropdown = false;
                 return;
             }
-            case "Enter": {
-                ev.preventDefault();
-                return this.reload();
-            }
             case "ArrowDown": {
                 return navigate(+1);
             }
@@ -261,21 +259,21 @@ export class Search extends Component {
                         checked[id] = true;
                     }
                 } else {
-                    this.reload({ withFilter: true });
+                    this.reload({ useTextFilter: true });
                 }
                 break;
             }
             case "Enter": {
                 ev.preventDefault();
                 ev.stopPropagation();
-                this.reload({ withFilter: !category });
+                this.reload({ useTextFilter: !category });
                 break;
             }
         }
     }
 
-    reload({ withFilter } = {}) {
-        if (withFilter) {
+    reload({ useTextFilter } = {}) {
+        if (useTextFilter) {
             this.env.url.setParams({
                 filter: this.state.query,
                 suite: null,
@@ -299,7 +297,6 @@ export class Search extends Component {
                 test: Object.keys(tests),
             });
         }
-        console.log({ withFilter });
         this.env.url.refresh();
     }
 

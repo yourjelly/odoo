@@ -36,12 +36,18 @@ function useColorScheme(storageKey) {
 }
 
 function updateTitle(failed) {
+    const toAdd = failed ? TITLE_PREFIX.fail : TITLE_PREFIX.success;
+    if (document.title.startsWith(toAdd)) {
+        return;
+    }
+    let title = document.title;
     for (const prefix of Object.values(TITLE_PREFIX)) {
-        if (document.title.startsWith(prefix)) {
-            return;
+        if (title.startsWith(prefix)) {
+            title = title.slice(prefix.length);
+            break;
         }
     }
-    document.title = `${failed ? TITLE_PREFIX.fail : TITLE_PREFIX.success} ${document.title}`;
+    document.title = `${toAdd} ${title}`;
 }
 
 const COLOR_SCHEMES = ["dark", "light"];
@@ -66,21 +72,24 @@ export class Main extends Component {
     static template = compactXML/* xml */ `
         <t t-if="env.runner.config.headless">
             Running in headless mode
+            <a t-att-href="env.url.createURL({ headless: null })">
+                Run with UI
+            </a>
         </t>
         <main t-else="" class="hoot-runner" t-att-class="color.scheme">
             <header class="hoot-panel hoot-col">
                 <div class="hoot-panel-top hoot-gap-2 hoot-row">
-                    <h1 class="hoot-logo hoot-text-primary" title="Hierarchically Organized Odoo Tests">
+                    <h1 class="hoot-logo hoot-text-primary hoot-w-full hoot-text-xl hoot-select-none" title="Hierarchically Organized Odoo Tests">
                         HOOT
                     </h1>
-                    <span class="hoot-useragent hoot-truncate hoot-row">${navigator.userAgent}</span>
+                    <span class="hoot-useragent hoot-truncate hoot-row hoot-text-sm">${navigator.userAgent}</span>
                     <button t-on-click="color.toggle" title="Toggle color scheme">
                         <t t-if="color.scheme === 'light'">${ICONS.moon}</t>
                         <t t-else="">${ICONS.sun}</t>
                     </button>
                 </div>
-                <nav class="hoot-controls">
-                    <div class="hoot-buttons hoot-gap-1 hoot-row">
+                <nav class="hoot-controls hoot-gap-4">
+                    <div class="hoot-buttons hoot-row">
                         <RunButton />
                         <RunFailedButton />
                         <RunAllButton />
@@ -120,7 +129,7 @@ export class Main extends Component {
         });
         runner.afterAll(() => {
             updateTitle(failed);
-            cleanupDOM();
+            // cleanupDOM();
         });
 
         onMounted(async () => {

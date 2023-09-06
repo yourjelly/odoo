@@ -8,7 +8,7 @@ import { ICONS } from "./icons";
 export class ConfigDropdown extends Component {
     static template = compactXML/* xml */ `
         <div class="hoot-config hoot-relative" t-ref="root">
-            <button t-ref="toggler" class="hoot-btn hoot-p-2">
+            <button t-ref="toggler" class="hoot-btn hoot-p-2" title="Configuration">
                 ${ICONS.gear}
             </button>
             <t t-if="state.open">
@@ -33,6 +33,14 @@ export class ConfigDropdown extends Component {
                         />
                         <span>No try/catch</span>
                     </label>
+                    <label class="hoot-checkbox hoot-dropdown-line">
+                        <input
+                            type="checkbox"
+                            t-model="env.runner.config.randomorder"
+                            t-on-change="env.url.refresh"
+                        />
+                        <span>Random order</span>
+                    </label>
                 </div>
             </t>
         </div>
@@ -44,9 +52,9 @@ export class ConfigDropdown extends Component {
         this.state = useState({ open: false });
 
         useExternalListener(window, "click", (ev) => {
-            if (!this.rootRef.el.contains(ev.target)) {
+            if (!this.rootRef.el?.contains(ev.target)) {
                 this.state.open = false;
-            } else if (this.togglerRef.el.contains(ev.target)) {
+            } else if (this.togglerRef.el?.contains(ev.target)) {
                 this.state.open = !this.state.open;
             }
         });

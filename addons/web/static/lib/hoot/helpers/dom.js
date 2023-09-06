@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
-import { groupBy, isIterable, log } from "../utils";
+import { App, Component, xml } from "@odoo/owl";
+import { groupBy, isIterable, log, match } from "../utils";
 
 /**
  * @typedef {{ x?: number; y?: number; left?: number; top?: number }} Coordinates
@@ -217,6 +218,13 @@ export function cleanupDOM() {
     }
 }
 
+export function getActiveElement() {
+    const { activeElement } = match(config.defaultRoot, Document)
+        ? config.defaultRoot
+        : config.defaultRoot.ownerDocument;
+    return activeElement;
+}
+
 export function getFocusableElements(parent) {
     const byTabIndex = groupBy(
         (parent || config.defaultRoot).querySelectorAll(FOCUSABLE_SELECTOR),
@@ -253,6 +261,10 @@ export function getPreviousFocusableElement(parent) {
     const focusableEls = getFocusableElements(parent);
     const index = focusableEls.indexOf((parent || config.defaultRoot).ownerDocument.activeElement);
     return index < 0 ? focusableEls.at(-1) : focusableEls[index - 1] || null;
+}
+
+export function getRoot() {
+    return config.defaultRoot;
 }
 
 /**
@@ -363,6 +375,22 @@ export function isVisible(target) {
  */
 export function isWindow(object) {
     return object && typeof object === "object" && object.window === object;
+}
+
+/**
+ * @param {import("@odoo/owl").ComponentConstructor | string} component
+ * @param {any} appConfig
+ */
+export async function mount(component, appConfig) {
+    if (typeof component === "string") {
+        component = class extends Component {
+            static template = xml`${component}`;
+        };
+    }
+
+    const app = new App(component, { ...appConfig, test: true });
+    await app.mount(config.defaultRoot);
+    return app;
 }
 
 /**

@@ -30,18 +30,17 @@ commandProviderRegistry.add("debug", {
                 name: _t("Deactivate debug mode"),
             });
             result.push({
-                action() {
-                    const runTestsURL = browser.location.origin + "/web/tests?debug=assets";
-                    browser.open(runTestsURL);
-                },
+                action: () => browser.open("/web/hoot?debug=assets"),
+                category: "debug",
+                name: _t("Run HOOT Tests"),
+            });
+            result.push({
+                action: () => browser.open("/web/tests?debug=assets"),
                 category: "debug",
                 name: _t("Run JS Tests"),
             });
             result.push({
-                action() {
-                    const runTestsURL = browser.location.origin + "/web/tests/mobile?debug=assets";
-                    browser.open(runTestsURL);
-                },
+                action: () => browser.open("/web/tests/mobile?debug=assets"),
                 category: "debug",
                 name: _t("Run JS Mobile Tests"),
             });

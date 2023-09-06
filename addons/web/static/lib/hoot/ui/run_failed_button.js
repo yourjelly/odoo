@@ -15,7 +15,6 @@ export class RunFailedButton extends Component {
                 t-on-click="onClick"
                 title="Run failed"
             >
-                ${ICONS.fail}
                 Run failed
             </a>
         </t>
@@ -34,9 +33,6 @@ export class RunFailedButton extends Component {
             if (!test.lastResults.pass) {
                 this.state.failed.push(test.id);
             }
-        });
-
-        runner.afterAll(() => {
             this.state.show = Boolean(this.state.failed.length);
         });
     }
