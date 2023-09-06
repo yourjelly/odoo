@@ -439,6 +439,8 @@ class Partner(models.Model):
         if company.country_id.vat_label:
             for node in arch.xpath("//field[@name='vat']"):
                 node.attrib["string"] = company.country_id.vat_label
+            for node in arch.xpath("//label[@for='vat']"):
+                node.attrib["string"] = company.country_id.vat_label
         return arch, view
 
     @api.constrains('parent_id')

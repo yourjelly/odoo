@@ -705,7 +705,6 @@ class EwaybillStock(models.Model):
         dispatch_details = saler_buyer.get("dispatch_details")
         buyer_details = saler_buyer.get("buyer_details")
         ship_to_details = saler_buyer.get("ship_to_details")
-        sign = ewaybill.stock_picking_id.picking_type_id.code == "outgoing" and -1 or 1
         extract_digits = self._l10n_in_edi_extract_digits
         json_payload = {
             "supplyType": ewaybill.stock_picking_id.picking_type_id.code == "outgoing" and "O" or "I",
@@ -732,7 +731,7 @@ class EwaybillStock(models.Model):
             "actToStateCode": int(ship_to_details.state_id.l10n_in_tin),
             "toStateCode": int(buyer_details.state_id.l10n_in_tin),
             "itemList": [
-                self._get_l10n_in_ewaybill_line_details(line, sign)
+                self._get_l10n_in_ewaybill_line_details(line)
                 for line in ewaybill.ewaybill_line_ids
             ],
             "totalValue": self._l10n_in_round_value(ewaybill.amount_untaxed),
@@ -776,9 +775,10 @@ class EwaybillStock(models.Model):
                 "vehicleNo": ewaybill.vehicle_no or "",
                 "vehicleType": ewaybill.vehicle_type or "",
             })
+        print(json_payload)
         return json_payload
 
-    def _get_l10n_in_ewaybill_line_details(self, line, sign):
+    def _get_l10n_in_ewaybill_line_details(self, line):
         extract_digits = self._l10n_in_edi_extract_digits
         line_details = {
             "productName": line.product_id.name,
@@ -786,7 +786,7 @@ class EwaybillStock(models.Model):
             "productDesc": line.product_id.name,
             "quantity": line.quantity,
             "qtyUnit": line.product_id.uom_id.l10n_in_code and line.product_id.uom_id.l10n_in_code.split("-")[0] or "OTH",
-            "taxableAmount": self._l10n_in_round_value(line.price_unit * sign),
+            "taxableAmount": self._l10n_in_round_value(line.price_unit),
         }
         if line.igst_rate:
             line_details.update({"igstRate": self._l10n_in_round_value(line.igst_rate)})
