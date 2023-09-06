@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { SPECIAL_TAGS, generateHash, isIterable, stringToNumber } from "../utils";
+import { SPECIAL_TAGS, isIterable, parseConfigTag, stringToNumber } from "../utils";
 
 /**
  * @typedef {import("./suite").Suite} Suite
@@ -23,6 +23,7 @@ export class Tag {
         this.name = name;
         this.id = this.name;
         this.special = this.name in SPECIAL_TAGS;
+        this.config = parseConfigTag(this.name);
         this.color = TAG_COLORS[stringToNumber(this.id) % TAG_COLORS.length];
     }
 }

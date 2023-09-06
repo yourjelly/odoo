@@ -7,6 +7,7 @@ import {
     console,
     JSON,
     localStorage,
+    Number,
     Object,
     Proxy,
     sessionStorage,
@@ -22,41 +23,7 @@ import {
 // Internal
 //-----------------------------------------------------------------------------
 
-/**
- * This private function computes a score that represent the fact that the
- * string contains the pattern, or not
- *
- * - If the score is 0, the string does not contain the letters of the pattern in
- *   the correct order.
- * - if the score is > 0, it actually contains the letters.
- *
- * Better matches will get a higher score: consecutive letters are better,
- * and a match closer to the beginning of the string is also scored higher.
- *
- * @param {string} pattern
- * @param {string} str
- */
-function getFuzzyScore(pattern, str) {
-    let totalScore = 0;
-    let currentScore = 0;
-    let len = str.length;
-    let patternIndex = 0;
-
-    pattern = pattern.toLowerCase();
-    str = str.toLowerCase();
-
-    for (let i = 0; i < len; i++) {
-        if (str[i] === pattern[patternIndex]) {
-            patternIndex++;
-            currentScore += 100 + currentScore - i / 200;
-        } else {
-            currentScore = 0;
-        }
-        totalScore = totalScore + currentScore;
-    }
-
-    return patternIndex === pattern.length ? totalScore : 0;
-}
+const CONFIG_TAG_PATTERN = /^([\w-]+)=([\w-]+)$/;
 
 const REGEX_PATTERN = /^\/(.*)\/([gim]+)?$/;
 
@@ -231,6 +198,39 @@ export function generateHash(...strings) {
 }
 
 /**
+ * This function computes a score that represent the fact that the
+ * string contains the pattern, or not
+ *
+ * - If the score is 0, the string does not contain the letters of the pattern in
+ *   the correct order.
+ * - if the score is > 0, it actually contains the letters.
+ *
+ * Better matches will get a higher score: consecutive letters are better,
+ * and a match closer to the beginning of the string is also scored higher.
+ *
+ * @param {string} pattern
+ * @param {string} string
+ */
+export function getFuzzyScore(pattern, string) {
+    let totalScore = 0;
+    let currentScore = 0;
+    let len = string.length;
+    let patternIndex = 0;
+
+    for (let i = 0; i < len; i++) {
+        if (string[i] === pattern[patternIndex]) {
+            patternIndex++;
+            currentScore += 100 + currentScore - i / 200;
+        } else {
+            currentScore = 0;
+        }
+        totalScore = totalScore + currentScore;
+    }
+
+    return patternIndex === pattern.length ? totalScore : 0;
+}
+
+/**
  * @template T
  * @param {Iterable<T>} iter
  * @param {keyof T} [property]
@@ -282,9 +282,9 @@ export const log = makeTaggable(function log(...args) {
 });
 
 /**
- * Return a list of things that matches a pattern, ordered by their 'score' (
- * higher score first). An higher score means that the match is better. For
- * example, consecutive letters are considered a better match.
+ * Returns a list of items that match the given pattern, ordered by their 'score'
+ * (descending). A higher score means that the match is closer (e.g. consecutive
+ * letters).
  *
  * @template T
  * @param {string} pattern
@@ -293,31 +293,22 @@ export const log = makeTaggable(function log(...args) {
  * @returns {T[]}
  */
 export function lookup(pattern, items, mapFn = (x) => x) {
-    const regexParams = pattern.match(REGEX_PATTERN);
-    if (regexParams) {
-        // Regex lookup
-        let regex;
-        try {
-            regex = new RegExp(regexParams[1], regexParams[2]);
-        } catch (err) {
-            if (err instanceof SyntaxError) {
-                return [];
-            } else {
-                throw err;
-            }
-        }
-        return items.filter((item) => regex.test(mapFn(item)));
+    const nPattern = parseRegExp(normalize(pattern));
+    if (nPattern instanceof RegExp) {
+        return items.filter((item) => nPattern.test(mapFn(item)));
     } else {
         // Fuzzy lookup
-        const results = [];
+        const groupedByScore = {};
         for (const item of items) {
-            const score = getFuzzyScore(pattern, mapFn(item));
+            const score = getFuzzyScore(nPattern, mapFn(item));
             if (score > 0) {
-                results.push([score, item]);
+                if (!groupedByScore[score]) {
+                    groupedByScore[score] = [];
+                }
+                groupedByScore[score].push(item);
             }
         }
-        // we want better matches first
-        return results.sort((a, b) => b[0] - a[0]).map((r) => r[1]);
+        return Object.values(groupedByScore).flat().reverse();
     }
 }
 
@@ -395,17 +386,67 @@ export function makeTaggable(fn) {
 
 /**
  * @param {unknown} value
- * @param {Matcher} matcher
+ * @param {Matcher} [matcher]
  */
 export function match(value, matcher) {
-    if (typeof matcher === "string") {
+    if (!matcher) {
+        return !value;
+    }
+    if (typeof matcher === "function") {
+        matcher = new RegExp(matcher.name);
+    } else if (typeof matcher === "string") {
         matcher = new RegExp(matcher, "i");
     }
-    if (matcher instanceof RegExp) {
-        return matcher.test(value);
-    } else {
-        return value instanceof matcher;
+    let strValue = String(value);
+    if (strValue === "[object Object]") {
+        strValue = value.constructor.name;
     }
+    return matcher.test(strValue);
+}
+
+/**
+ * @param {string} string
+ */
+export function normalize(string) {
+    return string
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+}
+
+/**
+ * @param {string} tag
+ */
+export function parseConfigTag(tag) {
+    const configParams = tag.match(CONFIG_TAG_PATTERN);
+    if (configParams) {
+        const [, key, value] = configParams;
+        const parser = CONFIG_TAGS[key];
+        if (!parser) {
+            throw new Error(`Invalid config tag: parameter "${key}" does not exist.`);
+        }
+        return { [key]: parser(value) };
+    }
+    return null;
+}
+
+/**
+ * @param {string} value
+ */
+export function parseRegExp(value) {
+    const regexParams = value.match(REGEX_PATTERN);
+    if (regexParams) {
+        try {
+            return new RegExp(regexParams[1], regexParams[2]);
+        } catch (err) {
+            if (match(err, SyntaxError)) {
+                return value;
+            } else {
+                throw err;
+            }
+        }
+    }
+    return value;
 }
 
 /**
@@ -490,6 +531,11 @@ export function toSelector(element, options) {
         return [tagName, id, ...classNames].join("");
     }
 }
+
+export const CONFIG_TAGS = {
+    timeout: Number,
+    multi: Number,
+};
 
 export const SPECIAL_TAGS = {
     debug: "debug",

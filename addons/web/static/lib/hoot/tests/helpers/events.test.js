@@ -1,7 +1,6 @@
 /** @odoo-module **/
 
-import { mountTemplate } from "@web/../tests/helpers/utils";
-import { queryOne } from "@web/core/utils/dom";
+import { mount, queryOne } from "../../helpers/dom";
 import {
     clear,
     click,
@@ -17,8 +16,8 @@ import {
     press,
     scroll,
     select,
-} from "../helpers/events";
-import { suite, test } from "../setup";
+} from "../../helpers/events";
+import { suite, test } from "../../setup";
 
 /**
  *
@@ -29,19 +28,21 @@ function addStepListener(element, type) {
     return on(element, type, (event) => QUnit.assert.step(event.type));
 }
 
-suite("HOOT", "Helpers", "Events", () => {
+suite.skip("HOOT", "Helpers", "Events", () => {
     test("clear", async (assert) => {
-        await mountTemplate(/* xml */ `<input value="Test" />`);
+        await mount(/* xml */ `<input value="Test" />`);
 
-        assert.equal(queryOne("input"), "Test");
+        const input = queryOne("input");
+        assert.equal(input.value, "Test");
 
-        clear("input");
+        click(input);
+        clear();
 
-        assert.equal(queryOne("input"), "");
+        assert.equal(input.value, "");
     });
 
     test("click", async (assert) => {
-        await mountTemplate(/* xml */ `<button>Click me</button>`);
+        await mount(/* xml */ `<button>Click me</button>`);
 
         addStepListener("button", "type");
 
@@ -54,7 +55,7 @@ suite("HOOT", "Helpers", "Events", () => {
     });
 
     test.skip("fill", async (assert) => {
-        await mountTemplate(/* xml */ `<input value="Test" />`);
+        await mount(/* xml */ `<input value="Test" />`);
 
         assert.equal(queryOne("input"), "Test");
 

@@ -23,37 +23,41 @@ export class TestResult extends Component {
     static template = compactXML/* xml */ `
         <t t-set="statusInfo" t-value="getStatusInfo()" />
         <details class="hoot-result hoot-col" t-att-class="statusInfo.className" t-att-open="props.defaultOpen">
-            <summary class="hoot-result-header hoot-row">
-                <div class="hoot-row hoot-overflow-hidden hoot-gap-1">
+            <summary class="hoot-result-header hoot-row hoot-text-md">
+                <div class="hoot-row hoot-overflow-hidden hoot-gap-2">
                     <span
                         class="hoot-circle"
                         t-attf-class="hoot-bg-{{ statusInfo.color }}"
+                        t-att-title="statusInfo.text"
                     />
                     <TestPath test="props.test" />
-                    <a
-                        t-att-href="env.url.withParams('test', props.test.id)"
-                        class="hoot-result-button-icon hoot-row"
-                        title="Run this test only"
-                    >
-                        ${ICONS.play}
-                    </a>
-                    <a
-                        t-att-href="env.url.withParams('debugTest', props.test.id)"
-                        class="hoot-result-button-icon hoot-row"
-                        title="Run this test only in debug mode"
-                    >
-                        ${ICONS.bug}
-                    </a>
-                    <a
-                        t-att-href="env.url.withParams('skip', props.test.id)"
-                        class="hoot-result-button-icon hoot-row"
-                        t-att-title="props.test.skip ? 'Unskip test' : 'Skip test'"
-                    >
-                        ${ICONS.forward}
-                    </a>
-                    <span class="hoot-status-label hoot-hide-sm" t-attf-class="hoot-text-{{ statusInfo.color }}" t-esc="statusInfo.text" />
+                    <div class="hoot-row">
+                        <a
+                            t-att-href="env.url.withParams('test', props.test.id)"
+                            class="hoot-result-button-icon hoot-row"
+                            title="Run this test only"
+                        >
+                            ${ICONS.play}
+                        </a>
+                        <a
+                            t-att-href="env.url.withParams('debugTest', props.test.id)"
+                            class="hoot-result-button-icon hoot-row"
+                            title="Run this test only in debug mode"
+                        >
+                            ${ICONS.bug}
+                        </a>
+                        <t t-if="!props.test.skip or !props.test.hasSkipTag()">
+                            <a
+                                t-att-href="env.url.withParams('skip-test', props.test.id)"
+                                class="hoot-result-button-icon hoot-row"
+                                t-att-title="props.test.skip ? 'Unskip test' : 'Skip test'"
+                            >
+                                ${ICONS.forward}
+                            </a>
+                        </t>
+                    </div>
                 </div>
-                <span t-if="!props.test.skip" class="hoot-duration">
+                <span t-if="!props.test.skip" class="hoot-duration hoot-text-sm">
                     <t t-esc="props.test.lastResults.duration" /> ms
                 </span>
             </summary>
@@ -92,24 +96,14 @@ export class TestResult extends Component {
 
     getStatusInfo() {
         const { aborted, pass } = this.props.test.lastResults;
-        if (this.skip || aborted) {
-            return {
-                color: "warn",
-                className: "hoot-skip",
-                text: aborted ? "(aborted)" : "(skipped)",
-            };
+        if (aborted) {
+            return { color: "warn", className: "hoot-abort", text: "aborted" };
+        } else if (this.props.test.skip) {
+            return { color: "info", className: "hoot-skip", text: "skipped" };
         } else if (pass) {
-            return {
-                color: "success",
-                className: "hoot-pass",
-                text: "(passed)",
-            };
+            return { color: "success", className: "hoot-pass", text: "passed" };
         } else {
-            return {
-                color: "danger",
-                className: "hoot-fail",
-                text: "(failed)",
-            };
+            return { color: "danger", className: "hoot-fail", text: "failed" };
         }
     }
 }

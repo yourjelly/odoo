@@ -16,6 +16,10 @@ import {
     title,
 } from "../utils";
 
+// suite("perfs", () => {
+//     test[`multi=${1_000}`]("multi test hihi", ({ ok }) => ok(true));
+// });
+
 suite("HOOT", "Utils", () => {
     test("debounce", async (assert) => {
         const def = makeDeferred();
@@ -125,7 +129,7 @@ suite("HOOT", "Utils", () => {
     });
 
     test("match", (assert) => {
-        assert.ok(match("abc", /abc/));
+        assert.ok(match("abc", /^abcd?/));
         assert.ok(match(new Error("error message"), "message"));
     });
 

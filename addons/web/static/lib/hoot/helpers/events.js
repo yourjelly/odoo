@@ -1,9 +1,10 @@
 /** @odoo-module **/
 
-import { navigator } from "../globals";
+import { matchMedia, navigator, ontouchstart } from "../globals";
 import { isIterable } from "../utils";
 import {
     config as DOMConfig,
+    getActiveElement,
     getNextFocusableElement,
     getPreviousFocusableElement,
     getRect,
@@ -70,8 +71,8 @@ function assert(element) {
     const throwErrors = () => {
         if (errors.length) {
             throw new Error(
-                `Element <${elementTag}/> fails the following assertions:`,
-                errors.map((err) => `- ${err}`).join("\n")
+                `Element <${elementTag}/> fails the following assertions: ` +
+                    errors.map((err) => `- ${err}`).join("\n")
             );
         }
     };
@@ -282,11 +283,11 @@ function getTriggerTargets(target, options) {
 }
 
 function hasTouch() {
-    return browser.ontouchstart !== undefined || browser.matchMedia("(pointer:coarse)").matches;
+    return ontouchstart !== undefined || matchMedia("(pointer:coarse)").matches;
 }
 
 function isMacOS() {
-    return /Mac/i.test(browser.navigator.userAgent);
+    return /Mac/i.test(navigator.userAgent);
 }
 
 /**
@@ -431,7 +432,7 @@ function triggerEvent(target, type, eventInit) {
  * @param {EventTarget} target
  */
 function triggerFocus(target) {
-    const previous = document.activeElement;
+    const previous = getActiveElement();
     /** @type {ReturnType<typeof triggerEvent<"focus">>[]} */
     const events = [];
     if (previous !== target.ownerDocument.body) {
@@ -495,7 +496,7 @@ function triggerKeyDown(target, eventInit) {
  * @param {KeyboardEventInit} eventInit
  * @param {string} [value]
  */
-function triggerKeyPress(element, eventInit, value) {
+function triggerKeyPress(target, eventInit, value) {
     /**
      * @type {ReturnType<typeof triggerKeyDown>
      *  | ReturnType<typeof triggerKeyUp>
@@ -503,38 +504,38 @@ function triggerKeyPress(element, eventInit, value) {
      * }
      */
     const events = [];
-    const keyDownEvents = triggerKeyDown(element, eventInit);
-    events.push(...keyDownEvents, ...triggerKeyUp(element, eventInit));
+    const keyDownEvents = triggerKeyDown(target, eventInit);
+    events.push(...keyDownEvents, ...triggerKeyUp(target, eventInit));
     let prevented = isPrevented(keyDownEvents[0]);
 
     if (!prevented) {
-        if (isEditable(element)) {
+        if (isEditable(target)) {
             if (typeof value === "string") {
                 // Hard-coded value from a special action (clear/fill all)
-                element.value = value;
+                target.value = value;
             } else if (/\w/.test(eventInit.key)) {
                 // Character coming from the keystroke
                 // ! TODO: Doesn't work with non-roman locales
-                element.value += eventInit.shiftKey
+                target.value += eventInit.shiftKey
                     ? eventInit.key.toUpperCase()
                     : eventInit.key.toLowerCase();
             }
         }
 
-        const keyPressEvent = triggerEvent(element, "keypress", eventInit);
+        const keyPressEvent = triggerEvent(target, "keypress", eventInit);
         events.push(keyPressEvent);
         prevented = isPrevented(keyPressEvent[0]);
     }
 
     if (!prevented && eventInit.key === "Enter") {
-        const parentForm = element.closest("form");
-        if (element.tagName === "BUTTON" && element.type === "button") {
+        const parentForm = target.closest("form");
+        if (target.tagName === "BUTTON" && target.type === "button") {
             /**
              * Special trigger: button 'Enter'
              *  On: unprevented 'Enter' keydown & keypress on a <button type="button"/>
              *  Do: triggers a 'click' event on the button
              */
-            events.push(triggerEvent(element, "click"));
+            events.push(triggerEvent(target, "click"));
         } else if (parentForm) {
             /**
              * Special trigger: form 'Enter'
@@ -688,7 +689,7 @@ export function clear() {
      * }
      */
     const events = [];
-    const element = document.activeElement;
+    const element = getActiveElement();
 
     assert(element).hasTag("select").or.validates(isEditable).throw();
 
@@ -889,7 +890,7 @@ export function fill(value, options) {
      * }
      */
     const events = [];
-    const element = document.activeElement;
+    const element = getActiveElement();
 
     assert(element).validates(isEditable).throw();
 
@@ -956,7 +957,7 @@ export function hover(target, options) {
  */
 export function keyDown(keyStrokes) {
     const eventInit = parseKeyStroke(keyStrokes);
-    const events = [triggerKeyDown(document.activeElement, eventInit)];
+    const events = [triggerKeyDown(getActiveElement(), eventInit)];
     return logEvents(events);
 }
 
@@ -965,7 +966,7 @@ export function keyDown(keyStrokes) {
  */
 export function keyUp(keyStrokes) {
     const eventInit = parseKeyStroke(keyStrokes);
-    const events = [triggerKeyUp(document.activeElement, eventInit)];
+    const events = [triggerKeyUp(getActiveElement(), eventInit)];
     return logEvents(events);
 }
 
@@ -1053,7 +1054,7 @@ export function pointerUp(target, options) {
  */
 export function press(keyStrokes) {
     const eventInit = parseKeyStroke(keyStrokes);
-    const events = [...triggerKeyPress(document.activeElement, eventInit)];
+    const events = [...triggerKeyPress(getActiveElement(), eventInit)];
     return logEvents(events);
 }
 
@@ -1112,12 +1113,11 @@ const LOG_COLORS = {
 export const config = {
     defaultActions: {
         // To clear input: remove all text with Backspace (Control + Backspace)
-        clear: (target) =>
-            triggerKeyPress(target, { ctrlKey: true, key: "Backspace" }, { value: "" }),
+        clear: (target) => triggerKeyPress(target, { ctrlKey: true, key: "Backspace" }, ""),
         // To cancel a drag sequence: press 'Escape'
         dragCancel: (target) => triggerKeyPress(target, { key: "Escape" }),
         // To fill all at once: paste from clipboard (Control + V)
-        fillAll: (target, value) => triggerKeyPress(target, { ctrlKey: true, key: "v" }, { value }),
+        fillAll: (target, value) => triggerKeyPress(target, { ctrlKey: true, key: "v" }, value),
     },
     log: Boolean(odoo.debug),
 };

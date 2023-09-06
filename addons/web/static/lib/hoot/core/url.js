@@ -19,30 +19,30 @@ const BOOLEAN_REGEX = /^true|false$/i;
 //-----------------------------------------------------------------------------
 
 /**
- * @param {{
- *  append?: Record<URLParam, any>;
- *  delete?: URLParam[]
- *  set?: Record<URLParam, any>;
- * }} params
- */
-export function createURL(params) {
-    const url = new URL(location.href);
-    for (const key in params) {
-        url.searchParams.delete(key);
-        if (!(key in URL_PARAMS)) {
-            throw new Error(`Unknown URL param key: "${key}"`);
-        }
-        for (const value of params[key] || []) {
-            url.searchParams.append(key, value);
-        }
-    }
-    return url;
-}
-
-/**
  * @param {{ history: History, location: Location }} params
  */
 export function makeURLStore({ history, location }) {
+    /**
+     * @param {{
+     *  append?: Record<URLParam, any>;
+     *  delete?: URLParam[]
+     *  set?: Record<URLParam, any>;
+     * }} params
+     */
+    function createURL(params) {
+        const url = new URL(location.href);
+        for (const key in params) {
+            url.searchParams.delete(key);
+            if (!(key in URL_PARAMS)) {
+                throw new Error(`Unknown URL param key: "${key}"`);
+            }
+            for (const value of params[key] || []) {
+                url.searchParams.append(key, value);
+            }
+        }
+        return url;
+    }
+
     /**
      * @param {string | URL} url
      * @param {string | URL} url
@@ -66,32 +66,19 @@ export function makeURLStore({ history, location }) {
         return url;
     }
 
-    /**
-     * @param {string} value
-     */
-    function processParamValue(value) {
-        if (BOOLEAN_REGEX.test(value)) {
-            return value.toLowerCase() === "true";
-        } else if (!isNaN(value)) {
-            return Number(value);
-        } else {
-            return value;
-        }
-    }
-
     function processURL() {
         const searchParams = new URLSearchParams(location.search);
         const keys = new Set(searchParams.keys());
         for (const key in urlParams) {
             if (keys.has(key)) {
                 keys.delete(key);
-                urlParams[key] = searchParams.getAll(key).map(processParamValue);
+                urlParams[key] = searchParams.getAll(key);
             } else {
                 delete urlParams[key];
             }
         }
         for (const key of keys) {
-            urlParams[key] = searchParams.getAll(key).map(processParamValue);
+            urlParams[key] = searchParams.getAll(key);
         }
     }
 
@@ -138,60 +125,81 @@ export function makeURLStore({ history, location }) {
      * @param {string} id
      */
     function withParams(type, id) {
-        const append = (id, category) => {
-            const items = urlParams[category];
-            if (!items) {
-                return [id];
-            }
-            const set = new Set(items);
-            set.add(id);
-            return set;
-        };
+        const clearAll = () => Object.keys(params).forEach((key) => params[key].clear())
 
-        const remove = (id, category) => {
-            const items = urlParams[category];
-            if (!items) {
-                return null;
-            }
-            const set = new Set(items);
-            set.delete(id);
-            return set;
-        };
+        const params = Object.fromEntries(
+            Object.keys(FILTER_PARAMS).map((k) => [k, new Set(urlParams[k] || [])])
+        );
 
-        const params = { ...FILTER_PARAMS };
-        for (const key in params) {
-            params[key] = null;
+        let skip = false;
+        if (type && type.startsWith("skip-")) {
+            skip = true;
+            type = type.slice("skip-".length);
         }
 
         switch (type) {
             case "debugTest": {
-                return createURL({ ...params, debugTest: [id] });
-            }
-            case "skip": {
-                if (urlParams.skip?.includes(id)) {
-                    return createURL({ skip: remove(id, "skip") });
-                } else {
-                    return createURL({
-                        debugTest: remove(id, "debugTest"),
-                        skip: append(id, "skip"),
-                        suite: remove(id, "suite"),
-                        test: remove(id, "test"),
-                    });
-                }
+                params.debugTest.add(id);
+                params.suite.clear();
+                params.tag.clear();
+                params.test.clear();
+                break;
             }
             case "suite": {
-                return createURL({ ...params, suite: [id], skip: remove(id, "skip") });
+                const skippedId = SKIP_PREFIX + id;
+                if (skip) {
+                    if (params.suite.has(skippedId)) {
+                        params.suite.delete(skippedId);
+                    } else {
+                        params.suite.add(skippedId);
+                    }
+                } else {
+                    clearAll();
+                    params.suite.add(id);
+                }
+                break;
             }
             case "tag": {
-                return createURL({ ...params, tag: [id] });
+                const skippedId = SKIP_PREFIX + id;
+                if (skip) {
+                    if (params.tag.has(skippedId)) {
+                        params.tag.delete(skippedId);
+                    } else {
+                        params.tag.add(skippedId);
+                    }
+                } else {
+                    clearAll();
+                    params.tag.add(id);
+                }
+                break;
             }
             case "test": {
-                return createURL({ ...params, test: [id], skip: remove(id, "skip") });
+                const skippedId = SKIP_PREFIX + id;
+                if (skip) {
+                    if (params.test.has(skippedId)) {
+                        params.test.delete(skippedId);
+                    } else {
+                        params.test.add(skippedId);
+                        params.debugTest.delete(skippedId);
+                    }
+                } else {
+                    clearAll();
+                    params.test.add(id);
+                }
+                break;
             }
             default: {
-                return createURL(params);
+                clearAll();
             }
         }
+
+        for (const key in params) {
+            if (!params[key].size) {
+                params[key] = null;
+            }
+        }
+
+        return createURL(params);
     }
 
     /** @type {Record<URLParam, any[]>} */
@@ -203,6 +211,7 @@ export function makeURLStore({ history, location }) {
         get params() {
             return urlParams;
         },
+        createURL,
         goto,
         refresh,
         setParams,
@@ -290,10 +299,11 @@ export const DEFAULT_CONFIG = {
 export const FILTER_PARAMS = {
     debugTest: "debugTest",
     filter: "filter",
-    skip: "skip",
     suite: "suite",
     tag: "tag",
     test: "test",
 };
+
+export const SKIP_PREFIX = "-";
 
 export const URL_PARAMS = { ...DEFAULT_CONFIG, ...FILTER_PARAMS };

@@ -31,11 +31,14 @@ body {
 .hoot-runner {
     // Generic colors
     --hoot-primary: #714b67;
+    --hoot-secondary: #74b4b9;
     --hoot-danger: #9f1239;
     --hoot-danger-bg: #fecdd3;
+    --hoot-info: #0891b2;
+    --hoot-info-bg: #e0f2fe;
     --hoot-success: #047857;
-    --hoot-success-bg: #d1fae5;
-    --hoot-warn: #d97706;
+    --hoot-success-bg: #ecfdf5;
+    --hoot-warn: #f59e0b;
     --hoot-warn-bg: #fef3c7;
 
     // Grays
@@ -57,10 +60,9 @@ body {
     --hoot-btn-bg: #714b67;
     --hoot-btn-bg-hover: #624159;
     --hoot-btn-text: #ffffff;
-    --hoot-text-suite: #431407;
-    --hoot-text-test: #1e40af;
-    --hoot-result-bg: rgba(255, 255, 255, 0.5);
-    --hoot-result-border: var(--hoot-gray-300);
+    --hoot-bg-result: rgba(255, 255, 255, 0.6);
+    --hoot-border-result: var(--hoot-gray-300);
+    --hoot-border-search: #d8dadd;
 
     // Reporting colors
     --hoot-bg-report: #ffffff;
@@ -84,6 +86,8 @@ body {
         --hoot-primary: #14b8a6;
         --hoot-danger: #fb7185;
         --hoot-danger-bg: #4c0519;
+        --hoot-info: #22d3ee;
+        --hoot-info-bg: #083344;
         --hoot-success: #34d399;
         --hoot-success-bg: #064e3b;
         --hoot-warn: #fbbf24;
@@ -97,10 +101,9 @@ body {
         --hoot-btn-bg: #00dac5;
         --hoot-btn-bg-hover: #00c1ae;
         --hoot-btn-text: #000000;
-        --hoot-text-suite: #fed7aa;
-        --hoot-text-test: #60a5fa;
-        --hoot-result-bg: rgba(0, 0, 0, 0.5);
-        --hoot-result-border: var(--hoot-gray-600);
+        --hoot-bg-result: rgba(0, 0, 0, 0.5);
+        --hoot-border-result: var(--hoot-gray-600);
+        --hoot-border-search: #3c3f4c;
 
         // Reporting colors
         --hoot-bg-report: #202124;
@@ -120,6 +123,7 @@ body {
     display: flex;
     flex-direction: column;
     font-family: sans-serif;
+    font-size: 0.875rem;
     height: 100%;
     background: var(--hoot-bg);
     color: var(--hoot-text);
@@ -193,13 +197,13 @@ body {
         "0": 0,
         "0\\.5": 0.125rem,
         "1": 0.25rem,
-        "1\\.5": 0_375rem,
+        "1\\.5": 0.375rem,
         "2": 0.5rem,
-        "2\\.5": 0_625rem,
+        "2\\.5": 0.625rem,
         "3": 0.75rem,
-        "3\\.5": 0_875rem,
+        "3\\.5": 0.875rem,
         "4": 1rem,
-        "4\\.5": 1_125rem,
+        "4\\.5": 1.125rem,
         "5": 1.25rem,
     );
 
@@ -217,6 +221,20 @@ body {
             padding-top: $value;
             padding-bottom: $value;
         }
+        .hoot-m-#{$size} {
+            margin: $value;
+        }
+
+        .hoot-mx-#{$size} {
+            margin-left: $value;
+            margin-right: $value;
+        }
+
+        .hoot-my-#{$size} {
+            margin-top: $value;
+            margin-bottom: $value;
+        }
+
         .hoot-gap-#{$size} {
             gap: $value;
         }
@@ -245,10 +263,26 @@ body {
         user-select: none;
     }
 
+    .hoot-text-sm {
+        font-size: 0.75rem;
+    }
+
+    .hoot-text-md {
+        font-size: 0.8rem;
+    }
+
+    .hoot-text-xl {
+        font-size: 1.5rem;
+    }
+
     .hoot-truncate {
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+    }
+
+    .hoot-w-full {
+        width: 100%;
     }
 
     @media (max-width: $hoot-break-sm) {
@@ -271,8 +305,17 @@ body {
         background: var(--hoot-panel-bg);
     }
 
+    .hoot-buttons {
+        border-radius: 0.25rem;
+        gap: 1px;
+        overflow: hidden;
+
+        .hoot-btn {
+            border-radius: 0;
+        }
+    }
+
     .hoot-controls {
-        gap: 0.75rem;
         padding: 0.25rem 0.5rem;
         display: flex;
         flex-flow: row nowrap;
@@ -301,26 +344,35 @@ body {
         }
     }
 
+    .hoot-search-group {
+        border: 1px solid var(--hoot-border-search);
+        border-radius: 0.25rem;
+        overflow: hidden;
+        transition: border-color 0.15s;
+
+        &:focus-within {
+            border-color: var(--hoot-secondary);
+        }
+
+        .hoot-btn-go {
+            border-radius: 0;
+        }
+    }
+
     .hoot-search-bar {
-        height: 1.5rem;
         width: 100%;
         outline: none;
-        border: 1px solid gray;
-        border-radius: 2px;
-        padding: 0 0.25rem;
         color: inherit;
         background-color: var(--hoot-bg);
 
         input[type="text"] {
-            flex: 1;
+            width: 100%;
+            outline: none;
         }
     }
 
     .hoot-logo {
-        font-size: 20pt;
         font-weight: 1000;
-        user-select: none;
-        flex: 1;
 
         &:hover {
             animation: hoot-sick-traverse 1.2s ease-in-out;
@@ -328,7 +380,6 @@ body {
     }
 
     .hoot-useragent {
-        font-size: 13px;
         color: var(--hoot-gray-500);
     }
 
@@ -337,8 +388,8 @@ body {
     }
 
     .hoot-status {
+        justify-content: space-between;
         background-color: var(--hoot-status-bg);
-        font-size: 13px;
         padding: 0.5rem 0.75rem;
     }
 
@@ -356,7 +407,6 @@ body {
         transition: color 0.15s, background-color 0.15s, border-color 0.15s;
 
         border-radius: 0.25rem;
-        font-size: 0.875rem;
         text-decoration: none;
         user-select: none;
 
@@ -385,11 +435,11 @@ body {
     .hoot-checkbox {
         display: flex;
         align-items: center;
-        font-size: 15px;
         gap: 0.25rem;
         cursor: pointer;
 
         input[type="checkbox"] {
+            cursor: inherit;
             appearance: none;
             width: 1em;
             height: 1em;
@@ -405,7 +455,6 @@ body {
 
     .hoot-tag {
         padding: 2px 5px;
-        font-size: 12px;
         font-weight: bold;
         border-radius: 999rem;
         background: var(--hoot-tag-bg);
@@ -422,7 +471,7 @@ body {
         right: 0;
         color: var(--hoot-text);
         background-color: var(--hoot-bg);
-        border: 1px solid var(--hoot-result-border);
+        border: 1px solid var(--hoot-border-result);
         padding: 0.5rem 0;
     }
 
@@ -476,19 +525,22 @@ body {
     //-----------------------------------------------------------------------------
 
     .hoot-reporting {
-        font-size: 13px;
         overflow: auto;
     }
 
     .hoot-result {
-        border-bottom: 1px solid var(--hoot-result-border);
+        border-bottom: 1px solid var(--hoot-border-result);
+
+        &.hoot-abort {
+            background: var(--hoot-warn-bg);
+        }
 
         &.hoot-fail {
             background: var(--hoot-danger-bg);
         }
 
         &.hoot-skip {
-            background: var(--hoot-warn-bg);
+            background: var(--hoot-info-bg);
         }
     }
 
@@ -496,10 +548,6 @@ body {
         cursor: pointer;
         padding: 0.1rem 1rem;
         justify-content: space-between;
-
-        .hoot-circle {
-            margin-right: 5px;
-        }
     }
 
     .hoot-result-detail {
@@ -507,8 +555,9 @@ body {
         margin-top: 0;
         gap: 0.5rem;
         padding: 0.3rem;
-        background: var(--hoot-result-bg);
+        background: var(--hoot-bg-result);
         border-radius: 0.3rem;
+        overflow-x: auto;
     }
 
     .hoot-info-line {
@@ -534,7 +583,6 @@ body {
     .hoot-technical {
         font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New",
             monospace;
-        font-size: 12px;
     }
 
     .hoot-object-type {
@@ -566,9 +614,17 @@ body {
         border-radius: 0.25rem;
     }
 
+    .hoot-suite {
+        color: var(--hoot-gray-500);
+    }
+
     .hoot-test {
-        color: var(--hoot-text-test);
-        width: clamp(100px, max-content, 50vw);
+        color: var(--hoot-primary);
+        width: clamp(100px, 100%, 50vw);
+    }
+
+    .hoot-skipped {
+        color: var(--hoot-info);
     }
 
     .hoot-icon {
@@ -578,8 +634,6 @@ body {
     }
 
     .hoot-result-button-text {
-        color: var(--hoot-text-suite);
-
         .hoot-icon {
             opacity: 0;
             width: 0;
@@ -589,6 +643,7 @@ body {
         &:active,
         &:focus-within,
         &:hover {
+            gap: 0.25rem;
             color: white;
             background-color: var(--hoot-primary);
 
@@ -612,17 +667,16 @@ body {
         }
     }
 
-    .hoot-status-label {
-        padding: 0 0.5rem;
-    }
-
     .hoot-path a,
     .hoot-name {
         user-select: text;
     }
 
+    .hoot-copy {
+        color: var(--hoot-gray-400);
+    }
+
     .hoot-duration {
-        font-size: smaller;
         white-space: nowrap;
         color: var(--hoot-gray-500);
     }
@@ -670,6 +724,13 @@ body {
     }
     .hoot-text-danger {
         color: var(--hoot-danger);
+    }
+
+    .hoot-bg-info {
+        background: var(--hoot-info);
+    }
+    .hoot-text-info {
+        color: var(--hoot-info);
     }
 
     .hoot-bg-success {

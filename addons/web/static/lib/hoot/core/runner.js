@@ -5,18 +5,18 @@ import { makeAssert } from "../assertions/assert";
 import { Error, Promise, clearTimeout, history, location, setTimeout } from "../globals";
 import {
     SPECIAL_TAGS,
-    log,
-    lookup,
+    getFuzzyScore,
     makeCallbacks,
     makeTaggable,
-    match,
+    normalize,
+    parseRegExp,
     shuffle,
     storage,
 } from "../utils";
 import { Suite } from "./suite";
 import { makeTags } from "./tag";
 import { Test } from "./test";
-import { DEFAULT_CONFIG, makeURLStore } from "./url";
+import { DEFAULT_CONFIG, SKIP_PREFIX, makeURLStore } from "./url";
 
 /**
  * @typedef {import("../assertions/assert").AssertMethods} AssertMethods
@@ -29,13 +29,17 @@ import { DEFAULT_CONFIG, makeURLStore } from "./url";
  * @typedef {T | PromiseLike<T>} MaybePromise
  */
 
-// ---------------------------------------------------------------------------
-// TestRunner
-// ---------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+// Internal
+//-----------------------------------------------------------------------------
 
 class TimeoutError extends Error {
     name = "TimeoutError";
 }
+
+//-----------------------------------------------------------------------------
+// Exports
+//-----------------------------------------------------------------------------
 
 /**
  * @param {typeof DEFAULT_CONFIG} params
@@ -57,33 +61,31 @@ export function makeTestRunner(params) {
         }
         const current = getCurrent();
         const tags = makeTags(current?.tags, suiteTags);
-        let suite = new Suite(
-            current,
-            name,
-            tags.filter((tag) => !tag.special)
-        );
+        let suite = new Suite(current, name, tags);
         const originalSuite = suites.find((s) => s.id === suite.id);
         if (originalSuite) {
             suite = originalSuite;
         } else {
-            (current?.jobs || currentJobs).push(suite);
+            (current?.jobs || rootJobs).push(suite);
         }
         suiteStack.push(suite);
         for (const tag of tags) {
-            switch (tag.name) {
-                case SPECIAL_TAGS.debug:
-                    debug = true;
-                case SPECIAL_TAGS.only:
-                    onlySet.add(suite.id);
-                    break;
-                case SPECIAL_TAGS.skip:
-                    skipSet.add(suite.id);
-                    break;
-                default:
-                    currentTags.add(tag);
+            if (tag.special) {
+                switch (tag.name) {
+                    case SPECIAL_TAGS.debug:
+                        debug = true;
+                    case SPECIAL_TAGS.only:
+                        suiteSet.add(suite.id);
+                        break;
+                    case SPECIAL_TAGS.skip:
+                        skipSet.add(suite.id);
+                        break;
+                }
+            } else if (!tag.config) {
+                allTags.add(tag);
             }
         }
-        if (skipSet.has(suite.id) && !onlySet.has(suite.id)) {
+        if (skipSet.has(suite.id) && !suiteSet.has(suite.id)) {
             suite.skip = true;
         }
         let result;
@@ -116,29 +118,31 @@ export function makeTestRunner(params) {
             throw new Error("Cannot add a test after starting the test runner");
         }
         const tags = makeTags(current?.tags, testTags);
-        const test = new Test(
-            current,
-            name,
-            testFn,
-            tags.filter((tag) => !tag.special)
-        );
-        (current?.jobs || currentJobs).push(test);
-        tests.push(test);
+        if (handleMulti(tags, name, testFn, testTags)) {
+            return;
+        }
+        const test = new Test(current, name, testFn, tags);
+        (current?.jobs || rootJobs).push(test);
+        if (!test.parent.config.multi) {
+            tests.push(test);
+        }
         for (const tag of tags) {
-            switch (tag.name) {
-                case SPECIAL_TAGS.debug:
-                    debug = true;
-                case SPECIAL_TAGS.only:
-                    onlySet.add(test.id);
-                    break;
-                case SPECIAL_TAGS.skip:
-                    skipSet.add(test.id);
-                    break;
-                default:
-                    currentTags.add(tag);
+            if (tag.special) {
+                switch (tag.name) {
+                    case SPECIAL_TAGS.debug:
+                        debug = true;
+                    case SPECIAL_TAGS.only:
+                        testSet.add(test.id);
+                        break;
+                    case SPECIAL_TAGS.skip:
+                        skipSet.add(test.id);
+                        break;
+                }
+            } else if (!tag.config) {
+                allTags.add(tag);
             }
         }
-        if (skipSet.has(test.id) && !onlySet.has(test.id)) {
+        if (skipSet.has(test.id) && !testSet.has(test.id)) {
             test.skip = true;
         }
     }
@@ -222,6 +226,28 @@ export function makeTestRunner(params) {
         return suiteStack.at(-1) || null;
     }
 
+    /**
+     * @param {Tag[]} tags
+     * @param {string} name
+     * @param {(assert: AssertMethods) => void | PromiseLike<void>} testFn
+     * @param {string[]} testTags
+     */
+    function handleMulti(tags, name, testFn, testTags) {
+        const index = tags.findIndex((t) => t.config?.multi);
+        if (index in tags) {
+            const tagsWithoutMulti = [...tags];
+            const [multiTag] = tagsWithoutMulti.splice(index, 1);
+            const suiteFn = () => {
+                for (let i = 0; i < multiTag.config.multi; i++) {
+                    addTest(`${i}) ${name}`, testFn, tagsWithoutMulti);
+                }
+            };
+            addSuite(name, suiteFn, testTags);
+            return true;
+        }
+        return false;
+    }
+
     function initFilters() {
         const urlParams = url.params;
         if (urlParams.tag) {
@@ -232,89 +258,89 @@ export function makeTestRunner(params) {
         }
         if (urlParams.filter) {
             hasFilter = true;
-        }
-        if (urlParams.skip) {
-            hasFilter = true;
-            for (const id of urlParams.skip) {
-                skipSet.add(id);
-            }
+            textFilter = parseRegExp(normalize(urlParams.filter.join(" ")));
         }
 
         const { get, remove } = storage("session");
         const previousFails = get("hoot-failed-tests", []);
         if (previousFails.length) {
+            // Previously failed tests
             hasFilter = true;
             remove("hoot-failed-tests");
             for (const id of previousFails) {
-                onlySet.add(id);
+                testSet.add(id);
             }
-        } else if (urlParams.debugTest) {
-            hasFilter = true;
-            debug = true;
-            for (const id of urlParams.debugTest) {
-                onlySet.add(id);
+        } else {
+            // Suites
+            if (urlParams.suite) {
+                hasFilter = true;
+                for (const id of urlParams.suite) {
+                    if (id.startsWith(SKIP_PREFIX)) {
+                        skipSet.add(id.slice(SKIP_PREFIX.length));
+                    } else {
+                        suiteSet.add(id);
+                    }
+                }
             }
-        } else if (urlParams.test) {
-            hasFilter = true;
-            for (const id of urlParams.test) {
-                onlySet.add(id);
-            }
-        } else if (urlParams.suite) {
-            hasFilter = true;
-            for (const id of urlParams.suite) {
-                onlySet.add(id);
+            // Tests
+            if (urlParams.debugTest) {
+                hasFilter = true;
+                debug = true;
+                for (const id of urlParams.debugTest) {
+                    testSet.add(id);
+                }
+            } else if (urlParams.test) {
+                hasFilter = true;
+                for (const id of urlParams.test) {
+                    if (id.startsWith(SKIP_PREFIX)) {
+                        skipSet.add(id.slice(SKIP_PREFIX.length));
+                    } else {
+                        testSet.add(id);
+                    }
+                }
             }
         }
     }
 
-    function prepareJobs() {
-        /**
-         * @param {Job[]} jobs
-         * @param {(job: Job) => boolean} predicate
-         */
-        function getValidJobs(jobs, predicate) {
-            return jobs.filter((job) => shouldBeRun(job, predicate));
-        }
-
-        /**
-         * @param {Job} job
-         * @param {(job: Job) => boolean} predicate
-         */
-        function shouldBeRun(job, predicate) {
-            if (predicate(job)) {
-                return true;
-            }
+    /**
+     * @param {Job[]} jobs
+     */
+    function prepareJobs(jobs) {
+        const filteredJobs = jobs.filter((job) => {
             if (job instanceof Suite) {
-                const subJobs = getValidJobs(job.jobs, predicate);
-                if (subJobs.length) {
-                    job.jobs = subJobs;
+                if (suiteSet.has(job.id)) {
+                    // The suite is in the suites' 'only' set
+                    return true;
+                }
+                job.jobs = prepareJobs(job.jobs);
+                if (job.jobs.length) {
+                    // The suite has valid tests to run
+                    return true;
+                }
+            } else {
+                if (testSet.has(job.id)) {
+                    // The test is in the tests' 'only' set
                     return true;
                 }
             }
-            return false;
-        }
 
-        let jobs = currentJobs;
-        currentJobs = [];
+            if (tagSet.size && job.tags.some((tag) => tagSet.has(tag.id))) {
+                // The job has a matching tag
+                return true;
+            }
 
-        if (onlySet.size) {
-            jobs = getValidJobs(jobs, (job) => onlySet.has(job.id));
-        }
-
-        if (tagSet.size) {
-            jobs = getValidJobs(jobs, (job) => job.tags.some((tag) => tagSet.has(tag.id)));
-        }
-
-        const textFilter = (url.params.filter || []).join(" ");
-        if (textFilter) {
-            const matching = [
-                ...lookup(textFilter, suites, (suite) => suite.fullName),
-                ...lookup(textFilter, tests, (tests) => tests.fullName),
-            ];
-            jobs = getValidJobs(jobs, (job) => matching.includes(job));
-        }
-
-        return config.randomorder ? shuffle(jobs) : jobs;
+            if (textFilter) {
+                // The job matches the URL filter
+                const fullName = normalize(job.fullName);
+                return textFilter instanceof RegExp
+                    ? textFilter.test(fullName)
+                    : getFuzzyScore(textFilter, fullName) > 0;
+            } else {
+                // There are no 'only' suites or 'only' tests
+                return suiteSet.size + testSet.size === 0;
+            }
+        });
+        return config.randomorder ? shuffle(filteredJobs) : filteredJobs;
     }
 
     /**
@@ -336,9 +362,6 @@ export function makeTestRunner(params) {
         if (suite.visited === 0) {
             // before suite code
             suiteStack.push(suite);
-            if (config.randomorder) {
-                suite.jobs = shuffle(suite.jobs);
-            }
 
             callbacks.add("before-suite", suite.callbacks);
             callbacks.add("before-test", suite.callbacks);
@@ -372,6 +395,7 @@ export function makeTestRunner(params) {
     async function runTest(test) {
         const run = (assert) => {
             let timeoutId;
+            const timeout = test.config.timeout || config.timeout;
             return Promise.race([
                 // Test promise
                 test.run(assert.methods),
@@ -382,9 +406,10 @@ export function makeTestRunner(params) {
 
                     if (!debug) {
                         // Set timeout
-                        timeoutId = setTimeout(() => {
-                            reject(new TimeoutError(`test took longer than ${config.timeout}ms`));
-                        }, config.timeout);
+                        timeoutId = setTimeout(
+                            () => reject(new TimeoutError(`test took longer than ${timeout}ms`)),
+                            timeout
+                        );
                     }
                 }).then(() => {
                     assert.aborted = true;
@@ -467,28 +492,27 @@ export function makeTestRunner(params) {
     }
 
     async function start() {
-        await Promise.resolve(); // make sure code that want to run right after
-        // dom ready get the opportunity to execute (and maybe listen to some
-        // events, such as beforeAll)
+        // Make sure that code that wants to run right after the DOM is ready gets
+        // the opportunity to execute (and maybe call some hook such as 'beforeAll').
+        await Promise.resolve();
 
         if (status !== "ready") {
             return;
         }
 
         status = "running";
+        const jobs = prepareJobs(rootJobs);
+
         await callbacks.call("before-all");
 
-        while (currentJobs.length && status === "running") {
-            const jobs = prepareJobs();
-            let job = jobs.shift();
-            while (job && status === "running") {
-                if (job instanceof Suite) {
-                    await runSuite(job);
-                    job = job.jobs[job.visited++] || job.parent || jobs.shift();
-                } else if (job instanceof Test) {
-                    await runTest(job);
-                    job = job.parent || jobs.shift();
-                }
+        let job = jobs.shift();
+        while (job && status === "running") {
+            if (job instanceof Suite) {
+                await runSuite(job);
+                job = job.jobs[job.visited++] || job.parent || jobs.shift();
+            } else {
+                await runTest(job);
+                job = job.parent || jobs.shift();
             }
         }
 
@@ -533,30 +557,31 @@ export function makeTestRunner(params) {
     const test = makeTaggable(addTest);
     const suite = makeTaggable(addSuite);
 
-    /** @type {Job[]} */
-    let currentJobs = [];
-    let abortCurrent = () => {};
-
     /** @type {Suite[]} */
     const suiteStack = [];
 
     /** @type {"ready" | "running"} */
     let status = "ready";
-
-    // miscellaneous filtering rules
+    let textFilter = "";
     let hasFilter = false;
+    let debug = false;
 
-    const onlySet = new Set();
     const skipSet = new Set();
+    const suiteSet = new Set();
     const tagSet = new Set();
+    const testSet = new Set();
 
     const tests = [];
     const suites = [];
-    const currentTags = new Set();
-    let debug = false;
 
     const callbacks = makeCallbacks();
     const missedCallbacks = [];
+
+    /** @type {Job[]} */
+    const rootJobs = [];
+    const allTags = new Set();
+
+    let abortCurrent = () => {};
 
     initFilters();
 
@@ -574,7 +599,7 @@ export function makeTestRunner(params) {
             return suites;
         },
         get tags() {
-            return [...currentTags];
+            return [...allTags];
         },
         get tests() {
             return tests;
