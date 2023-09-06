@@ -45,6 +45,7 @@ class EwaybillStockLine(models.Model):
     sgst_amount = fields.Float("SGST Amount", compute="_compute_rate_amount")
     cess_rate = fields.Float("CESS Rate", compute="_compute_rate_amount")
     cess_amount = fields.Float("CESS Amount", compute="_compute_rate_amount")
+    cess_non_advol_rate = fields.Float("CESS NON ADVOL Rate", compute="_compute_rate_amount")
     cess_non_advol_amount = fields.Float("CESS NON ADVOL Amount", compute="_compute_rate_amount")
     other_amount = fields.Float("Other Amount", compute="_compute_rate_amount")
 
@@ -126,6 +127,7 @@ class EwaybillStockLine(models.Model):
             record.sgst_amount = 0.0
             record.cess_rate = 0.0
             record.cess_amount = 0.0
+            record.cess_non_advol_rate = 0.0
             record.cess_non_advol_amount = 0.0
             record.other_amount = 0.0
 
@@ -151,6 +153,7 @@ class EwaybillStockLine(models.Model):
 
                 elif self.env.ref("l10n_in.tax_tag_cess").id in tax['tag_ids']:
                     if tax_id.amount_type != "percent":
+                        record.cess_non_advol_rate += tax_id.amount
                         record.cess_non_advol_amount += tax['amount']
                     else:
                         record.cess_rate = tax_id.amount

@@ -4,7 +4,7 @@
         <template id="report_ewaybill">
             <t t-call="web.html_container">
                <t t-foreach="docs" t-as="doc">
-                    <t t-call="web.external_layout">
+                    <t t-call="web.internal_layout">
                         <div class="page">
                         <style>
                             span{
@@ -221,7 +221,7 @@
                             <p t-esc="item.price_unit"/>
                         </td>
                         <td>
-                            <t t-set="tax" t-value="(str(round(item.cgst_amount, 2)) if item.cgst_amount else 'NE') + '+' + (str(round(item.sgst_amount, 2)) if item.sgst_amount else 'NE') + '+' + (str(round(item.igst_amount, 2)) if item.igst_amount else 'NE') + '+' + (str(round(item.cess_amount, 2)) if item.cess_amount else 'NE') + '+' + (str(round(item.cess_non_advol_amount, 2)) if item.cess_non_advol_amount else 'NE')"/>
+                            <t t-set="tax" t-value="(str(round(item.cgst_rate, 2)) if item.cgst_rate else 'NE') + '+' + (str(round(item.sgst_rate, 2)) if item.sgst_rate else 'NE') + '+' + (str(round(item.igst_rate, 2)) if item.igst_rate else 'NE') + '+' + (str(round(item.cess_rate, 2)) if item.cess_rate else 'NE') + '+' + (str(round(item.cess_non_advol_rate, 2)) if item.cess_non_advol_rate else 'NE')"/>
                             <p t-esc="tax"/>
                         </td>
                     </tr>
