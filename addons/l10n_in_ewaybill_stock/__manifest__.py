@@ -10,6 +10,7 @@
     "description": """Ewaybill for Stock Movement""",
     "data": [
         "security/ir.model.access.csv",
+        "data/ewaybill_type_data.xml",
         "wizard/ewaybill_update_part_b_views.xml",
         "wizard/ewaybill_update_transporter_views.xml",
         "wizard/ewaybill_extend_validity_views.xml",

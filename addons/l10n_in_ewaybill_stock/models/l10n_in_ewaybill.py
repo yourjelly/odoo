@@ -29,7 +29,10 @@ class EwaybillStock(models.Model):
 
     stock_picking_id = fields.Many2one("stock.picking", "Stock Transfer", required=True, readonly=True)
     date = fields.Datetime("Date", compute="_compute_date", store=True)
-
+    type_in_or_out = fields.Selection([
+        ("in", "In"),
+        ("out", "Out")],
+        string="Type", compute="_compute_type_in_or_out", store=True, readonly=False, copy=True)
     ewaybill_line_ids = fields.One2many("l10n.in.ewaybill.line", "ewaybill_id", compute="_compute_ewaybill_line_ids", store=True, readonly=False)
 
     partner_id = fields.Many2one(
@@ -126,6 +129,22 @@ class EwaybillStock(models.Model):
         ("4", "Others"),
         ], string="Cancel reason", copy=False, tracking=True)
     cancel_remarks = fields.Char("Cancel remarks", copy=False, tracking=True)
+
+    @api.depends('stock_picking_id')
+    def _compute_type_in_or_out(self):
+        for record in self:
+            if record.stock_picking_id.picking_type_id.code == "incoming":
+                record.type_in_or_out = "in"
+            else:
+                record.type_in_or_out = "out"
+
+    @api.depends('state', 'ewaybill_number')
+    def _compute_display_name(self):
+        for ewaybill in self:
+            if ewaybill.ewaybill_number:
+                ewaybill.display_name = ewaybill.ewaybill_number
+            else:
+                ewaybill.display_name = "Draft"
 
     @api.depends('attachment_id')
     def _compute_ewaybill_number(self):
