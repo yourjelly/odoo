@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { nbsp } from "@web/core/utils/strings";
+import { isIterable } from "./arrays";
 
 /**
  * XML document to create new elements from. The fact that this is a "text/xml"
@@ -103,7 +104,7 @@ export function createElement(tagName, ...args) {
         if (!arg) {
             continue;
         }
-        if (Symbol.iterator in arg) {
+        if (isIterable(arg)) {
             // Children list
             el.append(...arg);
         } else if (typeof arg === "object") {
