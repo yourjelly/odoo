@@ -61,7 +61,7 @@ function _getExtractorFrom(criterion) {
  * @returns {T[]}
  */
 export function ensureArray(value) {
-    return value && typeof value === "object" && value[Symbol.iterator] ? [...value] : [value];
+    return isIterable(value) ? [...value] : [value];
 }
 
 /**
@@ -77,6 +77,15 @@ export function intersection(array1, array2) {
 }
 
 /**
+ * Returns whether the given value is an iterable object (excluding strings).
+ *
+ * @param {unknown} value
+ */
+export function isIterable(value) {
+    return Boolean(value && typeof value === "object" && value[Symbol.iterator]);
+}
+
+/**
  * Returns an object holding different groups defined by a given criterion
  * or a default one. Each group is a subset of the original given list.
  * The given criterion can either be:
@@ -86,15 +95,15 @@ export function intersection(array1, array2) {
  * element.
  *
  * @template T
- * @param {T[]} array
- * @param {string | ((element: T) => any)} [criterion]
+ * @param {Iterable<T>} iter
+ * @param {keyof T | ((element: T) => string | number)} [criterion]
  * @returns {Record<string, T[]>}
  */
-export function groupBy(array, criterion) {
+export function groupBy(iter, criterion) {
     const extract = _getExtractorFrom(criterion);
     /** @type {Record<string, T[]>} */
     const groups = {};
-    for (const element of array) {
+    for (const element of iter) {
         const group = String(extract(element));
         if (!(group in groups)) {
             groups[group] = [];
