@@ -138,7 +138,7 @@ class ResConfigSettings(models.TransientModel):
                             _logger.warning("The value of '%s' is not properly saved to the pos_config_id field because the destination"
                                 " field '%s' is not a valid field in the pos.config model.", field.name, pos_config_field_name)
                         else:
-                            pos_fields_vals[pos_config_field_name] = val
+                            pos_fields_vals[pos_config_field_name] = self._preprocess_val(field, val)
                             del vals[field.name]
 
                 pos_config_id_to_fields_vals_map[pos_config_id] = pos_fields_vals
@@ -153,6 +153,10 @@ class ResConfigSettings(models.TransientModel):
             pos_config.write(pos_fields_vals)
 
         return result
+
+    @api.model
+    def _preprocess_val(self, field, val):
+        return val
 
     def set_values(self):
         super(ResConfigSettings, self).set_values()

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from odoo import models, fields, api, _
+from odoo import models, fields, api, _, Command
 from odoo.exceptions import UserError
 from odoo.tools.misc import split_every
 
@@ -43,6 +43,13 @@ class ResConfigSettings(models.TransientModel):
     pos_self_order_image_name = fields.Char(
         compute="_compute_pos_module_pos_self_order", store=True, readonly=False
     )
+
+    def _preprocess_val(self, field, val):
+        # The web client sends the selected images as [[4, id1], [4, id2], ...] which is not like other x2many fields which sends [[6, 0, [id1, id2, ...]].
+        # So we need to preprocess the value to convert it to the expected format.
+        if field.name == "pos_self_order_kiosk_image_home_ids":
+            return [Command.set([id[1] for id in val])]
+        return super()._preprocess_val(field, val)
 
     @api.onchange("pos_self_order_kiosk_default_language", "pos_self_order_kiosk_available_language_ids")
     def _onchange_pos_self_order_kiosk_default_language(self):
