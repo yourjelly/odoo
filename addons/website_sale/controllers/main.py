@@ -1836,7 +1836,6 @@ class PaymentPortal(payment_portal.PaymentPortal):
         order_sudo._check_cart_is_ready_to_be_paid()
 
         kwargs.update({
-            'reference_prefix': None,  # Allow the reference to be computed based on the order
             'partner_id': order_sudo.partner_invoice_id.id,
             'sale_order_id': order_id,  # Include the SO to allow Subscriptions to tokenize the tx
             'currency_id': order_sudo.currency_id.id,

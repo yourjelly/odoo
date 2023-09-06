@@ -83,6 +83,7 @@ checkoutForm.include({
             'partner_id': parseInt(this.txContext.partnerId),
             'currency_id': this.txContext.currencyId
                     ? parseInt(this.txContext.currencyId) : null,
+            'reference_prefix':this.txContext.referencePrefix?.toString(),
             'donation_comment': this.$('#donation_comment').val(),
             'donation_recipient_email': this.$('input[name="donation_recipient_email"]').val(),
         } : transactionRouteParams;

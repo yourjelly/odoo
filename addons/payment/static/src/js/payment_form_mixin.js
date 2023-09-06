@@ -310,7 +310,6 @@
         _prepareTransactionRouteParams: function (code, paymentOptionId, flow) {
             let tx_params = {
                 'payment_option_id': paymentOptionId,
-                'reference_prefix':this.txContext.referencePrefix?.toString(),
                 'amount': this.txContext.amount !== undefined
                         ? parseFloat(this.txContext.amount) : null,
                 'flow': flow,
@@ -328,6 +327,7 @@
                     'currency_id': this.txContext.currencyId
                         ? parseInt(this.txContext.currencyId) : null,
                     'partner_id': parseInt(this.txContext.partnerId),
+                    'reference_prefix':this.txContext.referencePrefix?.toString(),
                 });
             }
             return tx_params;
