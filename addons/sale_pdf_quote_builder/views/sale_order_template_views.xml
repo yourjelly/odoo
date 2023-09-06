@@ -8,8 +8,22 @@
         <field name="arch" type="xml">
             <notebook position="inside">
                 <page name="pdf_quote" string="PDF Quote">
-                    <field name="header"/>
-                    <field name="footer"/>
+                    <group>
+                        <group>
+                            <field name="sale_header"/>
+                            <field name="sale_footer"/>
+                        </group>
+                        <group>
+                            <p class="text-muted" colspan="2">
+                                Set a PDF header and footer to produce a high quality quotation, built
+                                by concatenating the template header, product sheets, the quotation with
+                                product and prices, and the footer.
+                            </p><p class="text-muted" colspan="2">
+                                To include product sheets in your Quotation templates, add documents on
+                                product forms, and set their visibility as "Inside Quotes".
+                            </p>
+                        </group>
+                    </group>
                 </page>
             </notebook>
         </field>

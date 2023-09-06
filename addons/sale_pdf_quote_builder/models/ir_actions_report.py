@@ -2,7 +2,7 @@
 import io
 from collections import OrderedDict
 from zlib import error as zlib_error
-from PyPDF2 import PdfFileReader, PdfFileMerger, PdfFileWriter
+from PyPDF2 import PdfReader, PdfMerger, PdfWriter
 try:
     from PyPDF2.errors import PdfStreamError, PdfReadError
 except ImportError:
@@ -28,26 +28,24 @@ class IrActionsReport(models.Model):
             if initial_stream:
                 order_template = order.sale_order_template_id
                 record = order_template or order.company_id
-                header = record.header
-                footer = record.footer
+                header = record.sale_header
+                footer = record.sale_footer
+
+                # TODO edm: constraint to force PDF, on product & company / template
+                if not header and not footer:
+                    continue
 
                 included_product_docs = self.env['product.document']
                 for line in order.order_line:
-                    document = line.product_id.product_document_ids or line.product_template_id.product_document_ids
+                    document = line.product_id.product_document_ids | line.product_template_id.product_document_ids
                     doc_to_include = document.filtered(lambda d: d.attached_on == 'inside')
                     included_product_docs = included_product_docs | doc_to_include
-                    # TODO edm: this code makes me bleed, working for now
 
-                # TODO edm: constraint if not PDF, either on the product document or filter here
-
-                if not header and not included_product_docs and not footer:
-                    continue
 
                 IrBinary = self.env['ir.binary']
-
                 pdf_data = []
                 if header:
-                    pdf_data.append(IrBinary._record_to_stream(record, 'header').read())
+                    pdf_data.append(IrBinary._record_to_stream(record, 'sale_header').read())
 
                 for included_product_doc in included_product_docs:
                     pdf_data.append(IrBinary._record_to_stream(included_product_doc, 'datas').read())
@@ -55,10 +53,20 @@ class IrActionsReport(models.Model):
                 pdf_data.append((initial_stream).getvalue())
 
                 if footer:
-                    pdf_data.append(IrBinary._record_to_stream(record, 'footer').read())
+                    pdf_data.append(IrBinary._record_to_stream(record, 'sale_footer').read())
 
                 try:
-                    stream = io.BytesIO(pdf.merge_pdf(pdf_data))
+                    form_fields = {
+                        'name': order.name,
+                        'partner_id__name': order.partner_id.name,
+                        'user_id__name': order.user_id.name,
+                        'amount_untaxed': order.amount_untaxed,
+                        'amount_total': order.amount_total,
+                        'commitment_date': order.commitment_date,
+                        'validity_date': order.validity_date and order.validity_date.strftime('%Y-%m-%d') or '',
+                        'client_order_ref': order.client_order_ref or '',
+                    }
+                    stream = io.BytesIO(pdf.merge_pdf(pdf_data, form_fields))
                     result[order.id].update({'stream': stream})
                 except (ValueError, PdfStreamError, PdfReadError, TypeError, zlib_error, NotImplementedError):
                     record._message_log(body=_(

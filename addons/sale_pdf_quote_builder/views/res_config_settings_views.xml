@@ -8,13 +8,13 @@
         <field name="arch" type="xml">
             <setting id="sale_pdf_quote_builder" position="inside">
                 <div class="mt16">
-                    <label for="header" class="me-2"/>
-                    <field name="header"/>
+                    <label for="sale_header" class="me-2"/>
+                    <field name="sale_header"/>
 <!--                    TODO edm: find where to modify framework JS to show the file's name instead -->
                 </div>
                 <div class="mt16">
-                    <label for="footer" class="me-2"/>
-                    <field name="footer"/>
+                    <label for="sale_footer" class="me-2"/>
+                    <field name="sale_footer"/>
                 </div>
             </setting>
         </field>

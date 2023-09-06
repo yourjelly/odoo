@@ -6,5 +6,5 @@ from odoo import api, fields, models
 class ResConfigSettings(models.TransientModel):
     _inherit = 'res.config.settings'
 
-    header = fields.Binary(related='company_id.header', readonly=False)
-    footer = fields.Binary(related='company_id.footer', readonly=False)
+    sale_header = fields.Binary(related='company_id.sale_header', readonly=False, string="Quotation PDF Header")
+    sale_footer = fields.Binary(related='company_id.sale_footer', readonly=False, string="Quotation PDF Footer")

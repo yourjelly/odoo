@@ -76,7 +76,7 @@ class BrandedFileWriter(PdfFileWriter):
 PdfFileWriter = BrandedFileWriter
 
 
-def merge_pdf(pdf_data):
+def merge_pdf(pdf_data, form_fields={}):
     ''' Merge a collection of PDF documents in one.
     Note that the attachments are not merged.
     :param list pdf_data: a list of PDF datastrings
@@ -85,8 +85,12 @@ def merge_pdf(pdf_data):
     writer = PdfFileWriter()
     for document in pdf_data:
         reader = PdfFileReader(io.BytesIO(document), strict=False)
+        has_fields = form_fields and bool(reader.get_fields())
         for page in range(0, reader.getNumPages()):
-            writer.addPage(reader.getPage(page))
+            page = reader.getPage(page)
+            writer.addPage(page)
+            if has_fields:
+                writer.update_page_form_field_values(page, form_fields)
     with io.BytesIO() as _buffer:
         writer.write(_buffer)
         return _buffer.getvalue()

@@ -6,5 +6,5 @@ from odoo import api, fields, models
 class ResCompany(models.Model):
     _inherit = 'res.company'
 
-    header = fields.Binary()
-    footer = fields.Binary()
+    sale_header = fields.Binary('Quotation PDF Header')
+    sale_footer = fields.Binary('Quotation PDF Footer')
