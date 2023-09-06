@@ -131,19 +131,67 @@
                 }
             }
 
-            return {
+
+
+            const errors = {
                 failed: [...this.failed],
                 cycle: visitJobs(this.jobs),
                 missing: [...missing],
                 unloaded: [...this.jobs].filter((j) => !this.factories.get(j).ignoreMissingDeps),
             };
+            odoo._errors = errors;
+            odoo._jobs = Object.fromEntries(this.factories.entries());
+            for (const [jobName, job] of Object.entries(odoo._jobs)) {
+                for (const dep of job.deps) {
+                    if (odoo._jobs[dep]) {
+                        odoo._jobs[dep].dependent ||= {}
+                        odoo._jobs[dep].dependent[jobName] = job;
+                    }
+                }
+            }
+
+            const allStrings = [];
+            const unloadedFromMissingStrings = [];
+            for (const unloadedJob of errors.unloaded) {
+                const job = this.factories.get(unloadedJob);
+                const reallyMissing = job.deps.filter(dep => errors.missing.includes(dep));
+                if (reallyMissing.length) {
+                    unloadedFromMissingStrings.push(`${unloadedJob} is missing deps:\n${reallyMissing.map(x => '  ' + x).join('\n')}\n`);
+                }
+            }
+            if (unloadedFromMissingStrings.length) {
+                allStrings.push(`Unloaded missing dependencies:\n\n${unloadedFromMissingStrings.join('\n')}`);
+            }
+            const unloadedString = [];
+            const allFailed = new Set([...errors.missing, ...errors.failed, ...errors.unloaded, ...(errors.cycle || [])]);
+            for (const unloadedJob of errors.unloaded) {
+                const job = this.factories.get(unloadedJob);
+                const failedDeps = job.deps.filter( dep => allFailed.has(dep));
+                unloadedString.push(`${unloadedJob}:\n${failedDeps.map(x => `  ${x}`).join('\n')}\n`);
+            }
+            if (unloadedString.length) {
+                allStrings.push(`Unmet dependencies:\n\n${unloadedString.join('\n')}`);
+            }
+            if (errors.missing.length) {
+                allStrings.push(`missing modules:\n${errors.missing.join('\n')}\n`);
+            }
+            if (errors.unloaded.length) {
+                allStrings.push(`unloaded modules:\n${errors.unloaded.join('\n')}\n`);
+            }
+            if (allStrings.length) {
+                console.error(allStrings.join('\n------------------\n\n'));
+            }
+
+            return errors;
         }
 
         async checkAndReportErrors() {
-            const { failed, cycle, missing, unloaded } = this.findErrors();
+            const errors = this.findErrors();
+            const { failed, cycle, missing, unloaded } = errors
             if (!failed.length && !unloaded.length) {
                 return;
             }
+            console.error("module errors", errors);
 
             function domReady(cb) {
                 if (document.readyState === "complete") {
