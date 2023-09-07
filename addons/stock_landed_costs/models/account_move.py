@@ -48,7 +48,8 @@ class AccountMove(models.Model):
 
     def _post(self, soft=True):
         posted = super()._post(soft)
-        posted.sudo().landed_costs_ids.reconcile_landed_cost()
+        if posted:
+            posted.sudo().landed_costs_ids.reconcile_landed_cost()
         return posted
 
 
