@@ -8,17 +8,17 @@
         <field name="arch" type="xml">
             <group name="provider_credentials" position='inside'>
                 <group name="razorpay_credentials"
-                       attrs="{'invisible': [('code', '!=', 'razorpay')]}">
+                       attrs="{'invisible': [('code', 'not in', ['razorpay', 'razorpay_auto'])]}">
                     <field name="razorpay_key_id"
                            string="Key Id"
-                           attrs="{'required': [('code', '=', 'razorpay'), ('state', '!=', 'disabled')]}"/>
+                           attrs="{'required': [('code', 'in', ['razorpay', 'razorpay_auto']), ('state', '!=', 'disabled')]}"/>
                     <field name="razorpay_key_secret"
                            string="Key Secret"
-                           attrs="{'required': [('code', '=', 'razorpay'), ('state', '!=', 'disabled')]}"
+                           attrs="{'required': [('code', '=', ['razorpay', 'razorpay_auto']), ('state', '!=', 'disabled')]}"
                            password="True"/>
                     <field name="razorpay_webhook_secret"
                            string="Webhook Secret"
-                           attrs="{'required': [('code', '=', 'razorpay'), ('state', '!=', 'disabled')]}"
+                           attrs="{'required': [('code', '=', ['razorpay', 'razorpay_auto']), ('state', '!=', 'disabled')]}"
                            password="True"/>
                 </group>
             </group>
