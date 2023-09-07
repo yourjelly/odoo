@@ -149,10 +149,12 @@
                         name="electronic_invoicing"
                         invisible="move_type not in ('out_invoice', 'out_refund', 'in_invoice', 'in_refund') or country_code != 'IT'">
                         <group>
-                            <field name="l10n_it_edi_transaction" groups="base.group_no_one" readonly="1"/>
-                            <field name="l10n_it_edi_attachment_id" groups="base.group_no_one" readonly="1"/>
-                            <field name="l10n_it_stamp_duty" readonly="state != 'draft'"/>
-                            <field name="l10n_it_ddt_id" readonly="state != 'draft'" invisible="move_type not in ('out_invoice', 'out_refund')"/>
+                            <group>
+                                <field name="l10n_it_edi_transaction" groups="base.group_no_one" readonly="1"/>
+                                <field name="l10n_it_edi_attachment_id" groups="base.group_no_one" readonly="1"/>
+                                <field name="l10n_it_stamp_duty" readonly="state != 'draft'"/>
+                                <field name="l10n_it_ddt_id" readonly="state != 'draft'" invisible="move_type not in ('out_invoice', 'out_refund')"/>
+                            </group>
                         </group>
                     </page>
                 </xpath>
