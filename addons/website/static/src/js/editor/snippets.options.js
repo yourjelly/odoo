@@ -3482,60 +3482,6 @@ options.registry.MegaMenuNoDelete = options.Class.extend({
     },
 });
 
-options.registry.sizing.include({
-    /**
-     * @override
-     */
-    start() {
-        const defs = this._super(...arguments);
-        const self = this;
-        this.$handles.on('mousedown', function (ev) {
-            // Since website is edited in an iframe, a div that goes over the
-            // iframe is necessary to catch mousemove and mouseup events,
-            // otherwise the iframe absorbs them.
-            const $body = $(this.ownerDocument.body);
-            if (!self.divEl) {
-                self.divEl = document.createElement('div');
-                self.divEl.style.position = 'absolute';
-                self.divEl.style.height = '100%';
-                self.divEl.style.width = '100%';
-                self.divEl.setAttribute('id', 'iframeEventOverlay');
-                $body.append(self.divEl);
-            }
-            const documentMouseUp = () => {
-                // Multiple mouseup can occur if mouse goes out of the window
-                // while moving.
-                if (self.divEl) {
-                    self.divEl.remove();
-                    self.divEl = undefined;
-                }
-                $body.off('mouseup', documentMouseUp);
-            };
-            $body.on('mouseup', documentMouseUp);
-        });
-        return defs;
-    },
-
-    //--------------------------------------------------------------------------
-    // Public
-    //--------------------------------------------------------------------------
-
-    /**
-     * @override
-     */
-    async updateUIVisibility() {
-        await this._super(...arguments);
-        const nonDraggableClasses = [
-            's_table_of_content_navbar_wrap',
-            's_table_of_content_main',
-        ];
-        if (nonDraggableClasses.some(c => this.$target[0].classList.contains(c))) {
-            const moveHandleEl = this.$overlay[0].querySelector('.o_move_handle');
-            moveHandleEl.classList.add('d-none');
-        }
-    },
-});
-
 options.registry.SwitchableViews = options.Class.extend({
     /**
      * @override

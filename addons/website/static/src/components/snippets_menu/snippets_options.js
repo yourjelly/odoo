@@ -4,7 +4,10 @@ import {
     SnippetOption,
     Box,
     LayoutColumn,
+    Sizing,
     SizingX,
+    SizingY,
+    SizingGrid,
     SnippetMove,
     ColoredLevelBackground,
     BackgroundToggler,
@@ -399,13 +402,61 @@ registry.category("snippets_options").add("website.CardBox", {
     target: ".card",
 });
 
-//registry.category("snippets_options").add("website.sizing_y", {
-//    template: xml`<div class="d-none"/>`,
-//
-//}
-//<div data-js="sizing_y"
-//     data-selector="section, .row > div, .parallax, .s_hr, .carousel-item, .s_rating"
-//     data-exclude="section:has(> .carousel), .s_image_gallery .carousel-item, .s_col_no_resize.row > div, .s_col_no_resize"/>
+patch(Sizing.prototype, {
+    /**
+     * @override
+     */
+    start() {
+        const defs = super.start(...arguments);
+        const self = this;
+        this.$handles.on("mousedown", function (ev) {
+            // Since website is edited in an iframe, a div that goes over the
+            // iframe is necessary to catch mousemove and mouseup events,
+            // otherwise the iframe absorbs them.
+            const $body = $(this.ownerDocument.body);
+            if (!self.divEl) {
+                self.divEl = document.createElement("div");
+                self.divEl.style.position = "absolute";
+                self.divEl.style.height = "100%";
+                self.divEl.style.width = "100%";
+                self.divEl.setAttribute("id", "iframeEventOverlay");
+                $body.append(self.divEl);
+            }
+            const documentMouseUp = () => {
+                // Multiple mouseup can occur if mouse goes out of the window
+                // while moving.
+                if (self.divEl) {
+                    self.divEl.remove();
+                    self.divEl = undefined;
+                }
+                $body.off("mouseup", documentMouseUp);
+            };
+            $body.on("mouseup", documentMouseUp);
+        });
+        return defs;
+    },
+    /**
+     * @override
+     */
+    async updateUIVisibility() {
+        await super.updateUIVisibility(...arguments);
+        const nonDraggableClasses = [
+            "s_table_of_content_navbar_wrap",
+            "s_table_of_content_main",
+        ];
+        if (nonDraggableClasses.some(c => this.target.classList.contains(c))) {
+            const moveHandleEl = this.$overlay[0].querySelector(".o_move_handle");
+            moveHandleEl.classList.add("d-none");
+        }
+    },
+});
+
+registry.category("snippets_options").add("website.sizing_y", {
+    component: SizingY,
+    template: xml`<div class="d-none"/>`,
+    selector: "section, .row > div, .parallax, .s_hr, .carousel-item, .s_rating",
+    exclude: "section:has(> .carousel), .s_image_gallery .carousel-item, .s_col_no_resize.row > div, .s_col_no_resize",
+});
 
 registry.category("snippets_options").add("website.sizing_x", {
     component: SizingX,
@@ -415,15 +466,13 @@ registry.category("snippets_options").add("website.sizing_x", {
     exclude: ".s_col_no_resize.row > div, .s_col_no_resize",
 });
 
-//<div data-js="sizing_x"
-//     data-selector=".row > div"
-//     data-drop-near=".row:not(.s_col_no_resize) > div"
-//     data-exclude=".s_col_no_resize.row > div, .s_col_no_resize"/>
-//
-//<div data-js="sizing_grid"
-//     data-selector=".row > div"
-//     data-drop-near=".row.o_grid_mode > div"
-//     data-exclude=".s_col_no_resize.row > div, .s_col_no_resize"/>
+registry.category("snippets_options").add("website.sizing_grid", {
+    component: SizingGrid,
+    template: xml`<div class="d-none"/>`,
+    selector: ".row > div",
+    dropNear: ".row.o_grid_mode > div",
+    exclude: ".s_col_no_resize.row > div, .s_col_no_resize",
+});
 
 registry.category("snippets_options").add("move_horizontally_opt", {
     template: "website.move_horizontally_opt",
