@@ -1,0 +1,131 @@
+diff --git a/addons/mrp_subcontracting/views/stock_move_views.xml b/addons/mrp_subcontracting/views/stock_move_views.xml
+index 7dde602230f4..154fb601a9ca 100644
+--- a/addons/mrp_subcontracting/views/stock_move_views.xml
++++ b/addons/mrp_subcontracting/views/stock_move_views.xml
+@@ -122,7 +122,7 @@
+                             <field name="location_dest_id" column_invisible="True"/>
+                             <field name="product_id" readonly="1" force_save="1"/>
+                             <field name="qty_done"/>
+-                            <field name="lot_id" column_invisible="parent.has_tracking not in ('serial', 'lot')" required="tracking in ('serial', 'lot')" context="{'default_product_id': product_id, 'default_company_id': company_id}" groups="stock.group_production_lot"/>
++                            <field name="lot_id" column_invisible="parent.has_tracking not in ('serial', 'lot')" required="tracking in ('serial', 'lot')" context="{'default_product_id': product_id}" groups="stock.group_production_lot"/>
+                         </tree>
+                     </field>
+                 </sheet>
+diff --git a/addons/repair/models/repair.py b/addons/repair/models/repair.py
+index 9c168567cd42..7a518ab86ded 100644
+--- a/addons/repair/models/repair.py
++++ b/addons/repair/models/repair.py
+@@ -84,7 +84,7 @@ class Repair(models.Model):
+         'stock.lot', 'Lot/Serial',
+         default=False,
+         compute="compute_lot_id", store=True,
+-        domain="[('product_id','=', product_id), ('company_id', '=', company_id)]", check_company=True,
++        domain="[('product_id','=', product_id), '|', ('company_id', '=', False), ('company_id', '=', company_id)]",
+         help="Products repaired are all belonging to this lot")
+     tracking = fields.Selection(string='Product Tracking', related="product_id.tracking", readonly=False)
+ 
+diff --git a/addons/repair/views/repair_views.xml b/addons/repair/views/repair_views.xml
+index ae02ebd5c9d7..d6def10133e3 100644
+--- a/addons/repair/views/repair_views.xml
++++ b/addons/repair/views/repair_views.xml
+@@ -86,7 +86,7 @@
+                             <field name="repair_request" invisible="not sale_order_line_id"/>
+                             <field name="partner_id" widget="res_partner_many2one" context="{'res_partner_search_mode': 'customer', 'show_vat': True}" readonly="sale_order_id"/>
+                             <field name="product_id" readonly="state in ['cancel', 'done']"/>
+-                            <field name="lot_id" context="{'default_product_id': product_id, 'default_company_id': company_id}" groups="stock.group_production_lot" options="{'no_create': True, 'no_create_edit': True}" invisible="tracking not in ['serial', 'lot']" readonly="state == 'done' or tracking not in ['serial', 'lot']" required="tracking in ['serial', 'lot']"/>
++                            <field name="lot_id" context="{'default_product_id': product_id}" groups="stock.group_production_lot" options="{'no_create': True, 'no_create_edit': True}" invisible="tracking not in ['serial', 'lot']" readonly="state == 'done' or tracking not in ['serial', 'lot']" required="tracking in ['serial', 'lot']"/>
+                             <field name="product_uom_category_id" invisible="1"/>
+                             <label for="product_qty" invisible="not product_id"/>
+                             <div class="o_row" invisible="not product_id">
+diff --git a/addons/stock/models/stock_lot.py b/addons/stock/models/stock_lot.py
+index 344a004604ad..400ef3da600f 100644
+--- a/addons/stock/models/stock_lot.py
++++ b/addons/stock/models/stock_lot.py
+@@ -30,13 +30,18 @@ class StockLot(models.Model):
+     product_qty = fields.Float('Quantity', compute='_product_qty')
+     note = fields.Html(string='Description')
+     display_complete = fields.Boolean(compute='_compute_display_complete')
+-    company_id = fields.Many2one('res.company', 'Company', required=True, index=True, default=lambda self: self.env.company.id)
++    company_id = fields.Many2one('res.company', 'Company', index=True, compute='_compute_company_id',store=True)
+     delivery_ids = fields.Many2many('stock.picking', compute='_compute_delivery_ids', string='Transfers')
+     delivery_count = fields.Integer('Delivery order count', compute='_compute_delivery_ids')
+     last_delivery_partner_id = fields.Many2one('res.partner', compute='_compute_delivery_ids')
+     lot_properties = fields.Properties('Properties', definition='product_id.lot_properties_definition', copy=True)
+     location_id = fields.Many2one('stock.location', 'Location', compute='_compute_single_location', store=True, readonly=False, inverse='_set_single_location', domain="[('usage', '!=', 'view')]")
+ 
++    @api.depends('product_id')
++    def _compute_company_id(self):
++        for record in self:
++            record.company_id = record.product_id.product_tmpl_id.company_id
++
+     @api.model
+     def generate_lot_names(self, first_lot, count):
+         """Generate `lot_names` from a string."""
+diff --git a/addons/stock/security/stock_security.xml b/addons/stock/security/stock_security.xml
+index 3e61deb06e1d..cacd6ba746de 100644
+--- a/addons/stock/security/stock_security.xml
++++ b/addons/stock/security/stock_security.xml
+@@ -111,7 +111,7 @@
+     <record model="ir.rule" id="stock_production_lot_rule">
+         <field name="name">Stock Production Lot multi-company</field>
+         <field name="model_id" search="[('model','=','stock.lot')]" model="ir.model"/>
+-        <field name="domain_force">[('company_id','in', company_ids)]</field>
++        <field name="domain_force">['|',('company_id','=',False),('company_id', 'in', company_ids)]</field>
+     </record>
+ 
+     <record model="ir.rule" id="stock_warehouse_comp_rule">
+diff --git a/addons/stock/views/stock_move_line_views.xml b/addons/stock/views/stock_move_line_views.xml
+index 02d107a38988..9ce0a249b790 100644
+--- a/addons/stock/views/stock_move_line_views.xml
++++ b/addons/stock/views/stock_move_line_views.xml
+@@ -93,7 +93,7 @@
+                                 <field name="qty_done"/>
+                                 <field name="product_uom_id" options="{'no_create': True}" string="Unit of Measure" groups="uom.group_uom"/>
+                             </div>
+-                            <field name="lot_id" groups="stock.group_production_lot" context="{'default_product_id': product_id, 'active_picking_id': picking_id, 'default_company_id': company_id}" invisible="not lot_id and lot_name"/>
++                            <field name="lot_id" groups="stock.group_production_lot" context="{'default_product_id': product_id, 'active_picking_id': picking_id }" invisible="not lot_id and lot_name"/>
+                             <field name="lot_name" groups="stock.group_production_lot" invisible="lot_id or not lot_name"/>
+                             <field name="package_id" string="Source Package" groups="stock.group_tracking_lot"/>
+                             <field name="result_package_id" string="Destination Package" groups="stock.group_tracking_lot"/>
+diff --git a/addons/stock/views/stock_move_views.xml b/addons/stock/views/stock_move_views.xml
+index a3ab8193a0a7..8e396da891e2 100644
+--- a/addons/stock/views/stock_move_views.xml
++++ b/addons/stock/views/stock_move_views.xml
+@@ -239,10 +239,9 @@
+                     <field name="lot_id" groups="stock.group_production_lot"
+                         column_invisible="not context.get('show_lots_m2o')"
+                         readonly="package_level_id and parent.picking_type_entire_packs"
+-                        domain="[('product_id', '=', parent.product_id), ('company_id', '=', company_id)]"
++                        domain="[('product_id', '=', parent.product_id), '|', ('company_id', '=', company_id), ('company_id', '=', False)]"
+                         context="{
+                             'active_picking_id': picking_id,
+-                            'default_company_id': parent.company_id,
+                             'default_product_id': parent.product_id,
+                         }"/>
+                     <field name="lot_name" string="Lot/Serial Number" widget="text" groups="stock.group_production_lot"
+diff --git a/addons/stock/views/stock_quant_views.xml b/addons/stock/views/stock_quant_views.xml
+index 3f9b2243c84c..4b40de8d7151 100644
+--- a/addons/stock/views/stock_quant_views.xml
++++ b/addons/stock/views/stock_quant_views.xml
+@@ -393,7 +393,7 @@ in this location. That leads to a negative stock.
+                         <field name="product_id" force_save="1" invisible="1"/>
+                         <field name="lot_id" domain="[('product_id', '=', product_id)]"
+                             groups="stock.group_production_lot" readonly="context.get('readonly_form')"
+-                            context="{'default_product_id': product_id, 'default_company_id': company_id}"/>
++                            context="{'default_product_id': product_id}"/>
+                         <field name="location_id" groups="stock.group_stock_multi_locations" readonly="context.get('readonly_form')"/>
+                         <field name="package_id" groups="stock.group_tracking_lot" invisible="context.get('readonly_form')"/>
+                         <field name="owner_id" groups="stock.group_tracking_owner" invisible="context.get('readonly_form')"/>
+diff --git a/addons/stock/views/stock_scrap_views.xml b/addons/stock/views/stock_scrap_views.xml
+index 720225225932..f063aff89164 100644
+--- a/addons/stock/views/stock_scrap_views.xml
++++ b/addons/stock/views/stock_scrap_views.xml
+@@ -172,7 +172,7 @@
+                                 <field name="product_uom_id" readonly="tracking == 'serial'" groups="uom.group_uom"/>
+                             </div>
+                             <field name="lot_id" groups="stock.group_production_lot"
+-                                context="{'default_company_id': company_id, 'default_product_id': product_id}"
++                                context="{'default_product_id': product_id}"
+                                 invisible="not product_id or tracking == 'none'"
+                                 readonly="state == 'done'"
+                                 required="tracking != 'none'"/>
