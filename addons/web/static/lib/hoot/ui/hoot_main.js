@@ -1,17 +1,33 @@
 /** @odoo-module **/
 
 import { Component, onMounted, useRef, useState, useSubEnv } from "@odoo/owl";
+import { createURL } from "../core/url";
 import { document, matchMedia, navigator } from "../globals";
-import { cleanupDOM, config as domConfig } from "../helpers/dom";
+import { config as domConfig } from "../helpers/dom";
 import { compactXML, storage } from "../utils";
-import { ConfigDropdown } from "./config_dropdown";
-import { ICONS } from "./icons";
-import { Reporting } from "./reporting";
-import { RunAllButton } from "./run_all_button";
-import { RunButton } from "./run_button";
-import { RunFailedButton } from "./run_failed_button";
-import { Search } from "./search";
-import { StatusPanel } from "./status_panel";
+import { HootConfigDropdown } from "./hoot_config_dropdown";
+import { HootReporting } from "./hoot_reporting";
+import { HootRunAllButton } from "./hoot_run_all_button";
+import { HootRunButton } from "./hoot_run_button";
+import { HootRunFailedButton } from "./hoot_run_failed_button";
+import { HootSearch } from "./hoot_search";
+import { HootStatusPanel } from "./hoot_status_panel";
+
+let imported = false;
+function importIcons() {
+    if (imported) {
+        return;
+    }
+    imported = true;
+    const link = document.createElement("link");
+    link.setAttribute("rel", "stylesheet");
+    link.setAttribute(
+        "href",
+        "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+    );
+    link.setAttribute("data-no-import", true);
+    document.head.appendChild(link);
+}
 
 /**
  * @param {string} storageKey
@@ -58,21 +74,21 @@ const TITLE_PREFIX = {
 };
 
 /** @extends Component<{}, import("../setup").Environment> */
-export class Main extends Component {
+export class HootMain extends Component {
     static components = {
-        ConfigDropdown,
-        RunAllButton,
-        RunButton,
-        RunFailedButton,
-        Search,
-        StatusPanel,
-        Reporting,
+        HootConfigDropdown,
+        HootRunAllButton,
+        HootRunButton,
+        HootRunFailedButton,
+        HootSearch,
+        HootStatusPanel,
+        HootReporting,
     };
 
     static template = compactXML/* xml */ `
         <t t-if="env.runner.config.headless">
             Running in headless mode
-            <a t-att-href="env.url.createURL({ headless: null })">
+            <a t-att-href="createURL({ headless: null })">
                 Run with UI
             </a>
         </t>
@@ -82,27 +98,28 @@ export class Main extends Component {
                     <h1 class="hoot-logo hoot-text-primary hoot-w-full hoot-text-xl hoot-select-none" title="Hierarchically Organized Odoo Tests">
                         HOOT
                     </h1>
-                    <span class="hoot-useragent hoot-truncate hoot-row hoot-text-sm">${navigator.userAgent}</span>
+                    <span class="hoot-text-muted hoot-truncate hoot-row hoot-text-sm">${navigator.userAgent}</span>
                     <button t-on-click="color.toggle" title="Toggle color scheme">
-                        <t t-if="color.scheme === 'light'">${ICONS.moon}</t>
-                        <t t-else="">${ICONS.sun}</t>
+                        <i t-attf-class="bi bi-{{ color.scheme === 'light' ? 'moon' : 'sun' }}-fill" />
                     </button>
                 </div>
                 <nav class="hoot-controls hoot-gap-4">
                     <div class="hoot-buttons hoot-row">
-                        <RunButton />
-                        <RunFailedButton />
-                        <RunAllButton />
+                        <HootRunButton />
+                        <HootRunFailedButton />
+                        <HootRunAllButton />
                     </div>
-                    <Search />
-                    <ConfigDropdown />
+                    <HootSearch />
+                    <HootConfigDropdown />
                 </nav>
-                <StatusPanel />
+                <HootStatusPanel />
             </header>
-            <Reporting />
+            <HootReporting />
         </main>
         <iframe t-ref="fixture" class="hoot-fixture" />
     `;
+
+    createURL = createURL;
 
     get fixtureDocument() {
         return this.fixtureRef.el?.contentDocument;
@@ -121,7 +138,8 @@ export class Main extends Component {
 
         runner.beforeAll(() => {
             const { head } = this.fixtureDocument;
-            for (const el of document.head.querySelectorAll("link,script,style")) {
+            const selectors = ["link", "script", "style"].map((s) => `${s}:not([data-no-import])`);
+            for (const el of document.head.querySelectorAll(selectors.join(","))) {
                 head.appendChild(el.cloneNode(true));
             }
         });
@@ -143,6 +161,10 @@ export class Main extends Component {
         });
 
         onMounted(async () => {
+            if (!runner.config.headless) {
+                importIcons();
+            }
+
             if (domConfig.defaultRoot === null) {
                 domConfig.defaultRoot = this.fixtureDocument.body;
             }

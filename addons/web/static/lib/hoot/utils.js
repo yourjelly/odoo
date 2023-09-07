@@ -283,6 +283,9 @@ export function isRegExpFilter(filter) {
 export const log = makeTaggable(function log(...args) {
     const [firstTag] = args.pop();
     const logFn = firstTag in console ? console[firstTag] : console.log;
+    if (["group", "groupEnd", "table"].includes(firstTag)) {
+        return logFn(...args);
+    }
     const prefix = `%c[HOOT]%c`;
     const styles = [`color:#ff0080`, `color:inherit`];
     let firstArg = args.shift() ?? "";
@@ -301,14 +304,14 @@ export const log = makeTaggable(function log(...args) {
  *
  * @template T
  * @param {string} pattern
- * @param {T[]} items
+ * @param {Iterable<T>} items
  * @param {(item: T) => string} mapFn
  * @returns {T[]}
  */
 export function lookup(pattern, items, mapFn = normalize) {
     const nPattern = parseRegExp(normalize(pattern));
     if (nPattern instanceof RegExp) {
-        return items.filter((item) => nPattern.test(mapFn(item)));
+        return [...items].filter((item) => nPattern.test(mapFn(item)));
     } else {
         // Fuzzy lookup
         const groupedByScore = {};

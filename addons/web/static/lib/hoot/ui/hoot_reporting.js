@@ -3,7 +3,8 @@
 import { Component, useState } from "@odoo/owl";
 import { isMarkupHelper } from "../assertions/assert_helpers";
 import { compactXML } from "../utils";
-import { TestResult } from "./test_result";
+import { HootTestResult } from "./hoot_test_result";
+import { subscribeToURLParams } from "../core/url";
 
 /**
  * @typedef {import("../core/test").Test} Test
@@ -38,14 +39,16 @@ function makeResultBatcher(reactiveResults, interval) {
     return { add };
 }
 
+const RENDER_INTERVAL = 100;
+
 /** @extends Component<{}, import("../setup").Environment> */
-export class Reporting extends Component {
-    static components = { TestResult };
+export class HootReporting extends Component {
+    static components = { HootTestResult };
 
     static template = compactXML/* xml */ `
         <div class="hoot-reporting hoot-col">
             <t t-foreach="displayedTests" t-as="test" t-key="test.id">
-                <TestResult test="test" index="testIndex" defaultOpen="canOpen(test)" />
+                <HootTestResult test="test" index="testIndex" defaultOpen="canOpen(test)" />
             </t>
         </div>
     `;
@@ -63,15 +66,15 @@ export class Reporting extends Component {
     }
 
     setup() {
-        const { runner, url } = this.env;
+        const { runner } = this.env;
 
-        url.subscribe("*");
+        subscribeToURLParams("*");
 
         /** @type {Test[]} */
         this.results = useState([]);
 
         // Batch results to avoid updating too frequently
-        const { add } = makeResultBatcher(this.results, runner.config.meta.renderInterval);
+        const { add } = makeResultBatcher(this.results, RENDER_INTERVAL);
 
         runner.afterAnyTest(add);
         runner.skippedAnyTest(add);

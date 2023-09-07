@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { mount, queryOne } from "../../helpers/dom";
+import { queryOne } from "../../helpers/dom";
 import {
     clear,
     click,
@@ -18,6 +18,7 @@ import {
     select,
 } from "../../helpers/events";
 import { suite, test } from "../../setup";
+import { mount } from "../local_helpers";
 
 /**
  *
@@ -28,7 +29,7 @@ function addStepListener(element, type) {
     return on(element, type, (event) => QUnit.assert.step(event.type));
 }
 
-suite.skip("HOOT", "Helpers", "Events", () => {
+suite.skip("@odoo/hoot", "Helpers", "Events", () => {
     test("clear", async (assert) => {
         await mount(/* xml */ `<input value="Test" />`);
 

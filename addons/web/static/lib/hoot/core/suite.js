@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { SPECIAL_TAGS, generateHash, makeCallbacks } from "../utils";
+import { SPECIAL_TAGS, generateHash, makeCallbacks, normalize } from "../utils";
 
 /**
  * @typedef {import("./tag").Tag} Tag
@@ -16,6 +16,7 @@ export class Suite {
     jobs = [];
     /** @type {Suite[]} */
     path = [this];
+    skip = false;
     /** @type {Tag[]} */
     specialTags = [];
     /** @type {Set<string>} */
@@ -31,17 +32,18 @@ export class Suite {
      */
     constructor(parent, name, tags) {
         this.parent = parent || null;
+        this.name = name;
 
         if (this.parent) {
             Object.assign(this.config, this.parent.config);
             this.path.unshift(...this.parent.path);
+            this.skip = this.parent.skip;
         }
 
-        this.name = name;
-        this.fullName = this.path.map((suite) => suite.name).join(" > ");
+        this.fullName = this.path.map((job) => job.name).join(" > ");
         this.id = generateHash(this.fullName);
+        this.index = normalize(this.fullName);
 
-        this.skip = this.parent ? this.parent.skip : false;
         for (const tag of tags) {
             if (tag.special) {
                 this.specialTags.push(tag);

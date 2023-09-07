@@ -64,7 +64,7 @@ body {
     --hoot-border-result: var(--hoot-gray-300);
     --hoot-border-search: #d8dadd;
 
-    // Reporting colors
+    // HootReporting colors
     --hoot-bg-report: #ffffff;
     --hoot-text-report: #202124;
     --hoot-border-report: #f0f0f0;
@@ -105,7 +105,7 @@ body {
         --hoot-border-result: var(--hoot-gray-600);
         --hoot-border-search: #3c3f4c;
 
-        // Reporting colors
+        // HootReporting colors
         --hoot-bg-report: #202124;
         --hoot-text-report: #e8eaed;
         --hoot-border-report: #3a3a3a;
@@ -285,6 +285,10 @@ body {
         width: 100%;
     }
 
+    .hoot-whitespace-nowrap {
+        white-space: nowrap;
+    }
+
     @media (max-width: $hoot-break-sm) {
         .hoot-hide-sm {
             display: none;
@@ -377,10 +381,6 @@ body {
         &:hover {
             animation: hoot-sick-traverse 1.2s ease-in-out;
         }
-    }
-
-    .hoot-useragent {
-        color: var(--hoot-gray-500);
     }
 
     .hoot-panel-top {
@@ -521,7 +521,7 @@ body {
     }
 
     //-----------------------------------------------------------------------------
-    // Reporting
+    // HootReporting
     //-----------------------------------------------------------------------------
 
     .hoot-reporting {
@@ -614,27 +614,37 @@ body {
         border-radius: 0.25rem;
     }
 
-    .hoot-suite {
-        color: var(--hoot-gray-500);
-    }
-
     .hoot-test {
         color: var(--hoot-primary);
         width: clamp(100px, 100%, 50vw);
+
+        &:hover .hoot-copy {
+            opacity: 1;
+            width: 16px;
+        }
+    }
+
+    .hoot-copy {
+        opacity: 0;
+        width: 0;
+        transition: 0.15s;
+        color: var(--hoot-gray-400);
+
+        &:hover {
+            color: var(--hoot-gray-500);
+        }
+
+        &.hoot-copied {
+            color: var(--hoot-success);
+        }
     }
 
     .hoot-skipped {
         color: var(--hoot-info);
     }
 
-    .hoot-icon {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-    }
-
     .hoot-result-button-text {
-        .hoot-icon {
+        i {
             opacity: 0;
             width: 0;
             transition: 0.15s;
@@ -643,42 +653,33 @@ body {
         &:active,
         &:focus-within,
         &:hover {
-            gap: 0.25rem;
             color: white;
             background-color: var(--hoot-primary);
 
-            .hoot-icon {
+            i {
                 opacity: 1;
                 width: 16px;
             }
         }
     }
 
-    .hoot-result-button-icon {
-        color: #808080;
-        padding: 0.25rem 0.2rem;
+    .hoot-result-btn {
+        color: var(--hoot-primary);
         border-radius: 0.25rem;
+        border: 1px solid var(--hoot-primary);
+        transition: color 0.15s, background-color 0.15s;
 
         &:active,
         &:focus-within,
         &:hover {
             color: white;
-            background-color: var(--hoot-primary);
+            background: var(--hoot-primary);
         }
     }
 
     .hoot-path a,
     .hoot-name {
         user-select: text;
-    }
-
-    .hoot-copy {
-        color: var(--hoot-gray-400);
-    }
-
-    .hoot-duration {
-        white-space: nowrap;
-        color: var(--hoot-gray-500);
     }
 
     .hoot-html {
@@ -731,6 +732,13 @@ body {
     }
     .hoot-text-info {
         color: var(--hoot-info);
+    }
+
+    .hoot-bg-muted {
+        background: var(--hoot-gray-500);
+    }
+    .hoot-text-muted {
+        color: var(--hoot-gray-500);
     }
 
     .hoot-bg-success {

@@ -1,8 +1,8 @@
 /** @odoo-module **/
 
-import { mount } from "../helpers/dom";
+import { App } from "@odoo/owl";
+import { getFixture } from "../helpers/dom";
 import { registerCleanup } from "../setup";
-import { Main } from "../ui/main";
 
 /**
  * @param {string} href
@@ -14,10 +14,18 @@ export function mockLocation(href) {
 }
 
 /**
- * @param {ReturnType<import("../core/runner").makeTestRunner>} runner
+ * @param {import("@odoo/owl").ComponentConstructor | string} component
+ * @param {any} appConfig
  */
-export async function mountRunner(runner) {
-    const app = await mount(Main, { env: { runner } });
+export async function mount(component, appConfig) {
+    if (typeof component === "string") {
+        component = class extends Component {
+            static template = xml`${component}`;
+        };
+    }
+
+    const app = new App(component, { ...appConfig, test: true });
+    await app.mount(getFixture());
 
     registerCleanup(() => app.destroy());
 }

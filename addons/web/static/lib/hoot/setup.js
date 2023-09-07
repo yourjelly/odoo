@@ -12,7 +12,7 @@ import { makeLogger } from "./core/logger";
 import { makeTestRunner } from "./core/runner";
 import { config as domConfig } from "./helpers/dom";
 import { config as eventsConfig } from "./helpers/events";
-import { Main } from "./ui/main";
+import { HootMain } from "./ui/hoot_main";
 import { log } from "./utils";
 
 /**
@@ -26,14 +26,14 @@ const runner = makeTestRunner();
 
 makeLogger(runner);
 
-whenReady(async () => mount(Main, document.body, { env: { runner } }));
+whenReady(async () => mount(HootMain, document.body, { env: { runner }, name: "HOOT" }));
 
 export const config = {
     ...domConfig,
     ...eventsConfig,
 };
 
-log.debug("Test runner:", runner);
+log.debug(runner);
 export const __debug__ = { runner };
 
 export const afterEach = runner.afterTest;

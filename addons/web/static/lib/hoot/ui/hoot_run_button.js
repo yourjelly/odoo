@@ -1,10 +1,11 @@
 /** @odoo-module **/
 
 import { Component, useState } from "@odoo/owl";
+import { refresh } from "../core/url";
 import { compactXML } from "../utils";
 
 /** @extends Component<{}, import("../setup").Environment> */
-export class RunButton extends Component {
+export class HootRunButton extends Component {
     static template = compactXML/* xml */ `
         <button
             class="hoot-abort hoot-btn hoot-row hoot-p-2 hoot-gap-1"
@@ -31,7 +32,11 @@ export class RunButton extends Component {
     onClick() {
         const { runner, url } = this.env;
         if (runner.status === "ready") {
-            url.refresh();
+            if (runner.config.autostart) {
+                refresh();
+            } else {
+                runner.start();
+            }
         } else {
             runner.stop();
         }

@@ -3,12 +3,13 @@
 import { Component } from "@odoo/owl";
 import { Test } from "../core/test";
 import { compactXML, copy } from "../utils";
-import { ICONS } from "./icons";
-import { TagButton } from "./tag_button";
+import { HootCopyButton } from "./hoot_copy_button";
+import { HootTagButton } from "./hoot_tag_button";
+import { withParams } from "../core/url";
 
 /** @extends Component<{}, import("../setup").Environment> */
-export class TestPath extends Component {
-    static components = { TagButton };
+export class HootTestPath extends Component {
+    static components = { HootCopyButton, HootTagButton };
 
     static props = { test: Test };
 
@@ -19,13 +20,13 @@ export class TestPath extends Component {
             <span class="hoot-suites hoot-row hoot-hide-sm">
                 <t t-foreach="props.test.path.slice(0, -1)" t-as="suite" t-key="suite.id">
                     <a
-                        t-att-href="env.url.withParams('suite', suite.id)"
-                        class="hoot-suite hoot-truncate hoot-result-button-text hoot-row hoot-p-1"
+                        t-att-href="withParams('suite', suite.id)"
+                        class="hoot-suite hoot-truncate hoot-result-button-text hoot-text-muted hoot-row hoot-p-1"
                         t-att-class="{ 'hoot-skipped': suite.skip }"
                         draggable="false"
                         t-attf-title='Run suite "{{ suite.name }}"'
                     >
-                        ${ICONS.play}
+                        <i class="bi bi-play-fill" />
                         <span class="hoot-text" t-esc="suite.name" />
                     </a>
                     <span class="hoot-mx-1" t-att-class="{ 'hoot-skipped': suite.skip }">&gt;</span>
@@ -38,19 +39,20 @@ export class TestPath extends Component {
                 draggable="false"
             >
                 <t t-esc="props.test.name" />
-                <span class="hoot-select-none" t-if="!props.test.skip">
-                    (<t t-esc="props.test.lastResults.assertions?.length or 0" />)
-                </span>
-                <button class="hoot-copy" t-on-click="() => copy(props.test.name)">
-                    copy
-                </button>
+                <t t-if="!props.test.skip">
+                    <t t-set="assertLength" t-value="props.test.lastResults.assertions?.length or 0" />
+                    <span class="hoot-select-none" t-attf-title="{{ assertLength }} assertions passed">
+                        (<t t-esc="assertLength" />)
+                    </span>
+                </t>
+                <HootCopyButton text="props.test.name" />
             </span>
         </span>
         <t t-if="props.test.tags.length">
             <ul class="hoot-tags hoot-row">
                 <t t-foreach="props.test.tags" t-as="tag" t-key="tag.id">
                     <li>
-                        <TagButton tag="tag" />
+                        <HootTagButton tag="tag" />
                     </li>
                 </t>
             </ul>
@@ -58,6 +60,7 @@ export class TestPath extends Component {
     `;
 
     copy = copy;
+    withParams = withParams;
 
     getStatusInfo() {
         const { lastResults, skip } = this.props.test;

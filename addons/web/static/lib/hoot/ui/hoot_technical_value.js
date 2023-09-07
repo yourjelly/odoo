@@ -3,15 +3,14 @@
 import { Component, toRaw, useState } from "@odoo/owl";
 import { isMarkupHelper } from "../assertions/assert_helpers";
 import { compactXML, isElement, isIterable, log, toSelector } from "../utils";
-import { ICONS } from "./icons";
 
 /**
  * @typedef {{ value: any }} TechnicalValueProps
  */
 
 /** @extends Component<TechnicalValueProps, import("../setup").Environment> */
-export class TechnicalValue extends Component {
-    static components = { TechnicalValue };
+export class HootTechnicalValue extends Component {
+    static components = { HootTechnicalValue };
 
     static props = ["value"];
 
@@ -20,7 +19,7 @@ export class TechnicalValue extends Component {
             <t t-if="value.multiline">
                 <pre class="hoot-technical" t-att-class="value.className">
                     <t t-foreach="value.content" t-as="subValue" t-key="subValue_index">
-                        <TechnicalValue value="subValue" />
+                        <HootTechnicalValue value="subValue" />
                     </t>
                 </pre>
             </t>
@@ -47,12 +46,7 @@ export class TechnicalValue extends Component {
             <t t-tag="state.open ? 'pre' : 'span'" class="hoot-technical">
                 <button class="hoot-object-type hoot-row" t-on-click.synthetic="onClick">
                     <t t-esc="getConstructor()" />
-                    <t t-if="state.open">
-                        ${ICONS.up}
-                    </t>
-                    <t t-else="">
-                        ${ICONS.down}
-                    </t>
+                    <i t-attf-class="bi bi-caret-{{ state.open ? 'up' : 'down' }}-fill" />
                 </button>
                 <button class="hoot-log" t-on-click.synthetic="log">
                     <t>log</t>
@@ -64,7 +58,7 @@ export class TechnicalValue extends Component {
                         <ul class="hoot-object-values">
                             <t t-foreach="value" t-as="subValue" t-key="subValue">
                                 <li class="hoot-object-line">
-                                    <TechnicalValue value="subValue" />
+                                    <HootTechnicalValue value="subValue" />
                                     <t t-esc="displayComma(subValue)" />
                                 </li>
                             </t>
@@ -76,7 +70,7 @@ export class TechnicalValue extends Component {
                         <ul class="hoot-object-values">
                             <t t-foreach="value" t-as="key" t-key="key">
                                 <li class="hoot-object-line">
-                                    <span class="hoot-key" t-esc="key" />: <TechnicalValue value="value[key]" />
+                                    <span class="hoot-key" t-esc="key" />: <HootTechnicalValue value="value[key]" />
                                     <t t-esc="displayComma(value[key])" />
                                 </li>
                             </t>

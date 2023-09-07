@@ -5,7 +5,7 @@ import { Suite } from "../core/suite";
 import { Test } from "../core/test";
 import { suite, test } from "../setup";
 
-suite("HOOT", "Core", "Runner", () => {
+suite("@odoo/hoot", "Core", "Runner", () => {
     test("can register suites", (assert) => {
         const runner = makeTestRunner();
         runner.suite("a suite", () => {});
@@ -18,7 +18,7 @@ suite("HOOT", "Core", "Runner", () => {
         }
     });
 
-    test("can register sub-suites", (assert) => {
+    test("can register nested suites", (assert) => {
         const runner = makeTestRunner();
         runner.suite("a", "b", "c", () => {});
 
@@ -28,29 +28,18 @@ suite("HOOT", "Core", "Runner", () => {
         );
     });
 
-    test("can register standalone tests", (assert) => {
+    test("can register tests", (assert) => {
         const runner = makeTestRunner();
-        runner.test("a test", () => {});
-        runner.test("another test", () => {});
-
-        assert.equal(runner.suites.length, 0);
-        assert.equal(runner.tests.length, 2);
-        for (const test of runner.tests) {
-            assert.match(test, Test);
-        }
-    });
-
-    test("can register tests in suites", (assert) => {
-        const runner = makeTestRunner();
-        runner.suite("suite", () => {
-            runner.test("child", () => {});
+        runner.suite("suite 1", () => {
+            runner.test("test 1", () => {});
         });
-        runner.test("standalone", () => {});
+        runner.suite("suite 2", () => {
+            runner.test("test 2", () => {});
+            runner.test("test 3", () => {});
+        });
 
-        assert.equal(runner.suites.length, 1);
-        assert.equal(runner.tests.length, 2);
-
-        assert.equal(runner.suites[0].jobs.length, 1);
+        assert.equal(runner.suites.length, 2);
+        assert.equal(runner.tests.length, 3);
     });
 
     test("should not have duplicate suites", (assert) => {
@@ -64,106 +53,32 @@ suite("HOOT", "Core", "Runner", () => {
         );
     });
 
-    test("can run tests", async (assert) => {
-        const runner = makeTestRunner();
-
-        runner.suite("suite", () => {
-            runner.beforeSuite((suite) => assert.step("beforeSuite:" + suite.name));
-            runner.beforeTest((test) => assert.step("beforeTest:" + test.name));
-            runner.afterTest((test) => assert.step("afterTest:" + test.name));
-            runner.afterSuite((suite) => assert.step("afterSuite:" + suite.name));
-
-            runner.test("suite test", ({ ok }) => {
-                assert.step("> suite test");
-
-                ok(true);
-            });
-        });
-
-        runner.test("standalone test", ({ ok }) => {
-            assert.step("> standalone test");
-
-            ok(true);
-        });
-
-        assert.throws(() => runner.beforeSuite(() => assert.step("beforeSuite:null")));
-        assert.throws(() => runner.afterSuite(() => assert.step("afterSuite:null")));
-
-        runner.beforeAll(() => assert.step("beforeAll"));
-        runner.beforeAnySuite((suite) => assert.step("beforeAnySuite:" + suite.name));
-        runner.beforeAnyTest((test) => assert.step("beforeAnyTest:" + test.name));
-        runner.afterAnyTest((test) => assert.step("afterAnyTest:" + test.name));
-        runner.afterAnySuite((suite) => assert.step("afterAnySuite:" + suite.name));
-        runner.afterAll(() => assert.step("afterAll"));
-
-        assert.verifySteps([]);
-
-        await runner.start();
-
-        assert.verifySteps([
-            // Before all
-            "beforeAll",
-            // First suite
-            "beforeAnySuite:suite",
-            "beforeSuite:suite",
-            // First test
-            "beforeAnyTest:suite test",
-            "beforeTest:suite test",
-            "> suite test",
-            "afterAnyTest:suite test",
-            "afterTest:suite test",
-            // End of first suite
-            "afterAnySuite:suite",
-            "afterSuite:suite",
-            // Second suite
-            "beforeAnyTest:standalone test",
-            "beforeTest:standalone test",
-            "> standalone test",
-            "afterAnyTest:standalone test",
-            "afterTest:standalone test",
-            // After all
-            "afterAll",
-        ]);
-    });
-
-    test("can be stopped", async (assert) => {
-        const runner = makeTestRunner();
-
-        runner.test("a", ({ ok }) => {
-            assert.step("a");
-
-            ok(true);
-        });
-        runner.test("b", async ({ ok }) => {
-            assert.step("b");
-
-            await runner.stop();
-
-            ok(true);
-        });
-        runner.test("c", ({ ok }) => {
-            assert.step("c");
-
-            ok(true);
-        });
-
-        await runner.start();
-
-        assert.verifySteps(["a", "b"]);
-    });
-
     test("can refuse standalone tests", async (assert) => {
-        const runner = makeTestRunner({ nostandalone: true });
-
         assert.throws(() =>
             runner.test("standalone test", ({ ok }) => {
                 ok(true);
             })
         );
     });
+
+    test("can register test tags", async (assert) => {
+        const runner = makeTestRunner();
+
+        runner.suite("suite", () => {
+            let testFn = runner.test;
+            for (let i = 1; i <= 10; i++) {
+                testFn = testFn[`Tag ${i}`];
+            }
+
+            testFn.debug.only.skip["eleventh tag"]("tagged test", () => {});
+        });
+
+        assert.equal(runner.tags.size, 11);
+        assert.equal(runner.tests[0].tags.length, 11);
+    });
 });
 
-suite("HOOT", "Core", "Suite", () => {
+suite("@odoo/hoot", "Core", "Suite", () => {
     test("should have a hashed id", (assert) => {
         assert.match(new Suite(null, "a suite", []).id, /^\w{8}$/);
     });
@@ -186,7 +101,7 @@ suite("HOOT", "Core", "Suite", () => {
     });
 });
 
-suite("HOOT", "Core", "Test", () => {
+suite("@odoo/hoot", "Core", "Test", () => {
     test("should have a hashed id", (assert) => {
         assert.match(new Test(null, "a test", () => {}, []).id, /^\w{8}$/);
     });

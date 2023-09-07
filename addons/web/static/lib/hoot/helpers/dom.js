@@ -263,7 +263,7 @@ export function getPreviousFocusableElement(parent) {
     return index < 0 ? focusableEls.at(-1) : focusableEls[index - 1] || null;
 }
 
-export function getRoot() {
+export function getFixture() {
     return config.defaultRoot;
 }
 
@@ -375,22 +375,6 @@ export function isVisible(target) {
  */
 export function isWindow(object) {
     return object && typeof object === "object" && object.window === object;
-}
-
-/**
- * @param {import("@odoo/owl").ComponentConstructor | string} component
- * @param {any} appConfig
- */
-export async function mount(component, appConfig) {
-    if (typeof component === "string") {
-        component = class extends Component {
-            static template = xml`${component}`;
-        };
-    }
-
-    const app = new App(component, { ...appConfig, test: true });
-    await app.mount(config.defaultRoot);
-    return app;
 }
 
 /**

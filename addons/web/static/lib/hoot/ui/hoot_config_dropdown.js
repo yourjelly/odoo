@@ -2,14 +2,14 @@
 
 import { Component, useExternalListener, useRef, useState } from "@odoo/owl";
 import { compactXML } from "../utils";
-import { ICONS } from "./icons";
+import { refresh } from "../core/url";
 
 /** @extends Component<{}, import("../setup").Environment> */
-export class ConfigDropdown extends Component {
+export class HootConfigDropdown extends Component {
     static template = compactXML/* xml */ `
         <div class="hoot-config hoot-relative" t-ref="root">
             <button t-ref="toggler" class="hoot-btn hoot-p-2" title="Configuration">
-                ${ICONS.gear}
+                <i class="bi bi-gear-fill" />
             </button>
             <t t-if="state.open">
                 <div class="hoot-dropdown">
@@ -21,7 +21,7 @@ export class ConfigDropdown extends Component {
                         <input
                             type="checkbox"
                             t-model="env.runner.config.failfast"
-                            t-on-change="env.url.refresh"
+                            t-on-change="refresh"
                         />
                         <span>Fail fast</span>
                     </label>
@@ -29,7 +29,7 @@ export class ConfigDropdown extends Component {
                         <input
                             type="checkbox"
                             t-model="env.runner.config.notrycatch"
-                            t-on-change="env.url.refresh"
+                            t-on-change="refresh"
                         />
                         <span>No try/catch</span>
                     </label>
@@ -37,14 +37,24 @@ export class ConfigDropdown extends Component {
                         <input
                             type="checkbox"
                             t-model="env.runner.config.randomorder"
-                            t-on-change="env.url.refresh"
+                            t-on-change="refresh"
                         />
                         <span>Random order</span>
+                    </label>
+                    <label class="hoot-checkbox hoot-dropdown-line">
+                        <input
+                            type="checkbox"
+                            t-model="env.runner.config.headless"
+                            t-on-change="refresh"
+                        />
+                        <span>Headless</span>
                     </label>
                 </div>
             </t>
         </div>
     `;
+
+    refresh = refresh;
 
     setup() {
         this.rootRef = useRef("root");

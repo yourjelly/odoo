@@ -2,14 +2,19 @@
 
 import { Component, useExternalListener, useRef, useState } from "@odoo/owl";
 import { Tag } from "../core/tag";
+import { refresh, setParams, subscribeToURLParams } from "../core/url";
 import { Object } from "../globals";
-import { compactXML, debounce, isRegExpFilter, lookup, normalize, title } from "../utils";
-import { ICONS } from "./icons";
-import { TagButton } from "./tag_button";
+import { compactXML, debounce, isRegExpFilter, lookup, title } from "../utils";
+import { HootTagButton } from "./hoot_tag_button";
 
 /**
  * @typedef {"suites" | "tags" | "tests"} SearchCategory
  */
+
+/**
+ * @param {import("../core/suite").Suite | import("../core/tag").Tag | import("../core/test").Test} item
+ */
+const getIndex = (item) => item.index;
 
 /**
  * @param {string[]} values
@@ -17,8 +22,8 @@ import { TagButton } from "./tag_button";
 const toObject = (values) => values.reduce((obj, value) => ({ ...obj, [value]: true }), {});
 
 /** @extends Component<{}, import("../setup").Environment> */
-export class Search extends Component {
-    static components = { TagButton };
+export class HootSearch extends Component {
+    static components = { HootTagButton };
 
     static template = compactXML/* xml */ `
         <div class="hoot-search hoot-relative" t-ref="root" t-on-keydown="onKeyDown">
@@ -28,10 +33,10 @@ export class Search extends Component {
                         <button
                             type="submit"
                             class="hoot-btn hoot-row hoot-gap-1 hoot-px-1 hoot-p-1"
-                            title="Remove all"
+                            t-att-title="count.text"
                             t-on-click="() => this.uncheckCategory(count.id)"
                         >
-                            <t t-out="count.icon" />
+                            <i t-attf-class="bi bi-{{ count.icon }}" />
                             <t t-esc="count.value" />
                         </button>
                     </t>
@@ -95,11 +100,9 @@ export class Search extends Component {
                                                     t-model="state.checked[category.id][item.id]"
                                                 />
                                                 <t t-if="isTag(item)">
-                                                    <TagButton tag="item" disabled="true" />
+                                                    <HootTagButton tag="item" disabled="true" />
                                                 </t>
-                                                <t t-else="">
-                                                    <span t-esc="item.fullName or item.name" />
-                                                </t>
+                                                <span t-else="" t-esc="item.fullName" />
                                             </label>
                                         </li>
                                     </t>
@@ -117,19 +120,19 @@ export class Search extends Component {
             id: "suites",
             singular: "suite",
             plural: "suites",
-            icon: ICONS.chain,
+            icon: "list-check",
         },
         {
             id: "tests",
             singular: "test",
             plural: "tests",
-            icon: ICONS.test,
+            icon: "braces-asterisk",
         },
         {
             id: "tags",
             singular: "tag",
             plural: "tags",
-            icon: ICONS.label,
+            icon: "tag-fill",
         },
     ];
     title = title;
@@ -141,7 +144,7 @@ export class Search extends Component {
     setup() {
         this.rootRef = useRef("root");
         this.searchInputRef = useRef("search-input");
-        this.urlParams = this.env.url.subscribe();
+        this.urlParams = subscribeToURLParams();
         this.state = useState({
             query: this.urlFilter,
             showDropdown: false,
@@ -173,19 +176,19 @@ export class Search extends Component {
         const { runner } = this.env;
         const { query } = this.state;
         return {
-            suites: lookup(query, runner.suites, (suite) => normalize(suite.fullName)),
-            tests: lookup(query, runner.tests, (test) => normalize(test.fullName)),
-            tags: lookup(query, runner.tags, (tag) => normalize(tag.name)),
+            suites: lookup(query, runner.suites, getIndex),
+            tests: lookup(query, runner.tests, getIndex),
+            tags: lookup(query, runner.tags, getIndex),
         };
     }
 
     getCategoryCounts() {
         const { checked } = this.state;
         const counts = [];
-        for (const { id, icon } of this.categories) {
+        for (const { id, icon, plural } of this.categories) {
             const count = Object.values(checked[id]).filter(Boolean).length;
             if (count) {
-                counts.push({ id, icon, value: count });
+                counts.push({ id, icon, text: `Remove all ${plural}`, value: count });
             }
         }
         return counts;
@@ -274,7 +277,7 @@ export class Search extends Component {
 
     reload({ useTextFilter } = {}) {
         if (useTextFilter) {
-            this.env.url.setParams({
+            setParams({
                 filter: this.state.query,
                 suite: null,
                 tag: null,
@@ -290,14 +293,14 @@ export class Search extends Component {
                 }
             }
             const { suites, tests, tags } = checked;
-            this.env.url.setParams({
+            setParams({
                 filter: null,
                 suite: Object.keys(suites),
                 tag: Object.keys(tags),
                 test: Object.keys(tests),
             });
         }
-        this.env.url.refresh();
+        refresh();
     }
 
     /**

@@ -16,11 +16,7 @@ import {
     title,
 } from "../utils";
 
-// suite("perfs", () => {
-//     test[`multi=${1_000}`]("multi test hihi", ({ ok }) => ok(true));
-// });
-
-suite("HOOT", "Utils", () => {
+suite("@odoo/hoot", "Utils", () => {
     test("debounce", async (assert) => {
         const def = makeDeferred();
         const debounced = debounce(function namedFunction(arg) {
