@@ -104,6 +104,10 @@ export class Main extends Component {
         <iframe t-ref="fixture" class="hoot-fixture" />
     `;
 
+    get fixtureDocument() {
+        return this.fixtureRef.el?.contentDocument;
+    }
+
     setup() {
         const { runner } = this.env;
 
@@ -115,17 +119,23 @@ export class Main extends Component {
 
         // Event listeners
 
+        runner.beforeAll(() => {
+            const { head } = this.fixtureDocument;
+            for (const el of document.head.querySelectorAll("link,script,style")) {
+                head.appendChild(el.cloneNode(true));
+            }
+        });
         runner.beforeAnyTest(() => {
-            this.fixtureRef.el.innerHTML = "";
+            this.fixtureDocument.body.innerHTML = "";
             if (runner.debug) {
-                this.fixtureRef.el?.classList.add("hoot-debug");
+                this.fixtureRef.el.classList.add("hoot-debug");
             }
         });
         runner.afterAnyTest((test) => {
             if (!test.lastResults.pass) {
                 failed = true;
             }
-            this.fixtureRef.el?.classList.remove("hoot-debug");
+            this.fixtureRef.el.classList.remove("hoot-debug");
         });
         runner.afterAll(() => {
             updateTitle(failed);
@@ -134,7 +144,7 @@ export class Main extends Component {
 
         onMounted(async () => {
             if (domConfig.defaultRoot === null) {
-                domConfig.defaultRoot = this.fixtureRef.el.contentDocument.body;
+                domConfig.defaultRoot = this.fixtureDocument.body;
             }
 
             if (runner.config.autostart) {

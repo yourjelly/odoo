@@ -21,15 +21,9 @@ export class TestResult extends Component {
     static components = { TestPath, TechnicalValue };
 
     static template = compactXML/* xml */ `
-        <t t-set="statusInfo" t-value="getStatusInfo()" />
-        <details class="hoot-result hoot-col" t-att-class="statusInfo.className" t-att-open="props.defaultOpen">
+        <details class="hoot-result hoot-col" t-att-class="className" t-att-open="props.defaultOpen">
             <summary class="hoot-result-header hoot-row hoot-text-md">
                 <div class="hoot-row hoot-overflow-hidden hoot-gap-2">
-                    <span
-                        class="hoot-circle"
-                        t-attf-class="hoot-bg-{{ statusInfo.color }}"
-                        t-att-title="statusInfo.text"
-                    />
                     <TestPath test="props.test" />
                     <div class="hoot-row">
                         <a
@@ -90,20 +84,20 @@ export class TestResult extends Component {
         </details>
     `;
 
-    setup() {
-        this.env.url.subscribe(...Object.keys(DEFAULT_CONFIG));
+    get className() {
+        const { lastResults, skip } = this.props.test;
+        if (lastResults.aborted) {
+            return "hoot-abort";
+        } else if (skip) {
+            return "hoot-skip";
+        } else if (lastResults.pass) {
+            return "hoot-pass";
+        } else {
+            return "hoot-fail";
+        }
     }
 
-    getStatusInfo() {
-        const { aborted, pass } = this.props.test.lastResults;
-        if (aborted) {
-            return { color: "warn", className: "hoot-abort", text: "aborted" };
-        } else if (this.props.test.skip) {
-            return { color: "info", className: "hoot-skip", text: "skipped" };
-        } else if (pass) {
-            return { color: "success", className: "hoot-pass", text: "passed" };
-        } else {
-            return { color: "danger", className: "hoot-fail", text: "failed" };
-        }
+    setup() {
+        this.env.url.subscribe(...Object.keys(DEFAULT_CONFIG));
     }
 }

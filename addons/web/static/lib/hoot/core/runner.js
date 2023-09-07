@@ -123,7 +123,7 @@ export function makeTestRunner(params) {
         }
         const test = new Test(current, name, testFn, tags);
         (current?.jobs || rootJobs).push(test);
-        if (!test.parent.config.multi) {
+        if (!test.parent?.config.multi) {
             tests.push(test);
         }
         for (const tag of tags) {
@@ -393,10 +393,10 @@ export function makeTestRunner(params) {
      * @param {Test} test
      */
     async function runTest(test) {
-        const run = (assert) => {
+        const run = async (assert) => {
             let timeoutId;
             const timeout = test.config.timeout || config.timeout;
-            return Promise.race([
+            await Promise.race([
                 // Test promise
                 test.run(assert.methods),
                 // Abort & timeout promise
@@ -526,7 +526,7 @@ export function makeTestRunner(params) {
         status = "ready";
 
         while (missedCallbacks.length) {
-            await missedCallbacks.pop()();
+            await missedCallbacks.shift()();
         }
 
         await callbacks.call("after-all");

@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { matchMedia, navigator, ontouchstart } from "../globals";
-import { isIterable } from "../utils";
+import { copy, isIterable } from "../utils";
 import {
     config as DOMConfig,
     getActiveElement,
@@ -471,7 +471,7 @@ function triggerKeyDown(target, eventInit) {
              */
             case "c": {
                 if (eventInit.ctrlKey) {
-                    navigator.clipboard.writeText(window.getSelection());
+                    copy(window.getSelection());
                 }
                 break;
             }
