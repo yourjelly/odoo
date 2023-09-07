@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { reactive } from "@odoo/owl";
-import { SPECIAL_TAGS, generateHash } from "../utils";
+import { SPECIAL_TAGS, generateHash, normalize } from "../utils";
 
 /**
  * @typedef {import("../assertions/assert").AssertMethods} AssertMethods
@@ -16,8 +16,9 @@ export class Test {
     config = {};
     /** @type {Partial<import("../assertions/assert").Assert>} */
     lastResults = reactive({});
-    /** @type {Suite[]} */
+    /** @type {(Suite | Test)[]} */
     path = [this];
+    skip = false;
     /** @type {Tag[]} */
     specialTags = [];
     /** @type {Set<string>} */
@@ -33,18 +34,19 @@ export class Test {
      */
     constructor(parent, name, runFn, tags) {
         this.parent = parent || null;
+        this.name = name;
+        this.runFn = runFn;
 
         if (this.parent) {
             Object.assign(this.config, this.parent.config);
             this.path.unshift(...this.parent.path);
+            this.skip = this.parent.skip;
         }
 
-        this.name = name;
-        this.fullName = this.path.map((suite) => suite.name).join(" > ");
+        this.fullName = this.path.map((job) => job.name).join(" > ");
         this.id = generateHash(this.fullName);
+        this.index = normalize(this.fullName);
 
-        this.runFn = runFn;
-        this.skip = this.parent ? this.parent.skip : false;
         for (const tag of tags) {
             if (tag.special) {
                 this.specialTags.push(tag);

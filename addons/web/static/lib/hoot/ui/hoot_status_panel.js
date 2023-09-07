@@ -1,20 +1,25 @@
 /** @odoo-module **/
 
 import { Component, useState } from "@odoo/owl";
-import { Date } from "../globals";
+import { Date, clearInterval, setInterval } from "../globals";
 import { compactXML } from "../utils";
-import { TestPath } from "./test_path";
+import { HootTestPath } from "./hoot_test_path";
 
 /** @extends Component<{}, import("../setup").Environment> */
-export class StatusPanel extends Component {
-    static components = { TestPath };
+export class HootStatusPanel extends Component {
+    static components = { HootTestPath };
 
     static template = compactXML/* xml */ `
         <div class="hoot-status hoot-row hoot-gap-3" t-att-class="state.className">
             <div class="hoot-row hoot-gap-2">
                 <span class="hoot-hide-sm" t-esc="state.text" t-att-title="state.text" />
                 <t t-if="state.runningTest">
-                    <TestPath test="state.runningTest" />
+                    <HootTestPath test="state.runningTest" />
+                </t>
+                <t t-if="state.timer !== null">
+                    <span class="hoot-text-info" t-attf-title="Running for {{ state.timer }} seconds">
+                        (<t t-esc="state.timer" />s)
+                    </span>
                 </t>
             </div>
             <ul class="hoot-row hoot-gap-1">
@@ -43,12 +48,14 @@ export class StatusPanel extends Component {
     setup() {
         const { runner } = this.env;
         let start;
+        let currentTestStart;
         this.state = useState({
             className: "",
             finished: false,
             /** @type {import("../core/test").Test | null} */
             runningTest: null,
             text: "Ready",
+            timer: null,
             // reporting
             done: 0,
             failed: 0,
@@ -56,23 +63,37 @@ export class StatusPanel extends Component {
             tests: 0,
         });
 
+        let intervalId = 0;
+
         runner.beforeAll(() => {
             this.state.finished = false;
             start = Date.now();
         });
 
         runner.beforeAnyTest((test) => {
+            currentTestStart = Date.now();
+
             this.state.runningTest = test;
             this.state.text = `Running`;
+            this.state.timer = 0;
+
+            intervalId = setInterval(() => {
+                this.state.timer = Math.floor((Date.now() - currentTestStart) / 1000);
+            }, 1000);
+
             if (runner.debug) {
                 this.state.text = `[DEBUG] ${this.state.text}`;
             }
         });
 
         runner.afterAnyTest((test) => {
+            clearInterval(intervalId);
+            this.state.timer = null;
+
             this.state.runningTest = null;
             this.state.tests++;
             this.state.done++;
+
             if (!test.lastResults.pass) {
                 this.state.failed++;
             }

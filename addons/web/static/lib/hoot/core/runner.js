@@ -2,7 +2,7 @@
 
 import { reactive } from "@odoo/owl";
 import { makeAssert } from "../assertions/assert";
-import { Error, Promise, clearTimeout, history, location, setTimeout } from "../globals";
+import { Error, Promise, clearTimeout, setTimeout } from "../globals";
 import {
     SPECIAL_TAGS,
     getFuzzyScore,
@@ -16,7 +16,7 @@ import {
 import { Suite } from "./suite";
 import { makeTags } from "./tag";
 import { Test } from "./test";
-import { DEFAULT_CONFIG, SKIP_PREFIX, makeURLStore } from "./url";
+import { DEFAULT_CONFIG, SKIP_PREFIX, setParams, urlParams } from "./url";
 
 /**
  * @typedef {import("../assertions/assert").AssertMethods} AssertMethods
@@ -37,6 +37,8 @@ class TimeoutError extends Error {
     name = "TimeoutError";
 }
 
+const BOOLEAN_REGEX = /^true|false$/i;
+
 //-----------------------------------------------------------------------------
 // Exports
 //-----------------------------------------------------------------------------
@@ -56,36 +58,36 @@ export function makeTestRunner(params) {
             const nestedArgs = [...arguments].slice(1);
             return addSuite(name, () => addSuite(...nestedArgs));
         }
-        if (status !== "ready") {
+        if (runner.status !== "ready") {
             throw new Error("Cannot add a suite after starting the test runner");
         }
         const current = getCurrent();
         const tags = makeTags(current?.tags, suiteTags);
         let suite = new Suite(current, name, tags);
-        const originalSuite = suites.find((s) => s.id === suite.id);
+        const originalSuite = runner.suites.find((s) => s.id === suite.id);
         if (originalSuite) {
             suite = originalSuite;
         } else {
-            (current?.jobs || rootJobs).push(suite);
+            (current?.jobs || runner.jobs).push(suite);
         }
         suiteStack.push(suite);
         for (const tag of tags) {
             if (tag.special) {
                 switch (tag.name) {
                     case SPECIAL_TAGS.debug:
-                        debug = true;
+                        runner.debug = true;
                     case SPECIAL_TAGS.only:
-                        suiteSet.add(suite.id);
+                        only.suites.add(suite.id);
                         break;
                     case SPECIAL_TAGS.skip:
-                        skipSet.add(suite.id);
+                        skip.suites.add(suite.id);
                         break;
                 }
             } else if (!tag.config) {
-                allTags.add(tag);
+                runner.tags.add(tag);
             }
         }
-        if (skipSet.has(suite.id) && !suiteSet.has(suite.id)) {
+        if (skip.suites.has(suite.id) && !only.suites.has(suite.id)) {
             suite.skip = true;
         }
         let result;
@@ -94,7 +96,7 @@ export function makeTestRunner(params) {
         } finally {
             suiteStack.pop();
             if (!originalSuite) {
-                suites.push(suite);
+                runner.suites.push(suite);
             }
         }
         if (result !== undefined) {
@@ -109,12 +111,10 @@ export function makeTestRunner(params) {
      */
     function addTest(name, testFn, testTags) {
         const current = getCurrent();
-        if (config.nostandalone && !current) {
-            throw new Error(
-                "Test runner is setup to refuse standalone tests. Please add a surrounding 'suite' statement."
-            );
+        if (!current) {
+            throw new Error(`Cannot register test "${name}" outside of a suite.`);
         }
-        if (status !== "ready") {
+        if (runner.status !== "ready") {
             throw new Error("Cannot add a test after starting the test runner");
         }
         const tags = makeTags(current?.tags, testTags);
@@ -122,104 +122,29 @@ export function makeTestRunner(params) {
             return;
         }
         const test = new Test(current, name, testFn, tags);
-        (current?.jobs || rootJobs).push(test);
+        (current?.jobs || runner.jobs).push(test);
         if (!test.parent?.config.multi) {
-            tests.push(test);
+            runner.tests.push(test);
         }
         for (const tag of tags) {
             if (tag.special) {
                 switch (tag.name) {
                     case SPECIAL_TAGS.debug:
-                        debug = true;
+                        runner.debug = true;
                     case SPECIAL_TAGS.only:
-                        testSet.add(test.id);
+                        only.tests.add(test.id);
                         break;
                     case SPECIAL_TAGS.skip:
-                        skipSet.add(test.id);
+                        skip.tests.add(test.id);
                         break;
                 }
             } else if (!tag.config) {
-                allTags.add(tag);
+                runner.tags.add(tag);
             }
         }
-        if (skipSet.has(test.id) && !testSet.has(test.id)) {
+        if (skip.tests.has(test.id) && !only.tests.has(test.id)) {
             test.skip = true;
         }
-    }
-
-    /**
-     * @param {() => MaybePromise<void>} callback
-     */
-    function afterAll(callback) {
-        callbacks.add("after-all", callback);
-    }
-
-    /**
-     * @param {(suite: Suite) => MaybePromise<void>} callback
-     */
-    function afterAnySuite(callback) {
-        callbacks.add("after-suite", callback);
-    }
-
-    /**
-     * @param {(test: Test) => MaybePromise<void>} callback
-     */
-    function afterAnyTest(callback) {
-        callbacks.add("after-test", callback);
-    }
-
-    /**
-     * @param {(suite: Suite) => MaybePromise<void>} callback
-     */
-    function afterSuite(callback) {
-        const current = getCurrent();
-        if (!current) {
-            throw new Error(`"afterSuite" can only be called when a suite is currently running`);
-        }
-        current.callbacks.add("after-suite", callback);
-    }
-
-    /**
-     * @param {(test: Test) => MaybePromise<void>} callback
-     */
-    function afterTest(callback) {
-        (getCurrent()?.callbacks || callbacks).add("after-test", callback);
-    }
-
-    /**
-     * @param {() => MaybePromise<void>} callback
-     */
-    function beforeAll(callback) {
-        callbacks.add("before-all", callback);
-    }
-
-    /**
-     * @param {(suite: Suite) => MaybePromise<void>} callback
-     */
-    function beforeAnySuite(callback) {
-        callbacks.add("before-suite", callback);
-    }
-
-    /**
-     * @param {(test: Test) => MaybePromise<void>} callback
-     */
-    function beforeAnyTest(callback) {
-        callbacks.add("before-test", callback);
-    }
-
-    /**
-     * @param {(suite: Suite) => MaybePromise<void>} callback
-     */
-    function beforeSuite(callback) {
-        const current = getCurrent();
-        if (!current) {
-            throw new Error(`"beforeSuite" should only be called inside a suite definition`);
-        }
-        current.callbacks.add("before-suite", callback);
-    }
-
-    function beforeTest(callback) {
-        (getCurrent()?.callbacks || callbacks).add("before-test", callback);
     }
 
     function getCurrent() {
@@ -249,54 +174,62 @@ export function makeTestRunner(params) {
     }
 
     function initFilters() {
-        const urlParams = url.params;
-        if (urlParams.tag) {
-            hasFilter = true;
-            for (const name of urlParams.tag) {
-                tagSet.add(name);
-            }
-        }
-        if (urlParams.filter) {
-            hasFilter = true;
-            textFilter = parseRegExp(normalize(urlParams.filter.join(" ")));
-        }
-
         const { get, remove } = storage("session");
         const previousFails = get("hoot-failed-tests", []);
         if (previousFails.length) {
             // Previously failed tests
-            hasFilter = true;
+            runner.hasFilter = true;
             remove("hoot-failed-tests");
             for (const id of previousFails) {
-                testSet.add(id);
+                only.tests.add(id);
             }
-        } else {
-            // Suites
-            if (urlParams.suite) {
-                hasFilter = true;
-                for (const id of urlParams.suite) {
-                    if (id.startsWith(SKIP_PREFIX)) {
-                        skipSet.add(id.slice(SKIP_PREFIX.length));
-                    } else {
-                        suiteSet.add(id);
-                    }
+            return;
+        }
+
+        // Text filter
+        if (urlParams.filter) {
+            runner.hasFilter = true;
+            runner.textFilter = parseRegExp(normalize(urlParams.filter.join(" ")));
+        }
+
+        // Suites
+        if (urlParams.suite) {
+            runner.hasFilter = true;
+            for (const id of urlParams.suite) {
+                if (id.startsWith(SKIP_PREFIX)) {
+                    ignore.suites.add(id.slice(SKIP_PREFIX.length));
+                } else {
+                    only.suites.add(id);
                 }
             }
-            // Tests
-            if (urlParams.debugTest) {
-                hasFilter = true;
-                debug = true;
-                for (const id of urlParams.debugTest) {
-                    testSet.add(id);
+        }
+
+        // Tags
+        if (urlParams.tag) {
+            runner.hasFilter = true;
+            for (const name of urlParams.tag) {
+                if (name.startsWith(SKIP_PREFIX)) {
+                    ignore.tags.add(name.slice(SKIP_PREFIX.length));
+                } else {
+                    only.tags.add(name);
                 }
-            } else if (urlParams.test) {
-                hasFilter = true;
-                for (const id of urlParams.test) {
-                    if (id.startsWith(SKIP_PREFIX)) {
-                        skipSet.add(id.slice(SKIP_PREFIX.length));
-                    } else {
-                        testSet.add(id);
-                    }
+            }
+        }
+
+        // Tests
+        if (urlParams.debugTest) {
+            runner.hasFilter = true;
+            runner.debug = true;
+            for (const id of urlParams.debugTest) {
+                only.tests.add(id);
+            }
+        } else if (urlParams.test) {
+            runner.hasFilter = true;
+            for (const id of urlParams.test) {
+                if (id.startsWith(SKIP_PREFIX)) {
+                    ignore.tests.add(id.slice(SKIP_PREFIX.length));
+                } else {
+                    only.tests.add(id);
                 }
             }
         }
@@ -308,51 +241,47 @@ export function makeTestRunner(params) {
     function prepareJobs(jobs) {
         const filteredJobs = jobs.filter((job) => {
             if (job instanceof Suite) {
-                if (suiteSet.has(job.id)) {
-                    // The suite is in the suites' 'only' set
-                    return true;
+                if (ignore.suites.has(job.id)) {
+                    return false;
                 }
                 job.jobs = prepareJobs(job.jobs);
-                if (job.jobs.length) {
-                    // The suite has valid tests to run
+                if (job.jobs.length || only.suites.has(job.id)) {
                     return true;
                 }
             } else {
-                if (testSet.has(job.id)) {
-                    // The test is in the tests' 'only' set
+                if (ignore.tests.has(job.id)) {
+                    return false;
+                }
+                if (only.tests.has(job.id)) {
                     return true;
                 }
             }
 
-            if (tagSet.size && job.tags.some((tag) => tagSet.has(tag.id))) {
-                // The job has a matching tag
+            if (ignore.tags.size && job.tags.some((tag) => ignore.tags.has(tag.id))) {
+                return false;
+            }
+            if (only.tags.size && job.tags.some((tag) => only.tags.has(tag.id))) {
                 return true;
             }
 
-            if (textFilter) {
+            if (runner.textFilter) {
                 // The job matches the URL filter
-                const fullName = normalize(job.fullName);
-                return textFilter instanceof RegExp
-                    ? textFilter.test(fullName)
-                    : getFuzzyScore(textFilter, fullName) > 0;
-            } else {
-                // There are no 'only' suites or 'only' tests
-                return suiteSet.size + testSet.size === 0;
+                if (
+                    runner.textFilter instanceof RegExp
+                        ? runner.textFilter.test(job.index)
+                        : getFuzzyScore(runner.textFilter, job.index) > 0
+                ) {
+                    return true;
+                }
             }
+
+            // No filter: is valid - With filter: did not pass the filters above
+            return (
+                only.suites.size + only.tags.size + only.tests.size + runner.textFilter.length === 0
+            );
         });
+
         return config.randomorder ? shuffle(filteredJobs) : filteredJobs;
-    }
-
-    /**
-     * @param {(test: Test) => MaybePromise<void>} callback
-     */
-    function registerCleanup(callback) {
-        const cleanup = () => {
-            callbacks.remove(cleanup);
-            return callback();
-        };
-
-        callbacks.add("after-test", cleanup);
     }
 
     /**
@@ -381,7 +310,7 @@ export function makeTestRunner(params) {
             callbacks.remove("skipped-test", suite.callbacks);
             callbacks.remove("after-suite", suite.callbacks);
 
-            if (debug) {
+            if (runner.debug) {
                 missedCallbacks.push(() => callbacks.call("after-suite", suite));
             } else {
                 await callbacks.call("after-suite", suite);
@@ -404,7 +333,7 @@ export function makeTestRunner(params) {
                     // Set abort signal
                     abortCurrent = resolve;
 
-                    if (!debug) {
+                    if (!runner.debug) {
                         // Set timeout
                         timeoutId = setTimeout(
                             () => reject(new TimeoutError(`test took longer than ${timeout}ms`)),
@@ -429,7 +358,7 @@ export function makeTestRunner(params) {
             await callbacks.call("before-test", test);
 
             // Setup
-            if (url.params.notrycatch) {
+            if (urlParams.notrycatch) {
                 await run(assert);
             } else {
                 try {
@@ -465,163 +394,233 @@ export function makeTestRunner(params) {
             }
 
             // After test (ignored in debug mode)
-            if (debug) {
+            if (runner.debug) {
                 missedCallbacks.push(() => callbacks.call("after-test", test));
             } else {
                 await callbacks.call("after-test", test);
 
-                if (url.params.failfast && !assert.pass && !test.skip) {
-                    return stop();
+                if (urlParams.failfast && !assert.pass && !test.skip) {
+                    return runner.stop();
                 }
             }
         }
     }
 
-    /**
-     * @param {(test: Test) => MaybePromise<void>} callback
-     */
-    function skippedAnyTest(callback) {
-        callbacks.add("skipped-test", callback);
-    }
-
-    /**
-     * @param {(test: Test) => MaybePromise<void>} callback
-     */
-    function skippedTest(callback) {
-        (getCurrent()?.callbacks || callbacks).add("skipped-test", callback);
-    }
-
-    async function start() {
-        // Make sure that code that wants to run right after the DOM is ready gets
-        // the opportunity to execute (and maybe call some hook such as 'beforeAll').
-        await Promise.resolve();
-
-        if (status !== "ready") {
-            return;
-        }
-
-        status = "running";
-        const jobs = prepareJobs(rootJobs);
-
-        await callbacks.call("before-all");
-
-        let job = jobs.shift();
-        while (job && status === "running") {
-            if (job instanceof Suite) {
-                await runSuite(job);
-                job = job.jobs[job.visited++] || job.parent || jobs.shift();
-            } else {
-                await runTest(job);
-                job = job.parent || jobs.shift();
-            }
-        }
-
-        if (!debug) {
-            await stop();
-        }
-    }
-
-    async function stop() {
-        abortCurrent();
-        status = "ready";
-
-        while (missedCallbacks.length) {
-            await missedCallbacks.shift()();
-        }
-
-        await callbacks.call("after-all");
-    }
-
-    const url = makeURLStore({ history, location });
     const initialConfig = { ...DEFAULT_CONFIG, ...params };
-    const rawConfig = { ...initialConfig, meta: { ...initialConfig.meta } };
+    const rawConfig = { ...initialConfig };
 
-    for (const key in url.params) {
-        if (key in rawConfig) {
-            rawConfig[key] = url.params[key][0];
+    for (const key in urlParams) {
+        if (key in DEFAULT_CONFIG) {
+            const [value] = urlParams[key];
+            if (BOOLEAN_REGEX.test(value)) {
+                rawConfig[key] = value.toLowerCase() === "true";
+            } else if (!isNaN(value)) {
+                rawConfig[key] = Number(value);
+            } else {
+                rawConfig[key] = value;
+            }
+        } else if (key in rawConfig) {
+            rawConfig[key] = urlParams[key];
         }
     }
     const config = reactive(rawConfig, () => {
         for (const key in config) {
-            if (key === "meta") {
-                continue;
-            }
             if (config[key] !== initialConfig[key]) {
-                url.setParams({ [key]: config[key] });
+                setParams({ [key]: config[key] });
             } else {
-                url.setParams({ [key]: null });
+                setParams({ [key]: null });
             }
         }
     });
 
-    const test = makeTaggable(addTest);
-    const suite = makeTaggable(addSuite);
-
     /** @type {Suite[]} */
     const suiteStack = [];
 
-    /** @type {"ready" | "running"} */
-    let status = "ready";
-    let textFilter = "";
-    let hasFilter = false;
-    let debug = false;
+    const runner = new (class TestRunner {
+        config = config;
+        debug = false;
+        hasFilter = false;
+        /** @type {Job[]} */
+        jobs = [];
+        /** @type {"ready" | "running"} */
+        status = "ready";
+        /** @type {Suite[]} */
+        suites = [];
+        /** @type {Set<Tag>} */
+        tags = new Set();
+        /** @type {Test[]} */
+        tests = [];
+        textFilter = "";
 
-    const skipSet = new Set();
-    const suiteSet = new Set();
-    const tagSet = new Set();
-    const testSet = new Set();
+        suite = makeTaggable(addSuite);
+        test = makeTaggable(addTest);
 
-    const tests = [];
-    const suites = [];
+        /**
+         * @param {() => MaybePromise<void>} callback
+         */
+        afterAll(callback) {
+            callbacks.add("after-all", callback);
+        }
+
+        /**
+         * @param {(suite: Suite) => MaybePromise<void>} callback
+         */
+        afterAnySuite(callback) {
+            callbacks.add("after-suite", callback);
+        }
+
+        /**
+         * @param {(test: Test) => MaybePromise<void>} callback
+         */
+        afterAnyTest(callback) {
+            callbacks.add("after-test", callback);
+        }
+
+        /**
+         * @param {(suite: Suite) => MaybePromise<void>} callback
+         */
+        afterSuite(callback) {
+            const current = getCurrent();
+            if (!current) {
+                throw new Error(
+                    `"afterSuite" can only be called when a suite is currently running`
+                );
+            }
+            current.callbacks.add("after-suite", callback);
+        }
+
+        /**
+         * @param {(test: Test) => MaybePromise<void>} callback
+         */
+        afterTest(callback) {
+            (getCurrent()?.callbacks || callbacks).add("after-test", callback);
+        }
+
+        /**
+         * @param {() => MaybePromise<void>} callback
+         */
+        beforeAll(callback) {
+            callbacks.add("before-all", callback);
+        }
+
+        /**
+         * @param {(suite: Suite) => MaybePromise<void>} callback
+         */
+        beforeAnySuite(callback) {
+            callbacks.add("before-suite", callback);
+        }
+
+        /**
+         * @param {(test: Test) => MaybePromise<void>} callback
+         */
+        beforeAnyTest(callback) {
+            callbacks.add("before-test", callback);
+        }
+
+        /**
+         * @param {(suite: Suite) => MaybePromise<void>} callback
+         */
+        beforeSuite(callback) {
+            const current = getCurrent();
+            if (!current) {
+                throw new Error(`"beforeSuite" should only be called inside a suite definition`);
+            }
+            current.callbacks.add("before-suite", callback);
+        }
+
+        beforeTest(callback) {
+            (getCurrent()?.callbacks || callbacks).add("before-test", callback);
+        }
+
+        /**
+         * @param {(test: Test) => MaybePromise<void>} callback
+         */
+        registerCleanup(callback) {
+            const cleanup = () => {
+                callbacks.remove(cleanup);
+                return callback();
+            };
+
+            callbacks.add("after-test", cleanup);
+        }
+
+        /**
+         * @param {(test: Test) => MaybePromise<void>} callback
+         */
+        skippedAnyTest(callback) {
+            callbacks.add("skipped-test", callback);
+        }
+
+        /**
+         * @param {(test: Test) => MaybePromise<void>} callback
+         */
+        skippedTest(callback) {
+            (getCurrent()?.callbacks || callbacks).add("skipped-test", callback);
+        }
+
+        async start() {
+            // Make sure that code that wants to run right after the DOM is ready gets
+            // the opportunity to execute (and maybe call some hook such as 'beforeAll').
+            await Promise.resolve();
+
+            if (runner.status !== "ready") {
+                return;
+            }
+
+            runner.status = "running";
+            const jobs = prepareJobs(runner.jobs);
+
+            await callbacks.call("before-all");
+
+            let job = jobs.shift();
+            while (job && runner.status === "running") {
+                if (job instanceof Suite) {
+                    await runSuite(job);
+                    job = job.jobs[job.visited++] || job.parent || jobs.shift();
+                } else {
+                    await runTest(job);
+                    job = job.parent || jobs.shift();
+                }
+            }
+
+            if (!runner.debug) {
+                await runner.stop();
+            }
+        }
+
+        async stop() {
+            abortCurrent();
+            runner.status = "ready";
+
+            while (missedCallbacks.length) {
+                await missedCallbacks.shift()();
+            }
+
+            await callbacks.call("after-all");
+        }
+    })();
+
+    const ignore = {
+        suites: new Set(),
+        tags: new Set(),
+        tests: new Set(),
+    };
+    const only = {
+        suites: new Set(),
+        tags: new Set(),
+        tests: new Set(),
+    };
+    const skip = {
+        suites: new Set(),
+        tests: new Set(),
+    };
 
     const callbacks = makeCallbacks();
     const missedCallbacks = [];
-
-    /** @type {Job[]} */
-    const rootJobs = [];
-    const allTags = new Set();
 
     let abortCurrent = () => {};
 
     initFilters();
 
-    return {
-        get debug() {
-            return debug;
-        },
-        get hasFilter() {
-            return hasFilter;
-        },
-        get status() {
-            return status;
-        },
-        get suites() {
-            return suites;
-        },
-        get tags() {
-            return [...allTags];
-        },
-        get tests() {
-            return tests;
-        },
-        config,
-        url,
-        afterAll,
-        afterAnySuite,
-        afterAnyTest,
-        afterSuite,
-        afterTest,
-        beforeAll,
-        beforeAnySuite,
-        beforeAnyTest,
-        beforeSuite,
-        beforeTest,
-        registerCleanup,
-        skippedAnyTest,
-        skippedTest,
-        start,
-        stop,
-        suite,
-        test,
-    };
+    return runner;
 }

@@ -93,7 +93,7 @@ const FULL_HTML_TEMPLATE = /* xml */ `
     `;
 const SVG_URL = "http://www.w3.org/2000/svg";
 
-suite.ui.skip("HOOT", "Helpers", "DOM", () => {
+suite.ui.skip("@odoo/hoot", "Helpers", "DOM", () => {
     test("getFocusableElements", async (assert) => {
         await mount(/* xml */ `
             <input class="input" />

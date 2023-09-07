@@ -3,10 +3,9 @@
 import { Component, useState } from "@odoo/owl";
 import { Boolean } from "../globals";
 import { compactXML, storage } from "../utils";
-import { ICONS } from "./icons";
 
 /** @extends Component<{}, import("../setup").Environment> */
-export class RunFailedButton extends Component {
+export class HootRunFailedButton extends Component {
     static template = compactXML/* xml */ `
         <t t-if="state.show">
             <a

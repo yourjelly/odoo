@@ -1,11 +1,10 @@
 /** @odoo-module **/
 
 import { Component } from "@odoo/owl";
-import { DEFAULT_CONFIG } from "../core/url";
+import { DEFAULT_CONFIG, subscribeToURLParams, withParams } from "../core/url";
 import { compactXML } from "../utils";
-import { ICONS } from "./icons";
-import { TechnicalValue } from "./technical_value";
-import { TestPath } from "./test_path";
+import { HootTechnicalValue } from "./hoot_technical_value";
+import { HootTestPath } from "./hoot_test_path";
 
 /**
  * @typedef {import("../core/test").Test} Test
@@ -17,42 +16,53 @@ import { TestPath } from "./test_path";
  */
 
 /** @extends Component<TestResultProps, import("../setup").Environment> */
-export class TestResult extends Component {
-    static components = { TestPath, TechnicalValue };
+export class HootTestResult extends Component {
+    static components = { HootTestPath, HootTechnicalValue };
 
     static template = compactXML/* xml */ `
         <details class="hoot-result hoot-col" t-att-class="className" t-att-open="props.defaultOpen">
             <summary class="hoot-result-header hoot-row hoot-text-md">
                 <div class="hoot-row hoot-overflow-hidden hoot-gap-2">
-                    <TestPath test="props.test" />
-                    <div class="hoot-row">
+                    <HootTestPath test="props.test" />
+                    <div class="hoot-row hoot-gap-1">
                         <a
-                            t-att-href="env.url.withParams('test', props.test.id)"
-                            class="hoot-result-button-icon hoot-row"
+                            t-att-href="withParams('test', props.test.id)"
+                            class="hoot-result-btn hoot-text-success hoot-px-1 hoot-py-0.5"
                             title="Run this test only"
                         >
-                            ${ICONS.play}
+                            <i class="bi bi-play-fill" />
                         </a>
                         <a
-                            t-att-href="env.url.withParams('debugTest', props.test.id)"
-                            class="hoot-result-button-icon hoot-row"
+                            t-att-href="withParams('debugTest', props.test.id)"
+                            class="hoot-result-btn hoot-text-success hoot-px-1 hoot-py-0.5"
                             title="Run this test only in debug mode"
                         >
-                            ${ICONS.bug}
+                            <i class="bi bi-bug-fill" />
                         </a>
                         <t t-if="!props.test.skip or !props.test.hasSkipTag()">
                             <a
-                                t-att-href="env.url.withParams('skip-test', props.test.id)"
-                                class="hoot-result-button-icon hoot-row"
+                                t-att-href="withParams('skip-test', props.test.id)"
+                                class="hoot-result-btn hoot-text-info hoot-px-1 hoot-py-0.5"
                                 t-att-title="props.test.skip ? 'Unskip test' : 'Skip test'"
                             >
-                                ${ICONS.forward}
+                                <i t-attf-class="bi bi-{{ props.test.skip ? 'arrow-repeat' : 'fast-forward-fill' }}" />
                             </a>
                         </t>
                     </div>
                 </div>
-                <span t-if="!props.test.skip" class="hoot-duration hoot-text-sm">
-                    <t t-esc="props.test.lastResults.duration" /> ms
+                <span
+                    class="hoot-text-sm hoot-whitespace-nowrap"
+                    t-attf-class="hoot-text-{{ props.test.skip ? 'info' : 'muted' }}"
+                >
+                    <t t-if="props.test.skip">
+                        skipped
+                    </t>
+                    <t t-else="">
+                        <t t-if="props.test.lastResults.aborted">
+                            aborted after
+                        </t>
+                        <t t-esc="props.test.lastResults.duration" /> ms
+                    </t>
                 </span>
             </summary>
             <t t-if="!props.test.skip">
@@ -64,8 +74,8 @@ export class TestResult extends Component {
                         <t t-if="!result.pass and result.info">
                             <t t-foreach="result.info" t-as="info" t-key="info_index">
                                 <div class="hoot-info-line">
-                                    <TechnicalValue value="info[0]" />
-                                    <TechnicalValue value="info[1]" />
+                                    <HootTechnicalValue value="info[0]" />
+                                    <HootTechnicalValue value="info[1]" />
                                 </div>
                             </t>
                         </t>
@@ -84,6 +94,8 @@ export class TestResult extends Component {
         </details>
     `;
 
+    withParams = withParams;
+
     get className() {
         const { lastResults, skip } = this.props.test;
         if (lastResults.aborted) {
@@ -98,6 +110,6 @@ export class TestResult extends Component {
     }
 
     setup() {
-        this.env.url.subscribe(...Object.keys(DEFAULT_CONFIG));
+        subscribeToURLParams(...Object.keys(DEFAULT_CONFIG));
     }
 }

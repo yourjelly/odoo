@@ -31,7 +31,7 @@ class WebSuite(odoo.tests.HttpCase):
     @odoo.tests.no_retry
     def test_hoot(self):
         # HOOT test suite
-        self.browser_js('/web/hoot?mod=web&headless=true&tag=-mobile', "", "", login='admin', timeout=1800, error_checker=qunit_error_checker)
+        self.browser_js('/web/hoot?headless=true&tag=-mobile', "", "", login='admin', timeout=1800, error_checker=qunit_error_checker)
 
     def test_check_suite(self):
         # verify no js test is using `QUnit.only` as it forbid any other test to be executed
@@ -68,4 +68,4 @@ class MobileWebSuite(odoo.tests.HttpCase):
     @odoo.tests.no_retry
     def test_hoot_mobile(self):
         # HOOT test suite
-        self.browser_js('/web/hoot?mod=web&headless=true&tag=-desktop', "", "", login='admin', timeout=1800, error_checker=qunit_error_checker)
+        self.browser_js('/web/hoot?headless=true&tag=-desktop', "", "", login='admin', timeout=1800, error_checker=qunit_error_checker)
