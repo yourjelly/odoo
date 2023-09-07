@@ -3711,6 +3711,7 @@
         generateCode() {
             let result = [];
             result.push(`function ${this.name}(ctx, node, key = "") {`);
+            result.push('try {');
             if (this.shouldProtectScope) {
                 result.push(`  ctx = Object.create(ctx);`);
                 result.push(`  ctx[isBoundary] = 1`);
@@ -3728,6 +3729,11 @@
             if (!this.hasRoot) {
                 result.push(`return text('');`);
             }
+            result.push('} catch (e) {');
+            result.push('  console.error("!!!!!!!!!", e);');
+            result.push('  debugger;');
+            result.push('}');
+
             result.push(`}`);
             return result.join("\n  ");
         }
