@@ -7,6 +7,7 @@ import {
     console,
     JSON,
     localStorage,
+    navigator,
     Number,
     Object,
     Proxy,
@@ -37,6 +38,18 @@ const REGEX_PATTERN = /^\/(.*)\/([gim]+)?$/;
 export function compactXML(...args) {
     const template = String.raw(...args);
     return xml`${template.trim().replace(/>[\s\n]+</gm, "><")}`;
+}
+
+/**
+ * @param {string} text
+ */
+export async function copy(text) {
+    try {
+        await navigator.clipboard.writeText(text);
+        log.debug(`Copied to clipboard:`, text);
+    } catch (err) {
+        log.warn("Could not copy to clipboard:", err);
+    }
 }
 
 /**
@@ -208,8 +221,8 @@ export function generateHash(...strings) {
  * Better matches will get a higher score: consecutive letters are better,
  * and a match closer to the beginning of the string is also scored higher.
  *
- * @param {string} pattern
- * @param {string} string
+ * @param {string} pattern (normalized)
+ * @param {string} string (normalized)
  */
 export function getFuzzyScore(pattern, string) {
     let totalScore = 0;
@@ -292,7 +305,7 @@ export const log = makeTaggable(function log(...args) {
  * @param {(item: T) => string} mapFn
  * @returns {T[]}
  */
-export function lookup(pattern, items, mapFn = (x) => x) {
+export function lookup(pattern, items, mapFn = normalize) {
     const nPattern = parseRegExp(normalize(pattern));
     if (nPattern instanceof RegExp) {
         return items.filter((item) => nPattern.test(mapFn(item)));

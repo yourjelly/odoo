@@ -2,10 +2,9 @@
 
 import { Component } from "@odoo/owl";
 import { Test } from "../core/test";
-import { compactXML } from "../utils";
+import { compactXML, copy } from "../utils";
 import { ICONS } from "./icons";
 import { TagButton } from "./tag_button";
-import { navigator } from "../globals";
 
 /** @extends Component<{}, import("../setup").Environment> */
 export class TestPath extends Component {
@@ -14,6 +13,8 @@ export class TestPath extends Component {
     static props = { test: Test };
 
     static template = compactXML/* xml */ `
+        <t t-set="statusInfo" t-value="getStatusInfo()" />
+        <span class="hoot-circle" t-att-class="statusInfo.className" t-att-title="statusInfo.text" />
         <span class="hoot-path hoot-row">
             <span class="hoot-suites hoot-row hoot-hide-sm">
                 <t t-foreach="props.test.path.slice(0, -1)" t-as="suite" t-key="suite.id">
@@ -40,7 +41,7 @@ export class TestPath extends Component {
                 <span class="hoot-select-none" t-if="!props.test.skip">
                     (<t t-esc="props.test.lastResults.assertions?.length or 0" />)
                 </span>
-                <button class="hoot-copy" t-on-click="copy">
+                <button class="hoot-copy" t-on-click="() => copy(props.test.name)">
                     copy
                 </button>
             </span>
@@ -56,7 +57,18 @@ export class TestPath extends Component {
         </t>
     `;
 
-    copy() {
-        navigator.clipboard.writeText(this.props.test.name);
+    copy = copy;
+
+    getStatusInfo() {
+        const { lastResults, skip } = this.props.test;
+        if (lastResults.aborted) {
+            return { className: "hoot-bg-warn", text: "aborted" };
+        } else if (skip) {
+            return { className: "hoot-bg-info", text: "skipped" };
+        } else if (lastResults.pass) {
+            return { className: "hoot-bg-success", text: "passed" };
+        } else {
+            return { className: "hoot-bg-danger", text: "failed" };
+        }
     }
 }

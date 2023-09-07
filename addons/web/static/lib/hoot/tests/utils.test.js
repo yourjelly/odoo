@@ -120,8 +120,8 @@ suite("HOOT", "Utils", () => {
 
     test("lookup", (assert) => {
         const list = ["babAba", "bAAab", "cccbCCb"];
-        assert.deepEqual(lookup("aaa", list), ["bAAab", "babAba"]);
-        assert.deepEqual(lookup("/b$/", list), ["bAAab", "cccbCCb"]);
+        assert.deepEqual(lookup("àâa", list), ["bAAab", "babAba"]);
+        assert.deepEqual(lookup("/.b$/", list), ["bAAab", "cccbCCb"]);
     });
 
     test("makeTaggable", (assert) => {
