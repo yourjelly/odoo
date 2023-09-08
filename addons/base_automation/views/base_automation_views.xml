@@ -9,7 +9,7 @@
                 <form string="Automation Rule">
                     <sheet>
                         <div class="oe_button_box" name="button_box">
-                            <button name="action_view_webhook_logs" type="object" string="Logs" class="oe_stat_button" icon="fa-list" attrs="{'invisible': [('trigger', '!=', 'on_webhook')]}">
+                            <button name="action_view_webhook_logs" type="object" string="Logs" class="oe_stat_button" icon="fa-list" invisible="trigger != 'on_webhook'">
                             </button>
                         </div>
                         <field name="active" invisible="1" />
@@ -64,8 +64,8 @@
                                     </div>
                                     <div class="text-muted" invisible="trigger != 'on_change'"><i class="fa fa-lightbulb-o"/> Automation rules that run on live updates will be executed every time the trigger fields change, <em>whether you save or not</em>.</div>
                                 </div>
-                                <label for="url" string="URL" attrs="{'invisible': [('trigger', '!=', 'on_webhook')]}"/>
-                                <div attrs="{'invisible': [('trigger', '!=', 'on_webhook')]}">
+                                <label for="url" string="URL" invisible="trigger != 'on_webhook'"/>
+                                <div invisible="trigger != 'on_webhook'">
                                     <field name="url" widget="CopyClipboardURL"  placeholder="URL will be created once the rule is saved."/>
                                     <div class="alert alert-warning" role="status">
                                         <strong><i class="fa fa-lock"/> Keep it secret, keep it safe.</strong>
@@ -73,13 +73,11 @@
                                         <button class="btn btn-seconadry" type="object" name="action_rotate_webhook_uuid" string="Rotate Secret" icon="fa-refresh" help="Change the URL's secret if you think the URL is no longer secure. You will have to update any automated system that calls this webhook to the new URL."/>
                                     </div>
                                 </div>
-                                <field name="log_webhook_calls" widget="boolean_toggle" attrs="{'invisible': [('trigger', '!=', 'on_webhook')]}"/>
+                                <field name="log_webhook_calls" widget="boolean_toggle" invisible="trigger != 'on_webhook'"/>
                                 <field name="trg_date_id" class="oe_inline" string="Date Field"
                                     options="{'no_open': True, 'no_create': True}"
-                                    attrs="{
-                                        'invisible': [('trigger', '!=', 'on_time')],
-                                        'required': [('trigger', 'in', ['on_time', 'on_time_created', 'on_time_updated'])]
-                                    }"/>
+                                    invisible="trigger != 'on_time'"
+                                    required="trigger in ['on_time', 'on_time_created', 'on_time_updated']"/>
                                 <label for="trg_date_range" class="oe_inline" string="Delay"
                                     invisible="trigger not in ['on_time', 'on_time_created', 'on_time_updated']"/>
                                 <div class="o_row oe_inline" invisible="trigger not in ['on_time', 'on_time_created', 'on_time_updated']" >
@@ -95,7 +93,7 @@
                                 </div>
                                 <field name="filter_pre_domain" class="oe_inline" widget="domain" groups="base.group_no_one"
                                        options="{'model': 'model_name', 'in_dialog': True}"
-                                       attrs="{'invisible': [('trigger', 'in', ['on_webhook'])]}"
+                                       invisible="trigger == 'on_webhook'"
                                 />
                                 <field name="filter_domain" class="oe_inline" widget="domain"
                                     options="{'model': 'model_name', 'in_dialog': True}"
@@ -103,9 +101,9 @@
                                 />
                             </group>
                             <group>
-                                <label for="record_getter" string="Target record" attrs="{'invisible': [('trigger', '!=', 'on_webhook')]}" />
-                                <div>
-                                    <field name="record_getter" string="Target record" attrs="{'invisible': [('trigger', '!=', 'on_webhook')]}"/>
+                                <label for="record_getter" string="Target record" invisible="trigger != 'on_webhook'" />
+                                <div invisible="trigger != 'on_webhook'">
+                                    <field name="record_getter" string="Target record"/>
                                     <div>
                                         <span colspan="2" class="text-muted"> Available variables: </span>
                                         <ul colspan="2" class="text-muted">
