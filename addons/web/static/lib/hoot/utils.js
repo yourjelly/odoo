@@ -356,11 +356,6 @@ export function makeCallbacks() {
 
     /**
      * @param {string} type
-     */
-    const get = (type) => callbackRegistry[type] || [];
-
-    /**
-     * @param {string} type
      * @param {...((...args: any[]) => Promise<void>)} callbacks
      */
     const remove = (type, ...callbacks) => {
@@ -375,7 +370,7 @@ export function makeCallbacks() {
     /** @type {Record<string, ((...args: any[]) => Promise<void>)[]>} */
     const callbackRegistry = {};
 
-    return { add, call, get, remove };
+    return { add, call, remove };
 }
 
 /**

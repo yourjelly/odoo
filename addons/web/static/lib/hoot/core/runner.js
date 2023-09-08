@@ -58,8 +58,17 @@ export function makeTestRunner(params) {
             const nestedArgs = [...arguments].slice(1);
             return addSuite(name, () => addSuite(...nestedArgs));
         }
+        if (typeof suiteFn !== "function") {
+            throw new Error(
+                `Error while registering suite "${name}": expected second argument to be a function and got ${String(
+                    suiteFn
+                )}`
+            );
+        }
         if (runner.status !== "ready") {
-            throw new Error("Cannot add a suite after starting the test runner");
+            throw new Error(
+                `Error while registering suite "${name}": cannot add a suite after the test runner started.`
+            );
         }
         const current = getCurrent();
         const tags = makeTags(current?.tags, suiteTags);
@@ -100,7 +109,9 @@ export function makeTestRunner(params) {
             }
         }
         if (result !== undefined) {
-            throw new Error("Invalid suite definition: cannot return a value");
+            throw new Error(
+                `Error while registering suite "${name}": the suite function cannot return a value`
+            );
         }
     }
 
@@ -112,10 +123,21 @@ export function makeTestRunner(params) {
     function addTest(name, testFn, testTags) {
         const current = getCurrent();
         if (!current) {
-            throw new Error(`Cannot register test "${name}" outside of a suite.`);
+            throw new Error(
+                `Error while registering test "${name}": cannot register a test outside of a suite.`
+            );
+        }
+        if (typeof testFn !== "function") {
+            throw new Error(
+                `Error while registering test "${name}": expected second argument to be a function and got ${String(
+                    testFn
+                )}`
+            );
         }
         if (runner.status !== "ready") {
-            throw new Error("Cannot add a test after starting the test runner");
+            throw new Error(
+                `Error while registering test "${name}": cannot add a test after the test runner started.`
+            );
         }
         const tags = makeTags(current?.tags, testTags);
         if (handleMulti(tags, name, testFn, testTags)) {
@@ -144,6 +166,29 @@ export function makeTestRunner(params) {
         }
         if (skip.tests.has(test.id) && !only.tests.has(test.id)) {
             test.skip = true;
+        }
+    }
+
+    /**
+     * Executes a given callback when not in debug mode.
+     * @param {() => Promise<void>} callback
+     */
+    async function execAfterCallback(callback) {
+        if (runner.debug) {
+            missedCallbacks.push(callback);
+        } else {
+            await callback();
+        }
+    }
+
+    /**
+     * @param {(callbacks: ReturnType<typeof makeCallbacks>) => any} callback
+     * @param {"pop" | "shift"} arrayFn
+     */
+    async function execCallbackOnSuites(callback, arrayFn) {
+        const stack = [...suiteStack];
+        while (stack.length) {
+            callback(stack[arrayFn]().callbacks);
         }
     }
 
@@ -304,21 +349,21 @@ export function makeTestRunner(params) {
          * @param {() => MaybePromise<void>} callback
          */
         afterAll(callback) {
-            callbacks.add("after-all", callback);
+            rootCallbacks.add("after-all", callback);
         }
 
         /**
          * @param {(suite: Suite) => MaybePromise<void>} callback
          */
         afterAnySuite(callback) {
-            callbacks.add("after-suite", callback);
+            rootCallbacks.add("after-suite", callback);
         }
 
         /**
          * @param {(test: Test) => MaybePromise<void>} callback
          */
         afterAnyTest(callback) {
-            callbacks.add("after-test", callback);
+            rootCallbacks.add("after-test", callback);
         }
 
         /**
@@ -328,7 +373,7 @@ export function makeTestRunner(params) {
             const current = getCurrent();
             if (!current) {
                 throw new Error(
-                    `"afterSuite" can only be called when a suite is currently running`
+                    `Error while calling hook "afterSuite": can only be called inside of a suite function.`
                 );
             }
             current.callbacks.add("after-suite", callback);
@@ -338,28 +383,34 @@ export function makeTestRunner(params) {
          * @param {(test: Test) => MaybePromise<void>} callback
          */
         afterTest(callback) {
-            (getCurrent()?.callbacks || callbacks).add("after-test", callback);
+            const current = getCurrent();
+            if (!current) {
+                throw new Error(
+                    `Error while calling hook "afterTest": can only be called inside of a suite function.`
+                );
+            }
+            current.callbacks.add("after-test", callback);
         }
 
         /**
          * @param {() => MaybePromise<void>} callback
          */
         beforeAll(callback) {
-            callbacks.add("before-all", callback);
+            rootCallbacks.add("before-all", callback);
         }
 
         /**
          * @param {(suite: Suite) => MaybePromise<void>} callback
          */
         beforeAnySuite(callback) {
-            callbacks.add("before-suite", callback);
+            rootCallbacks.add("before-suite", callback);
         }
 
         /**
          * @param {(test: Test) => MaybePromise<void>} callback
          */
         beforeAnyTest(callback) {
-            callbacks.add("before-test", callback);
+            rootCallbacks.add("before-test", callback);
         }
 
         /**
@@ -368,13 +419,21 @@ export function makeTestRunner(params) {
         beforeSuite(callback) {
             const current = getCurrent();
             if (!current) {
-                throw new Error(`"beforeSuite" should only be called inside a suite definition`);
+                throw new Error(
+                    `Error while calling hook "beforeSuite": can only be called inside of a suite function.`
+                );
             }
             current.callbacks.add("before-suite", callback);
         }
 
         beforeTest(callback) {
-            (getCurrent()?.callbacks || callbacks).add("before-test", callback);
+            const current = getCurrent();
+            if (!current) {
+                throw new Error(
+                    `Error while calling hook "beforeTest": can only be called inside of a suite function.`
+                );
+            }
+            current.callbacks.add("before-test", callback);
         }
 
         /**
@@ -382,25 +441,31 @@ export function makeTestRunner(params) {
          */
         registerCleanup(callback) {
             const cleanup = () => {
-                callbacks.remove("after-test", cleanup);
+                rootCallbacks.remove("after-test", cleanup);
                 return callback();
             };
 
-            callbacks.add("after-test", cleanup);
+            rootCallbacks.add("after-test", cleanup);
         }
 
         /**
          * @param {(test: Test) => MaybePromise<void>} callback
          */
         skippedAnyTest(callback) {
-            callbacks.add("skipped-test", callback);
+            rootCallbacks.add("skipped-test", callback);
         }
 
         /**
          * @param {(test: Test) => MaybePromise<void>} callback
          */
         skippedTest(callback) {
-            (getCurrent()?.callbacks || callbacks).add("skipped-test", callback);
+            const current = getCurrent();
+            if (!current) {
+                throw new Error(
+                    `Error while calling hook "skippedTest": can only be called inside of a suite function.`
+                );
+            }
+            current.callbacks.add("skipped-test", callback);
         }
 
         async start() {
@@ -415,7 +480,7 @@ export function makeTestRunner(params) {
             runner.status = "running";
             const jobs = prepareJobs(runner.jobs);
 
-            await callbacks.call("before-all");
+            await rootCallbacks.call("before-all");
 
             let job = jobs.shift();
             while (job && runner.status === "running") {
@@ -425,40 +490,34 @@ export function makeTestRunner(params) {
                         // before suite code
                         suiteStack.push(suite);
 
-                        callbacks.add("before-suite", ...suite.callbacks.get("before-suite"));
-                        callbacks.add("before-test", ...suite.callbacks.get("before-test"));
-                        callbacks.add("after-test", ...suite.callbacks.get("after-test"));
-                        callbacks.add("skipped-test", ...suite.callbacks.get("skipped-test"));
-                        callbacks.add("after-suite", ...suite.callbacks.get("after-suite"));
-
-                        await callbacks.call("before-suite", suite);
+                        await rootCallbacks.call("before-suite", suite);
+                        await suite.callbacks.call("before-suite", suite);
                     }
                     if (suite.visited === suite.jobs.length) {
                         // after suite code
                         suiteStack.pop();
 
-                        callbacks.remove("before-suite", ...suite.callbacks.get("before-suite"));
-                        callbacks.remove("before-test", ...suite.callbacks.get("before-test"));
-                        callbacks.remove("after-test", ...suite.callbacks.get("after-test"));
-                        callbacks.remove("skipped-test", ...suite.callbacks.get("skipped-test"));
-                        callbacks.remove("after-suite", ...suite.callbacks.get("after-suite"));
-
-                        if (runner.debug) {
-                            missedCallbacks.push(() => callbacks.call("after-suite", suite));
-                        } else {
-                            await callbacks.call("after-suite", suite);
-                        }
+                        execAfterCallback(async () => {
+                            await suite.callbacks.call("after-suite", suite);
+                            await rootCallbacks.call("after-suite", suite);
+                        });
                     }
                     job = suite.jobs[suite.visited++] || suite.parent || jobs.shift();
                 } else {
                     const test = job;
                     if (test.skip) {
-                        await callbacks.call("skipped-test", test);
+                        await execCallbackOnSuites(
+                            (callbacks) => callbacks.call("skipped-test", test),
+                            "pop"
+                        );
                     } else {
                         // Before test
                         const assert = makeAssert();
 
-                        await callbacks.call("before-test", test);
+                        await execCallbackOnSuites(
+                            (callbacks) => callbacks.call("before-test", test),
+                            "shift"
+                        );
 
                         // Setup
                         let timeoutId;
@@ -526,16 +585,16 @@ export function makeTestRunner(params) {
                             }
                         }
 
-                        // After test (ignored in debug mode)
-                        if (runner.debug) {
-                            missedCallbacks.push(() => callbacks.call("after-test", test));
-                        } else {
-                            await callbacks.call("after-test", test);
+                        execAfterCallback(async () => {
+                            await execCallbackOnSuites(
+                                (callbacks) => callbacks.call("after-test", test),
+                                "pop"
+                            );
 
                             if (urlParams.failfast && !assert.pass && !test.skip) {
                                 return runner.stop();
                             }
-                        }
+                        });
                     }
                     job = test.parent || jobs.shift();
                 }
@@ -554,7 +613,7 @@ export function makeTestRunner(params) {
                 await missedCallbacks.shift()();
             }
 
-            await callbacks.call("after-all");
+            await rootCallbacks.call("after-all");
         }
     }
 
@@ -600,7 +659,7 @@ export function makeTestRunner(params) {
         tests: new Set(),
     };
 
-    const callbacks = makeCallbacks();
+    const rootCallbacks = makeCallbacks();
     const missedCallbacks = [];
 
     let abortCurrent = () => {};

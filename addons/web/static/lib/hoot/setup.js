@@ -39,10 +39,12 @@ export const config = {
 log.debug(runner);
 export const __debug__ = { runner };
 
-export const afterEach = runner.afterTest;
+export const afterAll = runner.afterAll;
 export const afterSuite = runner.afterSuite;
-export const beforeEach = runner.beforeTest;
+export const afterTest = runner.afterTest;
+export const beforeAll = runner.beforeAll;
 export const beforeSuite = runner.beforeSuite;
+export const beforeTest = runner.beforeTest;
 export const registerCleanup = runner.registerCleanup;
 export const start = runner.start;
 export const suite = runner.suite;
