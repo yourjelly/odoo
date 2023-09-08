@@ -220,8 +220,18 @@
                 <t t-call-assets="web.unit_tests_assets" t-js="false"/>
                 <t t-call-assets="web.unit_tests_assets" t-css="false"/>
 
+                <script type="text/javascript">
+                    // prevent code to be executed
+                    odoo.loader.autostart = false;
+                </script>
+                <t t-call-assets="web.assets_backend"/>
+                <script type="text/javascript">
+                    odoo.loader.autostart = true;
+                </script>
                 <t t-call-assets="web.unit_tests" t-js="false"/>
                 <t t-call-assets="web.unit_tests" t-css="false"/>
+
+
             </t>
         </t>
     </template>

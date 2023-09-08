@@ -21,6 +21,8 @@
 
         checkErrorProm = null;
 
+        autostart = true;
+
         /**
          * @param {string} name
          * @param {string[]} deps
@@ -42,11 +44,13 @@
                     fn: factory,
                     ignoreMissingDeps: globalThis.__odooIgnoreMissingDependencies,
                 });
-                this.addJob(name);
-                this.checkErrorProm ||= Promise.resolve().then(() => {
-                    this.checkAndReportErrors();
-                    this.checkErrorProm = null;
-                });
+                if (this.autostart) {
+                    this.addJob(name);
+                    this.checkErrorProm ||= Promise.resolve().then(() => {
+                        this.checkAndReportErrors();
+                        this.checkErrorProm = null;
+                    });
+                }
             }
         }
 
@@ -219,8 +223,11 @@
         odoo.debug = "";
     }
 
-    const loader = new ModuleLoader();
-    odoo.define = loader.define.bind(loader);
-
-    odoo.loader = loader;
+    if (!odoo.loader) {
+        // in some cases (unit tests) we may load multiple times this file so we prevent
+        // recreating a new loader
+        const loader = new ModuleLoader();
+        odoo.define = loader.define.bind(loader);
+        odoo.loader = loader;
+    }
 })();
