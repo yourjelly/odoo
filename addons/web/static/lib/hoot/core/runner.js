@@ -270,7 +270,12 @@ export function makeTestRunner(params) {
                 }
             }
 
-            return !runner.hasFilter;
+            return !(
+                only.suites.size ||
+                only.tests.size ||
+                only.tags.size ||
+                runner.textFilter.length
+            );
         });
 
         return config.randomorder ? shuffle(filteredJobs) : filteredJobs;

@@ -50,6 +50,7 @@ export class HootReporting extends Component {
             <HootStatusPanel
                 filter="state.filter"
                 filterResults.bind="filterResults"
+                sortResults.bind="sortResults"
             />
             <div class="hoot-results hoot-col">
                 <t t-foreach="getFilteredResults()" t-as="test" t-key="test.id">
@@ -66,7 +67,7 @@ export class HootReporting extends Component {
     setup() {
         const { runner } = this.env;
 
-        subscribeToURLParams("showpassed");
+        subscribeToURLParams("hideskipped", "showpassed");
 
         this.state = useState({
             filter: null,
@@ -96,22 +97,64 @@ export class HootReporting extends Component {
     }
 
     getFilteredResults() {
-        const { filter, results } = this.state;
-        const { showpassed } = this.env.runner.config;
-        let filtered = [...results];
-        if (filter || !showpassed) {
-            filtered = filtered.filter((test) => {
-                switch (filter) {
-                    case "failed":
-                        return !test.skip && !test.lastResults.pass;
-                    case "passed":
-                        return !test.skip && test.lastResults.pass;
-                    case "skipped":
-                        return test.skip;
-                }
-                return showpassed || test.skip || !test.lastResults.pass;
-            });
+        const { filter, results, sort } = this.state;
+        const { hideskipped, showpassed } = this.env.runner.config;
+
+        if (!filter && !sort && !hideskipped && showpassed) {
+            return results;
         }
-        return filtered;
+
+        const groups = sort ? {} : [];
+        const [mapFn, ascending] = sort || [];
+        for (const test of results) {
+            let matchFilter = false;
+            switch (filter) {
+                case "failed":
+                    matchFilter = !test.skip && !test.lastResults.pass;
+                    break;
+                case "passed":
+                    matchFilter = !test.skip && test.lastResults.pass;
+                    break;
+                case "skipped":
+                    matchFilter = test.skip;
+                    break;
+                default:
+                    if (hideskipped && test.skip) {
+                        matchFilter = false;
+                    } else if (!showpassed && test.lastResults.pass) {
+                        matchFilter = false;
+                    } else {
+                        matchFilter = true;
+                    }
+                    break;
+            }
+            if (!matchFilter) {
+                continue;
+            }
+            if (sort) {
+                const key = mapFn(test);
+                if (!groups[key]) {
+                    groups[key] = [];
+                }
+                groups[key].push(test);
+            } else {
+                groups.push(test);
+            }
+        }
+
+        if (sort) {
+            const values = Object.values(groups).flat();
+            return ascending ? values : values.reverse();
+        } else {
+            return groups;
+        }
+    }
+
+    sortResults(mapFn) {
+        if (this.state.sort) {
+            this.state.sort = this.state.sort[1] ? null : [mapFn, true];
+        } else {
+            this.state.sort = [mapFn, false];
+        }
     }
 }

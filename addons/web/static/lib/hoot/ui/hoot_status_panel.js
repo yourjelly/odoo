@@ -12,6 +12,7 @@ export class HootStatusPanel extends Component {
     static props = {
         filter: [String, { value: null }],
         filterResults: Function,
+        sortResults: Function,
     };
 
     static template = compactXML/* xml */ `
@@ -58,9 +59,12 @@ export class HootStatusPanel extends Component {
                         <t t-esc="state.skipped" /> skipped
                     </button>
                 </t>
-                <!-- <button class="" t-on-click="props.sortResults((test) => test.lastResults.duration)">
+                <button
+                    title="Sort by time"
+                    t-on-click="() => props.sortResults((test) => test.lastResults.duration or 0)"
+                >
                     <i class="bi bi-filter" />
-                </button> -->
+                </button>
             </div>
         </div>
     `;
