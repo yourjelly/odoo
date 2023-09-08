@@ -140,7 +140,7 @@ export function makeTestRunner(params) {
             );
         }
         const tags = makeTags(current?.tags, testTags);
-        if (handleMulti(tags, name, testFn, testTags)) {
+        if (handleMulti(name, testFn, tags)) {
             return;
         }
         const test = new Test(current, name, testFn, tags);
@@ -190,22 +190,19 @@ export function makeTestRunner(params) {
     }
 
     /**
-     * @param {Tag[]} tags
      * @param {string} name
      * @param {(assert: AssertMethods) => void | PromiseLike<void>} testFn
-     * @param {string[]} testTags
+     * @param {Tag[]} tags
      */
-    function handleMulti(tags, name, testFn, testTags) {
+    function handleMulti(name, testFn, tags) {
         const index = tags.findIndex((t) => t.config?.multi);
         if (index in tags) {
             const tagsWithoutMulti = [...tags];
             const [multiTag] = tagsWithoutMulti.splice(index, 1);
-            const suiteFn = () => {
-                for (let i = 0; i < multiTag.config.multi; i++) {
-                    addTest(`${i}) ${name}`, testFn, tagsWithoutMulti);
-                }
-            };
-            addSuite(name, suiteFn, testTags);
+            const testTags = tagsWithoutMulti.map((t) => t.name);
+            for (let i = 0; i < multiTag.config.multi; i++) {
+                addTest(`${i}) ${name}`, testFn, testTags);
+            }
             return true;
         }
         return false;
@@ -490,7 +487,7 @@ export function makeTestRunner(params) {
                         // after suite code
                         suiteStack.pop();
 
-                        execAfterCallback(async () => {
+                        await execAfterCallback(async () => {
                             await suite.callbacks.call("after-suite", suite);
                             await rootCallbacks.call("after-suite", suite);
                         });
@@ -575,7 +572,7 @@ export function makeTestRunner(params) {
                             }
                         }
 
-                        execAfterCallback(async () => {
+                        await execAfterCallback(async () => {
                             for (const callbacks of [
                                 ...getSuiteCallbacks().reverse(),
                                 rootCallbacks,

@@ -90,7 +90,7 @@ export class HootMain extends Component {
                 Run with UI
             </a>
         </t>
-        <main t-else="" class="hoot-runner" t-att-class="color.scheme">
+        <main t-else="" class="hoot" t-att-class="color.scheme">
             <header class="hoot-panel hoot-col">
                 <nav class="hoot-controls hoot-row hoot-gap-4">
                     <h1 class="hoot-logo hoot-text-primary hoot-text-xl hoot-select-none" title="Hierarchically Organized Odoo Tests">
