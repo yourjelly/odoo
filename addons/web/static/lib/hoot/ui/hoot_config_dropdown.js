@@ -6,6 +6,11 @@ import { refresh } from "../core/url";
 
 /** @extends Component<{}, import("../setup").Environment> */
 export class HootConfigDropdown extends Component {
+    static props = {
+        colorToggle: Function,
+        colorScheme: String,
+    };
+
     static template = compactXML/* xml */ `
         <div class="hoot-config hoot-relative" t-ref="root">
             <button t-ref="toggler" class="hoot-btn hoot-p-2" title="Configuration">
@@ -49,6 +54,10 @@ export class HootConfigDropdown extends Component {
                         />
                         <span>Headless</span>
                     </label>
+                    <button class="hoot-dropdown-line hoot-row hoot-gap-1" t-on-click="props.colorToggle">
+                        <i t-attf-class="bi bi-{{ props.colorScheme === 'light' ? 'moon' : 'sun' }}-fill" />
+                        Color scheme
+                    </button>
                 </div>
             </t>
         </div>

@@ -10,7 +10,7 @@
 
     74% {
         opacity: 0;
-        transform: scaleX(90%) skew(-10deg) translateX(70vw);
+        transform: scaleX(90%) skew(-10deg) translateX(30vw);
     }
 
     75% {
@@ -321,18 +321,15 @@ body {
 
     .hoot-controls {
         padding: 0.25rem 0.5rem;
-        display: flex;
-        flex-flow: row nowrap;
-        align-items: center;
 
         @media (max-width: $hoot-break-sm) {
             display: grid;
-            grid-template: 1fr auto / 1fr auto;
+            grid-template: 1fr auto auto / 1fr auto auto;
             gap: 0.25rem;
 
             .hoot-search {
                 order: 99;
-                grid-column: span 2;
+                grid-column: span 3;
             }
         }
     }
@@ -381,10 +378,6 @@ body {
         &:hover {
             animation: hoot-sick-traverse 1.2s ease-in-out;
         }
-    }
-
-    .hoot-panel-top {
-        padding: 0.25rem 0.5rem;
     }
 
     .hoot-status {
