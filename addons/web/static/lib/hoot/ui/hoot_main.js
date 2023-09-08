@@ -94,23 +94,17 @@ export class HootMain extends Component {
         </t>
         <main t-else="" class="hoot-runner" t-att-class="color.scheme">
             <header class="hoot-panel hoot-col">
-                <div class="hoot-panel-top hoot-gap-2 hoot-row">
-                    <h1 class="hoot-logo hoot-text-primary hoot-w-full hoot-text-xl hoot-select-none" title="Hierarchically Organized Odoo Tests">
+                <nav class="hoot-controls hoot-row hoot-gap-4">
+                    <h1 class="hoot-logo hoot-text-primary hoot-text-xl hoot-select-none" title="Hierarchically Organized Odoo Tests">
                         HOOT
                     </h1>
-                    <span class="hoot-text-muted hoot-truncate hoot-row hoot-text-sm">${navigator.userAgent}</span>
-                    <button t-on-click="color.toggle" title="Toggle color scheme">
-                        <i t-attf-class="bi bi-{{ color.scheme === 'light' ? 'moon' : 'sun' }}-fill" />
-                    </button>
-                </div>
-                <nav class="hoot-controls hoot-gap-4">
                     <div class="hoot-buttons hoot-row">
                         <HootRunButton />
                         <HootRunFailedButton />
                         <HootRunAllButton />
                     </div>
                     <HootSearch />
-                    <HootConfigDropdown />
+                    <HootConfigDropdown colorScheme="color.scheme" colorToggle="color.toggle" />
                 </nav>
                 <HootStatusPanel />
             </header>
