@@ -762,9 +762,58 @@ class TestAccountMoveSend(TestAccountMoveSendCommon):
             },
         ])
 
-    def test_invoice_web_service_after_pdf_rendering(self):
+    def test_invoice_web_service_before_pdf_rendering_without_allow_fallback_pdf(self):
         """ Test the ir.attachment for the PDF is not generated when the web service
-        is called after the PDF generation but performing a cr.commit even in case of error.
+        is called without fallback PDF before the PDF generation but performing a cr.commit even in case of error.
+        """
+        invoice = self.init_invoice("out_invoice", amounts=[1000], post=True)
+        wizard = self.create_send_and_print(invoice)
+
+        def call_web_service_before_invoice_pdf_render(record, invoices_data):
+            for invoice_data in invoices_data.values():
+                invoice_data['error'] = "turlututu"
+
+        user_error_raised = False
+        with patch.object(type(wizard), '_call_web_service_before_invoice_pdf_render', call_web_service_before_invoice_pdf_render):
+            try:
+                wizard._action_send_and_print(allow_fallback_pdf=False)
+            except UserError:
+                # Prevent a rollback in case of UserError because we can't commit in this test.
+                # Instead, ignore the raised error.
+                user_error_raised = True
+
+        # The PDF is not generated in case of error.
+        self.assertTrue(user_error_raised)
+        self.assertFalse(invoice.invoice_pdf_report_id)
+
+    def test_invoice_web_service_before_pdf_rendering_with_allow_fallback_pdf(self):
+        """ Test the ir.attachment for the PDF is not generated when the web service
+        is called with fallback PDF before the PDF generation but performing a cr.commit even in case of error.
+        """
+        invoice = self.init_invoice("out_invoice", amounts=[1000], post=True)
+        wizard = self.create_send_and_print(invoice)
+
+        def call_web_service_before_invoice_pdf_render(record, invoices_data):
+            for invoice_data in invoices_data.values():
+                invoice_data['error'] = "turlututu"
+
+        user_error_raised = False
+        with patch.object(type(wizard), '_call_web_service_before_invoice_pdf_render', call_web_service_before_invoice_pdf_render):
+            try:
+                attachments = wizard._action_send_and_print(allow_fallback_pdf=True)
+            except UserError:
+                # Prevent a rollback in case of UserError because we can't commit in this test.
+                # Instead, ignore the raised error.
+                user_error_raised = True
+
+        # The PDF is not generated in case of error.
+        self.assertRecordValues(attachments, [{'res_model': False, 'res_id': False}])
+        self.assertFalse(user_error_raised)
+        self.assertFalse(invoice.invoice_pdf_report_id)
+
+    def test_invoice_web_service_after_pdf_rendering_without_allow_fallback_pdf(self):
+        """ Test the ir.attachment for the PDF is not generated when the web service
+        is called without fallback PDF after the PDF generation but performing a cr.commit even in case of error.
         """
         invoice = self.init_invoice("out_invoice", amounts=[1000], post=True)
         wizard = self.create_send_and_print(invoice)
@@ -773,15 +822,42 @@ class TestAccountMoveSend(TestAccountMoveSendCommon):
             for invoice_data in invoices_data.values():
                 invoice_data['error'] = "turlututu"
 
+        user_error_raised = False
         with patch.object(type(wizard), '_call_web_service_after_invoice_pdf_render', call_web_service_after_invoice_pdf_render):
             try:
-                wizard.action_send_and_print(allow_fallback_pdf=False)
+                wizard._action_send_and_print(allow_fallback_pdf=False)
             except UserError:
                 # Prevent a rollback in case of UserError because we can't commit in this test.
                 # Instead, ignore the raised error.
-                pass
+                user_error_raised = True
 
         # The PDF is not generated in case of error.
+        self.assertTrue(user_error_raised)
+        self.assertFalse(invoice.invoice_pdf_report_id)
+
+    def test_invoice_web_service_after_pdf_rendering_with_allow_fallback_pdf(self):
+        """ Test the ir.attachment for the PDF is not generated when the web service
+        is called with fallback PDF after the PDF generation but performing a cr.commit even in case of error.
+        """
+        invoice = self.init_invoice("out_invoice", amounts=[1000], post=True)
+        wizard = self.create_send_and_print(invoice)
+
+        def call_web_service_after_invoice_pdf_render(record, invoices_data):
+            for invoice_data in invoices_data.values():
+                invoice_data['error'] = "turlututu"
+
+        user_error_raised = False
+        with patch.object(type(wizard), '_call_web_service_after_invoice_pdf_render', call_web_service_after_invoice_pdf_render):
+            try:
+                attachments = wizard._action_send_and_print(allow_fallback_pdf=True)
+            except UserError:
+                # Prevent a rollback in case of UserError because we can't commit in this test.
+                # Instead, ignore the raised error.
+                user_error_raised = True
+
+        # The PDF is not generated in case of error.
+        self.assertRecordValues(attachments, [{'res_model': False, 'res_id': False}])
+        self.assertFalse(user_error_raised)
         self.assertFalse(invoice.invoice_pdf_report_id)
 
     def test_proforma_pdf(self):

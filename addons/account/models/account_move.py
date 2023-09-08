@@ -7,6 +7,7 @@ from contextlib import ExitStack, contextmanager
 from datetime import date, timedelta
 from dateutil.relativedelta import relativedelta
 from hashlib import sha256
+from io import BytesIO
 from json import dumps
 import logging
 from markupsafe import Markup, escape
@@ -34,6 +35,7 @@ from odoo.tools import (
     index_exists,
     is_html_empty,
 )
+from odoo.tools.pdf import OdooPdfFileReader, OdooPdfFileWriter
 
 _logger = logging.getLogger(__name__)
 
@@ -4384,21 +4386,34 @@ class AccountMove(models.Model):
                             error.
         :param allow_fallback_pdf:  In case of error when generating the documents for invoices, generate a
                                     proforma PDF report instead.
+        :return: The generated PDF attachments.
         """
         composer_vals = self._get_pdf_and_send_invoice_vals(template)
         composer = self.env['account.move.send'].create(composer_vals)
 
         # from_cron=True to log errors in chatter instead of raise
-        composer.action_send_and_print(from_cron=from_cron, allow_fallback_pdf=allow_fallback_pdf)
+        return composer._action_send_and_print(from_cron=from_cron, allow_fallback_pdf=allow_fallback_pdf)
 
     def generate_pdf_and_send_invoice(self):
         """ Calls `_generate_pdf_and_send_invoice` and returns the (pdf, filename)"""
         template = self.env.ref(self._get_mail_template())
-        self.with_context(skip_invoice_sync=True)._generate_pdf_and_send_invoice(template)
-        if len(self) < 2:
-            return self.invoice_pdf_report_id.raw, self.invoice_pdf_report_id.name
+        attachments = self._generate_pdf_and_send_invoice(template)
+        if len(attachments) <= 1:
+            return attachments.raw, attachments.name
         else:
-            return self.env['ir.actions.report']._render('account.account_invoices', self.ids)[0], "Invoices.pdf"
+            # Combine all attachments.
+            pdf_writer = OdooPdfFileWriter()
+            result_stream = BytesIO()
+            streams = [result_stream]
+            for attachment in attachments:
+                stream = BytesIO(attachment.raw)
+                streams.append(stream)
+                pdf_writer.appendPagesFromReader(OdooPdfFileReader(stream, strict=False))
+            pdf_writer.write(result_stream)
+            pdf_content = result_stream.getvalue()
+            for stream in streams:
+                stream.close()
+            return pdf_content, _("Invoices.pdf")
 
     def _get_invoice_pdf_report_filename(self):
         """ Get the filename of the generated PDF invoice report. """

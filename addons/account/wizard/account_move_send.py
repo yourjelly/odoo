@@ -364,8 +364,6 @@ class AccountMoveSend(models.Model):
             'raw': content,
             'name': invoice._get_invoice_proforma_pdf_report_filename(),
             'mimetype': 'application/pdf',
-            'res_model': invoice._name,
-            'res_id': invoice.id,
         }
 
     def _hook_invoice_document_after_pdf_report_render(self, invoice, invoice_data):
@@ -529,60 +527,80 @@ class AccountMoveSend(models.Model):
                                     proforma PDF report instead.
         :param invoices_data:   The collected data for invoices so far.
         """
+        # Hook before the pdf rendering.
         for invoice, invoice_data in invoices_data.items():
             form = invoice_data['_form']
-            if form._need_invoice_document(invoice):
+            invoice_data['need_pdf'] = form._need_invoice_document(invoice)
+            invoice_data['need_proforma_pdf'] = False
+            invoice_data['need_ws_before'] = invoice_data['need_ws_after'] = invoice_data['need_pdf']
+            if invoice_data['need_pdf']:
                 form._hook_invoice_document_before_pdf_report_render(invoice, invoice_data)
-                invoice_data['blocking_error'] = invoice_data.get('error') \
-                                                 and not (allow_fallback_pdf and invoice_data.get('error_but_continue'))
-                if invoice_data['blocking_error']:
-                    continue
+                if invoice_data.get('error'):
+                    error_but_continue = allow_fallback_pdf and invoice_data.get('error_but_continue')
+                    invoice_data['need_ws_before'] = invoice_data['need_ws_after'] = invoice_data['need_pdf'] = error_but_continue
+                    if allow_fallback_pdf:
+                        invoice_data['need_proforma_pdf'] = True
 
-        invoices_data_web_service = {
+        # In case of error_but_continue, log the error and continue.
+        invoices_data_error = {
             invoice: invoice_data
             for invoice, invoice_data in invoices_data.items()
-            if not invoice_data.get('error')
+            if invoice_data.get('error') and invoice_data.get('need_pdf')
         }
-        if invoices_data_web_service:
-            self._call_web_service_before_invoice_pdf_render(invoices_data_web_service)
+        if invoices_data_error:
+            self._hook_if_errors(invoices_data_error, allow_fallback_pdf=allow_fallback_pdf)
+            for invoice_data in invoices_data_error.values():
+                invoice_data.pop('error')
+                invoice_data.pop('error_but_continue', None)
 
+        # Web-service before the PDF rendering.
+        invoices_data_web_service_before = {
+            invoice: invoice_data
+            for invoice, invoice_data in invoices_data.items()
+            if invoice_data.get('need_ws_before')
+        }
+        if invoices_data_web_service_before:
+            self._call_web_service_before_invoice_pdf_render(invoices_data_web_service_before)
+            for invoice, invoice_data in invoices_data_web_service_before.items():
+                if invoice_data.get('error'):
+                    invoice_data['need_pdf'] = False
+                    invoice_data['need_proforma_pdf'] = True
+                    invoice_data['need_ws_after'] = False
+
+        # PDF.
         invoices_data_pdf = {
             invoice: invoice_data
             for invoice, invoice_data in invoices_data.items()
-            if not invoice_data.get('error') or not invoice_data.get('blocking_error', True)
+            if invoice_data.get('need_pdf')
         }
         for invoice, invoice_data in invoices_data_pdf.items():
             form = invoice_data['_form']
-            if form._need_invoice_document(invoice):
-                form._prepare_invoice_pdf_report(invoice, invoice_data)
-                form._hook_invoice_document_after_pdf_report_render(invoice, invoice_data)
-
-        # Cleanup the error if we don't want to block the regular pdf generation.
-        if allow_fallback_pdf:
-            invoices_data_pdf_error = {
-                invoice: invoice_data
-                for invoice, invoice_data in invoices_data.items()
-                if invoice_data.get('pdf_attachment_values') and invoice_data.get('error')
-            }
-            if invoices_data_pdf_error:
-                self._hook_if_errors(invoices_data_pdf_error, allow_fallback_pdf=allow_fallback_pdf)
-            for invoice_data in invoices_data_pdf_error.values():
-                invoice_data.pop('error')
+            form._prepare_invoice_pdf_report(invoice, invoice_data)
+            form._hook_invoice_document_after_pdf_report_render(invoice, invoice_data)
 
         # Web-service after the PDF generation.
-        invoices_data_web_service = {
+        invoices_data_web_service_after = {
             invoice: invoice_data
             for invoice, invoice_data in invoices_data.items()
-            if not invoice_data.get('error')
+            if invoice_data.get('need_ws_after')
         }
-        if invoices_data_web_service:
-            self._call_web_service_after_invoice_pdf_render(invoices_data_web_service)
+        if invoices_data_web_service_after:
+            self._call_web_service_after_invoice_pdf_render(invoices_data_web_service_after)
+            for invoice, invoice_data in invoices_data_web_service_after.items():
+                if invoice_data.get('error'):
+                    invoice_data.pop('pdf_attachment_values', None)
+                    if allow_fallback_pdf:
+                        invoice_data['need_proforma_pdf'] = True
 
-        # Create and link the generated documents to the invoice if the web-service didn't failed.
-        for invoice, invoice_data in invoices_data_pdf.items():
+        # Link documents.
+        invoices_data_pdf_values = {
+            invoice: invoice_data
+            for invoice, invoice_data in invoices_data.items()
+            if invoice_data.get('pdf_attachment_values')
+        }
+        for invoice, invoice_data in invoices_data_pdf_values.items():
             form = invoice_data['_form']
-            if not invoice_data.get('error') and form._need_invoice_document(invoice):
-                form._link_invoice_documents(invoice, invoice_data)
+            form._link_invoice_documents(invoice, invoice_data)
 
     def _generate_invoice_fallback_documents(self, invoices_data):
         """ Generate the invoice PDF and electronic documents.
@@ -590,8 +608,7 @@ class AccountMoveSend(models.Model):
         :param invoices_data:   The collected data for invoices so far.
         """
         for invoice, invoice_data in invoices_data.items():
-            if self._need_invoice_document(invoice) and invoice_data.get('error'):
-                invoice_data.pop('error')
+            if self._need_invoice_document(invoice):
                 self._prepare_invoice_proforma_pdf_report(invoice, invoice_data)
                 self._hook_invoice_document_after_pdf_report_render(invoice, invoice_data)
                 invoice_data['proforma_pdf_attachment'] = self.env['ir.attachment']\
@@ -606,19 +623,19 @@ class AccountMoveSend(models.Model):
             'close': True, # close the wizard
         }
 
-    def action_send_and_print(self, from_cron=False, allow_fallback_pdf=False):
+    def _action_send_and_print(self, from_cron=False, allow_fallback_pdf=False):
         """ Create the documents and send them to the end customers.
 
         :param from_cron:   Flag indicating if the method is called from a cron. In that case, we avoid raising any
                             error.
         :param allow_fallback_pdf:  In case of error when generating the documents for invoices, generate a
                                     proforma PDF report instead.
+        :return: The generated pdf attachments.
         """
         self.ensure_one()
 
-        download = self.enable_download and self.checkbox_download
         generate_invoice_documents = self.mode == 'invoice_single' or (self.mode == 'invoice_multi' and from_cron)
-        moves_data = {move: {} for move in self.move_ids}
+        moves_data = {move: {} for move in self.move_ids.with_context(skip_invoice_sync=True, skip_invoice_line_sync=True)}
 
         if len(moves_data) == 1:
             moves_data[self.move_ids]['_form'] = self
@@ -635,10 +652,10 @@ class AccountMoveSend(models.Model):
             if errors:
                 self._hook_if_errors(errors, from_cron=from_cron, allow_fallback_pdf=allow_fallback_pdf)
 
-            # Fallback in case of error.
-            errors = {move: move_data for move, move_data in moves_data.items() if move_data.get('error')}
-            if allow_fallback_pdf and errors:
-                self._generate_invoice_fallback_documents(errors)
+            # Fallback PDF proforma.
+            fallbacks = {move: move_data for move, move_data in moves_data.items() if move_data.get('need_proforma_pdf')}
+            if allow_fallback_pdf and fallbacks:
+                self._generate_invoice_fallback_documents(fallbacks)
 
             # Send mail.
             success = {move: move_data for move, move_data in moves_data.items() if not move_data.get('error') and move.partner_id.email}
@@ -650,13 +667,29 @@ class AccountMoveSend(models.Model):
         if not from_cron:
             self.env.ref('account.ir_cron_account_move_send')._trigger()
 
-        if download:
-            attachment = self.move_ids.invoice_pdf_report_id
-            if not attachment and moves_data:
-                attachment = list(moves_data.values())[0].get('proforma_pdf_attachment')
-            if attachment:
-                return self._download(attachment.id)
+        attachments = self.env['ir.attachment']
+        for move in self.move_ids:
+            move_data = moves_data[move]
+            if move.invoice_pdf_report_id:
+                attachments |= move.invoice_pdf_report_id
+            elif move_data.get('proforma_pdf_attachment'):
+                attachments |= move_data['proforma_pdf_attachment']
 
+        return attachments
+
+    def action_send_and_print(self, from_cron=False, allow_fallback_pdf=False):
+        """ Create the documents and send them to the end customers.
+
+        :param from_cron:   Flag indicating if the method is called from a cron. In that case, we avoid raising any
+                            error.
+        :param allow_fallback_pdf:  In case of error when generating the documents for invoices, generate a
+                                    proforma PDF report instead.
+        :return: An action.
+        """
+        download = self.enable_download and self.checkbox_download
+        attachments = self._action_send_and_print(from_cron=from_cron, allow_fallback_pdf=allow_fallback_pdf)
+        if download and attachments:
+            return self._download(attachments.id)
         return {'type': 'ir.actions.act_window_close'}
 
     def action_cancel(self):
