@@ -42,7 +42,7 @@ function useColorScheme(storageKey) {
 
     let defaultScheme = get(storageKey);
     if (!COLOR_SCHEMES.includes(defaultScheme)) {
-        defaultScheme = matchMedia("prefers-color-scheme: dark") ? "dark" : "light";
+        defaultScheme = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
         set(storageKey, defaultScheme);
     }
 
