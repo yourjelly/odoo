@@ -10,8 +10,11 @@ export function makeLogger(runner) {
     let currentSuiteFailed = 0;
     let currentSuitePassed = 0;
     let currentSuiteSkipped = 0;
+    let start;
 
     runner.beforeAll(() => {
+        start = Date.now();
+
         if (runner.config.headless) {
             log("Running in headless mode");
         } else {
@@ -70,6 +73,7 @@ export function makeLogger(runner) {
     });
 
     runner.afterAll(() => {
-        log("All test suites have ended");
+        const time = Date.now() - start;
+        log(`All test suites have ended (total time: ${time}ms)`);
     });
 }

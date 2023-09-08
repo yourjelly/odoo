@@ -11,33 +11,6 @@ import { makeDeferred, nextTick, patchWithCleanup } from "./helpers/utils";
 
 const serviceRegistry = registry.category("services");
 
-QUnit.module("demo", ({ before, beforeEach, after, afterEach }) => {
-    const steps = [];
-    before(() => steps.push("[PARENT] before"));
-    beforeEach(() => steps.push("[PARENT] beforeEach"));
-    afterEach(() => steps.push("[PARENT] afterEach"));
-    after(() => steps.push("[PARENT] after"));
-
-    window.__DEMO_STEPS__ = steps;
-
-    QUnit.module("nested", ({ before, beforeEach, after, afterEach }) => {
-        before(() => steps.push("[NESTED] before"));
-        beforeEach(() => steps.push("[NESTED] beforeEach"));
-        afterEach(() => steps.push("[NESTED] afterEach"));
-        after(() => steps.push("[NESTED] after"));
-
-        QUnit.test("demo nested test", (assert) => {
-            steps.push("[NESTED] test");
-            assert.ok(true);
-        });
-    });
-
-    QUnit.test("demo parent test", (assert) => {
-        steps.push("[PARENT] test");
-        assert.ok(true);
-    });
-});
-
 QUnit.module("env");
 
 QUnit.test("can start a service", async (assert) => {
