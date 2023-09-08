@@ -10,7 +10,7 @@ class StockPicking(models.Model):
     ewaybill_id = fields.Many2one(
         comodel_name='l10n.in.ewaybill',
         string='Ewaybill', readonly=True, ondelete='cascade',
-        check_company=True)
+        check_company=True, copy=False)
 
     def action_open_ewaybill_form(self):
         self.ensure_one()

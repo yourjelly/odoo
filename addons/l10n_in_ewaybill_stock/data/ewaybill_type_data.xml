@@ -7,7 +7,7 @@
         <field name="allowed_supply_type">out</field>
         <field name="active" eval="True"/>
     </record>
-    <record id="type_delivery_challan_job_work" model="l10n.in.ewaybill.type">
+    <record id="type_delivery_challan_job_work_return" model="l10n.in.ewaybill.type">
         <field name="name">Delivery Challan</field>
         <field name="code">CHL</field>
         <field name="sub_type">Job Work Return</field>
@@ -15,7 +15,7 @@
         <field name="allowed_supply_type">in</field>
         <field name="active" eval="True"/>
     </record>
-    <record id="type_delivery_challan_job_work" model="l10n.in.ewaybill.type">
+    <record id="type_delivery_challan_for_own_use" model="l10n.in.ewaybill.type">
         <field name="name">Delivery Challan</field>
         <field name="code">CHL</field>
         <field name="sub_type">For own Use</field>
@@ -23,7 +23,7 @@
         <field name="allowed_supply_type">both</field>
         <field name="active" eval="True"/>
     </record>
-    <record id="type_delivery_challan_job_work" model="l10n.in.ewaybill.type">
+    <record id="type_delivery_challan_exhibition_or_fairs" model="l10n.in.ewaybill.type">
         <field name="name">Delivery Challan</field>
         <field name="code">CHL</field>
         <field name="sub_type">Exhibition or fairs</field>

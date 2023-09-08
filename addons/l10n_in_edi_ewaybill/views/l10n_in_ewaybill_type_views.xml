@@ -1,0 +1,13 @@
+<odoo>
+	<record id="view_l10n_in_ewaybill_type_tree" model="ir.ui.view">
+        <field name="name">l10n.in.ewaybill.type.tree</field>
+        <field name="model">l10n.in.ewaybill.type</field>
+        <field eval="2" name="priority"/>
+        <field name="arch" type="xml">
+            <tree>
+            	<field name="name"/>
+            	<field name="sub_type"/>
+            </tree>
+        </field>
+    </record>
+</odoo>

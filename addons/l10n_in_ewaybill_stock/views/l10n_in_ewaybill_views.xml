@@ -45,8 +45,8 @@
                     <group>
                      <group>
                         <field string="Stock Transfer" name="stock_picking_id"/>
-                        <field name="type_in_or_out" readonly="1"/>
-                        <field name="type_id" domain="[('allowed_supply_type', 'in', ('in', 'both')) if type_in_or_out == 'in' else ('allowed_supply_type', 'in', ('out', 'both'))]"/>
+                        <field name="type_in_or_out" invisible="1"/>
+                        <field name="type_id" domain="[('code', '!=', 'INV'), ('allowed_supply_type', 'in', ('in', 'both')) if type_in_or_out == 'in' else ('allowed_supply_type', 'in', ('out', 'both'))]"/>
                      </group>
                      <group>
                         <field name="partner_id" string="Customer" />
@@ -65,17 +65,17 @@
                                 <field name="distance"/>
                                 <span>km</span>
                             </div>
-                            <field name="vehicle_type" invisible="mode != '1'" required="mode == '1'"/>
-                            <field name="vehicle_no" invisible="mode != '1'" required="mode == '1'"/> 
+                            <field name="vehicle_type" attrs="{'invisible':[('mode','!=','1')], 'required': [('mode','=','1')]}"/>
+                            <field name="vehicle_no" attrs="{'invisible':[('mode','!=','1')], 'required': [('mode','=','1')]}"/> 
                         </group>
                         <group>
-                            <field name="transportation_doc_no" required="mode in ['2','3','4']"/>
-                            <field name="transportation_doc_date" required="mode in ['2','3','4']"/>
+                            <field name="transportation_doc_no" attrs="{'required': [('mode','in', ['2','3','4'])]}"/>
+                            <field name="transportation_doc_date" attrs="{'required': [('mode','in', ['2','3','4'])]}"/>
                         </group>
                     </group>
-                    <group string="Cancel Ewaybill" invisible="state == 'pending'">
+                    <group string="Cancel Ewaybill" attrs="{'invisible': [('state', '=', 'pending')]}">
                         <group>
-                            <field name="cancel_reason" />
+                            <field name="cancel_reason"/>
                         </group>
                         <group>
                             <field name="cancel_remarks"/>
