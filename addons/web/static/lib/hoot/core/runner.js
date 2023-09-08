@@ -181,19 +181,12 @@ export function makeTestRunner(params) {
         }
     }
 
-    /**
-     * @param {(callbacks: ReturnType<typeof makeCallbacks>) => any} callback
-     * @param {"pop" | "shift"} arrayFn
-     */
-    async function execCallbackOnSuites(callback, arrayFn) {
-        const stack = [...suiteStack];
-        while (stack.length) {
-            callback(stack[arrayFn]().callbacks);
-        }
-    }
-
     function getCurrent() {
         return suiteStack.at(-1) || null;
+    }
+
+    function getSuiteCallbacks() {
+        return suiteStack.map((s) => s.callbacks);
     }
 
     /**
@@ -506,22 +499,19 @@ export function makeTestRunner(params) {
                 } else {
                     const test = job;
                     if (test.skip) {
-                        await execCallbackOnSuites(
-                            (callbacks) => callbacks.call("skipped-test", test),
-                            "pop"
-                        );
+                        for (const callbacks of [...getSuiteCallbacks().reverse(), rootCallbacks]) {
+                            callbacks.call("skipped-test", test);
+                        }
                     } else {
                         // Before test
-                        const assert = makeAssert();
-
-                        await execCallbackOnSuites(
-                            (callbacks) => callbacks.call("before-test", test),
-                            "shift"
-                        );
+                        for (const callbacks of [rootCallbacks, ...getSuiteCallbacks()]) {
+                            callbacks.call("before-test", test);
+                        }
 
                         // Setup
-                        let timeoutId;
+                        const assert = makeAssert();
                         const timeout = test.config.timeout || config.timeout;
+                        let timeoutId;
                         await Promise.race([
                             // Test promise
                             test.run(assert.methods),
@@ -586,11 +576,12 @@ export function makeTestRunner(params) {
                         }
 
                         execAfterCallback(async () => {
-                            await execCallbackOnSuites(
-                                (callbacks) => callbacks.call("after-test", test),
-                                "pop"
-                            );
-
+                            for (const callbacks of [
+                                ...getSuiteCallbacks().reverse(),
+                                rootCallbacks,
+                            ]) {
+                                callbacks.call("after-test", test);
+                            }
                             if (urlParams.failfast && !assert.pass && !test.skip) {
                                 return runner.stop();
                             }
