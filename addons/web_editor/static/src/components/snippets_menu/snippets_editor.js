@@ -1124,7 +1124,7 @@ export class SnippetEditor extends Component {
      */
     async onClone({ isCurrent }) {
         for (const opt of this.options) {
-            await opt.props.events.onClone(isCurrent);
+            await opt.props.events.onClone({ isCurrent });
         }
     }
     /**
