@@ -2,7 +2,7 @@
 
 import { Component, onMounted, useRef, useState, useSubEnv } from "@odoo/owl";
 import { createURL } from "../core/url";
-import { document, matchMedia, navigator } from "../globals";
+import { document, matchMedia } from "../globals";
 import { config as domConfig } from "../helpers/dom";
 import { compactXML, storage } from "../utils";
 import { HootConfigDropdown } from "./hoot_config_dropdown";
@@ -11,7 +11,6 @@ import { HootRunAllButton } from "./hoot_run_all_button";
 import { HootRunButton } from "./hoot_run_button";
 import { HootRunFailedButton } from "./hoot_run_failed_button";
 import { HootSearch } from "./hoot_search";
-import { HootStatusPanel } from "./hoot_status_panel";
 
 let imported = false;
 function importIcons() {
@@ -81,7 +80,6 @@ export class HootMain extends Component {
         HootRunButton,
         HootRunFailedButton,
         HootSearch,
-        HootStatusPanel,
         HootReporting,
     };
 
@@ -106,7 +104,6 @@ export class HootMain extends Component {
                     <HootSearch />
                     <HootConfigDropdown colorScheme="color.scheme" colorToggle="color.toggle" />
                 </nav>
-                <HootStatusPanel />
             </header>
             <HootReporting />
         </main>

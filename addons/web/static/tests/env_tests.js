@@ -11,6 +11,12 @@ import { makeDeferred, nextTick, patchWithCleanup } from "./helpers/utils";
 
 const serviceRegistry = registry.category("services");
 
+QUnit.module("QUnit tests", () => {
+    QUnit.test("demo test", (assert) => {
+        assert.ok(false);
+    });
+});
+
 QUnit.module("env");
 
 QUnit.test("can start a service", async (assert) => {

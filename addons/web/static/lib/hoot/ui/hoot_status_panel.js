@@ -9,6 +9,11 @@ import { HootTestPath } from "./hoot_test_path";
 export class HootStatusPanel extends Component {
     static components = { HootTestPath };
 
+    static props = {
+        filter: [String, { value: null }],
+        filterResults: Function,
+    };
+
     static template = compactXML/* xml */ `
         <div class="hoot-status hoot-row hoot-gap-3" t-att-class="state.className">
             <div class="hoot-row hoot-gap-2">
@@ -22,26 +27,41 @@ export class HootStatusPanel extends Component {
                     </span>
                 </t>
             </div>
-            <ul class="hoot-row hoot-gap-1">
-                <t t-if="state.done">
-                    <li class="hoot-row hoot-text-success hoot-gap-1 hoot-p-1">
-                        <span class="hoot-circle hoot-bg-success" />
+            <div class="hoot-row hoot-gap-1">
+                <t t-if="state.done - state.failed">
+                    <t t-set="color" t-value="!props.filter or props.filter === 'passed' ? 'success' : 'muted'" />
+                    <button
+                        t-attf-class="hoot-text-{{ color }} hoot-row hoot-gap-1 hoot-p-1 hoot-transition-colors"
+                        t-on-click="() => props.filterResults('passed')"
+                    >
+                        <span t-attf-class="hoot-bg-{{ color }} hoot-circle hoot-transition-colors" />
                         <t t-esc="state.done - state.failed" /> passed
-                    </li>
+                    </button>
                 </t>
                 <t t-if="state.failed">
-                    <li class="hoot-row hoot-text-danger hoot-gap-1 hoot-p-1">
-                        <span class="hoot-circle hoot-bg-danger" />
+                    <t t-set="color" t-value="!props.filter or props.filter === 'failed' ? 'danger' : 'muted'" />
+                    <button
+                        t-attf-class="hoot-text-{{ color }} hoot-row hoot-gap-1 hoot-p-1 hoot-transition-colors"
+                        t-on-click="() => props.filterResults('failed')"
+                    >
+                        <span t-attf-class="hoot-bg-{{ color }} hoot-circle hoot-transition-colors" />
                         <t t-esc="state.failed" /> failed
-                    </li>
+                    </button>
                 </t>
                 <t t-if="state.skipped">
-                    <li class="hoot-row hoot-text-info hoot-gap-1 hoot-p-1">
-                        <span class="hoot-circle hoot-bg-info" />
+                    <t t-set="color" t-value="!props.filter or props.filter === 'skipped' ? 'info' : 'muted'" />
+                    <button
+                        t-attf-class="hoot-text-{{ color }} hoot-row hoot-gap-1 hoot-p-1 hoot-transition-colors"
+                        t-on-click="() => props.filterResults('skipped')"
+                    >
+                        <span t-attf-class="hoot-bg-{{ color }} hoot-circle hoot-transition-colors" />
                         <t t-esc="state.skipped" /> skipped
-                    </li>
+                    </button>
                 </t>
-            </ul>
+                <!-- <button class="" t-on-click="props.sortResults((test) => test.lastResults.duration)">
+                    <i class="bi bi-filter" />
+                </button> -->
+            </div>
         </div>
     `;
 

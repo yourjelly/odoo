@@ -4,7 +4,7 @@ import { match } from "../utils";
 import { registerAssertMethod } from "./assert";
 
 /**
- * @param {import("./assert").Assert} assert
+ * @param {import("./assert").AssertInfo} assert
  * @param {() => any} fn
  * @param {import("../utils").Matcher} [matcher=Error]
  * @param {string} [message=""]

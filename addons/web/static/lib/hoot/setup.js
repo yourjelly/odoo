@@ -14,6 +14,7 @@ import { config as domConfig } from "./helpers/dom";
 import { config as eventsConfig } from "./helpers/events";
 import { HootMain } from "./ui/hoot_main";
 import { log } from "./utils";
+import { urlParams } from "./core/url";
 
 /**
  * @typedef {{
@@ -26,7 +27,9 @@ const runner = makeTestRunner();
 
 makeLogger(runner);
 
-whenReady(async () => mount(HootMain, document.body, { env: { runner }, name: "HOOT" }));
+whenReady(async () =>
+    mount(HootMain, document.body, { dev: urlParams.debug, env: { runner }, name: "HOOT" })
+);
 
 export const config = {
     ...domConfig,

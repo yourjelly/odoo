@@ -197,7 +197,7 @@ export function makeTestRunner(params) {
             runner.hasFilter = true;
             for (const id of urlParams.suite) {
                 if (id.startsWith(SKIP_PREFIX)) {
-                    ignore.suites.add(id.slice(SKIP_PREFIX.length));
+                    skip.suites.add(id.slice(SKIP_PREFIX.length));
                 } else {
                     only.suites.add(id);
                 }
@@ -209,7 +209,7 @@ export function makeTestRunner(params) {
             runner.hasFilter = true;
             for (const name of urlParams.tag) {
                 if (name.startsWith(SKIP_PREFIX)) {
-                    ignore.tags.add(name.slice(SKIP_PREFIX.length));
+                    skip.tags.add(name.slice(SKIP_PREFIX.length));
                 } else {
                     only.tags.add(name);
                 }
@@ -227,7 +227,7 @@ export function makeTestRunner(params) {
             runner.hasFilter = true;
             for (const id of urlParams.test) {
                 if (id.startsWith(SKIP_PREFIX)) {
-                    ignore.tests.add(id.slice(SKIP_PREFIX.length));
+                    skip.tests.add(id.slice(SKIP_PREFIX.length));
                 } else {
                     only.tests.add(id);
                 }
@@ -241,23 +241,18 @@ export function makeTestRunner(params) {
     function prepareJobs(jobs) {
         const filteredJobs = jobs.filter((job) => {
             if (job instanceof Suite) {
-                if (ignore.suites.has(job.id)) {
-                    return false;
-                }
-                job.jobs = prepareJobs(job.jobs);
-                if (job.jobs.length || only.suites.has(job.id)) {
+                if (only.suites.has(job.id)) {
                     return true;
                 }
+                job.jobs = prepareJobs(job.jobs);
+                return Boolean(job.jobs.length);
             } else {
-                if (ignore.tests.has(job.id)) {
-                    return false;
-                }
                 if (only.tests.has(job.id)) {
                     return true;
                 }
             }
 
-            if (ignore.tags.size && job.tags.some((tag) => ignore.tags.has(tag.id))) {
+            if (skip.tags.size && job.tags.some((tag) => skip.tags.has(tag.id))) {
                 return false;
             }
             if (only.tags.size && job.tags.some((tag) => only.tags.has(tag.id))) {
@@ -275,168 +270,13 @@ export function makeTestRunner(params) {
                 }
             }
 
-            // No filter: is valid - With filter: did not pass the filters above
-            return (
-                only.suites.size + only.tags.size + only.tests.size + runner.textFilter.length === 0
-            );
+            return !runner.hasFilter;
         });
 
         return config.randomorder ? shuffle(filteredJobs) : filteredJobs;
     }
 
-    /**
-     * @param {Suite} suite
-     */
-    async function runSuite(suite) {
-        if (suite.visited === 0) {
-            // before suite code
-            suiteStack.push(suite);
-
-            callbacks.add("before-suite", suite.callbacks);
-            callbacks.add("before-test", suite.callbacks);
-            callbacks.add("after-test", suite.callbacks);
-            callbacks.add("skipped-test", suite.callbacks);
-            callbacks.add("after-suite", suite.callbacks);
-
-            await callbacks.call("before-suite", suite);
-        }
-        if (suite.visited === suite.jobs.length) {
-            // after suite code
-            suiteStack.pop();
-
-            callbacks.remove("before-suite", suite.callbacks);
-            callbacks.remove("before-test", suite.callbacks);
-            callbacks.remove("after-test", suite.callbacks);
-            callbacks.remove("skipped-test", suite.callbacks);
-            callbacks.remove("after-suite", suite.callbacks);
-
-            if (runner.debug) {
-                missedCallbacks.push(() => callbacks.call("after-suite", suite));
-            } else {
-                await callbacks.call("after-suite", suite);
-            }
-        }
-    }
-
-    /**
-     * @param {Test} test
-     */
-    async function runTest(test) {
-        const run = async (assert) => {
-            let timeoutId;
-            const timeout = test.config.timeout || config.timeout;
-            await Promise.race([
-                // Test promise
-                test.run(assert.methods),
-                // Abort & timeout promise
-                new Promise((resolve, reject) => {
-                    // Set abort signal
-                    abortCurrent = resolve;
-
-                    if (!runner.debug) {
-                        // Set timeout
-                        timeoutId = setTimeout(
-                            () => reject(new TimeoutError(`test took longer than ${timeout}ms`)),
-                            timeout
-                        );
-                    }
-                }).then(() => {
-                    assert.aborted = true;
-                }),
-            ]).finally(() => {
-                abortCurrent = () => null;
-                clearTimeout(timeoutId);
-            });
-        };
-
-        if (test.skip) {
-            await callbacks.call("skipped-test", test);
-        } else {
-            // Before test
-            const assert = makeAssert();
-
-            await callbacks.call("before-test", test);
-
-            // Setup
-            if (urlParams.notrycatch) {
-                await run(assert);
-            } else {
-                try {
-                    await run(assert);
-                } catch (err) {
-                    assert.error = err;
-                    assert.pass = false;
-                }
-            }
-
-            if (assert.steps > 0) {
-                assert.methods.deepEqual([], assert.steps, `Unverified steps`);
-            }
-
-            if (assert.expects !== null) {
-                const expected = assert.expects;
-                const actual = assert.assertions.length;
-                assert.methods.equal(
-                    expected,
-                    actual,
-                    `Expected ${expected} assertions, but ${actual} were run`
-                );
-            } else if (!assert.assertions.length) {
-                assert.methods.ok(0, `Expected at least 1 assertion, but none were run`);
-            }
-
-            assert.end();
-
-            for (const [key, value] of Object.entries(assert)) {
-                if (typeof value !== "function") {
-                    test.lastResults[key] = value;
-                }
-            }
-
-            // After test (ignored in debug mode)
-            if (runner.debug) {
-                missedCallbacks.push(() => callbacks.call("after-test", test));
-            } else {
-                await callbacks.call("after-test", test);
-
-                if (urlParams.failfast && !assert.pass && !test.skip) {
-                    return runner.stop();
-                }
-            }
-        }
-    }
-
-    const initialConfig = { ...DEFAULT_CONFIG, ...params };
-    const rawConfig = { ...initialConfig };
-
-    for (const key in urlParams) {
-        if (key in DEFAULT_CONFIG) {
-            const [value] = urlParams[key];
-            if (BOOLEAN_REGEX.test(value)) {
-                rawConfig[key] = value.toLowerCase() === "true";
-            } else if (!isNaN(value)) {
-                rawConfig[key] = Number(value);
-            } else {
-                rawConfig[key] = value;
-            }
-        } else if (key in rawConfig) {
-            rawConfig[key] = urlParams[key];
-        }
-    }
-    const config = reactive(rawConfig, () => {
-        for (const key in config) {
-            if (config[key] !== initialConfig[key]) {
-                setParams({ [key]: config[key] });
-            } else {
-                setParams({ [key]: null });
-            }
-        }
-    });
-
-    /** @type {Suite[]} */
-    const suiteStack = [];
-
-    const runner = new (class TestRunner {
+    class TestRunner {
         config = config;
         debug = false;
         hasFilter = false;
@@ -537,7 +377,7 @@ export function makeTestRunner(params) {
          */
         registerCleanup(callback) {
             const cleanup = () => {
-                callbacks.remove(cleanup);
+                callbacks.remove("after-test", cleanup);
                 return callback();
             };
 
@@ -575,11 +415,124 @@ export function makeTestRunner(params) {
             let job = jobs.shift();
             while (job && runner.status === "running") {
                 if (job instanceof Suite) {
-                    await runSuite(job);
-                    job = job.jobs[job.visited++] || job.parent || jobs.shift();
+                    const suite = job;
+                    if (suite.visited === 0) {
+                        // before suite code
+                        suiteStack.push(suite);
+
+                        callbacks.add("before-suite", ...suite.callbacks.get("before-suite"));
+                        callbacks.add("before-test", ...suite.callbacks.get("before-test"));
+                        callbacks.add("after-test", ...suite.callbacks.get("after-test"));
+                        callbacks.add("skipped-test", ...suite.callbacks.get("skipped-test"));
+                        callbacks.add("after-suite", ...suite.callbacks.get("after-suite"));
+
+                        await callbacks.call("before-suite", suite);
+                    }
+                    if (suite.visited === suite.jobs.length) {
+                        // after suite code
+                        suiteStack.pop();
+
+                        callbacks.remove("before-suite", ...suite.callbacks.get("before-suite"));
+                        callbacks.remove("before-test", ...suite.callbacks.get("before-test"));
+                        callbacks.remove("after-test", ...suite.callbacks.get("after-test"));
+                        callbacks.remove("skipped-test", ...suite.callbacks.get("skipped-test"));
+                        callbacks.remove("after-suite", ...suite.callbacks.get("after-suite"));
+
+                        if (runner.debug) {
+                            missedCallbacks.push(() => callbacks.call("after-suite", suite));
+                        } else {
+                            await callbacks.call("after-suite", suite);
+                        }
+                    }
+                    job = suite.jobs[suite.visited++] || suite.parent || jobs.shift();
                 } else {
-                    await runTest(job);
-                    job = job.parent || jobs.shift();
+                    const test = job;
+                    if (test.skip) {
+                        await callbacks.call("skipped-test", test);
+                    } else {
+                        // Before test
+                        const assert = makeAssert();
+
+                        await callbacks.call("before-test", test);
+
+                        // Setup
+                        let timeoutId;
+                        const timeout = test.config.timeout || config.timeout;
+                        await Promise.race([
+                            // Test promise
+                            test.run(assert.methods),
+                            // Abort & timeout promise
+                            new Promise((resolve, reject) => {
+                                // Set abort signal
+                                abortCurrent = resolve;
+
+                                if (!runner.debug) {
+                                    // Set timeout
+                                    timeoutId = setTimeout(
+                                        () =>
+                                            reject(
+                                                new TimeoutError(
+                                                    `test took longer than ${timeout}ms`
+                                                )
+                                            ),
+                                        timeout
+                                    );
+                                }
+                            }).then(() => {
+                                assert.aborted = true;
+                            }),
+                        ])
+                            .catch((err) => {
+                                assert.error = err;
+                                assert.pass = false;
+                                if (config.notrycatch) {
+                                    throw err;
+                                }
+                            })
+                            .finally(() => {
+                                abortCurrent = () => null;
+                                clearTimeout(timeoutId);
+                            });
+
+                        if (assert.steps > 0) {
+                            assert.methods.deepEqual([], assert.steps, `Unverified steps`);
+                        }
+
+                        if (assert.expects !== null) {
+                            const expected = assert.expects;
+                            const actual = assert.assertions.length;
+                            assert.methods.equal(
+                                expected,
+                                actual,
+                                `Expected ${expected} assertions, but ${actual} were run`
+                            );
+                        } else if (!assert.assertions.length) {
+                            assert.methods.ok(
+                                0,
+                                `Expected at least 1 assertion, but none were run`
+                            );
+                        }
+
+                        assert.end();
+
+                        for (const [key, value] of Object.entries(assert)) {
+                            if (typeof value !== "function") {
+                                test.lastResults[key] = value;
+                            }
+                        }
+
+                        // After test (ignored in debug mode)
+                        if (runner.debug) {
+                            missedCallbacks.push(() => callbacks.call("after-test", test));
+                        } else {
+                            await callbacks.call("after-test", test);
+
+                            if (urlParams.failfast && !assert.pass && !test.skip) {
+                                return runner.stop();
+                            }
+                        }
+                    }
+                    job = test.parent || jobs.shift();
                 }
             }
 
@@ -598,13 +551,39 @@ export function makeTestRunner(params) {
 
             await callbacks.call("after-all");
         }
-    })();
+    }
 
-    const ignore = {
-        suites: new Set(),
-        tags: new Set(),
-        tests: new Set(),
-    };
+    const initialConfig = { ...DEFAULT_CONFIG, ...params };
+    const rawConfig = { ...initialConfig };
+
+    for (const key in urlParams) {
+        if (key in DEFAULT_CONFIG) {
+            const [value] = urlParams[key];
+            if (BOOLEAN_REGEX.test(value)) {
+                rawConfig[key] = value.toLowerCase() === "true";
+            } else if (!isNaN(value)) {
+                rawConfig[key] = Number(value);
+            } else {
+                rawConfig[key] = value;
+            }
+        } else if (key in rawConfig) {
+            rawConfig[key] = urlParams[key];
+        }
+    }
+    const config = reactive(rawConfig, () => {
+        for (const key in config) {
+            if (config[key] !== initialConfig[key]) {
+                setParams({ [key]: config[key] });
+            } else {
+                setParams({ [key]: null });
+            }
+        }
+    });
+
+    /** @type {Suite[]} */
+    const suiteStack = [];
+    const runner = new TestRunner();
+
     const only = {
         suites: new Set(),
         tags: new Set(),
@@ -612,6 +591,7 @@ export function makeTestRunner(params) {
     };
     const skip = {
         suites: new Set(),
+        tags: new Set(),
         tests: new Set(),
     };
 

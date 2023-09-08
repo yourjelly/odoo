@@ -14,7 +14,7 @@ import { SPECIAL_TAGS, generateHash, normalize } from "../utils";
 export class Test {
     /** @type {Record<string, any>} */
     config = {};
-    /** @type {Partial<import("../assertions/assert").Assert>} */
+    /** @type {Partial<import("../assertions/assert").AssertInfo>} */
     lastResults = reactive({});
     /** @type {(Suite | Test)[]} */
     path = [this];
@@ -35,7 +35,8 @@ export class Test {
     constructor(parent, name, runFn, tags) {
         this.parent = parent || null;
         this.name = name;
-        this.runFn = runFn;
+        // Keeps the stack trace bound to the original 'runFn'
+        this.run = async (...args) => runFn(...args);
 
         if (this.parent) {
             Object.assign(this.config, this.parent.config);
@@ -57,13 +58,6 @@ export class Test {
             }
             this.tagNames.add(tag.name);
         }
-    }
-
-    /**
-     * @param {AssertMethods} assert
-     */
-    async run(assert) {
-        await this.runFn(assert);
     }
 
     hasSkipTag() {

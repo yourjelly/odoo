@@ -3,6 +3,7 @@
 import { Component, useState } from "@odoo/owl";
 import { isMarkupHelper } from "../assertions/assert_helpers";
 import { compactXML } from "../utils";
+import { HootStatusPanel } from "./hoot_status_panel";
 import { HootTestResult } from "./hoot_test_result";
 import { subscribeToURLParams } from "../core/url";
 
@@ -13,9 +14,8 @@ import { subscribeToURLParams } from "../core/url";
 /**
  * @template T
  * @param {T[]} reactiveResults
- * @param {number} interval
  */
-function makeResultBatcher(reactiveResults, interval) {
+function makeResultBatcher(reactiveResults) {
     /**
      * @param {T} result
      */
@@ -28,7 +28,7 @@ function makeResultBatcher(reactiveResults, interval) {
             reactiveResults.push(...batchResults);
             batchResults = [];
             timeoutId = 0;
-        }, interval);
+        }, RENDER_INTERVAL);
     };
 
     let timeoutId = 0;
@@ -43,38 +43,38 @@ const RENDER_INTERVAL = 100;
 
 /** @extends Component<{}, import("../setup").Environment> */
 export class HootReporting extends Component {
-    static components = { HootTestResult };
+    static components = { HootStatusPanel, HootTestResult };
 
     static template = compactXML/* xml */ `
         <div class="hoot-reporting hoot-col">
-            <t t-foreach="displayedTests" t-as="test" t-key="test.id">
-                <HootTestResult test="test" index="testIndex" defaultOpen="canOpen(test)" />
-            </t>
+            <HootStatusPanel
+                filter="state.filter"
+                filterResults.bind="filterResults"
+            />
+            <div class="hoot-results hoot-col">
+                <t t-foreach="getFilteredResults()" t-as="test" t-key="test.id">
+                    <HootTestResult test="test" defaultOpen="canOpen(test)" />
+                </t>
+            </div>
         </div>
     `;
 
-    testIndex = 1;
     didShowDetail = !this.env.runner.config.showdetail;
 
     isMarkupHelper = isMarkupHelper;
 
-    get displayedTests() {
-        if (this.env.runner.config.showpassed) {
-            return this.results;
-        }
-        return this.results.filter((test) => !test.lastResults.pass || test.skip);
-    }
-
     setup() {
         const { runner } = this.env;
 
-        subscribeToURLParams("*");
+        subscribeToURLParams("showpassed");
 
-        /** @type {Test[]} */
-        this.results = useState([]);
+        this.state = useState({
+            filter: null,
+            /** @type {Test[]} */
+            results: [],
+        });
 
-        // Batch results to avoid updating too frequently
-        const { add } = makeResultBatcher(this.results, RENDER_INTERVAL);
+        const { add } = makeResultBatcher(this.state.results);
 
         runner.afterAnyTest(add);
         runner.skippedAnyTest(add);
@@ -89,5 +89,29 @@ export class HootReporting extends Component {
             this.didShowDetail = true;
             return true;
         }
+    }
+
+    filterResults(filter) {
+        this.state.filter = this.state.filter === filter ? null : filter;
+    }
+
+    getFilteredResults() {
+        const { filter, results } = this.state;
+        const { showpassed } = this.env.runner.config;
+        let filtered = [...results];
+        if (filter || !showpassed) {
+            filtered = filtered.filter((test) => {
+                switch (filter) {
+                    case "failed":
+                        return !test.lastResults.pass;
+                    case "passed":
+                        return test.lastResults.pass;
+                    case "skipped":
+                        return test.skip;
+                }
+                return showpassed || test.skip || !test.lastResults.pass;
+            });
+        }
+        return filtered;
     }
 }

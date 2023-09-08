@@ -6,7 +6,7 @@ import { applyModifier, diff, green, red, text } from "./assert_helpers";
 
 /**
  * @template {unknown} T
- * @param {import("./assert").Assert} assert
+ * @param {import("./assert").AssertInfo} assert
  * @param {T} actual
  * @param {T} expected
  * @param {string} [message=""]

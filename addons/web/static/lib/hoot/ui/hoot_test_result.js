@@ -110,6 +110,6 @@ export class HootTestResult extends Component {
     }
 
     setup() {
-        subscribeToURLParams(...Object.keys(DEFAULT_CONFIG));
+        subscribeToURLParams("*");
     }
 }
