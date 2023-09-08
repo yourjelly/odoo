@@ -103,9 +103,9 @@ export class HootReporting extends Component {
             filtered = filtered.filter((test) => {
                 switch (filter) {
                     case "failed":
-                        return !test.lastResults.pass;
+                        return !test.skip && !test.lastResults.pass;
                     case "passed":
-                        return test.lastResults.pass;
+                        return !test.skip && test.lastResults.pass;
                     case "skipped":
                         return test.skip;
                 }
