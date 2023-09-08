@@ -219,6 +219,12 @@ export const DEFAULT_CONFIG = {
      */
     headless: false,
     /**
+     * Hides all skipped tests.
+     * @type {boolean}
+     * @default false
+     */
+    hideskipped: false,
+    /**
      * Removes the safety try .. catch statements around the tests' run functions
      * to let errors bubble to the browser.
      * @type {boolean}
@@ -241,7 +247,7 @@ export const DEFAULT_CONFIG = {
      */
     showdetail: "first-fail",
     /**
-     * Shows all completed tests, including those who passed.
+     * Shows all completed tests including those who passed.
      * @type {boolean}
      * @default false
      */
