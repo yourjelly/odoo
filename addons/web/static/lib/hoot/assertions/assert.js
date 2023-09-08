@@ -65,6 +65,7 @@ export function makeAssert() {
             const fn = assertFns[name];
             methods[name] = {
                 async [name](...args) {
+                    const { stack } = new Error();
                     const fnResult = await fn(fullInfo, ...args);
                     const result = { ...fnResult, id: nextResultId++ };
                     if (result.errors?.length) {
@@ -84,7 +85,7 @@ export function makeAssert() {
                         result.info = [[red("Reasons:"), multiline(messages)]];
                     }
                     if (!result.pass) {
-                        const formattedStack = formatStack(new Error().stack);
+                        const formattedStack = formatStack(stack);
                         result.info ||= [];
                         result.info.push([red("Source:"), multiline(formattedStack)]);
                     }
