@@ -269,6 +269,14 @@ export class HootSearch extends Component {
             case "Enter": {
                 ev.preventDefault();
                 ev.stopPropagation();
+                if (category) {
+                    const checked = this.state.checked[category];
+                    if (checked[id]) {
+                        delete checked[id];
+                    } else {
+                        checked[id] = true;
+                    }
+                }
                 this.reload({ useTextFilter: !category });
                 break;
             }
