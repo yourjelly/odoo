@@ -4,7 +4,7 @@ import { formatHumanReadable } from "../utils";
 import { registerAssertMethod } from "./assert";
 
 /**
- * @param {import("./assert").Assert} assert
+ * @param {import("./assert").AssertInfo} assert
  * @param {string} name
  * @returns {import("./assert").AssertResult}
  */

@@ -4,7 +4,7 @@ import { registerAssertMethod } from "./assert";
 import { diff, green, red, text } from "./assert_helpers";
 
 /**
- * @param {import("./assert").Assert} assert
+ * @param {import("./assert").AssertInfo} assert
  * @param {string[]} expectedSteps
  * @returns {import("./assert").AssertResult}
  */

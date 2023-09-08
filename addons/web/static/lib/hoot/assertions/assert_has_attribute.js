@@ -6,7 +6,7 @@ import { registerAssertMethod } from "./assert";
 import { applyModifier, diff, green, red, text } from "./assert_helpers";
 
 /**
- * @param {import("./assert").Assert} assert
+ * @param {import("./assert").AssertInfo} assert
  * @param {import("../helpers/dom").Target} target
  * @param {string} attribute
  * @param {string} [value]

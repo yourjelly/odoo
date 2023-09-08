@@ -2,9 +2,8 @@
 
 import { suite, test } from "@odoo/hoot";
 
-suite("Core", () => {
-    test("core test", (assert) => {
-        assert.ok(true, "oui");
-        assert.equal(1, 1);
+suite("demo", () => {
+    test["multi=100"]("demo test", (assert) => {
+        assert.ok(false);
     });
 });

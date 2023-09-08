@@ -329,48 +329,53 @@ export function lookup(pattern, items, mapFn = normalize) {
 }
 
 export function makeCallbacks() {
-    function add(type, callbackOrCallbacks) {
+    /**
+     * @param {string} type
+     * @param {...((...args: any[]) => Promise<void>)} callbacks
+     */
+    const add = (type, ...callbacks) => {
         if (!callbackRegistry[type]) {
             callbackRegistry[type] = new Set();
         }
-        if (callbackOrCallbacks && callbackOrCallbacks._getCallbacks) {
-            for (const callback of callbackOrCallbacks._getCallbacks(type)) {
-                callbackRegistry[type].add(callback);
-            }
-        } else {
-            callbackRegistry[type].add(callbackOrCallbacks);
+        for (const callback of callbacks) {
+            callbackRegistry[type].add(callback);
         }
-    }
+    };
 
     /**
      * @param {string} type
      * @param {...any} args
      */
-    async function call(type, ...args) {
+    const call = async (type, ...args) => {
         if (!callbackRegistry[type]) {
             return;
         }
         const fns = [...callbackRegistry[type]];
         await Promise.all(fns.map((fn) => Promise.resolve(fn(...args)).catch(console.error)));
-    }
+    };
 
-    function remove(type, ...callbackOrCallbacks) {
+    /**
+     * @param {string} type
+     */
+    const get = (type) => callbackRegistry[type] || [];
+
+    /**
+     * @param {string} type
+     * @param {...((...args: any[]) => Promise<void>)} callbacks
+     */
+    const remove = (type, ...callbacks) => {
         if (!callbackRegistry[type]) {
             return;
         }
-        if (callbackOrCallbacks && callbackOrCallbacks._getCallbacks) {
-            for (const callback of callbackOrCallbacks._getCallbacks(type)) {
-                callbackRegistry[type].delete(callback);
-            }
-        } else {
-            callbackRegistry[type].delete(callbackOrCallbacks);
+        for (const callback of callbacks) {
+            callbackRegistry[type].delete(callback);
         }
-    }
+    };
 
     /** @type {Record<string, ((...args: any[]) => Promise<void>)[]>} */
     const callbackRegistry = {};
 
-    return { add, call, remove, _getCallbacks: (type) => callbackRegistry[type] || [] };
+    return { add, call, get, remove };
 }
 
 /**

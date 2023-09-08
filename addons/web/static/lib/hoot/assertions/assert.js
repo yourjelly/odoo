@@ -1,22 +1,23 @@
 /** @odoo-module **/
 
 import { markRaw, reactive } from "@odoo/owl";
-import { Error, Object, Promise } from "../globals";
+import { Error, Object } from "../globals";
 import { formatTechnical } from "../utils";
 import { formatStack, multiline, red } from "./assert_helpers";
 
 /**
  * @template F
  * @typedef {(
- *  F extends (assert: Assert, ...args: infer P) => infer R
+ *  F extends (assert: AssertInfo, ...args: infer P) => infer R
  *      ? (...args: P) => R extends Promise<any> ? Promise<void> : void
  *      : never
  *  )} AssertMethodType
  */
 
 /**
+ * @typedef {(assert: AssertInfo, ...args: any[]) => AssertResult | Promise<AssertResult>} AssertFunction
  *
- * @typedef {ReturnType<typeof makeAssert> & { isNot: boolean }} Assert
+ * @typedef {ReturnType<typeof makeAssert> & { isNot: boolean }} AssertInfo
  *
  * @typedef {RegisteredMethods & {
  *  not: Omit<RegisteredMethods, "step" | "verifySteps">;
@@ -48,58 +49,47 @@ import { formatStack, multiline, red } from "./assert_helpers";
  * }} RegisteredMethods
  */
 
-/**
- * @param {Assert} assert
- * @param {string} name
- * @param {Partial<AssertResult>} result
- */
-function resolveResult(assert, name, result) {
-    result = { ...result, id: nextResultId++ };
-    if (result.errors?.length) {
-        const messages = result.errors.map((error) => {
-            if (error.message) {
-                return error.message;
-            } else if ("arg" in error) {
-                return `argument ${error.arg} is expected to be a ${
-                    error.expected
-                }, got ${formatTechnical(error.actual)}`;
-            } else {
-                return error;
-            }
-        });
-        assert.pass = false;
-        result.message = `'assert.${name}' error`;
-        result.info = [[red("Reasons:"), multiline(messages)]];
-    }
-    if (!result.pass) {
-        const formattedStack = formatStack(new Error().stack);
-        result.info ||= [];
-        result.info.push([red("Source:"), multiline(formattedStack)]);
-    }
-    assert.assertions.push(result);
-    assert.pass &&= result.pass;
-}
+//-----------------------------------------------------------------------------
+// Exports
+//-----------------------------------------------------------------------------
 
 export function makeAssert() {
     /**
      * @param {boolean} isNot
      */
     function generateAssertMethods(isNot) {
-        const assertInfo = { ...assert, isNot };
+        const fullInfo = { ...assertInfo, isNot };
         /** @type {RegisteredMethods} */
         const methods = {};
         for (const name in assertFns) {
             const fn = assertFns[name];
             methods[name] = {
-                [name](...args) {
-                    const result = fn(assertInfo, ...args);
-                    if (result instanceof Promise) {
-                        return result.then((actualResult) =>
-                            resolveResult(assert, name, actualResult)
-                        );
-                    } else {
-                        return resolveResult(assert, name, result);
+                async [name](...args) {
+                    const fnResult = await fn(fullInfo, ...args);
+                    const result = { ...fnResult, id: nextResultId++ };
+                    if (result.errors?.length) {
+                        const messages = result.errors.map((error) => {
+                            if (error.message) {
+                                return error.message;
+                            } else if ("arg" in error) {
+                                return `argument ${error.arg} is expected to be a ${
+                                    error.expected
+                                }, got ${formatTechnical(error.actual)}`;
+                            } else {
+                                return error;
+                            }
+                        });
+                        assertInfo.pass = false;
+                        result.message = `'assert.${name}' error`;
+                        result.info = [[red("Reasons:"), multiline(messages)]];
                     }
+                    if (!result.pass) {
+                        const formattedStack = formatStack(new Error().stack);
+                        result.info ||= [];
+                        result.info.push([red("Source:"), multiline(formattedStack)]);
+                    }
+                    assertInfo.assertions.push(result);
+                    assertInfo.pass &&= result.pass;
                 },
             }[name];
         }
@@ -107,12 +97,18 @@ export function makeAssert() {
     }
 
     function end() {
-        assert.duration = Date.now() - startTime;
+        assertInfo.duration = Date.now() - startTime;
+    }
+
+    class Assert {
+        get not() {
+            return generateAssertMethods(true);
+        }
     }
 
     let startTime = Date.now();
 
-    const assert = reactive({
+    const assertInfo = reactive({
         aborted: false,
         /** @type {AssertResult[]} */
         assertions: [],
@@ -121,23 +117,19 @@ export function makeAssert() {
         error: null,
         expects: null,
         /** @type {AssertMethods} */
-        methods: markRaw({
-            get not() {
-                return generateAssertMethods(true);
-            },
-        }),
+        methods: markRaw(new Assert()),
         pass: true,
         /** @type {string[]} */
         steps: [],
     });
 
-    Object.assign(assert.methods, generateAssertMethods(false));
+    Object.assign(assertInfo.methods, generateAssertMethods(false));
 
-    return assert;
+    return assertInfo;
 }
 
 /**
- * @param {(assert: Assert, ...args: any[]) => AssertResult} assertFn
+ * @param {AssertFunction} assertFn
  */
 export function registerAssertMethod(assertFn) {
     const name = assertFn.name;
@@ -151,4 +143,5 @@ export function registerAssertMethod(assertFn) {
 
 let nextResultId = 1;
 
+/** @type {Record<string, AssertFunction>} */
 const assertFns = Object.create(null);

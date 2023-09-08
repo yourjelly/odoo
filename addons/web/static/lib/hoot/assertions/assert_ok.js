@@ -5,7 +5,7 @@ import { registerAssertMethod } from "./assert";
 import { applyModifier, red } from "./assert_helpers";
 
 /**
- * @param {import("./assert").Assert} assert
+ * @param {import("./assert").AssertInfo} assert
  * @param {boolean} value
  * @param {string} [message=""]
  * @returns {import("./assert").AssertResult}
