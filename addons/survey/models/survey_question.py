@@ -688,19 +688,22 @@ class SurveyQuestionAnswer(models.Model):
         This implementation makes sure we have at least 30 characters for the question title,
         then we elide it, leaving the rest of the space for the answer.
         """
+        super()._compute_display_name()
         for answer in self:
             # _origin (or fallback title) is (likely temporarily) needed to support survey snapshot
             # during onchange for a deleted answer used as trigger in another question.
-            title = answer._origin.question_id.title
-            n_extra_characters = len(title) + len(answer.value) + 3 - self.MAX_ANSWER_NAME_LENGTH  # 3 for `" : "`
-            if n_extra_characters <= 0:
-                answer.display_name = f'{title} : {answer.value}'
-            else:
-                answer.display_name = shorten(
-                    f'{shorten(title, max(30, len(title) - n_extra_characters), placeholder="...")} : {answer.value}',
-                    self.MAX_ANSWER_NAME_LENGTH,
-                    placeholder="..."
-                )
+
+            if answer._origin.question_id:
+                title = answer._origin.question_id.title
+                n_extra_characters = len(title) + len(answer.value) + 3 - self.MAX_ANSWER_NAME_LENGTH  # 3 for `" : "`
+                if n_extra_characters <= 0:
+                    answer.display_name = f'{title} : {answer.value}'
+                else:
+                    answer.display_name = shorten(
+                        f'{shorten(title, max(30, len(title) - n_extra_characters), placeholder="...")} : {answer.value}',
+                        self.MAX_ANSWER_NAME_LENGTH,
+                        placeholder="..."
+                    )
 
     @api.constrains('question_id', 'matrix_question_id')
     def _check_question_not_empty(self):
