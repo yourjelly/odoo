@@ -1,16 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates id="template" xml:space="preserve">
     <t t-name="pos_self_order.PriceDetails">
-        <div class="d-grid gap-2 w-100 w-100 pb-3">
-            <div class="d-flex justify-content-between text-muted">
-                Tax:
-                <span t-if="!selfOrder.priceLoading" t-esc="selfOrder.formatMonetary(props.tax)"/>
-                <span t-else="" class="spinner-border o-self-order-spinner-custom-height"></span>
-            </div>
-            <div class="d-flex justify-content-between fw-bold">
-                Total:
-                <span t-if="!selfOrder.priceLoading" t-esc="selfOrder.formatMonetary(props.total)"/>
-            </div>
+        <div class="table table-sm table-borderless mb-0 py-3">
+            <tbody>
+                <tr class="text-end text-muted">
+                    <th class="py-0">Tax:</th>
+                    <th class="py-0 pe-0" t-if="!selfOrder.priceLoading" t-esc="selfOrder.formatMonetary(props.tax)"/>
+                    <span t-else="" class="spinner-border o-self-order-spinner-custom-height mt-2"></span>
+                </tr>
+                <tr class="text-end">
+                    <th class="py-0">Amount:</th>
+                    <th class="py-0 pe-0" t-if="!selfOrder.priceLoading" t-esc="selfOrder.formatMonetary(props.total)" />
+                </tr>
+            </tbody>
         </div>
     </t>
 </templates>

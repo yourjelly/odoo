@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates id="template" xml:space="preserve">
     <t t-name="pos_self_order.ProductMainView">
-        <div class="d-flex flex-column dvh-100">
+        <div class="o_page_content container-md d-flex flex-column dvh-100 px-0 overflow-x-hidden">
             <NavBar shadow="true" />
             <div class="bg-white d-flex flex-column pt-3 overflow-auto h-100">
                 <div class="px-3">
@@ -111,29 +111,31 @@
                 </div>
             </div>
             <div t-if="selfOrder.ordering" class="d-flex flex-column align-items-center w-100 p-3 bg-white shadow-lg" style="z-index:1">
-                <div class="o_self_order_incr_button btn-group text-center border-light mb-1" role="group" aria-label="Quantity select">
-                    <button type="button"
-                        t-on-click = "() => this.changeQuantity(false)"
-                        class="btn btn-light rounded-circle"> - </button>
-                    <div class="d-flex align-items-center px-4 fw-bold" t-esc="state.qty + state.cartQty"/>
-                    <button type="button"
-                        t-on-click = "() => this.changeQuantity(true)"
-                        class="btn btn-light rounded-circle"> + </button>
+                <div class="d-grid gap-2 col-12 col-md-8 col-lg-4 col-xl-3 mx-auto p-3">
+                    <div class="o_self_order_incr_button btn-group text-center border-light mx-auto mb-1" role="group" aria-label="Quantity select">
+                        <button type="button"
+                            t-on-click = "() => this.changeQuantity(false)"
+                            class="btn btn-secondary rounded-circle"> - </button>
+                        <div class="d-flex align-items-center px-4 fw-bold" t-esc="state.qty + state.cartQty"/>
+                        <button type="button"
+                            t-on-click = "() => this.changeQuantity(true)"
+                            class="btn btn-secondary rounded-circle"> + </button>
+                    </div>
+                    <t t-set="button_disabled" t-value="!this.selfOrder.editedLine and state.qty + state.cartQty === 0" />
+                    <button
+                        t-on-click="addToCart"
+                        t-attf-class="{{ button_disabled ? 'disabled' : '' }} o_self_order_main_button btn btn-primary w-100 px-2 py-3 mt-2 rounded">
+                        <t t-if="this.selfOrder.editedLine and state.qty + state.cartQty > 0">
+                            Update Cart
+                        </t>
+                        <t t-elif="this.selfOrder.editedLine">
+                            Remove from Cart
+                        </t>
+                        <t t-else="">
+                            Add to Cart
+                        </t>
+                    </button>
                 </div>
-                <t t-set="button_disabled" t-value="!this.selfOrder.editedLine and state.qty + state.cartQty === 0" />
-                <button
-                    t-on-click="addToCart"
-                    t-attf-class="{{ button_disabled ? 'disabled' : '' }} o_self_order_main_button btn btn-primary w-100 px-2 py-3 mt-2 rounded">
-                    <t t-if="this.selfOrder.editedLine and state.qty + state.cartQty > 0">
-                        Update Cart
-                    </t>
-                    <t t-elif="this.selfOrder.editedLine">
-                        Remove from Cart
-                    </t>
-                    <t t-else="">
-                        Add to Cart
-                    </t>
-                </button>
             </div>
         </div>
     </t>

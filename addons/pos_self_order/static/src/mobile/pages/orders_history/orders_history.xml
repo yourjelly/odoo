@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates id="template" xml:space="preserve">
     <t t-name="pos_self_order.OrdersHistory">
-        <NavBar customText="'Orders'" shadow="true" />
-        <div class="overflow-auto dvh-100 pb-5">
+        <div class="o_page_content container-md overflow-auto dvh-100 pb-5 px-0 bg-300">
+            <NavBar customText="'Orders'" shadow="true" />
             <t t-if="state.loadingProgress">
                 <div class="d-flex align-items-center h-100 justify-content-center">
                     <div class="spinner-border" role="status">
@@ -10,22 +10,22 @@
                     </div>
                 </div>
             </t>
-            <div t-else="">
+            <div t-else="" class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3 my-md-0 mx-md-2">
                 <t t-foreach="orders" t-as="order" t-key="order.access_token">
-                    <div class="o_so_order d-flex flex-column">
-                        <div class="o_so_order_header p-3 bg-white" t-on-click="() => this.editOrder(order)">
+                    <div class="o_so_order d-flex flex-column mb-2">
+                        <div class="o_so_order_header px-3 pt-3 pb-2 bg-view" t-on-click="() => this.editOrder(order)">
                             <div class="d-flex align-items-center justify-content-between">
-                                <h6 class="m-0"
+                                <h3 class="m-0 fw-bolder"
                                     t-esc="order.pos_reference"/>
-                                <span class="badge p-2 text-bg-primary text-capitalize"
+                                <span t-attf-class="badge rounded-pill {{ order.state === 'draft' ? 'text-bg-200' : 'text-bg-success'}} fs-6 text-capitalize"
                                     t-esc="order.state"/>
                             </div>
                             <p class="small m-0 fst-italic text-muted"
                                 t-esc="order.date"/>
                         </div>
-                        <div class="o_so_order_body p-3 bg-300">
+                        <div class="o_so_order_body bg-view pt-2">
                             <Lines t-if="order.lines" order="order" />
-                            <div class="d-flex flex-column align-items-center px-3 pt-3 bg-white">
+                            <div class="float-end mx-3 border-top mb-0">
                                 <PriceDetails tax="order.amount_tax" total="order.amount_total"/>
                             </div>
                         </div>

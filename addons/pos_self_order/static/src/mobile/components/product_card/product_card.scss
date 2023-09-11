@@ -13,6 +13,11 @@
   height: 90px !important;
   object-fit: cover;
 }
+
+.o_so_order_body .o_self_order_item_card {
+  border:none;
+}
+
 .o_self_order_item_card {
   border-right: 1px solid $border-color;
   border-bottom: 1px solid $border-color;

@@ -30,3 +30,10 @@ header {
   color: white;
   padding: 5px;
 }
+
+@include media-breakpoint-up(md) {
+  .o_page_content {
+    border-left: 1px solid $border-color;
+    border-right: 1px solid $border-color;
+  }  
+}

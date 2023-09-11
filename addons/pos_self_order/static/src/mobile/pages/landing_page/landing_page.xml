@@ -8,28 +8,30 @@
                 background-position: center;
             ">
             <div class="d-flex flex-column flex-grow-1 w-100 justify-content-end mb-4">
-                <t t-foreach="selfOrder.custom_links" t-as="link" t-key="link.id">
-                    <a type="button"
-                        t-on-click="(event) => this.router.customLink(link)"
-                        t-attf-class="btn btn-{{link.style}} py-3 my-1 rounded">
-                        <t t-esc="link.name"/>
-                    </a>
-                </t>
-                <a
-                    type="button"
-                    t-on-click="() => this.router.navigate('productList')"
-                    class="btn btn-primary py-3 my-2">
-                    View Menu
-                </a>
-                <t t-if="showMyOrderBtn()">
-                    <hr class="bg-500"/>
+                <div class="d-grid gap-2 col-12 col-md-6 col-lg-3 mx-auto">
+                    <t t-foreach="selfOrder.custom_links" t-as="link" t-key="link.id">
+                        <a type="button"
+                            t-on-click="(event) => this.router.customLink(link)"
+                            t-attf-class="btn btn-{{link.style}} py-3 my-1 rounded">
+                            <t t-esc="link.name"/>
+                        </a>
+                    </t>
                     <a
                         type="button"
-                        t-on-click="() => this.router.navigate('orderHistory')"
-                        class="btn btn-outline-light py-3 my-2">
-                        My Orders
+                        t-on-click="() => this.router.navigate('productList')"
+                        class="btn btn-primary py-3 my-2">
+                        View Menu
                     </a>
-                </t>
+                    <t t-if="showMyOrderBtn()">
+                        <hr class="bg-500"/>
+                        <a
+                            type="button"
+                            t-on-click="() => this.router.navigate('orderHistory')"
+                            class="btn btn-outline-light py-3 my-2">
+                            My Orders
+                        </a>
+                    </t>
+                </div>
             </div>
             <div class="d-flex align-items-center py-2 px-3 text-white-50 small">Powered by
                 <span class="o_pos_self_order_odoo_logo ms-2 mt-n1">
