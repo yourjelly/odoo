@@ -63,9 +63,10 @@ export class Picker extends Component {
         this.popover = usePopover(PickerContent, {
             position: this.props.position,
             fixedPosition: true,
+            displayArrow: false,
             onClose: () => this.close(),
             closeOnClickAway: false,
-            popoverClass: "o-fast-popover",
+            animationTime: 20,
         });
         useExternalListener(
             browser,

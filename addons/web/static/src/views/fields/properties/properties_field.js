@@ -11,7 +11,7 @@ import { PropertyValue } from "./property_value";
 import { useService } from "@web/core/utils/hooks";
 import { usePopover } from "@web/core/popover/popover_hook";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
-import { reposition } from "@web/core/position_hook";
+// import { reposition } from "@web/core/position_hook";
 import { archParseBoolean } from "@web/views/utils";
 import { pick } from "@web/core/utils/objects";
 import { useSortable } from "@web/core/utils/sortable";
@@ -45,6 +45,7 @@ export class PropertiesField extends Component {
             position: "top",
             onClose: () => this.onCloseCurrentPopover?.(),
             fixedPosition: true,
+            displayArrow: false,
         });
         this.propertiesRef = useRef("properties");
 
@@ -79,7 +80,7 @@ export class PropertiesField extends Component {
             () => [this.openPropertyDefinition]
         );
 
-        useEffect(() => this._movePopoverIfNeeded());
+        // useEffect(() => this._movePopoverIfNeeded());
 
         // sort properties
         useSortable({
@@ -724,34 +725,34 @@ export class PropertiesField extends Component {
         this.state.unfoldedSeparators = unfoldedSeparators;
     }
 
-    /**
-     * Move the popover to the given property id.
-     * Used when we change the position of the properties.
-     *
-     * We change the popover position after the DOM has been updated (see @useEffect)
-     * because if we update it after changing the component properties,
-     */
-    _movePopoverIfNeeded() {
-        if (!this.movePopoverToProperty) {
-            return;
-        }
-        const propertyName = this.movePopoverToProperty;
-        this.movePopoverToProperty = null;
+    // /**
+    //  * Move the popover to the given property id.
+    //  * Used when we change the position of the properties.
+    //  *
+    //  * We change the popover position after the DOM has been updated (see @useEffect)
+    //  * because if we update it after changing the component properties,
+    //  */
+    // _movePopoverIfNeeded() {
+    //     if (!this.movePopoverToProperty) {
+    //         return;
+    //     }
+    //     const propertyName = this.movePopoverToProperty;
+    //     this.movePopoverToProperty = null;
 
-        const popover = document
-            .querySelector(".o_field_property_definition")
-            .closest(".o_popover");
-        const targetElement = document.querySelector(
-            `*[property-name="${propertyName}"] .o_field_property_open_popover`
-        );
+    //     const popover = document
+    //         .querySelector(".o_field_property_definition")
+    //         .closest(".o_popover");
+    //     const targetElement = document.querySelector(
+    //         `*[property-name="${propertyName}"] .o_field_property_open_popover`
+    //     );
 
-        reposition(targetElement, popover, null, { position: "top", margin: 10 });
+    //     reposition(targetElement, popover, null, { position: "top", margin: 10 });
 
-        const arrow = popover.querySelector(".popover-arrow");
-        if (arrow) {
-            arrow.classList.add("d-none");
-        }
-    }
+    //     const arrow = popover.querySelector(".popover-arrow");
+    //     if (arrow) {
+    //         arrow.classList.add("d-none");
+    //     }
+    // }
 
     /**
      * Verify that we can write on the parent record,

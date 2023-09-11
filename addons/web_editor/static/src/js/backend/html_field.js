@@ -198,7 +198,6 @@ export class HtmlField extends Component {
                                     {
                                         validateCallback: this.onDynamicPlaceholderValidate.bind(this),
                                         closeCallback: this.onDynamicPlaceholderClose.bind(this),
-                                        positionCallback: this.positionDynamicPlaceholder.bind(this),
                                     }
                                 );
                             });
@@ -352,20 +351,6 @@ export class HtmlField extends Component {
         this.wysiwyg.focus();
     }
 
-    /**
-     * @param {HTMLElement} popover
-     * @param {Object} position
-     */
-    positionDynamicPlaceholder(popover, position) {
-        let topPosition = this.wysiwygRangePosition.top;
-        // Offset the popover to ensure the arrow is pointing at
-        // the precise range location.
-        let leftPosition = this.wysiwygRangePosition.left - 14;
-
-        // Apply the position back to the element.
-        popover.style.top = topPosition + 'px';
-        popover.style.left = leftPosition + 'px';
-    }
     async commitChanges({ urgent } = {}) {
         if (this._isDirty() || urgent) {
             let savePendingImagesPromise, toInlinePromise;

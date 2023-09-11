@@ -10,7 +10,9 @@ import { PopoverController } from "./popover_controller";
  *   onClose?: () => void;
  *   popoverClass?: string;
  *   position?: import("@web/core/position_hook").Options["position"];
- *   onPositioned?: import("@web/core/position_hook").PositionEventHandler;
+ *   fixedPosition?: import("@web/core/position_hook").Options["fixedPosition"];
+ *   displayArrow?: import("@web/core/position_hook").Options["displayArrow"];
+ *   animationTime?: import("@web/core/position_hook").Options["animationTime"];
  * }} PopoverServiceAddOptions
  */
 
@@ -43,8 +45,9 @@ export const popoverService = {
                         target,
                         class: options.popoverClass,
                         position: options.position,
-                        onPositioned: options.onPositioned,
                         fixedPosition: options.fixedPosition,
+                        displayArrow: options.displayArrow,
+                        animationTime: options.animationTime,
                     },
                 },
                 { onRemove: options.onClose }

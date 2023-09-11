@@ -11,10 +11,8 @@ export function useDynamicPlaceholder(elementRef) {
     const ownerField = useComponent();
     const triggerKeyReplaceRegex = new RegExp(`${TRIGGER_KEY}$`);
     let closeCallback;
-    let positionCallback;
     const popover = usePopover(DynamicPlaceholderPopover, {
         onclose: () => closeCallback?.(),
-        onPositioned: (popper, position) => positionCallback?.(popper, position),
     });
     const notification = useService("notification");
 
@@ -60,7 +58,6 @@ export function useDynamicPlaceholder(elementRef) {
      * @param {Object} opts
      * @param {function} opts.validateCallback
      * @param {function} opts.closeCallback
-     * @param {function} [opts.positionCallback]
      */
     async function open(opts) {
         if (!model) {
@@ -70,7 +67,6 @@ export function useDynamicPlaceholder(elementRef) {
             );
         }
         closeCallback = opts.closeCallback;
-        positionCallback = opts.positionCallback;
         popover.open(elementRef?.el, {
             resModel: model,
             validate: opts.validateCallback,

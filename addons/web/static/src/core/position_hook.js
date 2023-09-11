@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { useThrottleForAnimation } from "./utils/timing";
+import { batched, useThrottleForAnimation } from "./utils/timing";
 import {
     EventBus,
     onWillDestroy,
@@ -10,6 +10,7 @@ import {
     useRef,
 } from "@odoo/owl";
 import { localization } from "@web/core/l10n/localization";
+import { uniqueId } from "./utils/functions";
 
 /**
  * @typedef {(popperElement: HTMLElement, solution: PositioningSolution) => void} PositionEventHandler
@@ -23,6 +24,12 @@ import { localization } from "@web/core/l10n/localization";
  *  margin in pixels between the popper and the target.
  * @property {Direction | Position} [position="bottom"]
  *  position of the popper relative to the target
+ * @property {Boolean} [fixedPosition]
+ *  the popper won't be repositioned if set to true
+ * @property {Boolean} [displayArrow]
+ *  the popper will have an arrow pointing towards its reference if set to true
+ * @property {number} [animationTime=0]
+ *  duration of animations in ms
  * @property {PositionEventHandler} [onPositioned]
  *  callback called everytime the popper has just been positioned
  *
@@ -81,6 +88,8 @@ const DEFAULTS = {
     position: "bottom",
 };
 
+const RE_CLEANUP = /^(bs-popover-)|(o-popover-)/g;
+
 /**
  * @param {HTMLElement} el
  * @returns {HTMLIFrameElement?}
@@ -112,7 +121,7 @@ function getIFrame(el) {
  *                                the containing block of the popper.
  *                                => can be applied to popper.style.(top|left)
  */
-function getBestPosition(target, popper, iframe, { container, margin, position }) {
+function getBestPosition(target, popper, iframe, { container, displayArrow, margin, position }) {
     // Retrieve directions and variants
     const [directionKey, variantKey = "middle"] = position.split("-");
     const directions =
@@ -168,7 +177,8 @@ function getBestPosition(target, popper, iframe, { container, margin, position }
     function getPositioningData(d = directions[0], v = variants[0], containerRestricted = false) {
         const vertical = ["t", "b"].includes(d);
         const variantPrefix = vertical ? "v" : "h";
-        const directionValue = directionsData[d];
+        const arrowOffset = ["b", "r"].includes(d) ? 8 : -8;
+        const directionValue = displayArrow ? directionsData[d] + arrowOffset : directionsData[d];
         const variantValue = variantsData[variantPrefix + v];
 
         if (containerRestricted) {
@@ -253,8 +263,10 @@ function getBestPosition(target, popper, iframe, { container, margin, position }
  * @param {HTMLElement} popper
  * @param {HTMLIFrameElement} [iframe]
  * @param {Options} options
+ * @param {PositioningSolution} [lastPosition]
+ * @returns {PositioningSolution|Promise<PositioningSolution>}
  */
-export function reposition(target, popper, iframe, options) {
+export function reposition(target, popper, iframe, options, lastPosition = null) {
     let [directionKey, variantKey = "middle"] = options.position.split("-");
     if (localization.direction === "rtl") {
         if (["bottom", "top"].includes(directionKey)) {
@@ -268,24 +280,98 @@ export function reposition(target, popper, iframe, options) {
     options.position = [directionKey, variantKey].join("-");
 
     // Reset popper style
+    popper.classList.forEach((c) => RE_CLEANUP.test(c) && popper.classList.remove(c));
     popper.style.position = "fixed";
     popper.style.top = "0px";
     popper.style.left = "0px";
 
+    // Display arrow ?
+    let arrow = popper.querySelector(":scope > .popover-arrow");
+    if (options.displayArrow && !arrow) {
+        // Make use of bootstrap style
+        popper.classList.add("popover");
+        arrow = popper.ownerDocument.createElement("div");
+        arrow.classList = "popover-arrow";
+        popper.appendChild(arrow);
+    }
+
     // Get best positioning solution and apply it
     const position = getBestPosition(target, popper, iframe, options);
-    const { top, left, variant } = position;
+    const { top, left, direction, variant } = position;
     popper.style.top = `${top}px`;
     popper.style.left = `${left}px`;
 
     if (variant === "fit") {
-        const styleProperty = ["top", "bottom"].includes(directionKey) ? "width" : "height";
+        const styleProperty = ["top", "bottom"].includes(direction) ? "width" : "height";
         popper.style[styleProperty] = target.getBoundingClientRect()[styleProperty] + "px";
     }
 
-    if (options.onPositioned) {
-        options.onPositioned(popper, position);
+    if (arrow) {
+        // reset all popover classes
+        const positionCode = `${direction[0]}${variant[0]}`;
+        const bsDirection = {
+            top: "top",
+            bottom: "bottom",
+            left: "start",
+            right: "end",
+        }[direction];
+        popper.classList.add(
+            `bs-popover-${bsDirection}`,
+            `o-popover-${direction}`,
+            `o-popover--${positionCode}`
+        );
+        arrow.className = "popover-arrow";
+        switch (positionCode) {
+            case "tm": // top-middle
+            case "bm": // bottom-middle
+            case "tf": // top-fit
+            case "bf": // bottom-fit
+                arrow.classList.add("start-0", "end-0", "mx-auto");
+                break;
+            case "lm": // left-middle
+            case "rm": // right-middle
+            case "lf": // left-fit
+            case "rf": // right-fit
+                arrow.classList.add("top-0", "bottom-0", "my-auto");
+                break;
+            case "ts": // top-start
+            case "bs": // bottom-start
+                arrow.classList.add("end-auto");
+                break;
+            case "te": // top-end
+            case "be": // bottom-end
+                arrow.classList.add("start-auto");
+                break;
+            case "ls": // left-start
+            case "rs": // right-start
+                arrow.classList.add("bottom-auto");
+                break;
+            case "le": // left-end
+            case "re": // right-end
+                arrow.classList.add("top-auto");
+                break;
+        }
     }
+
+    if (lastPosition || !options.animationTime) {
+        // No animation wanted in these cases
+        options.onPositioned?.(popper, position);
+        return position;
+    }
+
+    // Animate
+    const transform = {
+        top: ["translateY(-5%)", "translateY(0)"],
+        right: ["translateX(5%)", "translateX(0)"],
+        bottom: ["translateY(5%)", "translateY(0)"],
+        left: ["translateX(-5%)", "translateX(0)"],
+    }[direction];
+    const animation = popper.animate({ opacity: [0, 1], transform }, options.animationTime);
+    const prom = animation.finished;
+    return prom.then(() => {
+        options.onPositioned?.(popper, position);
+        return position;
+    });
 }
 
 const POSITION_BUS = Symbol("position-bus");
@@ -305,29 +391,46 @@ const POSITION_BUS = Symbol("position-bus");
  * @param {Options} options
  */
 export function usePosition(target, options) {
+    const component = useComponent();
     const popperRef = useRef(options?.popper || DEFAULTS.popper);
     const getTarget = typeof target === "function" ? target : () => target;
     let wasPositioned = false;
-    const update = () => {
-        const targetEl = getTarget();
-        const popperEl = popperRef.el;
-        if (!targetEl || !popperEl) {
-            return;
-        }
-        if (options.fixedPosition && wasPositioned) {
-            // in case we have fixedPosition set to true, we only want to position the popover once,
-            // and then ignore subsequent reposition events
-            return;
-        }
-        wasPositioned = true;
+    const __NAME = uniqueId(component.constructor.name);
+    let __COUNT = 0;
+    let last;
+    const update = batched(
+        /**
+         * @param {CustomEvent<Event?>} param0
+         */
+        async ({ detail: innerEvent }) => {
+            const targetEl = getTarget();
+            const popperEl = popperRef.el;
+            if (!targetEl || !popperEl) {
+                return;
+            }
+            if (innerEvent?.type === "scroll" && popperEl.contains(innerEvent?.target)) {
+                // In case the scroll event occurs inside the popper, do not reposition
+                return;
+            }
 
-        // Prepare
-        const iframe = getIFrame(targetEl);
-        const currentOptions = { ...DEFAULTS, ...options };
-        reposition(targetEl, popperEl, iframe, currentOptions);
-    };
+            const currentOptions = { ...DEFAULTS, ...options };
+            if (currentOptions.fixedPosition && wasPositioned) {
+                // in case we have fixedPosition set to true, we only want to position the popover once,
+                // and then ignore subsequent reposition events
+                return;
+            }
 
-    const component = useComponent();
+            const __LABEL = `[${__NAME}] reposition ${++__COUNT}`;
+            console.time(__LABEL);
+            const iframe = getIFrame(targetEl);
+            last = reposition(targetEl, popperEl, iframe, currentOptions, await last);
+            wasPositioned = true;
+            console.log(last);
+            console.timeEnd(__LABEL);
+        },
+        () => last // wait for previous animation to end
+    );
+
     const bus = component.env[POSITION_BUS] || new EventBus();
     bus.addEventListener("update", update);
     onWillDestroy(() => bus.removeEventListener("update", update));
@@ -337,7 +440,7 @@ export function usePosition(target, options) {
         useChildSubEnv({ [POSITION_BUS]: bus });
     }
 
-    const throttledUpdate = useThrottleForAnimation(() => bus.trigger("update"));
+    const throttledUpdate = useThrottleForAnimation((e) => bus.trigger("update", e));
     useEffect(() => {
         // Reposition
         bus.trigger("update");

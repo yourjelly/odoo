@@ -1,0 +1,19 @@
+/*!rtl:begin:ignore*/
+.popover {
+	&.o-popover--ts .popover-arrow, &.o-popover--bs .popover-arrow {
+		left: $popover-border-radius;
+	}
+
+	&.o-popover--te .popover-arrow, &.o-popover--be .popover-arrow {
+		right: $popover-border-radius;
+	}
+
+	&.o-popover--ls .popover-arrow, &.o-popover--rs .popover-arrow {
+		top: $popover-border-radius;
+	}
+
+	&.o-popover--le .popover-arrow, &.o-popover--re .popover-arrow {
+		bottom: $popover-border-radius;
+	}
+}
+/*!rtl:end:ignore*/

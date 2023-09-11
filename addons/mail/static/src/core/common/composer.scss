@@ -63,10 +63,6 @@
     --Avatar-size: #{$o-mail-Avatar-size};
 }
 
-.o-fast-popover {
-    animation: none !important;
-}
-
 .o-mail-Composer-fake {
     height: 0;
     top: -10000px;
