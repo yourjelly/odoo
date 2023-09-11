@@ -4,9 +4,10 @@
 from unittest.mock import patch
 import sys
 
+from odoo.tools import mute_logger
 from odoo.addons.base.tests.common import TransactionCaseWithUserDemo
 from odoo.tests import common, tagged
-from odoo.exceptions import AccessError
+from odoo.exceptions import AccessError, ValidationError
 from odoo import Command
 
 
@@ -955,3 +956,62 @@ class TestCompute(common.TransactionCase):
             task.unlink()
         finally:
             sys.setrecursionlimit(limit)
+
+    def test_mail_triggers(self):
+        lead_model = self.env["ir.model"]._get("base.automation.lead.test")
+        with self.assertRaises(ValidationError):
+            create_automation(self, trigger="on_mail_sent", model_id=lead_model.id)
+
+        lead_thread_model = self.env["ir.model"]._get("base.automation.lead.thread.test")
+        automation = create_automation(self, trigger="on_mail_sent", model_id=lead_thread_model.id, _actions={
+            "state": "object_write",
+            "update_field_id": self.env["ir.model.fields"]._get("base.automation.lead.thread.test", "active").id,
+            "value": False
+        })
+
+        ext_partner = self.env["res.partner"].create({"name": "ext", "email": "email@server.com"})
+        obj = self.env["base.automation.lead.thread.test"].create({"name": "test"})
+        obj.message_post(author_id=self.env["res.users"].browse(2).partner_id.id, partner_ids=ext_partner.ids, subtype_xmlid="mail.mt_comment")
+        self.assertFalse(obj.active)
+
+        obj.active = True
+        obj.message_post(author_id=self.env["res.users"].browse(2).partner_id.id, partner_ids=ext_partner.ids)
+        obj.message_post(author_id=self.env["res.users"].browse(2).partner_id.id, partner_ids=self.env["res.users"].browse(1).partner_id.ids, subtype_xmlid="mail.mt_comment")
+        obj.message_post(author_id=ext_partner.id)
+        self.assertTrue(obj.active)
+
+        automation.trigger = "on_mail_received"
+        obj.message_post(author_id=ext_partner.id)
+        obj.message_post(author_id=self.env["res.users"].browse(2).partner_id.id, partner_ids=self.env["res.users"].browse(1).partner_id.ids, subtype_xmlid="mail.mt_comment")
+        self.assertTrue(obj.active)
+        obj.message_post(author_id=ext_partner.id, subtype_xmlid="mail.mt_comment")
+        self.assertFalse(obj.active)
+
+
+@common.tagged("post_install", "-at_install")
+class TestHttp(common.HttpCase):
+    def test_webhook_trigger(self):
+        model = self.env["ir.model"]._get("base.automation.linked.test")
+        record_getter = "model.search([('name', '=', payload['name'])]) if payload.get('name') else None"
+        automation = create_automation(self, trigger="on_webhook", model_id=model.id, record_getter=record_getter, _actions={
+            "state": "object_write",
+            "update_field_id": self.env["ir.model.fields"]._get(model.model, "another_field").id,
+            "value": "written"
+        })
+
+        obj = self.env[model.model].create({"name": "some name"})
+        response = self.url_open(automation.url, data={"name": "some name"})
+        self.assertEqual(response.json(), {"status": "ok"})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(obj.another_field, "written")
+
+        obj.another_field = False
+        with mute_logger("odoo.addons.base_automation.models.base_automation"):
+            response = self.url_open(automation.url, data={})
+        self.assertEqual(response.json(), {"status": "error"})
+        self.assertEqual(response.status_code, 500)
+        self.assertEqual(obj.another_field, False)
+
+        response = self.url_open("/web/hook/0123456789", data={"name": "some name"})
+        self.assertEqual(response.json(), {"status": "error"})
+        self.assertEqual(response.status_code, 404)
