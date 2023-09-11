@@ -33,7 +33,7 @@ class ProductTemplateAttributeLine(models.Model):
         comodel_name='product.attribute.value',
         relation='product_attribute_value_product_template_attribute_line_rel',
         string="Values",
-        domain="[('attribute_id', '=', attribute_id)]",
+        domain="[('attribute_id', '=', attribute_id), ('is_hidden', '=', False)]",
         ondelete='restrict')
     value_count = fields.Integer(compute='_compute_value_count', store=True)
     product_template_value_ids = fields.One2many(
@@ -48,7 +48,7 @@ class ProductTemplateAttributeLine(models.Model):
 
     @api.onchange('attribute_id')
     def _onchange_attribute_id(self):
-        self.value_ids = self.value_ids.filtered(lambda pav: pav.attribute_id == self.attribute_id)
+        self.value_ids = self.value_ids.filtered(lambda pav: pav.attribute_id == self.attribute_id and not pav.is_hidden)
 
     @api.constrains('active', 'value_ids', 'attribute_id')
     def _check_valid_values(self):

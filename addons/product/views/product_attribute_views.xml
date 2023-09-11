@@ -46,6 +46,7 @@
                                 <field name="name"/>
                                 <field name="display_type" column_invisible="True"/>
                                 <field name="is_custom" groups="product.group_product_variant" column_invisible="parent.display_type == 'multi'"/>
+                                <field name="is_hidden"/>
                                 <field name="html_color" column_invisible="parent.display_type != 'color'" widget="color"/>
                                 <field name="default_extra_price"/>
                             </tree>

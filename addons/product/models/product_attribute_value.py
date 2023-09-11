@@ -44,6 +44,7 @@ class ProductAttributeValue(models.Model):
             " to display the color if the attribute type is 'Color'.")
     display_type = fields.Selection(related='attribute_id.display_type')
     color = fields.Integer(string="Color Index", default=_get_default_color)
+    is_hidden = fields.Boolean(default=False, string="Not available")
 
     _sql_constraints = [
         ('value_company_uniq',
@@ -90,6 +91,8 @@ class ProductAttributeValue(models.Model):
             # (eg. product.template.attribute.line: value_ids)
             self.env.flush_all()
             self.env.invalidate_all()
+        if 'is_hidden' in values:
+            self._update_product_attribute_values()
         return res
 
     @api.ondelete(at_uninstall=False)
@@ -115,3 +118,19 @@ class ProductAttributeValue(models.Model):
 
     def _without_no_variant_attributes(self):
         return self.filtered(lambda pav: pav.attribute_id.create_variant != 'no_variant')
+
+    def _update_product_attribute_values(self):
+        attribute_lines = self.mapped('pav_attribute_line_ids')
+        if attribute_lines:
+            non_hidden_values = self.env['product.attribute.value'].search([
+                ('attribute_id', '=', self.attribute_id.id),
+                ('is_hidden', '=', False),
+                ('pav_attribute_line_ids', 'in', attribute_lines.ids)
+            ])
+            value_ids_by_line = {}
+            for value in non_hidden_values:
+                for line in value.pav_attribute_line_ids:
+                    if line in attribute_lines:
+                        value_ids_by_line.setdefault(line, []).append(value.id)
+            for line in attribute_lines:
+                line.write({'value_ids': [(6, 0, value_ids_by_line.get(line, []))]})
