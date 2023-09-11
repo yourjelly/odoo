@@ -59,7 +59,7 @@ class LoyaltyProgram(models.Model):
             program.pos_order_count = sum(1 if any(id in group['reward_id'] for id in program_reward_ids) else 0 for group in read_group_res)
 
     def _compute_total_order_count(self):
-        super()._compute_total_order_count()
+        super(LoyaltyProgram, self.sudo())._compute_total_order_count()
         for program in self:
             program.total_order_count += program.pos_order_count
 
