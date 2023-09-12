@@ -10,8 +10,8 @@
                                 <t t-foreach="languages" t-as="lang" t-key="lang.id" >
                                     <t t-if="lang.id !== currentLanguage.id">
                                         <div class="btn btn-light d-flex flex-row align-items-center rounded border p-4" t-on-click="() => this.onClickLanguage(lang)">
-                                            <img class="rounded-2" t-attf-src="{{lang.flag_image_url}}" />
-                                            <span class="fs-5 ms-4" t-esc="lang.display_name" />
+                                            <img class="rounded-1" t-attf-src="{{lang.flag_image_url}}" />
+                                            <span class="fs-4 ms-3" t-esc="lang.display_name" />
                                         </div>
                                     </t>
                                 </t>

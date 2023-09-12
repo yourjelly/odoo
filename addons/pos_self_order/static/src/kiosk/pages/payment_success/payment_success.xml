@@ -29,8 +29,8 @@
                 </div>
             </t>
            <t t-set-slot="footer">
-                <div class="d-flex flex-row h-100 w-100 gap-3">
-                    <button class="btn btn-primary w-100 h-100 p-0 m-0 fs-2 text-uppercase" t-on-click="backToHome">Close</button>
+                <div class="text-center">
+                    <button class="btn btn-primary btn-lg text-uppercase" t-on-click="backToHome">Close</button>
                 </div>
             </t>
         </KioskTemplate>

@@ -8,4 +8,12 @@
 }
 .o_kiosk-landing_image {
     object-fit: cover;
+
+    @include o-kiosk-landscape() {
+        object-position: center;
+    }
+
+    @include o-kiosk-portrait() {
+        object-position: center top;
+    }
 }
