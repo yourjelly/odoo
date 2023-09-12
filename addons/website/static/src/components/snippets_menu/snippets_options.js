@@ -24,6 +24,8 @@ import { patch } from "@web/core/utils/patch";
 import { useService } from "@web/core/utils/hooks";
 import options from "@web_editor/js/editor/snippets.options";
 import {_t} from "@web/core/l10n/translation";
+import {isImageSupportedForStyle} from "@web_editor/js/editor/image_processing";
+
 registry.category("snippets_options").add("ContainerWidth", {
     template: "website.ContainerWidth",
     selector: "section, .s_carousel .carousel-item, s_quotes_carousel .carousel-item",
@@ -655,3 +657,282 @@ registry.category("snippets_options").add("website.ScrollButton", {
     selector: "section",
     exclude: "[data-snippet] :not(.oe_structure) > [data-snippet]",
 })
+
+class WebsiteAnimate extends SnippetOption {
+    /**
+     * @override
+     */
+    setup() {
+        super.setup();
+        this.env.validMethodNames.push("animationMode", "animationIntensity", "forceAnimation", "isAnimationTypeSelection");
+        this.$overlay = $(this.props.overlayEl);
+    }
+
+    //--------------------------------------------------------------------------
+    // SnippetOption overrides
+    //--------------------------------------------------------------------------
+
+    /**
+     * @override
+     */
+    async start() {
+        await super.start(...arguments);
+        // Animations for which the "On Scroll" and "Direction" options are not
+        // available.
+        this.limitedAnimations = ['o_anim_flash', 'o_anim_pulse', 'o_anim_shake', 'o_anim_tada', 'o_anim_flip_in_x', 'o_anim_flip_in_y'];
+        this.isAnimatedText = this.target.classList.contains('o_animated_text');
+        this.$optionsSection = this.$overlay.data('$optionsSection'); // TODO for animation in text
+        this.$scrollingElement = $().getScrollingElement(this.target.ownerDocument);
+    }
+    /**
+     * @override
+     */
+    onBuilt() {
+        this.target.classList.toggle('o_animate_preview', this.target.classList.contains('o_animate'));
+    }
+    /**
+     * @override
+     */
+    onFocus() {
+        // TODO animation in text
+        if (this.isAnimatedText) {
+            // For animated text, the animation options must be in the editor
+            // toolbar.
+            this.options.wysiwyg.toolbarEl.append(this.$el[0]);
+            this.$optionsSection.addClass('d-none');
+        }
+    }
+    /**
+     * @override
+     */
+    onBlur() {
+        // TODO animation in text.
+        if (this.isAnimatedText) {
+            // For animated text, the options must be returned to their
+            // original location as they were moved in the toolbar.
+            this.$optionsSection.append(this.$el);
+        }
+    }
+    /**
+     * @override
+     */
+    cleanForSave() {
+        if (this.target.closest('.o_animate')) {
+            // As images may have been added in an animated element, we must
+            // remove the lazy loading on them.
+            this.toggleImagesLazyLoading(false);
+        }
+    }
+    /**
+     * @override
+     */
+    async selectClass(previewMode, widgetValue, params) {
+        await super.selectClass(...arguments);
+        if (params.forceAnimation && params.name !== 'o_anim_no_effect_opt' && previewMode !== 'reset') {
+            this.forceAnimation();
+        }
+        if (params.isAnimationTypeSelection) {
+            this.target.classList.toggle('o_animate_preview', this.target.classList.contains("o_animate"));
+        }
+    }
+    /**
+     * @override
+     */
+    async selectDataAttribute(previewMode, widgetValue, params) {
+        await super.selectDataAttribute(...arguments);
+        if (params.forceAnimation) {
+            this.forceAnimation();
+        }
+    }
+    /**
+     * @override
+     */
+    computeWidgetVisibility(widgetName, params) {
+        const hasAnimateClass = this.target.classList.contains("o_animate");
+        switch (widgetName) {
+            case 'no_animation_opt': {
+                return !this.isAnimatedText;
+            }
+            case 'animation_effect_opt': {
+                return hasAnimateClass;
+            }
+            case 'animation_trigger_opt': {
+                return !this.target.closest('.dropdown');
+            }
+            case 'animation_on_scroll_opt':
+            case 'animation_direction_opt': {
+                if (widgetName === "animation_direction_opt" && !hasAnimateClass) {
+                    return false;
+                }
+                return !this.limitedAnimations.some(className => this.target.classList.contains(className));
+            }
+            case 'animation_intensity_opt': {
+                if (!hasAnimateClass) {
+                    return false;
+                }
+                const possibleDirections = this.requestUserValueWidgets('animation_direction_opt')[0].possibleValues["selectClass"];
+                if (this.target.classList.contains('o_anim_fade_in')) {
+                    for (const targetClass of this.target.classList) {
+                        // Show "Intensity" if "Fade in" + direction is not
+                        // "In Place" ...
+                        if (possibleDirections.indexOf(targetClass) >= 0) {
+                            return true;
+                        }
+                    }
+                    // ... but hide if "Fade in" + "In Place" direction.
+                    return false;
+                }
+                return true;
+            }
+            case 'animation_on_hover_opt': { // TODO when Image options will be done
+                const [hoverEffectOverlayWidget] = this.requestUserValueWidgets("hover_effect_overlay_opt");
+                if (hoverEffectOverlayWidget) {
+                    const hoverEffectWidget = hoverEffectOverlayWidget.getParent();
+                    const imageToolsOpt = hoverEffectWidget.getParent();
+                    return !imageToolsOpt._isDeviceShape() && !imageToolsOpt._isAnimatedShape();
+                }
+                return false;
+            }
+        }
+        return super.computeWidgetVisibility(...arguments);
+    }
+    /**
+     * @override
+     */
+    computeVisibility(methodName, params) {
+        if (this.$target[0].matches('img')) {
+            return isImageSupportedForStyle(this.target);
+        }
+        return super.computeVisibility(...arguments);
+    }
+    /**
+     * @override
+     */
+    computeWidgetState(methodName, params) {
+        if (methodName === 'animationIntensity') {
+            return window.getComputedStyle(this.target).getPropertyValue('--wanim-intensity');
+        }
+        return super.computeWidgetState(...arguments);
+    }
+
+    //--------------------------------------------------------------------------
+    // Option specific
+    //--------------------------------------------------------------------------
+
+    /**
+     * Sets the animation mode.
+     *
+     * @see this.selectClass for parameters
+     */
+    animationMode(previewMode, widgetValue, params) {
+        const targetClassList = this.target.classList;
+        this.$scrollingElement[0].classList.remove('o_wanim_overflow_xy_hidden');
+        targetClassList.remove('o_animating', 'o_animate_both_scroll', 'o_visible', 'o_animated', 'o_animate_out');
+        this.target.style.animationDelay = '';
+        this.target.style.animationPlayState = '';
+        this.target.style.animationName = '';
+        this.target.style.visibility = '';
+        if (widgetValue === 'onScroll') {
+            this.target.dataset.scrollZoneStart = 0;
+            this.target.dataset.scrollZoneEnd = 100;
+        } else {
+            delete this.target.dataset.scrollZoneStart;
+            delete this.target.dataset.scrollZoneEnd;
+        }
+        if (params.activeValue === "o_animate_on_hover") { // TODO when Image options will be done
+            this.trigger_up("option_update", {
+                optionName: "ImageTools",
+                name: "disable_hover_effect",
+            });
+        }
+        if ((!params.activeValue || params.activeValue === "o_animate_on_hover")
+                && widgetValue && widgetValue !== "onHover") {
+            // If "Animation" was on "None" or "o_animate_on_hover" and it is no
+            // longer, it is set to "fade_in" by default.
+            targetClassList.add('o_anim_fade_in');
+            this.toggleImagesLazyLoading(false);
+        }
+        if (!widgetValue || widgetValue === "onHover") {
+            const possibleEffects = this.requestUserValueWidgets('animation_effect_opt')[0].possibleValues["selectClass"];
+            const possibleDirections = this.requestUserValueWidgets('animation_direction_opt')[0].possibleValues["selectClass"];
+            const possibleEffectsAndDirections = possibleEffects.concat(possibleDirections);
+            // Remove the classes added by "Effect" and "Direction" options if
+            // "Animation" is "None".
+            for (const targetClass of targetClassList.value.split(/\s+/g)) {
+                if (possibleEffectsAndDirections.indexOf(targetClass) >= 0) {
+                    targetClassList.remove(targetClass);
+                }
+            }
+            this.target.style.setProperty('--wanim-intensity', '');
+            this.target.style.animationDuration = '';
+            this.toggleImagesLazyLoading(true);
+        }
+        if (widgetValue === "onHover") { // TODO when Image options will be done
+            this.trigger_up("option_update", {
+                optionName: "ImageTools",
+                name: "enable_hover_effect",
+            });
+        }
+    }
+    /**
+     * Sets the animation intensity.
+     *
+     * @see this.selectClass for parameters
+     */
+    animationIntensity(previewMode, widgetValue, params) {
+        this.target.style.setProperty('--wanim-intensity', widgetValue);
+        this.forceAnimation();
+    }
+    /**
+     *
+     */
+    async forceAnimation() {
+        this.$target.css('animation-name', 'dummy');
+
+        if (this.target.classList.contains('o_animate_on_scroll')) {
+            // Trigger a DOM reflow.
+            void this.target.offsetWidth;
+            this.$target.css('animation-name', '');
+            this.target.ownerDocument.defaultView.dispatchEvent(new Event("resize"));
+        } else {
+            // Trigger a DOM reflow (Needed to prevent the animation from
+            // being launched twice when previewing the "Intensity" option).
+            await new Promise(resolve => setTimeout(resolve));
+            this.target.classList.add('o_animating');
+            this.props.updateOverlay(); // TODO overlayVisible: true ?
+            this.$scrollingElement[0].classList.add('o_wanim_overflow_xy_hidden');
+            this.$target.css('animation-name', '');
+            this.$target.one('webkitAnimationEnd oanimationend msAnimationEnd animationend', () => {
+                this.$scrollingElement[0].classList.remove('o_wanim_overflow_xy_hidden');
+                this.target.classList.remove('o_animating');
+            });
+        }
+    }
+    /**
+     * Removes or adds the lazy loading on images because animated images can
+     * appear before or after their parents and cause bugs in the animations.
+     * To put "lazy" back on the "loading" attribute, we simply remove the
+     * attribute as it is automatically added on page load.
+     *
+     * @param {Boolean} lazy
+     */
+    toggleImagesLazyLoading(lazy) {
+        const imgEls = this.target.matches('img')
+            ? [this.target]
+            : this.target.querySelectorAll('img');
+        for (const imgEl of imgEls) {
+            if (lazy) {
+                // Let the automatic system add the loading attribute
+                imgEl.removeAttribute('loading');
+            } else {
+                imgEl.loading = 'eager';
+            }
+        }
+    }
+}
+registry.category("snippets_options").add("website.WebsiteAnimate", {
+    component: WebsiteAnimate,
+    template: "website.WebsiteAnimate",
+    selector: ".o_animable, section .row > div, img, .fa, .btn, .o_animated_text",
+    exclude: "[data-oe-xpath], .o_not-animable, .s_col_no_resize.row > div, .s_col_no_resize",
+});

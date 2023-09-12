@@ -298,4 +298,130 @@
             <WeButton selectClass="'mb-5'">Extra-Large</WeButton>
         </WeSelect>
     </t>
+    <t t-name="website.WebsiteAnimate">
+        <!-- Animation mode -->
+        <WeRow>
+            <t t-set-slot="title">Animation</t>
+            <WeSelect isAnimationTypeSelection="true" noPreview="true" dependencies="['!image_transform_opt']">
+                <WeButton animationMode="''"
+                          selectClass="''"
+                          name="'no_animation_opt'">None</WeButton>
+                <WeButton animationMode="'onAppearance'"
+                          forceAnimation="true"
+                          selectClass="'o_animate'"
+                          name="'animation_on_appearance_opt'">On Appearance</WeButton>
+                <WeButton animationMode="'onScroll'"
+                          selectClass="'o_animate o_animate_on_scroll'"
+                          forceAnimation="true"
+                          name="'animation_on_scroll_opt'">On Scroll</WeButton>
+                <WeButton animationMode="'onHover'"
+                          selectClass="'o_animate_on_hover'"
+                          name="'animation_on_hover_opt'">On Hover</WeButton>
+            </WeSelect>
+            <WeButtonGroup forceAnimation="true" noPreview="true" dependencies="['animation_on_scroll_opt']">
+                <WeButton selectClass="''">In</WeButton>
+                <WeButton selectClass="'o_animate_out'">Out</WeButton>
+            </WeButtonGroup>
+        </WeRow>
+        <!-- Effect -->
+        <WeSelect class="'o_we_sublevel_1'" name="'animation_effect_opt'">
+            <t t-set-slot="title">Effect</t>
+            <WeButton selectClass="''"
+                      name="'o_anim_no_effect_opt'"
+                      dependencies="['no_animation_opt']">None</WeButton>
+            <WeButton selectClass="'o_anim_fade_in'"
+                      trigger="'animation_direction_in_place_opt'">Fade</WeButton>
+            <WeButton selectClass="'o_anim_slide_in'"
+                      name="'o_anim_slide_in_opt'"
+                      trigger="'animation_direction_from_right_opt'">Slide</WeButton>
+            <WeButton selectClass="'o_anim_bounce_in'"
+                      trigger="'animation_direction_in_place_opt'">Bounce</WeButton>
+            <WeButton selectClass="'o_anim_rotate_in'"
+                      name="'o_anim_rotate_opt'"
+                      trigger="'animation_direction_in_place_opt'">Rotate</WeButton>
+            <WeButton selectClass="'o_anim_zoom_out'"
+                      trigger="'animation_direction_in_place_opt'">Zoom Out</WeButton>
+            <WeButton selectClass="'o_anim_zoom_in'"
+                      trigger="'animation_direction_in_place_opt'">Zoom In</WeButton>
+            <WeButton selectClass="'o_anim_flash'"
+                      dependencies="['animation_on_appearance_opt']"
+                      trigger="'animation_direction_in_place_opt'">Flash</WeButton>
+            <WeButton selectClass="'o_anim_pulse'"
+                      dependencies="['animation_on_appearance_opt']"
+                      trigger="'animation_direction_in_place_opt'">Pulse</WeButton>
+            <WeButton selectClass="'o_anim_shake'"
+                      dependencies="['animation_on_appearance_opt']"
+                      trigger="'animation_direction_in_place_opt'">Shake</WeButton>
+            <WeButton selectClass="'o_anim_tada'"
+                      dependencies="['animation_on_appearance_opt']"
+                      trigger="'animation_direction_in_place_opt'">Tada</WeButton>
+            <WeButton selectClass="'o_anim_flip_in_x'"
+                      dependencies="['animation_on_appearance_opt']"
+                      trigger="'animation_direction_in_place_opt'">Flip-In-X</WeButton>
+            <WeButton selectClass="'o_anim_flip_in_y'"
+                      dependencies="['animation_on_appearance_opt']"
+                      trigger="'animation_direction_in_place_opt'">Flip-In-Y</WeButton>
+        </WeSelect>
+        <!-- Direction -->
+        <WeSelect class="'o_we_sublevel_1'" name="'animation_direction_opt'" forceAnimation="true">
+            <t t-set-slot="title">Direction</t>
+            <WeButton selectClass="''"
+                      name="'animation_direction_in_place_opt'"
+                      dependencies="['!o_anim_slide_in_opt']">In Place</WeButton>
+            <WeButton selectClass="'o_anim_from_right'"
+                      name="'animation_direction_from_right_opt'"
+                      dependencies="['!o_anim_rotate_opt']">From Right</WeButton>
+            <WeButton selectClass="'o_anim_from_left'"
+                      dependencies="['!o_anim_rotate_opt']">From Left</WeButton>
+            <WeButton selectClass="'o_anim_from_bottom'"
+                      dependencies="['!o_anim_rotate_opt']">From Bottom</WeButton>
+            <WeButton selectClass="'o_anim_from_top'"
+                      dependencies="['!o_anim_rotate_opt']">From Top</WeButton>
+            <WeButton selectClass="'o_anim_from_top_right'"
+                      dependencies="['o_anim_rotate_opt']">From Top Right</WeButton>
+            <WeButton selectClass="'o_anim_from_top_left'"
+                      dependencies="['o_anim_rotate_opt']">From Top Left</WeButton>
+            <WeButton selectClass="'o_anim_from_bottom_right'"
+                      dependencies="['o_anim_rotate_opt']">From Bottom Right</WeButton>
+            <WeButton selectClass="'o_anim_from_bottom_left'"
+                      dependencies="['o_anim_rotate_opt']">From Bottom Left</WeButton>
+        </WeSelect>
+        <!-- Trigger -->
+        <WeSelect class="'o_we_sublevel_1'" dependencies="['animation_on_appearance_opt']" name="'animation_trigger_opt'">
+            <t t-set-slot="title">Trigger</t>
+            <WeButton selectClass="''">First Time Only</WeButton>
+            <WeButton selectClass="'o_animate_both_scroll'">Every Time</WeButton>
+        </WeSelect>
+        <!-- Intensity -->
+        <WeRange class="'o_we_sublevel_1'"
+                 name="'animation_intensity_opt'"
+                 animationIntensity="''" min="1" max="100" step="1"
+                 displayRangeValue="true" noPreview="true">
+            <t t-set-slot="title">Intensity</t>
+        </WeRange>
+        <!-- Scroll Zone -->
+        <WeRow class="'o_we_sublevel_1'">
+            <t t-set-slot="title">Scroll Zone</t>
+            <!-- TODO put back "%" as the units when it will work -->
+            <WeInput unit="''" step="1" dependencies="['animation_on_scroll_opt']"
+                     noPreview="true" selectDataAttribute="''"
+                     attributeName="'scrollZoneStart'" forceAnimation="true"/>
+            <span class="mx-2">to</span>
+            <WeInput unit="''" step="1" dependencies="['animation_on_scroll_opt']"
+                     noPreview="true" selectDataAttribute="''"
+                     attributeName="'scrollZoneEnd'" forceAnimation="true"/>
+        </WeRow>
+        <!-- Start After -->
+        <WeInput class="'o_we_sublevel_1 o_we_small_input'"
+                 dependencies="['animation_on_appearance_opt']" name="animation_delay_opt"
+                 selectStyle="'0s'" cssProperty="'animation-delay'" unit="'s'">
+            <t t-set-slot="title">Start After</t>
+        </WeInput>
+        <!-- Duration -->
+        <WeInput class="'o_we_sublevel_1 o_we_small_input'"
+                 dependencies="['animation_on_appearance_opt']"
+                 selectStyle="'0.4s'" cssProperty="'animation-duration'" unit="'s'">
+            <t t-set-slot="title">Duration</t>
+        </WeInput>
+    </t>
 </templates>
