@@ -540,7 +540,7 @@ class AccountEdiFormat(models.Model):
             else:
                 # 'ref' can be the same for different partners.
                 candidates = invoices.filtered(lambda x: x.ref[:60] == invoice_number)
-                if len(candidates) >= 1:
+                if len(candidates) > 1:
                     respl_partner_info = respl.IDFactura.IDEmisorFactura
                     inv = None
                     for candidate in candidates:
