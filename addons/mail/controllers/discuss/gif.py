@@ -3,6 +3,7 @@
 import requests
 import werkzeug.urls
 from odoo.http import request, route, Controller
+from odoo.addons.mail.models.discuss.mail_guest import add_guest_to_context
 
 
 class DiscussGifController(Controller):
@@ -13,8 +14,12 @@ class DiscussGifController(Controller):
         response.raise_for_status()
         return response
 
-    @route("/discuss/gif/search", type="json", auth="user")
+    @route("/discuss/gif/search", type="json", auth="public")
+    @add_guest_to_context
     def search(self, search_term, locale="en", country="US", position=None):
+        partner, guest = request.env["res.partner"]._get_current_persona()
+        if not guest and partner._is_public():
+            return request.not_found()
         ir_config = request.env["ir.config_parameter"].sudo()
         query_string = werkzeug.urls.url_encode(
             {
@@ -33,8 +38,12 @@ class DiscussGifController(Controller):
         if response:
             return response.json()
 
-    @route("/discuss/gif/categories", type="json", auth="user")
+    @route("/discuss/gif/categories", type="json", auth="public")
+    @add_guest_to_context
     def categories(self, locale="en", country="US"):
+        partner, guest = request.env["res.partner"]._get_current_persona()
+        if not guest and partner._is_public():
+            return request.not_found()
         ir_config = request.env["ir.config_parameter"].sudo()
         query_string = werkzeug.urls.url_encode(
             {
