@@ -20,6 +20,7 @@ import { uniqueId } from "./utils/functions";
  * @typedef Options
  * @property {string} [popper="popper"] useRef reference to the popper element
  * @property {HTMLElement} [container] container element
+ * @property {boolean} [holdOnFocus=false]
  * @property {number} [margin=0]
  *  margin in pixels between the popper and the target.
  * @property {Direction | Position} [position="bottom"]
@@ -395,6 +396,7 @@ export function usePosition(target, options) {
     const popperRef = useRef(options?.popper || DEFAULTS.popper);
     const getTarget = typeof target === "function" ? target : () => target;
     let wasPositioned = false;
+    let focusInside;
     const __NAME = uniqueId(component.constructor.name);
     let __COUNT = 0;
     let last;
@@ -420,6 +422,10 @@ export function usePosition(target, options) {
                 return;
             }
 
+            if (currentOptions.holdOnFocus && focusInside) {
+                return;
+            }
+
             const __LABEL = `[${__NAME}] reposition ${++__COUNT}`;
             console.time(__LABEL);
             const iframe = getIFrame(targetEl);
@@ -442,20 +448,35 @@ export function usePosition(target, options) {
 
     const throttledUpdate = useThrottleForAnimation((e) => bus.trigger("update", e));
     useEffect(() => {
-        // Reposition
-        bus.trigger("update");
+        const popperEl = popperRef.el;
+        focusInside = popperEl?.contains(popperEl.ownerDocument.activeElement);
+        const onPopperEnter = () => (focusInside = true);
+        const onPopperLeave = (ev) => {
+            focusInside = false;
+            throttledUpdate(ev);
+        };
+        popperEl?.addEventListener("pointerenter", onPopperEnter);
+        popperEl?.addEventListener("pointerleave", onPopperLeave);
 
+        const targetDocument = getTarget()?.ownerDocument;
         if (isTopmost) {
             // Attach listeners to keep the positioning up to date
-            const targetDocument = getTarget()?.ownerDocument;
             targetDocument?.addEventListener("scroll", throttledUpdate, { capture: true });
             targetDocument?.addEventListener("load", throttledUpdate, { capture: true });
             window.addEventListener("resize", throttledUpdate);
-            return () => {
+        }
+
+        // Reposition
+        bus.trigger("update");
+
+        return () => {
+            popperEl?.removeEventListener("pointerenter", onPopperEnter);
+            popperEl?.removeEventListener("pointerleave", onPopperLeave);
+            if (isTopmost) {
                 targetDocument?.removeEventListener("scroll", throttledUpdate, { capture: true });
                 targetDocument?.removeEventListener("load", throttledUpdate, { capture: true });
                 window.removeEventListener("resize", throttledUpdate);
-            };
-        }
+            }
+        };
     });
 }

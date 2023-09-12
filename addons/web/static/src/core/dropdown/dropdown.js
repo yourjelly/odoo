@@ -104,6 +104,7 @@ export class Dropdown extends Component {
         const positioningOptions = {
             popper: "menuRef",
             position,
+            holdOnFocus: this.props.holdPositionOnFocus,
             onPositioned: (el, { direction }) => {
                 this.state.directionCaretClass = DIRECTION_CARET_CLASS[direction];
             },
@@ -327,6 +328,7 @@ Dropdown.bus = new EventBus();
 Dropdown.defaultProps = {
     menuDisplay: "d-block",
     autoOpen: true,
+    holdPositionOnFocus: false,
     onOpened: () => {},
     onStateChanged: () => {},
     onScroll: () => {},
@@ -406,6 +408,10 @@ Dropdown.props = {
         optional: true,
     },
     showCaret: {
+        type: Boolean,
+        optional: true,
+    },
+    holdPositionOnFocus: {
         type: Boolean,
         optional: true,
     },

@@ -46,6 +46,8 @@ export class PropertiesField extends Component {
             onClose: () => this.onCloseCurrentPopover?.(),
             fixedPosition: true,
             displayArrow: false,
+            holdOnFocus: true,
+            // animateOnFocusOut: true,
         });
         this.propertiesRef = useRef("properties");
 
