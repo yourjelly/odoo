@@ -169,7 +169,7 @@
         </we-input>
     </t>
     <t t-name="web_editor.WeRange">
-        <we-range class="o_we_user_value_widget">
+        <we-range class="o_we_user_value_widget" t-att-class="this.cssClasses">
             <we-title t-if="props.slots?.title">
                 <t t-slot="title"/>
             </we-title>
@@ -248,7 +248,7 @@
         </we-list>
     </t>
     <t t-name="web_editor.WeMany2one">
-        <WeSelect placeholder="this.state.selectPlaceholder">
+        <WeSelect placeholder="this.state.selectPlaceholder" class="this.cssClasses">
             <t t-set-slot="title"><t t-if="props.slots?.default" t-slot="default"/></t>
             <div class="o_we_m2o_search">
                 <input t-model="this.state.searchValue" placeholder="Search for records..."/>
@@ -274,7 +274,7 @@
         </WeSelect>
     </t>
     <t t-name="web_editor.WeMany2Many">
-        <div class="o_we_user_value_widget o_we_m2m">
+        <div class="o_we_user_value_widget o_we_m2m" t-att-class="this.cssClasses">
             <WeList name="this.listWidgetName" renderListItems="true" noPreview="true" editable="false">
                 <t t-slot="listTitle"/>
                 <t t-set-slot="createWidget">
