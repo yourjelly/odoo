@@ -75,11 +75,6 @@ export function useParentedVisibility() {
     });
     // Make a method available for children components to notify the parent
     // of their visibility status.
-    useChildSubEnv({
-        updateParentVisibility: (childComponent, visible) => {
-            visibleState.visibleChildren.set(childComponent, visible);
-        },
-    });
     const env = useEnv();
     // When the children's visibility state are updated, check if the
     // parent should update theirs.
@@ -122,6 +117,11 @@ export class WeRow extends Component {
     };
     setup() {
         this.visibilityState = useParentedVisibility();
+        useChildSubEnv({
+            updateParentVisibility: (childComponent, visible) => {
+                this.visibilityState.visibleChildren.set(childComponent, visible);
+            },
+        });
     }
 
     get cssClasses() {
