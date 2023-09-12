@@ -764,23 +764,26 @@ export class WeInput extends UserValueWidget {
      */
     formatValues(value) {
         const newValues = {};
-        const formattedValue = value
-            .split(/\s+/g)
-            .map((v) => {
-                const numValue = parseFloat(v);
-                if (isNaN(numValue)) {
-                    return this.defaultValue;
-                } else {
-                    const value = weUtils.convertNumericToUnit(
-                        numValue,
-                        this.props.unit,
-                        this.saveUnit,
-                        this.props.cssProperty
-                    );
-                    return `${this.floatToStr(value)}${this.saveUnit}`;
-                }
-            })
-            .join(" ");
+        let formattedValue = value
+        if (this.props.unit !== "") {
+            formattedValue = formattedValue
+                .split(/\s+/g)
+                .map((v) => {
+                    const numValue = parseFloat(v);
+                    if (isNaN(numValue)) {
+                        return this.defaultValue;
+                    } else {
+                        const value = weUtils.convertNumericToUnit(
+                            numValue,
+                            this.props.unit,
+                            this.saveUnit,
+                            this.props.cssProperty
+                        );
+                        return `${this.floatToStr(value)}${this.saveUnit}`;
+                    }
+                })
+                .join(" ");
+        }
         for (const methodName of this.methodNames) {
             newValues[methodName] = formattedValue;
         }
@@ -818,7 +821,7 @@ export class WeInput extends UserValueWidget {
                     this.state.inputValue = "";
                     return "";
                 }
-                if (!this.state.preview) {
+                if (!this.state.preview && (this.props.unit !== "")) {
                     this.state.inputValue = weUtils.convertValueToUnit(value, this.props.unit);
                 }
                 return weUtils.convertValueToUnit(value, this.saveUnit);

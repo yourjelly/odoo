@@ -117,6 +117,7 @@ export class SnippetsMenu extends Component {
             }),
             activateSnippet: this.activateSnippet.bind(this),
             snippetEditionRequest: this.snippetEditionRequest.bind(this),
+            requestSave: this.onSaveRequest.bind(this),
         });
 
         this.editionState = useState(this.env.editionState);

@@ -12,7 +12,7 @@
                 <button type="button" t-on-click="this.props.undo" class="btn btn-secondary fa fa-undo" t-att-disabled="this.state.canUndo ? false: 'true'"/>
                 <button type="button" t-on-click="this.props.redo" class="btn btn-secondary fa fa-repeat" t-att-disabled="this.state.canRedo ? false : 'true'"/>
             </div>
-            <form t-ref="action-buttons" class="ms-auto d-flex" t-if="this.props.requestSave &amp;&amp; this.props.requestCancel">
+            <form t-ref="action-buttons" class="ms-auto d-flex" t-if="this.props.requestSave and this.props.requestCancel">
                 <!-- Uncomment the following line when the mobile preview will be available. -->
                 <!-- <button type="button" class="btn btn-secondary fa fa-mobile" name="mobile" data-action="mobilePreview"/> -->
                 <button type="button"
