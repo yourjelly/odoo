@@ -293,6 +293,8 @@ class AccountEdiFormat(models.Model):
                 else:
                     invoice_node['ClaveRegimenEspecialOTrascendencia'] = '02'
             else:
+                if invoice._l10n_es_is_dua():
+                    partner_info = self._l10n_es_edi_get_partner_info(invoice.company_id.partner_id)
                 info['IDFactura']['IDEmisorFactura'] = partner_info
                 info['IDFactura']['NumSerieFacturaEmisor'] = invoice.ref[:60]
                 if not is_simplified:
@@ -319,7 +321,7 @@ class AccountEdiFormat(models.Model):
                 invoice_node['TipoRectificativa'] = 'I'
             elif invoice.move_type == 'in_invoice':
                 invoice_node['TipoFactura'] = 'F1'
-                if any(t.l10n_es_type == 'dua' for t in invoice.invoice_line_ids.tax_ids.flatten_taxes_hierarchy()):
+                if invoice._l10n_es_is_dua():
                     invoice_node['TipoFactura'] = 'F5'
             elif invoice.move_type == 'in_refund':
                 invoice_node['TipoFactura'] = 'R4'
@@ -542,7 +544,10 @@ class AccountEdiFormat(models.Model):
                     respl_partner_info = respl.IDFactura.IDEmisorFactura
                     inv = None
                     for candidate in candidates:
-                        partner_info = self._l10n_es_edi_get_partner_info(candidate.commercial_partner_id)
+                        partner = candidate.commercial_partner_id
+                        if candidate._l10n_es_is_dua():
+                            partner = candidate.company_id.partner_id
+                        partner_info = self._l10n_es_edi_get_partner_info(partner)
                         if partner_info.get('NIF') and partner_info['NIF'] == respl_partner_info.NIF:
                             inv = candidate
                             break
