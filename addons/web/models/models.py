@@ -965,8 +965,10 @@ class Base(models.AbstractModel):
                             tuple(NewId(id_) for id_ in ids)
                             for ids in cache.get_values(lines, field)
                         ]
+                        assert(len(line_values) == len(lines))
                     else:
-                        line_values = map(copy.copy, cache.get_values(lines, field))
+                        line_values = list(map(copy.copy, cache.get_values(lines, field)))
+                        assert (len(line_values) == len(lines))
                     cache.update_raw(new_lines, field, line_values)
 
         # Isolate changed values, to handle inconsistent data sent from the
