@@ -92,3 +92,4 @@
 "account_tax_template_p_iva21_isp","IVA 21% Compra con Inversión del Sujeto Pasivo Nacional","","","sujeto_isp","","",""
 "account_tax_template_p_rp19","Retenciones 19% (préstamos)","","","retencion","","",""
 "account_tax_template_p_rrD19","Retenciones 19% (reparto de dividendos)","","","retencion","","",""
+"account_tax_template_p_iva_isub","Tax Only","","","ignore","","",""

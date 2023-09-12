@@ -78,10 +78,11 @@ class AccountEdiFormat(models.Model):
 
         def filter_to_apply(base_line, tax_values):
             # For intra-community, we do not take into account the negative repartition line
-            return tax_values['tax_repartition_line'].factor_percent > 0.0
+            return (tax_values['tax_repartition_line'].factor_percent > 0.0
+                    and tax_values['tax_repartition_line'].tax_id.l10n_es_type != 'ignore')
 
         def full_filter_invl_to_apply(invoice_line):
-            if 'ignore' in invoice_line.tax_ids.flatten_taxes_hierarchy().mapped('l10n_es_type'):
+            if all(t == 'ignore' for t in invoice_line.tax_ids.flatten_taxes_hierarchy().mapped('l10n_es_type')):
                 return False
             return filter_invl_to_apply(invoice_line) if filter_invl_to_apply else True
 
@@ -119,7 +120,7 @@ class AccountEdiFormat(models.Model):
         tax_subject_info_list = []
         tax_subject_isp_info_list = []
         for tax_values in tax_details['tax_details'].values():
-
+            print("l10n_es_type:", tax_values['l10n_es_type'])
             if invoice.is_sale_document():
                 # Customer invoices
 
@@ -160,7 +161,7 @@ class AccountEdiFormat(models.Model):
 
             else:
                 # Vendor bills
-                if tax_values['l10n_es_type'] in ('sujeto', 'sujeto_isp', 'no_sujeto', 'no_sujeto_loc'):
+                if tax_values['l10n_es_type'] in ('sujeto', 'sujeto_isp', 'no_sujeto', 'no_sujeto_loc', 'dua'):
                     tax_amount_deductible += tax_values['tax_amount']
                 elif tax_values['l10n_es_type'] == 'retencion':
                     tax_amount_retention += tax_values['tax_amount']
@@ -318,6 +319,8 @@ class AccountEdiFormat(models.Model):
                 invoice_node['TipoRectificativa'] = 'I'
             elif invoice.move_type == 'in_invoice':
                 invoice_node['TipoFactura'] = 'F1'
+                if any(t.l10n_es_type == 'dua' for t in invoice.invoice_line_ids.tax_ids.flatten_taxes_hierarchy()):
+                    invoice_node['TipoFactura'] = 'F5'
             elif invoice.move_type == 'in_refund':
                 invoice_node['TipoFactura'] = 'R4'
                 invoice_node['TipoRectificativa'] = 'I'
