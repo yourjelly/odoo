@@ -69,6 +69,7 @@ export class ListArchParser extends XMLParser {
         const treeAttr = {};
         let nextId = 0;
         const fieldNextIds = {};
+        let autofocusFieldId=null;
         this.visitXML(arch, (node) => {
             if (node.tagName !== "button") {
                 buttonGroup = undefined;
@@ -101,6 +102,9 @@ export class ListArchParser extends XMLParser {
                 const fieldId = `${fieldInfo.name}_${fieldNextIds[fieldInfo.name]++}`;
                 fieldNodes[fieldId] = fieldInfo;
                 node.setAttribute("field_id", fieldId);
+                if (archParseBoolean(node.getAttribute("default_focus") || "")) {
+                    autofocusFieldId = fieldId;
+                }
                 if (fieldInfo.isHandle) {
                     handleField = fieldInfo.name;
                 }
@@ -224,6 +228,7 @@ export class ListArchParser extends XMLParser {
         return {
             creates,
             headerButtons,
+            autofocusFieldId,
             fieldNodes,
             widgetNodes,
             columns,
