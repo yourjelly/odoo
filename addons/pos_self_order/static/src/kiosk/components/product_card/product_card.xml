@@ -2,7 +2,9 @@
 <templates id="template" xml:space="preserve">
     <t t-name="pos_self_order.ProductCard" owl="1">
         <button class="o_kiosk_product_card product-item btn btn-light d-flex flex-column p-2 pb-3 m-0 overflow-hidden"
+            t-att-class="{'o_kiosk_product_card_animated' : props.animation}"
             t-on-click="selectProduct"
+            t-att-style="props.animationDelay ? 'animation-delay:' +  props.animationDelay + 'ms;' : ''"
             t-ref="selfProductCard">
             <div class="ratio ratio-1x1 mb-3">
                 <img

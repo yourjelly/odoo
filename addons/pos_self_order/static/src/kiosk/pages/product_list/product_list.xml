@@ -35,7 +35,7 @@
                             <h2 class="pb-1 px-4 m-0 fs-1" t-esc="selfOrder.currentCategory" />
                             <div class="product-list-category d-grid p-3">
                                 <t t-foreach="productCategory" t-as="product" t-key="product.id">
-                                    <ProductCard product="product" currentProductCard="product.id === selfOrder.lastEditedProductId and currentProductCard" />
+                                    <ProductCard product="product" animation="true" animationDelay="product_index * 25" currentProductCard="product.id === selfOrder.lastEditedProductId and currentProductCard" />
                                 </t>
                             </div>
                         </div>

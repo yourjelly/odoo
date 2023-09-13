@@ -4,7 +4,26 @@
         object-fit: cover;
     }
 
+    &.o_kiosk_product_card_animated {
+        animation: o-kiosk-card-appear .5s both;
+    }
+
     &:active, &:hover, &:focus:not(:focus-visible) {
         outline: 3px solid var(--companyColor);
+    }
+}
+
+@keyframes o-kiosk-card-appear {
+    0% {
+        opacity: 0;
+        margin-top: 5%;
+        transform: translateY(-5%);
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        margin-top: 0;
+        transform: translateY(0);
     }
 }

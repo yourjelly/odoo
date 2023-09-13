@@ -7,7 +7,7 @@ import { Line } from "@pos_self_order/common/models/line";
 
 export class ProductCard extends Component {
     static template = "pos_self_order.ProductCard";
-    static props = ["product", "currentProductCard?"];
+    static props = ["product", "currentProductCard?", "animation?", "animationDelay?"];
 
     selfRef = useRef("selfProductCard");
     currentProductCardRef = useRef("currentProductCard");
@@ -32,6 +32,7 @@ export class ProductCard extends Component {
         const cardRect = productCardEl.getBoundingClientRect();
         const cartRect = cartButton.getBoundingClientRect();
 
+        clonedCard.classList.remove('o_kiosk_product_card_animated');
         clonedCard.style.position = "absolute";
         clonedCard.style.top = `${cardRect.top}px`;
         clonedCard.style.left = `${cardRect.left}px`;
@@ -45,7 +46,7 @@ export class ProductCard extends Component {
 
         requestAnimationFrame(() => {
             clonedCard.style.top = `${cartRect.top}px`;
-            clonedCard.style.left = `${cartRect.left * 0.35}px`;
+            clonedCard.style.left = `${cartRect.left}px`;
             clonedCard.style.width = `${cardRect.width * 0.80}px`;
             clonedCard.style.height = `${cardRect.height * 0.80}px`;
             clonedCard.style.opacity = "0"; // Fading out the card
