@@ -2,6 +2,7 @@
 
 import { click, editInput, getFixture, makeDeferred, nextTick, patchWithCleanup } from "@web/../tests/helpers/utils";
 import { makeView, setupViewRegistries } from "@web/../tests/views/helpers";
+import { makeEnv, startServices } from "@web/env";
 import { FormController } from '@web/views/form/form_controller';
 import { HtmlField } from "@web_editor/js/backend/html_field";
 import { parseHTML } from "@web_editor/js/editor/odoo-editor/src/utils/utils";
@@ -9,9 +10,6 @@ import { onRendered } from "@odoo/owl";
 import { wysiwygData } from "@web_editor/../tests/test_utils";
 import { OdooEditor } from '@web_editor/js/editor/odoo-editor/src/OdooEditor';
 import { Wysiwyg } from "@web_editor/js/wysiwyg/wysiwyg";
-
-// Legacy
-import legacyEnv from '@web/legacy/js/common_env';
 
 async function iframeReady(iframe) {
     const iframeLoadPromise = makeDeferred();
@@ -389,14 +387,17 @@ QUnit.module("WebEditor.HtmlField", ({ beforeEach }) => {
             }
         };
         // Add the ajax service (legacy), because wysiwyg RPCs use it.
-        patchWithCleanup(legacyEnv, {
+        const env = makeEnv();
+        patchWithCleanup(env, {
             services: {
-                ...legacyEnv.services,
+                ...env.services,
                 ajax: {
                     rpc: mockRPC,
                 },
             }
         });
+        await startServices(env);
+
         await makeView({
             type: "form",
             resId: 1,

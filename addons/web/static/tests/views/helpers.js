@@ -6,6 +6,7 @@ import { createDebugContext } from "@web/core/debug/debug_context";
 import { Dialog } from "@web/core/dialog/dialog";
 import { MainComponentsContainer } from "@web/core/main_components_container";
 import { registry } from "@web/core/registry";
+import { startServices } from "@web/env";
 import { View, getDefaultConfig } from "@web/views/view";
 import {
     fakeCompanyService,
@@ -19,9 +20,6 @@ import {
 } from "../search/helpers";
 
 import { Component, useSubEnv, xml } from "@odoo/owl";
-
-import { mapLegacyEnvToWowlEnv } from "@web/legacy/utils";
-import makeTestEnvironment from "@web/../tests/legacy/helpers/test_env";
 
 const serviceRegistry = registry.category("services");
 
@@ -130,7 +128,7 @@ export function setupViewRegistries() {
 }
 
 /**
- * This helper sets the legacy env and mounts a MainComponentsContainer
+ * This helper mounts a MainComponentsContainer
  * to allow legacy code to use wowl FormViewDialogs.
  *
  * TODO: remove this when there's no legacy code using the wowl FormViewDialog.
@@ -141,9 +139,7 @@ export function setupViewRegistries() {
  */
 export async function prepareWowlFormViewDialogs(serverData, mockRPC) {
     setupViewRegistries();
-    const wowlEnv = await makeTestEnv({ serverData, mockRPC });
-    const legacyEnv = makeTestEnvironment();
-    mapLegacyEnvToWowlEnv(legacyEnv, wowlEnv);
-    owl.Component.env = legacyEnv;
-    await mount(MainComponentsContainer, getFixture(), { env: wowlEnv });
+    const env = await makeTestEnv({ serverData, mockRPC });
+    await startServices(env);
+    await mount(MainComponentsContainer, getFixture(), { env });
 }

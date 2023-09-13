@@ -33,25 +33,6 @@ export function mapDoActionOptionAPI(legacyOptions) {
     return legacyOptions;
 }
 
-export function makeLegacyActionManagerService(legacyEnv) {
-    // add a service to redirect 'do-action' events triggered on the bus in the
-    // legacy env to the action-manager service in the wowl env
-    return {
-        dependencies: ["action"],
-        start(env) {
-            function do_action(action, options) {
-                const legacyOptions = mapDoActionOptionAPI(options);
-                return env.services.action.doAction(action, legacyOptions);
-            }
-            legacyEnv.bus.on("do-action", null, (payload) => {
-                const { action, options } = payload;
-                do_action(action, options);
-            });
-            return { do_action };
-        },
-    };
-}
-
 export function breadcrumbsToLegacy(breadcrumbs) {
     if (!breadcrumbs) {
         return;

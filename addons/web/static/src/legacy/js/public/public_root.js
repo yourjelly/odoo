@@ -1,7 +1,6 @@
 /** @odoo-module */
 
 import dom from '@web/legacy/js/core/dom';
-import legacyEnv from '@web/legacy/js/public/public_env';
 import {getCookie} from '@web/legacy/js/core/cookie_utils';
 import publicWidget from '@web/legacy/js/public/public_widget';
 import { registry } from '@web/core/registry';
@@ -9,8 +8,6 @@ import { registry } from '@web/core/registry';
 import lazyloader from "@web/legacy/js/public/lazyloader";
 
 import {
-    makeLegacyNotificationService,
-    mapLegacyEnvToWowlEnv,
     createWidgetParent,
 } from "../../utils";
 
@@ -63,7 +60,7 @@ export const PublicRoot = publicWidget.RootWidget.extend({
      */
     init: function () {
         this._super.apply(this, arguments);
-        this.env = legacyEnv;
+        this.env = makeEnv();
         this.publicWidgets = [];
     },
     /**
@@ -314,11 +311,6 @@ export const PublicRoot = publicWidget.RootWidget.extend({
 });
 
 /**
- * Configure Owl with the public env
- */
-owl.Component.env = legacyEnv;
-
-/**
  * This widget is important, because the tour manager needs a root widget in
  * order to work. The root widget must be a service provider with the ajax
  * service, so that the tour manager can let the server know when tours have
@@ -326,13 +318,6 @@ owl.Component.env = legacyEnv;
  */
 export async function createPublicRoot(RootWidget) {
     await lazyloader.allScriptsLoaded;
-    // add a bunch of mapping services that will redirect service calls from the legacy env
-    // to the wowl env
-    serviceRegistry.add("legacy_notification", makeLegacyNotificationService(legacyEnv));
-    const wowlToLegacyServiceMappers = registry.category('wowlToLegacyServiceMappers').getEntries();
-    for (const [legacyServiceName, wowlToLegacyServiceMapper] of wowlToLegacyServiceMappers) {
-        serviceRegistry.add(legacyServiceName, wowlToLegacyServiceMapper(legacyEnv));
-    }
     await whenReady();
 
     // Patch browser.fetch and the rpc service to use the correct base url when
@@ -366,9 +351,7 @@ export async function createPublicRoot(RootWidget) {
     const wowlEnv = makeEnv();
 
     await startServices(wowlEnv);
-    await wowlEnv.services.public_component.mountComponents();
-    mapLegacyEnvToWowlEnv(legacyEnv, wowlEnv);
-    const publicRoot = new RootWidget(createWidgetParent(legacyEnv));
+    const publicRoot = new RootWidget(createWidgetParent(wowlEnv));
     const app = new App(MainComponentsContainer, {
         templates,
         env: wowlEnv,

@@ -1,6 +1,5 @@
 /** @odoo-module **/
 
-import { browser } from "../core/browser/browser";
 import { useService } from "@web/core/utils/hooks";
 import {
     App,
@@ -18,18 +17,6 @@ import { templates } from "@web/core/assets";
 import { _t } from "@web/core/l10n/translation";
 
 export const wowlServicesSymbol = Symbol("wowlServices");
-
-/**
- * Deploys a service allowing legacy to add/remove commands.
- *
- * @param {object} legacyEnv
- * @returns a wowl deployable service
- */
-export function mapLegacyEnvToWowlEnv(legacyEnv, wowlEnv) {
-    // store wowl services on the legacy env (used by the 'useWowlService' hook)
-    legacyEnv[wowlServicesSymbol] = wowlEnv.services;
-    Object.setPrototypeOf(legacyEnv.services, wowlEnv.services);
-}
 
 const reBSTooltip = /^bs-.*$/;
 

@@ -37,25 +37,6 @@ function getSizeFromWidth(width) {
 }
 
 /**
- * Patch legacy objects referring to the ui size. This function must be removed
- * when the wowl env will be available in the form_renderer (currently the form
- * renderer relies on config). This will impact env.browser.innerWidth.
- *
- * @param {number} size
- * @param {number} width
- */
-function legacyPatchUiSize(height, width) {
-    const legacyEnv = owl.Component.env;
-    patchWithCleanup(legacyEnv, {
-        browser: {
-            ...legacyEnv.browser,
-            innerWidth: width,
-            innerHeight: height || browser.innerHeight,
-        },
-    });
-}
-
-/**
  * Adjust ui size either from given size (mapped to window breakpoints) or
  * width. This will impact uiService.{isSmall/size}, (wowl/legacy)
  * browser.innerWidth, (wowl) env.isSmall and. When a size is given, the browser
@@ -82,7 +63,6 @@ function patchUiSize({ height, size, width }) {
             return size;
         },
     });
-    legacyPatchUiSize(height, width);
 }
 
 export { patchUiSize, SIZES };

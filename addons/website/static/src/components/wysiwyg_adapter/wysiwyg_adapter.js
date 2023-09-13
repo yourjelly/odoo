@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { _t } from "@web/core/l10n/translation";
-import legacyEnv from '@web/legacy/js/common_env';
+import { makeEnv } from "@web/env";
 
 import { useService, useBus } from "@web/core/utils/hooks";
 import { useHotkey } from '@web/core/hotkeys/hotkey_hook';
@@ -787,7 +787,8 @@ export class WysiwygAdapterComponent extends Wysiwyg {
         if (evType in triggers) {
             triggers[evType](ev);
         } else if (evType === 'call_service') {
-            const service = legacyEnv.services[payload.service];
+            const env = makeEnv();
+            const service = env.services[payload.service];
             const result = service[payload.method].apply(service, payload.args || []);
             payload.callback(result);
         } else {

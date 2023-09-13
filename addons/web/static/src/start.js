@@ -1,8 +1,6 @@
 /** @odoo-module **/
 
 import { makeEnv, startServices } from "./env";
-import { legacySetupProm } from "./legacy/legacy_setup";
-import { mapLegacyEnvToWowlEnv } from "./legacy/utils";
 import { localization } from "@web/core/l10n/localization";
 import { session } from "@web/session";
 import { renderToString } from "./core/utils/render";
@@ -34,8 +32,6 @@ export async function startWebClient(Webclient) {
 
     // start web client
     await whenReady();
-    const legacyEnv = await legacySetupProm;
-    mapLegacyEnvToWowlEnv(legacyEnv, env);
     const app = new App(Webclient, {
         name: "Odoo Web Client",
         env,
