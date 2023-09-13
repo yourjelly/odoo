@@ -31,14 +31,11 @@ export class SMLX2ManyField extends X2ManyField {
     async onAdd({ context, editable } = {}) {
         if(!this.props.context.use_create_lots && !this.props.context.use_existing_lots)
         {
-            return super.onAdd({
-                editable,
-                context: {
-                    ...context,
-                }
-            });
+            this.env.services.notification.add(
+                this.env._t("Use existing lots and create new is disabled"),
+                {type: 'danger'}
+            );
         }
-        this.activeActions.create = this.props.context.use_create_lots;
         context = {
             ...context,
             single_product: true,
@@ -61,23 +58,54 @@ export class SMLX2ManyField extends X2ManyField {
         const params = {
             context: { default_quant_id: res_ids[0] },
         };
-        this.addInLine(params);
+        if(!this.props.context.use_existing_lots){
+            this.env.services.notification.add(
+                this.env._t("Use existing lots is disabled"),
+                {type: 'danger'}
+            );
+        }
+        else{
+            this.addInLine(params);
+        }
     }
 
     createOpenRecord() {
         const activeElement = document.activeElement;
-        this.openRecord({
-            context: {
-                ...this.props.context,
-                form_view_ref: "stock.view_stock_quant_form",
-            },
-            immediate: true,
-            onClose: () => {
-                if (activeElement) {
-                    activeElement.focus();
-                }
-            },
-        });
+        if(this.props.context.use_create_lots && this.props.context.use_existing_lots){
+            this.openRecord({
+                context: {
+                    ...this.props.context,
+                    form_view_ref: "stock.view_stock_quant_form",
+                },
+                immediate: true,
+                onClose: () => {
+                    if (activeElement) {
+                        activeElement.focus();
+                    }
+                },
+            });
+        }
+        else if(this.props.context.use_create_lots) {
+            this.openRecord({
+                context: {
+                    ...this.props.context,
+                    
+                    form_view_ref: "stock.view_stock_quant_form",
+                },
+                immediate: true,
+                onClose: () => {
+                    if (activeElement) {
+                        activeElement.focus();
+                    }
+                },
+            });  
+        }
+        else{
+            this.env.services.notification.add(
+                this.env._t("Create new lot is disabled"),
+                {type: 'danger'}
+           );
+        }       
     }
 }
 
