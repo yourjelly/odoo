@@ -4,15 +4,15 @@
         <div class="o_kiosk-cancel_popup o_dialog" t-att-id="id">
             <div role="dialog" class="modal d-block" tabindex="-1">
                   <div class="modal-dialog" role="document">
-                    <div class="modal-content rounded">
+                    <div class="modal-content top-50 start-50 translate-middle rounded">
                         <div class="modal-body p-5">
-                            <div class="pb-5 fs-3 text-center">
-                                Are you sure you want to cancel this order? <br/>
+                            <div class="pb-5 text-center">
+                                <div class="fs-1 lh-1 mb-4">Are you sure you want to cancel this order? </div>
                                 <span class="text-muted fs-4">All the items will be removed from the cart.</span>
                             </div>
                             <div class="d-flex align-items-center justify-content-center w-100 gap-3">
-                                <button type="button" class="btn btn-primary btn-lg popup_button" t-on-click="() => this.confirm()">Cancel Order</button>
-                                <button type="button" class="btn btn-secondary btn-lg popup_button" t-on-click="() => this.props.close()">Discard</button>
+                                <button type="button" class="btn btn-danger popup_button" t-on-click="() => this.confirm()">Cancel Order</button>
+                                <button type="button" class="btn btn-success popup_button" t-on-click="() => this.props.close()">Continue session</button>
                             </div>
                         </div>
                     </div>
