@@ -40,7 +40,7 @@
                                     </div>
 
                                     <div class="line-price d-flex flex-column align-items-end justify-content-between h-auto w-25">
-                                        <span class="fs-3 fw-bolder" t-esc="selfOrder.formatMonetary(getPrice(line))"/>
+                                        <span class="o_kiosk_tab_numbers fs-3 fw-bolder" t-esc="selfOrder.formatMonetary(getPrice(line))"/>
                                         <div class="o_self_order_incr_button d-flex flex-row text-center border-light mb-1">
                                             <button type="button"
                                                 t-on-click = "() => this.changeQuantity(line, false)"
@@ -48,7 +48,7 @@
                                                 <i t-if="line.qty === 1" class="fa fa-trash" aria-hidden="true"></i>
                                                 <span t-else=""> - </span>
                                             </button>
-                                            <div class="d-flex align-items-center px-5 fs-2 fw-bold" t-esc="line.qty"/>
+                                            <div class="o_kiosk_tab_numbers d-flex align-items-center px-4 fs-2 fw-bold" t-esc="line.qty"/>
                                             <button type="button"
                                                 t-on-click = "() => this.changeQuantity(line, true)"
                                                 class="btn btn-secondary fs-2 px-5 py-2 rounded" > + </button>
@@ -60,8 +60,8 @@
                     </div>
                     <div class="order-price absolute-content position-absolute h-10 fixed-bottom w-100">
                         <div class="absolute-content-price d-flex flex-column justify-content-center h-100 py-4 px-5 border-top bg-view text-end lh-sm">
-                            <p class="mb-0 fs-1 fw-bolder">Total: <t t-esc="selfOrder.formatMonetary(selfOrder.currentOrder.amount_total)" /></p>
-                            <p class="mb-0 fs-2 text-muted">Taxes: <t t-esc="selfOrder.formatMonetary(selfOrder.currentOrder.amount_tax)" /></p>
+                            <p class="o_kiosk_tab_numbers smb-0 fs-1 fw-bolder">Total: <t t-esc="selfOrder.formatMonetary(selfOrder.currentOrder.amount_total)" /></p>
+                            <p class="o_kiosk_tab_numbers mb-0 fs-2 text-muted">Taxes: <t t-esc="selfOrder.formatMonetary(selfOrder.currentOrder.amount_tax)" /></p>
                         </div>
                     </div>
                 </div>

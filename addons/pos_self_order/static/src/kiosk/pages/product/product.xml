@@ -37,7 +37,7 @@
                             <button type="button"
                                 t-on-click = "() => this.changeQuantity(false)"
                                 class="btn btn-secondary px-5 py-3 fs-1 "> - </button>
-                            <div class="d-flex align-items-center px-5 fs-1 fw-bold" t-esc="state.qty"/>
+                            <div class="o_kiosk_tab_numbers d-flex align-items-center px-5 fs-1 fw-bold" t-esc="state.qty"/>
                             <button type="button"
                                 t-on-click = "() => this.changeQuantity(true)"
                                 class="btn btn-secondary px-5 py-3 fs-1 "> + </button>
