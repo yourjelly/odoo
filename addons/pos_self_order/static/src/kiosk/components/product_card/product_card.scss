@@ -1,7 +1,10 @@
 .o_kiosk_product_card {
-    
+
     .o_self_order_item_card_image {
-        object-fit: contain;
-        aspect-ratio:1/1;
+        object-fit: cover;
+    }
+
+    &:active, &:hover, &:focus:not(:focus-visible) {
+        outline: 3px solid var(--companyColor);
     }
 }
