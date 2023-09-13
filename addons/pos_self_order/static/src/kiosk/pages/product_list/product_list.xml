@@ -8,7 +8,7 @@
             </t>
             <t t-set-slot="content">
                 <div class="o_kiosk_product_list h-100 d-flex flex-column">
-                    <div class="category-list d-flex flex-shrink-0 gap-3 p-3 shadow-sm bg-view overflow-x-auto z-index-1" t-ref="categoryList">
+                    <div class="category-list d-flex flex-shrink-0 gap-3 p-3 bg-view border-bottom overflow-x-auto z-index-1" t-ref="categoryList">
                         <button
                             t-foreach="categories"
                             t-as="category"
@@ -30,7 +30,7 @@
                                 t-esc="category.name"/>
                         </button>
                     </div>
-                    <div class="product-list py-5 overflow-y-auto" t-ref="productsList">
+                    <div class="product-list py-5 overflow-y-auto" t-ref="productsList" t-on-scroll="_productsListScroll">
                         <div>
                             <h2 class="pb-1 px-4 m-0 fs-1" t-esc="selfOrder.currentCategory" />
                             <div class="product-list-category d-grid p-3">

@@ -1,5 +1,6 @@
 .o_kiosk_product_list {
     .category-list {
+        transition: box-shadow .3s;
 
         .category-item {
             --aspect-ratio: 85%;

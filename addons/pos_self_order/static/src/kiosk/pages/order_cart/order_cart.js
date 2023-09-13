@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { Component } from "@odoo/owl";
+import { Component, useRef } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { useselfOrder } from "@pos_self_order/kiosk/self_order_kiosk_service";
 import { KioskTemplate } from "@pos_self_order/kiosk/template/kiosk_template";
@@ -12,6 +12,8 @@ export class OrderCart extends Component {
     setup() {
         this.selfOrder = useselfOrder();
         this.router = useService("router");
+        this.orderHeader= useRef("orderHeader");
+        this.orderContent= useRef("orderContent");
     }
 
     get lines() {
@@ -68,5 +70,9 @@ export class OrderCart extends Component {
             await this.selfOrder.getPricesFromServer();
         }
         return;
+    }
+
+    _orderListScroll () {
+        this.orderHeader.el.classList.toggle('shadow', this.orderContent.el.scrollTop > 0);
     }
 }

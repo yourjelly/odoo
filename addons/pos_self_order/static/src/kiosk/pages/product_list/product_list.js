@@ -17,6 +17,7 @@ export class ProductList extends Component {
         this.dialog = useService("dialog");
         this.router = useService("router");
         this.productsList = useRef("productsList");
+        this.categoryList = useRef("categoryList");
         this.currentProductCard = useChildRef();
 
         onMounted(() => {
@@ -54,5 +55,9 @@ export class ProductList extends Component {
                 this.router.navigate("default");
             },
         });
+    }
+
+    _productsListScroll () {
+        this.categoryList.el.classList.toggle('shadow', this.productsList.el.scrollTop > 0);
     }
 }

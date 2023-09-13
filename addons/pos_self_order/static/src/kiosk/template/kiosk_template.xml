@@ -2,7 +2,7 @@
 <templates id="template" xml:space="preserve">
     <t t-name="pos_self_order.KioskTemplate" owl="1">
         <div class="o_kiosk-template d-flex flex-column h-100 bg-200">
-            <section class="header-section">
+            <section class="header-section position-relative z-index-1">
                 <t t-slot="header" />
             </section>
             <section t-attf-class="content-section position-relative flex-basis-100 z-index-0 {{ props.hasFixedContent ? ' overflow-y-hidden' : 'overflow-y-auto' }}">
