@@ -218,10 +218,10 @@ class Lang(models.Model):
     def _lang_get_direction(self, code):
         return self.with_context(active_test=True).search([('code', '=', code)]).direction
 
-    def _url_to_code(self, url_code):
-        for lg in self.get_available():
-            if lg[3] and (lg[1] == url_code):
-                return lg[0]
+    def _url_to_code(self, url_code_param):
+        for code, url_code, name, active, *__ in self.get_available():
+            if active and (url_code == url_code_param):
+                return code
         return None
 
     def _lang_get(self, code):
@@ -263,7 +263,7 @@ class Lang(models.Model):
     @api.model
     @tools.ormcache('code')
     def _lang_code_to_urlcode(self, code):
-        for c, urlc, name, *_ in self.get_available():
+        for c, urlc, name, *__ in self.get_available():
             if c == code:
                 return urlc
         return self._lang_get(code).url_code
@@ -271,7 +271,7 @@ class Lang(models.Model):
     @api.model
     def get_installed(self):
         """ Return the installed languages as a list of (code, name) sorted by name. """
-        return [(lg[0], lg[2]) for lg in self.get_available() if lg[3]]
+        return [(code, name) for code, url_code, name, active, *__ in self.get_available() if active]
 
     def toggle_active(self):
         super().toggle_active()
@@ -281,8 +281,9 @@ class Lang(models.Model):
             mods = self.env['ir.module.module'].search([('state', '=', 'installed')])
             mods._update_translations(active_lang)
 
-        # If we activate a lang, set it's url_code to the shortest version if possible
-        if self.active and len(self.url_code) > 3:   # mya is the shortest
+        # If we activate a lang, set it's url_code to the shortest version if
+        # possible. Not done in `write` to avoid unpredictable side effects.
+        if self.active and len(self.url_code) > 3:  # mya is the shortest
             short = self.code.split('_')[0]
             others = self.with_context(active_test=False).search([('active', '=', False), ('url_code', '=', short)])
             if others and others != self:

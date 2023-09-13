@@ -13,9 +13,7 @@ class IrQWeb(models.AbstractModel):
             value (required to render portal layout template)
         """
         irQweb = super()._prepare_frontend_environment(values)
-        values.update(
-            is_html_empty=is_html_empty
-        )
+        values['is_html_empty'] = is_html_empty
         for key in irQweb.env.context:
             if key not in values:
                 values[key] = irQweb.env.context[key]

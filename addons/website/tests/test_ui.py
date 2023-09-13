@@ -114,7 +114,7 @@ class TestUiHtmlEditor(odoo.tests.HttpCase):
         self.start_tour("/", 'website_media_dialog_undraw', login='admin')
 
 
-@odoo.tests.tagged('-at_install', 'post_install', 'rte_case')
+@odoo.tests.tagged('-at_install', 'post_install')
 class TestUiTranslate(odoo.tests.HttpCase):
     def test_admin_tour_rte_translator(self):
         self.env['res.lang'].create({

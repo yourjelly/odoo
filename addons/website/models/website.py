@@ -956,24 +956,29 @@ class Website(models.Model):
 
     def _get_alternate_languages(self, canonical_params):
         self.ensure_one()
+
+        if not self._is_canonical_url(canonical_params=canonical_params):
+            # no hreflang on non-canonical pages
+            return []
+
         self_prefetch_langs = self.with_context(prefetch_langs=True)
         langs = []
         shorts = set()
-        for lg in self.env['res.lang'].get_available():
-            short = lg[0].split('_')[0]
+        for code, url_code, name, active, flag_image_url, id in self.get_available():
+            short = code.split('_')[0]
             if short in shorts:
-                hreflang = lg[0].replace('_', '-').lower()
+                hreflang = code.replace('_', '-').lower()
             else:
                 hreflang = short
                 shorts.add(short)
             langs.append({
-                'id': lg[5],
-                'code': lg[0],
+                'id': id,
+                'code': code,
                 'hreflang': hreflang,
-                'url_code': lg[1],
-                'name': lg[2].split('/').pop(),
-                'flag_image_url': lg[4],
-                'href': self_prefetch_langs._get_canonical_url_localized(lang=lg, canonical_params=canonical_params),
+                'url_code': url_code,
+                'name': name.split('/').pop(),
+                'flag_image_url': flag_image_url,
+                'href': self_prefetch_langs._get_canonical_url_localized(lang=[code, url_code, name, active, flag_image_url, id], canonical_params=canonical_params),
             })
         return langs
 
@@ -1388,10 +1393,37 @@ class Website(models.Model):
         except (NotFound, AccessError, MissingError):
             # The build method returns a quoted URL so convert in this case for consistency.
             path = urls.url_quote_plus(request.httprequest.path, safe='/')
+        import pudb;pu.db
         if lang[5] != self.default_lang_id.id:
             path = f'/{lang[1]}{path if path != "/" else ""}'
         canonical_query_string = f'?{urls.url_encode(canonical_params)}' if canonical_params else ''
         return self.get_base_url() + path + canonical_query_string
+
+    def _get_canonical_url(self, canonical_params):
+        """Returns the canonical URL for the current request."""
+        self.ensure_one()
+        lang = getattr(request, 'lang', self.env['ir.http']._get_default_lang())
+        return self._get_canonical_url_localized(lang=lang, canonical_params=canonical_params)
+
+    def _is_canonical_url(self, canonical_params):
+        """Returns whether the current request URL is canonical."""
+        self.ensure_one()
+        # Compare OrderedMultiDict because the order is important, there must be
+        # only one canonical and not params permutations.
+        params = request.httprequest.args
+        canonical_params = canonical_params or OrderedMultiDict()
+        if params != canonical_params:
+            return False
+        # Compare URL at the first routing iteration because it's the one with
+        # the language in the path. It is important to also test the domain of
+        # the current URL.
+        current_url = request.httprequest.url_root[:-1] + request.httprequest.environ['REQUEST_URI']
+        canonical_url = self._get_canonical_url_localized(lang=request.lang, canonical_params=None)
+        # A request path with quotable characters (such as ",") is never
+        # canonical because request.httprequest.base_url is always unquoted,
+        # and canonical url is always quoted, so it is never possible to tell
+        # if the current URL is indeed canonical or not.
+        return current_url == canonical_url
 
     @tools.ormcache('self.id')
     def _get_cached_values(self):
@@ -1400,7 +1432,7 @@ class Website(models.Model):
             'user_id': self.user_id.id,
             'company_id': self.company_id.id,
             'default_lang_id': self.default_lang_id.id,
-            'lang_ids': set(self.language_ids.mapped('id') + [self.default_lang_id.id]),
+            'lang_ids': self.language_ids.mapped('id'),
             'homepage_url': self.homepage_url,
         }
 
