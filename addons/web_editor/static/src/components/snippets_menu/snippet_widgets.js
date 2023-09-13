@@ -1351,12 +1351,14 @@ export class WeRange extends WeInput {
         max: { type: Number, optional: true },
         min: { type: Number, optional: true },
         step: { type: Number, optional: true },
+        displayRangeValue: { type: Boolean, optional: true },
     };
     static defaultProps = {
         ...WeInput.defaultProps,
         max: null,
         min: null,
         step: 1,
+        displayRangeValue: false,
     };
     get max() {
         if (this.props.max !== null) {

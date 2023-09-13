@@ -175,12 +175,14 @@
             </we-title>
                 <div>
                 <input type="range"
+                       t-att-style="this.props.displayRangeValue and 'min-width: 0'"
                        t-att-min="this.min"
                        t-att-value="this.state.inputValue"
                        t-att-max="this.max"
                        t-att-step="this.props.step"
                        t-on-input="this.onRangeInput"
                        t-on-change="this.onRangeChange"/>
+                <output t-if="this.props.displayRangeValue" class="ms-2"><t t-out="this.state.values"/></output>
            </div>
         </we-range>
     </t>
