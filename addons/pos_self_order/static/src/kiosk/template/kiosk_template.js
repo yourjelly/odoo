@@ -7,7 +7,7 @@ import { escape } from "@web/core/utils/strings";
 
 export class KioskTemplate extends Component {
     static template = "pos_self_order.KioskTemplate";
-    static props = ["hasFixedContent", "slots"];
+    static props = ["hasFixedContent","hideFooterBorder?", "slots"];
 
     setup() {
         this.selfOrder = useselfOrder();
@@ -42,7 +42,7 @@ export class KioskTemplate extends Component {
         this.idleTimer = setTimeout(() => this.router.navigate("default"), 3 * 60 * 1000); // 5 minutes
     }
 
-    get showShadow() {
+    get showBg() {
         return this.router.activeSlot === "default" ? false : true;
     }
 }

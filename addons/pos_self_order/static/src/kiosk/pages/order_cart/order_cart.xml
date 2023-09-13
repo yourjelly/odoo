@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates id="template" xml:space="preserve">
     <t t-name="pos_self_order.OrderCart" owl="1">
-        <KioskTemplate hasFixedContent="true">
+        <KioskTemplate hasFixedContent="true" hideFooterBorder="true">
             <t t-set-slot="header">
                 <div class="py-4 bg-view text-center">
                     <h1 class="mb-0 fw-bolder">Verify your Order</h1>
                 </div>
             </t>
             <t t-set-slot="content">
-                <div class="o_kiosk-order-cart position-relative h-100 d-flex flex-column justify-content-between bg-100">
-                    <div class="order-content h-90 px-3 py-4 bg-100 overflow-auto">
+                <div class="o_kiosk-order-cart position-relative h-100 d-flex flex-column justify-content-between">
+                    <div class="order-content h-90 px-3 py-4 overflow-auto">
                         <t t-foreach="lines" t-as="line" t-key="line.uuid">
                             <div t-if="!line.combo_parent_uuid" class="d-flex align-items-start justify-content-between w-100 gap-3 py-3 p-2 pe-4 mb-3 rounded shadow-sm bg-view">
                                 <t t-set="childLines" t-value="getChildLines(line)"/>

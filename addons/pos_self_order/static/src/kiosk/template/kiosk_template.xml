@@ -1,14 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates id="template" xml:space="preserve">
     <t t-name="pos_self_order.KioskTemplate" owl="1">
-        <div class="o_kiosk-template d-flex flex-column h-100">
+        <div class="o_kiosk-template d-flex flex-column h-100 bg-200">
             <section class="header-section">
                 <t t-slot="header" />
             </section>
             <section t-attf-class="content-section position-relative flex-basis-100 z-index-0 {{ props.hasFixedContent ? ' overflow-y-hidden' : 'overflow-y-auto' }}">
                 <t t-slot="content" />
             </section>
-            <section t-attf-class="content-footer position-relative p-3 bg-transparent z-index-1 {{ showShadow ? 'o_footer_shadow' : '' }}">
+            <section
+                class="content-footer position-relative p-3 z-index-1"
+                t-att-class="{
+                    'bg-view' : showBg,
+                    'border-top' : !props.hideFooterBorder,
+                }">
                 <t t-slot="footer" />
             </section>
         </div>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates id="template" xml:space="preserve">
     <t t-name="pos_self_order.Product" owl="1">
-        <KioskTemplate>
+        <KioskTemplate hideFooterBorder="state.showQtyButtons">
             <t t-set-slot="header">
             </t>
             <t t-set-slot="content">
