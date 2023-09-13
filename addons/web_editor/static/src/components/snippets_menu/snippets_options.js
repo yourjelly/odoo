@@ -14,6 +14,7 @@ import {
     onWillUpdateProps,
     xml,
     onMounted,
+    onWillStart,
 } from "@odoo/owl";
 import { MEDIAS_BREAKPOINTS, SIZES } from "@web/core/ui/ui_service";
 import { pick } from "@web/core/utils/objects";
@@ -21,6 +22,17 @@ import { useService } from "@web/core/utils/hooks";
 import * as gridUtils from "@web_editor/js/common/grid_layout_utils";
 import dom from "@web/legacy/js/core/dom";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+const {
+    normalizeColor,
+} = weUtils;
+import {
+    loadImage,
+    loadImageInfo,
+    applyModifications,
+    isImageSupportedForProcessing,
+    isImageSupportedForStyle,
+    getDataURLBinarySize,
+} from "@web_editor/js/editor/image_processing";
 
 /**
  * Creates a proxy for an object where one property is replaced by a different
@@ -2378,6 +2390,345 @@ export class CarouselHandler extends GalleryHandler {
             this.env.activateSnippet(snippet);
         }
         carouselEl.classList.add("slide");
+    }
+}
+
+/*
+ * Abstract option to be extended by the ImageTools and BackgroundOptimize
+ * options that handles all the common parts.
+ */
+class ImageHandlerOption extends SnippetOption {
+    /**
+     * @override
+     */
+    setup() {
+        super.setup();
+
+        this.rpc = useService("rpc");
+
+        onWillStart(async () => {
+            await this.initializeImage();
+        });
+    }
+
+    //--------------------------------------------------------------------------
+    // SnippetOption overrides
+    //--------------------------------------------------------------------------
+
+    /**
+     * @override
+     */
+    async start() {
+        await super.start(...arguments);
+        // TODO weight stuff later.
+        const weightEl = document.createElement('span');
+        weightEl.classList.add('o_we_image_weight', 'o_we_tag', 'd-none');
+        weightEl.title = _t("Size");
+        this.$weight = $(weightEl);
+        // Perform the loading of the image info synchronously in order to
+        // avoid an intermediate rendering of the Blocks tab during the
+        // loadImageInfo RPC that obtains the file size.
+        // This does not update the target.
+        await this.applyOptions(false);
+    }
+    /**
+     * @override
+     */
+    async updateUI() {
+        await super.updateUI(...arguments);
+
+        if (this._filesize === undefined) {
+            this.$weight.addClass('d-none');
+            await this.applyOptions(false);
+        }
+        if (this._filesize !== undefined) {
+            this.$weight.text(`${this._filesize.toFixed(1)} kb`);
+            this.$weight.removeClass('d-none');
+            this.relocateWeightEl();
+        }
+    }
+    /**
+     * @override
+     */
+    computeVisibility() {
+        const src = this.getImg().getAttribute('src');
+        return src && src !== '/';
+    }
+    /**
+     * @override
+     */
+    async computeWidgetState(methodName, params) {
+        const img = this.getImg();
+
+        // Make sure image is loaded because we need its naturalWidth
+        await new Promise((resolve, reject) => {
+            if (img.complete) {
+                resolve();
+                return;
+            }
+            img.addEventListener('load', resolve, {once: true});
+            img.addEventListener('error', resolve, {once: true});
+        });
+
+        switch (methodName) {
+            case 'selectFormat':
+                return img.naturalWidth + ' ' + this.getImageMimetype(img);
+            case 'setFilter':
+                return img.dataset.filter;
+            case 'glFilter':
+                return img.dataset.glFilter || "";
+            case 'setQuality':
+                return img.dataset.quality || "75";
+            case 'customFilter': {
+                const {filterProperty} = params;
+                const options = JSON.parse(img.dataset.filterOptions || "{}");
+                const defaultValue = filterProperty === "blend" ? "normal" : "0";
+                return options[filterProperty] || defaultValue;
+            }
+        }
+        return super.computeWidgetState(...arguments);
+    }
+    /**
+     * @override TODO CHECK HOW TO RENDER CUSTOM XML NOW !
+     */
+    async _renderCustomXML(uiFragment) {
+        const img = this.getImg();
+        if (!this.originalSrc || !this.isImageSupportedForProcessing(img)) {
+            return;
+        }
+        const $select = $(uiFragment).find('we-select[data-name=format_select_opt]');
+        (await this.computeAvailableFormats()).forEach(([value, [label, targetFormat]]) => {
+            $select.append(`<we-button data-select-format="${Math.round(value)} ${targetFormat}" class="o_we_badge_at_end">${label} <span class="badge rounded-pill text-bg-dark">${targetFormat.split('/')[1]}</span></we-button>`);
+        });
+
+        if (!['image/jpeg', 'image/webp'].includes(this.getImageMimetype(img))) {
+            const optQuality = uiFragment.querySelector('we-range[data-set-quality]');
+            if (optQuality) {
+                optQuality.remove();
+            }
+        }
+    }
+    /**
+     * @override
+     */
+    computeWidgetVisibility(widgetName, params) {
+        if (this.isImageProcessingWidget(widgetName, params)) {
+            const img = this.getImg();
+            return this.isImageSupportedForProcessing(img, true);
+        }
+        return isImageSupportedForStyle(this.getImg());
+    }
+
+    //--------------------------------------------------------------------------
+    // Option specific
+    //--------------------------------------------------------------------------
+
+    /**
+     * @see this.selectClass for parameters
+     */
+    selectFormat(previewMode, widgetValue, params) {
+        const values = widgetValue.split(' ');
+        const image = this.getImg();
+        image.dataset.resizeWidth = values[0];
+        if (image.dataset.shape) {
+            // If the image has a shape, modify its originalMimetype attribute.
+            image.dataset.originalMimetype = values[1];
+        } else {
+            // If the image does not have a shape, modify its mimetype
+            // attribute.
+            image.dataset.mimetype = values[1];
+        }
+        return this.applyOptions();
+    }
+    /**
+     * @see this.selectClass for parameters
+     */
+    setQuality(previewMode, widgetValue, params) {
+        if (previewMode) {
+            return;
+        }
+        this.getImg().dataset.quality = widgetValue;
+        return this.applyOptions();
+    }
+    /**
+     * @see this.selectClass for parameters
+     */
+    glFilter(previewMode, widgetValue, params) {
+        const dataset = this.getImg().dataset;
+        if (widgetValue) {
+            dataset.glFilter = widgetValue;
+        } else {
+            delete dataset.glFilter;
+        }
+        return this.applyOptions();
+    }
+    /**
+     * @see this.selectClass for parameters
+     */
+    customFilter(previewMode, widgetValue, params) {
+        const img = this.getImg();
+        const {filterOptions} = img.dataset;
+        const {filterProperty} = params;
+        if (filterProperty === 'filterColor') {
+            widgetValue = normalizeColor(widgetValue);
+        }
+        const newOptions = Object.assign(JSON.parse(filterOptions || "{}"), {[filterProperty]: widgetValue});
+        img.dataset.filterOptions = JSON.stringify(newOptions);
+        return this.applyOptions();
+    }
+    /**
+     * @abstract
+     */
+    relocateWeightEl() {}
+    /**
+     * Returns a list of valid formats for a given image.
+     */
+    async computeAvailableFormats() {
+        const img = this.getImg();
+        const original = await loadImage(this.originalSrc);
+        const maxWidth = img.dataset.width ? img.naturalWidth : original.naturalWidth;
+        const optimizedWidth = Math.min(maxWidth, this.computeMaxDisplayWidth());
+        this.optimizedWidth = optimizedWidth;
+        const widths = {
+            128: ['128px', 'image/webp'],
+            256: ['256px', 'image/webp'],
+            512: ['512px', 'image/webp'],
+            1024: ['1024px', 'image/webp'],
+            1920: ['1920px', 'image/webp'],
+        };
+        widths[img.naturalWidth] = [_t("%spx", img.naturalWidth), 'image/webp'];
+        widths[optimizedWidth] = [_t("%spx (Suggested)", optimizedWidth), 'image/webp'];
+        const imgMimetype = this.getImageMimetype(img);
+        widths[maxWidth] = [_t("%spx (Original)", maxWidth), imgMimetype];
+        if (imgMimetype !== 'image/webp') {
+            // Avoid a key collision by subtracting 0.1 - putting the webp
+            // above the original format one of the same size.
+            widths[maxWidth - 0.1] = [_t("%spx", maxWidth), 'image/webp'];
+        }
+        return Object.entries(widths)
+            .filter(([width]) => width <= maxWidth)
+            .sort(([v1], [v2]) => v1 - v2);
+    }
+    /**
+     * Applies all selected options on the original image.
+     *
+     * @param {boolean} [update=true] If this is false, this does not actually
+     *     modifies the image but only simulates the modifications on it to
+     *     be able to update the filesize UI.
+     */
+    async applyOptions(update = true) {
+        const img = this.getImg();
+        if (!update && !(img && img.complete)) {
+            return;
+        }
+        if (!this.isImageSupportedForProcessing(img)) {
+            this.originalId = null;
+            this._filesize = undefined;
+            return;
+        }
+        // Do not apply modifications if there is no original src, since it is
+        // needed for it.
+        if (!img.dataset.originalSrc) {
+            delete img.dataset.mimetype;
+            return;
+        }
+        const dataURL = await applyModifications(img, {mimetype: this.getImageMimetype(img)});
+        this._filesize = getDataURLBinarySize(dataURL) / 1024;
+
+        if (update) {
+            img.classList.add('o_modified_image_to_save');
+            const loadedImg = await loadImage(dataURL, img);
+            this.applyImage(loadedImg);
+            return loadedImg;
+        }
+        return img;
+    }
+    /**
+     * Loads the image's attachment info.
+     */
+    async loadImageInfo(attachmentSrc = '') {
+        const img = this.getImg();
+        await loadImageInfo(img, this.rpc, attachmentSrc);
+        if (!img.dataset.originalId) {
+            this.originalId = null;
+            this.originalSrc = null;
+            return;
+        }
+        this.originalId = img.dataset.originalId;
+        this.originalSrc = img.dataset.originalSrc;
+    }
+    /**
+     * Sets the image's width to its suggested size.
+     */
+    async autoOptimizeImage() {
+        await this.loadImageInfo();
+        await this._rerenderXML(); // TODO check for rerender
+        const img = this.getImg();
+        if (!['image/gif', 'image/svg+xml'].includes(img.dataset.mimetype)) {
+            // Convert to recommended format and width.
+            img.dataset.mimetype = 'image/webp';
+            img.dataset.resizeWidth = this.optimizedWidth;
+        } else if (img.dataset.shape && img.dataset.originalMimetype !== "image/gif") {
+            img.dataset.originalMimetype = "image/webp";
+            img.dataset.resizeWidth = this.optimizedWidth;
+        }
+        await this.applyOptions();
+        await this.updateUI();
+    }
+    /**
+     * Returns the image that is currently being modified.
+     *
+     * @abstract
+     * @returns {HTMLImageElement} the image to use for modifications
+     */
+    getImg() {}
+    /**
+     * Computes the image's maximum display width.
+     *
+     * @abstract
+     * @returns {Int} the maximum width at which the image can be displayed
+     */
+    computeMaxDisplayWidth() {}
+    /**
+     * Use the processed image when it's needed in the DOM.
+     *
+     * @abstract
+     * @param {HTMLImageElement} img
+     */
+    applyImage(img) {}
+    /**
+     * @param {HTMLImageElement} img
+     * @returns {String} The right mimetype used to apply options on image.
+     */
+    getImageMimetype(img) {
+        return img.dataset.mimetype;
+    }
+    /**
+     *
+     */
+    async initializeImage() {
+        return this.loadImageInfo();
+    }
+     /**
+     * @param {HTMLImageElement} img
+     * @param {Boolean} [strict=false]
+     * @returns {Boolean}
+     */
+    isImageSupportedForProcessing(img, strict = false) {
+        return isImageSupportedForProcessing(this.getImageMimetype(img), strict);
+    }
+    /**
+     * Indicates if an option should be applied only on supported mimetypes.
+     *
+     * @param {String} widgetName
+     * @param {Object} params
+     * @returns {Boolean}
+     */
+    isImageProcessingWidget(widgetName, params) {
+        return params.possibleValues.glFilter
+            || 'customFilter' in params.possibleValues
+            || params.possibleValues.setQuality
+            || widgetName === 'format_select_opt';
     }
 }
 
