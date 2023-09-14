@@ -2,7 +2,7 @@
 <templates id="template" xml:space="preserve">
     <t t-name="pos_self_order.ProductList" owl="1">
         <t t-set="categories" t-value="Array.from(selfOrder.categoryList)" />
-        <KioskTemplate headerHeight="selfOrder.kiosk_image_brand ? 8 : 0" contentHeight="selfOrder.kiosk_image_brand ? 80 : 88" footerHeight="12">
+        <KioskTemplate>
             <t t-set-slot="header">
                 <div class="header-image h-100" t-attf-style="background-image: url('data:image/png;base64,{{selfOrder.kiosk_image_brand}}')" />
             </t>

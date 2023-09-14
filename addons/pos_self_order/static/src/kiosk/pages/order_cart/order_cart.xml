@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates id="template" xml:space="preserve">
     <t t-name="pos_self_order.OrderCart" owl="1">
-        <KioskTemplate headerHeight="8" contentHeight="82" footerHeight="10">
+        <KioskTemplate hasFixedContent="true">
             <t t-set-slot="header">
-                <div class="d-flex align-items-end justify-content-center pb-4 w-100 h-100 bg-100">
-                    <h1 class="mb-0 fs-1 fw-bolder">Verify your Order</h1>
+                <div class="py-4 bg-view text-center">
+                    <h1 class="mb-0 fw-bolder">Verify your Order</h1>
                 </div>
             </t>
             <t t-set-slot="content">

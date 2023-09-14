@@ -7,7 +7,7 @@ import { escape } from "@web/core/utils/strings";
 
 export class KioskTemplate extends Component {
     static template = "pos_self_order.KioskTemplate";
-    static props = ["headerHeight", "contentHeight", "footerHeight", "slots"];
+    static props = ["hasFixedContent", "slots"];
 
     setup() {
         this.selfOrder = useselfOrder();

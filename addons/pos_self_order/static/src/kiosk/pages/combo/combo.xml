@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates id="template" xml:space="preserve">
     <t t-name="pos_self_order.Combo" owl="1">
-        <KioskTemplate headerHeight="10" contentHeight="78" footerHeight="12">
+        <KioskTemplate hasFixedContent="state.showResume">
             <t t-set-slot="header">
                 <div class="d-flex flex-column h-100 w-100 fs-2 text-center border-bottom">
                     <div class="w-100 h-100 d-flex align-items-center justify-content-center text-bg-300"><t t-esc="props.product.name" /></div>
