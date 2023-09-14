@@ -14,9 +14,8 @@ class ThreadController(thread.ThreadController):
     ):
         project_sharing_id = kwargs.get("project_sharing_id")
         if project_sharing_id:
-            token = ProjectSharingChatter._check_project_access_and_get_token(
-                self, project_sharing_id, thread_model, thread_id, token=None
-            )
+            token = ProjectSharingChatter._check_project_access_and_get_token(self, project_sharing_id, thread_model,
+                                                                              thread_id, None)
             if token:
                 request.update_context(portal_token=token)
         return super().mail_message_post(

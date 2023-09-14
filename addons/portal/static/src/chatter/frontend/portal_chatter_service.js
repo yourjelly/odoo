@@ -36,6 +36,22 @@ export class PortalChatterService {
         return shadow;
     }
 
+    async setUser(el) {
+        if (el) {
+            await rpc(
+                "/portal/chatter_init",
+                {
+                    thread_model: el.getAttribute("data-res_model"),
+                    thread_id: parseInt(el.getAttribute("data-res_id")),
+                    token: this.token
+                },
+                { silent: true }
+            ).then((data) => {
+                this.store.self = data;
+            });
+        }
+    }
+
     async initialize(env) {
         const chatterEl = document.querySelector(".o_portal_chatter");
         if (chatterEl) {
@@ -79,14 +95,8 @@ export class PortalChatterService {
                 }).mount(shadow);
             });
             this.token = props.portalSecurity.token;
-            await rpc(
-                "/portal/chatter_init",
-                { res_model: props.resModel, res_id: props.resId },
-                { silent: true }
-            ).then((data) => {
-                this.store.self = data;
-            });
         }
+        this.setUser(chatterEl);
     }
 }
 

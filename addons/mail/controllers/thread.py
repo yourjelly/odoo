@@ -117,7 +117,15 @@ class ThreadController(http.Controller):
 
     @http.route("/mail/message/update_content", methods=["POST"], type="json", auth="public")
     @add_guest_to_context
-    def mail_message_update_content(self, message_id, body, attachment_ids, attachment_tokens=None, partner_ids=None):
+    def mail_message_update_content(
+            self,
+            message_id,
+            body,
+            attachment_ids,
+            attachment_tokens=None,
+            partner_ids=None,
+            **kwargs
+    ):
         guest = request.env["mail.guest"]._get_guest_from_context()
         guest.env["ir.attachment"].browse(attachment_ids)._check_attachments_access(attachment_tokens)
         message_sudo = guest.env["mail.message"].browse(message_id).sudo().exists()

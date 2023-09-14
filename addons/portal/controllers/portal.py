@@ -2,7 +2,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import base64
-import json
 import math
 import re
 
@@ -16,6 +15,7 @@ from odoo.tools import consteq
 # --------------------------------------------------
 # Misc tools
 # --------------------------------------------------
+
 
 def pager(url, total, page=1, step=30, scope=5, url_args=None):
     """ Generate a dict with required value to render `website.pager` template.

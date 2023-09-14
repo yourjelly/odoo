@@ -29,7 +29,7 @@ class ProjectSharingChatter(PortalChatter):
             raise Forbidden()
         return task[task._mail_post_token_field]
 
-    # ============================================================ #
+# ============================================================ #
     # Note concerning the methods portal_chatter_(post/fetch)
     # ============================================================ #
     #

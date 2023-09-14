@@ -20,23 +20,30 @@ registry.category('web_tour.tours').add('course_reviews', {
     trigger: ".o-mail-Chatter-content:not(:has(o-mail-Message-content))",
     run: function() {},
 }, {
+    shadow_dom: "#ratingComposerRoot",
     trigger: 'span:contains("Add Review")',
     // If it fails here, it means the log note is considered as a review
 }, {
-    trigger: 'div.o_portal_chatter_composer_body textarea',
-    extra_trigger: 'div.modal_shown',
+    shadow_dom: "#ratingComposerRoot",
+    trigger: ".o-mail-Composer-input",
     run: "edit Great course!",
-    in_modal: false,
 }, {
-    trigger: 'button.o_portal_chatter_composer_btn',
-    in_modal: false,
+    shadow_dom: "#ratingComposerRoot",
+    trigger: ".o-mail-Composer-send:enabled",
 }, {
     trigger: 'a[id="review-tab"]',
+    run: 'click',
 }, {
+    shadow_dom: "#ratingComposerRoot",
     trigger: 'span:contains("Edit Review")',
     // If it fails here, it means the system is allowing you to add another review.
 }, {
-    trigger: "div.o_portal_chatter_composer_body textarea:value(Great course!)",
-    run: function() {},
+    shadow_dom: "#ratingComposerRoot",
+    trigger: '.o-mail-Composer-input',
+    run: function() {
+        if (this.anchor.value !== "Great course!") {
+            throw new Error("Composer should contain previous message body.");
+        }
+    },
 }
 ]});
