@@ -12,25 +12,40 @@
                     <t t-set-slot="content">
                         <t t-if="printItems.length">
                             <Dropdown t-if="printItems.length > 1">
-                                <button><i class="fa fa-print me-1"/> Print</button>
-
+                                <button>
+                                    <i class="fa fa-print me-1"/> Print
+                                </button>
                                 <t t-set-slot="content">
-                                    <t t-foreach="cogItems" t-as="item" t-key="item.key">
-                                        <t t-if="currentGroup !== null and currentGroup !== item.groupNumber">
-                                            <div role="separator" class="dropdown-divider"/>
-                                        </t>
-
-                                        <t t-if="item.Component" t-component="item.Component" t-props="item.props"/>
-
-                                        <DropdownItem t-else="" class="'o_menu_item'" onSelected="() => this.onItemSelected(item)">
-                                            <i t-if="item.icon" t-att-class="item.icon" class="fa-fw oi-fw me-1"/>
-                                            <t t-esc="item.description"/>
-                                        </DropdownItem>
-
-                                        <t t-set="currentGroup" t-value="item.groupNumber"/>
-                                    </t>
+                                    <DropdownItem
+                                        t-foreach="printItems"
+                                        t-as="item"
+                                        t-key="item.key"
+                                        class="'o_menu_item'"
+                                        onSelected="() => this.onItemSelected(item)"
+                                    >
+                                        <t t-esc="item.description"/>
+                                    </DropdownItem>
                                 </t>
                             </Dropdown>
+
+                            <DropdownItem t-else="" class="'o_menu_item'" onSelected="() => this.onItemSelected(printItems[0])">
+                                <i class="fa fa-print me-1"/> <t t-out="printItems[0].description"/>
+                            </DropdownItem>
+                        </t>
+
+                        <t t-foreach="cogItems" t-as="item" t-key="item.key">
+                            <t t-if="currentGroup !== null and currentGroup !== item.groupNumber">
+                                <div role="separator" class="dropdown-divider"/>
+                            </t>
+
+                            <t t-if="item.Component" t-component="item.Component" t-props="item.props"/>
+
+                            <DropdownItem t-else="" class="'o_menu_item'" onSelected="() => this.onItemSelected(item)">
+                                <i t-if="item.icon" t-att-class="item.icon" class="fa-fw oi-fw me-1"/>
+                                <t t-esc="item.description"/>
+                            </DropdownItem>
+
+                            <t t-set="currentGroup" t-value="item.groupNumber"/>
                         </t>
                     </t>
                 </Dropdown>

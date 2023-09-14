@@ -22,6 +22,7 @@
                         <t t-if="!element.domain">
                             <span class="fa fa-warning me-2 text-warning"/>
                         </t>
+                        <t t-out="element.name"/>
                     </DropdownItem>
                 </t>
             </t>
