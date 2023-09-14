@@ -814,6 +814,91 @@ class PurchaseOrder(models.Model):
             ('mail_reminder_confirmed', '=', False)
         ]).filtered(lambda p: p.mapped('order_line.product_id.product_tmpl_id.type') != ['service'])
 
+    def _get_product_catalog_domain(self):
+        """Get the domain to search for products in the catalog.
+
+        For a model that uses products that has to be hidden in the catalog, it must override this
+        method and extend the appropriate domain.
+        :returns: A list of tuples that represents a domain.
+        :rtype: list
+        """
+        return [
+            ('purchase_ok', '=', True),
+            ('company_id', 'in', [self.company_id.id, False]),
+        ]
+
+    def _get_product_catalog_order_line_info(self, product_ids, **kwargs):
+        order_line_info = {}
+        for product, lines in groupby(
+            self.order_line.filtered(lambda line: not line.display_type),
+            lambda line: line.product_id
+        ):
+            if product.id not in product_ids:
+                continue
+
+            purchase_order_lines = self.env['purchase.order.line'].browse(line.id for line in lines)
+            order_line_info[product.id] = purchase_order_lines._get_catalog_info()
+            product_ids.remove(product.id)
+
+        default_data = self.env['purchase.order.line']._get_catalog_info()
+        default_data['readOnly'] = self._is_readonly()
+
+        products = self.env['product.product'].browse(product_ids) - self.order_line.product_id
+        for product in products:
+            product_data = {**default_data, **self._get_product_price_and_data(product)}
+            order_line_info.update({product.id: product_data})
+        return order_line_info
+
+    def _get_product_price_and_data(self, product):
+        """ Fetch the product's data used by the purchase's catalog.
+
+        :return: the product's price and the minimum quantity to buy and the
+                 product's packaging data is appliant
+        :rtype: dict
+        """
+        self.ensure_one()
+        product_infos = {
+            'price': product.standard_price,
+            'uom': {
+                'display_name': product.uom_id.display_name,
+                'id': product.uom_id.id,
+            },
+        }
+        if product.uom_id != product.uom_po_id:
+            product_infos['purchase_uom'] = {
+                'display_name': product.uom_po_id.display_name,
+                'id': product.uom_po_id.id,
+            }
+        params = {'order_id': self}
+        # Check if there is a price and a minimum quantity for the order's vendor.
+        seller = product._select_seller(
+            partner_id=self.partner_id,
+            quantity=None,
+            date=self.date_order and self.date_order.date(),
+            uom_id=product.uom_id,
+            ordered_by='min_qty',
+            params=params
+        )
+        if seller:
+            product_infos.update(
+                price=seller.price,
+                min_qty=seller.min_qty,
+            )
+        # Check if the product uses some packaging.
+        packaging = self.env['product.packaging'].search(
+            [('product_id', '=', product.id), ('purchase', '=', True)], limit=1
+        )
+        if packaging:
+            qty = packaging.product_uom_id._compute_quantity(packaging.qty, product.uom_po_id)
+            product_infos.update(
+                packaging={
+                    'id': packaging.id,
+                    'name': packaging.display_name,
+                    'qty': qty,
+                }
+            )
+        return product_infos
+
     def get_confirm_url(self, confirm_type=None):
         """Create url for confirm reminder or purchase reception email for sending
         in mail."""
@@ -871,6 +956,48 @@ class PurchaseOrder(models.Model):
         for line, date in updated_dates:
             line._update_date_planned(date)
 
+    def _update_order_line_info(self, product_id, **kwargs):
+        """ Update purchase order line information for a given product or create
+        a new one if none exists yet.
+        :param int product_id: The product, as a `product.product` id.
+        :return: The unit price of the product, based on the pricelist of the
+                 purchase order and the quantity selected.
+        :rtype: float
+        """
+        self.ensure_one()
+        quantity = kwargs.get('quantity', 0)
+        product_packaging_qty = kwargs.get('product_packaging_qty', False)
+        product_packaging_id = kwargs.get('product_packaging_id', False)
+        pol = self.order_line.filtered(lambda line: line.product_id.id == product_id)
+        if pol:
+            if product_packaging_qty:
+                pol.product_packaging_id = product_packaging_id
+                pol.product_packaging_qty = product_packaging_qty
+            elif quantity != 0:
+                pol.product_qty = quantity
+            elif self.state in ['draft', 'sent']:
+                price_unit = self._get_product_price_and_data(pol.product_id)['price']
+                pol.unlink()
+                return price_unit
+            else:
+                pol.product_qty = 0
+        elif quantity > 0:
+            pol = self.env['purchase.order.line'].create({
+                'order_id': self.id,
+                'product_id': product_id,
+                'product_qty': quantity,
+                'sequence': ((self.order_line and self.order_line[-1].sequence + 1) or 10),  # put it at the end of the order
+            })
+            seller = pol.product_id._select_seller(
+                partner_id=pol.partner_id,
+                quantity=pol.product_qty,
+                date=pol.order_id.date_order and pol.order_id.date_order.date() or fields.Date.context_today(pol),
+                uom_id=pol.product_uom)
+            if seller:
+                # Fix the PO line's price on the seller's one.
+                pol.price_unit = seller.price
+        return pol.price_unit
+
     def _create_update_date_activity(self, updated_dates):
         note = Markup('<p>%s</p>\n') % _('%s modified receipt dates for the following products:', self.partner_id.name)
         for line, date in updated_dates:
@@ -907,3 +1034,13 @@ class PurchaseOrder(models.Model):
         if 'reminder_date_before_receipt' in vals:
             partner_values['reminder_date_before_receipt'] = vals.pop('reminder_date_before_receipt')
         return vals, partner_values
+
+    def _is_readonly(self):
+        """ Return whether the purchase order is read-only or not based on the state.
+        A purchase order is considered read-only if its state is 'cancel'.
+
+        :return: Whether the purchase order is read-only or not.
+        :rtype: bool
+        """
+        self.ensure_one()
+        return self.state == 'cancel'

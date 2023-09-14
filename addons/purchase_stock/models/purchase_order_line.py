@@ -144,6 +144,13 @@ class PurchaseOrderLine(models.Model):
 
         return super().unlink()
 
+    def action_add_from_catalog(self):
+        # Replaces the product's kanban view by the purchase specific one.
+        action = super().action_add_from_catalog()
+        kanban_view_id = self.env.ref('purchase_stock.product_view_kanban_catalog_purchase_only').id
+        action['views'][0] = (kanban_view_id, 'kanban')
+        return action
+
     # --------------------------------------------------
     # Business methods
     # --------------------------------------------------

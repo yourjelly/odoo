@@ -1805,6 +1805,46 @@ class SaleOrder(models.Model):
 
         return generated_invoices
 
+    def _get_product_catalog_order_line_info(self, product_ids, **kwargs):
+        """ Returns products information to be shown in the catalog.
+        :param list product_ids: The products currently displayed in the product catalog, as a list
+                                 of `product.product` ids.
+        :rtype: dict
+        :return: A dict with the following structure:
+            {
+                'productId': int
+                'quantity': float (optional)
+                'price': float
+                'readOnly': bool (optional)
+            }
+        """
+        order_line_info = {}
+        for product, lines in groupby(
+            self.order_line.filtered(lambda line: not line.display_type),
+            lambda line: line.product_id
+        ):
+            if product.id not in product_ids:
+                continue
+
+            sale_order_lines = self.env['sale.order.line'].browse(line.id for line in lines)
+            order_line_info[product.id] = sale_order_lines._get_catalog_info(**kwargs)
+            product_ids.remove(product.id)
+
+        default_data = self.env['sale.order.line']._get_catalog_info(**kwargs)
+        default_data['readOnly'] = self._is_readonly() if self else False
+
+        pricelist = self.pricelist_id._get_products_price(
+            quantity=1.0,
+            products=self.env['product.product'].browse(product_ids),
+            currency=self.currency_id,
+            date=self.date_order,
+        )
+        for product_id, price in pricelist.items():
+            product_data = {**default_data, 'price': price}
+            order_line_info.update({product_id: product_data})
+
+        return order_line_info
+
     def _get_product_documents(self):
         self.ensure_one()
 
@@ -1820,6 +1860,40 @@ class SaleOrder(models.Model):
                 document.attached_on == 'quotation'
                 or (self.state == 'sale' and document.attached_on == 'sale_order')
         )
+
+    def _update_order_line_info(self, product_id, **kwargs):
+        """ Update sale order line information for a given product or create a
+        new one if none exists yet.
+        :param int product_id: The product, as a `product.product` id.
+        :return: The unit price of the product, based on the pricelist of the
+                 sale order and the quantity selected.
+        :rtype: float
+        """
+        quantity = kwargs.get('quantity', 0)
+        sol = self.order_line.filtered(lambda line: line.product_id.id == product_id)
+        if sol:
+            if quantity != 0:
+                sol.product_uom_qty = quantity
+            elif self.state in ['draft', 'sent']:
+                price_unit = self.pricelist_id._get_product_price(
+                    product=sol.product_id,
+                    quantity=1.0,
+                    currency=self.currency_id,
+                    date=self.date_order,
+                    **kwargs,
+                )
+                sol.unlink()
+                return price_unit
+            else:
+                sol.product_uom_qty = 0
+        elif quantity > 0:
+            sol = self.env['sale.order.line'].create({
+                'order_id': self.id,
+                'product_id': product_id,
+                'product_uom_qty': quantity,
+                'sequence': ((self.order_line and self.order_line[-1].sequence + 1) or 10),  # put it at the end of the order
+            })
+        return sol.price_unit
 
     #=== HOOKS ===#
 

@@ -341,7 +341,7 @@ class SaleOrderLine(models.Model):
         extra_context.update(warehouse=order.warehouse_id.id)
         return extra_context
 
-    def _get_catalog_info(self):
+    def _get_catalog_info(self, **kwargs):
         """ Override of `sale` to add the delivered quantity.
 
         :rtype: dict
@@ -353,7 +353,7 @@ class SaleOrderLine(models.Model):
                 'readOnly': bool,
             }
         """
-        res = super()._get_catalog_info()
+        res = super()._get_catalog_info(**kwargs)
         res['deliveredQty'] = sum(
             self.mapped(
                 lambda line: line.product_uom._compute_quantity(
