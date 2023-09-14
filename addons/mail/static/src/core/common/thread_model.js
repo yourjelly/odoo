@@ -773,6 +773,10 @@ export class Thread extends Record {
         if (this.model === "mail.box") {
             return `/mail/${this.id}/messages`;
         }
+        return this.fetchRouteChatter;
+    }
+
+    get fetchRouteChatter() {
         return "/mail/thread/messages";
     }
 
@@ -990,6 +994,7 @@ export class Thread extends Record {
             mentionedChannels = [],
             mentionedPartners = [],
             cannedResponseIds,
+            extraData,
         } = {}
     ) {
         let tmpMsg;
@@ -1001,6 +1006,7 @@ export class Thread extends Record {
             mentionedChannels,
             mentionedPartners,
             thread: this,
+            extraData,
         });
         const tmpId = this.store.getNextTemporaryId();
         params.context = { ...user.context, ...params.context, temporary_id: tmpId };
