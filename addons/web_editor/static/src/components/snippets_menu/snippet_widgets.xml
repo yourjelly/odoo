@@ -83,7 +83,8 @@
                 <t t-slot="title"/>
             </we-title>
             <div>
-                <input type="text" class="text-end"
+                <input type="text"
+                       t-att-class="this.props.unit and 'text-end'"
                        t-att-value="this.state.inputValue"
                        t-on-input="onInput"
                        t-on-blur="onBlur"
