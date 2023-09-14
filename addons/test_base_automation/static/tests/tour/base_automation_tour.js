@@ -231,10 +231,10 @@ registry.category("web_tour.tours").add("test_open_automation_from_grouped_kanba
     test: true,
     steps: () => [
         {
-            trigger: ".o_kanban_view .o-dropdown.o_kanban_config button",
+            trigger: ".o_kanban_view .o_kanban_config button.dropdown-toggle",
         },
         {
-            trigger: ".o_kanban_view .o-dropdown.o_kanban_config .o_column_automations",
+            trigger: ".dropdown-menu .o_column_automations",
         },
         {
             trigger: ".o_base_automation_kanban_view .o_control_panel button.o-kanban-button-new",

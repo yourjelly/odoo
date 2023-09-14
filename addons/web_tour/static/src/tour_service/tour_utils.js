@@ -578,7 +578,7 @@ export const stepUtils = {
                 },
             },
             {
-                trigger: `.o_statusbar_buttons button:enabled:contains('${innerTextButton}')`,
+                trigger: `.o_statusbar_buttons button:enabled:contains('${innerTextButton}'), .dropdown-item button:enabled:contains('${innerTextButton}')`,
                 content: description,
                 position: "bottom",
             },
