@@ -20,7 +20,7 @@ stepUtils.openBurgerMenu(".o_breadcrumb .active:contains('Quotations')"),
     content: _t("Let's create products."),
     position: "bottom",
 }, {
-    trigger: ".o_menu_sections .dropdown-item:contains('Products'), nav.o_burger_menu_content li[data-menu-xmlid='sale.menu_product_template_action']",
+    trigger: ".dropdown-item:contains('Products'), nav.o_burger_menu_content li[data-menu-xmlid='sale.menu_product_template_action']",
     content: _t("Let's create products."),
     position: "bottom"
 }, {
@@ -79,7 +79,7 @@ stepUtils.openBurgerMenu(".o_breadcrumb .active:contains('Quotations')"),
 },
 stepUtils.autoExpandMoreButtons('.o_form_saved'),
 {
-    trigger: ".o-form-buttonbox .oe_stat_button div[name=bom_count]",
+    trigger: ".oe_stat_button div[name=bom_count]",
     extra_trigger: '.o_form_saved',
     content: _t('See Bill of material'),
     position: 'bottom',
@@ -503,7 +503,7 @@ stepUtils.autoExpandMoreButtons('.o_form_saved'),
     position: "bottom",
 }, {
     mobile: true,
-    trigger: ".o_statusbar_status .btn:contains(Proposition)",
+    trigger: ".dropdown-item:contains('Proposition')",
     content: _t("Change status from New to proposition."),
     position: "bottom",
 },
@@ -625,7 +625,7 @@ stepUtils.openBurgerMenu(".o_breadcrumb .active:contains('Inventory Overview')")
     content: _t("Go to Configuration"),
     position: "bottom"
 }, {
-    trigger: ".o_menu_sections .dropdown-item[data-menu-xmlid='stock.menu_reordering_rules_config'], nav.o_burger_menu_content li[data-menu-xmlid='stock.menu_reordering_rules_config']",
+    trigger: ".dropdown-item[data-menu-xmlid='stock.menu_reordering_rules_config'], nav.o_burger_menu_content li[data-menu-xmlid='stock.menu_reordering_rules_config']",
     content: _t("Reordering Rules"),
     position: "bottom"
 }, {
@@ -699,8 +699,8 @@ stepUtils.openBurgerMenu(".o_breadcrumb .active:contains('OP/')"),
     position: 'bottom',
 },
 ...stepUtils.statusbarButtonsSteps('Confirm Order', _t("Confirm quotation")),
-...stepUtils.statusbarButtonsSteps('Receive Products', _t("Receive Product"), ".o_statusbar_status .btn.dropdown-toggle:contains('Purchase Order')"),
-...stepUtils.statusbarButtonsSteps('Validate', _t("Validate"), ".o_statusbar_status .btn.dropdown-toggle:contains('Ready')"),
+...stepUtils.statusbarButtonsSteps('Receive Products', _t("Receive Product"), ".o_statusbar_status .btn:contains('Purchase Order')"),
+...stepUtils.statusbarButtonsSteps('Validate', _t("Validate"), ".o_statusbar_status .btn:contains('Ready')"),
 {
     trigger: ".modal-footer .btn-primary",
     extra_trigger: ".modal-dialog",
@@ -711,15 +711,15 @@ stepUtils.openBurgerMenu(".o_breadcrumb .active:contains('OP/')"),
     content: _t('go back to the purchase order'),
     position: 'bottom',
 },
-...stepUtils.statusbarButtonsSteps('Create Bill', _t('go to Vendor Bills'), ".o_statusbar_status .btn.dropdown-toggle:contains('Purchase Order')"),
+...stepUtils.statusbarButtonsSteps('Create Bill', _t('go to Vendor Bills'), ".o_statusbar_status .btn:contains('Purchase Order')"),
 {
     trigger:".o_field_widget[name=invoice_date] input",
     extra_trigger: ".o_form_label .o_field_widget:contains('Vendor Bill')",
     content: _t('Set the invoice date'),
     run: "text 01/01/2020",
 },
-...stepUtils.statusbarButtonsSteps('Confirm', _t("Try to send it to email"), ".o_statusbar_status .btn.dropdown-toggle:contains('Draft')"),
-...stepUtils.statusbarButtonsSteps('Register Payment', _t("Register Payment"), ".o_statusbar_status .btn.dropdown-toggle:contains('Posted')"),
+...stepUtils.statusbarButtonsSteps('Confirm', _t("Try to send it to email"), ".o_statusbar_status .btn:contains('Draft')"),
+...stepUtils.statusbarButtonsSteps('Register Payment', _t("Register Payment"), ".o_statusbar_status .btn:contains('Posted')"),
 {
     trigger: ".modal-footer .btn-primary",
     content: _t("Validate"),
@@ -738,7 +738,7 @@ stepUtils.openBurgerMenu(".o_breadcrumb .active:contains('Manufacturing Orders')
     content: _t('Click on Operations menuitem'),
     position: 'bottom',
 }, {
-    trigger: ".o_menu_sections .dropdown-item[data-menu-xmlid='mrp.menu_mrp_production_action'], nav.o_burger_menu_content li[data-menu-xmlid='mrp.menu_mrp_production_action']",
+    trigger: ".dropdown-item[data-menu-xmlid='mrp.menu_mrp_production_action'], nav.o_burger_menu_content li[data-menu-xmlid='mrp.menu_mrp_production_action']",
     content: _t('Open manufacturing orders'),
     position: 'bottom',
 }, {
@@ -785,7 +785,7 @@ stepUtils.openBurgerMenu(".o_breadcrumb .active:contains('Quotations')"),
     content: _t("Go to Sales menu"),
     position: "bottom"
 }, {
-    trigger: ".o_menu_sections .dropdown-item[data-menu-xmlid='sale.menu_sale_order'], nav.o_burger_menu_content li[data-menu-xmlid='sale.menu_sale_order']",
+    trigger: ".dropdown-item[data-menu-xmlid='sale.menu_sale_order'], nav.o_burger_menu_content li[data-menu-xmlid='sale.menu_sale_order']",
     content: _t("Go to the sales orders"),
     position: "bottom"
 }, {
@@ -804,12 +804,12 @@ stepUtils.openBurgerMenu(".o_breadcrumb .active:contains('Quotations')"),
 stepUtils.mobileModifier(stepUtils.autoExpandMoreButtons('.o_control_panel .o_breadcrumb:contains("S0")')),
 {
     mobile: false,
-    trigger: '.o-form-buttonbox .oe_stat_button:has(div[name=tasks_count])',
+    trigger: '.oe_stat_button:has(div[name=tasks_count])',
     content: _t('See Tasks'),
     position: 'right',
 }, {
     mobile: true,
-    trigger: '.o-form-buttonbox .oe_stat_button:has(div[name=tasks_count])',
+    trigger: '.oe_stat_button:has(div[name=tasks_count])',
     extra_trigger: '.o_control_panel .o_breadcrumb:contains("S0")',
     content: _t('See Tasks'),
     position: 'bottom',
@@ -869,7 +869,7 @@ stepUtils.mobileModifier(stepUtils.autoExpandMoreButtons('.o_control_panel .o_br
     position: "bottom",
 },
 ...stepUtils.statusbarButtonsSteps('Confirm', _t("Validate"), ".o_breadcrumb .active:contains('Draft Invoice')"),
-...stepUtils.statusbarButtonsSteps('Register Payment', _t("Register Payment"), ".o_statusbar_status .btn.dropdown-toggle:contains('Posted')"),
+...stepUtils.statusbarButtonsSteps('Register Payment', _t("Register Payment"), ".o_statusbar_status .btn:contains('Posted')"),
 {
     trigger: ".modal-footer .btn-primary",
     content: _t("Validate"),
