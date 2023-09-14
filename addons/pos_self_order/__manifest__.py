@@ -26,7 +26,9 @@
     "assets": {
         # Assets
         "pos_self_order.assets_common": [
+            "pos_self_order/static/src/kiosk/primary_variables.scss",
             "pos_self_order/static/src/kiosk/bootstrap_overridden.scss",
+
             ("include", "web._assets_helpers"),
             ("include", "web._assets_backend_helpers"),
             ("include", "web._assets_primary_variables"),
@@ -35,7 +37,10 @@
             "web/static/lib/bootstrap/scss/_variables.scss",
             ("include", "web._assets_bootstrap"),
             ("include", "web._assets_bootstrap_backend"),
+
             ('include', 'web._assets_core'),
+            ('remove', 'web/static/src/core/**/*.scss'),
+
             ("remove", "web/static/src/core/browser/router_service.js"),
             ("remove", "web/static/src/core/debug/**/*"),
             "web/static/src/views/fields/formatters.js",

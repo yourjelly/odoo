@@ -1,3 +1,17 @@
+:root {
+  @include o-kiosk-1k() {
+    --root-font-size: #{$o-kiosk-font-size-1k};
+  }
+
+  @include o-kiosk-2k() {
+    --root-font-size: #{$o-kiosk-font-size-2k};
+  }
+
+  @include o-kiosk-4k() {
+    --root-font-size: #{$o-kiosk-font-size-4k};
+  }
+}
+
 html,
 body {
   width: 100%;
@@ -6,7 +20,6 @@ body {
   padding: 0;
   box-sizing: border-box;
   overflow: hidden;
-  font-size: clamp(.75rem, 1.25rem, 1.50em);
   -webkit-user-select: none !important;
   -ms-user-select: none !important;
   user-select: none !important;

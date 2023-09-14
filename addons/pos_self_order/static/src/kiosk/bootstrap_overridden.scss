@@ -1,2 +1,24 @@
-$border-radius:           .65rem !default;
-$border-radius-lg:        .85rem  !default;
+$font-size-root: $o-kiosk-font-size-base !default; // ~16px
+$font-size-base: 1rem !default;
+$font-size-lg: 1.5rem !default;
+
+
+$spacer: 1rem !default;
+$spacers: (
+    0: 0,
+    1: $spacer * .25,
+    2: $spacer * .5,
+    3: $spacer,
+    4: $spacer * 1.5,
+    5: $spacer * 3,
+) !default;
+
+
+$border-radius: .65rem !default;
+$border-radius-lg: .85rem  !default;
+
+$input-btn-padding-y: 1.5rem !default;
+$input-btn-padding-x: 2rem !default;
+
+$input-btn-padding-y-lg: 2rem !default;
+$input-btn-padding-x-lg: 3rem !default;

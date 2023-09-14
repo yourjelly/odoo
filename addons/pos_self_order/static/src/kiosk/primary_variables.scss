@@ -1,0 +1,89 @@
+$o-kiosk-1k-multiplier: 1.25 !default;
+$o-kiosk-2k-multiplier:  2 !default;
+$o-kiosk-4k-multiplier:  2.6 !default;
+
+$o-kiosk-font-size-base: 1rem !default;
+
+$o-kiosk-font-size-1k: $o-kiosk-font-size-base * $o-kiosk-1k-multiplier !default;
+$o-kiosk-font-size-2k: $o-kiosk-font-size-base * $o-kiosk-2k-multiplier !default;
+$o-kiosk-font-size-4k: $o-kiosk-font-size-base * $o-kiosk-4k-multiplier !default;
+
+$o-kiosk-interaction-area: 2.25rem !default;
+$o-kiosk-interaction-area-tv: $o-kiosk-interaction-area * $o-kiosk-1k-multiplier !default;
+
+$o-kiosk-btn-border-width: 1px !default;
+$o-kiosk-btn-border-width-tv: 2px !default;
+
+// Mirror enterprise grayscale
+$o-white: #FFF !default;
+$o-black: #000 !default;
+
+$o-gray-100: #F9FAFB !default;
+$o-gray-200: #e7e9ed !default;
+$o-gray-300: #d8dadd !default;
+$o-gray-400: #9a9ca5 !default;
+$o-gray-500: #7c7f89 !default;
+$o-gray-600: #5f636f !default;
+$o-gray-700: #374151 !default;
+$o-gray-800: #1F2937 !default;
+$o-gray-900: #111827 !default;
+
+
+// Buttons
+// Map of customized values for each button. If a button's design is defined
+// here, the relative values will take priority over default BS ones.
+// Notice: each map's entry is passed directly to the Bootstrap mixin, meaning
+// that all states must be defined, there can't be omissions.
+$o-btns-bs-override: () !default;
+$o-btns-bs-override: map-merge((
+    "light": (
+        background: $o-white,
+        border: $o-gray-300,
+        color: $o-gray-700,
+
+        hover-background: $o-white,
+        hover-border: var(--companyColor),
+        hover-color: $o-gray-900,
+
+        active-background:  $o-white,
+        active-border: var(--companyColor),
+        active-color: $o-gray-900,
+    ),
+), $o-btns-bs-override);
+
+// Mixins
+@mixin o-kiosk-pc() {
+    @media #{screen and (max-width: 1279px), (max-height: 1279px)} {
+        @content;
+    }
+}
+
+@mixin o-kiosk-1k() {
+    @media #{screen and (min-width: 1281px), (min-height: 1281px)} {
+        @content;
+    }
+}
+
+@mixin o-kiosk-2k() {
+    @media #{screen and (min-width: 2200px), (min-height: 2200px)} {
+        @content;
+    }
+}
+
+@mixin o-kiosk-4k() {
+    @media #{screen and (min-width: 3839px), (min-height: 3839px)} {
+        @content;
+    }
+}
+
+@mixin o-kiosk-landscape() {
+    @media (orientation: landscape) {
+        @content;
+    }
+}
+
+@mixin o-kiosk-portrait() {
+    @media (orientation: portrait) {
+        @content;
+    }
+}
