@@ -3,6 +3,7 @@ import json
 from markupsafe import Markup
 from odoo import _, fields, models, api
 from odoo.tools import float_repr
+from odoo.exceptions import ValidationError
 from datetime import datetime
 from base64 import b64decode, b64encode
 from lxml import etree
@@ -118,6 +119,7 @@ class AccountMove(models.Model):
 
         return qr_code_str
 
+
     @api.depends('state', 'edi_document_ids.state')
     def _compute_edi_show_cancel_button(self):
         """
@@ -152,6 +154,10 @@ class AccountMove(models.Model):
         self.l10n_sa_uuid = uuid.uuid4()
         # We generate the XML content
         xml_content = edi_format._l10n_sa_generate_zatca_template(self)
+        if 'error' in xml_content:
+            self._l10n_sa_log_error(xml_content)
+            self.edi_document_ids.blocking_level = 'error'
+            return xml_content
         # Once the required values are generated, we hash the invoice, then use it to generate a Signature
         invoice_hash_hex = self.env['account.edi.xml.ubl_21.zatca']._l10n_sa_generate_invoice_xml_hash(xml_content).decode()
         self.l10n_sa_invoice_signature = edi_format._l10n_sa_get_digital_signature(self.journal_id.company_id,
@@ -189,6 +195,27 @@ class AccountMove(models.Model):
                     %s
                 </p>
             """) % (_('The invoice was accepted by ZATCA, but returned warnings. Please, check the response below:'), "<br/>".join([Markup("<b>%s</b> : %s") % (m['code'], m['message']) for m in response_data['validationResults']['warningMessages']]))
+        self.message_post(body=Markup("""
+            <div role='alert' class='alert alert-%s'>
+                <h4 class='alert-heading'>%s</h4>%s
+            </div>
+        """) % (bootstrap_cls, title, content))
+
+    def _l10n_sa_log_error(self, xml_content):
+        self.ensure_one()
+        bootstrap_cls, title = ("danger", _("Failed to generate Invoice UBL content"))
+        self.edi_document_ids.blocking_level = 'error'
+        xml_content = xml_content['error']
+
+        content = Markup("""
+                <p class='mb-0'>
+                    %s
+                </p>
+                <hr>
+                <p class='mb-0'>
+                    %s
+                </p>
+            """) % (_('Please, check the response below:'), xml_content)
         self.message_post(body=Markup("""
             <div role='alert' class='alert alert-%s'>
                 <h4 class='alert-heading'>%s</h4>%s

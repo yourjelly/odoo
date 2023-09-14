@@ -326,6 +326,13 @@ class AccountEdiFormat(models.Model):
             # the data that depends on it before submitting (UUID, XML content, signature)
             invoice.l10n_sa_chain_index = invoice.journal_id._l10n_sa_edi_get_next_chain_index()
             xml_content = invoice._l10n_sa_generate_unsigned_data()
+            if 'error' in xml_content:
+                invoice.l10n_sa_chain_index = False
+                return {
+                    invoice: {
+                        'response': xml_content
+                    }
+                }
 
         # Generate Invoice name for attachment
         attachment_name = self.env['account.edi.xml.ubl_21.zatca']._export_invoice_filename(invoice)
