@@ -67,14 +67,13 @@ export const tourService = {
             tours[name] = {
                 name: tour.saveAs || name,
                 get steps() {
-                    if(typeof tour.steps === "function") {
+                    if (typeof tour.steps === "function") {
                         return tour.steps().map((step) => {
                             step.shadow_dom = step.shadow_dom ?? tour.shadow_dom;
                             return step;
                         });
-                    }
-                    else {
-                        throw new Error(`tour.steps has to be a function that returns TourStep[]`)
+                    } else {
+                        throw new Error(`tour.steps has to be a function that returns TourStep[]`);
                     }
                 },
                 shadow_dom: tour.shadow_dom,
