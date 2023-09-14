@@ -6091,6 +6091,20 @@ class BaseModel(metaclass=MetaModel):
             return (self.company_ids & self.env.user.company_ids)[:1]
         return False
 
+    def _can_elevate_access(
+            self, field_name: str | None = None, access_token: str | None = None
+    ) -> bool:
+        """Check if extra access to a record is allowed in the context of displaying an image or
+        downloading a file. It could be overridden to bypass the ACLs.
+        :param Optional[str] field_name: image field name to check the access to
+        :param Optional[str] access_token: access token to use instead of the access rights and
+            access rules
+        :rtype: bool
+        :return: whether the extra access is allowed
+        """
+        self.ensure_one()
+        return False
+
     #
     # Instance creation
     #
