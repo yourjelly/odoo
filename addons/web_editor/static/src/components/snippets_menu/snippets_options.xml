@@ -98,4 +98,73 @@
             </t>
         </WeRow>
     </t>
+    <t t-name="web_editor.snippet_options_image_optimization_widgets">
+        <t t-set="filter_label">Filter</t>
+        <WeSelect class="indent and 'o_we_sublevel_2'">
+            <t t-set-slot="title"><t t-out="filter_label"/></t>
+            <WeButton glFilter="''">None</WeButton>
+            <WeButton glFilter="'blur'">Blur</WeButton>
+            <WeButton glFilter="'1977'">1977</WeButton>
+            <WeButton glFilter="'aden'">Aden</WeButton>
+            <WeButton glFilter="'brannan'">Brannan</WeButton>
+            <WeButton glFilter="'earlybird'">EarlyBird</WeButton>
+            <WeButton glFilter="'inkwell'">Inkwell</WeButton>
+            <WeButton glFilter="'maven'">Maven</WeButton>
+            <WeButton glFilter="'toaster'">Toaster</WeButton>
+            <WeButton glFilter="'walden'">Walden</WeButton>
+            <WeButton glFilter="'valencia'">Valencia</WeButton>
+            <WeButton glFilter="'xpro'">Xpro</WeButton>
+            <WeButton glFilter="'custom'" name="'custom_glfilter_opt'">Custom</WeButton>
+        </WeSelect>
+        <t t-set="color_label">Color</t>
+        <t t-set="saturation_label">Saturation</t>
+        <t t-set="contrast_label">Contrast</t>
+        <t t-set="brightness_label">Brightness</t>
+        <t t-set="sepia_label">Sepia</t>
+        <t t-set="blur_label">Blur</t>
+        <WeRow class="indent and 'o_we_sublevel_3' or 'o_we_sublevel_1'">
+            <t t-set-slot="title"><t t-out="color_label"/></t>
+            <WeSelect filterProperty="'blend'" dependencies="['custom_glfilter_opt']">
+                <WeButton customFilter="'normal'">Normal</WeButton>
+                <WeButton customFilter="'overlay'">overlay</WeButton>
+                <WeButton customFilter="'screen'">screen</WeButton>
+                <WeButton customFilter="'multiply'">multiply</WeButton>
+                <WeButton customFilter="'lighter'">add</WeButton>
+                <WeButton customFilter="'exclusion'">exclusion</WeButton>
+                <WeButton customFilter="'darken'">darken</WeButton>
+                <WeButton customFilter="'lighten'">lighten</WeButton>
+            </WeSelect>
+            <WeColorPicker dependencies="['custom_glfilter_opt']" customFilter="''" filterProperty="'filterColor'" excluded="'common, theme'"/>
+        </WeRow>
+        <WeRange class="indent and 'o_we_sublevel_3' or 'o_we_sublevel_1'" dependencies="['custom_glfilter_opt']"
+                 customFilter="''" filterProperty="'saturation'" min="-100" step="10">
+            <t t-set-slot="title"><t t-out="saturation_label"/></t>
+        </WeRange>
+        <WeRange class="indent and 'o_we_sublevel_3' or 'o_we_sublevel_1'" dependencies="['custom_glfilter_opt']"
+                 customFilter="''" filterProperty="'contrast'" min="-100" step="10">
+            <t t-set-slot="title"><t t-out="contrast_label"/></t>
+        </WeRange>
+        <WeRange class="indent and 'o_we_sublevel_3' or 'o_we_sublevel_1'" dependencies="['custom_glfilter_opt']"
+                 customFilter="''" filterProperty="'brightness'" min="-100" step="10">
+            <t t-set-slot="title"><t t-out="brightness_label"/></t>
+        </WeRange>
+        <WeRange class="indent and 'o_we_sublevel_3' or 'o_we_sublevel_1'" dependencies="['custom_glfilter_opt']"
+                 customFilter="''" filterProperty="'sepia'" step="5">
+            <t t-set-slot="title"><t t-out="sepia_label"/></t>
+        </WeRange>
+        <WeRange class="indent and 'o_we_sublevel_3' or 'o_we_sublevel_1'" dependencies="['custom_glfilter_opt']"
+                 customFilter="''" filterProperty="'blur'" max="2000" step="100">
+            <t t-set-slot="title"><t t-out="blur_label"/></t>
+        </WeRange>
+
+        <t t-set="format_label">Format</t>
+        <WeSelect class="indent and 'o_we_sublevel_2'" name="'format_select_opt'">
+            <t t-set-slot="title"><t t-out="format_label"/></t>
+        </WeSelect>
+
+        <t t-set="quality_label">Quality</t>
+        <WeRange class="indent and 'o_we_sublevel_2'" setQuality="''">
+            <t t-set-slot="title"><t t-out="quality_label"/></t>
+        </WeRange>
+    </t>
 </templates>
