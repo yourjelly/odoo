@@ -37,7 +37,7 @@ function createPropertyProxy(obj, propertyName, value) {
             if (prop === propertyName) {
                 return value;
             }
-            return obj[prop];
+            return Reflect.get(...arguments);
         },
         set: function (obj, prop, val) {
             if (prop === propertyName) {
@@ -112,6 +112,7 @@ export class SnippetOption extends Component {
         useSubEnv({
             validMethodNames: [
                 "selectClass",
+                "selectAttribute",
                 "selectDataAttribute",
                 "selectStyle",
                 "selectColorCombination",
@@ -139,20 +140,20 @@ export class SnippetOption extends Component {
             ) {
                 await this.updateUIVisibility();
             }
-            // This is the first updateUI, after updating the UI we can now start the option.
-            if (
-                nextProps.updateOptionsUIVisibilityCounter === 1 &&
-                this.props.updateOptionsUIVisibilityCounter === 0
-            ) {
-                this.env.mutex.exec(this.start.bind(this));
-            }
             // Because renders can be flushed if a parent updates a second time,
             // ensure we actually call onFocus/onBlur only once.
             // These two method should be deprecated in favor of a useEffect
             // on the prop. Since it's only related to UI things and not target
             // it should be handled by OWL and not by the SnippetOption itself.
             if (nextProps.visible !== this.visible) {
-                await (nextProps.visible && this.onFocus() || this.onBlur());
+                if (this.target.classList.contains("s_website_form_field_hidden_if") && this.toWatch) {
+                    debugger;
+                }
+                if (nextProps.visible) {
+                    await this.onFocus();
+                } else {
+                    await this.onBlur();
+                }
                 this.visible = nextProps.visible;
             }
         });
@@ -222,6 +223,40 @@ export class SnippetOption extends Component {
     selectDataAttribute(previewMode, widgetValue, params) {
         const value = this.selectAttributeHelper(widgetValue, params);
         this.target.dataset[params.attributeName] = value;
+    }
+    /**
+     * Default option method which allows to select a value and set it on the
+     * associated snippet as an attribute. The name of the attribute is
+     * given by the attributeName parameter.
+     *
+     * @param {boolean} previewMode - @see this.selectClass
+     * @param {string} widgetValue
+     * @param {Object} params
+     * @returns {Promise|undefined}
+     */
+    selectAttribute(previewMode, widgetValue, params) {
+        const value = this.selectAttributeHelper(widgetValue, params);
+        if (value) {
+            this.$target[0].setAttribute(params.attributeName, value);
+        } else {
+            this.$target[0].removeAttribute(params.attributeName);
+        }
+    }
+    /**
+     * Default option method which allows to select a value and set it on the
+     * associated snippet as a property. The name of the property is
+     * given by the propertyName parameter.
+     *
+     * @param {boolean} previewMode - @see this.selectClass
+     * @param {string} widgetValue
+     * @param {Object} params
+     */
+    selectProperty(previewMode, widgetValue, params) {
+        if (!params.propertyName) {
+            throw new Error('Property name missing');
+        }
+        const value = this.selectValueHelper(widgetValue, params);
+        this.$target[0][params.propertyName] = value;
     }
     selectStyle(previewMode, widgetValue, params) {
         // Disable all transitions for the duration of the method as many
@@ -527,7 +562,7 @@ export class SnippetOption extends Component {
      * @param {Object} widget - the widget which triggered the option change
      * @returns {Promise}
      */
-    async select(values, previewMode, widget, params) {
+    async select(values, previewMode, widget) {
         if (previewMode === true) {
             this.env.odooEditor.automaticStepUnactive("preview_option");
         }
@@ -543,7 +578,7 @@ export class SnippetOption extends Component {
                 }
                 obj = createPropertyProxy(this, 'target', $firstSubTarget[0]);
             }
-            const activeValue = params.activeValues?.[method];
+            const activeValue = widget.activeValues?.[method];
             if (!this[method]) {
                 throw new Error(_t("The Snippet Option does not have the method %s", method));
             }
@@ -582,6 +617,7 @@ export class SnippetOption extends Component {
             for (const method of widget.methodNames) {
                 const state = await this.computeWidgetState.call(obj, method, {
                     possibleValues: widget.possibleValues[method],
+                    activeValue: widget.activeValues?.[method],
                     ...widget.params,
                 });
                 widget.optionValues.set(method, state);
@@ -606,7 +642,16 @@ export class SnippetOption extends Component {
                 i++;
             }
             const proms = allSubWidgets.map(async (widget) => {
-                const show = await this.computeWidgetVisibility(widget.name || "", {
+                let obj = this;
+                if (widget.params.applyTo) {
+                    const $firstSubTarget = this.$(widget.params.applyTo).eq(0);
+                    if (!$firstSubTarget.length) {
+                        widget.toggleVisibility(false);
+                        return;
+                    }
+                    obj = createPropertyProxy(this, 'target', $firstSubTarget[0]);
+                }
+                const show = await this.computeWidgetVisibility.call(obj, widget.name || "", {
                     ...params,
                     possibleValues: widget.possibleValues,
                 });
@@ -649,17 +694,10 @@ export class SnippetOption extends Component {
         });
 
         await Promise.all(proms);
-        // TODO: Hide layouting elements. should be ok with parented visibility.
-    }
 
-    /**
-     * Callbacks used by widgets to notify an option of their visibility
-     *
-     * @param widgetId
-     * @param active
-     */
-    updateOptionVisibility(widgetId, active) {
-        this.widgetsVisibility[widgetId] = active;
+        const show = await this.computeVisibility();
+        this.props.toggleVisibility(show);
+        // TODO: Hide layouting elements. should be ok with parented visibility.
     }
     /**
      * Returns the string value that should be hold by the widget which is
@@ -876,6 +914,9 @@ export class SnippetOption extends Component {
             const firstOrLastChild = moveUpOrLeft ? ":first-child" : ":last-child";
             return !this.$target.is(firstOrLastChild);
         }
+        return true;
+    }
+    async computeVisibility() {
         return true;
     }
     /**
@@ -1123,7 +1164,7 @@ export class Sizing extends SnippetOption {
                     }
                     // Same as above but to the left/up.
                     if (prev !== dir.current && dd < (2 * dir.resize[1][prev] + dir.resize[1][dir.current]) / 3) {
-                        self.target.className = self.target.className.replace(dir.regClass, "")
+                        self.target.className = self.target.className.replace(dir.regClass, "");
                         self.target.classList.add(dir.resize[0][prev]);
                         dir.current = prev;
                         change = true;
@@ -2381,135 +2422,139 @@ export class CarouselHandler extends GalleryHandler {
     }
 }
 
-class SnippetTestOption extends SnippetOption {
-    setup() {
-        super.setup();
-        useSubEnv({
-            validMethodNames: [
-                ...this.env.validMethodNames,
-                "wait",
-                "test",
-                "testImg",
-                "testTimedate",
-                "testRange",
-                "testInput",
-                "testNotify",
-                "toggleButton",
-                "renderListItems",
-                "testMany2one",
-                "testMany2many",
-            ],
-        });
-        this.date = luxon.DateTime.now().ts;
-        this.range = "value1";
-        this.input = "auto";
-        this.records = [];
-        this.listItems = JSON.stringify([]);
-        this.many2oneState = "";
-        this.many2manyState = "[]";
-        for (let i = 1; i <= 10; i++) {
-            this.records.push(
-                {
-                    id: i,
-                    display_name: `Example ${i}`,
-                }
-            );
-        }
-    }
-    notify(name, data) {
-        console.log(name, data);
-    }
-    async wait(previewMode, widgetValue, params) {
-        const promise = new Promise((resolve, reject) => {
-            setTimeout(resolve, 1000);
-        });
-        await promise;
-    }
-    async test(previewMode, widgetValue, params) {}
-
-    testImg() {}
-    testTimedate(previewMode, widgetValue, params) {
-        this.date = widgetValue;
-    }
-    testRange(previewMode, widgetValue, params) {
-        this.range = widgetValue;
-    }
-    testInput(previewMode, widgetValue, params) {
-        this.input = widgetValue;
-    }
-    renderListItems(previewMode, widgetValue, params) {
-        this.listItems = widgetValue;
-    }
-    async testNotify(previewMode, widgetValue, params) {
-        await this.props.notifyOptions("SnippetTestOption", {
-            name: "test_notify",
-            data: {
-                target: this.target,
-            },
-        });
-    }
-    async toggleButton(previewMode, widgetValue, params) {
-        this.toggleButtonValue = widgetValue;
-    }
-    async testMany2one(previewMode, widgetValue, params) {
-        this.many2oneState = widgetValue;
-    }
-
-    async testMany2many(previewMode , widgetValue, params) {
-        this.many2manyState = widgetValue;
-    }
-    /**
-     * @override
-     */
-    computeWidgetState(methodName, params) {
-        if (methodName === "wait") {
-            return false;
-        }
-        if (methodName === "test") {
-            return false;
-        }
-        if (methodName === "testNotify") {
-            return false;
-        }
-        if (methodName === "testImg") {
-            return "/web/image/website.s_text_image_default_image";
-        }
-        if (methodName === "testTimedate") {
-            return this.date;
-        }
-        if (methodName === "testRange") {
-            return this.range;
-        }
-        if (methodName === "testInput") {
-            return this.input;
-        }
-        if (methodName === "toggleButton") {
-            return this.toggleButtonValue || "";
-        }
-        if (methodName === "renderListItems") {
-            return this.listItems;
-        }
-        if (methodName === "testMany2one") {
-            return this.many2oneState;
-        }
-        if (methodName === "testMany2many") {
-            return this.many2manyState;
-        }
-        return super.computeWidgetState(...arguments);
-    }
-}
-
-registry.category("snippets_options").add(
-    "TestOption",
-    {
-        component: SnippetTestOption,
-        selector: "section",
-        template: "web_editor.TestOption",
-    },
-    {
-        sequence: 15,
-    }
-);
+// class SnippetTestOption extends SnippetOption {
+//     setup() {
+//         super.setup();
+//         useSubEnv({
+//             validMethodNames: [
+//                 ...this.env.validMethodNames,
+//                 "wait",
+//                 "test",
+//                 "testImg",
+//                 "testTimedate",
+//                 "testRange",
+//                 "testInput",
+//                 "testNotify",
+//                 "toggleButton",
+//                 "renderListItems",
+//                 "testMany2one",
+//                 "testMany2many",
+//             ],
+//         });
+//         this.date = luxon.DateTime.now().ts;
+//         this.range = "value1";
+//         this.input = "auto";
+//         this.records = [];
+//         this.listItems = JSON.stringify([]);
+//         this.many2oneState = "";
+//         this.many2manyState = "[]";
+//         for (let i = 1; i <= 10; i++) {
+//             this.records.push(
+//                 {
+//                     id: i,
+//                     display_name: `Example ${i}`,
+//                 }
+//             );
+//         }
+//         this.visible = false;
+//     }
+//     notify(name, data) {
+//         console.log(name, data);
+//     }
+//     async wait(previewMode, widgetValue, params) {
+//         const promise = new Promise((resolve, reject) => {
+//             setTimeout(resolve, 1000);
+//         });
+//         await promise;
+//     }
+//     async test(previewMode, widgetValue, params) {}
+//
+//     testImg() {}
+//     testTimedate(previewMode, widgetValue, params) {
+//         this.date = widgetValue;
+//     }
+//     testRange(previewMode, widgetValue, params) {
+//         this.range = widgetValue;
+//     }
+//     testInput(previewMode, widgetValue, params) {
+//         this.input = widgetValue;
+//     }
+//     renderListItems(previewMode, widgetValue, params) {
+//         this.listItems = widgetValue;
+//     }
+//     async testNotify(previewMode, widgetValue, params) {
+//         await this.props.notifyOptions("SnippetTestOption", {
+//             name: "test_notify",
+//             data: {
+//                 target: this.target,
+//             },
+//         });
+//     }
+//     async toggleButton(previewMode, widgetValue, params) {
+//         this.toggleButtonValue = widgetValue;
+//     }
+//     async testMany2one(previewMode, widgetValue, params) {
+//         this.many2oneState = widgetValue;
+//     }
+//
+//     async testMany2many(previewMode , widgetValue, params) {
+//         this.many2manyState = widgetValue;
+//     }
+//     /**
+//      * @override
+//      */
+//     computeWidgetState(methodName, params) {
+//         if (methodName === "wait") {
+//             return false;
+//         }
+//         if (methodName === "test") {
+//             return false;
+//         }
+//         if (methodName === "testNotify") {
+//             return false;
+//         }
+//         if (methodName === "testImg") {
+//             return "/web/image/website.s_text_image_default_image";
+//         }
+//         if (methodName === "testTimedate") {
+//             return this.date;
+//         }
+//         if (methodName === "testRange") {
+//             return this.range;
+//         }
+//         if (methodName === "testInput") {
+//             return this.input;
+//         }
+//         if (methodName === "toggleButton") {
+//             return this.toggleButtonValue || "";
+//         }
+//         if (methodName === "renderListItems") {
+//             return this.listItems;
+//         }
+//         if (methodName === "testMany2one") {
+//             return this.many2oneState;
+//         }
+//         if (methodName === "testMany2many") {
+//             return this.many2manyState;
+//         }
+//         return super.computeWidgetState(...arguments);
+//     }
+//     computeVisibility() {
+//         return this.visible;
+//     }
+// }
+//
+// registry.category("snippets_options").add(
+//     "TestOption",
+//     {
+//         component: SnippetTestOption,
+//         selector: "section",
+//         template: "web_editor.TestOption",
+//     },
+//     {
+//         sequence: 15,
+//     }
+// );
 
 registry.category("snippets_options").add("s_hr", {
     selector: ".s_hr",

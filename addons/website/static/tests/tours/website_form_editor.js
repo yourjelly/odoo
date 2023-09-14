@@ -132,8 +132,8 @@
         // Drop a form builder snippet and configure it
         {
             content: "Drop the form snippet",
-            trigger: '#oe_snippets .oe_snippet:has(.s_website_form) .oe_snippet_thumbnail',
-            run: 'drag_and_drop iframe #wrap',
+            trigger: '#oe_snippets .oe_snippet[name="Form"] .oe_snippet_thumbnail',
+            run: 'drag_and_drop_native iframe #wrap',
         }, {
             content: "Select form by clicking on an input field",
             extra_trigger: 'iframe .s_website_form_field',
@@ -191,22 +191,25 @@
         ...addCustomField('one2many', 'checkbox', 'Products', true),
         {
             content: "Change Option 1 label",
-            trigger: 'we-list table input:eq(0)',
+            trigger: 'we-list table input[data-id="Option 1"]',
             run: 'text Iphone',
         }, {
             content: "Change Option 2 label",
-            trigger: 'we-list table input:eq(1)',
+            trigger: 'we-list table input[data-id="Option 2"]',
+            extra_trigger: 'we-list table input[data-display_name="Iphone"]',
             run: 'text Galaxy S',
         }, {
             content: "Change first Option 3 label",
-            trigger: 'we-list table input:eq(2)',
+            trigger: 'we-list table input[data-id="Option 3"]',
+            extra_trigger: 'we-list table input[data-display_name="Galaxy S"]',
             run: 'text Xperia',
         }, {
             content: "Click on Add new Checkbox",
             trigger: 'we-list we-button.o_we_list_add_optional',
+            extra_trigger: 'we-list table input[data-display_name="Xperia"]',
         }, {
             content: "Change added Option label",
-            trigger: 'we-list table input:eq(3)',
+            trigger: 'we-list table input[data-display_name="Entry"]',
             run: 'text Wiko Stairway',
         }, {
             content: "Check the resulting field",
@@ -233,22 +236,25 @@
         ...addCustomField('selection', 'radio', 'Service', true),
         {
             content: "Change Option 1 label",
-            trigger: 'we-list table input:eq(0)',
+            trigger: 'we-list table input[data-id="Option 1"]',
             run: 'text After-sales Service',
         }, {
             content: "Change Option 2 label",
-            trigger: 'we-list table input:eq(1)',
+            trigger: 'we-list table input[data-id="Option 2"]',
+            extra_trigger: 'we-list table input[data-display_name="After-sales Service"]',
             run: 'text Invoicing Service',
         }, {
             content: "Change first Option 3 label",
-            trigger: 'we-list table input:eq(2)',
+            trigger: 'we-list table input[data-id="Option 3"]',
+            extra_trigger: 'we-list table input[data-display_name="Invoicing Service"]',
             run: 'text Development Service',
         }, {
             content: "Click on Add new Checkbox",
             trigger: 'we-list we-button.o_we_list_add_optional',
+            extra_trigger: 'we-list table input[data-display_name="Development Service"]',
         }, {
             content: "Change last Option label",
-            trigger: 'we-list table input:eq(3)',
+            trigger: 'we-list table input[data-display_name="Entry"]',
             run: 'text Management Service',
         }, {
             content: "Mark the field as not required",
@@ -268,36 +274,39 @@
         // Customize custom selection field
         {
             content: "Change Option 1 Label",
-            trigger: 'we-list table input:eq(0)',
+            trigger: 'we-list table input[data-id="Option 1"]',
             run: 'text Germany',
         }, {
             content: "Change Option 2 Label",
-            trigger: 'we-list table input:eq(1)',
+            trigger: 'we-list table input[data-id="Option 2"]',
+            extra_trigger: 'we-list table input[data-display_name="Germany"]',
             run: 'text Belgium',
         }, {
             content: "Change first Option 3 label",
-            trigger: 'we-list table input:eq(2)',
+            trigger: 'we-list table input[data-id="Option 3"]',
+            extra_trigger: 'we-list table input[data-display_name="Belgium"]',
             run: 'text France',
         }, {
             content: "Click on Add new Checkbox",
             trigger: 'we-list we-button.o_we_list_add_optional',
+            extra_trigger: 'we-list table input[data-display_name="France"]',
         }, {
             content: "Change last Option label",
-            trigger: 'we-list table input:eq(3)',
+            trigger: 'we-list table input[data-display_name="Entry"]',
             run: 'text Canada',
         }, {
             content: "Remove Germany Option",
-            trigger: '.o_we_select_remove_option:eq(0)',
+            trigger: 'tr:has(input[data-display_name="Germany"]) .o_we_select_remove_option',
         }, {
             content: "Click on Add new Checkbox",
             trigger: 'we-list we-button.o_we_list_add_optional',
         }, {
             content: "Change last option label with a number",
-            trigger: 'we-list table input:eq(3)',
+            trigger: 'we-list table input[data-display_name="Entry"]',
             run: 'text 44 - UK',
         }, {
             content: "Check that the input value is the full option value",
-            trigger: 'we-list table input:eq(3)',
+            trigger: 'we-list table input[data-display_name="44 - UK"]',
             run: () => {
                 const addedOptionEl = document.querySelector('iframe.o_iframe').contentDocument.querySelector('.s_website_form_field select option[value="44 - UK"]');
                 if (!addedOptionEl) {
@@ -482,7 +491,7 @@
         {
             content: 'Change the Recipient Email',
             trigger: '[data-field-name="email_to"] input',
-            run: 'text test@test.test',
+            run: 'text_blur test@test.test',
         },
         ...addCustomField("char", "text", "''", false),
         ...addCustomField("char", "text", '""', false),

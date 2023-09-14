@@ -227,7 +227,7 @@
                     Height
                 </t>
             </t>
-            <WeButton name="'minheight_auto_opt'" selectClass="">
+            <WeButton name="'minheight_auto_opt'" selectClass="''">
                 <t t-set-slot="title">Fit content</t>
                 Auto
             </WeButton>

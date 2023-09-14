@@ -43,7 +43,6 @@ for (const snippet of snippetsNames) {
         run: function () {}, // it's a check
     }, {
         content: `Remove the ${snippet} snippet`, // Avoid bad perf if many snippets
-        buggyStep: true,
         trigger: "we-customizeblock-options:not(.d-none) we-button.oe_snippet_remove:last"
     }, {
         content: `click on 'BLOCKS' tab (${snippet})`,

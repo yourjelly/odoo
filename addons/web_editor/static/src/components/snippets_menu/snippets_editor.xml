@@ -42,7 +42,7 @@
                 <span t-out="this.state.name"/>
                 <we-top-button-group>
                     <t t-foreach="this.topOptions" t-as="option" t-key="option.props.id">
-                        <we-customizeblock-option t-att-data-name="option.name" t-att-class="{'d-none': !option.visible}">
+                        <we-customizeblock-option t-att-data-name="option.optionName" t-att-class="{'d-none': !option.props.visible, [`snippet-option-${option.optionName}`]: true}">
                             <t t-component="option.component" t-props="option.props"/>
                         </we-customizeblock-option>
                     </t>
@@ -60,7 +60,7 @@
                 </we-top-button-group>
             </we-title>
             <t t-foreach="this.options" t-as="option" t-key="option.props.id">
-                <we-customizeblock-option t-att-data-name="option.name" t-att-class="{'d-none': !option.props.visible}">
+                <we-customizeblock-option t-att-class="{'d-none': !option.props.visible, [`snippet-option-${option.optionName}`]: true}">
                     <t t-component="option.component" t-props="option.props"/>
                 </we-customizeblock-option>
             </t>

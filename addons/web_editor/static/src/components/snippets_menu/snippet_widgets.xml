@@ -13,6 +13,7 @@
     <t t-name="web_editor.WeButton">
         <we-button
                 class="o_we_user_value_widget"
+                t-att="this.dataAttrs"
                 t-att-class="this.cssClasses"
                 t-on-mouseenter="onMouseEnter"
                 t-on-mouseleave="onMouseLeave"
@@ -37,6 +38,7 @@
     </t>
     <t t-name="web_editor.WeCheckbox">
         <we-button class="o_we_user_value_widget o_we_checkbox_wrapper"
+                   t-att="this.dataAttrs"
                    t-att-class="this.cssClasses"
                    t-on-mouseenter="onMouseEnter"
                    t-on-mouseleave="onMouseLeave"
@@ -50,7 +52,7 @@
         </we-button>
     </t>
     <t t-name="web_editor.WeSelect">
-        <we-select class="o_we_user_value_widget" t-att-class="this.cssClasses">
+        <we-select class="o_we_user_value_widget" t-att-class="this.cssClasses" t-att="this.dataAttrs">
             <we-title t-if="props.slots?.title">
                 <t t-slot="title"/>
             </we-title>
@@ -78,7 +80,7 @@
         </we-button-group>
     </t>
     <t t-name="web_editor.WeInput">
-        <we-input class="o_we_user_value_widget" t-att-class="this.cssClasses">
+        <we-input class="o_we_user_value_widget" t-att-class="this.cssClasses" t-att="this.dataAttrs">
             <we-title t-if="props.slots?.title">
                 <t t-slot="title"/>
             </we-title>
@@ -88,6 +90,7 @@
                        t-on-input="onInput"
                        t-on-blur="onBlur"
                        t-on-keydown="onKeydown"
+                       t-on-change="onChange"
                        t-att-placeholder="this.props.placeholder"
                 />
                 <span t-out="this.props.unit"/>
@@ -95,7 +98,7 @@
         </we-input>
     </t>
     <t t-name="web_editor.WeColorPicker">
-        <we-select class="o_we_user_value_widget o_we_so_color_palette" t-att-class="this.cssClasses">
+        <we-select class="o_we_user_value_widget o_we_so_color_palette" t-att-class="this.cssClasses" t-att="this.dataAttrs">
             <we-title t-if="props.slots?.default">
                 <t t-slot="default"/>
             </we-title>
@@ -129,14 +132,14 @@
         </we-select>
     </t>
     <t t-name="web_editor.WeMulti">
-        <we-multi class="o_we_user_value_widget" t-att-class="this.cssClasses">
+        <we-multi class="o_we_user_value_widget" t-att-class="this.cssClasses" t-att="this.dataAttrs">
             <div>
                 <t t-slot="default"/>
             </div>
         </we-multi>
     </t>
     <t t-name="web_editor.WeSelectPager">
-        <we-select class="o_we_user_value_widget o_we_select_pager" t-att-class="this.cssClasses">
+        <we-select class="o_we_user_value_widget o_we_select_pager" t-att-class="this.cssClasses" t-att="this.dataAttrs">
             <div>
                 <we-toggler class="o_we_toggler_pager" t-on-click="this.onTogglerClick" t-att-class="{'active': state.isTogglerActive}">
                     <t t-out="this.togglerValue"/>
@@ -157,7 +160,7 @@
             <we-title t-if="props.slots?.title">
                 <t t-slot="title"/>
             </we-title>
-            <div>
+            <div t-if="this.visibilityState.visible">
                 <DateTimeInput value="this.dateTimePickerValue"
                                format="this.defaultFormat"
                                onChange.bind="this.onDateTimePickerChange"
@@ -169,7 +172,7 @@
         </we-input>
     </t>
     <t t-name="web_editor.WeRange">
-        <we-range class="o_we_user_value_widget" t-att-class="this.cssClasses">
+        <we-range class="o_we_user_value_widget" t-att-class="this.cssClasses" t-att="this.dataAttrs">
             <we-title t-if="props.slots?.title">
                 <t t-slot="title"/>
             </we-title>
@@ -185,7 +188,7 @@
         </we-range>
     </t>
     <t t-name="web_editor.WeList">
-        <we-list t-att-class="this.cssClasses" class="o_we_user_value_widget">
+        <we-list t-att-class="this.cssClasses" class="o_we_user_value_widget" t-att="this.dataAttrs">
             <div>
                 <div class="o_we_table_wrapper">
                     <table t-ref="table">
@@ -200,10 +203,10 @@
                                                t-att="this.getInputAttributes(input, listItem)"
                                                t-att-placeholder="listItem.placeholder"
                                                t-att-value="listItem[input.display]"
-                                               t-on-focus="this.onInputFocus"
-                                               t-on-blur="this.onInputBlur"
-                                               t-on-input="this.onInputInput"
-                                               t-on-keydown="this.onInputKeydown"
+                                               t-on-focus.capture.synthetic="this.onInputFocus"
+                                               t-on-blur.capture.synthetic="this.onInputBlur"
+                                               t-on-input.capture.synthetic="this.onInputInput"
+                                               t-on-keydown.capture.synthetic="this.onInputKeydown"
                                                t-att-data-input-index="input_index"
                                                t-att-data-item-index="listItem_index"
                                                t-att-disabled="!props.editable"

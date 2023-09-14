@@ -216,6 +216,7 @@ export class UserValueWidget extends Component {
                 possibleValues = [this.props[name]];
             }
             this.data.possibleValues[name].push(...possibleValues);
+            this.data.activeValues = this.getActiveValues();
 
             if (this.env.containerID) {
                 const containerData = this.env.widgetsData[this.env.containerID];
@@ -305,6 +306,20 @@ export class UserValueWidget extends Component {
         return [...this.data.methodNames.values()];
     }
     /**
+     * Mostly used for tests
+     */
+    get dataAttrs() {
+        const attrs = {};
+        const ignoredProps = ["slots", ""];
+        for (const [prop, propValue] of Object.entries(this.props)) {
+            if (ignoredProps.includes(prop)) {
+                continue;
+            }
+            attrs[`data-${camelToKebab(prop)}`] = propValue ? propValue.toString() : "";
+        }
+        return attrs || false;
+    }
+    /**
      * Returns the first possible value of the specified methodName
      * or return a dictionary of all default values by methodName.
      *
@@ -341,7 +356,7 @@ export class UserValueWidget extends Component {
             return pick(this.props, ...this.methodNames);
         }
         // The active value is the one given to the widget as a prop.
-        return this.props[methodName] || "";
+        return this.props[methodName] !== undefined && this.props[methodName];
     }
     /**
      * This method is called by the useEffect whenever an option updates
@@ -351,7 +366,7 @@ export class UserValueWidget extends Component {
      * @returns {*}
      */
     computeValues(values) {
-        return pick(Object.fromEntries(values), ...this.env.validMethodNames);
+        return pick(Object.fromEntries(values), ...this.methodNames);
     }
     /**
      * Returns whether the widget is active (holds a value).
@@ -412,8 +427,7 @@ export class UserValueWidget extends Component {
         if (this.props.noPreview && preview) {
             return;
         }
-        this.activeValues = values;
-        this.env.notifyValueChange(...arguments, this.id, { activeValues: this.state.values });
+        this.env.notifyValueChange(...arguments, this.id);
     }
     /**
      * Allows options and other widgets to trigger a state on this widget.
@@ -450,7 +464,7 @@ export class WeButton extends UserValueWidget {
         super.setup();
 
         for (const methodName of this.methodNames) {
-            if (this.data.possibleValues[methodName].length <= 1) {
+            if (this.data.possibleValues[methodName].length <= 1 && !this.env.containerID) {
                 this.data.possibleValues[methodName].unshift("");
             }
         }
@@ -591,6 +605,7 @@ class WeBaseSelection extends UserValueWidget {
         }
         useChildSubEnv({
             notifyValueChange: (values, preview, widgetID) => {
+                const widget = this.env.widgetsData[widgetID];
                 if ((preview || preview === "reset") && this.props.noPreview) {
                     return;
                 }
@@ -598,10 +613,15 @@ class WeBaseSelection extends UserValueWidget {
                     this.toggleWidgets(false);
                 }
                 if (preview === true) {
-                    this.onUserValuePreview(values);
+                    // In the case of a button that's already active,
+                    // previewing it again would be a wast, skip it.
+                    if (!widget.isActive()) {
+                        this.onUserValuePreview(values);
+                    }
                 } else if (preview === "reset") {
                     this.onUserValueReset();
                 } else {
+                    this.data.activeValues = widget.activeValues;
                     this.onUserValueChange(values);
                 }
             },
@@ -730,6 +750,7 @@ export class WeInput extends UserValueWidget {
     setup() {
         super.setup();
         this.state.values = this.getDefaultValue(this.methodNames[0]);
+        this.data.params.saveUnit = this.saveUnit;
         this.state.inputValue = "";
     }
     /**
@@ -739,17 +760,15 @@ export class WeInput extends UserValueWidget {
         return this.props.saveUnit || this.props.unit;
     }
     isActive() {
-        const methodName = this.methodNames[0]
+        const methodName = this.methodNames[0];
+        if (!this.props.unit) {
+            return this.optionValues.get(methodName) !== this.getDefaultValue(methodName);
+        }
         return (
             weUtils.convertValueToUnit(this.optionValues.get(methodName) || "", this.props.unit)
             !== this.getDefaultValue(methodName)
         );
     }
-    getDefaultValue(methodName) {
-        const value = super.getDefaultValue(methodName);
-        return super.getDefaultValue(methodName);
-    }
-
     /**
      * @override
      */
@@ -764,7 +783,7 @@ export class WeInput extends UserValueWidget {
      */
     formatValues(value) {
         const newValues = {};
-        let formattedValue = value
+        let formattedValue = value;
         if (this.props.unit !== "") {
             formattedValue = formattedValue
                 .split(/\s+/g)
@@ -817,14 +836,19 @@ export class WeInput extends UserValueWidget {
         const propKeys = Object.keys(this.props);
         for (const [methodName, value] of values) {
             if (propKeys.includes(methodName)) {
-                if (value === undefined || "") {
-                    this.state.inputValue = "";
-                    return "";
+                if (this.props.unit) {
+                    const inputValue = value.split(' ').map(v => {
+                        const numValue = weUtils.convertValueToUnit(v, this.props.unit, this.props.cssProperty);
+                        if (isNaN(numValue)) {
+                            return ''; // Something not supported
+                        }
+                        return this.floatToStr(numValue);
+                    }).join(' ');
+                    this.state.inputValue = inputValue;
+                    return inputValue;
                 }
-                if (!this.state.preview && (this.props.unit !== "")) {
-                    this.state.inputValue = weUtils.convertValueToUnit(value, this.props.unit);
-                }
-                return weUtils.convertValueToUnit(value, this.saveUnit);
+                this.state.inputValue = value;
+                return value;
             }
         }
         return this.getDefaultValue(this.methodNames[0]);
@@ -850,6 +874,13 @@ export class WeInput extends UserValueWidget {
         this.onUserValuePreview(ev.target.value);
     }
     onBlur(ev) {
+        if (this.state.preview) {
+            this.state.preview = false;
+            this.onUserValueChange(ev.target.value);
+        }
+    }
+    onChange(ev) {
+        // Duplicate since the test tours do not trigger blur events.
         if (this.state.preview) {
             this.state.preview = false;
             this.onUserValueChange(ev.target.value);
@@ -1305,7 +1336,7 @@ export class WeDatetimePicker extends UserValueWidget {
         if (!Object.values(this.state.values)[0]) {
             return null;
         }
-        return DateTime.fromMillis(Object.values(this.state.values)[0]);
+        return DateTime.fromSeconds(parseInt(Object.values(this.state.values)[0]));
     }
     onDateTimePickerChange(newValue) {
         this.onUserValuePreview(newValue);
@@ -1331,7 +1362,7 @@ export class WeDatetimePicker extends UserValueWidget {
     notifyValueChange(value, preview) {
         const newValues = {};
         for (const methodName of this.methodNames) {
-            newValues[methodName] = value;
+            newValues[methodName] = value / 1000;
         }
         super.notifyValueChange(newValues, preview);
     }
@@ -1462,7 +1493,6 @@ export class WeList extends UserValueWidget {
             const parsedValue = value && JSON.parse(value);
             if (parsedValue && Array.isArray(parsedValue)) {
                 this.state.list = parsedValue;
-                this.newList = null;
             }
         }
         return super.computeValues(values);
@@ -1515,6 +1545,9 @@ export class WeList extends UserValueWidget {
         if (!newList && !this.state.preview) {
             newList = this.newList;
         }
+        if (!newList) {
+            return;
+        }
         this.newList = newList;
         const newValue = JSON.stringify(newList);
         const methodName = this.methodNames[this.methodNames.length - 1];
@@ -1527,11 +1560,19 @@ export class WeList extends UserValueWidget {
         }
     }
     onInputFocus() {
+        if (this.blurTimeout) {
+            clearTimeout(this.blurTimeout);
+        }
         this.state.preview = true;
     }
     onInputBlur() {
-        this.state.preview = false;
-        this.notifyValueChange(null);
+        // Delay the on blur notification so that if it's a quick change between
+        // inputs, we stay in preview mode. This prevents the list from loosing
+        // values.
+        this.blurTimeout = setTimeout(() => {
+            this.state.preview = false;
+            this.notifyValueChange(null);
+        });
     }
     onInputKeydown(ev) {
         const key = getActiveHotkey(ev);
@@ -1545,6 +1586,9 @@ export class WeList extends UserValueWidget {
         const itemIndex = ev.target.dataset.itemIndex;
         const item = { ...this.state.list[itemIndex] };
         item[inputDef.display] = ev.target.value;
+        if (inputDef.idMode === "name") {
+            item.id = ev.target.value;
+        }
         newList[itemIndex] = item;
         this.notifyValueChange(newList);
     }
@@ -1742,7 +1786,7 @@ export class WeMany2Many extends UserValueWidget {
         onMounted(() => {
             this.data.methodNames.delete("renderListItems");
             this.data.methodNames.delete("addRecord");
-        })
+        });
     }
     /**
      * @override

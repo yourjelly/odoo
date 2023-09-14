@@ -1192,7 +1192,7 @@ export class SnippetsMenu extends Component {
                 }
                 return false;
             };
-            const editorIdsToRemove = []
+            const editorIdsToRemove = [];
             for (const editorProps of this.state.snippetEditorsProps) {
                 if (!isChild(editorProps.target, snippet)) {
                     editorProps.showOptions = false;
@@ -1214,8 +1214,8 @@ export class SnippetsMenu extends Component {
                 return;
             }
             this.state.activeTab = this.tabs.OPTIONS;
-            this.toggleOverlay(editorToEnable.id, true);
             await Promise.all(this.state.snippetEditorsProps.map(prop => prop.renderPromise));
+            this.toggleOverlay(editorToEnable.id, true);
         });
     }
     /**
@@ -1285,11 +1285,12 @@ export class SnippetsMenu extends Component {
                 return widget;
             },
             updateUI: () => {
-                this.execWithLoadingEffect(() =>
+                this.execWithLoadingEffect(() => {
+                    this.updateCurrentSnippetEditorOverlay();
                     this.state.snippetEditorsProps.forEach((props) => {
                         props.updateUICounter++;
-                    })
-                );
+                    });
+                });
             },
         };
         this.state.snippetEditorsProps.push(props);
@@ -2257,7 +2258,7 @@ export class SnippetsMenu extends Component {
      * @param {jQuery} [$scrollable] - $element to scroll
      * @return {Promise}
      */
-    async _scrollToSnippet($el, $scrollable) {
+    async scrollToSnippet($el, $scrollable) {
         // Don't scroll if $el is added to a visible popup that does not fill
         // the page (otherwise the page would scroll to a random location).
         const modalEl = $el[0].closest('.modal');

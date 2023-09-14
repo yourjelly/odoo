@@ -606,7 +606,8 @@ export class Wysiwyg extends Component {
                             // Await for the editor panel to be fully updated
                             // as some buttons of the link popover we create
                             // here relies on clicking in that editor panel...
-                            await this.snippetsMenu._mutex.exec(() => null);
+                            const snippetsMenuMutex = this.snippetsMenu._mutex || this.snippetsMenu.env.mutex;
+                            await snippetsMenuMutex.exec(() => null);
                             container = this.options.document.getElementById('oe_manipulators');
                         }
                         this.linkPopover = LinkPopoverWidget.createFor({
@@ -654,6 +655,7 @@ export class Wysiwyg extends Component {
         if (this.options.snippets) {
             this.snippetsMenuPromise = new Deferred();
             this.state.showSnippetsMenu = true;
+            $(this.odooEditor.document.body).addClass('editor_enable');
             this.toolbarEl.style.display = "none";
             this.state.toolbarProps.float = false;
         }

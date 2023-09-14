@@ -1,14 +1,17 @@
 /** @odoo-module **/
 
 import FormEditorRegistry from "@website/js/form_editor_registry";
-import options from "@web_editor/js/editor/snippets.options";
-import Dialog from "@web/legacy/js/core/dialog";
-import dom from "@web/legacy/js/core/dom";
+import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import weUtils from "@web_editor/js/common/utils";
 import "@website/js/editor/snippets.options";
 import { unique } from "@web/core/utils/arrays";
 import { _t } from "@web/core/l10n/translation";
 import { renderToElement } from "@web/core/utils/render";
+import { SnippetOption } from "@web_editor/components/snippets_menu/snippets_options";
+import { useService } from "@web/core/utils/hooks";
+import { onWillStart, useEffect, useState } from "@odoo/owl";
+import { registry } from "@web/core/registry";
+import { KeepLast } from "@web/core/utils/concurrency";
 
 let currentActionName;
 
@@ -37,7 +40,14 @@ function _getDomain(formEl, name, type, relation) {
     return field && field.domain;
 }
 
-const FormEditor = options.Class.extend({
+export class FormEditor extends SnippetOption {
+    /**
+     * @override
+     */
+    setup() {
+        super.setup();
+        this.orm = useService("orm");
+    }
     //----------------------------------------------------------------------
     // Private
     //----------------------------------------------------------------------
@@ -50,7 +60,7 @@ const FormEditor = options.Class.extend({
      * @param {Object} field
      * @returns {Promise<Object>}
      */
-    _fetchFieldRecords: async function (field) {
+    async _fetchFieldRecords(field) {
         // Convert the required boolean to a value directly usable
         // in qweb js to avoid duplicating this in the templates
         field.required = field.required ? 1 : null;
@@ -65,17 +75,14 @@ const FormEditor = options.Class.extend({
                 display_name: el[1],
             }));
         } else if (field.relation && field.relation !== 'ir.attachment') {
-            field.records = await this._rpc({
-                model: field.relation,
-                method: 'search_read',
-                args: [
-                    field.domain,
-                    ['display_name']
-                ],
-            });
+            field.records = await this.orm.searchRead(
+                field.relation,
+                field.domain || [],
+                ['display_name']
+            );
         }
         return field.records;
-    },
+    }
     /**
      * Returns a field object
      *
@@ -84,7 +91,7 @@ const FormEditor = options.Class.extend({
      * @param {string} name The name of the field used also as label
      * @returns {Object}
      */
-    _getCustomField: function (type, name) {
+    _getCustomField(type, name) {
         return {
             name: name,
             string: name,
@@ -102,14 +109,14 @@ const FormEditor = options.Class.extend({
                 display_name: _t('Option 3'),
             }],
         };
-    },
+    }
     /**
      * Returns the default formatInfos of a field.
      *
      * @private
      * @returns {Object}
      */
-    _getDefaultFormat: function () {
+    _getDefaultFormat() {
         return {
             labelWidth: this.$target[0].querySelector('.s_website_form_label').style.width,
             labelPosition: 'left',
@@ -118,14 +125,14 @@ const FormEditor = options.Class.extend({
             optionalMark: this._isOptionalMark(),
             mark: this._getMark(),
         };
-    },
+    }
     /**
      * @private
      * @returns {string}
      */
-    _getMark: function () {
+    _getMark() {
         return this.$target[0].dataset.mark;
-    },
+    }
     /**
      * Replace all `"` character by `&quot;`, all `'` character by `&apos;` and
      * all "`" character by `&lsquo;`. This is needed in order to be able to
@@ -137,27 +144,27 @@ const FormEditor = options.Class.extend({
         return name.replaceAll(/"/g, character => `&quot;`)
                    .replaceAll(/'/g, character => `&apos;`)
                    .replaceAll(/`/g, character => `&lsquo;`);
-    },
+    }
     /**
      * @private
      * @returns {boolean}
      */
-    _isOptionalMark: function () {
+    _isOptionalMark() {
         return this.$target[0].classList.contains('o_mark_optional');
-    },
+    }
     /**
      * @private
      * @returns {boolean}
      */
-    _isRequiredMark: function () {
+    _isRequiredMark() {
         return this.$target[0].classList.contains('o_mark_required');
-    },
+    }
     /**
      * @private
      * @param {Object} field
      * @returns {HTMLElement}
      */
-    _renderField: function (field, resetId = false) {
+    _renderField(field, resetId = false) {
         if (!field.id) {
             field.id = weUtils.generateHTMLId();
         }
@@ -194,19 +201,19 @@ const FormEditor = options.Class.extend({
             el.dataset.name = this._getQuotesEncodedName(el.dataset.name);
         });
         return template.content.firstElementChild;
-    },
-});
+    }
+}
 
-const FieldEditor = FormEditor.extend({
-    VISIBILITY_DATASET: ['visibilityDependency', 'visibilityCondition', 'visibilityComparator', 'visibilityBetween'],
+export class FieldEditor extends FormEditor {
+    VISIBILITY_DATASET = ['visibilityDependency', 'visibilityCondition', 'visibilityComparator', 'visibilityBetween'];
 
     /**
      * @override
      */
-    init: function () {
-        this._super.apply(this, arguments);
+    setup() {
+        super.setup();
         this.formEl = this.$target[0].closest('form');
-    },
+    }
 
     //--------------------------------------------------------------------------
     // Private
@@ -219,7 +226,7 @@ const FieldEditor = FormEditor.extend({
      * @param {boolean} noRecords
      * @returns {Object}
      */
-    _getActiveField: function (noRecords) {
+    _getActiveField(noRecords) {
         let field;
         const labelText = this.$target.find('.s_website_form_label_content').text();
         if (this._isFieldCustom()) {
@@ -234,7 +241,7 @@ const FieldEditor = FormEditor.extend({
         }
         this._setActiveProperties(field);
         return field;
-    },
+    }
     /**
      * Returns the format object of a field containing
      * the position, labelWidth and bootstrap col class
@@ -242,7 +249,7 @@ const FieldEditor = FormEditor.extend({
      * @private
      * @returns {Object}
      */
-    _getFieldFormat: function () {
+    _getFieldFormat() {
         let requiredMark, optionalMark;
         const mark = this.$target[0].querySelector('.s_website_form_mark');
         if (mark) {
@@ -260,66 +267,66 @@ const FieldEditor = FormEditor.extend({
             mark: mark && mark.textContent,
         };
         return format;
-    },
+    }
     /**
      * Returns the name of the field
      *
      * @private
      * @returns {string}
      */
-    _getFieldName: function () {
+    _getFieldName() {
         const multipleName = this.$target[0].querySelector('.s_website_form_multiple');
         return multipleName ? multipleName.dataset.name : this.$target[0].querySelector('.s_website_form_input').name;
-    },
+    }
     /**
      * Returns the type of the  field, can be used for both custom and existing fields
      *
      * @private
      * @returns {string}
      */
-    _getFieldType: function () {
+    _getFieldType() {
         return this.$target[0].dataset.type;
-    },
+    }
     /**
      * @private
      * @returns {string}
      */
-    _getLabelPosition: function () {
+    _getLabelPosition() {
         const label = this.$target[0].querySelector('.s_website_form_label');
         if (this.$target[0].querySelector('.row:not(.s_website_form_multiple)')) {
             return label.classList.contains('text-end') ? 'right' : 'left';
         } else {
             return label.classList.contains('d-none') ? 'none' : 'top';
         }
-    },
+    }
     /**
      * Returns the multiple checkbox/radio element if it exist else null
      *
      * @private
      * @returns {HTMLElement}
      */
-    _getMultipleInputs: function () {
+    _getMultipleInputs() {
         return this.$target[0].querySelector('.s_website_form_multiple');
-    },
+    }
     /**
      * Returns true if the field is a custom field, false if it is an existing field
      *
      * @private
      * @returns {boolean}
      */
-    _isFieldCustom: function () {
+    _isFieldCustom() {
         return !!this.$target[0].classList.contains('s_website_form_custom');
-    },
+    }
     /**
      * Returns true if the field is required by the model or by the user.
      *
      * @private
      * @returns {boolean}
      */
-    _isFieldRequired: function () {
+    _isFieldRequired() {
         const classList = this.$target[0].classList;
         return classList.contains('s_website_form_required') || classList.contains('s_website_form_model_required');
-    },
+    }
     /**
      * Set the active field properties on the field Object
      *
@@ -349,55 +356,61 @@ const FieldEditor = FormEditor.extend({
         field.modelRequired = classList.contains('s_website_form_model_required');
         field.hidden = classList.contains('s_website_form_field_hidden');
         field.formatInfo = this._getFieldFormat();
-    },
-});
+    }
+}
 
-options.registry.WebsiteFormEditor = FormEditor.extend({
-    events: Object.assign({}, options.Class.prototype.events || {}, {
-        'click .toggle-edit-message': '_onToggleEndMessageClick',
-    }),
+class WebsiteFormEditor extends FormEditor {
+    static template = "website.WebsiteFormEditor";
 
+    setup() {
+        super.setup();
+        this.state = useState({
+            activeForm: {},
+        });
+
+        this.dialogs = useService("dialog");
+        this.notifications = useService("notification");
+
+        this.formFieldsKeepLast = new KeepLast();
+
+        this.env.validMethodNames.push(
+            "addActionField",
+            "promptSaveRedirect",
+            "onSuccess",
+            "selectAction",
+            "setMark",
+            "toggleRecaptchaLegal"
+        );
+
+        onWillStart(async () => {
+            this.modelCantChange = this.$target.attr('hide-change-model') !== undefined;
+            if (this.modelCantChange) {
+                return;
+            }
+
+            // Get list of website_form compatible models.
+            this.models = await this.orm.call(
+                "ir.model",
+                "get_compatible_form_models"
+            );
+
+            const targetModelName = this.$target[0].dataset.model_name || 'mail.mail';
+            this.state.activeForm = this.models.find(m => m.model === targetModelName);
+            currentActionName = this.state.activeForm.website_form_label;
+            await this.prepareRender();
+        });
+
+        useEffect(
+            () => {
+            },
+            () => [this.state.activeForm.website_form_key]
+        );
+    }
     /**
      * @override
      */
-    willStart: async function () {
-        const _super = this._super.bind(this);
-
-        // Hide change form parameters option for forms
-        // e.g. User should not be enable to change existing job application form
-        // to opportunity form in 'Apply job' page.
-        this.modelCantChange = this.$target.attr('hide-change-model') !== undefined;
-        if (this.modelCantChange) {
-            return _super(...arguments);
-        }
-
-        // Get list of website_form compatible models.
-        this.models = await this._rpc({
-            model: 'ir.model',
-            method: 'get_compatible_form_models',
-        });
-
-        const targetModelName = this.$target[0].dataset.model_name || 'mail.mail';
-        this.activeForm = this.models.find(m => m.model === targetModelName);
-        currentActionName = this.activeForm.website_form_label;
-        // Create the Form Action select
-        this.selectActionEl = document.createElement('we-select');
-        this.selectActionEl.setAttribute('string', 'Action');
-        this.selectActionEl.dataset.noPreview = 'true';
-        this.models.forEach(el => {
-            const option = document.createElement('we-button');
-            option.textContent = el.website_form_label;
-            option.dataset.selectAction = el.id;
-            this.selectActionEl.append(option);
-        });
-
-        return _super(...arguments);
-    },
-    /**
-     * @override
-     */
-    start: function () {
-        const proms = [this._super(...arguments)];
+    start() {
+        const proms = [super.start(...arguments)];
         // Disable text edition
         this.$target.attr('contentEditable', false);
         // Make button, description, and recaptcha editable
@@ -411,11 +424,11 @@ options.registry.WebsiteFormEditor = FormEditor.extend({
             proms.push(this._applyFormModel());
         }
         return Promise.all(proms);
-    },
+    }
     /**
      * @override
      */
-    cleanForSave: function () {
+    cleanForSave() {
         const model = this.$target[0].dataset.model_name;
         // because apparently this can be called on the wrong widget and
         // we may not have a model, or fields...
@@ -426,47 +439,38 @@ options.registry.WebsiteFormEditor = FormEditor.extend({
             if (fields.length) {
                 // ideally we'd only do this if saving the form
                 // succeeds... but no idea how to do that
-                this._rpc({
-                    model: 'ir.model.fields',
-                    method: 'formbuilder_whitelist',
-                    args: [model, unique(fields)],
-                });
+                this.orm.call(
+                    'ir.model.fields',
+                    'formbuilder_whitelist',
+                    [model, unique(fields)],
+                );
             }
         }
         if (this.$message.length) {
             this.$target.removeClass('d-none');
             this.$message.addClass("d-none");
         }
-    },
+    }
     /**
      * @override
      */
-    updateUI: async function () {
-        // If we want to rerender the xml we need to avoid the updateUI
-        // as they are asynchronous and the ui might try to update while
-        // we are building the UserValueWidgets.
-        if (this.rerender) {
-            this.rerender = false;
-            await this._rerenderXML();
-            return;
-        }
-        await this._super.apply(this, arguments);
+    async updateUI() {
+        await super.updateUI();
         // End Message UI
         this.updateUIEndMessage();
-    },
+    }
     /**
      * @see this.updateUI
      */
-    updateUIEndMessage: function () {
+    updateUIEndMessage() {
         this.$target.toggleClass("d-none", this.showEndMessage);
         this.$message.toggleClass("d-none", !this.showEndMessage);
-        this.$el.find(".toggle-edit-message").toggleClass('text-primary', this.showEndMessage);
-    },
+    }
     /**
      * @override
      */
-    notify: function (name, data) {
-        this._super(...arguments);
+    async notify(name, data) {
+        await super.notify(...arguments);
         if (name === 'field_mark') {
             this._setLabelsMark();
         } else if (name === 'add_field') {
@@ -477,11 +481,9 @@ options.registry.WebsiteFormEditor = FormEditor.extend({
             field.formatInfo.mark = this._getMark();
             const fieldEl = this._renderField(field);
             data.$target.after(fieldEl);
-            this.trigger_up('activate_snippet', {
-                $snippet: $(fieldEl),
-            });
+            this.env.activateSnippet(fieldEl);
         }
-    },
+    }
 
     //--------------------------------------------------------------------------
     // Options
@@ -491,66 +493,54 @@ options.registry.WebsiteFormEditor = FormEditor.extend({
      * Select the value of a field (hidden) that will be used on the model as a preset.
      * ie: The Job you apply for if the form is on that job's page.
      */
-    addActionField: function (previewMode, value, params) {
+    addActionField(previewMode, value, params) {
         const fieldName = params.fieldName;
         if (params.isSelect === 'true') {
             value = parseInt(value);
         }
         this._addHiddenField(value, fieldName);
-    },
+    }
     /**
      * Prompts the user to save changes before being redirected
      * towards an action specified in value.
      *
      * @see this.selectClass for parameters
      */
-    promptSaveRedirect: function (name, value, widgetValue) {
+    promptSaveRedirect(name, value, widgetValue) {
         return new Promise((resolve, reject) => {
             const message = _t("Would you like to save before being redirected? Unsaved changes will be discarded.");
-            Dialog.confirm(this, message, {
-                cancel_callback: () => resolve(),
-                buttons: [
-                    {
-                        text: _t("Save"),
-                        classes: 'btn-primary',
-                        click: (ev) => {
-                            const restore = dom.addButtonLoadingEffect(ev.currentTarget);
-                            this.trigger_up('request_save', {
-                                reload: false,
-                                onSuccess: () => {
-                                    this._redirectToAction(value);
-                                },
-                                onFailure: () => {
-                                    restore();
-                                    this.displayNotification({
-                                        message: _t("Something went wrong."),
-                                        type: 'danger',
-                                        sticky: true,
-                                    });
-                                    reject();
-                                },
-                            });
-                            resolve();
-                        },
-                    }, {
-                        text: _t("Discard"),
-                        click: (ev) => {
-                            dom.addButtonLoadingEffect(ev.currentTarget);
+            this.dialogs.add(ConfirmationDialog, {
+                body: message,
+                confirm: () => {
+                    this.env.requestSave({
+                        reload: false,
+                        onSuccess: () => {
                             this._redirectToAction(value);
                         },
-                    }, {
-                        text: _t("Cancel"),
-                        close: true,
-                        click: () => resolve(),
-                    },
-                ],
+                        onFailure: () => {
+                            this.notifications.add(
+                                _t("Something went wrong."),
+                                {
+                                    type: 'danger',
+                                    sticky: true,
+                                }
+                            );
+                            reject();
+                        },
+                    });
+                    resolve();
+                },
+                cancel: () => resolve(),
+                confirmLabel: _t("Save"),
+                confirmClass: "btn-primary",
+                cancelLabel: _t("Discard"),
             });
         });
-    },
+    }
     /**
      * Changes the onSuccess event.
      */
-    onSuccess: function (previewMode, value, params) {
+    onSuccess(previewMode, value, params) {
         this.$target[0].dataset.successMode = value;
         if (value === 'message') {
             if (!this.$message.length) {
@@ -561,37 +551,36 @@ options.registry.WebsiteFormEditor = FormEditor.extend({
             this.showEndMessage = false;
             this.$message.remove();
         }
-    },
+    }
     /**
      * Select the model to create with the form.
      */
-    selectAction: async function (previewMode, value, params) {
+    async selectAction(previewMode, value, params) {
         if (this.modelCantChange) {
             return;
         }
         await this._applyFormModel(parseInt(value));
-        this.rerender = true;
-    },
+    }
     /**
      * @override
      */
-    selectClass: function (previewMode, value, params) {
-        this._super(...arguments);
+    async selectClass(previewMode, value, params) {
+        await super.selectClass(...arguments);
         if (params.name === 'field_mark_select') {
             this._setLabelsMark();
         }
-    },
+    }
     /**
      * Set the mark string on the form
      */
-    setMark: function (previewMode, value, params) {
+    setMark(previewMode, value, params) {
         this.$target[0].dataset.mark = value.trim();
         this._setLabelsMark();
-    },
+    }
     /**
      * Toggle the recaptcha legal terms
      */
-    toggleRecaptchaLegal: function (previewMode, value, params) {
+    toggleRecaptchaLegal(previewMode, value, params) {
         const recaptchaLegalEl = this.$target[0].querySelector('.s_website_form_recaptcha');
         if (recaptchaLegalEl) {
             recaptchaLegalEl.remove();
@@ -603,7 +592,7 @@ options.registry.WebsiteFormEditor = FormEditor.extend({
             legal.setAttribute('contentEditable', true);
             this.$target.find('.s_website_form_submit').before(legal);
         }
-    },
+    }
 
     //--------------------------------------------------------------------------
     // Private
@@ -612,10 +601,10 @@ options.registry.WebsiteFormEditor = FormEditor.extend({
     /**
      * @override
      */
-    _computeWidgetState: function (methodName, params) {
+    computeWidgetState(methodName, params) {
         switch (methodName) {
             case 'selectAction':
-                return this.activeForm.id;
+                return this.state.activeForm.id;
             case 'addActionField': {
                 const value = this.$target.find(`.s_website_form_dnone input[name="${params.fieldName}"]`).val();
                 if (value) {
@@ -631,21 +620,19 @@ options.registry.WebsiteFormEditor = FormEditor.extend({
             case 'toggleRecaptchaLegal':
                 return !this.$target[0].querySelector('.s_website_form_recaptcha') || '';
         }
-        return this._super(...arguments);
-    },
+        return super.computeWidgetState(...arguments);
+    }
     /**
-     * @override
+     * Prepares the state with the correct values to trigger a re-render.
+     *
+     * @returns {Promise<Awaited<unknown>[]>}
      */
-    _renderCustomXML: function (uiFragment) {
+    prepareRender() {
         if (this.modelCantChange) {
             return;
         }
-        // Add Action select
-        const firstOption = uiFragment.childNodes[0];
-        uiFragment.insertBefore(this.selectActionEl.cloneNode(true), firstOption);
-
         // Add Action related options
-        const formKey = this.activeForm.website_form_key;
+        const formKey = this.state.activeForm.website_form_key;
         const formInfo = FormEditorRegistry.get(formKey);
         if (!formInfo || !formInfo.fields) {
             return;
@@ -653,33 +640,9 @@ options.registry.WebsiteFormEditor = FormEditor.extend({
         allFormsInfo.set(this.$target[0], formInfo);
         const proms = formInfo.fields.map(field => this._fetchFieldRecords(field));
         return Promise.all(proms).then(() => {
-            formInfo.fields.forEach(field => {
-                let option;
-                switch (field.type) {
-                    case 'many2one':
-                        option = this._buildSelect(field);
-                        break;
-                    case 'char':
-                        option = this._buildInput(field);
-                        break;
-                }
-                if (field.required) {
-                    // Try to retrieve hidden value in form, else,
-                    // get default value or for many2one fields the first option.
-                    const currentValue = this.$target.find(`.s_website_form_dnone input[name="${field.name}"]`).val();
-                    const defaultValue = field.defaultValue || field.records[0].id;
-                    // TODO this code is not rightfully placed (even maybe
-                    // from the original form feature in older versions). It
-                    // changes the $target while this method is only about
-                    // declaring the option UI. This for example forces the
-                    // 'email_to' value to a dummy value on contact us form just
-                    // by clicking on it.
-                    this._addHiddenField(currentValue || defaultValue, field.name);
-                }
-                uiFragment.insertBefore(option, firstOption);
-            });
+            this.state.formInfo = formInfo;
         });
-    },
+    }
     /**
      * Add a hidden field to the form
      *
@@ -687,7 +650,7 @@ options.registry.WebsiteFormEditor = FormEditor.extend({
      * @param {string} value
      * @param {string} fieldName
      */
-    _addHiddenField: function (value, fieldName) {
+    _addHiddenField(value, fieldName) {
         this.$target.find(`.s_website_form_dnone:has(input[name="${fieldName}"])`).remove();
         if (value) {
             const hiddenField = renderToElement('website.form_field_hidden', {
@@ -700,7 +663,7 @@ options.registry.WebsiteFormEditor = FormEditor.extend({
             });
             this.$target.find('.s_website_form_submit').before(hiddenField);
         }
-    },
+    }
     /**
      * Returns a we-input element from the field
      *
@@ -708,7 +671,7 @@ options.registry.WebsiteFormEditor = FormEditor.extend({
      * @param {Object} field
      * @returns {HTMLElement}
      */
-    _buildInput: function (field) {
+    _buildInput(field) {
         const inputEl = document.createElement('we-input');
         inputEl.dataset.noPreview = 'true';
         inputEl.dataset.fieldName = field.name;
@@ -716,7 +679,7 @@ options.registry.WebsiteFormEditor = FormEditor.extend({
         inputEl.setAttribute('string', field.string);
         inputEl.classList.add('o_we_large');
         return inputEl;
-    },
+    }
     /**
      * Returns a we-select element with field's records as it's options
      *
@@ -724,7 +687,7 @@ options.registry.WebsiteFormEditor = FormEditor.extend({
      * @param {Object} field
      * @return {HTMLElement}
      */
-    _buildSelect: function (field) {
+    _buildSelect(field) {
         const selectEl = document.createElement('we-select');
         selectEl.dataset.noPreview = 'true';
         selectEl.dataset.fieldName = field.name;
@@ -746,7 +709,7 @@ options.registry.WebsiteFormEditor = FormEditor.extend({
             return this._addCreateButton(selectEl, field.createAction);
         }
         return selectEl;
-    },
+    }
     /**
      * Wraps an HTML element in a we-row element, and adds a
      * we-button linking to the given action.
@@ -756,7 +719,7 @@ options.registry.WebsiteFormEditor = FormEditor.extend({
      * @param {String} action
      * @returns {HTMLElement}
      */
-    _addCreateButton: function (element, action) {
+    _addCreateButton(element, action) {
         const linkButtonEl = document.createElement('we-button');
         linkButtonEl.title = _t("Create new");
         linkButtonEl.dataset.noPreview = 'true';
@@ -766,25 +729,26 @@ options.registry.WebsiteFormEditor = FormEditor.extend({
         projectRowEl.append(element);
         projectRowEl.append(linkButtonEl);
         return projectRowEl;
-    },
+    }
     /**
      * Apply the model on the form changing it's fields
      *
      * @private
      * @param {Integer} modelId
      */
-    _applyFormModel: async function (modelId) {
+    async _applyFormModel(modelId) {
         let oldFormInfo;
         if (modelId) {
-            const oldFormKey = this.activeForm.website_form_key;
+            const oldFormKey = this.state.activeForm.website_form_key;
             if (oldFormKey) {
                 oldFormInfo = FormEditorRegistry.get(oldFormKey);
             }
             this.$target.find('.s_website_form_field').remove();
-            this.activeForm = this.models.find(model => model.id === modelId);
-            currentActionName = this.activeForm.website_form_label;
+            this.state.activeForm = this.models.find(model => model.id === modelId);
+            currentActionName = this.state.activeForm.website_form_label;
         }
-        const formKey = this.activeForm.website_form_key;
+        await this.prepareRender();
+        const formKey = this.state.activeForm.website_form_key;
         const formInfo = FormEditorRegistry.get(formKey);
         // Success page
         if (!this.$target[0].dataset.successMode) {
@@ -799,23 +763,24 @@ options.registry.WebsiteFormEditor = FormEditor.extend({
             }
         }
         // Model name
-        this.$target[0].dataset.model_name = this.activeForm.model;
+        this.$target[0].dataset.model_name = this.state.activeForm.model;
         // Load template
         if (formInfo) {
             const formatInfo = this._getDefaultFormat();
-            await formInfo.formFields.forEach(async field => {
+            await Promise.all(formInfo.formFields.map(async field => {
                 field.formatInfo = formatInfo;
                 await this._fetchFieldRecords(field);
                 this.$target.find('.s_website_form_submit, .s_website_form_recaptcha').first().before(this._renderField(field));
-            });
+                return field;
+            }));
         }
-    },
+    }
     /**
      * Set the correct mark on all fields.
      *
      * @private
      */
-    _setLabelsMark: function () {
+    _setLabelsMark() {
         this.$target[0].querySelectorAll('.s_website_form_mark').forEach(el => el.remove());
         const mark = this._getMark();
         if (!mark) {
@@ -835,16 +800,16 @@ options.registry.WebsiteFormEditor = FormEditor.extend({
             span.textContent = ` ${mark}`;
             field.querySelector('.s_website_form_label').appendChild(span);
         });
-    },
+    }
     /**
      * Redirects the user to the page of a specified action.
      *
      * @private
      * @param {string} action
      */
-    _redirectToAction: function (action) {
+    _redirectToAction(action) {
         window.location.replace(`/web#action=${encodeURIComponent(action)}`);
-    },
+    }
 
     //--------------------------------------------------------------------------
     // Handlers
@@ -853,106 +818,111 @@ options.registry.WebsiteFormEditor = FormEditor.extend({
     /**
      * @private
      */
-    _onToggleEndMessageClick: function () {
+    _onToggleEndMessageClick() {
         this.showEndMessage = !this.showEndMessage;
         this.updateUIEndMessage();
-        this.trigger_up('activate_snippet', {
-            $snippet: this.showEndMessage ? this.$message : this.$target,
-        });
-    },
+        this.env.activateSnippet(
+            this.showEndMessage ? this.$message[0] : this.target
+        );
+    }
+}
+registry.category("snippets_options").add("website.WebsiteFormEditor", {
+    component: WebsiteFormEditor,
+    template: "website.WebsiteFormEditor",
+    selector: ".s_website_form",
+    target: "form",
+}, {
+    sequence: 10,
 });
 
 const authorizedFieldsCache = {};
 
-options.registry.WebsiteFieldEditor = FieldEditor.extend({
-    /**
-     * @override
-     */
-    init: function () {
-        this._super.apply(this, arguments);
-        this.rerender = true;
-    },
-    /**
-     * @override
-     */
-    willStart: async function () {
-        const _super = this._super.bind(this);
-        // Get the authorized existing fields for the form model
-        const model = this.formEl.dataset.model_name;
-        let getFields;
-        if (model in authorizedFieldsCache) {
-            getFields = authorizedFieldsCache[model];
-        } else {
-            getFields = this._rpc({
-                model: "ir.model",
-                method: "get_authorized_fields",
-                args: [model],
-            });
-            authorizedFieldsCache[model] = getFields;
+export class WebsiteFieldEditor extends FieldEditor {
+    setup() {
+        super.setup();
+
+        this.dialogs = useService("dialog");
+        this.state = useState({
+            hiddenConditionOptions: [],
+            hiddenConditionNoTextOptions: [],
+            typeOptions: [],
+        });
+        for (const methodName of Object.getOwnPropertyNames(WebsiteFieldEditor.prototype)) {
+            if (typeof this[methodName] === "function") {
+                this.env.validMethodNames.push(methodName);
+            }
         }
 
-        this.existingFields = await getFields.then((fields) => {
-            this.fields = {};
-            for (const [fieldName, field] of Object.entries(fields)) {
-                field.name = fieldName;
-                const fieldDomain = _getDomain(this.formEl, field.name, field.type, field.relation);
-                field.domain = fieldDomain || field.domain || [];
-                this.fields[fieldName] = field;
+        onWillStart(async () => {
+            // Get the authorized existing fields for the form model
+            const model = this.formEl.dataset.model_name;
+            let getFields;
+            if (model in authorizedFieldsCache) {
+                getFields = authorizedFieldsCache[model];
+            } else {
+                // Because we cache the call, we cannot use useService because
+                // the Promise would be aborted if the component gets destroyed
+                // during its onWillStart. We should look into why the component
+                // often gets destroyed, but still this seems the right thing
+                // to do regardless.
+                getFields = this.env.services.orm.call(
+                    "ir.model",
+                    "get_authorized_fields",
+                    [model],
+                );
+                authorizedFieldsCache[model] = getFields;
             }
-            // Create the buttons for the type we-select
-            return Object.keys(fields).map(key => {
-                const field = fields[key];
-                const button = document.createElement('we-button');
-                button.textContent = field.string;
-                button.dataset.existingField = field.name;
-                return button;
-            }).sort((a, b) => (a.textContent > b.textContent) ? 1 : (a.textContent < b.textContent) ? -1 : 0);
+
+            this.existingFields = await getFields.then((fields) => {
+                this.fields = {};
+                for (const [fieldName, field] of Object.entries(fields)) {
+                    field.name = fieldName;
+                    const fieldDomain = _getDomain(this.formEl, field.name, field.type, field.relation);
+                    field.domain = fieldDomain || field.domain || [];
+                    this.fields[fieldName] = field;
+                }
+                // Create the buttons for the type we-select
+                return Object.keys(fields).map(key => {
+                    const field = fields[key];
+                    return {
+                        textContent: field.string,
+                        existingField: field.name,
+                    };
+                }).sort((a, b) => (a.textContent > b.textContent) ? 1 : (a.textContent < b.textContent) ? -1 : 0);
+            });
+            await this.prepareRender();
         });
-        return _super(...arguments);
-    },
+    }
     /**
      * @override
      */
-    start: async function () {
-        const _super = this._super.bind(this);
+    async start() {
         // Build the custom select
         const select = this._getSelect();
         if (select) {
             const field = this._getActiveField();
             await this._replaceField(field);
         }
-        return _super(...arguments);
-    },
+        return super.start(...arguments);
+    }
     /**
      * @override
      */
-    cleanForSave: function () {
+    cleanForSave() {
         this.$target[0].querySelectorAll('#editable_select').forEach(el => el.remove());
         const select = this._getSelect();
         if (select) {
             select.style.display = '';
         }
-    },
+    }
     /**
      * @override
      */
-    updateUI: async function () {
-        // See Form updateUI
-        if (this.rerender) {
-            this.rerender = false;
-            await this._rerenderXML();
-            return;
-        }
-        await this._super.apply(this, arguments);
-    },
-    /**
-     * @override
-     */
-    onFocus: function () {
+    async onFocus() {
         // Other fields type might have change to an existing type.
         // We need to reload the existing type list.
-        this.rerender = true;
-    },
+        await this.prepareRender();
+    }
     /**
      * Rerenders the clone to avoid id duplicates.
      *
@@ -963,7 +933,7 @@ options.registry.WebsiteFieldEditor = FieldEditor.extend({
         delete field.id;
         const fieldEl = this._renderField(field);
         this._replaceFieldElement(fieldEl);
-    },
+    }
     /**
      * Removes the visibility conditions concerned by the deleted field
      *
@@ -979,7 +949,7 @@ options.registry.WebsiteFieldEditor = FieldEditor.extend({
         for (const fieldContainerEl of dependentFieldContainerEl) {
             this._deleteConditionalVisibility(fieldContainerEl);
         }
-    },
+    }
 
     //----------------------------------------------------------------------
     // Options
@@ -988,15 +958,15 @@ options.registry.WebsiteFieldEditor = FieldEditor.extend({
     /**
      * Add/remove a description to the field input
      */
-    toggleDescription: async function (previewMode, value, params) {
+    async toggleDescription(previewMode, value, params) {
         const field = this._getActiveField();
         field.description = !!value; // Will be changed to default description in qweb
         await this._replaceField(field);
-    },
+    }
     /**
      * Replace the current field with the custom field selected.
      */
-    customField: async function (previewMode, value, params) {
+    async customField(previewMode, value, params) {
         // Both custom Field and existingField are called when selecting an option
         // value is '' for the method that should not be called.
         if (!value) {
@@ -1006,12 +976,12 @@ options.registry.WebsiteFieldEditor = FieldEditor.extend({
         const field = this._getCustomField(value, oldLabelText);
         this._setActiveProperties(field);
         await this._replaceField(field);
-        this.rerender = true;
-    },
+        await this.prepareRender();
+    }
     /**
      * Replace the current field with the existing field selected.
      */
-    existingField: async function (previewMode, value, params) {
+    async existingField(previewMode, value, params) {
         // see customField
         if (!value) {
             return;
@@ -1019,12 +989,12 @@ options.registry.WebsiteFieldEditor = FieldEditor.extend({
         const field = Object.assign({}, this.fields[value]);
         this._setActiveProperties(field);
         await this._replaceField(field);
-        this.rerender = true;
-    },
+        await this.prepareRender();
+    }
     /**
      * Set the name of the field on the label
      */
-    setLabelText: function (previewMode, value, params) {
+    setLabelText(previewMode, value, params) {
         this.$target.find('.s_website_form_label_content').text(value);
         if (this._isFieldCustom()) {
             value = this._getQuotesEncodedName(value);
@@ -1042,37 +1012,37 @@ options.registry.WebsiteFieldEditor = FieldEditor.extend({
                 dependentEl.dataset.visibilityDependency = value;
             }
         }
-    },
+    }
     /**
      * Replace the field with the same field having the label in a different position.
      */
-    selectLabelPosition: async function (previewMode, value, params) {
+    async selectLabelPosition(previewMode, value, params) {
         const field = this._getActiveField();
         field.formatInfo.labelPosition = value;
         await this._replaceField(field);
-    },
-    selectType: async function (previewMode, value, params) {
+    }
+    async selectType(previewMode, value, params) {
         const field = this._getActiveField();
         field.type = value;
         await this._replaceField(field);
-    },
+    }
     /**
      * Select the textarea default value
      */
-    selectTextareaValue: function (previewMode, value, params) {
+    selectTextareaValue(previewMode, value, params) {
         this.$target[0].textContent = value;
         this.$target[0].value = value;
-    },
+    }
     /**
      * Select the date as value property and convert it to the right format
      */
-    selectValueProperty: function (previewMode, value, params) {
+    selectValueProperty(previewMode, value, params) {
         this.$target[0].value = value ? moment.unix(value).format(params.format) : '';
-    },
+    }
     /**
      * Select the display of the multicheckbox field (vertical & horizontal)
      */
-    multiCheckboxDisplay: function (previewMode, value, params) {
+    multiCheckboxDisplay(previewMode, value, params) {
         const target = this._getMultipleInputs();
         target.querySelectorAll('.checkbox, .radio').forEach(el => {
             if (value === 'horizontal') {
@@ -1082,23 +1052,22 @@ options.registry.WebsiteFieldEditor = FieldEditor.extend({
             }
         });
         target.dataset.display = value;
-    },
+    }
     /**
      * Set the field as required or not
      */
-    toggleRequired: function (previewMode, value, params) {
+    toggleRequired(previewMode, value, params) {
         const isRequired = this.$target[0].classList.contains(params.activeValue);
         this.$target[0].classList.toggle(params.activeValue, !isRequired);
         this.$target[0].querySelectorAll('input, select, textarea').forEach(el => el.toggleAttribute('required', !isRequired));
-        this.trigger_up('option_update', {
-            optionName: 'WebsiteFormEditor',
+        this.props.notifyOptions("WebsiteFormEditor", {
             name: 'field_mark',
         });
-    },
+    }
     /**
      * Apply the we-list on the target and rebuild the input(s)
      */
-    renderListItems: async function (previewMode, value, params) {
+    async renderListItems(previewMode, value, params) {
         const valueList = JSON.parse(value);
 
         // Synchronize the possible values with the fields whose visibility
@@ -1120,41 +1089,43 @@ options.registry.WebsiteFieldEditor = FieldEditor.extend({
         const field = this._getActiveField(true);
         field.records = valueList;
         await this._replaceField(field);
-    },
+    }
     /**
      * Sets the visibility of the field.
      *
      * @see this.selectClass for parameters
      */
-    setVisibility(previewMode, widgetValue, params) {
+    async setVisibility(previewMode, widgetValue, params) {
         if (widgetValue === 'conditional') {
-            const widget = this.findWidget('hidden_condition_opt');
-            const firstValue = widget.getMethodsParams('setVisibilityDependency').possibleValues.find(el => el !== '');
+            const widget = this.requestUserValueWidgets('hidden_condition_opt')[0];
+            const firstValue = widget.possibleValues['setVisibilityDependency'].find(el => el !== '');
             if (firstValue) {
                 // Set a default visibility dependency
-                this._setVisibilityDependency(firstValue);
+                await this._setVisibilityDependency(firstValue);
                 return;
             }
-            Dialog.confirm(this, _t("There is no field available for this option."));
+            this.dialogs.add(ConfirmationDialog, {
+                body: _t("There is no field available for this option."),
+            });
         }
         this._deleteConditionalVisibility(this.$target[0]);
-    },
+    }
     /**
      * @see this.selectClass for parameters
      */
-    setVisibilityDependency(previewMode, widgetValue, params) {
-        this._setVisibilityDependency(widgetValue);
-    },
+    async setVisibilityDependency(previewMode, widgetValue, params) {
+        await this._setVisibilityDependency(widgetValue);
+    }
     /**
      * @override
      */
     async selectDataAttribute(previewMode, widgetValue, params) {
-        await this._super(...arguments);
+        await super.selectDataAttribute(...arguments);
         if (params.attributeName === "maxFilesNumber") {
             const allowMultipleFiles = params.activeValue > 1;
             this.$target[0].toggleAttribute("multiple", allowMultipleFiles);
         }
-    },
+    }
 
     //----------------------------------------------------------------------
     // Private
@@ -1163,7 +1134,7 @@ options.registry.WebsiteFieldEditor = FieldEditor.extend({
     /**
      * @override
      */
-    _computeWidgetState: function (methodName, params) {
+    computeWidgetState(methodName, params) {
         switch (methodName) {
             case 'toggleDescription': {
                 const description = this.$target[0].querySelector('.s_website_form_field_description');
@@ -1194,12 +1165,12 @@ options.registry.WebsiteFieldEditor = FieldEditor.extend({
             case 'setVisibilityDependency':
                 return this.$target[0].dataset.visibilityDependency || '';
         }
-        return this._super(...arguments);
-    },
+        return super.computeWidgetState(...arguments);
+    }
     /**
      * @override
      */
-    _computeWidgetVisibility: function (widgetName, params) {
+    computeWidgetVisibility(widgetName, params) {
         const dependencyEl = this._getDependencyEl();
         switch (widgetName) {
             case 'hidden_condition_time_comparators_opt':
@@ -1266,8 +1237,8 @@ options.registry.WebsiteFieldEditor = FieldEditor.extend({
                     ["one2many", "many2many"].includes(fieldEl.dataset.type);
             }
         }
-        return this._super(...arguments);
-    },
+        return super.computeWidgetVisibility(...arguments);
+    }
     /**
      * Deletes all attributes related to conditional visibility.
      *
@@ -1278,7 +1249,7 @@ options.registry.WebsiteFieldEditor = FieldEditor.extend({
             delete fieldEl.dataset[name];
         }
         fieldEl.classList.remove('s_website_form_field_hidden_if', 'd-none');
-    },
+    }
     /**
      * @param {HTMLElement} [fieldEl]
      * @returns {HTMLElement} The visibility dependency of the field
@@ -1286,125 +1257,115 @@ options.registry.WebsiteFieldEditor = FieldEditor.extend({
     _getDependencyEl(fieldEl = this.$target[0]) {
         const dependencyName = fieldEl.dataset.visibilityDependency;
         return this.formEl.querySelector(`.s_website_form_input[name="${dependencyName}"]`);
-    },
+    }
     /**
      * @override
      */
-    _renderCustomXML: async function (uiFragment) {
-        const recursiveFindCircular = (el) => {
-            if (el.dataset.visibilityDependency === this._getFieldName()) {
-                return true;
-            }
-            const dependencyInputEl = this._getDependencyEl(el);
-            if (!dependencyInputEl) {
-                return false;
-            }
-            return recursiveFindCircular(dependencyInputEl.closest('.s_website_form_field'));
-        };
+    async prepareRender() {
+            const recursiveFindCircular = (el) => {
+                if (el.dataset.visibilityDependency === this._getFieldName()) {
+                    return true;
+                }
+                const dependencyInputEl = this._getDependencyEl(el);
+                if (!dependencyInputEl) {
+                    return false;
+                }
+                return recursiveFindCircular(dependencyInputEl.closest('.s_website_form_field'));
+            };
 
-        // Update available visibility dependencies
-        const selectDependencyEl = uiFragment.querySelector('we-select[data-name="hidden_condition_opt"]');
-        const existingDependencyNames = [];
-        for (const el of this.formEl.querySelectorAll('.s_website_form_field:not(.s_website_form_dnone)')) {
-            const inputEl = el.querySelector('.s_website_form_input');
-            if (el.querySelector('.s_website_form_label_content') && inputEl && inputEl.name
+            // Update available visibility dependencies
+            const existingDependencyNames = [];
+            this.state.hiddenConditionOptions = [];
+            for (const el of this.formEl.querySelectorAll('.s_website_form_field:not(.s_website_form_dnone)')) {
+                const inputEl = el.querySelector('.s_website_form_input');
+                if (el.querySelector('.s_website_form_label_content') && inputEl && inputEl.name
                     && inputEl.name !== this.$target[0].querySelector('.s_website_form_input').name
                     && !existingDependencyNames.includes(inputEl.name) && !recursiveFindCircular(el)) {
-                const button = document.createElement('we-button');
-                button.textContent = el.querySelector('.s_website_form_label_content').textContent;
-                button.dataset.setVisibilityDependency = inputEl.name;
-                selectDependencyEl.append(button);
-                existingDependencyNames.push(inputEl.name);
+                    this.state.hiddenConditionOptions.push({
+                        textContent: el.querySelector('.s_website_form_label_content').textContent,
+                        setVisibilityDependency: inputEl.name,
+                    });
+                    existingDependencyNames.push(inputEl.name);
+                }
             }
-        }
 
-        const comparator = this.$target[0].dataset.visibilityComparator;
-        const dependencyEl = this._getDependencyEl();
-        if (dependencyEl) {
-            if ((['radio', 'checkbox'].includes(dependencyEl.type) || dependencyEl.nodeName === 'SELECT')) {
-                // Update available visibility options
-                const selectOptEl = uiFragment.querySelectorAll('we-select[data-name="hidden_condition_no_text_opt"]')[1];
-                const inputContainerEl = this.$target[0];
-                const dependencyEl = this._getDependencyEl();
-                if (dependencyEl.nodeName === 'SELECT') {
-                    for (const option of dependencyEl.querySelectorAll('option')) {
-                        const button = document.createElement('we-button');
-                        button.textContent = option.value || `<${_t("no value")}>`;
-                        button.dataset.selectDataAttribute = option.value;
-                        selectOptEl.append(button);
+            const comparator = this.$target[0].dataset.visibilityComparator;
+            const dependencyEl = this._getDependencyEl();
+            this.state.hiddenConditionNoTextOptions = [];
+            if (dependencyEl) {
+                if ((['radio', 'checkbox'].includes(dependencyEl.type) || dependencyEl.nodeName === 'SELECT')) {
+                    // Update available visibility options
+                    // const selectOptEl = uiFragment.querySelectorAll('we-select[data-name="hidden_condition_no_text_opt"]')[1];
+                    const inputContainerEl = this.$target[0];
+                    const dependencyEl = this._getDependencyEl();
+                    if (dependencyEl.nodeName === 'SELECT') {
+                        for (const option of dependencyEl.querySelectorAll('option')) {
+                            this.state.hiddenConditionNoTextOptions.push({
+                                textContent: option.value || `<${_t("no value")}>`,
+                                selectDataAttribute: option.value,
+                            });
+                        }
+                        if (!inputContainerEl.dataset.visibilityCondition) {
+                            inputContainerEl.dataset.visibilityCondition = dependencyEl.querySelector('option').value;
+                        }
+                    } else { // DependecyEl is a radio or a checkbox
+                        const dependencyContainerEl = dependencyEl.closest('.s_website_form_field');
+                        const inputsInDependencyContainer = dependencyContainerEl.querySelectorAll('.s_website_form_input');
+                        for (const el of inputsInDependencyContainer) {
+                            this.state.hiddenConditionNoTextOptions.push({
+                                textContent: el.value,
+                                selectDataAttribute: el.value,
+                            });
+                        }
+                        if (!inputContainerEl.dataset.visibilityCondition) {
+                            inputContainerEl.dataset.visibilityCondition = inputsInDependencyContainer[0].value;
+                        }
                     }
-                    if (!inputContainerEl.dataset.visibilityCondition) {
-                        inputContainerEl.dataset.visibilityCondition = dependencyEl.querySelector('option').value;
-                    }
-                } else { // DependecyEl is a radio or a checkbox
-                    const dependencyContainerEl = dependencyEl.closest('.s_website_form_field');
-                    const inputsInDependencyContainer = dependencyContainerEl.querySelectorAll('.s_website_form_input');
-                    for (const el of inputsInDependencyContainer) {
-                        const button = document.createElement('we-button');
-                        button.textContent = el.value;
-                        button.dataset.selectDataAttribute = el.value;
-                        selectOptEl.append(button);
-                    }
-                    if (!inputContainerEl.dataset.visibilityCondition) {
-                        inputContainerEl.dataset.visibilityCondition = inputsInDependencyContainer[0].value;
+                    if (!inputContainerEl.dataset.visibilityComparator) {
+                        inputContainerEl.dataset.visibilityComparator = 'selected';
                     }
                 }
-                if (!inputContainerEl.dataset.visibilityComparator) {
-                    inputContainerEl.dataset.visibilityComparator = 'selected';
-                }
-                this.rerender = comparator ? this.rerender : true;
-            }
-            if (!comparator) {
-                // Set a default comparator according to the type of dependency
-                if (dependencyEl.dataset.target) {
-                    this.$target[0].dataset.visibilityComparator = 'after';
-                } else if (['text', 'email', 'tel', 'url', 'search', 'password', 'number'].includes(dependencyEl.type)
+                if (!comparator) {
+                    // Set a default comparator according to the type of dependency
+                    if (dependencyEl.dataset.target) {
+                        this.$target[0].dataset.visibilityComparator = 'after';
+                    } else if (['text', 'email', 'tel', 'url', 'search', 'password', 'number'].includes(dependencyEl.type)
                         || dependencyEl.nodeName === 'TEXTAREA') {
-                    this.$target[0].dataset.visibilityComparator = 'equal';
-                } else if (dependencyEl.type === 'file') {
-                    this.$target[0].dataset.visibilityComparator = 'fileSet';
+                        this.$target[0].dataset.visibilityComparator = 'equal';
+                    } else if (dependencyEl.type === 'file') {
+                        this.$target[0].dataset.visibilityComparator = 'fileSet';
+                    }
                 }
             }
-        }
 
-        const selectEl = uiFragment.querySelector('we-select[data-name="type_opt"]');
-        const currentFieldName = this._getFieldName();
-        const fieldsInForm = Array.from(this.formEl.querySelectorAll('.s_website_form_field:not(.s_website_form_custom) .s_website_form_input')).map(el => el.name).filter(el => el !== currentFieldName);
-        const availableFields = this.existingFields.filter(el => !fieldsInForm.includes(el.dataset.existingField));
-        if (availableFields.length) {
-            const title = document.createElement('we-title');
-            title.textContent = 'Existing fields';
-            availableFields.unshift(title);
-            availableFields.forEach(option => selectEl.append(option.cloneNode(true)));
-        }
 
-        const select = this._getSelect();
-        const multipleInputs = this._getMultipleInputs();
-        if (!select && !multipleInputs) {
-            return;
-        }
+            const currentFieldName = this._getFieldName();
+            const fieldsInForm = Array.from(this.formEl.querySelectorAll('.s_website_form_field:not(.s_website_form_custom) .s_website_form_input')).map(el => el.name).filter(el => el !== currentFieldName);
+            const availableFields = this.existingFields.filter(el => !fieldsInForm.includes(el.existingField));
+            this.state.availableFields = availableFields;
 
-        const field = Object.assign({}, this.fields[this._getFieldName()]);
-        const type = this._getFieldType();
+            const select = this._getSelect();
+            const multipleInputs = this._getMultipleInputs();
+            this.state.list = false;
+            if (!select && !multipleInputs) {
+                return;
+            }
 
-        const list = document.createElement('we-list');
-        const optionText = select ? 'Option' : type === 'selection' ? 'Radio' : 'Checkbox';
-        list.setAttribute('string', `${optionText} List`);
-        list.dataset.addItemTitle = _t("Add new %s", optionText);
-        list.dataset.renderListItems = '';
+            const field = Object.assign({}, this.fields[this._getFieldName()]);
+            const type = this._getFieldType();
 
-        list.dataset.hasDefault = ['one2many', 'many2many'].includes(type) ? 'multiple' : 'unique';
-        const defaults = [...this.$target[0].querySelectorAll('[checked], [selected]')].map(el => {
-            return /^-?[0-9]{1,15}$/.test(el.value) ? parseInt(el.value) : el.value;
-        });
-        list.dataset.defaults = JSON.stringify(defaults);
+            const list = {};
+            const optionText = select ? 'Option' : type === 'selection' ? 'Radio' : 'Checkbox';
+            list.textContent = `${optionText} List`;
+            list.addItemTitle = _t("Add new %s", optionText);
+            list.renderListItems = '';
 
-        if (!this._isFieldCustom()) {
-            await this._fetchFieldRecords(field);
-            list.dataset.availableRecords = JSON.stringify(field.records);
-        }
-        uiFragment.insertBefore(list, uiFragment.querySelector('we-select[string="Visibility"]'));
-    },
+            if (!this._isFieldCustom()) {
+                await this._fetchFieldRecords(field);
+                list.availableRecords = JSON.stringify(field.records);
+            }
+            this.state.list = list;
+    }
     /**
      * Replaces the target content with the field provided.
      *
@@ -1412,7 +1373,7 @@ options.registry.WebsiteFieldEditor = FieldEditor.extend({
      * @param {Object} field
      * @returns {Promise}
      */
-    _replaceField: async function (field) {
+    async _replaceField(field) {
         await this._fetchFieldRecords(field);
         const activeField = this._getActiveField();
         if (activeField.type !== field.type) {
@@ -1420,7 +1381,7 @@ options.registry.WebsiteFieldEditor = FieldEditor.extend({
         }
         const fieldEl = this._renderField(field);
         this._replaceFieldElement(fieldEl);
-    },
+    }
     /**
      * Replaces the target with provided field.
      *
@@ -1454,25 +1415,29 @@ options.registry.WebsiteFieldEditor = FieldEditor.extend({
         if (newInputEl) {
             newInputEl.dataset.fillWith = dataFillWith;
         }
-    },
+    }
     /**
      * Sets the visibility dependency of the field.
      *
      * @param {string} value name of the dependency input
      */
-     _setVisibilityDependency(value) {
+     async _setVisibilityDependency(value) {
         delete this.$target[0].dataset.visibilityCondition;
         delete this.$target[0].dataset.visibilityComparator;
         const previousDependency = this._getDependencyEl();
+        let rerender = false;
         if (this.formEl.querySelector(`.s_website_form_input[name="${value}"]`).type !== (previousDependency && previousDependency.type)) {
-            this.rerender = true;
+            rerender = true;
         }
         this.$target[0].dataset.visibilityDependency = value;
-    },
+        if (rerender) {
+            await this.prepareRender();
+        }
+    }
     /**
      * @private
      */
-    _getListItems: function () {
+    _getListItems() {
         const select = this._getSelect();
         const multipleInputs = this._getMultipleInputs();
         let options = [];
@@ -1489,21 +1454,37 @@ options.registry.WebsiteFieldEditor = FieldEditor.extend({
                 selected: select ? opt.selected : opt.checked,
             };
         });
-    },
+    }
     /**
      * Returns the select element if it exist else null
      *
      * @private
      * @returns {HTMLElement}
      */
-    _getSelect: function () {
+    _getSelect() {
         return this.$target[0].querySelector('select');
-    },
+    }
+}
+
+registry.category("snippets_options").add("website.WebsiteFieldEditor", {
+    template: "website.WebsiteFieldEditor",
+    component: WebsiteFieldEditor,
+    selector: ".s_website_form_field",
+    exclude: ".s_website_form_dnone",
+    dropNear: ".s_website_form_field",
+    "drop-lock-within": "form",
+}, {
+    sequence: 10,
 });
 
-options.registry.AddFieldForm = FormEditor.extend({
-    isTopOption: true,
-    isTopFirstOption: true,
+export class AddFieldForm extends FormEditor {
+    static isTopOption = true;
+    static isTopFirstOption = true;
+
+    setup() {
+        super.setup();
+        this.env.validMethodNames.push("addField");
+    }
 
     //--------------------------------------------------------------------------
     // Options
@@ -1513,20 +1494,29 @@ options.registry.AddFieldForm = FormEditor.extend({
      * Add a char field at the end of the form.
      * New field is set as active
      */
-    addField: async function (previewMode, value, params) {
+    async addField(previewMode, value, params) {
         const field = this._getCustomField('char', 'Custom Text');
         field.formatInfo = this._getDefaultFormat();
         const fieldEl = this._renderField(field);
         this.$target.find('.s_website_form_submit, .s_website_form_recaptcha').first().before(fieldEl);
-        this.trigger_up('activate_snippet', {
-            $snippet: $(fieldEl),
-        });
-    },
+        this.env.activateSnippet(fieldEl);
+    }
+}
+registry.category("snippets_options").add("website.AddFieldForm", {
+    component: AddFieldForm,
+    template: "website.AddFieldForm",
+    selector: ".s_website_form",
+    target: "form",
 });
 
-options.registry.AddField = FieldEditor.extend({
-    isTopOption: true,
-    isTopFirstOption: true,
+export class AddField extends FieldEditor {
+    static isTopOption = true;
+    static isTopFirstOption = true;
+
+    setup() {
+        super.setup();
+        this.env.validMethodNames.push("addField");
+    }
 
     //--------------------------------------------------------------------------
     // Options
@@ -1536,106 +1526,118 @@ options.registry.AddField = FieldEditor.extend({
      * Add a char field with active field properties after the active field.
      * New field is set as active
      */
-    addField: async function (previewMode, value, params) {
-        this.trigger_up('option_update', {
-            optionName: 'WebsiteFormEditor',
+    async addField(previewMode, value, params) {
+        await this.props.notifyOptions("WebsiteFormEditor", {
             name: 'add_field',
             data: {
                 formatInfo: this._getFieldFormat(),
                 $target: this.$target,
             },
         });
-    },
-});
-
-// Superclass for options that need to disable a button from the snippet overlay
-const DisableOverlayButtonOption = options.Class.extend({
-    // Disable a button of the snippet overlay
-    disableButton: function (buttonName, message) {
-        // TODO refactor in master
-        const className = 'oe_snippet_' + buttonName;
-        this.$overlay.add(this.$overlay.data('$optionsSection')).on('click', '.' + className, this.preventButton);
-        const $buttons = this.$overlay.add(this.$overlay.data('$optionsSection')).find('.' + className);
-        for (const buttonEl of $buttons) {
-            // For a disabled element to display a tooltip, it must be wrapped
-            // into a non-disabled element which holds the tooltip.
-            buttonEl.classList.add('o_disabled');
-            const spanEl = buttonEl.ownerDocument.createElement('span');
-            spanEl.setAttribute('tabindex', 0);
-            spanEl.setAttribute('title', message);
-            buttonEl.replaceWith(spanEl);
-            spanEl.appendChild(buttonEl);
-            Tooltip.getOrCreateInstance(spanEl, {delay: 0});
-        }
-    },
-
-    preventButton: function (event) {
-        // Snippet options bind their functions before the editor, so we
-        // can't cleanly unbind the editor onRemove function from here
-        event.preventDefault();
-        event.stopImmediatePropagation();
     }
+}
+registry.category("snippets_options").add("website.AddField", {
+    component: AddField,
+    template: "website.AddField",
+    selector: ".s_website_form_field",
+    exclude: ".s_website_form_field_dnone",
 });
 
-// Disable duplicate button for model fields
-options.registry.WebsiteFormFieldModel = DisableOverlayButtonOption.extend({
-    start: function () {
-        this.disableButton('clone', _t('You cannot duplicate this field.'));
-        return this._super.apply(this, arguments);
-    }
+registry.category("snippets_options").add("website.WebsitFormSubmit", {
+    template: "website.WebsiteFormSubmit",
+    selector: ".s_website_form_submit",
+    exclude: ".s_website_form_no_submit_options",
 });
 
-// Disable delete button for model required fields
-options.registry.WebsiteFormFieldRequired = DisableOverlayButtonOption.extend({
-    start: function () {
-        this.disableButton("remove", _t(
-            "This field is mandatory for this action. You cannot remove it. Try hiding it with the"
-            + " 'Visibility' option instead and add it a default value."
-        ));
-        return this._super.apply(this, arguments);
-    },
-
-    //--------------------------------------------------------------------------
-    // Private
-    //--------------------------------------------------------------------------
-
-    /**
-     * @override
-     */
-    async _renderCustomXML(uiFragment) {
-        const fieldName = this.$target[0]
-            .querySelector("input.s_website_form_input").getAttribute("name");
-        const spanEl = document.createElement("span");
-        spanEl.innerText = _t("The field '%s' is mandatory for the action '%s'.", fieldName, currentActionName);
-        uiFragment.querySelector("we-alert").appendChild(spanEl);
-    },
-});
-
-// Disable delete and duplicate button for submit
-options.registry.WebsiteFormSubmitRequired = DisableOverlayButtonOption.extend({
-    start: function () {
-        this.disableButton('remove', _t('You can\'t remove the submit button of the form'));
-        this.disableButton('clone', _t('You can\'t duplicate the submit button of the form.'));
-        return this._super.apply(this, arguments);
-    }
-});
-
-// Disable "Shown on Mobile/Desktop" option if for an hidden field
-options.registry.DeviceVisibility.include({
-
-    //--------------------------------------------------------------------------
-    // Private
-    //--------------------------------------------------------------------------
-
-    /**
-     * @override
-     */
-    async _computeVisibility() {
-        // Same as default but overridden by other apps
-        return await this._super(...arguments)
-            && !this.$target.hasClass('s_website_form_field_hidden');
-    },
-});
+//
+// // Superclass for options that need to disable a button from the snippet overlay
+// const DisableOverlayButtonOption = options.Class.extend({
+//     // Disable a button of the snippet overlay
+//     disableButton: function (buttonName, message) {
+//         // TODO refactor in master
+//         const className = 'oe_snippet_' + buttonName;
+//         this.$overlay.add(this.$overlay.data('$optionsSection')).on('click', '.' + className, this.preventButton);
+//         const $buttons = this.$overlay.add(this.$overlay.data('$optionsSection')).find('.' + className);
+//         for (const buttonEl of $buttons) {
+//             // For a disabled element to display a tooltip, it must be wrapped
+//             // into a non-disabled element which holds the tooltip.
+//             buttonEl.classList.add('o_disabled');
+//             const spanEl = buttonEl.ownerDocument.createElement('span');
+//             spanEl.setAttribute('tabindex', 0);
+//             spanEl.setAttribute('title', message);
+//             buttonEl.replaceWith(spanEl);
+//             spanEl.appendChild(buttonEl);
+//             Tooltip.getOrCreateInstance(spanEl, {delay: 0});
+//         }
+//     },
+//
+//     preventButton: function (event) {
+//         // Snippet options bind their functions before the editor, so we
+//         // can't cleanly unbind the editor onRemove function from here
+//         event.preventDefault();
+//         event.stopImmediatePropagation();
+//     }
+// });
+//
+// // Disable duplicate button for model fields
+// options.registry.WebsiteFormFieldModel = DisableOverlayButtonOption.extend({
+//     start: function () {
+//         this.disableButton('clone', _t('You cannot duplicate this field.'));
+//         return this._super.apply(this, arguments);
+//     }
+// });
+//
+// // Disable delete button for model required fields
+// options.registry.WebsiteFormFieldRequired = DisableOverlayButtonOption.extend({
+//     start: function () {
+//         this.disableButton("remove", _t(
+//             "This field is mandatory for this action. You cannot remove it. Try hiding it with the"
+//             + " 'Visibility' option instead and add it a default value."
+//         ));
+//         return this._super.apply(this, arguments);
+//     },
+//
+//     //--------------------------------------------------------------------------
+//     // Private
+//     //--------------------------------------------------------------------------
+//
+//     /**
+//      * @override
+//      */
+//     async _renderCustomXML(uiFragment) {
+//         const fieldName = this.$target[0]
+//             .querySelector("input.s_website_form_input").getAttribute("name");
+//         const spanEl = document.createElement("span");
+//         spanEl.innerText = _t("The field '%s' is mandatory for the action '%s'.", fieldName, currentActionName);
+//         uiFragment.querySelector("we-alert").appendChild(spanEl);
+//     },
+// });
+//
+// // Disable delete and duplicate button for submit
+// options.registry.WebsiteFormSubmitRequired = DisableOverlayButtonOption.extend({
+//     start: function () {
+//         this.disableButton('remove', _t('You can\'t remove the submit button of the form'));
+//         this.disableButton('clone', _t('You can\'t duplicate the submit button of the form.'));
+//         return this._super.apply(this, arguments);
+//     }
+// });
+//
+// // Disable "Shown on Mobile/Desktop" option if for an hidden field
+// options.registry.DeviceVisibility.include({
+//
+//     //--------------------------------------------------------------------------
+//     // Private
+//     //--------------------------------------------------------------------------
+//
+//     /**
+//      * @override
+//      */
+//     async _computeVisibility() {
+//         // Same as default but overridden by other apps
+//         return await this._super(...arguments)
+//             && !this.$target.hasClass('s_website_form_field_hidden');
+//     },
+// });
 
 export default {
     clearAllFormsInfo,

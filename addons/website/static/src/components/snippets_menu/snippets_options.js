@@ -22,7 +22,6 @@ import {
 } from "@odoo/owl";
 import { patch } from "@web/core/utils/patch";
 import { useService } from "@web/core/utils/hooks";
-import options from "@web_editor/js/editor/snippets.options";
 import {_t} from "@web/core/l10n/translation";
 registry.category("snippets_options").add("ContainerWidth", {
     template: "website.ContainerWidth",
@@ -52,6 +51,7 @@ patch(SnippetOption.prototype, {
         return new Promise((resolve, reject) => this._website.websiteRootInstance.trigger_up("widgets_start_request", {
             onSuccess: resolve,
             onFailure: reject,
+            $target: this.$target,
             editableMode: true,
         }));
     }
@@ -255,7 +255,7 @@ class CarouselItem extends SnippetOption {
      */
     async cleanForSave() {
         this.carouselEl.removeEventListener("active_slide_targeted", this.onActiveSlideTargeted);
-        await super.cleanForSave()
+        await super.cleanForSave();
     }
     /**
      * Gets the bootstrap instance of the carousel.
@@ -370,15 +370,6 @@ class GalleryElement extends SnippetOption {
                 position: widgetValue,
             },
         });
-        // TODO: notify
-        // this.trigger_up("option_update", {
-        //     optionName: optionName,
-        //     name: "reorder_items",
-        //     data: {
-        //         itemEl: this.target,
-        //         position: widgetValue,
-        //     },
-        // });
     }
 }
 registry.category("snippets_options").add("GalleryElement", {

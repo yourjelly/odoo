@@ -423,8 +423,8 @@ export class SnippetEditor extends Component {
                         template: optionDef.template,
                         toggleVisibility: (value) =>
                             value === undefined
-                                ? (option.props.visible = !option.props.visible)
-                                : (option.props.visible = value),
+                                ? (option.props.visible = this.props.showOptions && !option.props.visible)
+                                : (option.props.visible = this.props.showOptions && value),
                         target: target,
                         updateOverlay: () => {
                             this.cover();
@@ -442,7 +442,11 @@ export class SnippetEditor extends Component {
                     },
                 };
                 if (option.component.isTopOption) {
-                    this.topOptions.push(option);
+                    if (option.component.isTopFirstOption) {
+                        this.topOptions.unshift(option);
+                    } else {
+                        this.topOptions.push(option);
+                    }
                 } else {
                     this.options.push(option);
                 }
