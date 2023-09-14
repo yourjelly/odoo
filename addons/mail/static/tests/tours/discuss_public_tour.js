@@ -79,7 +79,7 @@ registry.category("web_tour.tours").add("mail/static/tests/tours/discuss_public_
         },
         {
             content: "Click on edit",
-            trigger: ".o-mail-Message [title='Edit']",
+            trigger: ".dropdown-menu .dropdown-item[title='Edit'], .o-mail-Message [title='Edit']",
         },
         {
             content: "Edit message",

@@ -11,7 +11,7 @@
 
                     <t t-set-slot="content">
                         <t t-if="printItems.length">
-                            <Dropdown t-if="printItems.length > 1" items="toDropdownItems(printItems)">
+                            <Dropdown t-if="printItems.length > 1" items="asDropdownItems(printItems)">
                                 <button><i class="fa fa-print me-1"/> Print</button>
                             </Dropdown>
 
