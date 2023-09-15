@@ -8,6 +8,7 @@ import weUtils from "@web_editor/js/common/utils";
 import {
     Component,
     markup, onMounted,
+    onWillUpdateProps,
     onWillStart,
     reactive,
     useChildSubEnv, useComponent,
@@ -135,6 +136,50 @@ export class WeRow extends Component {
         return this.visibilityState.visible;
     }
 }
+export class WeCollapse extends WeRow {
+    static template = "web_editor.WeCollapse";
+    static props = {
+        ...WeRow.props,
+        canCollapse: { type: Boolean, optional: true },
+    };
+    setup() {
+        super.setup();
+        this.state = useState({
+            canCollapse: this.props.canCollapse || true,
+            active: false,
+        });
+
+        onWillUpdateProps((nextProps) => {
+            this.state.canCollapse = nextProps.canCollapse;
+            this.state.active = nextProps.canCollapse;
+        });
+    }
+
+    /**
+     * @override
+     */
+    get cssClasses() {
+        const heritedClasses = super.cssClasses;
+        return {
+            ...heritedClasses,
+            "active": this.state.active,
+        };
+    }
+    /**
+     * @param {Event} ev
+     */
+    toggleCollapse(ev) {
+        const clickableComponents = ["we-collapse", "we-button", "we-select", "we-input", "we-range"];
+        // Only toggles when clicking on elements that do not trigger another
+        // click event (e.g.: the title of a WeRow). This gives a wider
+        // clickable area than just the we-toggler.
+        if (ev.target.closest("we-collapse") === ev.target.closest(clickableComponents)) {
+            this.state.active = !this.state.active;
+        }
+    }
+}
+
+
 /**
  * Abstract Widget class for SnippetOptions
  */

@@ -10,6 +10,20 @@
             </div>
         </we-row>
     </t>
+    <t t-name="web_editor.WeCollapse">
+        <we-collapse t-att-class="this.cssClasses">
+            <we-title t-if="props.slots?.title" t-on-click="toggleCollapse"
+                      class="o_we_collapse_toggler">
+                <t t-slot="title"/>
+            </we-title>
+            <t t-slot="weCollapseHeader" t-on-click="toggleCollapse"/>
+            <we-toggler t-on-click="toggleCollapse" class="o_we_collapse_toggler"
+                t-att-class="!state.canCollapse ? 'd-none' : state.active ? 'active' : ''"/>
+            <div>
+                <t t-slot="default"/>
+            </div>
+        </we-collapse>
+    </t>
     <t t-name="web_editor.WeButton">
         <we-button
                 class="o_we_user_value_widget"
@@ -257,7 +271,7 @@
                 <input t-model="this.state.searchValue" placeholder="Search for records..."/>
             </div>
             <t t-foreach="this.state.recordsList" t-as="record" t-key="record.id">
-                <we-button t-att-class="{'active': this.state.activeId === record.id}" 
+                <we-button t-att-class="{'active': this.state.activeId === record.id}"
                            t-on-click.synthetic="() => this.selectRecord(record)">
                            <div t-out="record.display_name"/>
                 </we-button>

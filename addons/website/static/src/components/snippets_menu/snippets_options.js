@@ -762,6 +762,7 @@ class ConditionalVisibility extends DeviceVisibility {
         this.state = useState({
             geoipCountryCode: undefined,
             websiteLanguageIds: [],
+            collapsible: false,
         });
 
         onWillStart(async () => {
@@ -858,10 +859,9 @@ class ConditionalVisibility extends DeviceVisibility {
 
         if (params.attributeName === "visibility") {
             if (widgetValue === "conditional") {
-                // TODO OWL: pass this as a prop to WeCollapse.
-        //         const collapseEl = this.$el.children('we-collapse')[0];
-        //         this._toggleCollapseEl(collapseEl);
+                this.state.collapsible = true;
             } else {
+                this.state.collapsible = false;
                 // TODO create a param to allow doing this automatically for genericSelectDataAttribute?
                 delete this.target.dataset.visibility;
 
