@@ -47,7 +47,6 @@ export class FormArchParser extends XMLParser {
             fieldNodes,
             widgetNodes,
             xmlDoc,
-            __rawArch: arch,
         };
     }
 }

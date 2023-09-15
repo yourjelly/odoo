@@ -52,7 +52,6 @@ export class ActivityArchParser extends XMLParser {
             fieldNodes,
             templateDocs,
             title,
-            __rawArch: arch,
         };
     }
 }
