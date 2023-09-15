@@ -171,7 +171,7 @@ class AccountEdiXmlUBL20(models.AbstractModel):
     def _get_invoice_tax_totals_vals_list(self, invoice, taxes_vals):
         tax_totals_vals = {
             'currency': invoice.currency_id,
-            'currency_dp': invoice.currency_id.decimal_places,
+            'currency_dp': self._get_currency_decimal_places(invoice.currency_id),
             'tax_amount': taxes_vals['tax_amount_currency'],
             'tax_subtotal_vals': [],
         }
@@ -179,7 +179,7 @@ class AccountEdiXmlUBL20(models.AbstractModel):
             if grouping_key['tax_amount_type'] != 'fixed':
                 tax_totals_vals['tax_subtotal_vals'].append({
                     'currency': invoice.currency_id,
-                    'currency_dp': invoice.currency_id.decimal_places,
+                    'currency_dp': self._get_currency_decimal_places(invoice.currency_id),
                     'taxable_amount': vals['base_amount_currency'],
                     'tax_amount': vals['tax_amount_currency'],
                     'percent': vals['_tax_category_vals_']['percent'],
@@ -237,7 +237,7 @@ class AccountEdiXmlUBL20(models.AbstractModel):
             if grouping_key['tax_amount_type'] == 'fixed':
                 fixed_tax_charge_vals_list.append({
                     'currency_name': line.currency_id.name,
-                    'currency_dp': line.currency_id.decimal_places,
+                    'currency_dp': self._get_currency_decimal_places(line.currency_id),
                     'charge_indicator': 'true',
                     'allowance_charge_reason_code': 'AEO',
                     'allowance_charge_reason': tax_details['tax_name'],
@@ -257,7 +257,7 @@ class AccountEdiXmlUBL20(models.AbstractModel):
 
         allowance_vals = {
             'currency_name': line.currency_id.name,
-            'currency_dp': line.currency_id.decimal_places,
+            'currency_dp': self._get_currency_decimal_places(line.currency_id),
 
             # Must be 'false' since this method is for allowances.
             'charge_indicator': 'false',
@@ -294,7 +294,7 @@ class AccountEdiXmlUBL20(models.AbstractModel):
 
         return {
             'currency': line.currency_id,
-            'currency_dp': line.currency_id.decimal_places,
+            'currency_dp': self._get_currency_decimal_places(line.currency_id),
 
             # The price of an item, exclusive of VAT, after subtracting item price discount.
             'price_amount': gross_price_unit,
@@ -323,7 +323,7 @@ class AccountEdiXmlUBL20(models.AbstractModel):
         )
         return {
             'currency': line.currency_id,
-            'currency_dp': line.currency_id.decimal_places,
+            'currency_dp': self._get_currency_decimal_places(line.currency_id),
             'invoiced_quantity': line.quantity,
             'invoiced_quantity_attrs': {'unitCode': uom},
             'line_extension_amount': line.price_subtotal + total_fixed_tax_amount,
@@ -333,12 +333,24 @@ class AccountEdiXmlUBL20(models.AbstractModel):
             'price_vals': self._get_invoice_line_price_vals(line),
         }
 
+    def _get_invoice_legal_monetary_total_vals(self, invoice, taxes_vals, line_extension_amount, allowance_total_amount):
+        """ Method used to fill the cac:LegalMonetaryTotal node"""
+        return {
+            'currency': invoice.currency_id,
+            'currency_dp': self._get_currency_decimal_places(invoice.currency_id),
+            'line_extension_amount': line_extension_amount,
+            'tax_exclusive_amount': taxes_vals['base_amount_currency'],
+            'tax_inclusive_amount': invoice.amount_total,
+            'allowance_total_amount': allowance_total_amount or None,
+            'prepaid_amount': invoice.amount_total - invoice.amount_residual,
+            'payable_amount': invoice.amount_residual,
+        }
+
     def _apply_invoice_tax_filter(self, base_line, tax_values):
         """
             To be overridden to apply a specific tax filter
         """
         return True
-
 
     def _apply_invoice_line_filter(self, invoice_line):
         """
@@ -454,18 +466,9 @@ class AccountEdiXmlUBL20(models.AbstractModel):
                 # allowances at the document level, the allowances on invoices (eg. discount) are on invoice_line_vals
                 'allowance_charge_vals': document_allowance_charge_vals_list,
                 'tax_total_vals': self._get_invoice_tax_totals_vals_list(invoice, taxes_vals),
-                'legal_monetary_total_vals': {
-                    'currency': invoice.currency_id,
-                    'currency_dp': invoice.currency_id.decimal_places,
-                    'line_extension_amount': line_extension_amount,
-                    'tax_exclusive_amount': taxes_vals['base_amount_currency'],
-                    'tax_inclusive_amount': invoice.amount_total,
-                    'allowance_total_amount': allowance_total_amount or None,
-                    'prepaid_amount': invoice.amount_total - invoice.amount_residual,
-                    'payable_amount': invoice.amount_residual,
-                },
+                'legal_monetary_total_vals': self._get_invoice_legal_monetary_total_vals(invoice, taxes_vals, line_extension_amount, allowance_total_amount),
                 'invoice_line_vals': invoice_line_vals_list,
-                'currency_dp': invoice.currency_id.decimal_places,  # currency decimal places
+                'currency_dp': self._get_currency_decimal_places(invoice.currency_id),  # currency decimal places
             },
         }
 
@@ -477,6 +480,7 @@ class AccountEdiXmlUBL20(models.AbstractModel):
             vals['vals']['credit_note_type_code'] = 381
 
         return vals
+
     def _export_invoice_constraints(self, invoice, vals):
         constraints = self._invoice_constraints_common(invoice)
         constraints.update({
@@ -494,6 +498,13 @@ class AccountEdiXmlUBL20(models.AbstractModel):
         xml_content = self.env['ir.qweb']._render(vals['main_template'], vals)
         return etree.tostring(cleanup_xml_node(xml_content), xml_declaration=True, encoding='UTF-8'), set(errors)
 
+    def _get_document_type_code_vals(self, invoice, invoice_data):
+        """Returns the values used for the `DocumentTypeCode` node"""
+        # To be overriden by custom format if required
+        # http://www.datypic.com/sc/ubl20/e-cbc_DocumentTypeCode.html
+        document_type_code = 380 if invoice.move_type == 'out_invoice' else 381
+        return {'attrs': {}, 'value': document_type_code}
+
     def _postprocess_invoice_xml(self, invoice, invoice_data):
         # EXTENDS account.edi.common
 
@@ -509,12 +520,18 @@ class AccountEdiXmlUBL20(models.AbstractModel):
         filename = invoice_data['pdf_attachment_values']['name']
         content = invoice_data['pdf_attachment_values']['raw']
 
+        edi_model = invoice_data["ubl_cii_xml_options"]["builder"]
+        doc_type_code_vals = edi_model._get_document_type_code_vals(invoice, invoice_data)
+        document_type_code_attributes = " ".join(f'{name}="{value}"' for name, value in doc_type_code_vals['attrs'].items())
+        document_type_code_value = doc_type_code_vals.get('value', '')
+
         to_inject = f'''
             <cac:AdditionalDocumentReference
                 xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
                 xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
                 xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
                 <cbc:ID>{escape(filename)}</cbc:ID>
+                <cbc:DocumentTypeCode {document_type_code_attributes}>{document_type_code_value}</cbc:DocumentTypeCode>
                 <cac:Attachment>
                     <cbc:EmbeddedDocumentBinaryObject
                         mimeCode="application/pdf"
