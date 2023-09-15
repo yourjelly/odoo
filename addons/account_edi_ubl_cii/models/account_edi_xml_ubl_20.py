@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
+import base64
+from lxml import etree
+from xml.sax.saxutils import escape, quoteattr
 
 from odoo import models, _
 from odoo.osv import expression
 from odoo.tools import html2plaintext, cleanup_xml_node, find_xml_value
-from lxml import etree
 
 
 class AccountEdiXmlUBL20(models.AbstractModel):
@@ -491,6 +493,42 @@ class AccountEdiXmlUBL20(models.AbstractModel):
         errors = [constraint for constraint in self._export_invoice_constraints(invoice, vals).values() if constraint]
         xml_content = self.env['ir.qweb']._render(vals['main_template'], vals)
         return etree.tostring(cleanup_xml_node(xml_content), xml_declaration=True, encoding='UTF-8'), set(errors)
+
+    def _postprocess_invoice_xml(self, invoice, invoice_data):
+        # EXTENDS account.edi.common
+
+        if 'ubl_cii_xml_options' not in invoice_data:
+            return
+
+        # Adding the PDF to the XML
+        tree = etree.fromstring(invoice_data['ubl_cii_xml_attachment_values']['raw'])
+        anchor_elements = tree.xpath("//*[local-name()='AccountingSupplierParty']")
+        if not anchor_elements:
+            return
+
+        filename = invoice_data['pdf_attachment_values']['name']
+        content = invoice_data['pdf_attachment_values']['raw']
+
+        to_inject = f'''
+            <cac:AdditionalDocumentReference
+                xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
+                xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+                xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+                <cbc:ID>{escape(filename)}</cbc:ID>
+                <cac:Attachment>
+                    <cbc:EmbeddedDocumentBinaryObject
+                        mimeCode="application/pdf"
+                        filename={quoteattr(filename)}>
+                        {base64.b64encode(content).decode()}
+                    </cbc:EmbeddedDocumentBinaryObject>
+                </cac:Attachment>
+            </cac:AdditionalDocumentReference>
+        '''
+        anchor_index = tree.index(anchor_elements[0])
+        tree.insert(anchor_index, etree.fromstring(to_inject))
+        invoice_data['ubl_cii_xml_attachment_values']['raw'] = etree.tostring(
+            cleanup_xml_node(tree), xml_declaration=True, encoding='UTF-8'
+        )
 
     # -------------------------------------------------------------------------
     # IMPORT

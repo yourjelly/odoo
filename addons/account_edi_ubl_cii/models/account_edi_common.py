@@ -740,3 +740,6 @@ class AccountEdiCommon(models.AbstractModel):
                 )
             )
         return response
+
+    def _postprocess_invoice_xml(self, invoice, invoice_data):
+        """post process hook to be overriden by the edi implementation"""
