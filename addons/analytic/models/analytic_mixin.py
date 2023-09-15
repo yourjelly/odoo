@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-from odoo import models, fields, api, _
+from odoo import models, fields, api, Command, _
 from odoo.tools.float_utils import float_round, float_compare
 from odoo.exceptions import UserError, ValidationError
 
@@ -101,10 +101,29 @@ class AnalyticMixin(models.AbstractModel):
                     raise ValidationError(_("One or more lines require a 100% analytic distribution."))
 
     def _sanitize_values(self, vals, decimal_precision):
-        """ Normalize the float of the distribution """
+        """ Normalize the float of the distribution,
+            and create composite accounts
+        """
         if 'analytic_distribution' in vals:
-            vals['analytic_distribution'] = vals.get('analytic_distribution') and {
-                account_id: float_round(distribution, decimal_precision) for account_id, distribution in vals['analytic_distribution'].items()}
+            sanitized_vals = {}
+            for account_id, distribution in vals['analytic_distribution'].items():
+                account_ids = account_id.split(",")
+                if len(account_ids) > 1:
+                    # TODO: This is a problem as a new composite is created every time, search first?
+                    # TODO: What plan does the composite fall under?
+                    account_ids = self.env['account.analytic.account'].create({
+                        'name': "Composite Account",
+                        'plan_id': self.env['account.analytic.plan'].search([], limit=1).id,
+                        'composition_ids': [Command.set([int(id) for id in account_ids])],
+                    }).id
+                    sanitized_vals[account_ids] = float_round(distribution, decimal_precision)
+                else:
+                    sanitized_vals[account_id] = float_round(distribution, decimal_precision)
+            vals['analytic_distribution'] = sanitized_vals
+            # vals['analytic_distribution'] = vals.get('analytic_distribution') and {
+            #     account_id: float_round(distribution, decimal_precision)
+            #     for account_id, distribution in vals['analytic_distribution'].items()
+            # }
         return vals
 
     def _apply_analytic_distribution_domain(self, domain):

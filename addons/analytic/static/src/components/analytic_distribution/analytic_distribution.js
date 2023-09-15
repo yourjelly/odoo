@@ -18,6 +18,10 @@ import { parseFloat as oParseFloat } from "@web/views/fields/parsers";
 import { formatPercentage } from "@web/views/fields/formatters";
 import { SelectCreateDialog } from "@web/views/view_dialogs/select_create_dialog";
 
+import { Record } from "@web/views/record";
+import { Many2ManyTagsField } from "@web/views/fields/many2many_tags/many2many_tags_field";
+import { PercentageField } from "@web/views/fields/percentage/percentage_field";
+
 const { Component, useState, useRef, useExternalListener, onWillStart, onPatched } = owl;
 
 const PLAN_APPLICABILITY = {
@@ -35,6 +39,7 @@ export class AnalyticDistribution extends Component {
         this.state = useState({
             showDropdown: false,
             list: {},
+            formattedData: [],
         });
 
         this.widgetRef = useRef("analyticDistribution");
@@ -76,8 +81,8 @@ export class AnalyticDistribution extends Component {
         this.lastProduct = this.props.product_field && this.props.record.data[this.props.product_field] || false;
 
         this.selectCreateIsOpen = false;
-        this.addDialog = useOwnedDialogs();
-        this.onSearchMore = this._onSearchMore.bind(this);
+        // this.addDialog = useOwnedDialogs();
+        // this.onSearchMore = this._onSearchMore.bind(this);
     }
 
     // Lifecycle
@@ -86,6 +91,7 @@ export class AnalyticDistribution extends Component {
             await this.fetchAllPlans();
         }
         await this.formatData();
+        await this.jsonToData();
     }
 
     async willUpdateRecord(record) {
@@ -180,17 +186,23 @@ export class AnalyticDistribution extends Component {
     }
 
     async fetchAnalyticAccounts(domain, limit=null) {
+        // TODO: Fix this since it is no longer used by the Autocomplete component nor the search more (view all) dialog
         const args = {
             domain: domain,
-            fields: ["id", "display_name", "root_plan_id", "color"],
+            fields: ["id", "display_name", "root_plan_id", "color", "composition_ids"],
             context: [],
         }
         if (limit) {
             args['limit'] = limit;
         }
         if (domain.length === 1 && domain[0][0] === "id") {
+            // args.domain = [...args.domain, ["composition_ids", "in", domain[0][2]]];
             //batch these orm calls
-            return await this.props.record.model.orm.read("account.analytic.account", domain[0][2], args.fields, {});
+            return await this.props.record.model.orm.read("account.analytic.account", domain[0][2], args.fields, {context: {"fetch_composite_children": true}});
+        } else {
+            // Added this, to ensure that composite accounts are excluded, but I don't think it's used
+            debugger;
+            args.domain = [...args.domain, ["composition_ids", "=", false]];
         }
         return await this.orm.call("account.analytic.account", "search_read", [], args);
     }
@@ -207,144 +219,144 @@ export class AnalyticDistribution extends Component {
         };
     }
 
-    analyticAccountDomain(groupId=null) {
-        let domain = [['id', 'not in', this.existingAnalyticAccountIDs]];
-        if (this.props.record.data.company_id){
-            domain.push(
-                '|',
-                ['company_id', '=', this.props.record.data.company_id[0]],
-                ['company_id', '=', false]
-            );
-        }
+    // analyticAccountDomain(groupId=null) {
+    //     let domain = [['id', 'not in', this.existingAnalyticAccountIDs]];
+    //     if (this.props.record.data.company_id){
+    //         domain.push(
+    //             '|',
+    //             ['company_id', '=', this.props.record.data.company_id[0]],
+    //             ['company_id', '=', false]
+    //         );
+    //     }
 
-        if (groupId) {
-            domain.push(['root_plan_id', '=', groupId]);
-        }
-        return domain;
-    }
+    //     if (groupId) {
+    //         domain.push(['root_plan_id', '=', groupId]);
+    //     }
+    //     return domain;
+    // }
 
-    searchAnalyticDomain(searchTerm) {
-        return [
-            '|',
-            ["name", "ilike", searchTerm],
-            '|',
-            ['code', 'ilike', searchTerm],
-            ['partner_id', 'ilike', searchTerm],
-        ];
-    }
+    // searchAnalyticDomain(searchTerm) {
+    //     return [
+    //         '|',
+    //         ["name", "ilike", searchTerm],
+    //         '|',
+    //         ['code', 'ilike', searchTerm],
+    //         ['partner_id', 'ilike', searchTerm],
+    //     ];
+    // }
 
-    async loadOptionsSourceAnalytic(groupId, searchTerm) {
-        const searchLimit = 6;
+    // async loadOptionsSourceAnalytic(groupId, searchTerm) {
+    //     const searchLimit = 6;
 
-        const records = await this.fetchAnalyticAccounts([
-            ...this.analyticAccountDomain(groupId),
-            ...this.searchAnalyticDomain(searchTerm)], searchLimit + 1);
+    //     const records = await this.fetchAnalyticAccounts([
+    //         ...this.analyticAccountDomain(groupId),
+    //         ...this.searchAnalyticDomain(searchTerm)], searchLimit + 1);
 
-        let options = records.map((result) => ({
-            value: result.id,
-            label: result.display_name,
-            group_id: result.root_plan_id[0],
-            color: result.color,
-        }));
+    //     let options = records.map((result) => ({
+    //         value: result.id,
+    //         label: result.display_name,
+    //         group_id: result.root_plan_id[0],
+    //         color: result.color,
+    //     }));
 
-        if (searchLimit < records.length) {
-            options.push({
-                label: _t("Search More..."),
-                action: (editedTag) => this.onSearchMore(searchTerm, editedTag),
-                classList: "o_m2o_dropdown_option o_m2o_dropdown_option_search_more",
-            });
-        }
+    //     if (searchLimit < records.length) {
+    //         options.push({
+    //             label: _t("Search More..."),
+    //             action: (editedTag) => this.onSearchMore(searchTerm, editedTag),
+    //             classList: "o_m2o_dropdown_option o_m2o_dropdown_option_search_more",
+    //         });
+    //     }
 
-        if (!options.length) {
-            options.push({
-                label: _t("No Analytic Accounts for this plan"),
-                classList: "o_m2o_no_result",
-                unselectable: true,
-            });
-        }
+    //     if (!options.length) {
+    //         options.push({
+    //             label: _t("No Analytic Accounts for this plan"),
+    //             classList: "o_m2o_no_result",
+    //             unselectable: true,
+    //         });
+    //     }
 
-        return options;
-    }
+    //     return options;
+    // }
 
-    async _onSearchMore(searchTerm, editedTag) {
-        let dynamicFilters = [];
-        if (searchTerm.length) {
-            dynamicFilters = [
-                {
-                    description: _t("Quick search: %s", searchTerm),
-                    domain: this.searchAnalyticDomain(searchTerm),
-                },
-            ];
-        }
-        this.selectCreateIsOpen = true;
-        this.addDialog(SelectCreateDialog, {
-            title: _t("Search: Analytic Account"),
-            noCreate: true,
-            multiSelect: true,
-            resModel: 'account.analytic.account',
-            context: {
-                tree_view_ref: "analytic.view_account_analytic_account_list_select",
-            },
-            domain: this.analyticAccountDomain(editedTag.group_id),
-            dynamicFilters: dynamicFilters,
-            onSelected: async (resIds) => {
-                const analytic_accounts = await this.fetchAnalyticAccounts([["id", "in", resIds]]);
-                // modify the edited tag
-                editedTag.analytic_account_id = analytic_accounts[0].id;
-                editedTag.analytic_account_name = analytic_accounts[0].display_name;
-                this.setFocusSelector(`.tag_${editedTag.id} .o_analytic_percentage`);
-                if (analytic_accounts.length > 1) {
-                    const planId = editedTag.group_id;
-                    // remove the autofill line
-                    this.list[planId].distribution = this.list[planId].distribution.filter((t) => !!t.analytic_account_id);
-                    for (const account of analytic_accounts.slice(1)) {
-                        // add new tags
-                        const tag = this.newTag(planId);
-                        tag.analytic_account_id = account.id;
-                        tag.analytic_account_name = account.display_name;
-                        this.list[planId].distribution.push(tag);
-                    }
-                }
-                this.autoFill();
-            },
-            onCreateEdit: () => {},
-        }, {
-            onClose: () => {
-                if (!editedTag.analytic_account_id) {
-                    this.setFocusSelector(`.tag_${editedTag.id} .o_analytic_account_name`);
-                    this.focusToSelector();
-                }
-                this.selectCreateIsOpen = false;
-            },
-        });
-    }
+    // async _onSearchMore(searchTerm, editedTag) {
+    //     let dynamicFilters = [];
+    //     if (searchTerm.length) {
+    //         dynamicFilters = [
+    //             {
+    //                 description: _t("Quick search: %s", searchTerm),
+    //                 domain: this.searchAnalyticDomain(searchTerm),
+    //             },
+    //         ];
+    //     }
+    //     this.selectCreateIsOpen = true;
+    //     this.addDialog(SelectCreateDialog, {
+    //         title: _t("Search: Analytic Account"),
+    //         noCreate: true,
+    //         multiSelect: true,
+    //         resModel: 'account.analytic.account',
+    //         context: {
+    //             tree_view_ref: "analytic.view_account_analytic_account_list_select",
+    //         },
+    //         domain: this.analyticAccountDomain(editedTag.group_id),
+    //         dynamicFilters: dynamicFilters,
+    //         onSelected: async (resIds) => {
+    //             const analytic_accounts = await this.fetchAnalyticAccounts([["id", "in", resIds]]);
+    //             // modify the edited tag
+    //             editedTag.analytic_account_id = analytic_accounts[0].id;
+    //             editedTag.analytic_account_name = analytic_accounts[0].display_name;
+    //             this.setFocusSelector(`.tag_${editedTag.id} .o_analytic_percentage`);
+    //             if (analytic_accounts.length > 1) {
+    //                 const planId = editedTag.group_id;
+    //                 // remove the autofill line
+    //                 this.list[planId].distribution = this.list[planId].distribution.filter((t) => !!t.analytic_account_id);
+    //                 for (const account of analytic_accounts.slice(1)) {
+    //                     // add new tags
+    //                     const tag = this.newTag(planId);
+    //                     tag.analytic_account_id = account.id;
+    //                     tag.analytic_account_name = account.display_name;
+    //                     this.list[planId].distribution.push(tag);
+    //                 }
+    //             }
+    //             this.autoFill();
+    //         },
+    //         onCreateEdit: () => {},
+    //     }, {
+    //         onClose: () => {
+    //             if (!editedTag.analytic_account_id) {
+    //                 this.setFocusSelector(`.tag_${editedTag.id} .o_analytic_account_name`);
+    //                 this.focusToSelector();
+    //             }
+    //             this.selectCreateIsOpen = false;
+    //         },
+    //     });
+    // }
 
-    autoCompleteInputChanged(distTag, inputValue) {
-        if (inputValue === "" && distTag.analytic_account_id) {
-            this.deleteTag(distTag.id, distTag.group_id);
-        }
-    }
+    // autoCompleteInputChanged(distTag, inputValue) {
+    //     if (inputValue === "" && distTag.analytic_account_id) {
+    //         this.deleteTag(distTag.id, distTag.group_id);
+    //     }
+    // }
 
     // Editing Distributions
-    async onSelect(option, params, tag) {
-        if (option.action) {
-            return option.action(tag);
-        }
-        const selected_option = Object.getPrototypeOf(option);
-        tag.analytic_account_id = parseInt(selected_option.value);
-        tag.analytic_account_name = selected_option.label;
-        tag.color = selected_option.color;
-        this.setFocusSelector(`.tag_${tag.id} .o_analytic_percentage`);
-        this.autoFill();
-    }
+    // async onSelect(option, params, tag) {
+    //     if (option.action) {
+    //         return option.action(tag);
+    //     }
+    //     const selected_option = Object.getPrototypeOf(option);
+    //     tag.analytic_account_id = parseInt(selected_option.value);
+    //     tag.analytic_account_name = selected_option.label;
+    //     tag.color = selected_option.color;
+    //     this.setFocusSelector(`.tag_${tag.id} .o_analytic_percentage`);
+    //     this.autoFill();
+    // }
 
-    async percentageChanged(dist_tag, ev) {
-        dist_tag.percentage = this.parse(ev.target.value);
-        if (dist_tag.percentage == 0) {
-            this.deleteTag(dist_tag.id, dist_tag.group_id);
-        }
-        this.autoFill();
-    }
+    // async percentageChanged(dist_tag, ev) {
+    //     dist_tag.percentage = this.parse(ev.target.value);
+    //     if (dist_tag.percentage == 0) {
+    //         this.deleteTag(dist_tag.id, dist_tag.group_id);
+    //     }
+    //     this.autoFill();
+    // }
 
     deleteTag(id, fromGroup) {
         // find the next tag to focus to before deleting the tag
@@ -362,16 +374,186 @@ export class AnalyticDistribution extends Component {
     }
 
     // Getters
-    get tags() {
-        return this.listReady.map((dist_tag) => ({
-            id: dist_tag.id,
-            text: `${dist_tag.percentage > 99.99 && dist_tag.percentage < 100.01 ? "" : this.formatPercentage(dist_tag.percentage) + " "}${dist_tag.analytic_account_name}`,
-            colorIndex: dist_tag.color,
-            group_id: dist_tag.group_id,
-            onClick: (ev) => this.tagClicked(ev, dist_tag.id),
-            onDelete: this.editingRecord ? () => this.deleteTag(dist_tag.id, dist_tag.group_id) : undefined
+    get planSummary() {
+        const planTotals = {};
+        this.state.formattedData.map((line) => {
+            line.analyticAccounts.map((a) => {
+                planTotals[a.accountRootPlan[0]] = (planTotals[a.accountRootPlan[0]] || 0) + line.percentage * 100;
+            });
+        });
+        return this.allPlans.map((group) => ({
+            id: group.id,
+            text: `${group.name} ${this.formatPercentage(planTotals[group.id])}`,
+            colorIndex: group.color,
         }));
     }
+
+    async jsonToData() {
+        // this converts the field value to an array of objects
+        // it keeps the order, breaks composite accounts into the respective accounts etc
+        // it is the replacement of formatData which updated `list` in the state to look something like
+        // {
+        //     [plan.id]: {
+        //         "id": plan.id,
+        //         "name": plan.name,
+        //         "color": plan.color,
+        //         "applicability": plan._get_applicability(**kwargs) if plan in root_plans else 'optional',
+        //         "all_account_count": plan.all_account_count,
+        //         distribution: [{
+        //                 analytic_account_id: record.id,
+        //                 percentage: data[record.id],
+        //                 id: this.nextId++,
+        //                 group_id: record.root_plan_id[0],
+        //                 analytic_account_name: record.display_name,
+        //                 color: record.color,
+        //             }...
+        //         ]
+        //     }
+        // }
+        // We can now simplify it since we don't need to maintain the order of plans etc
+        const jsonFieldValue = this.props.record.data[this.props.name];
+        const analyticAccountIds = Object.keys(jsonFieldValue).map((id) => parseInt(id));
+        const records = analyticAccountIds.length ? await this.fetchAnalyticAccounts([["id", "in", analyticAccountIds]]) : [];
+        // move this line to fetchAnalyticAccounts
+        const analyticAccountDict = Object.assign({}, ...records.map((r) => {
+            const {id, ...rest} = r;
+            return {[r.id]: rest};
+        }));
+        let distribution = [];
+
+        for (const [accountId, percentage] of Object.entries(jsonFieldValue)) {
+            // TODO: an account may not be found (if it was deleted)
+            const account = analyticAccountDict[parseInt(accountId)];
+            if (account.composition_ids.length) {
+                let compositionAccounts = [];
+                for (const comp of account.composition_ids) {
+                    let a = analyticAccountDict[comp];
+                    compositionAccounts.push({
+                        accountId: comp,
+                        accountDisplayName: a.display_name,
+                        accountColor: a.color,
+                        accountRootPlan: a.root_plan_id
+                    })
+                }
+                distribution.push({
+                    analyticAccounts: compositionAccounts,
+                    percentage: percentage/100,
+                });
+            } else {
+                // const account = analyticAccountDict[parseInt(accountId)];
+                distribution.push({
+                    analyticAccounts: [{
+                        accountId: accountId,
+                        accountDisplayName: account.display_name,
+                        accountColor: account.color,
+                        accountRootPlan: account.root_plan_id
+                    }],
+                    percentage: percentage/100,
+                });
+            }
+        }
+        this.state.formattedData = distribution;
+        this.addLine();
+        console.log(distribution);
+    }
+
+    addLine() {
+        this.state.formattedData.push({
+            analyticAccounts: [],
+            percentage: 1,
+        });
+    }
+
+    dataToJson() {
+        const result = {};
+        this.state.formattedData.filter((line) => line.analyticAccounts.length).map((line) => {
+            result[line.analyticAccounts.map((a) => a.accountId)] = line.percentage * 100;
+        });
+        return result;
+    }
+
+    getRecordDomain(accountIds) {
+        // This provides the domain for the many2many autocomplete
+        // It excludes all accounts from plans that have already been selected - You can only cross one account from a plan
+        // Also excludes composite accounts
+        // TODO: Rename everything: method name and variables
+        const usedPlanIds = Object.values(accountIds).map((account) => account.data.plan_id[0]);
+        const remainingPlans = this.allPlans.filter((p) => p.all_account_count > 0 && !usedPlanIds.includes(p.id)).map((p) => p.id);
+        return [["plan_id", "in", remainingPlans], ["composition_ids", "=", false]];
+    }
+
+    recordProps(line) {
+        const analyticAccountFields = {
+            id: { type: "int"},
+            display_name: { type: "char" },
+            color: { type: "int" },
+            plan_id: { type: "many2one" },
+            root_plan_id: { type: "many2one" },
+        };
+        const recordFields = {
+            analytic_account_ids: {
+                string: _t("Analytic Account"),
+                relation: "account.analytic.account",
+                type: "many2many",
+                related: {
+                    fields: analyticAccountFields,
+                    activeFields: analyticAccountFields,
+                },
+            },
+            percentage: {
+                string: _t("Percentage"),
+                type: "float",
+            }
+        };
+
+        return {
+            fields: recordFields,
+            values: {
+                analytic_account_ids: line.analyticAccounts.map((a) => parseInt(a.accountId)),
+                // this.currentValu
+                percentage: line.percentage,
+            },
+            activeFields: recordFields,
+            onRecordChanged: (record, changes) => this.lineChanged(record, changes, line),
+        };
+    }
+
+    lineChanged(record, changes, line) {
+        line.analyticAccounts = record.data.analytic_account_ids.records.map((r) => ({
+            accountId: r.data.id,
+            accountDisplayName: r.data.display_name,
+            accountColor: r.data.color,
+            accountRootPlan: [r.data.root_plan_id[0], r.data.root_plan_id[1]]}));
+        line.percentage = record.data.percentage;
+        console.log(line);
+    }
+
+    get compositeTags() {
+        // This replaces the tags getter (used to display the tags on the line)
+        // TODO: onClick & onDelete
+        return this.state.formattedData.filter((line) => line.analyticAccounts.length).map((line, idx) => ({
+            id: idx,
+            text: `${this.formatPercentage(line.percentage * 100)} ${line.analyticAccounts.map((a) => a.accountDisplayName).join(" | ")}`,
+            colorIndex: line.analyticAccounts.length == 1 ? line.analyticAccounts[0].accountColor : 0,
+            onClick: (ev) => {},
+            onDelete: () => this.deleteLine(idx),
+        }));
+    }
+
+    deleteLine(index) {
+        this.state.formattedData.splice(index, 1);
+    }
+
+    // get tags() {
+    //     return this.listReady.map((dist_tag) => ({
+    //         id: dist_tag.id,
+    //         text: `${dist_tag.percentage > 99.99 && dist_tag.percentage < 100.01 ? "" : this.formatPercentage(dist_tag.percentage) + " "}${dist_tag.analytic_account_name}`,
+    //         colorIndex: dist_tag.color,
+    //         group_id: dist_tag.group_id,
+    //         onClick: (ev) => this.tagClicked(ev, dist_tag.id),
+    //         onDelete: this.editingRecord ? () => this.deleteTag(dist_tag.id, dist_tag.group_id) : undefined
+    //     }));
+    // }
 
     get listForJson() {
         let res = {};
@@ -505,8 +687,8 @@ export class AnalyticDistribution extends Component {
     }
 
     async save() {
-        const currentDistribution = this.listForJson;
-        await this.props.record.update({ [this.props.name]: currentDistribution });
+        // const currentDistribution = this.listForJson;
+        await this.props.record.update({ [this.props.name]: this.dataToJson() });
     }
 
     onSaveNew() {
@@ -645,6 +827,7 @@ export class AnalyticDistribution extends Component {
     }
 
     onWindowClick(ev) {
+        // remove selectCreateIsOpen (it's taken car of by the many2many)
         if (this.isDropdownOpen
             && this.dropdownRef.el && !this.dropdownRef.el.contains(ev.target)
             && !this.widgetRef.el.contains(ev.target)
@@ -670,6 +853,9 @@ AnalyticDistribution.template = "analytic.AnalyticDistribution";
 AnalyticDistribution.components = {
     AutoComplete,
     TagsList,
+    Many2ManyTagsField,
+    Record,
+    PercentageField,
 }
 
 AnalyticDistribution.props = {

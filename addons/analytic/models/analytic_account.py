@@ -126,6 +126,17 @@ class AccountAnalyticAccount(models.Model):
         default.setdefault('name', _("%s (copy)", self.name))
         return super().copy_data(default)
 
+    def read(self, fields=None, load='_classic_read'):
+        res = super().read(fields, load)
+        # TODO: It's weird to return results for more records than were requested. Maybe use context?
+        if 'composition_ids' in fields and self._context.get("fetch_composite_children", False):
+            print('RETRIEVING COMPOSITE CHILDREN')
+            extra_ids_to_read = []
+            for rec in res:
+                extra_ids_to_read.extend(rec['composition_ids'])
+            res += self.browse(extra_ids_to_read).read(fields) if extra_ids_to_read else []
+        return res
+
     @api.model
     def _read_group(self, domain, groupby=(), aggregates=(), having=(), offset=0, limit=None, order=None):
         """ Override _read_group to aggregate no-store compute: balance/debit/credit """
