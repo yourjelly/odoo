@@ -1003,13 +1003,17 @@
         return position === "after" ? base + 1 : base;
     }
     /**
-     * Compare two objects.
+     * Compares two objects.
      */
     function deepEquals(o1, o2) {
         if (o1 === o2)
             return true;
         if ((o1 && !o2) || (o2 && !o1))
             return false;
+        if (typeof o1 !== typeof o2)
+            return false;
+        if (typeof o1 !== "object")
+            return o1 === o2;
         // Objects can have different keys if the values are undefined
         const keys = new Set();
         Object.keys(o1).forEach((key) => keys.add(key));
@@ -18284,6 +18288,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     padding: 10px;
     width: ${ERROR_TOOLTIP_WIDTH}px;
     box-sizing: border-box !important;
+    overflow-wrap: break-word;
   }
 `;
     class ErrorToolTip extends owl.Component {
@@ -21726,7 +21731,6 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         }
         setup() {
             this.showFormulaState = this.env.model.getters.shouldShowFormulas();
-            this.debouncedUpdateSearch = debounce(this.updateSearch.bind(this), 200);
             owl.onMounted(() => this.focusInput());
             owl.onWillUnmount(() => {
                 this.env.model.dispatch("CLEAR_SEARCH");
@@ -21772,6 +21776,13 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 toSearch: this.state.toSearch,
                 searchOptions: this.state.searchOptions,
             });
+        }
+        debouncedUpdateSearch() {
+            clearTimeout(this.debounceTimeoutId);
+            this.debounceTimeoutId = setTimeout(() => {
+                this.updateSearch();
+                this.debounceTimeoutId = undefined;
+            }, 200);
         }
         replace() {
             this.env.model.dispatch("REPLACE_SEARCH", {
@@ -22423,9 +22434,11 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             }
         }
         function updateMousePosition(e) {
-            x = e.offsetX;
-            y = e.offsetY;
-            lastMoved = Date.now();
+            if (gridRef.el === e.target) {
+                x = e.offsetX;
+                y = e.offsetY;
+                lastMoved = Date.now();
+            }
         }
         function recompute() {
             const { col, row } = getPosition();
@@ -32620,6 +32633,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             // stores the computed styles in the format of computedStyles.sheetName[col][row] = Style
             this.computedStyles = {};
             this.computedIcons = {};
+            this.uuidGenerator = new UuidGenerator();
             /**
              * Execute the predicate to know if a conditional formatting rule should be applied to a cell
              */
@@ -32972,12 +32986,19 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                             this.adaptRules(origin.sheetId, cf, [xc], toRemoveRange);
                         }
                         else {
-                            this.adaptRules(target.sheetId, cf, [xc], []);
                             this.adaptRules(origin.sheetId, cf, [], toRemoveRange);
+                            const cfToCopyTo = this.getCFToCopyTo(target.sheetId, cf);
+                            this.adaptRules(target.sheetId, cfToCopyTo, [xc], []);
                         }
                     }
                 }
             }
+        }
+        getCFToCopyTo(targetSheetId, originCF) {
+            const cfInTarget = this.getters
+                .getConditionalFormats(targetSheetId)
+                .find((cf) => cf.stopIfTrue === originCF.stopIfTrue && deepEquals(cf.rule, originCF.rule));
+            return cfInTarget ? cfInTarget : { ...originCF, id: this.uuidGenerator.uuidv4(), ranges: [] };
         }
     }
     EvaluationConditionalFormatPlugin.getters = ["getConditionalIcon", "getCellComputedStyle"];
@@ -44350,8 +44371,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
 
 
     __info__.version = '16.1.20';
-    __info__.date = '2023-09-12T12:03:09.343Z';
-    __info__.hash = '7d7b841';
+    __info__.date = '2023-09-18T12:06:27.039Z';
+    __info__.hash = 'c2c8ccd';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
