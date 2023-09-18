@@ -1717,8 +1717,8 @@ class Request:
             else:
                 return self._serve_nodb()
 
-        with contextlib.closing(self.registry.cursor()) as cr:
-            self.env = odoo.api.Environment(cr, self.session.uid, self.session.context)
+        with odoo.api.Environment(None, self.session.uid, self.session.context, registry=self.registry) as env:
+            self.env = env
             threading.current_thread().uid = self.env.uid
             try:
                 return service_model.retrying(self._serve_ir_http, self.env)
@@ -1727,6 +1727,18 @@ class Request:
                     raise  # bubble up to odoo.http.Application.__call__
                 exc.error_response = self.registry['ir.http']._handle_error(exc)
                 raise
+
+
+        # with contextlib.closing(self.registry.cursor()) as cr:
+        #     self.env = odoo.api.Environment(cr, self.session.uid, self.session.context)
+        #     threading.current_thread().uid = self.env.uid
+        #     try:
+        #         return service_model.retrying(self._serve_ir_http, self.env)
+        #     except Exception as exc:
+        #         if isinstance(exc, HTTPException) and exc.code is None:
+        #             raise  # bubble up to odoo.http.Application.__call__
+        #         exc.error_response = self.registry['ir.http']._handle_error(exc)
+        #         raise
 
     def _serve_ir_http(self):
         """

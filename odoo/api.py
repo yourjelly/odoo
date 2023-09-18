@@ -19,6 +19,7 @@ import warnings
 from collections import defaultdict
 from collections.abc import Mapping
 from contextlib import contextmanager
+from functools import cached_property
 from inspect import signature
 from pprint import pformat
 from weakref import WeakSet
@@ -479,38 +480,83 @@ class Environment(Mapping):
         """ Reset the transaction, see :meth:`Transaction.reset`. """
         self.transaction.reset()
 
-    def __new__(cls, cr, uid, context, su=False):
+    def __new__(cls, cr, uid, context, su=False, registry=None, _cr=None):
         if uid == SUPERUSER_ID:
             su = True
         assert context is not None
         args = (cr, uid, context, su)
 
         # determine transaction object
-        transaction = cr.transaction
-        if transaction is None:
-            transaction = cr.transaction = Transaction(Registry(cr.dbname))
+        if cr:
+            transaction = cr.transaction
+            if transaction is None:
+                transaction = cr.transaction = Transaction(Registry(cr.dbname))
 
-        # if env already exists, return it
-        for env in transaction.envs:
-            if env.args == args:
-                return env
+            # if env already exists, return it
+            for env in transaction.envs:
+                if env.args == args:
+                    return env
 
         # otherwise create environment, and add it in the set
         self = object.__new__(cls)
+        self._cr = (lambda self_: self_.registry.cursor()) if _cr is None else _cr
         args = (cr, uid, frozendict(context), su)
-        self.cr, self.uid, self.context, self.su = self.args = args
+        _, self.uid, self.context, self.su = self.args = args
+        if cr:
+            self.cr = cr
 
-        self.transaction = self.all = transaction
-        self.registry = transaction.registry
-        self.cache = transaction.cache
-        self._cache_key = {}                    # memo {field: cache_key}
-        self._protected = transaction.protected
-        transaction.envs.add(self)
+            self.transaction = self.all = transaction
+            self.registry = transaction.registry
+            self.cache = transaction.cache
+            self._protected = transaction.protected
+            transaction.envs.add(self)
+        else:
+            self.registry = registry
+        self._cache_key = {}  # memo {field: cache_key}
         return self
 
     #
     # Mapping methods
     #
+
+    def __enter__(self):
+        assert 'cr' not in self.__dict__
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if 'cr' in self.__dict__:
+            self.cr.close()
+
+    @cached_property
+    def cr(self):
+        # we can predict if the transaction for rpc is readonly using history data with the model_name and method name
+        cr = self._cr(self)
+        self.args = (cr,) + self.args[1:]
+        return cr
+
+    @cached_property
+    def transaction(self):
+        cr = self.cr
+        transaction = cr.transaction
+        if transaction is None:
+            transaction = cr.transaction = Transaction(Registry(cr.dbname))
+
+        # otherwise create environment, and add it in the set
+        transaction.envs.add(self)
+        return transaction
+
+    @cached_property
+    def all(self):
+        return self.transaction
+
+    @cached_property
+    def cache(self):
+        return self.transaction.cache
+
+    @cached_property
+    def _protected(self):
+        return self.transaction.protected
+
 
     def __contains__(self, model_name):
         """ Test whether the given model exists. """
@@ -549,11 +595,14 @@ class Environment(Mapping):
         :returns: environment with specified args (new or existing one)
         :rtype: :class:`Environment`
         """
-        cr = self.cr if cr is None else cr
+        if cr is None:
+            if 'cr' in self.__dict__:
+                cr = self.cr
+        _cr = lambda self_: self.cr if cr is None else None
         uid = self.uid if user is None else int(user)
         context = self.context if context is None else context
         su = (user is None and self.su) if su is None else su
-        return Environment(cr, uid, context, su)
+        return Environment(cr, uid, context, su, registry=self.registry, _cr=_cr)
 
     def ref(self, xml_id, raise_if_not_found=True):
         """ Return the record corresponding to the given ``xml_id``.
