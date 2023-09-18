@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { Component } from "@odoo/owl";
+import { Tag } from "../core/tag";
 import { subscribeToURLParams, withParams } from "../core/url";
 import { compactXML } from "../utils";
 import { HootTechnicalValue } from "./hoot_technical_value";
@@ -39,7 +40,7 @@ export class HootTestResult extends Component {
                         >
                             <i class="bi bi-bug-fill" />
                         </a>
-                        <t t-if="!props.test.skip or !props.test.hasSkipTag()">
+                        <t t-if="!props.test.skip or !props.test.hasTag(Tag.SKIP)">
                             <a
                                 t-att-href="withParams('skip-test', props.test.id)"
                                 class="hoot-result-btn hoot-text-info hoot-px-1 hoot-py-0.5"
@@ -94,6 +95,7 @@ export class HootTestResult extends Component {
         </details>
     `;
 
+    Tag = Tag;
     withParams = withParams;
 
     get className() {

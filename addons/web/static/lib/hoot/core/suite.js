@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
-import { SPECIAL_TAGS, generateHash, makeCallbacks, normalize } from "../utils";
+import { generateHash, makeCallbacks, normalize } from "../utils";
+import { Tag } from "./tag";
 
 /**
  * @typedef {import("./tag").Tag} Tag
@@ -61,7 +62,8 @@ export class Suite {
         return !this.skip && this.jobs.length && this.jobs.every((job) => job.canRun());
     }
 
-    hasSkipTag() {
-        return this.tagNames.has(SPECIAL_TAGS.skip) || this.parent?.hasSkipTag();
+    /** @param {string} tagName */
+    hasTag(tagName) {
+        return this.tagNames.has(tagName) || this.parent?.hasTag(tagName);
     }
 }
