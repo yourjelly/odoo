@@ -24,6 +24,7 @@ PAYMENT_STATUS_MAPPING = {
 
 # Events that are handled by the webhook.
 HANDLED_WEBHOOK_EVENTS = [
+    'order.paid',
     'payment.authorized',
     'payment.captured',
     'payment.failed',

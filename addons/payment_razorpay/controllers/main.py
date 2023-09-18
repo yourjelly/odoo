@@ -19,6 +19,7 @@ _logger = logging.getLogger(__name__)
 class RazorpayController(http.Controller):
     _return_url = '/payment/razorpay/return'
     _webhook_url = '/payment/razorpay/webhook'
+    _webhook_auto_url = '/payment/razorpay_auto/webhook'
 
     @http.route(
         _return_url, type='http', auth='public', methods=['GET', 'POST'], csrf=False,
@@ -46,8 +47,7 @@ class RazorpayController(http.Controller):
         # Redirect the user to the status page.
         return request.redirect('/payment/status')
 
-    @http.route(_webhook_url, type='http', methods=['POST'], auth='public', csrf=False)
-    def razorpay_webhook(self):
+    def _razorpay_webhook_process(self, provider_code):
         """ Process the notification data sent by Razorpay to the webhook.
 
         :return: An empty string to acknowledge the notification.
@@ -58,7 +58,7 @@ class RazorpayController(http.Controller):
 
         event_type = data['event']
         if event_type in HANDLED_WEBHOOK_EVENTS:
-            entity_type = 'payment' if 'payment' in event_type else 'refund'
+            entity_type = 'payment' if 'payment' in event_type else 'order' if 'order' in event_type else 'refund'
             try:
                 entity_data = data['payload'].get(entity_type, {}).get('entity', {})
                 entity_data.update(entity_type=entity_type)
@@ -66,17 +66,25 @@ class RazorpayController(http.Controller):
                 # Check the integrity of the event.
                 received_signature = request.httprequest.headers.get('X-Razorpay-Signature')
                 tx_sudo = request.env['payment.transaction'].sudo()._get_tx_from_notification_data(
-                    'razorpay', entity_data
+                    provider_code, entity_data
                 )
                 self._verify_notification_signature(
                     request.httprequest.data, received_signature, tx_sudo, is_redirect=False
                 )
 
                 # Handle the notification data.
-                tx_sudo._handle_notification_data('razorpay', entity_data)
+                tx_sudo._handle_notification_data(provider_code, entity_data)
             except ValidationError:  # Acknowledge the notification to avoid getting spammed.
                 _logger.exception("Unable to handle the notification data; skipping to acknowledge")
         return request.make_json_response('')
+
+    @http.route(_webhook_url, type='http', methods=['POST'], auth='public', csrf=False)
+    def razorpay_webhook(self):
+        return self._razorpay_webhook_process('razorpay')
+
+    @http.route(_webhook_auto_url, type='http', methods=['POST'], auth='public', csrf=False)
+    def razorpay_webhook_auto(self):
+        return self._razorpay_webhook_process('razorpay_auto')
 
     @staticmethod
     def _verify_notification_signature(

@@ -51,18 +51,8 @@
                 "customer_id": processingValues.customer_id,
                 "recurring": "1",
                 "handler": (resp) => {
-                    const payload = {
-                        reference: processingValues.reference,
-                        razorpay_customer_id: processingValues.customer_id,
-                        razorpay_payment_id: resp.razorpay_payment_id,
-                        razorpay_order_id: resp.razorpay_order_id || false,
-                        razorpay_signature: resp.razorpay_signature
-                    };
-
                     if (resp.razorpay_payment_id && resp.razorpay_order_id && resp.razorpay_signature) {
-                        $.post('/payment/razorpay/return', payload).done(()=> {
-                            window.location.reload();
-                        });
+                        window.location = '/payment/status';
 
                     }
                 },

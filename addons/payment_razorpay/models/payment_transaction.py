@@ -261,6 +261,15 @@ class PaymentTransaction(models.Model):
             if not reference:
                 raise ValidationError("Razorpay: " + _("Received data with missing reference."))
             tx = self.search([('reference', '=', reference), ('provider_code', 'in', ['razorpay', 'razorpay_auto'])])
+        elif entity_type == 'order':
+            reference = notification_data.get('notes', {}).get('reference')
+            if reference:
+                tx = self.search([('reference', '=', reference), ('provider_code', '=', 'razorpay_auto')])
+            else:
+                tx = self.search([
+                    ('provider_reference', '=', notification_data['payment']['id']),
+                    ('provider_code', '=', 'razorpay_auto'),
+                ])
         else:  # 'refund'
             reference = notification_data.get('notes', {}).get('reference')
             if reference:  # The refund was initiated from Odoo.
@@ -381,9 +390,9 @@ class PaymentTransaction(models.Model):
         # Create the token.
         token = self.env['payment.token'].create({
             'provider_id': self.provider_id.id,
-            'payment_details': notification_data['razorpay_payment_id'],
+            'payment_details': notification_data['id'],
             'partner_id': self.partner_id.id,
-            'provider_ref': notification_data['razorpay_customer_id'],
+            'provider_ref': notification_data['customer_id'],
             'verified': True,
         })
         self.write({
