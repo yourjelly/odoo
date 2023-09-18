@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { Component } from "@odoo/owl";
-import { DEFAULT_CONFIG, subscribeToURLParams, withParams } from "../core/url";
+import { subscribeToURLParams, withParams } from "../core/url";
 import { compactXML } from "../utils";
 import { HootTechnicalValue } from "./hoot_technical_value";
 import { HootTestPath } from "./hoot_test_path";

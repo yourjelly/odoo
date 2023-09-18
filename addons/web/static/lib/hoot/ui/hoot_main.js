@@ -160,7 +160,7 @@ export class HootMain extends Component {
                 domConfig.defaultRoot = this.fixtureDocument.body;
             }
 
-            if (runner.config.autostart) {
+            if (!runner.config.manual) {
                 runner.start();
             }
         });

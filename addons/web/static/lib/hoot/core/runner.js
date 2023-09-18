@@ -224,7 +224,7 @@ export function makeTestRunner(params) {
         // Text filter
         if (urlParams.filter) {
             runner.hasFilter = true;
-            runner.textFilter = parseRegExp(normalize(urlParams.filter.join(" ")));
+            runner.textFilter = parseRegExp(normalize(urlParams.filter));
         }
 
         // Suites
@@ -372,11 +372,11 @@ export function makeTestRunner(params) {
         /**
          * @param {(test: Test) => MaybePromise<void>} callback
          */
-        afterTest(callback) {
+        afterEach(callback) {
             const current = getCurrent();
             if (!current) {
                 throw new Error(
-                    `Error while calling hook "afterTest": can only be called inside of a suite function.`
+                    `Error while calling hook "afterEach": can only be called inside of a suite function.`
                 );
             }
             current.callbacks.add("after-test", callback);
@@ -416,11 +416,11 @@ export function makeTestRunner(params) {
             current.callbacks.add("before-suite", callback);
         }
 
-        beforeTest(callback) {
+        beforeEach(callback) {
             const current = getCurrent();
             if (!current) {
                 throw new Error(
-                    `Error while calling hook "beforeTest": can only be called inside of a suite function.`
+                    `Error while calling hook "beforeEach": can only be called inside of a suite function.`
                 );
             }
             current.callbacks.add("before-test", callback);
@@ -476,21 +476,23 @@ export function makeTestRunner(params) {
             while (job && runner.status === "running") {
                 if (job instanceof Suite) {
                     const suite = job;
-                    if (suite.visited === 0) {
-                        // before suite code
-                        suiteStack.push(suite);
+                    if (job.canRun()) {
+                        if (suite.visited === 0) {
+                            // before suite code
+                            suiteStack.push(suite);
 
-                        await rootCallbacks.call("before-suite", suite);
-                        await suite.callbacks.call("before-suite", suite);
-                    }
-                    if (suite.visited === suite.jobs.length) {
-                        // after suite code
-                        suiteStack.pop();
+                            await rootCallbacks.call("before-suite", suite);
+                            await suite.callbacks.call("before-suite", suite);
+                        }
+                        if (suite.visited === suite.jobs.length) {
+                            // after suite code
+                            suiteStack.pop();
 
-                        await execAfterCallback(async () => {
-                            await suite.callbacks.call("after-suite", suite);
-                            await rootCallbacks.call("after-suite", suite);
-                        });
+                            await execAfterCallback(async () => {
+                                await suite.callbacks.call("after-suite", suite);
+                                await rootCallbacks.call("after-suite", suite);
+                            });
+                        }
                     }
                     job = suite.jobs[suite.visited++] || suite.parent || jobs.shift();
                 } else {
@@ -517,16 +519,16 @@ export function makeTestRunner(params) {
                                 // Set abort signal
                                 abortCurrent = resolve;
 
-                                if (!runner.debug) {
+                                if (timeout && !runner.debug) {
                                     // Set timeout
                                     timeoutId = setTimeout(
                                         () =>
                                             reject(
                                                 new TimeoutError(
-                                                    `test took longer than ${timeout}ms`
+                                                    `test took longer than ${timeout}s`
                                                 )
                                             ),
-                                        timeout
+                                        timeout * 1000
                                     );
                                 }
                             }).then(() => {
@@ -579,7 +581,7 @@ export function makeTestRunner(params) {
                             ]) {
                                 callbacks.call("after-test", test);
                             }
-                            if (urlParams.failfast && !assert.pass && !test.skip) {
+                            if (urlParams.bail && !assert.pass && !test.skip) {
                                 return runner.stop();
                             }
                         });
@@ -606,23 +608,7 @@ export function makeTestRunner(params) {
     }
 
     const initialConfig = { ...DEFAULT_CONFIG, ...params };
-    const rawConfig = { ...initialConfig };
-
-    for (const key in urlParams) {
-        if (key in DEFAULT_CONFIG) {
-            const [value] = urlParams[key];
-            if (BOOLEAN_REGEX.test(value)) {
-                rawConfig[key] = value.toLowerCase() === "true";
-            } else if (!isNaN(value)) {
-                rawConfig[key] = Number(value);
-            } else {
-                rawConfig[key] = value;
-            }
-        } else if (key in rawConfig) {
-            rawConfig[key] = urlParams[key];
-        }
-    }
-    const config = reactive(rawConfig, () => {
+    const config = reactive({ ...initialConfig, ...urlParams }, () => {
         for (const key in config) {
             if (config[key] !== initialConfig[key]) {
                 setParams({ [key]: config[key] });

@@ -60,6 +60,10 @@ export class Test {
         }
     }
 
+    canRun() {
+        return !this.skip;
+    }
+
     hasSkipTag() {
         return this.tagNames.has(SPECIAL_TAGS.skip) || this.parent?.hasSkipTag();
     }
