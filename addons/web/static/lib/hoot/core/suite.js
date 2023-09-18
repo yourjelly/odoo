@@ -56,6 +56,11 @@ export class Suite {
         }
     }
 
+    /** @returns {boolean} */
+    canRun() {
+        return !this.skip && this.jobs.length && this.jobs.every((job) => job.canRun());
+    }
+
     hasSkipTag() {
         return this.tagNames.has(SPECIAL_TAGS.skip) || this.parent?.hasSkipTag();
     }

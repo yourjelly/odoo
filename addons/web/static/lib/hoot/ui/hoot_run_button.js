@@ -30,12 +30,12 @@ export class HootRunButton extends Component {
     }
 
     onClick() {
-        const { runner, url } = this.env;
+        const { runner } = this.env;
         if (runner.status === "ready") {
-            if (runner.config.autostart) {
-                refresh();
-            } else {
+            if (runner.config.manual) {
                 runner.start();
+            } else {
+                refresh();
             }
         } else {
             runner.stop();

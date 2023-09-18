@@ -18,23 +18,24 @@ export class HootConfigDropdown extends Component {
             </button>
             <t t-if="state.open">
                 <div class="hoot-dropdown">
-                    <label class="hoot-checkbox hoot-dropdown-line">
+                    <label
+                        class="hoot-checkbox hoot-dropdown-line"
+                        title="Display the tests that passed in the list of test results"
+                    >
                         <input type="checkbox" t-model="env.runner.config.showpassed" />
                         <span>Show passed tests</span>
                     </label>
-                    <label class="hoot-checkbox hoot-dropdown-line">
+                    <label
+                        class="hoot-checkbox hoot-dropdown-line"
+                        title="Hide all tests that have been skipped"
+                    >
                         <input type="checkbox" t-model="env.runner.config.hideskipped" />
                         <span>Hide skipped tests</span>
                     </label>
-                    <label class="hoot-checkbox hoot-dropdown-line">
-                        <input
-                            type="checkbox"
-                            t-model="env.runner.config.failfast"
-                            t-on-change="refresh"
-                        />
-                        <span>Fail fast</span>
-                    </label>
-                    <label class="hoot-checkbox hoot-dropdown-line">
+                    <label
+                        class="hoot-checkbox hoot-dropdown-line"
+                        title="Re-run current tests without catching any errors"
+                    >
                         <input
                             type="checkbox"
                             t-model="env.runner.config.notrycatch"
@@ -42,7 +43,10 @@ export class HootConfigDropdown extends Component {
                         />
                         <span>No try/catch</span>
                     </label>
-                    <label class="hoot-checkbox hoot-dropdown-line">
+                    <label
+                        class="hoot-checkbox hoot-dropdown-line"
+                        title="Re-run current tests after shuffling them in a non-deterministic order"
+                    >
                         <input
                             type="checkbox"
                             t-model="env.runner.config.randomorder"
@@ -50,7 +54,10 @@ export class HootConfigDropdown extends Component {
                         />
                         <span>Random order</span>
                     </label>
-                    <label class="hoot-checkbox hoot-dropdown-line">
+                    <label
+                        class="hoot-checkbox hoot-dropdown-line"
+                        title="Re-run current tests in headless mode (no UI)"
+                    >
                         <input
                             type="checkbox"
                             t-model="env.runner.config.headless"
@@ -58,7 +65,25 @@ export class HootConfigDropdown extends Component {
                         />
                         <span>Headless</span>
                     </label>
-                    <button class="hoot-dropdown-line hoot-row hoot-gap-1" t-on-click="props.colorToggle">
+                    <div
+                        class="hoot-dropdown-line hoot-row hoot-gap-1"
+                        title="Re-run current tests and abort after a given amount of failed tests"
+                    >
+                        <span>Bail after</span>
+                        <input
+                            type="number"
+                            min="0"
+                            class="hoot-w-1/4"
+                            t-model.number="env.runner.config.bail"
+                            t-on-change="refresh"
+                        />
+                        <span>failed tests</span>
+                    </div>
+                    <button
+                        class="hoot-dropdown-line hoot-row hoot-gap-1"
+                        title="Toggle the color scheme of the UI"
+                        t-on-click="props.colorToggle"
+                    >
                         <i t-attf-class="bi bi-{{ props.colorScheme === 'light' ? 'moon' : 'sun' }}-fill" />
                         Color scheme
                     </button>

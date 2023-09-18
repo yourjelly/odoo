@@ -5,56 +5,89 @@ import { Error, Object, Set, URL, URLSearchParams, history, location } from "../
 import { isIterable } from "../utils";
 
 /**
- * @typedef {keyof typeof URL_PARAMS} URLParam
+ * @template T
+ * @typedef {{ [key in keyof T]: ReturnType<T[key]["parse"]> }} InferFromSchema
  */
 
 //-----------------------------------------------------------------------------
 // Internal
 //-----------------------------------------------------------------------------
 
-function processParams() {
+/**
+ * @template T
+ * @param {T} schema
+ * @returns {{ [key in keyof T]: ReturnType<T[key]["parse"]> }}
+ */
+const getSchemaDefaults = (schema) =>
+    Object.fromEntries(Object.entries(schema).map(([key, value]) => [key, value.default]));
+
+/**
+ * @template T
+ * @param {T} schema
+ * @returns {(keyof T)[]}
+ */
+const getSchemaKeys = (schema) => Object.keys(schema);
+
+/**
+ * @template T
+ * @param {(values: string[]) => T} parse
+ * @returns {(valueIfEmpty: T) => (values: string[]) => T}
+ */
+const makeParser = (parse) => (valueIfEmpty) => (values) =>
+    values.length ? parse(values) : valueIfEmpty;
+
+const parseBoolean = makeParser(([value]) => value === "true");
+
+const parseNumber = makeParser(([value]) => Number(value) || 0);
+
+/** @type {ReturnType<typeof makeParser<"first-fail" | "failed" | false>>} */
+const parseShowDetail = makeParser(([value]) => (value === "false" ? false : value));
+
+const parseString = makeParser(([value]) => value);
+
+const parseStringArray = makeParser((values) => values);
+
+const processParams = () => {
     const url = createURL();
     url.search = "";
-    for (const key in urlParams) {
-        for (const value of urlParams[key]) {
-            url.searchParams.append(key, value);
+    for (const [key, value] of Object.entries(urlParams)) {
+        if (isIterable(value)) {
+            for (const value of urlParams[key]) {
+                if (value) {
+                    url.searchParams.append(key, value);
+                }
+            }
+        } else if (value) {
+            url.searchParams.set(key, value);
         }
     }
     return url;
-}
+};
 
-function processURL() {
+const processURL = () => {
     const searchParams = new URLSearchParams(location.search);
     const keys = new Set(searchParams.keys());
-    for (const key in urlParams) {
+    for (const [key, { parse }] of Object.entries({ ...CONFIG_SCHEMA, ...FILTER_SCHEMA })) {
         if (keys.has(key)) {
-            keys.delete(key);
-            urlParams[key] = searchParams.getAll(key);
+            urlParams[key] = parse(searchParams.getAll(key).filter(Boolean));
         } else {
             delete urlParams[key];
         }
     }
-    for (const key of keys) {
-        urlParams[key] = searchParams.getAll(key);
-    }
-}
+};
 
 //-----------------------------------------------------------------------------
 // Exports
 //-----------------------------------------------------------------------------
 
 /**
- * @param {{
- *  append?: Record<URLParam, any>;
- *  delete?: URLParam[]
- *  set?: Record<URLParam, any>;
- * }} params
+ * @param {Partial<typeof DEFAULT_CONFIG | typeof DEFAULT_FILTERS>} params
  */
 export function createURL(params) {
     const url = new URL(location.href);
     for (const key in params) {
         url.searchParams.delete(key);
-        if (!(key in URL_PARAMS)) {
+        if (!CONFIG_KEYS.includes(key) && !FILTER_KEYS.includes(key)) {
             throw new Error(`Unknown URL param key: "${key}"`);
         }
         for (const value of params[key] || []) {
@@ -81,18 +114,17 @@ export function refresh() {
 }
 
 /**
- * @param {Record<URLParam, any>} values
+ * @param {Partial<typeof DEFAULT_CONFIG | typeof DEFAULT_FILTERS>} params
  */
-export function setParams(values) {
-    for (const key in values) {
-        if (!(key in URL_PARAMS)) {
+export function setParams(params) {
+    for (const [key, value] in Object.entries(params)) {
+        if (!CONFIG_KEYS.includes(key) && !FILTER_KEYS.includes(key)) {
             throw new Error(`Unknown URL param key: "${key}"`);
         }
-        const value = values[key];
-        if ([null, undefined].includes(value)) {
-            delete urlParams[key];
+        if (value) {
+            urlParams[key] = isIterable(value) ? [...value] : value;
         } else {
-            urlParams[key] = isIterable(value) ? [...value] : [value];
+            delete urlParams[key];
         }
     }
 
@@ -100,30 +132,26 @@ export function setParams(values) {
 }
 
 /**
- * @param  {...string} keys
+ * @param {...(keyof typeof CONFIG_SCHEMA | keyof typeof FILTER_SCHEMA | "*")} keys
  */
 export function subscribeToURLParams(...keys) {
     const state = useState(urlParams);
     if (keys.length) {
-        const all = keys.at(-1) === "*";
-        onWillRender(() => {
-            const observedKeys = all ? Object.keys(state) : keys;
-            observedKeys.forEach((key) => state[key]);
-        });
+        const observedKeys = keys.includes("*") ? [...CONFIG_KEYS, ...FILTER_KEYS] : keys;
+        onWillRender(() => observedKeys.forEach((key) => state[key]));
     }
     return state;
 }
 
 /**
- * @param {URLParam} type
+ * @param {keyof typeof FILTER_SCHEMA | `skip-${keyof typeof FILTER_SCHEMA}`} type
  * @param {string} id
  */
 export function withParams(type, id) {
     const clearAll = () => Object.keys(nextParams).forEach((key) => nextParams[key].clear());
 
-    const nextParams = Object.fromEntries(
-        Object.keys(FILTER_PARAMS).map((k) => [k, new Set(urlParams[k] || [])])
-    );
+    const nextParams = Object.fromEntries(FILTER_KEYS.map((k) => [k, new Set(urlParams[k] || [])]));
+    delete nextParams.filter;
 
     let skip = false;
     if (type && type.startsWith("skip-")) {
@@ -196,83 +224,114 @@ export function withParams(type, id) {
     return createURL(nextParams);
 }
 
-export const DEFAULT_CONFIG = {
+export const CONFIG_SCHEMA = {
     /**
-     * Whether the test runner will start automatically on page load.
-     * @type {boolean}
-     * @default true
+     * Amount of failed tests after which the test runner will be aborted.
+     * A falsy value (including 0) means that the runner should not be aborted.
      */
-    autostart: true,
-    /**
-     * If true, the test runner will stop after the first failed test (not the
-     * first failed assertion - the current test will finish properly before stopping).
-     * @type {boolean}
-     * @default false
-     */
-    failfast: false,
+    bail: {
+        default: 0,
+        parse: parseNumber(1),
+    },
     /**
      * Whether to render the test runner user interface.
      * Note: this cannot be changed on runtime: the UI will not be un-rendered or
      * rendered if this param changes.
-     * @type {boolean}
-     * @default false
      */
-    headless: false,
+    headless: {
+        default: false,
+        parse: parseBoolean(true),
+    },
     /**
      * Hides all skipped tests.
-     * @type {boolean}
-     * @default false
      */
-    hideskipped: false,
+    hideskipped: {
+        default: false,
+        parse: parseBoolean(true),
+    },
+    /**
+     * Whether the test runner must be manually started after page load (defaults
+     * to starting automatically).
+     */
+    manual: {
+        default: false,
+        parse: parseBoolean(true),
+    },
     /**
      * Removes the safety try .. catch statements around the tests' run functions
      * to let errors bubble to the browser.
-     * @type {boolean}
-     * @default false
      */
-    notrycatch: false,
+    notrycatch: {
+        default: false,
+        parse: parseBoolean(true),
+    },
     /**
      * Shuffles the running order of tests and suites.
-     * @type {boolean}
-     * @default false
      */
-    randomorder: false,
+    randomorder: {
+        default: false,
+        parse: parseBoolean(true),
+    },
     /**
      * Determines how the failed tests must be unfolded in the UI:
      * - "first-fail": only the first failed test will be unfolded
      * - "failed": all failed tests will be unfolded
      * - false: all tests will remain folded
-     * @type {"first-fail" | "failed" | false}
-     * @default "first-fail"
      */
-    showdetail: "first-fail",
+    showdetail: {
+        default: "first-fail",
+        parse: parseShowDetail("failed"),
+    },
     /**
      * Shows all completed tests including those who passed.
-     * @type {boolean}
-     * @default false
      */
-    showpassed: false,
+    showpassed: {
+        default: false,
+        parse: parseBoolean(true),
+    },
     /**
-     * Duration at the end of which a test will automatically fail.
-     * @type {number}
-     * @default 10_000
+     * Duration (in seconds) at the end of which a test will automatically fail.
      */
-    timeout: /* 1O seconds */ 10_000,
+    timeout: {
+        default: 10,
+        parse: parseNumber(10),
+    },
 };
 
-export const FILTER_PARAMS = {
-    debugTest: "debugTest",
-    filter: "filter",
-    suite: "suite",
-    tag: "tag",
-    test: "test",
+export const FILTER_SCHEMA = {
+    debugTest: {
+        default: [],
+        parse: parseStringArray([]),
+    },
+    filter: {
+        default: "",
+        parse: parseString(""),
+    },
+    suite: {
+        default: [],
+        parse: parseStringArray([]),
+    },
+    tag: {
+        default: [],
+        parse: parseStringArray([]),
+    },
+    test: {
+        default: [],
+        parse: parseStringArray([]),
+    },
 };
+
+/** @see {CONFIG_SCHEMA} */
+export const DEFAULT_CONFIG = getSchemaDefaults(CONFIG_SCHEMA);
+export const CONFIG_KEYS = getSchemaKeys(CONFIG_SCHEMA);
+
+/** @see {FILTER_SCHEMA} */
+export const DEFAULT_FILTERS = getSchemaDefaults(FILTER_SCHEMA);
+export const FILTER_KEYS = getSchemaKeys(FILTER_SCHEMA);
 
 export const SKIP_PREFIX = "-";
 
-export const URL_PARAMS = { ...DEFAULT_CONFIG, ...FILTER_PARAMS };
-
-/** @type {Record<URLParam, any[]>} */
+/** @type {Partial<typeof DEFAULT_CONFIG & typeof DEFAULT_FILTERS>} */
 export const urlParams = reactive({});
 
 processURL();

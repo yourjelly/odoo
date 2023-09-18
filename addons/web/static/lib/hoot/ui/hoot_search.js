@@ -137,16 +137,12 @@ export class HootSearch extends Component {
     ];
     title = title;
 
-    get urlFilter() {
-        return (this.urlParams.filter || []).join(" ");
-    }
-
     setup() {
         this.rootRef = useRef("root");
         this.searchInputRef = useRef("search-input");
         this.urlParams = subscribeToURLParams();
         this.state = useState({
-            query: this.urlFilter,
+            query: this.urlParams.filter || "",
             showDropdown: false,
             buttonDisabled: true,
             categories: {
@@ -208,7 +204,7 @@ export class HootSearch extends Component {
     }
 
     onInput() {
-        this.state.buttonDisabled = !this.state.query || this.state.query === this.urlFilter;
+        this.state.buttonDisabled = !this.state.query || this.state.query === this.urlParams.filter;
         this.updateSuggestions();
     }
 
