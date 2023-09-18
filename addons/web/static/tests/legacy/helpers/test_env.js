@@ -41,10 +41,7 @@
                 hotkey: { add: () => () => {} }, // fake service
                 notification: { notify() {} },
                 ajax: { rpc },
-                rpc(params, options) {
-                    const query = buildQuery(params);
-                    return rpc(query.route, query.params, options);
-                },
+                rpc,
                 ui: { activeElement: document }, // fake service
                 ...env.services,
             },
