@@ -1720,6 +1720,7 @@ class Request:
         with odoo.api.Environment(None, self.session.uid, self.session.context, registry=self.registry) as env:
             self.env = env
             threading.current_thread().uid = self.env.uid
+            threading.current_thread().dbname = self.env.registry.db_name
             try:
                 return service_model.retrying(self._serve_ir_http, self.env)
             except Exception as exc:

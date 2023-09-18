@@ -531,19 +531,18 @@ class Environment(Mapping):
     def cr(self):
         # we can predict if the transaction for rpc is readonly using history data with the model_name and method name
         cr = self._cr(self)
-        self.args = (cr,) + self.args[1:]
-        return cr
-
-    @cached_property
-    def transaction(self):
-        cr = self.cr
         transaction = cr.transaction
         if transaction is None:
             transaction = cr.transaction = Transaction(Registry(cr.dbname))
 
         # otherwise create environment, and add it in the set
         transaction.envs.add(self)
-        return transaction
+        self.args = (cr,) + self.args[1:]
+        return cr
+
+    @cached_property
+    def transaction(self):
+        return self.cr.transaction
 
     @cached_property
     def all(self):
