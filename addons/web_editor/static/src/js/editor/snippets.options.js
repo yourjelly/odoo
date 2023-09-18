@@ -1029,6 +1029,7 @@ const SelectUserValueWidget = BaseSelectionUserValueWidget.extend({
      */
     close: function () {
         this._super(...arguments);
+        this.el.classList.remove("o_we_select_dropdown_up");
         if (this.menuTogglerEl) {
             this.menuTogglerEl.classList.remove('active');
         }
@@ -1111,6 +1112,34 @@ const SelectUserValueWidget = BaseSelectionUserValueWidget.extend({
     _shouldIgnoreClick(ev) {
         return !!ev.target.closest('[role="button"]');
     },
+    /**
+     * Decides whether the dropdown should be positioned below or above the
+     * selector based on the available space.
+     * 
+     * @private
+     */
+    async _adjustDropdownPosition() {
+        const customizePanelEl = this.menuEl.closest(".o_we_customize_panel");
+        if (this.menuEl.matches(".o_we_has_pager") || !customizePanelEl) {
+            return;
+        }
+        const customizePanelElCoords = customizePanelEl.getBoundingClientRect();
+        let dropdownMenuElCoords = this.menuEl.getBoundingClientRect();
+        // Adds a margin to prevent the dropdown from sticking to the edge of
+        // the customize panel.
+        const dropdownMenuMargin = 5;
+        // If after opening, the dropdown list overflows the customization
+        // panel at the bottom, opens the dropdown above the selector.
+        if ((dropdownMenuElCoords.bottom + dropdownMenuMargin) > customizePanelElCoords.bottom) {
+            this.el.classList.add("o_we_select_dropdown_up");
+            dropdownMenuElCoords = this.menuEl.getBoundingClientRect();
+            // If there is no available space above it either, then we open
+            // it below the selector.
+            if (dropdownMenuElCoords.top < customizePanelElCoords.top) {
+                this.el.classList.remove("o_we_select_dropdown_up");
+            }
+        }
+    },
 
     //--------------------------------------------------------------------------
     // Handlers
@@ -1128,6 +1157,7 @@ const SelectUserValueWidget = BaseSelectionUserValueWidget.extend({
 
         if (!this.menuTogglerEl.classList.contains('active')) {
             this.open();
+            this._adjustDropdownPosition();
         } else {
             this.close();
         }
@@ -1679,6 +1709,17 @@ const ColorpickerUserValueWidget = SelectUserValueWidget.extend({
             selectedCC: this._ccValue,
             selectedColor: this._value,
         });
+    },
+    /**
+     * @override
+     */
+    async _adjustDropdownPosition() {
+        const _super = this._super.bind(this);
+        // To adjust the position of the colorpicker, we need to wait for the
+        // colorpalette to be completely rendered to ensure that the colorpicker
+        // has its final height.
+        await this._colorPaletteRenderPromise;
+        await _super(...arguments);
     },
 
     //--------------------------------------------------------------------------
