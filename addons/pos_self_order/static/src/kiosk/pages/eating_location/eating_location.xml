@@ -24,8 +24,8 @@
                 </div>
             </t>
             <t t-set-slot="footer">
-                <div class="d-flex w-100 h-100">
-                    <button class="h-100 btn btn-secondary w-100 p-0 m-0 fs-2 text-uppercase" t-on-click="back">
+                <div class="d-flex justify-content-center text-center p-3">
+                    <button class="h-100 btn btn-secondary text-uppercase flex-basis-50 flex-shrink-0 flex-grow-1 flex-xl-grow-0" t-on-click="back">
                         <i class="oi oi-chevron-left"/>
                         Back
                     </button>
