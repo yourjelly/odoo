@@ -439,7 +439,7 @@ This module provides the core of the Odoo Web Client.
         ],
         # Assets for test framework and setup
         'web.unit_tests_assets': [
-            'web/static/src/boot.js',
+            'web/static/src/module_loader.js',
 
             'web/static/lib/owl/owl.js',
             'web/static/lib/owl/odoo_module.js',

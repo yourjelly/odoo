@@ -97,7 +97,10 @@ export function makeAssert() {
         return methods;
     }
 
-    function end() {
+    /**
+     * Used to calculate test duration.
+     */
+    function timeEnd() {
         assertInfo.duration = Date.now() - startTime;
     }
 
@@ -114,7 +117,6 @@ export function makeAssert() {
         /** @type {AssertResult[]} */
         assertions: [],
         duration: 0,
-        end,
         error: null,
         expects: null,
         /** @type {AssertMethods} */
@@ -122,6 +124,7 @@ export function makeAssert() {
         pass: true,
         /** @type {string[]} */
         steps: [],
+        timeEnd,
     });
 
     Object.assign(assertInfo.methods, generateAssertMethods(false));

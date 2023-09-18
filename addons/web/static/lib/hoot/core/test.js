@@ -1,7 +1,8 @@
 /** @odoo-module **/
 
 import { reactive } from "@odoo/owl";
-import { SPECIAL_TAGS, generateHash, normalize } from "../utils";
+import { generateHash, normalize } from "../utils";
+import { Tag } from "./tag";
 
 /**
  * @typedef {import("../assertions/assert").AssertMethods} AssertMethods
@@ -64,7 +65,8 @@ export class Test {
         return !this.skip;
     }
 
-    hasSkipTag() {
-        return this.tagNames.has(SPECIAL_TAGS.skip) || this.parent?.hasSkipTag();
+    /** @param {string} tagName */
+    hasTag(tagName) {
+        return this.tagNames.has(tagName) || this.parent?.hasTag(tagName);
     }
 }

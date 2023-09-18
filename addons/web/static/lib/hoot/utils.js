@@ -8,7 +8,6 @@ import {
     JSON,
     localStorage,
     navigator,
-    Number,
     Object,
     Proxy,
     sessionStorage,
@@ -23,8 +22,6 @@ import {
 //-----------------------------------------------------------------------------
 // Internal
 //-----------------------------------------------------------------------------
-
-const CONFIG_TAG_PATTERN = /^([\w-]+)=([\w-]+)$/;
 
 const REGEX_PATTERN = /^\/(.*)\/([gim]+)?$/;
 
@@ -51,7 +48,6 @@ export async function copy(text) {
         log.warn("Could not copy to clipboard:", err);
     }
 }
-
 /**
  * @template {(...args: any[]) => any} T
  * @param {T} fn
@@ -431,22 +427,6 @@ export function normalize(string) {
 }
 
 /**
- * @param {string} tag
- */
-export function parseConfigTag(tag) {
-    const configParams = tag.match(CONFIG_TAG_PATTERN);
-    if (configParams) {
-        const [, key, value] = configParams;
-        const parser = CONFIG_TAGS[key];
-        if (!parser) {
-            throw new Error(`Invalid config tag: parameter "${key}" does not exist.`);
-        }
-        return { [key]: parser(value) };
-    }
-    return null;
-}
-
-/**
  * @param {string} value
  */
 export function parseRegExp(value) {
@@ -547,14 +527,3 @@ export function toSelector(element, options) {
         return [tagName, id, ...classNames].join("");
     }
 }
-
-export const CONFIG_TAGS = {
-    timeout: Number,
-    multi: Number,
-};
-
-export const SPECIAL_TAGS = {
-    debug: "debug",
-    only: "only",
-    skip: "skip",
-};
