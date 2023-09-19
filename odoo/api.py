@@ -505,10 +505,7 @@ class Environment(Mapping):
         if cr:
             self.cr = cr
 
-            self.transaction = self.all = transaction
             self.registry = transaction.registry
-            self.cache = transaction.cache
-            self._protected = transaction.protected
             transaction.envs.add(self)
         else:
             self.registry = registry
@@ -540,21 +537,21 @@ class Environment(Mapping):
         self.args = (cr,) + self.args[1:]
         return cr
 
-    @cached_property
+    @property
     def transaction(self):
         return self.cr.transaction
 
-    @cached_property
+    @property
     def all(self):
-        return self.transaction
+        return self.cr.transaction
 
-    @cached_property
+    @property
     def cache(self):
-        return self.transaction.cache
+        return self.cr.transaction.cache
 
-    @cached_property
+    @property
     def _protected(self):
-        return self.transaction.protected
+        return self.cr.transaction.protected
 
 
     def __contains__(self, model_name):
