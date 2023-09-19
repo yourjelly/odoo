@@ -61,6 +61,13 @@ export class PopoverController extends Component {
 
     onClickAway(ev) {
         const target = ev.composedPath()[0];
+
+        // Skip if clicked element is in another popover
+        const popover = target.closest(".o_popover");
+        if (popover && popover !== this.popoverRef.el) {
+            return;
+        }
+
         if (
             this.props.closeOnClickAway(target) &&
             !this.props.target.contains(target) &&

@@ -314,7 +314,7 @@ export class Dropdown extends Component {
         this.navigation.enable();
         if (this.target) {
             this.target.ariaExpanded = true;
-            this.target.classList.add("o-dropdown--open");
+            this.target.classList.add("show");
         }
     }
 
@@ -322,11 +322,19 @@ export class Dropdown extends Component {
         this.navigation.disable();
         if (this.target) {
             this.target.ariaExpanded = false;
-            this.target.classList.remove("o-dropdown--open");
+            this.target.classList.remove("show");
         }
     }
 
+    /**
+     * @param {HTMLElement} target
+     * @returns
+     */
     closeOnClickAway(target) {
+        if (target.closest(".o_dialog")) {
+            return false;
+        }
+
         if (
             !this.target.contains(target) &&
             !this.menuRef.el.contains(target) &&
