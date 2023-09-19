@@ -1,7 +1,8 @@
 /** @odoo-module **/
 
-import { Component, useEffect, useRef } from "@odoo/owl";
+import { Component, onWillUpdateProps, useEffect, useRef } from "@odoo/owl";
 import { reposition } from "@web/core/position_hook";
+import { usePosition } from "@web/core/position_hook2";
 
 /**
  * @typedef {import("../tour_service/tour_pointer_state").TourPointerState} TourPointerState
@@ -49,94 +50,69 @@ export class TourPointer extends Component {
     static height = 28; // in pixels
 
     setup() {
-        const rootRef = useRef("popper");
-        /** @type {DOMREct | null} */
-        let dimensions = null;
-        let lastMeasuredContent = null;
-        let lastOpenState = this.isOpen;
+        let lastAnchor;
         let [anchorX, anchorY] = [0, 0];
-
-        useEffect(
-            () => {
-                const { el } = rootRef;
-                if (el) {
-                    const hasContentChanged = lastMeasuredContent !== this.content;
-                    const hasOpenStateChanged = lastOpenState !== this.isOpen;
-                    lastOpenState = this.isOpen;
-
-                    // Content changed: we must re-measure the dimensions of the text.
-                    if (hasContentChanged) {
-                        lastMeasuredContent = this.content;
-                        el.style.removeProperty("width");
-                        el.style.removeProperty("height");
-                        dimensions = el.getBoundingClientRect();
-                    }
-
-                    // If the content or the "is open" state changed: we must apply
-                    // new width and height properties
-                    if (hasContentChanged || hasOpenStateChanged) {
-                        const [width, height] = this.isOpen
-                            ? [dimensions.width, dimensions.height]
-                            : [this.constructor.width, this.constructor.height];
-                        if (this.isOpen) {
-                            el.style.removeProperty("transition");
-                        } else {
-                            // No transition if switching from open to closed
-                            el.style.setProperty("transition", "none");
-                        }
-                        el.style.setProperty("width", `${width}px`);
-                        el.style.setProperty("height", `${height}px`);
-                    }
-
-                    if (!this.isOpen) {
-                        const { anchor } = this.props.pointerState;
-                        if (anchor) {
-                            const { x, y, width } = anchor.getBoundingClientRect();
-                            const [lastAnchorX, lastAnchorY] = [anchorX, anchorY];
-                            [anchorX, anchorY] = [x, y];
-                            // Let's just say that the anchor is static if it moved less than 1px.
-                            const delta = Math.sqrt(
-                                Math.pow(x - lastAnchorX, 2) + Math.pow(y - lastAnchorY, 2)
-                            );
-                            if (delta < 1) {
-                                return;
-                            }
-                            const wouldOverflow =
-                                window.innerWidth - x - width / 2 < dimensions?.width;
-                            el.classList.toggle("o_expand_left", wouldOverflow);
-                            reposition(anchor, el, null, {
-                                position: this.position,
-                                margin: 6,
-                                onPositioned: (popper, position) => {
-                                    const popperRect = popper.getBoundingClientRect();
-                                    const { top, left, direction } = position;
-                                    if (direction === "top") {
-                                        popper.style.bottom = `${
-                                            window.innerHeight - top - popperRect.height
-                                        }px`;
-                                        popper.style.removeProperty("top");
-                                    } else {
-                                        popper.style.top = `${top}px`;
-                                    }
-                                    if (direction === "left") {
-                                        popper.style.right = `${
-                                            window.innerWidth - left - popperRect.width
-                                        }px`;
-                                        popper.style.removeProperty("left");
-                                    } else {
-                                        popper.style.left = `${left}px`;
-                                    }
-                                },
-                            });
-                        }
-                    }
+        usePosition(
+            "pointer",
+            () => this.props.pointerState.anchor,
+            (pointer, anchor) => {
+                // Content changed: we must re-measure the dimensions of the text.
+                if (this.isOpen) {
+                    pointer.style.removeProperty("width");
+                    pointer.style.removeProperty("height");
+                    // dimensions = pointer.getBoundingClientRect();
+                    // const { width, height } = dimensions;
+                    // pointer.style.removeProperty("transition");
+                    // pointer.style.setProperty("width", `${width}px`);
+                    // pointer.style.setProperty("height", `${height}px`);
+                    return;
                 } else {
-                    lastMeasuredContent = null;
-                    lastOpenState = false;
-                    dimensions = null;
+                    pointer.style.setProperty("width", `${this.constructor.width}px`);
+                    pointer.style.setProperty("height", `${this.constructor.height}px`);
                 }
-            },
-            () => [this.props.pointerState.rev]
+
+                if (anchor !== lastAnchor) {
+                    lastAnchor = anchor;
+                } else {
+                    const { x, y } = anchor.getBoundingClientRect();
+                    const [lastAnchorX, lastAnchorY] = [anchorX, anchorY];
+                    [anchorX, anchorY] = [x, y];
+                    // Let's just say that the anchor is static if it moved less than 1px.
+                    const delta = Math.sqrt(
+                        Math.pow(x - lastAnchorX, 2) + Math.pow(y - lastAnchorY, 2)
+                    );
+                    if (delta < 1) {
+                        return;
+                    }
+                }
+
+                pointer.style.removeProperty("bottom");
+                pointer.style.removeProperty("right");
+                return {
+                    position: this.position,
+                    margin: 6,
+                    onPositioned: (_, position) => {
+                        const popperRect = pointer.getBoundingClientRect();
+                        const { top, left, direction } = position;
+                        if (direction === "top") {
+                            pointer.style.bottom = `${
+                                window.innerHeight - top - popperRect.height
+                            }px`;
+                            pointer.style.removeProperty("top");
+                        } else {
+                            pointer.style.top = `${top}px`;
+                        }
+                        if (direction === "left") {
+                            pointer.style.right = `${
+                                window.innerWidth - left - popperRect.width
+                            }px`;
+                            pointer.style.removeProperty("left");
+                        } else {
+                            pointer.style.left = `${left}px`;
+                        }
+                    },
+                };
+            }
         );
     }
 
