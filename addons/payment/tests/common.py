@@ -149,7 +149,7 @@ class PaymentCommon(BaseCommon):
             AND([provider_domain, [('company_id', '=', company.id)]]), limit=1
         )
         if not provider:
-            base_provider = cls.provider
+            base_provider = cls.env['payment.provider'].sudo().search(provider_domain, limit=1)
             if not base_provider:
                 _logger.error("no payment.provider found for code %s", code)
                 return cls.env['payment.provider']
