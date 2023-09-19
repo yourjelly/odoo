@@ -21,8 +21,15 @@ export class HootTestResult extends Component {
     static components = { HootTestPath, HootTechnicalValue };
 
     static template = compactXML/* xml */ `
-        <details class="hoot-result hoot-col" t-att-class="className" t-att-open="props.defaultOpen">
-            <summary class="hoot-result-header hoot-row hoot-text-md">
+        <details
+            class="hoot-result hoot-col"
+            t-att-class="className"
+            t-att-open="props.open"
+        >
+            <summary
+                class="hoot-result-header hoot-row hoot-text-md"
+                t-on-click.synthetic="props.onToggle"
+            >
                 <div class="hoot-row hoot-overflow-hidden hoot-gap-2">
                     <HootTestPath test="props.test" />
                     <div class="hoot-row hoot-gap-1">
@@ -67,9 +74,9 @@ export class HootTestResult extends Component {
                 </span>
             </summary>
             <t t-if="!props.test.skip">
-                <div class="hoot-result-detail hoot-col">
+                <div class="hoot-result-detail hoot-col hoot-mx-3">
                     <t t-foreach="props.test.lastResults.assertions" t-as="result" t-key="result.id">
-                        <div class="hoot-result-line" t-att-class="result.pass ? 'hoot-text-success' : 'hoot-text-danger'">
+                        <div class="hoot-result-line hoot-row hoot-px-2" t-att-class="result.pass ? 'hoot-text-success' : 'hoot-text-danger'">
                             <t t-esc="result_index + 1" />. <t t-esc="result.message" />
                         </div>
                         <t t-if="!result.pass and result.info">
@@ -82,7 +89,7 @@ export class HootTestResult extends Component {
                         </t>
                     </t>
                     <t t-if="props.test.lastResults.error">
-                        <div class="hoot-result-line hoot-text-danger">
+                        <div class="hoot-result-line hoot-row hoot-px-2 hoot-text-danger">
                             Error while running test "<t t-esc="props.test.name" />"
                         </div>
                         <div class="hoot-info-line">

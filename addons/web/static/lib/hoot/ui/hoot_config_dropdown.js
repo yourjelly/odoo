@@ -27,10 +27,10 @@ export class HootConfigDropdown extends Component {
                     </label>
                     <label
                         class="hoot-checkbox hoot-dropdown-line"
-                        title="Hide all tests that have been skipped"
+                        title="Show all tests that have been skipped"
                     >
-                        <input type="checkbox" t-model="env.runner.config.hideskipped" />
-                        <span>Hide skipped tests</span>
+                        <input type="checkbox" t-model="env.runner.config.showskipped" />
+                        <span>Show skipped tests</span>
                     </label>
                     <label
                         class="hoot-checkbox hoot-dropdown-line"

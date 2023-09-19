@@ -3,9 +3,17 @@
 import { suite, test } from "@odoo/hoot";
 
 suite("demo", () => {
-    for (let s = 0; s < 100; s++) {
+    test.todo("todo", (assert) => {
+        assert.not.ok(true);
+    });
+
+    test("todo", (assert) => {
+        assert.deepEqual({ a: 1 }, { b: [2] });
+    });
+
+    for (let s = 0; s < 25; s++) {
         suite(`suite ${s}`, () => {
-            for (let t = 0; t < 100; t++) {
+            for (let t = 0; t < 25; t++) {
                 test(`test ${t} from suite ${s}`, (assert) => {
                     assert.ok(true);
                 });

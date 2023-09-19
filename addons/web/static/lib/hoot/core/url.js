@@ -85,7 +85,7 @@ export function refresh() {
  * @param {Partial<DEFAULT_CONFIG & DEFAULT_FILTERS>} params
  */
 export function setParams(params) {
-    for (const [key, value] in Object.entries(params)) {
+    for (const [key, value] of Object.entries(params)) {
         if (!CONFIG_KEYS.includes(key) && !FILTER_KEYS.includes(key)) {
             throw new Error(`Unknown URL param key: "${key}"`);
         }
