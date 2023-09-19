@@ -3,7 +3,7 @@
 import { makeContext } from "@web/core/context";
 import { _t } from "@web/core/l10n/translation";
 import { evaluateExpr, evaluateBooleanExpr } from "@web/core/py_js/py";
-import { XMLParser } from "@web/core/utils/xml";
+import { visitXML } from "@web/core/utils/xml";
 import { DEFAULT_INTERVAL, DEFAULT_PERIOD } from "@web/search/utils/dates";
 
 const ALL = _t("All");
@@ -35,10 +35,8 @@ function reduceType(type) {
     return type;
 }
 
-export class SearchArchParser extends XMLParser {
+export class SearchArchParser {
     constructor(searchViewDescription, fields, searchDefaults = {}, searchPanelDefaults = {}) {
-        super();
-
         const { irFilters, arch } = searchViewDescription;
 
         this.fields = fields || {};
@@ -63,7 +61,7 @@ export class SearchArchParser extends XMLParser {
     }
 
     parse() {
-        this.visitXML(this.arch, (node, visitChildren) => {
+        visitXML(this.arch, (node, visitChildren) => {
             switch (node.tagName) {
                 case "search":
                     this.visitSearch(node, visitChildren);

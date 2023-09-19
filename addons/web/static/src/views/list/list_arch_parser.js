@@ -1,20 +1,20 @@
 /** @odoo-module */
 
 import { Field } from "@web/views/fields/field";
-import { XMLParser } from "@web/core/utils/xml";
+import { parseXML, visitXML } from "@web/core/utils/xml";
 import { stringToOrderBy } from "@web/search/utils/order_by";
 import { archParseBoolean, getActiveActions, getDecoration, processButton } from "@web/views/utils";
 import { encodeObjectForTemplate } from "@web/views/view_compiler";
 import { combineModifiers } from "@web/model/relational_model/utils";
 import { Widget } from "@web/views/widgets/widget";
 
-export class GroupListArchParser extends XMLParser {
+export class GroupListArchParser {
     parse(arch, models, modelName, jsClass) {
         const fieldNodes = {};
         const fieldNextIds = {};
         const buttons = [];
         let buttonId = 0;
-        this.visitXML(arch, (node) => {
+        visitXML(arch, (node) => {
             if (node.tagName === "button") {
                 buttons.push({
                     ...processButton(node),
@@ -36,7 +36,7 @@ export class GroupListArchParser extends XMLParser {
     }
 }
 
-export class ListArchParser extends XMLParser {
+export class ListArchParser {
     parseFieldNode(node, models, modelName) {
         return Field.parseFieldNode(node, models, modelName, "list");
     }
@@ -50,7 +50,7 @@ export class ListArchParser extends XMLParser {
     }
 
     parse(arch, models, modelName) {
-        const xmlDoc = this.parseXML(arch);
+        const xmlDoc = parseXML(arch);
         const fieldNodes = {};
         const widgetNodes = {};
         let widgetNextId = 0;
@@ -69,7 +69,7 @@ export class ListArchParser extends XMLParser {
         const treeAttr = {};
         let nextId = 0;
         const fieldNextIds = {};
-        this.visitXML(arch, (node) => {
+        visitXML(arch, (node) => {
             if (node.tagName !== "button") {
                 buttonGroup = undefined;
             }

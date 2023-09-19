@@ -1,11 +1,14 @@
 /** @odoo-module **/
 
-import { XMLParser } from "@web/core/utils/xml";
+import { parseXML, visitXML } from "@web/core/utils/xml";
 import { Field } from "@web/views/fields/field";
 import { Widget } from "@web/views/widgets/widget";
 import { archParseBoolean, getActiveActions } from "@web/views/utils";
 
-export class FormArchParser extends XMLParser {
+export class FormArchParser {
+    parseXML(arch) {
+        return parseXML(arch);
+    }
     parse(arch, models, modelName) {
         const xmlDoc = this.parseXML(arch);
         const jsClass = xmlDoc.getAttribute("js_class");
@@ -16,7 +19,7 @@ export class FormArchParser extends XMLParser {
         let widgetNextId = 0;
         const fieldNextIds = {};
         let autofocusFieldId = null;
-        this.visitXML(xmlDoc, (node) => {
+        visitXML(xmlDoc, (node) => {
             if (node.tagName === "field") {
                 const fieldInfo = Field.parseFieldNode(node, models, modelName, "form", jsClass);
                 if (!(fieldInfo.name in fieldNextIds)) {
