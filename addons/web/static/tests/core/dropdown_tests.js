@@ -1372,7 +1372,7 @@ QUnit.module("Components", ({ beforeEach }) => {
             await click(one);
             assert.verifySteps([]);
             assert.containsOnce(target, DROPDOWN_MENU);
-            assert.hasClass(one, "o-dropdown--open");
+            assert.hasClass(one, "show");
 
             // Hover on TWO
             target.querySelector(".two").dispatchEvent(new MouseEvent("mouseenter"));
