@@ -177,6 +177,7 @@ export function createPointerState() {
     const state = reactive({});
     const intersection = new Intersection();
     const floatingAnchor = document.createElement("div");
+    floatingAnchor.id = "o-tour-floating-anchor";
     floatingAnchor.className = "position-fixed";
 
     return { state, methods: { setState, showContent, pointTo, hide, destroy } };

@@ -224,7 +224,16 @@ export class MacroEngine {
         }
     }
 
-    delayedCheck() {
+    delayedCheck(observations) {
+        if (
+            observations?.every((o) => o.target?.closest?.(".o_tour_pointer")) ||
+            observations?.every(
+                (o) =>
+                    o.removedNodes.length === 1 && o.removedNodes[0].id === "o-tour-floating-anchor"
+            )
+        ) {
+            return;
+        }
         if (this.timeout) {
             browser.clearTimeout(this.timeout);
         }
