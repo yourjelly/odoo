@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from unittest.mock import patch
-
 from odoo import _, api, fields, models, modules, tools, Command
 from odoo.exceptions import UserError
 from odoo.tools.misc import get_lang
@@ -313,7 +310,12 @@ class AccountMoveSend(models.Model):
         if invoice.invoice_pdf_report_id:
             return
 
-        content, _report_format = self.env['ir.actions.report']._render('account.account_invoices', invoice.ids)
+        action_report = self.env['ir.actions.report'].search([
+            ('model', '=', 'account.move'),
+            ('report_name', '=', invoice._get_name_invoice_report()),
+            # ('report_name', '=like', f'{invoice._get_name_invoice_report()}%'), smth similar could work to get copied action_report through studio but not very robust
+        ], limit=1)
+        content, _report_format = self.env['ir.actions.report']._render(action_report.xml_id, invoice.ids)
 
         invoice_data['pdf_attachment_values'] = {
             'raw': content,
