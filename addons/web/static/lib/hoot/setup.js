@@ -1,14 +1,25 @@
 /** @odoo-module **/
 
 import { mount, whenReady } from "@odoo/owl";
-import { registerAssertMethod } from "./assertions/assert";
 import { makeLogger } from "./core/logger";
 import { makeTestRunner } from "./core/runner";
+import { expect as _expect, registerMatcher } from "./expect";
 import { URL, location } from "./globals";
 import { config as domConfig } from "./helpers/dom";
 import { config as eventsConfig } from "./helpers/events";
 import { HootMain } from "./ui/hoot_main";
 import { log } from "./utils";
+
+import "./matchers/to_be";
+import "./matchers/to_be_between";
+import "./matchers/to_be_truthy";
+import "./matchers/to_be_visible";
+import "./matchers/to_contain";
+import "./matchers/to_equal";
+import "./matchers/to_have_attribute";
+import "./matchers/to_have_class";
+import "./matchers/to_match";
+import "./matchers/to_throw";
 
 /**
  * @typedef {{
@@ -43,8 +54,9 @@ export const afterEach = runner.afterEach;
 export const beforeAll = runner.beforeAll;
 export const beforeSuite = runner.beforeSuite;
 export const beforeEach = runner.beforeEach;
+export const extend = registerMatcher;
+export const expect = _expect;
 export const registerCleanup = runner.registerCleanup;
 export const start = runner.start;
 export const suite = runner.suite;
 export const test = runner.test;
-export const extend = registerAssertMethod;

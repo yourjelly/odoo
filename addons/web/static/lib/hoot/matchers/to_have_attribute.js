@@ -1,31 +1,30 @@
 /** @odoo-module **/
 
+import { expect } from "../expect";
 import { queryOne } from "../helpers/dom";
 import { formatHumanReadable } from "../utils";
-import { registerAssertMethod } from "./assert";
-import { applyModifier, diff, green, red, text } from "./assert_helpers";
+import { applyModifier, diff, green, red, text } from "./expect_helpers";
 
 /**
- * @param {import("./assert").AssertInfo} assert
- * @param {import("../helpers/dom").Target} target
+ * @param {import("../expect").ExpectContext<import("../helpers/dom").Target>} context
  * @param {string} attribute
  * @param {string} [value]
  * @param {string} [message=""]
- * @returns {import("./assert").AssertResult}
+ * @returns {import("../expect").ExpectResult}
  */
-export function hasAttribute({ isNot }, target, attribute, value, message = "") {
-    const element = queryOne(target);
+export function toHaveAttribute({ actual, not }, attribute, value, message = "") {
+    const element = queryOne(actual);
     const expectsValue = ![null, undefined].includes(value);
     const pass = applyModifier(
         expectsValue ? element.getAttribute(attribute) === value : element.hasAttribute(attribute),
-        isNot
+        not
     );
     if (pass) {
         message ||= `attribute on ${formatHumanReadable(element)}${
-            isNot ? " does not have" : " has"
+            not ? " does not have" : " has"
         } the correct value`;
     } else {
-        message ||= `expected target to${isNot ? " not" : ""} have the correct value`;
+        message ||= `expected target to${not ? " not" : ""} have the correct value`;
     }
 
     const result = { message, pass };
@@ -39,4 +38,4 @@ export function hasAttribute({ isNot }, target, attribute, value, message = "") 
     return result;
 }
 
-registerAssertMethod(hasAttribute);
+expect.extend(toHaveAttribute);

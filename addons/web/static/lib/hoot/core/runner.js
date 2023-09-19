@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { reactive } from "@odoo/owl";
-import { makeAssert } from "../assertions/assert";
+import { setupExpect } from "../expect";
 import { Error, Promise, clearTimeout, setTimeout } from "../globals";
 import {
     getFuzzyScore,
@@ -19,8 +19,6 @@ import { Test } from "./test";
 import { SKIP_PREFIX, setParams, urlParams } from "./url";
 
 /**
- * @typedef {import("../assertions/assert").AssertMethods} AssertMethods
- *
  * @typedef {Suite | Test} Job
  */
 
@@ -32,6 +30,12 @@ import { SKIP_PREFIX, setParams, urlParams } from "./url";
 //-----------------------------------------------------------------------------
 // Internal
 //-----------------------------------------------------------------------------
+
+const suiteError = (name, message) =>
+    new Error(`Error while registering suite "${name}": ${message}`);
+
+const testError = (name, message) =>
+    new Error(`Error while registering test "${name}": ${message}`);
 
 class TimeoutError extends Error {
     name = "TimeoutError";
@@ -57,16 +61,13 @@ export function makeTestRunner(params) {
             return addSuite(name, () => addSuite(...nestedArgs));
         }
         if (typeof suiteFn !== "function") {
-            throw new Error(
-                `Error while registering suite "${name}": expected second argument to be a function and got ${String(
-                    suiteFn
-                )}`
+            throw suiteError(
+                name,
+                `expected second argument to be a function and got ${String(suiteFn)}`
             );
         }
         if (runner.status !== "ready") {
-            throw new Error(
-                `Error while registering suite "${name}": cannot add a suite after the test runner started.`
-            );
+            throw suiteError(name, `cannot add a suite after the test runner started`);
         }
         const current = getCurrent();
         const tags = createTags(current?.tags, suiteTags);
@@ -107,41 +108,40 @@ export function makeTestRunner(params) {
             }
         }
         if (result !== undefined) {
-            throw new Error(
-                `Error while registering suite "${name}": the suite function cannot return a value`
-            );
+            throw suiteError(name, `the suite function cannot return a value`);
         }
     }
 
     /**
      * @param {string} name
-     * @param {(assert: AssertMethods) => void | PromiseLike<void>} testFn
+     * @param {() => void | PromiseLike<void>} testFn
      * @param {string[]} testTags
      */
     function addTest(name, testFn, testTags) {
         const current = getCurrent();
         if (!current) {
-            throw new Error(
-                `Error while registering test "${name}": cannot register a test outside of a suite.`
-            );
+            throw testError(name, `cannot register a test outside of a suite.`);
         }
         if (typeof testFn !== "function") {
-            throw new Error(
-                `Error while registering test "${name}": expected second argument to be a function and got ${String(
-                    testFn
-                )}`
+            throw testError(
+                name,
+                `expected second argument to be a function and got ${String(testFn)}`
             );
         }
         if (runner.status !== "ready") {
-            throw new Error(
-                `Error while registering test "${name}": cannot add a test after the test runner started.`
-            );
+            throw testError(name, `cannot add a test after the test runner started.`);
         }
         const tags = createTags(current?.tags, testTags);
         if (handleMulti(name, testFn, tags)) {
             return;
         }
         const test = new Test(current, name, testFn, tags);
+        if (runner.tests.some((t) => t.fullName === test.fullName)) {
+            throw testError(
+                name,
+                `a test with that name already exists in the suite "${current.name}"`
+            );
+        }
         (current?.jobs || runner.jobs).push(test);
         if (!test.parent?.config.multi) {
             runner.tests.push(test);
@@ -189,7 +189,7 @@ export function makeTestRunner(params) {
 
     /**
      * @param {string} name
-     * @param {(assert: AssertMethods) => void | PromiseLike<void>} testFn
+     * @param {() => void | PromiseLike<void>} testFn
      * @param {Tag[]} tags
      */
     function handleMulti(name, testFn, tags) {
@@ -511,12 +511,13 @@ export function makeTestRunner(params) {
                         }
 
                         // Setup
-                        const assert = makeAssert();
+                        const { setStatus, tearDown } = setupExpect();
+
                         const timeout = test.config.timeout || config.timeout;
                         let timeoutId;
                         await Promise.race([
                             // Test promise
-                            test.run(assert.methods),
+                            test.run(),
                             // Abort & timeout promise
                             new Promise((resolve, reject) => {
                                 // Set abort signal
@@ -534,15 +535,12 @@ export function makeTestRunner(params) {
                                         timeout
                                     );
                                 }
-                            }).then(() => {
-                                assert.aborted = true;
-                            }),
+                            }).then(() => setStatus({ aborted: true })),
                         ])
-                            .catch((err) => {
-                                assert.error = err;
-                                assert.pass = false;
+                            .catch((error) => {
+                                setStatus({ error });
                                 if (config.notrycatch) {
-                                    throw err;
+                                    throw error;
                                 }
                             })
                             .finally(() => {
@@ -550,36 +548,11 @@ export function makeTestRunner(params) {
                                 clearTimeout(timeoutId);
                             });
 
-                        if (assert.steps > 0) {
-                            assert.methods.deepEqual([], assert.steps, `Unverified steps`);
-                        }
-
-                        if (assert.expects !== null) {
-                            const expected = assert.expects;
-                            const actual = assert.assertions.length;
-                            assert.methods.equal(
-                                expected,
-                                actual,
-                                `Expected ${expected} assertions, but ${actual} were run`
-                            );
-                        } else if (!assert.assertions.length) {
-                            assert.methods.ok(
-                                0,
-                                `Expected at least 1 assertion, but none were run`
-                            );
-                        }
-
                         if (test.hasTag(Tag.TODO)) {
-                            assert.pass = !assert.pass;
+                            setStatus({ pass: true });
                         }
 
-                        assert.timeEnd();
-
-                        for (const [key, value] of Object.entries(assert)) {
-                            if (typeof value !== "function") {
-                                test.lastResults[key] = value;
-                            }
-                        }
+                        Object.assign(test.lastResults, await tearDown());
 
                         await execAfterCallback(async () => {
                             for (const callbacks of [
@@ -588,7 +561,7 @@ export function makeTestRunner(params) {
                             ]) {
                                 callbacks.call("after-test", test);
                             }
-                            if (urlParams.bail && !assert.pass && !test.skip) {
+                            if (urlParams.bail && !expect.pass && !test.skip) {
                                 return runner.stop();
                             }
                         });

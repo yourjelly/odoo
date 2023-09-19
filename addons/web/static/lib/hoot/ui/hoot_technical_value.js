@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { Component, toRaw, useState } from "@odoo/owl";
-import { isMarkupHelper } from "../assertions/assert_helpers";
+import { isMarkupHelper } from "../matchers/expect_helpers";
 import { compactXML, isElement, isIterable, log, toSelector } from "../utils";
 
 /**

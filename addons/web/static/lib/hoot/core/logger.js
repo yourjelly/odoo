@@ -35,8 +35,8 @@ export function makeLogger(runner) {
                 error = test.lastResults.error.message;
             } else {
                 error = test.lastResults.assertions
-                    .filter((assert) => !assert.pass)
-                    .map((assert) => assert.errors?.join(" ") || assert.message)
+                    .filter((expect) => !expect.pass)
+                    .map((expect) => expect.errors?.join(" ") || expect.message)
                     .join(" and ");
             }
 

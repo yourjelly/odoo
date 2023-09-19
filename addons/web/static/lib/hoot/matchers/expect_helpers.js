@@ -33,10 +33,10 @@ const { DIFF_INSERT, DIFF_DELETE } = DiffMatchPatch;
 //-----------------------------------------------------------------------------
 
 /**
- * @param {boolean} assertion
- * @param {boolean} isNot
+ * @param {boolean} expection
+ * @param {boolean} not
  */
-export const applyModifier = (assertion, isNot) => Boolean(isNot ? !assertion : assertion);
+export const applyModifier = (expection, not) => Boolean(not ? !expection : expection);
 
 /**
  * @param {string} a

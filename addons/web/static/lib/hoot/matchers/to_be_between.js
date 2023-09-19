@@ -1,18 +1,17 @@
 /** @odoo-module **/
 
+import { expect } from "../expect";
 import { formatHumanReadable, isIterable } from "../utils";
-import { registerAssertMethod } from "./assert";
-import { applyModifier, green, red } from "./assert_helpers";
+import { applyModifier, green, red } from "./expect_helpers";
 
 /**
- * @param {import("./assert").AssertInfo} assert
- * @param {number} value
+ * @param {import("../expect").ExpectContext<number>} context
  * @param {number | [number, number]} min
  * @param {number | string} [max]
  * @param {string} [message]
- * @returns {import("./assert").AssertResult}
+ * @returns {import("../expect").ExpectResult}
  */
-export function between({ isNot }, value, min, max, message = "") {
+export function toBeBetween({ actual, not }, min, max, message = "") {
     if (isIterable(min)) {
         message = max;
         [min, max] = min;
@@ -25,7 +24,7 @@ export function between({ isNot }, value, min, max, message = "") {
     if (isNaN(max)) {
         errors.push({ arg: 1, expected: "number", actual: max });
     }
-    const [hValue, hMin, hMax] = [value, min, max].map(formatHumanReadable);
+    const [hActual, hMin, hMax] = [actual, min, max].map(formatHumanReadable);
     if (max < min) {
         errors.push({
             message: `first argument must be smaller than the second, got ${hMin} and ${hMax}`,
@@ -35,21 +34,21 @@ export function between({ isNot }, value, min, max, message = "") {
         return { errors };
     }
 
-    const pass = applyModifier(min <= value && value <= max, isNot);
+    const pass = applyModifier(min <= actual && actual <= max, not);
     if (pass) {
-        message ||= `${hValue} is${isNot ? " not" : ""} between ${hMin} and ${hMax}`;
+        message ||= `${hActual} is${not ? " not" : ""} between ${hMin} and ${hMax}`;
     } else {
-        message ||= `expected value to${isNot ? " not" : ""} be within given range`;
+        message ||= `expected value to${not ? " not" : ""} be within given range`;
     }
 
     const result = { message, pass };
     if (!pass) {
         result.info = [
             [green("Expected:"), `${min} - ${max}`],
-            [red("Received:"), value],
+            [red("Received:"), actual],
         ];
     }
     return result;
 }
 
-registerAssertMethod(between);
+expect.extend(toBeBetween);

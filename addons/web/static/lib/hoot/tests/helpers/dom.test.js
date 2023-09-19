@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
+import { expect } from "../../expect";
 import {
-    closest,
     getFocusableElements,
     getNextFocusableElement,
     getParentFrame,
@@ -94,7 +94,7 @@ const FULL_HTML_TEMPLATE = /* xml */ `
 const SVG_URL = "http://www.w3.org/2000/svg";
 
 suite.ui.skip("@odoo/hoot", "Helpers", "DOM", () => {
-    test("getFocusableElements", async (assert) => {
+    test("getFocusableElements", async () => {
         await mount(/* xml */ `
             <input class="input" />
             <div class="div" tabindex="0" />
@@ -102,13 +102,14 @@ suite.ui.skip("@odoo/hoot", "Helpers", "DOM", () => {
             <button class="button" tabindex="1">Button</button>
         `);
 
-        assert.deepEqual(
-            getFocusableElements().map((el) => el.className),
-            ["button", "input", "div"]
-        );
+        expect(getFocusableElements().map((el) => el.className)).toEqual([
+            "button",
+            "input",
+            "div",
+        ]);
     });
 
-    test("getNextFocusableElement", async (assert) => {
+    test("getNextFocusableElement", async () => {
         await mount(/* xml */ `
             <input class="input" />
             <div class="div" tabindex="0" />
@@ -118,10 +119,10 @@ suite.ui.skip("@odoo/hoot", "Helpers", "DOM", () => {
 
         click(".input");
 
-        assert.hasClass(getNextFocusableElement(), "div");
+        expect(getNextFocusableElement()).toHaveClass("div");
     });
 
-    test("getParentFrame", async (assert) => {
+    test("getParentFrame", async () => {
         await mount(/* xml */ `<div class="root" />`);
 
         const parent = await makeIframe(document, queryOne(".root"));
@@ -130,12 +131,12 @@ suite.ui.skip("@odoo/hoot", "Helpers", "DOM", () => {
         const content = child.contentDocument.createElement("div");
         child.contentDocument.body.appendChild(content);
 
-        assert.equal(getParentFrame(content), child);
-        assert.equal(getParentFrame(child), parent);
-        assert.equal(getParentFrame(parent), null);
+        expect(getParentFrame(content)).toBe(child);
+        expect(getParentFrame(child)).toBe(parent);
+        expect(getParentFrame(parent)).toBe(null);
     });
 
-    test("getPreviousFocusableElement", async (assert) => {
+    test("getPreviousFocusableElement", async () => {
         await mount(/* xml */ `
             <input class="input" />
             <div class="div" tabindex="0" />
@@ -145,10 +146,10 @@ suite.ui.skip("@odoo/hoot", "Helpers", "DOM", () => {
 
         click(".input");
 
-        assert.hasClass(getPreviousFocusableElement(), "button");
+        expect(getPreviousFocusableElement()).toHaveClass("button");
     });
 
-    test("getRect", async (assert) => {
+    test("getRect", async () => {
         await mount(/* xml */ `
             <div class="root position-relative">
                 ${makeSquare({ left: 10, top: 20, padding: 5 }, "target")}
@@ -159,86 +160,85 @@ suite.ui.skip("@odoo/hoot", "Helpers", "DOM", () => {
         const { x, y } = getRect(root);
         const target = root.querySelector(".target");
 
-        assert.deepEqual(getRect(target), new DOMRect(x + 10, y + 20, 30, 30));
-        assert.deepEqual(
-            getRect(queryOne(".target"), { trimPadding: true }),
+        expect(getRect(target)).toEqual(new DOMRect(x + 10, y + 20, 30, 30));
+        expect(getRect(queryOne(".target"), { trimPadding: true })).toEqual(
             new DOMRect(x + 15, y + 25, 20, 20)
         );
     });
 
-    test("getScrollParent", async (assert) => {
+    test("getScrollParent", async () => {
         await mount(FULL_HTML_TEMPLATE);
 
-        assert.equal(getScrollParent(".highlighted", "x"), queryOne("main"));
-        assert.equal(getScrollParent(".highlighted", "y"), queryOne("ul"));
+        expect(getScrollParent(".highlighted", "x")).toBe(queryOne("main"));
+        expect(getScrollParent(".highlighted", "y")).toBe(queryOne("ul"));
     });
 
-    test("getText", async (assert) => {
+    test("getText", async () => {
         await mount(FULL_HTML_TEMPLATE);
 
-        assert.deepEqual(getText(".title"), ["Title", "List header", "Form title"]);
-        assert.deepEqual(getText("footer"), ["Footer\nBack to top"]);
+        expect(getText(".title")).toEqual(["Title", "List header", "Form title"]);
+        expect(getText("footer")).toEqual(["Footer\nBack to top"]);
     });
 
-    test.skip("getTouchingElements", async (assert) => {
-        assert.ok(getTouchingElements());
+    test.skip("getTouchingElements", async () => {
+        expect(getTouchingElements()).toBeTruthy();
     });
 
-    test("isDocument", async (assert) => {
-        assert.ok(isDocument(document));
-        assert.ok(isDocument((await makeIframe(document, queryOne())).contentDocument));
-        assert.ok(isDocument(document.createElement("div").ownerDocument));
-        assert.not.ok(isDocument(document.body));
-        assert.not.ok(isDocument(window));
+    test("isDocument", async () => {
+        expect(isDocument(document)).toBeTruthy();
+        expect(isDocument((await makeIframe(document, queryOne())).contentDocument)).toBeTruthy();
+        expect(isDocument(document.createElement("div").ownerDocument)).toBeTruthy();
+        expect(isDocument(document.body)).not.toBeTruthy();
+        expect(isDocument(window)).not.toBeTruthy();
     });
 
-    test("isEditable", async (assert) => {
-        assert.ok(isEditable(document.createElement("input")));
-        assert.ok(isEditable(document.createElement("textarea")));
-        assert.not.ok(isEditable(document.createElement("select")));
+    test("isEditable", async () => {
+        expect(isEditable(document.createElement("input"))).toBeTruthy();
+        expect(isEditable(document.createElement("textarea"))).toBeTruthy();
+        expect(isEditable(document.createElement("select"))).not.toBeTruthy();
 
         const editableDiv = document.createElement("div");
-        assert.not.ok(isEditable(editableDiv));
+        expect(isEditable(editableDiv)).not.toBeTruthy();
         editableDiv.setAttribute("contenteditable", "true");
-        assert.ok(isEditable(editableDiv));
+        expect(isEditable(editableDiv)).toBeTruthy();
     });
 
-    test("isElement", async (assert) => {
-        assert.ok(isElement(document.body));
-        assert.ok(isElement(document.createElement("form")));
-        assert.ok(isElement(document.createElementNS(SVG_URL, "svg")));
-        assert.not.ok(isElement(window));
-        assert.not.ok(isElement(document));
-        assert.not.ok(isElement({}));
+    test("isElement", async () => {
+        expect(isElement(document.body)).toBeTruthy();
+        expect(isElement(document.createElement("form"))).toBeTruthy();
+        expect(isElement(document.createElementNS(SVG_URL, "svg"))).toBeTruthy();
+        expect(isElement(window)).not.toBeTruthy();
+        expect(isElement(document)).not.toBeTruthy();
+        expect(isElement({})).not.toBeTruthy();
     });
 
-    test("isEventTarget", async (assert) => {
-        assert.ok(isEventTarget(window));
-        assert.ok(isEventTarget(document));
-        assert.ok(isEventTarget(document.body));
-        assert.ok(isEventTarget(document.createElement("form")));
-        assert.ok(isEventTarget(document.createElementNS(SVG_URL, "svg")));
-        assert.not.ok(isEventTarget({}));
+    test("isEventTarget", async () => {
+        expect(isEventTarget(window)).toBeTruthy();
+        expect(isEventTarget(document)).toBeTruthy();
+        expect(isEventTarget(document.body)).toBeTruthy();
+        expect(isEventTarget(document.createElement("form"))).toBeTruthy();
+        expect(isEventTarget(document.createElementNS(SVG_URL, "svg"))).toBeTruthy();
+        expect(isEventTarget({})).not.toBeTruthy();
     });
 
-    test("isFocusable", async (assert) => {
+    test("isFocusable", async () => {
         await mount(FULL_HTML_TEMPLATE);
 
-        assert.ok(isFocusable("input:first"));
-        assert.not.ok(isFocusable("li:first"));
+        expect(isFocusable("input:first")).toBeTruthy();
+        expect(isFocusable("li:first")).not.toBeTruthy();
     });
 
-    test("isVisible", async (assert) => {
+    test("isVisible", async () => {
         await mount(FULL_HTML_TEMPLATE);
 
-        assert.ok(isVisible(window));
-        assert.ok(isVisible(document));
-        assert.ok(isVisible(document.body));
-        assert.ok(isVisible("form"));
-        assert.not.ok(isVisible(".d-none"));
+        expect(isVisible(window)).toBeTruthy();
+        expect(isVisible(document)).toBeTruthy();
+        expect(isVisible(document.body)).toBeTruthy();
+        expect(isVisible("form")).toBeTruthy();
+        expect(isVisible(".d-none")).not.toBeTruthy();
     });
 
-    test("queryAll", async (assert) => {
+    test("queryAll", async () => {
         /** @param {string} selector */
         const $$ = (selector, root = queryOne()) =>
             selector ? [...root.querySelectorAll(selector)] : [];
@@ -250,44 +250,43 @@ suite.ui.skip("@odoo/hoot", "Helpers", "DOM", () => {
         await new Promise((resolve) => iframe.addEventListener("load", resolve));
 
         // Regular selectors
-        assert.deepEqual(queryAll("body"), [document.body]);
-        assert.deepEqual(queryAll("document"), [document.body]);
-        assert.deepEqual(queryAll(".title"), $$(".title"));
-        assert.deepEqual(queryAll("ul > li"), $$("ul > li"));
-        assert.deepEqual(queryAll(), $$());
+        expect(queryAll("body")).toEqual([document.body]);
+        expect(queryAll("document")).toEqual([document.body]);
+        expect(queryAll(".title")).toEqual($$(".title"));
+        expect(queryAll("ul > li")).toEqual($$("ul > li"));
+        expect(queryAll()).toEqual($$());
 
         // :first, :last & :eq
-        assert.deepEqual(queryAll(".title:first"), [$$(".title").at(0)]);
-        assert.deepEqual(queryAll(".title:last"), [$$(".title").at(-1)]);
-        assert.deepEqual(queryAll(".title:eq(1)"), [$$(".title").at(1)]);
+        expect(queryAll(".title:first")).toEqual([$$(".title").at(0)]);
+        expect(queryAll(".title:last")).toEqual([$$(".title").at(-1)]);
+        expect(queryAll(".title:eq(1)")).toEqual([$$(".title").at(1)]);
 
         // :contains
-        assert.deepEqual(queryAll(".text:contains(text)"), $$("p"));
-        assert.deepEqual(queryAll(".text:contains(item)"), $$("li"));
+        expect(queryAll(".text:contains(text)")).toEqual($$("p"));
+        expect(queryAll(".text:contains(item)")).toEqual($$("li"));
 
         // :value
-        assert.deepEqual(queryAll("input:value(john)"), $$("[name=name],[name=email"));
-        assert.deepEqual(queryAll("input:value(john doe)"), $$("[name=name]"));
-        assert.deepEqual(queryAll("input:value(johndoe)"), $$("[name=email]"));
-        assert.deepEqual(queryAll("select:value(mr)"), $$("[name=title]"));
-        assert.deepEqual(queryAll("select:value(unknown value)"), $$());
+        expect(queryAll("input:value(john)")).toEqual($$("[name=name],[name=email"));
+        expect(queryAll("input:value(john doe)")).toEqual($$("[name=name]"));
+        expect(queryAll("input:value(johndoe)")).toEqual($$("[name=email]"));
+        expect(queryAll("select:value(mr)")).toEqual($$("[name=title]"));
+        expect(queryAll("select:value(unknown value)")).toEqual($$());
 
         // :selected
-        assert.deepEqual(
-            queryAll("option:selected"),
+        expect(queryAll("option:selected")).toEqual(
             $$("select[name=title] option[value=mr],select[name=job] option:first-child")
         );
 
         // :iframe
-        assert.deepEqual(queryAll("iframe p:contains(text)"), $$());
-        assert.deepEqual(queryAll(":iframe p:contains(text)"), $$("p", iframe.contentDocument));
+        expect(queryAll("iframe p:contains(text)")).toEqual($$());
+        expect(queryAll(":iframe p:contains(text)")).toEqual($$("p", iframe.contentDocument));
     });
 
-    test("queryOne", async (assert) => {
+    test("queryOne", async () => {
         await mount(FULL_HTML_TEMPLATE);
 
-        assert.equal(queryOne(".title:first"), queryOne().querySelector("header .title"));
-        assert.throws(() => queryOne(".title"));
-        assert.throws(() => queryOne(".title", { single: false }));
+        expect(queryOne(".title:first")).toBe(queryOne().querySelector("header .title"));
+        expect(() => queryOne(".title")).toThrow();
+        expect(() => queryOne(".title", { single: false })).toThrow();
     });
 });

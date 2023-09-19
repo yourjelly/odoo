@@ -1,5 +1,6 @@
 /** @odoo-module **/
 
+import { expect } from "../expect";
 import { makeDeferred } from "../helpers/concurency";
 import { suite, test } from "../setup";
 import {
@@ -17,119 +18,114 @@ import {
 } from "../utils";
 
 suite("@odoo/hoot", "Utils", () => {
-    test("debounce", async (assert) => {
+    test("debounce", async () => {
         const def = makeDeferred();
         const debounced = debounce(function namedFunction(arg) {
-            assert.step(`call: ${arg}`);
+            expect.step(`call: ${arg}`);
 
             def.resolve();
         }, 5);
 
-        assert.equal(debounced.name, "namedFunction (debounced)");
+        expect(debounced.name).toBe("namedFunction (debounced)");
 
         debounced(1);
         debounced(2);
 
-        assert.verifySteps([]);
+        expect.verifySteps([]);
 
         await def;
 
-        assert.verifySteps(["call: 2"]);
+        expect.verifySteps(["call: 2"]);
     });
 
-    test("deepEqual", (assert) => {
-        assert.ok(deepEqual(true, true));
-        assert.ok(deepEqual(false, false));
-        assert.ok(deepEqual(null, null));
-        assert.ok(deepEqual({ b: 2, a: 1 }, { a: 1, b: 2 }));
-        assert.ok(deepEqual({ o: { a: [{ b: 1 }] } }, { o: { a: [{ b: 1 }] } }));
-        assert.ok(deepEqual([1, 2, 3], [1, 2, 3]));
+    test("deepEqual", () => {
+        expect(deepEqual(true, true)).toBeTruthy();
+        expect(deepEqual(false, false)).toBeTruthy();
+        expect(deepEqual(null, null)).toBeTruthy();
+        expect(deepEqual({ b: 2, a: 1 }, { a: 1, b: 2 })).toBeTruthy();
+        expect(deepEqual({ o: { a: [{ b: 1 }] } }, { o: { a: [{ b: 1 }] } })).toBeTruthy();
+        expect(deepEqual([1, 2, 3], [1, 2, 3])).toBeTruthy();
 
-        assert.not.ok(deepEqual(true, false));
-        assert.not.ok(deepEqual(null, undefined));
-        assert.not.ok(deepEqual([1, 2, 3], [3, 1, 2]));
+        expect(deepEqual(true, false)).not.toBeTruthy();
+        expect(deepEqual(null, undefined)).not.toBeTruthy();
+        expect(deepEqual([1, 2, 3], [3, 1, 2])).not.toBeTruthy();
     });
 
-    test("formatHumanReadable", (assert) => {
+    test("formatHumanReadable", () => {
         // Strings
-        assert.equal(formatHumanReadable("abc"), `"abc"`);
-        assert.equal(formatHumanReadable("a".repeat(300)), `"${"a".repeat(255)}..."`);
+        expect(formatHumanReadable("abc")).toBe(`"abc"`);
+        expect(formatHumanReadable("a".repeat(300))).toBe(`"${"a".repeat(255)}..."`);
         // Numbers
-        assert.equal(formatHumanReadable(1), `1`);
+        expect(formatHumanReadable(1)).toBe(`1`);
         // Other primitives
-        assert.equal(formatHumanReadable(true), `true`);
-        assert.equal(formatHumanReadable(null), `null`);
+        expect(formatHumanReadable(true)).toBe(`true`);
+        expect(formatHumanReadable(null)).toBe(`null`);
         // Functions & classes
-        assert.equal(
-            formatHumanReadable(function oui() {}),
-            `Function oui() { ... }`
-        );
-        assert.equal(formatHumanReadable(class Oui {}), `class Oui { ... }`);
+        expect(formatHumanReadable(function oui() {})).toBe(`Function oui() { ... }`);
+        expect(formatHumanReadable(class Oui {})).toBe(`class Oui { ... }`);
         // Iterators
-        assert.equal(formatHumanReadable([1, 2, 3]), `Array [...]`);
-        assert.equal(formatHumanReadable(new Set([1, 2, 3])), `Set [...]`);
-        assert.equal(
+        expect(formatHumanReadable([1, 2, 3])).toBe(`Array [...]`);
+        expect(formatHumanReadable(new Set([1, 2, 3]))).toBe(`Set [...]`);
+        expect(
             formatHumanReadable(
                 new Map([
                     ["a", 1],
                     ["b", 2],
                 ])
-            ),
-            `Map [...]`
-        );
+            )
+        ).toBe(`Map [...]`);
         // Objects
-        assert.equal(formatHumanReadable(/ab(c)d/gi), `/ab(c)d/gi`);
-        assert.equal(
-            formatHumanReadable(new Date("1997-01-09T12:30:00.000Z")),
+        expect(formatHumanReadable(/ab(c)d/gi)).toBe(`/ab(c)d/gi`);
+        expect(formatHumanReadable(new Date("1997-01-09T12:30:00.000Z"))).toBe(
             `1997-01-09T12:30:00.000Z`
         );
-        assert.equal(formatHumanReadable({ a: { b: 1 } }), `Object { ... }`);
-        assert.equal(formatHumanReadable(new Proxy({}, {})), `Object { ... }`);
-        assert.equal(formatHumanReadable(window), `Window { ... }`);
-        assert.equal(formatHumanReadable(document.createElement("div")), `<div />`);
+        expect(formatHumanReadable({ a: { b: 1 } })).toBe(`Object { ... }`);
+        expect(formatHumanReadable(new Proxy({}, {}))).toBe(`Object { ... }`);
+        expect(formatHumanReadable(window)).toBe(`Window { ... }`);
+        expect(formatHumanReadable(document.createElement("div"))).toBe(`<div />`);
     });
 
-    test("generateHash", (assert) => {
-        assert.equal(generateHash("abc").length, 8);
-        assert.equal(generateHash("abcdef").length, 8);
-        assert.equal(generateHash("abc"), generateHash("abc"));
+    test("generateHash", () => {
+        expect(generateHash("abc").length).toBe(8);
+        expect(generateHash("abcdef").length).toBe(8);
+        expect(generateHash("abc")).toBe(generateHash("abc"));
 
-        assert.not.equal(generateHash("abc"), generateHash("def"));
+        expect(generateHash("abc")).not.toBe(generateHash("def"));
     });
 
-    test("isIterable", (assert) => {
-        assert.ok(isIterable([1, 2, 3]));
-        assert.ok(isIterable(new Set([1, 2, 3])));
+    test("isIterable", () => {
+        expect(isIterable([1, 2, 3])).toBeTruthy();
+        expect(isIterable(new Set([1, 2, 3]))).toBeTruthy();
 
-        assert.not.ok(isIterable(null));
-        assert.not.ok(isIterable("abc"));
-        assert.not.ok(isIterable({}));
+        expect(isIterable(null)).not.toBeTruthy();
+        expect(isIterable("abc")).not.toBeTruthy();
+        expect(isIterable({})).not.toBeTruthy();
     });
 
-    test("isRegExpFilter", (assert) => {
-        assert.ok(isRegExpFilter("/abc/"));
-        assert.ok(isRegExpFilter("/abc/i"));
+    test("isRegExpFilter", () => {
+        expect(isRegExpFilter("/abc/")).toBeTruthy();
+        expect(isRegExpFilter("/abc/i")).toBeTruthy();
 
-        assert.not.ok(isRegExpFilter("/abc"));
-        assert.not.ok(isRegExpFilter("abc/"));
+        expect(isRegExpFilter("/abc")).not.toBeTruthy();
+        expect(isRegExpFilter("abc/")).not.toBeTruthy();
     });
 
-    test("lookup", (assert) => {
+    test("lookup", () => {
         const list = ["babAba", "bAAab", "cccbCCb"];
-        assert.deepEqual(lookup("àâa", list), ["bAAab", "babAba"]);
-        assert.deepEqual(lookup("/.b$/", list), ["bAAab", "cccbCCb"]);
+        expect(lookup("àâa", list)).toEqual(["bAAab", "babAba"]);
+        expect(lookup("/.b$/", list)).toEqual(["bAAab", "cccbCCb"]);
     });
 
-    test("makeTaggable", (assert) => {
-        assert.equal(typeof makeTaggable(function () {}).withTag, "function");
+    test("makeTaggable", () => {
+        expect(typeof makeTaggable(function () {}).withTag).toBe("function");
     });
 
-    test("match", (assert) => {
-        assert.ok(match("abc", /^abcd?/));
-        assert.ok(match(new Error("error message"), "message"));
+    test("match", () => {
+        expect(match("abc", /^abcd?/)).toBeTruthy();
+        expect(match(new Error("error message"), "message")).toBeTruthy();
     });
 
-    test("shuffle", (assert) => {
+    test("shuffle", () => {
         const range = [...Array(1e2)].map((_, i) => i);
         let shuffled = shuffle(range);
         if (deepEqual(range, shuffled)) {
@@ -137,11 +133,11 @@ suite("@odoo/hoot", "Utils", () => {
             shuffled = shuffle(range);
         }
 
-        assert.not.deepEqual(range, shuffled);
-        assert.deepEqual(range, range);
+        expect(range).not.toEqual(shuffled);
+        expect(range).toEqual(range);
     });
 
-    test("title", (assert) => {
-        assert.equal(title("abcDef"), "AbcDef");
+    test("title", () => {
+        expect(title("abcDef")).toBe("AbcDef");
     });
 });
