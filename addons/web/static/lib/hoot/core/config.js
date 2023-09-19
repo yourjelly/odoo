@@ -68,14 +68,6 @@ export const CONFIG_SCHEMA = {
         parse: parseBoolean(true),
     },
     /**
-     * Hides all skipped tests.
-     * @default false
-     */
-    hideskipped: {
-        default: false,
-        parse: parseBoolean(true),
-    },
-    /**
      * Whether the test runner must be manually started after page load (defaults
      * to starting automatically).
      * @default false
@@ -117,6 +109,14 @@ export const CONFIG_SCHEMA = {
      * @default false
      */
     showpassed: {
+        default: false,
+        parse: parseBoolean(true),
+    },
+    /**
+     * Shows all skipped tests.
+     * @default false
+     */
+    showskipped: {
         default: false,
         parse: parseBoolean(true),
     },
