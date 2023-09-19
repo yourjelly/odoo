@@ -52,14 +52,10 @@ QUnit.module("Mobile Fields", ({ beforeEach }) => {
         );
         assert.containsOnce(
             fixture,
-            ".o_statusbar_status .dropdown",
+            ".o_statusbar_status .o-dropdown",
             "should have a dropdown containing all status"
         );
-        assert.containsNone(
-            fixture,
-            ".o_statusbar_status .dropdown-menu",
-            "dropdown should be hidden"
-        );
+        assert.containsNone(fixture, ".o-dropdown--menu", "dropdown should be hidden");
         assert.strictEqual(
             fixture.querySelector(".o_statusbar_status button.dropdown-toggle").textContent.trim(),
             "aaa",
@@ -68,25 +64,16 @@ QUnit.module("Mobile Fields", ({ beforeEach }) => {
 
         // open the dropdown
         await click(fixture, ".o_statusbar_status > button");
-        assert.containsOnce(
-            fixture,
-            ".o_statusbar_status .dropdown-menu",
-            "dropdown should be visible"
-        );
+        assert.containsOnce(fixture, ".o-dropdown--menu", "dropdown should be visible");
+        assert.containsN(fixture, ".o-dropdown--menu .dropdown-item", 3, "should have 3 status");
         assert.containsN(
             fixture,
-            ".o_statusbar_status .dropdown-menu .dropdown-item",
-            3,
-            "should have 3 status"
-        );
-        assert.containsN(
-            fixture,
-            ".o_statusbar_status .dropdown-item.disabled",
+            ".o-dropdown--menu .dropdown-item.disabled",
             3,
             "all status should be disabled"
         );
         assert.hasClass(
-            fixture.querySelector(".o_statusbar_status .dropdown-item:nth-child(3)"),
+            fixture.querySelector(".o-dropdown--menu .dropdown-item:nth-child(3)"),
             "active",
             "active status should be set"
         );
@@ -126,33 +113,27 @@ QUnit.module("Mobile Fields", ({ beforeEach }) => {
         await click(fixture, ".o_statusbar_status button.dropdown-toggle");
         assert.containsOnce(
             fixture,
-            ".o_statusbar_status .dropdown-menu",
+            ".o-dropdown--menu",
             "statusbar widget should have a dropdown menu"
         );
         assert.containsN(
             fixture,
-            ".o_statusbar_status .dropdown-menu .dropdown-item",
+            ".o-dropdown--menu .dropdown-item",
             3,
             "statusbar widget dropdown menu should have 3 items"
         );
         assert.strictEqual(
-            fixture
-                .querySelectorAll(".o_statusbar_status .dropdown-menu .dropdown-item")[0]
-                .textContent.trim(),
+            fixture.querySelectorAll(".o-dropdown--menu .dropdown-item")[0].textContent.trim(),
             "first record",
             "statusbar widget dropdown first item should display the first record display_name"
         );
         assert.strictEqual(
-            fixture
-                .querySelectorAll(".o_statusbar_status .dropdown-menu .dropdown-item")[1]
-                .textContent.trim(),
+            fixture.querySelectorAll(".o-dropdown--menu .dropdown-item")[1].textContent.trim(),
             "second record",
             "statusbar widget dropdown second item should display the second record display_name"
         );
         assert.strictEqual(
-            fixture
-                .querySelectorAll(".o_statusbar_status .dropdown-menu .dropdown-item")[2]
-                .textContent.trim(),
+            fixture.querySelectorAll(".o-dropdown--menu .dropdown-item")[2].textContent.trim(),
             "aaa",
             "statusbar widget dropdown third item should display the third record display_name"
         );
@@ -175,34 +156,34 @@ QUnit.module("Mobile Fields", ({ beforeEach }) => {
 
         await click(fixture, ".o_statusbar_status .dropdown-toggle");
         assert.hasClass(
-            fixture.querySelector(".o_statusbar_status .dropdown-menu .dropdown-item:nth-child(3)"),
+            fixture.querySelector(".o-dropdown--menu .dropdown-item:nth-child(3)"),
             "active"
         );
         assert.hasClass(
-            fixture.querySelector(".o_statusbar_status .dropdown-menu .dropdown-item:nth-child(3)"),
+            fixture.querySelector(".o-dropdown--menu .dropdown-item:nth-child(3)"),
             "disabled"
         );
 
         assert.containsN(
             fixture,
-            ".o_statusbar_status .dropdown-item:not(.dropdown-toggle):not(.disabled):not(.active)",
+            ".o-dropdown--menu .dropdown-item:not(.dropdown-toggle):not(.disabled):not(.active)",
             2,
             "other status should be active and not disabled"
         );
 
         await click(
             fixture.querySelector(
-                ".o_statusbar_status .dropdown-item:not(.dropdown-toggle):not(.disabled):not(.active)"
+                ".o-dropdown--menu .dropdown-item:not(.dropdown-toggle):not(.disabled):not(.active)"
             )
         );
 
         await click(fixture, ".o_statusbar_status .dropdown-toggle");
         assert.hasClass(
-            fixture.querySelector(".o_statusbar_status .dropdown-menu .dropdown-item:nth-child(1)"),
+            fixture.querySelector(".o-dropdown--menu .dropdown-item:nth-child(1)"),
             "active"
         );
         assert.hasClass(
-            fixture.querySelector(".o_statusbar_status .dropdown-menu .dropdown-item:nth-child(1)"),
+            fixture.querySelector(".o-dropdown--menu .dropdown-item:nth-child(1)"),
             "disabled"
         );
     });

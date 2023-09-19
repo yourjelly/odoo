@@ -48,10 +48,7 @@ async function changeType(target, propertyType) {
     const propertyTypeIndex = TYPES_INDEX[propertyType];
     await click(target, ".o_field_property_definition_type input");
     await nextTick();
-    await click(
-        target,
-        `.o_field_property_definition_type .dropdown-item:nth-child(${propertyTypeIndex})`
-    );
+    await click(target, `.o-dropdown--menu .dropdown-item:nth-child(${propertyTypeIndex})`);
 }
 
 // -----------------------------------------
@@ -422,6 +419,7 @@ QUnit.module("Fields", (hooks) => {
         // Change the property type to "Date & Time"
         await editInput(target, ".o_field_property_definition_header", "My Datetime");
         await changeType(target, "datetime");
+        console.log(type.value);
         assert.strictEqual(type.value, "Date & Time", "Should have changed the property type");
 
         // Choosing a date in the date picker should not close the definition popover

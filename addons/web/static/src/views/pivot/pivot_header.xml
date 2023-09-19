@@ -70,7 +70,7 @@
                 </t>
                 <t t-if="!hideCustomGroupBy and fields.length">
                     <div t-if="items.length" role="separator" class="dropdown-divider"/>
-                    <CustomGroupByItem fields="fields" onAddCustomGroup.bind="onAddCustomGroup"/>
+                    <CustomGroupByItem fields="fields" onAddCustomGroup.bind="onAddCustomGroup" closingMode="'all'"/>
                 </t>
             </t>
         </Dropdown>

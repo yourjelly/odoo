@@ -214,7 +214,7 @@ QUnit.module("Mobile Views", ({ beforeEach }) => {
         });
         assert.containsOnce(fixture, "table .o_optional_columns_dropdown_toggle");
         await click(fixture, "table .o_optional_columns_dropdown_toggle");
-        assert.containsOnce(fixture, "div.o_optional_columns_dropdown .dropdown-item");
+        assert.containsOnce(fixture, ".dropdown-item");
     });
 
     QUnit.test(

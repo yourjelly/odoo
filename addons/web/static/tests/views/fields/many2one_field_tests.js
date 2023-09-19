@@ -3913,7 +3913,7 @@ QUnit.module("Fields", (hooks) => {
         // dropdown selector
         const searchDropdown = ".o_control_panel_actions .o-dropdown";
         await click(document.querySelector(searchDropdown));
-        assert.hasClass(document.querySelector(searchDropdown), "o-dropdown--open");
+        assert.hasClass(document.querySelector(searchDropdown), "show");
         assert.isVisible(
             getDropdownMenu(target, searchDropdown),
             "the search bar dropdown menu should be visible"

@@ -1082,8 +1082,6 @@ QUnit.module("Search", (hooks) => {
             await toggleSearchBarMenu(target);
             await toggleMenuItem(target, "Date");
 
-            const optionEls = target.querySelectorAll(".dropdown .o_item_option");
-
             // default filter should be activated with the global default period 'this_month'
             assert.deepEqual(getDomain(controlPanel), [
                 "&",
@@ -1094,6 +1092,7 @@ QUnit.module("Search", (hooks) => {
             assert.ok(isOptionSelected(target, "Date", "March"));
 
             // check option descriptions
+            const optionEls = target.querySelectorAll(".o-dropdown--menu .o_item_option");
             const optionDescriptions = [...optionEls].map((e) => e.innerText.trim());
             const expectedDescriptions = [
                 "March",
@@ -1647,9 +1646,9 @@ QUnit.module("Search", (hooks) => {
             const connectorEl = target.querySelector(".o_domain_tree_connector_selector");
             await click(connectorEl.querySelector("button.o_domain_tree_connector_caret"));
             await click(
-                [
-                    ...target.querySelectorAll(".o_domain_tree_connector_selector .dropdown-item"),
-                ].find((el) => el.innerText === "all")
+                [...target.querySelectorAll(".o-dropdown--menu .dropdown-item")].find(
+                    (el) => el.innerText === "all"
+                )
             );
 
             await click(
