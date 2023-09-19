@@ -2,6 +2,7 @@
 
 import { Component } from "@odoo/owl";
 import { Tag } from "../core/tag";
+import { Test } from "../core/test";
 import { subscribeToURLParams, withParams } from "../core/url";
 import { compactXML } from "../utils";
 import { HootTechnicalValue } from "./hoot_technical_value";
@@ -20,16 +21,18 @@ import { HootTestPath } from "./hoot_test_path";
 export class HootTestResult extends Component {
     static components = { HootTestPath, HootTechnicalValue };
 
+    static props = {
+        open: Boolean,
+        test: Test,
+    };
+
     static template = compactXML/* xml */ `
         <details
             class="hoot-result hoot-col"
             t-att-class="className"
             t-att-open="props.open"
         >
-            <summary
-                class="hoot-result-header hoot-row hoot-text-md"
-                t-on-click.synthetic="props.onToggle"
-            >
+            <summary class="hoot-result-header hoot-row hoot-text-md">
                 <div class="hoot-row hoot-overflow-hidden hoot-gap-2">
                     <HootTestPath test="props.test" />
                     <div class="hoot-row hoot-gap-1">

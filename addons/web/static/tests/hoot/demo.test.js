@@ -1,21 +1,21 @@
 /** @odoo-module **/
 
-import { suite, test } from "@odoo/hoot";
+import { expect, suite, test } from "@odoo/hoot";
 
 suite("demo", () => {
-    test.todo("todo", (assert) => {
-        assert.not.ok(true);
+    test.todo("todo", () => {
+        expect(true).not.toBeTruthy();
     });
 
-    test("todo", (assert) => {
-        assert.deepEqual({ a: 1 }, { b: [2] });
+    test.todo("done", () => {
+        expect({ a: 1 }).toEqual({ b: [2] });
     });
 
-    for (let s = 0; s < 25; s++) {
+    for (let s = 0; s < 1; s++) {
         suite(`suite ${s}`, () => {
-            for (let t = 0; t < 25; t++) {
-                test(`test ${t} from suite ${s}`, (assert) => {
-                    assert.ok(true);
+            for (let t = 0; t < 1; t++) {
+                test(`test ${t} from suite ${s}`, () => {
+                    expect(true).toBeTruthy();
                 });
             }
         });
@@ -50,8 +50,8 @@ suite("demo", () => {
 //             for (let m = 0; m < 100; m++) {
 //                 module(`module ${m}`, () => {
 //                     for (let t = 0; t < 100; t++) {
-//                         test(`test ${t} from module ${m}`, (assert) => {
-//                             assert.ok(true);
+//                         test(`test ${t} from module ${m}`, (expect) => {
+//                             expect.ok(true);
 //                         });
 //                     }
 //                 });

@@ -40,9 +40,9 @@ export class HootTestPath extends Component {
             >
                 <t t-esc="props.test.name" />
                 <t t-if="!props.test.skip">
-                    <t t-set="assertLength" t-value="props.test.lastResults.assertions?.length or 0" />
-                    <span class="hoot-select-none" t-attf-title="{{ assertLength }} assertions passed">
-                        (<t t-esc="assertLength" />)
+                    <t t-set="expectLength" t-value="props.test.lastResults.assertions?.length or 0" />
+                    <span class="hoot-select-none" t-attf-title="{{ expectLength }} assertions passed">
+                        (<t t-esc="expectLength" />)
                     </span>
                 </t>
                 <HootCopyButton text="props.test.name" />

@@ -5,8 +5,6 @@ import { generateHash, normalize } from "../utils";
 import { Tag } from "./tag";
 
 /**
- * @typedef {import("../assertions/assert").AssertMethods} AssertMethods
- *
  * @typedef {import("./suite").Suite} Suite
  *
  * @typedef {import("./tag").Tag} Tag
@@ -15,7 +13,7 @@ import { Tag } from "./tag";
 export class Test {
     /** @type {Record<string, any>} */
     config = {};
-    /** @type {Partial<import("../assertions/assert").AssertInfo>} */
+    /** @type {Partial<import("../expect").CurrentResults>} */
     lastResults = reactive({});
     /** @type {(Suite | Test)[]} */
     path = [this];
@@ -30,7 +28,7 @@ export class Test {
     /**
      * @param {Suite | null} parent
      * @param {string} name
-     * @param {(assert: AssertMethods) => any} runFn
+     * @param {() => void} runFn
      * @param {Tag[]} tags
      */
     constructor(parent, name, runFn, tags) {

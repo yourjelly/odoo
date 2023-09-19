@@ -1,8 +1,8 @@
 /** @odoo-module **/
 
 import { Component, useState } from "@odoo/owl";
-import { isMarkupHelper } from "../assertions/assert_helpers";
 import { subscribeToURLParams } from "../core/url";
+import { isMarkupHelper } from "../matchers/expect_helpers";
 import { compactXML, debounce } from "../utils";
 import { HootStatusPanel } from "./hoot_status_panel";
 import { HootTestResult } from "./hoot_test_result";
@@ -50,8 +50,8 @@ export class HootReporting extends Component {
                 sortResults.bind="sortResults"
             />
             <div class="hoot-results">
-                <t t-foreach="getFilteredResults()" t-as="result" t-key="result.test.id">
-                    <HootTestResult test="result.test" open="result.open" />
+                <t t-foreach="getFilteredResults()" t-as="test" t-key="test.id">
+                    <HootTestResult test="test" open="state.open.includes(test.id)" />
                 </t>
             </div>
         </div>
@@ -99,12 +99,6 @@ export class HootReporting extends Component {
     }
 
     getFilteredResults() {
-        /** @param {Test} test */
-        const createResult = (test) => {
-            const open = this.state.open.includes(test.id);
-            return { open, test };
-        };
-
         const { filter, sort, tests } = this.state;
         const { showskipped, showpassed } = this.env.runner.config;
 
@@ -140,15 +134,14 @@ export class HootReporting extends Component {
                 continue;
             }
 
-            const result = createResult(test);
             if (sort) {
                 const key = mapFn(test);
                 if (!groups[key]) {
                     groups[key] = [];
                 }
-                groups[key].push(result);
+                groups[key].push(test);
             } else {
-                groups.push(result);
+                groups.push(test);
             }
         }
 

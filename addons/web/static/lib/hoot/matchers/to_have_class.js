@@ -1,36 +1,34 @@
 /** @odoo-module **/
 
+import { expect } from "../expect";
 import { queryOne } from "../helpers/dom";
 import { formatHumanReadable, isIterable } from "../utils";
-import { registerAssertMethod } from "./assert";
-import { applyModifier, green, red } from "./assert_helpers";
+import { applyModifier, green, red } from "./expect_helpers";
 
 /**
- * @param {import("./assert").AssertInfo} assert
- * @param {import("../helpers/dom").Target} target
+ * @param {import("../expect").ExpectContext<import("../helpers/dom").Target>} context
  * @param {string | string[]} className
  * @param {string} [message=""]
- * @returns {import("./assert").AssertResult}
+ * @returns {import("../expect").ExpectResult}
  */
-export function hasClass({ isNot }, target, className, message = "") {
+export function toHaveClass({ actual, not }, className, message = "") {
+    const element = queryOne(actual);
     const classNames = isIterable(className) ? [...className] : [className];
-    const element = queryOne(target);
 
     const pass = applyModifier(
         classNames.every((cls) => element.classList.contains(cls)),
-        isNot
+        not
     );
     if (pass) {
         message ||= `${formatHumanReadable(element)}${
-            isNot ? " does not have any" : " has all"
+            not ? " does not have any" : " has all"
         } of the given class names`;
     } else {
         message ||= `expected target to${
-            isNot ? " not have any" : " have all"
+            not ? " not have any" : " have all"
         } of the given class names`;
     }
 
-    /** @type {import("./assert").AssertResult} */
     const result = { message, pass };
     if (!pass) {
         result.info = [
@@ -41,4 +39,4 @@ export function hasClass({ isNot }, target, className, message = "") {
     return result;
 }
 
-registerAssertMethod(hasClass);
+expect.extend(toHaveClass);

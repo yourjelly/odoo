@@ -39,7 +39,7 @@ import {
  * @template {HTMLElement} T
  * @param {T} element
  */
-function assert(element) {
+function expect(element) {
     let errors = [];
     const elementTag = element.tagName.toLowerCase();
 
@@ -691,7 +691,7 @@ export function clear() {
     const events = [];
     const element = getActiveElement();
 
-    assert(element).hasTag("select").or.validates(isEditable).throw();
+    expect(element).hasTag("select").or.validates(isEditable).throw();
 
     if (isEditable(element)) {
         events.push(...config.defaultActions.clear(element));
@@ -755,7 +755,7 @@ export function drag(target, options) {
      * @param {boolean} endDrag
      * @returns {T}
      */
-    const assertIsDragging = (fn, endDrag) => {
+    const expectIsDragging = (fn, endDrag) => {
         return {
             [fn.name](...args) {
                 if (dragEndReason) {
@@ -771,12 +771,12 @@ export function drag(target, options) {
         }[fn.name];
     };
 
-    const cancel = assertIsDragging(function cancel() {
+    const cancel = expectIsDragging(function cancel() {
         events.push(...config.defaultActions.dragCancel(DOMConfig.defaultView));
         return logEvents(events);
     }, true);
 
-    const drop = assertIsDragging(
+    const drop = expectIsDragging(
         /**
          * @param {Target} [to]
          * @param {PointerOptions} [options]
@@ -800,7 +800,7 @@ export function drag(target, options) {
         true
     );
 
-    const moveTo = assertIsDragging(
+    const moveTo = expectIsDragging(
         /**
          * @param {Target} [to]
          * @param {PointerOptions} [options]
@@ -892,7 +892,7 @@ export function fill(value, options) {
     const events = [];
     const element = getActiveElement();
 
-    assert(element).validates(isEditable).throw();
+    expect(element).validates(isEditable).throw();
 
     let prevented = false;
     if (element.tagName === "INPUT" && element.type === "file") {
@@ -1095,7 +1095,7 @@ export function select(target, value, options) {
     /** @type {ReturnType<typeof triggerEvent<"change">>[]} */
     const events = [];
     for (const element of getTriggerTargets(target, options)) {
-        assert(element).hasTag("select").throw();
+        expect(element).hasTag("select").throw();
 
         element.value = String(value);
         events.push(triggerEvent(element, "change"));
