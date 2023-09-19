@@ -166,3 +166,11 @@ class TestMailingABTesting(MassMailCommon):
             ab_testing.action_send_mail()
         self.assertEqual(ab_testing.state, 'done')
         self.assertEqual(len(self._mails), 1)
+
+    def test_mailing_ab_testing_duplicate_date(self):
+        """ Test that "Send final on" date value should be copied in new mass_mailing """
+        self.ab_testing_mailing_1.write({
+            'ab_testing_schedule_datetime': datetime.now() + timedelta(days=10),
+        })
+        new_mailing = self.ab_testing_mailing_1.copy()
+        self.assertEqual(new_mailing.ab_testing_schedule_datetime, self.ab_testing_mailing_1.ab_testing_schedule_datetime)
