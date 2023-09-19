@@ -2,6 +2,7 @@
 <odoo>
     <record id="product_dua_valuation_21" model="product.product">
         <field name="name">DUA VAT Valuation 21%</field>
+        <field name="default_code">DUA21</field>
         <field name="categ_id" ref="product.product_category_all"/>
         <field name="type">service</field>
         <field name="sale_ok" eval="False"/>
@@ -9,13 +10,15 @@
     </record>
     <record id="product_dua_valuation_10" model="product.product">
         <field name="name">DUA VAT Valuation 10%</field>
+        <field name="default_code">DUA10</field>
         <field name="categ_id" ref="product.product_category_all"/>
         <field name="type">service</field>
         <field name="sale_ok" eval="False"/>
         <field name="purchase_ok" eval="True"/>
     </record>
-    <record id="product_dua_valuation_5" model="product.product">
-        <field name="name">DUA VAT Valuation 5%</field>
+    <record id="product_dua_valuation_4" model="product.product">
+        <field name="name">DUA VAT Valuation 4%</field>
+        <field name="default_code">DUA4</field>
         <field name="categ_id" ref="product.product_category_all"/>
         <field name="type">service</field>
         <field name="sale_ok" eval="False"/>
