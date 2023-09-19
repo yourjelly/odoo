@@ -123,6 +123,9 @@ paymentForm.include({
 
     /**
      * Trigger the payment processing by submitting the component.
+     * The component is submitted here instead of in _processDirectFlow because for PayPal we use
+     * native button which does not follow the standard flow. The transaction is created in
+     * _adyenOnSubmit.
      *
      * @override method from payment.payment_form
      * @private
@@ -144,7 +147,7 @@ paymentForm.include({
             this._enableButton();
             return;
         }
-        this.adyenComponents[paymentOptionId].submit(); // TODO VCHU split like in authorize
+        this.adyenComponents[paymentOptionId].submit();
     },
 
     /**

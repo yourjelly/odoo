@@ -31,7 +31,7 @@ publicWidget.registry.PaymentForm = publicWidget.Widget.extend({
         const checkedRadio = document.querySelector('input[name="o_payment_radio"]:checked');
         if (checkedRadio) {
             await this._expandInlineForm(checkedRadio);
-            this._enableButton();
+            this._enableButton(false);
         } else {
             this._setPaymentFlow(); // Initialize the payment flow to let providers overwrite it.
         }
@@ -60,7 +60,7 @@ publicWidget.registry.PaymentForm = publicWidget.Widget.extend({
         await this._expandInlineForm(checkedRadio);
 
         // Re-enable the submit button after the inline form has been prepared.
-        this._enableButton();
+        this._enableButton(false);
     },
 
     /**
@@ -153,13 +153,16 @@ publicWidget.registry.PaymentForm = publicWidget.Widget.extend({
      * The UI is also unblocked in case it had been blocked.
      *
      * @private
+     * @param {boolean} unblockUI - Whether the UI should also be unblocked.
      * @return {void}
      */
-    _enableButton() {
+    _enableButton(unblockUI = true) {
         if (this._canSubmit()) {
             this._getSubmitButton().removeAttribute('disabled');
         }
-        this.call('ui', 'unblock');
+        if (unblockUI){
+            this.call('ui', 'unblock');
+        }
     },
 
     /**
