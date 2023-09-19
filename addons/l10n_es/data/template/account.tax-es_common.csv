@@ -10,8 +10,8 @@
 "account_tax_template_s_iva21isp","","VAT 21% (Reverse charge)","","sale","21% RC","IVA 21% (ISP)","21.0","percent","tax_group_iva_21","","","base","l10n_es.mod_303_07","invoice","","","",""
 "","","","","","","","","","","","","tax","l10n_es.mod_303_09","invoice","account_common_477","","",""
 "","","","","","","","","","","","","base","l10n_es.mod_303_14_sale","refund","","","",""
-"","","","","","","","","","","","","tax","l10n_es.mod_303_15","refund","account_common_477","","",""
-"account_tax_template_p_iva21_bc","0","VAT 21% included (goods)","","purchase","21% G INC","21% IVA soportado (bienes corrientes)","21.0","percent","tax_group_iva_21","","","base","l10n_es.mod_303_28","invoice","","","",""
+"","",,"","","","","","","","","","tax","l10n_es.mod_303_15","refund","account_common_477","","",""
+"account_tax_template_p_iva21_bc","0",VAT 21% included (goods),"","purchase","21% G INC","21% IVA soportado (bienes corrientes)","21.0","percent","tax_group_iva_21","","","base","l10n_es.mod_303_28","invoice","","","",""
 "","","","","","","","","","","","","tax","l10n_es.mod_303_29","invoice","account_common_472","","",""
 "","","","","","","","","","","","","base","l10n_es.mod_303_40","refund","","","",""
 "","","","","","","","","","","","","tax","l10n_es.mod_303_41","refund","account_common_472","","",""
@@ -165,7 +165,7 @@
 "","","","","","","","","","","","","tax","","invoice","","","",""
 "","","","","","","","","","","","","base","l10n_es.mod_303_40",refund,"",,"",""
 "","","","","","","","","","","","","tax","","refund",,"","",""
-"account_tax_template_p_iva_isub","","Tax Only","","none","Solo Imp","DUA No Base","-100.0","percent","tax_group_iva_0","","","base","","invoice","","","",
+"account_tax_template_p_iva_isub","","Tax Only","","none","Subtract Base","DUA No Base","-100.0","percent","tax_group_iva_0","","","base","","invoice","","","",
 "","","","","","","","","","","","","tax","","invoice","","",""
 "","","","","","","","","","","","","base","","refund","","",""
 "","","","","","","","","","","","","tax","","refund","","",""
