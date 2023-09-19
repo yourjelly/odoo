@@ -18,7 +18,12 @@ import { parseFloat as oParseFloat } from "@web/views/fields/parsers";
 import { formatPercentage } from "@web/views/fields/formatters";
 import { SelectCreateDialog } from "@web/views/view_dialogs/select_create_dialog";
 
+import { Record } from "@web/views/record";
+import { PercentageField } from "@web/views/fields/percentage/percentage_field";
+import { Many2OneField } from "@web/views/fields/many2one/many2one_field";
+
 const { Component, useState, useRef, useExternalListener, onWillStart, onPatched } = owl;
+
 
 const PLAN_APPLICABILITY = {
     mandatory: _t("Mandatory"),
@@ -35,6 +40,7 @@ export class AnalyticDistribution extends Component {
         this.state = useState({
             showDropdown: false,
             list: {},
+            formattedData: [],
         });
 
         this.widgetRef = useRef("analyticDistribution");
@@ -86,6 +92,7 @@ export class AnalyticDistribution extends Component {
             await this.fetchAllPlans();
         }
         await this.formatData();
+        // await this.jsonToData();
     }
 
     async willUpdateRecord(record) {
@@ -107,12 +114,19 @@ export class AnalyticDistribution extends Component {
             this.lastAccount = accountChanged && currentAccount || this.lastAccount;
             this.lastProduct = productChanged && currentProduct || this.lastProduct;
             await this.formatData();
+            // await this.jsonToData();
         }
         this.currentValue = record.data[this.props.name];
     }
 
     patched() {
         this.focusToSelector();
+    }
+
+    async jsonToData() {
+        const fieldJSONValue = this.props.record[this.props.name];
+        const accountIds = Object.keys(fieldJSONValue).map((idList) => idList.split(",")).flat().map((id) => parseInt(id));
+        const records = accountIds.length ? await this.fetchAnalyticAccounts([["id", "in", accountIds]]) : [];
     }
 
     async formatData() {
@@ -666,7 +680,7 @@ export class AnalyticDistribution extends Component {
         return formatPercentage(value / 100, { digits: [false, this.props.record.data.analytic_precision || 2] });
     }
 }
-AnalyticDistribution.template = "analytic.AnalyticDistribution";
+AnalyticDistribution.template = "analytic.AnalyticDistribution2";
 AnalyticDistribution.components = {
     AutoComplete,
     TagsList,
@@ -696,4 +710,4 @@ export const analyticDistribution = {
     }),
 };
 
-// registry.category("fields").add("analytic_distribution", analyticDistribution);
+registry.category("fields").add("analytic_distribution", analyticDistribution);

@@ -44,6 +44,48 @@ class AccountAnalyticLine(models.Model):
     ref = fields.Char(string='Ref.')
     category = fields.Selection(selection_add=[('invoice', 'Customer Invoice'), ('vendor_bill', 'Vendor Bill')])
 
+    account_plan_id = fields.Many2one('account.analytic.plan', related="account_id.plan_id")
+    account2_id = fields.Many2one(
+        'account.analytic.account',
+        'Cross Account 1',
+        domain="[('plan_id', 'not in', account_id.plan_id.ids)]",  # doesn't work
+        ondelete='restrict',
+        index=True,
+        check_company=True,
+    )
+    account2_plan_id = fields.Many2one('account.analytic.plan', related="account2_id.plan_id")
+    account3_id = fields.Many2one(
+        'account.analytic.account',
+        'Cross Account 2',
+        ondelete='restrict',
+        index=True,
+        check_company=True,
+    )
+    account3_plan_id = fields.Many2one('account.analytic.plan', related="account3_id.plan_id")
+    percentage = fields.Float(
+        inverse="_inverse_percentage"
+    )
+    state = fields.Selection(
+        selection=[
+            ('draft', 'Draft'),
+            ('posted', 'Posted'),
+        ],
+        compute="_compute_state",
+        store=True,
+    )
+
+
+    @api.depends('move_line_id', 'move_line_id.parent_state')
+    def _compute_state(self):
+        for analytic_line in self:
+            state = 'posted' if analytic_line.move_line_id.parent_state == 'posted' or not analytic_line.move_line_id else 'draft'
+            analytic_line.state = state
+
+    @api.onchange('percentage')
+    def _inverse_percentage(self):
+        for line in self:
+            line.amount = -line.move_line_id.balance * line.percentage
+
     @api.depends('move_line_id')
     def _compute_general_account_id(self):
         for line in self:

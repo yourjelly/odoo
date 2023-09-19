@@ -941,6 +941,19 @@
                                                optional="show"
                                                options="{'product_field': 'product_id', 'account_field': 'account_id'}"
                                                business_domain_compute="parent.move_type in ['out_invoice', 'out_refund', 'out_receipt'] and 'invoice' or parent.move_type in ['in_invoice', 'in_refund', 'in_receipt'] and 'bill' or 'general'"/>
+                                        <field name="analytic_line_ids" string="Analytic" context="{'default_name': name }">
+                                            <tree>
+                                                <field name="name" column_invisible="True"/>
+                                                <field name="account_plan_id" optional="hide"/>
+                                                <field name="account2_plan_id" optional="hide"/>
+                                                <field name="account3_plan_id" optional="hide"/>
+                                                <field name="account_id" domain="[('plan_id', 'not in', [account2_plan_id, account3_plan_id])]"/>
+                                                <field name="account2_id" domain="[('plan_id', 'not in', [account_plan_id, account3_plan_id])]"/>
+                                                <field name="account3_id" domain="[('plan_id', 'not in', [account_plan_id, account2_plan_id])]"/>
+                                                <field name="percentage" widget="percentage"/>
+                                                <field name="amount"/>
+                                            </tree>
+                                        </field>
                                         <field name="quantity" optional="show"/>
                                         <field name="product_uom_category_id" column_invisible="True"/>
                                         <field name="product_uom_id" string="UoM" groups="uom.group_uom" optional="show"/>

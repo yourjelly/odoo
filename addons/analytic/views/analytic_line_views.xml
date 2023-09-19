@@ -76,6 +76,9 @@
             <form string="Analytic Item">
             <field name="company_id" invisible="1"/>
             <sheet>
+                <header>
+                    <field name="state" widget="statusbar"/>
+                </header>
                 <group>
                     <group name="analytic_item" string="Analytic Item">
                         <field name="name"/>

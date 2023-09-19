@@ -4022,7 +4022,7 @@ class AccountMove(models.Model):
             if move.restrict_mode_hash_table and move.state == 'posted':
                 raise UserError(_('You cannot modify a posted entry of this journal because it is in strict mode.'))
             # We remove all the analytics entries for this journal
-            move.mapped('line_ids.analytic_line_ids').unlink()
+            # move.mapped('line_ids.analytic_line_ids').unlink()
 
         self.mapped('line_ids').remove_move_reconcile()
         self.write({'state': 'draft', 'is_move_sent': False})
