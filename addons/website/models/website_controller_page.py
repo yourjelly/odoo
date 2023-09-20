@@ -24,10 +24,9 @@ class ControllerPage(models.Model):
     _order = 'website_id'
 
     view_id = fields.Many2one('ir.ui.view', string='View', required=True, ondelete="cascade")
-    menu_ids = fields.One2many('website.menu', 'page_id', 'Related Menus')
+    menu_ids = fields.One2many('website.menu', 'controller_page_id', 'Related Menus')
 
     website_id = fields.Many2one(related='view_id.website_id', store=True, readonly=False, ondelete='cascade')
-    arch = fields.Text(related='view_id.arch', readonly=False, depends_context=('website_id',))
 
     # Bindings to model/records, to expose the page on the website.
     # Route: /model/<string:page_name_slugified>
@@ -57,18 +56,16 @@ class ControllerPage(models.Model):
 
 
     def unlink(self):
-        # When a website_page is deleted, the ORM does not delete its
+        # When a website_controller_page is deleted, the ORM does not delete its
         # ir_ui_view. So we got to delete it ourself, but only if the
         # ir_ui_view is not used by another website_page.
         views_to_delete = self.view_id.filtered(
-            lambda v: v.page_ids <= self and not v.inherit_children_ids
+            lambda v: v.controller_page_ids <= self and not v.inherit_children_ids
         )
         # Rebind self to avoid unlink already deleted records from `ondelete="cascade"`
-        self = self - views_to_delete.page_ids
+        self = self - views_to_delete.controller_page_ids
         views_to_delete.unlink()
 
         # Make sure website._get_menu_ids() will be recomputed
         self.env.registry.clear_cache()
         return super().unlink()
-    
-    # TODO DAFL: verify once more that we did not omit an important method
