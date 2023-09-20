@@ -110,10 +110,10 @@ export class HootTestResult extends Component {
 
     get className() {
         const { lastResults, skip } = this.props.test;
-        if (lastResults.aborted) {
-            return "hoot-abort";
-        } else if (skip) {
+        if (!lastResults || skip) {
             return "hoot-skip";
+        } else if (lastResults.aborted) {
+            return "hoot-abort";
         } else if (lastResults.pass) {
             return "hoot-pass";
         } else {

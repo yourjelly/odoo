@@ -8,7 +8,7 @@ import { URL, location } from "./globals";
 import { config as domConfig } from "./helpers/dom";
 import { config as eventsConfig } from "./helpers/events";
 import { HootMain } from "./ui/hoot_main";
-import { log } from "./utils";
+import { getDebugMode, log } from "./utils";
 
 import "./matchers/to_be";
 import "./matchers/to_be_between";
@@ -34,7 +34,7 @@ makeLogger(runner);
 
 whenReady(async () =>
     mount(HootMain, document.body, {
-        dev: new URL(location).searchParams.has("debug"),
+        dev: getDebugMode(),
         env: { runner },
         name: "HOOT",
     })

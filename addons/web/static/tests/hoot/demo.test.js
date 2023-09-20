@@ -11,9 +11,9 @@ suite("demo", () => {
         expect({ a: 1 }).toEqual({ b: [2] });
     });
 
-    for (let s = 0; s < 1; s++) {
+    for (let s = 0; s < 10; s++) {
         suite(`suite ${s}`, () => {
-            test["multi=10"](`test from suite ${s}`, () => {
+            test["multi=100"](`test from suite ${s}`, () => {
                 expect(true).toBeTruthy();
             });
         });

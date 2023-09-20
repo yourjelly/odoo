@@ -1,8 +1,8 @@
 /** @odoo-module **/
 
-import { Component, onMounted, useRef, useState, useSubEnv } from "@odoo/owl";
+import { Component, onMounted, onWillStart, useRef, useState, useSubEnv } from "@odoo/owl";
 import { createURL } from "../core/url";
-import { document, matchMedia } from "../globals";
+import { Promise, document, matchMedia } from "../globals";
 import { config as domConfig } from "../helpers/dom";
 import { compactXML, storage } from "../utils";
 import { HootConfigDropdown } from "./hoot_config_dropdown";
@@ -20,7 +20,7 @@ import { HootSearch } from "./hoot_search";
  * @param {"link" | "script"} type
  * @param {string} url
  */
-const importURL = ({ type, url }) => {
+const importURL = async ({ type, url }) => {
     if (imported.has(url)) {
         return;
     }
@@ -38,7 +38,13 @@ const importURL = ({ type, url }) => {
         }
     }
     element.setAttribute("data-no-import", true);
-    document.head.appendChild(element);
+
+    return new Promise((resolve, reject) => {
+        element.addEventListener("load", resolve);
+        element.addEventListener("error", reject);
+
+        document.head.appendChild(element);
+    });
 };
 
 /**
@@ -109,7 +115,7 @@ export class HootMain extends Component {
                 Run with UI
             </a>
         </t>
-        <main t-else="" class="hoot" t-att-class="color.scheme">
+        <main t-else="" class="hoot" t-attf-class="hoot-{{ color.scheme }}">
             <header class="hoot-panel hoot-col">
                 <nav class="hoot-controls hoot-row hoot-gap-4">
                     <h1 class="hoot-logo hoot-text-primary hoot-text-xl hoot-select-none" title="Hierarchically Organized Odoo Tests">
@@ -141,7 +147,7 @@ export class HootMain extends Component {
         useSubEnv({ runner, url: runner.url });
 
         let failed = false;
-        this.color = useColorScheme("hoot-color-scheme");
+        this.color = useColorScheme("color-scheme");
         this.fixtureRef = useRef("fixture");
 
         // Event listeners
@@ -159,8 +165,8 @@ export class HootMain extends Component {
                 this.fixtureRef.el.classList.add("hoot-debug");
             }
         });
-        runner.afterAnyTest((test) => {
-            if (!test.lastResults.pass) {
+        runner.afterAnyTest(({ lastResults }) => {
+            if (!lastResults.pass) {
                 failed = true;
             }
             this.fixtureRef.el.classList.remove("hoot-debug");
@@ -170,20 +176,22 @@ export class HootMain extends Component {
             // cleanupDOM();
         });
 
-        onMounted(async () => {
+        onWillStart(async () => {
             if (!runner.config.headless) {
-                importURL({
+                await importURL({
                     type: "link",
                     url: "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css",
                 });
             }
-
+        });
+        onMounted(async () => {
             if (domConfig.defaultRoot === null) {
                 domConfig.defaultRoot = this.fixtureDocument.body;
             }
 
             if (!runner.config.manual) {
-                runner.start();
+                // Allows DOM to be fully rendered before starting
+                requestAnimationFrame(runner.start);
             }
         });
     }

@@ -21,22 +21,22 @@ export class HootRunFailedButton extends Component {
 
     setup() {
         const { runner } = this.env;
-        const previousFails = storage("session").get("hoot-failed-tests", []);
+        const previousFails = storage("session").get("failed-tests", []);
 
         this.state = useState({
             failed: previousFails,
             show: Boolean(previousFails.length),
         });
 
-        runner.afterAnyTest((test) => {
-            if (!test.lastResults.pass) {
-                this.state.failed.push(test.id);
+        runner.afterAnyTest(({ id, lastResults }) => {
+            if (!lastResults.pass) {
+                this.state.failed.push(id);
             }
             this.state.show = Boolean(this.state.failed.length);
         });
     }
 
     onClick() {
-        storage("session").set("hoot-failed-tests", this.state.failed);
+        storage("session").set("failed-tests", this.state.failed);
     }
 }

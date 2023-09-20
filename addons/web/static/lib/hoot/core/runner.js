@@ -186,11 +186,11 @@ export function makeTestRunner(params) {
 
     function initFilters() {
         const { get, remove } = storage("session");
-        const previousFails = get("hoot-failed-tests", []);
+        const previousFails = get("failed-tests", []);
         if (previousFails.length) {
             // Previously failed tests
             runner.hasFilter = true;
-            remove("hoot-failed-tests");
+            remove("failed-tests");
             for (const id of previousFails) {
                 only.tests.add(id);
             }
@@ -440,10 +440,6 @@ export function makeTestRunner(params) {
          * ! it to a minimum (i.e. TestRunner.start() > Test.run() > Error)
          */
         async start() {
-            // Make sure that code that wants to run right after the DOM is ready gets
-            // the opportunity to execute (and maybe call some hook such as 'beforeAll').
-            await Promise.resolve();
-
             if (runner.status !== "ready") {
                 return;
             }
@@ -530,7 +526,7 @@ export function makeTestRunner(params) {
                             setStatus({ pass: true });
                         }
 
-                        Object.assign(test.lastResults, await tearDown());
+                        test.results.push(await tearDown());
 
                         await execAfterCallback(async () => {
                             for (const callbacks of [

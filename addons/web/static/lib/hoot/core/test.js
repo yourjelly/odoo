@@ -12,10 +12,10 @@ import { generateHash, normalize } from "../utils";
 export class Test {
     /** @type {Record<string, any>} */
     config = {};
-    /** @type {Partial<import("../expect").CurrentResults>} */
-    lastResults = reactive({});
     /** @type {(Suite | Test)[]} */
     path = [this];
+    /** @type {Partial<import("../expect").CurrentResults>[]} */
+    results = reactive([]);
     skip = false;
     /** @type {Tag[]} */
     specialTags = [];
@@ -24,6 +24,11 @@ export class Test {
     /** @type {Tag[]} */
     tags = [];
     visited = 0;
+
+    /** @returns {typeof Test["prototype"]["results"][number]} */
+    get lastResults() {
+        return this.results.at(-1);
+    }
 
     /**
      * @param {Suite | null} parent

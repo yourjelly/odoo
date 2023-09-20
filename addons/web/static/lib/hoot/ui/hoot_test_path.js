@@ -40,13 +40,18 @@ export class HootTestPath extends Component {
             >
                 <t t-esc="props.test.name" />
                 <t t-if="!props.test.skip">
-                    <t t-set="expectLength" t-value="props.test.lastResults.assertions?.length or 0" />
+                    <t t-set="expectLength" t-value="props.test.lastResults?.assertions?.length or 0" />
                     <span class="hoot-select-none" t-attf-title="{{ expectLength }} assertions passed">
                         (<t t-esc="expectLength" />)
                     </span>
                 </t>
                 <HootCopyButton text="props.test.name" />
             </span>
+            <t t-if="props.test.config.multi">
+                <strong class="hoot-text-warn hoot-whitespace-nowrap">
+                    x <t t-esc="props.test.config.multi" />
+                </strong>
+            </t>
         </span>
         <t t-if="props.test.tags.length">
             <ul class="hoot-tags hoot-row">
@@ -64,10 +69,10 @@ export class HootTestPath extends Component {
 
     getStatusInfo() {
         const { lastResults, skip } = this.props.test;
-        if (lastResults.aborted) {
-            return { className: "hoot-bg-warn", text: "aborted" };
-        } else if (skip) {
+        if (!lastResults || skip) {
             return { className: "hoot-bg-info", text: "skipped" };
+        } else if (lastResults.aborted) {
+            return { className: "hoot-bg-warn", text: "aborted" };
         } else if (lastResults.pass) {
             return { className: "hoot-bg-success", text: "passed" };
         } else {
