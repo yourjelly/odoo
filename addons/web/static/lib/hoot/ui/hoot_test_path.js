@@ -7,7 +7,7 @@ import { HootCopyButton } from "./hoot_copy_button";
 import { HootTagButton } from "./hoot_tag_button";
 import { withParams } from "../core/url";
 
-/** @extends Component<{}, import("../setup").Environment> */
+/** @extends Component<{}, import("../hoot").Environment> */
 export class HootTestPath extends Component {
     static components = { HootCopyButton, HootTagButton };
 

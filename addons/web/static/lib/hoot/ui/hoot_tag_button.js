@@ -5,7 +5,7 @@ import { Tag } from "../core/tag";
 import { withParams } from "../core/url";
 import { compactXML } from "../utils";
 
-/** @extends Component<{}, import("../setup").Environment> */
+/** @extends Component<{}, import("../hoot").Environment> */
 export class HootTagButton extends Component {
     static props = {
         disabled: { type: Boolean, optional: true },

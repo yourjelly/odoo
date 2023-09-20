@@ -1,6 +1,5 @@
 /** @odoo-module **/
 
-import { App, Component, xml } from "@odoo/owl";
 import { groupBy, isIterable, log, match } from "../utils";
 
 /**
@@ -26,15 +25,13 @@ import { groupBy, isIterable, log, match } from "../utils";
 /**
  * @param {Document | Element} element
  */
-function isElementFocusable(element) {
-    return element.matches(FOCUSABLE_SELECTOR);
-}
+const isElementFocusable = (element) => element.matches(FOCUSABLE_SELECTOR);
 
 /**
  * @param {Document | Element} element
  * @param {"x" | "y"} axis
  */
-function isElementScrollable(element, axis) {
+const isElementScrollable = (element, axis) => {
     const [scrollProp, sizeProp] =
         axis === "x" ? ["scrollWidth", "clientWidth"] : ["scrollHeight", "clientHeight"];
     if (element[scrollProp] > element[sizeProp]) {
@@ -44,12 +41,12 @@ function isElementScrollable(element, axis) {
         }
     }
     return false;
-}
+};
 
 /**
  * @param {Document | Element} element
  */
-function isElementVisible(element) {
+const isElementVisible = (element) => {
     if (isDocument(element) || element === config.defaultRoot) {
         return true;
     } else if (!element) {
@@ -71,14 +68,14 @@ function isElementVisible(element) {
         }
     }
     return visible;
-}
+};
 
 /**
  * @template T
  * @param {T} node
  * @param {"element" | "text" | "document"} type
  */
-function isNodeOfType(node, type) {
+const isNodeOfType = (node, type) => {
     if (node && typeof node === "object" && node.nodeType) {
         switch (type) {
             case "element":
@@ -90,7 +87,7 @@ function isNodeOfType(node, type) {
         }
     }
     return false;
-}
+};
 
 /**
  * Converts a CSS pixel value to a number, removing the 'px' part.
@@ -98,16 +95,16 @@ function isNodeOfType(node, type) {
  * @param {string} val
  * @returns {number}
  */
-function pixelValueToNumber(val) {
+const pixelValueToNumber = (val) => {
     return Number(val.endsWith("px") ? val.slice(0, -2) : val);
-}
+};
 
 /**
  * @param {string} text
  */
-function toPermissiveRegex(text) {
+const toPermissiveRegex = (text) => {
     return new RegExp(text.replace(/\s+/g, "\\s+"), "i");
-}
+};
 
 // Following selector is based on this spec: https://html.spec.whatwg.org/multipage/interaction.html#dom-tabindex
 const FOCUSABLE_SELECTOR = [

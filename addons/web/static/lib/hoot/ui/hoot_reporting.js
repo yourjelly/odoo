@@ -17,7 +17,7 @@ import { HootTestResult } from "./hoot_test_result";
  * @param {number} interval
  * @returns {T}
  */
-function batch(fn, interval) {
+const batch = (fn, interval) => {
     /** @type {T[]} */
     const currentBatch = [];
     const name = `${fn.name} (batched)`;
@@ -36,9 +36,9 @@ function batch(fn, interval) {
             }, interval);
         },
     }[name];
-}
+};
 
-/** @extends Component<{}, import("../setup").Environment> */
+/** @extends Component<{}, import("../hoot").Environment> */
 export class HootReporting extends Component {
     static components = { HootStatusPanel, HootTestResult };
 

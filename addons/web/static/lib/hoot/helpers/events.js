@@ -35,11 +35,15 @@ import {
  * @typedef {import("./dom").Target} Target
  */
 
+//-----------------------------------------------------------------------------
+// Internal
+//-----------------------------------------------------------------------------
+
 /**
  * @template {HTMLElement} T
  * @param {T} element
  */
-function expect(element) {
+const expect = (element) => {
     let errors = [];
     const elementTag = element.tagName.toLowerCase();
 
@@ -91,7 +95,7 @@ function expect(element) {
     };
 
     return handlers;
-}
+};
 
 /**
  * Returns the list of nodes containing n2 (included) that do not contain n1.
@@ -99,7 +103,7 @@ function expect(element) {
  * @param {HTMLOrSVGElement} el1
  * @param {HTMLOrSVGElement} el2
  */
-function getDifferentParents(el1, el2) {
+const getDifferentParents = (el1, el2) => {
     const parents = [el2];
     while (parents[0].parentElement) {
         const parent = parents[0].parentElement;
@@ -109,14 +113,14 @@ function getDifferentParents(el1, el2) {
         parents.unshift(parent);
     }
     return parents;
-}
+};
 
 /**
  * @template {typeof Event} T
  * @param {EventType} eventType
  * @returns {[T, (attrs: EventInit) => EventInit]}
  */
-function getEventConstructor(eventType) {
+const getEventConstructor = (eventType) => {
     switch (eventType) {
         // Mouse events
         case "auxclick":
@@ -207,13 +211,13 @@ function getEventConstructor(eventType) {
         default:
             return [Event, mapBubblingEvent];
     }
-}
+};
 
 /**
  * @param {HTMLElement} element
  * @param {PointerOptions} [options]
  */
-function getPosition(element, options) {
+const getPosition = (element, options) => {
     const { position, relative } = options || {};
     const isObject = position && typeof position === "object";
 
@@ -272,30 +276,23 @@ function getPosition(element, options) {
     }
 
     return { clientX, clientY };
-}
+};
 
 /**
  * @param {Target} target
  * @param {QueryOptions} options
  */
-function getTriggerTargets(target, options) {
-    return isEventTarget(target) ? [target] : queryAll(target, options);
-}
+const getTriggerTargets = (target, options) =>
+    isEventTarget(target) ? [target] : queryAll(target, options);
 
-function hasTouch() {
-    return ontouchstart !== undefined || matchMedia("(pointer:coarse)").matches;
-}
+const hasTouch = () => ontouchstart !== undefined || matchMedia("(pointer:coarse)").matches;
 
-function isMacOS() {
-    return /Mac/i.test(navigator.userAgent);
-}
+const isMacOS = () => /Mac/i.test(navigator.userAgent);
 
 /**
  * @param {Event} event
  */
-function isPrevented(event) {
-    return event && event.defaultPrevented;
-}
+const isPrevented = (event) => event && event.defaultPrevented;
 
 const logEvents = (() => {
     const flushEventLog = () => {
@@ -366,7 +363,7 @@ const logEvents = (() => {
 /**
  * @param {string | string[]} keyStrokes
  */
-function parseKeyStroke(keyStrokes) {
+const parseKeyStroke = (keyStrokes) => {
     const keys = (isIterable(keyStrokes) ? [...keyStrokes] : [keyStrokes])
         .map((keyStroke) => keyStroke.split(/[\s,+]+/))
         .flat();
@@ -399,7 +396,7 @@ function parseKeyStroke(keyStrokes) {
     }
 
     return eventInit;
-}
+};
 
 /**
  * @template {EventType} T
@@ -408,7 +405,7 @@ function parseKeyStroke(keyStrokes) {
  * @param {EventInit} [eventInit]
  * @returns {GlobalEventHandlersEventMap[T]}
  */
-function triggerEvent(target, type, eventInit) {
+const triggerEvent = (target, type, eventInit) => {
     const [Constructor, processParams] = getEventConstructor(type);
     const event = new Constructor(type, processParams(eventInit));
 
@@ -426,12 +423,12 @@ function triggerEvent(target, type, eventInit) {
     target.dispatchEvent(event);
 
     return event;
-}
+};
 
 /**
  * @param {EventTarget} target
  */
-function triggerFocus(target) {
+const triggerFocus = (target) => {
     const previous = getActiveElement();
     /** @type {ReturnType<typeof triggerEvent<"focus">>[]} */
     const events = [];
@@ -442,13 +439,13 @@ function triggerFocus(target) {
         events.push(triggerEvent(target, "focus", { relatedTarget: previous }));
     }
     return events;
-}
+};
 
 /**
  * @param {EventTarget} target
  * @param {KeyboardEventInit} eventInit
  */
-function triggerKeyDown(target, eventInit) {
+const triggerKeyDown = (target, eventInit) => {
     const events = [triggerEvent(target, "keydown", eventInit)];
     if (!isPrevented(events[0])) {
         switch (eventInit.key) {
@@ -489,14 +486,14 @@ function triggerKeyDown(target, eventInit) {
         }
     }
     return events;
-}
+};
 
 /**
  * @param {EventTarget} target
  * @param {KeyboardEventInit} eventInit
  * @param {string} [value]
  */
-function triggerKeyPress(target, eventInit, value) {
+const triggerKeyPress = (target, eventInit, value) => {
     /**
      * @type {ReturnType<typeof triggerKeyDown>
      *  | ReturnType<typeof triggerKeyUp>
@@ -547,21 +544,21 @@ function triggerKeyPress(target, eventInit, value) {
         }
     }
     return events;
-}
+};
 
 /**
  * @param {EventTarget} target
  * @param {KeyboardEventInit} eventInit
  */
-function triggerKeyUp(target, eventInit) {
+const triggerKeyUp = (target, eventInit) => {
     return [triggerEvent(target, "keyup", eventInit)];
-}
+};
 
 /**
  * @param {EventTarget} target
  * @param {PointerEventInit} eventInit
  */
-function triggerPointerDown(target, eventInit) {
+const triggerPointerDown = (target, eventInit) => {
     const events = [triggerEvent(target, "pointerdown", eventInit)];
 
     if (!isPrevented(events[0])) {
@@ -587,13 +584,13 @@ function triggerPointerDown(target, eventInit) {
         }
     }
     return events;
-}
+};
 
 /**
  * @param {EventTarget} target
  * @param {PointerEventInit} eventInit
  */
-function triggerPointerUp(target, eventInit) {
+const triggerPointerUp = (target, eventInit) => {
     const events = [triggerEvent(target, "pointerup", eventInit)];
     if (!events.some(isPrevented)) {
         // pointer events are triggered along their related counterparts:
@@ -603,80 +600,71 @@ function triggerPointerUp(target, eventInit) {
         events.push(triggerEvent(target, relatedType));
     }
     return events;
-}
+};
 
 //-----------------------------------------------------------------------------
 // Event init attributes mappers
 //-----------------------------------------------------------------------------
 
 /** @param {EventInit} [eventInit] */
-function mapBubblingEvent(eventInit) {
-    return {
-        ...eventInit,
-        bubbles: true,
-    };
-}
+const mapBubblingEvent = (eventInit) => ({
+    ...eventInit,
+    bubbles: true,
+});
 
 /** @param {EventInit} [eventInit] */
-function mapBubblingCancelableEvent(eventInit) {
-    return {
-        ...mapBubblingEvent(eventInit),
-        cancelable: true,
-    };
-}
+const mapBubblingCancelableEvent = (eventInit) => ({
+    ...mapBubblingEvent(eventInit),
+    cancelable: true,
+});
 
 /** @param {EventInit} [eventInit] */
-function mapNonBubblingEvent(eventInit) {
-    return {
-        ...eventInit,
-        bubbles: false,
-    };
-}
+const mapNonBubblingEvent = (eventInit) => ({
+    ...eventInit,
+    bubbles: false,
+});
 
 /** @param {PointerEventInit} [eventInit] */
-function mapBubblingPointerEvent(eventInit) {
-    return {
-        clientX: eventInit?.clientX ?? eventInit?.pageX ?? 0,
-        clientY: eventInit?.clientY ?? eventInit?.pageY ?? 0,
-        view: DOMConfig.defaultView,
-        ...mapBubblingCancelableEvent(eventInit),
-    };
-}
+const mapBubblingPointerEvent = (eventInit) => ({
+    clientX: eventInit?.clientX ?? eventInit?.pageX ?? 0,
+    clientY: eventInit?.clientY ?? eventInit?.pageY ?? 0,
+    view: DOMConfig.defaultView,
+    ...mapBubblingCancelableEvent(eventInit),
+});
 
 /** @param {PointerEventInit} [eventInit] */
-function mapNonBubblingPointerEvent(eventInit) {
-    return {
-        ...mapBubblingPointerEvent(eventInit),
-        bubbles: false,
-        cancelable: false,
-    };
-}
+const mapNonBubblingPointerEvent = (eventInit) => ({
+    ...mapBubblingPointerEvent(eventInit),
+    bubbles: false,
+    cancelable: false,
+});
 
 /** @param {TouchEventInit} [eventInit] */
-function mapCancelableTouchEvent(eventInit) {
-    return {
-        view: DOMConfig.defaultView,
-        ...mapBubblingCancelableEvent(eventInit),
-        composed: true,
-        touches: eventInit?.touches ? [...eventInit.touches.map((e) => new Touch(e))] : undefined,
-    };
-}
+const mapCancelableTouchEvent = (eventInit) => ({
+    view: DOMConfig.defaultView,
+    ...mapBubblingCancelableEvent(eventInit),
+    composed: true,
+    touches: eventInit?.touches ? [...eventInit.touches.map((e) => new Touch(e))] : undefined,
+});
 
 /** @param {TouchEventInit} [eventInit] */
-function mapNonCancelableTouchEvent(eventInit) {
-    return {
-        ...mapCancelableTouchEvent(eventInit),
-        cancelable: false,
-    };
-}
+const mapNonCancelableTouchEvent = (eventInit) => ({
+    ...mapCancelableTouchEvent(eventInit),
+    cancelable: false,
+});
 
 /** @param {TouchEventInit} [eventInit] */
-function mapKeyboardEvent(eventInit) {
-    return {
-        view: DOMConfig.defaultView,
-        ...mapBubblingCancelableEvent(eventInit),
-    };
-}
+const mapKeyboardEvent = (eventInit) => ({
+    view: DOMConfig.defaultView,
+    ...mapBubblingCancelableEvent(eventInit),
+});
+
+const LOG_COLORS = {
+    blue: "#5db0d7",
+    orange: "#f29364",
+    lightBlue: "#9bbbdc",
+    reset: "inherit",
+};
 
 //-----------------------------------------------------------------------------
 // Exports
@@ -1102,13 +1090,6 @@ export function select(target, value, options) {
     }
     return logEvents(events);
 }
-
-const LOG_COLORS = {
-    blue: "#5db0d7",
-    orange: "#f29364",
-    lightBlue: "#9bbbdc",
-    reset: "inherit",
-};
 
 export const config = {
     defaultActions: {

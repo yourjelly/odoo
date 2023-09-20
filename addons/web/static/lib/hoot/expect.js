@@ -14,6 +14,18 @@ import { formatTechnical } from "./utils";
  *  pass: boolean,
  *  steps: string[],
  * }} CurrentResults
+ *
+ * @typedef {(expect: ExpectContext<any>, ...args: any[]) => ExpectResult | Promise<ExpectResult>} ExpectMatcher
+ *
+ * @typedef {(expect: ExpectContext<any>, ...args: any[]) => void} ExpectMethod
+ *
+ * @typedef {{
+ *  diff?: unknown;
+ *  errors?: ({ message: string } | { arg: number; expected: string; actual: string })[];
+ *  info?: string[];
+ *  message?: string;
+ *  pass: boolean;
+ * }} ExpectResult
  */
 
 /**
@@ -24,24 +36,6 @@ import { formatTechnical } from "./utils";
  *  resolves: boolean;
  *  rejects: boolean;
  * }} ExpectContext
- */
-
-/**
- * @typedef {(expect: ExpectContext<any>, ...args: any[]) => ExpectResult | Promise<ExpectResult>} ExpectMatcher
- */
-
-/**
- * @typedef {(expect: ExpectContext<any>, ...args: any[]) => void} ExpectMethod
- */
-
-/**
- * @typedef {{
- *  diff?: unknown;
- *  errors?: ({ message: string } | { arg: number; expected: string; actual: string })[];
- *  info?: string[];
- *  message?: string;
- *  pass: boolean;
- * }} ExpectResult
  */
 
 /**
@@ -84,7 +78,7 @@ import { formatTechnical } from "./utils";
  * @param {T} actual
  * @param {{ not?: boolean; rejects?: boolean; resolves?: boolean }} context
  */
-function generateMatchers(actual, { not, rejects, resolves }) {
+const generateMatchers = (actual, { not, rejects, resolves }) => {
     const fullInfo = { ...currentResults, actual, not, rejects, resolves };
     /** @type {RegisteredMatchers<T>} */
     const matchers = {};
@@ -127,7 +121,11 @@ function generateMatchers(actual, { not, rejects, resolves }) {
         }[name];
     }
     return matchers;
-}
+};
+
+
+
+
 
 /**
  * @param {ExpectResult} result

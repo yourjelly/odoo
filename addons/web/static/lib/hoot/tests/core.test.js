@@ -3,7 +3,7 @@
 import { makeTestRunner } from "../core/runner";
 import { Suite } from "../core/suite";
 import { Test } from "../core/test";
-import { expect, suite, test } from "../setup";
+import { expect, suite, test } from "../hoot";
 
 suite("@odoo/hoot", "Core", "Runner", () => {
     test("can register suites", () => {

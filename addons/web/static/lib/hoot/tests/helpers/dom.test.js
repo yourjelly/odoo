@@ -21,7 +21,7 @@ import {
     queryOne,
 } from "../../helpers/dom";
 import { click } from "../../helpers/events";
-import { suite, test } from "../../setup";
+import { suite, test } from "../../hoot";
 
 /**
  * @param {Document} document

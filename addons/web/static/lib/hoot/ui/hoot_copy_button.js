@@ -3,7 +3,7 @@
 import { Component, useState } from "@odoo/owl";
 import { compactXML, copy } from "../utils";
 
-/** @extends Component<{}, import("../setup").Environment> */
+/** @extends Component<{}, import("../hoot").Environment> */
 export class HootCopyButton extends Component {
     static props = { text: String };
 

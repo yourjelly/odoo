@@ -132,9 +132,6 @@ export function makeTestRunner(params) {
             throw testError(name, `cannot add a test after the test runner started.`);
         }
         const tags = createTags(current?.tags, testTags);
-        if (handleMulti(name, testFn, tags)) {
-            return;
-        }
         const test = new Test(current, name, testFn, tags);
         if (runner.tests.some((t) => t.fullName === test.fullName)) {
             throw testError(
@@ -143,9 +140,7 @@ export function makeTestRunner(params) {
             );
         }
         (current?.jobs || runner.jobs).push(test);
-        if (!test.parent?.config.multi) {
-            runner.tests.push(test);
-        }
+        runner.tests.push(test);
         for (const tag of tags) {
             if (tag.special) {
                 switch (tag.name) {
@@ -185,25 +180,6 @@ export function makeTestRunner(params) {
 
     function getSuiteCallbacks() {
         return suiteStack.map((s) => s.callbacks);
-    }
-
-    /**
-     * @param {string} name
-     * @param {() => void | PromiseLike<void>} testFn
-     * @param {Tag[]} tags
-     */
-    function handleMulti(name, testFn, tags) {
-        const index = tags.findIndex((t) => t.config?.multi);
-        if (index in tags) {
-            const tagsWithoutMulti = [...tags];
-            const [multiTag] = tagsWithoutMulti.splice(index, 1);
-            const testTags = tagsWithoutMulti.map((t) => t.name);
-            for (let i = 0; i < multiTag.config.multi; i++) {
-                addTest(`${i}) ${name}`, testFn, testTags);
-            }
-            return true;
-        }
-        return false;
     }
 
     function initFilters() {
@@ -566,7 +542,9 @@ export function makeTestRunner(params) {
                             }
                         });
                     }
-                    job = test.parent || jobs.shift();
+                    if (!test.config.multi || ++test.visited === test.config.multi) {
+                        job = test.parent || jobs.shift();
+                    }
                 }
             }
 

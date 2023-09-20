@@ -4,7 +4,7 @@ import { Component } from "@odoo/owl";
 import { subscribeToURLParams, withParams } from "../core/url";
 import { compactXML } from "../utils";
 
-/** @extends Component<{}, import("../setup").Environment> */
+/** @extends Component<{}, import("../hoot").Environment> */
 export class HootRunAllButton extends Component {
     static template = compactXML/* xml */ `
         <t t-if="env.runner.hasFilter">
