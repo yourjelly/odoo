@@ -10,6 +10,7 @@
     'depends': ['sale', 'mass_mailing'],
     'data': [
         'views/mailing_mailing_views.xml',
+        'views/sale_report_views.xml',
     ],
     'demo': [
         'demo/mailing_mailing.xml',

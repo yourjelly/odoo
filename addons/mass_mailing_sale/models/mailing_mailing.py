@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import ast
+
 from markupsafe import Markup
 from odoo import api, fields, models, _, tools
 from odoo.osv import expression
@@ -39,22 +41,13 @@ class MassMailing(models.Model):
     def action_redirect_to_quotations(self):
         helper_header = _("No Quotations yet!")
         helper_message = _("Quotations will appear here once your customers add "
-                           "products to their Carts or when your sales reps assign this mailing.")
-        return {
-            'context': {
-                'create': False,
-                'search_default_group_by_date_day': True,
-                'sale_report_view_hide_date': True,
-            },
-            'domain': [('source_id', '=', self.source_id.id)],
-            'help': Markup('<p class="o_view_nocontent_smiling_face">%s</p><p>%s</p>') % (
-                helper_header, helper_message,
-            ),
-            'name': _("Sales Analysis"),
-            'res_model': 'sale.report',
-            'type': 'ir.actions.act_window',
-            'view_mode': 'graph,pivot,tree,form',
-        }
+                           "products to their Carts or when your sales reps assign this mailing1.")
+        action = self.env["ir.actions.actions"]._for_xml_id("sale.action_order_report_all")
+        action['domain'] = [('source_id', '=', self.source_id.id)]
+        action['search_view_id'] = [self.env.ref('mass_mailing_sale.view_order_product_search_inherit').id]
+        action['help'] = Markup('<p class="o_view_nocontent_smiling_face">%s</p><p>%s</p>') % (helper_header, helper_message),
+        action['context'] = dict(ast.literal_eval(action.get('context')), search_default_group_by_date=True)
+        return action
 
     def action_redirect_to_invoiced(self):
         domain = expression.AND([
