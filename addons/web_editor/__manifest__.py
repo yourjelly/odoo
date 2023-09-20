@@ -192,6 +192,7 @@ Odoo Web Editor widget.
             'web_editor/static/src/js/frontend/loader.js',
             'web_editor/static/src/js/backend/**/*',
             'web_editor/static/src/xml/backend.xml',
+            'web_editor/static/src/components/history_dialog/**/*',
 
             ('include', 'web_editor.assets_wysiwyg'),
         ],
