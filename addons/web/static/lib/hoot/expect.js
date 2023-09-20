@@ -1,7 +1,8 @@
 /** @odoo-module */
 
+import { Boolean, Date, Error, navigator, Number, Object, Promise } from "./globals";
 import { isVisible, queryAll, queryOne } from "./helpers/dom";
-import { MarkupHelper, deepEqual, formatHumanReadable, isIterable, match } from "./utils";
+import { deepEqual, formatHumanReadable, isIterable, MarkupHelper, match } from "./utils";
 
 /**
  * @typedef {ArgumentPrimitive | `${ArgumentPrimitive}[]` | null} ArgumentDef
@@ -285,6 +286,9 @@ export class Matchers {
             const resolve = this.#resolve;
             this[fnName] = {
                 [fnName](...args) {
+                    // TODO: fix
+                    // this.#stack = new Error().stack;
+
                     return resolve(fn(...args));
                 },
             }[fnName];
@@ -292,53 +296,44 @@ export class Matchers {
     }
 
     /**
-     * @template R
-     * @param {MatcherSpecifications<T, R>} specs
-     * @returns {Async extends true ? Promise<void> : void}
+     * Expects the received value to be strictly equal to the `expected` value.
+     *
+     * @param {T} expected
+     * @param {string} [message=""]
+     * @example ```js
+     *  expect("foo").toBe("foo");
+     *  expect({ foo: 1 }).not.toBe({ foo: 1 });
+     * ```
      */
-    #resolve(specs) {
-        if (this.#promise) {
-            return this.#promise.then(() => this.#resolveFinalResult(specs));
-        } else {
-            return this.#resolveFinalResult(specs);
-        }
+    toBe(expected, message = "") {
+        this.#stack = new Error().stack;
+
+        ensureArguments([
+            [expected, "any"],
+            [message, ["string", null]],
+        ]);
+
+        return this.#resolve({
+            predicate: (actual) => actual === expected,
+            message: (pass) =>
+                message ||
+                (pass
+                    ? `%actual% is[! not] strictly equal to ${formatHumanReadable(expected)}`
+                    : `expected values to be strictly equal`),
+            details: (actual) => [
+                [MarkupHelper.green("Expected:"), expected],
+                [MarkupHelper.red("Received:"), actual],
+                [MarkupHelper.text("Diff:"), MarkupHelper.diff(expected, actual)],
+            ],
+        });
     }
 
     /**
-     * @template R
-     * @param {MatcherSpecifications<T, R>} specs
-     */
-    #resolveFinalResult({ transform, predicate, message, details }) {
-        const { not } = this.#modifiers;
-        const actual = transform ? transform(this.#actual) : this.#actual;
-        let pass = predicate(actual);
-        if (not) {
-            pass = !pass;
-        }
-
-        const assertion = {
-            id: nextResultId++,
-            message: formatMessage(message(pass), { actual, not }),
-            pass,
-        };
-        if (!pass) {
-            const formattedStack = formatStack(this.#stack);
-            assertion.info = [
-                ...details(actual),
-                [MarkupHelper.red("Source:"), MarkupHelper.multiline(formattedStack)],
-            ];
-        }
-
-        currentResults.assertions.push(assertion);
-        currentResults.pass &&= assertion.pass;
-    }
-
-    /**
-     * Expects the received value to be between `min` and `max`.
+     * Expects the received value to be strictly between `min` and `max`.
      *
      * @param {number | [number, number]} min
      * @param {number | string} [max]
-     * @param {string} [message]
+     * @param {string} [message=""]
      * @example ```js
      *  expect(5).toBeBetween(3, 9);
      *  expect(-8).toBeBetween([-10, 0]);
@@ -364,7 +359,7 @@ export class Matchers {
         );
 
         return this.#resolve({
-            predicate: (actual) => min <= actual && actual <= max,
+            predicate: (actual) => min < actual && actual < max,
             message: (pass) =>
                 message ||
                 (pass
@@ -374,6 +369,70 @@ export class Matchers {
                     : `expected value to[! not] be between given range`),
             details: (actual) => [
                 [MarkupHelper.green("Expected:"), `${min} - ${max}`],
+                [MarkupHelper.red("Received:"), actual],
+            ],
+        });
+    }
+
+    /**
+     * Expects the received value to be strictly greater than `max`.
+     *
+     * @param {number} max
+     * @param {string} [message=""]
+     * @example ```js
+     *  expect(5).toBeGreaterThan(-1);
+     *  expect(4 + 2).toBeGreaterThan(5);
+     * ```
+     */
+    toBeGreaterThan(max, message = "") {
+        this.#stack = new Error().stack;
+
+        ensureArguments([
+            [max, "number"],
+            [message, ["string", null]],
+        ]);
+
+        return this.#resolve({
+            predicate: (actual) => max < actual,
+            message: (pass) =>
+                message ||
+                (pass
+                    ? `%actual% is[! not] strictly greater than ${formatHumanReadable(max)}`
+                    : `expected value to[! not] be strictly greater`),
+            details: (actual) => [
+                [MarkupHelper.green("Expected:"), max],
+                [MarkupHelper.red("Received:"), actual],
+            ],
+        });
+    }
+
+    /**
+     * Expects the received value to be strictly less than `min`.
+     *
+     * @param {number} min
+     * @param {string} [message=""]
+     * @example ```js
+     *  expect(5).toBeLessThan(10);
+     *  expect(8 - 6).toBeLessThan(3);
+     * ```
+     */
+    toBeLessThan(min, message = "") {
+        this.#stack = new Error().stack;
+
+        ensureArguments([
+            [min, "number"],
+            [message, ["string", null]],
+        ]);
+
+        return this.#resolve({
+            predicate: (actual) => actual < min,
+            message: (pass) =>
+                message ||
+                (pass
+                    ? `%actual% is[! not] strictly less than ${formatHumanReadable(min)}`
+                    : `expected value to[! not] be strictly less`),
+            details: (actual) => [
+                [MarkupHelper.green("Expected:"), min],
                 [MarkupHelper.red("Received:"), actual],
             ],
         });
@@ -422,39 +481,6 @@ export class Matchers {
                 message ||
                 (pass ? `%actual% is[! not] visible` : `expected target to be [visible!invisible]`),
             details: (actual) => [[MarkupHelper.red("Received:"), actual]],
-        });
-    }
-
-    /**
-     * Expects the received value to be strictly equal to the `expected` value.
-     *
-     * @param {T} expected
-     * @param {string} [message=""]
-     * @example ```js
-     *  expect("foo").toBe("foo");
-     *  expect({ foo: 1 }).not.toBe({ foo: 1 });
-     * ```
-     */
-    toBe(expected, message = "") {
-        this.#stack = new Error().stack;
-
-        ensureArguments([
-            [expected, "any"],
-            [message, ["string", null]],
-        ]);
-
-        return this.#resolve({
-            predicate: (actual) => actual === expected,
-            message: (pass) =>
-                message ||
-                (pass
-                    ? `%actual% is[! not] strictly equal to ${formatHumanReadable(expected)}`
-                    : `expected values to be strictly equal`),
-            details: (actual) => [
-                [MarkupHelper.green("Expected:"), expected],
-                [MarkupHelper.red("Received:"), actual],
-                [MarkupHelper.text("Diff:"), MarkupHelper.diff(expected, actual)],
-            ],
         });
     }
 
@@ -690,6 +716,48 @@ export class Matchers {
                 [MarkupHelper.red("Received:"), actual],
             ],
         });
+    }
+
+    /**
+     * @template R
+     * @param {MatcherSpecifications<T, R>} specs
+     * @returns {Async extends true ? Promise<void> : void}
+     */
+    #resolve(specs) {
+        if (this.#promise) {
+            return this.#promise.then(() => this.#resolveFinalResult(specs));
+        } else {
+            return this.#resolveFinalResult(specs);
+        }
+    }
+
+    /**
+     * @template R
+     * @param {MatcherSpecifications<T, R>} specs
+     */
+    #resolveFinalResult({ transform, predicate, message, details }) {
+        const { not } = this.#modifiers;
+        const actual = transform ? transform(this.#actual) : this.#actual;
+        let pass = predicate(actual);
+        if (not) {
+            pass = !pass;
+        }
+
+        const assertion = {
+            id: nextResultId++,
+            message: formatMessage(message(pass), { actual, not }),
+            pass,
+        };
+        if (!pass) {
+            const formattedStack = formatStack(this.#stack);
+            assertion.info = [
+                ...details(actual),
+                [MarkupHelper.red("Source:"), MarkupHelper.multiline(formattedStack)],
+            ];
+        }
+
+        currentResults.assertions.push(assertion);
+        currentResults.pass &&= assertion.pass;
     }
 
     /**
