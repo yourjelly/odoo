@@ -806,6 +806,11 @@ class Website(Home):
 
         return request.redirect('/')
 
+    @http.route('/website/save_layout_mode', type='json', auth='public', website=True)
+    def save_layout_mode(self, layout_mode, view_id):
+        assert layout_mode in ('grid', 'list'), "Invalid layout mode"
+        request.session[f'website_{view_id}_layout_mode'] = layout_mode
+
 
 class WebsiteBinary(Binary):
 
