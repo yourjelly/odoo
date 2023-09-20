@@ -4,7 +4,7 @@ import { Component, useExternalListener, useRef, useState } from "@odoo/owl";
 import { compactXML } from "../utils";
 import { refresh } from "../core/url";
 
-/** @extends Component<{}, import("../setup").Environment> */
+/** @extends Component<{}, import("../hoot").Environment> */
 export class HootConfigDropdown extends Component {
     static props = {
         colorToggle: Function,

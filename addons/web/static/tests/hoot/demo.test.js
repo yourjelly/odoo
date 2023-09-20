@@ -13,11 +13,9 @@ suite("demo", () => {
 
     for (let s = 0; s < 1; s++) {
         suite(`suite ${s}`, () => {
-            for (let t = 0; t < 1; t++) {
-                test(`test ${t} from suite ${s}`, () => {
-                    expect(true).toBeTruthy();
-                });
-            }
+            test["multi=10"](`test from suite ${s}`, () => {
+                expect(true).toBeTruthy();
+            });
         });
     }
 });

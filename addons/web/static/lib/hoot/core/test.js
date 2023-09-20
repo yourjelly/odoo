@@ -24,6 +24,7 @@ export class Test {
     tagNames = new Set();
     /** @type {Tag[]} */
     tags = [];
+    visited = 0;
 
     /**
      * @param {Suite | null} parent

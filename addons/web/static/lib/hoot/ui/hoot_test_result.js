@@ -17,7 +17,7 @@ import { HootTestPath } from "./hoot_test_path";
  * }} TestResultProps
  */
 
-/** @extends Component<TestResultProps, import("../setup").Environment> */
+/** @extends Component<TestResultProps, import("../hoot").Environment> */
 export class HootTestResult extends Component {
     static components = { HootTestPath, HootTechnicalValue };
 

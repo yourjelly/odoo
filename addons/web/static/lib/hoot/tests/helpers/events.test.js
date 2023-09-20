@@ -17,7 +17,7 @@ import {
     scroll,
     select,
 } from "../../helpers/events";
-import { suite, test } from "../../setup";
+import { suite, test } from "../../hoot";
 import { mount } from "../local_helpers";
 
 /**

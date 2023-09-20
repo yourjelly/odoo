@@ -36,14 +36,16 @@ const { DIFF_INSERT, DIFF_DELETE } = DiffMatchPatch;
  * @param {boolean} expection
  * @param {boolean} not
  */
-export const applyModifier = (expection, not) => Boolean(not ? !expection : expection);
+export function applyModifier(expection, not) {
+    return Boolean(not ? !expection : expection);
+}
 
 /**
  * @param {string} a
  * @param {string} b
  */
-export const diff = (a, b) =>
-    new MarkupHelper({
+export function diff(a, b) {
+    return new MarkupHelper({
         multiline: true,
         content: dmp.diff_main(formatTechnical(a), formatTechnical(b)).map((diff) => {
             let tagName = "t";
@@ -55,6 +57,7 @@ export const diff = (a, b) =>
             return new MarkupHelper({ content: diff[1], tagName });
         }),
     });
+}
 
 /** @param {string} stack */
 export function formatStack(stack) {

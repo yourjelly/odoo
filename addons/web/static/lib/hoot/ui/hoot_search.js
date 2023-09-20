@@ -11,6 +11,10 @@ import { HootTagButton } from "./hoot_tag_button";
  * @typedef {"suites" | "tags" | "tests"} SearchCategory
  */
 
+//-----------------------------------------------------------------------------
+// Internal
+//-----------------------------------------------------------------------------
+
 /**
  * @param {import("../core/suite").Suite | import("../core/tag").Tag | import("../core/test").Test} item
  */
@@ -21,7 +25,11 @@ const getIndex = (item) => item.index;
  */
 const toObject = (values) => values.reduce((obj, value) => ({ ...obj, [value]: true }), {});
 
-/** @extends Component<{}, import("../setup").Environment> */
+//-----------------------------------------------------------------------------
+// Exports
+//-----------------------------------------------------------------------------
+
+/** @extends Component<{}, import("../hoot").Environment> */
 export class HootSearch extends Component {
     static components = { HootTagButton };
 

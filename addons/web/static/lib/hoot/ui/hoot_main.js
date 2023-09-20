@@ -12,26 +12,39 @@ import { HootRunButton } from "./hoot_run_button";
 import { HootRunFailedButton } from "./hoot_run_failed_button";
 import { HootSearch } from "./hoot_search";
 
-let imported = false;
-function importIcons() {
-    if (imported) {
+//-----------------------------------------------------------------------------
+// Internal
+//-----------------------------------------------------------------------------
+
+/**
+ * @param {"link" | "script"} type
+ * @param {string} url
+ */
+const importURL = ({ type, url }) => {
+    if (imported.has(url)) {
         return;
     }
-    imported = true;
-    const link = document.createElement("link");
-    link.setAttribute("rel", "stylesheet");
-    link.setAttribute(
-        "href",
-        "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
-    );
-    link.setAttribute("data-no-import", true);
-    document.head.appendChild(link);
-}
+    imported.add(url);
+    const element = document.createElement(type);
+    switch (type) {
+        case "link": {
+            element.setAttribute("rel", "stylesheet");
+            element.setAttribute("href", url);
+            break;
+        }
+        case "script": {
+            element.setAttribute("src", url);
+            break;
+        }
+    }
+    element.setAttribute("data-no-import", true);
+    document.head.appendChild(element);
+};
 
 /**
  * @param {string} storageKey
  */
-function useColorScheme(storageKey) {
+const useColorScheme = (storageKey) => {
     function toggle() {
         color.scheme = color.scheme === "dark" ? "light" : "dark";
         set(storageKey, color.scheme);
@@ -48,9 +61,9 @@ function useColorScheme(storageKey) {
     const color = useState({ scheme: defaultScheme, toggle });
 
     return color;
-}
+};
 
-function updateTitle(failed) {
+const updateTitle = (failed) => {
     const toAdd = failed ? TITLE_PREFIX.fail : TITLE_PREFIX.success;
     if (document.title.startsWith(toAdd)) {
         return;
@@ -63,7 +76,7 @@ function updateTitle(failed) {
         }
     }
     document.title = `${toAdd} ${title}`;
-}
+};
 
 const COLOR_SCHEMES = ["dark", "light"];
 
@@ -72,7 +85,13 @@ const TITLE_PREFIX = {
     success: "✔",
 };
 
-/** @extends Component<{}, import("../setup").Environment> */
+const imported = new Set();
+
+//-----------------------------------------------------------------------------
+// Exports
+//-----------------------------------------------------------------------------
+
+/** @extends Component<{}, import("../hoot").Environment> */
 export class HootMain extends Component {
     static components = {
         HootConfigDropdown,
@@ -153,7 +172,10 @@ export class HootMain extends Component {
 
         onMounted(async () => {
             if (!runner.config.headless) {
-                importIcons();
+                importURL({
+                    type: "link",
+                    url: "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css",
+                });
             }
 
             if (domConfig.defaultRoot === null) {

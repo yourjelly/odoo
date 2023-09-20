@@ -2,7 +2,7 @@
 
 import { expect } from "../expect";
 import { makeDeferred } from "../helpers/concurency";
-import { suite, test } from "../setup";
+import { suite, test } from "../hoot";
 import {
     debounce,
     deepEqual,

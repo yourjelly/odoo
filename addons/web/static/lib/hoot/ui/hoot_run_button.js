@@ -4,7 +4,7 @@ import { Component, useState } from "@odoo/owl";
 import { refresh } from "../core/url";
 import { compactXML } from "../utils";
 
-/** @extends Component<{}, import("../setup").Environment> */
+/** @extends Component<{}, import("../hoot").Environment> */
 export class HootRunButton extends Component {
     static template = compactXML/* xml */ `
         <button

@@ -8,7 +8,7 @@ import { compactXML, isElement, isIterable, log, toSelector } from "../utils";
  * @typedef {{ value: any }} TechnicalValueProps
  */
 
-/** @extends Component<TechnicalValueProps, import("../setup").Environment> */
+/** @extends Component<TechnicalValueProps, import("../hoot").Environment> */
 export class HootTechnicalValue extends Component {
     static components = { HootTechnicalValue };
 

@@ -2,7 +2,7 @@
 
 import { App } from "@odoo/owl";
 import { getFixture } from "../helpers/dom";
-import { registerCleanup } from "../setup";
+import { registerCleanup } from "../hoot";
 
 /**
  * @param {string} href

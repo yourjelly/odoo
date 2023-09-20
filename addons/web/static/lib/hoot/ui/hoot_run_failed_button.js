@@ -4,7 +4,7 @@ import { Component, useState } from "@odoo/owl";
 import { Boolean } from "../globals";
 import { compactXML, storage } from "../utils";
 
-/** @extends Component<{}, import("../setup").Environment> */
+/** @extends Component<{}, import("../hoot").Environment> */
 export class HootRunFailedButton extends Component {
     static template = compactXML/* xml */ `
         <t t-if="state.show">

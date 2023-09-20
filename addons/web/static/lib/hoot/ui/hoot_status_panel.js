@@ -5,7 +5,7 @@ import { Date, clearInterval, setInterval } from "../globals";
 import { compactXML } from "../utils";
 import { HootTestPath } from "./hoot_test_path";
 
-/** @extends Component<{}, import("../setup").Environment> */
+/** @extends Component<{}, import("../hoot").Environment> */
 export class HootStatusPanel extends Component {
     static components = { HootTestPath };
 
