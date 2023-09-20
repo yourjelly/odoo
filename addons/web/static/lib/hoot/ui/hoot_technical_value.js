@@ -123,7 +123,7 @@ export class HootTechnicalValue extends Component {
             try {
                 return Object.create(toRaw(value));
             } catch (err) {
-                log.warn("Could not create copy for object:", value);
+                log.warn("Could not create copy for object:", value, err);
             }
         }
         return toRaw(value);
@@ -137,10 +137,3 @@ export class HootTechnicalValue extends Component {
         log(this.value);
     }
 }
-
-const LOG_COLORS = {
-    blue: "#5db0d7",
-    orange: "#f29364",
-    lightBlue: "#9bbbdc",
-    reset: "inherit",
-};

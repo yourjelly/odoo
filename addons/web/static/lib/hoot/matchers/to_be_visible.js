@@ -20,7 +20,7 @@ export function toBeVisible({ actual, not }, message = "") {
 
     const result = { message, pass };
     if (!pass) {
-        result.info = [[red("Received:"), target]];
+        result.info = [[red("Received:"), actual]];
     }
     return result;
 }

@@ -1,7 +1,6 @@
 /** @odoo-module **/
 
 import { generateHash, makeCallbacks, normalize } from "../utils";
-import { Tag } from "./tag";
 
 /**
  * @typedef {import("./tag").Tag} Tag

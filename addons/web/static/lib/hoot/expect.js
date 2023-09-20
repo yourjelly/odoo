@@ -123,10 +123,6 @@ const generateMatchers = (actual, { not, rejects, resolves }) => {
     return matchers;
 };
 
-
-
-
-
 /**
  * @param {ExpectResult} result
  * @param {string} name

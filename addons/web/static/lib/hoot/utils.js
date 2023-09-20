@@ -223,10 +223,10 @@ export function generateHash(...strings) {
 export function getFuzzyScore(pattern, string) {
     let totalScore = 0;
     let currentScore = 0;
-    let len = string.length;
     let patternIndex = 0;
 
-    for (let i = 0; i < len; i++) {
+    const length = string.length;
+    for (let i = 0; i < length; i++) {
         if (string[i] === pattern[patternIndex]) {
             patternIndex++;
             currentScore += 100 + currentScore - i / 200;
@@ -284,7 +284,7 @@ export const log = makeTaggable(function log(...args) {
     }
     const prefix = `%c[HOOT]%c`;
     const styles = [`color:#ff0080`, `color:inherit`];
-    let firstArg = args.shift() ?? "";
+    const firstArg = args.shift() ?? "";
     if (typeof firstArg === "string") {
         args.unshift(`${prefix} ${firstArg}`, ...styles);
     } else {
