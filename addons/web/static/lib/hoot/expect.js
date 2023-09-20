@@ -17,12 +17,10 @@ import { MarkupHelper, deepEqual, formatHumanReadable, isIterable, match } from 
  *  pass: boolean,
  *  steps: string[],
  * }} CurrentResults
- *
- * @typedef {(...args: any[]) => MatcherSpecifications} MatcherFunction
  */
 
 /**
- * @template T, [R=T]
+ * @template [T=unknown], [R=T]
  * @typedef {{
  *  transform?: (actual: T) => R;
  *  predicate: (actual: R) => boolean;
@@ -177,7 +175,7 @@ export function setupExpect() {
  * @template [Async=false]
  */
 export class Matchers {
-    /** @type {Record<string, MatcherFunction>} */
+    /** @type {Record<string, (...args: any[]) => MatcherSpecifications>} */
     static registry = Object.create(null);
 
     /** @type {T} */
@@ -396,7 +394,7 @@ export class Matchers {
         ensureArguments([[message, ["string", null]]]);
 
         return this.#resolve({
-            predicate: (actual) => actual,
+            predicate: Boolean,
             message: (pass) =>
                 message ||
                 (pass ? `%actual% is[! not] truthy` : `expected value[! not] to be truthy`),
@@ -697,7 +695,7 @@ export class Matchers {
     /**
      * Extends the available matchers methods with a given function.
      *
-     * @param {MatcherFunction} matcher
+     * @param {(...args: any[]) => MatcherSpecifications<any>} matcher
      */
     static extend(matcher) {
         const name = matcher.name;

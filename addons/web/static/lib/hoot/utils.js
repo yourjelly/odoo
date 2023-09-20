@@ -392,6 +392,9 @@ export function makeTaggable(fn) {
     /** @type {typeof taggedFn & { [key: string]: typeof taggedFn }} */
     const tagProxy = new Proxy(taggedFn, {
         get(target, p) {
+            if (p in target) {
+                return target[p];
+            }
             currentTags.push(p);
             return tagProxy;
         },
