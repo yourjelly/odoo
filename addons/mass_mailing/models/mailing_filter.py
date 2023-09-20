@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from ast import literal_eval
+import odoo.tools.safe_eval as safe_eval
 
 from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError
@@ -22,13 +22,28 @@ class MailingFilter(models.Model):
     mailing_model_id = fields.Many2one('ir.model', string='Recipients Model', required=True, ondelete='cascade')
     mailing_model_name = fields.Char(string='Recipients Model Name', related='mailing_model_id.model')
 
+    @staticmethod
+    def _evaluate_domain(domain):
+        """Evaluate domain string as python code using safe_eval
+
+        :param str domain: the domain to evaluate
+        :returns dict: evaluation context given to safe_eval
+        """
+        return safe_eval.safe_eval(domain, {
+            'context_today': safe_eval.datetime.datetime.today,
+            'datetime': safe_eval.datetime,
+            'dateutil': safe_eval.dateutil,
+            'relativedelta': safe_eval.dateutil.relativedelta.relativedelta,
+            'time': safe_eval.time,
+        })
+
     @api.constrains('mailing_domain', 'mailing_model_id')
     def _check_mailing_domain(self):
         """ Check that if the mailing domain is set, it is a valid one """
         for mailing_filter in self:
             if mailing_filter.mailing_domain != "[]":
                 try:
-                    self.env[mailing_filter.mailing_model_id.model].search_count(literal_eval(mailing_filter.mailing_domain))
+                    self.env[mailing_filter.mailing_model_id.model].search_count(self._evaluate_domain(mailing_filter.mailing_domain))
                 except:
                     raise ValidationError(
                         _("The filter domain is not valid for this recipients.")

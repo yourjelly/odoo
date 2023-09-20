@@ -1453,10 +1453,7 @@ class MassMailing(models.Model):
 
     def _parse_mailing_domain(self):
         self.ensure_one()
-        try:
-            mailing_domain = literal_eval(self.mailing_domain)
-        except Exception:
-            mailing_domain = [('id', 'in', [])]
+        mailing_domain = self.env['mailing.filter']._evaluate_domain(self.mailing_domain)
         return mailing_domain
 
     def _generate_mailing_recipient_token(self, document_id, email):

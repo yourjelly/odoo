@@ -3,9 +3,7 @@
 
 import base64
 import re
-from ast import literal_eval
 from datetime import datetime
-from unittest.mock import patch
 
 from freezegun import freeze_time
 from psycopg2 import IntegrityError
@@ -28,6 +26,9 @@ class TestMassMailValues(MassMailCommon):
     def setUpClass(cls):
         super(TestMassMailValues, cls).setUpClass()
         cls._create_mailing_list()
+
+    def _eval_domain(self, domain):
+        return self.env['mailing.filter']._evaluate_domain(domain)
 
     @users('user_marketing')
     def test_mailing_body_cropped_vml_image(self):
@@ -209,12 +210,12 @@ class TestMassMailValues(MassMailCommon):
         self.assertEqual(mailing.reply_to_mode, 'new')
         self.assertEqual(mailing.reply_to, self.user_marketing.email_formatted)
         # default for partner: remove blacklisted
-        self.assertEqual(literal_eval(mailing.mailing_domain), [('is_blacklisted', '=', False)])
+        self.assertEqual(self._eval_domain(mailing.mailing_domain), [('is_blacklisted', '=', False)])
         # update domain
         mailing.write({
             'mailing_domain': [('email', 'ilike', 'test.example.com')]
         })
-        self.assertEqual(literal_eval(mailing.mailing_domain), [('email', 'ilike', 'test.example.com')])
+        self.assertEqual(self._eval_domain(mailing.mailing_domain), [('email', 'ilike', 'test.example.com')])
 
         # reset mailing model -> reset domain; set reply_to -> keep it
         mailing.write({
@@ -226,11 +227,11 @@ class TestMassMailValues(MassMailCommon):
         self.assertEqual(mailing.reply_to_mode, 'new')
         self.assertEqual(mailing.reply_to, self.email_reply_to)
         # default for mailing list: depends upon contact_list_ids
-        self.assertEqual(literal_eval(mailing.mailing_domain), [('list_ids', 'in', [])])
+        self.assertEqual(self._eval_domain(mailing.mailing_domain), [('list_ids', 'in', [])])
         mailing.write({
             'contact_list_ids': [(4, self.mailing_list_1.id), (4, self.mailing_list_2.id)]
         })
-        self.assertEqual(literal_eval(mailing.mailing_domain), [('list_ids', 'in', (self.mailing_list_1 | self.mailing_list_2).ids)])
+        self.assertEqual(self._eval_domain(mailing.mailing_domain), [('list_ids', 'in', (self.mailing_list_1 | self.mailing_list_2).ids)])
 
         # reset mailing model -> reset domain and reply to mode
         mailing.write({
@@ -253,7 +254,7 @@ class TestMassMailValues(MassMailCommon):
             'mailing_model_id': self.env['ir.model']._get('res.partner').id,
         })
         # default for partner: remove blacklisted
-        self.assertEqual(literal_eval(mailing.mailing_domain), [('is_blacklisted', '=', False)])
+        self.assertEqual(self._eval_domain(mailing.mailing_domain), [('is_blacklisted', '=', False)])
 
         # prepare initial data
         filter_1, filter_2, filter_3 = self.env['mailing.filter'].create([
@@ -273,7 +274,7 @@ class TestMassMailValues(MassMailCommon):
 
         # check that adding mailing_filter_id updates domain correctly
         mailing.mailing_filter_id = filter_2
-        self.assertEqual(literal_eval(mailing.mailing_domain), literal_eval(filter_2.mailing_domain))
+        self.assertEqual(self._eval_domain(mailing.mailing_domain), self._eval_domain(filter_2.mailing_domain))
 
         # cannot set a filter linked to another model
         with self.assertRaises(ValidationError):
@@ -281,11 +282,11 @@ class TestMassMailValues(MassMailCommon):
 
         # resetting model should reset domain, even if filter was chosen previously
         mailing.mailing_model_id = self.env['ir.model']._get('discuss.channel').id
-        self.assertEqual(literal_eval(mailing.mailing_domain), [])
+        self.assertEqual(self._eval_domain(mailing.mailing_domain), [])
 
         # changing the filter should update the mailing domain correctly
         mailing.mailing_filter_id = filter_1
-        self.assertEqual(literal_eval(mailing.mailing_domain), literal_eval(filter_1.mailing_domain))
+        self.assertEqual(self._eval_domain(mailing.mailing_domain), self._eval_domain(filter_1.mailing_domain))
 
         # changing the domain should not empty the mailing_filter_id
         mailing.mailing_domain = "[('email', 'ilike', 'info_be@odoo.com')]"
@@ -295,10 +296,10 @@ class TestMassMailValues(MassMailCommon):
         mailing.mailing_model_id = self.env['ir.model']._get('res.partner').id
         mailing.mailing_filter_id = filter_3
         filter_3_domain = filter_3.mailing_domain
-        self.assertEqual(literal_eval(mailing.mailing_domain), literal_eval(filter_3_domain))
+        self.assertEqual(self._eval_domain(mailing.mailing_domain), self._eval_domain(filter_3_domain))
         filter_3.unlink()  # delete the filter record
         self.assertFalse(mailing.mailing_filter_id, "Should unset filter if it is deleted")
-        self.assertEqual(literal_eval(mailing.mailing_domain), literal_eval(filter_3_domain), "Should still have the same domain")
+        self.assertEqual(self._eval_domain(mailing.mailing_domain), self._eval_domain(filter_3_domain), "Should still have the same domain")
 
     @users('user_marketing')
     def test_mailing_computed_fields_default(self):
@@ -311,7 +312,53 @@ class TestMassMailValues(MassMailCommon):
             'body_html': '<p>Hello <t t-out="object.name"/></p>',
             'mailing_model_id': self.env['ir.model']._get('res.partner').id,
         })
-        self.assertEqual(literal_eval(mailing.mailing_domain), [('email', 'ilike', 'test.example.com')])
+        self.assertEqual(self._eval_domain(mailing.mailing_domain), [('email', 'ilike', 'test.example.com')])
+
+    @users('user_marketing')
+    @mute_logger('odoo.sql_db')
+    def test_mailing_computed_fields_dynamic_domain(self):
+        """Ensure dynamic domain evaluation works and isn't obviously unsafe."""
+        filters = self.env['mailing.filter'].create([
+            {'name': 'Literals Filter',
+             'mailing_domain': [('create_uid', '=', '1')],
+             'mailing_model_id': self.env['ir.model']._get('discuss.channel').id
+             },
+            {'name': 'String Literals Filter',
+             'mailing_domain': "[('create_uid', '=', '1')]",
+             'mailing_model_id': self.env['ir.model']._get('discuss.channel').id
+             },
+            {'name': 'Dynamic Filter',
+             'mailing_domain': "[('id', '=', 1 + 1)]",
+             'mailing_model_id': self.env['ir.model']._get('discuss.channel').id
+             },
+            {'name': 'Dynamic Date Context Methods',
+             'mailing_domain': "[('create_date', '<=', (datetime.datetime(2042, 12, 31) + relativedelta(days=1)).strftime('%Y-%m-%d'))]",
+             'mailing_model_id': self.env['ir.model']._get('discuss.channel').id
+             },
+            {'name': 'Dynamic Date Object',
+             'mailing_domain': "[('create_date', '<=', datetime.datetime(2042, 12, 31) + relativedelta(days=1))]",
+             'mailing_model_id': self.env['ir.model']._get('discuss.channel').id
+             }
+        ])
+
+        domains = [[('create_uid', '=', '1')], [('create_uid', '=', '1')], [('id', '=', 2)],
+                   [('create_date', '<=', '2043-01-01')], [('create_date', '<=', datetime(2043, 1, 1))]]
+
+        for mailing_filter, domain in zip(filters, domains):
+            self.assertListEqual(self._eval_domain(mailing_filter.mailing_domain), domain)
+
+        with self.assertRaises(ValidationError):
+            self.env['mailing.filter'].create({
+                'name': 'Invalid Dynamic Filter',
+                'mailing_domain': "[('create_date', '<=', dict())]",
+                'mailing_model_id': self.env['ir.model']._get('discuss.channel').id
+            })
+        with self.assertRaises(ValidationError):
+            self.env['mailing.filter'].create({
+                'name': 'Illegal Dynamic Filter',
+                'mailing_domain': "[('id', '=', datetime.sys.hash_info)]",
+                'mailing_model_id': self.env['ir.model']._get('discuss.channel').id
+            })
 
     @users('user_marketing')
     def test_mailing_computed_fields_form(self):
@@ -320,7 +367,7 @@ class TestMassMailValues(MassMailCommon):
             default_mailing_model_id=self.env['ir.model']._get('res.partner').id,
         ))
         self.assertEqual(
-            literal_eval(mailing_form.mailing_domain),
+            self._eval_domain(mailing_form.mailing_domain),
             [('email', 'ilike', 'test.example.com')],
         )
         self.assertEqual(mailing_form.mailing_model_real, 'res.partner')
