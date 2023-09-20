@@ -714,6 +714,9 @@ export const expect = Object.assign(
      * @param {T} actual
      */
     function expect(actual) {
+        if (!currentResults) {
+            throw new Error(`Cannot call expect outside of a test.`);
+        }
         return new Matchers(actual, {});
     },
     {

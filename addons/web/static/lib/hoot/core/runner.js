@@ -237,18 +237,18 @@ export class TestRunner {
     /**
      * @param {string[]} tagNames
      * @param {string} name
-     * @param {(() => void) | string} suiteFn
+     * @param {(() => void) | string} fn
      * @param {...(() => void) | string} nestedSuiteArgs
      */
-    addSuite(tagNames, name, suiteFn, ...nestedSuiteArgs) {
-        if (typeof suiteFn === "string") {
-            const nestedSuiteFn = () => this.addSuite([], suiteFn, ...nestedSuiteArgs);
+    addSuite(tagNames, name, fn, ...nestedSuiteArgs) {
+        if (typeof fn === "string") {
+            const nestedSuiteFn = () => this.addSuite([], fn, ...nestedSuiteArgs);
             return this.addSuite(tagNames, name, nestedSuiteFn);
         }
-        if (typeof suiteFn !== "function") {
+        if (typeof fn !== "function") {
             throw suiteError(
                 name,
-                `expected second argument to be a function and got ${String(suiteFn)}`
+                `expected second argument to be a function and got ${String(fn)}`
             );
         }
         if (this.status !== "ready") {
@@ -256,7 +256,7 @@ export class TestRunner {
         }
         const { suite: currentSuite } = this.getCurrent();
         const tags = createTags(currentSuite?.tags, tagNames);
-        let suite = new Suite(currentSuite, name, suiteFn, tags);
+        let suite = new Suite(currentSuite, name, fn, tags);
         const originalSuite = this.suites.find((s) => s.id === suite.id);
         if (originalSuite) {
             suite = originalSuite;
@@ -287,7 +287,7 @@ export class TestRunner {
         }
         let result;
         try {
-            result = suiteFn();
+            result = fn();
         } finally {
             this.#suiteStack.pop();
         }
@@ -299,24 +299,24 @@ export class TestRunner {
     /**
      * @param {string[]} tagNames
      * @param {string} name
-     * @param {() => void | PromiseLike<void>} testFn
+     * @param {() => void | PromiseLike<void>} fn
      */
-    addTest(tagNames, name, testFn) {
+    addTest(tagNames, name, fn) {
         const { suite: currentSuite } = this.getCurrent();
         if (!currentSuite) {
             throw testError(name, `cannot register a test outside of a suite.`);
         }
-        if (typeof testFn !== "function") {
+        if (typeof fn !== "function") {
             throw testError(
                 name,
-                `expected second argument to be a function and got ${String(testFn)}`
+                `expected second argument to be a function and got ${String(fn)}`
             );
         }
         if (this.status !== "ready") {
             throw testError(name, `cannot add a test after the test this started.`);
         }
         const tags = createTags(currentSuite?.tags, tagNames);
-        const test = new Test(currentSuite, name, testFn, tags);
+        const test = new Test(currentSuite, name, fn, tags);
         if (this.tests.some((t) => t.fullName === test.fullName)) {
             throw testError(
                 name,

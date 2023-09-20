@@ -21,15 +21,15 @@ export class Job {
     /**
      * @param {import("./suite").Suite | null} parent
      * @param {string} name
-     * @param {() => void} runFn
+     * @param {() => void} fn
      * @param {import("./tag").Tag[]} tags
      */
-    constructor(parent, name, runFn, tags) {
+    constructor(parent, name, fn, tags) {
         this.parent = parent || null;
         this.name = name;
 
-        // Keeps the stack trace bound to the original 'runFn'
-        this.run = (...args) => runFn(...args);
+        // Keeps the stack trace bound to the original 'fn'
+        this.run = (...args) => fn(...args);
 
         if (this.parent) {
             Object.assign(this.config, this.parent.config);
