@@ -935,6 +935,21 @@ class Base(models.AbstractModel):
                 if field_name in defaults:
                     field_names.append(field_name)
 
+        def fill_cache(records, spec):
+            records.fetch(spec.keys())
+            # copy the cache of lines to their corresponding new records;
+            # this avoids computing computed stored fields on new_lines
+            new_lines = records.browse(map(NewId, line_ids))
+            for field_name in spec:
+                field = records._fields[field_name]
+                line_values = [
+                    field.convert_to_cache(line[field_name], new_line, validate=False)
+                    for new_line, line in zip(new_lines, records)
+                ]
+                cache.update(new_lines, field, line_values)
+                if field.type in ('one2many', 'many2many') and spec[field_name].get('fields'):
+                    fill_cache(records[field_name], spec[field_name]['fields'])
+
         # prefetch x2many lines: this speeds up the initial snapshot by avoiding
         # computing fields on new records as much as possible, as that can be
         # costly and is not necessary at all
@@ -953,18 +968,7 @@ class Base(models.AbstractModel):
                     elif cmd[0] == Command.SET:
                         line_ids.update(cmd[2])
                 # prefetch stored fields on lines
-                lines = self[field_name].browse(line_ids)
-                lines.fetch(sub_fields_spec.keys())
-                # copy the cache of lines to their corresponding new records;
-                # this avoids computing computed stored fields on new_lines
-                new_lines = lines.browse(map(NewId, line_ids))
-                for field_name in sub_fields_spec:
-                    field = lines._fields[field_name]
-                    line_values = [
-                        field.convert_to_cache(line[field_name], new_line, validate=False)
-                        for new_line, line in zip(new_lines, lines)
-                    ]
-                    cache.update(new_lines, field, line_values)
+                fill_cache(self[field_name].browse(line_ids), sub_fields_spec)
 
         # Isolate changed values, to handle inconsistent data sent from the
         # client side: when a form view contains two one2many fields that

@@ -4544,7 +4544,9 @@ class One2many(_RelationalMulti):
                     elif command[0] == Command.UPDATE:
                         browse([command[1]]).update(command[2])
                     elif command[0] == Command.DELETE:
-                        browse([command[1]])[inverse] = False
+                        record = browse([command[1]])
+                        with record.env.protecting(record._fields.values(), record):
+                            record[inverse] = False
                     elif command[0] == Command.UNLINK:
                         browse([command[1]])[inverse] = False
                     elif command[0] == Command.LINK:
