@@ -71,11 +71,11 @@ export class HootReporting extends Component {
             open: [],
             /** @type {[(test: Test) => number, boolean] | null} */
             sort: null,
-            /** @type {Test[]} */
-            tests: [],
+            /** @type {Record<string, Test>} */
+            tests: {},
         });
 
-        const addTest = batch((test) => this.state.tests.push(test), 100);
+        const addTest = batch((test) => (this.state.tests[test.id] = test), 100);
 
         let didShowDetail = false;
         const { showdetail } = this.env.runner.config;
@@ -104,15 +104,15 @@ export class HootReporting extends Component {
 
         const groups = sort ? {} : [];
         const [mapFn, ascending] = sort || [];
-        for (const test of tests) {
+        for (const test of Object.values(tests)) {
             let matchFilter = false;
             switch (filter) {
                 case "failed": {
-                    matchFilter = !test.skip && !test.lastResults.pass;
+                    matchFilter = !test.skip && test.results.some((r) => !r.pass);
                     break;
                 }
                 case "passed": {
-                    matchFilter = !test.skip && test.lastResults.pass;
+                    matchFilter = !test.skip && test.results.every((r) => r.pass);
                     break;
                 }
                 case "skipped": {
@@ -122,7 +122,7 @@ export class HootReporting extends Component {
                 default: {
                     if (!showskipped && test.skip) {
                         matchFilter = false;
-                    } else if (!showpassed && test.lastResults.pass) {
+                    } else if (!showpassed && test.results.every((r) => r.pass)) {
                         matchFilter = false;
                     } else {
                         matchFilter = true;

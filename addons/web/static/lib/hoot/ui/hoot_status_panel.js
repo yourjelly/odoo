@@ -61,7 +61,7 @@ export class HootStatusPanel extends Component {
                 </t>
                 <button
                     title="Sort by time"
-                    t-on-click="() => props.sortResults((test) => test.lastResults.duration or 0)"
+                    t-on-click="() => props.sortResults((test) => test.lastResults?.duration or 0)"
                 >
                     <i class="bi bi-filter" />
                 </button>
@@ -70,6 +70,19 @@ export class HootStatusPanel extends Component {
     `;
 
     setup() {
+        const startTimer = () => {
+            stopTimer();
+            currentTestStart = Date.now();
+            intervalId = setInterval(() => {
+                this.state.timer = Math.floor((Date.now() - currentTestStart) / 1000);
+            }, 1000);
+        };
+
+        const stopTimer = () => {
+            clearInterval(intervalId);
+            this.state.timer = null;
+        };
+
         const { runner } = this.env;
         let start;
         let currentTestStart;
@@ -95,30 +108,25 @@ export class HootStatusPanel extends Component {
         });
 
         runner.beforeAnyTest((test) => {
-            currentTestStart = Date.now();
-
             this.state.runningTest = test;
             this.state.text = `Running`;
             this.state.timer = 0;
 
-            intervalId = setInterval(() => {
-                this.state.timer = Math.floor((Date.now() - currentTestStart) / 1000);
-            }, 1000);
+            startTimer();
 
             if (runner.debug) {
                 this.state.text = `[DEBUG] ${this.state.text}`;
             }
         });
 
-        runner.afterAnyTest((test) => {
-            clearInterval(intervalId);
-            this.state.timer = null;
+        runner.afterAnyTest(({ lastResults }) => {
+            stopTimer();
 
             this.state.runningTest = null;
             this.state.tests++;
             this.state.done++;
 
-            if (!test.lastResults.pass) {
+            if (!lastResults.pass) {
                 this.state.failed++;
             }
         });
@@ -129,6 +137,8 @@ export class HootStatusPanel extends Component {
         });
 
         runner.afterAll(() => {
+            stopTimer();
+
             const { done } = this.state;
             const textParts = [`${done} test${done === 1 ? "" : "s"} completed`];
             textParts.push(`(total time: ${Date.now() - start} ms)`);
@@ -136,9 +146,5 @@ export class HootStatusPanel extends Component {
             this.state.text = textParts.join(" ");
             this.state.finished = true;
         });
-    }
-
-    start() {
-        this.env.runner.start();
     }
 }

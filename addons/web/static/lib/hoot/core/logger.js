@@ -25,22 +25,22 @@ export function makeLogger(runner) {
         log("Starting test suites");
     });
 
-    runner.afterAnyTest((test) => {
-        if (test.lastResults.pass) {
+    runner.afterAnyTest(({ fullName, lastResults }) => {
+        if (lastResults.pass) {
             currentSuitePassed++;
         } else {
             currentSuiteFailed++;
             let error;
-            if (test.lastResults.error) {
-                error = test.lastResults.error.message;
+            if (lastResults.error) {
+                error = lastResults.error.message;
             } else {
-                error = test.lastResults.assertions
+                error = lastResults.assertions
                     .filter((expect) => !expect.pass)
                     .map((expect) => expect.errors?.join(" ") || expect.message)
                     .join(" and ");
             }
 
-            log.error(`Test "${test.fullName}" failed:`, error);
+            log.error(`Test "${fullName}" failed:`, error);
         }
     });
 

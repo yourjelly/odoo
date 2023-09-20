@@ -7,6 +7,7 @@ import {
     console,
     JSON,
     localStorage,
+    location,
     navigator,
     Object,
     Proxy,
@@ -204,6 +205,18 @@ export function generateHash(...strings) {
     // string, which isn't strictly necessary but increases user understanding
     // that the id is a SHA-like hash
     return (hash + 2 ** 32).toString(16).slice(-8);
+}
+
+export function getDebugMode() {
+    const { get, set } = storage("session");
+    if (new URL(location).searchParams.has("debug")) {
+        set("debug", true);
+        return true;
+    }
+    if (get("debug")) {
+        return true;
+    }
+    return false;
 }
 
 /**
@@ -470,7 +483,7 @@ export function storage(type) {
      * @returns {T}
      */
     const get = (key, defaultValue) => {
-        const value = s.getItem(key);
+        const value = s.getItem(`hoot-${key}`);
         return value ? JSON.parse(value) : defaultValue;
     };
 
@@ -479,7 +492,7 @@ export function storage(type) {
      */
     const remove = (...keys) => {
         for (const key of keys) {
-            s.removeItem(key);
+            s.removeItem(`hoot-${key}`);
         }
     };
 
@@ -488,7 +501,7 @@ export function storage(type) {
      * @param {string} key
      * @param {T} value
      */
-    const set = (key, value) => s.setItem(key, JSON.stringify(value));
+    const set = (key, value) => s.setItem(`hoot-${key}`, JSON.stringify(value));
 
     const s = type === "local" ? localStorage : sessionStorage;
 
