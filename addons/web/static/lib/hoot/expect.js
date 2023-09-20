@@ -18,7 +18,7 @@ import { MarkupHelper, deepEqual, formatHumanReadable, isIterable, match } from 
  *  steps: string[],
  * }} CurrentResults
  *
- * @typedef {(...args: any[]) => void} MatcherFunction
+ * @typedef {(...args: any[]) => MatcherSpecifications} MatcherFunction
  */
 
 /**
@@ -734,9 +734,7 @@ export const expect = Object.assign(
                 );
             });
         },
-        /**
-         * @param {ExpectMatcher} matcher
-         */
+        /** @type {(typeof Matchers)["extend"]} */
         extend: (matcher) => Matchers.extend(matcher),
         hasAssertions() {
             currentResults.afterTestCallbacks.push(() => {

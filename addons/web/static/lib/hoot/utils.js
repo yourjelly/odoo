@@ -282,7 +282,7 @@ export function isRegExpFilter(filter) {
 
 /** @type {Console["log"] & Console} */
 export const log = makeTaggable(function log(...args) {
-    const [firstTag] = args.pop();
+    const [firstTag] = args.shift();
     const logFn = firstTag in console ? console[firstTag] : console.log;
     if (["group", "groupEnd", "table"].includes(firstTag)) {
         return logFn(...args);
@@ -375,21 +375,21 @@ export function makeCallbacks() {
 }
 
 /**
- * @template {(...args: any) => any} T
- * @param {T} fn
+ * @template P, R
+ * @param {(tags: string[], ...args: P) => R} fn
  */
 export function makeTaggable(fn) {
     let currentTags = [];
 
-    /** @type {T} */
+    /** @type {(...args: P) => R} */
     const taggedFn = (...args) => {
         const tags = currentTags;
         currentTags = [];
 
-        return fn(...args, tags);
+        return fn(tags, ...args);
     };
 
-    /** @type {T & { [key: string]: T }} */
+    /** @type {typeof taggedFn & { [key: string]: typeof taggedFn }} */
     const tagProxy = new Proxy(taggedFn, {
         get(target, p) {
             currentTags.push(p);

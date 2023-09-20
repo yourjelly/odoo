@@ -6,10 +6,10 @@ import { Test } from "../core/test";
 import { describe, expect, test } from "../hoot";
 
 describe("@odoo/hoot", "Core", "Runner", () => {
-    test("can register suites", () => {
+    test.oui("can register suites", () => {
         const runner = new TestRunner();
-        runner.addSuite("a suite", () => {});
-        runner.addSuite("another suite", () => {});
+        runner.addSuite([], "a suite", () => {});
+        runner.addSuite([], "another suite", () => {});
 
         expect(runner.suites.length).toBe(2);
         expect(runner.tests.length).toBe(0);
@@ -20,19 +20,19 @@ describe("@odoo/hoot", "Core", "Runner", () => {
 
     test("can register nested suites", () => {
         const runner = new TestRunner();
-        runner.addSuite("a", "b", "c", () => {});
+        runner.addSuite([], "a", "b", "c", () => {});
 
         expect(runner.suites.map((s) => s.name)).toEqual(["a", "b", "c"]);
     });
 
     test("can register tests", () => {
         const runner = new TestRunner();
-        runner.addSuite("suite 1", () => {
-            runner.addTest("test 1", () => {});
+        runner.addSuite([], "suite 1", () => {
+            runner.addTest([], "test 1", () => {});
         });
-        runner.addSuite("suite 2", () => {
-            runner.addTest("test 2", () => {});
-            runner.addTest("test 3", () => {});
+        runner.addSuite([], "suite 2", () => {
+            runner.addTest([], "test 2", () => {});
+            runner.addTest([], "test 3", () => {});
         });
 
         expect(runner.suites.length).toBe(2);
@@ -41,8 +41,8 @@ describe("@odoo/hoot", "Core", "Runner", () => {
 
     test("should not have duplicate suites", () => {
         const runner = new TestRunner();
-        runner.addSuite("parent", "child a", () => {});
-        runner.addSuite("parent", "child b", () => {});
+        runner.addSuite([], "parent", "child a", () => {});
+        runner.addSuite([], "parent", "child b", () => {});
 
         expect(runner.suites.map((suite) => suite.name)).toEqual(["parent", "child a", "child b"]);
     });
@@ -50,7 +50,7 @@ describe("@odoo/hoot", "Core", "Runner", () => {
     test("can refuse standalone tests", async () => {
         const runner = new TestRunner();
         expect(() =>
-            runner.addTest("standalone test", () => {
+            runner.addTest([], "standalone test", () => {
                 expect(true).toBeTruthy();
             })
         ).toThrow();
@@ -59,7 +59,7 @@ describe("@odoo/hoot", "Core", "Runner", () => {
     test.todo("can register test tags", async () => {
         const runner = new TestRunner();
 
-        runner.addSuite("suite", () => {
+        runner.addSuite([], "suite", () => {
             let testFn = runner.addTest.bind(runner);
             for (let i = 1; i <= 10; i++) {
                 testFn = testFn[`Tag ${i}`].bind(runner);

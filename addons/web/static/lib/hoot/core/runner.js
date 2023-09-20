@@ -233,16 +233,17 @@ export class TestRunner {
         }
         suite.callbacks.add("before-test", callback);
     }
+
     /**
+     * @param {string[]} tagNames
      * @param {string} name
      * @param {(() => void) | string} suiteFn
-     * @param {string[]} suiteTags
+     * @param {...(() => void) | string} nestedSuiteArgs
      */
-    addSuite(name, suiteFn, suiteTags) {
+    addSuite(tagNames, name, suiteFn, ...nestedSuiteArgs) {
         if (typeof suiteFn === "string") {
-            // nesaddSuiteted suite definition
-            const nestedArgs = [...arguments].slice(1);
-            return this.addSuite(name, () => this.addSuite(...nestedArgs));
+            const nestedSuiteFn = () => this.addSuite([], suiteFn, ...nestedSuiteArgs);
+            return this.addSuite(tagNames, name, nestedSuiteFn);
         }
         if (typeof suiteFn !== "function") {
             throw suiteError(
@@ -254,7 +255,7 @@ export class TestRunner {
             throw suiteError(name, `cannot add a suite after the test this started`);
         }
         const { suite: currentSuite } = this.getCurrent();
-        const tags = createTags(currentSuite?.tags, suiteTags);
+        const tags = createTags(currentSuite?.tags, tagNames);
         let suite = new Suite(currentSuite, name, suiteFn, tags);
         const originalSuite = this.suites.find((s) => s.id === suite.id);
         if (originalSuite) {
@@ -296,11 +297,11 @@ export class TestRunner {
     }
 
     /**
+     * @param {string[]} tagNames
      * @param {string} name
      * @param {() => void | PromiseLike<void>} testFn
-     * @param {string[]} testTags
      */
-    addTest(name, testFn, testTags) {
+    addTest(tagNames, name, testFn) {
         const { suite: currentSuite } = this.getCurrent();
         if (!currentSuite) {
             throw testError(name, `cannot register a test outside of a suite.`);
@@ -314,7 +315,7 @@ export class TestRunner {
         if (this.status !== "ready") {
             throw testError(name, `cannot add a test after the test this started.`);
         }
-        const tags = createTags(currentSuite?.tags, testTags);
+        const tags = createTags(currentSuite?.tags, tagNames);
         const test = new Test(currentSuite, name, testFn, tags);
         if (this.tests.some((t) => t.fullName === test.fullName)) {
             throw testError(
