@@ -19,7 +19,7 @@ BLACKLIST = {
     'auth_ldap',
     'pos_blackbox_be',
 }
-IGNORE = ('hw_', 'theme_', 'l10n_', 'test_')
+IGNORE = ('hw_', 'theme_', 'test_')
 
 INSTALL_BLACKLIST = {
     'payment_alipay', 'payment_ogone', 'payment_payulatam', 'payment_payumoney',
