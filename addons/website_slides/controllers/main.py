@@ -23,6 +23,10 @@ from odoo.tools import consteq, email_split
 _logger = logging.getLogger(__name__)
 
 
+def handle_wslide_error():
+    return request.redirect("/slides?invite_error=no_rights", 302)
+
+
 class WebsiteSlides(WebsiteProfile):
     _slides_per_page = 12
     _slides_per_aside = 20
@@ -504,7 +508,7 @@ class WebsiteSlides(WebsiteProfile):
         '/slides/<model("slide.channel"):channel>/tag/<model("slide.tag"):tag>/page/<int:page>',
         '/slides/<model("slide.channel"):channel>/category/<model("slide.slide"):category>',
         '/slides/<model("slide.channel"):channel>/category/<model("slide.slide"):category>/page/<int:page>',
-    ], type='http', auth="public", website=True, sitemap=sitemap_slide)
+    ], type='http', auth="public", website=True, sitemap=sitemap_slide, handle_access_error=handle_wslide_error)
     def channel(self, channel=False, channel_id=False, category=None, category_id=False, tag=None, page=1, slide_category=None, uncategorized=False, sorting=None, search=None, **kw):
         """ Will return the rendered page of a course, with optional parameters allowing customization:
 
@@ -943,7 +947,8 @@ class WebsiteSlides(WebsiteProfile):
     # SLIDE.SLIDE MAIN / SEARCH
     # --------------------------------------------------
 
-    @http.route('''/slides/slide/<model("slide.slide"):slide>''', type='http', auth="public", website=True, sitemap=True)
+    @http.route('/slides/slide/<model("slide.slide"):slide>', type='http', auth="public",
+                website=True, sitemap=True, handle_access_error=handle_wslide_error)
     def slide_view(self, slide, **kwargs):
         if not slide.channel_id.can_access_from_current_website() or not slide.active:
             raise werkzeug.exceptions.NotFound()
@@ -1006,8 +1011,8 @@ class WebsiteSlides(WebsiteProfile):
             'access_error_slide_name': user_slide_authorization['slide'].name,
         })))
 
-    @http.route('''/slides/slide/<model("slide.slide"):slide>/pdf_content''',
-                type='http', auth="public", website=True, sitemap=False)
+    @http.route('/slides/slide/<model("slide.slide"):slide>/pdf_content',
+                type='http', auth="public", website=True, sitemap=False, handle_access_error=handle_wslide_error)
     def slide_get_pdf_content(self, slide):
         response = Response()
         response.data = slide.binary_content and base64.b64decode(slide.binary_content) or b''
@@ -1062,7 +1067,8 @@ class WebsiteSlides(WebsiteProfile):
             'next_category_id': next_category.id if next_category else False,
         }
 
-    @http.route('/slides/slide/<model("slide.slide"):slide>/set_uncompleted', website=True, type='http', auth='user')
+    @http.route('/slides/slide/<model("slide.slide"):slide>/set_uncompleted',
+                website=True, type='http', auth='user', handle_access_error=handle_wslide_error)
     def slide_set_uncompleted_and_redirect(self, slide):
         self._slide_mark_uncompleted(slide)
         return request.redirect(f'/slides/slide/{slug(slide)}')

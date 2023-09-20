@@ -1725,7 +1725,8 @@ class Request:
             except Exception as exc:
                 if isinstance(exc, HTTPException) and exc.code is None:
                     raise  # bubble up to odoo.http.Application.__call__
-                exc.error_response = self.registry['ir.http']._handle_error(exc)
+                if not getattr(exc, 'error_response', None):
+                    exc.error_response = self.registry['ir.http']._handle_error(exc)
                 raise
 
     def _serve_ir_http(self):

@@ -23,6 +23,7 @@ from odoo import api, models, exceptions, tools, http
 from odoo.addons.base.models import ir_http
 from odoo.addons.base.models.ir_http import RequestUID
 from odoo.addons.base.models.ir_qweb import QWebException
+from odoo.exceptions import AccessError
 from odoo.http import request, Response
 from odoo.osv import expression
 from odoo.tools import config, ustr, pycompat
@@ -544,8 +545,22 @@ class IrHttp(models.AbstractModel):
 
         # update the context of "<model(...):...>" args
         for key, val in list(args.items()):
-            if isinstance(val, models.BaseModel):
-                args[key] = val.with_context(request.context)
+            if not isinstance(val, models.BaseModel):
+                continue
+
+            args[key] = val.with_context(request.context)
+
+            try:
+                # explicitly crash now, instead of crashing later
+                args[key].check_access_rights('read')
+                args[key].check_access_rule('read')
+            except AccessError as e:
+                # custom behavior in case a record is not accessible
+                if handle_error := rule.endpoint.original_routing.get('handle_access_error'):
+                    e.error_response = handle_error()
+                raise
+            except odoo.exceptions.MissingError:
+                raise werkzeug.exceptions.NotFound()
 
         if request.is_frontend_multilang:
             # A product with id 1 and named 'egg' is accessible via a
@@ -557,10 +572,8 @@ class IrHttp(models.AbstractModel):
             # '/fr/foo/oeuf-1'. While it is nice (for humans) to have a
             # pretty URL, the real reason of this redirection is SEO.
             if request.httprequest.method in ('GET', 'HEAD'):
-                try:
-                    _, path = rule.build(args)
-                except odoo.exceptions.MissingError:
-                    raise werkzeug.exceptions.NotFound()
+                _, path = rule.build(args)
+
                 assert path is not None
                 generated_path = werkzeug.urls.url_unquote_plus(path)
                 current_path = werkzeug.urls.url_unquote_plus(request.httprequest.path)
