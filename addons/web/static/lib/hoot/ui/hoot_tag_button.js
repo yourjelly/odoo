@@ -1,4 +1,4 @@
-/** @odoo-module **/
+/** @odoo-module */
 
 import { Component } from "@odoo/owl";
 import { Tag } from "../core/tag";

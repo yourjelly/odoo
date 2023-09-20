@@ -1,4 +1,4 @@
-/** @odoo-module **/
+/** @odoo-module */
 
 import { Component, useState } from "@odoo/owl";
 import { Date, clearInterval, setInterval } from "../globals";
@@ -10,8 +10,11 @@ export class HootStatusPanel extends Component {
     static components = { HootTestPath };
 
     static props = {
-        filter: [String, { value: null }],
+        filter: [{ value: "failed" }, { value: "passed" }, { value: "skipped" }, { value: null }],
         filterResults: Function,
+        grouped: Boolean,
+        groupResults: Function,
+        sorted: [{ value: "asc" }, { value: "desc" }, { value: false }],
         sortResults: Function,
     };
 
@@ -59,10 +62,7 @@ export class HootStatusPanel extends Component {
                         <t t-esc="state.skipped" /> skipped
                     </button>
                 </t>
-                <button
-                    title="Sort by time"
-                    t-on-click="() => props.sortResults((test) => test.lastResults?.duration or 0)"
-                >
+                <button title="Sort by duration" t-on-click="props.sortResults">
                     <i class="bi bi-filter" />
                 </button>
             </div>

@@ -7,7 +7,7 @@ declare module "@odoo/owl" {
     export * from "@odoo/owl/dist/types/owl";
 }
 declare module "@odoo/hoot" {
-    export * from "@web/../lib/hoot/setup";
+    export * from "@web/../lib/hoot/hoot";
 }
 
 // declare const Qunit: typeof import("qunit"); => Because we add methods to QUnit, we define our own..

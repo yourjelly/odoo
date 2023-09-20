@@ -1,4 +1,4 @@
-/** @odoo-module **/
+/** @odoo-module */
 
 import { queryOne } from "../../helpers/dom";
 import {
@@ -17,7 +17,7 @@ import {
     scroll,
     select,
 } from "../../helpers/events";
-import { suite, test } from "../../hoot";
+import { describe, expect, test } from "../../hoot";
 import { mount } from "../local_helpers";
 
 /**
@@ -29,79 +29,79 @@ function addStepListener(element, type) {
     return on(element, type, (event) => QUnit.expect.step(event.type));
 }
 
-suite.skip("@odoo/hoot", "Helpers", "Events", () => {
-    test("clear", async (expect) => {
+describe.skip("@odoo/hoot", "Helpers", "Events", () => {
+    test("clear", async () => {
         await mount(/* xml */ `<input value="Test" />`);
 
         const input = queryOne("input");
-        expect.equal(input.value, "Test");
+        expect(input.value).toBe("Test");
 
         click(input);
         clear();
 
-        expect.equal(input.value, "");
+        expect(input.value).toBe("");
     });
 
-    test("click", async (expect) => {
+    test("click", async () => {
         await mount(/* xml */ `<button>Click me</button>`);
 
         addStepListener("button", "type");
 
         click("button");
-        expect.ok(click());
+        expect(click()).toBeTruthy();
     });
 
-    test.skip("drag", async (expect) => {
+    test.skip("drag", async () => {
         expect.ok(drag());
     });
 
-    test.skip("fill", async (expect) => {
+    test.skip("fill", async () => {
         await mount(/* xml */ `<input value="Test" />`);
 
-        expect.equal(queryOne("input"), "Test");
+        expect(queryOne("input")).toBe("Test");
 
         fill("input", " value");
 
-        expect.equal(queryOne("input"), "Test value");
+        expect(queryOne("input")).toBe("Test value");
     });
 
-    test.skip("hover", async (expect) => {
-        expect.ok(hover());
+    test.skip("hover", async () => {
+        expect(hover()).toBeTruthy();
     });
 
-    test.skip("keyDown", async (expect) => {
-        expect.ok(keyDown());
+    test.skip("keyDown", async () => {
+        expect(keyDown()).toBeTruthy();
     });
 
-    test.skip("keyUp", async (expect) => {
-        expect.ok(keyUp());
+    test.skip("keyUp", async () => {
+        expect(keyUp()).toBeTruthy();
     });
 
-    test.skip("leave", async (expect) => {
-        expect.ok(leave());
+    test.skip("leave", async () => {
+        expect(leave()).toBeTruthy();
     });
 
-    test.skip("on", async (expect) => {
-        expect.ok(on());
+    test.skip("on", async () => {
+        expect(on()).toBeTruthy();
     });
 
-    test.skip("pointerDown", async (expect) => {
-        expect.ok(pointerDown());
+    test.skip("pointerDown", async () => {
+        expect(pointerDown()).toBeTruthy();
     });
 
-    test.skip("pointerUp", async (expect) => {
-        expect.ok(pointerUp());
+    test.skip("pointerUp", async () => {
+        expect(pointerUp()).toBeTruthy();
     });
 
-    test.skip("press", async (expect) => {
-        expect.ok(press());
+    test.skip("press", async () => {
+        expect(press()).toBeTruthy();
     });
 
-    test.skip("scroll", async (expect) => {
-        expect.ok(scroll());
+    test.skip("scroll", async () => {
+        expect(scroll()).toBeTruthy();
     });
 
-    test.skip("select", async (expect) => {
-        expect.ok(select());
+    test.skip("select", async () => {
+        expect(select()).toBeTruthy();
     });
 });

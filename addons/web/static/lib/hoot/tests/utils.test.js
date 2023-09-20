@@ -1,8 +1,8 @@
-/** @odoo-module **/
+/** @odoo-module */
 
-import { expect } from "../expect";
 import { makeDeferred } from "../helpers/concurency";
-import { suite, test } from "../hoot";
+import { describe, test } from "../hoot";
+import { expect } from "../matchers";
 import {
     debounce,
     deepEqual,
@@ -17,7 +17,7 @@ import {
     title,
 } from "../utils";
 
-suite("@odoo/hoot", "Utils", () => {
+describe("@odoo/hoot", "Utils", () => {
     test("debounce", async () => {
         const def = makeDeferred();
         const debounced = debounce(function namedFunction(arg) {

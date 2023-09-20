@@ -1,4 +1,4 @@
-/** @odoo-module **/
+/** @odoo-module */
 
 import { groupBy, isIterable, log, match } from "../utils";
 

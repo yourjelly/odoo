@@ -1,11 +1,11 @@
-/** @odoo-module **/
+/** @odoo-module */
 
 import { Component } from "@odoo/owl";
 import { Test } from "../core/test";
+import { withParams } from "../core/url";
 import { compactXML, copy } from "../utils";
 import { HootCopyButton } from "./hoot_copy_button";
 import { HootTagButton } from "./hoot_tag_button";
-import { withParams } from "../core/url";
 
 /** @extends Component<{}, import("../hoot").Environment> */
 export class HootTestPath extends Component {
@@ -22,24 +22,24 @@ export class HootTestPath extends Component {
                     <a
                         t-att-href="withParams('suite', suite.id)"
                         class="hoot-suite hoot-truncate hoot-result-button-text hoot-text-muted hoot-row hoot-p-1"
-                        t-att-class="{ 'hoot-skipped': suite.skip }"
+                        t-att-class="{ 'hoot-skipped': suite.config.skip }"
                         draggable="false"
                         t-attf-title='Run suite "{{ suite.name }}"'
                     >
                         <i class="bi bi-play-fill" />
                         <span class="hoot-text" t-esc="suite.name" />
                     </a>
-                    <span class="hoot-mx-1" t-att-class="{ 'hoot-skipped': suite.skip }">&gt;</span>
+                    <span class="hoot-mx-1" t-att-class="{ 'hoot-skipped': suite.config.skip }">&gt;</span>
                 </t>
             </span>
             <span
                 class="hoot-test hoot-truncate hoot-row hoot-gap-1"
-                t-att-class="{ 'hoot-skipped': props.test.skip }"
+                t-att-class="{ 'hoot-skipped': props.test.config.skip }"
                 t-att-title="props.test.name"
                 draggable="false"
             >
                 <t t-esc="props.test.name" />
-                <t t-if="!props.test.skip">
+                <t t-if="!props.test.config.skip">
                     <t t-set="expectLength" t-value="props.test.lastResults?.assertions?.length or 0" />
                     <span class="hoot-select-none" t-attf-title="{{ expectLength }} assertions passed">
                         (<t t-esc="expectLength" />)
@@ -68,8 +68,8 @@ export class HootTestPath extends Component {
     withParams = withParams;
 
     getStatusInfo() {
-        const { lastResults, skip } = this.props.test;
-        if (!lastResults || skip) {
+        const { config, lastResults } = this.props.test;
+        if (!lastResults || config.skip) {
             return { className: "hoot-bg-info", text: "skipped" };
         } else if (lastResults.aborted) {
             return { className: "hoot-bg-warn", text: "aborted" };

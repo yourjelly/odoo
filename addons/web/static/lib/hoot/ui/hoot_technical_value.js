@@ -1,8 +1,7 @@
-/** @odoo-module **/
+/** @odoo-module */
 
 import { Component, toRaw, useState } from "@odoo/owl";
-import { isMarkupHelper } from "../matchers/expect_helpers";
-import { compactXML, isElement, isIterable, log, toSelector } from "../utils";
+import { MarkupHelper, compactXML, isElement, isIterable, log, toSelector } from "../utils";
 
 /**
  * @typedef {{ value: any }} TechnicalValueProps
@@ -93,7 +92,7 @@ export class HootTechnicalValue extends Component {
     toSelector = toSelector;
     isIterable = isIterable;
     isElement = isElement;
-    isMarkupHelper = isMarkupHelper;
+    isMarkupHelper = (value) => value instanceof MarkupHelper;
 
     setup() {
         this.value = this.getValueCopy(this.props);

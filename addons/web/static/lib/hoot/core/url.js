@@ -1,4 +1,4 @@
-/** @odoo-module **/
+/** @odoo-module */
 
 import { onWillRender, reactive, useState } from "@odoo/owl";
 import { Error, Object, Set, URL, URLSearchParams, history, location } from "../globals";

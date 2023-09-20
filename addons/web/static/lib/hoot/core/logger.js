@@ -1,10 +1,10 @@
-/** @odoo-module **/
+/** @odoo-module */
 
 import { toRaw } from "@odoo/owl";
 import { log } from "../utils";
 
 /**
- * @param {ReturnType<typeof import("./runner").makeTestRunner>} runner
+ * @param {import("./runner").TestRunner} runner
  */
 export function makeLogger(runner) {
     let currentSuiteFailed = 0;

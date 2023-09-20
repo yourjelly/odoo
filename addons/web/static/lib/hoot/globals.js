@@ -1,4 +1,4 @@
-/** @odoo-module **/
+/** @odoo-module */
 
 // Import initial Window object to prevent them from being patched
 export const Boolean = window.Boolean;

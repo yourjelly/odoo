@@ -1,4 +1,4 @@
-/** @odoo-module **/
+/** @odoo-module */
 
 import { Component, onMounted, onWillStart, useRef, useState, useSubEnv } from "@odoo/owl";
 import { createURL } from "../core/url";
@@ -191,7 +191,7 @@ export class HootMain extends Component {
 
             if (!runner.config.manual) {
                 // Allows DOM to be fully rendered before starting
-                requestAnimationFrame(runner.start);
+                requestAnimationFrame(() => runner.start());
             }
         });
     }

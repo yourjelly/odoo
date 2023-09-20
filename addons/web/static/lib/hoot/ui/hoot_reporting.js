@@ -1,9 +1,8 @@
-/** @odoo-module **/
+/** @odoo-module */
 
 import { Component, useState } from "@odoo/owl";
 import { subscribeToURLParams } from "../core/url";
-import { isMarkupHelper } from "../matchers/expect_helpers";
-import { compactXML, debounce } from "../utils";
+import { MarkupHelper, compactXML, debounce, match } from "../utils";
 import { HootStatusPanel } from "./hoot_status_panel";
 import { HootTestResult } from "./hoot_test_result";
 
@@ -47,17 +46,23 @@ export class HootReporting extends Component {
             <HootStatusPanel
                 filter="state.filter"
                 filterResults.bind="filterResults"
+                grouped="state.grouped"
+                groupResults.bind="groupResults"
+                sorted="state.sorted"
                 sortResults.bind="sortResults"
             />
             <div class="hoot-results">
-                <t t-foreach="getFilteredResults()" t-as="test" t-key="test.id">
-                    <HootTestResult test="test" open="state.open.includes(test.id)" />
+                <t t-foreach="getFilteredResults()" t-as="result" t-key="result.id">
+                    <t t-if="result.group">
+                    </t>
+                    <t t-else="">
+                        <HootTestResult test="result.test" open="state.open.includes(result.test.id)" />
+                    </t>
                 </t>
             </div>
         </div>
     `;
 
-    isMarkupHelper = isMarkupHelper;
     debouncedOnScroll = debounce(() => this.onScroll(), 16);
 
     setup() {
@@ -67,10 +72,10 @@ export class HootReporting extends Component {
 
         this.state = useState({
             filter: null,
+            grouped: false,
             /** @type {string[]} */
             open: [],
-            /** @type {[(test: Test) => number, boolean] | null} */
-            sort: null,
+            sorted: false,
             /** @type {Record<string, Test>} */
             tests: {},
         });
@@ -99,28 +104,32 @@ export class HootReporting extends Component {
     }
 
     getFilteredResults() {
-        const { filter, sort, tests } = this.state;
-        const { showskipped, showpassed } = this.env.runner.config;
+        if (!this.state) return [];
 
-        const groups = sort ? {} : [];
-        const [mapFn, ascending] = sort || [];
+        const makeResult = ({ group, test }) =>
+            group ? { group, id: `group#${group.id}` } : { test, id: `test#${test.id}` };
+
+        const { showskipped, showpassed } = this.env.runner.config;
+        const { filter, grouped, sorted, tests } = this.state;
+
+        const groups = sorted ? {} : [];
         for (const test of Object.values(tests)) {
             let matchFilter = false;
             switch (filter) {
                 case "failed": {
-                    matchFilter = !test.skip && test.results.some((r) => !r.pass);
+                    matchFilter = !test.config.skip && test.results.some((r) => !r.pass);
                     break;
                 }
                 case "passed": {
-                    matchFilter = !test.skip && test.results.every((r) => r.pass);
+                    matchFilter = !test.config.skip && test.results.every((r) => r.pass);
                     break;
                 }
                 case "skipped": {
-                    matchFilter = test.skip;
+                    matchFilter = test.config.skip;
                     break;
                 }
                 default: {
-                    if (!showskipped && test.skip) {
+                    if (!showskipped && test.config.skip) {
                         matchFilter = false;
                     } else if (!showpassed && test.results.every((r) => r.pass)) {
                         matchFilter = false;
@@ -134,30 +143,36 @@ export class HootReporting extends Component {
                 continue;
             }
 
-            if (sort) {
-                const key = mapFn(test);
+            if (sorted) {
+                const key = test.lastResults?.duration || 0;
                 if (!groups[key]) {
                     groups[key] = [];
                 }
-                groups[key].push(test);
+                groups[key].push(makeResult({ test }));
             } else {
-                groups.push(test);
+                groups.push(makeResult({ test }));
             }
         }
 
-        if (sort) {
+        if (sorted) {
             const values = Object.values(groups).flat();
-            return ascending ? values : values.reverse();
+            return sorted === "asc" ? values : values.reverse();
         } else {
             return groups;
         }
     }
 
-    sortResults(mapFn) {
-        if (this.state.sort) {
-            this.state.sort = this.state.sort[1] ? null : [mapFn, true];
+    groupResults() {
+        this.state.grouped = !this.state.grouped;
+    }
+
+    sortResults() {
+        if (!this.state.sorted) {
+            this.state.sorted = "desc";
+        } else if (this.state.sorted === "desc") {
+            this.state.sorted = "asc";
         } else {
-            this.state.sort = [mapFn, false];
+            this.state.sorted = false;
         }
     }
 }

@@ -1,8 +1,8 @@
-/** @odoo-module **/
+/** @odoo-module */
 
-import { expect, suite, test } from "@odoo/hoot";
+import { describe, expect, test } from "@odoo/hoot";
 
-suite("demo", () => {
+describe("demo", () => {
     test.todo("todo", () => {
         expect(true).not.toBeTruthy();
     });
@@ -12,7 +12,7 @@ suite("demo", () => {
     });
 
     for (let s = 0; s < 10; s++) {
-        suite(`suite ${s}`, () => {
+        describe(`suite ${s}`, () => {
             test["multi=100"](`test from suite ${s}`, () => {
                 expect(true).toBeTruthy();
             });

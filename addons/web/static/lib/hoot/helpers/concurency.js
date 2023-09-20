@@ -1,4 +1,4 @@
-/** @odoo-module **/
+/** @odoo-module */
 
 import { config as domConfig, observe, queryAll } from "./dom";
 

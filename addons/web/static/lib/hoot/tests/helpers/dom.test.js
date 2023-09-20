@@ -1,6 +1,5 @@
-/** @odoo-module **/
+/** @odoo-module */
 
-import { expect } from "../../expect";
 import {
     getFocusableElements,
     getNextFocusableElement,
@@ -21,7 +20,7 @@ import {
     queryOne,
 } from "../../helpers/dom";
 import { click } from "../../helpers/events";
-import { suite, test } from "../../hoot";
+import { describe, expect, test } from "../../hoot";
 
 /**
  * @param {Document} document
@@ -93,7 +92,7 @@ const FULL_HTML_TEMPLATE = /* xml */ `
     `;
 const SVG_URL = "http://www.w3.org/2000/svg";
 
-suite.ui.skip("@odoo/hoot", "Helpers", "DOM", () => {
+describe.ui.skip("@odoo/hoot", "Helpers", "DOM", () => {
     test("getFocusableElements", async () => {
         await mount(/* xml */ `
             <input class="input" />

@@ -1,4 +1,4 @@
-/** @odoo-module **/
+/** @odoo-module */
 
 import { matchMedia, navigator, ontouchstart } from "../globals";
 import { copy, isIterable } from "../utils";
@@ -11,7 +11,6 @@ import {
     isEditable,
     isEventTarget,
     isFocusable,
-    parseCoordinates,
     queryAll,
     queryOne,
     toSelector,
@@ -1100,5 +1099,5 @@ export const config = {
         // To fill all at once: paste from clipboard (Control + V)
         fillAll: (target, value) => triggerKeyPress(target, { ctrlKey: true, key: "v" }, value),
     },
-    log: Boolean(odoo.debug),
+    log: true,
 };

@@ -1,4 +1,4 @@
-/** @odoo-module **/
+/** @odoo-module */
 
 import { App, Component, xml } from "@odoo/owl";
 import { getFixture } from "../helpers/dom";

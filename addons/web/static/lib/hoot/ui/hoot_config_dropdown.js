@@ -1,4 +1,4 @@
-/** @odoo-module **/
+/** @odoo-module */
 
 import { Component, useExternalListener, useRef, useState } from "@odoo/owl";
 import { compactXML } from "../utils";

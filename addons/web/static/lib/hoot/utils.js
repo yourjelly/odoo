@@ -1,4 +1,4 @@
-/** @odoo-module **/
+/** @odoo-module */
 
 import { xml } from "@odoo/owl";
 import {
@@ -7,7 +7,6 @@ import {
     console,
     JSON,
     localStorage,
-    location,
     navigator,
     Object,
     Proxy,
@@ -15,16 +14,21 @@ import {
     setTimeout,
     String,
 } from "./globals";
+import { DiffMatchPatch } from "./lib/diff_match_patch";
 
 /**
  * @typedef {string | RegExp | { new(): any }} Matcher
  */
 
 //-----------------------------------------------------------------------------
+
 // Internal
 //-----------------------------------------------------------------------------
 
 const REGEX_PATTERN = /^\/(.*)\/([gim]+)?$/;
+
+const dmp = new DiffMatchPatch();
+const { DIFF_INSERT, DIFF_DELETE } = DiffMatchPatch;
 
 //-----------------------------------------------------------------------------
 // Exports
@@ -497,6 +501,15 @@ export function storage(type) {
 }
 
 /**
+ * @template T
+ * @param {T} a
+ * @param {T} b
+ */
+export function strictEqual(a, b) {
+    return a === b;
+}
+
+/**
  * @param {string} string
  */
 export function stringToNumber(string) {
@@ -526,5 +539,60 @@ export function toSelector(element, options) {
         return { tagName, id, classNames };
     } else {
         return [tagName, id, ...classNames].join("");
+    }
+}
+
+export class MarkupHelper {
+    /**
+     * @param {{
+     *  className?: string;
+     *  content: any;
+     *  multiline: boolean;
+     * }} params
+     */
+    constructor({ className, content, multiline, tagName }) {
+        this.className = className || "";
+        this.tagName = tagName || "div";
+        this.content = content || "";
+        this.multiline = multiline;
+    }
+
+    /**
+     * @param {string} a
+     * @param {string} b
+     */
+    static diff(a, b) {
+        return new MarkupHelper({
+            multiline: true,
+            content: dmp.diff_main(formatTechnical(a), formatTechnical(b)).map((diff) => {
+                let tagName = "t";
+                if (diff[0] === DIFF_INSERT) {
+                    tagName = "ins";
+                } else if (diff[0] === DIFF_DELETE) {
+                    tagName = "del";
+                }
+                return new MarkupHelper({ content: diff[1], tagName });
+            }),
+        });
+    }
+
+    /** @param {string} content */
+    static green(content) {
+        return new MarkupHelper({ className: "hoot-text-success", content });
+    }
+
+    /** @param {Iterable<string>} content */
+    static multiline(content) {
+        return new MarkupHelper({ multiline: true, content });
+    }
+
+    /** @param {string} content */
+    static red(content) {
+        return new MarkupHelper({ className: "hoot-text-danger", content });
+    }
+
+    /** @param {string} content */
+    static text(content) {
+        return new MarkupHelper({ content });
     }
 }

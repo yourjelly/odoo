@@ -1,4 +1,4 @@
-/** @odoo-module **/
+/** @odoo-module */
 
 /**
  * @typedef {Record<string, any>} Schema
@@ -45,6 +45,10 @@ const parseStringArray = makeParser((values) => values);
 //-----------------------------------------------------------------------------
 // Exports
 //-----------------------------------------------------------------------------
+
+export function getJobConfig() {
+
+}
 
 /** @implements {Schema} */
 export const CONFIG_SCHEMA = {

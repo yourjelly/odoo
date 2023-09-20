@@ -1,4 +1,4 @@
-/** @odoo-module **/
+/** @odoo-module */
 
 import { Component } from "@odoo/owl";
 import { Tag } from "../core/tag";
@@ -50,22 +50,22 @@ export class HootTestResult extends Component {
                         >
                             <i class="bi bi-bug-fill" />
                         </a>
-                        <t t-if="!props.test.skip or !props.test.hasTag(Tag.SKIP)">
+                        <t t-if="!props.test.config.skip or !props.test.hasTag(Tag.SKIP)">
                             <a
                                 t-att-href="withParams('skip-test', props.test.id)"
                                 class="hoot-result-btn hoot-text-info hoot-px-1 hoot-py-0.5"
                                 t-att-title="props.test.skip ? 'Unskip test' : 'Skip test'"
                             >
-                                <i t-attf-class="bi bi-{{ props.test.skip ? 'arrow-repeat' : 'fast-forward-fill' }}" />
+                                <i t-attf-class="bi bi-{{ props.test.config.skip ? 'arrow-repeat' : 'fast-forward-fill' }}" />
                             </a>
                         </t>
                     </div>
                 </div>
                 <span
                     class="hoot-text-sm hoot-whitespace-nowrap"
-                    t-attf-class="hoot-text-{{ props.test.skip ? 'info' : 'muted' }}"
+                    t-attf-class="hoot-text-{{ props.test.config.skip ? 'info' : 'muted' }}"
                 >
-                    <t t-if="props.test.skip">
+                    <t t-if="props.test.config.skip">
                         skipped
                     </t>
                     <t t-else="">
@@ -76,7 +76,7 @@ export class HootTestResult extends Component {
                     </t>
                 </span>
             </summary>
-            <t t-if="!props.test.skip">
+            <t t-if="!props.test.config.skip">
                 <div class="hoot-result-detail hoot-col hoot-mx-3">
                     <t t-foreach="props.test.lastResults.assertions" t-as="result" t-key="result.id">
                         <div class="hoot-result-line hoot-row hoot-px-2" t-att-class="result.pass ? 'hoot-text-success' : 'hoot-text-danger'">
@@ -109,8 +109,8 @@ export class HootTestResult extends Component {
     withParams = withParams;
 
     get className() {
-        const { lastResults, skip } = this.props.test;
-        if (!lastResults || skip) {
+        const { config, lastResults } = this.props.test;
+        if (!lastResults || config.skip) {
             return "hoot-skip";
         } else if (lastResults.aborted) {
             return "hoot-abort";
