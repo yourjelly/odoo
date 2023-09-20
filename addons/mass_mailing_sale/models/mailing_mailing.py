@@ -43,13 +43,13 @@ class MassMailing(models.Model):
         return {
             'context': {
                 'create': False,
-                'search_default_group_by_date_day': True,
-                'sale_report_view_hide_date': True,
+                'search_default_group_by_date': True,
             },
             'domain': [('source_id', '=', self.source_id.id)],
             'help': Markup('<p class="o_view_nocontent_smiling_face">%s</p><p>%s</p>') % (
                 helper_header, helper_message,
             ),
+            'search_view_id': [self.env.ref('mass_mailing_sale.view_order_product_search_inherit').id],
             'name': _("Sales Analysis"),
             'res_model': 'sale.report',
             'type': 'ir.actions.act_window',
