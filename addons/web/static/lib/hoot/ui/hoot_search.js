@@ -212,7 +212,7 @@ export class HootSearch extends Component {
     }
 
     onInput() {
-        this.state.buttonDisabled = !this.state.query || this.state.query === this.urlParams.filter;
+        this.state.buttonDisabled = this.state.query === this.urlParams.filter;
         this.updateSuggestions();
     }
 
@@ -240,8 +240,10 @@ export class HootSearch extends Component {
 
         switch (ev.key) {
             case "Escape": {
-                ev.preventDefault();
-                this.state.showDropdown = false;
+                if (this.state.showDropdown) {
+                    ev.preventDefault();
+                    this.state.showDropdown = false;
+                }
                 return;
             }
             case "ArrowDown": {
