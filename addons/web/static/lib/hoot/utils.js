@@ -207,18 +207,6 @@ export function generateHash(...strings) {
     return (hash + 2 ** 32).toString(16).slice(-8);
 }
 
-export function getDebugMode() {
-    const { get, set } = storage("session");
-    if (new URL(location).searchParams.has("debug")) {
-        set("debug", true);
-        return true;
-    }
-    if (get("debug")) {
-        return true;
-    }
-    return false;
-}
-
 /**
  * This function computes a score that represent the fact that the
  * string contains the pattern, or not
