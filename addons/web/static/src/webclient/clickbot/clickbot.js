@@ -125,9 +125,11 @@
         let timeLimit = tl;
         while (!stopCondition()) {
             if (timeLimit <= 0) {
-                throw new Error(`Timeout, the clicked element took more than ${tl / 1000} seconds to load`)
+                throw new Error(
+                    `Timeout, the clicked element took more than ${tl / 1000} seconds to load`
+                );
             }
-            await new Promise(resolve => setTimeout(resolve, interval));
+            await new Promise((resolve) => setTimeout(resolve, interval));
             timeLimit -= interval;
         }
     }
@@ -154,13 +156,11 @@
      * Make sure the apps menu is open (community only)
      */
     async function ensureAppsMenu() {
-        const appsMenu = document.querySelector(".o_navbar_apps_menu .dropdown-menu");
+        const appsMenu = document.querySelector(".o-dropdown--menu");
         if (!appsMenu) {
             const toggler = document.querySelector(".o_navbar_apps_menu .dropdown-toggle");
             await triggerClick(toggler, "apps menu toggle button");
-            await waitForCondition(() =>
-                document.querySelector(".o_navbar_apps_menu .dropdown-menu")
-            );
+            await waitForCondition(() => document.querySelector(".o-dropdown--menu"));
         }
     }
 
@@ -171,7 +171,7 @@
      */
     async function getNextMenu() {
         const menus = document.querySelectorAll(
-            ".o_menu_sections > .dropdown > .dropdown-toggle, .o_menu_sections > .dropdown-item"
+            ".o_menu_sections > .dropdown-toggle, .o-dropdown--menu > .dropdown-item"
         );
         if (menuIndex === menus.length) {
             menuIndex = 0;
@@ -189,7 +189,7 @@
                 menuIndex = 0; // empty More menu has no dropdown (FIXME?)
                 return;
             }
-            const items = dropdown.querySelectorAll(".dropdown-item");
+            const items = document.querySelectorAll(".o-dropdown--menu .dropdown-item");
             menu = items[subMenuIndex];
             if (subMenuIndex === items.length - 1) {
                 // this is the last item, so go to the next menu
@@ -446,7 +446,7 @@
                         document.querySelector(".o_navbar_apps_menu .dropdown-toggle")
                     );
                     app = document.querySelector(
-                        `.o_navbar_apps_menu .dropdown-item[data-menu-xmlid="${xmlId}"]`
+                        `.o-dropdown--menu .dropdown-item[data-menu-xmlid="${xmlId}"]`
                     );
                 }
                 if (!app) {
