@@ -4,11 +4,10 @@ import { mount, whenReady } from "@odoo/owl";
 import { makeLogger } from "./core/logger";
 import { makeTestRunner } from "./core/runner";
 import { expect as _expect, registerMatcher } from "./expect";
-import { URL, location } from "./globals";
 import { config as domConfig } from "./helpers/dom";
 import { config as eventsConfig } from "./helpers/events";
 import { HootMain } from "./ui/hoot_main";
-import { getDebugMode, log } from "./utils";
+import { log } from "./utils";
 
 import "./matchers/to_be";
 import "./matchers/to_be_between";
@@ -34,7 +33,7 @@ makeLogger(runner);
 
 whenReady(async () =>
     mount(HootMain, document.body, {
-        dev: getDebugMode(),
+        dev: true, // TODO: remove when the lib is stable
         env: { runner },
         name: "HOOT",
     })

@@ -49,7 +49,7 @@ export class HootTestPath extends Component {
             </span>
             <t t-if="props.test.config.multi">
                 <strong class="hoot-text-warn hoot-whitespace-nowrap">
-                    x <t t-esc="props.test.config.multi" />
+                    x<t t-esc="props.test.config.multi" />
                 </strong>
             </t>
         </span>
