@@ -444,16 +444,10 @@ class MrpWorkorder(models.Model):
                         values['duration_expected'] = computed_duration
                 # Update MO dates if the start date of the first WO or the
                 # finished date of the last WO is update.
-                if workorder == workorder.production_id.workorder_ids[0] and 'date_start' in values:
-                    if values['date_start']:
-                        workorder.production_id.with_context(force_date=True).write({
-                            'date_start': fields.Datetime.to_datetime(values['date_start'])
-                        })
-                if workorder == workorder.production_id.workorder_ids[-1] and 'date_finished' in values:
-                    if values['date_finished']:
-                        workorder.production_id.with_context(force_date=True).write({
-                            'date_finished': fields.Datetime.to_datetime(values['date_finished'])
-                        })
+                if values.get('date_start') and workorder.production_id.date_start > values['date_start']:
+                    workorder.production_id.with_context(force_date=True).date_start = values['date_start']
+                if values.get('date_finished') and workorder.production_id.date_finished < values['date_finished']:
+                    workorder.production_id.with_context(force_date=True).date_finished = values['date_finished']
         return super(MrpWorkorder, self).write(values)
 
     @api.model_create_multi
@@ -512,26 +506,16 @@ class MrpWorkorder(models.Model):
                 continue
             # Check if this workcenter is better than the previous ones
             if to_date and to_date < best_date_finished:
-                best_date_start = from_date
                 best_date_finished = to_date
-                best_workcenter = workcenter
                 vals = {
                     'workcenter_id': workcenter.id,
                     'duration_expected': duration_expected,
+                    'date_start': from_date,
+                    'date_finished': to_date,
                 }
         # If none of the workcenter are available, raise
         if best_date_finished == datetime.max:
             raise UserError(_('Impossible to plan the workorder. Please check the workcenter availabilities.'))
-        # Create leave on chosen workcenter calendar
-        leave = self.env['resource.calendar.leaves'].create({
-            'name': self.display_name,
-            'calendar_id': best_workcenter.resource_calendar_id.id,
-            'date_from': best_date_start,
-            'date_to': best_date_finished,
-            'resource_id': best_workcenter.resource_id.id,
-            'time_type': 'other'
-        })
-        vals['leave_id'] = leave.id
         self.write(vals)
 
     def _cal_cost(self):
