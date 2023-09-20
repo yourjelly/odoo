@@ -17,7 +17,7 @@ export class HootRunAllButton extends Component {
     withParams = withParams;
 
     setup() {
-        const { runner, url } = this.env;
+        const { runner } = this.env;
         subscribeToURLParams(...Object.keys(runner.config));
     }
 }

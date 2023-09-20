@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { App } from "@odoo/owl";
+import { App, Component, xml } from "@odoo/owl";
 import { getFixture } from "../helpers/dom";
 import { registerCleanup } from "../hoot";
 

@@ -84,6 +84,7 @@ export function makeTestRunner(params) {
                 switch (tag.name) {
                     case Tag.DEBUG:
                         runner.debug = true;
+                    // fall through
                     case Tag.ONLY:
                         only.suites.add(suite.id);
                         break;
@@ -146,6 +147,7 @@ export function makeTestRunner(params) {
                 switch (tag.name) {
                     case Tag.DEBUG:
                         runner.debug = true;
+                    // fall through
                     case Tag.ONLY:
                         only.tests.add(test.id);
                         break;

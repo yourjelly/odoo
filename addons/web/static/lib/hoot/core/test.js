@@ -2,7 +2,6 @@
 
 import { reactive } from "@odoo/owl";
 import { generateHash, normalize } from "../utils";
-import { Tag } from "./tag";
 
 /**
  * @typedef {import("./suite").Suite} Suite

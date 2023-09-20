@@ -119,7 +119,6 @@ export function withParams(type, id) {
     const clearAll = () => Object.keys(nextParams).forEach((key) => nextParams[key].clear());
 
     const nextParams = Object.fromEntries(FILTER_KEYS.map((k) => [k, new Set(urlParams[k] || [])]));
-    delete nextParams.filter;
 
     let skip = false;
     if (type && type.startsWith("skip-")) {

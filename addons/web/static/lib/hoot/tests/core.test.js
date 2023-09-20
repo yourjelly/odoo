@@ -48,6 +48,7 @@ suite("@odoo/hoot", "Core", "Runner", () => {
     });
 
     test("can refuse standalone tests", async () => {
+        const runner = makeTestRunner();
         expect(() =>
             runner.test("standalone test", () => {
                 expect(true).toBeTruthy();
