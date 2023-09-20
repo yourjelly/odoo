@@ -7,7 +7,7 @@ import { deepEqual, formatHumanReadable, isIterable, MarkupHelper, match } from 
 /**
  * @typedef {ArgumentPrimitive | `${ArgumentPrimitive}[]` | null} ArgumentDef
  *
- * @typedef {"any" | "boolean" | "number" | "string"} ArgumentPrimitive
+ * @typedef {"any" | "boolean" | "function" | "number" | "string"} ArgumentPrimitive
  *
  * @typedef {{
  *  aborted: boolean;
@@ -329,52 +329,6 @@ export class Matchers {
     }
 
     /**
-     * Expects the received value to be strictly between `min` and `max`.
-     *
-     * @param {number | [number, number]} min
-     * @param {number | string} [max]
-     * @param {string} [message=""]
-     * @example ```js
-     *  expect(5).toBeBetween(3, 9);
-     *  expect(-8).toBeBetween([-10, 0]);
-     * ```
-     */
-    toBeBetween(min, max, message = "") {
-        this.#stack = new Error().stack;
-
-        if (isIterable(min)) {
-            message = max;
-            [min, max] = min;
-        }
-
-        ensureArguments([
-            [min, "number"],
-            [max, "number"],
-            [message, ["string", null]],
-        ]);
-
-        ensure(
-            min <= max,
-            `Expected the first argument to be smaller than the second, got ${min} and ${max}`
-        );
-
-        return this.#resolve({
-            predicate: (actual) => min < actual && actual < max,
-            message: (pass) =>
-                message ||
-                (pass
-                    ? `%actual% is[! not] between ${formatHumanReadable(
-                          min
-                      )} and ${formatHumanReadable(max)}`
-                    : `expected value to[! not] be between given range`),
-            details: (actual) => [
-                [MarkupHelper.green("Expected:"), `${min} - ${max}`],
-                [MarkupHelper.red("Received:"), actual],
-            ],
-        });
-    }
-
-    /**
      * Expects the received value to be strictly greater than `max`.
      *
      * @param {number} max
@@ -462,6 +416,39 @@ export class Matchers {
     }
 
     /**
+     * Expects the received value to be of the given type.
+     *
+     * @param {"bigint" | "boolean" | "function" | "number" | "object" | "string" | "symbol" | "undefined"} type
+     * @param {string} [message=""]
+     * @example ```js
+     *  expect("foo").toBeTypeOf("");
+     *  expect({ foo: 1 }).toBeTypeOf("object");
+     * ```
+     */
+    toBeTypeOf(type, message = "") {
+        this.#stack = new Error().stack;
+
+        ensureArguments([
+            [type, "string"],
+            [message, ["string", null]],
+        ]);
+
+        return this.#resolve({
+            transform: (actual) => typeof actual,
+            predicate: (actual) => actual === type,
+            message: (pass) =>
+                message ||
+                (pass
+                    ? `%actual% is[! not] of type ${formatHumanReadable(type)}`
+                    : `expected values to be of the given type`),
+            details: (actual) => [
+                [MarkupHelper.green("Expected:"), type],
+                [MarkupHelper.red("Received:"), actual],
+            ],
+        });
+    }
+
+    /**
      * Expects the received value (`Element`) to be visible in the current view.
      *
      * @param {string} [message=""]
@@ -481,6 +468,48 @@ export class Matchers {
                 message ||
                 (pass ? `%actual% is[! not] visible` : `expected target to be [visible!invisible]`),
             details: (actual) => [[MarkupHelper.red("Received:"), actual]],
+        });
+    }
+
+    /**
+     * Expects the received value to be strictly between `min` (inclusive) and
+     * `max` (exclusive).
+     *
+     * @param {number} min (inclusive)
+     * @param {number} max (exlusive)
+     * @param {string} [message=""]
+     * @example ```js
+     *  expect(3).toBeWithin(3, 9);
+     *  expect(-8).toBeWithin([-10, 0]);
+     * ```
+     */
+    toBeWithin(min, max, message = "") {
+        this.#stack = new Error().stack;
+
+        ensureArguments([
+            [min, "number"],
+            [max, "number"],
+            [message, ["string", null]],
+        ]);
+
+        ensure(
+            min <= max,
+            `Expected the first argument to be smaller than the second, got ${min} and ${max}`
+        );
+
+        return this.#resolve({
+            predicate: (actual) => min <= actual && actual < max,
+            message: (pass) =>
+                message ||
+                (pass
+                    ? `%actual% is[! not] between ${formatHumanReadable(
+                          min
+                      )} and ${formatHumanReadable(max)}`
+                    : `expected value to[! not] be between given range`),
+            details: (actual) => [
+                [MarkupHelper.green("Expected:"), `${min} - ${max}`],
+                [MarkupHelper.red("Received:"), actual],
+            ],
         });
     }
 
@@ -674,6 +703,42 @@ export class Matchers {
             details: (actual) => [
                 [MarkupHelper.green("Matcher:"), matcher],
                 [MarkupHelper.red("Received:"), actual],
+            ],
+        });
+    }
+
+    /**
+     * Expects the received value to satisfy the given predicate, taking the received
+     * value as argument.
+     *
+     * @param {(actual: T) => boolean} predicate
+     * @param {string} [message=""]
+     * @example ```js
+     *  expect("foo").toSatisfy((value) => typeof value === "string");
+     *  expect(false).not.toSatisfy(Boolean);
+     * ```
+     */
+    toSatisfy(predicate, message = "") {
+        this.#stack = new Error().stack;
+
+        ensureArguments([
+            [predicate, "function"],
+            [message, ["string", null]],
+        ]);
+
+        return this.#resolve({
+            predicate: (actual) => predicate(actual),
+            message: (pass) =>
+                message ||
+                (pass
+                    ? `%actual% [satisfies!does not satisfy] the predicate ${formatHumanReadable(
+                          predicate
+                      )}`
+                    : `expected value to[! not] satisfy the predicate`),
+            details: (actual) => [
+                [MarkupHelper.green("Expected:"), true],
+                [MarkupHelper.red("Received:"), actual],
+                [MarkupHelper.text("Predicate:"), predicate],
             ],
         });
     }
