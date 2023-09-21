@@ -152,8 +152,8 @@ def file_path(file_path, filter_ext=('',), env=None):
     Examples::
 
     >>> file_path('hr')
-    >>> file_path('hr/static/description/icon.png')
-    >>> file_path('hr/static/description/icon.png', filter_ext=('.png', '.jpg'))
+    >>> file_path('hr/static/description/icon.svg')
+    >>> file_path('hr/static/description/icon.svg', filter_ext=('.png', '.jpg'))
 
     :param str file_path: absolute file path, or relative path within any `addons_path` directory
     :param list[str] filter_ext: optional list of supported extensions (lowercase, with leading dot)
@@ -193,9 +193,9 @@ def file_open(name, mode="r", filter_ext=None, env=None):
 
     Examples::
 
-        >>> file_open('hr/static/description/icon.png')
-        >>> file_open('hr/static/description/icon.png', filter_ext=('.png', '.jpg'))
-        >>> with file_open('/opt/odoo/addons/hr/static/description/icon.png', 'rb') as f:
+        >>> file_open('hr/static/description/icon.svg')
+        >>> file_open('hr/static/description/icon.svg', filter_ext=('.png', '.jpg'))
+        >>> with file_open('/opt/odoo/addons/hr/static/description/icon.svg', 'rb') as f:
         ...     contents = f.read()
 
     :param name: absolute or relative path to a file located inside an addon

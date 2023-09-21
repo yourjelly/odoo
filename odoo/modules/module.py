@@ -37,7 +37,7 @@ _DEFAULT_MANIFEST = {
     'depends': [],
     'description': '',
     'external_dependencies': {},
-    #icon: f'/{module}/static/description/icon.png',  # automatic
+    #icon: f'/{module}/static/description/icon.svg',  # automatic
     'init_xml': [],
     'installable': True,
     'images': [],  # website
@@ -241,13 +241,13 @@ def get_resource_from_path(path):
     return None
 
 def get_module_icon(module):
-    iconpath = ['static', 'description', 'icon.png']
+    iconpath = ['static', 'description', 'icon.svg']
     if get_module_resource(module, *iconpath):
         return ('/' + module + '/') + '/'.join(iconpath)
     return '/base/'  + '/'.join(iconpath)
 
 def get_module_icon_path(module):
-    iconpath = ['static', 'description', 'icon.png']
+    iconpath = ['static', 'description', 'icon.svg']
     path = get_module_resource(module.name, *iconpath)
     if not path:
         path = get_module_resource('base', *iconpath)

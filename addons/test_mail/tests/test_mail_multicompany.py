@@ -402,7 +402,7 @@ class TestMultiCompanySetup(MailCommon, TestRecipients):
             test_activity,
             {
                 "actions": [{"icon": "fa-clock-o", "name": "Summary"}],
-                "icon": "/base/static/description/icon.png",
+                "icon": "/base/static/description/icon.svg",
                 "id": self.env["ir.model"]._get_id("mail.test.multi.company.with.activity"),
                 "model": "mail.test.multi.company.with.activity",
                 "name": "Test Multi Company Mail With Activity",
@@ -422,7 +422,7 @@ class TestMultiCompanySetup(MailCommon, TestRecipients):
             test_activity,
             {
                 "actions": [{"icon": "fa-clock-o", "name": "Summary"}],
-                "icon": "/base/static/description/icon.png",
+                "icon": "/base/static/description/icon.svg",
                 "id": self.env["ir.model"]._get_id("mail.test.multi.company.with.activity"),
                 "model": "mail.test.multi.company.with.activity",
                 "name": "Test Multi Company Mail With Activity",
