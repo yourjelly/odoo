@@ -26,6 +26,7 @@ import {
 import { getPickerCell } from "./datetime/datetime_test_helpers";
 import { datetimePickerService } from "@web/core/datetime/datetimepicker_service";
 import { popoverService } from "@web/core/popover/popover_service";
+import { registerCleanup } from "@web/../tests/helpers/cleanup";
 
 const serviceRegistry = registry.category("services");
 
@@ -131,7 +132,9 @@ QUnit.module("Components", ({ beforeEach }) => {
         assert.containsNone(target, DROPDOWN_MENU);
 
         const toggle = target.querySelector(DROPDOWN_TOGGLE);
-        assert.strictEqual(toggle.className, "o-dropdown dropdown-toggle");
+        assert.hasClass(toggle, "o-dropdown");
+        assert.hasClass(toggle, "dropdown-toggle");
+        assert.hasClass(toggle, "dropdown");
         assert.strictEqual(toggle.ariaExpanded, "false");
     });
 
@@ -142,7 +145,7 @@ QUnit.module("Components", ({ beforeEach }) => {
                 <Dropdown menuClass="'test-menu'">
                     <button class="test-toggler">Coucou</button>
                     <t t-set-slot="content">
-                        <DropdownItem class="'test-dropdown-item'"/>
+                        <DropdownItem class="'test-dropdown-item'">Item</DropdownItem>
                     </t>
                 </Dropdown>
             `;
@@ -240,38 +243,6 @@ QUnit.module("Components", ({ beforeEach }) => {
         assert.containsNone(target, DROPDOWN_MENU);
     });
 
-    QUnit.test("'o-dropdown-caret' class adds a caret", async (assert) => {
-        class Parent extends Component {
-            static components = { Dropdown, DropdownItem };
-            static template = xml`
-                <Dropdown>
-                    <button class="first o-dropdown-caret" data-hotkey="1">First</button>
-                    <t t-set-slot="content">
-                        <DropdownItem class="'first-first'">O</DropdownItem>
-                        <Dropdown>
-                            <button class="second o-dropdown-no-caret">Second</button>
-                            <t t-set-slot="content">
-                                <DropdownItem class="'second-first'">O</DropdownItem>
-                            </t>
-                        </Dropdown>
-                    </t>
-                </Dropdown>
-            `;
-        }
-        await mountInFixture(Parent, target);
-
-        const getContent = (selector) => {
-            const element = target.querySelector(selector);
-            const styles = window.getComputedStyle(element, "::after");
-            return styles.content;
-        };
-
-        assert.notEqual(getContent(".first"), "none", "first dropdown should have a caret");
-
-        await openDropdown(target);
-        assert.equal(getContent(".second"), "none", "second dropdown should not have a caret");
-    });
-
     QUnit.test("onOpened callback props called after the menu has been mounted", async (assert) => {
         const beforeOpenProm = makeDeferred();
         class Parent extends Component {
@@ -312,6 +283,97 @@ QUnit.module("Components", ({ beforeEach }) => {
         }
         await mountInFixture(Parent, target);
         assert.strictEqual(Boolean(target.querySelector(DROPDOWN_TOGGLE).disabled), true);
+    });
+
+    QUnit.test("'o-dropdown-caret' class adds a caret", async (assert) => {
+        class Parent extends Component {
+            static components = { Dropdown, DropdownItem };
+            static template = xml`
+                <Dropdown>
+                    <button class="first o-dropdown-caret">First</button>
+                    <t t-set-slot="content">
+                        <DropdownItem>Item</DropdownItem>
+                        <Dropdown>
+                            <button class="second">Second</button>
+                            <t t-set-slot="content">
+                                <DropdownItem>Item</DropdownItem>
+                            </t>
+                        </Dropdown>
+                        <Dropdown>
+                            <button class="third o-dropdown--no-caret">Third</button>
+                            <t t-set-slot="content">
+                                <DropdownItem>Item</DropdownItem>
+                            </t>
+                        </Dropdown>
+                    </t>
+                </Dropdown>
+            `;
+        }
+        await mountInFixture(Parent, target);
+
+        const getContent = (selector) => {
+            const element = target.querySelector(selector);
+            const styles = window.getComputedStyle(element, "::after");
+            return styles.content;
+        };
+
+        assert.notEqual(getContent(".first"), "none", "first dropdown caret should not be empty");
+
+        await openDropdown(target);
+        assert.notEqual(
+            getContent(".second"),
+            "none",
+            "second sub-dropdown caret should have a caret by default"
+        );
+        assert.equal(
+            getContent(".third"),
+            "none",
+            "third sub-dropdown with 'o-dropdown--no-caret' should not have a caret"
+        );
+    });
+
+    QUnit.test("direction class set to default when closed", async (assert) => {
+        registerCleanup(() => {
+            target.style.position = "";
+            target.style.height = "";
+            target.style.top = "";
+            target.style.left = "";
+        });
+
+        class Parent extends Component {
+            static components = { Dropdown, DropdownItem };
+            static template = xml`
+                <div style="height: 500px;"/>
+                <Dropdown>
+                    <!-- style dropdown to be at the bottom to force popover to position on top -->
+                    <button class="o-dropdown-caret">First</button>
+                    <t t-set-slot="content">
+                        <div style="height: 400px;"/>
+                        Content
+                    </t>
+                </Dropdown>
+            `;
+        }
+
+        target.style.position = "abosulte";
+        target.style.height = "800px";
+        target.style.top = "0px";
+        target.style.left = "0px";
+
+        await mountInFixture(Parent, target);
+        const dropdown = target.querySelector(".o-dropdown");
+        assert.doesNotHaveClass(dropdown, "show");
+        assert.hasClass(dropdown, "dropdown");
+
+        // open
+        await click(dropdown);
+        assert.hasClass(dropdown, "show");
+        assert.hasClass(dropdown, "dropup");
+
+        // close
+        await click(dropdown);
+        assert.doesNotHaveClass(dropdown, "show");
+        assert.hasClass(dropdown, "dropdown");
     });
 
     QUnit.test("multi-level dropdown: can be rendered and toggled", async (assert) => {
@@ -943,72 +1005,6 @@ QUnit.module("Components", ({ beforeEach }) => {
         parentState.foo = true;
         await nextTick();
         assert.verifySteps(["submenu patched"]);
-    });
-
-    QUnit.test("showCaret props adds caret class", async (assert) => {
-        class Parent extends Component {}
-        Parent.template = xml`
-            <Dropdown class="'first'" hotkey="'1'" showCaret="true">
-                <DropdownItem class="'first-first'">O</DropdownItem>
-                <Dropdown class="'second'" showCaret="false">
-                    <DropdownItem class="'second-first'">O</DropdownItem>
-                </Dropdown>
-            </Dropdown>
-        `;
-        Parent.components = { Dropdown, DropdownItem };
-        env = await makeTestEnv();
-        await mount(Parent, target, { env });
-        assert.containsNone(
-            target,
-            ".first.o-dropdown--no-caret",
-            "first dropdown should have a caret"
-        );
-        await click(target, ".dropdown-toggle");
-        assert.containsOnce(
-            target,
-            ".second.o-dropdown--no-caret",
-            "second dropdown should not have a caret"
-        );
-    });
-
-    QUnit.test("caret should be repositioned to default direction when closed", async (assert) => {
-        class Parent extends Component {
-            static components = { Dropdown };
-            static template = xml`
-                <div style="height: 384px;"/> <!-- filler: takes half the runbot's browser_size -->
-                <Dropdown showCaret="true">
-                    <t t-set-slot="toggler">🍋</t>
-                    <div style="height: 400px; width: 50px;"/> <!-- menu filler -->
-                </Dropdown>
-            `;
-        }
-        // The fixture should be shown for this test, as the positioning container is the html node
-        target.style.position = "fixed";
-        target.style.top = "0";
-        target.style.left = "0";
-
-        env = await makeTestEnv();
-        await mount(Parent, target, { env });
-        const dropdown = target.querySelector(".o-dropdown");
-        assert.doesNotHaveClass(dropdown, "show");
-        assert.hasClass(dropdown, "dropdown");
-
-        // open
-        await click(target, ".dropdown-toggle");
-        await nextTick(); // awaits for the caret to get patched
-        assert.hasClass(dropdown, "show");
-        assert.hasClass(dropdown, "dropend");
-
-        // close
-        await click(target, ".dropdown-toggle");
-        assert.doesNotHaveClass(dropdown, "show");
-        assert.hasClass(dropdown, "dropdown");
-
-        // open
-        await click(target, ".dropdown-toggle");
-        await nextTick(); // awaits for the caret to get patched
-        assert.hasClass(dropdown, "show");
-        assert.hasClass(dropdown, "dropend");
     });
 
     QUnit.test(
