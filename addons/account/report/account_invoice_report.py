@@ -94,7 +94,7 @@ class AccountInvoiceReport(models.Model):
                 template.categ_id                                           AS product_categ_id,
                 line.quantity / NULLIF(COALESCE(uom_line.factor, 1) / COALESCE(uom_template.factor, 1), 0.0) * (CASE WHEN move.move_type IN ('in_invoice','out_refund','in_receipt') THEN -1 ELSE 1 END)
                                                                             AS quantity,
-                -line.balance * currency_table.rate                         AS price_subtotal,
+                -line.balance                        AS price_subtotal,
                 line.price_total * (CASE WHEN move.move_type IN ('in_invoice','out_refund','in_receipt') THEN -1 ELSE 1 END)
                                                                             AS price_total,
                 -COALESCE(
