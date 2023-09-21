@@ -19,7 +19,7 @@ import {
     isArtificialVoidElement,
     ancestors,
     EMAIL_REGEX,
-    URL_REGEX_WITH_INFOS,
+    URL_REGEX,
     PHONE_REGEX,
 } from './utils.js';
 
@@ -94,7 +94,7 @@ export function deduceURLfromText(text, link) {
        return match[1] ? match[0] : 'mailto:' + match[0];
    }
    // Check for http link.
-   match = label.match(URL_REGEX_WITH_INFOS);
+   match = label.match(URL_REGEX);
    if (match && match[0] === label) {
        const currentHttpProtocol = (link?.href.match(/^http(s)?:\/\//gi) || [])[0];
        if (match[2]) {
