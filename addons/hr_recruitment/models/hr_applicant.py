@@ -2,11 +2,10 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from markupsafe import Markup
-
 from odoo import api, fields, models, tools, SUPERUSER_ID
-from odoo.exceptions import AccessError, UserError
+from odoo.exceptions import AccessError, UserError,ValidationError
 from odoo.osv import expression
-from odoo.tools import Query
+from odoo.tools import Query,email_re
 from odoo.tools.translate import _
 
 from dateutil.relativedelta import relativedelta
@@ -102,6 +101,12 @@ class Applicant(models.Model):
         ('refused', 'Refused'),
         ('archived', 'Archived'),
     ], compute="_compute_application_status")
+    
+    @api.constrains('email_from')
+    def _check_valid_email(self):
+        for record in self:
+            if record.email_from and not email_re.match(record.email_from):
+                raise ValidationError(('Invalid email address'))
 
     @api.onchange('job_id')
     def _onchange_job_id(self):
