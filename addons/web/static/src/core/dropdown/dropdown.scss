@@ -53,7 +53,7 @@
             right: 10px;
         }
 
-        &.o-dropdown--open:after {
+        &.show:after {
             transform: rotate(180deg);
         }
 

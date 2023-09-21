@@ -54,13 +54,6 @@ class DropdownNestingState {
         );
     }
 
-    contains(el) {
-        return (
-            this.containerRef.el?.contains(el) ||
-            [...this.children].some((child) => child.contains(el))
-        );
-    }
-
     handleChange(other) {
         if (this.shouldIgnoreChanges(other)) {
             return;
@@ -72,6 +65,12 @@ class DropdownNestingState {
     }
 }
 
+/**
+ *
+ * @param {import("@web/core/dropdown/dropdown").DropdownState} state
+ * @param {*} containerRef
+ * @returns
+ */
 export function useDropdownNesting(state, containerRef) {
     const env = useEnv();
     const current = new DropdownNestingState({
@@ -81,7 +80,6 @@ export function useDropdownNesting(state, containerRef) {
     });
 
     useChildSubEnv({ [DROPDOWN]: current });
-
     useBus(BUS, "state-changed", ({ detail: other }) => current.handleChange(other));
 
     useEffect(

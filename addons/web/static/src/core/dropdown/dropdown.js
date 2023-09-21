@@ -21,13 +21,10 @@ import { mergeClasses } from "../utils/className";
 /**
  * Hook used to interact with the Dropdown state.
  *
- * @param {Object} [options] - options
- *
- * @param {'auto'|'controlled'} [mode='auto'] - By default ('auto') the state
+ * @param {'auto'|'controlled'} [mode='auto'] - By default the state
  * is managed by the dropdown, meaning click events on the toggler will open
- * the dropdown.
- * When set to 'controlled', no listener is added and it's the parent's
- * responsability to open the dropdown.
+ * the dropdown. Default is 'auto' but when set to 'controlled' no listener
+ * is added and it's the parent's responsability to open the dropdown.
  *
  * @param {Function} [beforeOpen=undefined] - Callback invoked before opening
  * the dropdown, this can be an asynchronous function.
@@ -37,9 +34,9 @@ import { mergeClasses } from "../utils/className";
  *
  * @returns {DropdownState}
  */
-export function useDropdown({ mode, beforeOpen, onChange } = {}) {
+export function useDropdown({ mode = "auto", beforeOpen, onChange } = {}) {
     const state = useState({
-        mode: mode || "auto",
+        mode: mode,
         isOpen: false,
         open: async () => {
             if (beforeOpen) {
@@ -85,8 +82,8 @@ function getFirstElementOfNode(node) {
 }
 
 /**
- * The Dropdown component is a menu with a button that
- * will show the users actions or options to choose from.
+ * The Dropdown component allows to define a menu that will
+ * show itself when a target is toggled.
  *
  * Items are defined using DropdownItems. Dropdowns are
  * also allowed as items to be able to create nested
@@ -126,7 +123,7 @@ export class Dropdown extends Component {
         options: { type: Object, optional: true },
         menuRef: { type: Function, optional: true }, // To be used with useChildRef
 
-        // Manual State Handling
+        /** Manual state handling, @see useDropdown */
         state: {
             type: Object,
             shape: {
@@ -152,7 +149,6 @@ export class Dropdown extends Component {
         this.popover = useService("popover");
         this.menuRef = useChildRef();
         this.props.menuRef?.(this.menuRef);
-        this.renderRef = {};
         this.state = this.props.state || useDropdown({ beforeOpen: this.props.beforeOpen });
         this.nesting = useDropdownNesting(this.state, this.menuRef);
         this.group = useDropdownGroup();
@@ -163,9 +159,20 @@ export class Dropdown extends Component {
             ...this.props.options.navigation,
         });
 
+        this.DIRECTION_CLASS = {
+            bottom: "dropdown",
+            top: "dropup",
+            left: "dropstart",
+            right: "dropend",
+        };
+
+        // As the popover is in another context we need to force
+        // its re-rendering when the dropdown re-renders
+        this.renderRef = {};
         onRendered(() => this.renderRef.render?.());
-        onMounted(() => this.handleStateChange(this.state));
-        effect((state) => this.handleStateChange(state), [this.state]);
+
+        onMounted(() => this.onStateChanged(this.state));
+        effect((state) => this.onStateChanged(state), [this.state]);
 
         useEffect(
             (target) => this.setTargetElement(target),
@@ -182,10 +189,17 @@ export class Dropdown extends Component {
         );
     }
 
+    /** @type {string} */
+    get position() {
+        return this.props.position || (this.hasParent ? "right-start" : "bottom-start");
+    }
+
+    /** @type {boolean} */
     get hasParent() {
         return this.nesting.hasParent;
     }
 
+    /** @type {HTMLElement|null} */
     get target() {
         const target = getFirstElementOfNode(this.__owl__.bdom);
         if (target) {
@@ -197,52 +211,9 @@ export class Dropdown extends Component {
         }
     }
 
+    /** @type {boolean} */
     get isControlled() {
         return this.props.state && this.props.state.mode == "controlled";
-    }
-
-    setTargetElement(target) {
-        if (!target) {
-            return;
-        }
-        target.ariaExpanded = false;
-
-        const tagName = target.tagName.toLowerCase();
-        target.classList.add("o-dropdown");
-
-        if (!["input", "textarea", "table", "thead", "tbody", "tr", "th", "td"].includes(tagName)) {
-            target.classList.add("dropdown-toggle");
-            if (this.hasParent) {
-                target.classList.add(
-                    "o-dropdown-item",
-                    "o-dropdown-caret",
-                    "o-navigable",
-                    "dropdown-item"
-                );
-            }
-        }
-
-        if (this.hasParent) {
-            target.classList.add("o-dropdown--has-parent");
-        }
-
-        if (!this.isControlled) {
-            target.addEventListener("click", this.handleClick.bind(this));
-            target.addEventListener("mouseenter", this.handleMouseEnter.bind(this));
-
-            return () => {
-                target.removeEventListener("click", this.handleClick.bind(this));
-                target.removeEventListener("mouseenter", this.handleMouseEnter.bind(this));
-            };
-        }
-    }
-
-    handleStateChange(state) {
-        if (state.isOpen) {
-            this.openPopover();
-        } else if (!state.isOpen) {
-            this.closePopover();
-        }
     }
 
     async handleClick(event) {
@@ -269,6 +240,63 @@ export class Dropdown extends Component {
         }
     }
 
+    onStateChanged(state) {
+        if (state.isOpen) {
+            this.openPopover();
+        } else if (!state.isOpen) {
+            this.closePopover();
+        }
+    }
+
+    setTargetElement(target) {
+        if (!target) {
+            return;
+        }
+        target.ariaExpanded = false;
+
+        const tagName = target.tagName.toLowerCase();
+        target.classList.add("o-dropdown");
+
+        if (!["input", "textarea", "table", "thead", "tbody", "tr", "th", "td"].includes(tagName)) {
+            target.classList.add("dropdown-toggle");
+            if (this.hasParent) {
+                target.classList.add("o-dropdown-item", "o-navigable", "dropdown-item");
+
+                if (!target.classList.contains("o-dropdown--no-caret")) {
+                    target.classList.add("o-dropdown-caret");
+                }
+            }
+        }
+
+        if (this.hasParent) {
+            target.classList.add("o-dropdown--has-parent");
+        }
+
+        this.defaultDirection = this.position.split("-")[0];
+        this.setTargetDirectionClass(this.defaultDirection);
+
+        if (!this.isControlled) {
+            target.addEventListener("click", this.handleClick.bind(this));
+            target.addEventListener("mouseenter", this.handleMouseEnter.bind(this));
+
+            return () => {
+                target.removeEventListener("click", this.handleClick.bind(this));
+                target.removeEventListener("mouseenter", this.handleMouseEnter.bind(this));
+            };
+        }
+    }
+
+    setTargetDirectionClass(direction) {
+        if (!this.target) {
+            return;
+        }
+        for (const _direction in this.DIRECTION_CLASS) {
+            this.target.classList[_direction === direction ? "add" : "remove"](
+                this.DIRECTION_CLASS[_direction]
+            );
+        }
+    }
+
     async openPopover() {
         if (this._closePopover !== undefined || status(this) !== "mounted") {
             return;
@@ -292,10 +320,13 @@ export class Dropdown extends Component {
             popoverClass: mergeClasses("o-dropdown--menu dropdown-menu", this.props.menuClass),
             popoverRole: "menu",
             enableArrow: false,
-            closeOnEscape: false, // Handled via navigation and prevents closing root of nested dropdown
-            position: this.props.position || (this.hasParent ? "right-start" : "bottom-start"),
+            position: this.position,
             ref: this.menuRef,
+            closeOnEscape: false, // Handled via navigation and prevents closing root of nested dropdown
             closeOnClickAway: (target) => this.closeOnClickAway(target),
+            onPositioned: (el, { direction }) => {
+                this.setTargetDirectionClass(direction);
+            },
         };
 
         this._closePopover = this.popover.add(this.target, DropdownPopover, props, options);
@@ -303,10 +334,8 @@ export class Dropdown extends Component {
     }
 
     closePopover() {
-        if (this._closePopover) {
-            this._closePopover();
-            this._closePopover = undefined;
-        }
+        this._closePopover?.();
+        this._closePopover = undefined;
     }
 
     onOpened() {
@@ -323,23 +352,17 @@ export class Dropdown extends Component {
         if (this.target) {
             this.target.ariaExpanded = false;
             this.target.classList.remove("show");
+            this.setTargetDirectionClass(this.defaultDirection);
         }
     }
 
-    /**
-     * @param {HTMLElement} target
-     * @returns
-     */
-    closeOnClickAway(target) {
-        if (target.closest(".o_dialog")) {
-            return false;
-        }
+    closeOnClickAway(eventTarget) {
+        const notInDialog = !eventTarget.closest(".o_dialog");
+        const notInToggler = !this.target.contains(eventTarget);
+        const notInPopover = !this.menuRef.el.contains(eventTarget);
+        const notInDropdown = !this.isNestedDropdown(eventTarget);
 
-        if (
-            !this.target.contains(target) &&
-            !this.menuRef.el.contains(target) &&
-            !this.isNestedDropdown(target)
-        ) {
+        if (notInDialog && notInToggler && notInPopover && notInDropdown) {
             this.state.close();
         }
         return false;
