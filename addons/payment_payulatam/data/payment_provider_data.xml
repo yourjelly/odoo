@@ -6,7 +6,7 @@
         <field name="display_as">Credit Card (powered by PayU Latam)</field>
         <field name="image_128"
                type="base64"
-               file="payment_payulatam/static/description/icon.svg"/>
+               file="payment_payulatam/static/description/icon.png"/>
         <field name="module_id" ref="base.module_payment_payulatam"/>
         <!-- https://www.payulatam.com/medios-de-pago/ -->
         <field name="payment_method_ids"

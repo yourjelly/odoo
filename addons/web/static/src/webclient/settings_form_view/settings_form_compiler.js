@@ -58,7 +58,7 @@ export class SettingsFormCompiler extends FormCompiler {
             string: el.getAttribute("string"),
             imgurl:
                 el.getAttribute("logo") ||
-                "/" + el.getAttribute("name") + "/static/description/icon.svg",
+                "/" + el.getAttribute("name") + "/static/description/icon.png",
         };
         params.modules.push(module);
         const settingsApp = createElement("SettingsApp", {

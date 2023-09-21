@@ -50,7 +50,7 @@ class IrModule(models.Model):
         if not terp:
             return False
         if not terp.get('icon'):
-            icon_path = 'static/description/icon.svg'
+            icon_path = 'static/description/icon.png'
             module_icon = module if os.path.exists(opj(path, icon_path)) else 'base'
             terp['icon'] = opj('/', module_icon, icon_path)
         values = self.get_values_from_terp(terp)

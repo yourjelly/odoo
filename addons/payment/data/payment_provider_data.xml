@@ -4,7 +4,7 @@
     <record id="payment_provider_adyen" model="payment.provider">
         <field name="name">Adyen</field>
         <field name="display_as">Credit Card (powered by Adyen)</field>
-        <field name="image_128" type="base64" file="payment_adyen/static/description/icon.svg"/>
+        <field name="image_128" type="base64" file="payment_adyen/static/description/icon.png"/>
         <field name="module_id" ref="base.module_payment_adyen"/>
         <!-- https://www.adyen.com/payment-methods -->
         <field name="payment_method_ids"
@@ -23,7 +23,7 @@
     <record id="payment_provider_aps" model="payment.provider">
         <field name="name">Amazon Payment Services</field>
         <field name="display_as">Amazon Payment Services</field>
-        <field name="image_128" type="base64" file="payment_aps/static/description/icon.svg"/>
+        <field name="image_128" type="base64" file="payment_aps/static/description/icon.png"/>
         <field name="module_id" ref="base.module_payment_aps"/>
         <!-- https://paymentservices.amazon.com/docs/EN/24.html -->
         <field name="payment_method_ids"
@@ -38,7 +38,7 @@
     <record id="payment_provider_asiapay" model="payment.provider">
         <field name="name">Asiapay</field>
         <field name="display_as">Credit Card (powered by Asiapay)</field>
-        <field name="image_128" type="base64" file="payment_asiapay/static/description/icon.svg"/>
+        <field name="image_128" type="base64" file="payment_asiapay/static/description/icon.png"/>
         <field name="module_id" ref="base.module_payment_asiapay"/>
         <!-- See https://www.asiapay.com/payment.html#option -->
         <field name="payment_method_ids"
@@ -54,7 +54,7 @@
         <field name="display_as">Credit Card (powered by Authorize)</field>
         <field name="image_128"
                type="base64"
-               file="payment_authorize/static/description/icon.svg"/>
+               file="payment_authorize/static/description/icon.png"/>
         <field name="module_id" ref="base.module_payment_authorize"/>
         <!-- https://www.authorize.net/solutions/merchantsolutions/onlinemerchantaccount/ -->
         <field name="payment_method_ids"
@@ -73,7 +73,7 @@
         <field name="display_as">Credit Card (powered by Buckaroo)</field>
         <field name="image_128"
                type="base64"
-               file="payment_buckaroo/static/description/icon.svg"/>
+               file="payment_buckaroo/static/description/icon.png"/>
         <field name="module_id" ref="base.module_payment_buckaroo"/>
         <!-- https://www.buckaroo-payments.com/products/payment-methods/ -->
         <field name="payment_method_ids"
@@ -89,7 +89,7 @@
     <record id="payment_provider_demo" model="payment.provider">
         <field name="name">Demo</field>
         <field name="sequence">40</field>
-        <field name="image_128" type="base64" file="payment_demo/static/description/icon.svg"/>
+        <field name="image_128" type="base64" file="payment_demo/static/description/icon.png"/>
         <field name="module_id" ref="base.module_payment_demo"/>
     </record>
 
@@ -97,7 +97,7 @@
         <field name="name">Flutterwave</field>
         <field name="image_128"
                type="base64"
-               file="payment_flutterwave/static/description/icon.svg"/>
+               file="payment_flutterwave/static/description/icon.png"/>
         <field name="module_id" ref="base.module_payment_flutterwave"/>
         <!-- https://developer.flutterwave.com/docs/collecting-payments/payment-methods/ -->
         <field name="payment_method_ids" eval="[(6, 0, [
@@ -116,7 +116,7 @@
         <field name="display_as">Credit Card (powered by Mercado Pago)</field>
         <field name="image_128"
                type="base64"
-               file="payment_mercado_pago/static/description/icon.svg"/>
+               file="payment_mercado_pago/static/description/icon.png"/>
         <field name="module_id" ref="base.module_payment_mercado_pago"/>
 
          <!-- Payment methods must be fetched from the API. See
@@ -134,7 +134,7 @@
 
     <record id="payment_provider_mollie" model="payment.provider">
         <field name="name">Mollie</field>
-        <field name="image_128" type="base64" file="payment_mollie/static/description/icon.svg"/>
+        <field name="image_128" type="base64" file="payment_mollie/static/description/icon.png"/>
         <field name="module_id" ref="base.module_payment_mollie"/>
         <!-- https://www.mollie.com/en/payments -->
         <field name="payment_method_ids" eval="[(6, 0, [
@@ -157,7 +157,7 @@
 
     <record id="payment_provider_paypal" model="payment.provider">
         <field name="name">PayPal</field>
-        <field name="image_128" type="base64" file="payment_paypal/static/description/icon.svg"/>
+        <field name="image_128" type="base64" file="payment_paypal/static/description/icon.png"/>
         <field name="module_id" ref="base.module_payment_paypal"/>
         <!-- https://www.paypal.com/us/selfhelp/article/Which-credit-cards-can-I-accept-with-PayPal-Merchant-Services-FAQ1525#business -->
         <field name="payment_method_ids"
@@ -176,7 +176,7 @@
     <record id="payment_provider_razorpay" model="payment.provider">
         <field name="name">Razorpay</field>
         <field name="display_as">Credit &amp; Debit Card, UPI (Powered by Razorpay)</field>
-        <field name="image_128" type="base64" file="payment_razorpay/static/description/icon.svg"/>
+        <field name="image_128" type="base64" file="payment_razorpay/static/description/icon.png"/>
         <field name="module_id" ref="base.module_payment_razorpay"/>
         <!-- https://razorpay.com/docs/payments/payment-methods/#supported-payment-methods -->
         <field name="payment_method_ids"
@@ -202,7 +202,7 @@
     <record id="payment_provider_sips" model="payment.provider">
         <field name="name">Sips</field>
         <field name="display_as">Credit Card (powered by Sips)</field>
-        <field name="image_128" type="base64" file="payment_sips/static/description/icon.svg"/>
+        <field name="image_128" type="base64" file="payment_sips/static/description/icon.png"/>
         <field name="module_id" ref="base.module_payment_sips"/>
         <!-- See http://sips.worldline.com/en-us/home/features/payment-types-and-acquirers.html -->
         <field name="payment_method_ids"
@@ -222,7 +222,7 @@
     <record id="payment_provider_stripe" model="payment.provider">
         <field name="name">Stripe</field>
         <field name="display_as">Credit &amp; Debit Card</field>
-        <field name="image_128" type="base64" file="payment_stripe/static/description/icon.svg"/>
+        <field name="image_128" type="base64" file="payment_stripe/static/description/icon.png"/>
         <field name="module_id" ref="base.module_payment_stripe"/>
         <!--
             See https://stripe.com/payments/payment-methods-guide
@@ -245,7 +245,7 @@
         <field name="sequence">30</field>
         <field name="image_128"
                type="base64"
-               file="payment_custom/static/description/icon.svg"/>
+               file="payment_custom/static/description/icon.png"/>
         <field name="module_id" ref="base.module_payment_custom"/>
     </record>
 

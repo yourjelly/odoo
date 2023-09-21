@@ -7,7 +7,7 @@
             <field name="inherit_id" ref="base.res_config_settings_view_form"/>
             <field name="arch" type="xml">
                 <xpath expr="//form" position="inside">
-                    <app data-string="General Settings" string="General Settings" name="general_settings" logo="/base/static/description/settings.svg">
+                    <app data-string="General Settings" string="General Settings" name="general_settings" logo="/base/static/description/settings.png">
 
                         <div id="invite_users">
                             <block title="Users" name="users_setting_container">

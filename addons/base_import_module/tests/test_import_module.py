@@ -320,7 +320,7 @@ class TestImportModuleHttp(TestImportModule, odoo.tests.HttpCase):
         and with the base module icon if module without icon"""
         files = [
             ('foo/__manifest__.py', b"{'name': 'foo'}"),
-            ('foo/static/description/icon.svg', b"foo_icon"),
+            ('foo/static/description/icon.png', b"foo_icon"),
             ('bar/__manifest__.py', b"{'name': 'bar'}"),
         ]
         self.import_zipfile(files)
