@@ -61,6 +61,25 @@ QUnit.module("py", {}, () => {
             assert.strictEqual(evaluateExpr('"foo" + "bar"'), "foobar");
         });
 
+        QUnit.test("wrong syntax", (assert) => {
+            const wrong = [
+                "1 5",
+                "True 5",
+                "not",
+                "is",
+                "not is",
+                "True not is True",
+                "True is",
+                "True in",
+                "is True",
+                "in []",
+                "bool 5",
+            ];
+            for (const expr of wrong) {
+                assert.throws(() => evaluateExpr(expr), expr);
+            }
+        });
+
         QUnit.module("number properties");
 
         QUnit.test("number arithmetic", (assert) => {
@@ -401,6 +420,11 @@ QUnit.module("py", {}, () => {
         });
 
         QUnit.module("builtin");
+
+        QUnit.test("bool", (assert) => {
+            assert.strictEqual(evaluateExpr("bool(5)"), true);
+            assert.strictEqual(evaluateExpr("not bool(5)"), false);
+        });
 
         QUnit.test("any", (assert) => {
             assert.deepEqual(evaluateExpr("any([1,2,3,0])"), true);

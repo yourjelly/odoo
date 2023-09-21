@@ -455,6 +455,9 @@ function parseInfix(left, current, tokens) {
 function _parse(tokens, bp = 0) {
     const token = tokens.shift();
     let expr = parsePrefix(token, tokens);
+    if (tokens[0] && tokens[0].type !== 2 && !bindingPower(tokens[0])) {
+        throw new ParserError("Token cannot be parsed");
+    }
     while (tokens[0] && bindingPower(tokens[0]) > bp) {
         expr = parseInfix(expr, tokens.shift(), tokens);
     }
