@@ -187,6 +187,7 @@ export class AddPageTemplatePreview extends Component {
                 previewEl.style.setProperty("height", `${Math.round(innerHeight * ratio)}px`);
                 // Sometimes the final height is not ready yet.
                 setTimeout(adjustHeight, 50);
+                holderEl.classList.add("o_ready");
             };
             adjustHeight();
         });
@@ -207,6 +208,7 @@ AddPageTemplatePreview.props = {
     addPage: Function,
     getCssLinkEls: Function,
     template: Object,
+    animationDelay: Number,
     firstRow: {
         type: Boolean,
         optional: true,

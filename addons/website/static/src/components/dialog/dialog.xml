@@ -23,28 +23,29 @@
 </t>
 
 <t t-name="website.AddPageTemplatePreview" owl="1">
-    <div t-ref="holder" class="gx-4 o_page_template" t-att-class="{ 'mb-4': props.firstRow }">
-        <div t-ref="preview" class="o_page_template_preview">
-            <iframe t-ref="iframe" src="about:blank"/>
+    <div t-ref="holder" class="o_page_template position-relative placeholder-glow mx-auto transition-base" t-att-class="{ 'mb-4': props.firstRow }">
+        <div t-ref="preview" class="o_page_template_preview border border-white bg-white rounded shadow">
+            <iframe class="border-0 pe-none transition-base" t-ref="iframe" src="about:blank"/>
         </div>
-        <div class="o_button_area">
+        <span class="placeholder position-absolute top-0 w-100 h-100 rounded" t-attf-style="animation-duration: #{props.animationDelay + 500}ms"/>
+        <div class="o_button_area position-absolute top-0 w-100 h-100 d-flex align-items-center justify-content-center">
             <button class="btn btn-primary" t-on-click="select">Use this template</button>
         </div>
     </div>
 </t>
 
 <t t-name="website.AddPageTemplatePreviews" owl="1">
-    <div class="container">
-        <div class="row gy-4">
+    <div class="container-fluid py-3 py-xl-4">
+        <div class="row g-0">
             <t t-foreach="[...this.columns.entries()]" t-as="column" t-key="column[0]">
                 <div class="col-lg-4 col-12">
                     <t t-foreach="[...column[1].entries()]" t-as="template" t-key="template[0]">
-                        <AddPageTemplatePreview template="template[1]" firstRow="template_first"
-                            addPage="props.addPage" getCssLinkEls="props.getCssLinkEls" 
+                        <AddPageTemplatePreview template="template[1]" animationDelay="(column_index * 500) + (template_index * 350)" firstRow="template_first"
+                            addPage="props.addPage" getCssLinkEls="props.getCssLinkEls"
                         />
                     </t>
                     <t t-if="column[1].length === 0">
-                        <div class="gx-4 o_page_template"/>
+                        <div class="o_page_template position-relative"/>
                     </t>
                 </div>
             </t>
@@ -53,24 +54,33 @@
 </t>
 
 <t t-name="website.AddPageTemplates" owl="1">
-    <div class="row py-4" t-att-class="{o_loading: state.loading}">
-        <div t-if="state.loading" class="col-12 mt-5">
-            <p class="text-center h2">Loading page templates...</p>
+    <div class="overflow-hidden w-100" t-att-class="{o_loading: state.loading}">
+        <div t-if="state.loading" class="d-flex align-items-center justify-content-center h-100">
+            <div class="spinner-grow" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
         </div>
         <!-- Do not rely on Notebook to avoid pages from needing reload -->
-        <div t-else="" class="o_notebook d-flex w-100 vertical flex-row">
-            <div class="o_notebook_headers m-0">
-                <ul t-ref="tabs" class="nav nav-tabs flex-column p-0">
-                    <t t-foreach="state.pages" t-as="page" t-key="page.id">
-                        <li t-att-data-id="page.id" class="nav-item flex-nowrap cursor-pointer" t-on-click="() => this.onTabClick(page.id)">
-                            <a class="nav-link p-3 rounded-0" t-att-class="{active: page_first}" href="#" role="tab" tabindex="0"><t t-out="page.title"/></a>
-                        </li>
-                    </t>
-                </ul>
-            </div>
-            <div t-ref="panes" class="o_notebook_content tab-content">
+        <div t-else="" class="d-flex w-100 h-100 vertical flex-row">
+            <ul t-ref="tabs" class="nav nav-pills flex-column flex-nowrap overflow-y-auto">
                 <t t-foreach="state.pages" t-as="page" t-key="page.id">
-                    <div t-att-data-id="page.id" class="tab-pane" t-att-class="{active: page_first}">
+                    <li class="nav-item">
+                        <a t-att-data-id="page.id"
+                            t-on-click="() => this.onTabClick(page.id)"
+                            class="nav-link p-3 rounded-0"
+                            t-att-class="{active: page_first}"
+                            href="#"
+                            role="tab"
+                            tabindex="0"
+                            t-out="page.title"/>
+                    </li>
+                </t>
+            </ul>
+            <div t-ref="panes" class="position-relative flex-grow-1 flex-shrink-1 bg-200">
+                <t t-foreach="state.pages" t-as="page" t-key="page.id">
+                    <div t-att-data-id="page.id"
+                         class="o_website_page_templates_pane position-absolute top-0 start-0 w-100 h-100 overflow-y-scroll bg-200"
+                         t-att-class="{active: page_first}">
                         <AddPageTemplatePreviews
                             name="page.props.name"
                             addPage="page.props.addPage"
@@ -87,10 +97,11 @@
 <t t-name="website.AddPageDialog" owl="1">
     <WebsiteDialog
         title="title"
+        contentClass="'o_website_page_templates_dialog h-100'"
         showFooter="false"
         size="'xl'"
         close="props.close">
-        <div class="row gy-4">
+        <div class="row gy-4 d-none"> <!-- POC: Temporary hide, to be moved in "step 2 modal" -->
             <div class="col-md-2">
                 <button class="btn btn-primary" t-on-click="() => this.addPage()">+ Blank Page</button>
             </div>
