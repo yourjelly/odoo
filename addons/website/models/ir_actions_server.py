@@ -14,13 +14,7 @@ class ServerAction(models.Model):
     _inherit = 'ir.actions.server'
 
     xml_id = fields.Char('External ID', compute='_compute_xml_id', help="ID of the action if defined in a XML file")
-    website_path = fields.Char('Website Path')
-    website_url = fields.Char('Website Url', compute='_get_website_url', help='The full URL to access the server action through the website.')
-    website_published = fields.Boolean('Available on the Website', copy=False,
-                                       help='A code server action can be executed from the website, using a dedicated '
-                                            'controller. The address is <base>/website/action/<website_path>. '
-                                            'Set this field as True to allow users to run this action. If it '
-                                            'is set to False the action cannot be run through the website.')
+    expose = fields.Selection(selection_add=[("website", "Expose on website")])
 
     def _compute_xml_id(self):
         res = self.get_external_id()
@@ -35,13 +29,12 @@ class ServerAction(models.Model):
             return urls.url_join(base_url, path)
         return ''
 
-    @api.depends('state', 'website_published', 'website_path', 'xml_id')
-    def _get_website_url(self):
+    @api.depends('xml_id')
+    def _compute_url(self):
+        super()._compute_url()
         for action in self:
-            if action.state == 'code' and action.website_published:
-                action.website_url = action._compute_website_url(action.website_path, action.xml_id)
-            else:
-                action.website_url = False
+            if action.state == 'code' and action.expose == "website":
+                action.url = action._compute_website_url(action.url_path, action.xml_id)
 
     @api.model
     def _get_eval_context(self, action):

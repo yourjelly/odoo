@@ -5,11 +5,10 @@ import datetime
 import logging
 import traceback
 from collections import defaultdict
-from uuid import uuid4
 
 from dateutil.relativedelta import relativedelta
 
-from odoo import _, api, Command, exceptions, fields, models, SUPERUSER_ID
+from odoo import _, api, Command, exceptions, fields, models
 from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT
 from odoo.tools import safe_eval
 
@@ -83,10 +82,6 @@ class BaseAutomation(models.Model):
         store=True,
         readonly=False,
     )
-    url = fields.Char(compute='_compute_url')
-    webhook_uuid = fields.Char(string="Webhook UUID", readonly=True, copy=False, default=lambda self: str(uuid4()))
-    record_getter = fields.Char(help="This code will be run to find on which record the automation rule should be run.\nExample: model.browse(payload.get('recordId')))")
-    log_webhook_calls = fields.Boolean(string="Log Calls", default=True)
     active = fields.Boolean(default=True, help="When unchecked, the rule is hidden and will not be executed.")
 
     @api.constrains("trigger", "model_id")
@@ -116,8 +111,6 @@ class BaseAutomation(models.Model):
             ('on_time_updated', "After last update"),
             ("on_mail_received", "An email was received from an external user"),
             ("on_mail_sent", "An email was sent to an external user"),
-
-            ('on_webhook', "On webhook"),
         ], string='Trigger',
         compute='_compute_trigger_and_trigger_field_ids', readonly=False, store=True, required=True)
     trg_selection_field_id = fields.Many2one(
@@ -196,97 +189,9 @@ class BaseAutomation(models.Model):
     CRITICAL_FIELDS = ['model_id', 'active', 'trigger', 'on_change_field_ids']
     RANGE_FIELDS = ['trg_date_range', 'trg_date_range_type']
 
-    @api.depends("trigger", "webhook_uuid")
-    def _compute_url(self):
-        for automation in self:
-            if automation.trigger != "on_webhook":
-                automation.url = ""
-            else:
-                automation.url = "%s/web/hook/%s" % (automation.get_base_url(), automation.webhook_uuid)
-
     def _inverse_model_name(self):
         for rec in self:
             rec.model_id = self.env["ir.model"]._get(rec.model_name)
-
-    def action_rotate_webhook_uuid(self):
-        for automation in self:
-            automation.webhook_uuid = str(uuid4())
-
-    def action_view_webhook_logs(self):
-        self.ensure_one()
-        return {
-            'type': 'ir.actions.act_window',
-            'name': _('Webhook Logs'),
-            'res_model': 'ir.logging',
-            'view_mode': 'tree,form',
-            'domain': [('path', '=', "base_automation(%s)" % self.id)],
-        }
-
-    def _execute_webhook(self, payload):
-        """ Execute the webhook for the given payload.
-        The payload is a dictionnary that can be used by the `record_getter` to
-        identify the record on which the automation should be run.
-        """
-        self.ensure_one()
-        self_sudo = self.with_user(SUPERUSER_ID)
-        ir_logging_sudo = self.env['ir.logging'].sudo()
-        msg = "Webhook #%s triggered with payload %s" % (self_sudo.id, payload)
-        _logger.info(msg)
-        if self_sudo.log_webhook_calls:
-            ir_logging_sudo.create({'name': _("Webhook Log"),
-                        'type': 'server',
-                        'dbname': self._cr.dbname,
-                        'level': 'INFO',
-                        'message': msg,
-                        'path': "base_automation(%s)" % self_sudo.id,
-                        'func': '',
-                        'line': ''})
-        if self.record_getter:
-            try:
-                record = safe_eval.safe_eval(self_sudo.record_getter, self._get_eval_context(payload=payload))
-            except Exception as e: # noqa: BLE001
-                msg = "Webhook #%s could not be triggered because the record_getter failed:\n%s" % (self_sudo.id, traceback.format_exc())
-                _logger.warning(msg)
-                if self_sudo.log_webhook_calls:
-                    ir_logging_sudo.create({'name': _("Webhook Log"),
-                                'type': 'server',
-                                'dbname': self._cr.dbname,
-                                'level': 'ERROR',
-                                'message': msg,
-                                'path': "base_automation(%s)" % self_sudo.id,
-                                'func': '',
-                                'line': ''})
-                raise e
-        else:
-            record = None
-        if record is None or not record.exists():
-            msg = "Webhook #%s could not be triggered because no record to run it on was found." % self_sudo.id
-            _logger.warning(msg)
-            if self_sudo.log_webhook_calls:
-                ir_logging_sudo.create({'name': _("Webhook Log"),
-                            'type': 'server',
-                            'dbname': self._cr.dbname,
-                            'level': 'ERROR',
-                            'message': msg,
-                            'path': "base_automation(%s)" % self_sudo.id,
-                            'func': '',
-                            'line': ''})
-            raise exceptions.ValidationError(_("No record to run the automation on was found."))
-        try:
-            return self_sudo._process(record.with_user(SUPERUSER_ID))
-        except Exception as e: # noqa: BLE001
-            msg = "Webhook #%s failed with error:\n%s" % (self_sudo.id, traceback.format_exc())
-            _logger.warning(msg)
-            if self_sudo.log_webhook_calls:
-                ir_logging_sudo.create({'name': _("Webhook Log"),
-                            'type': 'server',
-                            'dbname': self._cr.dbname,
-                            'level': 'ERROR',
-                            'message': msg,
-                            'path': "base_automation(%s)" % self_sudo.id,
-                            'func': '',
-                            'line': ''})
-            raise e
 
     @api.constrains('trigger', 'action_server_ids')
     def _check_trigger_state(self):
@@ -521,7 +426,7 @@ class BaseAutomation(models.Model):
         automations = self.with_context(active_test=True).sudo().search(domain)
         return automations.with_env(self.env)
 
-    def _get_eval_context(self, payload=None):
+    def _get_eval_context(self):
         """ Prepare the context used when evaluating python code
             :returns: dict -- evaluation context given to safe_eval
         """
@@ -533,8 +438,6 @@ class BaseAutomation(models.Model):
             'time': safe_eval.time,
             'model': model,
         }
-        if payload is not None:
-            eval_context['payload'] = payload
         return eval_context
 
     def _get_cron_interval(self, automations=None):

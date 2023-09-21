@@ -788,7 +788,7 @@ class Website(Home):
             action = request.env.ref(path_or_xml_id_or_id, raise_if_not_found=False).sudo()
         if not action:
             action = ServerActions.sudo().search(
-                [('website_path', '=', path_or_xml_id_or_id), ('website_published', '=', True)], limit=1)
+                [('url_path', '=', path_or_xml_id_or_id), ('expose', '=', "website")], limit=1)
         if not action:
             try:
                 action_id = int(path_or_xml_id_or_id)
@@ -798,7 +798,7 @@ class Website(Home):
 
         # run it, return only if we got a Response object
         if action:
-            if action.state == 'code' and action.website_published:
+            if action.state == 'code' and action.expose == "website":
                 # use main session env for execution
                 action_res = ServerActions.browse(action.id).run()
                 if isinstance(action_res, werkzeug.wrappers.Response):

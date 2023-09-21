@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record model="ir.ui.view" id="view_server_action_form_web">
+        <field name="name">ir.actions.server.form.web</field>
+        <field name="model">ir.actions.server</field>
+        <field name="inherit_id" ref="base.view_server_action_form"/>
+        <field name="arch" type="xml">
+            <data>
+                <xpath expr="/form/sheet" position="inside">
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_webhook_logs" type="object" string="Logs" class="oe_stat_button" icon="fa-list" invisible="expose != 'webhook'">
+                            </button>
+                    </div>
+                </xpath>
+                <xpath expr="//field[@name='state']" position="after">
+                    <field name="url_path" invisible="True"/>
+                    <field name="expose"
+                        invisible="state != 'code'"/>
+                    <label for="url" invisible="expose != 'webhook'" />
+                    <div invisible="expose != 'webhook'">
+                        <field name="url" widget="CopyClipboardURL" readonly="1" placeholder="URL will be created once the rule is saved."/>
+                        <div class="alert alert-warning" role="status">
+                            <strong><i class="fa fa-lock"/> Keep it secret, keep it safe.</strong>
+                            <p>Your webhook URL contains a secret. Don't share it online or carelessly.</p>
+                            <button class="btn btn-secondary" type="object" name="action_rotate_url" string="Rotate Secret" icon="fa-refresh" help="Change the URL's secret if you think the URL is no longer secure. You will have to update any automated system that calls this webhook to the new URL."/>
+                        </div>
+                    </div>
+                    <field name="log_webhook_calls" invisible="expose != 'webhook'" />
+                </xpath>
+            </data>
+        </field>
+    </record>
+
+    <record id="ir_cron_view_form" model="ir.ui.view">
+        <field name="name">ir.cron.view.form.button.remove.webhook</field>
+        <field name="model">ir.cron</field>
+        <field name="inherit_id" ref="base.ir_cron_view_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='action_rotate_url']" position="replace" />
+            <xpath expr="//button[@name='action_view_webhook_logs']" position="replace"/>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="view_server_action_tree_web">
+        <field name="name">ir.actions.server.tree.web</field>
+        <field name="model">ir.actions.server</field>
+        <field name="inherit_id" ref="base.view_server_action_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='model_id']" position="after">
+                <field name="url"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="view_server_action_search_webhook">
+        <field name="name">ir.actions.server.search.webhook</field>
+        <field name="model">ir.actions.server</field>
+        <field name="inherit_id" ref="base.view_server_action_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='state']" position="after">
+                <filter string="Webhooks" name="webhook"
+                    domain="[('expose', '=', 'webhook'), ('state', '=', 'code')]"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

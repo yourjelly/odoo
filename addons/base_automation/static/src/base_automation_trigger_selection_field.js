@@ -30,10 +30,6 @@ const OPT_GROUPS = [
         triggers: ["on_create_or_write", "on_unlink", "on_change"],
     },
     {
-        group: { sequence: 50, key: "external", name: _lt("External") },
-        triggers: ["on_webhook"],
-    },
-    {
         group: { sequence: 20, key: "mail", name: _t("Email Events") },
         triggers: ["on_mail_sent", "on_mail_received"],
     },

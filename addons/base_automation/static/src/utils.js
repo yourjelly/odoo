@@ -21,5 +21,4 @@ export const TRIGGER_FILTERS = {
         f.ttype === "selection" && ["priority", "x_studio_priority"].includes(f.name),
     on_archive: (f) => f.ttype === "boolean" && ["active", "x_active"].includes(f.name),
     on_unarchive: (f) => f.ttype === "boolean" && ["active", "x_active"].includes(f.name),
-    on_webhook: (f) => true,
 };

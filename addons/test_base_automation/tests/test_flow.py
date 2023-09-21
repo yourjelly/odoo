@@ -990,28 +990,43 @@ class TestCompute(common.TransactionCase):
 
 @common.tagged("post_install", "-at_install")
 class TestHttp(common.HttpCase):
+
     def test_webhook_trigger(self):
+        self.authenticate(None, None)
         model = self.env["ir.model"]._get("base.automation.linked.test")
-        record_getter = "model.search([('name', '=', payload['name'])]) if payload.get('name') else None"
-        automation = create_automation(self, trigger="on_webhook", model_id=model.id, record_getter=record_getter, _actions={
-            "state": "object_write",
-            "update_field_id": self.env["ir.model.fields"]._get(model.model, "another_field").id,
-            "value": "written"
+
+        code = """
+compare_digest(payload.get("secret"), '1234')
+rec = model.sudo().search([('name', '=', payload['name'])]) if payload.get('name') else None
+rec.write({'another_field': 'written'})"""
+
+        server_action = self.env["ir.actions.server"].create({
+            "name": "some webhook",
+            "state": "code",
+            "model_id": model.id,
+            "expose": "webhook",
+            "code": code
         })
 
         obj = self.env[model.model].create({"name": "some name"})
-        response = self.url_open(automation.url, data={"name": "some name"})
+        response = self.url_open(server_action.url, data={"name": "some name", "secret": 1234})
         self.assertEqual(response.json(), {"status": "ok"})
         self.assertEqual(response.status_code, 200)
         self.assertEqual(obj.another_field, "written")
 
         obj.another_field = False
-        with mute_logger("odoo.addons.base_automation.models.base_automation"):
-            response = self.url_open(automation.url, data={})
+        with mute_logger("odoo.addons.web.controllers.action"):
+            response = self.url_open(server_action.url, data={"name": "some name", "secret": 3})
         self.assertEqual(response.json(), {"status": "error"})
         self.assertEqual(response.status_code, 500)
         self.assertEqual(obj.another_field, False)
 
-        response = self.url_open("/web/hook/0123456789", data={"name": "some name"})
+        with mute_logger("odoo.addons.web.controllers.action"):
+            response = self.url_open(server_action.url, data={"secret": 1234})
+        self.assertEqual(response.json(), {"status": "error"})
+        self.assertEqual(response.status_code, 500)
+        self.assertEqual(obj.another_field, False)
+
+        response = self.url_open("/web/hook/0123456789", data={"name": "some name", "secret": 1234})
         self.assertEqual(response.json(), {"status": "error"})
         self.assertEqual(response.status_code, 404)
