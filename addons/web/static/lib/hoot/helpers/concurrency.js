@@ -3,23 +3,55 @@
 import { config as domConfig, observe, queryAll } from "./dom";
 
 //-----------------------------------------------------------------------------
-// Exports
+// Internal
 //-----------------------------------------------------------------------------
 
 /**
- * @template T
+ * @template [T=unknown]
  */
-export function makeDeferred() {
+class Deferred extends Promise {
     /** @type {typeof Promise.resolve<T>} */
-    let resolve;
+    #resolve;
     /** @type {typeof Promise.reject<T>} */
-    let reject;
-    /** @type {Promise<T>} */
-    const promise = new Promise((_resolve, _reject) => {
-        resolve = _resolve;
-        reject = _reject;
-    });
-    return Object.assign(promise, { resolve, reject });
+    #reject;
+
+    /**
+     * @param {(resolve: (value: T) => void, reject: (reason?: any) => void) => void} [executor]
+     */
+    constructor(executor) {
+        let _resolve, _reject;
+
+        super((resolve, reject) => {
+            _resolve = resolve;
+            _reject = reject;
+            return executor?.(resolve, reject);
+        });
+
+        this.#resolve = _resolve;
+        this.#reject = _reject;
+    }
+
+    /**
+     * @param {any} [reason]
+     */
+    reject(reason) {
+        return this.#reject(reason);
+    }
+
+    /**
+     * @param {T} [value]
+     */
+    resolve(value) {
+        return this.#resolve(value);
+    }
+}
+
+//-----------------------------------------------------------------------------
+// Exports
+//-----------------------------------------------------------------------------
+
+export function makeDeferred() {
+    return new Deferred();
 }
 
 export async function nextTick() {

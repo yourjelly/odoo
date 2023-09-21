@@ -10,7 +10,13 @@ export class HootStatusPanel extends Component {
     static components = { HootTestPath };
 
     static props = {
-        filter: [{ value: "failed" }, { value: "passed" }, { value: "skipped" }, { value: null }],
+        filter: [
+            { value: "failed" },
+            { value: "passed" },
+            { value: "skipped" },
+            { value: "todo" },
+            { value: null },
+        ],
         filterResults: Function,
         grouped: Boolean,
         groupResults: Function,
@@ -19,50 +25,77 @@ export class HootStatusPanel extends Component {
     };
 
     static template = compactXML/* xml */ `
-        <div class="hoot-status hoot-row hoot-gap-3" t-att-class="state.className">
-            <div class="hoot-row hoot-gap-2">
-                <span class="hoot-hide-sm" t-esc="state.text" t-att-title="state.text" />
+        <div class="hoot-status d-flex flex-row align-items-center gap-3" t-att-class="state.className">
+            <div class="d-flex flex-row align-items-center gap-2">
+                <span class="d-none d-md-block" t-esc="state.text" t-att-title="state.text" />
                 <t t-if="state.runningTest">
                     <HootTestPath test="state.runningTest" />
                 </t>
                 <t t-if="state.timer !== null">
-                    <span class="hoot-text-info" t-attf-title="Running for {{ state.timer }} seconds">
+                    <span class="hoot-text-skip" t-attf-title="Running for {{ state.timer }} seconds">
                         (<t t-esc="state.timer" />s)
                     </span>
                 </t>
             </div>
-            <div class="hoot-row hoot-gap-1">
-                <t t-if="state.done - state.failed">
-                    <t t-set="color" t-value="!props.filter or props.filter === 'passed' ? 'success' : 'muted'" />
+            <div class="d-flex flex-row align-items-center gap-1">
+                <t t-if="state.passed">
+                    <t t-set="color" t-value="!props.filter or props.filter === 'passed' ? 'pass' : 'muted'" />
                     <button
-                        t-attf-class="hoot-text-{{ color }} hoot-row hoot-gap-1 hoot-p-1 hoot-transition-colors"
+                        t-attf-class="hoot-text-{{ color }} d-flex flex-row align-items-center gap-1 p-1 hoot-transition-colors"
                         t-on-click="() => props.filterResults('passed')"
                     >
                         <span t-attf-class="hoot-bg-{{ color }} hoot-circle hoot-transition-colors" />
-                        <t t-esc="state.done - state.failed" /> passed
+                        <t t-esc="state.passed" />
+                        <span class="d-none d-md-block">passed</span>
                     </button>
                 </t>
                 <t t-if="state.failed">
-                    <t t-set="color" t-value="!props.filter or props.filter === 'failed' ? 'danger' : 'muted'" />
+                    <t t-set="color" t-value="!props.filter or props.filter === 'failed' ? 'fail' : 'muted'" />
                     <button
-                        t-attf-class="hoot-text-{{ color }} hoot-row hoot-gap-1 hoot-p-1 hoot-transition-colors"
+                        t-attf-class="hoot-text-{{ color }} d-flex flex-row align-items-center gap-1 p-1 hoot-transition-colors"
                         t-on-click="() => props.filterResults('failed')"
                     >
                         <span t-attf-class="hoot-bg-{{ color }} hoot-circle hoot-transition-colors" />
-                        <t t-esc="state.failed" /> failed
+                        <t t-esc="state.failed" />
+                        <span class="d-none d-md-block">failed</span>
                     </button>
                 </t>
                 <t t-if="state.skipped">
-                    <t t-set="color" t-value="!props.filter or props.filter === 'skipped' ? 'info' : 'muted'" />
+                    <t t-set="color" t-value="!props.filter or props.filter === 'skipped' ? 'skip' : 'muted'" />
                     <button
-                        t-attf-class="hoot-text-{{ color }} hoot-row hoot-gap-1 hoot-p-1 hoot-transition-colors"
+                        t-attf-class="hoot-text-{{ color }} d-flex flex-row align-items-center gap-1 p-1 hoot-transition-colors"
                         t-on-click="() => props.filterResults('skipped')"
                     >
                         <span t-attf-class="hoot-bg-{{ color }} hoot-circle hoot-transition-colors" />
-                        <t t-esc="state.skipped" /> skipped
+                        <t t-esc="state.skipped" />
+                        <span class="d-none d-md-block">skipped</span>
                     </button>
                 </t>
-                <button title="Sort by duration" t-on-click="props.sortResults">
+                <t t-if="state.todo">
+                    <t t-set="color" t-value="!props.filter or props.filter === 'todo' ? 'todo' : 'muted'" />
+                    <button
+                        t-attf-class="hoot-text-{{ color }} d-flex flex-row align-items-center gap-1 p-1 hoot-transition-colors"
+                        t-on-click="() => props.filterResults('todo')"
+                    >
+                        <span t-attf-class="hoot-bg-{{ color }} hoot-circle hoot-transition-colors" />
+                        <t t-esc="state.todo" />
+                        <span class="d-none d-md-block">todo</span>
+                    </button>
+                </t>
+                <button
+                    class="p-1"
+                    t-att-class="{ 'hoot-text-primary': props.grouped }"
+                    title="Group by suite"
+                    t-on-click="props.groupResults"
+                >
+                    <i class="bi bi-list-nested" />
+                </button>
+                <button
+                    class="p-1"
+                    t-att-class="{ 'hoot-text-primary': props.sorted }"
+                    title="Sort by duration"
+                    t-on-click="props.sortResults"
+                >
                     <i class="bi bi-filter" />
                 </button>
             </div>
@@ -96,7 +129,9 @@ export class HootStatusPanel extends Component {
             // reporting
             done: 0,
             failed: 0,
+            passed: 0,
             skipped: 0,
+            todo: 0,
             tests: 0,
         });
 
@@ -119,7 +154,7 @@ export class HootStatusPanel extends Component {
             }
         });
 
-        runner.afterAnyTest(({ lastResults }) => {
+        runner.afterAnyTest(({ config, lastResults }) => {
             stopTimer();
 
             this.state.runningTest = null;
@@ -128,6 +163,10 @@ export class HootStatusPanel extends Component {
 
             if (!lastResults.pass) {
                 this.state.failed++;
+            } else if (config.todo) {
+                this.state.todo++;
+            } else {
+                this.state.passed++;
             }
         });
 

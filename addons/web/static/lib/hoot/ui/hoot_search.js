@@ -34,13 +34,16 @@ export class HootSearch extends Component {
     static components = { HootTagButton };
 
     static template = compactXML/* xml */ `
-        <div class="hoot-search hoot-relative" t-ref="root" t-on-keydown="onKeyDown">
-            <form class="hoot-search-group hoot-row" t-on-submit.prevent="onSubmit">
-                <div class="hoot-search-bar hoot-row hoot-p-1 hoot-gap-1">
+        <div class="hoot-search position-relative" t-ref="root" t-on-keydown="onKeyDown">
+            <form
+                class="hoot-search-group d-flex flex-row align-items-center overflow-hidden"
+                t-on-submit.prevent="onSubmit"
+            >
+                <div class="hoot-search-bar d-flex flex-row align-items-center p-1 gap-1">
                     <t t-foreach="getCategoryCounts()" t-as="count" t-key="count.id">
                         <button
                             type="submit"
-                            class="hoot-btn hoot-row hoot-gap-1 hoot-px-1 hoot-p-1"
+                            class="hoot-btn d-flex flex-row align-items-center gap-1 px-1 p-1"
                             t-att-title="count.text"
                             t-on-click="() => this.uncheckCategory(count.id)"
                         >
@@ -50,7 +53,7 @@ export class HootSearch extends Component {
                     </t>
                     <input
                         type="text"
-                        class="hoot-p-1"
+                        class="w-100 p-1"
                         autofocus="autofocus"
                         placeholder="Filter suites, tests or tags"
                         t-ref="search-input"
@@ -60,7 +63,7 @@ export class HootSearch extends Component {
                 </div>
                 <button
                     type="submit"
-                    class="hoot-btn-go hoot-btn hoot-p-2 hoot-px-2"
+                    class="hoot-btn-go hoot-btn p-2"
                     t-att-disabled="state.buttonDisabled"
                 >
                     Go
@@ -68,11 +71,11 @@ export class HootSearch extends Component {
             </form>
             <t t-if="state.query and state.showDropdown">
                 <div class="hoot-dropdown">
-                    <div class="hoot-dropdown-category hoot-col">
-                        <h5 class="hoot-dropdown-header hoot-row">
+                    <div class="hoot-dropdown-category d-flex flex-column">
+                        <h6 class="hoot-dropdown-header d-flex flex-row align-items-center">
                             <span class="hoot-dropdown-title">Filter using <t t-esc="filterType" /></span>
-                        </h5>
-                        <ul class="hoot-dropdown-lines hoot-col">
+                        </h6>
+                        <ul class="hoot-dropdown-lines d-flex flex-column">
                             <li tabindex="0" t-on-keydown="(ev) => this.onLineKeyDown(ev, null)">
                                 <button
                                     class="hoot-dropdown-line"
@@ -86,16 +89,18 @@ export class HootSearch extends Component {
                     </div>
                     <t t-foreach="categories" t-as="category" t-key="category.id">
                         <t t-if="state.categories[category.id].length">
-                            <div class="hoot-dropdown-category hoot-col">
-                                <h5 class="hoot-dropdown-header hoot-row">
+                            <div class="hoot-dropdown-category d-flex flex-column">
+                                <h6 class="hoot-dropdown-header d-flex flex-row align-items-center">
                                     <span class="hoot-dropdown-title" t-esc="title(category.plural)" />
                                     <button
-                                        class="hoot-remove-category hoot-text-danger"
+                                        class="hoot-remove-category hoot-text-fail"
                                         t-attf-title="Uncheck all {{ category.plural }}"
                                         t-on-click="() => this.uncheckCategory(category.id)"
-                                    >✖</button>
-                                </h5>
-                                <ul class="hoot-dropdown-lines hoot-col">
+                                    >
+                                        <small>✖</small>
+                                    </button>
+                                </h6>
+                                <ul class="hoot-dropdown-lines d-flex flex-column">
                                     <t t-foreach="state.categories[category.id]" t-as="item" t-key="item.id">
                                         <li tabindex="0" t-on-keydown="(ev) => this.onLineKeyDown(ev, category.id, item.id)">
                                             <label

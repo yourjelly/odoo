@@ -8,7 +8,7 @@ import { compactXML } from "../utils";
 export class HootRunButton extends Component {
     static template = compactXML/* xml */ `
         <button
-            class="hoot-abort hoot-btn hoot-row hoot-p-2 hoot-gap-1"
+            class="hoot-abort hoot-btn d-flex flex-row align-items-center p-2 gap-1"
             t-on-click="onClick"
             t-att-title="state.text"
         >

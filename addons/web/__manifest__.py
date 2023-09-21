@@ -445,6 +445,7 @@ This module provides the core of the Odoo Web Client.
             'web/static/lib/owl/odoo_module.js',
 
             'web/static/lib/hoot/**/*',
+            ('remove', 'web/static/lib/hoot/tests/**/*'),
         ],
         # Unit test files
         'web.unit_tests': [

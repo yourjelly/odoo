@@ -1,8 +1,7 @@
 /** @odoo-module */
 
-import { makeDeferred } from "../helpers/concurency";
-import { describe, test } from "../hoot";
-import { expect } from "../matchers";
+import { makeDeferred } from "../helpers/concurrency";
+import { describe, expect, test } from "../hoot";
 import {
     debounce,
     deepEqual,

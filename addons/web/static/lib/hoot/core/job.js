@@ -36,7 +36,7 @@ export class Job {
             this.path.unshift(...this.parent.path);
         }
 
-        this.fullName = this.path.map((job) => job.name).join(" > ");
+        this.fullName = this.path.map((job) => job.name).join("/");
         this.id = generateHash(this.fullName);
         this.index = normalize(this.fullName);
 

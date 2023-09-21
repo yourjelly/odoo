@@ -9,7 +9,7 @@ export class HootRunFailedButton extends Component {
     static template = compactXML/* xml */ `
         <t t-if="state.show">
             <a
-                class="hoot-run-failed hoot-btn hoot-row hoot-p-2 hoot-gap-1"
+                class="hoot-run-failed hoot-btn d-flex flex-row align-items-center p-2 gap-1"
                 href=""
                 t-on-click="onClick"
                 title="Run failed"

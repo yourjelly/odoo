@@ -17,10 +17,14 @@ import { HootSearch } from "./hoot_search";
 //-----------------------------------------------------------------------------
 
 /**
- * @param {"link" | "script"} type
- * @param {string} url
+ * @param {{
+ *  crossorigin?: string;
+ *  integrity?: string;
+ *  url: string;
+ *  type: "script" | "link";
+ * }} params
  */
-const importURL = async ({ type, url }) => {
+const importURL = async ({ crossorigin, integrity, type, url }) => {
     if (imported.has(url)) {
         return;
     }
@@ -37,6 +41,14 @@ const importURL = async ({ type, url }) => {
             break;
         }
     }
+
+    if (integrity) {
+        element.setAttribute("integrity", integrity);
+    }
+    if (crossorigin) {
+        element.setAttribute("crossorigin", crossorigin);
+    }
+
     element.setAttribute("data-no-import", true);
 
     return new Promise((resolve, reject) => {
@@ -70,7 +82,7 @@ const useColorScheme = (storageKey) => {
 };
 
 const updateTitle = (failed) => {
-    const toAdd = failed ? TITLE_PREFIX.fail : TITLE_PREFIX.success;
+    const toAdd = failed ? TITLE_PREFIX.fail : TITLE_PREFIX.pass;
     if (document.title.startsWith(toAdd)) {
         return;
     }
@@ -88,7 +100,7 @@ const COLOR_SCHEMES = ["dark", "light"];
 
 const TITLE_PREFIX = {
     fail: "✖",
-    success: "✔",
+    pass: "✔",
 };
 
 const imported = new Set();
@@ -116,12 +128,12 @@ export class HootMain extends Component {
             </a>
         </t>
         <main t-else="" class="hoot" t-attf-class="hoot-{{ color.scheme }}">
-            <header class="hoot-panel hoot-col">
-                <nav class="hoot-controls hoot-row hoot-gap-4">
-                    <h1 class="hoot-logo hoot-text-primary hoot-text-xl hoot-select-none" title="Hierarchically Organized Odoo Tests">
+            <header class="hoot-panel d-flex flex-column">
+                <nav class="hoot-controls d-flex flex-row align-items-center py-1 px-2 gap-4">
+                    <h1 class="hoot-logo hoot-text-primary fw-bolder fs-4 user-select-none" title="Hierarchically Organized Odoo Tests">
                         HOOT
                     </h1>
-                    <div class="hoot-buttons hoot-row">
+                    <div class="hoot-buttons d-flex flex-row align-items-center overflow-hidden">
                         <HootRunButton />
                         <HootRunFailedButton />
                         <HootRunAllButton />
@@ -178,10 +190,19 @@ export class HootMain extends Component {
 
         onWillStart(async () => {
             if (!runner.config.headless) {
-                await importURL({
-                    type: "link",
-                    url: "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css",
-                });
+                await Promise.all([
+                    importURL({
+                        type: "link",
+                        url: "https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css",
+                        integrity:
+                            "sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN",
+                        crossorigin: "anonymous",
+                    }),
+                    importURL({
+                        type: "link",
+                        url: "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css",
+                    }),
+                ]);
             }
         });
         onMounted(async () => {

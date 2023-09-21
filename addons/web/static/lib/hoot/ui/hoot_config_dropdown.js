@@ -12,8 +12,8 @@ export class HootConfigDropdown extends Component {
     };
 
     static template = compactXML/* xml */ `
-        <div class="hoot-config hoot-relative" t-ref="root">
-            <button t-ref="toggler" class="hoot-btn hoot-p-2" title="Configuration">
+        <div class="hoot-config position-relative" t-ref="root">
+            <button t-ref="toggler" class="btn hoot-btn p-2" title="Configuration">
                 <i class="bi bi-gear-fill" />
             </button>
             <t t-if="state.open">
@@ -66,21 +66,21 @@ export class HootConfigDropdown extends Component {
                         <span>Headless</span>
                     </label>
                     <div
-                        class="hoot-dropdown-line hoot-row hoot-gap-1"
+                        class="hoot-dropdown-line d-flex flex-row align-items-center gap-1"
                         title="Re-run current tests and abort after a given amount of failed tests"
                     >
                         <span>Bail after</span>
                         <input
                             type="number"
                             min="0"
-                            class="hoot-w-1/4"
+                            class="w-25"
                             t-model.number="env.runner.config.bail"
                             t-on-change="refresh"
                         />
                         <span>failed tests</span>
                     </div>
                     <button
-                        class="hoot-dropdown-line hoot-row hoot-gap-1"
+                        class="hoot-dropdown-line d-flex flex-row align-items-center gap-1"
                         title="Toggle the color scheme of the UI"
                         t-on-click="props.colorToggle"
                     >

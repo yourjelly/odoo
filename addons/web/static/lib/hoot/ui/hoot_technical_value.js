@@ -43,7 +43,7 @@ export class HootTechnicalValue extends Component {
         </t>
         <t t-elif="value and typeof value === 'object'">
             <t t-tag="state.open ? 'pre' : 'span'" class="hoot-technical">
-                <button class="hoot-object-type hoot-row" t-on-click.synthetic="onClick">
+                <button class="hoot-object-type d-flex flex-row align-items-center" t-on-click.synthetic="onClick">
                     <t t-esc="getConstructor()" />
                     <i t-attf-class="bi bi-caret-{{ state.open ? 'up' : 'down' }}-fill" />
                 </button>
@@ -54,9 +54,9 @@ export class HootTechnicalValue extends Component {
                 <t t-if="state.open">
                     <t t-if="isIterable(value)">
                         <t>[</t>
-                        <ul class="hoot-object-values">
+                        <ul class="ps-3">
                             <t t-foreach="value" t-as="subValue" t-key="subValue">
-                                <li class="hoot-object-line">
+                                <li class="d-flex flex-row">
                                     <HootTechnicalValue value="subValue" />
                                     <t t-esc="displayComma(subValue)" />
                                 </li>
@@ -66,9 +66,9 @@ export class HootTechnicalValue extends Component {
                     </t>
                     <t t-else="">
                         <t>{</t>
-                        <ul class="hoot-object-values">
+                        <ul class="ps-3">
                             <t t-foreach="value" t-as="key" t-key="key">
-                                <li class="hoot-object-line">
+                                <li class="d-flex flex-row">
                                     <span class="hoot-key" t-esc="key" />: <HootTechnicalValue value="value[key]" />
                                     <t t-esc="displayComma(value[key])" />
                                 </li>

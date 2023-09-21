@@ -42,7 +42,7 @@ export class HootReporting extends Component {
     static components = { HootStatusPanel, HootTestResult };
 
     static template = compactXML/* xml */ `
-        <div class="hoot-reporting hoot-col">
+        <div class="hoot-reporting d-flex flex-column">
             <HootStatusPanel
                 filter="state.filter"
                 filterResults.bind="filterResults"
@@ -53,7 +53,10 @@ export class HootReporting extends Component {
             />
             <div class="hoot-results">
                 <t t-foreach="getFilteredResults()" t-as="result" t-key="result.id">
-                    <t t-if="result.group">
+                    <t t-if="result.suite">
+                        <div class="hoot-result">
+                            <h5 class="hoot-result-header" t-esc="result.suite.fullName" />
+                        </div>
                     </t>
                     <t t-else="">
                         <HootTestResult test="result.test" open="state.open.includes(result.test.id)" />
@@ -106,13 +109,13 @@ export class HootReporting extends Component {
     getFilteredResults() {
         if (!this.state) return [];
 
-        const makeResult = ({ group, test }) =>
-            group ? { group, id: `group#${group.id}` } : { test, id: `test#${test.id}` };
+        const makeResult = ({ suite, test }) =>
+            suite ? { suite, id: `suite#${suite.id}` } : { test, id: `test#${test.id}` };
 
         const { showskipped, showpassed } = this.env.runner.config;
         const { filter, grouped, sorted, tests } = this.state;
 
-        const groups = sorted ? {} : [];
+        const groups = grouped || sorted ? {} : [];
         for (const test of Object.values(tests)) {
             let matchFilter = false;
             switch (filter) {
@@ -121,17 +124,21 @@ export class HootReporting extends Component {
                     break;
                 }
                 case "passed": {
-                    matchFilter = !test.config.skip && test.results.every((r) => r.pass);
+                    matchFilter = !test.config.todo && !test.config.skip && test.results.every((r) => r.pass);
                     break;
                 }
                 case "skipped": {
                     matchFilter = test.config.skip;
                     break;
                 }
+                case "todo": {
+                    matchFilter = test.config.todo && test.results.every((r) => r.pass);
+                    break;
+                }
                 default: {
                     if (!showskipped && test.config.skip) {
                         matchFilter = false;
-                    } else if (!showpassed && test.results.every((r) => r.pass)) {
+                    } else if (!showpassed && test.results.length && test.results.every((r) => r.pass)) {
                         matchFilter = false;
                     } else {
                         matchFilter = true;
@@ -149,6 +156,13 @@ export class HootReporting extends Component {
                     groups[key] = [];
                 }
                 groups[key].push(makeResult({ test }));
+            } else if (grouped) {
+                const suite = test.parent;
+                const key = suite.id;
+                if (!groups[key]) {
+                    groups[key] = [makeResult({ suite })];
+                }
+                groups[key].push(makeResult({ test }));
             } else {
                 groups.push(makeResult({ test }));
             }
@@ -157,16 +171,20 @@ export class HootReporting extends Component {
         if (sorted) {
             const values = Object.values(groups).flat();
             return sorted === "asc" ? values : values.reverse();
+        } else if (grouped) {
+            return Object.values(groups).flat();
         } else {
             return groups;
         }
     }
 
     groupResults() {
+        this.state.sorted = false;
         this.state.grouped = !this.state.grouped;
     }
 
     sortResults() {
+        this.state.grouped = false;
         if (!this.state.sorted) {
             this.state.sorted = "desc";
         } else if (this.state.sorted === "desc") {

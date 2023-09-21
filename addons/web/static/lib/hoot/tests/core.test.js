@@ -56,9 +56,8 @@ describe("@odoo/hoot", "Core", "Runner", () => {
         ).toThrow();
     });
 
-    test.todo("can register test tags", async () => {
+    test.skip("can register test tags", async () => {
         const runner = new TestRunner();
-
         runner.addSuite([], "suite", () => {
             let testFn = runner.addTest.bind(runner);
             for (let i = 1; i <= 10; i++) {
@@ -90,9 +89,9 @@ describe("@odoo/hoot", "Core", "Suite", () => {
         expect(d.parent.parent).toBe(a);
 
         expect(a.fullName).toBe("a");
-        expect(b.fullName).toBe("a > b");
-        expect(c.fullName).toBe("a > c");
-        expect(d.fullName).toBe("a > b > d");
+        expect(b.fullName).toBe("a/b");
+        expect(c.fullName).toBe("a/c");
+        expect(d.fullName).toBe("a/b/d");
     });
 });
 
@@ -109,7 +108,7 @@ describe("@odoo/hoot", "Core", "Test", () => {
         const t3 = new Test(b, "t3", () => {}, []);
 
         expect(t1.fullName).toBe("t1");
-        expect(t2.fullName).toBe("a > t2");
-        expect(t3.fullName).toBe("a > b > t3");
+        expect(t2.fullName).toBe("a/t2");
+        expect(t3.fullName).toBe("a/b/t3");
     });
 });

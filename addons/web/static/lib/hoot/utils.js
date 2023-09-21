@@ -581,7 +581,7 @@ export class MarkupHelper {
 
     /** @param {string} content */
     static green(content) {
-        return new MarkupHelper({ className: "hoot-text-success", content });
+        return new MarkupHelper({ className: "hoot-text-pass", content });
     }
 
     /** @param {Iterable<string>} content */
@@ -591,7 +591,7 @@ export class MarkupHelper {
 
     /** @param {string} content */
     static red(content) {
-        return new MarkupHelper({ className: "hoot-text-danger", content });
+        return new MarkupHelper({ className: "hoot-text-fail", content });
     }
 
     /** @param {string} content */

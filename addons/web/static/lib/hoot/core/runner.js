@@ -1,7 +1,7 @@
 /** @odoo-module */
 
 import { reactive } from "@odoo/owl";
-import { setupExpect } from "../expect";
+import { expect, setupExpect } from "../expect";
 import { Error, Promise, clearTimeout, setTimeout } from "../globals";
 import { getFuzzyScore, makeCallbacks, normalize, parseRegExp, shuffle, storage } from "../utils";
 import { DEFAULT_CONFIG } from "./config";
@@ -49,6 +49,7 @@ export class TestRunner {
     #callbacks = makeCallbacks();
     /** @type {Test | null} */
     #currentTest = null;
+    #failed = 0;
     /** @type {import("./job").Job[]} */
     #jobs = [];
     #missedCallbacks = [];
@@ -241,9 +242,10 @@ export class TestRunner {
      * @param {...(() => void) | string} nestedSuiteArgs
      */
     addSuite(tagNames, name, fn, ...nestedSuiteArgs) {
+        name = name.toLowerCase();
         if (typeof fn === "string") {
-            const nestedSuiteFn = () => this.addSuite([], fn, ...nestedSuiteArgs);
-            return this.addSuite(tagNames, name, nestedSuiteFn);
+            const nestedSuiteFn = () => this.addSuite(tagNames, fn, ...nestedSuiteArgs);
+            return this.addSuite([], name, nestedSuiteFn);
         }
         if (typeof fn !== "function") {
             throw suiteError(
@@ -276,14 +278,17 @@ export class TestRunner {
                         break;
                     case Tag.SKIP:
                         this.#skip.suites.add(suite.id);
+                        if (!this.#only.suites.has(suite.id)) {
+                            suite.config.skip = true;
+                        }
+                        break;
+                    case Tag.TODO:
+                        suite.config.todo = true;
                         break;
                 }
             } else if (!tag.config) {
                 this.tags.add(tag);
             }
-        }
-        if (this.#skip.suites.has(suite.id) && !this.#only.suites.has(suite.id)) {
-            suite.config.skip = true;
         }
         let result;
         try {
@@ -336,14 +341,17 @@ export class TestRunner {
                         break;
                     case Tag.SKIP:
                         this.#skip.tests.add(test.id);
+                        if (!this.#only.tests.has(test.id)) {
+                            test.config.skip = true;
+                        }
+                        break;
+                    case Tag.TODO:
+                        test.config.todo = true;
                         break;
                 }
             } else if (!tag.config) {
                 this.tags.add(tag);
             }
-        }
-        if (this.#skip.tests.has(test.id) && !this.#only.tests.has(test.id)) {
-            test.config.skip = true;
         }
     }
 
@@ -441,7 +449,7 @@ export class TestRunner {
                     }
 
                     // Setup
-                    const { setStatus, tearDown } = setupExpect();
+                    const { results, tearDown } = setupExpect();
 
                     const timeout = test.config.timeout || this.config.timeout;
                     let timeoutId;
@@ -463,10 +471,11 @@ export class TestRunner {
                                     timeout
                                 );
                             }
-                        }).then(() => setStatus({ aborted: true })),
+                        }).then(() => (results.aborted = true)),
                     ])
                         .catch((error) => {
-                            setStatus({ error });
+                            results.error = error;
+                            results.pass = false;
                             if (this.config.notrycatch) {
                                 throw error;
                             }
@@ -476,11 +485,19 @@ export class TestRunner {
                             clearTimeout(timeoutId);
                         });
 
-                    if (test.hasTag(Tag.TODO)) {
-                        setStatus({ pass: true });
+                    if (test.config.todo) {
+                        if (results.pass) {
+                            results.error = new Error(
+                                `tests tagged with "todo" are expected to fail`
+                            );
+                            results.pass = false;
+                        } else {
+                            expect.pass();
+                        }
                     }
 
-                    test.results.push(await tearDown());
+                    const finalResults = await tearDown();
+                    test.results.push(finalResults);
 
                     await this.#execAfterCallback(async () => {
                         for (const callbacks of [
@@ -489,8 +506,13 @@ export class TestRunner {
                         ]) {
                             callbacks.call("after-test", test);
                         }
-                        if (urlParams.bail && !expect.pass && !test.config.skip) {
-                            return this.stop();
+                        if (this.config.bail) {
+                            if (!test.config.skip && !test.lastResults.pass) {
+                                this.#failed++;
+                            }
+                            if (this.#failed >= this.config.bail) {
+                                return this.stop();
+                            }
                         }
                     });
                 }

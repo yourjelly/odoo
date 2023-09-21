@@ -6,21 +6,19 @@ import {
     getParentFrame,
     getPreviousFocusableElement,
     getRect,
-    getScrollParent,
     getText,
-    getTouchingElements,
     isDocument,
     isEditable,
     isElement,
     isEventTarget,
     isFocusable,
     isVisible,
-    mount,
     queryAll,
     queryOne,
 } from "../../helpers/dom";
 import { click } from "../../helpers/events";
 import { describe, expect, test } from "../../hoot";
+import { mount } from "../local_helpers";
 
 /**
  * @param {Document} document
@@ -92,7 +90,7 @@ const FULL_HTML_TEMPLATE = /* xml */ `
     `;
 const SVG_URL = "http://www.w3.org/2000/svg";
 
-describe.ui.skip("@odoo/hoot", "Helpers", "DOM", () => {
+describe.ui("@odoo/hoot/helpers", "DOM", () => {
     test("getFocusableElements", async () => {
         await mount(/* xml */ `
             <input class="input" />
@@ -165,22 +163,11 @@ describe.ui.skip("@odoo/hoot", "Helpers", "DOM", () => {
         );
     });
 
-    test("getScrollParent", async () => {
-        await mount(FULL_HTML_TEMPLATE);
-
-        expect(getScrollParent(".highlighted", "x")).toBe(queryOne("main"));
-        expect(getScrollParent(".highlighted", "y")).toBe(queryOne("ul"));
-    });
-
     test("getText", async () => {
         await mount(FULL_HTML_TEMPLATE);
 
         expect(getText(".title")).toEqual(["Title", "List header", "Form title"]);
         expect(getText("footer")).toEqual(["Footer\nBack to top"]);
-    });
-
-    test.skip("getTouchingElements", async () => {
-        expect(getTouchingElements()).toBeTruthy();
     });
 
     test("isDocument", async () => {

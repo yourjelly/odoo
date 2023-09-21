@@ -28,24 +28,24 @@ export class HootTestResult extends Component {
 
     static template = compactXML/* xml */ `
         <details
-            class="hoot-result hoot-col"
+            class="hoot-result d-flex flex-column"
             t-att-class="className"
             t-att-open="props.open"
         >
-            <summary class="hoot-result-header hoot-row hoot-text-md">
-                <div class="hoot-row hoot-overflow-hidden hoot-gap-2">
+            <summary class="hoot-result-header d-flex flex-row align-items-center">
+                <div class="d-flex flex-row align-items-center overflow-hidden gap-2">
                     <HootTestPath test="props.test" />
-                    <div class="hoot-row hoot-gap-1">
+                    <div class="d-flex flex-row align-items-center gap-1">
                         <a
                             t-att-href="withParams('test', props.test.id)"
-                            class="hoot-result-btn hoot-text-success hoot-px-1 hoot-py-0.5"
+                            class="hoot-result-btn hoot-text-pass px-1"
                             title="Run this test only"
                         >
                             <i class="bi bi-play-fill" />
                         </a>
                         <a
                             t-att-href="withParams('debugTest', props.test.id)"
-                            class="hoot-result-btn hoot-text-success hoot-px-1 hoot-py-0.5"
+                            class="hoot-result-btn hoot-text-pass px-1"
                             title="Run this test only in debug mode"
                         >
                             <i class="bi bi-bug-fill" />
@@ -53,7 +53,7 @@ export class HootTestResult extends Component {
                         <t t-if="!props.test.config.skip or !props.test.hasTag(Tag.SKIP)">
                             <a
                                 t-att-href="withParams('skip-test', props.test.id)"
-                                class="hoot-result-btn hoot-text-info hoot-px-1 hoot-py-0.5"
+                                class="hoot-result-btn hoot-text-skip px-1"
                                 t-att-title="props.test.skip ? 'Unskip test' : 'Skip test'"
                             >
                                 <i t-attf-class="bi bi-{{ props.test.config.skip ? 'arrow-repeat' : 'fast-forward-fill' }}" />
@@ -61,9 +61,9 @@ export class HootTestResult extends Component {
                         </t>
                     </div>
                 </div>
-                <span
-                    class="hoot-text-sm hoot-whitespace-nowrap"
-                    t-attf-class="hoot-text-{{ props.test.config.skip ? 'info' : 'muted' }}"
+                <small
+                    class="text-nowrap"
+                    t-attf-class="hoot-text-{{ props.test.config.skip ? 'skip' : 'muted' }}"
                 >
                     <t t-if="props.test.config.skip">
                         skipped
@@ -74,16 +74,20 @@ export class HootTestResult extends Component {
                         </t>
                         <t t-esc="props.test.lastResults.duration" /> ms
                     </t>
-                </span>
+                </small>
             </summary>
             <t t-if="!props.test.config.skip">
-                <div class="hoot-result-detail hoot-col hoot-mx-3">
-                    <t t-foreach="props.test.lastResults.assertions" t-as="result" t-key="result.id">
-                        <div class="hoot-result-line hoot-row hoot-px-2" t-att-class="result.pass ? 'hoot-text-success' : 'hoot-text-danger'">
-                            <t t-esc="result_index + 1" />. <t t-esc="result.message" />
+                <div class="hoot-result-detail d-flex flex-column gap-1 rounded overflow-x-auto p-1 m-2 mt-0">
+                    <t t-foreach="props.test.lastResults.assertions" t-as="assertion" t-key="assertion.id">
+                        <div
+                            t-attf-class="hoot-result-line hoot-text-{{ assertion.pass ? 'pass' : 'fail' }} d-flex flex-row align-items-center gap-1 px-2 text-truncate"
+                        >
+                            <t t-esc="assertion_index + 1" />.
+                            <strong class="hoot-text-skip" t-esc="assertion.name" />
+                            <t t-esc="assertion.message" />
                         </div>
-                        <t t-if="!result.pass and result.info">
-                            <t t-foreach="result.info" t-as="info" t-key="info_index">
+                        <t t-if="!assertion.pass and assertion.info">
+                            <t t-foreach="assertion.info" t-as="info" t-key="info_index">
                                 <div class="hoot-info-line">
                                     <HootTechnicalValue value="info[0]" />
                                     <HootTechnicalValue value="info[1]" />
@@ -92,11 +96,11 @@ export class HootTestResult extends Component {
                         </t>
                     </t>
                     <t t-if="props.test.lastResults.error">
-                        <div class="hoot-result-line hoot-row hoot-px-2 hoot-text-danger">
+                        <div class="hoot-result-line d-flex flex-row align-items-center px-2 hoot-text-fail">
                             Error while running test "<t t-esc="props.test.name" />"
                         </div>
                         <div class="hoot-info-line">
-                            <span class="hoot-text-danger">Source:</span>
+                            <span class="hoot-text-fail ps-2">Source:</span>
                             <pre class="hoot-technical" t-esc="props.test.lastResults.error.stack" />
                         </div>
                     </t>

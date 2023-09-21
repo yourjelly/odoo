@@ -15,7 +15,7 @@ export class HootTagButton extends Component {
     static template = compactXML/* xml */ `
         <a
             t-att="{ href: !props.disabled and withParams('tag', props.tag.name) }"
-            class="hoot-tag"
+            class="hoot-tag badge rounded-pill"
             t-attf-style="--hoot-tag-bg: {{ props.tag.color[0] }}; --hoot-tag-text: {{ props.tag.color[1] }};"
             t-esc="props.tag.name"
         />

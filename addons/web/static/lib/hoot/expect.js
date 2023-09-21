@@ -10,9 +10,17 @@ import { deepEqual, formatHumanReadable, isIterable, MarkupHelper, match } from 
  * @typedef {"any" | "boolean" | "function" | "number" | "string"} ArgumentPrimitive
  *
  * @typedef {{
+ *  id: number;
+ *  info?: [any, any][];
+ *  message: string;
+ *  name: string;
+ *  pass: boolean;
+ * }} Assertion
+ *
+ * @typedef {{
  *  aborted: boolean;
  *  afterTestCallbacks: (() => any)[];
- *  assertions: ExpectResult[];
+ *  assertions: Assertion[];
  *  duration: number,
  *  error: Error | null,
  *  pass: boolean,
@@ -23,6 +31,7 @@ import { deepEqual, formatHumanReadable, isIterable, MarkupHelper, match } from 
 /**
  * @template [T=unknown], [R=T]
  * @typedef {{
+ *  name: string;
  *  transform?: (actual: T) => R;
  *  predicate: (actual: R) => boolean;
  *  message: (pass: boolean) => string;
@@ -44,7 +53,7 @@ import { deepEqual, formatHumanReadable, isIterable, MarkupHelper, match } from 
 //-----------------------------------------------------------------------------
 
 /**
- * @param {() => boolean} predicate
+ * @param {boolean} predicate
  * @param {string} errorMessage
  */
 const ensure = (predicate, errorMessage) => {
@@ -106,19 +115,27 @@ const formatMessage = (message, { actual, not }) => {
 
 /** @param {string} stack */
 const formatStack = (stack) => {
-    const lines = stack
-        .toString()
-        .split("\n")
-        .map((v) => MarkupHelper.text(v.trim()));
-    return isFirefox ? lines : lines.slice(1);
+    let stackLines = String(stack)
+        .split(/\n/g)
+        .slice(isFirefox() ? 1 : 2); // remove `saveStack` (and ´Error´ in chrome)
+    if (stackLines.length > 10) {
+        stackLines = [...stackLines.slice(0, 10), `... ${stackLines.length - 10} more`];
+    }
+    return stackLines.map((v) => MarkupHelper.text(v.trim()));
+};
+
+const isFirefox = () => /firefox/i.test(navigator.userAgent);
+
+const saveStack = () => {
+    currentStack = new Error().stack;
 };
 
 const ACTUAL_REGEX = /%actual%/i;
-const NOT_REGEX = /\[([\w\s])*!([\w\s]*)\]/;
-const isFirefox = navigator.userAgent.includes("Firefox");
+const NOT_REGEX = /\[([\w\s]*)!([\w\s]*)\]/;
 
 /** @type {CurrentResults | null} */
 let currentResults = null;
+let currentStack = "";
 let nextResultId = 1;
 
 //-----------------------------------------------------------------------------
@@ -126,19 +143,6 @@ let nextResultId = 1;
 //-----------------------------------------------------------------------------
 
 export function setupExpect() {
-    const setStatus = (status) => {
-        if ("aborted" in status) {
-            currentResults.aborted = true;
-        }
-        if ("error" in status) {
-            currentResults.error = status.error;
-            currentResults.pass = false;
-        }
-        if ("pass" in status) {
-            currentResults.pass = status.pass;
-        }
-    };
-
     const tearDown = async () => {
         while (currentResults.afterTestCallbacks.length) {
             await currentResults.afterTestCallbacks.pop()();
@@ -168,7 +172,7 @@ export function setupExpect() {
         steps: [],
     };
 
-    return { setStatus, tearDown };
+    return { results: currentResults, tearDown };
 }
 
 /**
@@ -189,8 +193,6 @@ export class Matchers {
     };
     /** @type {Promise<T> | null} */
     #promise = null;
-    /** @type {string} */
-    #stack = "";
 
     /**
      * Returns a set of matchers expecting a result opposite to what normal matchers
@@ -254,7 +256,7 @@ export class Matchers {
         this.#modifiers = modifiers;
 
         if (this.#modifiers.rejects || this.#modifiers.resolves) {
-            this.#promise = Promise.resolve(this.#actual)
+            this.#promise = Promise.resolve(actual)
                 .then(
                     /** @param {PromiseFulfilledResult<T>} reason */
                     (result) => {
@@ -286,10 +288,9 @@ export class Matchers {
             const resolve = this.#resolve;
             this[fnName] = {
                 [fnName](...args) {
-                    // TODO: fix
-                    // this.#stack = new Error().stack;
-
-                    return resolve(fn(...args));
+                    saveStack();
+                    const result = fn(...args);
+                    return resolve.call(this, { ...result, name: fnName });
                 },
             }[fnName];
         }
@@ -306,7 +307,7 @@ export class Matchers {
      * ```
      */
     toBe(expected, message = "") {
-        this.#stack = new Error().stack;
+        saveStack();
 
         ensureArguments([
             [expected, "any"],
@@ -314,6 +315,7 @@ export class Matchers {
         ]);
 
         return this.#resolve({
+            name: "toBe",
             predicate: (actual) => actual === expected,
             message: (pass) =>
                 message ||
@@ -339,7 +341,7 @@ export class Matchers {
      * ```
      */
     toBeGreaterThan(max, message = "") {
-        this.#stack = new Error().stack;
+        saveStack();
 
         ensureArguments([
             [max, "number"],
@@ -347,6 +349,7 @@ export class Matchers {
         ]);
 
         return this.#resolve({
+            name: "toBeGreaterThan",
             predicate: (actual) => max < actual,
             message: (pass) =>
                 message ||
@@ -371,7 +374,7 @@ export class Matchers {
      * ```
      */
     toBeLessThan(min, message = "") {
-        this.#stack = new Error().stack;
+        saveStack();
 
         ensureArguments([
             [min, "number"],
@@ -379,6 +382,7 @@ export class Matchers {
         ]);
 
         return this.#resolve({
+            name: "toBeLessThan",
             predicate: (actual) => actual < min,
             message: (pass) =>
                 message ||
@@ -402,11 +406,12 @@ export class Matchers {
      * ```
      */
     toBeTruthy(message = "") {
-        this.#stack = new Error().stack;
+        saveStack();
 
         ensureArguments([[message, ["string", null]]]);
 
         return this.#resolve({
+            name: "toBeTruthy",
             predicate: Boolean,
             message: (pass) =>
                 message ||
@@ -426,7 +431,7 @@ export class Matchers {
      * ```
      */
     toBeTypeOf(type, message = "") {
-        this.#stack = new Error().stack;
+        saveStack();
 
         ensureArguments([
             [type, "string"],
@@ -434,6 +439,7 @@ export class Matchers {
         ]);
 
         return this.#resolve({
+            name: "toBeTypeOf",
             transform: (actual) => typeof actual,
             predicate: (actual) => actual === type,
             message: (pass) =>
@@ -458,11 +464,12 @@ export class Matchers {
      * ```
      */
     toBeVisible(message = "") {
-        this.#stack = new Error().stack;
+        saveStack();
 
         ensureArguments([[message, ["string", null]]]);
 
         return this.#resolve({
+            name: "toBeVisible",
             predicate: isVisible,
             message: (pass) =>
                 message ||
@@ -484,7 +491,7 @@ export class Matchers {
      * ```
      */
     toBeWithin(min, max, message = "") {
-        this.#stack = new Error().stack;
+        saveStack();
 
         ensureArguments([
             [min, "number"],
@@ -498,6 +505,7 @@ export class Matchers {
         );
 
         return this.#resolve({
+            name: "toBeWithin",
             predicate: (actual) => min <= actual && actual < max,
             message: (pass) =>
                 message ||
@@ -528,7 +536,7 @@ export class Matchers {
      * ```
      */
     toContain(target, amount = "any", message = "") {
-        this.#stack = new Error().stack;
+        saveStack();
 
         ensureArguments([
             [target, ["any"]],
@@ -538,6 +546,7 @@ export class Matchers {
 
         let found;
         return this.#resolve({
+            name: "toContain",
             transform: (actual) => {
                 const root = queryOne(actual);
                 found = queryAll(target, { root });
@@ -571,7 +580,7 @@ export class Matchers {
      * ```
      */
     toEqual(expected, message = "") {
-        this.#stack = new Error().stack;
+        saveStack();
 
         ensureArguments([
             [expected, "any"],
@@ -579,6 +588,7 @@ export class Matchers {
         ]);
 
         return this.#resolve({
+            name: "toEqual",
             predicate: (actual) => deepEqual(actual, expected),
             message: (pass) =>
                 message ||
@@ -606,7 +616,7 @@ export class Matchers {
      * ```
      */
     toHaveAttribute(attribute, value, message = "") {
-        this.#stack = new Error().stack;
+        saveStack();
 
         ensureArguments([
             [attribute, ["string"]],
@@ -617,6 +627,7 @@ export class Matchers {
         const expectsValue = ![null, undefined].includes(value);
 
         return this.#resolve({
+            name: "toHaveAttribute",
             tranform: (actual) => queryOne(actual),
             predicate: (actual) =>
                 expectsValue
@@ -651,7 +662,7 @@ export class Matchers {
      * ```
      */
     toHaveClass(className, message = "") {
-        this.#stack = new Error().stack;
+        saveStack();
 
         ensureArguments([
             [className, ["string", "string[]"]],
@@ -661,6 +672,7 @@ export class Matchers {
         const classNames = isIterable(className) ? [...className] : [className];
 
         return this.#resolve({
+            name: "toHaveClass",
             tranform: (actual) => queryOne(actual),
             predicate: (actual) => classNames.every((cls) => actual.classList.contains(cls)),
             message: (pass) =>
@@ -686,7 +698,7 @@ export class Matchers {
      * ```
      */
     toMatch(matcher, message = "") {
-        this.#stack = new Error().stack;
+        saveStack();
 
         ensureArguments([
             [matcher, "any"],
@@ -694,11 +706,12 @@ export class Matchers {
         ]);
 
         return this.#resolve({
+            name: "toMatch",
             predicate: (actual) => match(actual, matcher),
             message: (pass) =>
                 message ||
                 (pass
-                    ? `%actual% [matchers!does not match] ${formatHumanReadable(matcher)}`
+                    ? `%actual% [matches!does not match] ${formatHumanReadable(matcher)}`
                     : `expected value [! not] to match the given matcher`),
             details: (actual) => [
                 [MarkupHelper.green("Matcher:"), matcher],
@@ -719,7 +732,7 @@ export class Matchers {
      * ```
      */
     toSatisfy(predicate, message = "") {
-        this.#stack = new Error().stack;
+        saveStack();
 
         ensureArguments([
             [predicate, "function"],
@@ -727,6 +740,7 @@ export class Matchers {
         ]);
 
         return this.#resolve({
+            name: "toSatisfy",
             predicate: (actual) => predicate(actual),
             message: (pass) =>
                 message ||
@@ -754,7 +768,7 @@ export class Matchers {
      * ```
      */
     toThrow(matcher = Error, message = "") {
-        this.#stack = new Error().stack;
+        saveStack();
 
         ensureArguments([
             [matcher, "any"],
@@ -763,6 +777,7 @@ export class Matchers {
 
         let name;
         return this.#resolve({
+            name: "toThrow",
             transform: (actual) => {
                 try {
                     actual();
@@ -800,7 +815,7 @@ export class Matchers {
      * @template R
      * @param {MatcherSpecifications<T, R>} specs
      */
-    #resolveFinalResult({ transform, predicate, message, details }) {
+    #resolveFinalResult({ name, transform, predicate, message, details }) {
         const { not } = this.#modifiers;
         const actual = transform ? transform(this.#actual) : this.#actual;
         let pass = predicate(actual);
@@ -810,11 +825,12 @@ export class Matchers {
 
         const assertion = {
             id: nextResultId++,
+            name,
             message: formatMessage(message(pass), { actual, not }),
             pass,
         };
         if (!pass) {
-            const formattedStack = formatStack(this.#stack);
+            const formattedStack = formatStack(currentStack);
             assertion.info = [
                 ...details(actual),
                 [MarkupHelper.red("Source:"), MarkupHelper.multiline(formattedStack)],
@@ -847,9 +863,8 @@ export const expect = Object.assign(
      * @param {T} actual
      */
     function expect(actual) {
-        if (!currentResults) {
-            throw new Error(`Cannot call expect outside of a test.`);
-        }
+        ensure(currentResults, `Cannot call \`expect()\` outside of a test.`);
+
         return new Matchers(actual, {});
     },
     {
@@ -857,6 +872,8 @@ export const expect = Object.assign(
          * @param {number} expected
          */
         assertions(expected) {
+            ensure(currentResults, `Cannot call \`expect.assertions()\` outside of a test.`);
+
             if (!Number.isInteger(expected)) {
                 throw new Error(`Expected argument to be an integer, got ${expected}`);
             }
@@ -870,7 +887,23 @@ export const expect = Object.assign(
         },
         /** @type {(typeof Matchers)["extend"]} */
         extend: (matcher) => Matchers.extend(matcher),
+        /**
+         * Sets the current test to fail. An assertion can be added as well to provide
+         * additional context.
+         *
+         * @param {Assertion} [assertion]
+         */
+        fail(assertion) {
+            ensure(currentResults, `Cannot call \`expect.fail()\` outside of a test.`);
+
+            currentResults.pass = false;
+            if (assertion) {
+                currentResults.assertions.push({ ...assertion, pass: false });
+            }
+        },
         hasAssertions() {
+            ensure(currentResults, `Cannot call \`expect.hasAssertions()\` outside of a test.`);
+
             currentResults.afterTestCallbacks.push(() => {
                 expect(currentResults.assertions.length).toBeGreaterThan(
                     0,
@@ -879,12 +912,26 @@ export const expect = Object.assign(
             });
         },
         /**
+         * Sets the current test to pass. An assertion can be added as well to provide
+         * additional context.
+         *
+         * @param {Assertion} [assertion]
+         */
+        pass(assertion) {
+            ensure(currentResults, `Cannot call \`expect.pass()\` outside of a test.`);
+
+            currentResults.pass = true;
+            if (assertion) {
+                currentResults.assertions.push({ ...assertion, pass: true });
+            }
+        },
+        /**
          * @param {string} name
          */
         step(name) {
-            if (typeof name !== "string") {
-                throw new Error(`Expected first argument to be a string, got ${name}`);
-            }
+            ensure(currentResults, `Cannot call \`expect.step()\` outside of a test.`);
+            ensureArguments([[name, "string"]]);
+
             currentResults.afterTestCallbacks.push(() => {
                 if (currentResults.steps.length) {
                     expect(currentResults.steps).toEqual([], `Unverified steps`);
@@ -896,6 +943,8 @@ export const expect = Object.assign(
          * @param {string[]} expectedSteps
          */
         verifySteps(expectedSteps) {
+            ensure(currentResults, `Cannot call \`expect.verifySteps()\` outside of a test.`);
+
             expect(currentResults.steps).toEqual(expectedSteps);
             currentResults.steps = [];
         },

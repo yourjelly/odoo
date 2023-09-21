@@ -29,7 +29,7 @@ function addStepListener(element, type) {
     return on(element, type, (event) => QUnit.expect.step(event.type));
 }
 
-describe.skip("@odoo/hoot", "Helpers", "Events", () => {
+describe("@odoo/hoot/helpers", "Events", () => {
     test("clear", async () => {
         await mount(/* xml */ `<input value="Test" />`);
 
@@ -52,7 +52,7 @@ describe.skip("@odoo/hoot", "Helpers", "Events", () => {
     });
 
     test.skip("drag", async () => {
-        expect.ok(drag());
+        expect(drag()).toBeTruthy();
     });
 
     test.skip("fill", async () => {
