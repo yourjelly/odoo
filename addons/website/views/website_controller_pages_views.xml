@@ -45,7 +45,7 @@
 <record id="action_website_controller_pages_list" model="ir.actions.act_window">
     <field name="name">Website Controller Pages</field>
     <field name="res_model">website.controller.page</field>
-    <field name="view_mode">form,tree,kanban</field>
+    <field name="view_mode">tree,kanban,form</field>
 </record>
 
 <menuitem id="menu_website_controller_pages_list"

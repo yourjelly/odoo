@@ -84,9 +84,11 @@ class ManualModelsController(Controller):
             website.website_domain(),
         ]))
 
-        # TODO DAFL: insert unicity in (page_name_slugified,model,page_type)
         single_record_page = single_record_pages.filtered(lambda rec: rec.name_slugified == page_name_slugified)
-        single_record_page = single_record_page or single_record_pages[0]
+        if len(single_record_page):
+            single_record_page = single_record_page[0]
+        else:
+            single_record_page = single_record_pages[0] if len(single_record_pages) else False
 
         def record_to_url(record):
             if not single_record_page:
