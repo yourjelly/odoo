@@ -7,9 +7,10 @@ function getGroup(id) {
     if (!GROUPS.has(id)) {
         GROUPS.set(id, {
             group: new Set(),
-            count: 1,
+            count: 0,
         });
     }
+    GROUPS.get(id).count++;
     return GROUPS.get(id).group;
 }
 
