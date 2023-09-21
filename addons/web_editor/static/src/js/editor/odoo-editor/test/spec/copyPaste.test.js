@@ -1473,15 +1473,15 @@ describe('Paste', () => {
                     stepFunction: async editor => {
                         await pasteText(editor, 'abc www.odoo.com xyz');
                     },
-                    contentAfter: '<p>abc <a href="https://www.odoo.com">www.odoo.com</a> xyz[]</p>',
+                    contentAfter: '<p>abc <a href="http://www.odoo.com">www.odoo.com</a> xyz[]</p>',
                 });
                 await testEditor(BasicEditor, {
                     contentBefore: '<p><a href="#">[]\u200B</a></p>',
                     stepFunction: async editor => {
                         await pasteText(editor, 'odoo.com\ngoogle.com');
                     },
-                    contentAfter: '<p style="margin-bottom: 0px;"><a href="https://odoo.com">odoo.com</a></p>' +
-                                  '<p><a href="https://google.com">google.com</a>[]<br></p>'
+                    contentAfter: '<p style="margin-bottom: 0px;"><a href="http://odoo.com">odoo.com</a></p>' +
+                                  '<p><a href="http://google.com">google.com</a>[]<br></p>'
                 });
             });
             it('should paste html content over an empty link', async () => {
@@ -1694,7 +1694,7 @@ describe('Paste', () => {
                     stepFunction: async editor => {
                         await pasteText(editor, 'abc www.odoo.com xyz');
                     },
-                    contentAfter: '<p>abc <a href="https://www.odoo.com">www.odoo.com</a> xyz[]</p>',
+                    contentAfter: '<p>abc <a href="http://www.odoo.com">www.odoo.com</a> xyz[]</p>',
                 });
                 const imageUrl = 'https://download.odoocdn.com/icons/website/static/description/icon.png';
                 await testEditor(BasicEditor, {
