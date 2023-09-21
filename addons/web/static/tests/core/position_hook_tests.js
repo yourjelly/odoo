@@ -51,7 +51,11 @@ function getTestComponent(popperOptions = {}, target = document.createElement("d
 
     class TestComp extends Component {
         setup() {
-            usePosition(target, popperOptions);
+            usePosition(
+                "popper",
+                () => target,
+                () => popperOptions
+            );
         }
     }
     TestComp.template = xml`<div id="popper" t-ref="popper" />`;
@@ -568,7 +572,11 @@ QUnit.test("popper as child of another", async (assert) => {
         `;
         setup() {
             const ref = useRef("ref");
-            usePosition(() => ref.el, { position: "left" });
+            usePosition(
+                "popper",
+                () => ref.el,
+                () => ({ position: "left" })
+            );
         }
     }
     const target = document.createElement("div");
@@ -579,7 +587,7 @@ QUnit.test("popper as child of another", async (assert) => {
         static components = { Child };
         static template = /* xml */ xml`<div id="popper"><Child/></div>`;
         setup() {
-            usePosition(target);
+            usePosition("popper", () => target);
         }
     }
 

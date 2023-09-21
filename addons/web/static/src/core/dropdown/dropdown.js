@@ -102,7 +102,6 @@ export class Dropdown extends Component {
         }
         this.defaultDirection = direction;
         const positioningOptions = {
-            popper: "menuRef",
             position,
             holdOnFocus: this.props.holdPositionOnFocus,
             onPositioned: (el, { direction }) => {
@@ -150,11 +149,19 @@ export class Dropdown extends Component {
             );
 
             // Position menu relatively to parent element
-            usePosition(() => this.rootRef.el.parentElement, positioningOptions);
+            usePosition(
+                "menuRef",
+                () => this.rootRef.el.parentElement,
+                () => positioningOptions
+            );
         } else {
             // Position menu relatively to inner toggler
             const togglerRef = useRef("togglerRef");
-            usePosition(() => togglerRef.el, positioningOptions);
+            usePosition(
+                "menuRef",
+                () => togglerRef.el,
+                () => positioningOptions
+            );
         }
 
         useEffect(

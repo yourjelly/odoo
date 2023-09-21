@@ -1,8 +1,7 @@
 /** @odoo-module **/
 
-import { Component, onWillUpdateProps, useEffect, useRef } from "@odoo/owl";
-import { reposition } from "@web/core/position_hook";
-import { usePosition } from "@web/core/position_hook2";
+import { Component } from "@odoo/owl";
+import { usePosition } from "@web/core/position_hook";
 
 /**
  * @typedef {import("../tour_service/tour_pointer_state").TourPointerState} TourPointerState
@@ -50,30 +49,45 @@ export class TourPointer extends Component {
     static height = 28; // in pixels
 
     setup() {
+        /** @type {DOMREct | null} */
+        let dimensions = null;
+        let lastMeasuredContent = null;
+        let lastOpenState = this.isOpen;
         let lastAnchor;
         let [anchorX, anchorY] = [0, 0];
         usePosition(
             "pointer",
             () => this.props.pointerState.anchor,
             (pointer, anchor) => {
+                const hasContentChanged = lastMeasuredContent !== this.content;
+                const hasOpenStateChanged = lastOpenState !== this.isOpen;
+                lastOpenState = this.isOpen;
+
                 // Content changed: we must re-measure the dimensions of the text.
-                if (this.isOpen) {
+                if (hasContentChanged) {
+                    lastMeasuredContent = this.content;
                     pointer.style.removeProperty("width");
                     pointer.style.removeProperty("height");
-                    // dimensions = pointer.getBoundingClientRect();
-                    // const { width, height } = dimensions;
-                    // pointer.style.removeProperty("transition");
-                    // pointer.style.setProperty("width", `${width}px`);
-                    // pointer.style.setProperty("height", `${height}px`);
-                    return;
-                } else {
-                    pointer.style.setProperty("width", `${this.constructor.width}px`);
-                    pointer.style.setProperty("height", `${this.constructor.height}px`);
+                    dimensions = pointer.getBoundingClientRect();
                 }
 
-                if (anchor !== lastAnchor) {
-                    lastAnchor = anchor;
-                } else {
+                // If the content or the "is open" state changed: we must apply
+                // new width and height properties
+                if (hasContentChanged || hasOpenStateChanged) {
+                    const [width, height] = this.isOpen
+                        ? [dimensions.width, dimensions.height]
+                        : [this.constructor.width, this.constructor.height];
+                    if (this.isOpen) {
+                        pointer.style.removeProperty("transition");
+                    } else {
+                        // No transition if switching from open to closed
+                        pointer.style.transition = "none";
+                    }
+                    pointer.style.width = `${width}px`;
+                    pointer.style.height = `${height}px`;
+                }
+
+                if (anchor === lastAnchor) {
                     const { x, y } = anchor.getBoundingClientRect();
                     const [lastAnchorX, lastAnchorY] = [anchorX, anchorY];
                     [anchorX, anchorY] = [x, y];
@@ -85,6 +99,7 @@ export class TourPointer extends Component {
                         return;
                     }
                 }
+                lastAnchor = anchor;
 
                 pointer.style.removeProperty("bottom");
                 pointer.style.removeProperty("right");
@@ -95,20 +110,19 @@ export class TourPointer extends Component {
                         const popperRect = pointer.getBoundingClientRect();
                         const { top, left, direction } = position;
                         if (direction === "top") {
+                            // position from the bottom instead of the top as it is needed
+                            // to ensure the expand animation is properly done
                             pointer.style.bottom = `${
                                 window.innerHeight - top - popperRect.height
                             }px`;
                             pointer.style.removeProperty("top");
-                        } else {
-                            pointer.style.top = `${top}px`;
-                        }
-                        if (direction === "left") {
+                        } else if (direction === "left") {
+                            // position from the right instead of the left as it is needed
+                            // to ensure the expand animation is properly done
                             pointer.style.right = `${
                                 window.innerWidth - left - popperRect.width
                             }px`;
                             pointer.style.removeProperty("left");
-                        } else {
-                            pointer.style.left = `${left}px`;
                         }
                     },
                 };

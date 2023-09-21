@@ -7,13 +7,16 @@ import { usePosition } from "@web/core/position_hook";
 export class Popover extends Component {
     setup() {
         useForwardRefToParent("ref");
-        usePosition(this.props.target, {
-            position: this.props.position,
-            popper: "ref",
-            fixedPosition: this.props.fixedPosition,
-            displayArrow: this.props.displayArrow,
-            animationTime: this.props.animationTime,
-        });
+        usePosition(
+            "ref",
+            () => this.props.target,
+            () => ({
+                position: this.props.position,
+                fixedPosition: this.props.fixedPosition,
+                displayArrow: this.props.displayArrow,
+                animationTime: this.props.animationTime,
+            })
+        );
     }
 }
 

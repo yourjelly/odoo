@@ -178,12 +178,15 @@ QUnit.test("reposition popover should properly change classNames", async (assert
     const TestPopover = class extends Popover {
         setup() {
             // Don't call super.setup() in order to replace the use of usePosition hook...
-            usePosition(this.props.target, {
-                container,
-                onPositioned: this.onPositioned.bind(this),
-                position: this.props.position,
-                popper: "ref",
-            });
+            usePosition(
+                "ref",
+                () => this.props.target,
+                () => ({
+                    container,
+                    onPositioned: this.onPositioned.bind(this),
+                    position: this.props.position,
+                })
+            );
         }
     };
 

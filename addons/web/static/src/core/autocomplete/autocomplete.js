@@ -45,7 +45,6 @@ export class AutoComplete extends Component {
             }
         }, this.constructor.timeout);
 
-
         useExternalListener(window, "scroll", this.onWindowScroll, true);
 
         this.hotkey = useService("hotkey");
@@ -62,10 +61,11 @@ export class AutoComplete extends Component {
 
         // position and size
         if (this.props.dropdown) {
-            usePosition(() => this.inputRef.el, {
-                popper: "sourcesList",
-                position: "bottom-start",
-            });
+            usePosition(
+                "sourcesList",
+                () => this.inputRef.el,
+                () => ({ position: "bottom-start" })
+            );
         } else {
             this.open(false);
         }

@@ -18,7 +18,6 @@ import { uniqueId } from "./utils/functions";
 
 /**
  * @typedef Options
- * @property {string} [popper="popper"] useRef reference to the popper element
  * @property {HTMLElement} [container] container element
  * @property {boolean} [holdOnFocus=false]
  * @property {number} [margin=0]
@@ -84,9 +83,9 @@ const FIT_FLIP_ORDER = { top: "tb", right: "rl", bottom: "bt", left: "lr" };
 
 /** @type {Options} */
 const DEFAULTS = {
-    popper: "popper",
     margin: 0,
     position: "bottom",
+    sync() {},
 };
 
 const RE_CLEANUP = /^(bs-popover-)|(o-popover-)/g;
@@ -355,6 +354,7 @@ export function reposition(target, popper, iframe, options, lastPosition = null)
     }
 
     if (lastPosition || !options.animationTime) {
+        // BOI TODO, remove lastPosition condition
         // No animation wanted in these cases
         options.onPositioned?.(popper, position);
         return position;
@@ -388,15 +388,17 @@ const POSITION_BUS = Symbol("position-bus");
  * Note: The popper element should be indicated in your template with a t-ref reference.
  *       This could be customized with the `popper` option.
  *
- * @param {HTMLElement | (() => HTMLElement)} target
- * @param {Options} options
+ * @param {string} refName
+ * @param {() => HTMLElement} getTarget
+ * @param {() => Options} [getOptions]
  */
-export function usePosition(target, options) {
+export function usePosition(refName, getTarget, getOptions = () => DEFAULTS) {
     const component = useComponent();
-    const popperRef = useRef(options?.popper || DEFAULTS.popper);
-    const getTarget = typeof target === "function" ? target : () => target;
+    const ref = useRef(refName);
     let wasPositioned = false;
     let focusInside;
+    let currentArgs = null;
+    let options;
     const __NAME = uniqueId(component.constructor.name);
     let __COUNT = 0;
     let last;
@@ -404,13 +406,9 @@ export function usePosition(target, options) {
         /**
          * @param {CustomEvent<Event?>} param0
          */
-        async ({ detail: innerEvent }) => {
-            const targetEl = getTarget();
-            const popperEl = popperRef.el;
-            if (!targetEl || !popperEl) {
-                return;
-            }
-            if (innerEvent?.type === "scroll" && popperEl.contains(innerEvent?.target)) {
+        ({ detail: innerEvent }) => {
+            const [target, el, iframe] = currentArgs;
+            if (innerEvent?.type === "scroll" && el.contains(innerEvent?.target)) {
                 // In case the scroll event occurs inside the popper, do not reposition
                 return;
             }
@@ -428,13 +426,15 @@ export function usePosition(target, options) {
 
             const __LABEL = `[${__NAME}] reposition ${++__COUNT}`;
             console.time(__LABEL);
-            const iframe = getIFrame(targetEl);
-            last = reposition(targetEl, popperEl, iframe, currentOptions, await last);
-            wasPositioned = true;
+            last = reposition(target, el, iframe, options, last);
+            wasPositioned = true; // BOI TODO probably needs set to false at some point
             console.log(last);
             console.timeEnd(__LABEL);
         },
-        () => last // wait for previous animation to end
+        async () => {
+            await last; // await last positioning (i.e. animation)
+            await options.sync(); // await sync option BOI TODO, remove the above and keep this
+        }
     );
 
     const bus = component.env[POSITION_BUS] || new EventBus();
@@ -448,17 +448,29 @@ export function usePosition(target, options) {
 
     const throttledUpdate = useThrottleForAnimation((e) => bus.trigger("update", e));
     useEffect(() => {
-        const popperEl = popperRef.el;
-        focusInside = popperEl?.contains(popperEl.ownerDocument.activeElement);
+        const { el } = ref;
+        const target = getTarget();
+        if (!el || !target) {
+            return;
+        }
+        options = getOptions(el, target);
+        if (!options) {
+            // No compute needed
+            return;
+        }
+        options = { ...DEFAULTS, ...options };
+        currentArgs = [target, el, getIFrame(target)];
+
+        focusInside = el?.contains(el.ownerDocument.activeElement);
         const onPopperEnter = () => (focusInside = true);
         const onPopperLeave = (ev) => {
             focusInside = false;
             throttledUpdate(ev);
         };
-        popperEl?.addEventListener("pointerenter", onPopperEnter);
-        popperEl?.addEventListener("pointerleave", onPopperLeave);
+        el?.addEventListener("pointerenter", onPopperEnter);
+        el?.addEventListener("pointerleave", onPopperLeave);
 
-        const targetDocument = getTarget()?.ownerDocument;
+        const targetDocument = target.ownerDocument;
         if (isTopmost) {
             // Attach listeners to keep the positioning up to date
             targetDocument?.addEventListener("scroll", throttledUpdate, { capture: true });
@@ -470,8 +482,8 @@ export function usePosition(target, options) {
         bus.trigger("update");
 
         return () => {
-            popperEl?.removeEventListener("pointerenter", onPopperEnter);
-            popperEl?.removeEventListener("pointerleave", onPopperLeave);
+            el?.removeEventListener("pointerenter", onPopperEnter);
+            el?.removeEventListener("pointerleave", onPopperLeave);
             if (isTopmost) {
                 targetDocument?.removeEventListener("scroll", throttledUpdate, { capture: true });
                 targetDocument?.removeEventListener("load", throttledUpdate, { capture: true });
