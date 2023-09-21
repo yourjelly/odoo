@@ -27,6 +27,7 @@ class ProductImage(models.Model):
     embed_code = fields.Html(compute="_compute_embed_code", sanitize=False)
 
     can_image_1024_be_zoomed = fields.Boolean("Can Image 1024 be zoomed", compute='_compute_can_image_1024_be_zoomed', store=True)
+    mimetype = fields.Char('Mime Type', readonly=True)
 
     @api.depends('image_1920', 'image_1024')
     def _compute_can_image_1024_be_zoomed(self):

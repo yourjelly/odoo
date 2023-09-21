@@ -98,6 +98,21 @@ class ProductTemplate(models.Model):
         copy=True,
     )
 
+    # To display extra images in form view
+    extra_image_ids = fields.Many2many(
+        'product.image', string="",
+        compute="_compute_extra_image_ids",
+        inverse="_inverse_extra_image_ids"
+    )
+
+    @api.model
+    def remove_image(self, record_id, image_id):
+        record = self.browse(record_id)
+        image_id = self.env['ir.attachment'].browse(image_id).res_id
+        record.write({
+            'extra_image_ids': [(3, image_id, 0)]
+        })
+
     base_unit_count = fields.Float(
         string="Base Unit Count",
         compute='_compute_base_unit_count',
@@ -174,6 +189,15 @@ class ProductTemplate(models.Model):
         if vals.get('description_ecommerce') and is_html_empty(vals['description_ecommerce']):
             vals['description_ecommerce'] = ''
         return super().write(vals)
+
+    @api.depends('product_template_image_ids')
+    def _compute_extra_image_ids(self):
+        for image in self:
+            image.extra_image_ids = image.product_template_image_ids
+
+    def _inverse_extra_image_ids(self):
+        for image in self:
+            image.product_template_image_ids = image.extra_image_ids
 
     #=== BUSINESS METHODS ===#
 

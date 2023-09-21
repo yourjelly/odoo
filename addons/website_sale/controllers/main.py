@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import base64
 import json
 import logging
 
@@ -17,6 +18,7 @@ from odoo.addons.payment import utils as payment_utils
 from odoo.addons.payment.controllers import portal as payment_portal
 from odoo.addons.website.controllers.main import QueryURL
 from odoo.addons.website.models.ir_http import sitemap_qs2dom
+from odoo.addons.web_editor.tools import get_video_thumbnail
 from odoo.exceptions import AccessError, MissingError, ValidationError
 from odoo.addons.portal.controllers.portal import _build_url_w_params
 from odoo.addons.website.controllers import main
@@ -519,6 +521,28 @@ class WebsiteSale(payment_portal.PaymentPortal):
     def old_product(self, product, category='', search='', **kwargs):
         # Compatibility pre-v14
         return request.redirect(_build_url_w_params("/shop/%s" % slug(product), request.params), code=301)
+
+    @http.route(['/shop/product/video'], type='json', auth='user', website=True)
+    def add_video(self, video, product_template_id):
+        if not request.env.user.has_group('website.group_website_restricted_editor'):
+            raise NotFound()
+        id = video[0]['id']
+        video[0].update({'id': 975})
+        video_ids = request.env["ir.attachment"].browse(i['id'] for i in video)
+        thumbnail = base64.b64encode(get_video_thumbnail(video[0]['src']))
+
+        video_create_data = [Command.create({
+                    'name': 'Odoo Video',
+                    'video_url': video[0]['src'],
+                    'image_1920': thumbnail,
+                })
+            ]
+        product_template = request.env['product.template'].browse(int(product_template_id)) if product_template_id else False
+
+        if product_template:
+            product_template.write({
+                'product_template_image_ids': video_create_data
+            })
 
     @http.route(['/shop/product/extra-images'], type='json', auth='user', website=True)
     def add_product_images(self, images, product_product_id, product_template_id, combination_ids=None):
