@@ -34,6 +34,16 @@
     let testedApps;
     let testedMenus;
 
+    function getDropdownMenu(togglerSelector) {
+        const el =
+            typeof togglerSelector === "string"
+                ? document.querySelector(togglerSelector)
+                : togglerSelector;
+        return document.querySelector(
+            `.o-dropdown--menu[data-popover-id="${el.dataset.popoverFor}"]`
+        );
+    }
+
     /**
      * Hook on specific activities of the webclient to detect when to move forward.
      * This should be done only once.
@@ -156,11 +166,11 @@
      * Make sure the apps menu is open (community only)
      */
     async function ensureAppsMenu() {
-        const appsMenu = document.querySelector(".o-dropdown--menu");
+        const appsMenu = getDropdownMenu(".o_navbar_apps_menu .dropdown-toggle");
         if (!appsMenu) {
             const toggler = document.querySelector(".o_navbar_apps_menu .dropdown-toggle");
             await triggerClick(toggler, "apps menu toggle button");
-            await waitForCondition(() => document.querySelector(".o-dropdown--menu"));
+            await waitForCondition(() => getDropdownMenu(".o_navbar_apps_menu .dropdown-toggle"));
         }
     }
 
@@ -171,7 +181,7 @@
      */
     async function getNextMenu() {
         const menus = document.querySelectorAll(
-            ".o_menu_sections > .dropdown-toggle, .o-dropdown--menu > .dropdown-item"
+            ".o_menu_sections > .dropdown-toggle, .o_menu_sections > .dropdown-item"
         );
         if (menuIndex === menus.length) {
             menuIndex = 0;
@@ -180,16 +190,12 @@
         let menu = menus[menuIndex];
         if (menu.classList.contains("dropdown-toggle")) {
             // the current menu is a dropdown toggler -> open it and pick a menu inside the dropdown
-            if (!menu.nextElementSibling) {
+            if (!getDropdownMenu(menu)) {
                 // might already be opened if the last menu was blacklisted
                 await triggerClick(menu, "menu toggler");
             }
-            const dropdown = menu.nextElementSibling;
-            if (!dropdown) {
-                menuIndex = 0; // empty More menu has no dropdown (FIXME?)
-                return;
-            }
-            const items = document.querySelectorAll(".o-dropdown--menu .dropdown-item");
+
+            const items = getDropdownMenu(menu).querySelectorAll(".dropdown-item");
             menu = items[subMenuIndex];
             if (subMenuIndex === items.length - 1) {
                 // this is the last item, so go to the next menu
@@ -218,7 +224,10 @@
             apps = document.querySelectorAll(".o_apps .o_app");
         } else {
             await ensureAppsMenu();
-            apps = document.querySelectorAll(".o_navbar_apps_menu .dropdown-item");
+            apps = getDropdownMenu(".o_navbar_apps_menu .dropdown-toggle").querySelectorAll(
+                ".o-dropdown--menu .dropdown-item"
+            );
+            console.log(apps);
         }
         const app = apps[appIndex];
         appIndex++;
@@ -255,35 +264,25 @@
         if (appsMenusOnly === true) {
             return;
         }
-        const filterMenuButton = document.querySelector(".o_control_panel .o_filter_menu > button");
-        if (!filterMenuButton) {
+        const searchViewToggle = document.querySelector(".o_searchview_dropdown_toggler");
+        if (!searchViewToggle) {
             return;
         }
         // Open the filter menu dropdown
-        await triggerClick(
-            filterMenuButton,
-            `toggling menu "${filterMenuButton.innerText.trim()}"`
-        );
+        await triggerClick(searchViewToggle, `toggling searchview menu`);
 
-        const simpleFilterSel = ".o_control_panel .o_filter_menu > .dropdown-menu > .dropdown-item";
-        const dateFilterSel = ".o_control_panel .o_filter_menu > .dropdown-menu > .dropdown";
+        const simpleFilterSel = ".o_filter_menu > .dropdown-item:not(.o_add_custom_filter)";
+        const dateFilterSel = ".o_filter_menu > .dropdown-toggle:not(.o_add_custom_filter)";
         const filterMenuItems = document.querySelectorAll(`${simpleFilterSel},${dateFilterSel}`);
         console.log("Testing", filterMenuItems.length, "filters");
         for (const filter of filterMenuItems) {
             const currentViewCount = viewUpdateCount;
-            if (filter.classList.contains("dropdown")) {
-                await triggerClick(
-                    filter.querySelector(".dropdown-toggle"),
-                    `filter "${filter.innerText.trim()}"`
-                );
-                // the sub-dropdown opens 200ms after the mousenter, so we trigger an ArrayRight
-                // keydown s.t. it opens directly
-                window.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight" }));
-                await waitForNextAnimationFrame();
+            if (filter.classList.contains("o_accordion_toggle")) {
+                await triggerClick(filter, `filter "${filter.innerText.trim()}"`);
 
                 // If a fitler has options, it will simply unfold and show all options.
                 // We then click on the first one.
-                const firstOption = filter.querySelector(".dropdown-menu > .dropdown-item");
+                const firstOption = filter.nextElementSibling.querySelector(".dropdown-item");
                 if (firstOption) {
                     await triggerClick(
                         firstOption,

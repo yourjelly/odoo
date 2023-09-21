@@ -2,6 +2,7 @@
 
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
+import { DropdownGroup } from "@web/core/dropdown/dropdown_group";
 import { useService } from "@web/core/utils/hooks";
 import { registry } from "@web/core/registry";
 import { browser } from "@web/core/browser/browser";
@@ -13,7 +14,6 @@ const store = reactive({
     nextAvailableCompanies: [],
 });
 
-
 export class SwitchCompanyItem extends Component {
     setup() {
         this.companyService = useService("company");
@@ -21,7 +21,7 @@ export class SwitchCompanyItem extends Component {
     }
 
     get selectedCompanies() {
-        this.store.nextAvailableCompanies;  // check if the state changed
+        this.store.nextAvailableCompanies; // check if the state changed
         return this.companyService.nextAvailableCompanies;
     }
 
@@ -42,14 +42,13 @@ export class SwitchCompanyItem extends Component {
         }, this.constructor.toggleDelay);
     }
 }
-SwitchCompanyItem.template = 'web.SwitchCompanyItem';
+SwitchCompanyItem.template = "web.SwitchCompanyItem";
 SwitchCompanyItem.components = { DropdownItem, SwitchCompanyItem };
 SwitchCompanyItem.props = {
     company: {},
-    level: {type: Number},
+    level: { type: Number },
 };
 SwitchCompanyItem.toggleDelay = 1000;
-
 
 export class SwitchCompanyMenu extends Component {
     setup() {
@@ -59,7 +58,7 @@ export class SwitchCompanyMenu extends Component {
     }
 }
 SwitchCompanyMenu.template = "web.SwitchCompanyMenu";
-SwitchCompanyMenu.components = { Dropdown, DropdownItem, SwitchCompanyItem };
+SwitchCompanyMenu.components = { Dropdown, DropdownItem, SwitchCompanyItem, DropdownGroup };
 SwitchCompanyMenu.props = {};
 
 export const systrayItem = {

@@ -3,20 +3,22 @@
 
 <t t-name="web.SwitchCompanyMenu">
     <div class="o_switch_company_menu d-none d-md-block">
-        <Dropdown position="'bottom-end'">
-            <button>
-                <i class="fa fa-building d-lg-none"/>
-                <span class="oe_topbar_name d-none d-lg-block" t-esc="companyService.currentCompany.name"/>
-            </button>
-            <t t-set-slot="content">
-                <t t-foreach="Object.values(companyService.availableCompanies)
-                      .filter((c) => !c.parent_id)
-                      .sort((c1, c2) => c1.sequence - c2.sequence)
-                     " t-as="company" t-key="company.id">
-                    <SwitchCompanyItem company="company" level="0"/>
+        <DropdownGroup group="'web-navbar-group'">
+            <Dropdown position="'bottom-end'">
+                <button>
+                    <i class="fa fa-building d-lg-none"/>
+                    <span class="oe_topbar_name d-none d-lg-block" t-esc="companyService.currentCompany.name"/>
+                </button>
+                <t t-set-slot="content">
+                    <t t-foreach="Object.values(companyService.availableCompanies)
+                        .filter((c) => !c.parent_id)
+                        .sort((c1, c2) => c1.sequence - c2.sequence)
+                        " t-as="company" t-key="company.id">
+                        <SwitchCompanyItem company="company" level="0"/>
+                    </t>
                 </t>
-            </t>
-        </Dropdown>
+            </Dropdown>
+        </DropdownGroup>
     </div>
 </t>
 

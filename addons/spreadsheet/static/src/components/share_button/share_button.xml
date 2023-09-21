@@ -7,7 +7,7 @@
       position="'bottom-end'"
       onOpened.bind="onOpened"
     >
-      <button togglerClass="btn btn-light">
+      <button class="btn btn-light">
         <i class="fa fa-share-alt"/>
         Share
       </button>
