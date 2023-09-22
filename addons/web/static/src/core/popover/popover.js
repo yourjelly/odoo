@@ -3,7 +3,7 @@
 import { Component, useRef } from "@odoo/owl";
 import { useForwardRefToParent } from "../utils/hooks";
 import { usePosition } from "@web/core/position_hook";
-import { addClassesToElement } from "../utils/className";
+import { addClassesToElement, mergeClasses } from "../utils/className";
 
 export function nextId() {
     nextId.current = (nextId.current || 0) + 1;
@@ -17,14 +17,19 @@ export class Popover extends Component {
 
         useForwardRefToParent("ref");
         usePosition(this.props.target, {
-            onPositioned: (popperElement, solution) => {
-                this.props.onPositioned?.(popperElement, solution);
-                this.onPositioned(popperElement, solution);
-            },
+            // onPositioned: (popperElement, solution) => {
+            //     this.props.onPositioned?.(popperElement, solution);
+            //     this.onPositioned(popperElement, solution);
+            // },
+            onPositioned: this.props.onPositioned || this.onPositioned.bind(this),
             position: this.props.position,
             popper: "ref",
             fixedPosition: this.props.fixedPosition,
         });
+    }
+
+    get defaultClassName() {
+        return mergeClasses("o_popover popover mw-100 shadow", this.props.class);
     }
 
     onPositioned(el, { direction, variant }) {
@@ -43,15 +48,18 @@ export class Popover extends Component {
         };
         addClassesToElement(
             el,
-            "o_popover popover mw-100 shadow",
+            this.defaultClassName,
             `bs-popover-${directionMap[direction]}`,
             `o-popover-${direction}`,
-            `o-popover--${position}`,
-            this.props.class
+            `o-popover--${position}`
         );
 
         if (!this.props.enableArrow) {
             el.classList.add("o-popover-no-arrow");
+            return;
+        }
+
+        if (!this.arrow.el) {
             return;
         }
 

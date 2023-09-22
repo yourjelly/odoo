@@ -41,7 +41,7 @@ export function toClassObj(classDefinition) {
  * @returns {Object}
  *
  * @example
- * mergeClasses("hello world", { "hello": 0 == 1, }...)
+ * mergeClasses("hello", { "world": 0 == 1, }...)
  */
 export function mergeClasses(...classes) {
     const classObj = {};
