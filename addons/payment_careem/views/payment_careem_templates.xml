@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="careem_express_checkout_form">
+        <cpay-checkout-button name="o_express_checkout_container" id="checkoutBtn" class="mt-2"
+                t-att-data-provider-id="provider_sudo.id"
+                t-att-data-provider-code="provider_sudo.code"
+                t-att-data-client-id="provider_sudo.careem_client_id"
+                t-att-data-provider-state="provider_sudo.state"
+                t-att-mode="'auto'"
+                disabled="disabled"
+        />
+    </template>
+
+    <template id="redirect_form">
+        <form t-att-action="api_url" method="get">
+            <input type="hidden" name="invoiceId" t-att-value="invoice_id"/>
+        </form>
+    </template>
+
+</odoo>

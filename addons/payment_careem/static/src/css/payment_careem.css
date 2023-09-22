@@ -1,0 +1,5 @@
+cpay-checkout-button {
+    --cpay-checkout-button-height: 20px;
+    --cpay-checkout-button-width: 75px;
+    --cpay-checkout-button-radius: 5px;
+}

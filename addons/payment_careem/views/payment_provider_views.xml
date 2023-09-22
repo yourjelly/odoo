@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="payment_provider_form" model="ir.ui.view">
+        <field name="name">Careem Pay Provider Form</field>
+        <field name="model">payment.provider</field>
+        <field name="inherit_id" ref="payment.payment_provider_form"/>
+        <field name="arch" type="xml">
+            <group name="provider_credentials" position="inside">
+                <group attrs="{'invisible': [('code', '!=', 'careem')]}" name="careem_credentials">
+                    <field name="careem_client_id"
+                            attrs="{'required':[('code', '=', 'careem'), ('state', '!=', 'disabled')]}"/>
+                    <field name="careem_client_secret_key"
+                            attrs="{'required':[('code', '=', 'careem'), ('state', '!=', 'disabled')]}"
+                            password="True"/>
+                    <field name="careem_access_token_expiry" groups="base.group_no_one"/>
+                    <label for="careem_access_token"/>
+                    <div class="o_row" col="2">
+                        <field name="careem_access_token" readonly="True"/>
+                        <field name="careem_access_token_expired" invisible="True"/>
+                        <button string="Generate Access Token"
+                                type="object" icon="fa-refresh"
+                                name="action_careem_create_access_token" class="oe_link"
+                                attrs="{'invisible': [('careem_access_token_expired', '=', False)]}"/>
+                    </div>
+                </group>
+            </group>
+        </field>
+    </record>
+
+</odoo>

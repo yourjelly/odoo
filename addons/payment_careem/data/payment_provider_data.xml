@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="payment.payment_provider_careem" model="payment.provider">
+        <field name="code">careem</field>
+        <field name="allow_tokenization">False</field>
+        <field name="allow_express_checkout">True</field>
+        <field name="redirect_form_view_id" ref="redirect_form"/>
+        <field name="express_checkout_form_view_id" ref="careem_express_checkout_form"/>
+    </record>
+</odoo>

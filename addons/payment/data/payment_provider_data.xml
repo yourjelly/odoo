@@ -240,6 +240,22 @@
                ])]"/>
     </record>
 
+    <record id="payment_provider_careem" model="payment.provider">
+        <field name="name">Careem Pay</field>
+        <field name="display_as">Credit &amp; Debit Card (Powered by Careem)</field>
+        <field name="image_128" type="base64" file="payment_careem/static/description/icon.png"/>
+        <field name="module_id" ref="base.module_payment_careem"/>
+        <!--
+            See https://help.careem.com/hc/en-us/articles/360001603207-Payment-options
+        -->
+        <field name="payment_icon_ids"
+               eval="[(6, 0, [
+                   ref('payment.payment_icon_cc_visa'),
+                   ref('payment.payment_icon_cc_mastercard'),
+                   ref('payment.payment_icon_cc_american_express')
+               ])]"/>
+    </record>
+
     <record id="payment_provider_transfer" model="payment.provider">
         <field name="name">Wire Transfer</field>
         <field name="sequence">30</field>
