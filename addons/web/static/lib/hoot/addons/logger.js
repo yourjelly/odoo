@@ -4,7 +4,7 @@ import { toRaw } from "@odoo/owl";
 import { log } from "../utils";
 
 /**
- * @param {import("./runner").TestRunner} runner
+ * @param {import("../core/runner").TestRunner} runner
  */
 export function makeLogger(runner) {
     let currentSuiteFailed = 0;
@@ -44,7 +44,7 @@ export function makeLogger(runner) {
         }
     });
 
-    runner.skippedAnyTest(() => {
+    runner.afterAnySkippedTest(() => {
         currentSuiteSkipped++;
     });
 

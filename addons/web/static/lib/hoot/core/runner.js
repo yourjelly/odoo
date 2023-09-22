@@ -1,7 +1,6 @@
 /** @odoo-module */
 
 import { reactive } from "@odoo/owl";
-import { expect, setupExpect } from "../expect";
 import { Error, Promise, clearTimeout, setTimeout } from "../globals";
 import { getFuzzyScore, makeCallbacks, normalize, parseRegExp, shuffle, storage } from "../utils";
 import { DEFAULT_CONFIG } from "./config";
@@ -145,97 +144,6 @@ export class TestRunner {
     }
 
     /**
-     * @param {() => MaybePromise<void>} callback
-     */
-    afterAll(callback) {
-        this.#callbacks.add("after-all", callback);
-    }
-
-    /**
-     * @param {(suite: Suite) => MaybePromise<void>} callback
-     */
-    afterAnySuite(callback) {
-        this.#callbacks.add("after-suite", callback);
-    }
-
-    /**
-     * @param {(test: Test) => MaybePromise<void>} callback
-     */
-    afterAnyTest(callback) {
-        this.#callbacks.add("after-test", callback);
-    }
-
-    /**
-     * @param {(suite: Suite) => MaybePromise<void>} callback
-     */
-    afterSuite(callback) {
-        const { suite } = this.getCurrent();
-        if (!suite) {
-            throw new Error(
-                `Error while calling hook "afterSuite": can only be called inside of a suite function.`
-            );
-        }
-        suite.callbacks.add("after-suite", callback);
-    }
-
-    /**
-     * @param {(test: Test) => MaybePromise<void>} callback
-     */
-    afterEach(callback) {
-        const { suite } = this.getCurrent();
-        if (!suite) {
-            throw new Error(
-                `Error while calling hook "afterEach": can only be called inside of a suite function.`
-            );
-        }
-        suite.callbacks.add("after-test", callback);
-    }
-
-    /**
-     * @param {() => MaybePromise<void>} callback
-     */
-    beforeAll(callback) {
-        this.#callbacks.add("before-all", callback);
-    }
-
-    /**
-     * @param {(suite: Suite) => MaybePromise<void>} callback
-     */
-    beforeAnySuite(callback) {
-        this.#callbacks.add("before-suite", callback);
-    }
-
-    /**
-     * @param {(test: Test) => MaybePromise<void>} callback
-     */
-    beforeAnyTest(callback) {
-        this.#callbacks.add("before-test", callback);
-    }
-
-    /**
-     * @param {(suite: Suite) => MaybePromise<void>} callback
-     */
-    beforeSuite(callback) {
-        const { suite } = this.getCurrent();
-        if (!suite) {
-            throw new Error(
-                `Error while calling hook "beforeSuite": can only be called inside of a suite function.`
-            );
-        }
-        suite.callbacks.add("before-suite", callback);
-    }
-
-    beforeEach(callback) {
-        const { suite } = this.getCurrent();
-        if (!suite) {
-            throw new Error(
-                `Error while calling hook "beforeEach": can only be called inside of a suite function.`
-            );
-        }
-        suite.callbacks.add("before-test", callback);
-    }
-
-    /**
      * @param {string[]} tagNames
      * @param {string} name
      * @param {(() => void) | string} fn
@@ -355,6 +263,120 @@ export class TestRunner {
         }
     }
 
+    /**
+     * @param {() => MaybePromise<void>} callback
+     */
+    afterAll(callback) {
+        this.#callbacks.add("after-all", callback);
+    }
+
+    /**
+     * @param {(test: Test) => MaybePromise<void>} callback
+     */
+    afterAnySkippedTest(callback) {
+        this.#callbacks.add("after-skipped-test", callback);
+    }
+
+    /**
+     * @param {(suite: Suite) => MaybePromise<void>} callback
+     */
+    afterAnySuite(callback) {
+        this.#callbacks.add("after-suite", callback);
+    }
+
+    /**
+     * @param {(test: Test) => MaybePromise<void>} callback
+     */
+    afterAnyTest(callback) {
+        this.#callbacks.add("after-test", callback);
+    }
+
+    /**
+     * @param {(test: Test) => MaybePromise<void>} callback
+     */
+    afterEach(callback) {
+        const { suite } = this.getCurrent();
+        if (!suite) {
+            throw new Error(
+                `Error while calling hook "afterEach": can only be called inside of a suite function.`
+            );
+        }
+        suite.callbacks.add("after-test", callback);
+    }
+
+    /**
+     * @param {(test: Test) => MaybePromise<void>} callback
+     */
+    afterEachSkipped(callback) {
+        const { suite } = this.getCurrent();
+        if (!suite) {
+            throw new Error(
+                `Error while calling hook "afterEachSkipped": can only be called inside of a suite function.`
+            );
+        }
+        suite.callbacks.add("after-skipped-test", callback);
+    }
+
+    /**
+     * @param {(suite: Suite) => MaybePromise<void>} callback
+     */
+    afterSuite(callback) {
+        const { suite } = this.getCurrent();
+        if (!suite) {
+            throw new Error(
+                `Error while calling hook "afterSuite": can only be called inside of a suite function.`
+            );
+        }
+        suite.callbacks.add("after-suite", callback);
+    }
+
+    /**
+     * @param {() => MaybePromise<void>} callback
+     */
+    beforeAll(callback) {
+        this.#callbacks.add("before-all", callback);
+    }
+
+    /**
+     * @param {(suite: Suite) => MaybePromise<void>} callback
+     */
+    beforeAnySuite(callback) {
+        this.#callbacks.add("before-suite", callback);
+    }
+
+    /**
+     * @param {(test: Test) => MaybePromise<void>} callback
+     */
+    beforeAnyTest(callback) {
+        this.#callbacks.add("before-test", callback);
+    }
+
+    /**
+     * @param {(test: Test) => MaybePromise<void>} callback
+     */
+    beforeEach(callback) {
+        const { suite } = this.getCurrent();
+        if (!suite) {
+            throw new Error(
+                `Error while calling hook "beforeEach": can only be called inside of a suite function.`
+            );
+        }
+        suite.callbacks.add("before-test", callback);
+    }
+
+    /**
+     * @param {(suite: Suite) => MaybePromise<void>} callback
+     */
+    beforeSuite(callback) {
+        const { suite } = this.getCurrent();
+        if (!suite) {
+            throw new Error(
+                `Error while calling hook "beforeSuite": can only be called inside of a suite function.`
+            );
+        }
+        suite.callbacks.add("before-suite", callback);
+    }
+
     getCurrent() {
         return {
             suite: this.#suiteStack.at(-1) || null,
@@ -372,26 +394,6 @@ export class TestRunner {
         };
 
         this.#callbacks.add("after-test", cleanup);
-    }
-
-    /**
-     * @param {(test: Test) => MaybePromise<void>} callback
-     */
-    skippedAnyTest(callback) {
-        this.#callbacks.add("skipped-test", callback);
-    }
-
-    /**
-     * @param {(test: Test) => MaybePromise<void>} callback
-     */
-    skippedTest(callback) {
-        const { suite } = this.getCurrent();
-        if (!suite) {
-            throw new Error(
-                `Error while calling hook "skippedTest": can only be called inside of a suite function.`
-            );
-        }
-        suite.callbacks.add("skipped-test", callback);
     }
 
     /**
@@ -439,7 +441,7 @@ export class TestRunner {
                         ...this.#getSuiteCallbacks().reverse(),
                         this.#callbacks,
                     ]) {
-                        callbacks.call("skipped-test", test);
+                        callbacks.call("after-skipped-test", test);
                     }
                 } else {
                     // Before test
@@ -449,8 +451,6 @@ export class TestRunner {
                     }
 
                     // Setup
-                    const { results, tearDown } = setupExpect();
-
                     const timeout = test.config.timeout || this.config.timeout;
                     let timeoutId;
                     await Promise.race([
@@ -471,9 +471,10 @@ export class TestRunner {
                                     timeout
                                 );
                             }
-                        }).then(() => (results.aborted = true)),
+                        }).then(() => (test.lastResults.aborted = true)),
                     ])
                         .catch((error) => {
+                            const results = test.lastResults;
                             results.error = error;
                             results.pass = false;
                             if (this.config.notrycatch) {
@@ -484,20 +485,6 @@ export class TestRunner {
                             this.#abortCurrent = () => null;
                             clearTimeout(timeoutId);
                         });
-
-                    if (test.config.todo) {
-                        if (results.pass) {
-                            results.error = new Error(
-                                `tests tagged with "todo" are expected to fail`
-                            );
-                            results.pass = false;
-                        } else {
-                            expect.pass();
-                        }
-                    }
-
-                    const finalResults = await tearDown();
-                    test.results.push(finalResults);
 
                     await this.#execAfterCallback(async () => {
                         for (const callbacks of [
@@ -551,6 +538,10 @@ export class TestRunner {
         }
     }
 
+    #getSuiteCallbacks() {
+        return this.#suiteStack.map((s) => s.callbacks);
+    }
+
     /**
      * @param {Job} job
      */
@@ -591,10 +582,6 @@ export class TestRunner {
             this.#only.tags.size ||
             this.textFilter.length
         );
-    }
-
-    #getSuiteCallbacks() {
-        return this.#suiteStack.map((s) => s.callbacks);
     }
 
     /**

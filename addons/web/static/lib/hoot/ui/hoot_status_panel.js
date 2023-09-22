@@ -170,7 +170,7 @@ export class HootStatusPanel extends Component {
             }
         });
 
-        runner.skippedAnyTest(() => {
+        runner.afterAnySkippedTest(() => {
             this.state.runningTest = null;
             this.state.skipped++;
         });

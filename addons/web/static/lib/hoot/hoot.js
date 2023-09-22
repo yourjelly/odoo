@@ -1,11 +1,13 @@
 /** @odoo-module */
 
 import { mount, whenReady } from "@odoo/owl";
-import { makeLogger } from "./core/logger";
+import { makeCleanup } from "./addons/cleanup";
+import { makeLogger } from "./addons/logger";
 import { TestRunner } from "./core/runner";
-import { expect as _expect } from "./expect";
+import { makeExpect } from "./expect";
 import { config as domConfig } from "./helpers/dom";
 import { config as eventsConfig } from "./helpers/events";
+import { intercept as _intercept } from "./intercept";
 import { HootMain } from "./ui/hoot_main";
 import { log, makeTaggable } from "./utils";
 
@@ -17,8 +19,6 @@ import { log, makeTaggable } from "./utils";
  */
 
 const runner = new TestRunner();
-
-makeLogger(runner);
 
 whenReady(async () =>
     mount(HootMain, document.body, {
@@ -50,8 +50,14 @@ export const beforeAll = exportRunnerFunction("beforeAll");
 export const beforeSuite = exportRunnerFunction("beforeSuite");
 export const beforeEach = exportRunnerFunction("beforeEach");
 export const describe = makeTaggable(exportRunnerFunction("addSuite"));
-export const expect = _expect;
+export const expect = makeExpect(runner);
 export const getCurrent = exportRunnerFunction("getCurrent");
 export const registerCleanup = exportRunnerFunction("registerCleanup");
 export const start = exportRunnerFunction("start");
 export const test = makeTaggable(exportRunnerFunction("addTest"));
+
+/** @type {typeof _intercept} */
+export const intercept = (...args) => registerCleanup(_intercept(...args));
+
+makeLogger(runner);
+makeCleanup(runner);

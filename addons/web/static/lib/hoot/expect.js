@@ -142,37 +142,146 @@ let nextResultId = 1;
 // Exports
 //-----------------------------------------------------------------------------
 
-export function setupExpect() {
-    const tearDown = async () => {
+/**
+ * @param {import("./core/runner").TestRunner} runner
+ */
+export function makeExpect(runner) {
+    /**
+     * @param {number} expected
+     */
+    function assertions(expected) {
+        ensure(currentResults, `Cannot call \`expect.assertions()\` outside of a test.`);
+
+        if (!Number.isInteger(expected)) {
+            throw new Error(`Expected argument to be an integer, got ${expected}`);
+        }
+        currentResults.afterTestCallbacks.push(() => {
+            const actual = currentResults.assertions.length;
+            expect(actual).toBe(
+                expected,
+                `Expected ${expected} assertions, but ${actual} were run`
+            );
+        });
+    }
+
+    /**
+     * @template [T=unknown]
+     * @param {T} actual
+     */
+    function expect(actual) {
+        ensure(currentResults, `Cannot call \`expect()\` outside of a test.`);
+
+        return new Matchers(actual, {});
+    }
+
+    /** @type {(typeof Matchers)["extend"]} */
+    function extend(matcher) {
+        return Matchers.extend(matcher);
+    }
+
+    /**
+     * Sets the current test to fail. An assertion can be added as well to provide
+     * additional context.
+     *
+     * @param {Assertion} [assertion]
+     */
+    function fail(assertion) {
+        ensure(currentResults, `Cannot call \`expect.fail()\` outside of a test.`);
+
+        currentResults.pass = false;
+        if (assertion) {
+            currentResults.assertions.push({ ...assertion, pass: false });
+        }
+    }
+
+    function hasAssertions() {
+        ensure(currentResults, `Cannot call \`expect.hasAssertions()\` outside of a test.`);
+
+        currentResults.afterTestCallbacks.push(() => {
+            expect(currentResults.assertions.length).toBeGreaterThan(
+                0,
+                `Expected at least 1 expection, but none were run`
+            );
+        });
+    }
+
+    /**
+     * Sets the current test to pass. An assertion can be added as well to provide
+     * additional context.
+     *
+     * @param {Assertion} [assertion]
+     */
+    function pass(assertion) {
+        ensure(currentResults, `Cannot call \`expect.pass()\` outside of a test.`);
+
+        currentResults.pass = true;
+        if (assertion) {
+            currentResults.assertions.push({ ...assertion, pass: true });
+        }
+    }
+
+    /**
+     * @param {string} name
+     */
+    function step(name) {
+        ensure(currentResults, `Cannot call \`expect.step()\` outside of a test.`);
+        ensureArguments([[name, "string"]]);
+
+        currentResults.afterTestCallbacks.push(() => {
+            if (currentResults.steps.length) {
+                expect(currentResults.steps).toEqual([], `Unverified steps`);
+            }
+        });
+        currentResults.steps.push(name);
+    }
+
+    /** @type {number} */
+    let startTime;
+
+    runner.beforeAnyTest((test) => {
+        startTime = Date.now();
+        currentResults = {
+            aborted: false,
+            afterTestCallbacks: [],
+            assertions: [],
+            duration: 0,
+            error: null,
+            pass: true,
+            steps: [],
+        };
+        test.results.push(currentResults);
+    });
+
+    runner.afterAnyTest(async (test) => {
+        if (!currentResults) {
+            return;
+        }
+
+        if (test.config.todo) {
+            if (currentResults.pass) {
+                currentResults.error = new Error(`tests tagged with "todo" are expected to fail`);
+                currentResults.pass = false;
+            } else {
+                expect.pass();
+            }
+        }
+
         while (currentResults.afterTestCallbacks.length) {
             await currentResults.afterTestCallbacks.pop()();
         }
 
-        const results = {
-            ...currentResults,
-            duration: Date.now() - startTime,
-        };
+        currentResults.duration = Date.now() - startTime;
         currentResults = null;
+    });
 
-        return results;
-    };
-
-    if (currentResults) {
-        throw new Error("Cannot setup expect: results already exist");
-    }
-
-    const startTime = Date.now();
-    currentResults = {
-        aborted: false,
-        afterTestCallbacks: [],
-        assertions: [],
-        duration: 0,
-        error: null,
-        pass: true,
-        steps: [],
-    };
-
-    return { results: currentResults, tearDown };
+    return Object.assign(expect, {
+        assertions,
+        extend,
+        fail,
+        hasAssertions,
+        pass,
+        step,
+    });
 }
 
 /**
@@ -894,88 +1003,3 @@ export class Matchers {
         this.registry[name] = matcher;
     }
 }
-
-export const expect = Object.assign(
-    /**
-     * @template [T=unknown]
-     * @param {T} actual
-     */
-    function expect(actual) {
-        ensure(currentResults, `Cannot call \`expect()\` outside of a test.`);
-
-        return new Matchers(actual, {});
-    },
-    {
-        /**
-         * @param {number} expected
-         */
-        assertions(expected) {
-            ensure(currentResults, `Cannot call \`expect.assertions()\` outside of a test.`);
-
-            if (!Number.isInteger(expected)) {
-                throw new Error(`Expected argument to be an integer, got ${expected}`);
-            }
-            currentResults.afterTestCallbacks.push(() => {
-                const actual = currentResults.assertions.length;
-                expect(actual).toBe(
-                    expected,
-                    `Expected ${expected} assertions, but ${actual} were run`
-                );
-            });
-        },
-        /** @type {(typeof Matchers)["extend"]} */
-        extend: (matcher) => Matchers.extend(matcher),
-        /**
-         * Sets the current test to fail. An assertion can be added as well to provide
-         * additional context.
-         *
-         * @param {Assertion} [assertion]
-         */
-        fail(assertion) {
-            ensure(currentResults, `Cannot call \`expect.fail()\` outside of a test.`);
-
-            currentResults.pass = false;
-            if (assertion) {
-                currentResults.assertions.push({ ...assertion, pass: false });
-            }
-        },
-        hasAssertions() {
-            ensure(currentResults, `Cannot call \`expect.hasAssertions()\` outside of a test.`);
-
-            currentResults.afterTestCallbacks.push(() => {
-                expect(currentResults.assertions.length).toBeGreaterThan(
-                    0,
-                    `Expected at least 1 expection, but none were run`
-                );
-            });
-        },
-        /**
-         * Sets the current test to pass. An assertion can be added as well to provide
-         * additional context.
-         *
-         * @param {Assertion} [assertion]
-         */
-        pass(assertion) {
-            ensure(currentResults, `Cannot call \`expect.pass()\` outside of a test.`);
-
-            currentResults.pass = true;
-            if (assertion) {
-                currentResults.assertions.push({ ...assertion, pass: true });
-            }
-        },
-        /**
-         * @param {string} name
-         */
-        step(name) {
-            ensure(currentResults, `Cannot call \`expect.step()\` outside of a test.`);
-            ensureArguments([[name, "string"]]);
-
-            currentResults.afterTestCallbacks.push(() => {
-                if (currentResults.steps.length) {
-                    expect(currentResults.steps).toEqual([], `Unverified steps`);
-                }
-            });
-            currentResults.steps.push(name);
-        },
-    }
-);

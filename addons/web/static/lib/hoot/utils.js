@@ -99,6 +99,16 @@ export function deepEqual(a, b, cache = new Set()) {
 }
 
 /**
+ * @param {boolean} predicate
+ * @param {string} errorMessage
+ */
+export function ensure(predicate, errorMessage) {
+    if (!predicate) {
+        throw new Error(errorMessage);
+    }
+}
+
+/**
  * @param {unknown} value
  * @returns {string}
  */
@@ -332,15 +342,13 @@ export function lookup(pattern, items, mapFn = normalize) {
 export function makeCallbacks() {
     /**
      * @param {string} type
-     * @param {...((...args: any[]) => Promise<void>)} callbacks
+     * @param {(...args: any[]) => Promise<void>} callback
      */
-    const add = (type, ...callbacks) => {
+    const add = (type, callback) => {
         if (!callbackRegistry[type]) {
             callbackRegistry[type] = new Set();
         }
-        for (const callback of callbacks) {
-            callbackRegistry[type].add(callback);
-        }
+        callbackRegistry[type].add(callback);
     };
 
     /**

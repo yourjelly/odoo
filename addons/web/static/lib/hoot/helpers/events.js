@@ -11,7 +11,7 @@ import {
     requestAnimationFrame,
     String,
 } from "../globals";
-import { copy, isIterable } from "../utils";
+import { copy, ensure, isIterable } from "../utils";
 import {
     config as DOMConfig,
     getActiveElement,
@@ -47,64 +47,6 @@ import {
 //-----------------------------------------------------------------------------
 // Internal
 //-----------------------------------------------------------------------------
-
-/**
- * @template {HTMLElement} T
- * @param {T} element
- */
-const expect = (element) => {
-    let errors = [];
-    const elementTag = element.tagName.toLowerCase();
-
-    /**
-     * @param  {...string} tags
-     */
-    const hasTag = (...tags) => {
-        if (!tags.some((tag) => tag === elementTag)) {
-            errors.push(
-                `expected tag name ${tags.map((tag) => `"${tag}"`).join(" or ")}, got <${
-                    element.tagName
-                }/>`
-            );
-        }
-        return handlers;
-    };
-
-    /**
-     *
-     * @param {(element: T) => boolean} filter
-     */
-    const validates = (filter) => {
-        if (!filter(element)) {
-            errors.push(`does not validate constraint '${filter.name}'`);
-        }
-        return handlers;
-    };
-
-    const throwErrors = () => {
-        if (errors.length) {
-            throw new Error(
-                `Element <${elementTag}/> fails the following assertions: ` +
-                    errors.map((err) => `- ${err}`).join("\n")
-            );
-        }
-    };
-
-    const handlers = {
-        get errors() {
-            return errors;
-        },
-        get or() {
-            errors = [];
-            return handlers;
-        },
-        hasTag,
-        validates,
-        throw: throwErrors,
-    };
-
-    return handlers;
-};
 
 /**
  * Returns the list of nodes containing n2 (included) that do not contain n1.
@@ -293,6 +235,12 @@ const getPosition = (element, options) => {
  */
 const getTriggerTargets = (target, options) =>
     isEventTarget(target) ? [target] : queryAll(target, options);
+
+/**
+ * @param {HTMLElement} element
+ * @param  {...string} tagNames
+ */
+const hasTagName = (element, ...tagNames) => tagNames.includes(element.tagName.toLowerCase());
 
 const hasTouch = () => ontouchstart !== undefined || matchMedia("(pointer:coarse)").matches;
 
@@ -688,7 +636,7 @@ export function clear() {
     const events = [];
     const element = getActiveElement();
 
-    expect(element).hasTag("select").or.validates(isEditable).throw();
+    ensure(hasTagName(element, "select") || isEditable(element), "element should be editable");
 
     if (isEditable(element)) {
         events.push(...config.defaultActions.clear(element));
@@ -889,7 +837,7 @@ export function fill(value, options) {
     const events = [];
     const element = getActiveElement();
 
-    expect(element).validates(isEditable).throw();
+    ensure(isEditable(element), "element should be editable");
 
     let prevented = false;
     if (element.tagName === "INPUT" && element.type === "file") {
@@ -1092,7 +1040,7 @@ export function select(target, value, options) {
     /** @type {ReturnType<typeof triggerEvent<"change">>[]} */
     const events = [];
     for (const element of getTriggerTargets(target, options)) {
-        expect(element).hasTag("select").throw();
+        ensure(hasTagName(element, "select"), "element should be a <select> element");
 
         element.value = String(value);
         events.push(triggerEvent(element, "change"));

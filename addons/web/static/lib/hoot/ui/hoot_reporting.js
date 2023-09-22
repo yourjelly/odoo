@@ -99,7 +99,7 @@ export class HootReporting extends Component {
                 this.state.open.push(test.id);
             }
         });
-        runner.skippedAnyTest(addTest);
+        runner.afterAnySkippedTest(addTest);
     }
 
     filterResults(filter) {
