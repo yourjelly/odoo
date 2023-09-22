@@ -1,5 +1,6 @@
 /** @odoo-module */
 
+import { clearTimeout, Error, Promise, requestAnimationFrame, setTimeout } from "../globals";
 import { config as domConfig, observe, queryAll } from "./dom";
 
 //-----------------------------------------------------------------------------
@@ -55,7 +56,7 @@ export function makeDeferred() {
 }
 
 export async function nextTick() {
-    await new Promise((resolve) => window.requestAnimationFrame(resolve));
+    await new Promise((resolve) => requestAnimationFrame(resolve));
     await new Promise((resolve) => setTimeout(resolve));
 }
 

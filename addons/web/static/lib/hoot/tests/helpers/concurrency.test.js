@@ -17,7 +17,7 @@ describe("@odoo/hoot/helpers", "Concurrency", () => {
 
         await expect(def).resolves.toBe(14);
 
-        expect.verifySteps(["before", "after", "resolved"]);
+        expect(["before", "after", "resolved"]).toVerifySteps();
     });
 
     test("nextTick", async () => {

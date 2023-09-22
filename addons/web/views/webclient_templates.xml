@@ -219,9 +219,6 @@
             <t t-set="head">
                 <t t-call-assets="web.unit_tests_assets" t-js="false"/>
                 <t t-call-assets="web.unit_tests_assets" t-css="false"/>
-
-                <t t-call-assets="web.unit_tests" t-js="false"/>
-                <t t-call-assets="web.unit_tests" t-css="false"/>
             </t>
         </t>
     </template>

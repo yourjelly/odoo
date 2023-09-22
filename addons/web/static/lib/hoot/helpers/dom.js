@@ -1,5 +1,16 @@
 /** @odoo-module */
 
+import {
+    Boolean,
+    document,
+    Error,
+    Map,
+    MutationObserver,
+    Number,
+    Object,
+    RegExp,
+    Set,
+} from "../globals";
 import { groupBy, isIterable, log, match } from "../utils";
 
 /**

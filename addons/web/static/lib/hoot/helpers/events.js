@@ -1,6 +1,16 @@
 /** @odoo-module */
 
-import { matchMedia, navigator, ontouchstart } from "../globals";
+import {
+    cancelAnimationFrame,
+    console,
+    Error,
+    matchMedia,
+    navigator,
+    Object,
+    ontouchstart,
+    requestAnimationFrame,
+    String,
+} from "../globals";
 import { copy, isIterable } from "../utils";
 import {
     config as DOMConfig,

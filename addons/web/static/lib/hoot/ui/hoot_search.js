@@ -34,7 +34,7 @@ export class HootSearch extends Component {
     static components = { HootTagButton };
 
     static template = compactXML/* xml */ `
-        <div class="hoot-search position-relative" t-ref="root" t-on-keydown="onKeyDown">
+        <div class="hoot-search dropdown" t-ref="root" t-on-keydown="onKeyDown">
             <form
                 class="hoot-search-group d-flex flex-row align-items-center overflow-hidden"
                 t-on-submit.prevent="onSubmit"
@@ -70,12 +70,12 @@ export class HootSearch extends Component {
                 </button>
             </form>
             <t t-if="state.query and state.showDropdown">
-                <div class="hoot-dropdown">
+                <div class="hoot-dropdown dropdown-menu show end-0">
                     <div class="hoot-dropdown-category d-flex flex-column">
                         <h6 class="hoot-dropdown-header d-flex flex-row align-items-center">
                             <span class="hoot-dropdown-title">Filter using <t t-esc="filterType" /></span>
                         </h6>
-                        <ul class="hoot-dropdown-lines d-flex flex-column">
+                        <ul class="hoot-dropdown-lines d-flex flex-column m-0 list-unstyled">
                             <li tabindex="0" t-on-keydown="(ev) => this.onLineKeyDown(ev, null)">
                                 <button
                                     class="hoot-dropdown-line"
@@ -100,7 +100,7 @@ export class HootSearch extends Component {
                                         <small>✖</small>
                                     </button>
                                 </h6>
-                                <ul class="hoot-dropdown-lines d-flex flex-column">
+                                <ul class="hoot-dropdown-lines d-flex flex-column m-0 list-unstyled">
                                     <t t-foreach="state.categories[category.id]" t-as="item" t-key="item.id">
                                         <li tabindex="0" t-on-keydown="(ev) => this.onLineKeyDown(ev, category.id, item.id)">
                                             <label
@@ -115,7 +115,7 @@ export class HootSearch extends Component {
                                                 <t t-if="isTag(item)">
                                                     <HootTagButton tag="item" disabled="true" />
                                                 </t>
-                                                <span t-else="" t-esc="item.fullName" />
+                                                <span class="text-truncate" t-else="" t-esc="item.fullName" />
                                             </label>
                                         </li>
                                     </t>

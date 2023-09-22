@@ -54,7 +54,7 @@ export class HootTechnicalValue extends Component {
                 <t t-if="state.open">
                     <t t-if="isIterable(value)">
                         <t>[</t>
-                        <ul class="ps-3">
+                        <ul class="ps-3 m-0 list-unstyled">
                             <t t-foreach="value" t-as="subValue" t-key="subValue">
                                 <li class="d-flex flex-row">
                                     <HootTechnicalValue value="subValue" />
@@ -66,7 +66,7 @@ export class HootTechnicalValue extends Component {
                     </t>
                     <t t-else="">
                         <t>{</t>
-                        <ul class="ps-3">
+                        <ul class="ps-3 m-0 list-unstyled">
                             <t t-foreach="value" t-as="key" t-key="key">
                                 <li class="d-flex flex-row">
                                     <span class="hoot-key" t-esc="key" />: <HootTechnicalValue value="value[key]" />

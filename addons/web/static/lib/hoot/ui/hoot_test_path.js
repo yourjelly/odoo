@@ -21,7 +21,7 @@ export class HootTestPath extends Component {
                 <t t-foreach="props.test.path.slice(0, -1)" t-as="suite" t-key="suite.id">
                     <a
                         t-att-href="withParams('suite', suite.id)"
-                        class="hoot-result-button-text hoot-text-muted rounded fw-semibold text-truncate d-flex flex-row align-items-center p-1"
+                        class="hoot-result-button-text text-decoration-none hoot-text-muted rounded fw-semibold text-truncate d-flex flex-row align-items-center p-1"
                         t-att-class="{ 'hoot-text-skip': suite.config.skip }"
                         draggable="false"
                         t-attf-title='Run suite "{{ suite.name }}"'
@@ -54,7 +54,7 @@ export class HootTestPath extends Component {
             </t>
         </span>
         <t t-if="props.test.tags.length">
-            <ul class="hoot-tags d-flex flex-row align-items-center">
+            <ul class="hoot-tags d-flex flex-row align-items-center m-0 list-unstyled">
                 <t t-foreach="props.test.tags" t-as="tag" t-key="tag.id">
                     <li>
                         <HootTagButton tag="tag" />

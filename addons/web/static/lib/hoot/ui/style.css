@@ -74,6 +74,9 @@
     --hoot-text-report-html-id: #1a1aa8;
     --hoot-text-report-html-class: #994500;
 
+    /* Bootstrap overrides */
+    --bs-primary: var(--hoot-primary);
+
     display: flex;
     flex-direction: column;
     font-size: 0.875rem;
@@ -136,26 +139,26 @@
 /* CSS reset                                                                 */
 /*---------------------------------------------------------------------------*/
 
-.hoot a {
+a {
     color: inherit;
     text-decoration: none;
 }
 
-.hoot h1,
-.hoot h2,
-.hoot h3,
-.hoot h4,
-.hoot h5,
-.hoot p,
-.hoot pre,
-.hoot form {
+h1,
+h2,
+h3,
+h4,
+h5,
+p,
+pre,
+form {
     margin: 0;
 }
 
-.hoot input,
-.hoot button,
-.hoot textarea,
-.hoot select {
+input,
+button,
+textarea,
+select {
     font: inherit;
     color: inherit;
     background-color: inherit;
@@ -163,12 +166,6 @@
     padding: 0;
     margin: 0;
     text-align: start;
-}
-
-.hoot ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
 }
 
 /*---------------------------------------------------------------------------*/
@@ -192,7 +189,7 @@
 }
 
 .hoot .hoot-config .hoot-dropdown {
-    width: clamp(200px, 200px, 100vw);
+    width: clamp(200px, 256px, 100vw);
 }
 
 .hoot .hoot-search {
@@ -300,13 +297,11 @@
 /*---------------------------------------------------------------------------*/
 
 .hoot .hoot-dropdown {
-    position: absolute;
-    top: 100%;
-    right: 0;
+    --bs-dropdown-link-active-bg: var(--hoot-primary);
+    --bs-dropdown-link-color: var(--hoot-text);
+
     color: var(--hoot-text);
     background-color: var(--hoot-bg);
-    border: 1px solid var(--hoot-border-result);
-    padding: 0.5rem 0;
 }
 
 .hoot .hoot-dropdown-category:hover .hoot-remove-category {

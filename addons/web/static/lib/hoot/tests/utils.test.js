@@ -30,11 +30,11 @@ describe("@odoo/hoot", "Utils", () => {
         debounced(1);
         debounced(2);
 
-        expect.verifySteps([]);
+        expect([]).toVerifySteps();
 
         await def;
 
-        expect.verifySteps(["call: 2"]);
+        expect(["call: 2"]).toVerifySteps();
     });
 
     test("deepEqual", () => {

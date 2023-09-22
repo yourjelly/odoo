@@ -799,6 +799,44 @@ export class Matchers {
     }
 
     /**
+     * Expects the received steps to be equal to the current steps. This also resets
+     * the current steps.
+     *
+     * @param {string} [message=""]
+     * @example ```js
+     *  expect(() => { throw new Error() }).toThrow();
+     *  expect(() => Promise.reject("foo")).rejects.toThrow("foo");
+     * ```
+     */
+    toVerifySteps(message = "") {
+        saveStack();
+
+        ensureArguments([[message, ["string", null]]]);
+
+        let expected;
+        return this.#resolve({
+            name: "toVerifySteps",
+            predicate: (actual) => {
+                expected = currentResults.steps;
+                currentResults.steps = [];
+                return deepEqual(actual, expected);
+            },
+            message: (pass) =>
+                message ||
+                (pass
+                    ? expected.length
+                        ? `[${expected.map(formatHumanReadable).join(", ")}]`
+                        : "no steps"
+                    : `expected the following steps`),
+            details: (actual) => [
+                [MarkupHelper.green("Expected:"), expected],
+                [MarkupHelper.red("Received:"), actual],
+                [MarkupHelper.text("Diff:"), MarkupHelper.diff(expected, actual)],
+            ],
+        });
+    }
+
+    /**
      * @template R
      * @param {MatcherSpecifications<T, R>} specs
      * @returns {Async extends true ? Promise<void> : void}
@@ -938,15 +976,6 @@ export const expect = Object.assign(
                 }
             });
             currentResults.steps.push(name);
-        },
-        /**
-         * @param {string[]} expectedSteps
-         */
-        verifySteps(expectedSteps) {
-            ensure(currentResults, `Cannot call \`expect.verifySteps()\` outside of a test.`);
-
-            expect(currentResults.steps).toEqual(expectedSteps);
-            currentResults.steps = [];
         },
     }
 );
