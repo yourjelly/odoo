@@ -18,6 +18,13 @@ class AccountChartTemplate(models.AbstractModel):
             'property_tax_receivable_account_id': 'account_template_102010802',
         }
 
+    @template('br', 'account.journal')
+    def _get_br_account_journal(self):
+        return {
+            'sale': {'refund_sequence': False},
+            'purchase': {'refund_sequence': False},
+        }
+
     @template('br', 'res.company')
     def _get_br_res_company(self):
         return {
