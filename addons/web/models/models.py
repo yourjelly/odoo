@@ -76,6 +76,9 @@ class Base(models.AbstractModel):
         return self.with_context(bin_size=True).web_read(specification)
 
     def web_read(self, specification: Dict[str, Dict]) -> List[Dict]:
+        print("\n\n========================================================\nweb_read")
+        print(specification)
+        print(self)
         fields_to_read = list(specification) or ['id']
 
         if fields_to_read == ['id']:

@@ -12,7 +12,6 @@ class HtmlHistoryRevision(models.Model):
         "ir.model.fields",
         required=True,
         readonly=True,
-        index=True,
         ondelete="cascade",
         string="Related Document ir_field",
     )

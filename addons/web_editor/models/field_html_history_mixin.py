@@ -17,6 +17,10 @@ class HtmlHistory(models.AbstractModel):
         domain="[('res_model', '=', self._name)]",
     )
 
+    history_revision_ids_related = fields.One2many(
+        related="history_revision_ids.patch",
+    )
+
     def _get_versioned_field(self):
         """This method should be overriden
 
@@ -43,7 +47,9 @@ class HtmlHistory(models.AbstractModel):
                         }
                     )
         if new_revisions_batch:
-            self.env["field.html.history.revision"].create(new_revisions_batch)
+            self.env["field.html.history.revision"].sudo().create(
+                new_revisions_batch
+            )
 
         return super().write(vals)
 

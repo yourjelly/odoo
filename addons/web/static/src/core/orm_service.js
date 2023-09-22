@@ -273,6 +273,10 @@ export class ORM {
      */
     webRead(model, ids, kwargs = {}) {
         validatePrimitiveList("ids", "number", ids);
+        console.warn("webread");
+        console.log(model);
+        console.log(ids);
+        console.log(kwargs);
         return this.call(model, "web_read", [ids], kwargs);
     }
 
@@ -326,7 +330,8 @@ export class ORM {
  *
  * ...
  *
- * const result = await this.orm.withOption({shadow: true}).read('res.partner', [id]);
+ * const result = await this.orm.withOption({shadow: true}).read('res.partner',
+ * [id]);
  */
 export const ormService = {
     dependencies: ["rpc", "user"],

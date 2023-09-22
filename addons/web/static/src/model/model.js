@@ -93,6 +93,10 @@ export function useModel(ModelClass, params, options = {}) {
     const model = new ModelClass(component.env, params, services);
     onWillStart(async () => {
         await options.beforeFirstLoad?.();
+        console.warn("useModel");
+        console.log(component);
+        console.log(component.props);
+        console.log(model);
         return model.load(component.props);
     });
     onWillUpdateProps((nextProps) => model.load(nextProps));
