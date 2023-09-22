@@ -1,48 +1,44 @@
 /** @odoo-module */
 
-import { EventTarget, Map, Object, Set } from "../globals";
-import { intercept } from "../intercept";
-import { match } from "../utils";
+import { cleanupDOM, cleanupObservers } from "@odoo/hoot/helpers";
+import { Map, Object, Set, document } from "../globals";
+import { intercept, log } from "../utils";
+
+const INSPECTED_ELEMENTS = [window, document];
 
 /**
  * @param {import("../core/runner").TestRunner} runner
  */
 export function makeCleanup(runner) {
     runner.beforeAnyTest(() => {
-        acceptedGlobalKeys = new Set(Object.keys(window));
-        cleanupFns.push(
-            intercept(
-                EventTarget.prototype,
-                "addEventListener",
-                function addEventListener(type, callback, options) {
-                    if (options?.once) {
-                        return;
+        for (const element of INSPECTED_ELEMENTS) {
+            const { prototype } = element.constructor;
+            const listeners = {};
+            acceptedKeys.set(element, new Set(Object.keys(element)));
+            listenersMap.set(element, listeners);
+            cleanupFns.push(
+                intercept(
+                    prototype,
+                    "addEventListener",
+                    function addEventListener(type, callback, options) {
+                        if (options?.once) {
+                            return;
+                        }
+                        if (!listeners[type]) {
+                            listeners[type] = new Set();
+                        }
+                        listeners[type].add(callback);
                     }
-                    if (!listenersMap.has(this)) {
-                        listenersMap.set(this, {});
+                ),
+                intercept(
+                    prototype,
+                    "removeEventListener",
+                    function removeEventListener(type, callback) {
+                        listeners[type]?.delete(callback);
                     }
-                    const elListeners = listenersMap.get(this);
-                    if (!elListeners[type]) {
-                        elListeners[type] = new Set();
-                    }
-                    elListeners[type].add(callback);
-                }
-            ),
-            intercept(
-                EventTarget.prototype,
-                "removeEventListener",
-                function removeEventListener(type, callback) {
-                    if (!listenersMap.has(this)) {
-                        return;
-                    }
-                    const elListeners = listenersMap.get(this);
-                    if (!elListeners[type]) {
-                        return;
-                    }
-                    elListeners[type].delete(callback);
-                }
-            )
-        );
+                )
+            );
+        }
     });
 
     runner.afterAnyTest(() => {
@@ -50,26 +46,29 @@ export function makeCleanup(runner) {
             cleanupFns.pop()();
         }
 
-        const keysDiff = Object.keys(window).filter((key) => !acceptedGlobalKeys.has(key));
-        if (keysDiff.length) {
-            console.warn(
-                `Found`,
-                keysDiff.length,
-                `added keys on Window object after test:`,
-                keysDiff
-            );
-            for (const key of keysDiff) {
-                delete window[key];
-            }
-        }
+        cleanupDOM();
+        cleanupObservers();
 
-        for (const [element, listeners] of listenersMap) {
-            if (!match(element, "Window") && !match(element, "Document")) {
-                continue;
+        for (const element of INSPECTED_ELEMENTS) {
+            // Check keys
+            const keys = acceptedKeys.get(element);
+            const keysDiff = Object.keys(element).filter((key) => !keys.has(key));
+            if (keysDiff.length) {
+                log.warn(
+                    `Found`,
+                    keysDiff.length,
+                    `added keys on ${element.constructor.name} object after test:`,
+                    keysDiff
+                );
+                for (const key of keysDiff) {
+                    delete element[key];
+                }
             }
-            for (const [type, callbacks] of Object.entries(listeners)) {
+
+            // Check listeners
+            for (const [type, callbacks] of Object.entries(listenersMap.get(element))) {
                 if (callbacks.size) {
-                    console.warn(
+                    log.warn(
                         `Element`,
                         element.constructor.name,
                         `has`,
@@ -86,8 +85,9 @@ export function makeCleanup(runner) {
         listenersMap.clear();
     });
 
-    let acceptedGlobalKeys;
+    /** @type {Map<typeof INSPECTED_ELEMENTS[number], Set<string>>} */
+    const acceptedKeys = new Map();
     const cleanupFns = [];
-    /** @type {Map<EventTarget, Record<string, Set<typeof EventTarget["prototype"]["addEventListener"]>>>} */
+    /** @type {Map<typeof INSPECTED_ELEMENTS[number], Record<string, Set<typeof EventTarget["prototype"]["addEventListener"]>>>} */
     const listenersMap = new Map();
 }

@@ -1,8 +1,8 @@
 /** @odoo-module */
 
-import { Boolean, Date, Error, navigator, Number, Object, Promise } from "./globals";
-import { isVisible, queryAll, queryOne } from "./helpers/dom";
-import { deepEqual, formatHumanReadable, isIterable, MarkupHelper, match } from "./utils";
+import { Boolean, Date, Error, navigator, Number, Object, Promise } from "../globals";
+import { isVisible, queryAll, queryOne } from "../helpers/dom";
+import { deepEqual, formatHumanReadable, isIterable, MarkupHelper, match } from "../utils";
 
 /**
  * @typedef {ArgumentPrimitive | `${ArgumentPrimitive}[]` | null} ArgumentDef
@@ -143,7 +143,7 @@ let nextResultId = 1;
 //-----------------------------------------------------------------------------
 
 /**
- * @param {import("./core/runner").TestRunner} runner
+ * @param {import("./runner").TestRunner} runner
  */
 export function makeExpect(runner) {
     /**

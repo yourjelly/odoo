@@ -4,7 +4,7 @@ import { reactive } from "@odoo/owl";
 import { Job } from "./job";
 
 export class Test extends Job {
-    /** @type {Partial<import("../expect").CurrentResults>[]} */
+    /** @type {Partial<import("./expect").CurrentResults>[]} */
     results = reactive([]);
 
     /** @returns {typeof Test["prototype"]["results"][number]} */

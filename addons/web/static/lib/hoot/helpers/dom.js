@@ -208,15 +208,14 @@ customPseudoClasses
 //-----------------------------------------------------------------------------
 
 export function cleanupDOM() {
-    // TODO: this is called by the sub-runners in the runner tests, making
-    // them crash because it's throwing errors in the ongoing (actual) test.
-
     const remainingElements = config.defaultRoot?.children.length;
     if (remainingElements) {
         log.warn(`${remainingElements} undesired elements left in the root element`);
         config.defaultRoot.innerHTML = "";
     }
+}
 
+export function cleanupObservers() {
     const remainingObservers = observers.size;
     if (remainingObservers) {
         log.warn(`${remainingObservers} observers still running`);

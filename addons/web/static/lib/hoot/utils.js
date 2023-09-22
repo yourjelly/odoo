@@ -9,6 +9,7 @@ import {
     localStorage,
     navigator,
     Object,
+    Promise,
     Proxy,
     sessionStorage,
     setTimeout,
@@ -273,6 +274,33 @@ export function groupBy(iter, property) {
 }
 
 /**
+ * @template O
+ * @template {keyof O} F
+ * @param {O} owner
+ * @param {F} fnName
+ * @param {O[F]} callback
+ */
+export function intercept(owner, fnName, callback) {
+    const originalFn = owner[fnName];
+    const mockName = `${fnName} (mocked)`;
+
+    owner[fnName] = {
+        [mockName](...args) {
+            const result = callback.call(this, ...args);
+            if (result instanceof Promise) {
+                return result.then(() => originalFn(...args));
+            } else {
+                return originalFn(...args);
+            }
+        },
+    }[mockName];
+
+    return function restore() {
+        owner[fnName] = originalFn;
+    };
+}
+
+/**
  * @param {unknown} value
  */
 export function isIterable(value) {
@@ -365,15 +393,13 @@ export function makeCallbacks() {
 
     /**
      * @param {string} type
-     * @param {...((...args: any[]) => Promise<void>)} callbacks
+     * @param {(...args: any[]) => Promise<void>} callback
      */
-    const remove = (type, ...callbacks) => {
+    const remove = (type, callback) => {
         if (!callbackRegistry[type]) {
             return;
         }
-        for (const callback of callbacks) {
-            callbackRegistry[type].delete(callback);
-        }
+        callbackRegistry[type].delete(callback);
     };
 
     /** @type {Record<string, ((...args: any[]) => Promise<void>)[]>} */

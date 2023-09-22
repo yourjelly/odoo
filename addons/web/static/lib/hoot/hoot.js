@@ -3,11 +3,10 @@
 import { mount, whenReady } from "@odoo/owl";
 import { makeCleanup } from "./addons/cleanup";
 import { makeLogger } from "./addons/logger";
+import { makeExpect } from "./core/expect";
 import { TestRunner } from "./core/runner";
-import { makeExpect } from "./expect";
 import { config as domConfig } from "./helpers/dom";
 import { config as eventsConfig } from "./helpers/events";
-import { intercept as _intercept } from "./intercept";
 import { HootMain } from "./ui/hoot_main";
 import { log, makeTaggable } from "./utils";
 
@@ -55,9 +54,6 @@ export const getCurrent = exportRunnerFunction("getCurrent");
 export const registerCleanup = exportRunnerFunction("registerCleanup");
 export const start = exportRunnerFunction("start");
 export const test = makeTaggable(exportRunnerFunction("addTest"));
-
-/** @type {typeof _intercept} */
-export const intercept = (...args) => registerCleanup(_intercept(...args));
 
 makeLogger(runner);
 makeCleanup(runner);

@@ -413,6 +413,7 @@ export class TestRunner {
 
         let job = jobs.shift();
         while (job && this.status === "running") {
+            const callbackChain = this.#getCallbackChain(job);
             if (job instanceof Suite) {
                 const suite = job;
                 if (suite.canRun()) {
@@ -420,16 +421,18 @@ export class TestRunner {
                         // before suite code
                         this.#suiteStack.push(suite);
 
-                        await this.#callbacks.call("before-suite", suite);
-                        await suite.callbacks.call("before-suite", suite);
+                        for (const callbacks of [...callbackChain].reverse()) {
+                            await callbacks.call("before-suite", suite);
+                        }
                     }
                     if (suite.visited === suite.jobs.length) {
                         // after suite code
                         this.#suiteStack.pop();
 
                         await this.#execAfterCallback(async () => {
-                            await suite.callbacks.call("after-suite", suite);
-                            await this.#callbacks.call("after-suite", suite);
+                            for (const callbacks of callbackChain) {
+                                await callbacks.call("after-suite", suite);
+                            }
                         });
                     }
                 }
@@ -437,17 +440,14 @@ export class TestRunner {
             } else {
                 const test = job;
                 if (test.config.skip) {
-                    for (const callbacks of [
-                        ...this.#getSuiteCallbacks().reverse(),
-                        this.#callbacks,
-                    ]) {
-                        callbacks.call("after-skipped-test", test);
+                    for (const callbacks of callbackChain) {
+                        await callbacks.call("after-skipped-test", test);
                     }
                 } else {
                     // Before test
                     this.#currentTest = test;
-                    for (const callbacks of [this.#callbacks, ...this.#getSuiteCallbacks()]) {
-                        callbacks.call("before-test", test);
+                    for (const callbacks of [...callbackChain].reverse()) {
+                        await callbacks.call("before-test", test);
                     }
 
                     // Setup
@@ -487,11 +487,8 @@ export class TestRunner {
                         });
 
                     await this.#execAfterCallback(async () => {
-                        for (const callbacks of [
-                            ...this.#getSuiteCallbacks().reverse(),
-                            this.#callbacks,
-                        ]) {
-                            callbacks.call("after-test", test);
+                        for (const callbacks of callbackChain) {
+                            await callbacks.call("after-test", test);
                         }
                         if (this.config.bail) {
                             if (!test.config.skip && !test.lastResults.pass) {
@@ -538,8 +535,19 @@ export class TestRunner {
         }
     }
 
-    #getSuiteCallbacks() {
-        return this.#suiteStack.map((s) => s.callbacks);
+    /**
+     * @param {Job} job
+     */
+    #getCallbackChain(job) {
+        const chain = [];
+        while (job) {
+            if (job instanceof Suite) {
+                chain.push(job.callbacks);
+            }
+            job = job.parent;
+        }
+        chain.push(this.#callbacks);
+        return chain;
     }
 
     /**

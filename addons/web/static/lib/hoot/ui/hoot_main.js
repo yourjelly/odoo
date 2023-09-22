@@ -185,7 +185,6 @@ export class HootMain extends Component {
         });
         runner.afterAll(() => {
             updateTitle(failed);
-            // cleanupDOM();
         });
 
         onWillStart(async () => {
