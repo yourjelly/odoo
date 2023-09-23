@@ -144,17 +144,6 @@ a {
     text-decoration: none;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-p,
-pre,
-form {
-    margin: 0;
-}
-
 input,
 button,
 textarea,
@@ -178,6 +167,12 @@ select {
 
 .hoot .hoot-panel {
     background: var(--hoot-panel-bg);
+}
+
+.hoot .hoot-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
 }
 
 .hoot .hoot-buttons {
@@ -345,13 +340,13 @@ select {
 
 /* Bootstrap SM breakpoint */
 @media (max-width: 576px) {
-    .hoot-controls {
+    .hoot .hoot-controls {
         display: grid;
         grid-template: 1fr auto auto / 1fr auto auto;
         gap: 0.25rem;
     }
 
-    .hoot-controls .hoot-search {
+    .hoot .hoot-controls .hoot-search {
         order: 99;
         grid-column: span 3;
     }
@@ -389,6 +384,7 @@ select {
     margin: 0.5rem;
     margin-top: 0;
     background: var(--hoot-bg-result);
+    grid-template-columns: 1fr auto;
 }
 
 .hoot .hoot-info-line {
@@ -418,7 +414,7 @@ select {
     color: #909090;
     margin: 0 0.5rem;
 }
-.hoot .hoot-log :hover {
+.hoot .hoot-log:hover {
     color: #606060;
 }
 
@@ -427,7 +423,7 @@ select {
     width: clamp(100px, 100%, 50vw);
 }
 
-.hoot .hoot-test:hover .hoot-copy {
+.hoot .hoot-path:hover .hoot-copy {
     opacity: 1;
     width: 16px;
 }

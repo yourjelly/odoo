@@ -112,19 +112,14 @@ export function subscribeToURLParams(...keys) {
 }
 
 /**
- * @param {keyof DEFAULT_FILTERS | `skip-${keyof DEFAULT_FILTERS}`} type
+ * @param {keyof DEFAULT_FILTERS} type
  * @param {string} id
+ * @param {boolean} [ignore]
  */
-export function withParams(type, id) {
+export function withParams(type, id, ignore) {
     const clearAll = () => Object.keys(nextParams).forEach((key) => nextParams[key].clear());
 
     const nextParams = Object.fromEntries(FILTER_KEYS.map((k) => [k, new Set(urlParams[k] || [])]));
-
-    let skip = false;
-    if (type && type.startsWith("skip-")) {
-        skip = true;
-        type = type.slice("skip-".length);
-    }
 
     switch (type) {
         case "debugTest": {
@@ -136,7 +131,7 @@ export function withParams(type, id) {
         }
         case "suite": {
             const skippedId = SKIP_PREFIX + id;
-            if (skip) {
+            if (ignore) {
                 if (nextParams.suite.has(skippedId)) {
                     nextParams.suite.delete(skippedId);
                 } else {
@@ -150,7 +145,7 @@ export function withParams(type, id) {
         }
         case "tag": {
             const skippedId = SKIP_PREFIX + id;
-            if (skip) {
+            if (ignore) {
                 if (nextParams.tag.has(skippedId)) {
                     nextParams.tag.delete(skippedId);
                 } else {
@@ -164,7 +159,7 @@ export function withParams(type, id) {
         }
         case "test": {
             const skippedId = SKIP_PREFIX + id;
-            if (skip) {
+            if (ignore) {
                 if (nextParams.test.has(skippedId)) {
                     nextParams.test.delete(skippedId);
                 } else {

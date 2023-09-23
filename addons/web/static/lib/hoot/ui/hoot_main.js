@@ -129,8 +129,8 @@ export class HootMain extends Component {
         </t>
         <main t-else="" class="hoot" t-attf-class="hoot-{{ color.scheme }}">
             <header class="hoot-panel d-flex flex-column">
-                <nav class="hoot-controls d-flex flex-row align-items-center py-1 px-2 gap-4">
-                    <h1 class="hoot-logo hoot-text-primary fw-bolder fs-4 user-select-none" title="Hierarchically Organized Odoo Tests">
+                <nav class="hoot-controls py-1 px-2">
+                    <h1 class="hoot-logo hoot-text-primary m-0 fw-bolder fs-4 user-select-none" title="Hierarchically Organized Odoo Tests">
                         HOOT
                     </h1>
                     <div class="hoot-buttons d-flex flex-row align-items-center overflow-hidden">
@@ -199,7 +199,7 @@ export class HootMain extends Component {
                     }),
                     importURL({
                         type: "link",
-                        url: "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css",
+                        url: "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css",
                     }),
                 ]);
             }

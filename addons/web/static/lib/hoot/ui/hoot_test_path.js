@@ -3,7 +3,7 @@
 import { Component } from "@odoo/owl";
 import { Test } from "../core/test";
 import { withParams } from "../core/url";
-import { compactXML, copy } from "../utils";
+import { compactXML } from "../utils";
 import { HootCopyButton } from "./hoot_copy_button";
 import { HootTagButton } from "./hoot_tag_button";
 
@@ -45,8 +45,8 @@ export class HootTestPath extends Component {
                         (<t t-esc="expectLength" />)
                     </span>
                 </t>
-                <HootCopyButton text="props.test.name" />
             </span>
+            <HootCopyButton text="props.test.name" />
             <t t-if="props.test.config.multi">
                 <strong class="hoot-text-abort text-nowrap">
                     x<t t-esc="props.test.config.multi" />
@@ -64,7 +64,6 @@ export class HootTestPath extends Component {
         </t>
     `;
 
-    copy = copy;
     withParams = withParams;
 
     getStatusInfo() {

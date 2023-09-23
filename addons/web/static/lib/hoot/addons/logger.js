@@ -1,7 +1,8 @@
 /** @odoo-module */
 
 import { toRaw } from "@odoo/owl";
-import { log } from "../utils";
+import { performance } from "../globals";
+import { formatMS, log } from "../utils";
 
 /**
  * @param {import("../core/runner").TestRunner} runner
@@ -13,7 +14,7 @@ export function makeLogger(runner) {
     let start;
 
     runner.beforeAll(() => {
-        start = Date.now();
+        start = performance.now();
 
         if (runner.config.headless) {
             log("Running in headless mode");
@@ -73,7 +74,7 @@ export function makeLogger(runner) {
     });
 
     runner.afterAll(() => {
-        const time = Date.now() - start;
-        log(`All test suites have ended (total time: ${time}ms)`);
+        const time = performance.now() - start;
+        log(`All test suites have ended (total time: ${formatMS(time)})`);
     });
 }

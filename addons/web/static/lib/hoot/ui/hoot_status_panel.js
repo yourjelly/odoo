@@ -1,8 +1,8 @@
 /** @odoo-module */
 
 import { Component, useState } from "@odoo/owl";
-import { Date, clearInterval, setInterval } from "../globals";
-import { compactXML } from "../utils";
+import { clearInterval, performance, setInterval } from "../globals";
+import { compactXML, formatMS } from "../utils";
 import { HootTestPath } from "./hoot_test_path";
 
 /** @extends Component<{}, import("../hoot").Environment> */
@@ -104,14 +104,20 @@ export class HootStatusPanel extends Component {
 
     setup() {
         const startTimer = () => {
+            if (runner.config.headless) {
+                return;
+            }
             stopTimer();
-            currentTestStart = Date.now();
+            currentTestStart = performance.now();
             intervalId = setInterval(() => {
-                this.state.timer = Math.floor((Date.now() - currentTestStart) / 1000);
+                this.state.timer = Math.floor((performance.now() - currentTestStart) / 1000);
             }, 1000);
         };
 
         const stopTimer = () => {
+            if (runner.config.headless) {
+                return;
+            }
             clearInterval(intervalId);
             this.state.timer = null;
         };
@@ -139,7 +145,7 @@ export class HootStatusPanel extends Component {
 
         runner.beforeAll(() => {
             this.state.finished = false;
-            start = Date.now();
+            start = performance.now();
         });
 
         runner.beforeAnyTest((test) => {
@@ -180,7 +186,7 @@ export class HootStatusPanel extends Component {
 
             const { done } = this.state;
             const textParts = [`${done} test${done === 1 ? "" : "s"} completed`];
-            textParts.push(`(total time: ${Date.now() - start} ms)`);
+            textParts.push(`(total time: ${formatMS(performance.now() - start)})`);
 
             this.state.text = textParts.join(" ");
             this.state.finished = true;

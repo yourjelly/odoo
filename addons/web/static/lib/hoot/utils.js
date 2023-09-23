@@ -49,7 +49,7 @@ export function compactXML(...args) {
 export async function copy(text) {
     try {
         await navigator.clipboard.writeText(text);
-        log.debug(`Copied to clipboard:`, text);
+        log.debug(`Copied to clipboard: "${text}"`);
     } catch (err) {
         log.warn("Could not copy to clipboard:", err);
     }
@@ -139,6 +139,13 @@ export function formatHumanReadable(value) {
         }
     }
     return String(value);
+}
+
+/**
+ * @param {number} value
+ */
+export function formatMS(value) {
+    return `${Math.floor(value)}ms`;
 }
 
 /**

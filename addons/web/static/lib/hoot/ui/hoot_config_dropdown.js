@@ -17,23 +17,23 @@ export class HootConfigDropdown extends Component {
                 <i class="bi bi-gear-fill" />
             </button>
             <t t-if="state.open">
-                <div class="hoot-dropdown dropdown-menu show end-0">
+                <div class="hoot-dropdown position-absolute end-0 px-2 py-3 shadow">
                     <label
-                        class="hoot-checkbox dropdown-item"
+                        class="hoot-checkbox hoot-dropdown-line"
                         title="Display the tests that passed in the list of test results"
                     >
                         <input type="checkbox" t-model="env.runner.config.showpassed" />
                         <span>Show passed tests</span>
                     </label>
                     <label
-                        class="hoot-checkbox dropdown-item"
+                        class="hoot-checkbox hoot-dropdown-line"
                         title="Show all tests that have been skipped"
                     >
                         <input type="checkbox" t-model="env.runner.config.showskipped" />
                         <span>Show skipped tests</span>
                     </label>
                     <label
-                        class="hoot-checkbox dropdown-item"
+                        class="hoot-checkbox hoot-dropdown-line"
                         title="Re-run current tests without catching any errors"
                     >
                         <input
@@ -44,7 +44,7 @@ export class HootConfigDropdown extends Component {
                         <span>No try/catch</span>
                     </label>
                     <label
-                        class="hoot-checkbox dropdown-item"
+                        class="hoot-checkbox hoot-dropdown-line"
                         title="Re-run current tests after shuffling them in a non-deterministic order"
                     >
                         <input
@@ -55,7 +55,7 @@ export class HootConfigDropdown extends Component {
                         <span>Random order</span>
                     </label>
                     <label
-                        class="hoot-checkbox dropdown-item"
+                        class="hoot-checkbox hoot-dropdown-line"
                         title="Re-run current tests in headless mode (no UI)"
                     >
                         <input
@@ -66,7 +66,7 @@ export class HootConfigDropdown extends Component {
                         <span>Headless</span>
                     </label>
                     <div
-                        class="dropdown-item d-flex gap-1"
+                        class="hoot-dropdown-line d-flex gap-1"
                         title="Re-run current tests and abort after a given amount of failed tests"
                     >
                         <span>Bail after</span>
@@ -80,7 +80,7 @@ export class HootConfigDropdown extends Component {
                         <span>failed tests</span>
                     </div>
                     <button
-                        class="dropdown-item"
+                        class="hoot-dropdown-line"
                         title="Toggle the color scheme of the UI"
                         t-on-click="props.colorToggle"
                     >
@@ -99,6 +99,12 @@ export class HootConfigDropdown extends Component {
         this.togglerRef = useRef("toggler");
         this.state = useState({ open: false });
 
+        useExternalListener(window, "keydown", (ev) => {
+            if (this.state.open && ev.key === "Escape") {
+                ev.preventDefault();
+                this.state.open = false;
+            }
+        });
         useExternalListener(window, "click", (ev) => {
             if (!this.rootRef.el?.contains(ev.target)) {
                 this.state.open = false;

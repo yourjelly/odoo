@@ -70,7 +70,7 @@ export class HootSearch extends Component {
                 </button>
             </form>
             <t t-if="state.query and state.showDropdown">
-                <div class="hoot-dropdown dropdown-menu show end-0">
+                <div class="hoot-dropdown position-absolute end-0 px-2 py-3 shadow">
                     <div class="hoot-dropdown-category d-flex flex-column">
                         <h6 class="hoot-dropdown-header d-flex flex-row align-items-center">
                             <span class="hoot-dropdown-title">Filter using <t t-esc="filterType" /></span>

@@ -2,7 +2,15 @@
 
 import { reactive } from "@odoo/owl";
 import { Error, Promise, clearTimeout, setTimeout } from "../globals";
-import { getFuzzyScore, makeCallbacks, normalize, parseRegExp, shuffle, storage } from "../utils";
+import {
+    getFuzzyScore,
+    log,
+    makeCallbacks,
+    normalize,
+    parseRegExp,
+    shuffle,
+    storage,
+} from "../utils";
 import { DEFAULT_CONFIG } from "./config";
 import { Suite } from "./suite";
 import { Tag, createTags } from "./tag";
@@ -34,7 +42,6 @@ class TimeoutError extends Error {
 
 export class TestRunner {
     debug = false;
-    hasFilter = false;
     /** @type {"ready" | "running"} */
     status = "ready";
     /** @type {Suite[]} */
@@ -43,25 +50,44 @@ export class TestRunner {
     tags = new Set();
     /** @type {Test[]} */
     tests = [];
+    /** @type {string | RegExp} */
     textFilter = "";
+
+    get hasFilter() {
+        return this.#hasExcludeFilter || this.#hasIncludeFilter;
+    }
 
     #callbacks = makeCallbacks();
     /** @type {Test | null} */
     #currentTest = null;
     #failed = 0;
+    #hasExcludeFilter = false;
+    #hasIncludeFilter = false;
     /** @type {import("./job").Job[]} */
     #jobs = [];
     #missedCallbacks = [];
+
+    #include = {
+        suites: new Set(),
+        tags: new Set(),
+        tests: new Set(),
+    };
+    #exclude = {
+        suites: new Set(),
+        tags: new Set(),
+        tests: new Set(),
+    };
     #only = {
         suites: new Set(),
-        tags: new Set(),
+        // tags: new Set(),
         tests: new Set(),
     };
-    #skip = {
-        suites: new Set(),
-        tags: new Set(),
-        tests: new Set(),
-    };
+
+    // #skip = {
+    //     suites: new Set(),
+    //     tags: new Set(),
+    //     tests: new Set(),
+    // };
     /** @type {Suite[]} */
     #suiteStack = [];
 
@@ -86,58 +112,61 @@ export class TestRunner {
         const previousFails = get("failed-tests", []);
         if (previousFails.length) {
             // Previously failed tests
-            this.hasFilter = true;
+            this.#hasIncludeFilter = true;
             remove("failed-tests");
             for (const id of previousFails) {
-                this.#only.tests.add(id);
+                this.#include.tests.add(id);
             }
             return;
         }
 
         // Text filter
         if (urlParams.filter) {
-            this.hasFilter = true;
+            this.#hasIncludeFilter = true;
             this.textFilter = parseRegExp(normalize(urlParams.filter));
         }
 
         // Suites
         if (urlParams.suite) {
-            this.hasFilter = true;
             for (const id of urlParams.suite) {
                 if (id.startsWith(SKIP_PREFIX)) {
-                    this.#skip.suites.add(id.slice(SKIP_PREFIX.length));
+                    this.#hasExcludeFilter = true;
+                    this.#exclude.suites.add(id.slice(SKIP_PREFIX.length));
                 } else {
-                    this.#only.suites.add(id);
+                    this.#hasIncludeFilter = true;
+                    this.#include.suites.add(id);
                 }
             }
         }
 
         // Tags
         if (urlParams.tag) {
-            this.hasFilter = true;
             for (const name of urlParams.tag) {
                 if (name.startsWith(SKIP_PREFIX)) {
-                    this.#skip.tags.add(name.slice(SKIP_PREFIX.length));
+                    this.#hasExcludeFilter = true;
+                    this.#exclude.tags.add(name.slice(SKIP_PREFIX.length));
                 } else {
-                    this.#only.tags.add(name);
+                    this.#hasIncludeFilter = true;
+                    this.#include.tags.add(name);
                 }
             }
         }
 
         // Tests
         if (urlParams.debugTest) {
-            this.hasFilter = true;
+            this.#hasIncludeFilter = true;
             this.debug = true;
             for (const id of urlParams.debugTest) {
-                this.#only.tests.add(id);
+                this.#include.tests.add(id);
             }
         } else if (urlParams.test) {
-            this.hasFilter = true;
             for (const id of urlParams.test) {
                 if (id.startsWith(SKIP_PREFIX)) {
-                    this.#skip.tests.add(id.slice(SKIP_PREFIX.length));
+                    this.#hasExcludeFilter = true;
+                    this.#exclude.tests.add(id.slice(SKIP_PREFIX.length));
                 } else {
-                    this.#only.tests.add(id);
+                    this.#hasIncludeFilter = true;
+                    this.#include.tests.add(id);
                 }
             }
         }
@@ -185,8 +214,9 @@ export class TestRunner {
                         this.#only.suites.add(suite.id);
                         break;
                     case Tag.SKIP:
-                        this.#skip.suites.add(suite.id);
-                        if (!this.#only.suites.has(suite.id)) {
+                        if (this.#only.suites.has(suite.id)) {
+                            log.warn(`'skip' tag of suite ${suite.name} has been ignored`);
+                        } else {
                             suite.config.skip = true;
                         }
                         break;
@@ -248,8 +278,9 @@ export class TestRunner {
                         this.#only.tests.add(test.id);
                         break;
                     case Tag.SKIP:
-                        this.#skip.tests.add(test.id);
-                        if (!this.#only.tests.has(test.id)) {
+                        if (this.#only.tests.has(test.id)) {
+                            log.warn(`'skip' tag of test ${test.name} has been ignored`);
+                        } else {
                             test.config.skip = true;
                         }
                         break;
@@ -536,7 +567,7 @@ export class TestRunner {
     }
 
     /**
-     * @param {Job} job
+     * @param {import("./job").Job} job
      */
     #getCallbackChain(job) {
         const chain = [];
@@ -551,30 +582,49 @@ export class TestRunner {
     }
 
     /**
-     * @param {Job} job
+     * @param {import("./job").Job} job
      */
     #prepareJob(job) {
+        // For suites: always included if at least 1 included job
         if (job instanceof Suite) {
-            if (this.#only.suites.has(job.id)) {
-                return true;
-            }
             job.jobs = this.#prepareJobs(job.jobs);
-            return Boolean(job.jobs.length);
-        } else {
-            if (this.#only.tests.has(job.id)) {
+            if (job.jobs.length) {
                 return true;
             }
         }
 
-        if (this.#skip.tags.size && job.tags.some((tag) => this.#skip.tags.has(tag.id))) {
-            return false;
-        }
-        if (this.#only.tags.size && job.tags.some((tag) => this.#only.tags.has(tag.id))) {
+        // Priority 1: always included if in the "only" set (tag "only" or failed tests)
+        const onlySet = job instanceof Suite ? this.#only.suites : this.#only.tests;
+        if (onlySet.has(job.id)) {
             return true;
         }
 
+        // Priority 2: excluded if in the test or suite "exlude" set
+        const excludeSet = job instanceof Suite ? this.#exclude.suites : this.#exclude.tests;
+        if (excludeSet.has(job.id)) {
+            return false;
+        }
+
+        // Priority 3: included if in the test or suite "include" set
+        const includeSet = job instanceof Suite ? this.#include.suites : this.#include.tests;
+        if (includeSet.has(job.id)) {
+            return true;
+        }
+
+        // Priority 4: excluded if one of the job tags is in the tag "exlude" set
+        const excludedTags = [...this.#exclude.tags];
+        if (excludedTags.some((tag) => job.tagNames.has(tag))) {
+            return false;
+        }
+
+        // Priority 5: included if one of the job tags is in the tag "include" set
+        const includedTags = [...this.#include.tags];
+        if (includedTags.some((tag) => job.tagNames.has(tag))) {
+            return true;
+        }
+
+        // Priority 6: included if the job name matches the text filter
         if (this.textFilter) {
-            // The job matches the URL filter
             if (
                 this.textFilter instanceof RegExp
                     ? this.textFilter.test(job.index)
@@ -584,12 +634,8 @@ export class TestRunner {
             }
         }
 
-        return !(
-            this.#only.suites.size ||
-            this.#only.tests.size ||
-            this.#only.tags.size ||
-            this.textFilter.length
-        );
+        // If no match: is included if there is no other specific include filter
+        return !this.#hasIncludeFilter;
     }
 
     /**
