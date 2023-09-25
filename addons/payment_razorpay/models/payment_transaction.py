@@ -42,6 +42,26 @@ class PaymentTransaction(models.Model):
             raise ValidationError("Razorpay: " + error_message)
         return phone
 
+    def _create_order(self, customer_id=False, is_payment_capture=False):
+        # Initiate the payment and retrieve the related order id.
+        # TO DO master: remove customer from context and add it into argument
+        order_payload = self.with_context(razorpay_customer_id=customer_id)._razorpay_prepare_order_request_payload()
+        if is_payment_capture:
+            order_payload.update(payment_capture=True)
+        _logger.info(
+            "Payload of '/orders' request for transaction with reference %s:\n%s",
+            self.reference, pprint.pformat(order_payload)
+        )
+        order_response = self.provider_id._razorpay_make_request(endpoint='orders', payload=order_payload)
+        _logger.info(
+            "Response of '/orders' request for transaction with reference %s:\n%s",
+            self.reference, pprint.pformat(order_response)
+        )
+        return order_response
+
+    def _should_rendering_values_return_condition(self):
+        return self.provider_code != 'razorpay'
+
     def _get_specific_rendering_values(self, processing_values):
         """ Override of `payment` to return razorpay-specific rendering values.
 
@@ -53,23 +73,11 @@ class PaymentTransaction(models.Model):
         :rtype: dict
         """
         res = super()._get_specific_rendering_values(processing_values)
-        if self.provider_code != 'razorpay':
+        if self._should_rendering_values_return_condition():
             return res
 
-        # Initiate the payment and retrieve the related order id.
-        payload = self._razorpay_prepare_order_request_payload()
-        _logger.info(
-            "Payload of '/orders' request for transaction with reference %s:\n%s",
-            self.reference, pprint.pformat(payload)
-        )
-        order_data = self.provider_id._razorpay_make_request(endpoint='orders', payload=payload)
-        _logger.info(
-            "Response of '/orders' request for transaction with reference %s:\n%s",
-            self.reference, pprint.pformat(order_data)
-        )
-
+        order_response = self._create_order()
         # Initiate the payment
-        converted_amount = payment_utils.to_minor_currency_units(self.amount, self.currency_id)
         base_url = self.provider_id.get_base_url()
         return_url_params = {'reference': self.reference}
         phone = self._validate_and_sanatize_phone_number(self.partner_id.phone)
@@ -78,8 +86,8 @@ class PaymentTransaction(models.Model):
             'name': self.company_id.name,
             'description': self.reference,
             'company_logo': url_join(base_url, f'web/image/res.company/{self.company_id.id}/logo'),
-            'order_id': order_data['id'],
-            'amount': converted_amount,
+            'order_id': order_response['id'],
+            'amount': order_response['amount'],
             'currency': self.currency_id.name,
             'partner_name': self.partner_name,
             'partner_email': self.partner_email,
@@ -286,8 +294,12 @@ class PaymentTransaction(models.Model):
         if entity_status in PAYMENT_STATUS_MAPPING['pending']:
             self._set_pending()
         elif entity_status in PAYMENT_STATUS_MAPPING['authorized']:
+            if self.tokenize:
+                self._razorpay_tokenize_from_notification_data(notification_data)
             self._set_authorized()
         elif entity_status in PAYMENT_STATUS_MAPPING['done']:
+            if self.tokenize:
+                self._razorpay_tokenize_from_notification_data(notification_data)
             self._set_done()
 
             # Immediately post-process the transaction if it is a refund, as the post-processing
@@ -310,3 +322,6 @@ class PaymentTransaction(models.Model):
             self._set_error(
                 "Razorpay: " + _("Received data with invalid status: %s", entity_status)
             )
+
+    def _razorpay_tokenize_from_notification_data(self, notification_data):
+        pass
