@@ -250,6 +250,11 @@ export function sanitize(nodeToSanitize, root = nodeToSanitize) {
         if (startEl && root.contains(startEl)) {
             const label = startEl.innerText;
             const url = deduceURLfromText(label, startEl);
+            // Allow user to remove a part of the label without affecting the
+            // url, for example:
+            // label: changed from odoo.com/extra_stuff to odoo.com
+            // url: remains odoo.com/extra_stuff
+            if (url && !startEl.href.includes(url)) {
                 startEl.setAttribute('href', url);
             }
         }
