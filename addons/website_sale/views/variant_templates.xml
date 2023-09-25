@@ -66,8 +66,7 @@
 
                     <t t-elif="ptal.attribute_id.display_type == 'pills'">
                         <ul t-att-data-attribute_id="ptal.attribute_id.id"
-                            t-attf-class="btn-group-toggle list-inline list-unstyled o_wsale_product_attribute #{'d-none' if single_and_custom else ''}"
-                            data-bs-toggle="buttons">
+                            t-attf-class="list-inline list-unstyled o_wsale_product_attribute #{'d-none' if single_and_custom else ''}">
                             <t t-foreach="ptal.product_template_value_ids._only_active()" t-as="ptav">
                                 <li t-attf-class="o_variant_pills btn btn-primary mb-1 list-inline-item js_attribute_value #{'active' if ptav in combination else ''}">
                                     <input type="radio"
