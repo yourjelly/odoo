@@ -101,6 +101,7 @@ export class ListArchParser extends XMLParser {
                 const fieldId = `${fieldInfo.name}_${fieldNextIds[fieldInfo.name]++}`;
                 fieldNodes[fieldId] = fieldInfo;
                 node.setAttribute("field_id", fieldId);
+                node.getAttribute("default_focus") || "";
                 if (fieldInfo.isHandle) {
                     handleField = fieldInfo.name;
                 }

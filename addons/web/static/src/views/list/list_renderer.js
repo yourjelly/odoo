@@ -130,6 +130,8 @@ export class ListRenderer extends Component {
             await Promise.resolve();
 
             const editedRecord = this.props.list.editedRecord;
+            let nameFieldIndex = this.state.columns.findIndex((col) => col['attrs'] && col['attrs']['default_focus']==='1')
+            nameFieldIndex = nameFieldIndex !== -1 ? nameFieldIndex : 0;
             if (editedRecord && this.activeRowId !== editedRecord.id) {
                 if (this.cellToFocus && this.cellToFocus.record === editedRecord) {
                     const column = this.cellToFocus.column;
@@ -138,7 +140,7 @@ export class ListRenderer extends Component {
                 } else if (this.lastEditedCell) {
                     this.focusCell(this.lastEditedCell.column, true);
                 } else {
-                    this.focusCell(this.state.columns[0]);
+                    this.focusCell(this.state.columns[nameFieldIndex]);
                 }
             }
             this.cellToFocus = null;

@@ -19752,4 +19752,20 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".o_data_row");
         assert.containsOnce(target, ".o_data_row.o_selected_row");
     });
+
+    QUnit.only("default_focus field is focused in list view", async function (assert) {
+        await makeView({
+            type: "list",
+            resModel: "foo",
+            serverData,
+            arch: '<tree editable="bottom"><field name="name"/><field name="foo" default_focus="1"/></tree>',
+        });
+
+        await click(target.querySelector(".o_data_cell"));
+            assert.hasClass(target.querySelector(".o_data_row"), "o_selected_row");
+            assert.strictEqual(
+                document.activeElement,
+                target.querySelector(".o_data_row .o_data_cell input")
+            );
+    });
 });
