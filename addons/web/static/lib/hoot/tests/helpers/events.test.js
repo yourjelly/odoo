@@ -20,53 +20,82 @@ import {
 import { describe, expect, test } from "../../hoot";
 import { mount } from "../local_helpers";
 
-/**
- *
- * @param {HTMLElement} element
- * @param {import("@web/core/utils/events").EventType} type
- */
-function addStepListener(element, type) {
-    return on(element, type, (event) => QUnit.expect.step(event.type));
-}
-
 describe("@odoo/hoot/helpers", "Events", () => {
     test("clear", async () => {
         await mount(/* xml */ `<input value="Test" />`);
 
         const input = queryOne("input");
+        const exepctedEvents = [
+            "pointerdown",
+            "mousedown",
+            "focus",
+            "pointerup",
+            "mouseup",
+            "click",
+            "keydown",
+            "keyup",
+            "keypress",
+            "input",
+            "change",
+        ];
+        for (const evType of exepctedEvents) {
+            on(input, evType, (ev) => expect.step(ev.type));
+        }
+
         expect(input.value).toBe("Test");
 
-        click(input);
-        clear();
+        const events = [...click(input), ...clear()];
 
         expect(input.value).toBe("");
+        expect(events.map((ev) => ev.type)).toEqual(exepctedEvents);
+        expect(exepctedEvents).toVerifySteps();
     });
 
     test("click", async () => {
         await mount(/* xml */ `<button>Click me</button>`);
 
-        addStepListener("button", "type");
+        const exepctedEvents = [
+            "pointerdown",
+            "mousedown",
+            "focus",
+            "pointerup",
+            "mouseup",
+            "click",
+        ];
+        for (const evType of exepctedEvents) {
+            on("button", evType, (ev) => expect.step(ev.type));
+        }
 
-        click("button");
-        expect(click()).toBeTruthy();
+        const events = click("button");
+
+        expect(events.map((ev) => ev.type)).toEqual(exepctedEvents);
+        expect(exepctedEvents).toVerifySteps();
     });
 
     test.skip("drag", async () => {
         expect(drag()).toBeTruthy();
     });
 
-    test.skip("fill", async () => {
+    test("fill", async () => {
         await mount(/* xml */ `<input value="Test" />`);
 
-        expect(queryOne("input")).toBe("Test");
+        const input = queryOne("input");
+        expect(input.value).toBe("Test");
 
-        fill("input", " value");
+        click("input");
+        fill("Test value");
 
-        expect(queryOne("input")).toBe("Test value");
+        expect(input.value).toBe("Test value");
     });
 
     test.skip("hover", async () => {
-        expect(hover()).toBeTruthy();
+        await mount(/* xml */ `<button>Click me</button>`);
+
+        on("button", "pointerenter", (ev) => expect.step(ev.type));
+
+        hover("button");
+
+        expect(["pointerenter"]).toVerifySteps();
     });
 
     test.skip("keyDown", async () => {

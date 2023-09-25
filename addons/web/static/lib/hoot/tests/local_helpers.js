@@ -19,6 +19,8 @@ export async function mount(component, appConfig) {
     await app.mount(getFixture());
 
     registerCleanup(() => app.destroy());
+
+    return app;
 }
 
 /**

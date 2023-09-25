@@ -959,6 +959,9 @@ export function leave(target, options) {
  */
 export function on(target, type, listener, options) {
     const targets = isEventTarget(target) ? [target] : queryAll(target);
+    if (!targets.length) {
+        throw new Error(`Expected at least 1 element, got none.`);
+    }
     for (const element of targets) {
         element.addEventListener(type, listener, options);
     }

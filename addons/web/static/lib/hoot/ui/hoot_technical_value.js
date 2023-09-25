@@ -61,7 +61,7 @@ export class HootTechnicalValue extends Component {
                     <t t-if="isIterable(value)">
                         <t>[</t>
                         <ul class="ps-3 m-0 list-unstyled">
-                            <t t-foreach="value" t-as="subValue" t-key="subValue">
+                            <t t-foreach="value" t-as="subValue" t-key="subValue_index">
                                 <li class="d-flex flex-row">
                                     <HootTechnicalValue value="subValue" />
                                     <t t-esc="displayComma(subValue)" />

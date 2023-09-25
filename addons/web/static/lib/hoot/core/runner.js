@@ -584,30 +584,39 @@ export class TestRunner {
     /**
      * @param {import("./job").Job} job
      */
-    #prepareJob(job) {
-        // For suites: always included if at least 1 included job
-        if (job instanceof Suite) {
-            job.jobs = this.#prepareJobs(job.jobs);
-            if (job.jobs.length) {
-                return true;
+    #includeSubJobs(job) {
+        if (!(job instanceof Suite)) {
+            return;
+        }
+        for (const subJob of job.jobs) {
+            if (subJob instanceof Suite) {
+                this.#include.suites.add(subJob.id);
+            } else {
+                this.#include.tests.add(subJob.id);
             }
         }
+    }
+
+    #isIncluded(job) {
+        const isSuite = job instanceof Suite;
 
         // Priority 1: always included if in the "only" set (tag "only" or failed tests)
-        const onlySet = job instanceof Suite ? this.#only.suites : this.#only.tests;
+        const onlySet = isSuite ? this.#only.suites : this.#only.tests;
         if (onlySet.has(job.id)) {
+            this.#includeSubJobs(job);
             return true;
         }
 
         // Priority 2: excluded if in the test or suite "exlude" set
-        const excludeSet = job instanceof Suite ? this.#exclude.suites : this.#exclude.tests;
+        const excludeSet = isSuite ? this.#exclude.suites : this.#exclude.tests;
         if (excludeSet.has(job.id)) {
             return false;
         }
 
         // Priority 3: included if in the test or suite "include" set
-        const includeSet = job instanceof Suite ? this.#include.suites : this.#include.tests;
+        const includeSet = isSuite ? this.#include.suites : this.#include.tests;
         if (includeSet.has(job.id)) {
+            this.#includeSubJobs(job);
             return true;
         }
 
@@ -620,6 +629,7 @@ export class TestRunner {
         // Priority 5: included if one of the job tags is in the tag "include" set
         const includedTags = [...this.#include.tags];
         if (includedTags.some((tag) => job.tagNames.has(tag))) {
+            this.#includeSubJobs(job);
             return true;
         }
 
@@ -642,7 +652,24 @@ export class TestRunner {
      * @param {import("./job").Job[]} jobs
      */
     #prepareJobs(jobs) {
-        const filteredJobs = jobs.filter((job) => this.#prepareJob(job));
+        const filteredJobs = jobs.filter((job) => {
+            let included = this.#isIncluded(job);
+            if (job instanceof Suite) {
+                // For suites: included if at least 1 included job
+                if (included) {
+                    for (const subJob of job.jobs) {
+                        if (subJob instanceof Suite) {
+                            this.#include.suites.add(subJob.id);
+                        } else {
+                            this.#include.tests.add(subJob.id);
+                        }
+                    }
+                }
+                job.jobs = this.#prepareJobs(job.jobs);
+                included ||= job.jobs.length;
+            }
+            return included;
+        });
 
         return this.config.randomorder ? shuffle(filteredJobs) : filteredJobs;
     }
