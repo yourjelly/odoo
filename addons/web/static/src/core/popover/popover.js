@@ -17,11 +17,10 @@ export class Popover extends Component {
 
         useForwardRefToParent("ref");
         usePosition(this.props.target, {
-            // onPositioned: (popperElement, solution) => {
-            //     this.props.onPositioned?.(popperElement, solution);
-            //     this.onPositioned(popperElement, solution);
-            // },
-            onPositioned: this.props.onPositioned || this.onPositioned.bind(this),
+            onPositioned: (popperElement, solution) => {
+                this.props.onPositioned?.(popperElement, solution);
+                this.onPositioned(popperElement, solution);
+            },
             position: this.props.position,
             popper: "ref",
             fixedPosition: this.props.fixedPosition,
