@@ -47,6 +47,7 @@ class PaymentProvider(models.Model):
         self.filtered(lambda p: p.code == 'razorpay').update({
             'support_manual_capture': 'full_only',
             'support_refund': 'partial',
+            'support_tokenization': True,
         })
 
     # === BUSINESS METHODS ===#
@@ -119,3 +120,8 @@ class PaymentProvider(models.Model):
         else:  # Notification data.
             secret = self.razorpay_webhook_secret
             return hmac.new(secret.encode(), msg=data, digestmod=hashlib.sha256).hexdigest()
+
+    def _get_validation_amount(self):
+        if self.code == 'razorpay':
+            return 1.0
+        return super()._get_validation_amount()
