@@ -5,7 +5,7 @@ from markupsafe import Markup
 from odoo import api, fields, models, tools, SUPERUSER_ID
 from odoo.exceptions import AccessError, UserError,ValidationError
 from odoo.osv import expression
-from odoo.tools import Query,email_re
+from odoo.tools import email_re
 from odoo.tools.translate import _
 
 from dateutil.relativedelta import relativedelta
