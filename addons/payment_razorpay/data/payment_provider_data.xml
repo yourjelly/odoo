@@ -4,6 +4,7 @@
     <record id="payment.payment_provider_razorpay" model="payment.provider">
         <field name="code">razorpay</field>
         <field name="redirect_form_view_id" ref="redirect_form"/>
+        <field name="allow_tokenization">True</field>
     </record>
 
 </odoo>

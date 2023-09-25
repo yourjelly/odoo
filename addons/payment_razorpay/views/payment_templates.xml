@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+     <!-- Only load the SDK on pages with the payment form. -->
+    <template id="payment_razorpay.form" inherit_id="payment.form">
+        <xpath expr="." position="inside">
+            <script src="https://checkout.razorpay.com/v1/checkout.js"/>    
+        </xpath>
+    </template>
+
+</odoo>
