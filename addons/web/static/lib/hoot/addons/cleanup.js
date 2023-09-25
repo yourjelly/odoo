@@ -1,17 +1,24 @@
 /** @odoo-module */
 
-import { cleanupDOM, cleanupObservers } from "@odoo/hoot/helpers";
-import { Map, Object, Set, document } from "../globals";
+import { Map, Object, Set } from "../globals";
+import { cleanupDOM, cleanupObservers, getFixture } from "../helpers/dom";
 import { intercept, log } from "../utils";
 
-const INSPECTED_ELEMENTS = [window, document];
+const getGlobalElements = () => {
+    const { ownerDocument } = getFixture();
+    return [ownerDocument, ownerDocument.defaultView];
+};
 
 /**
  * @param {import("../core/runner").TestRunner} runner
  */
 export function makeCleanup(runner) {
     runner.beforeAnyTest(() => {
-        for (const element of INSPECTED_ELEMENTS) {
+        if (runner.config.nocleanup) {
+            return;
+        }
+
+        for (const element of getGlobalElements()) {
             const { prototype } = element.constructor;
             const listeners = {};
             acceptedKeys.set(element, new Set(Object.keys(element)));
@@ -42,6 +49,10 @@ export function makeCleanup(runner) {
     });
 
     runner.afterAnyTest(() => {
+        if (runner.config.nocleanup) {
+            return;
+        }
+
         while (cleanupFns.length) {
             cleanupFns.pop()();
         }
@@ -49,7 +60,7 @@ export function makeCleanup(runner) {
         cleanupDOM();
         cleanupObservers();
 
-        for (const element of INSPECTED_ELEMENTS) {
+        for (const element of getGlobalElements()) {
             // Check keys
             const keys = acceptedKeys.get(element);
             const keysDiff = Object.keys(element).filter((key) => !keys.has(key));
@@ -85,9 +96,9 @@ export function makeCleanup(runner) {
         listenersMap.clear();
     });
 
-    /** @type {Map<typeof INSPECTED_ELEMENTS[number], Set<string>>} */
+    /** @type {Map<Document | Element | Window, Set<string>>} */
     const acceptedKeys = new Map();
     const cleanupFns = [];
-    /** @type {Map<typeof INSPECTED_ELEMENTS[number], Record<string, Set<typeof EventTarget["prototype"]["addEventListener"]>>>} */
+    /** @type {Map<Document | Element | Window, Record<string, Set<typeof EventTarget["prototype"]["addEventListener"]>>>} */
     const listenersMap = new Map();
 }

@@ -1,17 +1,7 @@
 /** @odoo-module */
 
-import {
-    Boolean,
-    document,
-    Error,
-    Map,
-    MutationObserver,
-    Number,
-    Object,
-    RegExp,
-    Set,
-} from "../globals";
-import { groupBy, isIterable, log, match } from "../utils";
+import { Boolean, Error, Map, MutationObserver, Number, Object, RegExp, Set } from "../globals";
+import { groupBy, isIterable, log } from "../utils";
 
 /**
  * @typedef {{ x?: number; y?: number; left?: number; top?: number }} Coordinates
@@ -58,7 +48,7 @@ const isElementScrollable = (element, axis) => {
  * @param {Document | Element} element
  */
 const isElementVisible = (element) => {
-    if (isDocument(element) || element === config.defaultRoot) {
+    if (isDocument(element)) {
         return true;
     } else if (!element) {
         return false;
@@ -84,21 +74,9 @@ const isElementVisible = (element) => {
 /**
  * @template T
  * @param {T} node
- * @param {"element" | "text" | "document"} type
+ * @param {number} type
  */
-const isNodeOfType = (node, type) => {
-    if (node && typeof node === "object" && node.nodeType) {
-        switch (type) {
-            case "element":
-                return node.nodeType === 1;
-            case "text":
-                return node.nodeType === 3;
-            case "document":
-                return node.nodeType === 9;
-        }
-    }
-    return false;
-};
+const isNodeOfType = (node, type) => node && typeof node === "object" && node.nodeType === type;
 
 /**
  * Converts a CSS pixel value to a number, removing the 'px' part.
@@ -137,13 +115,20 @@ const FOCUSABLE_SELECTOR = [
 const PSEUDO_SELECTOR_REGEX = /:([\w-]+)(\(([^)]*)\))?/g;
 const ROOT_SPECIAL_SELECTORS = {
     get body() {
-        return config.defaultRoot.ownerDocument.body;
+        return defaultRoot.body;
     },
-    document,
+    get document() {
+        return defaultRoot;
+    },
+    get window() {
+        return defaultRoot.defaultView;
+    },
 };
 
 /** @type {Map<HTMLElement, { callbacks: Set<MutationCallback>, observer: MutationObserver }>} */
 const observers = new Map();
+/** @type {Document | null} */
+let defaultRoot = null;
 
 //-----------------------------------------------------------------------------
 // Default pseudo classes
@@ -208,10 +193,10 @@ customPseudoClasses
 //-----------------------------------------------------------------------------
 
 export function cleanupDOM() {
-    const remainingElements = config.defaultRoot?.children.length;
+    const remainingElements = defaultRoot?.body.children.length;
     if (remainingElements) {
         log.warn(`${remainingElements} undesired elements left in the root element`);
-        config.defaultRoot.innerHTML = "";
+        defaultRoot.body.innerHTML = "";
     }
 }
 
@@ -225,16 +210,27 @@ export function cleanupObservers() {
     }
 }
 
-export function getActiveElement() {
-    const { activeElement } = match(config.defaultRoot, Document)
-        ? config.defaultRoot
-        : config.defaultRoot.ownerDocument;
-    return activeElement;
+/**
+ * @param {Document | Element} value
+ */
+export function getActiveElement(value) {
+    return getDocument(value || defaultRoot).activeElement;
 }
 
+/**
+ * @param {Document | Element} value
+ * @returns {Document}
+ */
+export function getDocument(value) {
+    return isDocument(value) ? value : value.ownerDocument;
+}
+
+/**
+ * @param {Element} [parent]
+ */
 export function getFocusableElements(parent) {
     const byTabIndex = groupBy(
-        (parent || config.defaultRoot).querySelectorAll(FOCUSABLE_SELECTOR),
+        (parent || defaultRoot).querySelectorAll(FOCUSABLE_SELECTOR),
         "tabIndex"
     );
     const withTabIndexZero = byTabIndex[0] || [];
@@ -244,7 +240,7 @@ export function getFocusableElements(parent) {
 
 export function getNextFocusableElement(parent) {
     const focusableEls = getFocusableElements(parent);
-    const index = focusableEls.indexOf((parent || config.defaultRoot).ownerDocument.activeElement);
+    const index = focusableEls.indexOf(getActiveElement(parent));
     return focusableEls[index + 1] || null;
 }
 
@@ -264,14 +260,17 @@ export function getParentFrame(node) {
     return null;
 }
 
+/**
+ * @param {Element} [parent]
+ */
 export function getPreviousFocusableElement(parent) {
     const focusableEls = getFocusableElements(parent);
-    const index = focusableEls.indexOf((parent || config.defaultRoot).ownerDocument.activeElement);
+    const index = focusableEls.indexOf(getActiveElement(parent));
     return index < 0 ? focusableEls.at(-1) : focusableEls[index - 1] || null;
 }
 
 export function getFixture() {
-    return config.defaultRoot;
+    return defaultRoot?.body;
 }
 
 /**
@@ -322,7 +321,7 @@ export function getText(target, options) {
  * @returns {T is Document}
  */
 export function isDocument(object) {
-    return isNodeOfType(object, "document");
+    return isNodeOfType(object, Node.DOCUMENT_NODE);
 }
 
 /**
@@ -342,7 +341,7 @@ export function isEditable(element) {
  * @returns {T is Element}
  */
 export function isElement(object) {
-    return isNodeOfType(object, "element");
+    return isNodeOfType(object, Node.ELEMENT_NODE);
 }
 
 /**
@@ -369,7 +368,7 @@ export function isFocusable(target) {
  * @param {Target} target
  */
 export function isVisible(target) {
-    if (isWindow(target) || isDocument(target) || target === config.defaultRoot) {
+    if (isWindow(target) || isDocument(target)) {
         return true;
     }
     return isElementVisible(queryOne(target));
@@ -446,7 +445,7 @@ export function queryAll(target, options) {
         if (target in ROOT_SPECIAL_SELECTORS) {
             elements = _filter(ROOT_SPECIAL_SELECTORS[target]);
         } else {
-            elements = _filter(options?.root || config.defaultRoot);
+            elements = _filter(options?.root || defaultRoot);
             selector = target;
         }
         // HTMLSelectElement is iterable ¯\_(ツ)_/¯
@@ -546,6 +545,19 @@ export function queryOne(target, options) {
 }
 
 /**
+ * @param {Document | HTMLElement} element
+ */
+export function setFixture(element) {
+    if (defaultRoot) {
+        throw new Error(`Fixture has already been set`);
+    }
+    if (!isDocument(element)) {
+        throw new Error(`Fixture should be an HTML document`);
+    }
+    defaultRoot = element;
+}
+
+/**
  * @param {HTMLElement} element
  * @param {{ object?: boolean }} [options]
  */
@@ -561,8 +573,3 @@ export function toSelector(element, options) {
     }
     return options?.object ? parts : parts.join("");
 }
-
-export const config = {
-    defaultRoot: null,
-    defaultView: window.top,
-};

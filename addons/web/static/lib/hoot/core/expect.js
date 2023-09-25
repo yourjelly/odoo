@@ -1,8 +1,15 @@
 /** @odoo-module */
 
-import { Boolean, Error, Number, Object, Promise, navigator, performance } from "../globals";
+import { Boolean, Error, Object, Promise, navigator, performance } from "../globals";
 import { isVisible, queryAll, queryOne } from "../helpers/dom";
-import { MarkupHelper, deepEqual, ensure, formatHumanReadable, isIterable, match } from "../utils";
+import {
+    MarkupHelper,
+    deepEqual,
+    ensureArguments,
+    formatHumanReadable,
+    isIterable,
+    match,
+} from "../utils";
 
 /**
  * @typedef {ArgumentPrimitive | `${ArgumentPrimitive}[]` | null} ArgumentDef
@@ -55,47 +62,6 @@ import { MarkupHelper, deepEqual, ensure, formatHumanReadable, isIterable, match
 //-----------------------------------------------------------------------------
 
 /**
- *
- * @param {unknown} value
- * @param {ArgumentDef} type
- * @returns {boolean}
- */
-const ensureArgument = (value, type) => {
-    if (typeof type === "string" && type.endsWith("[]")) {
-        const itemType = type.slice(0, -2);
-        return isIterable(value) && [...value].every((v) => ensureArgument(v, itemType));
-    }
-    switch (type) {
-        case null:
-            return value === null || value === undefined;
-        case "any":
-            return true;
-        case "string":
-            return typeof value === "string";
-        case "number":
-            return typeof value === "number";
-        case "boolean":
-            return typeof value === "boolean";
-        default:
-            return false;
-    }
-};
-
-/**
- * @param {[unknown, ArgumentDef | ArgumentDef[]][]} argumentsDef
- */
-const ensureArguments = (argumentsDef) => {
-    for (let i = 0; i < argumentsDef.length; i++) {
-        const [value, acceptedType] = argumentsDef[i];
-        const types = isIterable(acceptedType) ? [...acceptedType] : [acceptedType];
-        ensure(
-            types.some((type) => ensureArgument(value, type)),
-            `Expected argument ${i} to be of type ${types.join(" or ")}`
-        );
-    }
-};
-
-/**
  * @param {string} message
  * @param {{ actual: unknown; not: boolean }} params
  */
@@ -138,8 +104,10 @@ export function makeExpect(runner) {
      * @param {number} expected
      */
     function assertions(expected) {
-        ensure(currentResults, `Cannot call \`expect.assertions()\` outside of a test.`);
-        ensure(Number.isInteger(expected), `Expected argument to be an integer, got ${expected}`);
+        if (!currentResults) {
+            throw new Error(`Cannot call \`expect.assertions()\` outside of a test.`);
+        }
+        ensureArguments([[expected, "integer"]]);
 
         currentResults.afterTestCallbacks.push(() => {
             const actual = currentResults.assertions.length;
@@ -155,7 +123,9 @@ export function makeExpect(runner) {
      * @param {T} actual
      */
     function expect(actual) {
-        ensure(currentResults, `Cannot call \`expect()\` outside of a test.`);
+        if (!currentResults) {
+            throw new Error(`Cannot call \`expect()\` outside of a test.`);
+        }
 
         return new Matchers(actual, {}, runner.config.headless);
     }
@@ -172,7 +142,9 @@ export function makeExpect(runner) {
      * @param {Assertion} [assertion]
      */
     function fail(assertion) {
-        ensure(currentResults, `Cannot call \`expect.fail()\` outside of a test.`);
+        if (!currentResults) {
+            throw new Error(`Cannot call \`expect.fail()\` outside of a test.`);
+        }
 
         currentResults.pass = false;
         if (assertion) {
@@ -181,7 +153,9 @@ export function makeExpect(runner) {
     }
 
     function hasAssertions() {
-        ensure(currentResults, `Cannot call \`expect.hasAssertions()\` outside of a test.`);
+        if (!currentResults) {
+            throw new Error(`Cannot call \`expect.hasAssertions()\` outside of a test.`);
+        }
 
         currentResults.afterTestCallbacks.push(() => {
             expect(currentResults.assertions.length).toBeGreaterThan(
@@ -198,7 +172,9 @@ export function makeExpect(runner) {
      * @param {Assertion} [assertion]
      */
     function pass(assertion) {
-        ensure(currentResults, `Cannot call \`expect.pass()\` outside of a test.`);
+        if (!currentResults) {
+            throw new Error(`Cannot call \`expect.pass()\` outside of a test.`);
+        }
 
         currentResults.pass = true;
         if (assertion) {
@@ -210,7 +186,9 @@ export function makeExpect(runner) {
      * @param {string} name
      */
     function step(name) {
-        ensure(currentResults, `Cannot call \`expect.step()\` outside of a test.`);
+        if (!currentResults) {
+            throw new Error(`Cannot call \`expect.setp()\` outside of a test.`);
+        }
         ensureArguments([[name, "string"]]);
 
         currentResults.afterTestCallbacks.push(() => {
@@ -298,7 +276,9 @@ export class Matchers {
      * ```
      */
     get not() {
-        ensure(!this.#modifiers.not, `Invalid modifier "not": cannot negate a negated matcher.`);
+        if (this.#modifiers.not) {
+            throw new Error(`Invalid modifier "not": cannot negate a negated matcher.`);
+        }
 
         return new Matchers(this.#actual, { ...this.#modifiers, not: true }, this.#headless);
     }
@@ -314,10 +294,11 @@ export class Matchers {
      * ```
      */
     get rejects() {
-        ensure(
-            !this.#promise,
-            `Invalid modifier "rejects": received value has already been wrapped in a \`Promise.resolve()\`.`
-        );
+        if (this.#promise) {
+            throw new Error(
+                `Invalid modifier "rejects": received value has already been wrapped in a \`Promise.resolve()\`.`
+            );
+        }
 
         return new Matchers(this.#actual, { ...this.#modifiers, rejects: true }, this.#headless);
     }
@@ -333,10 +314,11 @@ export class Matchers {
      * ```
      */
     get resolves() {
-        ensure(
-            !this.#promise,
-            `Invalid modifier "resolves": received value has already been wrapped in a \`Promise.resolve()\`.`
-        );
+        if (this.#promise) {
+            throw new Error(
+                `Invalid modifier "resolves": received value has already been wrapped in a \`Promise.resolve()\`.`
+            );
+        }
 
         return new Matchers(this.#actual, { ...this.#modifiers, resolves: true }, this.#headless);
     }
@@ -355,20 +337,23 @@ export class Matchers {
                 .then(
                     /** @param {PromiseFulfilledResult<T>} reason */
                     (result) => {
-                        ensure(
-                            !this.#modifiers.rejects,
-                            `Expected promise to reject, instead resolved with: ${result}`
-                        );
+                        if (this.#modifiers.rejects) {
+                            throw new Error(
+                                `Expected promise to reject, instead resolved with: ${result}`
+                            );
+                        }
                         this.#actual = result;
                     }
                 )
                 .catch(
                     /** @param {PromiseRejectedResult} reason */
                     (reason) => {
-                        ensure(
-                            !this.#modifiers.resolves,
-                            `Expected promise to resolve, instead rejected with: ${reason}`
-                        );
+                        if (this.#modifiers.resolves) {
+                            throw new Error(
+                                `Expected promise to resolve, instead rejected with: ${reason}`,
+                                { cause: reason }
+                            );
+                        }
                         this.#actual = reason;
                     }
                 );
@@ -592,10 +577,11 @@ export class Matchers {
             [message, ["string", null]],
         ]);
 
-        ensure(
-            min <= max,
-            `Expected the first argument to be smaller than the second, got ${min} and ${max}`
-        );
+        if (min > max) {
+            throw new Error(
+                `Expected the first argument to be smaller than the second, got ${min} and ${max}`
+            );
+        }
 
         return this.#resolve({
             name: "toBeWithin",
@@ -985,10 +971,15 @@ export class Matchers {
      * @param {(...args: any[]) => MatcherSpecifications<any>} matcher
      */
     static extend(matcher) {
-        const name = matcher.name;
+        ensureArguments([[matcher, "function"]]);
 
-        ensure(typeof name === "string", `Matcher must be a named function`);
-        ensure(!this.registry[name], `A matcher with the name '${name}' already exists`);
+        const { name } = matcher;
+        if (!name) {
+            throw new Error(`Matcher must be a named function`);
+        }
+        if (this.registry[name]) {
+            throw new Error(`A matcher with the name '${name}' already exists`);
+        }
 
         this.registry[name] = matcher;
     }

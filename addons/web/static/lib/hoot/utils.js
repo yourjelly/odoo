@@ -26,6 +26,29 @@ import { DiffMatchPatch } from "./lib/diff_match_patch";
 // Internal
 //-----------------------------------------------------------------------------
 
+/**
+ *
+ * @param {unknown} value
+ * @param {ArgumentDef} type
+ * @returns {boolean}
+ */
+const ensureArgument = (value, type) => {
+    if (typeof type === "string" && type.endsWith("[]")) {
+        const itemType = type.slice(0, -2);
+        return isIterable(value) && [...value].every((v) => ensureArgument(v, itemType));
+    }
+    switch (type) {
+        case null:
+            return value === null || value === undefined;
+        case "any":
+            return true;
+        case "integer":
+            return Number.isInteger(value);
+        default:
+            return typeof value === type;
+    }
+};
+
 const REGEX_PATTERN = /^\/(.*)\/([gim]+)?$/;
 
 const dmp = new DiffMatchPatch();
@@ -100,12 +123,17 @@ export function deepEqual(a, b, cache = new Set()) {
 }
 
 /**
- * @param {boolean} predicate
- * @param {string} errorMessage
+ * @param {[unknown, ArgumentDef | ArgumentDef[]][]} argumentsDef
  */
-export function ensure(predicate, errorMessage) {
-    if (!predicate) {
-        throw new Error(errorMessage);
+export function ensureArguments(argumentsDef) {
+    for (let i = 0; i < argumentsDef.length; i++) {
+        const [value, acceptedType] = argumentsDef[i];
+        const types = isIterable(acceptedType) ? [...acceptedType] : [acceptedType];
+        if (!types.some((type) => ensureArgument(value, type))) {
+            throw new Error(
+                `Expected ${ordinal(i + 1)} argument to be of type ${types.join(" or ")}`
+            );
+        }
     }
 }
 
@@ -343,6 +371,17 @@ export const log = makeTaggable(function log(...args) {
     return logFn(...args);
 });
 
+export function toExplicitString(value) {
+    const strValue = String(value);
+    switch (strValue) {
+        case "\n":
+            return "\\n";
+        case "\t":
+            return "\\t";
+    }
+    return strValue;
+}
+
 /**
  * Returns a list of items that match the given pattern, ordered by their 'score'
  * (descending). A higher score means that the match is closer (e.g. consecutive
@@ -447,22 +486,27 @@ export function makeTaggable(fn) {
 
 /**
  * @param {unknown} value
- * @param {Matcher} [matcher]
+ * @param {...Matcher} matchers
  */
-export function match(value, matcher) {
-    if (!matcher) {
+export function match(value, ...matchers) {
+    if (!matchers.length) {
         return !value;
     }
-    if (typeof matcher === "function") {
-        matcher = new RegExp(matcher.name);
-    } else if (typeof matcher === "string") {
-        matcher = new RegExp(matcher, "i");
+    for (let matcher of matchers) {
+        if (typeof matcher === "function") {
+            matcher = new RegExp(matcher.name);
+        } else if (typeof matcher === "string") {
+            matcher = new RegExp(matcher, "i");
+        }
+        let strValue = String(value);
+        if (strValue === "[object Object]") {
+            strValue = value.constructor.name;
+        }
+        if (matcher.test(strValue)) {
+            return true;
+        }
     }
-    let strValue = String(value);
-    if (strValue === "[object Object]") {
-        strValue = value.constructor.name;
-    }
-    return matcher.test(strValue);
+    return false;
 }
 
 /**
@@ -473,6 +517,26 @@ export function normalize(string) {
         .toLowerCase()
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "");
+}
+
+/**
+ * @param {number} number
+ */
+export function ordinal(number) {
+    const [beforeLast, last] = String(number).slice(-2);
+    if (beforeLast === "1") {
+        return `${number}th`;
+    }
+    switch (last) {
+        case "1":
+            return `${number}st`;
+        case "2":
+            return `${number}nd`;
+        case "3":
+            return `${number}rd`;
+        default:
+            return `${number}th`;
+    }
 }
 
 /**
@@ -615,7 +679,7 @@ export class MarkupHelper {
                 } else if (diff[0] === DIFF_DELETE) {
                     tagName = "del";
                 }
-                return new MarkupHelper({ content: diff[1], tagName });
+                return new MarkupHelper({ content: toExplicitString(diff[1]), tagName });
             }),
         });
     }

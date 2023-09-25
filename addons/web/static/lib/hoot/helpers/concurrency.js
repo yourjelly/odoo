@@ -1,7 +1,7 @@
 /** @odoo-module */
 
 import { clearTimeout, Error, Promise, requestAnimationFrame, setTimeout } from "../globals";
-import { config as domConfig, observe, queryAll } from "./dom";
+import { getFixture, observe, queryAll } from "./dom";
 
 //-----------------------------------------------------------------------------
 // Internal
@@ -82,7 +82,7 @@ export function waitUntil(predicate, options) {
             () => reject(new Error(`'waitUntil' timed out`)),
             options?.timeout || 10_000
         );
-        disconnect = observe(domConfig.defaultRoot, () => {
+        disconnect = observe(getFixture(), () => {
             if (predicate()) {
                 resolve(true);
                 clearTimeout(timeoutId);

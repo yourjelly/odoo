@@ -5,15 +5,6 @@ import { getFixture } from "../helpers/dom";
 import { registerCleanup } from "../hoot";
 
 /**
- * @param {string} href
- */
-export function mockLocation(href) {
-    const a = document.createElement("a");
-    a.href = href || "http://www.fake.url/tests/";
-    return a;
-}
-
-/**
  * @param {import("@odoo/owl").ComponentConstructor | string} component
  * @param {any} appConfig
  */

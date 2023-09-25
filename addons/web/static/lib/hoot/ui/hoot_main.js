@@ -3,7 +3,7 @@
 import { Component, onMounted, onWillStart, useRef, useState, useSubEnv } from "@odoo/owl";
 import { createURL } from "../core/url";
 import { Promise, document, matchMedia } from "../globals";
-import { config as domConfig } from "../helpers/dom";
+import { getFixture, setFixture } from "../helpers/dom";
 import { compactXML, storage } from "../utils";
 import { HootConfigDropdown } from "./hoot_config_dropdown";
 import { HootReporting } from "./hoot_reporting";
@@ -205,8 +205,8 @@ export class HootMain extends Component {
             }
         });
         onMounted(async () => {
-            if (domConfig.defaultRoot === null) {
-                domConfig.defaultRoot = this.fixtureDocument.body;
+            if (!getFixture()) {
+                setFixture(this.fixtureDocument);
             }
 
             if (!runner.config.manual) {

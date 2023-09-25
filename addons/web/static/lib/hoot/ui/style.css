@@ -381,10 +381,13 @@ select {
 }
 
 .hoot .hoot-result-detail {
-    margin: 0.5rem;
-    margin-top: 0;
     background: var(--hoot-bg-result);
     grid-template-columns: 1fr auto;
+}
+
+.hoot .hoot-info {
+    display: grid;
+    grid-template-columns: auto 1fr;
 }
 
 .hoot .hoot-info-line {
@@ -412,7 +415,6 @@ select {
 
 .hoot .hoot-log {
     color: #909090;
-    margin: 0 0.5rem;
 }
 .hoot .hoot-log:hover {
     color: #606060;
@@ -483,8 +485,9 @@ select {
 }
 
 .hoot .hoot-html {
-    font-weight: 700;
+    background: transparent;
     color: var(--hoot-text-report-html-tag);
+    font-weight: 700;
 }
 .hoot .hoot-html:hover {
     font-weight: 800;

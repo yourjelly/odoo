@@ -2,7 +2,6 @@
 
 import {
     cancelAnimationFrame,
-    console,
     Error,
     matchMedia,
     navigator,
@@ -11,10 +10,10 @@ import {
     requestAnimationFrame,
     String,
 } from "../globals";
-import { copy, ensure, isIterable } from "../utils";
+import { copy, ensureArguments, isIterable, log } from "../utils";
 import {
-    config as DOMConfig,
     getActiveElement,
+    getFixture,
     getNextFocusableElement,
     getPreviousFocusableElement,
     getRect,
@@ -232,6 +231,7 @@ const getPosition = (element, options) => {
 /**
  * @param {Target} target
  * @param {QueryOptions} options
+ * @returns {Element[]}
  */
 const getTriggerTargets = (target, options) =>
     isEventTarget(target) ? [target] : queryAll(target, options);
@@ -254,7 +254,7 @@ const isPrevented = (event) => event && event.defaultPrevented;
 const logEvents = (() => {
     const flushEventLog = () => {
         const groupName = ["<triggered", allEvents.length, "events>"];
-        console.groupCollapsed(...groupName);
+        log.groupCollapsed(...groupName);
         for (const event of allEvents) {
             const { target } = event;
             /** @type {(keyof typeof LOG_COLORS)[]} */
@@ -289,12 +289,12 @@ const logEvents = (() => {
                 ])
                 .flat();
 
-            console.groupCollapsed(message, ...messageColors);
-            console.dir(event);
-            console.log(event.target);
-            console.groupEnd(message);
+            log.groupCollapsed(message, ...messageColors);
+            log.dir(event);
+            log.log(event.target);
+            log.groupEnd(message);
         }
-        console.groupEnd(...groupName);
+        log.groupEnd(...groupName);
         allEvents = [];
     };
 
@@ -307,7 +307,7 @@ const logEvents = (() => {
      * @param {T} events
      */
     return function logEvents(events) {
-        if (config.log) {
+        if (allowLogs) {
             allEvents.push(...events);
             cancelAnimationFrame(handle);
             handle = requestAnimationFrame(flushEventLog);
@@ -585,7 +585,7 @@ const mapNonBubblingEvent = (eventInit) => ({
 const mapBubblingPointerEvent = (eventInit) => ({
     clientX: eventInit?.clientX ?? eventInit?.pageX ?? 0,
     clientY: eventInit?.clientY ?? eventInit?.pageY ?? 0,
-    view: DOMConfig.defaultView,
+    view: getFixture().ownerDocument.defaultView,
     ...mapBubblingCancelableEvent(eventInit),
 });
 
@@ -598,7 +598,7 @@ const mapNonBubblingPointerEvent = (eventInit) => ({
 
 /** @param {TouchEventInit} [eventInit] */
 const mapCancelableTouchEvent = (eventInit) => ({
-    view: DOMConfig.defaultView,
+    view: getFixture().ownerDocument.defaultView,
     ...mapBubblingCancelableEvent(eventInit),
     composed: true,
     touches: eventInit?.touches ? [...eventInit.touches.map((e) => new Touch(e))] : undefined,
@@ -612,7 +612,7 @@ const mapNonCancelableTouchEvent = (eventInit) => ({
 
 /** @param {TouchEventInit} [eventInit] */
 const mapKeyboardEvent = (eventInit) => ({
-    view: DOMConfig.defaultView,
+    view: getFixture().ownerDocument.defaultView,
     ...mapBubblingCancelableEvent(eventInit),
 });
 
@@ -622,6 +622,16 @@ const LOG_COLORS = {
     lightBlue: "#9bbbdc",
     reset: "inherit",
 };
+
+const defaultActions = {
+    // To clear input: remove all text with Backspace (Control + Backspace)
+    clear: (target) => triggerKeyPress(target, { ctrlKey: true, key: "Backspace" }, ""),
+    // To cancel a drag sequence: press 'Escape'
+    dragCancel: (target) => triggerKeyPress(target, { key: "Escape" }),
+    // To fill all at once: paste from clipboard (Control + V)
+    fillAll: (target, value) => triggerKeyPress(target, { ctrlKey: true, key: "v" }, value),
+};
+let allowLogs = true;
 
 //-----------------------------------------------------------------------------
 // Exports
@@ -636,10 +646,12 @@ export function clear() {
     const events = [];
     const element = getActiveElement();
 
-    ensure(hasTagName(element, "select") || isEditable(element), "element should be editable");
+    if (!hasTagName(element, "select") && !isEditable(element)) {
+        throw new Error(`Cannot call \`clear()\`: target should be editable`);
+    }
 
     if (isEditable(element)) {
-        events.push(...config.defaultActions.clear(element));
+        events.push(...defaultActions.clear(element));
         events.push(triggerEvent(element, "input"));
     } else {
         element.selectedIndex = -1;
@@ -717,7 +729,7 @@ export function drag(target, options) {
     };
 
     const cancel = expectIsDragging(function cancel() {
-        events.push(...config.defaultActions.dragCancel(DOMConfig.defaultView));
+        events.push(...defaultActions.dragCancel(getFixture().ownerDocument.defaultView));
         return logEvents(events);
     }, true);
 
@@ -837,7 +849,9 @@ export function fill(value, options) {
     const events = [];
     const element = getActiveElement();
 
-    ensure(isEditable(element), "element should be editable");
+    if (!isEditable(element)) {
+        throw new Error(`Cannot call \`fill()\`: target should be editable`);
+    }
 
     let prevented = false;
     if (element.tagName === "INPUT" && element.type === "file") {
@@ -851,7 +865,7 @@ export function fill(value, options) {
         element.files = dataTransfer.files;
     } else if (isEditable(element)) {
         if (options?.allAtOnce) {
-            events.push(...config.defaultActions.fillAll(element));
+            events.push(...defaultActions.fillAll(element));
             events.push(triggerEvent(element, "input"));
         } else {
             for (const char of value) {
@@ -1040,22 +1054,25 @@ export function select(target, value, options) {
     /** @type {ReturnType<typeof triggerEvent<"change">>[]} */
     const events = [];
     for (const element of getTriggerTargets(target, options)) {
-        ensure(hasTagName(element, "select"), "element should be a <select> element");
-
+        if (!hasTagName(element, "select")) {
+            throw new Error(`Cannot call \`select()\`: target should be a <select> element`);
+        }
         element.value = String(value);
         events.push(triggerEvent(element, "change"));
     }
     return logEvents(events);
 }
 
-export const config = {
-    defaultActions: {
-        // To clear input: remove all text with Backspace (Control + Backspace)
-        clear: (target) => triggerKeyPress(target, { ctrlKey: true, key: "Backspace" }, ""),
-        // To cancel a drag sequence: press 'Escape'
-        dragCancel: (target) => triggerKeyPress(target, { key: "Escape" }),
-        // To fill all at once: paste from clipboard (Control + V)
-        fillAll: (target, value) => triggerKeyPress(target, { ctrlKey: true, key: "v" }, value),
-    },
-    log: true,
-};
+/**
+ * @template {keyof typeof defaultActions} T
+ * @param {T} name
+ * @param {typeof defaultActions[T]} action
+ */
+export function setDefaultAction(name, action) {
+    ensureArguments([
+        [name, "string"],
+        [action, "function"],
+    ]);
+
+    defaultActions[name] = action;
+}

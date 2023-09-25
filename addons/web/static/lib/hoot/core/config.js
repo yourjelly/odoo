@@ -81,6 +81,18 @@ export const CONFIG_SCHEMA = {
         parse: parseBoolean(true),
     },
     /**
+     * Do not execute clean-ups after each tests. These clean-ups check for:
+     * - elements left in the DOM
+     * - mutation observers still running
+     * - listeners left on global objects
+     * - global keys added and not removed during the test
+     * @default false
+     */
+    nocleanup: {
+        default: false,
+        parse: parseBoolean(true),
+    },
+    /**
      * Removes the safety try .. catch statements around the tests' run functions
      * to let errors bubble to the browser.
      * @default false

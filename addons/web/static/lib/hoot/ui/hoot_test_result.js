@@ -79,7 +79,7 @@ export class HootTestResult extends Component {
                     <t t-set="lastResults" t-value="props.test.lastResults" />
                     <t t-foreach="lastResults.assertions" t-as="assertion" t-key="assertion.id">
                         <div
-                            t-attf-class="hoot-result-line hoot-text-{{ assertion.pass ? 'pass' : 'fail' }} d-flex flex-row align-items-center gap-1 px-2 text-truncate"
+                            t-attf-class="hoot-text-{{ assertion.pass ? 'pass' : 'fail' }} d-flex flex-row align-items-center gap-1 px-2 text-truncate"
                         >
                             <t t-esc="assertion_index + 1" />.
                             <strong class="hoot-text-skip" t-esc="assertion.name" />
@@ -90,22 +90,27 @@ export class HootTestResult extends Component {
                             @<t t-esc="formatMS(timestamp)" />
                         </small>
                         <t t-if="!assertion.pass and assertion.info">
-                            <t t-foreach="assertion.info" t-as="info" t-key="info_index">
-                                <div class="hoot-info-line">
+                            <div class="hoot-info d-grid column-gap-2">
+                                <t t-foreach="assertion.info" t-as="info" t-key="info_index">
                                     <HootTechnicalValue value="info[0]" />
                                     <HootTechnicalValue value="info[1]" />
-                                </div>
-                            </t>
+                                </t>
+                            </div>
+                            <div />
                         </t>
                     </t>
                     <t t-if="lastResults.error">
-                        <div class="hoot-result-line d-flex flex-row align-items-center px-2 hoot-text-fail">
+                        <div class="px-2 hoot-text-fail">
                             Error while running test "<t t-esc="props.test.name" />"
                         </div>
-                        <div class="hoot-info-line">
-                            <span class="hoot-text-fail ps-2">Source:</span>
-                            <pre class="hoot-technical" t-esc="lastResults.error.stack" />
+                        <div />
+                        <div class="hoot-info d-grid column-gap-2">
+                            <div class="hoot-info-line">
+                                <span class="hoot-text-fail">Source:</span>
+                                <pre class="hoot-technical m-0" t-esc="lastResults.error.stack" />
+                            </div>
                         </div>
+                        <div />
                     </t>
                 </div>
             </t>

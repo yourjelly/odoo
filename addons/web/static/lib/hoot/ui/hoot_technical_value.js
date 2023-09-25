@@ -1,7 +1,16 @@
 /** @odoo-module */
 
 import { Component, toRaw, useState } from "@odoo/owl";
-import { MarkupHelper, compactXML, isElement, isIterable, log, toSelector } from "../utils";
+import {
+    MarkupHelper,
+    compactXML,
+    isElement,
+    isIterable,
+    log,
+    toExplicitString,
+    toSelector,
+} from "../utils";
+import { console } from "../globals";
 
 /**
  * @typedef {{ value: any }} TechnicalValueProps
@@ -16,7 +25,7 @@ export class HootTechnicalValue extends Component {
     static template = compactXML/* xml */ `
         <t t-if="isMarkupHelper(value)">
             <t t-if="value.multiline">
-                <pre class="hoot-technical" t-att-class="value.className">
+                <pre class="hoot-technical m-0" t-att-class="value.className">
                     <t t-foreach="value.content" t-as="subValue" t-key="subValue_index">
                         <HootTechnicalValue value="subValue" />
                     </t>
@@ -42,13 +51,10 @@ export class HootTechnicalValue extends Component {
             </button>
         </t>
         <t t-elif="value and typeof value === 'object'">
-            <t t-tag="state.open ? 'pre' : 'span'" class="hoot-technical">
+            <pre class="hoot-technical m-0">
                 <button class="hoot-object-type d-flex flex-row align-items-center" t-on-click.synthetic="onClick">
                     <t t-esc="getConstructor()" />
                     <i t-attf-class="bi bi-caret-{{ state.open ? 'up' : 'down' }}-fill" />
-                </button>
-                <button class="hoot-log" t-on-click.synthetic="log">
-                    <t>log</t>
                 </button>
                 <t> </t>
                 <t t-if="state.open">
@@ -77,14 +83,14 @@ export class HootTechnicalValue extends Component {
                         <t>}</t>
                     </t>
                 </t>
-            </t>
+            </pre>
         </t>
         <t t-else="">
             <span t-attf-class="hoot-{{ typeof value }}">
                 <t t-if="typeof value === 'string'">
                     <t>"</t><t t-esc="value" /><t>"</t>
                 </t>
-                <t t-else="" t-esc="value" />
+                <t t-else="" t-esc="toExplicitString(value)" />
             </span>
         </t>
     `;
@@ -93,6 +99,7 @@ export class HootTechnicalValue extends Component {
     isIterable = isIterable;
     isElement = isElement;
     isMarkupHelper = (value) => value instanceof MarkupHelper;
+    toExplicitString = toExplicitString;
 
     setup() {
         this.value = this.getValueCopy(this.props);
@@ -133,6 +140,6 @@ export class HootTechnicalValue extends Component {
     }
 
     log() {
-        log(this.value);
+        console.log(this.value);
     }
 }

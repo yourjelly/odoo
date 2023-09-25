@@ -5,10 +5,8 @@ import { makeCleanup } from "./addons/cleanup";
 import { makeLogger } from "./addons/logger";
 import { makeExpect } from "./core/expect";
 import { TestRunner } from "./core/runner";
-import { config as domConfig } from "./helpers/dom";
-import { config as eventsConfig } from "./helpers/events";
 import { HootMain } from "./ui/hoot_main";
-import { log, makeTaggable } from "./utils";
+import { makeTaggable } from "./utils";
 
 /**
  * @typedef {{
@@ -27,12 +25,6 @@ whenReady(async () =>
     })
 );
 
-export const config = {
-    ...domConfig,
-    ...eventsConfig,
-};
-
-log.debug(runner); // TODO: remove
 export const __debug__ = { runner };
 
 /**

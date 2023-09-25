@@ -10,6 +10,7 @@ export const CustomEvent = window.CustomEvent;
 export const Date = window.Date;
 export const Document = window.Document;
 export const document = window.document;
+export const Element = window.Element;
 export const Error = window.Error;
 export const EventTarget = window.EventTarget;
 export const history = window.history;
