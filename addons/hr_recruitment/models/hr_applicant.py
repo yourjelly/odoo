@@ -3,9 +3,9 @@
 
 from markupsafe import Markup
 from odoo import api, fields, models, tools, SUPERUSER_ID
-from odoo.exceptions import AccessError, UserError,ValidationError
+from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.osv import expression
-from odoo.tools import email_re
+from odoo.tools import single_email_re
 from odoo.tools.translate import _
 
 from dateutil.relativedelta import relativedelta
@@ -101,12 +101,11 @@ class Applicant(models.Model):
         ('refused', 'Refused'),
         ('archived', 'Archived'),
     ], compute="_compute_application_status")
-    
+
     @api.constrains('email_from')
     def _check_valid_email(self):
-        for record in self:
-            if record.email_from and not email_re.match(record.email_from):
-                raise ValidationError(('Invalid email address'))
+        if any(record.email_from and not single_email_re.match(record.email_from) for record in self):
+            raise ValidationError(_('Invalid email address'))
 
     @api.onchange('job_id')
     def _onchange_job_id(self):
