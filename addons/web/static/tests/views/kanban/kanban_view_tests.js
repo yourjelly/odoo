@@ -624,20 +624,8 @@ QUnit.module("Views", (hooks) => {
             const clickColumnAction = await toggleColumnActions(1);
 
             // check archive/restore all actions in kanban header's config dropdown
-            assert.containsOnce(
-                getDropdownMenu(
-                    target,
-                    ".o_kanban_group:last-child .o_kanban_header .o_kanban_config"
-                ),
-                ".o_column_archive_records"
-            );
-            assert.containsOnce(
-                getDropdownMenu(
-                    target,
-                    ".o_kanban_group:last-child .o_kanban_header .o_kanban_config"
-                ),
-                ".o_column_unarchive_records"
-            );
+            assert.containsOnce(getColumnDropdownMenu(1), ".o_column_archive_records");
+            assert.containsOnce(getColumnDropdownMenu(1), ".o_column_unarchive_records");
             assert.containsN(target, ".o_kanban_group", 2);
             assert.containsOnce(target, ".o_kanban_group:first-child .o_kanban_record");
             assert.containsN(target, ".o_kanban_group:last-child .o_kanban_record", 3);
