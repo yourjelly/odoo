@@ -2,27 +2,18 @@
     $-accent-color: #BB86FC; // dark mode primary color
     --website-loader-color: #{$white};
 
-    font-family: "Montserrat", $font-family-sans-serif;
-    background-color: $o-shadow-color;
     pointer-events: all;
-    font-size: 3.5rem;
-    justify-content: space-evenly;
     z-index: $zindex-modal - 1;
-    padding: 7%;
+    background-color: $o-we-bg-lighter;
     color: var(--website-loader-color);
 
     .o_website_loader {
-        position: relative;
-        display: inline-block;
         width: 400px;
         height: 220px;
         background-image: url('/website/static/src/img/theme_loader.gif');
-        background-size: cover;
-        border-radius: 6px;
     }
 
     .o_website_loader_tip {
-        font-size: 0.5em;
         color: var(--website-loader-color);
 
         @include media-breakpoint-down(md) {
