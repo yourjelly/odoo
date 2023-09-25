@@ -291,7 +291,7 @@ class Sanitize {
             // Update link URL if label is a new valid link.
             if (node.nodeName === 'A' && anchorEl === node) {
                 const url = deduceURLfromLabel(node);
-                if (url) {
+                if (url && !node.href.includes(url)) {
                     node.setAttribute('href', url);
                 }
             }
