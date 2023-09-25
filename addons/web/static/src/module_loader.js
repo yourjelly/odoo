@@ -219,8 +219,9 @@
         odoo.debug = "";
     }
 
-    const loader = new ModuleLoader();
-    odoo.define = loader.define.bind(loader);
-
-    odoo.loader = loader;
+    if (!odoo.loader) {
+        const loader = new ModuleLoader();
+        odoo.define = loader.define.bind(loader);
+        odoo.loader = loader;
+    }
 })();
