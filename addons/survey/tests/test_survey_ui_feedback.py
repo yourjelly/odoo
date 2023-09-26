@@ -179,12 +179,17 @@ class TestUiFeedback(HttpCaseWithUserDemo):
             'access_token': '3cfadce3-3f7e-41da-920d-10fa0eb19527',
             'access_mode': 'public',
             'users_can_go_back': True,
-            'questions_layout': 'one_page',
+            'questions_layout': 'page_per_section',
             'description': "<p>Test survey with conditional questions</p>",
             'question_and_page_ids': [
                 (0, 0, {
-                    'title': 'Q1',
+                    'title': 'Section 1',
                     'sequence': 1,
+                    'question_type': False,
+                    'is_page': True,
+                }), (0, 0, {
+                    'title': 'Q1',
+                    'sequence': 2,
                     'question_type': 'simple_choice',
                     'suggested_answer_ids': [
                         (0, 0, {
@@ -198,7 +203,7 @@ class TestUiFeedback(HttpCaseWithUserDemo):
                     'constr_mandatory': True,
                 }), (0, 0, {
                     'title': 'Q2',
-                    'sequence': 2,
+                    'sequence': 3,
                     'question_type': 'simple_choice',
                     'suggested_answer_ids': [
                         (0, 0, {
@@ -213,7 +218,40 @@ class TestUiFeedback(HttpCaseWithUserDemo):
                     'constr_mandatory': True,
                 }), (0, 0, {
                     'title': 'Q3',
-                    'sequence': 3,
+                    'sequence': 4,
+                    'question_type': 'simple_choice',
+                    'suggested_answer_ids': [
+                        (0, 0, {
+                            'value': 'Answer 1',
+                            'sequence': 1,
+                        }), (0, 0, {
+                            'value': 'Answer 2',
+                            'sequence': 2,
+                        })
+                    ],
+                    'is_conditional': True,
+                }), (0, 0, {
+                    'title': 'Section 2',
+                    'sequence': 5,
+                    'question_type': False,
+                    'is_page': True,
+                }), (0, 0, {
+                    'title': 'Q4',
+                    'sequence': 6,
+                    'question_type': 'simple_choice',
+                    'suggested_answer_ids': [
+                        (0, 0, {
+                            'value': 'Answer 1',
+                            'sequence': 1,
+                        }), (0, 0, {
+                            'value': 'Answer 2',
+                            'sequence': 2,
+                        })
+                    ],
+                    'constr_mandatory': True,
+                }), (0, 0, {
+                    'title': 'Q5',
+                    'sequence': 7,
                     'question_type': 'simple_choice',
                     'suggested_answer_ids': [
                         (0, 0, {
@@ -226,21 +264,42 @@ class TestUiFeedback(HttpCaseWithUserDemo):
                     ],
                     'is_conditional': True,
                     'constr_mandatory': True,
-                }),
+                }), (0, 0, {
+                    'title': 'Q6',
+                    'sequence': 8,
+                    'question_type': 'simple_choice',
+                    'suggested_answer_ids': [
+                        (0, 0, {
+                            'value': 'Answer 1',
+                            'sequence': 1,
+                        }), (0, 0, {
+                            'value': 'Answer 2',
+                            'sequence': 2,
+                        })
+                    ],
+                    'is_conditional': True,
+                    'constr_mandatory': True,
+                })
             ]
         })
+        # map every question to their name
+        qs = {q.title: q for q in survey_with_triggers.question_ids}
 
-        q1 = survey_with_triggers.question_ids.filtered(lambda q: q.title == 'Q1')
-        q1_a1 = q1.suggested_answer_ids.filtered(lambda a: a.value == 'Answer 1')
-        q2 = survey_with_triggers.question_ids.filtered(lambda q: q.title == 'Q2')
-        q2_a1 = q2.suggested_answer_ids.filtered(lambda a: a.value == 'Answer 1')
-        q3 = survey_with_triggers.question_ids.filtered(lambda q: q.title == 'Q3')
+        q1_a1 = qs['Q1'].suggested_answer_ids.filtered(lambda a: a.value == 'Answer 1')
+        q4_a1 = qs['Q4'].suggested_answer_ids.filtered(lambda a: a.value == 'Answer 1')
+        q5_a1 = qs['Q5'].suggested_answer_ids.filtered(lambda a: a.value == 'Answer 1')
 
-        q2.triggering_question_id = q1
-        q2.triggering_answer_id = q1_a1
+        qs['Q2'].triggering_question_id = qs['Q1']
+        qs['Q2'].triggering_answer_id = q1_a1
 
-        q3.triggering_question_id = q2
-        q3.triggering_answer_id = q2_a1
+        qs['Q3'].triggering_question_id = qs['Q1']
+        qs['Q3'].triggering_answer_id = q1_a1
+
+        qs['Q5'].triggering_question_id = qs['Q4']
+        qs['Q5'].triggering_answer_id = q4_a1
+
+        qs['Q6'].triggering_question_id = qs['Q5']
+        qs['Q6'].triggering_answer_id = q5_a1
 
         access_token = survey_with_triggers.access_token
         self.start_tour("/survey/start/%s" % access_token, 'test_survey_chained_conditional_questions')

@@ -14,13 +14,12 @@ tour.register('test_survey_chained_conditional_questions', {
         content: 'Answer Q1 with Answer 1',
         trigger: 'div.js_question-wrapper:contains("Q1") label:contains("Answer 1")',
     }, {
-        content: 'Answer Q2 with Answer 1',
-        trigger: 'div.js_question-wrapper:contains("Q2") label:contains("Answer 1")',
+        content: 'Check that Q2 and Q3 are visible',
+        trigger: 'div.js_question-wrapper:contains(Q2)',
+        extra_trigger: 'div.js_question-wrapper:contains(Q3)',
+        run: () => {},
     }, {
-        content: 'Answer Q3 with Answer 1',
-        trigger: 'div.js_question-wrapper:contains("Q3") label:contains("Answer 1")',
-    }, {
-        content: 'Answer Q1 with Answer 2',  // This should hide all remaining questions.
+        content: 'Answer Q1 with Answer 2',
         trigger: 'div.js_question-wrapper:contains("Q1") label:contains("Answer 2")',
     }, {
         content: 'Check that only question 1 is now visible',
@@ -29,6 +28,27 @@ tour.register('test_survey_chained_conditional_questions', {
             const selector = 'div.js_question-wrapper.d-none';
             if (document.querySelectorAll(selector).length !== 2) {
                 throw new Error('Q2 and Q3 should have been hidden.');
+            }
+        }
+    }, {
+        content: 'Go to Section 2',
+        trigger: 'button[value="next"]',
+    }, {
+        content: 'Answer Q4 with Answer 1',
+        trigger: 'div.js_question-wrapper:contains("Q4") label:contains("Answer 1")',
+    }, {
+        content: 'Answer Q5 with Answer 1',
+        trigger: 'div.js_question-wrapper:contains("Q5") label:contains("Answer 1")',
+    }, {
+        content: 'Answer Q4 with Answer 2',  // This should hide all remaining questions.
+        trigger: 'div.js_question-wrapper:contains("Q4") label:contains("Answer 2")',
+    }, {
+        content: 'Check that only question 4 is now visible',
+        trigger: 'div.js_question-wrapper:contains("Q4")',
+        run: () => {
+            const selector = 'div.js_question-wrapper.d-none';
+            if (document.querySelectorAll(selector).length !== 2) {
+                throw new Error('Q5 and Q6 should have been hidden.');
             }
         }
     }, {
