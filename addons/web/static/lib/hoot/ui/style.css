@@ -388,6 +388,7 @@ select {
 .hoot .hoot-info {
     display: grid;
     grid-template-columns: auto 1fr;
+    column-gap: 0.5rem;
 }
 
 .hoot .hoot-info-line {

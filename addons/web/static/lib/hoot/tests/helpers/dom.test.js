@@ -172,7 +172,7 @@ describe.ui("@odoo/hoot/helpers", "DOM", () => {
 
     test("isDocument", async () => {
         expect(isDocument(document)).toBeTruthy();
-        expect(isDocument((await makeIframe(document, queryOne())).contentDocument)).toBeTruthy();
+        expect(isDocument((await makeIframe(document)).contentDocument)).toBeTruthy();
         expect(isDocument(document.createElement("div").ownerDocument)).toBeTruthy();
         expect(isDocument(document.body)).not.toBeTruthy();
         expect(isDocument(window)).not.toBeTruthy();

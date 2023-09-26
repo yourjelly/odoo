@@ -211,25 +211,29 @@ export function formatTechnical(
             } else if (isIterable(value)) {
                 const proto =
                     value.constructor.name === "Array" ? "" : `${value.constructor.name} `;
-                return `${baseIndent}${proto}[\n${[...value].map(
-                    (val) =>
-                        `${startIndent}${formatTechnical(val, {
-                            cache,
-                            depth: depth + 1,
-                            isObjectValue: true,
-                        })},\n`
-                )}${endIndent}]`;
+                return `${baseIndent}${proto}[\n${[...value]
+                    .map(
+                        (val) =>
+                            `${startIndent}${formatTechnical(val, {
+                                cache,
+                                depth: depth + 1,
+                                isObjectValue: true,
+                            })},\n`
+                    )
+                    .join("")}${endIndent}]`;
             } else {
                 const proto =
                     value.constructor.name === "Object" ? "" : `${value.constructor.name} `;
-                return `${baseIndent}${proto}{\n${Object.entries(value).map(
-                    ([k, v]) =>
-                        `${startIndent}${k}: ${formatTechnical(v, {
-                            cache,
-                            depth: depth + 1,
-                            isObjectValue: true,
-                        })},\n`
-                )}${endIndent}}`;
+                return `${baseIndent}${proto}{\n${Object.entries(value)
+                    .map(
+                        ([k, v]) =>
+                            `${startIndent}${k}: ${formatTechnical(v, {
+                                cache,
+                                depth: depth + 1,
+                                isObjectValue: true,
+                            })},\n`
+                    )
+                    .join("")}${endIndent}}`;
             }
         }
     }

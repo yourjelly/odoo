@@ -90,7 +90,7 @@ export class HootTestResult extends Component {
                             @<t t-esc="formatMS(timestamp)" />
                         </small>
                         <t t-if="!assertion.pass and assertion.info">
-                            <div class="hoot-info d-grid column-gap-2">
+                            <div class="hoot-info d-grid">
                                 <t t-foreach="assertion.info" t-as="info" t-key="info_index">
                                     <HootTechnicalValue value="info[0]" />
                                     <HootTechnicalValue value="info[1]" />
@@ -104,7 +104,7 @@ export class HootTestResult extends Component {
                             Error while running test "<t t-esc="props.test.name" />"
                         </div>
                         <div />
-                        <div class="hoot-info d-grid column-gap-2">
+                        <div class="hoot-info d-grid">
                             <div class="hoot-info-line">
                                 <span class="hoot-text-fail">Source:</span>
                                 <pre class="hoot-technical m-0" t-esc="lastResults.error.stack" />

@@ -62,6 +62,11 @@ import {
 //-----------------------------------------------------------------------------
 
 /**
+ * @param {unknown} value
+ */
+const canDiff = (value) => value && !["boolean", "number"].includes(typeof value);
+
+/**
  * @param {string} message
  * @param {{ actual: unknown; not: boolean }} params
  */
@@ -400,11 +405,16 @@ export class Matchers {
                 (pass
                     ? `%actual% is[! not] strictly equal to ${formatHumanReadable(expected)}`
                     : `expected values to be strictly equal`),
-            details: (actual) => [
-                [MarkupHelper.green("Expected:"), expected],
-                [MarkupHelper.red("Received:"), actual],
-                [MarkupHelper.text("Diff:"), MarkupHelper.diff(expected, actual)],
-            ],
+            details: (actual) => {
+                const details = [
+                    [MarkupHelper.green("Expected:"), expected],
+                    [MarkupHelper.red("Received:"), actual],
+                ];
+                if (canDiff(actual) && canDiff(expected)) {
+                    details.push([MarkupHelper.text("Diff:"), MarkupHelper.diff(expected, actual)]);
+                }
+                return details;
+            },
         });
     }
 
@@ -674,11 +684,16 @@ export class Matchers {
                 (pass
                     ? `%actual% is[! not] deeply equal to ${formatHumanReadable(expected)}`
                     : `expected values to be deeply equal`),
-            details: (actual) => [
-                [MarkupHelper.green("Expected:"), expected],
-                [MarkupHelper.red("Received:"), actual],
-                [MarkupHelper.text("Diff:"), MarkupHelper.diff(expected, actual)],
-            ],
+            details: (actual) => {
+                const details = [
+                    [MarkupHelper.green("Expected:"), expected],
+                    [MarkupHelper.red("Received:"), actual],
+                ];
+                if (canDiff(actual) && canDiff(expected)) {
+                    details.push([MarkupHelper.text("Diff:"), MarkupHelper.diff(expected, actual)]);
+                }
+                return details;
+            },
         });
     }
 
@@ -719,14 +734,17 @@ export class Matchers {
                           amount
                       )} elements matching ${formatHumanReadable(target)}`
                     : `element does not have the correct amount of matches`),
-            details: () => [
-                [MarkupHelper.green("Expected:"), value],
-                [MarkupHelper.red("Received:"), actual.getAttribute(attribute)],
-                [
-                    MarkupHelper.text("Diff:"),
-                    MarkupHelper.diff(value, actual.getAttribute(attribute)),
-                ],
-            ],
+            details: () => {
+                const received = actual.getAttribute(attribute);
+                const details = [
+                    [MarkupHelper.green("Expected:"), value],
+                    [MarkupHelper.red("Received:"), received],
+                ];
+                if (canDiff(received) && canDiff(value)) {
+                    details.push([MarkupHelper.text("Diff:"), MarkupHelper.diff(value, received)]);
+                }
+                return details;
+            },
         });
     }
 

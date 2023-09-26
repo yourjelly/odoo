@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { describe, expect, test } from "@odoo/hoot";
+import { describe, expect, registerCleanup, test } from "@odoo/hoot";
 import { mockDate } from "@odoo/hoot/helpers";
 import { evaluateExpr } from "@web/core/py_js/py";
 import { PyDate, PyTimeDelta } from "@web/core/py_js/py_date";
@@ -27,6 +27,9 @@ const formatDateTime = (d) => {
     const s = format(d.getUTCSeconds());
     return `${formatDate(d)} ${h}:${m}:${s}`;
 };
+
+/** @type {typeof mockDate} */
+const mockDateWithCleanup = (...args) => registerCleanup(mockDate(...args));
 
 describe("@web", "core", "py_js", "py_date", () => {
     describe("time", () => {
@@ -60,7 +63,7 @@ describe("@web", "core", "py_js", "py_date", () => {
         });
 
         test("to_utc", () => {
-            mockDate("2021-08-17 10:00:00", +360);
+            mockDateWithCleanup("2021-09-17 10:00:00", +6);
 
             const expr =
                 "datetime.datetime.combine(context_today(), datetime.time(0,0,0)).to_utc()";
@@ -69,7 +72,7 @@ describe("@web", "core", "py_js", "py_date", () => {
         });
 
         test("to_utc in october with winter/summer change", () => {
-            mockDate("2021-09-17 10:00:00", [+60, +120]);
+            mockDateWithCleanup("2021-10-17 10:00:00", [+1, +2]);
 
             const expr = "datetime.datetime(2022, 10, 17).to_utc()";
             expect(JSON.stringify(evaluateExpr(expr))).toBe(`"2022-10-16 22:00:00"`);
@@ -415,7 +418,7 @@ describe("@web", "core", "py_js", "py_date", () => {
         });
 
         test("current_date", () => {
-            mockDate("2021-08-20 10:00:00");
+            mockDateWithCleanup("2021-09-20 10:00:00");
             expect(evaluateExpr("current_date")).toBe("2021-09-20");
         });
     });

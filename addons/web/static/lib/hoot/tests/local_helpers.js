@@ -4,11 +4,6 @@ import { App, Component, xml } from "@odoo/owl";
 import { getFixture } from "../helpers/dom";
 import { registerCleanup } from "../hoot";
 
-
-export function mockWindow(property, value) {
-
-}
-
 /**
  * @param {import("@odoo/owl").ComponentConstructor | string} component
  * @param {any} appConfig
@@ -26,16 +21,4 @@ export async function mount(component, appConfig) {
     registerCleanup(() => app.destroy());
 
     return app;
-}
-
-/**
- * @param {Partial<Window>} values
- */
-export function patchWindow(values) {
-    const original = {};
-    for (const [key, value] of Object.entries(values)) {
-        original[key] = window[key];
-        window[key] = value;
-    }
-    registerCleanup(() => Object.assign(window, original));
 }

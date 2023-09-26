@@ -1,8 +1,8 @@
 /** @odoo-module */
 
-import { Component, onMounted, onWillStart, useRef, useState, useSubEnv } from "@odoo/owl";
+import { Component, onMounted, useRef, useState, useSubEnv } from "@odoo/owl";
 import { createURL } from "../core/url";
-import { Promise, document, matchMedia } from "../globals";
+import { document, matchMedia } from "../globals";
 import { getFixture, setFixture } from "../helpers/dom";
 import { compactXML, storage } from "../utils";
 import { HootConfigDropdown } from "./hoot_config_dropdown";
@@ -15,49 +15,6 @@ import { HootSearch } from "./hoot_search";
 //-----------------------------------------------------------------------------
 // Internal
 //-----------------------------------------------------------------------------
-
-/**
- * @param {{
- *  crossorigin?: string;
- *  integrity?: string;
- *  url: string;
- *  type: "script" | "link";
- * }} params
- */
-const importURL = async ({ crossorigin, integrity, type, url }) => {
-    if (imported.has(url)) {
-        return;
-    }
-    imported.add(url);
-    const element = document.createElement(type);
-    switch (type) {
-        case "link": {
-            element.setAttribute("rel", "stylesheet");
-            element.setAttribute("href", url);
-            break;
-        }
-        case "script": {
-            element.setAttribute("src", url);
-            break;
-        }
-    }
-
-    if (integrity) {
-        element.setAttribute("integrity", integrity);
-    }
-    if (crossorigin) {
-        element.setAttribute("crossorigin", crossorigin);
-    }
-
-    element.setAttribute("data-no-import", true);
-
-    return new Promise((resolve, reject) => {
-        element.addEventListener("load", resolve);
-        element.addEventListener("error", reject);
-
-        document.head.appendChild(element);
-    });
-};
 
 /**
  * @param {string} storageKey
@@ -187,21 +144,6 @@ export class HootMain extends Component {
             updateTitle(failed);
         });
 
-        onWillStart(async () => {
-            if (!runner.config.headless) {
-                importURL({
-                    type: "link",
-                    url: "https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css",
-                    integrity:
-                        "sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN",
-                    crossorigin: "anonymous",
-                });
-                importURL({
-                    type: "link",
-                    url: "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css",
-                });
-            }
-        });
         onMounted(async () => {
             if (!getFixture()) {
                 setFixture(this.fixtureDocument);
