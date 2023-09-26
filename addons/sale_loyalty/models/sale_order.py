@@ -366,6 +366,18 @@ class SaleOrder(models.Model):
             'reward_identifier_code': reward_code,
             'sequence': sequence,
         }
+        # specific : price> discount --> max_discount : price
+        # common : total > discount --> discount : total
+
+        discount_value = 0
+        if reward_applies_on == 'specific' and discountable >= max_discount:
+            discount_value = max_discount
+        elif reward_applies_on == 'specific' and discountable < max_discount:
+            discount_value = discountable
+        elif  reward_applies_on != 'specific' and self.amount_total >= max_discount:
+            discount_value = max_discount
+        else:
+            discount_value = self.amount_total
         if reward.discount_mode == 'per_order':
             reward_dict = {'tax': {
                 **product_dict,
@@ -374,6 +386,14 @@ class SaleOrder(models.Model):
                 'price_unit': -max_discount,
                 'tax_id': False,
             }}
+        elif reward.discount_mode == 'per_point':
+            reward_dict = {'tax': {
+                **product_dict,
+                'name': _("Discount: %(discount)s", discount=reward.description),
+                'product_id': reward.discount_line_product_id.id,
+                'price_unit':-discount_value,
+                'tax_id': False,
+            } for tax, price in discountable_per_tax.items() if price}
         else:
             reward_dict = {tax: {
                 **product_dict,
