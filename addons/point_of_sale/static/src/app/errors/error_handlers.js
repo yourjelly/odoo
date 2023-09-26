@@ -2,7 +2,7 @@
 
 import { registry } from "@web/core/registry";
 import { odooExceptionTitleMap } from "@web/core/errors/error_dialogs";
-import { ConnectionLostError, RPCError } from "@web/core/network/rpc_service";
+import { ConnectionLostError, RPCError } from "@web/core/network/rpc";
 import { ErrorPopup } from "@point_of_sale/app/errors/popups/error_popup";
 import { ErrorTracebackPopup } from "@point_of_sale/app/errors/popups/error_traceback_popup";
 import { OfflineErrorPopup } from "@point_of_sale/app/errors/popups/offline_error_popup";

@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { _t } from "@web/core/l10n/translation";
-import { makeErrorFromResponse, ConnectionLostError } from "@web/core/network/rpc_service";
+import { makeErrorFromResponse, ConnectionLostError } from "@web/core/network/rpc";
 import { browser } from "@web/core/browser/browser";
 
 /* eslint-disable */
@@ -456,18 +456,18 @@ function _download(data, filename, mimetype) {
  * @param {String} filename
  * @param {String} mimetype
  * @returns {Boolean}
- * 
+ *
  * Note: the actual implementation is certainly unconventional, but sadly
  * necessary to be able to test code using the download function
  */
 export function downloadFile(data, filename, mimetype) {
-    return downloadFile._download(data, filename, mimetype)
+    return downloadFile._download(data, filename, mimetype);
 }
 downloadFile._download = _download;
 
 /**
  * Download a file from form or server url
- * 
+ *
  * This function is meant to call a controller with some data
  * and download the response.
  *
@@ -504,10 +504,7 @@ download._download = (options) => {
         xhr.responseType = "blob";
         xhr.onload = () => {
             const mimetype = xhr.response.type;
-            const header = (xhr.getResponseHeader("Content-Disposition") || "").replace(
-                /;$/,
-                ""
-            );
+            const header = (xhr.getResponseHeader("Content-Disposition") || "").replace(/;$/, "");
             // replace because apparently we send some C-D headers with a trailing ";"
             const filename = header ? parse(header).parameters.filename : null;
             // In Odoo, the default mimetype, including for JSON errors is text/html (ref: http.py:Root.get_response )

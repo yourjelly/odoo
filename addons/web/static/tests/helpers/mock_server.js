@@ -15,7 +15,7 @@ import { intersection, unique } from "@web/core/utils/arrays";
 import { deepCopy, pick } from "@web/core/utils/objects";
 import { makeFakeRPCService, makeMockFetch } from "./mock_services";
 import { patchWithCleanup } from "./utils";
-import { makeErrorFromResponse } from "@web/core/network/rpc_service";
+import { makeErrorFromResponse } from "@web/core/network/rpc";
 
 const serviceRegistry = registry.category("services");
 

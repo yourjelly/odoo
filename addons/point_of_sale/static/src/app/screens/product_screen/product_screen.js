@@ -10,7 +10,7 @@ import { _t } from "@web/core/l10n/translation";
 import { NumberPopup } from "@point_of_sale/app/utils/input_popups/number_popup";
 import { ErrorPopup } from "@point_of_sale/app/errors/popups/error_popup";
 import { ControlButtonPopup } from "@point_of_sale/app/screens/product_screen/control_buttons/control_buttons_popup";
-import { ConnectionLostError } from "@web/core/network/rpc_service";
+import { ConnectionLostError } from "@web/core/network/rpc";
 
 import { usePos } from "@point_of_sale/app/store/pos_hook";
 import { Component, onMounted, useState } from "@odoo/owl";
@@ -97,7 +97,6 @@ export class ProductScreen extends ControlButtonsMixin(Component) {
         }
         this.numberBuffer.sendKey(buttonValue);
     }
-
 
     selectLine(orderline) {
         this.numberBuffer.reset();
@@ -211,7 +210,7 @@ export class ProductScreen extends ControlButtonsMixin(Component) {
             const { product_id = [], packaging = [] } = await this.orm.silent.call(
                 "pos.session",
                 "find_product_by_barcode",
-                [odoo.pos_session_id, code.base_code],
+                [odoo.pos_session_id, code.base_code]
             );
             if (product_id.length) {
                 await this.pos._addProducts(product_id, false);

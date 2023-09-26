@@ -2,7 +2,7 @@
 
 import { _t } from "@web/core/l10n/translation";
 import { browser } from "../browser/browser";
-import { ConnectionLostError, RPCError } from "../network/rpc_service";
+import { ConnectionLostError, RPCError } from "../network/rpc";
 import { registry } from "../registry";
 import {
     ClientErrorDialog,

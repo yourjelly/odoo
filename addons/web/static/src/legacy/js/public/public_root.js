@@ -19,7 +19,7 @@ import { makeEnv, startServices } from "@web/env";
 import { loadJS, templates } from '@web/core/assets';
 import { MainComponentsContainer } from "@web/core/main_components_container";
 import { browser } from '@web/core/browser/browser';
-import { jsonrpc } from '@web/core/network/rpc_service';
+import { jsonrpc } from '@web/core/network/rpc';
 import { renderToString } from "@web/core/utils/render";
 import { _t } from "@web/core/l10n/translation";
 import { omit } from "@web/core/utils/objects";

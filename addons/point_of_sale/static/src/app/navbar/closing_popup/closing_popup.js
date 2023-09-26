@@ -8,7 +8,7 @@ import { useService } from "@web/core/utils/hooks";
 import { useState } from "@odoo/owl";
 import { AlertPopup } from "@point_of_sale/app/utils/alert_popup/alert_popup";
 import { ErrorPopup } from "@point_of_sale/app/errors/popups/error_popup";
-import { ConnectionLostError } from "@web/core/network/rpc_service";
+import { ConnectionLostError } from "@web/core/network/rpc";
 import { identifyError } from "@point_of_sale/app/errors/error_handlers";
 import { _t } from "@web/core/l10n/translation";
 import { usePos } from "@point_of_sale/app/store/pos_hook";

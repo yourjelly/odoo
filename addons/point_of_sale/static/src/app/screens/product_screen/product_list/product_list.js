@@ -4,7 +4,7 @@ import { _t } from "@web/core/l10n/translation";
 import { usePos } from "@point_of_sale/app/store/pos_hook";
 import { useService } from "@web/core/utils/hooks";
 import { identifyError } from "@point_of_sale/app/errors/error_handlers";
-import { ConnectionLostError, ConnectionAbortedError } from "@web/core/network/rpc_service";
+import { ConnectionLostError, ConnectionAbortedError } from "@web/core/network/rpc";
 
 import { ProductCard } from "@point_of_sale/app/generic_components/product_card/product_card";
 import { Component, useState } from "@odoo/owl";

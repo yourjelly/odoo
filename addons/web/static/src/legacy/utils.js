@@ -16,11 +16,7 @@ import {
 } from "@odoo/owl";
 import { templates } from "@web/core/assets";
 import { _t } from "@web/core/l10n/translation";
-import {
-    ConnectionAbortedError,
-    ConnectionLostError,
-    RPCError,
-} from "@web/core/network/rpc_service";
+import { ConnectionAbortedError, ConnectionLostError, RPCError } from "@web/core/network/rpc";
 
 export const wowlServicesSymbol = Symbol("wowlServices");
 

@@ -11,7 +11,7 @@ import { overlayService } from "@web/core/overlay/overlay_service";
 import { uiService } from "@web/core/ui/ui_service";
 import { userService } from "@web/core/user_service";
 import { objectToUrlEncodedString } from "@web/core/utils/urls";
-import { ConnectionAbortedError } from "../../src/core/network/rpc_service";
+import { ConnectionAbortedError } from "../../src/core/network/rpc";
 import { registerCleanup } from "./cleanup";
 import { patchWithCleanup } from "./utils";
 

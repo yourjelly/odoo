@@ -9,7 +9,7 @@ import {
     standardErrorDialogProps,
 } from "@web/core/errors/error_dialogs";
 import { errorService, UncaughtPromiseError } from "@web/core/errors/error_service";
-import { ConnectionLostError, RPCError } from "@web/core/network/rpc_service";
+import { ConnectionLostError, RPCError } from "@web/core/network/rpc";
 import { notificationService } from "@web/core/notifications/notification_service";
 import { overlayService } from "@web/core/overlay/overlay_service";
 import { registry } from "@web/core/registry";
