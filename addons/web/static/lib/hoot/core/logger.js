@@ -2,7 +2,8 @@
 
 import { toRaw } from "@odoo/owl";
 import { performance } from "../globals";
-import { formatMS, log } from "../utils";
+import { formatMS, isIterable, log } from "../utils";
+import { FILTER_KEYS } from "./config";
 
 /**
  * @param {import("./runner").TestRunner} runner
@@ -21,7 +22,14 @@ export function makeLogger(runner) {
         } else {
             log("Running with UI");
         }
-        log.table(toRaw(runner.config));
+
+        const table = { ...toRaw(runner.config) };
+        for (const key of FILTER_KEYS) {
+            if (isIterable(table[key])) {
+                table[key] = `[${[...table[key]].join(", ")}]`;
+            }
+        }
+        log.table(table);
 
         log("Starting test suites");
     });
