@@ -96,6 +96,14 @@ publicWidget.registry.PaymentPostProcessing = publicWidget.Widget.extend({
         this.call('ui', 'unblock');
         const statusContainer = document.querySelector('div[name="o_payment_status_content"]');
         statusContainer.innerHTML = renderToElement(xmlid, display_values).innerHTML;
+        if (display_values.state === 'pending') {
+            const contactUsLink = statusContainer.querySelector('a[href="#discussion"]');
+            if (contactUsLink) {
+                let currentHref = contactUsLink.getAttribute('href');
+                currentHref = `${display_values.chatter_route || display_values.landing_route}${currentHref}`;
+                contactUsLink.setAttribute('href', currentHref);
+            }
+        }
     },
 
 });

@@ -2435,6 +2435,10 @@
                     </a>
                     <t t-if="tx_sudo.state == 'pending'">
                         <t t-out="tx_sudo.provider_id.sudo().pending_msg"/>
+                        <!-- <t t-set="default_pending_msg" t-value="tx_sudo.provider_id.sudo().pending_msg"/>
+                        <t t-set="modified_default_pending_msg"
+                           t-value="default_pending_msg.replace('#discussion', '/my/orders/%s?access_token=%s#discussion' % (order.id, order.access_token))"/>
+                        <t t-out="modified_default_pending_msg or default_pending_msg"/> -->
                     </t>
                     <t t-if="tx_sudo.state == 'done'">
                         <span t-if='tx_sudo.provider_id.sudo().done_msg' t-out="tx_sudo.provider_id.sudo().done_msg"/>
