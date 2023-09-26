@@ -5,7 +5,8 @@ from random import randint
 
 from odoo import api, fields, models, tools, SUPERUSER_ID
 from odoo.tools.translate import _
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
+from odoo.tools import single_email_re
 
 AVAILABLE_PRIORITIES = [
     ('0', 'Normal'),
@@ -170,6 +171,12 @@ class Applicant(models.Model):
     meeting_ids = fields.One2many('calendar.event', 'applicant_id', 'Meetings')
     meeting_display_text = fields.Char(compute='_compute_meeting_display')
     meeting_display_date = fields.Date(compute='_compute_meeting_display')
+
+    @api.constrains('email_from')
+    def _check_valid_email(self):
+        for record in self:
+            if record.email_from and not single_email_re.match(record.email_from):
+                raise ValidationError(_('Invalid email address'))
 
     @api.depends('date_open', 'date_closed')
     def _compute_day(self):
