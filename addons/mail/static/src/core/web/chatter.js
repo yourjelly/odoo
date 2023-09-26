@@ -1,6 +1,6 @@
 /* @odoo-module */
 
-import { AttachmentList } from "@mail/core/common/attachment_list";
+import { AttachmentPanel } from "@mail/discuss/core/common/attachment_panel";
 import { useAttachmentUploader } from "@mail/core/common/attachment_uploader_hook";
 import { Composer } from "@mail/core/common/composer";
 import { useDropzone } from "@mail/core/common/dropzone_hook";
@@ -44,7 +44,7 @@ export const DELAY_FOR_SPINNER = 1000;
 export class Chatter extends Component {
     static template = "mail.Chatter";
     static components = {
-        AttachmentList,
+        AttachmentPanel,
         Dropdown,
         Thread,
         Composer,
