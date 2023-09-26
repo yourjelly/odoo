@@ -31,6 +31,14 @@ def _create_warehouse_data(env):
 
 def uninstall_hook(env):
     warehouses = env["stock.warehouse"].search([])
+    for warehouse in warehouses:
+        sequence_data = warehouse._get_sequence_values()
+        if sequence_data:
+            domain = ['|', '|', ('prefix', '=', sequence_data.get('pbm_type_id')['prefix']),
+                      ('prefix', '=', sequence_data.get('sam_type_id')['prefix']),
+                      ('prefix', '=', sequence_data.get('manu_type_id')['prefix'])]
+            existing_seq_obj = env['ir.sequence'].sudo().search(domain)
+            existing_seq_obj.unlink()
     pbm_routes = warehouses.mapped("pbm_route_id")
     warehouses.write({"pbm_route_id": False})
     # Fail unlink means that the route is used somewhere (e.g. route_id on stock.rule). In this case
