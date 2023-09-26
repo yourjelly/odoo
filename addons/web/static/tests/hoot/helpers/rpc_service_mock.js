@@ -1,11 +1,23 @@
 /** @odoo-module */
 
+let jsonrpc = () => {};
+
+export function mockRpc(fn) {
+    if (!in suite or test) {
+        boom
+    }
+    jsonrpc = fn;
+}
+
 const mocks = {
-    "@web/core/network/rpc_service": function () {
+    "@web/core/network/rpc": {
         return {
-            rpcService: {},
+            rpc: function mockRpc(...args) {
+                return jsonrpc(...args);
+            }
         };
     },
+    "@web/start": () => {},
 };
 
 const define = odoo.define;
