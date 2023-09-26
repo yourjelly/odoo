@@ -13,6 +13,7 @@ declare module "@odoo/hoot" {
 
 declare module "@odoo/hoot/helpers" {
     export * from "@web/../lib/hoot/helpers/concurency";
+    export * from "@web/../lib/hoot/helpers/date";
     export * from "@web/../lib/hoot/helpers/dom";
     export * from "@web/../lib/hoot/helpers/events";
 }

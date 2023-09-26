@@ -29,7 +29,7 @@ export class Job {
         this.name = name;
 
         // Keeps the stack trace bound to the original 'fn'
-        this.run = (...args) => fn(...args);
+        this.run = async (...args) => fn(...args);
 
         if (this.parent) {
             Object.assign(this.config, this.parent.config);

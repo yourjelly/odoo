@@ -1,43 +1,42 @@
 /** @odoo-module **/
 
+import { describe, expect, test } from "@odoo/hoot";
 import { parseExpr } from "@web/core/py_js/py";
 
-QUnit.module("py", {}, () => {
-    QUnit.module("parser");
-
-    QUnit.test("can parse basic elements", (assert) => {
-        assert.deepEqual(parseExpr("1"), { type: 0 /* Number */, value: 1 });
-        assert.deepEqual(parseExpr('"foo"'), { type: 1 /* String */, value: "foo" });
-        assert.deepEqual(parseExpr("foo"), { type: 5 /* Name */, value: "foo" });
-        assert.deepEqual(parseExpr("True"), { type: 2 /* Boolean */, value: true });
-        assert.deepEqual(parseExpr("False"), { type: 2 /* Boolean */, value: false });
-        assert.deepEqual(parseExpr("None"), { type: 3 /* None */ });
+describe("@web", "core", "py_js", "py_parser", () => {
+    test("can parse basic elements", () => {
+        expect(parseExpr("1")).toEqual({ type: 0 /* Number */, value: 1 });
+        expect(parseExpr('"foo"')).toEqual({ type: 1 /* String */, value: "foo" });
+        expect(parseExpr("foo")).toEqual({ type: 5 /* Name */, value: "foo" });
+        expect(parseExpr("True")).toEqual({ type: 2 /* Boolean */, value: true });
+        expect(parseExpr("False")).toEqual({ type: 2 /* Boolean */, value: false });
+        expect(parseExpr("None")).toEqual({ type: 3 /* None */ });
     });
 
-    QUnit.test("cannot parse empty string", (assert) => {
-        assert.throws(() => parseExpr(""), /Error: Missing token/);
+    test("cannot parse empty string", () => {
+        expect(() => parseExpr("")).toThrow(/Error: Missing token/);
     });
 
-    QUnit.test("can parse unary operator -", (assert) => {
-        assert.deepEqual(parseExpr("-1"), {
+    test("can parse unary operator -", () => {
+        expect(parseExpr("-1")).toEqual({
             type: 6 /* UnaryOperator */,
             op: "-",
             right: { type: 0 /* Number */, value: 1 },
         });
-        assert.deepEqual(parseExpr("-foo"), {
+        expect(parseExpr("-foo")).toEqual({
             type: 6 /* UnaryOperator */,
             op: "-",
             right: { type: 5 /* Name */, value: "foo" },
         });
-        assert.deepEqual(parseExpr("not True"), {
+        expect(parseExpr("not True")).toEqual({
             type: 6 /* UnaryOperator */,
             op: "not",
             right: { type: 2 /* Boolean */, value: true },
         });
     });
 
-    QUnit.test("can parse parenthesis", (assert) => {
-        assert.deepEqual(parseExpr("(1 + 2)"), {
+    test("can parse parenthesis", () => {
+        expect(parseExpr("(1 + 2)")).toEqual({
             type: 7 /* BinaryOperator */,
             op: "+",
             left: { type: 0 /* Number */, value: 1 },
@@ -45,14 +44,14 @@ QUnit.module("py", {}, () => {
         });
     });
 
-    QUnit.test("can parse binary operators", (assert) => {
-        assert.deepEqual(parseExpr("1 < 2"), {
+    test("can parse binary operators", () => {
+        expect(parseExpr("1 < 2")).toEqual({
             type: 7 /* BinaryOperator */,
             op: "<",
             left: { type: 0 /* Number */, value: 1 },
             right: { type: 0 /* Number */, value: 2 },
         });
-        assert.deepEqual(parseExpr('a + "foo"'), {
+        expect(parseExpr('a + "foo"')).toEqual({
             type: 7 /* BinaryOperator */,
             op: "+",
             left: { type: 5 /* Name */, value: "a" },
@@ -60,14 +59,14 @@ QUnit.module("py", {}, () => {
         });
     });
 
-    QUnit.test("can parse boolean operators", (assert) => {
-        assert.deepEqual(parseExpr('True and "foo"'), {
+    test("can parse boolean operators", () => {
+        expect(parseExpr('True and "foo"')).toEqual({
             type: 14 /* BooleanOperator */,
             op: "and",
             left: { type: 2 /* Boolean */, value: true },
             right: { type: 1 /* String */, value: "foo" },
         });
-        assert.deepEqual(parseExpr('True or "foo"'), {
+        expect(parseExpr('True or "foo"')).toEqual({
             type: 14 /* BooleanOperator */,
             op: "or",
             left: { type: 2 /* Boolean */, value: true },
@@ -75,8 +74,8 @@ QUnit.module("py", {}, () => {
         });
     });
 
-    QUnit.test("expression with == and or", (assert) => {
-        assert.deepEqual(parseExpr("False == True and False"), {
+    test("expression with == and or", () => {
+        expect(parseExpr("False == True and False")).toEqual({
             type: 14 /* BooleanOperator */,
             op: "and",
             left: {
@@ -89,8 +88,8 @@ QUnit.module("py", {}, () => {
         });
     });
 
-    QUnit.test("expression with + and ==", (assert) => {
-        assert.deepEqual(parseExpr("1 + 2 == 3"), {
+    test("expression with + and ==", () => {
+        expect(parseExpr("1 + 2 == 3")).toEqual({
             type: 7 /* BinaryOperator */,
             op: "==",
             left: {
@@ -103,8 +102,8 @@ QUnit.module("py", {}, () => {
         });
     });
 
-    QUnit.test("can parse chained comparisons", (assert) => {
-        assert.deepEqual(parseExpr("1 < 2 <= 3"), {
+    test("can parse chained comparisons", () => {
+        expect(parseExpr("1 < 2 <= 3")).toEqual({
             type: 14 /* BooleanOperator */,
             op: "and",
             left: {
@@ -120,7 +119,7 @@ QUnit.module("py", {}, () => {
                 right: { type: 0 /* Number */, value: 3 },
             },
         });
-        assert.deepEqual(parseExpr("1 < 2 <= 3 > 33"), {
+        expect(parseExpr("1 < 2 <= 3 > 33")).toEqual({
             type: 14 /* BooleanOperator */,
             op: "and",
             left: {
@@ -148,31 +147,31 @@ QUnit.module("py", {}, () => {
         });
     });
 
-    QUnit.test("can parse lists", (assert) => {
-        assert.deepEqual(parseExpr("[]"), {
+    test("can parse lists", () => {
+        expect(parseExpr("[]")).toEqual({
             type: 4 /* List */,
             value: [],
         });
-        assert.deepEqual(parseExpr("[1]"), {
+        expect(parseExpr("[1]")).toEqual({
             type: 4 /* List */,
             value: [{ type: 0 /* Number */, value: 1 }],
         });
-        assert.deepEqual(parseExpr("[1,]"), {
+        expect(parseExpr("[1,]")).toEqual({
             type: 4 /* List */,
             value: [{ type: 0 /* Number */, value: 1 }],
         });
-        assert.deepEqual(parseExpr("[1, 4]"), {
+        expect(parseExpr("[1, 4]")).toEqual({
             type: 4 /* List */,
             value: [
                 { type: 0 /* Number */, value: 1 },
                 { type: 0 /* Number */, value: 4 },
             ],
         });
-        assert.throws(() => parseExpr("[1 1]"));
+        expect(() => parseExpr("[1 1]")).toThrow();
     });
 
-    QUnit.test("can parse lists lookup", (assert) => {
-        assert.deepEqual(parseExpr("[1,2][1]"), {
+    test("can parse lists lookup", () => {
+        expect(parseExpr("[1,2][1]")).toEqual({
             type: 12 /* Lookup */,
             target: {
                 type: 4 /* List */,
@@ -185,71 +184,71 @@ QUnit.module("py", {}, () => {
         });
     });
 
-    QUnit.test("can parse tuples", (assert) => {
-        assert.deepEqual(parseExpr("()"), {
+    test("can parse tuples", () => {
+        expect(parseExpr("()")).toEqual({
             type: 10 /* Tuple */,
             value: [],
         });
-        assert.deepEqual(parseExpr("(1,)"), {
+        expect(parseExpr("(1,)")).toEqual({
             type: 10 /* Tuple */,
             value: [{ type: 0 /* Number */, value: 1 }],
         });
-        assert.deepEqual(parseExpr("(1,4)"), {
+        expect(parseExpr("(1,4)")).toEqual({
             type: 10 /* Tuple */,
             value: [
                 { type: 0 /* Number */, value: 1 },
                 { type: 0 /* Number */, value: 4 },
             ],
         });
-        assert.throws(() => parseExpr("(1 1)"));
+        expect(() => parseExpr("(1 1)")).toThrow();
     });
 
-    QUnit.test("can parse dictionary", (assert) => {
-        assert.deepEqual(parseExpr("{}"), {
+    test("can parse dictionary", () => {
+        expect(parseExpr("{}")).toEqual({
             type: 11 /* Dictionary */,
             value: {},
         });
-        assert.deepEqual(parseExpr("{'foo': 1}"), {
+        expect(parseExpr("{'foo': 1}")).toEqual({
             type: 11 /* Dictionary */,
             value: { foo: { type: 0 /* Number */, value: 1 } },
         });
-        assert.deepEqual(parseExpr("{'foo': 1, 'bar': 3}"), {
+        expect(parseExpr("{'foo': 1, 'bar': 3}")).toEqual({
             type: 11 /* Dictionary */,
             value: {
                 foo: { type: 0 /* Number */, value: 1 },
                 bar: { type: 0 /* Number */, value: 3 },
             },
         });
-        assert.deepEqual(parseExpr("{1: 2}"), {
+        expect(parseExpr("{1: 2}")).toEqual({
             type: 11 /* Dictionary */,
             value: { 1: { type: 0 /* Number */, value: 2 } },
         });
     });
 
-    QUnit.test("can parse dictionary lookup", (assert) => {
-        assert.deepEqual(parseExpr("{}['a']"), {
+    test("can parse dictionary lookup", () => {
+        expect(parseExpr("{}['a']")).toEqual({
             type: 12 /* Lookup */,
             target: { type: 11 /* Dictionary */, value: {} },
             key: { type: 1 /* String */, value: "a" },
         });
     });
 
-    QUnit.test("can parse assignment", (assert) => {
-        assert.deepEqual(parseExpr("a=1"), {
+    test("can parse assignment", () => {
+        expect(parseExpr("a=1")).toEqual({
             type: 9 /* Assignment */,
             name: { type: 5 /* Name */, value: "a" },
             value: { type: 0 /* Number */, value: 1 },
         });
     });
 
-    QUnit.test("can parse function calls", (assert) => {
-        assert.deepEqual(parseExpr("f()"), {
+    test("can parse function calls", () => {
+        expect(parseExpr("f()")).toEqual({
             type: 8 /* FunctionCall */,
             fn: { type: 5 /* Name */, value: "f" },
             args: [],
             kwargs: {},
         });
-        assert.deepEqual(parseExpr("f() + 2"), {
+        expect(parseExpr("f() + 2")).toEqual({
             type: 7 /* BinaryOperator */,
             op: "+",
             left: {
@@ -260,13 +259,13 @@ QUnit.module("py", {}, () => {
             },
             right: { type: 0 /* Number */, value: 2 },
         });
-        assert.deepEqual(parseExpr("f(1)"), {
+        expect(parseExpr("f(1)")).toEqual({
             type: 8 /* FunctionCall */,
             fn: { type: 5 /* Name */, value: "f" },
             args: [{ type: 0 /* Number */, value: 1 }],
             kwargs: {},
         });
-        assert.deepEqual(parseExpr("f(1, 2)"), {
+        expect(parseExpr("f(1, 2)")).toEqual({
             type: 8 /* FunctionCall */,
             fn: { type: 5 /* Name */, value: "f" },
             args: [
@@ -277,14 +276,14 @@ QUnit.module("py", {}, () => {
         });
     });
 
-    QUnit.test("can parse function calls with kwargs", (assert) => {
-        assert.deepEqual(parseExpr("f(a = 1)"), {
+    test("can parse function calls with kwargs", () => {
+        expect(parseExpr("f(a = 1)")).toEqual({
             type: 8 /* FunctionCall */,
             fn: { type: 5 /* Name */, value: "f" },
             args: [],
             kwargs: { a: { type: 0 /* Number */, value: 1 } },
         });
-        assert.deepEqual(parseExpr("f(3, a = 1)"), {
+        expect(parseExpr("f(3, a = 1)")).toEqual({
             type: 8 /* FunctionCall */,
             fn: { type: 5 /* Name */, value: "f" },
             args: [{ type: 0 /* Number */, value: 3 }],
@@ -292,8 +291,8 @@ QUnit.module("py", {}, () => {
         });
     });
 
-    QUnit.test("can parse not a in b", (assert) => {
-        assert.deepEqual(parseExpr("not a in b"), {
+    test("can parse not a in b", () => {
+        expect(parseExpr("not a in b")).toEqual({
             type: 6 /* UnaryOperator */,
             op: "not",
             right: {
@@ -303,7 +302,7 @@ QUnit.module("py", {}, () => {
                 right: { type: 5 /* Name */, value: "b" },
             },
         });
-        assert.deepEqual(parseExpr("a.b.c"), {
+        expect(parseExpr("a.b.c")).toEqual({
             type: 15 /* ObjLookup */,
             obj: {
                 type: 15 /* ObjLookup */,
@@ -314,14 +313,14 @@ QUnit.module("py", {}, () => {
         });
     });
 
-    QUnit.test("can parse if statement", (assert) => {
-        assert.deepEqual(parseExpr("1 if True else 2"), {
+    test("can parse if statement", () => {
+        expect(parseExpr("1 if True else 2")).toEqual({
             type: 13 /* If */,
             condition: { type: 2 /* Boolean */, value: true },
             ifTrue: { type: 0 /* Number */, value: 1 },
             ifFalse: { type: 0 /* Number */, value: 2 },
         });
-        assert.deepEqual(parseExpr("1 + 1 if True else 2"), {
+        expect(parseExpr("1 + 1 if True else 2")).toEqual({
             type: 13 /* If */,
             condition: { type: 2 /* Boolean */, value: true },
             ifTrue: {
@@ -334,8 +333,8 @@ QUnit.module("py", {}, () => {
         });
     });
 
-    QUnit.test("tuple in list", (assert) => {
-        assert.deepEqual(parseExpr("[(1,2)]"), {
+    test("tuple in list", () => {
+        expect(parseExpr("[(1,2)]")).toEqual({
             type: 4 /* List */,
             value: [
                 {
