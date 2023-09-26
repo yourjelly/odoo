@@ -2535,21 +2535,6 @@ export class Wysiwyg extends Component {
             this.cancel(false);
         });
     }
-    // TODO unused => remove or reuse as it should be
-    _attachTooltips() {
-        $(document.body)
-            .tooltip({
-                selector: '[data-oe-readonly]',
-                container: 'body',
-                trigger: 'hover',
-                delay: {'show': 1000, 'hide': 100},
-                placement: 'bottom',
-                title: _t("Readonly field")
-            })
-            .on('click', function () {
-                $(this).tooltip('hide');
-            });
-    }
     /**
      * Gets jQuery cloned element with internal text nodes escaped for XML
      * storage.
