@@ -168,11 +168,8 @@ class AccountAnalyticLine(models.Model):
             if not vals.get('project_id'):
                 continue
             employee_in_id = vals.get('employee_id')
-            print("\n employee_in_id",employee_in_id)
-            print("\n company",self.env.companies.ids)
             if employee_in_id:
                 if employee_in_id in valid_employee_per_id:
-                    print("\n valid_id",valid_employee_per_id)
                     vals['user_id'] = valid_employee_per_id[employee_in_id].sudo().user_id.id   # (A) OK
                     continue
                 else:
