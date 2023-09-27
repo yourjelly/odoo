@@ -256,7 +256,12 @@ export class Record extends DataPoint {
         if (this.model._urgentSave) {
             return this._update(changes, { save: false }); // save is already scheduled
         }
-        return this.model.mutex.exec(() => this._update(changes, { save }));
+        return this.model.mutex.exec(async () => {
+            await this._update(changes, { withoutOnchange: save });
+            if (save) {
+                return this._save();
+            }
+        });
     }
 
     urgentSave() {
@@ -679,6 +684,7 @@ export class Record extends DataPoint {
             this._preprocessMany2oneChanges(changes),
             this._preprocessReferenceChanges(changes),
             this._preprocessX2manyChanges(changes),
+            this._preprocessProperties(changes),
         ]);
     }
 
@@ -809,6 +815,30 @@ export class Record extends DataPoint {
                 }
             }
             changes[fieldName] = list;
+        }
+    }
+
+    _preprocessProperties(changes) {
+        for (const [fieldName, value] of Object.entries(changes)) {
+            const field = this.fields[fieldName];
+            if (field && field.relatedPropertyField) {
+                const [propertyFieldName, propertyName] = field.name.split(".");
+                const propertiesData = this.data[propertyFieldName] || [];
+                if (!propertiesData.find((property) => property.name === propertyName)) {
+                    // try to change the value of a properties that has a different parent
+                    this.model.notification.add(
+                        _t(
+                            "This record belongs to a different parent so you can not change this property."
+                        ),
+                        { type: "warning" }
+                    );
+                    return;
+                }
+                changes[propertyFieldName] = propertiesData.map((property) =>
+                    property.name === propertyName ? { ...property, value } : property
+                );
+                delete changes[field.name];
+            }
         }
     }
 
@@ -979,7 +1009,7 @@ export class Record extends DataPoint {
         }
     }
 
-    async _update(changes, { withoutOnchange, withoutParentUpdate, save } = {}) {
+    async _update(changes, { withoutOnchange, withoutParentUpdate } = {}) {
         this.dirty = true;
         const prom = this._preprocessChanges(changes);
         if (prom && !this.model._urgentSave) {
@@ -989,31 +1019,10 @@ export class Record extends DataPoint {
             this._applyChanges(changes);
             return this.model.root._multiSave(this);
         }
-        for (const [fieldName, value] of Object.entries(changes)) {
-            const field = this.fields[fieldName];
-            if (field && field.relatedPropertyField) {
-                const [propertyFieldName, propertyName] = field.name.split(".");
-                const propertiesData = this.data[propertyFieldName] || [];
-                if (!propertiesData.find((property) => property.name === propertyName)) {
-                    // try to change the value of a properties that has a different parent
-                    this.model.notification.add(
-                        _t(
-                            "This record belongs to a different parent so you can not change this property."
-                        ),
-                        { type: "warning" }
-                    );
-                    return;
-                }
-                changes[propertyFieldName] = propertiesData.map((property) =>
-                    property.name === propertyName ? { ...property, value } : property
-                );
-                delete changes[field.name];
-            }
-        }
         const onChangeFields = Object.keys(changes).filter(
             (fieldName) => this.activeFields[fieldName] && this.activeFields[fieldName].onChange
         );
-        if (onChangeFields.length && !this.model._urgentSave && !withoutOnchange && !save) {
+        if (onChangeFields.length && !this.model._urgentSave && !withoutOnchange) {
             const localChanges = this._getChanges(
                 { ...this._changes, ...changes },
                 { withReadonly: true }
@@ -1050,7 +1059,7 @@ export class Record extends DataPoint {
             }
         }
         if (Object.keys(changes).length > 0) {
-            const initialChanges = pick(this.data, ...Object.keys(changes));
+            const initialChanges = pick(toRaw(this.data), ...Object.keys(changes));
             this._applyChanges(changes);
             try {
                 await this._onUpdate({ withoutParentUpdate });
@@ -1059,9 +1068,6 @@ export class Record extends DataPoint {
                 throw e;
             }
             await this.model.hooks.onRecordChanged(this, this._getChanges());
-        }
-        if (save) {
-            return this._save();
         }
     }
 
