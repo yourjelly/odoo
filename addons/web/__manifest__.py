@@ -79,7 +79,6 @@ This module provides the core of the Odoo Web Client.
             'web/static/lib/bootstrap/js/dist/dom/selector-engine.js',
             'web/static/lib/bootstrap/js/dist/base-component.js',
             'web/static/lib/bootstrap/js/dist/alert.js',
-            'web/static/lib/bootstrap/js/dist/collapse.js',
             'web/static/lib/bootstrap/js/dist/dropdown.js',
             'web/static/lib/bootstrap/js/dist/modal.js',
             'web/static/lib/bootstrap/js/dist/tooltip.js',
