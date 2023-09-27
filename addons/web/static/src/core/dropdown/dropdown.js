@@ -357,12 +357,12 @@ export class Dropdown extends Component {
     }
 
     closeOnClickAway(eventTarget) {
-        const notInDialog = !eventTarget.closest(".o_dialog");
-        const notInToggler = !this.target.contains(eventTarget);
-        const notInPopover = !this.menuRef.el.contains(eventTarget);
-        const notInDropdown = !this.isNestedDropdown(eventTarget);
+        const inToggler = this.target && this.target.contains(eventTarget);
+        const inPopover = this.menuRef.el && this.menuRef.el.contains(eventTarget);
+        const inChildDropdown = this.isNestedDropdown(eventTarget);
+        const inDialog = eventTarget.closest(".o_dialog");
 
-        if (notInDialog && notInToggler && notInPopover && notInDropdown) {
+        if (!inToggler || !inPopover || !inChildDropdown || !inDialog) {
             this.state.close();
         }
         return false;
