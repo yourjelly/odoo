@@ -26,7 +26,7 @@ class SaleOrderDiscountWizard(models.TransientModel):
         for line in self.sale_order_id.order_line:
             if not (line.product_uom_qty and line.price_unit):
                 continue
-            total_price_per_tax[line.tax_id] += line.price_unit * line.product_uom_qty
+            total_price_per_tax[line.tax_id] += line.price_subtotal
         mapped_taxes = {tax: self.sale_order_id.fiscal_position_id.map_tax(tax) for tax in total_price_per_tax}
         vals = {
             'order_id': self.sale_order_id.id,
@@ -37,7 +37,7 @@ class SaleOrderDiscountWizard(models.TransientModel):
             vals_list = [{
                 **vals,
                 'name': _("Discount: %(discount)s", discount=self.discount_amount),
-                'price_unit': -self.discount_amount,
+                'price_unit': -min(self.sale_order_id.amount_total, self.discount_amount),
                 'tax_id': False,
             }]
         else:
