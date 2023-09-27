@@ -28,6 +28,10 @@ const dynamicSnippetBlogPostsOptions = dynamicSnippetOptions.extend({
     _computeWidgetVisibility: function (widgetName, params) {
         if (widgetName === 'hover_effect_opt') {
             return this.$target.get(0).dataset.templateKey === 'website_blog.dynamic_filter_template_blog_post_big_picture';
+        } else if (widgetName === 'picture_size_opt') {
+            return this.$target.get(0).dataset.templateKey === 'website_blog.dynamic_filter_template_blog_post_big_picture';
+        } else if (widgetName === 'teaser_opt') {
+            return this.$target.get(0).dataset.templateKey === 'website_blog.dynamic_filter_template_blog_post_card';
         }
         return this._super.apply(this, arguments);
     },
