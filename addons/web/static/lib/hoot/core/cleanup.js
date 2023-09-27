@@ -1,13 +1,8 @@
 /** @odoo-module */
 
 import { Map, Object, Set } from "../globals";
-import { cleanupDOM, cleanupObservers, getFixture } from "../helpers/dom";
+import { cleanupDOM, cleanupObservers, getDocument, getFixture, getWindow } from "../helpers/dom";
 import { intercept, log } from "../utils";
-
-const getGlobalElements = () => {
-    const { ownerDocument } = getFixture();
-    return [ownerDocument, ownerDocument.defaultView];
-};
 
 /**
  * @param {import("./runner").TestRunner} runner
@@ -18,10 +13,15 @@ export function makeCleanup(runner) {
             return;
         }
 
-        for (const element of getGlobalElements()) {
+        const fixture = getFixture();
+        const document = getDocument(fixture);
+        const window = getWindow(fixture);
+
+        acceptedKeys.set(window, new Set(Object.keys(window)));
+
+        for (const element of [fixture, document, window]) {
             const { prototype } = element.constructor;
             const listeners = {};
-            acceptedKeys.set(element, new Set(Object.keys(element)));
             listenersMap.set(element, listeners);
             cleanupFns.push(
                 intercept(
@@ -60,29 +60,31 @@ export function makeCleanup(runner) {
         cleanupDOM();
         cleanupObservers();
 
-        for (const element of getGlobalElements()) {
-            // Check keys
-            const keys = acceptedKeys.get(element);
-            const keysDiff = Object.keys(element).filter((key) => !keys.has(key));
-            if (keysDiff.length) {
-                log.warn(
-                    `Found`,
-                    keysDiff.length,
-                    `added keys on ${element.constructor.name} object after test:`,
-                    keysDiff
-                );
-                for (const key of keysDiff) {
-                    delete element[key];
-                }
-            }
+        const fixture = getFixture();
+        const document = getDocument(fixture);
+        const window = getWindow(fixture);
 
+        // Check keys
+        const keys = acceptedKeys.get(window);
+        const keysDiff = Object.keys(window).filter((key) => isNaN(key) && !keys.has(key));
+        if (keysDiff.length) {
+            log.warn(
+                `Found`,
+                keysDiff.length,
+                `added keys on ${window.constructor.name} object after test:`,
+                keysDiff
+            );
+            for (const key of keysDiff) {
+                delete window[key];
+            }
+        }
+
+        for (const element of [fixture, document, window]) {
             // Check listeners
             for (const [type, callbacks] of Object.entries(listenersMap.get(element))) {
                 if (callbacks.size) {
                     log.warn(
-                        `Element`,
-                        element.constructor.name,
-                        `has`,
+                        `Element ${element.constructor.name} has`,
                         callbacks.size,
                         `event listeners left on "${type}" events.`
                     );

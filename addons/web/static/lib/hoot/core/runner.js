@@ -309,6 +309,7 @@ export class TestRunner {
     }
 
     /**
+     * TODO: better name ? (no more "suite")
      * @param {(suite: Suite) => MaybePromise<void>} callback
      */
     afterAnySuite(callback) {
@@ -349,6 +350,7 @@ export class TestRunner {
     }
 
     /**
+     * TODO: better name ? (no more "suite")
      * @param {(suite: Suite) => MaybePromise<void>} callback
      */
     afterSuite(callback) {
@@ -369,6 +371,7 @@ export class TestRunner {
     }
 
     /**
+     * TODO: better name ? (no more "suite")
      * @param {(suite: Suite) => MaybePromise<void>} callback
      */
     beforeAnySuite(callback) {
@@ -396,6 +399,7 @@ export class TestRunner {
     }
 
     /**
+     * TODO: better name ? (no more "suite")
      * @param {(suite: Suite) => MaybePromise<void>} callback
      */
     beforeSuite(callback) {

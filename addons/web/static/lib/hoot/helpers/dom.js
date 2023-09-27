@@ -1,6 +1,16 @@
 /** @odoo-module */
 
-import { Boolean, Error, Map, MutationObserver, Number, Object, RegExp, Set } from "../globals";
+import {
+    Boolean,
+    Error,
+    Map,
+    MutationObserver,
+    Number,
+    Object,
+    RegExp,
+    Set,
+    document,
+} from "../globals";
 import { groupBy, isIterable, log } from "../utils";
 
 /**
@@ -115,19 +125,19 @@ const FOCUSABLE_SELECTOR = [
 const PSEUDO_SELECTOR_REGEX = /:([\w-]+)(\(([^)]*)\))?/g;
 const ROOT_SPECIAL_SELECTORS = {
     get body() {
-        return defaultRoot.body;
+        return getDocument().body;
     },
     get document() {
-        return defaultRoot;
+        return getDocument();
     },
     get window() {
-        return defaultRoot.defaultView;
+        return getDocument().defaultView;
     },
 };
 
 /** @type {Map<HTMLElement, { callbacks: Set<MutationCallback>, observer: MutationObserver }>} */
 const observers = new Map();
-/** @type {Document | null} */
+/** @type {HTMLElement | null} */
 let defaultRoot = null;
 
 //-----------------------------------------------------------------------------
@@ -193,10 +203,11 @@ customPseudoClasses
 //-----------------------------------------------------------------------------
 
 export function cleanupDOM() {
-    const remainingElements = defaultRoot?.body.children.length;
+    const root = getFixture();
+    const remainingElements = root?.children.length;
     if (remainingElements) {
         log.warn(`${remainingElements} undesired elements left in the root element`);
-        defaultRoot.body.innerHTML = "";
+        root.innerHTML = "";
     }
 }
 
@@ -214,7 +225,7 @@ export function cleanupObservers() {
  * @param {Document | Element} value
  */
 export function getActiveElement(value) {
-    return getDocument(value || defaultRoot).activeElement;
+    return getDocument(value).activeElement;
 }
 
 /**
@@ -222,7 +233,8 @@ export function getActiveElement(value) {
  * @returns {Document}
  */
 export function getDocument(value) {
-    return isDocument(value) ? value : value.ownerDocument;
+    value ||= getFixture();
+    return isDocument(value) ? value : value.ownerDocument || document;
 }
 
 /**
@@ -230,7 +242,7 @@ export function getDocument(value) {
  */
 export function getFocusableElements(parent) {
     const byTabIndex = groupBy(
-        (parent || defaultRoot).querySelectorAll(FOCUSABLE_SELECTOR),
+        (parent || getFixture()).querySelectorAll(FOCUSABLE_SELECTOR),
         "tabIndex"
     );
     const withTabIndexZero = byTabIndex[0] || [];
@@ -239,6 +251,7 @@ export function getFocusableElements(parent) {
 }
 
 export function getNextFocusableElement(parent) {
+    parent ||= getFixture();
     const focusableEls = getFocusableElements(parent);
     const index = focusableEls.indexOf(getActiveElement(parent));
     return focusableEls[index + 1] || null;
@@ -264,13 +277,14 @@ export function getParentFrame(node) {
  * @param {Element} [parent]
  */
 export function getPreviousFocusableElement(parent) {
+    parent ||= getFixture();
     const focusableEls = getFocusableElements(parent);
     const index = focusableEls.indexOf(getActiveElement(parent));
     return index < 0 ? focusableEls.at(-1) : focusableEls[index - 1] || null;
 }
 
 export function getFixture() {
-    return defaultRoot?.body;
+    return defaultRoot;
 }
 
 /**
@@ -313,6 +327,13 @@ export function getRect(element, options) {
  */
 export function getText(target, options) {
     return queryAll(target, options).map((element) => element.innerText);
+}
+
+/**
+ * @param {Document | Element} value
+ */
+export function getWindow(value) {
+    return getDocument(value).defaultView;
 }
 
 /**
@@ -445,7 +466,7 @@ export function queryAll(target, options) {
         if (target in ROOT_SPECIAL_SELECTORS) {
             elements = _filter(ROOT_SPECIAL_SELECTORS[target]);
         } else {
-            elements = _filter(options?.root || defaultRoot);
+            elements = _filter(options?.root || getFixture());
             selector = target;
         }
         // HTMLSelectElement is iterable ¯\_(ツ)_/¯
@@ -545,13 +566,13 @@ export function queryOne(target, options) {
 }
 
 /**
- * @param {Document | HTMLElement} element
+ * @param {HTMLElement} element
  */
 export function setFixture(element) {
     if (defaultRoot) {
         throw new Error(`Fixture has already been set`);
     }
-    if (!isDocument(element)) {
+    if (!isElement(element)) {
         throw new Error(`Fixture should be an HTML document`);
     }
     defaultRoot = element;

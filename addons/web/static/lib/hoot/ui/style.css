@@ -374,12 +374,6 @@ select {
     background: var(--hoot-skip-bg);
 }
 
-.hoot .hoot-result-header {
-    cursor: pointer;
-    padding: 0.1rem 1rem;
-    justify-content: space-between;
-}
-
 .hoot .hoot-result-detail {
     background: var(--hoot-bg-result);
     grid-template-columns: 1fr auto;
@@ -428,12 +422,12 @@ select {
 
 .hoot .hoot-path:hover .hoot-copy {
     opacity: 1;
-    width: 16px;
+    transform: none;
 }
 
 .hoot .hoot-copy {
     opacity: 0;
-    width: 0;
+    transform: translateX(-20%);
     transition: 0.15s;
     color: var(--hoot-gray-400);
 }
@@ -446,25 +440,15 @@ select {
     color: var(--hoot-pass);
 }
 
-.hoot .hoot-result-button-text i {
-    opacity: 0;
-    width: 0;
-    transition: 0.15s;
+.hoot .hoot-result-button-text {
+    text-decoration: none;
 }
 
 .hoot .hoot-result-button-text:active,
 .hoot .hoot-result-button-text:focus-within,
 .hoot .hoot-result-button-text:hover {
-    color: white;
-    margin: 0 0.25rem;
-    background-color: var(--hoot-primary);
-}
-
-.hoot .hoot-result-button-text:active i,
-.hoot .hoot-result-button-text:focus-within i,
-.hoot .hoot-result-button-text:hover i {
-    opacity: 1;
-    width: 16px;
+    color: var(--hoot-primary);
+    text-decoration: underline;
 }
 
 .hoot .hoot-result-btn {

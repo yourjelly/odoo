@@ -188,6 +188,7 @@ export class HootStatusPanel extends Component {
             const textParts = [`${done} test${done === 1 ? "" : "s"} completed`];
             textParts.push(`(total time: ${formatMS(performance.now() - start)})`);
 
+            this.state.runningTest = null;
             this.state.text = textParts.join(" ");
             this.state.finished = true;
         });

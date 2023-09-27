@@ -32,7 +32,7 @@ export class HootTestResult extends Component {
             t-att-class="className"
             t-att-open="props.open"
         >
-            <summary class="hoot-result-header d-flex flex-row align-items-center">
+            <summary class="px-3 d-flex flex-row align-items-center justify-content-between">
                 <div class="d-flex flex-row align-items-center overflow-hidden gap-2">
                     <HootTestPath test="props.test" />
                     <div class="d-flex flex-row align-items-center gap-1">

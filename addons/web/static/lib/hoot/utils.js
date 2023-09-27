@@ -18,6 +18,10 @@ import {
 import { DiffMatchPatch } from "./lib/diff_match_patch";
 
 /**
+ * @typedef {ArgumentPrimitive | `${ArgumentPrimitive}[]` | null} ArgumentDef
+ *
+ * @typedef {"any" | "boolean" | "function" | "number" | "string"} ArgumentPrimitive
+ *
  * @typedef {string | RegExp | { new(): any }} Matcher
  */
 
@@ -123,11 +127,11 @@ export function deepEqual(a, b, cache = new Set()) {
 }
 
 /**
- * @param {[unknown, ArgumentDef | ArgumentDef[]][]} argumentsDef
+ * @param {[unknown, ArgumentDef | ArgumentDef[]][]} argumentsDefs
  */
-export function ensureArguments(argumentsDef) {
-    for (let i = 0; i < argumentsDef.length; i++) {
-        const [value, acceptedType] = argumentsDef[i];
+export function ensureArguments(argumentsDefs) {
+    for (let i = 0; i < argumentsDefs.length; i++) {
+        const [value, acceptedType] = argumentsDefs[i];
         const types = isIterable(acceptedType) ? [...acceptedType] : [acceptedType];
         if (!types.some((type) => ensureArgument(value, type))) {
             throw new Error(

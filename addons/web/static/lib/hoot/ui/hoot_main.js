@@ -3,7 +3,7 @@
 import { Component, onMounted, useRef, useState, useSubEnv } from "@odoo/owl";
 import { createURL } from "../core/url";
 import { document, matchMedia } from "../globals";
-import { getFixture, setFixture } from "../helpers/dom";
+import { getDocument, getFixture, setFixture } from "../helpers/dom";
 import { compactXML, storage } from "../utils";
 import { HootConfigDropdown } from "./hoot_config_dropdown";
 import { HootReporting } from "./hoot_reporting";
@@ -101,14 +101,10 @@ export class HootMain extends Component {
             </header>
             <HootReporting />
         </main>
-        <iframe t-ref="fixture" class="hoot-fixture" />
+        <div t-ref="fixture" class="hoot-fixture" />
     `;
 
     createURL = createURL;
-
-    get fixtureDocument() {
-        return this.fixtureRef.el?.contentDocument;
-    }
 
     setup() {
         const { runner } = this.env;
@@ -121,24 +117,16 @@ export class HootMain extends Component {
 
         // Event listeners
 
-        runner.beforeAll(() => {
-            const { head } = this.fixtureDocument;
-            const selectors = ["link", "script", "style"].map((s) => `${s}:not([data-no-import])`);
-            for (const el of document.head.querySelectorAll(selectors.join(","))) {
-                head.appendChild(el.cloneNode(true));
-            }
-        });
         runner.beforeAnyTest(() => {
-            this.fixtureDocument.body.innerHTML = "";
             if (runner.debug) {
-                this.fixtureRef.el.classList.add("hoot-debug");
+                this.fixtureRef.el?.classList.add("hoot-debug");
             }
         });
         runner.afterAnyTest(({ lastResults }) => {
             if (!lastResults.pass) {
                 failed = true;
             }
-            this.fixtureRef.el.classList.remove("hoot-debug");
+            this.fixtureRef.el?.classList.remove("hoot-debug");
         });
         runner.afterAll(() => {
             updateTitle(failed);
@@ -146,7 +134,7 @@ export class HootMain extends Component {
 
         onMounted(async () => {
             if (!getFixture()) {
-                setFixture(this.fixtureDocument);
+                setFixture(this.fixtureRef.el);
             }
 
             if (!runner.config.manual) {

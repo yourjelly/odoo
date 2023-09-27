@@ -77,10 +77,10 @@ describe("@odoo/hoot/helpers", "Events", () => {
     });
 
     test("fill", async () => {
-        await mount(/* xml */ `<input value="Test" />`);
+        await mount(/* xml */ `<input value="" />`);
 
         const input = queryOne("input");
-        expect(input.value).toBe("Test");
+        expect(input.value).toBe("");
 
         click("input");
         fill("Test value");

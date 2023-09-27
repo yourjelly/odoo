@@ -12,10 +12,6 @@ import {
 } from "../utils";
 
 /**
- * @typedef {ArgumentPrimitive | `${ArgumentPrimitive}[]` | null} ArgumentDef
- *
- * @typedef {"any" | "boolean" | "function" | "number" | "string"} ArgumentPrimitive
- *
  * @typedef {{
  *  id: number;
  *  info?: [any, any][];
@@ -116,10 +112,7 @@ export function makeExpect(runner) {
 
         currentResults.afterTestCallbacks.push(() => {
             const actual = currentResults.assertions.length;
-            expect(actual).toBe(
-                expected,
-                `Expected ${expected} assertions, but ${actual} were run`
-            );
+            expect(actual).toBe(expected, `Expected ${expected} assertions and ${actual} were run`);
         });
     }
 

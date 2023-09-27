@@ -13,10 +13,10 @@ import {
 import { copy, ensureArguments, isIterable, log } from "../utils";
 import {
     getActiveElement,
-    getFixture,
     getNextFocusableElement,
     getPreviousFocusableElement,
     getRect,
+    getWindow,
     isEditable,
     isEventTarget,
     isFocusable,
@@ -585,7 +585,7 @@ const mapNonBubblingEvent = (eventInit) => ({
 const mapBubblingPointerEvent = (eventInit) => ({
     clientX: eventInit?.clientX ?? eventInit?.pageX ?? 0,
     clientY: eventInit?.clientY ?? eventInit?.pageY ?? 0,
-    view: getFixture().ownerDocument.defaultView,
+    view: getWindow(),
     ...mapBubblingCancelableEvent(eventInit),
 });
 
@@ -598,7 +598,7 @@ const mapNonBubblingPointerEvent = (eventInit) => ({
 
 /** @param {TouchEventInit} [eventInit] */
 const mapCancelableTouchEvent = (eventInit) => ({
-    view: getFixture().ownerDocument.defaultView,
+    view: getWindow(),
     ...mapBubblingCancelableEvent(eventInit),
     composed: true,
     touches: eventInit?.touches ? [...eventInit.touches.map((e) => new Touch(e))] : undefined,
@@ -612,7 +612,7 @@ const mapNonCancelableTouchEvent = (eventInit) => ({
 
 /** @param {TouchEventInit} [eventInit] */
 const mapKeyboardEvent = (eventInit) => ({
-    view: getFixture().ownerDocument.defaultView,
+    view: getWindow(),
     ...mapBubblingCancelableEvent(eventInit),
 });
 
@@ -729,7 +729,7 @@ export function drag(target, options) {
     };
 
     const cancel = expectIsDragging(function cancel() {
-        events.push(...defaultActions.dragCancel(getFixture().ownerDocument.defaultView));
+        events.push(...defaultActions.dragCancel(getWindow()));
         return logEvents(events);
     }, true);
 

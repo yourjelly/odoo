@@ -54,7 +54,7 @@ const FULL_HTML_TEMPLATE = /* xml */ `
     <header>
         <h1 class="title">Title</h1>
     </header>
-    <main class="overflow-auto" style="max-width: 100px">
+    <main>
         <h5 class="title">List header</h5>
         <ul class="overflow-auto" style="max-height: 80px">
             <li class="text highlighted">First item</li>
@@ -64,7 +64,7 @@ const FULL_HTML_TEMPLATE = /* xml */ `
         <p class="text">Paragraph with some long text</p>
         <div class="d-none">Invisible section</div>
         <svg />
-        <form>
+        <form class="overflow-auto" style="max-width: 100px">
             <h5 class="title">Form title</h5>
             <input name="name" type="text" t-att-value="'John Doe'" />
             <input name="email" type="email" t-att-value="'johndoe@sample.com'" />
@@ -167,7 +167,7 @@ describe.ui("@odoo/hoot/helpers", "DOM", () => {
         await mount(FULL_HTML_TEMPLATE);
 
         expect(getText(".title")).toEqual(["Title", "List header", "Form title"]);
-        expect(getText("footer")).toEqual(["Footer\nBack to top"]);
+        expect(getText("footer")).toEqual(["FooterBack to top"]);
     });
 
     test("isDocument", async () => {

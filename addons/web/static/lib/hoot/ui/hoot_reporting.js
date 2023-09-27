@@ -55,7 +55,7 @@ export class HootReporting extends Component {
                 <t t-foreach="getFilteredResults()" t-as="result" t-key="result.id">
                     <t t-if="result.suite">
                         <div class="hoot-result">
-                            <h5 class="hoot-result-header" t-esc="result.suite.fullName" />
+                            <h5 class="p-2 text-reset m-0" t-esc="result.suite.fullName" />
                         </div>
                     </t>
                     <t t-else="">
