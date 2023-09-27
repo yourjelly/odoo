@@ -33,7 +33,7 @@
             bus: env.bus || new Bus(),
             debug: env.debug || false,
             services: {
-                getCookie() {},
+                getCookie() {}, // JPP : tEST DELETE THIS
                 httpRequest(/* route, params = {}, readMethod = 'json' */) {
                     return Promise.resolve('');
                 },
