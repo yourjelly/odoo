@@ -157,6 +157,14 @@ export function useSpecialData(loadFn) {
     ormWithCache.call = (...args) => specialDataCaches[key].read(...args);
 
     const result = {};
+    // useRecordObserver(async (record, nextProps) => {
+    //     result.data = await loadFn(ormWithCache, { ...nextProps, record });
+    // });
+    // onWillUpdateProps(async (props) => {
+    //     if (props.record.id === component.props.record.id) {
+    //         result.data = await loadFn(ormWithCache, props);
+    //     }
+    // });
     onWillStart(async () => {
         result.data = await loadFn(ormWithCache, component.props);
     });
