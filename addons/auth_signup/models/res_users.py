@@ -278,3 +278,16 @@ class ResUsers(models.Model):
             # avoid sending email to the user we are duplicating
             sup = super(ResUsers, self.with_context(no_reset_password=True))
         return sup.copy(default=default)
+
+    def _something(self):
+        from markupsafe import Markup
+        Markup("safe")
+        pass
+        pass
+        Markup(self.data)
+        pass
+        pass
+        Markup('safe' + self.data)
+        pass
+        pass 
+        Markup('safe %s') % self.data
