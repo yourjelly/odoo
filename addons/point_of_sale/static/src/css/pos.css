@@ -1739,8 +1739,9 @@ td {
     }
     .pos .receipt-screen .pos-receipt-container {
         position: absolute !important;
-        top: 0;
-        left: 0;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
     }
     .pos .receipt-screen .pos-receipt-container, .pos .receipt-screen .pos-receipt-container  * {
         visibility: visible;
