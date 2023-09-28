@@ -41,12 +41,21 @@ publicWidget.registry.WebsiteLayout = publicWidget.Widget.extend({
             activeClasses.map((c) => btn.classList.toggle(c));
         });
 
+        const el = document.querySelector(isList ? ".o_website_grid" : ".o_website_list");
         if (isList) {
-            document.querySelector(".o_website_grid").classList.add("d-none");
-            document.querySelector(".o_website_list").classList.remove("d-none");
+            el.classList.add("o_website_list");
+            el.classList.remove("o_website_grid");
+            // remove bootstrap classes specific to grid display
+            $(".o_website_list > div").each((index, card) => {
+                card.classList = ""
+            });
         } else {
-            document.querySelector(".o_website_list").classList.add("d-none");
-            document.querySelector(".o_website_grid").classList.remove("d-none");
+            el.classList.add("o_website_grid");
+            el.classList.remove("o_website_list");
+            // each card must have the correct bootstrap classes
+            $(".o_website_grid > div").each((index, card) => {
+                card.classList = "col-lg-3 col-md-4 col-sm-6 px-2 col-xs-12"
+            });
         }
         if (wysiwyg) {
             wysiwyg.odooEditor.observerActive("_onApplyLayoutChange");
