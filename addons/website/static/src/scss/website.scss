@@ -2515,3 +2515,21 @@ input[value*="data-oe-translation-initial-sha"] {
         }
     }
 }
+
+.o_website_grid {
+    .o_website_record {
+        transition: box-shadow ease-in 0.1s;
+        &:hover {
+            box-shadow: 0 5px 25px -10px black;
+        }
+
+        a {
+            height: 12em;
+            background-color: rgba(map-get($theme-colors, 'secondary'), 0.2);
+        }
+
+        .o_website_tags {
+                min-height: 1.5em;
+        }
+    }
+}

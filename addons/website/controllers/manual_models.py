@@ -70,7 +70,7 @@ class ManualModelsController(Controller):
 
         layout_mode = request.session.get(f'website_{view.id}_layout_mode')
         if not layout_mode:
-            layout_mode = 'grid'
+            layout_mode = 'list'
             # TODO DAFL: Change the default to what we put in editor
             request.session[f'website_{view.id}_layout_mode'] = layout_mode
 

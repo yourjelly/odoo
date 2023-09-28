@@ -3,10 +3,10 @@
 import publicWidget from "@web/legacy/js/public/public_widget";
 
 publicWidget.registry.WebsiteLayout = publicWidget.Widget.extend({
-    selector: ".o_website_grid_list",
+    selector: ".o_website_listing_layout",
     disabledInEditableMode: false,
     events: {
-        "change .o_website_apply_layout input": "_onApplyLayoutChange",
+        "change .listing_layout_switcher input": "_onApplyLayoutChange",
     },
 
     //--------------------------------------------------------------------------
@@ -30,7 +30,7 @@ publicWidget.registry.WebsiteLayout = publicWidget.Widget.extend({
                 params: {
                     layout_mode: isList ? "list" : "grid",
                     view_id: document
-                        .querySelector(".o_website_apply_layout")
+                        .querySelector(".listing_layout_switcher")
                         .getAttribute("data-view-id"),
                 },
             });
