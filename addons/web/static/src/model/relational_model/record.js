@@ -1027,7 +1027,7 @@ export class Record extends DataPoint {
             const otherChanges = await this.model._onchange(this.config, {
                 changes: localChanges,
                 fieldNames: onChangeFields,
-                evalContext: this.evalContext,
+                evalContext: toRaw(this.evalContext),
                 onError: (e) => {
                     for (const fieldName in localChanges) {
                         this._setInvalidField(fieldName);
@@ -1050,7 +1050,7 @@ export class Record extends DataPoint {
             }
         }
         if (Object.keys(changes).length > 0) {
-            const initialChanges = pick(this.data, ...Object.keys(changes));
+            const initialChanges = pick(toRaw(this.data), ...Object.keys(changes));
             this._applyChanges(changes);
             try {
                 await this._onUpdate({ withoutParentUpdate });
