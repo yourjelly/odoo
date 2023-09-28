@@ -260,8 +260,9 @@ class SaleOrder(models.Model):
             else:
                 non_common_lines = discounted_lines - lines_to_discount
                 # Fixed prices are per tax
-                discounted_amounts = {line.tax_id: abs(line.price_total) for line in lines}
+                discounted_amounts = {line.tax_id: abs(line.price_total) for line in (lines + common_lines + non_common_lines)}
                 for line in itertools.chain(non_common_lines, common_lines):
+                    breakpoint()
                     # For gift card and eWallet programs we have no tax but we can consume the amount completely
                     if lines.reward_id.program_id.is_payment_program:
                         discounted_amount = discounted_amounts[lines.tax_id]
@@ -278,8 +279,10 @@ class SaleOrder(models.Model):
                     remaining_amount_per_line[line] -= consumed
 
         discountable = 0
+        total_line_amount = 0
         discountable_per_tax = defaultdict(int)
         for line in lines_to_discount:
+            total_line_amount += line.price_unit
             discountable += remaining_amount_per_line[line]
             line_discountable = line.price_unit * line.product_uom_qty * (1 - (line.discount or 0.0) / 100.0)
             # line_discountable is the same as in a 'order' discount
@@ -287,7 +290,7 @@ class SaleOrder(models.Model):
             #  and then multiplied by another factor coming from the discountable
             discountable_per_tax[line.tax_id] += line_discountable *\
                 (remaining_amount_per_line[line] / line.price_total)
-        return discountable, discountable_per_tax
+        return min(discountable, total_line_amount), discountable_per_tax
 
     def _get_reward_values_discount(self, reward, coupon, **kwargs):
         self.ensure_one()
@@ -325,9 +328,11 @@ class SaleOrder(models.Model):
         # discount should never surpass the order's current total amount
         max_discount = min(self.amount_total, max_discount)
         if reward.discount_mode == 'per_point':
+            # discount should never surpass the total product amount
+            max_discount = min(discountable, max_discount)
             max_discount = min(max_discount,
                 reward.currency_id._convert(reward.discount * self._get_real_points_for_coupon(coupon),
-                    self.currency_id, self.company_id, fields.Date.today()))
+                    self.currency_id, self.company_id, fields.Date.today())) 
         elif reward.discount_mode == 'per_order':
             max_discount = min(max_discount,
                 reward.currency_id._convert(reward.discount, self.currency_id, self.company_id, fields.Date.today()))
@@ -366,7 +371,7 @@ class SaleOrder(models.Model):
             'reward_identifier_code': reward_code,
             'sequence': sequence,
         }
-        if reward.discount_mode == 'per_order':
+        if reward.discount_mode in ['per_order', 'per_point']:
             reward_dict = {'tax': {
                 **product_dict,
                 'name': _("Discount: %(discount)s", discount=reward.description),
