@@ -1534,37 +1534,9 @@ class BaseModel(metaclass=MetaModel):
             not preceded by ``!`` and is not member of any of the groups
             preceded by ``!``
         """
-        from odoo.http import request
-        user = self.env.user
-
-        has_groups = []
-        not_has_groups = []
-        for group_ext_id in groups.split(','):
-            group_ext_id = group_ext_id.strip()
-            if group_ext_id[0] == '!':
-                not_has_groups.append(group_ext_id[1:])
-            else:
-                has_groups.append(group_ext_id)
-
-        for group_ext_id in not_has_groups:
-            if group_ext_id == 'base.group_no_one':
-                # check: the group_no_one is effective in debug mode only
-                if user.has_group(group_ext_id) and request and request.session.debug:
-                    return False
-            else:
-                if user.has_group(group_ext_id):
-                    return False
-
-        for group_ext_id in has_groups:
-            if group_ext_id == 'base.group_no_one':
-                # check: the group_no_one is effective in debug mode only
-                if user.has_group(group_ext_id) and request and request.session.debug:
-                    return True
-            else:
-                if user.has_group(group_ext_id):
-                    return True
-
-        return not has_groups
+        if not self.env.user:
+            return False
+        return self.env.user in self.env['res.groups']._define_group(groups)
 
     @api.model
     @api.readonly

@@ -441,7 +441,7 @@ class Users(models.Model):
 
     @api.depends('groups_id')
     def _compute_share(self):
-        user_group_id = self.env['ir.model.data']._xmlid_to_res_id('base.group_user')
+        user_group_id = self.env['res.groups']._get_group_id('base.group_user')
         internal_users = self.filtered_domain([('groups_id', 'in', [user_group_id])])
         internal_users.share = False
         (self - internal_users).share = True
@@ -1001,30 +1001,38 @@ class Users(models.Model):
     @api.model
     @api.readonly
     def has_group(self, group_ext_id):
-        # use singleton's id if called on a non-empty recordset, otherwise
-        # context uid
-        uid = self.id
-        if uid and uid != self._uid:
-            self = self.with_user(uid)
-        return self._has_group(group_ext_id)
+        """Return True if the user contains the required group."""
+        # TODO: Add to log a warning when the group_id is None. Because, this implies that the
+        # group xml id does not exist and therefore the data may be inconsistent.
+        # This change must be made at the same time as the __manifest__ and xml changes because
+        # several modules use groups before those are created.
+        group_id = self.env['res.groups']._get_group_id(group_ext_id)
 
-    @api.model
-    @tools.ormcache('self._uid', 'group_ext_id')
-    def _has_group(self, group_ext_id):
-        """Checks whether user belongs to given group.
+        # use singleton's id if called on a non-empty recordset, otherwise context uid
+        return group_id in (self or self.env.user)._user_groups()
 
-        :param str group_ext_id: external ID (XML ID) of the group.
-           Must be provided in fully-qualified form (``module.ext_id``), as there
-           is no implicit module to use..
-        :return: True if the current user is a member of the group with the
-           given external ID (XML ID), else False.
-        """
-        assert group_ext_id and '.' in group_ext_id, "External ID '%s' must be fully qualified" % group_ext_id
-        module, ext_id = group_ext_id.split('.')
-        self._cr.execute("""SELECT 1 FROM res_groups_users_rel WHERE uid=%s AND gid IN
-                            (SELECT res_id FROM ir_model_data WHERE module=%s AND name=%s AND model='res.groups')""",
-                         (self._uid, module, ext_id))
-        return bool(self._cr.fetchone())
+    def _user_groups(self, debug_mode=None):
+        """Returns the list of user group ids.
+
+        If the user is part of 'base.group_user' and we are in debug_mode (from the params or
+        from the session) then the group id of 'base.group_no_one' will be added."""
+
+        group_ids = self.__user_groups()
+        if self.env['res.groups']._get_group_id('base.group_user') in group_ids:
+            if debug_mode is None:
+                debug_mode = bool(request and request.session.debug)
+            if debug_mode:
+                group_ids += (self.env['res.groups']._get_group_id('base.group_no_one'),)
+
+        return group_ids
+
+    @tools.ormcache('self.id')
+    def __user_groups(self):
+        """Returns the list of user group ids. (without the group id of 'base.group_no_one')"""
+
+        self.ensure_one()
+        group_no_one_id = self.env['res.groups']._get_group_id('base.group_no_one')
+        return tuple(id_ for id_ in self.groups_id._ids if id_ != group_no_one_id)
 
     def _action_show(self):
         """If self is a singleton, directly access the form view. If it is a recordset, open a tree view"""
@@ -1256,6 +1264,460 @@ class Users(models.Model):
 # to the implied groups (transitively).
 #
 
+class GroupsObject:
+    def __eq__(self, other):
+        return self._key == other._key
+
+    def __le__(self, other):
+        raise NotImplementedError()
+
+    def __lt__(self, other):
+        return self != other and self <= other
+
+    def __ge__(self, other):
+        return other <= self
+
+    def __gt__(self, other):
+        return self != other and other <= self
+
+    def __bool__(self):
+        raise NotImplementedError()
+
+
+class GroupsObjectUnion(GroupsObject):
+    # union of intersections of leaf (user group or inverted user group)
+
+    def __init__(self, *intersections, reduce=False, data=None, root=None):
+        """
+        Each group object represents a combination of accesses and is immutable.
+        Only public functions of this object can be used.
+
+        :param GroupsObjectIntersection intersections: optional intersection, by default is no_one
+        :param boolean reduce: reduce the complexity of the given intersections
+        :param {id: str} id_to_ref: id to referency
+        :param {id: set()} greaters: id to greaters set, the greater contains the ensemble.
+            e.g.:
+                {N: {N, Z, Q, R, C}}
+                Real numbers (id=R) is greater of Natural numbers (id=N)
+                The N is inside the greater beacause N is equal/inside N
+        :param {id: set()} distincts: id to distincts set without any possible intersections
+            e.g.:
+                {R: {I}}
+                Real numbers (id=N) as no possible intersection with the Imaginary numbers (id=I)
+        """
+        self._root = self if root is None else root
+
+        if root is None:
+            self._all_leafs = {}
+
+            data[0] = {'ref': '*'}
+
+            for leaf_id, info in data.items():
+                ref = info['ref']
+                leaf = GroupsObjectLeaf(leaf_id, ref=ref)
+                self._all_leafs[leaf_id] = leaf
+                self._all_leafs[ref] = leaf
+
+            for leaf_id, info in data.items():
+                parent_ids = info.get('greaters') or set()
+                self._all_leafs[leaf_id]._greaters.update(parent_ids)
+                self._all_leafs[leaf_id]._smallers.add(leaf_id)
+                for parent_id in parent_ids:
+                    self._all_leafs[parent_id]._smallers.add(leaf_id)
+
+            for leaf_id, info in data.items():
+                distincts = info.get('distincts') or set()
+                full = set()
+                for distinct in distincts:
+                    full.add(distinct)
+                    full.update(self._all_leafs[distinct]._smallers)
+                    self._all_leafs[leaf_id]._distincts.update(full)
+                for smaller in self._all_leafs[leaf_id]._smallers:
+                    self._all_leafs[smaller]._distincts.update(full)
+
+                for f_id in full:
+                    self._all_leafs[f_id]._distincts.add(leaf_id)
+                    self._all_leafs[f_id]._distincts.update(self._all_leafs[leaf_id]._smallers)
+
+            self._every_one = GroupsObjectUnion(GroupsObjectIntersection(self._all_leafs[0]), root=self._root)
+            self._no_one = GroupsObjectUnion(GroupsObjectIntersection(~self._all_leafs[0]), root=self._root)
+
+        if reduce and intersections:
+            intersections = self._reduce_intersections(intersections)
+
+        self._intersections = tuple(sorted(set(intersections), key=lambda intersection: intersection._key))
+        self._key = tuple(intersection._key for intersection in self._intersections)
+        self._hash = hash(self._key)
+
+    def every_one(self):
+        """ Returns a group object that contains all users """
+        return self._root._every_one
+
+    def no_one(self):
+        """ Returns a group object that contains no one """
+        return self._root._no_one
+
+    def define(self, group_ext_ids):
+        """ Return the group object from the string.
+
+        :param str group_ext_ids: comma-separated list of fully-qualified group
+            external IDs, e.g., ``base.group_user,base.group_system``,
+            optionally preceded by ``!``
+        """
+        intersect_args = []
+        union_args = []
+        for xmlid in group_ext_ids.split(','):
+            if xmlid.startswith('!'):
+                intersect_args.append(~self._define_leaf(xmlid[1:]))
+            else:
+                union_args.append(GroupsObjectIntersection(self._define_leaf(xmlid)))
+
+        if union_args and intersect_args:
+            return GroupsObjectUnion(*union_args, root=self._root) & GroupsObjectUnion(GroupsObjectIntersection(*intersect_args), root=self._root)
+        elif union_args:
+            return GroupsObjectUnion(*union_args, root=self._root)
+        elif intersect_args:
+            return GroupsObjectUnion(GroupsObjectIntersection(*intersect_args), root=self._root)
+        else:
+            return self.every_one()
+
+    def _define_leaf(self, group_ext_id):
+        if group_ext_id not in self._root._all_leafs:
+            leaf_id = -len(self._root._all_leafs)
+            self._root._all_leafs[leaf_id] = self._root._all_leafs[group_ext_id] = GroupsObjectLeaf(leaf_id, ref=group_ext_id)
+        return self._root._all_leafs[group_ext_id]
+
+    def define_from_repr(self, group_repr):
+        """ Return the group object from the string (given by the repr of the group object).
+
+        :param group_repr: str
+            Use | (union) and & (intersection) separator like the python object.
+                intersection it's apply before union.
+                Can use an invertion with ~.
+        """
+        if not group_repr:
+            return self.every_one()
+
+        res = None
+        for union in group_repr.split('|'):
+            union = union.strip()
+            intersection = None
+            if union.startswith('(') and union.endswith(')'):
+                union = union[1:-1]
+            for xmlid in union.split('&'):
+                xmlid = xmlid.strip()
+                leaf = ~self.define(xmlid[1:]) if xmlid.startswith('~') else self.define(xmlid)
+                if intersection is None:
+                    intersection = leaf
+                else:
+                    intersection &= leaf
+            if intersection is None:
+                return self.every_one()
+            elif res is None:
+                res = intersection
+            else:
+                res |= intersection
+        return self.no_one() if res is None else res
+
+    def define_from_ids(self, ids):
+        """ Return the group object from the res.groups ids. """
+        intersections = [GroupsObjectIntersection(self._root._all_leafs[leaf_id]) for leaf_id in ids]
+        return GroupsObjectUnion(*intersections, reduce=True, root=self._root)
+
+    def get_id(self, group_ext_id):
+        """ Return the group id from the external referency. Return None if the group
+        does not exists. """
+        leaf = self._root._all_leafs.get(group_ext_id)
+        if leaf is None or leaf._id < 0:
+            return None
+        return leaf._id
+
+    def is_every_one(self):
+        """ Returns True if the group object contains all users """
+        return self is self._root._every_one or (self._intersections and any(item.is_every_one() for item in self._intersections))
+
+    def is_empty(self):
+        """ Returns True if whatever users there are, none will be contained in this set of access groups. """
+        return self is self._root._no_one or not self._intersections or all(item.is_empty() for item in self._intersections)
+
+    def _reduce_intersections(self, intersections):
+        """ Reduces the complexity of the object by reducing the number of elements. """
+        intersections_leafs = [set(intersection._leafs) for intersection in intersections if not intersection.is_empty()]
+
+        if not intersections_leafs:
+            return [GroupsObjectIntersection(~self._root._all_leafs[0])]
+
+        # remove complementary intersections: (A & ~B) | (A & B) => A
+        for intersection_leafs in intersections_leafs:
+            for other_leafs in intersections_leafs:
+                if other_leafs == intersection_leafs:
+                    continue
+                for leaf in list(intersection_leafs):
+                    if ~leaf in other_leafs and set(intersection_leafs) - {leaf} == set(other_leafs) - {~leaf}:
+                        intersection_leafs.remove(leaf)
+                        other_leafs.remove(~leaf)
+                        if not intersection_leafs:
+                            intersection_leafs.add(self._root._all_leafs[0])
+
+        # remove smaller union set: (A & B) | A => A
+        reduced_leafs = []
+        for i_leafs in list(intersections_leafs):
+            for o_leafs in intersections_leafs:
+                if o_leafs == i_leafs:
+                    continue
+                if len(o_leafs) == 1 and o_leafs < i_leafs:
+                    intersections_leafs.remove(i_leafs)
+                    break
+                if o_leafs and all(any(leaf >= l for l in i_leafs) for leaf in o_leafs):
+                    intersections_leafs.remove(i_leafs)
+                    break
+            else:
+                reduced_leafs.append(i_leafs)
+
+        if reduced_leafs:
+            return [GroupsObjectIntersection(*leafs) for leafs in reduced_leafs if leafs]
+        else:
+            return [GroupsObjectIntersection(self._root._all_leafs[0])]
+
+    def __and__(self, other):
+        if self == other:
+            return self
+
+        combine = []
+        for other_intersection in other._intersections:
+            for intersection in self._intersections:
+                if intersection._leafs == other_intersection._leafs:
+                    combine.append(intersection)
+                else:
+                    combine.append(GroupsObjectIntersection(*(intersection._leafs + other_intersection._leafs), reduce=True))
+
+        return GroupsObjectUnion(*combine, reduce=True, root=self._root)
+
+    def __or__(self, other):
+        if self == other:
+            return self
+        combine = self._intersections + other._intersections
+        return GroupsObjectUnion(*combine, reduce=True, root=self._root)
+
+    def __invert__(self):
+        if self.is_empty():
+            return self.every_one()
+        if self.is_every_one():
+            return self.no_one()
+
+        # optimizes most cases
+        if len(self._intersections) == 1 and len(self._intersections[0]._leafs) == 1:
+            return GroupsObjectUnion(GroupsObjectIntersection(~self._intersections[0]._leafs[0]), root=self._root)
+
+        # intersections of unions will be normalized into an union of intersections
+        unions_to_intersect = [
+            {~leaf for leaf in intersection._leafs}
+            for intersection in self._intersections
+        ]
+
+        # distributes
+        combines = [set()]
+        for union_leafs in unions_to_intersect:
+            intersections = list(combines)
+            combines = []
+            for leafs in intersections:
+                no_empty = {
+                    leaf
+                    for leaf in union_leafs
+                    if ~leaf not in leafs and
+                        not any(l._negate == leaf._negate and
+                        leaf._id in l._distincts for l in leafs)}
+                if not no_empty:
+                    continue
+
+                missing = no_empty - leafs
+                if missing != no_empty:
+                    missing.add(None)
+
+                for leaf in missing:
+                    if leaf is None:
+                        combine = leafs
+                    else:
+                        combine = {l for l in leafs if not (l >= leaf)}
+                        if not any(l <= leaf for l in leafs):
+                            combine |= {leaf}
+                    if combine and combine not in combines:
+                        combines.append(combine)
+
+        if not combines:
+            return self.no_one()
+
+        return GroupsObjectUnion(*[GroupsObjectIntersection(*leafs) for leafs in combines], reduce=True, root=self._root)
+
+    def __contains__(self, user):
+        try:
+            assert user._name == 'res.users'
+            if not user:
+                return False
+            user.ensure_one()
+        except (AttributeError, AssertionError, ValueError):
+            raise ValueError('You can only check access for one user. (%s)' % user)
+
+        group_ids = user._user_groups()
+        implied_group_ids = set(chain(*[self._root._all_leafs[group_id]._greaters for group_id in group_ids]))
+
+        for intersection in self._intersections:
+            if all(
+                (
+                    (leaf._negate and leaf._id not in implied_group_ids) or
+                    (not leaf._negate and leaf._id in implied_group_ids)
+                )
+                for leaf in intersection._leafs):
+                return True
+        return False
+
+    def __le__(self, other):
+        if self._key == other._key:
+            return True
+        if self.is_every_one() or other.is_empty():
+            return False
+        if other.is_every_one() or self.is_empty():
+            return True
+        return all(any(intersection <= i for i in other._intersections) for intersection in self._intersections)
+
+    def __str__(self):
+        """ Returns an intersection union representation of groups using user-readable references.
+
+            e.g. (base.group_user & base.group_multi_company) | (base.group_portal & ~base.group_multi_company) | base.group_public
+        """
+        union_str = []
+        intersections = self._intersections
+        if not intersections:
+            return '~*'
+        for intersection in intersections:
+            if not intersection._leafs:
+                union_str.append("~*")
+                continue
+            intersection_str = [f"{'~' if leaf._negate else ''}{leaf._ref}" for leaf in intersection._leafs]
+            union_str.append(" & ".join(intersection_str))
+        if len(union_str) == 1:
+            return union_str[0]
+        union_str = [f'({s})' if '&' in s else s for s in union_str]
+        return " | ".join(union_str)
+
+    def __repr__(self):
+        return repr(self.__str__())
+
+    def __hash__(self):
+        return self._hash
+
+
+class GroupsObjectIntersection(GroupsObject):
+    def __init__(self, *leafs, reduce=False):
+        if reduce:
+            leafs = self._reduce_leafs(leafs)
+
+        self._leafs = tuple(sorted(set(leafs), key=lambda leaf: leaf._key))
+        self._key = tuple(leaf._key for leaf in self._leafs)
+        self._hash = hash(self._key)
+
+    def is_empty(self):
+        return not self._leafs or any(item.is_empty() for item in self._leafs)
+
+    def is_every_one(self):
+        return self._leafs and all(item.is_every_one() for item in self._leafs)
+
+    def _reduce_leafs(self, leafs):
+        """ Reduces the complexity of the object by reducing the number of elements. """
+        is_empty = not leafs
+        normalized_leafs = []
+        for leaf in leafs:
+            if is_empty or leaf.is_empty():
+                is_empty = True
+                break
+            if leaf in normalized_leafs:
+                continue
+            for other in leafs:
+                if other == leaf:
+                    continue
+                if other.is_every_one():
+                    continue
+                if (
+                        not leaf._negate and
+                        other._negate and other._id and
+                        other._id in leaf._greaters
+                    ):
+                    is_empty = True
+                    break
+                if other < leaf:
+                    break
+                if not other._negate and other._id in leaf._distincts:
+                    if not leaf._negate:
+                        is_empty = True
+                    break
+                if leaf._negate and other._negate and (leaf._greaters & other._distincts):
+                    is_empty = True
+                    break
+            else:
+                normalized_leafs.append(leaf)
+
+        if is_empty:
+            normalized_leafs = []
+        elif len(normalized_leafs) > 1:
+            normalized_leafs = [leaf for leaf in normalized_leafs if not leaf.is_every_one()] or normalized_leafs[0]
+        return normalized_leafs
+
+    def __le__(self, intersection):
+        if self._key == intersection._key:
+            return True
+        return all(any(leaf >= l for l in self._leafs) for leaf in intersection._leafs)
+
+    def __hash__(self):
+        return self._hash
+
+
+class GroupsObjectLeaf(GroupsObject):
+    def __init__(self, leaf_id, negate=False, ref=None):
+        self._id = leaf_id
+        self._negate = negate
+        self._ref = ref
+        self._key = (leaf_id, negate)
+        self._hash = hash(self._key)
+
+        self._greaters = {0}
+        self._smallers = set()
+        self._distincts = set()
+        self._invert = None
+
+    def is_empty(self):
+        return self._id == 0 and self._negate
+
+    def is_every_one(self):
+        return self._id == 0 and not self._negate
+
+    def __invert__(self):
+        if self._invert is None:
+            self._invert = GroupsObjectLeaf(self._id, negate=not self._negate, ref=self._ref)
+            self._invert._invert = self
+            self._invert._greaters = self._greaters
+            self._invert._smallers = self._smallers
+            self._invert._distincts = self._distincts
+        return self._invert
+
+    def __le__(self, leaf):
+        if self._negate:
+            if leaf._negate:
+                if self._id in leaf._greaters:
+                    return True
+                if self._id in leaf._distincts and (leaf._greaters - {leaf._id}) & self._distincts:
+                    return True
+        else:
+            if leaf._negate:
+                if self._smallers & leaf._distincts:
+                    return True
+            elif leaf._id in self._greaters:
+                return True
+        return False
+
+    def __hash__(self):
+        return self._hash
+
+
 class GroupsImplied(models.Model):
     _inherit = 'res.groups'
 
@@ -1335,6 +1797,68 @@ class GroupsImplied(models.Model):
                 # do not remove inactive users (e.g. default)
                 implied_group.with_context(active_test=False).write(
                     {'users': [Command.unlink(user.id) for user in users_to_unlink]})
+
+    @api.model
+    @tools.ormcache()
+    def __get_group(self):
+        groups = self.sudo().search([], order='id')
+        id_to_ref = groups.get_external_id()
+        # no one depending of the session, it's not realy implied
+        no_one_ids = {_id for _id, ref in id_to_ref.items() if ref == 'base.group_no_one'}
+
+        # determine distinct groups
+        distinct_groups = set()
+        user_types_category_id = self.env['ir.model.data']._xmlid_to_res_id('base.module_category_user_type', raise_if_not_found=False)
+        if user_types_category_id:
+            distinct_groups.update(self.sudo().search([('category_id', '=', user_types_category_id)]).ids)
+
+        data = {
+            group.id: {
+                'ref': id_to_ref[group.id] or str(group.id),
+                'greaters': set(group.trans_implied_ids.ids + [group.id, 0]) - (no_one_ids if group.id not in no_one_ids else set()),
+                'distincts':
+                    distinct_groups - {group.id}
+                    if group.id in distinct_groups else
+                    set(),
+            }
+            for group in groups
+        }
+        return GroupsObjectUnion(data=data)
+
+    @api.model
+    def _get_group_id(self, group_ext_id):
+        return self.__get_group().get_id(group_ext_id)
+
+    @api.model
+    def _define_group(self, group_ext_ids=None):
+        """ Return the group object from a string or an list of
+        res.groups ids.
+
+        :param list group_ext_ids: res.groups ids. The result is an
+            union between this groups.
+
+        :param str group_ext_ids: from field and ir.ui.view:
+            comma-separated list of fully-qualified group external IDs,
+                optionally preceded by ``!`` (negative group). The
+                result is an union between positive group who intersect
+                every negative group.
+                e.g. ``base.group_user,!base.group_system``
+
+        :param str group_ext_ids: from the group object repr:
+            Use | (union) and & (intersection) separator like the python
+                object.
+                Intersection it's apply before union.
+                Can use an invertion with ~.
+                e.g. ``base.group_user & ~base.group_system``
+        """
+        if not group_ext_ids:
+            return self.__get_group()
+        if isinstance(group_ext_ids, (list, tuple)):
+            return self.__get_group().define_from_ids(group_ext_ids)
+        if '|' in group_ext_ids or '&' in group_ext_ids or '~' in group_ext_ids:
+            return self.__get_group().define_from_repr(group_ext_ids)
+        return self.__get_group().define(group_ext_ids)
+
 
 class UsersImplied(models.Model):
     _inherit = 'res.users'
@@ -1445,8 +1969,8 @@ class GroupsView(models.Model):
             xml = E.field(name="groups_id", position="after")
 
         else:
-            group_no_one = view.env.ref('base.group_no_one')
-            group_employee = view.env.ref('base.group_user')
+            group_no_one_id = self._get_group_id('base.group_no_one')
+            group_employee_id = self._get_group_id('base.group_user')
             xml0, xml1, xml2, xml3, xml4 = [], [], [], [], []
             xml_by_category = {}
             xml1.append(E.separator(string='User Type', colspan="2", groups='base.group_no_one'))
@@ -1472,7 +1996,7 @@ class GroupsView(models.Model):
                     # and is therefore removed when not in debug mode.
                     xml0.append(E.field(name=field_name, invisible="1", on_change="1"))
                     user_type_field_name = field_name
-                    user_type_readonly = f'{user_type_field_name} != {group_employee.id}'
+                    user_type_readonly = f'{user_type_field_name} != {group_employee_id}'
                     attrs['widget'] = 'radio'
                     # Trigger the on_change of this "virtual field"
                     attrs['on_change'] = '1'
@@ -1504,7 +2028,7 @@ class GroupsView(models.Model):
                     for g in gs:
                         field_name = name_boolean_group(g.id)
                         dest_group = left_group if group_count % 2 == 0 else right_group
-                        if g == group_no_one:
+                        if g.id == group_no_one_id:
                             # make the group_no_one invisible in the form view
                             dest_group.append(E.field(name=field_name, invisible="1", **attrs))
                         else:
@@ -1516,7 +2040,7 @@ class GroupsView(models.Model):
                     xml4.append(E.group(*right_group))
 
             xml4.append({'class': "o_label_nowrap"})
-            user_type_invisible = f'{user_type_field_name} != {group_employee.id}' if user_type_field_name else None
+            user_type_invisible = f'{user_type_field_name} != {group_employee_id}' if user_type_field_name else None
 
             for xml_cat in sorted(xml_by_category.keys(), key=lambda it: it[0]):
                 master_category_name = xml_cat[1]
