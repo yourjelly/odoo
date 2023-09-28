@@ -3294,6 +3294,9 @@
         CommandResult[CommandResult["InvalidQuantity"] = 86] = "InvalidQuantity";
     })(exports.CommandResult || (exports.CommandResult = {}));
 
+    function isMatrix(x) {
+        return Array.isArray(x) && Array.isArray(x[0]);
+    }
     var DIRECTION;
     (function (DIRECTION) {
         DIRECTION["UP"] = "up";
@@ -3689,6 +3692,9 @@
                 }
             });
             this.state.values = this.getFilterValues(this.props.filterPosition);
+        }
+        get isReadonly() {
+            return this.env.model.getters.isReadonly();
         }
         getFilterValues(position) {
             const sheetId = this.env.model.getters.getActiveSheetId();
@@ -10008,9 +10014,9 @@
         }
         setup() {
             this.showFormulaState = this.env.model.getters.shouldShowFormulas();
-            this.debouncedUpdateSearch = debounce(this.updateSearch.bind(this), 200);
             owl.onMounted(() => this.focusInput());
             owl.onWillUnmount(() => {
+                clearTimeout(this.debounceTimeoutId);
                 this.env.model.dispatch("CLEAR_SEARCH");
                 this.env.model.dispatch("SET_FORMULA_VISIBILITY", { show: this.showFormulaState });
             });
@@ -10052,6 +10058,13 @@
                 toSearch: this.state.toSearch,
                 searchOptions: this.state.searchOptions,
             });
+        }
+        debouncedUpdateSearch() {
+            clearTimeout(this.debounceTimeoutId);
+            this.debounceTimeoutId = setTimeout(() => {
+                this.updateSearch();
+                this.debounceTimeoutId = undefined;
+            }, 200);
         }
         replace() {
             this.env.model.dispatch("REPLACE_SEARCH", {
@@ -17056,6 +17069,36 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         isExported: true,
     };
     // -----------------------------------------------------------------------------
+    // INDEX
+    // -----------------------------------------------------------------------------
+    const INDEX = {
+        description: _lt(`Returns the content of a cell, specified by row and column offset.`),
+        args: args(`
+      reference (range) ${_lt("The range of cells from which the value is returned.")}
+      row (number) ${_lt("The index of the row to be returned from within the reference range of cells.")}
+      column (number) ${_lt("The index of the column to be returned from within the reference range of cells.")}
+`),
+        returns: ["ANY"],
+        computeFormat: (reference, row, column) => {
+            var _a;
+            const _row = toNumber(row.value);
+            const _column = toNumber(column.value);
+            return (_a = reference[_column - 1][_row - 1]) === null || _a === void 0 ? void 0 : _a.format;
+        },
+        compute: function (reference, row, column) {
+            const _reference = isMatrix(reference) ? reference : [[reference]];
+            const _row = toNumber(row);
+            const _column = toNumber(column);
+            assert(() => _column >= 0 &&
+                _column - 1 < _reference.length &&
+                _row >= 0 &&
+                _row - 1 < _reference[0].length, _lt("Index out of range."));
+            assert(() => row !== 0 && column !== 0, _lt("This function can only return a single cell value, not an array. Provide valid row and column indices."));
+            return _reference[_column - 1][_row - 1];
+        },
+        isExported: true,
+    };
+    // -----------------------------------------------------------------------------
     // LOOKUP
     // -----------------------------------------------------------------------------
     const LOOKUP = {
@@ -17244,6 +17287,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         COLUMN: COLUMN,
         COLUMNS: COLUMNS,
         HLOOKUP: HLOOKUP,
+        INDEX: INDEX,
         LOOKUP: LOOKUP,
         MATCH: MATCH,
         ROW: ROW,
@@ -31654,7 +31698,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             });
             for (const filterTable of this.copiedTables) {
                 this.dispatch("REMOVE_FILTER_TABLE", {
-                    sheetId: this.getters.getActiveSheetId(),
+                    sheetId: this.sheetId,
                     target: [filterTable.zone],
                 });
             }
@@ -42922,8 +42966,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
 
 
     __info__.version = '16.0.19';
-    __info__.date = '2023-09-22T07:46:21.175Z';
-    __info__.hash = '229c563';
+    __info__.date = '2023-09-28T11:01:52.988Z';
+    __info__.hash = 'c4bef11';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
