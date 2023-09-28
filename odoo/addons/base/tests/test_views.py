@@ -34,21 +34,21 @@ class ViewCase(common.TransactionCase):
         super(ViewCase, self).setUp()
         self.View = self.env['ir.ui.view']
 
-    def assertValid(self, arch, name='valid view', inherit_id=False):
+    def assertValid(self, arch, name='valid view', inherit_id=False, model='ir.ui.view'):
         return self.View.create({
             'name': name,
-            'model': 'ir.ui.view',
+            'model': model,
             'inherit_id': inherit_id,
             'arch': arch,
         })
 
-    def assertInvalid(self, arch, expected_message=None, name='invalid view', inherit_id=False):
+    def assertInvalid(self, arch, expected_message=None, name='invalid view', inherit_id=False, model='ir.ui.view'):
         with mute_logger('odoo.addons.base.models.ir_ui_view'):
             with self.assertRaises(ValidationError) as catcher:
                 with self.cr.savepoint():
                     self.View.create({
                         'name': name,
-                        'model': 'ir.ui.view',
+                        'model': model,
                         'inherit_id': inherit_id,
                         'arch': arch,
                     })
@@ -59,11 +59,11 @@ class ViewCase(common.TransactionCase):
         else:
             _logger.warning(message)
 
-    def assertWarning(self, arch, expected_message=None, name='invalid view'):
+    def assertWarning(self, arch, expected_message=None, name='invalid view', model='ir.ui.view'):
         with self.assertLogs('odoo.addons.base.models.ir_ui_view', level="WARNING") as log_catcher:
             self.View.create({
                 'name': name,
-                'model': 'ir.ui.view',
+                'model': model,
                 'arch': arch,
             })
         self.assertEqual(len(log_catcher.output), 1, "Exactly one warning should be logged")
@@ -318,7 +318,7 @@ class TestViewInheritance(ViewCase):
         _, _, counter = get_cache_key_counter(self.env['ir.model.data']._xmlid_lookup, 'base.action_ui_view')
         hit, miss = counter.hit, counter.miss
 
-        with self.assertQueryCount(7):
+        with self.assertQueryCount(11):
             base_view = self.assertValid("""
                 <form string="View">
                     <header>
@@ -332,7 +332,7 @@ class TestViewInheritance(ViewCase):
         self.assertEqual(counter.hit, hit)
         self.assertEqual(counter.miss, miss + 2)
 
-        with self.assertQueryCount(6):
+        with self.assertQueryCount(10):
             self.assertValid("""
                 <field name="name" position="replace"/>
             """, inherit_id=base_view.id)
@@ -343,7 +343,7 @@ class TestViewInheritance(ViewCase):
         _, _, counter = get_cache_key_counter(self.env['ir.model.data']._xmlid_lookup, 'base.group_system')
         hit, miss = counter.hit, counter.miss
 
-        with self.assertQueryCount(4):
+        with self.assertQueryCount(8):
             base_view = self.assertValid("""
                 <form string="View">
                     <field name="name" groups="base.group_system"/>
@@ -354,7 +354,7 @@ class TestViewInheritance(ViewCase):
         self.assertEqual(counter.hit, hit)
         self.assertEqual(counter.miss, miss + 1)
 
-        with self.assertQueryCount(4):
+        with self.assertQueryCount(8):
             self.assertValid("""
                 <field name="name" position="replace">
                     <field name="key" groups="base.group_system"/>
@@ -1853,11 +1853,13 @@ class TestViews(ViewCase):
                 <field name="inherit_id" context="{'stuff': model}"/>
             </form>
         """
-        self.assertValid(arch % '<field name="model"/>')
-        self.assertInvalid(
-            arch % '',
-            """Field 'model' used in context ({'stuff': model}) must be present in view but is missing.""",
-        )
+        view = self.assertValid(arch % '<field name="model"/>')
+        view_arch = view.get_views([(view.id, 'form')])['views']['form']['arch']
+        self.assertFalse(etree.fromstring(view_arch).xpath('//field[@name="model"][@invisible][@readonly]'))
+
+        view = self.assertValid(arch % '')
+        view_arch = view.get_views([(view.id, 'form')])['views']['form']['arch']
+        self.assertTrue(etree.fromstring(view_arch).xpath('//field[@name="model"][@invisible][@readonly]'))
 
     @mute_logger('odoo.addons.base.models.ir_ui_view')
     def test_context_in_subview(self):
@@ -1872,15 +1874,17 @@ class TestViews(ViewCase):
                 </field>
             </form>
         """
-        self.assertValid(arch % ('', '<field name="model"/>'))
-        self.assertInvalid(
-            arch % ('', ''),
-            """Field 'model' used in context ({'stuff': model}) must be present in view but is missing.""",
-        )
-        self.assertInvalid(
-            arch % ('<field name="model"/>', ''),
-            """Field 'model' used in context ({'stuff': model}) must be present in view but is missing.""",
-        )
+        view = self.assertValid(arch % ('', '<field name="model"/>'))
+        view_arch = view.get_views([(view.id, 'form')])['views']['form']['arch']
+        self.assertFalse(etree.fromstring(view_arch).xpath('//field[@name="model"][@invisible][@readonly]'))
+
+        view = self.assertValid(arch % ('', ''))
+        view_arch = view.get_views([(view.id, 'form')])['views']['form']['arch']
+        self.assertTrue(etree.fromstring(view_arch).xpath('//field/form/field[@name="model"][@invisible][@readonly]'))
+
+        view = self.assertValid(arch % ('<field name="model"/>', ''))
+        view_arch = view.get_views([(view.id, 'form')])['views']['form']['arch']
+        self.assertTrue(etree.fromstring(view_arch).xpath('//field/form/field[@name="model"][@invisible][@readonly]'))
 
     @mute_logger('odoo.addons.base.models.ir_ui_view')
     def test_context_in_subview_with_parent(self):
@@ -1895,17 +1899,21 @@ class TestViews(ViewCase):
                 </field>
             </form>
         """
-        self.assertValid(arch % ('<field name="model"/>', ''))
-        self.assertInvalid(
-            arch % ('', ''),
-            """Field 'model' used in context ({'stuff': parent.model}) must be present in view but is missing.""",
-        )
-        self.assertInvalid(
-            arch % ('', '<field name="model"/>'),
-            """Field 'model' used in context ({'stuff': parent.model}) must be present in view but is missing.""",
-        )
 
-    @mute_logger('odoo.addons.base.models.ir_ui_view')
+        view = self.assertValid(arch % ('<field name="model"/>', ''))
+        view_arch = view.get_views([(view.id, 'form')])['views']['form']['arch']
+        self.assertFalse(etree.fromstring(view_arch).xpath('//field[@name="model"][@invisible][@readonly]'))
+
+        view = self.assertValid(arch % ('', ''))
+        view_arch = view.get_views([(view.id, 'form')])['views']['form']['arch']
+        self.assertTrue(etree.fromstring(view_arch).xpath('//field[@name="model"][@invisible][@readonly]'))
+        self.assertFalse(etree.fromstring(view_arch).xpath('//field/form/field[@name="model"][@invisible][@readonly]'))
+
+        view = self.assertValid(arch % ('', '<field name="model"/>'))
+        view_arch = view.get_views([(view.id, 'form')])['views']['form']['arch']
+        self.assertTrue(etree.fromstring(view_arch).xpath('//field[@name="model"][@invisible][@readonly]'))
+        self.assertFalse(etree.fromstring(view_arch).xpath('//field/form/field[@name="model"][@invisible][@readonly]'))
+
     def test_context_in_subsubview_with_parent(self):
         arch = """
             <form string="View">
@@ -1920,22 +1928,31 @@ class TestViews(ViewCase):
                             </form>
                         </field>
                     </form>
+                    <tree>
+                        <field name="name"/>
+                    </tree>
                 </field>
             </form>
         """
-        self.assertValid(arch % ('<field name="model"/>', '', ''))
-        self.assertInvalid(
-            arch % ('', '', ''),
-            """Field 'model' used in context ({'stuff': parent.parent.model}) must be present in view but is missing.""",
-        )
-        self.assertInvalid(
-            arch % ('', '<field name="model"/>', ''),
-            """Field 'model' used in context ({'stuff': parent.parent.model}) must be present in view but is missing.""",
-        )
-        self.assertInvalid(
-            arch % ('', '', '<field name="model"/>'),
-            """Field 'model' used in context ({'stuff': parent.parent.model}) must be present in view but is missing.""",
-        )
+
+        view = self.assertValid(arch % ('<field name="model"/>', '', ''))
+        view_arch = view.get_views([(view.id, 'form')])['views']['form']['arch']
+        self.assertFalse(etree.fromstring(view_arch).xpath('//field[@name="model"][@invisible][@readonly]'))
+
+        view = self.assertValid(arch % ('', '', ''))
+        view_arch = view.get_views([(view.id, 'form')])['views']['form']['arch']
+        self.assertTrue(etree.fromstring(view_arch).xpath('//field[@name="model"][@invisible][@readonly]'))
+        self.assertFalse(etree.fromstring(view_arch).xpath('//field//field[@name="model"][@invisible][@readonly]'))
+
+        view = self.assertValid(arch % ('', '<field name="model"/>', ''))
+        view_arch = view.get_views([(view.id, 'form')])['views']['form']['arch']
+        self.assertTrue(etree.fromstring(view_arch).xpath('//field[@name="model"][@invisible][@readonly]'))
+        self.assertFalse(etree.fromstring(view_arch).xpath('//field//field[@name="model"][@invisible][@readonly]'))
+
+        view = self.assertValid(arch % ('', '', '<field name="model"/>'))
+        view_arch = view.get_views([(view.id, 'form')])['views']['form']['arch']
+        self.assertTrue(etree.fromstring(view_arch).xpath('//field[@name="model"][@invisible][@readonly]'))
+        self.assertFalse(etree.fromstring(view_arch).xpath('//field//field[@name="model"][@invisible][@readonly]'))
 
     @mute_logger('odoo.addons.base.models.ir_ui_view')
     def test_domain_id_case(self):
@@ -1958,11 +1975,10 @@ class TestViews(ViewCase):
         self.assertValid(arch % ('', '0', '1'))
         # self.assertInvalid(arch % ('', '1', '0'))
         self.assertValid(arch % ('<field name="name"/>', '1', '0 if name else 1'))
-        # self.assertInvalid(arch % ('<field name="name"/><field name="type"/>', "'tata' if name else 'tutu'", 'type'), 'xxxx')
-        self.assertInvalid(
-            arch % ('', '1', '0 if name else 1'),
-            """Field 'name' used in domain of <field name="inherit_id"> ([(1, '=', 0 if name else 1)]) must be present in view but is missing""",
-        )
+        self.assertInvalid(arch % ('<field name="name"/><field name="type"/>', "'tata' if name else 'tutu'", 'type'), 'Wrong domain formatting')
+        view = self.assertValid(arch % ('', '1', '0 if name else 1'))
+        view_arch = view.get_views([(view.id, 'form')])['views']['form']['arch']
+        self.assertTrue(etree.fromstring(view_arch).xpath('//field[@name="name"][@invisible][@readonly]'))
 
     @mute_logger('odoo.addons.base.models.ir_ui_view')
     def test_domain_in_view(self):
@@ -1972,11 +1988,13 @@ class TestViews(ViewCase):
                 <field name="inherit_id" domain="[('model', '=', model)]"/>
             </form>
         """
-        self.assertValid(arch % '<field name="model"/>')
-        self.assertInvalid(
-            arch % '',
-            """Field 'model' used in domain of <field name="inherit_id"> ([('model', '=', model)]) must be present in view but is missing.""",
-        )
+        view = self.assertValid(arch % '<field name="model"/>')
+        view_arch = view.get_views([(view.id, 'form')])['views']['form']['arch']
+        self.assertFalse(etree.fromstring(view_arch).xpath('//field[@name="model"][@invisible][@readonly]'))
+
+        view = self.assertValid(arch % '')
+        view_arch = view.get_views([(view.id, 'form')])['views']['form']['arch']
+        self.assertTrue(etree.fromstring(view_arch).xpath('//field[@name="model"][@invisible][@readonly]'))
 
     def test_domain_unknown_field(self):
         self.assertInvalid("""
@@ -2025,14 +2043,14 @@ class TestViews(ViewCase):
             </form>
         """
         self.assertValid(arch % ('', '<field name="model"/>'))
-        self.assertInvalid(
-            arch % ('', ''),
-            """Field 'model' used in domain of <field name="inherit_id"> ([('model', '=', model)]) must be present in view but is missing.""",
-        )
-        self.assertInvalid(
-            arch % ('<field name="model"/>', ''),
-            """Field 'model' used in domain of <field name="inherit_id"> ([('model', '=', model)]) must be present in view but is missing.""",
-        )
+
+        view = self.assertValid(arch % ('', ''))
+        view_arch = view.get_views([(view.id, 'form')])['views']['form']['arch']
+        self.assertTrue(etree.fromstring(view_arch).xpath('//field/form/field[@name="model"][@invisible][@readonly]'))
+
+        view = self.assertValid(arch % ('<field name="model"/>', ''))
+        view_arch = view.get_views([(view.id, 'form')])['views']['form']['arch']
+        self.assertTrue(etree.fromstring(view_arch).xpath('//field/form/field[@name="model"][@invisible][@readonly]'))
 
     @mute_logger('odoo.addons.base.models.ir_ui_view')
     def test_domain_in_subview_with_parent(self):
@@ -2047,16 +2065,21 @@ class TestViews(ViewCase):
                 </field>%s
             </form>
         """
-        self.assertValid(arch % ('<field name="model"/>', '', ''))
-        self.assertValid(arch % ('', '', '<field name="model"/>'))
-        self.assertInvalid(
-            arch % ('', '', ''),
-            """Field 'model' used in domain of <field name="inherit_id"> ([('model', '=', parent.model)]) must be present in view but is missing.""",
-        )
-        self.assertInvalid(
-            arch % ('', '<field name="model"/>', ''),
-            """Field 'model' used in domain of <field name="inherit_id"> ([('model', '=', parent.model)]) must be present in view but is missing.""",
-        )
+        view = self.assertValid(arch % ('<field name="model"/>', '', ''))
+        view_arch = view.get_views([(view.id, 'form')])['views']['form']['arch']
+        self.assertFalse(etree.fromstring(view_arch).xpath('//field[@name="model"][@invisible][@readonly]'))
+
+        view = self.assertValid(arch % ('', '', '<field name="model"/>'))
+        view_arch = view.get_views([(view.id, 'form')])['views']['form']['arch']
+        self.assertFalse(etree.fromstring(view_arch).xpath('//field[@name="model"][@invisible][@readonly]'))
+
+        view = self.assertValid(arch % ('', '', ''))
+        view_arch = view.get_views([(view.id, 'form')])['views']['form']['arch']
+        self.assertTrue(etree.fromstring(view_arch).xpath('//field[@name="model"][@invisible][@readonly]'))
+
+        view = self.assertValid(arch % ('', '<field name="model"/>', ''))
+        view_arch = view.get_views([(view.id, 'form')])['views']['form']['arch']
+        self.assertTrue(etree.fromstring(view_arch).xpath('//field[@name="model"][@invisible][@readonly]'))
 
     @mute_logger('odoo.addons.base.models.ir_ui_view')
     def test_domain_on_field_in_view(self):
@@ -2069,11 +2092,13 @@ class TestViews(ViewCase):
                 <field name="inherit_id"/>
             </form>
         """
-        self.assertValid(arch % '<field name="model"/>')
-        self.assertInvalid(
-            arch % '',
-            """Field 'model' used in domain of python field 'inherit_id' ([('model', '=', model)]) must be present in view but is missing.""",
-        )
+        view = self.assertValid(arch % '<field name="model"/>')
+        view_arch = view.get_views([(view.id, 'form')])['views']['form']['arch']
+        self.assertFalse(etree.fromstring(view_arch).xpath('//field[@name="model"][@invisible][@readonly]'))
+
+        view = self.assertValid(arch % '')
+        view_arch = view.get_views([(view.id, 'form')])['views']['form']['arch']
+        self.assertTrue(etree.fromstring(view_arch).xpath('//field[@name="model"][@invisible][@readonly]'))
 
     @mute_logger('odoo.addons.base.models.ir_ui_view')
     def test_domain_on_field_in_subview(self):
@@ -2091,15 +2116,13 @@ class TestViews(ViewCase):
                 </field>
             </form>
         """
-        self.assertValid(arch % ('', '<field name="model"/>'))
-        self.assertInvalid(
-            arch % ('', ''),
-            """Field 'model' used in domain of python field 'inherit_id' ([('model', '=', model)]) must be present in view but is missing.""",
-        )
-        self.assertInvalid(
-            arch % ('<field name="model"/>', ''),
-            """Field 'model' used in domain of python field 'inherit_id' ([('model', '=', model)]) must be present in view but is missing.""",
-        )
+        view = self.assertValid(arch % ('', '<field name="model"/>'))
+        view_arch = view.get_views([(view.id, 'form')])['views']['form']['arch']
+        self.assertFalse(etree.fromstring(view_arch).xpath('//field[@name="model"][@invisible][@readonly]'))
+
+        view = self.assertValid(arch % ('', ''))
+        view_arch = view.get_views([(view.id, 'form')])['views']['form']['arch']
+        self.assertTrue(etree.fromstring(view_arch).xpath('//field/form/field[@name="model"][@invisible][@readonly]'))
 
     @mute_logger('odoo.addons.base.models.ir_ui_view')
     def test_domain_on_field_in_subview_with_parent(self):
@@ -2117,15 +2140,20 @@ class TestViews(ViewCase):
                 </field>
             </form>
         """
-        self.assertValid(arch % ('<field name="model"/>', ''))
-        self.assertInvalid(
-            arch % ('', ''),
-            """Field 'model' used in domain of python field 'inherit_id' ([('model', '=', parent.model)]) must be present in view but is missing.""",
-        )
-        self.assertInvalid(
-            arch % ('', '<field name="model"/>'),
-            """Field 'model' used in domain of python field 'inherit_id' ([('model', '=', parent.model)]) must be present in view but is missing.""",
-        )
+        view = self.assertValid(arch % ('<field name="model"/>', ''))
+        view_arch = view.get_views([(view.id, 'form')])['views']['form']['arch']
+        self.assertFalse(etree.fromstring(view_arch).xpath('//field[@name="model"][@invisible][@readonly]'))
+
+        view = self.assertValid(arch % ('', ''))
+        view_arch = view.get_views([(view.id, 'form')])['views']['form']['arch']
+        self.assertTrue(etree.fromstring(view_arch).xpath('//field[@name="model"][@invisible][@readonly]'))
+        self.assertFalse(etree.fromstring(view_arch).xpath('//field/form/field[@name="model"][@invisible][@readonly]'))
+
+        view = self.assertValid(arch % ('', '<field name="model"/>'))
+        view_arch = view.get_views([(view.id, 'form')])['views']['form']['arch']
+        self.assertTrue(etree.fromstring(view_arch).xpath('//field[@name="model"][@invisible][@readonly]'))
+        self.assertFalse(etree.fromstring(view_arch).xpath('//field/form/field[@name="model"][@invisible][@readonly]'))
+
 
     @mute_logger('odoo.addons.base.models.ir_ui_view')
     def test_domain_on_field_in_noneditable_subview(self):
@@ -2143,11 +2171,13 @@ class TestViews(ViewCase):
                 </field>
             </form>
         """
-        self.assertValid(arch % '')
-        self.assertInvalid(
-            arch % ' editable="bottom"',
-            """Field 'model' used in domain of python field 'inherit_id' ([('model', '=', model)]) must be present in view but is missing.""",
-        )
+        view = self.assertValid(arch % '')
+        view_arch = view.get_views([(view.id, 'form')])['views']['form']['arch']
+        self.assertFalse(etree.fromstring(view_arch).xpath('//field[@name="model"][@invisible][@readonly]'))
+
+        view = self.assertValid(arch % ' editable="bottom"')
+        view_arch = view.get_views([(view.id, 'form')])['views']['form']['arch']
+        self.assertTrue(etree.fromstring(view_arch).xpath('//field/tree/field[@name="model"][@column_invisible][@readonly]'))
 
     @mute_logger('odoo.addons.base.models.ir_ui_view')
     def test_domain_on_readonly_field_in_view(self):
@@ -2187,11 +2217,13 @@ class TestViews(ViewCase):
                 </field>
             </form>
         """
-        self.assertValid(arch % ' readonly="1"')
-        self.assertInvalid(
-            arch % '',
-            """Field 'model' used in domain of python field 'inherit_id' ([('model', '=', model)]) must be present in view but is missing.""",
-        )
+        view = self.assertValid(arch % ' readonly="1"')
+        view_arch = view.get_views([(view.id, 'form')])['views']['form']['arch']
+        self.assertFalse(etree.fromstring(view_arch).xpath('//field[@name="model"][@invisible][@readonly]'))
+
+        view = self.assertValid(arch % '')
+        view_arch = view.get_views([(view.id, 'form')])['views']['form']['arch']
+        self.assertTrue(etree.fromstring(view_arch).xpath('//field/form/field[@name="model"][@invisible][@readonly]'))
 
     @mute_logger('odoo.addons.base.models.ir_ui_view')
     def test_domain_in_filter(self):
@@ -2252,14 +2284,22 @@ class TestViews(ViewCase):
                 </searchpanel>
             </search>
         """
-        self.assertValid(arch % ('', '<field name="inherit_id"/>', 'view_access', 'inherit_id'))
-        self.assertInvalid(
-            arch % ('<field name="inherit_id"/>', '', 'view_access', 'inherit_id'),
-            """Field 'inherit_id' used in domain of <field name="groups_id"> ([('view_access', '=', inherit_id)]) must be present in view but is missing.""",
-        )
+        view = self.assertValid(arch % ('', '<field name="inherit_id"/>', 'view_access', 'inherit_id'))
+        view_arch = view.get_views([(view.id, 'form')])['views']['form']['arch']
+        self.assertFalse(etree.fromstring(view_arch).xpath('//field[@name="inherit_id"][@invisible][@readonly]'))
+        self.assertFalse(etree.fromstring(view_arch).xpath('//field[@name="view_access"][@invisible][@readonly]'))
+
+        view = self.assertValid(arch % ('<field name="inherit_id"/>', '', 'view_access', 'inherit_id'))
+        view_arch = view.get_views([(view.id, 'form')])['views']['form']['arch']
+        self.assertTrue(etree.fromstring(view_arch).xpath('//searchpanel/field[@name="inherit_id"][@invisible][@readonly]'))
+
+        view = self.assertValid(arch % ('', '<field name="inherit_id"/>', 'view_access', 'parent.view_access'))
+        view_arch = view.get_views([(view.id, 'form')])['views']['form']['arch']
+        self.assertFalse(etree.fromstring(view_arch).xpath('//field[@name="view_access"][@invisible][@readonly]'))
+
         self.assertInvalid(
             arch % ('', '<field name="inherit_id"/>', 'view_access', 'view_access'),
-            """Field 'view_access' used in domain of <field name="groups_id"> ([('view_access', '=', view_access)]) must be present in view but is missing.""",
+            """Field 'view_access' in domain of <field name="groups_id"> ([('view_access', '=', view_access)]) does not exist in model 'ir.ui.view'.""",
         )
         self.assertInvalid(
             arch % ('', '<field name="inherit_id"/>', 'inherit_id', 'inherit_id'),
@@ -2325,53 +2365,35 @@ class TestViews(ViewCase):
         self.assertTrue(tree.xpath('//div[@id="bar"]'))
 
     def test_attrs_groups_validation(self):
-        def validate(arch, valid=False, parent=False):
+        def validate(arch, valid=False, parent=False, field='name', model='ir.ui.view'):
             parent = 'parent.' if parent else ''
             if valid:
-                self.assertValid(arch % {'attrs': f"""invisible="{parent}name == 'foo'" """})
-                self.assertValid(arch % {'attrs': f"""domain="[('name', '!=', {parent}name)]" """})
-                self.assertValid(arch % {'attrs': f"""context="{{'default_name': {parent}name}}" """})
-                self.assertValid(arch % {'attrs': f"""decoration-info="{parent}name == 'foo'" """})
+                self.assertValid(arch % {'attrs': f"""invisible="{parent}{field} == 'foo'" """}, model=model)
+                self.assertValid(arch % {'attrs': f"""domain="[('name', '!=', {parent}{field})]" """}, model=model)
+                self.assertValid(arch % {'attrs': f"""context="{{'default_name': {parent}{field}}}" """}, model=model)
+                self.assertValid(arch % {'attrs': f"""decoration-info="{parent}{field} == 'foo'" """}, model=model)
             else:
                 self.assertInvalid(
-                    arch % {'attrs': f"""invisible="{parent}name == 'foo'" """},
-                    f"""Field 'name' used in modifier 'invisible' ({parent}name == 'foo') is restricted to the group(s)""",
+                    arch % {'attrs': f"""invisible="{parent}{field} == 'foo'" """},
+                    f"""Field '{field}' used in modifier 'invisible' ({parent}{field} == 'foo') is restricted to the group(s)""",
+                    model=model,
+                )
+                target = 'inherit_id' if model == 'ir.ui.view' else 'company_id'
+                self.assertInvalid(
+                    arch % {'attrs': f"""domain="[('name', '!=', {parent}{field})]" """},
+                    f"""Field '{field}' used in domain of <field name="{target}"> ([('name', '!=', {parent}{field})]) is restricted to the group(s)""",
+                    model=model,
                 )
                 self.assertInvalid(
-                    arch % {'attrs': f"""domain="[('name', '!=', {parent}name)]" """},
-                    f"""Field 'name' used in domain of <field name="inherit_id"> ([('name', '!=', {parent}name)]) is restricted to the group(s)""",
+                    arch % {'attrs': f"""context="{{'default_name': {parent}{field}}}" """},
+                    f"""Field '{field}' used in context ({{'default_name': {parent}{field}}}) is restricted to the group(s)""",
+                    model=model,
                 )
                 self.assertInvalid(
-                    arch % {'attrs': f"""context="{{'default_name': {parent}name}}" """},
-                    f"""Field 'name' used in context ({{'default_name': {parent}name}}) is restricted to the group(s)""",
+                    arch % {'attrs': f"""decoration-info="{parent}{field} == 'foo'" """},
+                    f"""Field '{field}' used in decoration-info="{parent}{field} == 'foo'" is restricted to the group(s)""",
+                    model=model,
                 )
-                self.assertInvalid(
-                    arch % {'attrs': f"""decoration-info="{parent}name == 'foo'" """},
-                    f"""Field 'name' used in decoration-info="{parent}name == 'foo'" is restricted to the group(s)""",
-                )
-
-
-        # Assert using a field restricted to a group
-        # in another field without the same group is invalid
-        validate("""
-            <form string="View">
-                <field name="name" groups="base.group_system"/>
-                <field name="inherit_id" %(attrs)s/>
-            </form>
-        """, valid=False)
-
-        # Assert using a parent field restricted to a group
-        # in a child field without the same group is invalid
-        validate("""
-            <form string="View">
-                <field name="name" groups="base.group_system"/>
-                <field name="inherit_children_ids">
-                    <tree editable="bottom">
-                        <field name="inherit_id" %(attrs)s/>
-                    </tree>
-                </field>
-            </form>
-        """, valid=False, parent=True)
 
         # Assert using a parent field restricted to a group
         # in a child field with the same group is valid
@@ -2427,16 +2449,6 @@ class TestViews(ViewCase):
             </form>
         """, valid=True)
 
-        # Assert using a field restricted to a group only
-        # in other fields restricted to at least one different group is invalid
-        validate("""
-            <form string="View">
-                <field name="name" groups="base.group_system"/>
-                <field name="inherit_id" groups="base.group_system" %(attrs)s/>
-                <field name="inherit_id" groups="base.group_portal" %(attrs)s/>
-            </form>
-        """, valid=False)
-
         # Assert using a field available twice for 2 different groups
         # in other fields restricted to the same 2 group is valid
         validate("""
@@ -2456,15 +2468,6 @@ class TestViews(ViewCase):
                 <field name="inherit_id" groups="base.group_system" %(attrs)s/>
             </form>
         """, valid=True)
-
-        # Assert using a field available for 1 group only
-        # in another field restricted 2 groups is invalid
-        validate("""
-            <form string="View">
-                <field name="name" groups="base.group_system"/>
-                <field name="inherit_id" groups="base.group_portal,base.group_system" %(attrs)s/>
-            </form>
-        """, valid=False)
 
         # Assert using a field restricted to a group
         # in another field restricted to a group including the group for which the field is available is valid
@@ -2487,39 +2490,6 @@ class TestViews(ViewCase):
                 </field>
             </form>
         """, valid=True, parent=True)
-
-        # Assert using a field restricted to a group
-        # in another field restricted to a group not including the group for which the field is available is invalid
-        validate("""
-            <form string="View">
-                <field name="name" groups="base.group_system"/>
-                <field name="inherit_id" groups="base.group_erp_manager" %(attrs)s/>
-            </form>
-        """, valid=False)
-
-        # Assert using a parent field restricted to a group
-        # in a child field restricted to a group not including the group for which the field is available is invalid
-        validate("""
-            <form string="View">
-                <field name="name" groups="base.group_system"/>
-                <field name="inherit_children_ids">
-                    <tree editable="bottom">
-                        <field name="inherit_id" groups="base.group_erp_manager" %(attrs)s/>
-                    </tree>
-                </field>
-            </form>
-        """, valid=False, parent=True)
-
-        # Assert using a field within a block restricted to a group
-        # in another field not restricted to the same group is invalid
-        validate("""
-            <form string="View">
-                <group groups="base.group_system">
-                    <field name="name"/>
-                </group>
-                <field name="inherit_id" %(attrs)s/>
-            </form>
-        """, valid=False)
 
         # Assert using a field within a block restricted to a group
         # in another field within the same block restricted to a group is valid
@@ -2570,20 +2540,6 @@ class TestViews(ViewCase):
             </form>
         """, valid=True)
 
-        # Assert using a field within a block restricted to a group
-        # in another field within a block restricted to a group not including the group for which the field is available
-        # is invalid
-        validate("""
-            <form string="View">
-                <group groups="base.group_system">
-                    <field name="name"/>
-                </group>
-                <group groups="base.group_erp_manager">
-                    <field name="inherit_id" %(attrs)s/>
-                </group>
-            </form>
-        """, valid=False)
-
         # Assert using a parent field restricted to a group
         # in a child field under a relational field restricted to the same group is valid
         validate("""
@@ -2611,29 +2567,6 @@ class TestViews(ViewCase):
             </form>
         """, valid=True, parent=True)
 
-        # Assert using a parent field restricted to a group
-        # in a child field under a relational field restricted
-        # to a group not including the group for which the field is available is invalid
-        validate("""
-            <form string="View">
-                <field name="name" groups="base.group_system"/>
-                <field name="inherit_children_ids" groups="base.group_erp_manager">
-                    <tree editable="bottom">
-                        <field name="inherit_id" %(attrs)s/>
-                    </tree>
-                </field>
-            </form>
-        """, valid=False, parent=True)
-
-        # Assert using a field restricted to users not having a group
-        # in another field not restricted to any group is invalid
-        validate("""
-            <form string="View">
-                <field name="name" groups="!base.group_system"/>
-                <field name="inherit_id" %(attrs)s/>
-            </form>
-        """, valid=False)
-
         # Assert using a field not restricted to any group
         # in another field restricted to users not having a group is valid
         validate("""
@@ -2642,19 +2575,6 @@ class TestViews(ViewCase):
                 <field name="inherit_id" groups="!base.group_system" %(attrs)s/>
             </form>
         """, valid=True)
-
-        # Assert using a field restricted to users not having multiple groups
-        # in another field restricted to users not having one of the group only is invalid
-        # e.g.
-        # if the user is portal, the field "name" will not be in the view
-        # but the field "inherit_id" where "name" is used will be in the view
-        # making it invalid.
-        validate("""
-            <form string="View">
-                <field name="name" groups="!base.group_system,!base.group_portal"/>
-                <field name="inherit_id" groups="!base.group_system" %(attrs)s/>
-            </form>
-        """, valid=False)
 
         # Assert using a field restricted to users not having a group
         # in another field restricted to users not having multiple group including the one above is valid
@@ -2670,19 +2590,6 @@ class TestViews(ViewCase):
         """, valid=True)
 
         # Assert using a field restricted to a non group
-        # in another field for which the non group is not implied is invalid
-        # e.g.
-        # if the user is employee, the field "name" will not be in the view
-        # but the field "inherit_id" where "name" is used will be in the view,
-        # making it invalid.
-        validate("""
-            <form string="View">
-                <field name="name" groups="!base.group_user"/>
-                <field name="inherit_id" groups="!base.group_system" %(attrs)s/>
-            </form>
-        """, valid=False)
-
-        # Assert using a field restricted to a non group
         # in another field restricted to a non group implied in the non group of the available field is valid
         # e.g.
         # if the user is employee, the field "name" will be in the view
@@ -2694,37 +2601,6 @@ class TestViews(ViewCase):
                 <field name="inherit_id" groups="!base.group_user" %(attrs)s/>
             </form>
         """, valid=True)
-
-        # Assert using a field restricted to non-admins, itself in a block restricted to employees,
-        # in another field restricted to a block restricted to employees
-        # is invalid
-        # e.g.
-        # if the user is admin, the field "name" will not be in the view
-        # but the field "inherit_id", where "name" is used, will be in the view,
-        # threfore making it invalid
-        validate("""
-            <form string="View">
-                <group groups="base.group_user">
-                    <field name="name" groups="!base.group_system"/>
-                </group>
-                <group groups="base.group_user">
-                    <field name="inherit_id" %(attrs)s/>
-                </group>
-            </form>
-        """, valid=False)
-
-        # Assert using a field restricted to a group
-        # in another field restricted the opposite group is invalid
-        # e.g.
-        # if the user is admin, the field "name" will be in the view
-        # but the field "inherit_id", where "name" is used, will not be in the view,
-        # therefore making it invalid
-        validate("""
-            <form string="View">
-                <field name="name" groups="base.group_system"/>
-                <field name="inherit_id" groups="!base.group_system" %(attrs)s/>
-            </form>
-        """, valid=False)
 
         # Assert having two times the same field with a mutually exclusive group
         # and using that field in another field without any group is valid
@@ -2766,24 +2642,194 @@ class TestViews(ViewCase):
             </form>
         """, valid=True)
 
-        # Assert using a field restricted to a 'base.group_no_one' in another
-        # field with a group implied 'base.group_no_one' is invalid. The group
-        # 'base.group_no_one' must be in the view because it's depending of the
-        # session.
+        # The modifier node should have the same group 'base.group_user'
+        # (or a depending group '') that the used field 'access_token'
         validate("""
-            <form string="View">
-                <field name="name" groups="base.group_no_one"/>
-                <field name="inherit_id" %(attrs)s groups="base.group_user"/>
+            <form string="View attachment">
+                <field name="access_token"/>
+                <field name="company_id" %(attrs)s groups="base.group_user"/>
             </form>
-        """, valid=False)
+        """, model='ir.attachment', field='access_token', valid=True)
         validate("""
-            <form string="View">
-                <field name="name" groups="base.group_no_one"/>
-                <group groups="base.group_no_one">
-                    <field name="inherit_id" %(attrs)s groups="base.group_user"/>
+            <form string="View attachment">
+                <field name="company_id" %(attrs)s groups="base.group_user"/>
+            </form>
+        """, model='ir.attachment', field='access_token', valid=True)
+        validate("""
+            <form string="View attachment">
+                <field name="company_id" %(attrs)s groups="base.group_erp_manager"/>
+            </form>
+        """, model='ir.attachment', field='access_token', valid=True)
+        validate("""
+            <form string="View attachment">
+                <group groups="base.group_erp_manager">
+                    <field name="company_id" %(attrs)s/>
                 </group>
             </form>
-        """, valid=True)
+        """, model='ir.attachment', field='access_token', valid=True)
+
+        # 'access_token' has 'group_user' groups but only 'group_user' has access to read 'ir.attachment'
+        validate("""
+            <form string="View attachment">
+                <field name="access_token"/>
+                <field name="company_id" %(attrs)s/>
+            </form>
+        """, model='ir.attachment', field='access_token', valid=True)
+        validate("""
+            <form string="View attachment">
+                <field name="access_token"/>
+                <field name="company_id" %(attrs)s groups="base.group_portal"/>
+            </form>
+        """, model='ir.attachment', field='access_token', valid=True)
+        validate("""
+            <form string="View attachment">
+                <field name="company_id" %(attrs)s groups="base.group_portal"/>
+            </form>
+        """, model='ir.attachment', field='access_token', valid=True)
+        validate("""
+            <form string="View attachment">
+                <field name="company_id" %(attrs)s/>
+            </form>
+        """, model='ir.attachment', field='access_token', valid=True)
+        validate("""
+            <form string="View attachment">
+                <field name="company_id" %(attrs)s groups="base.group_no_one"/>
+            </form>
+        """, model='ir.attachment', field='access_token', valid=True)
+        validate("""
+            <form string="View attachment">
+                <group groups="base.group_no_one">
+                    <field name="company_id" %(attrs)s/>
+                </group>
+            </form>
+        """, model='ir.attachment', field='access_token', valid=True)
+
+    def test_attrs_missing_field(self):
+        user_demo = self.env.ref('base.user_demo')
+
+        def validate(template, field, demo=True, groups='', no_add=False):
+            # add 'access_token' field automatically
+            view = self.View.create({
+                'name': 'Form view attachment',
+                'model': 'ir.attachment',
+                'arch': template,
+            })
+            # cached view
+            arch = self.env['ir.attachment']._get_view_cache(view_id=view.id)['arch']
+            tree = etree.fromstring(arch)
+            nodes = tree.xpath(f"//field[@name='{field}'][@invisible='True'][@readonly='True']")
+            if no_add:
+                self.assertFalse(nodes, f"Field '{field}' should not be added automatically")
+                return
+            self.assertTrue(len(nodes) == 1, f"Field '{field}' should be added automatically")
+            self.assertEqual(nodes[0].get('groups', ''), groups or '')
+
+            # admin
+            arch = self.env['ir.attachment'].get_view(view_id=view.id)['arch']
+            tree = etree.fromstring(arch)
+            nodes = tree.xpath(f"//field[@name='{field}'][@invisible='True'][@readonly='True']")
+            self.assertTrue(len(nodes) == 1, f"Field '{field}' should be added automatically")
+
+            # user
+            arch = self.env['ir.attachment'].with_user(user_demo).get_view(view_id=view.id)['arch']
+            tree = etree.fromstring(arch)
+            nodes = tree.xpath(f"//field[@name='{field}'][@invisible='True'][@readonly='True']")
+            if demo:
+                self.assertTrue(len(nodes) == 1, f"Field '{field}' should be added automatically")
+            else:
+                self.assertFalse(nodes, f"Field '{field}' should be added automatically but was removed by access rigth")
+
+
+        # add missing field
+        validate("""
+                <form string="View attachment">
+                    <field name="company_id" invisible="name != 'toto'"/>
+                </form>
+            """, field='name')
+
+
+        # add missing field with groups
+        validate("""
+                <form string="View attachment">
+                    <field name="company_id" invisible="not access_token" groups="base.group_erp_manager"/>
+                </form>
+            """, field='access_token', demo=False, groups="base.group_erp_manager")
+
+        # add missing field with multi groups
+        validate("""
+                <form string="View attachment">
+                    <field name="company_id" invisible="not name" groups="base.group_erp_manager"/>
+                    <field name="company_id" invisible="not name" groups="base.group_system"/>
+                </form>
+            """, field='name', demo=False, groups="base.group_erp_manager")
+        # add missing field without group because the view is already restricted to the group 'base.group_user'
+        validate("""
+                <form string="View attachment">
+                    <field name="company_id" invisible="not name" groups="base.group_erp_manager"/>
+                    <field name="company_id" invisible="not name" groups="base.group_system"/>
+                    <field name="company_id" invisible="not name" groups="base.group_multi_company"/>
+                    <field name="company_id" invisible="not name" groups="base.group_user"/>
+                </form>
+            """, field='name', demo=True)
+        validate("""
+                <form string="View attachment">
+                    <field name="company_id" invisible="not name" groups="base.group_erp_manager"/>
+                    <field name="company_id" invisible="not name"/>
+                </form>
+            """, field='name', demo=True)
+
+        # nested groups
+        validate("""
+                <form string="View attachment">
+                    <group groups="base.group_erp_manager">
+                        <field name="company_id" invisible="not access_token"/>
+                    </group>
+                </form>
+            """, field='access_token', demo=False, groups="base.group_erp_manager")
+        validate("""
+                <form string="View attachment">
+                    <group groups="base.group_erp_manager">
+                        <field name="company_id" invisible="not name" groups="base.group_multi_company"/>
+                        <field name="company_id" invisible="not name" groups="base.group_user"/>
+                    </group>
+                </form>
+            """, field='name', demo=False, groups="base.group_erp_manager")
+        validate("""
+                <form string="View attachment">
+                    <group groups="base.group_erp_manager" invisible="not display_name">
+                        <field name="company_id" invisible="not name" groups="base.group_multi_company"/>
+                        <field name="company_id" invisible="not name" groups="base.group_user"/>
+                    </group>
+                </form>
+            """, field='display_name', demo=False, groups="base.group_erp_manager")
+        validate("""
+                <form string="View attachment">
+                    <group groups="base.group_erp_manager" invisible="not name">
+                        <field name="company_id" invisible="not name" groups="base.group_multi_company"/>
+                        <field name="company_id" invisible="not name" groups="base.group_user"/>
+                    </group>
+                </form>
+            """, field='name', demo=False, groups="base.group_erp_manager")
+
+        # field already exist with implied groups
+        validate("""
+                <form string="View attachment">
+                    <field name="name" groups="base.group_user"/>
+                    <field name="name" groups="base.group_multi_company"/>
+
+                    <group groups="base.group_erp_manager" invisible="not name">
+                        <field name="company_id" invisible="not name" groups="base.group_multi_company"/>
+                        <field name="company_id" invisible="not name" groups="base.group_user"/>
+                    </group>
+                </form>
+            """, field='name', no_add=True)
+
+        # add missing field without group because the view is already restricted to the group 'base.group_user'
+        validate("""
+                <form string="View attachment">
+                    <field name="access_token" invisible="not name"/>
+                </form>
+            """, field='name', demo=True)
 
     @mute_logger('odoo.addons.base.models.ir_ui_view')
     def test_empty_groups_attrib(self):
@@ -2890,11 +2936,14 @@ class TestViews(ViewCase):
                 </groupby>
             </tree>
         """
-        self.assertValid(arch % ('', '<field name="noupdate"/>'))
-        self.assertInvalid(
-            arch % ('', ''),
-            """Field 'noupdate' used in modifier 'invisible' (noupdate) must be present in view but is missing.""",
-        )
+        view = self.assertValid(arch % ('', '<field name="noupdate"/>'))
+        view_arch = view.get_views([(view.id, 'form')])['views']['form']['arch']
+        self.assertFalse(etree.fromstring(view_arch).xpath('//field[@name="noupdate"][@invisible][@readonly]'))
+
+        view = self.assertValid(arch % ('', ''))
+        view_arch = view.get_views([(view.id, 'form')])['views']['form']['arch']
+        self.assertTrue(etree.fromstring(view_arch).xpath('//groupby/field[@name="noupdate"][@invisible][@readonly]'))
+
         self.assertInvalid(
             arch % ('<field name="noupdate"/>', ''),
             '''Field "noupdate" does not exist in model "ir.ui.view"''',
@@ -3087,11 +3136,18 @@ class TestViews(ViewCase):
         )
 
         # replacing an element should validate the whole view
-        self.assertInvalid(
+        view_arch = self.View.get_views([(view0.id, 'form')])['views']['form']['arch']
+        self.assertFalse(etree.fromstring(view_arch).xpath('//field[@name="model"][@invisible][@readonly]'))
+        view0bis = None
+        view0bis = self.assertValid(
             """<field name="model" position="replace"/>""",
-            """Field 'model' used in domain of <field name="inherit_id"> ([('model', '=', model)]) must be present in view but is missing.""",
             inherit_id=view0.id,
         )
+        view_arch = self.View.get_views([(view0.id, 'form')])['views']['form']['arch']
+        self.assertTrue(etree.fromstring(view_arch).xpath('//field[@name="model"][@invisible][@readonly]'))
+        view0bis.active = False
+        view_arch = self.View.get_views([(view0.id, 'form')])['views']['form']['arch']
+        self.assertFalse(etree.fromstring(view_arch).xpath('//field[@name="model"][@invisible][@readonly]'))
 
         # moving an element should have no impact; this test checks that the
         # implementation does not flag the inner element to be validated, which
@@ -3104,12 +3160,12 @@ class TestViews(ViewCase):
         )
 
         # modifying a view extension should validate the other views
-        with mute_logger('odoo.addons.base.models.ir_ui_view'):
-            with self.assertRaises(ValidationError):
-                with self.cr.savepoint():
-                    view1.arch = """<form position="inside">
-                        <field name="type"/>
-                    </form>"""
+        self.assertFalse(etree.fromstring(view_arch).xpath('//field[@name="name"][@invisible][@readonly]'))
+        view1.arch = """<form position="inside">
+            <field name="type"/>
+        </form>"""
+        view_arch = self.View.get_views([(view0.id, 'form')])['views']['form']['arch']
+        self.assertTrue(etree.fromstring(view_arch).xpath('//field[@name="name"][@invisible][@readonly]'))
 
     def test_graph_fields(self):
         self.assertValid('<graph string="Graph"><field name="model" type="row"/><field name="inherit_id" type="measure"/></graph>')
@@ -4180,11 +4236,13 @@ class ViewModifiers(ViewCase):
                        readonly="model == 'ir.ui.view'"/>
             </form>
         """
-        self.assertValid(arch % '<field name="model"/>')
-        self.assertInvalid(
-            arch % '',
-            """Field 'model' used in modifier 'readonly' (model == 'ir.ui.view') must be present in view but is missing""",
-        )
+        view = self.assertValid(arch % '<field name="model"/>')
+        view_arch = view.get_views([(view.id, 'form')])['views']['form']['arch']
+        self.assertFalse(etree.fromstring(view_arch).xpath('//field[@name="model"][@invisible][@readonly]'))
+
+        view = self.assertValid(arch % '')
+        view_arch = view.get_views([(view.id, 'form')])['views']['form']['arch']
+        self.assertTrue(etree.fromstring(view_arch).xpath('//field[@name="model"][@invisible][@readonly]'))
 
     @mute_logger('odoo.addons.base.models.ir_ui_view')
     def test_12_invalid_syntax(self):
@@ -4206,25 +4264,12 @@ class ViewModifiers(ViewCase):
                 <field name="name"/>
                 <field name="model"/>
                 <field name="inherit_id"
-                       readonly="bidule.get('truc') or context.get('truc')"/>
+                       readonly="bidule.get('truc') === 1 or context.get('truc')"/>
             </form>
         """
         self.assertInvalid(
             arch,
-            """Field 'bidule' used in modifier 'readonly' (bidule.get('truc') or context.get('truc')) must be present in view but is missing.""",
-        )
-
-        arch = """
-            <form string="View">
-                <field name="name"/>
-                <field name="model"/>
-                <field name="inherit_id"
-                       readonly="context.get('truc') or bidule.get('toto')"/>
-            </form>
-        """
-        self.assertInvalid(
-            arch,
-            """must be present in view but is missing""",
+            """Invalid modifier 'readonly'""",
         )
 
     @mute_logger('odoo.addons.base.models.ir_ui_view')
@@ -4271,15 +4316,17 @@ class ViewModifiers(ViewCase):
                 </field>
             </form>
         """
-        self.assertValid(arch % ('', '<field name="model"/>'))
-        self.assertInvalid(
-            arch % ('', ''),
-            """Field 'model' used in modifier 'readonly' (model == 'ir.ui.view') must be present in view but is missing.""",
-        )
-        self.assertInvalid(
-            arch % ('<field name="model"/>', ''),
-            """Field 'model' used in modifier 'readonly' (model == 'ir.ui.view') must be present in view but is missing.""",
-        )
+        view = self.assertValid(arch % ('', '<field name="model"/>'))
+        view_arch = view.get_views([(view.id, 'form')])['views']['form']['arch']
+        self.assertFalse(etree.fromstring(view_arch).xpath('//field[@name="model"][@invisible][@readonly]'))
+
+        view = self.assertValid(arch % ('', ''))
+        view_arch = view.get_views([(view.id, 'form')])['views']['form']['arch']
+        self.assertTrue(etree.fromstring(view_arch).xpath('//field[@name="model"][@invisible][@readonly]'))
+
+        view = self.assertValid(arch % ('<field name="model"/>', ''))
+        view_arch = view.get_views([(view.id, 'form')])['views']['form']['arch']
+        self.assertTrue(etree.fromstring(view_arch).xpath('//field[@name="model"][@invisible][@readonly]'))
 
     @mute_logger('odoo.addons.base.models.ir_ui_view')
     def test_15_attrs_subfield_with_parent(self):
@@ -4295,15 +4342,19 @@ class ViewModifiers(ViewCase):
                 </field>
             </form>
         """
-        self.assertValid(arch % ('<field name="model"/>', ''))
-        self.assertInvalid(
-            arch % ('', ''),
-            """Field 'model' used in modifier 'readonly' (parent.model == 'ir.ui.view') must be present in view but is missing.""",
-        )
-        self.assertInvalid(
-            arch % ('', '<field name="model"/>'),
-            """Field 'model' used in modifier 'readonly' (parent.model == 'ir.ui.view') must be present in view but is missing.""",
-        )
+        view = self.assertValid(arch % ('<field name="model"/>', ''))
+        view_arch = view.get_views([(view.id, 'form')])['views']['form']['arch']
+        self.assertFalse(etree.fromstring(view_arch).xpath('//field[@name="model"][@invisible][@readonly]'))
+
+        view = self.assertValid(arch % ('', ''))
+        view_arch = view.get_views([(view.id, 'form')])['views']['form']['arch']
+        self.assertTrue(etree.fromstring(view_arch).xpath('//field[@name="model"][@invisible][@readonly]'))
+        self.assertFalse(etree.fromstring(view_arch).xpath('//field/form/field[@name="model"][@invisible][@readonly]'))
+
+        view = self.assertValid(arch % ('', '<field name="model"/>'))
+        view_arch = view.get_views([(view.id, 'form')])['views']['form']['arch']
+        self.assertTrue(etree.fromstring(view_arch).xpath('//field[@name="model"][@invisible][@readonly]'))
+        self.assertFalse(etree.fromstring(view_arch).xpath('//field/form/field[@name="model"][@invisible][@readonly]'))
 
     def test_16_attrs_groups_behavior(self):
         view = self.View.create({
@@ -4340,443 +4391,416 @@ class ViewModifiers(ViewCase):
 
     @mute_logger('odoo.addons.base.models.ir_ui_view')
     def test_17_attrs_groups_validation(self):
-        def validate(arch, valid=False, parent=False):
+        def validate(arch, add_field_with_groups=False, parent=False, model='ir.ui.view'):
             parent = 'parent.' if parent else ''
-            if valid:
-                self.assertValid(arch % {'attrs': f"""invisible="{parent}name == 'foo'" """})
-                self.assertValid(arch % {'attrs': f"""domain="[('name', '!=', {parent}name)]" """})
-                self.assertValid(arch % {'attrs': f"""context="{{'default_name': {parent}name}}" """})
-                self.assertValid(arch % {'attrs': f"""decoration-info="{parent}name == 'foo'" """})
+            if add_field_with_groups is False:
+                self.assertValid(arch % {'attrs': f"""invisible="{parent}name == 'foo'" """}, model=model)
+                self.assertValid(arch % {'attrs': f"""domain="[('name', '!=', {parent}name)]" """}, model=model)
+                self.assertValid(arch % {'attrs': f"""context="{{'default_name': {parent}name}}" """}, model=model)
+                view = self.assertValid(arch % {'attrs': f"""decoration-info="{parent}name == 'foo'" """}, model=model)
+                view_arch = view.get_views([(view.id, 'form')])['views']['form']['arch']
+                self.assertFalse(etree.fromstring(view_arch).xpath('//field[@name="name"][@invisible][@readonly]'))
             else:
-                self.assertInvalid(
-                    arch % {'attrs': f"""invisible="{parent}name == 'foo'" """},
-                    f"""Field 'name' used in modifier 'invisible' ({parent}name == 'foo') is restricted to the group(s)""",
-                )
-                self.assertInvalid(
-                    arch % {'attrs': f"""domain="[('name', '!=', {parent}name)]" """},
-                    f"""Field 'name' used in domain of <field name="inherit_id"> ([('name', '!=', {parent}name)]) is restricted to the group(s)""",
-                )
-                self.assertInvalid(
-                    arch % {'attrs': f"""context="{{'default_name': {parent}name}}" """},
-                    f"""Field 'name' used in context ({{'default_name': {parent}name}}) is restricted to the group(s)""",
-                )
-                self.assertInvalid(
-                    arch % {'attrs': f"""decoration-info="{parent}name == 'foo'" """},
-                    f"""Field 'name' used in decoration-info="{parent}name == 'foo'" is restricted to the group(s)""",
-                )
+                view = self.assertValid(arch % {'attrs': f"""invisible="{parent}name == 'foo'" """}, model=model)
+                arch = self.env[model]._get_view_cache(view_id=view.id)['arch']
+                tree = etree.fromstring(arch)
+                nodes = tree.xpath("//field[@name='name'][@invisible='True'][@readonly='True']")
+                self.assertEqual(len(nodes), 1)
+                self.assertEqual(nodes[0].get('groups', ''), add_field_with_groups)
 
+                view_arch = view.get_views([(view.id, 'form')])['views']['form']['arch']
+                self.assertTrue(etree.fromstring(view_arch).xpath('//field[@name="name"]'))
 
-        # Assert using a field restricted to a group
-        # in another field without the same group is invalid
+                view = self.assertValid(arch % {'attrs': f"""domain="[('name', '!=', {parent}name)]" """}, model=model)
+                view_arch = view.get_views([(view.id, 'form')])['views']['form']['arch']
+                self.assertTrue(etree.fromstring(view_arch).xpath('//field[@name="name"]'))
+
+                view = self.assertValid(arch % {'attrs': f"""context="{{'default_name': {parent}name}}" """}, model=model)
+                view_arch = view.get_views([(view.id, 'form')])['views']['form']['arch']
+                self.assertTrue(etree.fromstring(view_arch).xpath('//field[@name="name"]'))
+
+                view = self.assertValid(arch % {'attrs': f"""decoration-info="{parent}name == 'foo'" """}, model=model)
+                view_arch = view.get_views([(view.id, 'form')])['views']['form']['arch']
+                self.assertTrue(etree.fromstring(view_arch).xpath('//field[@name="name"]'))
+
+        # add missing field
         validate("""
             <form string="View">
-                <field name="name" groups="base.group_system"/>
                 <field name="inherit_id" %(attrs)s/>
             </form>
-        """, valid=False)
+        """, add_field_with_groups='')
 
-        # Assert using a parent field restricted to a group
-        # in a child field without the same group is invalid
+        # add missing field with needed groups
         validate("""
             <form string="View">
-                <field name="name" groups="base.group_system"/>
+                <field name="inherit_id" groups="base.group_user" %(attrs)s/>
+            </form>
+        """, add_field_with_groups='base.group_user')
+
+        # add missing field because the existing field group does not match
+        validate("""
+            <form string="View">
+                <field name="name" groups="base.group_allow_export"/>
+                <field name="inherit_id" %(attrs)s/>
+            </form>
+        """, add_field_with_groups='')
+
+        # Add missing field because the field name has defined groups.
+        validate("""
+            <form string="View">
+                <field name="name" groups="base.group_allow_export"/>
                 <field name="inherit_children_ids">
                     <tree editable="bottom">
                         <field name="inherit_id" %(attrs)s/>
                     </tree>
                 </field>
             </form>
-        """, valid=False, parent=True)
+        """, add_field_with_groups='', parent=True)
 
-        # Assert using a parent field restricted to a group
-        # in a child field with the same group is valid
+        # Don't need to add field if the dependent field is in the same groups
         validate("""
             <form string="View">
-                <field name="name" groups="base.group_system"/>
+                <field name="name" groups="base.group_allow_export"/>
                 <field name="inherit_children_ids">
                     <tree editable="bottom">
-                        <field name="inherit_id" groups="base.group_system" %(attrs)s/>
+                        <field name="inherit_id" groups="base.group_allow_export" %(attrs)s/>
                     </tree>
                 </field>
             </form>
-        """, valid=True, parent=True)
+        """, add_field_with_groups=False, parent=True)
 
-        # Assert using a parent field available for everyone
-        # in a child field restricted to a group is valid
         validate("""
             <form string="View">
                 <field name="name"/>
                 <field name="inherit_children_ids">
                     <tree editable="bottom">
-                        <field name="inherit_id" groups="base.group_system" %(attrs)s/>
+                        <field name="inherit_id" groups="base.group_allow_export" %(attrs)s/>
                     </tree>
                 </field>
             </form>
-        """, valid=True, parent=True)
+        """, add_field_with_groups=False, parent=True)
 
-        # Assert using a field available for everyone
-        # in another field restricted to a group is valid
         validate("""
             <form string="View">
                 <field name="name"/>
-                <field name="inherit_id" %(attrs)s groups="base.group_system"/>
+                <field name="inherit_id" %(attrs)s groups="base.group_allow_export"/>
             </form>
-        """, valid=True)
+        """, add_field_with_groups=False)
 
-        # Assert using a field restricted to a group
-        # in another field with the same group is valid
         validate("""
             <form string="View">
-                <field name="name" groups="base.group_system"/>
-                <field name="inherit_id" groups="base.group_system" %(attrs)s/>
+                <field name="name" groups="base.group_allow_export"/>
+                <field name="inherit_id" groups="base.group_allow_export" %(attrs)s/>
             </form>
-        """, valid=True)
+        """, add_field_with_groups=False)
 
-        # Assert using a field available twice for 2 diffent groups
-        # in another field restricted to one of the 2 groups is valid
         validate("""
             <form string="View">
                 <field name="name" groups="base.group_portal"/>
-                <field name="name" groups="base.group_system"/>
-                <field name="inherit_id" groups="base.group_system" %(attrs)s/>
+                <field name="name" groups="base.group_allow_export"/>
+                <field name="inherit_id" groups="base.group_allow_export" %(attrs)s/>
             </form>
-        """, valid=True)
+        """, add_field_with_groups=False)
 
-        # Assert using a field restricted to a group only
-        # in other fields restricted to at least one different group is invalid
+        # Add the missing field only for 'base.group_portal' because the
+        # other field is valid.
         validate("""
             <form string="View">
-                <field name="name" groups="base.group_system"/>
-                <field name="inherit_id" groups="base.group_system" %(attrs)s/>
+                <field name="name" groups="base.group_allow_export"/>
+                <field name="inherit_id" groups="base.group_allow_export" %(attrs)s/>
                 <field name="inherit_id" groups="base.group_portal" %(attrs)s/>
             </form>
-        """, valid=False)
+        """, add_field_with_groups='base.group_portal')
 
-        # Assert using a field available twice for 2 different groups
-        # in other fields restricted to the same 2 group is valid
+        # All situations have the field name, not need to add one as invisible.
         validate("""
             <form string="View">
-                <field name="name" groups="base.group_system"/>
+                <field name="name" groups="base.group_allow_export"/>
                 <field name="name" groups="base.group_portal"/>
-                <field name="inherit_id" groups="base.group_system" %(attrs)s/>
+                <field name="inherit_id" groups="base.group_allow_export" %(attrs)s/>
                 <field name="inherit_id" groups="base.group_portal" %(attrs)s/>
             </form>
-        """, valid=True)
+        """, add_field_with_groups=False)
 
-        # Assert using a field available for 2 diffent groups,
-        # in another field restricted to one of the 2 groups is valid
         validate("""
             <form string="View">
-                <field name="name" groups="base.group_portal,base.group_system"/>
-                <field name="inherit_id" groups="base.group_system" %(attrs)s/>
+                <field name="name" groups="base.group_portal,base.group_allow_export"/>
+                <field name="inherit_id" groups="base.group_allow_export" %(attrs)s/>
             </form>
-        """, valid=True)
+        """, add_field_with_groups=False)
 
-        # Assert using a field available for 1 group only
-        # in another field restricted 2 groups is invalid
+        # add the missing field to have 'name' when inherit_id is present in the view.
         validate("""
             <form string="View">
-                <field name="name" groups="base.group_system"/>
-                <field name="inherit_id" groups="base.group_portal,base.group_system" %(attrs)s/>
+                <field name="name" groups="base.group_allow_export"/>
+                <field name="inherit_id" groups="base.group_portal,base.group_allow_export" %(attrs)s/>
             </form>
-        """, valid=False)
+        """, add_field_with_groups='base.group_allow_export,base.group_portal')
 
-        # Assert using a field restricted to a group
-        # in another field restricted to a group including the group for which the field is available is valid
+        # Should not add the field because when 'inherit_id' is present, 'name' is present
+        validate("""
+            <form string="View">
+                <field name="name" groups="base.group_allow_export"/>
+                <div groups="base.group_portal,base.group_system">
+                    <field name="inherit_id" groups="base.group_allow_export" %(attrs)s/>
+                </div>
+            </form>
+        """, add_field_with_groups=False)
+
+        # The view has base.group_system, implied base.group_erp_manager
         validate("""
             <form string="View">
                 <field name="name" groups="base.group_erp_manager"/>
-                <field name="inherit_id" groups="base.group_system" %(attrs)s/>
+                <field name="inherit_id" groups="base.group_allow_export" %(attrs)s/>
             </form>
-        """, valid=True)
+        """, add_field_with_groups=False)
 
-        # Assert using a parent field restricted to a group
-        # in a child field restricted to a group including the group for which the field is available is valid
+        # don't add the field because the field 'name' is already present
+        # when the view have 'base.group_erp_manager' in access rigths.
         validate("""
             <form string="View">
                 <field name="name" groups="base.group_erp_manager"/>
                 <field name="inherit_children_ids">
                     <tree editable="bottom">
-                        <field name="inherit_id" groups="base.group_system" %(attrs)s/>
+                        <field name="inherit_id" groups="base.group_portal" %(attrs)s/>
                     </tree>
                 </field>
             </form>
-        """, valid=True, parent=True)
+        """, add_field_with_groups=False, parent=True)
 
-        # Assert using a field restricted to a group
-        # in another field restricted to a group not including the group for which the field is available is invalid
+        # add missing field with the same group of the needed
         validate("""
             <form string="View">
-                <field name="name" groups="base.group_system"/>
+                <field name="name" groups="base.group_allow_export"/>
                 <field name="inherit_id" groups="base.group_erp_manager" %(attrs)s/>
             </form>
-        """, valid=False)
+        """, add_field_with_groups='base.group_erp_manager')
 
-        # Assert using a parent field restricted to a group
-        # in a child field restricted to a group not including the group for which the field is available is invalid
         validate("""
             <form string="View">
-                <field name="name" groups="base.group_system"/>
+                <field name="name" groups="base.group_allow_export"/>
                 <field name="inherit_children_ids">
                     <tree editable="bottom">
                         <field name="inherit_id" groups="base.group_erp_manager" %(attrs)s/>
                     </tree>
                 </field>
             </form>
-        """, valid=False, parent=True)
+        """, add_field_with_groups='base.group_erp_manager', parent=True)
 
-        # Assert using a field within a block restricted to a group
-        # in another field not restricted to the same group is invalid
         validate("""
             <form string="View">
-                <group groups="base.group_system">
+                <group groups="base.group_allow_export">
                     <field name="name"/>
                 </group>
                 <field name="inherit_id" %(attrs)s/>
             </form>
-        """, valid=False)
+        """, add_field_with_groups='')
 
-        # Assert using a field within a block restricted to a group
-        # in another field within the same block restricted to a group is valid
         validate("""
             <form string="View">
-                <group groups="base.group_system">
+                <group groups="base.group_allow_export">
                     <field name="name"/>
                     <field name="inherit_id" %(attrs)s/>
                 </group>
             </form>
-        """, valid=True)
+        """, add_field_with_groups=False)
 
-        # Assert using a field within a block restricted to a group
-        # in another field within the same block restricted to a group and additional groups on the field node is valid
         validate("""
             <form string="View">
-                <group groups="base.group_system">
+                <group groups="base.group_allow_export">
                     <field name="name"/>
                     <field name="inherit_id" %(attrs)s groups="base.group_multi_currency,base.group_multi_company"/>
                 </group>
             </form>
-        """, valid=True)
+        """, add_field_with_groups=False)
 
-        # Assert using a field within a block restricted to a group
-        # in another field within a block restricted to the same group is valid
         validate("""
             <form string="View">
-                <group groups="base.group_system">
+                <group groups="base.group_allow_export">
                     <field name="name"/>
                 </group>
-                <group groups="base.group_system">
+                <group groups="base.group_allow_export">
                     <field name="inherit_id" %(attrs)s/>
                 </group>
             </form>
-        """, valid=True)
+        """, add_field_with_groups=False)
 
-        # Assert using a field within a block restricted to a group
-        # in another field within a block restricted to a group including the group for which the field is available
-        # is valid
+        # view access right has base.group_system implied base.group_erp_manager
         validate("""
             <form string="View">
                 <group groups="base.group_erp_manager">
                     <field name="name"/>
                 </group>
-                <group groups="base.group_system">
+                <group groups="base.group_allow_export">
                     <field name="inherit_id" %(attrs)s/>
                 </group>
             </form>
-        """, valid=True)
+        """, add_field_with_groups=False)
 
-        # Assert using a field within a block restricted to a group
-        # in another field within a block restricted to a group not including the group for which the field is available
-        # is invalid
         validate("""
             <form string="View">
-                <group groups="base.group_system">
+                <group groups="base.group_allow_export">
                     <field name="name"/>
                 </group>
                 <group groups="base.group_erp_manager">
                     <field name="inherit_id" %(attrs)s/>
                 </group>
             </form>
-        """, valid=False)
+        """, add_field_with_groups='base.group_erp_manager')
 
-        # Assert using a parent field restricted to a group
-        # in a child field under a relational field restricted to the same group is valid
         validate("""
             <form string="View">
-                <field name="name" groups="base.group_system"/>
-                <field name="inherit_children_ids" groups="base.group_system">
+                <field name="name" groups="base.group_allow_export"/>
+                <field name="inherit_children_ids" groups="base.group_allow_export">
                     <tree editable="bottom">
                         <field name="inherit_id" %(attrs)s/>
                     </tree>
                 </field>
             </form>
-        """, valid=True, parent=True)
+        """, add_field_with_groups=False, parent=True)
 
-        # Assert using a parent field restricted to a group
-        # in a child field under a relational field restricted
-        # to a group including the group for which the field is available is valid
         validate("""
             <form string="View">
                 <field name="name" groups="base.group_erp_manager"/>
-                <field name="inherit_children_ids" groups="base.group_system">
+                <field name="inherit_children_ids" groups="base.group_allow_export">
                     <tree editable="bottom">
                         <field name="inherit_id" %(attrs)s/>
                     </tree>
                 </field>
             </form>
-        """, valid=True, parent=True)
+        """, add_field_with_groups=False, parent=True)
 
-        # Assert using a parent field restricted to a group
-        # in a child field under a relational field restricted
-        # to a group not including the group for which the field is available is invalid
         validate("""
             <form string="View">
-                <field name="name" groups="base.group_system"/>
+                <field name="name" groups="base.group_allow_export"/>
                 <field name="inherit_children_ids" groups="base.group_erp_manager">
                     <tree editable="bottom">
                         <field name="inherit_id" %(attrs)s/>
                     </tree>
                 </field>
             </form>
-        """, valid=False, parent=True)
+        """, add_field_with_groups='base.group_erp_manager', parent=True)
 
-        # Assert using a field restricted to users not having a group
-        # in another field not restricted to any group is invalid
         validate("""
             <form string="View">
-                <field name="name" groups="!base.group_system"/>
+                <field name="name" groups="!base.group_allow_export"/>
                 <field name="inherit_id" %(attrs)s/>
             </form>
-        """, valid=False)
+        """, add_field_with_groups='')
 
-        # Assert using a field not restricted to any group
-        # in another field restricted to users not having a group is valid
         validate("""
             <form string="View">
                 <field name="name"/>
-                <field name="inherit_id" groups="!base.group_system" %(attrs)s/>
+                <field name="inherit_id" groups="!base.group_allow_export" %(attrs)s/>
             </form>
-        """, valid=True)
+        """, add_field_with_groups=False)
 
-        # Assert using a field restricted to users not having multiple groups
-        # in another field restricted to users not having one of the group only is invalid
-        # e.g.
-        # if the user is portal, the field "name" will not be in the view
-        # but the field "inherit_id" where "name" is used will be in the view
-        # making it invalid.
         validate("""
             <form string="View">
-                <field name="name" groups="!base.group_system,!base.group_portal"/>
-                <field name="inherit_id" groups="!base.group_system" %(attrs)s/>
+                <field name="name" groups="!base.group_allow_export"/>
+                <field name="name" groups="base.group_allow_export"/>
+                <field name="inherit_id" groups="base.group_allow_export" %(attrs)s/>
             </form>
-        """, valid=False)
+        """, add_field_with_groups=False)
 
-        # Assert using a field restricted to users not having a group
-        # in another field restricted to users not having multiple group including the one above is valid
-        # e.g.
-        # if the user is portal, the field "name" will be in the view
-        # but the field "inherit_id" where "name" is used will not be in the view
-        # making it valid.
+        validate("""
+            <form string="View">
+                <field name="name" groups="!base.group_allow_export"/>
+                <field name="name" groups="base.group_allow_export"/>
+                <field name="inherit_id" groups="!base.group_allow_export" %(attrs)s/>
+            </form>
+        """, add_field_with_groups=False)
+
+        validate("""
+            <form string="View">
+                <field name="name" groups="!base.group_allow_export"/>
+                <field name="name" groups="base.group_allow_export"/>
+                <field name="inherit_id" groups="base.group_portal" %(attrs)s/>
+            </form>
+        """, add_field_with_groups=False)
+
+        # Add field because the field 'name' can be hide from the other
+        # negative group
+        validate("""
+            <form string="View">
+                <field name="name" groups="!base.group_public,!base.group_portal"/>
+                <field name="inherit_id" groups="!base.group_public" %(attrs)s/>
+            </form>
+        """, add_field_with_groups='!base.group_public')
+
+        # don't need to add field, the negative group can must with the mandatory
         validate("""
             <form string="View">
                 <field name="name" groups="!base.group_user"/>
                 <field name="inherit_id" groups="!base.group_user,!base.group_portal" %(attrs)s/>
             </form>
-        """, valid=True)
+        """, add_field_with_groups=False)
 
-        # Assert using a field restricted to a non group
-        # in another field for which the non group is not implied is invalid
-        # e.g.
-        # if the user is employee, the field "name" will not be in the view
-        # but the field "inherit_id" where "name" is used will be in the view,
-        # making it invalid.
+        # add field with the negative mandatory group (the group is added in order
+        # to only be present in the view when it is needed.)
         validate("""
             <form string="View">
                 <field name="name" groups="!base.group_user"/>
-                <field name="inherit_id" groups="!base.group_system" %(attrs)s/>
+                <field name="inherit_id" groups="!base.group_public" %(attrs)s/>
             </form>
-        """, valid=False)
+        """, add_field_with_groups='!base.group_public')
 
-        # Assert using a field restricted to a non group
-        # in another field restricted to a non group implied in the non group of the available field is valid
-        # e.g.
-        # if the user is employee, the field "name" will be in the view
-        # but the field "inherit_id", where "name" is used, will not be in the view,
-        # therefore making it valid
+        # don't need to add field, the negative group is a subset of the mandatory group
         validate("""
             <form string="View">
-                <field name="name" groups="!base.group_system"/>
+                <field name="name" groups="!base.group_allow_export"/>
                 <field name="inherit_id" groups="!base.group_user" %(attrs)s/>
             </form>
-        """, valid=True)
+        """, add_field_with_groups=False)
 
-        # Assert using a field restricted to non-admins, itself in a block restricted to employees,
-        # in another field restricted to a block restricted to employees
-        # is invalid
-        # e.g.
-        # if the user is admin, the field "name" will not be in the view
-        # but the field "inherit_id", where "name" is used, will be in the view,
-        # threfore making it invalid
+        # add missing field with the mandatory group. The field present in view has a
+        # restricted group opposing the desired visibility.
         validate("""
             <form string="View">
                 <group groups="base.group_user">
-                    <field name="name" groups="!base.group_system"/>
+                    <field name="name" groups="!base.group_allow_export"/>
                 </group>
                 <group groups="base.group_user">
                     <field name="inherit_id" %(attrs)s/>
                 </group>
             </form>
-        """, valid=False)
+        """, add_field_with_groups='base.group_user')
 
-        # Assert using a field restricted to a group
-        # in another field restricted the opposite group is invalid
-        # e.g.
-        # if the user is admin, the field "name" will be in the view
-        # but the field "inherit_id", where "name" is used, will not be in the view,
-        # therefore making it invalid
+        # add missing field with the mandatory group. The field present in view has a
+        # restricted (negative) group opposing the desired visibility.
         validate("""
             <form string="View">
-                <field name="name" groups="base.group_system"/>
-                <field name="inherit_id" groups="!base.group_system" %(attrs)s/>
+                <field name="name" groups="base.group_public"/>
+                <field name="inherit_id" groups="!base.group_public" %(attrs)s/>
             </form>
-        """, valid=False)
+        """, add_field_with_groups='!base.group_public')
 
-        # Assert having two times the same field with a mutually exclusive group
-        # and using that field in another field without any group is valid
+        # Add a field for the missing combination
         validate("""
             <form string="View">
-                <field name="name" groups="!base.group_system"/>
-                <field name="name" groups="base.group_system"/>
+                <field name="name" groups="!base.group_allow_export"/>
+                <field name="name" groups="base.group_allow_export"/>
+                <field name="name" groups="!base.group_portal"/>
+                <field name="name" groups="base.group_portal"/>
+                <field name="inherit_id" %(attrs)s groups="base.group_allow_export"/>
+                <field name="inherit_id" %(attrs)s groups="!base.group_allow_export"/>
+                <field name="inherit_id" %(attrs)s groups="base.group_portal"/>
+                <field name="inherit_id" %(attrs)s groups="!base.group_portal"/>
                 <field name="inherit_id" %(attrs)s/>
             </form>
-        """, valid=True)
+        """, add_field_with_groups='')
 
-        # Assert having two times the same field with a mutually exclusive group
-        # and using that field in another field using the group is valid
+        # Add a field for the missing combination
         validate("""
             <form string="View">
-                <field name="name" groups="!base.group_system"/>
-                <field name="name" groups="base.group_system"/>
-                <field name="inherit_id" groups="base.group_system" %(attrs)s/>
+                <field name="name" groups="!base.group_allow_export"/>
+                <field name="name" groups="base.group_allow_export"/>
+                <field name="name" groups="!base.group_portal"/>
+                <field name="name" groups="base.group_portal"/>
+                <field name="inherit_id" %(attrs)s groups="base.group_allow_export"/>
+                <field name="inherit_id" %(attrs)s groups="!base.group_allow_export"/>
+                <field name="inherit_id" %(attrs)s groups="base.group_portal"/>
+                <field name="inherit_id" %(attrs)s groups="!base.group_portal"/>
+                <field name="inherit_id" %(attrs)s groups="base.group_public"/>
             </form>
-        """, valid=True)
-
-        # Assert having two times the same field with a mutually exclusive group
-        # and using that field in another field using the !group is valid
-        validate("""
-            <form string="View">
-                <field name="name" groups="!base.group_system"/>
-                <field name="name" groups="base.group_system"/>
-                <field name="inherit_id" groups="!base.group_system" %(attrs)s/>
-            </form>
-        """, valid=True)
-
-        # Assert having two times the same field with a mutually exclusive group
-        # and using that field in another field restricted to any other group is valid
-        validate("""
-            <form string="View">
-                <field name="name" groups="!base.group_system"/>
-                <field name="name" groups="base.group_system"/>
-                <field name="inherit_id" groups="base.group_portal" %(attrs)s/>
-            </form>
-        """, valid=True)
+        """, add_field_with_groups='base.group_public')

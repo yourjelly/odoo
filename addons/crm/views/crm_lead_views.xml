@@ -819,9 +819,11 @@
                     <field name="lead_properties"/>
                     <button name="%(crm.action_lead_mail_compose)d" type="action" string="Email" icon="fa-envelope"/>
                     <button name="action_reschedule_meeting" class="text-warning" type="object" string="Reschedule"
-                        icon="fa-calendar" invisible="not my_activity_date_deadline or not activity_calendar_event_id"/>
+                        icon="fa-calendar" invisible="not my_activity_date_deadline or not activity_calendar_event_id"
+                        groups="base.group_user"/>
                     <button name="action_snooze" class="text-warning" type="object" string="Snooze 7d"
-                        icon="fa-bell-slash" invisible="not my_activity_date_deadline or activity_calendar_event_id"/>
+                        icon="fa-bell-slash" invisible="not my_activity_date_deadline or activity_calendar_event_id"
+                        groups="base.group_user"/>
                 </tree>
             </field>
         </record>

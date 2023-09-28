@@ -2,7 +2,10 @@
 
 import { _t } from "@web/core/l10n/translation";
 import { hasTouch } from "@web/core/browser/feature_detection";
-import { deleteConfirmationMessage, ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import {
+    deleteConfirmationMessage,
+    ConfirmationDialog,
+} from "@web/core/confirmation_dialog/confirmation_dialog";
 import { makeContext } from "@web/core/context";
 import { useDebugCategory } from "@web/core/debug/debug_context";
 import { registry } from "@web/core/registry";
@@ -81,10 +84,6 @@ export async function loadSubViews(
                 refinedContext[key] = context[key];
             }
         }
-        // specify the main model to prevent access rights defined in the context
-        // (e.g. create: 0) to apply to sub views (same logic as the one applied by
-        // the server for inline views)
-        refinedContext.base_model_name = resModel;
 
         const comodel = field.relation;
         const {
