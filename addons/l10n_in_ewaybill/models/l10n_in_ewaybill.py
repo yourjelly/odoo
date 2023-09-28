@@ -5,6 +5,8 @@ import json
 import re
 import markupsafe
 import logging
+import base64
+
 
 from odoo import fields, models, api, _
 from odoo.fields import Command
@@ -13,7 +15,9 @@ from odoo.tools import html_escape, html2plaintext
 
 from odoo.addons.iap import jsonrpc
 from odoo.addons.l10n_in_edi.models.account_edi_format import DEFAULT_IAP_ENDPOINT, DEFAULT_IAP_TEST_ENDPOINT
-from odoo.addons.l10n_in_edi_ewaybill.models.error_codes import ERROR_CODES
+
+from .error_codes import ERROR_CODES
+
 
 from datetime import timedelta
 from markupsafe import Markup
@@ -22,44 +26,33 @@ from markupsafe import Markup
 _logger = logging.getLogger(__name__)
 
 
-class EwaybillStock(models.Model):
+class Ewaybill(models.Model):
     _name = "l10n.in.ewaybill"
-    _description = "Ewaybill for stock movement"
+    _description = "Ewaybill for invoice"
     _inherit = ['portal.mixin', 'mail.thread', 'mail.activity.mixin']
 
-    stock_picking_id = fields.Many2one("stock.picking", "Stock Transfer", required=True)
+    account_move_id = fields.Many2one("account.move", store=True)
+    account_move_line_ids = fields.One2many("account.move.line", related="account_move_id.invoice_line_ids")
+
     date = fields.Datetime("Date", compute="_compute_date", store=True)
 
-    ewaybill_line_ids = fields.One2many("l10n.in.ewaybill.line", "ewaybill_id", compute="_compute_ewaybill_line_ids", store=True, readonly=False)
-
-    partner_id = fields.Many2one(
+    company_id = fields.Many2one("res.company", compute="_compute_company_id", store=True)
+    partner_id = fields.Many2one("res.partner", compute="_compute_partner_id", store=True)
+    partner_shipping_id = fields.Many2one(
         comodel_name='res.partner',
-        string='Partner',
-        compute='_compute_partner_id', store=True)
+        string='Delivery Address',
+        compute='_compute_partner_shipping_id', store=True, readonly=False,
+        check_company=True,
+        help="The delivery address will be used in the computation of the fiscal position.",
+    )
 
-    attachment_id = fields.Many2one(
-        comodel_name='ir.attachment',
-        groups='base.group_system',
-        help="The file generated when the ewaybill is posted (and this document is processed).")
+    country_id = fields.Many2one('res.country', compute="_compute_country_id", store=True)
 
-    company_id = fields.Many2one(
-        comodel_name='res.company',
-        string='Company',
-        compute='_compute_company_id', store=True,
-        index=True)
-
-    currency_id = fields.Many2one(
-        'res.currency',
-        string='Currency',
-        tracking=True,
-        compute='_compute_currency_id', store=True)
-
-    amount_untaxed = fields.Monetary(string="Untaxed Amount", store=True, compute='_compute_amounts', tracking=True)
-    amount_total = fields.Monetary(string="Total", store=True, compute='_compute_amounts', tracking=True)
-    tax_totals = fields.Binary(compute='_compute_tax_totals')
     state = fields.Selection(
         selection=[
-            ('pending', 'Pending'),
+            ('draft', 'Draft'),
+            ('sending', 'Sending'),
+            ('error', 'Error'),
             ('sent', 'Sent'),
             ('cancel', 'Cancelled'),
         ],
@@ -68,32 +61,20 @@ class EwaybillStock(models.Model):
         readonly=True,
         copy=False,
         tracking=True,
-        default='pending')
+        default='draft')
 
-    partner_shipping_id = fields.Many2one(
-        comodel_name='res.partner',
-        string='Delivery Address',
-        compute='_compute_partner_shipping_id', store=True,
-        domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]",
-        help="The delivery address will be used in the computation of the fiscal position.")
+    state_id = fields.Many2one('res.country.state', string="Place of supply", compute="_compute_state_id", store=True, readonly=False)
 
-    gst_treatment = fields.Selection([
-            ('regular', 'Registered Business - Regular'),
-            ('composition', 'Registered Business - Composition'),
-            ('unregistered', 'Unregistered Business'),
-            ('consumer', 'Consumer'),
-            ('overseas', 'Overseas'),
-            ('special_economic_zone', 'Special Economic Zone'),
-            ('deemed_export', 'Deemed Export'),
-            ('uin_holders', 'UIN Holders'),
-        ], string="GST Treatment", compute="_compute_gst_treatment", store=True, readonly=False, copy=True)
-
+    # Transaction Details
     type_id = fields.Many2one("l10n.in.ewaybill.type", "E-waybill Document Type", tracking=True)
 
-    transporter_id = fields.Many2one("res.partner", "Transporter", copy=False, tracking=True)
+    sub_type_code = fields.Char(related="type_id.sub_type_code")
+
+    # transportation details
     distance = fields.Integer("Distance", tracking=True)
     mode = fields.Selection([
-        ("1", "Road"),
+        ("0", "Managed by Transporter"),
+        ("1", "By Road"),
         ("2", "Rail"),
         ("3", "Air"),
         ("4", "Ship")],
@@ -106,203 +87,160 @@ class EwaybillStock(models.Model):
         ("O", "ODC")],
         string="Vehicle Type", copy=False, tracking=True)
 
+    # Document number and date required in case of transportation mode is Rail, Air or Ship.
     transportation_doc_no = fields.Char(
-        string="Transportation Document Number",
+        string="E-waybill Document Number",
         help="""Transport document number. If it is more than 15 chars, last 15 chars may be entered""",
         copy=False, tracking=True)
-
     transportation_doc_date = fields.Date(
         string="Document Date",
         help="Date on the transporter document",
-        copy=False, tracking=True)
+        copy=False,
+        tracking=True)
 
-    state_id = fields.Many2one('res.country.state', string="Place of supply", compute="_compute_state_id", store=True, readonly=False)
+    # transporter id required when transportation done by other party.
+    transporter_id = fields.Many2one("res.partner", "Transporter", copy=False, tracking=True)
 
-    ewaybill_number = fields.Char("Ewaybill Number", compute="_compute_ewaybill_number", store=True)
-    cancel_reason = fields.Selection(selection=[
-        ("1", "Duplicate"),
-        ("2", "Data Entry Mistake"),
-        ("3", "Order Cancelled"),
-        ("4", "Others"),
-        ], string="Cancel reason", copy=False, tracking=True)
-    cancel_remarks = fields.Char("Cancel remarks", copy=False, tracking=True)
+    attachment_id = fields.Many2one(
+        comodel_name='ir.attachment',
+        groups='base.group_system',
+        help="The file generated by edi_format_id when the invoice is posted (and this document is processed).",
+    )
 
-    @api.depends('state')
-    def _compute_display_name(self):
-        for ewaybill in self:
-            if ewaybill.ewaybill_number:
-                ewaybill.display_name = ewaybill.ewaybill_number
-            else:
-                ewaybill.display_name = "Draft"
 
-    @api.depends('attachment_id')
-    def _compute_ewaybill_number(self):
-        for ewaybill in self:
-            ewaybill_response_json = ewaybill._get_l10n_in_edi_ewaybill_response_json()
-            if ewaybill_response_json:
-                ewaybill.ewaybill_number = ewaybill_response_json.get("ewayBillNo") or ewaybill_response_json.get("EwbNo")
-            else:
-                ewaybill.ewaybill_number = False
+    error_message = fields.Html(readonly=True)
 
-    @api.depends('stock_picking_id')
+    content = fields.Binary(compute='_compute_content', compute_sudo=True)
+
+    @api.depends('account_move_id')
     def _compute_date(self):
         for record in self:
-            record.date = record.stock_picking_id.scheduled_date
-
-    @api.depends('stock_picking_id')
-    def _compute_ewaybill_line_ids(self):
-        for record in self:
-            if not record.stock_picking_id:
-                record.ewaybill_line_ids = False
-            else:
-                lines = self.env['stock.move'].search([('picking_id', '=', record.stock_picking_id.id)])
-                record.ewaybill_line_ids = [Command.delete(line.id) for line in record.ewaybill_line_ids]
-                record.ewaybill_line_ids = lines.mapped(lambda line: Command.create({
-                    'stock_move_id': line.id,
-                }))
-
-    @api.depends('stock_picking_id.company_id')
-    def _compute_company_id(self):
-        for record in self:
-            record.company_id = record.stock_picking_id.company_id
-
-    @api.depends('company_id')
-    def _compute_currency_id(self):
-        for record in self:
-            record.currency_id = record.company_id.currency_id
-
-    @api.depends('stock_picking_id.partner_id')
-    def _compute_partner_id(self):
-        for record in self:
-            record.partner_id = record.stock_picking_id.partner_id
+            record.date = record.account_move_id.invoice_date
 
     @api.depends('partner_id', 'company_id')
     def _compute_state_id(self):
         for ewaybill in self:
             ewaybill.state_id = ewaybill.partner_id.state_id
 
-    @api.depends('partner_id')
+    @api.depends('account_move_id.company_id')
+    def _compute_company_id(self):
+        for record in self:
+            record.company_id = record.account_move_id.company_id
+
+    @api.depends('account_move_id.company_id')
+    def _compute_country_id(self):
+        for record in self:
+            record.country_id = record.company_id.country_id
+
+    @api.depends('account_move_id.partner_id')
+    def _compute_partner_id(self):
+        for record in self:
+            record.partner_id = record.account_move_id.partner_id
+
+    @api.depends('state')
+    def _compute_content(self):
+        for ewaybill in self:
+            res = b''
+            base = self._l10n_in_edi_ewaybill_base_irn_or_direct(ewaybill)
+            if base == "irn":
+                res = base64.b64encode(ewaybill._l10n_in_edi_ewaybill_irn_json_invoice_content(ewaybill))
+            else:
+                res = base64.b64encode(ewaybill._l10n_in_edi_ewaybill_json_invoice_content(ewaybill))
+        ewaybill.content = res
+
+    def action_export_xml(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_url',
+            'url':  '/web/content/l10n.in.ewaybill/%s/content' % self.id
+        }
+
+    @api.depends('account_move_id')
     def _compute_partner_shipping_id(self):
         for ewaybill in self:
-            addr = ewaybill.partner_id.address_get(['delivery'])
-            ewaybill.partner_shipping_id = addr and addr.get('delivery')
-
-    @api.depends('partner_id')
-    def _compute_gst_treatment(self):
-        for record in self:
-            gst_treatment = record.partner_id.l10n_in_gst_treatment
-            if not gst_treatment:
-                gst_treatment = 'unregistered'
-                if record.partner_id.country_id.code == 'IN' and record.partner_id.vat:
-                    gst_treatment = 'regular'
-                elif record.partner_id.country_id and record.partner_id.country_id.code != 'IN':
-                    gst_treatment = 'overseas'
-            record.gst_treatment = gst_treatment
-
-    @api.depends('ewaybill_line_ids')
-    def _compute_amounts(self):
-        for record in self:
-            amount_untaxed = 0.0
-            amount_tax = 0.0
-
-            for rec in record.ewaybill_line_ids:
-                amount_untaxed += rec.price_subtotal
-                amount_tax += rec.cgst_amount + rec.sgst_amount + rec.igst_amount + rec.cess_amount + rec.cess_non_advol_amount + rec.other_amount
-
-            record.amount_untaxed = amount_untaxed
-            record.amount_total = amount_untaxed + amount_tax
-
-    @api.depends('ewaybill_line_ids.tax_ids', 'ewaybill_line_ids.price_unit', 'amount_total', 'amount_untaxed', 'currency_id')
-    def _compute_tax_totals(self):
-        for record in self:
-            lines = record.ewaybill_line_ids
-            record.tax_totals = self.env['account.tax']._prepare_tax_totals(
-                [x._convert_to_tax_base_line_dict() for x in lines],
-                record.currency_id or record.company_id.currency_id,
-            )
-
-    def ewaybill_cancel(self):
-        for ewaybill in self:
-            if ewaybill.state == "sent" and (not ewaybill.cancel_reason or not ewaybill.cancel_remarks):
-                raise UserError(_("To cancel E-waybill set cancel reason and remarks\n"))
-            res = ewaybill._l10n_in_ewaybill_cancel_invoice(ewaybill)
-            if res.get('success') is True:
-                ewaybill.message_post(body=_("A cancellation of the Ewaybill has been requested."))
-                ewaybill.write({'state': 'cancel'})
+            if ewaybill.account_move_id:
+                ewaybill.partner_shipping_id = ewaybill.account_move_id.partner_shipping_id
             else:
-                raise ValidationError(_("\nEwaybill not cancelled \n\n%s") % (html2plaintext(res.get(ewaybill).get("error", False))))
+                ewaybill.partner_shipping_id = False
+
+    def _l10n_in_edi_ewaybill_base_irn_or_direct(self, ewaybill):
+        """
+            There is two type of api call to create E-waybill
+            1. base on IRN, IRN is number created when we do E-invoice
+            2. direct call, when E-invoice not aplicable or it"s credit not
+        """
+        if ewaybill.account_move_id.move_type == "out_invoice":
+            return "irn"
+        # einvoice_in_edi_format = move.journal_id.edi_format_ids.filtered(lambda f: f.code == "in_einvoice_1_03")
+        return "direct"
 
     def ewaybill_send(self):
         for ewaybill in self:
             errors = self._check_ewaybill_configuration(ewaybill)
             if errors:
-                raise UserError(_("Invalid invoice configuration:\n%s") % '\n'.join(errors))
-
-            res = ewaybill._l10n_in_ewaybill_post_invoice_edi(ewaybill)
+                raise UserError(_("Invalid ewaybill configuration:\n\n%s") % '\n'.join(errors))
+            
+            base = self._l10n_in_edi_ewaybill_base_irn_or_direct(ewaybill)
+            print(base)
+            if base == 'irn':
+                res = ewaybill._l10n_in_edi_ewaybill_irn_post_invoice_edi(ewaybill)
+            else:
+                res = ewaybill._l10n_in_edi_ewaybill_post_invoice_edi(ewaybill)
+            print(res)
             if res.get(ewaybill).get("success") is True:
                 ewaybill.write({
                     'state': 'sent',
                     'attachment_id' : res.get(ewaybill).get('attachment'),
                 })
-                stock_picking = self.env['stock.picking'].browse(ewaybill.stock_picking_id.id)
-                stock_picking.write({'ewaybill_id': self.id})
             else:
-                raise ValidationError(_("\nEwaybill not sent\n\n%s") % (html2plaintext(res.get(ewaybill).get("error", False))))
+                ewaybill.write({
+                    'state': 'error',
+                })
+                ewaybill.error_message = res.get(ewaybill).get("error", False)
 
-    def ewaybill_update_part_b(self):
-        return {
-            'name': _('Update Part-B'),
-            'res_model': 'ewaybill.update.part.b',
-            'view_mode': 'form',
-            'context': {
-                'default_ewaybill_id': self.id,
-            },
-            'target': 'new',
-            'type': 'ir.actions.act_window',
-        }
+    def _l10n_in_edi_ewaybill_irn_json_invoice_content(self, move):
+        return json.dumps(self._l10n_in_edi_irn_ewaybill_generate_json(move)).encode()
 
-    def ewaybill_update_transporter(self):
-        return {
-            'name': _('Update Transporter'),
-            'res_model': 'ewaybill.update.transporter',
-            'view_mode': 'form',
-            'context': {
-                'default_ewaybill_id': self.id,
-            },
-            'target': 'new',
-            'type': 'ir.actions.act_window',
-        }
+    def _l10n_in_edi_ewaybill_json_invoice_content(self, move):
+        return json.dumps(self._l10n_in_edi_ewaybill_generate_json(move)).encode()
 
-    def ewaybill_extend_validity(self):
-        return {
-            'name': _('Extend Validity'),
-            'res_model': 'ewaybill.extend.validity',
-            'view_mode': 'form',
-            'context': {
-                'default_ewaybill_id': self.id,
-            },
-            'target': 'new',
-            'type': 'ir.actions.act_window',
-        }
+    def _l10n_in_edi_extract_digits(self, string):
+        if not string:
+            return string
+        matches = re.findall(r"\d+", string)
+        result = "".join(matches)
+        return result
 
-    def _check_ewaybill_configuration(self, ewaybill):
+    def _check_ewaybill_configuration(self, move):
         error_message = []
-        if not ewaybill.type_id:
+        base = self._l10n_in_edi_ewaybill_base_irn_or_direct(move)
+        if not move.type_id and base == "direct":
             error_message.append(_("- Document Type"))
-        if not ewaybill.mode:
+        if not move.mode:
             error_message.append(_("- Transportation Mode"))
-        elif ewaybill.mode == "1":
-            if not ewaybill.vehicle_no and ewaybill.vehicle_type:
+        elif move.mode == "0" and not move.l10n_in_transporter_id:
+            error_message.append(_("- Transporter is required when E-waybill is managed by transporter"))
+        elif move.mode == "0" and move.l10n_in_transporter_id and not move.l10n_in_transporter_id.vat:
+            error_message.append(_("- Selected Transporter is missing GSTIN"))
+        elif move.mode == "1":
+            if not move.l10n_in_vehicle_no and move.l10n_in_vehicle_type:
                 error_message.append(_("- Vehicle Number and Type is required when Transportation Mode is By Road"))
-        elif ewaybill.mode in ("2", "3", "4"):
-            if not ewaybill.transportation_doc_no and ewaybill.transportation_doc_date:
+        elif move.mode in ("2", "3", "4"):
+            if not move.transportation_doc_no and move.transportation_doc_date:
                 error_message.append(_("- Transport document number and date is required when Transportation Mode is Rail,Air or Ship"))
         if error_message:
             error_message.insert(0, _("The following information are missing on the invoice (see eWayBill tab):"))
-        error_message += self._l10n_in_validate_partner(ewaybill.partner_id)
-        error_message += self._l10n_in_validate_partner(ewaybill.company_id.partner_id, is_company=True)
+        if base == "irn":
+            # already checked by E-invoice (l10n_in_edi) so no need to check
+            return error_message
+        is_purchase = move.account_move_id.is_purchase_document(include_receipts=True)
+        error_message += self._l10n_in_validate_partner(move.partner_id)
+        error_message += self._l10n_in_validate_partner(move.company_id.partner_id, is_company=True)
+        if not re.match("^.{1,16}$", is_purchase and move.account_move_id.ref or move.account_move_id.name):
+            error_message.append(_("%s number should be set and not more than 16 characters",
+                (is_purchase and "Bill Reference" or "Invoice")))
         goods_line_is_available = False
-        for line in ewaybill.ewaybill_line_ids.filtered(lambda line: line.product_id.type != "service"):
+        for line in move.account_move_line_ids.filtered(lambda line: not (line.display_type in ('line_section', 'line_note', 'rounding') or line.product_id.type == "service")):
             goods_line_is_available = True
             if line.product_id:
                 hsn_code = self._l10n_in_edi_extract_digits(line.product_id.l10n_in_hsn_code)
@@ -344,85 +282,28 @@ class EwaybillStock(models.Model):
             message.append(_("\n- Email address should be valid and not more then 100 characters"))
         return message
 
-    def _l10n_in_ewaybill_post_invoice_edi(self, ewaybill):
+    def _l10n_in_edi_ewaybill_cancel_invoice(self, invoices):
+        if self.code != "in_ewaybill_1_03":
+            return super()._cancel_invoice_edi(invoices)
         response = {}
         res = {}
-        generate_json = self._l10n_in_ewaybill_generate_json(ewaybill)
-        response = self._l10n_in_edi_ewaybill_generate(ewaybill.company_id, generate_json)
-        if response.get("error"):
-            error = response["error"]
-            error_codes = [e.get("code") for e in error]
-            if "238" in error_codes:
-                # Invalid token eror then create new token and send generate request again.
-                # This happen when authenticate called from another odoo instance with same credentials (like. Demo/Test)
-                authenticate_response = self._l10n_in_edi_ewaybill_authenticate(ewaybill.company_id)
-                if not authenticate_response.get("error"):
-                    error = []
-                    response = self._l10n_in_edi_ewaybill_generate(ewaybill.company_id, generate_json)
-                    if response.get("error"):
-                        error = response["error"]
-                        error_codes = [e.get("code") for e in error]
-            if "604" in error_codes:
-                # Get E-waybill by details in case of E-waybill is already generated
-                # this happens when timeout from the Government portal but E-waybill is generated
-                response = self._l10n_in_edi_ewaybill_get_by_consigner(
-                    ewaybill.company_id, generate_json.get("docType"), generate_json.get("docNo"))
-                if not response.get("error"):
-                    error = []
-                    odoobot = self.env.ref("base.partner_root")
-                    ewaybill.message_post(author_id=odoobot.id, body=
-                        _("Somehow this E-waybill has been generated in the government portal before. You can verify by checking the invoice details into the government (https://ewaybillgst.gov.in/Others/EBPrintnew.asp)")
-                    )
-            if "no-credit" in error_codes:
-                res[ewaybill] = {
-                    "success": False,
-                    "error": self._l10n_in_edi_get_iap_buy_credits_message(ewaybill.company_id),
-                    "blocking_level": "error",
-                }
-            elif error:
-                error_message = "<br/>".join(["[%s] %s" % (e.get("code"), html_escape(e.get("message") or self._l10n_in_ewaybill_get_error_message(e.get('code')))) for e in error])
-                blocking_level = "error"
-                if "404" in error_codes:
-                    blocking_level = "warning"
-                res[ewaybill] = {
-                    "success": False,
-                    "error": error_message,
-                    "blocking_level": blocking_level,
-                }
-        if not response.get("error"):
-            json_dump = json.dumps(response.get("data"))
-            json_name = "%s_ewaybill.json" % (ewaybill.stock_picking_id.name.replace("/", "_"))
-            attachment = self.env["ir.attachment"].create({
-                "name": json_name,
-                "raw": json_dump.encode(),
-                "res_model": "l10n.in.ewaybill",
-                "res_id": ewaybill.id,
-                "mimetype": "application/json",
-            })
-            inv_res = {"success": True, "attachment": attachment}
-            res[ewaybill] = inv_res
-        return res
-
-    def _l10n_in_ewaybill_cancel_invoice(self, ewaybill):
-        response = {}
-        res = {}
-        ewaybill_response_json = ewaybill._get_l10n_in_edi_ewaybill_response_json()
+        ewaybill_response_json = invoices._get_l10n_in_edi_ewaybill_response_json()
         cancel_json = {
             "ewbNo": ewaybill_response_json.get("ewayBillNo") or ewaybill_response_json.get("EwbNo"),
-            "cancelRsnCode": int(ewaybill.cancel_reason),
-            "CnlRem": ewaybill.cancel_remarks,
+            "cancelRsnCode": int(invoices.l10n_in_edi_cancel_reason),
+            "CnlRem": invoices.l10n_in_edi_cancel_remarks,
         }
-        response = self._l10n_in_edi_ewaybill_cancel(ewaybill.company_id, cancel_json)
+        response = self._l10n_in_edi_ewaybill_cancel(invoices.company_id, cancel_json)
         if response.get("error"):
             error = response["error"]
             error_codes = [e.get("code") for e in error]
             if "238" in error_codes:
                 # Invalid token eror then create new token and send generate request again.
                 # This happen when authenticate called from another odoo instance with same credentials (like. Demo/Test)
-                authenticate_response = self._l10n_in_edi_ewaybill_authenticate(ewaybill.company_id)
+                authenticate_response = self._l10n_in_edi_ewaybill_authenticate(invoices.company_id)
                 if not authenticate_response.get("error"):
                     error = []
-                    response = self._l10n_in_edi_ewaybill_cancel(ewaybill.company_id, cancel_json)
+                    response = self._l10n_in_edi_ewaybill_cancel(invoices.company_id, cancel_json)
                     if response.get("error"):
                         error = response["error"]
                         error_codes = [e.get("code") for e in error]
@@ -433,17 +314,17 @@ class EwaybillStock(models.Model):
                 error = []
                 response = {"data": ""}
                 odoobot = self.env.ref("base.partner_root")
-                ewaybill.message_post(author_id=odoobot.id, body=
-                    Markup("%s<br/>%s:<br/>%s") % (
+                invoices.message_post(author_id=odoobot.id, body=
+                    Markup("%s<br/>%s:<br/>%s") %(
                         _("Somehow this E-waybill has been canceled in the government portal before. You can verify by checking the details into the government (https://ewaybillgst.gov.in/Others/EBPrintnew.asp)"),
                         _("Error"),
                         error_message
                     )
                 )
             if "no-credit" in error_codes:
-                res[ewaybill] = {
+                res[invoices] = {
                     "success": False,
-                    "error": self._l10n_in_edi_get_iap_buy_credits_message(ewaybill.company_id),
+                    "error": self._l10n_in_edi_get_iap_buy_credits_message(invoices.company_id),
                     "blocking_level": "error",
                 }
             elif error:
@@ -451,247 +332,227 @@ class EwaybillStock(models.Model):
                 blocking_level = "error"
                 if "404" in error_codes:
                     blocking_level = "warning"
-                res[ewaybill] = {
+                res[invoices] = {
                     "success": False,
                     "error": error_message,
                     "blocking_level": blocking_level,
                 }
         if not response.get("error"):
             json_dump = json.dumps(response.get("data"))
-            json_name = "%s_ewaybill_cancel.json" % (ewaybill.name.replace("/", "_"))
+            json_name = "%s_ewaybill_cancel.json" % (invoices.name.replace("/", "_"))
+            attachment = self.env["ir.attachment"].create({
+                "name": json_name,
+                "raw": json_dump.encode(),
+                "res_model": "account.move",
+                "res_id": invoices.id,
+                "mimetype": "application/json",
+            })
+            inv_res = {"success": True, "attachment": attachment}
+            res[invoices] = inv_res
+        return res
+
+    def _l10n_in_edi_ewaybill_irn_post_invoice_edi(self, invoices):
+        response = {}
+        res = {}
+        generate_json = self._l10n_in_edi_irn_ewaybill_generate_json(invoices)
+        print(generate_json)
+        response = self._l10n_in_edi_irn_ewaybill_generate(invoices.company_id, generate_json)
+        if response.get("error"):
+            error = response["error"]
+            error_codes = [e.get("code") for e in error]
+            if "1005" in error_codes:
+                # Invalid token eror then create new token and send generate request again.
+                # This happen when authenticate called from another odoo instance with same credentials (like. Demo/Test)
+                authenticate_response = self._l10n_in_edi_authenticate(invoices.company_id)
+                if not authenticate_response.get("error"):
+                    error = []
+                    response = self._l10n_in_edi_irn_ewaybill_generate(invoices.company_id, generate_json)
+                    if response.get("error"):
+                        error = response["error"]
+                        error_codes = [e.get("code") for e in error]
+            if "4002" in error_codes or "4026" in error_codes:
+                # Get E-waybill by details in case of IRN is already generated
+                # this happens when timeout from the Government portal but E-waybill is generated
+                response = self._l10n_in_edi_irn_ewaybill_get(invoices.company_id, generate_json.get("Irn"))
+                if not response.get("error"):
+                    error = []
+                    odoobot = self.env.ref("base.partner_root")
+                    invoices.message_post(author_id=odoobot.id, body=
+                        _("Somehow this E-waybill has been generated in the government portal before. You can verify by checking the invoice details into the government (https://ewaybillgst.gov.in/Others/EBPrintnew.asp)")
+                    )
+
+            if "no-credit" in error_codes:
+                res[invoices] = {
+                    "success": False,
+                    "error": self._l10n_in_edi_get_iap_buy_credits_message(invoices.company_id),
+                    "blocking_level": "error",
+                }
+            elif error:
+                error_message = "<br/>".join(["[%s] %s" % (e.get("code"), html_escape(e.get("message") or self._l10n_in_edi_ewaybill_get_error_message(e.get('code')))) for e in error])
+                blocking_level = "error"
+                if "404" in error_codes or "waiting" in error_codes:
+                    blocking_level = "warning"
+                res[invoices] = {
+                    "success": False,
+                    "error": error_message,
+                    "blocking_level": blocking_level,
+                }
+        if not response.get("error"):
+            json_dump = json.dumps(response.get("data"))
+            json_name = "%s_irn_ewaybill.json" % (invoices.name.replace("/", "_"))
+            attachment = self.env["ir.attachment"].create({
+                "name": json_name,
+                "raw": json_dump.encode(),
+                "res_model": "account.move",
+                "res_id": invoices.id,
+                "mimetype": "application/json",
+            })
+            inv_res = {"success": True, "attachment": attachment}
+            res[invoices] = inv_res
+        return res
+
+    def _l10n_in_edi_irn_ewaybill_generate_json(self, invoice):
+        json_payload = {
+            "Irn": invoice._get_l10n_in_edi_response_json().get("Irn"),
+            "Distance": invoice.distance,
+        }
+        if invoice.mode == "0":
+            json_payload.update({
+                "TransId": invoice.transporter_id.vat,
+                "TransName": invoice.transporter_id.name,
+            })
+        elif invoice.mode == "1":
+            json_payload.update({
+                "TransMode": invoice.mode,
+                "VehNo": invoice.vehicle_no,
+                "VehType": invoice.vehicle_type,
+            })
+        elif invoice.mode in ("2", "3", "4"):
+            doc_date = invoice.transportation_doc_date
+            json_payload.update({
+                "TransMode": invoice.mode,
+                "TransDocDt": doc_date and doc_date.strftime("%d/%m/%Y") or False,
+                "TransDocNo": invoice.transportation_doc_no,
+            })
+        return json_payload
+
+    def _get_l10n_in_edi_response_json(self):
+        self.ensure_one()
+        l10n_in_edi = self.account_move_id.edi_document_ids.filtered(lambda i: i.edi_format_id.code == "in_einvoice_1_03"
+            and i.state in ("sent", "to_cancel"))
+        if l10n_in_edi:
+            return json.loads(l10n_in_edi.sudo().attachment_id.raw.decode("utf-8"))
+        else:
+            return {}
+
+    def _l10n_in_edi_ewaybill_post_invoice_edi(self, invoices):
+        response = {}
+        res = {}
+        generate_json = self._l10n_in_edi_ewaybill_generate_json(invoices)
+        print(generate_json)
+        response = self._l10n_in_edi_ewaybill_generate(invoices.company_id, generate_json)
+        if response.get("error"):
+            error = response["error"]
+            error_codes = [e.get("code") for e in error]
+            if "238" in error_codes:
+                # Invalid token eror then create new token and send generate request again.
+                # This happen when authenticate called from another odoo instance with same credentials (like. Demo/Test)
+                authenticate_response = self._l10n_in_edi_ewaybill_authenticate(invoices.company_id)
+                if not authenticate_response.get("error"):
+                    error = []
+                    response = self._l10n_in_edi_ewaybill_generate(invoices.company_id, generate_json)
+                    if response.get("error"):
+                        error = response["error"]
+                        error_codes = [e.get("code") for e in error]
+            if "604" in error_codes:
+                # Get E-waybill by details in case of E-waybill is already generated
+                # this happens when timeout from the Government portal but E-waybill is generated
+                response = self._l10n_in_edi_ewaybill_get_by_consigner(
+                    invoices.company_id, generate_json.get("docType"), generate_json.get("docNo"))
+                if not response.get("error"):
+                    error = []
+                    odoobot = self.env.ref("base.partner_root")
+                    invoices.message_post(author_id=odoobot.id, body=
+                        _("Somehow this E-waybill has been generated in the government portal before. You can verify by checking the invoice details into the government (https://ewaybillgst.gov.in/Others/EBPrintnew.asp)")
+                    )
+            if "no-credit" in error_codes:
+                res[invoices] = {
+                    "success": False,
+                    "error": self._l10n_in_edi_get_iap_buy_credits_message(invoices.company_id),
+                    "blocking_level": "error",
+                }
+            elif error:
+                error_message = "<br/>".join(["[%s] %s" % (e.get("code"), html_escape(e.get("message") or self._l10n_in_edi_ewaybill_get_error_message(e.get('code')))) for e in error])
+                blocking_level = "error"
+                if "404" in error_codes:
+                    blocking_level = "warning"
+                res[invoices] = {
+                    "success": False,
+                    "error": error_message,
+                    "blocking_level": blocking_level,
+                }
+        if not response.get("error"):
+            json_dump = json.dumps(response.get("data"))
+            json_name = "%s_ewaybill.json" % (invoices.account_move_id.name.replace("/", "_"))
             attachment = self.env["ir.attachment"].create({
                 "name": json_name,
                 "raw": json_dump.encode(),
                 "res_model": "l10n.in.ewaybill",
-                "res_id": ewaybill.id,
+                "res_id": invoices.id,
                 "mimetype": "application/json",
             })
             inv_res = {"success": True, "attachment": attachment}
-            res[ewaybill] = inv_res
+            res[invoices] = inv_res
         return res
 
-    def _l10n_in_edi_get_iap_buy_credits_message(self, company):
-        base_url = "https://iap-sandbox.odoo.com/iap/1/credit" if not company.sudo().l10n_in_edi_production_env else ""
-        url = self.env["iap.account"].get_credits_url(service_name="l10n_in_edi", base_url=base_url)
-        return markupsafe.Markup("""<p><b>%s</b></p><p>%s <a href="%s">%s</a></p>""") % (
-            _("You have insufficient credits to send this document!"),
-            _("Please buy more credits and retry: "),
-            url,
-            _("Buy Credits")
+    def _l10n_in_edi_ewaybill_get_error_message(self, code):
+        error_message = ERROR_CODES.get(code)
+        return error_message or _("We don't know the error message for this error code. Please contact support.")
+
+    def _get_l10n_in_edi_saler_buyer_party(self, move):
+        # res = move._get_l10n_in_edi_saler_buyer_party(move)
+        res = {
+            "seller_details": move.company_id.partner_id,
+            "dispatch_details": move.account_move_id._l10n_in_get_warehouse_address() or move.company_id.partner_id,
+            "buyer_details": move.partner_id,
+            "ship_to_details": move.partner_shipping_id or move.partner_id,
+        }
+        if move.account_move_id.is_purchase_document(include_receipts=True):
+            res = {
+                "seller_details":  move.partner_id,
+                "dispatch_details": move.partner_shipping_id or move.partner_id,
+                "buyer_details": move.company_id.partner_id,
+                "ship_to_details": move.account_move_id._l10n_in_get_warehouse_address() or move.company_id.partner_id,
+            }
+        return res
+
+    def _prepare_edi_tax_details(self, filter_to_apply=None, filter_invl_to_apply=None, grouping_key_generator=None):
+        return self._prepare_invoice_aggregated_taxes(
+            filter_invl_to_apply=filter_invl_to_apply,
+            filter_tax_values_to_apply=filter_to_apply,
+            grouping_key_generator=grouping_key_generator,
+        )
+    
+    def _prepare_invoice_aggregated_taxes(self, filter_invl_to_apply=None, filter_tax_values_to_apply=None, grouping_key_generator=None):
+        self.ensure_one()
+
+        base_lines = [
+            x._convert_to_tax_base_line_dict()
+            for x in self.account_move_line_ids.filtered(lambda x: x.display_type == 'product' and (not filter_invl_to_apply or filter_invl_to_apply(x)))
+        ]
+
+        to_process = []
+        for base_line in base_lines:
+            to_update_vals, tax_values_list = self.env['account.tax']._compute_taxes_for_single_line(base_line)
+            to_process.append((base_line, to_update_vals, tax_values_list))
+
+        return self.env['account.tax']._aggregate_taxes(
+            to_process,
+            filter_tax_values_to_apply=filter_tax_values_to_apply,
+            grouping_key_generator=grouping_key_generator,
         )
 
-    def _l10n_in_ewaybill_update_part_b(self, ewaybill, val):
-        response = {}
-        res = {}
-        ewaybill_response_json = ewaybill._get_l10n_in_edi_ewaybill_response_json()
-
-        update_part_b_json = {
-            "ewbNo": ewaybill_response_json.get("ewayBillNo") or ewaybill_response_json.get("EwbNo"),
-            "vehicleNo": val.get("vehicle_no") or "",
-            "fromPlace": val.get("update_place") or "",
-            "fromStateCode": int(val.get("update_state_id").l10n_in_tin) or "",
-            "reasonCode" : int(val.get("update_reason_code")),
-            "reasonRem" : val.get("update_remarks"),
-            "transDocNo": val.get("transportation_doc_no") or "",
-            "transDocDate": val.get("transportation_doc_date") and
-                    val.get("transportation_doc_date").strftime("%d/%m/%Y") or "",
-            "transMode": val.get("mode"),
-            "vehicleType": val.get("vehicle_type") or "",
-        }
-        response = self._l10n_in_edi_ewaybill_update_part_b(ewaybill.company_id, update_part_b_json)
-        if response.get("error"):
-            error = response["error"]
-            error_codes = [e.get("code") for e in error]
-            if "238" in error_codes:
-                # Invalid token eror then create new token and send generate request again.
-                # This happen when authenticate called from another odoo instance with same credentials (like. Demo/Test)
-                authenticate_response = self._l10n_in_edi_ewaybill_authenticate(ewaybill.company_id)
-                if not authenticate_response.get("error"):
-                    error = []
-                    response = self._l10n_in_edi_ewaybill_generate(ewaybill.company_id, update_part_b_json)
-                    if response.get("error"):
-                        error = response["error"]
-                        error_codes = [e.get("code") for e in error]
-            if "no-credit" in error_codes:
-                res[ewaybill] = {
-                    "success": False,
-                    "error": self._l10n_in_edi_get_iap_buy_credits_message(ewaybill.company_id),
-                    "blocking_level": "error",
-                }
-            elif error:
-                error_message = "<br/>".join(["[%s] %s" % (e.get("code"), html_escape(e.get("message") or self._l10n_in_edi_ewaybill_get_error_message(e.get('code')))) for e in error])
-                blocking_level = "error"
-                if "404" in error_codes:
-                    blocking_level = "warning"
-                res[ewaybill] = {
-                    "success": False,
-                    "error": error_message,
-                    "blocking_level": blocking_level,
-                }
-        if not response.get("error"):
-            json_dump = json.dumps(response.get("data"))
-            json_name = "%s_ewaybill_updatepartb.json" % (ewaybill.name.replace("/", "_"))
-            attachment = self.env["ir.attachment"].create({
-                "name": json_name,
-                "raw": json_dump.encode(),
-                "res_model": "l10n.in.ewaybill",
-                "res_id": ewaybill.id,
-                "mimetype": "application/json",
-            })
-            inv_res = {"success": True, "attachment": attachment}
-            res[ewaybill] = inv_res
-        return res
-
-    def _l10n_in_ewaybill_update_transporter(self, ewaybill, val):
-        response = {}
-        res = {}
-        ewaybill_response_json = ewaybill._get_l10n_in_edi_ewaybill_response_json()
-        update_transporter_json = {
-            "ewbNo": ewaybill_response_json.get("ewayBillNo") or ewaybill_response_json.get("EwbNo"),
-            "transporterId": val.get("transporter_id"),
-        }
-        response = self._l10n_in_edi_ewaybill_update_transporter(ewaybill.company_id, update_transporter_json)
-        if response.get("error"):
-            error = response["error"]
-            error_codes = [e.get("code") for e in error]
-            if "238" in error_codes:
-                # Invalid token eror then create new token and send generate request again.
-                # This happen when authenticate called from another odoo instance with same credentials (like. Demo/Test)
-                authenticate_response = self._l10n_in_edi_ewaybill_authenticate(ewaybill.company_id)
-                if not authenticate_response.get("error"):
-                    error = []
-                    response = self._l10n_in_edi_ewaybill_generate(ewaybill.company_id, update_transporter_json)
-                    if response.get("error"):
-                        error = response["error"]
-                        error_codes = [e.get("code") for e in error]
-            if "no-credit" in error_codes:
-                res[ewaybill] = {
-                    "success": False,
-                    "error": self._l10n_in_edi_get_iap_buy_credits_message(ewaybill.company_id),
-                    "blocking_level": "error",
-                }
-            elif error:
-                error_message = "<br/>".join(["[%s] %s" % (e.get("code"), html_escape(e.get("message") or self._l10n_in_edi_ewaybill_get_error_message(e.get('code')))) for e in error])
-                blocking_level = "error"
-                if "404" in error_codes:
-                    blocking_level = "warning"
-                res[ewaybill] = {
-                    "success": False,
-                    "error": error_message,
-                    "blocking_level": blocking_level,
-                }
-        if not response.get("error"):
-            json_dump = json.dumps(response.get("data"))
-            json_name = "%s_ewaybill_update_transporter.json" % (ewaybill.name.replace("/", "_"))
-            attachment = self.env["ir.attachment"].create({
-                "name": json_name,
-                "raw": json_dump.encode(),
-                "res_model": "l10n.in.ewaybill",
-                "res_id": ewaybill.id,
-                "mimetype": "application/json",
-            })
-            inv_res = {"success": True, "attachment": attachment}
-            res[ewaybill] = inv_res
-        return res
-
-    def _l10n_in_ewaybill_extend_validity(self, ewaybill, val):
-        response = {}
-        res = {}
-        ewaybill_response_json = ewaybill._get_l10n_in_edi_ewaybill_response_json()
-        extend_validity_json = {
-            "ewbNo": ewaybill_response_json.get("ewayBillNo") or ewaybill_response_json.get("EwbNo"),
-            "vehicleNo": val.get("vehicle_no") or "",
-            "fromPlace": val.get("current_place"),
-            "fromStateCode": int(val.get("current_state_id").l10n_in_tin) or "",
-            "remainingDistance": val.get("rem_distance"),
-            "transDocNo": val.get("transportation_doc_no") or "",
-            "transDocDate": val.get("transportation_doc_date") and
-                    val.get("transportation_doc_date").strftime("%d/%m/%Y") or "",
-            "transMode": val.get("mode"),
-            "extnRsnCode": val.get("extend_reason_code"),
-            "extnRemarks": val.get("extend_reason_remarks"),
-            "fromPincode": int(self._l10n_in_edi_extract_digits(val.get("current_pincode"))),
-            "consignmentStatus": val.get("mode") in ('1', '2', '3', '4') and "M" or "T",
-            "transitType": val.get("consignment_status") == "T" and val.get("transit_type") or "",
-        }
-        response = self._l10n_in_edi_ewaybill_extend_validity(ewaybill.company_id, extend_validity_json)
-        if response.get("error"):
-            error = response["error"]
-            error_codes = [e.get("code") for e in error]
-            if "238" in error_codes:
-                # Invalid token eror then create new token and send generate request again.
-                # This happen when authenticate called from another odoo instance with same credentials (like. Demo/Test)
-                authenticate_response = self._l10n_in_edi_ewaybill_authenticate(ewaybill.company_id)
-                if not authenticate_response.get("error"):
-                    error = []
-                    response = self._l10n_in_edi_ewaybill_generate(ewaybill.company_id, extend_validity_json)
-                    if response.get("error"):
-                        error = response["error"]
-                        error_codes = [e.get("code") for e in error]
-            if "no-credit" in error_codes:
-                res[ewaybill] = {
-                    "success": False,
-                    "error": self._l10n_in_edi_get_iap_buy_credits_message(ewaybill.company_id),
-                    "blocking_level": "error",
-                }
-            elif error:
-                error_message = "<br/>".join(["[%s] %s" % (e.get("code"), html_escape(e.get("message") or self._l10n_in_edi_ewaybill_get_error_message(e.get('code')))) for e in error])
-                blocking_level = "error"
-                if "404" in error_codes:
-                    blocking_level = "warning"
-                res[ewaybill] = {
-                    "success": False,
-                    "error": error_message,
-                    "blocking_level": blocking_level,
-                }
-        if not response.get("error"):
-            json_dump = json.dumps(response.get("data"))
-            json_name = "%s_ewaybill_extendvalidity.json" % (ewaybill.name.replace("/", "_"))
-            attachment = self.env["ir.attachment"].create({
-                "name": json_name,
-                "raw": json_dump.encode(),
-                "res_model": "l10n.in.ewaybill",
-                "res_id": ewaybill.id,
-                "mimetype": "application/json",
-            })
-            inv_res = {"success": True, "attachment": attachment}
-            res[ewaybill] = inv_res
-        return res
-
-    def _get_l10n_in_edi_ewaybill_response_json(self):
-        self.ensure_one()
-        for ewaybill in self:
-            if ewaybill.state == "sent" and ewaybill.attachment_id:
-                return json.loads(ewaybill.sudo().attachment_id.raw.decode("utf-8"))
-            else:
-                return {}
-
-    def _get_l10n_in_edi_saler_buyer_party(self, ewaybill):
-        return {
-            "seller_details": ewaybill.company_id.partner_id,
-            "dispatch_details": ewaybill.stock_picking_id.picking_type_id.warehouse_id.partner_id or ewaybill.company_id.partner_id,
-            "buyer_details": ewaybill.partner_id,
-            "ship_to_details": ewaybill.partner_shipping_id or ewaybill.partner_id,
-        }
-
-    def _l10n_in_edi_extract_digits(self, string):
-        if not string:
-            return string
-        matches = re.findall(r"\d+", string)
-        result = "".join(matches)
-        return result
-
-    @api.model
-    def _l10n_in_round_value(self, amount, precision_digits=2):
-        """
-            This method is call for rounding.
-            If anything is wrong with rounding then we quick fix in method
-        """
-        value = round(amount, precision_digits)
-        # avoid -0.0
-        return value if value else 0.0
-
-    def _l10n_in_ewaybill_generate_json(self, ewaybill):
+    def _l10n_in_edi_ewaybill_generate_json(self, invoices):
         def get_transaction_type(seller_details, dispatch_details, buyer_details, ship_to_details):
             """
                 1 - Regular
@@ -707,22 +568,26 @@ class EwaybillStock(models.Model):
                 return 2
             else:
                 return 1
-
-        saler_buyer = self._get_l10n_in_edi_saler_buyer_party(ewaybill)
+        account_edi = self.env['account.edi.format']
+        saler_buyer = self._get_l10n_in_edi_saler_buyer_party(invoices)
         seller_details = saler_buyer.get("seller_details")
         dispatch_details = saler_buyer.get("dispatch_details")
         buyer_details = saler_buyer.get("buyer_details")
         ship_to_details = saler_buyer.get("ship_to_details")
+        sign = invoices.account_move_id.is_inbound() and -1 or 1
         extract_digits = self._l10n_in_edi_extract_digits
+        tax_details = account_edi._l10n_in_prepare_edi_tax_details(invoices)
+        tax_details_by_code = account_edi._get_l10n_in_tax_details_by_line_code(tax_details.get("tax_details", {}))
+        invoice_line_tax_details = tax_details.get("tax_details_per_record")
         json_payload = {
-            "supplyType": ewaybill.stock_picking_id.picking_type_id.code == "outgoing" and "O" or "I",
-            "subSupplyType": ewaybill.type_id.sub_type_code,
-            "docType": ewaybill.type_id.code,
+            "supplyType": invoices.account_move_id.is_purchase_document(include_receipts=True) and "I" or "O",
+            "subSupplyType": invoices.type_id.sub_type_code,
+            "docType": invoices.type_id.code,
             "transactionType": get_transaction_type(seller_details, dispatch_details, buyer_details, ship_to_details),
-            "transDistance": str(ewaybill.distance),
-            "docNo": ewaybill.stock_picking_id.name,
-            "docDate": ewaybill.date.strftime("%d/%m/%Y"),
-            "fromGstin": seller_details.country_id.code == "IN" and seller_details.commercial_partner_id.vat or "URP",
+            "transDistance": str(invoices.distance),
+            "docNo": invoices.account_move_id.is_purchase_document(include_receipts=True) and invoices.account_move_id.ref or invoices.account_move_id.name,
+            "docDate": invoices.account_move_id.date.strftime("%d/%m/%Y"),
+            "fromGstin": seller_details.commercial_partner_id.vat or "URP",
             "fromTrdName": seller_details.commercial_partner_id.name,
             "fromAddr1": dispatch_details.street or "",
             "fromAddr2": dispatch_details.street2 or "",
@@ -730,85 +595,149 @@ class EwaybillStock(models.Model):
             "fromPincode": dispatch_details.country_id.code == "IN" and int(extract_digits(dispatch_details.zip)) or "",
             "fromStateCode": int(seller_details.state_id.l10n_in_tin) or "",
             "actFromStateCode": dispatch_details.state_id.l10n_in_tin and int(dispatch_details.state_id.l10n_in_tin) or "",
-            "toGstin": buyer_details.country_id.code == "IN" and buyer_details.commercial_partner_id.vat or "URP",
+            "toGstin": buyer_details.commercial_partner_id.vat or "URP",
             "toTrdName": buyer_details.commercial_partner_id.name,
             "toAddr1": ship_to_details.street or "",
             "toAddr2": ship_to_details.street2 or "",
             "toPlace": ship_to_details.city or "",
             "toPincode": int(extract_digits(ship_to_details.zip)),
             "actToStateCode": int(ship_to_details.state_id.l10n_in_tin),
-            "toStateCode": int(buyer_details.state_id.l10n_in_tin),
+            "toStateCode": invoices.account_move_id.l10n_in_state_id.l10n_in_tin and int(invoices.account_move_id.l10n_in_state_id.l10n_in_tin) or (
+                buyer_details.state_id.l10n_in_tin or int(buyer_details.state_id.l10n_in_tin) or ""
+            ),
             "itemList": [
-                self._get_l10n_in_ewaybill_line_details(line)
-                for line in ewaybill.ewaybill_line_ids
+                self._get_l10n_in_edi_ewaybill_line_details(line, line_tax_details, sign)
+                for line, line_tax_details in invoice_line_tax_details.items()
             ],
-            "totalValue": self._l10n_in_round_value(ewaybill.amount_untaxed),
-            "cgstValue": self._l10n_in_round_value(sum(ewaybill.ewaybill_line_ids.mapped('cgst_amount'))),
-            "sgstValue": self._l10n_in_round_value(sum(ewaybill.ewaybill_line_ids.mapped('sgst_amount'))),
-            "igstValue": self._l10n_in_round_value(sum(ewaybill.ewaybill_line_ids.mapped('igst_amount'))),
-            "cessValue": self._l10n_in_round_value(sum(ewaybill.ewaybill_line_ids.mapped('cess_amount'))),
-            "cessNonAdvolValue": self._l10n_in_round_value(sum(ewaybill.ewaybill_line_ids.mapped('cess_non_advol_amount'))),
-            "otherValue": self._l10n_in_round_value(sum(ewaybill.ewaybill_line_ids.mapped('other_amount'))),
-            "totInvValue": self._l10n_in_round_value(ewaybill.amount_total),
+            "totalValue": self._l10n_in_round_value(tax_details.get("base_amount")),
+            "cgstValue": self._l10n_in_round_value(tax_details_by_code.get("cgst_amount", 0.00)),
+            "sgstValue": self._l10n_in_round_value(tax_details_by_code.get("sgst_amount", 0.00)),
+            "igstValue": self._l10n_in_round_value(tax_details_by_code.get("igst_amount", 0.00)),
+            "cessValue": self._l10n_in_round_value(tax_details_by_code.get("cess_amount", 0.00)),
+            "cessNonAdvolValue": self._l10n_in_round_value(tax_details_by_code.get("cess_non_advol_amount", 0.00)),
+            "otherValue": self._l10n_in_round_value(tax_details_by_code.get("other_amount", 0.00)),
+            "totInvValue": self._l10n_in_round_value((tax_details.get("base_amount") + tax_details.get("tax_amount"))),
         }
-        if ewaybill.transporter_id:
-            json_payload.update({
-            "transporterId": ewaybill.transporter_id.vat,
-            "transporterName": ewaybill.transporter_id.name,
-            })
-        is_overseas = ewaybill.gst_treatment in ("overseas", "special_economic_zone")
-        if is_overseas:
-            json_payload.update({"toStateCode": 99})
-        if is_overseas and ship_to_details.state_id.country_id.code != "IN":
-            json_payload.update({
-                "actToStateCode": 99,
-                "toPincode": 999999,
-            })
+        is_overseas = invoices.account_move_id.l10n_in_gst_treatment in ("overseas", "special_economic_zone")
+        if invoices.account_move_id.is_purchase_document(include_receipts=True):
+            if is_overseas:
+                json_payload.update({"fromStateCode": 99})
+            if is_overseas and dispatch_details.state_id.country_id.code != "IN":
+                json_payload.update({
+                    "actFromStateCode": 99,
+                    "fromPincode": 999999,
+                })
+            else:
+                json_payload.update({
+                    "actFromStateCode": dispatch_details.state_id.l10n_in_tin and int(dispatch_details.state_id.l10n_in_tin) or "",
+                    "fromPincode": int(extract_digits(dispatch_details.zip)),
+                })
         else:
-            json_payload.update({
-                "actToStateCode": int(ship_to_details.state_id.l10n_in_tin),
-                "toPincode": int(extract_digits(ship_to_details.zip)),
-            })
+            if is_overseas:
+                json_payload.update({"toStateCode": 99})
+            if is_overseas and ship_to_details.state_id.country_id.code != "IN":
+                json_payload.update({
+                    "actToStateCode": 99,
+                    "toPincode": 999999,
+                })
+            else:
+                json_payload.update({
+                    "actToStateCode": int(ship_to_details.state_id.l10n_in_tin),
+                    "toPincode": int(extract_digits(ship_to_details.zip)),
+                })
 
-        if ewaybill.mode in ("2", "3", "4"):
+        if invoices.mode == "0":
             json_payload.update({
-                "transMode": ewaybill.mode,
-                "transDocNo": ewaybill.transportation_doc_no or "",
-                "transDocDate": ewaybill.transportation_doc_date and
-                    ewaybill.transportation_doc_date.strftime("%d/%m/%Y") or "",
+                "transporterId": invoices.l10n_in_transporter_id.vat or "",
+                "transporterName": invoices.l10n_in_transporter_id.name or "",
             })
-        if ewaybill.mode == "1":
+        if invoices.mode in ("2", "3", "4"):
             json_payload.update({
-                "transMode": ewaybill.mode,
-                "vehicleNo": ewaybill.vehicle_no or "",
-                "vehicleType": ewaybill.vehicle_type or "",
+                "transMode": invoices.mode,
+                "transDocNo": invoices.transportation_doc_no or "",
+                "transDocDate": invoices.transportation_doc_date and
+                    invoices.transportation_doc_date.strftime("%d/%m/%Y") or "",
+            })
+        if invoices.mode == "1":
+            json_payload.update({
+                "transMode": invoices.mode,
+                "vehicleNo": invoices.vehicle_no or "",
+                "vehicleType": invoices.vehicle_type or "",
             })
         return json_payload
 
-    def _get_l10n_in_ewaybill_line_details(self, line):
+    @api.model
+    def _l10n_in_round_value(self, amount, precision_digits=2):
+        """
+            This method is call for rounding.
+            If anything is wrong with rounding then we quick fix in method
+        """
+        value = round(amount, precision_digits)
+        # avoid -0.0
+        return value if value else 0.0
+
+    def _get_l10n_in_edi_ewaybill_line_details(self, line, line_tax_details, sign):
+        account_edi = self.env['account.edi.format']
         extract_digits = self._l10n_in_edi_extract_digits
+        tax_details_by_code = account_edi._get_l10n_in_tax_details_by_line_code(line_tax_details.get("tax_details", {}))
         line_details = {
             "productName": line.product_id.name,
             "hsnCode": extract_digits(line.product_id.l10n_in_hsn_code),
-            "productDesc": line.product_id.name,
+            "productDesc": line.name,
             "quantity": line.quantity,
             "qtyUnit": line.product_id.uom_id.l10n_in_code and line.product_id.uom_id.l10n_in_code.split("-")[0] or "OTH",
-            "taxableAmount": self._l10n_in_round_value(line.price_unit),
+            "taxableAmount": self._l10n_in_round_value(line.balance * sign),
         }
-        if line.igst_rate:
-            line_details.update({"igstRate": self._l10n_in_round_value(line.igst_rate)})
+        if tax_details_by_code.get("igst_rate") or (line.move_id.l10n_in_state_id.l10n_in_tin != line.company_id.state_id.l10n_in_tin):
+            line_details.update({"igstRate": self._l10n_in_round_value(tax_details_by_code.get("igst_rate", 0.00))})
         else:
             line_details.update({
-                "cgstRate": self._l10n_in_round_value(line.cgst_rate),
-                "sgstRate": self._l10n_in_round_value(line.sgst_rate),
+                "cgstRate": self._l10n_in_round_value(tax_details_by_code.get("cgst_rate", 0.00)),
+                "sgstRate": self._l10n_in_round_value(tax_details_by_code.get("sgst_rate", 0.00)),
             })
-        if line.cess_rate:
-            line_details.update({"cessRate": self._l10n_in_round_value(line.cess_rate)})
+        if tax_details_by_code.get("cess_rate"):
+            line_details.update({"cessRate": self._l10n_in_round_value(tax_details_by_code.get("cess_rate"))})
         return line_details
 
-    def _l10n_in_ewaybill_get_error_message(self, code):
-        error_message = ERROR_CODES.get(code)
-        return error_message or _("We don't know the error message for this error code. Please contact support.")
+    #================================ E-invoice API methods ===========================
+
+    @api.model
+    def _l10n_in_edi_irn_ewaybill_generate(self, company, json_payload):
+        # IRN is created by E-invoice API call so waiting for it.
+        if not json_payload.get("Irn"):
+            return {"error": [{
+                "code": "waiting",
+                "message": _("waiting For IRN generation To create E-waybill")}
+            ]}
+        token = self._l10n_in_edi_get_token(company)
+        if not token:
+            return self._l10n_in_edi_no_config_response()
+        params = {
+            "auth_token": token,
+            "json_payload": json_payload,
+        }
+        return self._l10n_in_edi_connect_to_server(company, url_path="/iap/l10n_in_edi/1/generate_ewaybill_by_irn", params=params)
+
+    @api.model
+    def _l10n_in_edi_irn_ewaybill_get(self, company, irn):
+        token = self._l10n_in_edi_get_token(company)
+        if not token:
+            return self._l10n_in_edi_no_config_response()
+        params = {
+            "auth_token": token,
+            "irn": irn,
+        }
+        return self._l10n_in_edi_connect_to_server(company, url_path="/iap/l10n_in_edi/1/get_ewaybill_by_irn", params=params)
+
+    def _l10n_in_edi_get_iap_buy_credits_message(self, company):
+        base_url = "https://iap-sandbox.odoo.com/iap/1/credit" if not company.sudo().l10n_in_edi_production_env else ""
+        url = self.env["iap.account"].get_credits_url(service_name="l10n_in_edi", base_url=base_url)
+        return markupsafe.Markup("""<p><b>%s</b></p><p>%s <a href="%s">%s</a></p>""") % (
+            _("You have insufficient credits to send this document!"),
+            _("Please buy more credits and retry: "),
+            url,
+            _("Buy Credits")
+        )
 
     #=============================== E-waybill API methods ===================================
 
@@ -899,34 +828,4 @@ class EwaybillStock(models.Model):
         params = {"document_type": document_type, "document_number": document_number}
         return self._l10n_in_edi_ewaybill_connect_to_server(
             company, url_path="/iap/l10n_in_edi_ewaybill/1/getewaybillgeneratedbyconsigner", params=params
-        )
-
-    @api.model
-    def _l10n_in_edi_ewaybill_update_part_b(self, company, json_payload):
-        is_authenticated = self._l10n_in_edi_ewaybill_check_authentication(company)
-        if not is_authenticated:
-            return self._l10n_in_edi_ewaybill_no_config_response()
-        params = {"json_payload": json_payload}
-        return self._l10n_in_edi_ewaybill_connect_to_server(
-            company, url_path="/iap/l10n_in_edi_ewaybill/1/updatepartb", params=params
-        )
-
-    @api.model
-    def _l10n_in_edi_ewaybill_update_transporter(self, company, json_payload):
-        is_authenticated = self._l10n_in_edi_ewaybill_check_authentication(company)
-        if not is_authenticated:
-            return self._l10n_in_edi_ewaybill_no_config_response()
-        params = {"json_payload": json_payload}
-        return self._l10n_in_edi_ewaybill_connect_to_server(
-            company, url_path="/iap/l10n_in_edi_ewaybill/1/updatetransporter", params=params
-        )
-
-    @api.model
-    def _l10n_in_edi_ewaybill_extend_validity(self, company, json_payload):
-        is_authenticated = self._l10n_in_edi_ewaybill_check_authentication(company)
-        if not is_authenticated:
-            return self._l10n_in_edi_ewaybill_no_config_response()
-        params = {"json_payload": json_payload}
-        return self._l10n_in_edi_ewaybill_connect_to_server(
-            company, url_path="/iap/l10n_in_edi_ewaybill/1/extendvalidity", params=params
         )

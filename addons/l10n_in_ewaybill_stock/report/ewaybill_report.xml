@@ -206,8 +206,9 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <t t-set="items" t-value="doc.mapped('ewaybill_line_ids')"/>
+                    <t t-set="items" t-value="doc.mapped('move_ids')"/>
                     <tr t-foreach="items" t-as="item">
+                        <t t-set="tax_details_by_line" t-value="doc._l10n_in_tax_details_by_line(item)"/>
                         <td>
                             <p t-esc="item.product_id.l10n_in_hsn_code"/>
                         </td>
@@ -215,13 +216,13 @@
                             <p t-esc="item.product_id.l10n_in_hsn_description"/>
                         </td>
                         <td>    
-                            <p t-esc="item.quantity"/>
+                            <p t-esc="item.quantity_done"/>
                         </td>
                         <td>    
                             <p t-esc="item.price_unit"/>
                         </td>
                         <td>
-                            <t t-set="tax" t-value="(str(round(item.cgst_rate, 2)) if item.cgst_rate else 'NE') + '+' + (str(round(item.sgst_rate, 2)) if item.sgst_rate else 'NE') + '+' + (str(round(item.igst_rate, 2)) if item.igst_rate else 'NE') + '+' + (str(round(item.cess_rate, 2)) if item.cess_rate else 'NE') + '+' + (str(round(item.cess_non_advol_rate, 2)) if item.cess_non_advol_rate else 'NE')"/>
+                            <t t-set="tax" t-value="(str(round(tax_details_by_line['cgst_rate'], 2)) if tax_details_by_line['cgst_rate'] else 'NE') + '+' + (str(round(tax_details_by_line['sgst_rate'], 2)) if tax_details_by_line['sgst_rate'] else 'NE') + '+' + (str(round(tax_details_by_line['igst_rate'], 2)) if tax_details_by_line['igst_rate'] else 'NE') + '+' + (str(round(tax_details_by_line['cess_rate'], 2)) if tax_details_by_line['cess_rate'] else 'NE') + '+' + (str(round(tax_details_by_line['cess_non_advol_rate'], 2)) if tax_details_by_line['cess_rate'] else 'NE')"/>
                             <p t-esc="tax"/>
                         </td>
                     </tr>

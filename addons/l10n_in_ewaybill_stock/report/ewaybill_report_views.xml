@@ -21,10 +21,10 @@
             <field name="name">Ewaybill</field>
             <field name="model">l10n.in.ewaybill</field>
             <field name="report_type">qweb-pdf</field>
-            <field name="report_name">l10n_in_ewaybill.report_ewaybill</field>
-            <field name="report_file">l10n_in_ewaybill.report_ewaybill</field>
+            <field name="report_name">l10n_in_ewaybill_stock.report_ewaybill</field>
+            <field name="report_file">l10n_in_ewaybill_stock.report_ewaybill</field>
             <field name="print_report_name">'Ewaybill'</field>
-            <field name="paperformat_id" ref="l10n_in_ewaybill.paperformat_ewaybill"/>
+            <field name="paperformat_id" ref="l10n_in_ewaybill_stock.paperformat_ewaybill"/>
             <field name="binding_model_id" ref="model_l10n_in_ewaybill"/>
             <field name="binding_type">report</field>
         </record>
