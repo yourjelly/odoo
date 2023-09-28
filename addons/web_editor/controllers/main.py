@@ -25,12 +25,30 @@ from odoo.tools import file_open
 from odoo.tools.mimetypes import guess_mimetype
 from odoo.tools.image import image_data_uri, binary_to_image
 from odoo.addons.base.models.assetsbundle import AssetsBundle
+from odoo.addons.bus.websocket import Websocket
+from odoo.addons.bus.models.bus import dispatch
 
 from ..models.ir_attachment import SUPPORTED_IMAGE_MIMETYPES
 
 logger = logging.getLogger(__name__)
 DEFAULT_LIBRARY_ENDPOINT = 'https://media-api.odoo.com'
 
+def onclose(env, socket):
+    # import pprint; print('onopen a: ',end='');pprint.pprint(a)
+    # import pprint; print('onopen b: ',end='');pprint.pprint(b)
+    # import pprint; print('onopen c: ',end='');pprint.pprint(c)
+    import pprint; print('socket._channels: ',end='');pprint.pprint(socket._channels)
+
+    for channel in socket._channels:
+        if type(channel) == tuple and channel[1] == 'editor_collaboration':
+            print('onclose editor_collaboration')
+            env['bus.bus']._sendone(channel, 'editor_collaboration_list_socket', {
+                'model_name': channel[2],
+                'field_name': channel[3],
+                'res_id': channel[4],
+                'uuid_sockets': list(map(lambda x: x.uuid, dispatch._channels_to_ws[channel]))
+            })
+Websocket.onclose(onclose)
 
 class Web_Editor(http.Controller):
     #------------------------------------------------------
@@ -760,3 +778,28 @@ class Web_Editor(http.Controller):
     @http.route('/web_editor/tests', type='http', auth="user")
     def test_suite(self, mod=None, **kwargs):
         return request.render('web_editor.tests')
+
+    @http.route('/web_editor/broadcast_channel_sockets', type='json', auth="user")
+    def nby(self, model_name, field_name, res_id):
+        document = request.env[model_name].browse([res_id])
+
+        document.check_access_rights('read')
+        document.check_field_access_rights('read', [field_name])
+        document.check_access_rule('read')
+        document.check_access_rights('write')
+        document.check_field_access_rights('write', [field_name])
+        document.check_access_rule('write')
+
+        # channel = (request.db, 'editor_collaboration', model_name, field_name, int(res_id))
+        # bus_data.update({'model_name': model_name, 'field_name': field_name, 'res_id': res_id})
+        # ids = [1, 2]
+        # print('broadcasting')
+        # import pprint; print('dispatch._channels_to_ws: ',end='');pprint.pprint(dispatch._channels_to_ws)
+        # request.env['bus.bus']._sendone(channel, 'editor_collaboration', {
+        #     'model_name': model_name,
+        #     'field_name': field_name,
+        #     'res_id': res_id,
+        #     'notificationName': 'list_socket_ids',
+        #     'notificationPayload': list(map(lambda x: x.uuid, dispatch._channels_to_ws[channel]))
+        # })
+        return 'ok'

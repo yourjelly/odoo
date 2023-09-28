@@ -209,6 +209,7 @@ class CloseFrame(Frame):
         self.reason = reason
         super().__init__(Opcode.CLOSE, payload)
 
+foo = [0]
 
 class Websocket:
     _instances = WeakSet()
@@ -249,6 +250,7 @@ class Websocket:
         self._selector.register(self._socket, selectors.EVENT_READ)
         self._selector.register(self._notif_sock_r, selectors.EVENT_READ)
         self.state = ConnectionState.OPEN
+        self.uuid = str(random.randint(0, 2**52 - 1))
         type(self)._instances.add(self)
         self._trigger_lifecycle_event(LifecycleEvent.OPEN)
 
@@ -497,7 +499,12 @@ class Websocket:
             output.extend(
                 struct.pack('!BBQ', first_byte, 127, payload_length)
             )
+        # import pprint; print('frame.payload: ',end='');pprint.pprint(frame.payload)
+
+        # foo[0] = foo[0]+1
+        # import pprint; print('foo[0]: ',end='');pprint.pprint(foo[0])
         output.extend(frame.payload)
+        # payload = json.loads(frame.payload.decode('utf-8'))
         self._socket.sendall(output)
         self._timeout_manager.acknowledge_frame_sent(frame)
         if not isinstance(frame, CloseFrame):
@@ -628,6 +635,17 @@ class Websocket:
                         LifecycleEvent(event_type).name,
                         exc_info=True
                     )
+
+    def callCB(self, callback):
+        with closing(acquire_cursor(self._session.db)) as cr:
+            env = api.Environment(cr, self._session.uid, self._session.context)
+            try:
+                service_model.retrying(functools.partial(callback, env, self), env)
+            except Exception:
+                _logger.warning(
+                    'Error during Websocket %s callback',
+                    exc_info=True
+                )
 
     def _dispatch_bus_notifications(self):
         """

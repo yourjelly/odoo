@@ -676,9 +676,19 @@ export class Wysiwyg extends Component {
                 ) {
                     if (payload.notificationName === 'html_field_write') {
                         this._onServerLastIdUpdate(payload.notificationPayload.last_step_id);
+                    } else if (payload.notificationName === 'list_socket_ids') {
+                        console.log('list_socket_ids');
+                        console.log(`payload.notificationPayload:`, payload.notificationPayload);
                     } else if (this._ptpJoined) {
                         this._peerToPeerLoading.then(() => this.ptp.handleNotification(payload));
                     }
+                } else if (
+                    type === 'editor_collaboration_list_socket' &&
+                    payload.model_name === modelName &&
+                    payload.field_name === fieldName &&
+                    payload.res_id === resId
+                ) {
+                    console.log('payload.uuid_sockets', payload.uuid_sockets);
                 }
             }
         }
@@ -2857,6 +2867,17 @@ export class Wysiwyg extends Component {
             }
         });
     }
+    _broadcastChannelSockets() {
+        const {collaborationChannel} = this.options;
+        const modelName = collaborationChannel.collaborationModelName;
+        const fieldName = collaborationChannel.collaborationFieldName;
+        const resId = collaborationChannel.collaborationResId;
+        return this._serviceRpc('/web_editor/broadcast_channel_sockets', {
+            model_name: modelName,
+            field_name: fieldName,
+            res_id: resId,
+        });
+    }
     _getCollaborationClientAvatarUrl() {
         return `${browser.location.origin}/web/image?model=res.users&field=avatar_128&id=${encodeURIComponent(session.uid)}`
     }
@@ -2875,6 +2896,7 @@ export class Wysiwyg extends Component {
                     const success = await this._resetFromServerAndResyncWithClients();
                     if (!success) return;
                 }
+                this._broadcastChannelSockets();
                 this.ptp.notifyAllClients('ptp_join');
                 this._joiningPtp = false;
                 this._ptpJoined = true;

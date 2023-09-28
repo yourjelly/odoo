@@ -39,7 +39,7 @@ class IrWebsocket(models.AbstractModel):
         if data['last'] > last_known_notification_id:
             data['last'] = 0
         channels = set(self._build_bus_channel_list(data['channels']))
-        dispatch.subscribe(channels, data['last'], self.env.registry.db_name, wsrequest.ws)
+        dispatch.subscribe(channels, data['last'], self.env.registry.db_name, wsrequest.ws, self.env)
 
     def _update_bus_presence(self, inactivity_period, im_status_ids_by_model):
         if self.env.user and not self.env.user._is_public():

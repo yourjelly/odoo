@@ -15,6 +15,7 @@ class IrWebsocket(models.AbstractModel):
             # Do not alter original list.
             channels = list(channels)
             for channel in channels:
+                # import pprint; print('channel: ',end='');pprint.pprint(channel)
                 if isinstance(channel, str):
                     match = re.match(r'editor_collaboration:(\w+(?:\.\w+)*):(\w+):(\d+)', channel)
                     if match:

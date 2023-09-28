@@ -123,7 +123,16 @@ class ImDispatch(threading.Thread):
         super().__init__(daemon=True, name=f'{__name__}.Bus')
         self._channels_to_ws = {}
 
-    def subscribe(self, channels, last, db, websocket):
+    def _update_channel_collab(self, env, channel):
+        if type(channel) == tuple and channel[1] == 'editor_collaboration':
+            env['bus.bus']._sendone(channel, 'editor_collaboration_list_socket', {
+                'model_name': channel[2],
+                'field_name': channel[3],
+                'res_id': channel[4],
+                'uuid_sockets': list(map(lambda x: x.uuid, dispatch._channels_to_ws[channel]))
+            })
+
+    def subscribe(self, channels, last, db, websocket, env):
         """
         Subcribe to bus notifications. Every notification related to the
         given channels will be sent through the websocket. If a subscription
@@ -132,20 +141,52 @@ class ImDispatch(threading.Thread):
         channels = {hashable(channel_with_db(db, c)) for c in channels}
         for channel in channels:
             self._channels_to_ws.setdefault(channel, set()).add(websocket)
+        print('subscribe')
         outdated_channels = websocket._channels - channels
         self._clear_outdated_channels(websocket, outdated_channels)
+        for channel in channels:
+            self._update_channel_collab(env, channel)
         websocket.subscribe(channels, last)
+
+        # import pprint; print('subscribe: ',end='');pprint.pprint(websocket.uuid)
+        # import pprint; print('channels: ',end='');pprint.pprint(channels)
+        # channel = (request.db, 'editor_collaboration', model_name, field_name, int(res_id))
+        # # bus_data.update({'model_name': model_name, 'field_name': field_name, 'res_id': res_id})
+        # ids = [1, 2]
+        # print('broadcasting')
+        # import pprint; print('dispatch._channels_to_ws: ',end='');pprint.pprint(dispatch._channels_to_ws)
+        # self.env.env['bus.bus']._sendone(channel, 'editor_collaboration', {
+        #     'model_name': model_name,
+        #     'field_name': field_name,
+        #     'res_id': res_id,
+        #     'notificationName': 'list_socket_ids',
+        #     'notificationPayload': list(map(lambda x: x.uuid, dispatch._channels_to_ws[channel]))
+        # })
         with contextlib.suppress(RuntimeError):
             if not self.is_alive():
                 self.start()
 
     def unsubscribe(self, websocket):
+        import pprint; print('websocket._channels: ',end='');pprint.pprint(websocket._channels)
+
+        # channels = {hashable(channel_with_db(db, c)) for c in channels}
+        # import pprint; print('channels: ',end='');pprint.pprint(channels)
+        # for channel in channels:
+        #     self._update_channel_collab(env, channel)
+
         self._clear_outdated_channels(websocket, websocket._channels)
 
     def _clear_outdated_channels(self, websocket, outdated_channels):
         """ Remove channels from channel to websocket map. """
+        # import pprint; print('outdated_channels: ',end='');pprint.pprint(outdated_channels)
+
         for channel in outdated_channels:
             self._channels_to_ws[channel].remove(websocket)
+
+            def up(env, socket):
+                self._update_channel_collab(env, channel)
+            websocket.callCB(up)
+
             if not self._channels_to_ws[channel]:
                 self._channels_to_ws.pop(channel)
 
@@ -167,9 +208,12 @@ class ImDispatch(threading.Thread):
                     # relay notifications to websockets that have
                     # subscribed to the corresponding channels.
                     websockets = set()
+                    # import pudb; pudb.set_trace()
+                    # import pprint; print('channels: ',end='');pprint.pprint(channels)
                     for channel in channels:
                         websockets.update(self._channels_to_ws.get(hashable(channel), []))
                     for websocket in websockets:
+                        websocket.foo = 'bar'
                         websocket.trigger_notification_dispatching()
 
     def run(self):
