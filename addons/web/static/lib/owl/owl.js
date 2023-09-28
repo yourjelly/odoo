@@ -2083,7 +2083,7 @@
                 // While Array length may trigger the set trap, it's not actually set by this
                 // method but is updated behind the scenes, and the trap is not called with the
                 // new value. We disable the "same-value-optimization" for it because of that.
-                if (originalValue !== Reflect.get(target, key, receiver) ||
+                if (toRaw(originalValue) !== toRaw(Reflect.get(target, key, receiver)) ||
                     (key === "length" && Array.isArray(target))) {
                     notifyReactives(target, key);
                 }
