@@ -26,7 +26,7 @@
          * @param {string[]} deps
          * @param {Function} factory
          */
-        define(name, deps, factory) {
+        define(name, deps, factory, lazy = false) {
             if (typeof name !== "string") {
                 throw new Error(`Invalid name definition: ${name} (should be a string)"`);
             }
@@ -40,13 +40,15 @@
                 this.factories.set(name, {
                     deps,
                     fn: factory,
-                    ignoreMissingDeps: globalThis.__odooIgnoreMissingDependencies,
+                    ignoreMissingDeps: globalThis.__odooIgnoreMissingDependencies || !lazy,
                 });
-                this.addJob(name);
-                this.checkErrorProm ||= Promise.resolve().then(() => {
-                    this.checkAndReportErrors();
-                    this.checkErrorProm = null;
-                });
+                if (!lazy) {
+                    this.addJob(name);
+                    this.checkErrorProm ||= Promise.resolve().then(() => {
+                        this.checkAndReportErrors();
+                        this.checkErrorProm = null;
+                    });
+                }
             }
         }
 
@@ -73,6 +75,7 @@
 
         startModule(name) {
             const require = (name) => this.modules.get(name);
+            require.moduleName = name;
             this.jobs.delete(name);
             const factory = this.factories.get(name);
             let value = null;
@@ -225,6 +228,7 @@
 
     const loader = new ModuleLoader();
     odoo.define = loader.define.bind(loader);
+    odoo.ModuleLoader = ModuleLoader;
 
     odoo.loader = loader;
 })();

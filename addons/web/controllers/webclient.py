@@ -134,6 +134,10 @@ class WebClient(http.Controller):
     @http.route('/web/hoot', type='http', auth="user")
     def unit_tests_suite(self, mod=None, **kwargs):
         return request.render('web.unit_tests_suite')
+    
+    @http.route('/web/hoot/module_set', type='http', auth="user")
+    def unit_tests_suite_module_set(self, mod=None, **kwargs):
+        return request.render('web.unit_tests_suite_module_set')
 
     @http.route('/web/bundle/<string:bundle_name>', auth="public", methods=["GET"])
     def bundle(self, bundle_name, **bundle_params):

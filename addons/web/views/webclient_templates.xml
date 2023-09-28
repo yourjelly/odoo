@@ -223,6 +223,25 @@
             </t>
         </t>
     </template>
+    <template id="web.unit_tests_suite_module_set">
+        <t t-call="web.layout">
+            <t t-set="html_data" t-value="{'style': 'height: 100%;'}"/>
+            <t t-set="title">Web Unit Tests</t>
+            <t t-set="head">
+                <t t-call-assets="web.assets_unit_tests_setup" />
+                <script>
+                    // All modules defined hereafter are *lazy*. The .hoot.js files will be executed
+                    // asap to get suite definitions, .tests.js file will get their suite definition from
+                    // the corresponding hoot file or get a suite auto-generated if none is present
+                    const prevDefine = odoo.define;
+                    odoo.define = function(modName, deps, factory) {
+                        return prevDefine.call(odoo, ...arguments, !modName.endsWith("hoot"));
+                    };
+                </script>
+                <t t-call-assets="web.assets_unit_tests_module_set" />
+            </t>
+        </t>
+    </template>
 
     <template id="web.qunit_suite">
         <t t-call="web.layout">
