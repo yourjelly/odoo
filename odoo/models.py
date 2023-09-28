@@ -1567,37 +1567,23 @@ class BaseModel(metaclass=MetaModel):
             not preceded by ``!`` and is not member of any of the groups
             preceded by ``!``
         """
-        from odoo.http import request
-        user = self.env.user
+        if not self.env.user:
+            return False
 
-        has_groups = []
-        not_has_groups = []
-        for group_ext_id in groups.split(','):
-            group_ext_id = group_ext_id.strip()
-            if group_ext_id[0] == '!':
-                not_has_groups.append(group_ext_id[1:])
-            else:
-                has_groups.append(group_ext_id)
+        user_group_ids = self.env.user._get_group_ids()
 
-        for group_ext_id in not_has_groups:
-            if group_ext_id == 'base.group_no_one':
-                # check: the group_no_one is effective in debug mode only
-                if user.has_group(group_ext_id) and request and request.session.debug:
+        test = None
+        for group_str in groups.split(','):
+            group, negate = (group_str[1:], True) if group_str[0] == '!' else (group_str, False)
+            group_id = self.env['ir.model.data']._xmlid_to_res_id(group, raise_if_not_found=False)
+            if group_id in user_group_ids:
+                if negate:
                     return False
-            else:
-                if user.has_group(group_ext_id):
-                    return False
+                test = True
+            elif test is None:
+                test = False
 
-        for group_ext_id in has_groups:
-            if group_ext_id == 'base.group_no_one':
-                # check: the group_no_one is effective in debug mode only
-                if user.has_group(group_ext_id) and request and request.session.debug:
-                    return True
-            else:
-                if user.has_group(group_ext_id):
-                    return True
-
-        return not has_groups
+        return not (test is False)
 
     @api.model
     @api.readonly

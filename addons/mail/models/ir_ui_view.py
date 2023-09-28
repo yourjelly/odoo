@@ -11,7 +11,7 @@ class View(models.Model):
         if node.xpath("ancestor::div[hasclass('oe_chatter')]"):
             # Pass the postprocessing of the mail thread fields
             # The web client makes it completely custom, and this is therefore pointless.
-            name_manager.has_field(node, node.get('name'), {})
+            name_manager.has_field(node, node.get('name'), node_info['model_groups'], node_info['view_groups'], {})
             return
         return super()._postprocess_tag_field(node, name_manager, node_info)
 

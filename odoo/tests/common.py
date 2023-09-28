@@ -403,18 +403,13 @@ class BaseCase(case.TestCase, metaclass=MetaCase):
     @contextmanager
     def debug_mode(self):
         """ Enable the effects of group 'base.group_no_one'; mainly useful with :class:`Form`. """
-        origin_user_has_groups = BaseModel.user_has_groups
+        from odoo.addons.base.models.res_users import Users  # pylint: disable=C0415
 
-        def user_has_groups(self, groups):
-            group_set = set(groups.split(','))
-            if '!base.group_no_one' in group_set:
-                return False
-            elif 'base.group_no_one' in group_set:
-                group_set.remove('base.group_no_one')
-                return not group_set or origin_user_has_groups(self, ','.join(group_set))
-            return origin_user_has_groups(self, groups)
+        origin_get_group_ids = Users._get_group_ids
+        def _get_group_ids(self, debug_mode=None):
+            return origin_get_group_ids(self, debug_mode=True)
 
-        with patch('odoo.models.BaseModel.user_has_groups', user_has_groups):
+        with patch('odoo.addons.base.models.res_users.Users._get_group_ids', _get_group_ids):
             yield
 
     @contextmanager

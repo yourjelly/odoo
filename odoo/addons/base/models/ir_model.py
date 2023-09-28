@@ -1982,6 +1982,26 @@ class IrModelAccess(models.Model):
         """, [lang, lang, model_name])
         return [('%s/%s' % x) if x[0] else x[1] for x in self._cr.fetchall()]
 
+    @api.model
+    @tools.ormcache('model_name', 'access_mode')
+    def _group_xmlid_with_access(self, model_name, access_mode='read'):
+        """ Return the xml ids of groups which have been granted
+            ``access_mode`` on the model ``model_name``.
+            If the tuple is empty, there is no group that can satisfy.
+            If the method returns None, it is not necessary to belong to a group to have access.
+           :rtype: tuple | None
+        """
+        assert access_mode in ('read', 'write', 'create', 'unlink'), 'Invalid access mode'
+        model = self.env['ir.model']._get(model_name)
+        access = self.search([(f'perm_{access_mode}', '=', True), ('model_id', '=', model.id)])
+
+        res_groups = self.env['res.groups']
+        if not access:
+            return res_groups._get_group_definitions().empty
+        if any(not acc.group_id for acc in access):
+            return res_groups._get_group_definitions().universe
+        return res_groups._parse_groups_expression(access.group_id.ids)
+
     # The context parameter is useful when the method translates error messages.
     # But as the method raises an exception in that case,  the key 'lang' might
     # not be really necessary as a cache key, unless the `ormcache_context`

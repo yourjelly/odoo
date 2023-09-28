@@ -29,7 +29,7 @@ from odoo.addons.base.models.ir_model import MODULE_UNINSTALL_FLAG
 from odoo.exceptions import AccessDenied, AccessError, UserError, ValidationError
 from odoo.http import request, DEFAULT_LANG
 from odoo.osv import expression
-from odoo.tools import is_html_empty, partition, collections, frozendict, lazy_property
+from odoo.tools import is_html_empty, partition, collections, frozendict, lazy_property, SetDefinitions
 
 _logger = logging.getLogger(__name__)
 
@@ -443,7 +443,7 @@ class Users(models.Model):
 
     @api.depends('groups_id')
     def _compute_share(self):
-        user_group_id = self.env['ir.model.data']._xmlid_to_res_id('base.group_user')
+        user_group_id = self.env['ir.model.data']._xmlid_to_res_id('base.group_user', raise_if_not_found=False)
         internal_users = self.filtered_domain([('groups_id', 'in', [user_group_id])])
         internal_users.share = False
         (self - internal_users).share = True
@@ -1010,30 +1010,59 @@ class Users(models.Model):
     @api.model
     @api.readonly
     def has_group(self, group_ext_id):
-        # use singleton's id if called on a non-empty recordset, otherwise
-        # context uid
-        uid = self.id
-        if uid and uid != self._uid:
-            self = self.with_user(uid)
-        return self._has_group(group_ext_id)
+        """Return True if the user contains the required group."""
+        # TODO: Add to log a warning when the group_id is None. Because, this implies that the
+        # group xml id does not exist and therefore the data may be inconsistent.
+        # This change must be made at the same time as the __manifest__ and xml changes because
+        # several modules use groups before those are created.
+        group_id = self.env['ir.model.data']._xmlid_to_res_id(group_ext_id, raise_if_not_found=False)
 
-    @api.model
-    @tools.ormcache('self._uid', 'group_ext_id')
-    def _has_group(self, group_ext_id):
-        """Checks whether user belongs to given group.
+        # use singleton's id if called on a non-empty recordset, otherwise context uid
+        return group_id in (self or self.env.user)._get_group_ids()
 
-        :param str group_ext_id: external ID (XML ID) of the group.
-           Must be provided in fully-qualified form (``module.ext_id``), as there
-           is no implicit module to use..
-        :return: True if the current user is a member of the group with the
-           given external ID (XML ID), else False.
+    def has_group_set(self, group):
+        """Return True if the user is is in the set of users with this group combination.
+            This can be a single group (str) or a group representation with unons and
+            intersections between groups (object from _get_group_definitions).
         """
-        assert group_ext_id and '.' in group_ext_id, "External ID '%s' must be fully qualified" % group_ext_id
-        module, ext_id = group_ext_id.split('.')
-        self._cr.execute("""SELECT 1 FROM res_groups_users_rel WHERE uid=%s AND gid IN
-                            (SELECT res_id FROM ir_model_data WHERE module=%s AND name=%s AND model='res.groups')""",
-                         (self._uid, module, ext_id))
-        return bool(self._cr.fetchone())
+        if not self:
+            return False
+
+        is_str = isinstance(group, str)
+        if is_str and',' not in group:
+            return self.has_group(group)
+
+        group_definitions = self.env['res.groups']._get_group_definitions()
+        group = group_definitions.parse(group) if is_str else group
+        if group.is_empty():
+            return False
+        if group.is_universal():
+            return True
+
+        return group.matches(self._get_group_ids())
+
+    def _get_group_ids(self, debug_mode=None):
+        """Returns the list of user group ids.
+
+        If the user is part of 'base.group_user' and we are in debug_mode (from the params or
+        from the session) then the group id of 'base.group_no_one' will be added."""
+
+        group_ids = self.__get_group_ids()
+        if self.env['ir.model.data']._xmlid_to_res_id('base.group_user', raise_if_not_found=False) in group_ids:
+            if debug_mode is None:
+                debug_mode = bool(request and request.session.debug)
+            if debug_mode:
+                group_ids += (self.env['ir.model.data']._xmlid_to_res_id('base.group_no_one', raise_if_not_found=False),)
+
+        return group_ids
+
+    @tools.ormcache('self.id')
+    def __get_group_ids(self):
+        """Returns the list of user group ids. (without the group id of 'base.group_no_one')"""
+
+        self.ensure_one()
+        group_no_one_id = self.env['ir.model.data']._xmlid_to_res_id('base.group_no_one', raise_if_not_found=False)
+        return tuple(id_ for id_ in self.groups_id._ids if id_ != group_no_one_id)
 
     def _action_show(self):
         """If self is a singleton, directly access the form view. If it is a recordset, open a tree view"""
@@ -1345,6 +1374,51 @@ class GroupsImplied(models.Model):
                 implied_group.with_context(active_test=False).write(
                     {'users': [Command.unlink(user.id) for user in users_to_unlink]})
 
+    @api.model
+    @tools.ormcache()
+    def _get_group_definitions(self):
+        """ Return the definition of all the groups as a :class:`~odoo.tools.SetDefinitions`. """
+        groups = self.sudo().search([], order='id')
+        id_to_ref = groups.get_external_id()
+        # no one depending of the session, it's not realy implied
+        no_one_ids = {_id for _id, ref in id_to_ref.items() if ref == 'base.group_no_one'}
+
+        # determine distinct groups
+        distinct_groups = set()
+        user_types_category_id = self.env['ir.model.data']._xmlid_to_res_id('base.module_category_user_type', raise_if_not_found=False)
+        if user_types_category_id:
+            distinct_groups.update(self.sudo().search([('category_id', '=', user_types_category_id)]).ids)
+
+        data = {
+            group.id: {
+                'ref': id_to_ref[group.id] or str(group.id),
+                'supersets': set(group.implied_ids.ids) - (no_one_ids if group.id not in no_one_ids else set()),
+                'disjoints': distinct_groups - {group.id} if group.id in distinct_groups else (),
+            }
+            for group in groups
+        }
+        return SetDefinitions(data)
+
+    @api.model
+    def _parse_groups_expression(self, group_ext_ids=None, raise_if_not_found=True):
+        """ Return the group object from a string or an list of
+        res.groups ids.
+
+        :param list group_ext_ids: res.groups ids. The result is an
+            union between this groups.
+
+        :param str group_ext_ids: from field and ir.ui.view:
+            comma-separated list of fully-qualified group external IDs,
+                optionally preceded by ``!`` (negative group). The
+                result is an union between positive group who intersect
+                every negative group.
+                e.g. ``base.group_user,!base.group_system``
+        """
+        if isinstance(group_ext_ids, (list, tuple)):
+            return self._get_group_definitions().from_ids(group_ext_ids)
+        return self._get_group_definitions().parse(group_ext_ids, raise_if_not_found)
+
+
 class UsersImplied(models.Model):
     _inherit = 'res.users'
 
@@ -1454,8 +1528,8 @@ class GroupsView(models.Model):
             xml = E.field(name="groups_id", position="after")
 
         else:
-            group_no_one = view.env.ref('base.group_no_one')
-            group_employee = view.env.ref('base.group_user')
+            group_no_one_id = self.env['ir.model.data']._xmlid_to_res_id('base.group_no_one', raise_if_not_found=False)
+            group_employee_id = self.env['ir.model.data']._xmlid_to_res_id('base.group_user', raise_if_not_found=False)
             xml0, xml1, xml2, xml3, xml4 = [], [], [], [], []
             xml_by_category = {}
             xml1.append(E.separator(string='User Type', colspan="2", groups='base.group_no_one'))
@@ -1481,7 +1555,7 @@ class GroupsView(models.Model):
                     # and is therefore removed when not in debug mode.
                     xml0.append(E.field(name=field_name, invisible="1", on_change="1"))
                     user_type_field_name = field_name
-                    user_type_readonly = f'{user_type_field_name} != {group_employee.id}'
+                    user_type_readonly = f'{user_type_field_name} != {group_employee_id}'
                     attrs['widget'] = 'radio'
                     # Trigger the on_change of this "virtual field"
                     attrs['on_change'] = '1'
@@ -1513,7 +1587,7 @@ class GroupsView(models.Model):
                     for g in gs:
                         field_name = name_boolean_group(g.id)
                         dest_group = left_group if group_count % 2 == 0 else right_group
-                        if g == group_no_one:
+                        if g.id == group_no_one_id:
                             # make the group_no_one invisible in the form view
                             dest_group.append(E.field(name=field_name, invisible="1", **attrs))
                         else:
@@ -1525,7 +1599,7 @@ class GroupsView(models.Model):
                     xml4.append(E.group(*right_group))
 
             xml4.append({'class': "o_label_nowrap"})
-            user_type_invisible = f'{user_type_field_name} != {group_employee.id}' if user_type_field_name else None
+            user_type_invisible = f'{user_type_field_name} != {group_employee_id}' if user_type_field_name else None
 
             for xml_cat in sorted(xml_by_category.keys(), key=lambda it: it[0]):
                 master_category_name = xml_cat[1]
