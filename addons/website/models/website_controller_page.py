@@ -48,7 +48,7 @@ class WebsiteControllerPage(models.Model):
         for rec in self:
             if not rec.model_id or not rec.page_type:
                 continue
-            rec.name_slugified = slugify(rec.page_name)
+            rec.name_slugified = slugify(rec.page_name or '')
 
 
     def unlink(self):
