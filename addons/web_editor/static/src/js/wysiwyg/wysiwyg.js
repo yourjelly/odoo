@@ -402,7 +402,7 @@ export class Wysiwyg extends Component {
                 return this.scrollContainer.getBoundingClientRect();
             },
             getPowerboxElement: () => {
-                const selection = (this.options.document || document).getSelection();
+                const selection = (this.odooEditor.document || document).getSelection();
                 if (selection.isCollapsed && selection.rangeCount) {
                     const baseNode = closestElement(selection.anchorNode, 'P:not([t-field]), DIV:not([t-field])');
                     const fieldContainer = closestElement(selection.anchorNode, '[data-oe-field]');
