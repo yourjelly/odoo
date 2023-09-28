@@ -26,7 +26,7 @@ class WebsiteControllerPage(models.Model):
 
     # Bindings to model/records, to expose the page on the website.
     # Route: /model/<string:page_name_slugified>
-    page_name = fields.Char(string="Page Name", help="The name of the page")
+    page_name = fields.Char(string="Page Name", help="The name of the page", required=True)
     name_slugified = fields.Char(compute="_compute_name_slugified", store=True,
         string="URL Name", help="The name of the page usable in a url")
     page_type = fields.Selection(selection=[("listing", "Listing"), ("single", "Single record")],
