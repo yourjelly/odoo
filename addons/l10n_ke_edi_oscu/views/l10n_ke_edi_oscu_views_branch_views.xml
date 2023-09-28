@@ -45,9 +45,7 @@
     </record>
 
         <!-- <menuitem id="menu_action_l10n_ke_edi_oscu_branch" action="action_l10n_ke_edi_oscu_branch" sequence="8" groups="base.group_no_one"/> -->
-
-
-        <record id="l10n_ke_edi_oscu_view_branch_tree" model="ir.ui.view">
+    <record id="l10n_ke_edi_oscu_view_branch_tree" model="ir.ui.view">
         <field name="name">l10n.ke.edi.customs.import.tree</field>
         <field name="model">l10n_ke_edi_oscu.branch</field>
         <field name="arch" type="xml">
@@ -90,7 +88,4 @@
           </p>
         </field>
     </record>
-
-
-
 </odoo>

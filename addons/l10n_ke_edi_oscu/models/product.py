@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+import logging
 import requests
 from collections import defaultdict
 
@@ -14,6 +15,9 @@ FETCH_ITEM_URL = URL + "selectItemList"
 SAVE_STOCK_MASTER_URL = URL + "saveStockMaster"
 INSERT_STOCK_IO_URL = URL + "insertStockIO"
 IMPORT_ITEM_URL = URL + "selectImportItemList"
+FETCH_UNSPSC_URL = URL + "selectItemClsList"
+
+_logger = logging.getLogger(__name__)
 
 class ProductTemplate(models.Model):
     _inherit = 'product.template'
@@ -341,6 +345,45 @@ class ProductProduct(models.Model):
             item['message'] = message
 
         return lines_dict
+
+
+class ProductCode(models.Model):
+
+    _inherit = 'product.unspsc.code'
+
+    def _cron_l10n_ke_oscu_get_codes_from_device(self):
+        """ Automatically fetch and create UNSPSC codes from the OSCU if they don't already exist """
+        company = self.env['res.company'].search([
+            ('l10n_ke_oscu_cmc_key', '!=', False),
+        ], limit=1)
+        if not company:
+            _logger.error('No OSCU initialized company could be found. No KRA Codes fetched.')
+            return
+
+        session = company.l10n_ke_oscu_get_session()
+        # The API will return all codes added since this date
+        last_request_date = self.env['ir.config_parameter'].get_param('l10n_ke_oscu.last_unspsc_code_request_date', '20180101000000')
+        response = session.post(FETCH_UNSPSC_URL, json={'lastReqDt': last_request_date})
+        if (response_content := response.ok and response.json()):
+            if response_content['resultCd'] == '001':
+                _logger.info("No new UNSPSC codes fetched from the OSCU.")
+                return
+            if response_content['resultCd'] == '000':
+                cls_list = response_content['data']['itemClsList']
+                existing_codes = self.search([
+                    ('code', 'in', [code_dict['itemClsCd'] for code_dict in cls_list])
+                ]).mapped("code")
+
+                new_codes = self.env['product.unspsc.code'].create([{
+                    'name': code_dict['itemClsNm'],
+                    'code': code_dict['itemClsCd'],
+                    'applies_to': 'product',
+                } for code_dict in cls_list if not code_dict['itemClsCd'] not in existing_codes])
+
+                _logger.info("%i UNSPSC codes fetched from the OSCU, %i UNSPSC codes created", len(cls_list), len(new_codes))
+                self.env['ir.config_parameter'].sudo().set_param('l10n_ke_oscu.last_unspsc_code_request_date', fields.Datetime.now().strftime('%Y%m%d%H%M%S'))
+                return
+            _logger.error('Request Error Code: %s, Message: %s', response_content['resultCd'], response_content['resultMsg'])
 
 # {'tin': 'P052112956W',
 #  'itemCd': '00000000000000000016',

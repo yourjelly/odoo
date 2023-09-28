@@ -154,8 +154,6 @@ class AccountMove(models.Model):
             })
             missing_fields = check_required_fields('TrnsSalesSaveWrReq', content)
         if missing_fields:
-            print(content)
-            import pdb; pdb;set_trace()
             raise ValidationError(_("Required field %s missing from invoice content.", missing_fields))
         return content
 
@@ -166,9 +164,7 @@ class AccountMove(models.Model):
             content = self._l10n_ke_oscu_move_content()
             content.update({'invcNo': sequence.number_next})            # KRA Invoice Number
             session = company.l10n_ke_oscu_get_session()
-            print(session.headers)
             url_to_use = SALE_URL if move.move_type in ('out_invoice', 'out_refund') else PURCHASE_URL
-            print(content)
             response = session.post(url_to_use, json=content)
             # if not response.ok:
             #     raise somekindofError()
@@ -186,7 +182,7 @@ class AccountMove(models.Model):
                 sequence.next_by_id()
 
     def cron_l10n_ke_oscu_fetch_purchases(self):
-        """  """
+        """ Retrieve vendor bills from the KRA """
         companies = self.env['res.company'].search([
             ('l10n_ke_oscu_branch_code', '!=', False),
             ('l10n_ke_oscu_serial_number', '!=', False),
@@ -231,11 +227,11 @@ class AccountMove(models.Model):
                     no_new_invoice=True,
                 ).message_post(attachment_ids=attachment.ids)
                 moves |= move
+            company.l10n_ke_oscu_last_fetch_purchase_date = fields.Datetime.now().strftime('%Y%m%d%H%M%S')
 
         for move in moves:
             move._extend_with_attachments(move.l10n_ke_oscu_attachment_id, new=True)
             self.env.cr.commit()
-
 
     def _get_edi_decoder(self, file_data, new=False):
         # EXTENDS 'account'
@@ -336,5 +332,3 @@ class AccountMove(models.Model):
    #   'taxblAmt': 4000,
    #   'taxAmt': 0,
    #   'totAmt': 4000},
-
-    # def _l10n_ke_oscu_import_invoice_items(self, invoice, data, is_new):

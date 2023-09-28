@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+import logging
 import requests
 
 from odoo import api, fields, models
@@ -9,6 +10,8 @@ URL = "https://etims-api-sbx.kra.go.ke/etims-api/"
 DEVICE_INIT_URL = URL + "selectInitOsdcInfo"
 NOTICE_SEARCH_URL = URL + "selectNoticeList"
 CUSTOMS_IMPORT_URL = URL + "selectImportItemList"
+
+_logger = logging.getLogger(__name__)
 
 
 class ResCompany(models.Model):
@@ -39,9 +42,11 @@ class ResCompany(models.Model):
             }
             response = session.post(DEVICE_INIT_URL, json=content)
             response_content = response.json()
+            print(f"\n\n response_content:\n{response_content}\n\n")
+            if response.json()['resultCd'] != '000':
+                raise ValidationError('Request Error Code: %s, Message: %s', response_content['resultCd'], response_content['resultMsg'])
             if response_content['resultCd'] == '000':
                 info = response_content['data']['info']
-                print(info)
                 company.l10n_ke_oscu_cmc_key = info['cmcKey']
                 # Create OSCU sequences on the company
                 sequence_name_and_code = [
@@ -114,26 +119,6 @@ class ResCompany(models.Model):
                         'l10n_ke_oscu_branch_code': bhf['bhfId'],
                     })
 
-    def action_l10n_ke_oscu_get_notices(self):
-        """ Retrieve the notices TODO explanation """
-
-        last_request_date = self.env['ir.config_parameter'].get_param('l10n_ke_oscu.last_notice_request_date', '20180101000000')
-        content = {
-            'tin': self.vat,
-            'bhfId': self.l10n_ke_oscu_branch_code,
-            'cmcKey': self.l10n_ke_oscu_cmc_key,
-            'lastReqDt': last_request_date,
-        }
-        session = self.l10n_ke_oscu_get_session()
-        response = session.post(NOTICE_SEARCH_URL, json=content)
-        response_content = response.json()
-        if response_content['resultCd'] == '001':
-            return None
-        if response_content['resultCd'] != '000':
-            raise ValidationError()
-        # response_content['data']
-        return response
-
     def l10n_ke_oscu_get_session(self):
         """ Return a requests.session with the appropriate header fields for usage with the OSCU """
         session = requests.Session()
@@ -143,4 +128,3 @@ class ResCompany(models.Model):
             'cmcKey': self.l10n_ke_oscu_cmc_key or self.parent_id.l10n_ke_oscu_cmc_key,
         })
         return session
-

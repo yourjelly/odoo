@@ -30,7 +30,7 @@
     ],
     'demo': [
         'demo/demo_company.xml',
-        #'demo/demo_branch.xml',
+        'demo/demo_branch.xml',
         'demo/demo_product.xml',
     ],
     #     'views/res_config_settings_view.xml',
