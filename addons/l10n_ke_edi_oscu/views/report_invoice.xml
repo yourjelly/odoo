@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="l10n_ke_invoice" inherit_id="account.report_invoice_document">
+        <xpath expr="//div[@id='qrcode']" position="before">
+            <div t-if="o.l10n_ke_oscu_invoice_number" id="l10n_ke_control_unit_information" style="page-break-inside:avoid;">
+                <b>SCU Information</b>
+                <div class="row mt-4 mb-4">
+                    <div class="col-auto col-3 mw-100 mb-2">
+                        <p>
+                            <b>SCU ID: </b><br></br>
+                            <span t-field="o.l10n_ke_oscu_serial_number"/>
+                        </p>
+                        <p>
+                            <b>CU Invoice Number: </b><br></br>
+                            <span>
+                                <t t-esc="o.l10n_ke_oscu_serial_number + '/' + str(o.l10n_ke_oscu_invoice_number)"/>
+                            </span>
+                        </p>
+                        <p>
+                            <b>Receipt Number: </b><br></br>
+                            <span t-field="o.l10n_ke_oscu_receipt_number"/>
+                        </p>
+                        <p>
+                            <b>Date and Time of Signing: </b><br></br>
+                            <span t-field="o.l10n_ke_oscu_datetime"/>
+                        </p>
+                    </div>
+                    <div class="col-auto col-3 mw-100 mb-2">
+                        <p>
+                            <b>Internal Data: </b><br></br>
+                            <span t-field="o.l10n_ke_oscu_internal_data"/>
+                        </p>
+                        <p>
+                            <b>Receipt Signature: </b><br></br>
+                            <span t-field="o.l10n_ke_oscu_signature"/>
+                        </p>
+                        <p t-if="o.l10n_ke_oscu_receipt_url">
+                            <img style="display:block;"  t-att-src="'/report/barcode/?barcode_type=%s&amp;value=%s&amp;width=%s&amp;height=%s' % ('QR', quote_plus(o.l10n_ke_oscu_receipt_url), 130, 130)" alt="QR Code"/>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </xpath>
+    </template>
+</odoo>

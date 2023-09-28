@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="tax_type_a" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">04</field>
+            <field name="code">A</field>
+            <field name="name">A-Exempt</field>
+            <field name="description">A-Exempt</field>
+            <field name="order">1</field>
+            <field name="tax_rate">0</field>
+        </record>
+        <record id="tax_type_b" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">04</field>
+            <field name="code">B</field>
+            <field name="name">B-Standard Rated</field>
+            <field name="description">B-Standard Rated</field>
+            <field name="order">2</field>
+            <field name="tax_rate">16</field>
+        </record>
+        <record id="tax_type_c" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">04</field>
+            <field name="code">C</field>
+            <field name="name">C-Zero Rated</field>
+            <field name="description">C-Zero Rated</field>
+            <field name="order">3</field>
+            <field name="tax_rate">0</field>
+        </record>
+        <record id="tax_type_d" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">04</field>
+            <field name="code">D</field>
+            <field name="name">D-Non VAT</field>
+            <field name="description">D-Non VAT</field>
+            <field name="order">5</field>
+            <field name="tax_rate">0</field>
+        </record>
+        <record id="tax_type_e" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">04</field>
+            <field name="code">E</field>
+            <field name="name">E-VAT 8%</field>
+            <field name="description">E-VAT 8%</field>
+            <field name="order">4</field>
+            <field name="tax_rate">8</field>
+        </record>
+    </data>
+</odoo>

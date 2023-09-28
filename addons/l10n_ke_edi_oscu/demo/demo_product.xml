@@ -1,0 +1,11 @@
+<odoo>
+    <data>
+        <record id="product.product_product_25" model="product.product">
+            <field name="l10n_ke_item_code">00000000000000000031</field>
+            <field name="l10n_ke_packaging_unit_id" ref="l10n_ke_edi_oscu.packaging_type_bf"/>
+            <field name="l10n_ke_packaging_quantity">1.23</field>
+            <field name="l10n_ke_quantity_unit_id" ref="l10n_ke_edi_oscu.quantity_unit_ktm"/>
+            <field name="l10n_ke_origin_country_id" ref="base.bj"/>
+        </record>
+    </data>
+</odoo>

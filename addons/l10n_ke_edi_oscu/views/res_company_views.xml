@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="res_company_form_inherit_l10n_ke_edi_oscu" model="ir.ui.view">
+            <field name="name">res.company.form.inherit</field>
+            <field name="model">res.company</field>
+            <field name="inherit_id" ref="base.view_company_form"/>
+            <field name="arch" type="xml">
+                <page name="general_info" position="after">
+                    <page string="OSCU Details" name="l10n_ke_edi_oscu_details">
+                        <group>
+                            <group>
+                                <field name="l10n_ke_oscu_branch_code"/>
+                                <field name="l10n_ke_oscu_serial_number"/>
+                                <field name="l10n_ke_oscu_cmc_key"/>
+                                <div class="cell"/>
+                                <button name="action_l10n_ke_oscu_initialize" string="Initialize OSCU" type="object"/> <!-- invisible="l10n_ke_oscu_cmc_key"/> -->
+                                <div class="cell"/>
+                                <button name="action_l10n_ke_oscu_get_notices" string="Get OSCU Notices" type="object"/> <!-- invisible="l10n_ke_oscu_cmc_key"/> -->
+                            </group>
+                        </group>
+                    </page>
+                </page>
+            </field>
+        </record>
+
+    </data>
+</odoo>

@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="quantity_unit_4b" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">10</field>
+            <field name="code">4B</field>
+            <field name="name">Pair</field>
+            <field name="description">Pair</field>
+            <field name="order">1</field>
+        </record>
+        <record id="quantity_unit_av" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">10</field>
+            <field name="code">AV</field>
+            <field name="name">Cap</field>
+            <field name="description">Cap</field>
+            <field name="order">2</field>
+        </record>
+        <record id="quantity_unit_ba" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">10</field>
+            <field name="code">BA</field>
+            <field name="name">Barrel</field>
+            <field name="description">Barrel</field>
+            <field name="order">3</field>
+        </record>
+        <record id="quantity_unit_be" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">10</field>
+            <field name="code">BE</field>
+            <field name="name">bundle</field>
+            <field name="description">bundle</field>
+            <field name="order">4</field>
+        </record>
+        <record id="quantity_unit_bg" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">10</field>
+            <field name="code">BG</field>
+            <field name="name">bag</field>
+            <field name="description">bag</field>
+            <field name="order">5</field>
+        </record>
+        <record id="quantity_unit_bl" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">10</field>
+            <field name="code">BL</field>
+            <field name="name">block</field>
+            <field name="description">block</field>
+            <field name="order">6</field>
+        </record>
+        <record id="quantity_unit_bll" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">10</field>
+            <field name="code">BLL</field>
+            <field name="name">BLL Barrel (petroleum) (158,987 dm3)</field>
+            <field name="description">BLL Barrel (petroleum) (158,987 dm3)</field>
+            <field name="order">7</field>
+        </record>
+        <record id="quantity_unit_bx" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">10</field>
+            <field name="code">BX</field>
+            <field name="name">box</field>
+            <field name="description">box</field>
+            <field name="order">8</field>
+        </record>
+        <record id="quantity_unit_ca" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">10</field>
+            <field name="code">CA</field>
+            <field name="name">Can</field>
+            <field name="description">Can</field>
+            <field name="order">9</field>
+        </record>
+        <record id="quantity_unit_cel" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">10</field>
+            <field name="code">CEL</field>
+            <field name="name">Cell</field>
+            <field name="description">Cell</field>
+            <field name="order">10</field>
+        </record>
+        <record id="quantity_unit_cmt" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">10</field>
+            <field name="code">CMT</field>
+            <field name="name">centimetre</field>
+            <field name="description">centimetre</field>
+            <field name="order">11</field>
+        </record>
+        <record id="quantity_unit_cr" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">10</field>
+            <field name="code">CR</field>
+            <field name="name">CARAT</field>
+            <field name="description">CARAT</field>
+            <field name="order">12</field>
+        </record>
+        <record id="quantity_unit_dr" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">10</field>
+            <field name="code">DR</field>
+            <field name="name">Drum</field>
+            <field name="description">Drum</field>
+            <field name="order">13</field>
+        </record>
+        <record id="quantity_unit_dz" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">10</field>
+            <field name="code">DZ</field>
+            <field name="name">Dozen</field>
+            <field name="description">Dozen</field>
+            <field name="order">14</field>
+        </record>
+        <record id="quantity_unit_gll" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">10</field>
+            <field name="code">GLL</field>
+            <field name="name">Gallon</field>
+            <field name="description">Gallon</field>
+            <field name="order">15</field>
+        </record>
+        <record id="quantity_unit_grm" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">10</field>
+            <field name="code">GRM</field>
+            <field name="name">Gram</field>
+            <field name="description">Gram</field>
+            <field name="order">16</field>
+        </record>
+        <record id="quantity_unit_gro" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">10</field>
+            <field name="code">GRO</field>
+            <field name="name">Gross</field>
+            <field name="description">Gross</field>
+            <field name="order">17</field>
+        </record>
+        <record id="quantity_unit_kg" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">10</field>
+            <field name="code">KG</field>
+            <field name="name">Kilo-Gramme</field>
+            <field name="description">Kilo-Gramme</field>
+            <field name="order">18</field>
+        </record>
+        <record id="quantity_unit_ktm" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">10</field>
+            <field name="code">KTM</field>
+            <field name="name">kilometre</field>
+            <field name="description">kilometre</field>
+            <field name="order">19</field>
+        </record>
+        <record id="quantity_unit_kwt" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">10</field>
+            <field name="code">KWT</field>
+            <field name="name">kilowatt</field>
+            <field name="description">kilowatt</field>
+            <field name="order">20</field>
+        </record>
+        <record id="quantity_unit_l" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">10</field>
+            <field name="code">L</field>
+            <field name="name">Litre</field>
+            <field name="description">Litre</field>
+            <field name="order">21</field>
+        </record>
+        <record id="quantity_unit_lbr" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">10</field>
+            <field name="code">LBR</field>
+            <field name="name">pound</field>
+            <field name="description">pound</field>
+            <field name="order">22</field>
+        </record>
+        <record id="quantity_unit_lk" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">10</field>
+            <field name="code">LK</field>
+            <field name="name">link</field>
+            <field name="description">link</field>
+            <field name="order">23</field>
+        </record>
+        <record id="quantity_unit_ltr" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">10</field>
+            <field name="code">LTR</field>
+            <field name="name">Litre</field>
+            <field name="description">Litre</field>
+            <field name="order">24</field>
+        </record>
+        <record id="quantity_unit_m" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">10</field>
+            <field name="code">M</field>
+            <field name="name">Metre</field>
+            <field name="description">Metre</field>
+            <field name="order">25</field>
+        </record>
+        <record id="quantity_unit_m2" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">10</field>
+            <field name="code">M2</field>
+            <field name="name">Square Metre</field>
+            <field name="description">Square Metre</field>
+            <field name="order">26</field>
+        </record>
+        <record id="quantity_unit_m3" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">10</field>
+            <field name="code">M3</field>
+            <field name="name">Cubic Metre</field>
+            <field name="description">Cubic Metre</field>
+            <field name="order">27</field>
+        </record>
+        <record id="quantity_unit_mgm" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">10</field>
+            <field name="code">MGM</field>
+            <field name="name">milligram</field>
+            <field name="description">milligram</field>
+            <field name="order">28</field>
+        </record>
+        <record id="quantity_unit_mtr" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">10</field>
+            <field name="code">MTR</field>
+            <field name="name">metre</field>
+            <field name="description">metre</field>
+            <field name="order">29</field>
+        </record>
+        <record id="quantity_unit_mwt" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">10</field>
+            <field name="code">MWT</field>
+            <field name="name">megawatt hour (1000 kW.h)</field>
+            <field name="description">megawatt hour (1000 kW.h)</field>
+            <field name="order">30</field>
+        </record>
+        <record id="quantity_unit_no" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">10</field>
+            <field name="code">NO</field>
+            <field name="name">Number</field>
+            <field name="description">Number</field>
+            <field name="order">31</field>
+        </record>
+        <record id="quantity_unit_nx" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">10</field>
+            <field name="code">NX</field>
+            <field name="name">part per thousand</field>
+            <field name="description">part per thousand</field>
+            <field name="order">32</field>
+        </record>
+        <record id="quantity_unit_pa" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">10</field>
+            <field name="code">PA</field>
+            <field name="name">packet</field>
+            <field name="description">packet</field>
+            <field name="order">33</field>
+        </record>
+        <record id="quantity_unit_pg" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">10</field>
+            <field name="code">PG</field>
+            <field name="name">plate</field>
+            <field name="description">plate</field>
+            <field name="order">34</field>
+        </record>
+        <record id="quantity_unit_pr" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">10</field>
+            <field name="code">PR</field>
+            <field name="name">pair</field>
+            <field name="description">pair</field>
+            <field name="order">35</field>
+        </record>
+        <record id="quantity_unit_rl" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">10</field>
+            <field name="code">RL</field>
+            <field name="name">reel</field>
+            <field name="description">reel</field>
+            <field name="order">36</field>
+        </record>
+        <record id="quantity_unit_ro" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">10</field>
+            <field name="code">RO</field>
+            <field name="name">roll</field>
+            <field name="description">roll</field>
+            <field name="order">37</field>
+        </record>
+        <record id="quantity_unit_set" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">10</field>
+            <field name="code">SET</field>
+            <field name="name">set</field>
+            <field name="description">set</field>
+            <field name="order">38</field>
+        </record>
+        <record id="quantity_unit_st" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">10</field>
+            <field name="code">ST</field>
+            <field name="name">sheet</field>
+            <field name="description">sheet</field>
+            <field name="order">39</field>
+        </record>
+        <record id="quantity_unit_tne" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">10</field>
+            <field name="code">TNE</field>
+            <field name="name">tonne (metric ton)</field>
+            <field name="description">tonne (metric ton)</field>
+            <field name="order">40</field>
+        </record>
+        <record id="quantity_unit_tu" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">10</field>
+            <field name="code">TU</field>
+            <field name="name">tube</field>
+            <field name="description">tube</field>
+            <field name="order">41</field>
+        </record>
+        <record id="quantity_unit_u" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">10</field>
+            <field name="code">U</field>
+            <field name="name">Pieces/item [Number]</field>
+            <field name="description">Pieces/item [Number]</field>
+            <field name="order">42</field>
+        </record>
+        <record id="quantity_unit_yrd" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">10</field>
+            <field name="code">YRD</field>
+            <field name="name">yard</field>
+            <field name="description">yard</field>
+            <field name="order">43</field>
+        </record>
+    </data>
+</odoo>

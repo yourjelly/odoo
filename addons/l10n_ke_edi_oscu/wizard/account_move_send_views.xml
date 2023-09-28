@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="account_move_send_inherit_account_peppol">
+            <field name="name">account.move.send.form.inherit.l10n.ke.oscu</field>
+            <field name="model">account.move.send</field>
+            <field name="inherit_id" ref="account.account_move_send_form"/>
+            <field name="arch" type="xml">
+                <!-- <xpath expr="//div[@name='warnings']" position="inside"> -->
+                    <!-- <field name="enable_peppol" invisible="1"/> -->
+                    <!-- <div class="alert alert-warning" role="alert" invisible="not checkbox_send_peppol or not peppol_warning"> -->
+                        <!-- <field name="peppol_warning"/> -->
+                    <!-- </div> -->
+                <!-- </xpath> -->
+                <xpath expr="//div[@name='option_send_mail']" position='after'>
+                    <div name="option_l10n_ke_oscu">
+                        <field name="checkbox_send_l10n_ke_oscu"/>
+                        <b>
+                            <label for="checkbox_send_l10n_ke_oscu"/>
+                        </b>
+                    </div>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

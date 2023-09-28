@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="l10n_ke_edi_oscu_view_inherit_warehouse" model="ir.ui.view">
+        <field name="name">stock.warehouse</field>
+        <field name="model">stock.warehouse</field>
+        <field name="inherit_id" ref="stock.view_warehouse"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="l10n_ke_edi_oscu_branch_id"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="l10n_ke_edi_oscu_view_inherit_warehouse_tree" model="ir.ui.view">
+        <field name="name">stock.warehouse.tree</field>
+        <field name="model">stock.warehouse</field>
+        <field name="inherit_id" ref="stock.view_warehouse_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='company_id']" position="after">
+                <field name="l10n_ke_edi_oscu_branch_id"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- <record id="stock_warehouse_view_search" model="ir.ui.view"> -->
+    <!--     <field name="name">stock.warehouse.search</field> -->
+    <!--     <field name="model">stock.warehouse</field> -->
+    <!--     <field name="arch" type="xml"> -->
+    <!--         <search string="Warehouse"> -->
+    <!--             <field name="name"/> -->
+    <!--             <filter string="With OSCU Branch" name="with_l10n_ke_edi_oscu_branch_id" domain="[('l10n_ke_oscu_branch_id','!=',False)]"/> -->
+    <!--         </search> -->
+    <!--     </field> -->
+    <!-- </record> -->
+</odoo>

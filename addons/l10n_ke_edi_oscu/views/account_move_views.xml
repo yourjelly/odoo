@@ -1,0 +1,44 @@
+<odoo>
+    <data>
+        <!-- <record id="view_move_line_tree_grouped_inherit_l10n_ke_oscu_fields" model="ir.ui.view"> -->
+        <!--     <field name="name">account.move.line.tree.grouped.inherit.l10n.ke.oscu.fields</field> -->
+        <!--     <field name="model">account.move.line</field> -->
+        <!--     <field name="inherit_id" ref="account.view_move_line_tree"/> -->
+        <!--     <field name="arch" type="xml"> -->
+        <!--         <xpath expr="//field[@name='tax_ids']" position="after"> -->
+        <!--             <field name="l10n_ke_packaging_unit_id" optional="hide"/> -->
+        <!--         </xpath> -->
+        <!--     </field> -->
+        <!-- </record> -->
+        <record id="invoice_form_inherit_l10n_ke_oscu" model="ir.ui.view">
+            <field name="name">invoice.form.form.inherit.l10n.ke.oscu</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_move_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//header" position="inside">
+                    <button
+                        name="action_l10n_ke_oscu_send" type="object" string="Save changes to OSCU"
+                        invisible="move_type not in ('in_invoice', 'in_refund')"/>
+                </xpath>
+                <!-- <xpath expr="//field[@name='invoice_line_ids']/tree//field[@name='quantity']" position="before"> -->
+                <!--     <field name="l10n_ke_packaging_unit_id" optional="hide"/> -->
+                <!--     <field name="l10n_ke_packaging_quantity" optional="hide"/> -->
+                <!--     <field name="l10n_ke_quantity_unit_id" optional="hide"/> -->
+                <!-- </xpath> -->
+                <notebook position="inside">
+                    <page string="KRA OSCU" invisible="country_code != 'KE'">
+                        <group>
+                            <group string="OSCU Details">
+                                <field name="l10n_ke_oscu_invoice_number" readonly="1"/>
+                                <field name="l10n_ke_oscu_receipt_number" readonly="1"/>
+                                <field name="l10n_ke_oscu_signature" readonly="1"/>
+                                <field name="l10n_ke_oscu_datetime" readonly="1"/>
+                                <field name="l10n_ke_oscu_internal_data" readonly="1"/>
+                            </group>
+                        </group>
+                    </page>
+                </notebook>
+            </field>
+        </record>
+    </data>
+</odoo>

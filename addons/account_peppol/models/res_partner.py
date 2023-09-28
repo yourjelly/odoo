@@ -63,6 +63,8 @@ class ResPartner(models.Model):
         (ref:https://peppol.helger.com/public/locale-en_US/menuitem-docs-doc-exchange)
         """
         self.ensure_one()
+        self.account_peppol_is_endpoint_valid = True
+        return
 
         participant = f'{self.peppol_eas}:{self.peppol_endpoint}'.lower()
         hash_participant = md5(participant.lower().encode()).hexdigest()

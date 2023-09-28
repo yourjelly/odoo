@@ -1,0 +1,369 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="packaging_type_am" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">17</field>
+            <field name="code">AM</field>
+            <field name="name">Ampoule</field>
+            <field name="description">Ampoule</field>
+            <field name="order">1</field>
+        </record>
+        <record id="packaging_type_ba" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">17</field>
+            <field name="code">BA</field>
+            <field name="name">Barrel</field>
+            <field name="description">Barrel</field>
+            <field name="order">2</field>
+        </record>
+        <record id="packaging_type_bc" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">17</field>
+            <field name="code">BC</field>
+            <field name="name">Bottlecrate</field>
+            <field name="description">Bottlecrate</field>
+            <field name="order">3</field>
+        </record>
+        <record id="packaging_type_be" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">17</field>
+            <field name="code">BE</field>
+            <field name="name">Bundle</field>
+            <field name="description">Bundle</field>
+            <field name="order">4</field>
+        </record>
+        <record id="packaging_type_bf" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">17</field>
+            <field name="code">BF</field>
+            <field name="name">Balloon, non-protected</field>
+            <field name="description">Balloon, non-protected</field>
+            <field name="order">5</field>
+        </record>
+        <record id="packaging_type_bg" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">17</field>
+            <field name="code">BG</field>
+            <field name="name">Bag</field>
+            <field name="description">Bag</field>
+            <field name="order">6</field>
+        </record>
+        <record id="packaging_type_bj" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">17</field>
+            <field name="code">BJ</field>
+            <field name="name">Bucket</field>
+            <field name="description">Bucket</field>
+            <field name="order">7</field>
+        </record>
+        <record id="packaging_type_bk" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">17</field>
+            <field name="code">BK</field>
+            <field name="name">Basket</field>
+            <field name="description">Basket</field>
+            <field name="order">8</field>
+        </record>
+        <record id="packaging_type_bl" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">17</field>
+            <field name="code">BL</field>
+            <field name="name">Bale</field>
+            <field name="description">Bale</field>
+            <field name="order">9</field>
+        </record>
+        <record id="packaging_type_bq" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">17</field>
+            <field name="code">BQ</field>
+            <field name="name">Bottle, protected cylindrical</field>
+            <field name="description">Bottle, protected cylindrical</field>
+            <field name="order">10</field>
+        </record>
+        <record id="packaging_type_br" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">17</field>
+            <field name="code">BR</field>
+            <field name="name">Bar</field>
+            <field name="description">Bar</field>
+            <field name="order">11</field>
+        </record>
+        <record id="packaging_type_bv" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">17</field>
+            <field name="code">BV</field>
+            <field name="name">Bottle, bulbous</field>
+            <field name="description">Bottle, bulbous</field>
+            <field name="order">12</field>
+        </record>
+        <record id="packaging_type_bz" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">17</field>
+            <field name="code">BZ</field>
+            <field name="name">Bag</field>
+            <field name="description">Bag</field>
+            <field name="order">13</field>
+        </record>
+        <record id="packaging_type_ca" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">17</field>
+            <field name="code">CA</field>
+            <field name="name">Can</field>
+            <field name="description">Can</field>
+            <field name="order">14</field>
+        </record>
+        <record id="packaging_type_ch" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">17</field>
+            <field name="code">CH</field>
+            <field name="name">Chest</field>
+            <field name="description">Chest</field>
+            <field name="order">15</field>
+        </record>
+        <record id="packaging_type_cj" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">17</field>
+            <field name="code">CJ</field>
+            <field name="name">Coffin</field>
+            <field name="description">Coffin</field>
+            <field name="order">16</field>
+        </record>
+        <record id="packaging_type_cl" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">17</field>
+            <field name="code">CL</field>
+            <field name="name">Coil</field>
+            <field name="description">Coil</field>
+            <field name="order">17</field>
+        </record>
+        <record id="packaging_type_cr" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">17</field>
+            <field name="code">CR</field>
+            <field name="name">Wooden Box, Wooden Case</field>
+            <field name="description">Wooden Box, Wooden Case</field>
+            <field name="order">18</field>
+        </record>
+        <record id="packaging_type_cs" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">17</field>
+            <field name="code">CS</field>
+            <field name="name">Cassette</field>
+            <field name="description">Cassette</field>
+            <field name="order">19</field>
+        </record>
+        <record id="packaging_type_ct" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">17</field>
+            <field name="code">CT</field>
+            <field name="name">Carton</field>
+            <field name="description">Carton</field>
+            <field name="order">20</field>
+        </record>
+        <record id="packaging_type_ctn" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">17</field>
+            <field name="code">CTN</field>
+            <field name="name">Container</field>
+            <field name="description">Container</field>
+            <field name="order">21</field>
+        </record>
+        <record id="packaging_type_cy" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">17</field>
+            <field name="code">CY</field>
+            <field name="name">Cylinder</field>
+            <field name="description">Cylinder</field>
+            <field name="order">22</field>
+        </record>
+        <record id="packaging_type_dr" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">17</field>
+            <field name="code">DR</field>
+            <field name="name">Drum</field>
+            <field name="description">Drum</field>
+            <field name="order">23</field>
+        </record>
+        <record id="packaging_type_gt" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">17</field>
+            <field name="code">GT</field>
+            <field name="name">Extra Countable Item</field>
+            <field name="description">Extra Countable Item</field>
+            <field name="order">24</field>
+        </record>
+        <record id="packaging_type_hh" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">17</field>
+            <field name="code">HH</field>
+            <field name="name">Hand Baggage</field>
+            <field name="description">Hand Baggage</field>
+            <field name="order">25</field>
+        </record>
+        <record id="packaging_type_iz" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">17</field>
+            <field name="code">IZ</field>
+            <field name="name">Ingots</field>
+            <field name="description">Ingots</field>
+            <field name="order">26</field>
+        </record>
+        <record id="packaging_type_jr" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">17</field>
+            <field name="code">JR</field>
+            <field name="name">Jar</field>
+            <field name="description">Jar</field>
+            <field name="order">27</field>
+        </record>
+        <record id="packaging_type_ju" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">17</field>
+            <field name="code">JU</field>
+            <field name="name">Jug</field>
+            <field name="description">Jug</field>
+            <field name="order">28</field>
+        </record>
+        <record id="packaging_type_jy" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">17</field>
+            <field name="code">JY</field>
+            <field name="name">Jerry CAN Cylindrical</field>
+            <field name="description">Jerry CAN Cylindrical</field>
+            <field name="order">29</field>
+        </record>
+        <record id="packaging_type_kz" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">17</field>
+            <field name="code">KZ</field>
+            <field name="name">Canester</field>
+            <field name="description">Canester</field>
+            <field name="order">30</field>
+        </record>
+        <record id="packaging_type_lz" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">17</field>
+            <field name="code">LZ</field>
+            <field name="name">Logs, in bundle/bunch/truss</field>
+            <field name="description">Logs, in bundle/bunch/truss</field>
+            <field name="order">31</field>
+        </record>
+        <record id="packaging_type_nt" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">17</field>
+            <field name="code">NT</field>
+            <field name="name">Net</field>
+            <field name="description">Net</field>
+            <field name="order">32</field>
+        </record>
+        <record id="packaging_type_ou" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">17</field>
+            <field name="code">OU</field>
+            <field name="name">Non-Exterior Packaging Unit</field>
+            <field name="description">Non-Exterior Packaging Unit</field>
+            <field name="order">33</field>
+        </record>
+        <record id="packaging_type_pd" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">17</field>
+            <field name="code">PD</field>
+            <field name="name">Poddon</field>
+            <field name="description">Poddon</field>
+            <field name="order">34</field>
+        </record>
+        <record id="packaging_type_pg" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">17</field>
+            <field name="code">PG</field>
+            <field name="name">Plate</field>
+            <field name="description">Plate</field>
+            <field name="order">35</field>
+        </record>
+        <record id="packaging_type_pi" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">17</field>
+            <field name="code">PI</field>
+            <field name="name">Pipe</field>
+            <field name="description">Pipe</field>
+            <field name="order">36</field>
+        </record>
+        <record id="packaging_type_po" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">17</field>
+            <field name="code">PO</field>
+            <field name="name">Pilot</field>
+            <field name="description">Pilot</field>
+            <field name="order">37</field>
+        </record>
+        <record id="packaging_type_pu" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">17</field>
+            <field name="code">PU</field>
+            <field name="name">Traypack</field>
+            <field name="description">Traypack</field>
+            <field name="order">38</field>
+        </record>
+        <record id="packaging_type_rl" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">17</field>
+            <field name="code">RL</field>
+            <field name="name">Reel</field>
+            <field name="description">Reel</field>
+            <field name="order">39</field>
+        </record>
+        <record id="packaging_type_ro" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">17</field>
+            <field name="code">RO</field>
+            <field name="name">Roll</field>
+            <field name="description">Roll</field>
+            <field name="order">40</field>
+        </record>
+        <record id="packaging_type_rz" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">17</field>
+            <field name="code">RZ</field>
+            <field name="name">Rods, in bundle/bunch/truss</field>
+            <field name="description">Rods, in bundle/bunch/truss</field>
+            <field name="order">41</field>
+        </record>
+        <record id="packaging_type_sk" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">17</field>
+            <field name="code">SK</field>
+            <field name="name">Skeletoncase</field>
+            <field name="description">Skeletoncase</field>
+            <field name="order">42</field>
+        </record>
+        <record id="packaging_type_ty" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">17</field>
+            <field name="code">TY</field>
+            <field name="name">Tank, cylindrical</field>
+            <field name="description">Tank, cylindrical</field>
+            <field name="order">43</field>
+        </record>
+        <record id="packaging_type_vg" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">17</field>
+            <field name="code">VG</field>
+            <field name="name">Bulk,gas(at 1031 mbar 15 oC)</field>
+            <field name="description">Bulk,gas(at 1031 mbar 15 oC)</field>
+            <field name="order">44</field>
+        </record>
+        <record id="packaging_type_vl" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">17</field>
+            <field name="code">VL</field>
+            <field name="name">Bulk,liquid(at normal temperature/pressure)</field>
+            <field name="description">Bulk,liquid(at normal temperature/pressure)</field>
+            <field name="order">45</field>
+        </record>
+        <record id="packaging_type_vo" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">17</field>
+            <field name="code">VO</field>
+            <field name="name">Bulk, solid, large particles(nodules)</field>
+            <field name="description">Bulk, solid, large particles("nodules")</field>
+            <field name="order">46</field>
+        </record>
+        <record id="packaging_type_vq" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">17</field>
+            <field name="code">VQ</field>
+            <field name="name">Bulk, gas (liquefied at abnormal temperature/pressure)</field>
+            <field name="description">Bulk, gas(liquefied at abnormal temperature/pressure)</field>
+            <field name="order">47</field>
+        </record>
+        <record id="packaging_type_vr" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">17</field>
+            <field name="code">VR</field>
+            <field name="name">Bulk, solid, granular particles(grains)</field>
+            <field name="description">Bulk, solid, granular particles("grains")</field>
+            <field name="order">48</field>
+        </record>
+        <record id="packaging_type_vt" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">17</field>
+            <field name="code">VT</field>
+            <field name="name">Extra Bulk Item</field>
+            <field name="description">Extra Bulk Item</field>
+            <field name="order">49</field>
+        </record>
+        <record id="packaging_type_vy" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">17</field>
+            <field name="code">VY</field>
+            <field name="name">Bulk, fine particles(powder)</field>
+            <field name="description">Bulk, fine particles("powder")</field>
+            <field name="order">50</field>
+        </record>
+        <record id="packaging_type_ml" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">17</field>
+            <field name="code">ML</field>
+            <field name="name">Mills</field>
+            <field name="description">cigarette Mills</field>
+            <field name="order">51</field>
+        </record>
+        <record id="packaging_type_tn" model="l10n_ke_edi_oscu.code">
+            <field name="code_type">17</field>
+            <field name="code">TN</field>
+            <field name="name">TAN</field>
+            <field name="description">1TAN REFER TO 20BAGS</field>
+            <field name="order">52</field>
+        </record>
+    </data>
+</odoo>

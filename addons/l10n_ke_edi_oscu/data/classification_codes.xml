@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="code_classification_tax_rate" model="l10n_ke_edi_oscu.code_classification">
+            <field name="code">04</field>
+            <field name="name">Taxation Type</field>
+            <field name="use" eval="True"/>
+            <field name="user_defined_code_1">Tax Rate</field>
+        </record>
+        <!-- skipped:country -->
+        <record id="code_classification_payment_type" model="l10n_ke_edi_oscu.code_classification">
+            <field name="code">07</field>
+            <field name="name">Payment Type</field>
+            <field name="use" eval="True"/>
+        </record>
+        <record id="code_classification_branch_status" model="l10n_ke_edi_oscu.code_classification">
+            <field name="code">09</field>
+            <field name="name">Branch status</field>
+            <field name="use" eval="True"/>
+        </record>
+        <record id="code_classification_quantity_unit" model="l10n_ke_edi_oscu.code_classification">
+            <field name="code">10</field>
+            <field name="name">Quantity Unit</field>
+            <field name="use" eval="True"/>
+        </record>
+        <record id="code_classification_sale_status" model="l10n_ke_edi_oscu.code_classification">
+            <field name="code">11</field>
+            <field name="name">Sale Status</field>
+            <field name="use" eval="True"/>
+        </record>
+        <record id="code_classification_stock_io_type" model="l10n_ke_edi_oscu.code_classification">
+            <field name="code">12</field>
+            <field name="name">Stock I/O Type</field>
+            <field name="use" eval="True"/>
+        </record>
+        <record id="code_classification_transaction_type" model="l10n_ke_edi_oscu.code_classification">
+            <field name="code">14</field>
+            <field name="name">Transaction Type</field>
+            <field name="use" eval="True"/>
+        </record>
+        <record id="code_classification_packaging_unit" model="l10n_ke_edi_oscu.code_classification">
+            <field name="code">17</field>
+            <field name="name">Packing Unit</field>
+            <field name="use" eval="True"/>
+        </record>
+        <record id="code_classification_item_type" model="l10n_ke_edi_oscu.code_classification">
+            <field name="code">24</field>
+            <field name="name">Item Type</field>
+            <field name="use" eval="True"/>
+        </record>
+        <record id="code_classification_import_item_status" model="l10n_ke_edi_oscu.code_classification">
+            <field name="code">26</field>
+            <field name="name">Import Item Status</field>
+            <field name="use" eval="True"/>
+        </record>
+        <record id="code_classification_refund_reason" model="l10n_ke_edi_oscu.code_classification">
+            <field name="code">32</field>
+            <field name="name">Refund Reason</field>
+            <field name="use" eval="True"/>
+        </record>
+        <!-- skipped:currency -->
+        <record id="code_classification_purchase_status" model="l10n_ke_edi_oscu.code_classification">
+            <field name="code">34</field>
+            <field name="name">Purchase Status</field>
+            <field name="use" eval="True"/>
+        </record>
+        <record id="code_classification_inventory_adjustmen_reason" model="l10n_ke_edi_oscu.code_classification">
+            <field name="code">35</field>
+            <field name="name">Inventory Adjustment Reason</field>
+            <field name="use" eval="True"/>
+        </record>
+        <record id="code_classification_bank" model="l10n_ke_edi_oscu.code_classification">
+            <field name="code">36</field>
+            <field name="name">Bank</field>
+            <field name="use" eval="True"/>
+        </record>
+        <record id="code_classification_sale_receipt_type" model="l10n_ke_edi_oscu.code_classification">
+            <field name="code">37</field>
+            <field name="name">Sales Receipt Type</field>
+            <field name="use" eval="True"/>
+        </record>
+        <record id="code_classification_purchase_receipt_type" model="l10n_ke_edi_oscu.code_classification">
+            <field name="code">38</field>
+            <field name="name">Purchase Receipt Type</field>
+            <field name="use" eval="True"/>
+        </record>
+        <record id="code_classification_tax_office" model="l10n_ke_edi_oscu.code_classification">
+            <field name="code">45</field>
+            <field name="name">Tax Office</field>
+            <field name="use" eval="True"/>
+        </record>
+        <!-- skipped:locale -->
+        <record id="code_classification_category_level" model="l10n_ke_edi_oscu.code_classification">
+            <field name="code">49</field>
+            <field name="name">Category Level</field>
+            <field name="use" eval="True"/>
+        </record>
+    </data>
+</odoo>

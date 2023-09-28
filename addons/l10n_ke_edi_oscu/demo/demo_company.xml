@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="l10n_ke.partner_demo_company_ke" model="res.partner">
+        <field name="vat">P052112956W</field>
+    </record>
+</odoo>
