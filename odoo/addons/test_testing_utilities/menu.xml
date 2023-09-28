@@ -1,6 +1,34 @@
 <odoo>
     <menuitem id="menu_ssf" parent="base.menu_tests" name="Server-side form"/>
 
+    <record id="view_groups" model="ir.ui.view">
+        <field name="name">Test attrs and groups</field>
+        <field name="model">test_testing_utilities.groups</field>
+        <field name="mode">primary</field>
+        <field name="arch" type="xml">
+            <form>
+                <field name="a" readonly="not d" groups="base.group_erp_manager"/>
+                <field name="a" readonly="k"/>  <!-- valid from 'ir.model.access': 'base.group_public' -->
+                <field name="b" readonly="not d" groups="base.group_system"/>
+                <field name="c" readonly="d" groups="base.group_erp_manager,base.group_system"/>
+                <field name="d" readonly="e"/>
+                <field name="f" readonly="e"/>
+                <field name="h" readonly="g"/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_groups_sub" model="ir.ui.view">
+        <field name="name">Test attrs and groups_sub</field>
+        <field name="model">test_testing_utilities.groups_sub</field>
+        <field name="mode">primary</field>
+        <field name="arch" type="xml">
+            <form>
+                <field name="g_id" groups="base.group_erp_manager"/>
+            </form>
+        </field>
+    </record>
+
     <record id="action_test_o2m_onchange" model="ir.actions.act_window">
         <field name="name">Test o2m onchange thing</field>
         <field name="res_model">test_testing_utilities.parent</field>
@@ -238,6 +266,7 @@
         <field name="model">test_testing_utilities.ref</field>
         <field name="arch" type="xml">
             <form>
+                <field name="x" invisible="True" readonly="True"/>
                 <field name="value"/>
                 <field name="subs"
                     invisible="value == 666"
@@ -274,12 +303,11 @@
         <field name="arch" type="xml">
             <tree editable="bottom">
                 <field name="a"/>
-                <field name="b" readonly="parent.value == 42"/>
+                <field name="b" readonly="parent.value == 42 and not parent.x and not z"/>
                 <field name="c" column_invisible="context.get('hide_c')"/>
             </tree>
         </field>
     </record>
-
 
     <record id="o2m_widget_m2m" model="ir.ui.view">
         <field name="name">Treat o2m as m2m</field>

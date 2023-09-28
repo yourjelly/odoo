@@ -100,6 +100,7 @@ class StockReplenishmentOption(models.TransientModel):
     product_id = fields.Many2one('product.product')
     replenishment_info_id = fields.Many2one('stock.replenishment.info')
 
+    company_id = fields.Many2one(related='warehouse_id.company_id')
     location_id = fields.Many2one('stock.location', related='warehouse_id.lot_stock_id')
     warehouse_id = fields.Many2one('stock.warehouse', related='route_id.supplier_wh_id')
     uom = fields.Char(related='product_id.uom_name')

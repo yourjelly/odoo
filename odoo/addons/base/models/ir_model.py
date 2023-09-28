@@ -1842,6 +1842,13 @@ class IrModelAccess(models.Model):
         """, [lang, lang, model_name])
         return [('%s/%s' % x) if x[0] else x[1] for x in self._cr.fetchall()]
 
+    @api.model
+    @tools.ormcache('model_name', 'access_mode')
+    def _group_xmlid_with_access(self, model_name, access_mode):
+        assert access_mode in ('read', 'write', 'create', 'unlink'), 'Invalid access mode'
+        group_ids = self.env['ir.model.access'].search([(f'perm_{access_mode}', '=', True), ('model_id.model', '=', model_name)]).mapped('group_id').ids
+        return tuple(self.env['ir.model.data'].search([('model', '=', 'res.groups'), ('res_id', 'in', group_ids)]).mapped('complete_name'))
+
     # The context parameter is useful when the method translates error messages.
     # But as the method raises an exception in that case,  the key 'lang' might
     # not be really necessary as a cache key, unless the `ormcache_context`

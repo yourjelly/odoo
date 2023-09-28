@@ -34,21 +34,21 @@ class ViewCase(common.TransactionCase):
         super(ViewCase, self).setUp()
         self.View = self.env['ir.ui.view']
 
-    def assertValid(self, arch, name='valid view', inherit_id=False):
+    def assertValid(self, arch, name='valid view', inherit_id=False, model='ir.ui.view'):
         return self.View.create({
             'name': name,
-            'model': 'ir.ui.view',
+            'model': model,
             'inherit_id': inherit_id,
             'arch': arch,
         })
 
-    def assertInvalid(self, arch, expected_message=None, name='invalid view', inherit_id=False):
+    def assertInvalid(self, arch, expected_message=None, name='invalid view', inherit_id=False, model='ir.ui.view'):
         with mute_logger('odoo.addons.base.models.ir_ui_view'):
             with self.assertRaises(ValidationError) as catcher:
                 with self.cr.savepoint():
                     self.View.create({
                         'name': name,
-                        'model': 'ir.ui.view',
+                        'model': model,
                         'inherit_id': inherit_id,
                         'arch': arch,
                     })
@@ -59,11 +59,11 @@ class ViewCase(common.TransactionCase):
         else:
             _logger.warning(message)
 
-    def assertWarning(self, arch, expected_message=None, name='invalid view'):
+    def assertWarning(self, arch, expected_message=None, name='invalid view', model='ir.ui.view'):
         with self.assertLogs('odoo.addons.base.models.ir_ui_view', level="WARNING") as log_catcher:
             self.View.create({
                 'name': name,
-                'model': 'ir.ui.view',
+                'model': model,
                 'arch': arch,
             })
         self.assertEqual(len(log_catcher.output), 1, "Exactly one warning should be logged")
@@ -318,7 +318,7 @@ class TestViewInheritance(ViewCase):
         _, _, counter = get_cache_key_counter(self.env['ir.model.data']._xmlid_lookup, 'base.action_ui_view')
         hit, miss = counter.hit, counter.miss
 
-        with self.assertQueryCount(7):
+        with self.assertQueryCount(11):
             base_view = self.assertValid("""
                 <form string="View">
                     <header>
@@ -332,7 +332,7 @@ class TestViewInheritance(ViewCase):
         self.assertEqual(counter.hit, hit)
         self.assertEqual(counter.miss, miss + 2)
 
-        with self.assertQueryCount(6):
+        with self.assertQueryCount(10):
             self.assertValid("""
                 <field name="name" position="replace"/>
             """, inherit_id=base_view.id)
@@ -343,7 +343,7 @@ class TestViewInheritance(ViewCase):
         _, _, counter = get_cache_key_counter(self.env['ir.model.data']._xmlid_lookup, 'base.group_system')
         hit, miss = counter.hit, counter.miss
 
-        with self.assertQueryCount(4):
+        with self.assertQueryCount(8):
             base_view = self.assertValid("""
                 <form string="View">
                     <field name="name" groups="base.group_system"/>
@@ -354,7 +354,7 @@ class TestViewInheritance(ViewCase):
         self.assertEqual(counter.hit, hit)
         self.assertEqual(counter.miss, miss + 1)
 
-        with self.assertQueryCount(4):
+        with self.assertQueryCount(8):
             self.assertValid("""
                 <field name="name" position="replace">
                     <field name="key" groups="base.group_system"/>
@@ -2325,29 +2325,34 @@ class TestViews(ViewCase):
         self.assertTrue(tree.xpath('//div[@id="bar"]'))
 
     def test_attrs_groups_validation(self):
-        def validate(arch, valid=False, parent=False):
+        def validate(arch, valid=False, parent=False, field='name', model='ir.ui.view'):
             parent = 'parent.' if parent else ''
             if valid:
-                self.assertValid(arch % {'attrs': f"""invisible="{parent}name == 'foo'" """})
-                self.assertValid(arch % {'attrs': f"""domain="[('name', '!=', {parent}name)]" """})
-                self.assertValid(arch % {'attrs': f"""context="{{'default_name': {parent}name}}" """})
-                self.assertValid(arch % {'attrs': f"""decoration-info="{parent}name == 'foo'" """})
+                self.assertValid(arch % {'attrs': f"""invisible="{parent}{field} == 'foo'" """}, model=model)
+                self.assertValid(arch % {'attrs': f"""domain="[('name', '!=', {parent}{field})]" """}, model=model)
+                self.assertValid(arch % {'attrs': f"""context="{{'default_name': {parent}{field}}}" """}, model=model)
+                self.assertValid(arch % {'attrs': f"""decoration-info="{parent}{field} == 'foo'" """}, model=model)
             else:
                 self.assertInvalid(
-                    arch % {'attrs': f"""invisible="{parent}name == 'foo'" """},
-                    f"""Field 'name' used in modifier 'invisible' ({parent}name == 'foo') is restricted to the group(s)""",
+                    arch % {'attrs': f"""invisible="{parent}{field} == 'foo'" """},
+                    f"""Field '{field}' used in modifier 'invisible' ({parent}{field} == 'foo') is restricted to the group(s)""",
+                    model=model,
+                )
+                target = 'inherit_id' if model == 'ir.ui.view' else 'company_id'
+                self.assertInvalid(
+                    arch % {'attrs': f"""domain="[('name', '!=', {parent}{field})]" """},
+                    f"""Field '{field}' used in domain of <field name="{target}"> ([('name', '!=', {parent}{field})]) is restricted to the group(s)""",
+                    model=model,
                 )
                 self.assertInvalid(
-                    arch % {'attrs': f"""domain="[('name', '!=', {parent}name)]" """},
-                    f"""Field 'name' used in domain of <field name="inherit_id"> ([('name', '!=', {parent}name)]) is restricted to the group(s)""",
+                    arch % {'attrs': f"""context="{{'default_name': {parent}{field}}}" """},
+                    f"""Field '{field}' used in context ({{'default_name': {parent}{field}}}) is restricted to the group(s)""",
+                    model=model,
                 )
                 self.assertInvalid(
-                    arch % {'attrs': f"""context="{{'default_name': {parent}name}}" """},
-                    f"""Field 'name' used in context ({{'default_name': {parent}name}}) is restricted to the group(s)""",
-                )
-                self.assertInvalid(
-                    arch % {'attrs': f"""decoration-info="{parent}name == 'foo'" """},
-                    f"""Field 'name' used in decoration-info="{parent}name == 'foo'" is restricted to the group(s)""",
+                    arch % {'attrs': f"""decoration-info="{parent}{field} == 'foo'" """},
+                    f"""Field '{field}' used in decoration-info="{parent}{field} == 'foo'" is restricted to the group(s)""",
+                    model=model,
                 )
 
 
@@ -2766,24 +2771,189 @@ class TestViews(ViewCase):
             </form>
         """, valid=True)
 
-        # Assert using a field restricted to a 'base.group_no_one' in another
-        # field with a group implied 'base.group_no_one' is invalid. The group
-        # 'base.group_no_one' must be in the view because it's depending of the
-        # session.
+        # The modifier node should have the same group 'base.group_user'
+        # (or a depending group '') that the used field 'access_token'
         validate("""
-            <form string="View">
-                <field name="name" groups="base.group_no_one"/>
-                <field name="inherit_id" %(attrs)s groups="base.group_user"/>
+            <form string="View attachment">
+                <field name="access_token"/>
+                <field name="company_id" %(attrs)s groups="base.group_user"/>
             </form>
-        """, valid=False)
+        """, model='ir.attachment', field='access_token', valid=True)
         validate("""
-            <form string="View">
-                <field name="name" groups="base.group_no_one"/>
-                <group groups="base.group_no_one">
-                    <field name="inherit_id" %(attrs)s groups="base.group_user"/>
+            <form string="View attachment">
+                <field name="company_id" %(attrs)s groups="base.group_user"/>
+            </form>
+        """, model='ir.attachment', field='access_token', valid=True)
+        validate("""
+            <form string="View attachment">
+                <field name="company_id" %(attrs)s groups="base.group_erp_manager"/>
+            </form>
+        """, model='ir.attachment', field='access_token', valid=True)
+        validate("""
+            <form string="View attachment">
+                <group groups="base.group_erp_manager">
+                    <field name="company_id" %(attrs)s/>
                 </group>
             </form>
-        """, valid=True)
+        """, model='ir.attachment', field='access_token', valid=True)
+
+        # 'access_token' has 'group_user' groups but only 'group_user' has access to read 'ir.attachment'
+        validate("""
+            <form string="View attachment">
+                <field name="access_token"/>
+                <field name="company_id" %(attrs)s/>
+            </form>
+        """, model='ir.attachment', field='access_token', valid=True)
+        validate("""
+            <form string="View attachment">
+                <field name="access_token"/>
+                <field name="company_id" %(attrs)s groups="base.group_portal"/>
+            </form>
+        """, model='ir.attachment', field='access_token', valid=True)
+        validate("""
+            <form string="View attachment">
+                <field name="company_id" %(attrs)s groups="base.group_portal"/>
+            </form>
+        """, model='ir.attachment', field='access_token', valid=True)
+        validate("""
+            <form string="View attachment">
+                <field name="company_id" %(attrs)s/>
+            </form>
+        """, model='ir.attachment', field='access_token', valid=True)
+        validate("""
+            <form string="View attachment">
+                <field name="company_id" %(attrs)s groups="base.group_no_one"/>
+            </form>
+        """, model='ir.attachment', field='access_token', valid=True)
+        validate("""
+            <form string="View attachment">
+                <group groups="base.group_no_one">
+                    <field name="company_id" %(attrs)s/>
+                </group>
+            </form>
+        """, model='ir.attachment', field='access_token', valid=True)
+
+    def test_attrs_missing_field(self):
+        user_demo = self.env.ref('base.user_demo')
+
+        def validate(template, field, demo=True, groups=''):
+            # add 'access_token' field automatically
+            view = self.View.create({
+                'name': 'Form view attachment',
+                'model': 'ir.attachment',
+                'arch': template,
+            })
+            # cached view
+            arch = self.env['ir.attachment']._get_view_cache(view_id=view.id)['arch']
+            tree = etree.fromstring(arch)
+            nodes = tree.xpath(f"//field[@name='{field}'][@invisible='True'][@readonly='True']%s" % (f"[@groups='{groups}']" if groups else ''))
+            self.assertTrue(len(nodes) == 1, f"Field '{field}' should be added automatically")
+
+            # admin
+            arch = self.env['ir.attachment'].get_view(view_id=view.id)['arch']
+            tree = etree.fromstring(arch)
+            nodes = tree.xpath(f"//field[@name='{field}'][@invisible='True'][@readonly='True']")
+            self.assertTrue(len(nodes) == 1, f"Field '{field}' should be added automatically")
+
+            # user
+            arch = self.env['ir.attachment'].with_user(user_demo).get_view(view_id=view.id)['arch']
+            tree = etree.fromstring(arch)
+            nodes = tree.xpath(f"//field[@name='{field}'][@invisible='True'][@readonly='True']")
+            if demo:
+                self.assertTrue(len(nodes) == 1, f"Field '{field}' should be added automatically")
+            else:
+                self.assertFalse(nodes, f"Field '{field}' should be added automatically but was removed by access rigth")
+
+
+        # add missing field
+        validate("""
+                <form string="View attachment">
+                    <field name="company_id" invisible="name != 'toto'"/>
+                </form>
+            """, field='name')
+
+
+        # add missing field with groups
+        validate("""
+                <form string="View attachment">
+                    <field name="company_id" invisible="not access_token" groups="base.group_erp_manager"/>
+                </form>
+            """, field='access_token', demo=False, groups="base.group_erp_manager")
+
+        # add missing field with multi groups
+        validate("""
+                <form string="View attachment">
+                    <field name="company_id" invisible="not name" groups="base.group_erp_manager"/>
+                    <field name="company_id" invisible="not name" groups="base.group_system"/>
+                </form>
+            """, field='name', demo=False, groups="base.group_erp_manager,base.group_system")
+        validate("""
+                <form string="View attachment">
+                    <field name="company_id" invisible="not name" groups="base.group_erp_manager"/>
+                    <field name="company_id" invisible="not name" groups="base.group_system"/>
+                    <field name="company_id" invisible="not name" groups="base.group_multi_company"/>
+                    <field name="company_id" invisible="not name" groups="base.group_user"/>
+                </form>
+            """, field='name', demo=True, groups="base.group_erp_manager,base.group_multi_company,base.group_system,base.group_user")
+        validate("""
+                <form string="View attachment">
+                    <field name="company_id" invisible="not name" groups="base.group_erp_manager"/>
+                    <field name="company_id" invisible="not name"/>
+                </form>
+            """, field='name', demo=True)
+
+        # nested groups
+        validate("""
+                <form string="View attachment">
+                    <group groups="base.group_erp_manager">
+                        <field name="company_id" invisible="not access_token"/>
+                    </group>
+                </form>
+            """, field='access_token', demo=False, groups="base.group_erp_manager")
+        validate("""
+                <form string="View attachment">
+                    <group groups="base.group_erp_manager">
+                        <field name="company_id" invisible="not name" groups="base.group_multi_company"/>
+                        <field name="company_id" invisible="not name" groups="base.group_user"/>
+                    </group>
+                </form>
+            """, field='name', demo=True, groups="base.group_erp_manager,base.group_multi_company,base.group_user")
+        validate("""
+                <form string="View attachment">
+                    <group groups="base.group_erp_manager" invisible="not display_name">
+                        <field name="company_id" invisible="not name" groups="base.group_multi_company"/>
+                        <field name="company_id" invisible="not name" groups="base.group_user"/>
+                    </group>
+                </form>
+            """, field='display_name', demo=False, groups="base.group_erp_manager")
+        validate("""
+                <form string="View attachment">
+                    <group groups="base.group_erp_manager" invisible="not name">
+                        <field name="company_id" invisible="not name" groups="base.group_multi_company"/>
+                        <field name="company_id" invisible="not name" groups="base.group_user"/>
+                    </group>
+                </form>
+            """, field='name', demo=True, groups="base.group_erp_manager,base.group_multi_company,base.group_user")
+
+        # dependencie exist in different groups
+        validate("""
+                <form string="View attachment">
+                    <field name="name" groups="base.group_user"/>
+                    <field name="name" groups="base.group_multi_company"/>
+
+                    <group groups="base.group_erp_manager" invisible="not name">
+                        <field name="company_id" invisible="not name" groups="base.group_multi_company"/>
+                        <field name="company_id" invisible="not name" groups="base.group_user"/>
+                    </group>
+                </form>
+            """, field='name', demo=True, groups="base.group_erp_manager,base.group_multi_company,base.group_user")
+
+        # add missing field used by restricted field
+        validate("""
+                <form string="View attachment">
+                    <field name="access_token" invisible="not name"/>
+                </form>
+            """, field='name', demo=True, groups="base.group_user")
 
     @mute_logger('odoo.addons.base.models.ir_ui_view')
     def test_empty_groups_attrib(self):

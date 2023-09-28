@@ -11,6 +11,7 @@ from operator import itemgetter
 
 from odoo.tests import TransactionCase, Form
 from odoo import Command
+from odoo.exceptions import ValidationError
 
 
 class TestBasic(TransactionCase):
@@ -107,6 +108,108 @@ class TestBasic(TransactionCase):
         f.f3 = 5
         with self.assertRaises(AssertionError):
             f.f2 = 6
+
+    def test_attrs_groups(self):
+        """ Checks that attrs/modifiers with groups work
+        """
+        f = Form(self.env['test_testing_utilities.groups'], view='test_testing_utilities.view_groups')
+        f.a = 1
+        f.b = 2
+        with self.assertRaises(AssertionError):
+            f.c = 3
+        with self.assertRaises(AssertionError):
+            f.e = 3
+        with self.assertRaises(AssertionError):
+            f.f = 3
+
+        with self.assertRaises(ValidationError):
+            # create must fail because 'a' and the model has no 'base.group_portal'
+            self.env['ir.ui.view'].create({
+                'name': 'stuff',
+                'model': 'test_testing_utilities.groups',
+                'arch': """
+                    <form>
+                        <field name="a" readonly="j"/>
+                    </form>
+                """,
+            })
+
+        with self.assertRaises(ValidationError):
+            # a: base.group_no_one > -
+            # d: base.group_no_one > base.group_erp_manager
+            self.env['ir.ui.view'].create({
+                'name': 'stuff',
+                'model': 'test_testing_utilities.groups',
+                'arch': """
+                    <form>
+                        <field name="a" readonly="d"/>
+                    </form>
+                """,
+            })
+
+        with self.assertRaises(ValidationError):
+            # e: base.group_no_one > base.group_erp_manager,base.group_portal
+            # d: base.group_no_one > base.group_erp_manager
+            self.env['ir.ui.view'].create({
+                'name': 'stuff',
+                'model': 'test_testing_utilities.groups',
+                'arch': """
+                    <form>
+                        <field name="e" readonly="d"/>
+                    </form>
+                """,
+            })
+
+        with self.assertRaises(ValidationError):
+            # i: base.group_no_one > !base.group_portal
+            # h: base.group_no_one > base.group_erp_manager,!base.group_portal
+            self.env['ir.ui.view'].create({
+                'name': 'stuff',
+                'model': 'test_testing_utilities.groups',
+                'arch': """
+                    <form>
+                        <field name="i" readonly="h"/>
+                    </form>
+                """,
+            })
+
+        with self.assertRaises(ValidationError):
+            # i: base.group_no_one > !base.group_portal
+            # h: base.group_no_one > base.group_portal
+            self.env['ir.ui.view'].create({
+                'name': 'stuff',
+                'model': 'test_testing_utilities.groups',
+                'arch': """
+                    <form>
+                        <field name="i" readonly="j"/>
+                    </form>
+                """,
+            })
+
+    def test_related_field_and_groups(self):
+        with self.assertRaises(ValidationError):
+            # group from related
+            self.env['ir.ui.view'].create({
+                'name': 'stuff',
+                'model': 'test_testing_utilities.groups_sub',
+                'arch': """
+                    <form>
+                        <field name="g_id"/>
+                    </form>
+                """,
+            })
+
+        with self.assertRaises(ValidationError):
+            # fail because can not add 'g_d' used from related domain
+            self.env['ir.ui.view'].create({
+                'name': 'stuff',
+                'model': 'test_testing_utilities.groups_sub_sub',
+                'arch': """
+                    <form>
+                        <field name="g_sub_id" groups="base.group_erp_manager"/>
+                    </form>
+                """,
+            })
 
 class TestM2O(TransactionCase):
     def test_default_and_onchange(self):

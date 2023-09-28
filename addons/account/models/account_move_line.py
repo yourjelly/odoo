@@ -38,6 +38,7 @@ class AccountMoveLine(models.Model):
         ondelete="cascade",
         check_company=True,
     )
+    suitable_journal_ids = fields.Many2many(related='move_id.suitable_journal_ids')
     journal_id = fields.Many2one(
         related='move_id.journal_id', store=True, precompute=True,
         index=True,

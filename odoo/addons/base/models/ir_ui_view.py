@@ -8,6 +8,7 @@ import json
 import logging
 import pprint
 import re
+import threading
 import uuid
 import warnings
 
@@ -1051,7 +1052,7 @@ actual arch.
 
         return tree
 
-    def _postprocess_view(self, node, model_name, editable=True, parent_name_manager=None, **options):
+    def _postprocess_view(self, node, model_name, editable=True, parent_name_manager=None, parent_field=None, **options):
         """ Process the given architecture, modifying it in-place to add and
         remove stuff.
 
@@ -1070,7 +1071,7 @@ actual arch.
         if self._onchange_able_view(root):
             self._postprocess_on_change(root, model)
 
-        name_manager = NameManager(model, parent=parent_name_manager)
+        name_manager = NameManager(model, parent=parent_name_manager, parent_field=parent_field)
 
         root_info = {
             'view_type': root.tag,
@@ -1173,7 +1174,8 @@ actual arch.
     def _postprocess_tag_field(self, node, name_manager, node_info):
         if node.get('name'):
             attrs = {'id': node.get('id'), 'select': node.get('select')}
-            field = name_manager.model._fields.get(node.get('name'))
+            name = node.get('name')
+            field = name_manager.model._fields.get(name)
             if field:
                 if field.groups:
                     if node.get('groups'):
@@ -1209,7 +1211,8 @@ actual arch.
                     if child.tag in ('form', 'tree', 'graph', 'kanban', 'calendar'):
                         node_info['children'] = []
                         self._postprocess_view(
-                            child, field.comodel_name, editable=node_info['editable'], parent_name_manager=name_manager,
+                            child, field.comodel_name, editable=node_info['editable'],
+                            parent_name_manager=name_manager, parent_field=name,
                         )
                 if node_info['editable'] and field.type in ('many2one', 'many2many'):
                     node.set('model_access_rights', field.comodel_name)
@@ -1229,7 +1232,7 @@ actual arch.
         if not field or not field.comodel_name:
             return
         # post-process the node as a nested view, and associate it to the field
-        self._postprocess_view(node, field.comodel_name, editable=False, parent_name_manager=name_manager)
+        self._postprocess_view(node, field.comodel_name, editable=False, parent_name_manager=name_manager, parent_field=name)
         name_manager.has_field(node, name)
 
     def _postprocess_tag_label(self, node, name_manager, node_info):
@@ -1276,7 +1279,7 @@ actual arch.
 
     def _editable_tag_field(self, node, name_manager):
         field = name_manager.model._fields.get(node.get('name'))
-        return field is None or field.is_editable() and node.get('readonly') not in ('1', 'True')
+        return field is None or (node.get('readonly') not in ('1', 'True') if node.get('readonly') else field.is_editable())
 
     def _onchange_able_view(self, node):
         func = getattr(self, f"_onchange_able_view_{node.tag}", None)
@@ -1302,7 +1305,8 @@ actual arch.
     # view validation
     #-------------------------------------------------------------------
 
-    def _validate_view(self, node, model_name, view_type=None, editable=True, full=False):
+    def _validate_view(self, node, model_name, view_type=None, editable=True, full=False,
+            parent_name_manager=None, parent_field=None):
         """ Validate the given architecture node, and return its corresponding
         NameManager.
 
@@ -1327,7 +1331,7 @@ actual arch.
 
         # fields_get() optimization: validation does not require translations
         model = self.env[model_name].with_context(lang=None)
-        name_manager = NameManager(model)
+        name_manager = NameManager(model, parent=parent_name_manager, parent_field=parent_field)
 
         view_type = node.tag
         # use a stack to recursively traverse the tree
@@ -1450,10 +1454,11 @@ actual arch.
                 node.remove(child)
                 sub_manager = self._validate_view(
                     child, field.comodel_name, view_type=child.tag, editable=node_info['editable'], full=validate,
+                    parent_name_manager=name_manager, parent_field=name,
                 )
                 for fname, groups_uses in sub_manager.mandatory_parent_fields.items():
-                    for groups, use in groups_uses.items():
-                        name_manager.must_have_field(node, fname, use, groups=groups)
+                    for groups, (use, item) in groups_uses.items():
+                        name_manager.must_have_field(item, fname, use, groups=groups)
 
         elif validate and name not in name_manager.field_info:
             msg = _(
@@ -1542,11 +1547,12 @@ actual arch.
             # validate the node as a nested view
             sub_manager = self._validate_view(
                 groupby_node, field.comodel_name, view_type="groupby", editable=False, full=node_info['validate'],
+                parent_name_manager=name_manager, parent_field=name,
             )
             name_manager.has_field(node, name)
             for fname, groups_uses in sub_manager.mandatory_parent_fields.items():
-                for groups, use in groups_uses.items():
-                    name_manager.must_have_field(node, fname, use, groups=groups)
+                for groups, (use, item) in groups_uses.items():
+                    name_manager.must_have_field(item, fname, use, groups=groups)
 
         elif node_info['validate']:
             msg = _(
@@ -2757,7 +2763,7 @@ class Model(models.AbstractModel):
 class NameManager:
     """ An object that manages all the named elements in a view. """
 
-    def __init__(self, model, parent=None):
+    def __init__(self, model, parent=None, parent_field=None):
         self.model = model
         self.available_fields = collections.defaultdict(dict)  # {field_name: {'groups': groups, 'info': field_info}}
         self.available_actions = set()
@@ -2768,6 +2774,7 @@ class NameManager:
         self.must_exist_actions = {}
         self.must_exist_groups = {}
         self.parent = parent
+        self.parent_field = parent_field
         self.children = []
         if self.parent:
             self.parent.children.append(self)
@@ -2791,15 +2798,16 @@ class NameManager:
         self.available_actions.add(name)
 
     def must_have_field(self, node, name, use, groups=None):
-        node_groups = self._get_node_groups(node)
-        if groups:
-            groups = groups + node_groups
-        else:
-            groups = node_groups
+        if not groups:
+            node_groups = self._get_node_groups(node)
+            if groups:
+                groups = groups + node_groups
+            else:
+                groups = node_groups
         if name.startswith('parent.'):
-            self.mandatory_parent_fields[name[7:]][groups] = use
+            self.mandatory_parent_fields[name[7:]][groups] = (use, node)
         else:
-            self.mandatory_fields[name][groups] = use
+            self.mandatory_fields[name][groups] = (use, node)
 
     def must_have_fields(self, node, names, use, groups=None):
         for name in names:
@@ -2815,13 +2823,34 @@ class NameManager:
         self.must_exist_groups[name] = node
 
     def _get_node_groups(self, node):
-        return tuple(tuple(n.get('groups').split(',')) for n in chain([node], node.iterancestors()) if n.get('groups'))
+        """
+        returns: tuple(tuple(parent groups),... tuple(node groups))
+        """
+        groups = [tuple(n.get('groups').split(',')) for n in chain([node], node.iterancestors()) if n.get('groups')]
+
+        model_fields = [(self, node.get('name') if node.tag == 'field' else None)]
+        manager = self
+        while manager.parent:
+            model_fields.append((manager.parent, manager.parent_field))
+            manager = manager.parent
+
+        Access = manager.model.env['ir.model.access']
+        for manager, name in model_fields:
+            groups.append(Access._group_xmlid_with_access(manager.model._name, 'read'))
+            field = manager.model._fields.get(name)
+            if field and field.groups:
+                groups.append(tuple(field.groups.split(',')))
+        return tuple(groups)
 
     def check(self, view):
-        # context for translations below
-        context = view.env.context          # pylint: disable=unused-variable
-
         for name, use in self.mandatory_names.items():
+            if (name not in self.available_actions and name not in self.available_names and
+                name not in self.model._fields and name not in self.field_info):
+                msg = _(
+                    "Name or id %(name_or_id)r in %(use)s does not exist.",
+                    name_or_id=name, use=use,
+                )
+                view._raise_view_error(msg)
             if name not in self.available_actions and name not in self.available_names:
                 msg = _(
                     "Name or id %(name_or_id)r in %(use)s must be present in view but is missing.",
@@ -2864,7 +2893,7 @@ class NameManager:
                 view._log_view_warning(msg, node)
 
         for name, groups_uses in self.mandatory_fields.items():
-            use = next(iter(groups_uses.values()))
+            use, node = next(iter(groups_uses.values()))
             if name == 'id':  # always available
                 continue
             if "." in name:
@@ -2874,6 +2903,7 @@ class NameManager:
                 )
                 view._raise_view_error(msg)
             info = self.available_fields[name].get('info')
+
             if info is None:
                 if name in ['active_id', 'active_ids', 'active_model']:
                     _logger.warning("Using active_id, active_ids and active_model in expressions is deprecated, found %s", name)
@@ -2883,7 +2913,10 @@ class NameManager:
                     name=name, use=use,
                 )
                 view._raise_view_error(msg)
-            if info.get('select') == 'multi':  # mainly for searchpanel, but can be a generic behaviour.
+                if name in ['false', 'true']:
+                    _logger.warning("Using Javascript syntax 'true, 'false' in expressions is deprecated, found %s", name)
+                    continue
+            elif info.get('select') == 'multi':  # mainly for searchpanel, but can be a generic behaviour.
                 msg = _(
                     "Field %(name)r used in %(use)s is present in view but is in select multi.",
                     name=name, use=use,
@@ -2915,7 +2948,7 @@ class NameManager:
                     combinations = [group + tuple(c) for c in combinate(groups[1:]) for group in combinations]
                 return [set(combination) for combination in set(tuple(combination) for combination in combinations)]
 
-            for mandatory_for_groups, use in groups_uses.items():
+            for mandatory_for_groups, (use, node) in groups_uses.items():
                 mandatory_combinations = combinate(mandatory_for_groups or [(None,)])
                 available_combinations = [
                     combination
@@ -2995,6 +3028,69 @@ class NameManager:
                         )
                     )
                     view._raise_view_error(msg)
+
+            for mandatory_for_groups, (use, node) in groups_uses.items():
+                field = self.model._fields.get(name)
+                msg = None
+                if not field:
+                    if name not in self.available_names:
+                        msg = _(
+                            "Field %(name)r in %(use)s does not exist in model %(model)r.",
+                            name=name, use=use, model=self.model._name,
+                        )
+                elif field.groups:
+                    # only check the access on python field.
+                    # The missing fields will added automatically
+                    if mandatory_for_groups:
+                        # the mandatory field must have at least all positive groups (or implied groups) defined when use it (modifier, domain...)
+                        # the mandatory field must have at less negative groups defined when use it (modifier, domain...)
+                        # E.g.
+                        # <div groups="g0">
+                        #   <div groups="g1,g2,!g3,!g4" invisible="foo == bar"/>
+                        # </div>
+                        # fields: 'foo' has an attribute groups="g1,g21,!g31"
+                        #         'bar' has an attribute groups="g0,g1"
+                        # groups: g2 implies g21, g22
+                        #         g3 implies g31, g32
+                        # => all positive groups is on the field: g0=>g0, g1=>g1, g2=>g21
+                        # => less negative groups on the field: !g31=>!g3
+                        positives = set(chain.from_iterable(
+                            [g] + list(view.env.ref(g).trans_implied_ids.get_external_id().values())
+                            for g in field.groups.split(',') if g[0] != '!'
+                        )) or {'full'}
+                        negatives = set(chain.from_iterable(
+                            [g[1:]] + list(view.env.ref(g[1:]).trans_implied_ids.get_external_id().values())
+                            for g in field.groups.split(',') if g[0] == '!'
+                        ))
+                        if any((
+                                # all the groups where the field is used are found in those of the field
+                                all(implied_mandatory_groups & positives
+                                    for implied_mandatory_groups in ([
+                                        {mandatory_group} | set(view.env.ref(mandatory_group).trans_implied_ids.get_external_id().values())
+                                        for mandatory_group in mandatory_groups if mandatory_group[0] != '!'] or [{'full'}])) and
+                                # at least one negative group is found in those where the field is used
+                                all((negative in set(chain.from_iterable(
+                                            [mandatory_group[1:]] + list(view.env.ref(mandatory_group[1:]).trans_implied_ids.get_external_id().values())
+                                            for mandatory_group in mandatory_groups if mandatory_group[0] == '!'))
+                                    ) for negative in negatives)
+                            ) for mandatory_groups in mandatory_for_groups):
+                            continue
+
+                    msg = _(
+                        "Field %(name)r used in %(use)s is restricted to the group(s) %(groups)r.\nUsed by element: %(node)s\nWith groups: %(mandatory_for_groups)s",
+                        name=name, use=use, groups=field.groups,
+                        node=etree.tostring(etree.Element(node.tag, node.attrib), encoding='unicode'),
+                        mandatory_for_groups=' > '.join([','.join(g) for g in mandatory_for_groups]) or '-',
+                    )
+                if msg:
+                    if self.model.pool._init and not config['test_enable'] and not getattr(threading.current_thread(), 'testing', False):
+                        # Version 17.0: Use of the warning instead of the error because in
+                        # previous versions, this did not trigger an error. To avoid upgrade
+                        # errors, the behavior is preserved during installation. This
+                        # condition should be removed for later versions.
+                        view._log_view_warning(msg, node)
+                    else:
+                        view._raise_view_error(msg)
 
     def update_available_fields(self):
         for name, info in self.available_fields.items():

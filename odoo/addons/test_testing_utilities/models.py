@@ -50,6 +50,36 @@ class C(models.Model):
     def _on_change_f2(self):
         self.name = self.f2.name
 
+class Groups(models.Model):
+    _name = 'test_testing_utilities.groups'
+    _description = 'Testing Utilities attrs and groups'
+
+    a = fields.Integer()
+    b = fields.Integer()
+    c = fields.Integer()
+    d = fields.Integer(default=1, groups="base.group_erp_manager")
+    e = fields.Integer(default=1, groups="base.group_erp_manager,base.group_portal")
+    f = fields.Integer(groups="base.group_erp_manager,base.group_portal")
+    g = fields.Integer(default=1, groups="base.group_erp_manager,base.group_multi_company,!base.group_portal")
+    h = fields.Integer(default=1, groups="base.group_erp_manager,!base.group_portal")
+    i = fields.Integer(default=1, groups="!base.group_portal")
+    j = fields.Integer(default=1, groups="base.group_portal")
+    k = fields.Integer(default=1, groups="base.group_public")
+
+class GroupsSub(models.Model):
+    _name = 'test_testing_utilities.groups_sub'
+    _description = 'Testing Utilities attrs and groups sub'
+
+    g_id = fields.Many2one('test_testing_utilities.groups', domain='[("a", "=", g_d)]')
+    g_d = fields.Integer(related='g_id.d')
+
+class GroupsSubSub(models.Model):
+    _name = 'test_testing_utilities.groups_sub_sub'
+    _description = 'Testing Utilities attrs and groups sub sub'
+
+    xxx_id = fields.Many2one('test_testing_utilities.groups_sub')
+    xxx_sub_id = fields.Many2one(related='xxx_id.g_id')
+
 class M2O(models.Model):
     _name = 'test_testing_utilities.m2o'
     _description = 'Testing Utilities Many To One'
@@ -177,6 +207,7 @@ class O2MRef(models.Model):
 
     value = fields.Integer(default=1)
     subs = fields.One2many('test_testing_utilities.ref.sub', 'parent_id')
+    x = fields.Integer()
 
 class O2MRefSub(models.Model):
     _name = 'test_testing_utilities.ref.sub'
@@ -185,6 +216,7 @@ class O2MRefSub(models.Model):
     a = fields.Integer()
     b = fields.Integer()
     c = fields.Integer()
+    z = fields.Integer()
     parent_id = fields.Many2one('test_testing_utilities.ref')
 
 class O2MDefault(models.Model):

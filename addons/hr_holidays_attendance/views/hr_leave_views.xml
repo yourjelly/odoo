@@ -7,7 +7,8 @@
             <xpath expr="(//div[@name='duration_display']/div)[last()]" position="after">
                 <field name="overtime_deductible" invisible="1" />
                 <field name="employee_overtime" invisible="1" />
-                <div invisible="not employee_id or not overtime_deductible or employee_overtime &lt;= 0">
+                <div invisible="not employee_id or not overtime_deductible or employee_overtime &lt;= 0"
+                    groups="hr_attendance.group_hr_attendance_kiosk,hr_attendance.group_hr_attendance,hr.group_hr_user">
                     <field name="employee_overtime" nolabel="1" widget="float_time" class="text-success" style="width: 6rem;" /> Extra Hours Available
                 </div>
             </xpath>
@@ -21,7 +22,8 @@
             <xpath expr="(//div[@name='duration_display']/div)[last()]" position="after">
                 <field name="overtime_deductible" invisible="1" />
                 <field name="employee_overtime" invisible="1" />
-                <div invisible="not employee_id or not overtime_deductible or employee_overtime &lt;= 0">
+                <div invisible="not employee_id or not overtime_deductible or employee_overtime &lt;= 0"
+                    groups="hr_attendance.group_hr_attendance_kiosk,hr_attendance.group_hr_attendance,hr.group_hr_user">
                     <field name="employee_overtime" nolabel="1" widget="float_time" class="text-success" style="max-width: 6rem;" /> Extra Hours Available
                 </div>
             </xpath>

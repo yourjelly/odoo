@@ -9,6 +9,7 @@
                 <field name="overtime_deductible" invisible="1" />
                 <field name="employee_overtime" invisible="1" />
                 <div class="oe_inline"
+                    groups="hr_attendance.group_hr_attendance_kiosk,hr_attendance.group_hr_attendance,hr.group_hr_user"
                     invisible="not hr_attendance_overtime or not employee_id or not overtime_deductible or employee_overtime &lt;= 0">
                     <field name="employee_overtime" nolabel="1" widget="float_time" class="text-success" /> Extra Hours Available
                 </div>
