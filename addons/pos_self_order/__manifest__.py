@@ -28,6 +28,9 @@
         'web.assets_backend': [
             "pos_self_order/static/src/upgrade_selection_field.js",
         ],
+        'point_of_sale._assets_pos': [
+            'pos_self_order/static/src/overrides/**/*',
+        ],
         "pos_self_order.assets": [
             "pos_self_order/static/src/app/bootstrap_overridden.scss",
             ("include", "web._assets_helpers"),
