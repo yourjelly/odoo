@@ -9,7 +9,7 @@ from odoo import api, fields, models
 from odoo.tools.translate import _
 
 
-class ControllerPage(models.Model):
+class WebsiteControllerPage(models.Model):
     _name = 'website.controller.page'
     _inherits = {'ir.ui.view': 'view_id'}
     _inherit = [
