@@ -1035,7 +1035,7 @@ export class Record extends DataPoint {
                     throw e;
                 },
             });
-            Object.assign(changes, this._parseServerValues(otherChanges, this.data));
+            Object.assign(changes, this._parseServerValues(otherChanges, toRaw(this.data)));
         }
         // changes inside the record set as value for a many2one field must trigger the onchange,
         // but can't be considered as changes on the parent record, so here we detect if many2one

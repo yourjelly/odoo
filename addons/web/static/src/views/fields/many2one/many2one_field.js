@@ -104,7 +104,7 @@ export class Many2OneField extends Component {
         };
 
         this.state = useState({
-            isFloating: !this.value,
+            isFloating: false,
         });
         this.computeActiveActions(this.props);
 
