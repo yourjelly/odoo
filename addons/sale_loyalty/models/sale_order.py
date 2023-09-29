@@ -240,8 +240,8 @@ class SaleOrder(models.Model):
         cheapest_line = False
         for lines in discount_lines.values():
             line_reward = lines.reward_id
-            if line_reward.discount_mode == 'per_order' and not lines.tax_id:
-                continue
+            # if line_reward.discount_mode == 'per_order' and not lines.tax_id:
+            #     continue
             discounted_lines = order_lines
             if line_reward.discount_applicability == 'cheapest':
                 cheapest_line = cheapest_line or self._cheapest_line()
@@ -261,9 +261,10 @@ class SaleOrder(models.Model):
                 non_common_lines = discounted_lines - lines_to_discount
                 # Fixed prices are per tax
                 discounted_amounts = {line.tax_id: abs(line.price_total) for line in lines}
+                # breakpoint()
                 for line in itertools.chain(non_common_lines, common_lines):
                     # For gift card and eWallet programs we have no tax but we can consume the amount completely
-                    if line_reward.discount_mode == 'per_point':
+                    if line_reward.discount_mode in ['per_point','per_order']:
                         discounted_amounts[line.tax_id] = discounted_amounts.get(self.env['account.tax'], 0)
                     if lines.reward_id.program_id.is_payment_program:
                         discounted_amount = discounted_amounts[lines.tax_id]
@@ -273,11 +274,17 @@ class SaleOrder(models.Model):
                         continue
                     remaining = remaining_amount_per_line[line]
                     consumed = min(remaining, discounted_amount)
+                    if line_reward.discount_mode == 'per_point':
+                        consumed = consumed / (len((non_common_lines + common_lines).filtered(lambda line: line.product_id in line_reward.discount_product_ids)) or 1)
+                    # breakpoint()
                     if lines.reward_id.program_id.is_payment_program:
                         discounted_amounts[lines.tax_id] -= consumed
                     else:
                         discounted_amounts[line.tax_id] -= consumed
                     remaining_amount_per_line[line] -= consumed
+            # print("\n\n remaining_amount_per_line", remaining_amount_per_line)
+            
+            # breakpoint()
 
         discountable = 0
         total_line_amount = 0
@@ -335,6 +342,8 @@ class SaleOrder(models.Model):
                 reward.currency_id._convert(reward.discount * self._get_real_points_for_coupon(coupon),
                     self.currency_id, self.company_id, fields.Date.today())) 
         elif reward.discount_mode == 'per_order':
+            # discount should never surpass the total product amount
+            max_discount = min(discountable, max_discount)
             max_discount = min(max_discount,
                 reward.currency_id._convert(reward.discount, self.currency_id, self.company_id, fields.Date.today()))
         elif reward.discount_mode == 'percent':
