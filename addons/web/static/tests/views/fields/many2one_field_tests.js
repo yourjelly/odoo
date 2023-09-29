@@ -742,7 +742,7 @@ QUnit.module("Fields", (hooks) => {
             const input = target.querySelector(".o_field_widget[name=user_id] input");
             await editInput(input, null, "yy");
             await clickOpenedDropdownItem(target, "user_id", 'Create "yy"');
-
+            assert.containsOnce(target, ".o_external_button");
             assert.verifySteps(["name_create"]);
         }
     );
