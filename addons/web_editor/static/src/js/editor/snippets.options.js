@@ -5516,9 +5516,9 @@ registry.ReplaceMedia = SnippetOptionWidget.extend({
      * @see this.selectClass for parameters
      */
     async replaceMedia() {
-        // TODO for now, this simulates a double click on the media,
-        // to be refactored when the new editor is merged
-        this.$target.dblclick();
+        // await this.options.wysiwyg.openMediaDialog(this.$target[0]);
+        // this.options.wysiwyg.openMediaDialog(this.$target);
+        this.options.wysiwyg.openMediaDialog({node: this.$target[0]});
     },
     /**
      * Makes the image a clickable link by wrapping it in an <a>.
