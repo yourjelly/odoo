@@ -57,6 +57,7 @@
             'web/static/lib/bootstrap/js/dist/base-component.js',
             "web/static/lib/bootstrap/js/dist/carousel.js",
             'web/static/lib/bootstrap/js/dist/scrollspy.js',
+            'point_of_sale/static/src/app/generic_components/input/**/*',
             "pos_self_order/static/src/app/**/*",
         ],
         # Assets tests

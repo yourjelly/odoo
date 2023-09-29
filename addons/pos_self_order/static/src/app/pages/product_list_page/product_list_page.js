@@ -8,22 +8,21 @@ import { useService, useChildRef } from "@web/core/utils/hooks";
 import { OrderWidget } from "@pos_self_order/app/components/order_widget/order_widget";
 import { _t } from "@web/core/l10n/translation";
 import { fuzzyLookup } from "@web/core/utils/search";
+import { Input } from "@point_of_sale/app/generic_components/input/input";
 
 export class ProductListPage extends Component {
     static template = "pos_self_order.ProductListPage";
-    static components = { ProductCard, OrderWidget };
+    static components = { ProductCard, OrderWidget, Input };
 
     setup() {
         this.selfOrder = useSelfOrder();
+        this.ui = useService("ui");
         this.dialog = useService("dialog");
         this.router = useService("router");
         this.productsList = useRef("productsList");
         this.categoryList = useRef("categoryList");
         this.currentProductCard = useChildRef();
-        this.state = useState({
-            search: false,
-            searchInput: "",
-        });
+        this.state = useState({ searchInput: "" });
         this.categoryButton = Object.fromEntries(
             Array.from(this.selfOrder.categoryList).map((category) => {
                 return [category.name, useRef(`category_${category.name}`)];
@@ -77,22 +76,10 @@ export class ProductListPage extends Component {
         );
     }
 
-    get width() {
-        return window.innerWidth;
-    }
-
     get productCategory() {
         const productByCat = this.selfOrder.productsGroupedByCategory;
         const currentCategory = this.selfOrder.currentCategory;
         return productByCat[currentCategory] ? productByCat[currentCategory] : [];
-    }
-
-    focusSearch() {
-        this.state.search = !this.state.search;
-
-        if (!this.state.search) {
-            this.state.searchInput = "";
-        }
     }
 
     getFilteredProducts() {

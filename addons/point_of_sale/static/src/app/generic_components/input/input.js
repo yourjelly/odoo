@@ -52,11 +52,11 @@ export class Input extends Component {
     setup() {
         this.state = useState({ isOpen: false });
         this.setValue = debounce(this.setValue, this.props.debounceMillis);
-        this.props.getRef?.(
+        const ref =
             (this.props.autofocus &&
                 useAutofocus({ refName: "input", mobile: this.props.autofocusMobile })) ||
-                useRef("input")
-        );
+            useRef("input");
+        this.props.getRef?.(ref);
     }
     getValue(tModel = this.props.tModel) {
         const [obj, key] = tModel;
