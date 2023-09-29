@@ -260,10 +260,11 @@ class SaleOrder(models.Model):
             else:
                 non_common_lines = discounted_lines - lines_to_discount
                 # Fixed prices are per tax
-                discounted_amounts = {line.tax_id: abs(line.price_total) for line in (lines + common_lines + non_common_lines)}
+                discounted_amounts = {line.tax_id: abs(line.price_total) for line in lines}
                 for line in itertools.chain(non_common_lines, common_lines):
-                    breakpoint()
                     # For gift card and eWallet programs we have no tax but we can consume the amount completely
+                    if line_reward.discount_mode == 'per_point':
+                        discounted_amounts[line.tax_id] = discounted_amounts.get(self.env['account.tax'], 0)
                     if lines.reward_id.program_id.is_payment_program:
                         discounted_amount = discounted_amounts[lines.tax_id]
                     else:
