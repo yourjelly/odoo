@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import fields, models
+from odoo import api, fields, models
 
 
 class HtmlHistoryRevision(models.Model):
@@ -23,6 +23,29 @@ class HtmlHistoryRevision(models.Model):
     )
 
     patch = fields.Text(string="Diff", readonly=True)
+
+    @api.model
+    def search_read(
+        self, domain=None, fields=None, offset=0, limit=None, order=None
+    ):
+        print("=====================================")
+        print("=   revision model :: search_read ===")
+        print("=====================================")
+        print("domain: ", domain)
+        print("fields: ", fields)
+        print("offset: ", offset)
+        print("limit: ", limit)
+        print("order: ", order)
+        # ensure the user has read rights on the linked record (res_model)
+        if self.env[self.res_model].check_access_rights("read"):
+
+            return self.sudo().search_read(
+                domain=domain,
+                fields=fields,
+                offset=offset,
+                limit=limit,
+                order=order,
+            )
 
     def get_content(self):
         return (

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import fields, models
+from odoo import api, fields, models
 
 from .patch_utils import apply_patch, generate_comparison, generate_patch
 
@@ -10,19 +10,99 @@ class HtmlHistory(models.AbstractModel):
     _name = "field.html.history.mixin"
     _description = "Field html History"
 
-    history_revision_ids = fields.One2many(
-        "field.html.history.revision",
-        "res_id",
-        string="Related revision Ids",
-        domain="[('res_model', '=', self._name)]",
-    )
-
     def _get_versioned_field(self):
         """This method should be overriden
 
         :return: List[string]: A list of name of the fields to be versioned
         """
         return {}
+
+    history_revision_ids = fields.One2many(
+        "field.html.history.revision",
+        "res_id",
+        readonly=True,
+        string="Related revision Ids",
+        domain="[('res_model', '=', self._name)]",
+        # search="_search_history_revision_ids",
+    )
+
+    def get_history_revision_ids(self, field_name):
+        print("=====================================")
+        print("= _get_history_revision_ids===")
+        print("=====================================")
+        print("field_name: ", field_name)
+
+        assert field_name in self._get_versioned_field()
+
+        records = (
+            self.env["field.html.history.revision"]
+            .sudo()
+            .search(
+                [
+                    ("res_id", "in", self.ids),
+                    ("res_model", "=", self._name),
+                    ("res_field", "=", field_name),
+                ]
+            )
+        )
+        print("records: ", records)
+        return records
+
+    # @api.model
+    # def _search_history_revision_ids(self, operator, operand):
+    #     print("=====================================")
+    #     print("= _search_history_revision_ids===")
+    #     print("=====================================")
+    #     print("operator: ", operator)
+    #     print("operand: ", operand)
+    #     return [("history_revision_ids", operator, operand)]
+    #
+    # def read(self, fields=None, load="_classic_read"):
+    #     print("=====================================")
+    #     print("= read  model mixin       ===========")
+    #     print("=====================================")
+    #     print("fields: ", fields)
+    #     print("load: ", load)
+    #     # self.check_access_rule('read')
+    #     return super().read(fields=fields, load=load)
+    #
+    # def fetch(self, field_names):
+    #     print("=====================================")
+    #     print("= fetch  model mixin      ===========")
+    #     print("=====================================")
+    #     print("field_names: ", field_names)
+    #     # self = self.sudo()
+    #     return super().fetch(field_names)
+    #
+    # @api.model
+    # def _search(
+    #     self, domain, offset=0, limit=None, order=None, access_rights_uid=None
+    # ):
+    #     print("=====================================")
+    #     print("= _search  model mixin    ===========")
+    #     print("=====================================")
+    #     print("domain: ", domain)
+    #     print("offset: ", offset)
+    #     print("limit: ", limit)
+    #     print("order: ", order)
+    #     print("access_rights_uid: ", access_rights_uid)
+    #
+    #     res = super()._search(domain, offset, limit, order, access_rights_uid)
+    #     print("res: ", res)
+    #     return res
+    #
+    #     # # Rules do not apply to administrator
+    #     # if self.env.is_superuser():
+    #     #     return super()._search(
+    #     #         domain, offset, limit, order, access_rights_uid
+    #     #     )
+    #     #
+    #     # # Non-employee see only messages with a subtype and not internal
+    #     # if not self.env["res.users"].has_group("base.group_user"):
+    #     #     domain = self._get_search_domain_share() + domain
+    #     #
+    #     # # make the search query with the default rules
+    #     # query = super()._search(domain, offset, limit, order, access_rights_uid)
 
     def write(self, vals):
         versioned_fields = self._get_versioned_field()
@@ -51,7 +131,7 @@ class HtmlHistory(models.AbstractModel):
 
     def unlink(self):
         """Delete all revision related to this document"""
-        self.env["field.html.history.revision"].search(
+        self.env["field.html.history.revision"].sudo().search(
             [("res_id", "in", self.ids), ("res_model", "=", self._name)]
         ).unlink()
         return super().unlink()
