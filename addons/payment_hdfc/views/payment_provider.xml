@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="payment_provider_form_ccavenue" model="ir.ui.view">
+        <field name="name">payment.provider.form.inherit</field>
+        <field name="model">payment.provider</field>
+        <field name="inherit_id" ref="payment.payment_provider_form"/>
+        <field name="arch" type="xml">
+            <group name="provider_credentials" position='inside'>
+                <group name="hdfc_credentials" invisible="code != 'hdfc'">
+                    <field name="hdfc_merchant_id" required="code == 'hdfc' and state != 'disabled'"/>
+                    <field name="hdfc_access_code" password="True" required="code == 'hdfc' and state != 'disabled'"/>
+                    <field name="hdfc_working_key" password="True" required="code == 'hdfc' and state != 'disabled'"/>
+                </group>
+            </group>
+        </field>
+    </record>
+</odoo>

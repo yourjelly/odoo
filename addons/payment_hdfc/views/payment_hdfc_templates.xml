@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="redirect_form">
+        <form t-att-action="api_url" method="post">
+            <input type="hidden" id="command" name="command" t-att-value="command"/>
+            <input type="hidden" id="merchant_id" name="merchant_id" t-att-value="merchant_id"/>
+            <input type="hidden" id="encRequest" name="encRequest" t-att-value="encRequest"/>
+            <input type="hidden" id="access_code" name="access_code" t-att-value="access_code"/>
+        </form>
+    </template>
+</odoo>
