@@ -4,7 +4,6 @@ import testUtils from "@web/../tests/legacy/helpers/test_utils";
 import { registry } from "@web/core/registry";
 import { click, getFixture, patchWithCleanup, makeDeferred, nextTick } from "../../helpers/utils";
 import { createWebClient, doAction, getActionManagerServerData } from "./../helpers";
-import { registerCleanup } from "../../helpers/cleanup";
 import { errorService } from "@web/core/errors/error_service";
 import { useService } from "@web/core/utils/hooks";
 import { ClientErrorDialog } from "@web/core/errors/error_dialogs";
@@ -267,17 +266,7 @@ QUnit.module("ActionManager", (hooks) => {
 
     QUnit.test("do not commit a dialog in error", async (assert) => {
         assert.expect(6);
-
-        const handler = (ev) => {
-            // need to preventDefault to remove error from console (so python test pass)
-            ev.preventDefault();
-        };
-        window.addEventListener("unhandledrejection", handler);
-        registerCleanup(() => window.removeEventListener("unhandledrejection", handler));
-
-        patchWithCleanup(QUnit, {
-            onUnhandledRejection: () => {},
-        });
+        assert.expectToThrow(["my error"]);
 
         class ErrorClientAction extends Component {
             setup() {

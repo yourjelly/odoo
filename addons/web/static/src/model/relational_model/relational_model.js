@@ -92,6 +92,7 @@ const DEFAULT_HOOKS = {
 
 export function fetchRecordErrorHandler(env, error, originalError) {
     if (originalError instanceof FetchRecordError) {
+        error.event.preventDefault();
         env.services.notification.add(originalError.message, { sticky: true, type: "danger" });
         return true;
     }

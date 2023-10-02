@@ -1,12 +1,7 @@
 /** @odoo-module */
 
 import { isVisible as isElemVisible } from "@web/core/utils/ui";
-import { UncaughtClientError, UncaughtPromiseError } from "@web/core/errors/error_service";
-import {
-    completeUncaughtError,
-    fullTraceback,
-    fullAnnotatedTraceback,
-} from "@web/core/errors/error_utils";
+import { fullTraceback, fullAnnotatedTraceback } from "@web/core/errors/error_utils";
 import { registry } from "@web/core/registry";
 import { escape } from "@web/core/utils/strings";
 
@@ -207,6 +202,12 @@ export function setupQUnit() {
     function isNotVisible(el, msg) {
         return _checkVisible(el, false, msg);
     }
+    function expectToThrow(errors) {
+        QUnit.config.current.errors = {
+            expected: errors,
+            received: [],
+        };
+    }
     QUnit.assert.containsN = containsN;
     QUnit.assert.containsNone = containsNone;
     QUnit.assert.containsOnce = containsOnce;
@@ -215,6 +216,7 @@ export function setupQUnit() {
     QUnit.assert.hasAttrValue = hasAttrValue;
     QUnit.assert.isVisible = isVisible;
     QUnit.assert.isNotVisible = isNotVisible;
+    QUnit.assert.expectToThrow = expectToThrow;
 
     // -----------------------------------------------------------------------------
     // QUnit logs
@@ -609,12 +611,58 @@ export function setupQUnit() {
         document.head.appendChild(el);
     });
 
+    // -----------------------------------------------------------------------------
+    // Error management
+    // -----------------------------------------------------------------------------
+
+    QUnit.on("OdooAfterTestHook", (info) => {
+        if (QUnit.config.current.errors) {
+            const { expected, received } = QUnit.config.current.errors;
+            let hasFailed = expected.length !== received.length;
+            for (let i = 0; !hasFailed && i < expected.length; i++) {
+                hasFailed = !new RegExp(expected[i]).test(received[i]);
+            }
+            if (hasFailed) {
+                const format = (errors) => {
+                    return errors.map((e) => `"${e}"`).join(", ");
+                };
+                QUnit.pushFailure(
+                    `Expected errors [${format(expected)}], got [${format(received)}]`
+                );
+            }
+        }
+    });
+
     const { onUnhandledRejection, onError } = QUnit;
     QUnit.onUnhandledRejection = () => {};
     QUnit.onError = () => {};
+
+    function onUncaughtErrorInTest(error, ev, qunitErrorHandler) {
+        // do not log to the console as this will kill python test early
+        if (ev) {
+            ev.preventDefault();
+        }
+
+        if (!QUnit.config.current.errors) {
+            // we did not expect any error, so notify qunit to add a failure
+            qunitErrorHandler(error);
+        } else {
+            // we expected errors, so store it, it will be checked at the end of the test
+            while (error instanceof Error && "cause" in error) {
+                error = error.cause;
+            }
+            QUnit.config.current.errors.received.push(error.message);
+        }
+    }
+
+    // e.g. setTimeout(() => throw new Error()) (event handler crashes synchronously)
     window.addEventListener("error", async (ev) => {
-        // don't do anything if error service is up and we are in a test
-        if (registry.category("services").get("error", false) && QUnit.config.current) {
+        if (!QUnit.config.current) {
+            return; // we are not in a test -> do nothing
+        }
+        // If the error service is deployed, we'll get to the patched default handler below if no
+        // other handler handled the error, so do nothing here
+        if (registry.category("services").get("error", false)) {
             return;
         }
         if (
@@ -623,33 +671,35 @@ export function setupQUnit() {
         ) {
             return;
         }
-        // Do not log to the console as this will kill python test early
-        ev.preventDefault();
-        const { error: originalError } = ev;
-        const uncaughtError = new UncaughtClientError();
-        if (originalError instanceof Error) {
-            originalError.errorEvent = ev;
-            await completeUncaughtError(uncaughtError, originalError);
-            originalError.stacktrace = uncaughtError.traceback;
-        }
-        onError(originalError);
+        onUncaughtErrorInTest(ev.error, ev, onError);
     });
 
+    // e.g. Promise.resolve().then(() => throw new Error()) (crash in event handler after async boundary)
     window.addEventListener("unhandledrejection", async (ev) => {
-        // don't do anything if error service is up and we are in a test
-        if (registry.category("services").get("error", false) && QUnit.config.current) {
+        if (!QUnit.config.current) {
+            return; // we are not in a test -> do nothing
+        }
+        // If the error service is deployed, we'll get to the patched default handler below if no
+        // other handler handled the error, so do nothing here
+        if (registry.category("services").get("error", false)) {
             return;
         }
-        // Do not log to the console as this will kill python test early
-        ev.preventDefault();
-        const originalError = ev.reason;
-        const uncaughtError = new UncaughtPromiseError();
-        uncaughtError.unhandledRejectionEvent = ev;
-        if (originalError instanceof Error) {
-            originalError.errorEvent = ev;
-            await completeUncaughtError(uncaughtError, originalError);
-            originalError.stack = uncaughtError.traceback;
-        }
-        onUnhandledRejection(originalError);
+        onUncaughtErrorInTest(ev.reason, ev, onUnhandledRejection);
+    });
+
+    // This is an approximation, but we can't directly import the default error handler, because
+    // it's not the same in all tested environments (e.g. /web and /pos), so we get the last item
+    // from the handler registry and assume it is the default one, which handles all "not already
+    // handled" errors, like tracebacks.
+    const errorHandlerRegistry = registry.category("error_handlers");
+    const [defaultHandlerName, defaultHandler] = errorHandlerRegistry.getEntries().slice(-1)[0];
+    const testDefaultHandler = (env, uncaughtError, originalError) => {
+        onUncaughtErrorInTest(originalError, uncaughtError.event, onUnhandledRejection);
+        return defaultHandler(env, uncaughtError);
+    };
+    errorHandlerRegistry.remove(defaultHandlerName);
+    errorHandlerRegistry.add(defaultHandlerName, testDefaultHandler, {
+        sequence: Number.POSITIVE_INFINITY,
+        force: true,
     });
 }
