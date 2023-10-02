@@ -1319,6 +1319,9 @@ class Field(MetaField('DummyField', (object,), {})):
                 parents.filtered(lambda r: not r.id)[self.name] = value
 
         if other_ids:
+            if not self.store and self.compute and not self.inverse:
+                warnings.warn("You should not assign no-store, compute and not inversible field", stacklevel=2)
+
             # base case: full business logic
             records = records.browse(other_ids)
             write_value = self.convert_to_write(value, records)
