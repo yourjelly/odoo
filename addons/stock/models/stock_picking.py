@@ -23,11 +23,6 @@ class PickingType(models.Model):
     _rec_names_search = ['name', 'warehouse_id.name']
     _check_company_auto = True
 
-    def _default_show_operations(self):
-        return self.user_has_groups('stock.group_production_lot,'
-                                    'stock.group_stock_multi_locations,'
-                                    'stock.group_tracking_lot')
-
     name = fields.Char('Operation Type', required=True, translate=True)
     color = fields.Integer('Color')
     sequence = fields.Integer('Sequence', help="Used to order the 'All Operations' kanban view")
@@ -67,7 +62,7 @@ class PickingType(models.Model):
         'Print Label',
         help="If this checkbox is ticked, label will be print in this operation.")
     show_operations = fields.Boolean(
-        'Show Detailed Operations', default=_default_show_operations,
+        'Show Detailed Operations',
         help="If this checkbox is ticked, the pickings lines will represent detailed stock operations. If not, the picking lines will represent an aggregate of detailed stock operations.")
     show_reserved = fields.Boolean(
         'Pre-fill Detailed Operations', default=True,
