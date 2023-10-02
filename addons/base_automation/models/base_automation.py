@@ -88,7 +88,7 @@ class BaseAutomation(models.Model):
     def _check_trigger(self):
         for automation in self:
             if automation.trigger in MAIL_TRIGGERS and not automation.model_id.is_mail_thread:
-                raise exceptions.ValidationError(_("Reacting on mail events are only available on model implementing Mail Thread."))
+                raise exceptions.ValidationError(_("Mail event can not be configured on model %s. Only models with discussion feature can be used.", automation.model_id.name))
 
     trigger = fields.Selection(
         [
