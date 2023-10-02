@@ -26,22 +26,16 @@ import { mergeClasses } from "../utils/className";
  * the dropdown. Default is 'auto' but when set to 'controlled' no listener
  * is added and it's the parent's responsability to open the dropdown.
  *
- * @param {Function} [beforeOpen=undefined] - Callback invoked before opening
- * the dropdown, this can be an asynchronous function.
- *
  * @param {Function} [onChange=undefined] - Callback invoked when the state
  * changes, takes (isOpen) as its parameter.
  *
  * @returns {DropdownState}
  */
-export function useDropdown({ mode = "auto", beforeOpen, onChange } = {}) {
+export function useDropdown({ mode = "auto", onChange } = {}) {
     const state = useState({
         mode: mode,
         isOpen: false,
         open: async () => {
-            if (beforeOpen) {
-                await beforeOpen();
-            }
             state.isOpen = true;
             onChange?.(true);
         },
@@ -118,10 +112,12 @@ export class Dropdown extends Component {
         },
 
         enabled: { type: Boolean, optional: true },
-        onOpened: { type: Function, optional: true },
-        beforeOpen: { type: Function, optional: true },
         options: { type: Object, optional: true },
         menuRef: { type: Function, optional: true }, // To be used with useChildRef
+
+        beforeOpen: { type: Function, optional: true },
+        onOpened: { type: Function, optional: true },
+        onStateChanged: { type: Function, optional: true },
 
         /** Manual state handling, @see useDropdown */
         state: {
@@ -149,7 +145,7 @@ export class Dropdown extends Component {
         this.popover = useService("popover");
         this.menuRef = useChildRef();
         this.props.menuRef?.(this.menuRef);
-        this.state = this.props.state || useDropdown({ beforeOpen: this.props.beforeOpen });
+        this.state = this.props.state || useDropdown();
         this.nesting = useDropdownNesting(this.state, this.menuRef);
         this.group = useDropdownGroup();
         this.navigation = useNavigation(this.menuRef, {
@@ -222,20 +218,24 @@ export class Dropdown extends Component {
         }
 
         event.stopPropagation();
-        if (this.hasParent) {
-            await this.state.open();
+        if (this.state.isOpen && !this.hasParent) {
+            await this.state.close();
         } else {
-            if (this.state.isOpen) {
-                await this.state.close();
-            } else {
-                await this.state.open();
-            }
+            await this.beforeOpen();
+            await this.state.open();
+        }
+    }
+
+    async beforeOpen() {
+        if (this.props.beforeOpen) {
+            await this.props.beforeOpen();
         }
     }
 
     async handleMouseEnter() {
         if (this.hasParent || this.group.isOpen) {
             this.target.focus();
+            await this.beforeOpen();
             await this.state.open();
         }
     }
@@ -246,6 +246,7 @@ export class Dropdown extends Component {
         } else if (!state.isOpen) {
             this.closePopover();
         }
+        this.props.onStateChanged?.(state.isOpen);
     }
 
     setTargetElement(target) {
