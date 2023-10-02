@@ -58,7 +58,7 @@
                             </div>
                         </button>
                         <t t-set-slot="content">
-                            <DropdownItem t-foreach="moreActions" t-as="action" t-key="action.id" class="'btn rounded-0 d-flex align-items-center px-2 py-2 m-0 opacity-75 opacity-100-hover'" title="action.name" onSelected="action.onSelect">
+                            <DropdownItem t-foreach="moreActions" t-as="action" t-key="action.id" class="'btn rounded-0 d-flex align-items-center px-2 py-2 m-0 opacity-75 opacity-100-hover'" attrs="{ title: action.name }" onSelected="action.onSelect">
                                 <i t-att-class="action.icon"/>
                                 <span class="mx-2" t-out="action.name"/>
                             </DropdownItem>
