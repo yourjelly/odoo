@@ -637,12 +637,7 @@ export function setupQUnit() {
     QUnit.onUnhandledRejection = () => {};
     QUnit.onError = () => {};
 
-    function onUncaughtErrorInTest(error, ev, qunitErrorHandler) {
-        // do not log to the console as this will kill python test early
-        if (ev) {
-            ev.preventDefault();
-        }
-
+    function onUncaughtErrorInTest(error, qunitErrorHandler) {
         if (!QUnit.config.current.errors) {
             // we did not expect any error, so notify qunit to add a failure
             qunitErrorHandler(error);
@@ -660,7 +655,9 @@ export function setupQUnit() {
         if (!QUnit.config.current) {
             return; // we are not in a test -> do nothing
         }
-        // If the error service is deployed, we'll get to the patched default handler below if no
+        // do not log to the console as this will kill python test early
+        ev.preventDefault();
+        // if the error service is deployed, we'll get to the patched default handler below if no
         // other handler handled the error, so do nothing here
         if (registry.category("services").get("error", false)) {
             return;
@@ -671,7 +668,7 @@ export function setupQUnit() {
         ) {
             return;
         }
-        onUncaughtErrorInTest(ev.error, ev, onError);
+        onUncaughtErrorInTest(ev.error, onError);
     });
 
     // e.g. Promise.resolve().then(() => throw new Error()) (crash in event handler after async boundary)
@@ -679,12 +676,14 @@ export function setupQUnit() {
         if (!QUnit.config.current) {
             return; // we are not in a test -> do nothing
         }
-        // If the error service is deployed, we'll get to the patched default handler below if no
+        // do not log to the console as this will kill python test early
+        ev.preventDefault();
+        // if the error service is deployed, we'll get to the patched default handler below if no
         // other handler handled the error, so do nothing here
         if (registry.category("services").get("error", false)) {
             return;
         }
-        onUncaughtErrorInTest(ev.reason, ev, onUnhandledRejection);
+        onUncaughtErrorInTest(ev.reason, onUnhandledRejection);
     });
 
     // This is an approximation, but we can't directly import the default error handler, because
@@ -694,7 +693,7 @@ export function setupQUnit() {
     const errorHandlerRegistry = registry.category("error_handlers");
     const [defaultHandlerName, defaultHandler] = errorHandlerRegistry.getEntries().slice(-1)[0];
     const testDefaultHandler = (env, uncaughtError, originalError) => {
-        onUncaughtErrorInTest(originalError, uncaughtError.event, onUnhandledRejection);
+        onUncaughtErrorInTest(originalError, onUnhandledRejection);
         return defaultHandler(env, uncaughtError);
     };
     errorHandlerRegistry.remove(defaultHandlerName);
