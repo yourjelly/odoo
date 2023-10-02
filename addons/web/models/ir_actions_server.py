@@ -4,6 +4,7 @@ from uuid import uuid4
 from json import JSONDecodeError
 from secrets import compare_digest
 import hashlib
+from odoo.tools.json import scriptsafe as json_scriptsafe
 
 from odoo.http import request
 from odoo import fields, models, api, exceptions, _
@@ -17,7 +18,7 @@ class ServerAction(models.Model):
     expose = fields.Selection([("webhook", "Expose as webhook")],
         help="Expose this server action via a controller. The 'as webhook' option will make the server action available via '/web/hook/<url_path>'")
 
-    log_webhook_calls = fields.Boolean(string="Log Calls", default=True)
+    log_webhook_calls = fields.Boolean(string="Log Calls", default=False)
 
     @api.constrains("expose", "state")
     def _constrains_state(self):
@@ -28,7 +29,7 @@ class ServerAction(models.Model):
     @api.depends("state", "expose", "url_path")
     def _compute_url(self):
         for action in self:
-            if action.expose == "webhook" and action.state == "code":
+            if action.expose == "webhook":
                 action.url = f"/web/hook/{action.url_path}"
             else:
                 action.url = False
@@ -36,13 +37,19 @@ class ServerAction(models.Model):
     @api.depends("state", "expose")
     def _compute_url_path(self):
         for action in self:
-            if action.expose == "webhook" and action.state == "code":
+            if action.expose == "webhook":
                 action.url_path = str(uuid4())
             else:
                 action.url_path = False
 
     def _get_eval_context(self, action=None):
         eval_context = super()._get_eval_context(action)
+        if action and action.state == "code":
+            eval_context.update({
+                "request": request,
+                "json": json_scriptsafe,
+            })
+
         if action and action.expose == "webhook" and request:
             try:
                 payload = request.get_json_data()
@@ -53,7 +60,6 @@ class ServerAction(models.Model):
                 if not compare_digest(a, b):
                     raise exceptions.UserError(_("Secrets not matching"))
             eval_context.update({
-                "request": request,
                 "payload": payload,
                 "compare_digest": _compare_digest,
                 "sha256": hashlib.sha256,
