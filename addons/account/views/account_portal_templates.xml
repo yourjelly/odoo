@@ -132,7 +132,7 @@
                                 </h6>
                                 <div class="o_portal_contact_details d-flex flex-column gap-2">
                                     <div class="d-flex justify-content-start align-items-center gap-2">
-                                        <img class="o_portal_contact_img rounded-circle o_object_fit_cover" t-att-src="image_data_uri(invoice.invoice_user_id.avatar_1024)" alt="Contact"/>
+                                        <img class="o_portal_contact_img o_avatar rounded o_object_fit_cover" t-att-src="image_data_uri(invoice.invoice_user_id.avatar_1024)" alt="Contact"/>
                                         <div>
                                             <h6 class="mb-0" t-out="invoice.invoice_user_id.name"/>
                                             <a href="#discussion" class="d-flex align-items-center gap-2 small fw-bold">
@@ -148,7 +148,7 @@
                 </t>
 
                 <!-- Page Content -->
-                <div id="invoice_content" class="col-12 col-lg-9">
+                <div id="invoice_content" class="portal_content col-12 col-lg-9">
                     <t t-if="error or warning" t-call="account.portal_invoice_error"/>
                     <t t-if="success and (not error and not warning)" t-call="account.portal_invoice_success"/>
                     <div class="o_portal_html_view p-3">
