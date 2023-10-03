@@ -112,4 +112,25 @@ if (window.QUnit) {
         }
         document.body.classList.remove("modal-open");
     });
+
+    /**
+     * Before each test, we copy the content of document.cookie into a global variable
+     * After each test, we check that the content of document.cookie is the same as before.
+     * If not, it means that a test or the tested code has modified the cookies without using the
+     * cookie utils methods.
+     */
+
+    let cookieBeforeTest;
+
+    QUnit.on("OdooBeforeTestHook", function () {
+        cookieBeforeTest = document.cookie;
+    });
+
+    QUnit.on("OdooAfterTestHook", function () {
+        if (cookieBeforeTest !== document.cookie) {
+            QUnit.pushFailure(
+                `document.cookie has been modified during the test. Please use the cookie utils methods instead.`
+            );
+        }
+    });
 }
