@@ -93,7 +93,7 @@
                                     <span title="Current project of the task" t-esc="task.project_id.name" />
                                 </td>
                                 <td t-if="groupby != 'stage'" class="text-end lh-1">
-                                    <span t-attf-class="badge #{'bg-success-light text-success' if task.stage_id.fold else 'bg-primary-light text-primary'} fw-normal o_text_overflow" t-attf-title="#{task.stage_id.name}" t-esc="task.stage_id.name"/>
+                                    <span t-attf-class="badge #{'text-bg-success' if task.stage_id.fold else 'text-bg-primary'} fw-normal o_text_overflow" t-attf-title="#{task.stage_id.name}" t-esc="task.stage_id.name"/>
                                 </td>
                             </tr>
                         </t>
@@ -166,7 +166,7 @@
                                     <t t-foreach="task.user_ids" t-as="user">
                                         <div t-attf-class="o_portal_contact_details d-flex flex-column gap-2 mb-3">
                                             <div class="d-flex justify-content-start align-items-center gap-2">
-                                                <img class="o_portal_contact_img rounded-circle o_object_fit_cover" t-att-src="image_data_uri(user.avatar_1024)"/>
+                                                <img class="o_portal_contact_img o_avatar rounded o_object_fit_cover" t-att-src="image_data_uri(user.avatar_1024)"/>
                                                 <h6 class="mb-0" t-out="user.name"></h6>
                                             </div>
                                             <div t-out="user" t-options='{"widget": "contact", "fields": ["email", "phone"]}'/>
@@ -178,7 +178,7 @@
                                     <t t-foreach="task.partner_id" t-as="partner">
                                         <div class="o_portal_contact_details d-flex flex-column gap-2">
                                             <div class="d-flex justify-content-start align-items-center gap-2">
-                                                <img class="o_portal_contact_img rounded-circle o_object_fit_cover" t-att-src="image_data_uri(partner.avatar_1024)"/>
+                                                <img class="o_portal_contact_img o_avatar rounded o_object_fit_cover" t-att-src="image_data_uri(partner.avatar_1024)"/>
                                                 <h6 class="mb-0" t-out="partner.name"></h6>
                                             </div>
                                             <div t-field="task.partner_id" t-options='{"widget": "contact", "fields": ["email", "phone"]}'/>
@@ -189,7 +189,7 @@
                         </div>
                     </t>
                 </t>
-                <div id="task_content" class="col-12 col-lg-9">
+                <div id="task_content" class="portal_content col-12 col-lg-9">
                     <div id="card">
                         <div id="card_header" data-anchor="true">
                             <div class="row g-0">
