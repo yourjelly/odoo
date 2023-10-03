@@ -73,7 +73,7 @@ publicWidget.registry.SalePortalSidebar = PortalSidebar.extend({
                     if (!text) {
                         break;
                     }
-                    lastLI = $("<li class='nav-item'>").append($('<a class="nav-link" style="max-width: 200px;" href="#' + id + '"/>').text(text)).appendTo($bsSidenav);
+                    lastLI = $("<li class='nav-item'>").append($('<a class="nav-link p-0" style="max-width: 200px;" href="#' + id + '"/>').text(text)).appendTo($bsSidenav);
                     lastUL = false;
                     break;
                 case "h3":
