@@ -163,7 +163,7 @@
                                 <h6><small class="text-muted">Purchase Representative</small></h6>
                                 <div class="o_portal_contact_details d-flex flex-column gap-2">
                                     <div class="d-flex justify-content-start align-items-center gap-2">
-                                        <img class="o_portal_contact_img rounded-circle o_object_fit_cover" t-att-src="image_data_uri(order.user_id.avatar_1024)" alt="Contact"/>
+                                        <img class="o_portal_contact_img o_avatar rounded o_object_fit_cover" t-att-src="image_data_uri(order.user_id.avatar_1024)" alt="Contact"/>
                                         <div>
                                             <h6 class="mb-0" t-out="order.user_id.name"/>
                                             <a href="#discussion" class="small fw-bold">Send message</a>
@@ -176,7 +176,7 @@
                     </t>
                 </t>
                 <!-- Page content -->
-                <div id="quote_content" class="col-12 col-lg-9">
+                <div id="quote_content" class="portal_content col-12 col-lg-9">
 
                         <!-- status messages -->
                     <div t-if="order.state == 'cancel'" class="alert alert-danger alert-dismissable d-print-none" role="alert">
