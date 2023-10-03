@@ -16,10 +16,8 @@ import { DateTimeInput } from "../datetime/datetime_input";
 import { TagsList } from "@web/core/tags_list/tags_list";
 import { ModelFieldSelector } from "@web/core/model_field_selector/model_field_selector";
 import { Expression, formatValue } from "@web/core/domain_tree";
-import {
-    DomainSelectorAutocomplete,
-    DomainSelectorSingleAutocomplete,
-} from "./domain_selector_autocomplete";
+import { RecordSelector } from "../record_selectors/record_selector";
+import { MultiRecordSelector } from "../record_selectors/multi_record_selector";
 
 const { DateTime } = luxon;
 
@@ -313,7 +311,7 @@ const NUMBER = {
 
 const isId = (value) => Number.isInteger(value) && value >= 1;
 
-const RELATIONAL_EDITOR_EQUALITY = makeEditor(DomainSelectorSingleAutocomplete, {
+const RELATIONAL_EDITOR_EQUALITY = makeEditor(RecordSelector, {
     props: ({ value, update, fieldDef }) => {
         return {
             resModel: fieldDef.relation,
@@ -326,7 +324,7 @@ const RELATIONAL_EDITOR_EQUALITY = makeEditor(DomainSelectorSingleAutocomplete, 
 });
 RELATIONAL_EDITOR_EQUALITY.shouldResetValue = (value) => value !== false || !isId(value);
 
-const RELATIONAL_EDITOR_IN = makeEditor(DomainSelectorAutocomplete, {
+const RELATIONAL_EDITOR_IN = makeEditor(MultiRecordSelector, {
     props: ({ value, update, fieldDef }) => {
         return {
             resModel: fieldDef.relation,
