@@ -11,6 +11,7 @@ export class BadgeSelectionField extends Component {
     static props = {
         ...standardFieldProps,
         domain: { type: Array, optional: true },
+        size: { type: String, optional: true, validate: (s) => ["sm", "md", "lg"].includes(s), default: "md"},
     };
 
     setup() {
@@ -85,6 +86,7 @@ export const badgeSelectionField = {
     isEmpty: (record, fieldName) => record.data[fieldName] === false,
     extractProps: (fieldInfo, dynamicInfo) => ({
         domain: dynamicInfo.domain(),
+        size: fieldInfo.options.size,
     }),
 };
 
