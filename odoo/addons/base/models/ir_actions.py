@@ -3,16 +3,18 @@
 
 import odoo
 from odoo import api, fields, models, tools, _, Command
-from odoo.exceptions import MissingError, ValidationError, AccessError
+from odoo.exceptions import MissingError, ValidationError, AccessError, UserError
 from odoo.tools import frozendict
 from odoo.tools.safe_eval import safe_eval, test_python_expr
 from odoo.tools.float_utils import float_compare
 from odoo.http import request
-
 import base64
 from collections import defaultdict
+import contextlib
 import functools
 import logging
+import requests
+import json
 
 from pytz import timezone
 
@@ -400,6 +402,25 @@ class IrActionsActUrl(models.Model):
             "target", "url", "close",
         }
 
+WEBHOOK_SAMPLE_VALUES = {
+    "integer": 42,
+    "float": 42.42,
+    "monetary": 42.42,
+    "char": "Hello World",
+    "text": "Hello World",
+    "html": "<p>Hello World</p>",
+    "boolean": True,
+    "selection": "option1",
+    "date": "2020-01-01",
+    "datetime": "2020-01-01 00:00:00",
+    "binary": "<base64_data>",
+    "many2one": 47,
+    "many2many": [42, 47],
+    "one2many": [42, 47],
+    "reference": "res.partner,42",
+    None: "some_data",
+}
+
 
 class IrActionsServer(models.Model):
     """ Server actions model. Server action work on a base model and offer various
@@ -461,6 +482,7 @@ class IrActionsServer(models.Model):
         ('object_write', 'Update Record'),
         ('object_create', 'Create Record'),
         ('code', 'Execute Code'),
+        ('webhook', 'Send Webhook Notification'),
         ('multi', 'Execute existing actions')], string='Type',
         default='object_write', required=True, copy=True,
         help="Type of server action. The following values are available:\n"
@@ -471,6 +493,7 @@ class IrActionsServer(models.Model):
              "- 'Add/Remove Followers': add or remove followers to a record (Discuss)\n"
              "- 'Create Record': create a new record with new values\n"
              "- 'Execute Code': a block of Python code that will be executed\n"
+             "- 'Send Webhook Notification': send a POST request to an external system, also known as a Webhook\n"
              "- 'Execute existing actions': define an action that triggers several other server actions\n")
     # Generic
     sequence = fields.Integer(default=5,
@@ -525,6 +548,14 @@ class IrActionsServer(models.Model):
         ('resource_ref', 'reference'),
         ('selection_value', 'selection_value'),
     ], compute='_compute_value_field_to_show')
+    # Webhook
+    webhook_url = fields.Char(string='Webhook URL', help="URL to send the POST request to.")
+    webhook_field_ids = fields.Many2many('ir.model.fields', 'ir_act_server_webhook_field_rel', 'server_id', 'field_id',
+                                         string='Webhook Fields',
+                                         help="Fields to send in the POST request. "
+                                              "The id and model of the record are always sent as '_id' and '_model'. "
+                                              "The name of the action that triggered the webhook is always sent as '_name'.")
+    webhook_sample_payload = fields.Text(string='Sample Payload', compute='_compute_webhook_sample_payload')
 
     @api.depends('state', 'update_field_id', 'crud_model_id', 'value')
     def _compute_name(self):
@@ -538,6 +569,8 @@ class IrActionsServer(models.Model):
                     model_name=action.crud_model_id.name,
                     value=action.value
                 )
+            elif action.state == 'webhook':
+                action.name = _("Send Webhook Notification to %s", action.webhook_url)
             else:
                 action.name = dict(action._fields['state']._description_selection(self.env))[action.state]
 
@@ -638,6 +671,26 @@ class IrActionsServer(models.Model):
             pretty_path.append(field_id.field_description)
         return ' > '.join(pretty_path)
 
+    @api.depends('state', 'webhook_field_ids', 'name')
+    def _compute_webhook_sample_payload(self):
+        for action in self:
+            if action.state != 'webhook':
+                action.webhook_sample_payload = False
+                continue
+            payload = {
+                '_id': 1,
+                '_model': self.model_id.model,
+                '_name': action.name,
+            }
+            for field in action.webhook_field_ids:
+                sample_record = self.env[self.model_id.model].with_context(active_test=False).search([], limit=1, order='active desc, id desc')
+                if sample_record:
+                    payload['_id'] = sample_record.id
+                    payload.update(sample_record.read(self.webhook_field_ids.mapped('name'), load=None)[0])
+                else:
+                    payload[field.name] = WEBHOOK_SAMPLE_VALUES[field.ttype] if field.ttype in WEBHOOK_SAMPLE_VALUES else WEBHOOK_SAMPLE_VALUES[None]
+            action.webhook_sample_payload = json.dumps(payload, indent=4, sort_keys=True, default=str)
+
     @api.depends('model_id')
     def _compute_link_field_id(self):
         invalid = self.filtered(lambda act: act.link_field_id.model_id != act.model_id)
@@ -721,6 +774,36 @@ class IrActionsServer(models.Model):
             starting_record = self.env[self.model_id.model].browse(self._context.get('active_id'))
             _, _, target_records = self._traverse_path(record=starting_record)
             target_records.write(res)
+
+    def _run_action_webhook(self, eval_context=None):
+        """Send a post request with a read of the selected field on active_id."""
+        record = self.env[self.model_id.model].browse(self._context.get('active_id'))
+        url = self.webhook_url
+        if not url:
+            raise UserError(_("I'll be happy to send a webhook for you, but you really need to give me a URL to reach out to..."))
+        vals = {
+            '_model': self.model_id.model,
+            '_id': record.id,
+            '_action': '%s(#%s)' % (self.name, self.id),
+        }
+        if self.webhook_field_ids:
+            # you might think we could use the default json serializer of the requests library
+            # but it will fail on many fields, e.g. datetime, date or binary
+            # so we use the json.dumps serializer instead with the str() function as default
+            vals.update(record.read(self.webhook_field_ids.mapped('name'), load=None)[0])
+        json_values = json.dumps(vals, sort_keys=True, default=str)
+        _logger.info("Webhook call: %s with POST JSON data %s", url, json_values)
+        try:
+            # 'send and forget' strategy, and avoid locking the user if the webhook
+            # is slow or non-functional (we still allow for a 0.1s timeout so that
+            # if we get a proper error response code like 400, 404 or 500 we can log)
+            with contextlib.suppress(requests.exceptions.ReadTimeout):
+                response = requests.post(url, data=json_values, headers={'Content-Type': 'application/json'}, timeout=0.1)
+                response.raise_for_status()
+        except requests.exceptions.RequestException as e:
+            _logger.warning("Webhook call failed: %s", e)
+        except Exception as e:
+            raise UserError(_("Wow, your webhook call failed with a really unusual error: %s", e))
 
     def _run_action_object_create(self, eval_context=None):
         """Create specified model object with specified name contained in value.
