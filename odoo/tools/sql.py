@@ -9,7 +9,8 @@ import logging
 import re
 from binascii import crc32
 from collections import defaultdict
-from typing import Iterable, Union
+from collections.abc import Iterable, Iterator
+from typing import Union
 
 import psycopg2
 
@@ -58,13 +59,21 @@ class SQL:
     if ``code`` is a string literal (not a dynamic string), then the SQL object
     made with ``code`` is guaranteed to be safe, provided the SQL objects
     within its parameters are themselves safe.
+
+    The third purpose of the wrapper is to carry metadata with the SQL code,
+    which is convenient for keeping track of information that is relevant for
+    the upper layers of the program. We currently only support the keyword
+    argument ``to_flush``, the value of which may be either a ``Field`` object,
+    or a dict mapping model names to lists of corresponding field names.
     """
-    __slots__ = ('__code', '__args')
+    __slots__ = ('__code', '__args', '__meta')
 
     # pylint: disable=keyword-arg-before-vararg
     def __new__(cls, code: (str | SQL) = "", /, *args, **kwargs):
         if isinstance(code, SQL):
             return code
+
+        to_flush = kwargs.pop('to_flush', None)
 
         # validate the format of code and parameters
         if args and kwargs:
@@ -72,11 +81,13 @@ class SQL:
         if args:
             code % tuple("" for arg in args)
         elif kwargs:
-            code, args = named_to_positional_printf(code, kwargs)
+            code, keys = named_to_positional_printf(code)
+            args = tuple(kwargs[key] for key in keys)
 
         self = object.__new__(cls)
         self.__code = code
         self.__args = args
+        self.__meta = to_flush
         return self
 
     @property
@@ -97,6 +108,15 @@ class SQL:
             else:
                 result.append(arg)
         return result
+
+    @property
+    def to_flush(self) -> Iterator:
+        """ Return an iterator over the metadata "to flush" contained in ``self``. """
+        if self.__meta is not None:
+            yield self.__meta
+        for arg in self.__args:
+            if isinstance(arg, SQL):
+                yield from arg.to_flush
 
     def __repr__(self):
         return f"SQL({', '.join(map(repr, [self.code, *self.params]))})"
@@ -135,13 +155,15 @@ class SQL:
         return SQL("%s" * len(items), *items)
 
     @classmethod
-    def identifier(cls, name: str, subname: (str | None) = None) -> SQL:
-        """ Return an SQL object that represents an identifier. """
+    def identifier(cls, name: str, subname: (str | None) = None, **kwargs) -> SQL:
+        """ Return an SQL object that represents an identifier. The extra
+        keyword arguments are for metadata.
+        """
         assert IDENT_RE.match(name), f"{name!r} invalid for SQL.identifier()"
         if subname is None:
-            return cls(f'"{name}"')
+            return cls(f'"{name}"', **kwargs)
         assert IDENT_RE.match(subname), f"{subname!r} invalid for SQL.identifier()"
-        return cls(f'"{name}"."{subname}"')
+        return cls(f'"{name}"."{subname}"', **kwargs)
 
 
 def existing_tables(cr, tablenames):

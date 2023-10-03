@@ -137,6 +137,16 @@ class TestSQL(BaseCase):
         self.assertEqual(sql.params, [1, 2])
         self.assertEqual(sql, SQL("foo=%s AND bar=%s", 1, 2))
 
+    def test_sql_with_metadata(self):
+        sql = SQL(
+            "SELECT %s FROM %s WHERE %s",
+            SQL.identifier("foo", to_flush="foo1"),
+            SQL.identifier("bar"),
+            SQL("%s = %s", SQL.identifier("foo", to_flush="foo2"), 42),
+            to_flush="select",
+        )
+        self.assertEqual(list(sql.to_flush), ['select', 'foo1', 'foo2'])
+
     def test_complex_sql(self):
         sql = SQL(
             "SELECT %s FROM %s WHERE %s",

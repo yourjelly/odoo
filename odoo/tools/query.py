@@ -172,6 +172,10 @@ class Query(object):
         """ Return the WHERE condition of ``self``, without the WHERE keyword. """
         return SQL(" AND ").join(self._where_clauses)
 
+    @property
+    def to_flush(self):
+        return self.select('').to_flush
+
     def is_empty(self):
         """ Return whether the query is known to return nothing. """
         return self._ids == ()

@@ -1826,25 +1826,24 @@ def format_frame(frame):
     return f'{code.co_name} {code.co_filename}:{frame.f_lineno}'
 
 
-def named_to_positional_printf(string: str, args: Mapping) -> tuple[str, tuple]:
-    """ Convert a named printf-style format string with its arguments to an
-    equivalent positional format string with its arguments. This implementation
-    does not support escaped ``%`` characters (``"%%"``).
+def named_to_positional_printf(string: str) -> tuple[str, list[str]]:
+    """ Convert a named printf-style format string to an equivalent positional
+    format string, together with the list of names occurring in ``string``.
+    This implementation does not support escaped ``%`` characters (``"%%"``).
     """
     if '%%' in string:
         raise ValueError(f"Unsupported escaped '%' in format string {string!r}")
-    args = _PrintfArgs(args)
-    return string % args, tuple(args.values)
+    args = _PrintfArgs()
+    return string % args, args.used
 
 
 class _PrintfArgs:
     """ Helper object to turn a named printf-style format string into a positional one. """
-    __slots__ = ('mapping', 'values')
+    __slots__ = ('used',)
 
-    def __init__(self, mapping):
-        self.mapping = mapping
-        self.values = []
+    def __init__(self):
+        self.used = []
 
     def __getitem__(self, key):
-        self.values.append(self.mapping[key])
+        self.used.append(key)
         return "%s"
