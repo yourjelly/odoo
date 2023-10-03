@@ -146,13 +146,13 @@
                             </button>
                             </div>
                         <div class="row justify-content-between">
-                            <div t-attf-class="col-12 col-lg-9 border-0">
+                            <div t-attf-class="col-12 col-lg-9">
                                 <t t-out="0"/>
                             </div>
                             <div id="accountOffCanvas" class="offcanvas offcanvas-start pt-5">
                                 <div class="p-4">
                                     <div class="d-flex justify-content-start align-items-center gap-3 mb-4 mb-lg-2">
-                                        <img class="o_portal_contact_img rounded-circle o_object_fit_cover"
+                                        <img class="o_portal_contact_img o_avatar rounded o_object_fit_cover"
                                         t-att-src="image_data_uri(user_id.partner_id.avatar_1024)" alt="Contact" width="50"/>
                                         <div class="d-flex flex-column justify-content-center">
                                             <h5 class="mb-0" t-out="user_id.name"/>
@@ -169,9 +169,9 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="d-none d-lg-block col-12 col-lg-3 col-xl-3 pt-5 pt-lg-0">
+                            <div class="d-none d-lg-block col-12 col-lg-3">
                                 <div class="d-flex justify-content-start align-items-center gap-3 mb-4 mb-lg-2">
-                                    <img class="o_portal_contact_img rounded-circle o_object_fit_cover"
+                                    <img class="o_portal_contact_img o_avatar rounded o_object_fit_cover"
                                     t-att-src="image_data_uri(user_id.partner_id.avatar_1024)" alt="Contact" width="50"/>
                                     <div class="d-flex flex-column justify-content-center">
                                         <h5 class="mb-0" t-out="user_id.name"/>
@@ -265,7 +265,7 @@
                         <t t-elif="placeholder_count">
                             <span t-att-class="'mb-0 ' + ('' if show_count else 'd-none')" t-att-data-placeholder_count="placeholder_count"/>
                         </t>
-                        <span t-out="title" class="mb-0"/>
+                        <span t-out="title"/>
                     </h5>
                     <p class="card-text text-600">
                         <t t-out="text"/>
@@ -288,7 +288,7 @@
 
     <template id="portal_record_sidebar" name="My Portal Record Sidebar">
         <div t-attf-class="#{classes}">
-            <div class="sticky-lg-top mb-4 mb-lg-0 p-3 p-lg-0" id="sidebar_content">
+            <div class="portal_sidebar sticky-lg-top mb-4 mb-lg-0 p-3 p-lg-0" id="sidebar_content">
                 <div t-if="title" class="position-relative d-flex align-items-center flex-row justify-content-md-center justify-content-lg-between flex-wrap gap-2">
                     <t t-out="title"/>
                 </div>
@@ -336,7 +336,7 @@
 
             <!--  Collapsable content  -->
             <div t-attf-class="collapse navbar-collapse align-items-stretch justify-content-start justify-content-md-end flex-wrap flex-lg-nowrap border-top-0 bg-transparent {{'flex-wrap' if breadcrumbs_searchbar else ''}}" id="o_portal_navbar_content">
-                <div t-attf-class="nav gap-2 flex-row justify-content-lg-end mb-3 mb-lg-0 me-md-2 w-100 p-0 {{'flex-md-grow-0' if breadcrumbs_searchbar else ''}}">
+                <div t-attf-class="nav gap-2 flex-row justify-content-lg-end w-100 mb-3 mb-lg-0 me-md-2 p-0 {{'flex-md-grow-0' if breadcrumbs_searchbar else ''}}">
                     <div t-if="searchbar_sortings">
                         <span class="small me-1 navbar-text">Sort By:</span>
                         <div class="btn-group">
@@ -398,7 +398,7 @@
                                 </a>
                             </t>
                         </div>
-                        <input type="text" class="form-control form-control-sm" placeholder="Search" t-att-value='search' name="search"/>
+                        <input type="text" class="form-control form-control-sm border-top border-bottom" placeholder="Search" t-att-value='search' name="search"/>
                         <button class="btn btn-light border o_wait_lazy_js" type="submit">
                             <span class="fa fa-search"/>
                         </button>
@@ -423,7 +423,7 @@
         <div class="o_portal_contact_details d-flex flex-column">
             <h6 class="text-muted">Your contact</h6>
             <div class="d-flex justify-content-start align-items-center gap-2">
-                <img class="o_portal_contact_img rounded-circle o_object_fit_cover" t-att-src="image_data_uri(sales_user.avatar_1024)" alt="Contact" width="30" height="30"/>
+                <img class="o_portal_contact_img o_avatar rounded o_object_fit_cover" t-att-src="image_data_uri(sales_user.avatar_1024)" alt="Contact" width="30" height="30"/>
                 <h6 class="mb-0" t-out="sales_user.name"/>
             </div>
             <div class="o_portal_my_details">
@@ -696,8 +696,8 @@
     <template id="record_pager" name="Portal Record Pager">
         <t t-if='prev_record or next_record'>
             <div class="record_pager btn-group" role="group">
-                <a role="button" t-att-class="'btn btn-light text-decoration-none %s' % ('disabled' if not prev_record else '')" t-att-href="prev_record or '#'" ><i class="oi oi-chevron-left" role="img" aria-label="Previous" title="Previous"></i></a>
-                <a role="button" t-att-class="'btn btn-light text-decoration-none %s' % ('disabled' if not next_record else '')" t-att-href="next_record or '#'" ><i class="oi oi-chevron-right" role="img" aria-label="Next" title="Next"></i></a>
+                <a role="button" t-att-class="'btn btn-light %s' % ('disabled' if not prev_record else '')" t-att-href="prev_record or '#'" ><i class="oi oi-chevron-left" role="img" aria-label="Previous" title="Previous"></i></a>
+                <a role="button" t-att-class="'btn btn-light %s' % ('disabled' if not next_record else '')" t-att-href="next_record or '#'" ><i class="oi oi-chevron-right" role="img" aria-label="Next" title="Next"></i></a>
             </div>
         </t>
     </template>

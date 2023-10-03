@@ -31,7 +31,7 @@ body {
     direction: ltr;
 }
 
-th{
+th {
     font-weight: 500;
 }
 
@@ -356,10 +356,6 @@ form label {
     }
 }
 
-.o_portal_contact_img {
-    width: 50px;
-}
-
 .o_portal_sidebar {
     .o_portal_html_view {
         overflow: hidden;
@@ -375,13 +371,13 @@ form label {
         }
     }
 
-    div.sticky-lg-top{
+    .portal_sidebar {
         @include media-breakpoint-down(lg) {
             background: $o-gray-100;
         }
     }
 
-    div.col-12.col-lg-9{
+    .portal_content{
         @include media-breakpoint-up(lg) {
             border-left: $border-width solid $border-color;
         }
@@ -506,8 +502,6 @@ form label {
     }
 }
 
-.o_portal_contact_details .o_portal_contact_img{
-    min-height: 1px;
-    height: 2.2em;
-    aspect-ratio: 1;
+.o_portal_contact_details .o_portal_contact_img {
+    --Avatar-size: 32px;
 }
