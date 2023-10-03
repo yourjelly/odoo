@@ -1477,7 +1477,7 @@ export class PosStore extends Reactive {
 
         var total_excluded = round_pr(
             recompute_base(base, incl_fixed_amount, incl_percent_amount, incl_division_amount),
-            initial_currency_rounding
+            currency_rounding
         );
         var total_included = total_excluded;
 
