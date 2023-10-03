@@ -5,6 +5,7 @@ import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
 import { FollowerSubtypeDialog } from "./follower_subtype_dialog";
 import { useVisible } from "@mail/utils/common/hooks";
+import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 
 /**
  * @typedef {Object} Props
@@ -13,8 +14,10 @@ import { useVisible } from "@mail/utils/common/hooks";
  * @property {import('@mail/core/common/thread_model').Thread} thread
  * @extends {Component<Props, Env>}
  */
+
 export class FollowerList extends Component {
     static template = "mail.FollowerList";
+    static components = { DropdownItem };
     static props = ["onAddFollowers?", "onFollowerChanged?", "thread"];
 
     setup() {
@@ -29,7 +32,6 @@ export class FollowerList extends Component {
     }
 
     onClickAddFollowers() {
-        document.body.click(); // hack to close dropdown
         const action = {
             type: "ir.actions.act_window",
             res_model: "mail.wizard.invite",

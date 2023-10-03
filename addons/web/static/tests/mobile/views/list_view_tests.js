@@ -86,7 +86,7 @@ QUnit.module("Mobile Views", ({ beforeEach }) => {
 
         await toggleActionMenu(fixture);
         assert.deepEqual(
-            getMenuItemTexts(fixture.querySelector(".o_cp_action_menus")),
+            getMenuItemTexts(fixture),
             ["Duplicate", "Delete"],
             "action menu should contain the Duplicate and Delete actions"
         );
@@ -133,7 +133,7 @@ QUnit.module("Mobile Views", ({ beforeEach }) => {
 
         await toggleActionMenu(fixture);
         assert.deepEqual(
-            getMenuItemTexts(fixture.querySelector(".o_cp_action_menus")),
+            getMenuItemTexts(fixture),
             ["Duplicate", "Delete"],
             "action menu should contain the Duplicate and Delete actions"
         );

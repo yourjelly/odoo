@@ -8,7 +8,7 @@ import { patchUiSize, SIZES } from "@mail/../tests/helpers/patch_ui_size";
 import { start } from "@mail/../tests/helpers/test_utils";
 
 import { browser } from "@web/core/browser/browser";
-import { patchWithCleanup } from "@web/../tests/helpers/utils";
+import { nextTick, patchWithCleanup } from "@web/../tests/helpers/utils";
 import { click, contains, triggerEvents } from "@web/../tests/utils";
 
 QUnit.module("messaging menu");
@@ -546,6 +546,7 @@ QUnit.test("basic rendering", async (assert) => {
     await contains("button", { text: "New Message" });
     await contains(".o-mail-MessagingMenu div.text-muted", { text: "No conversation yet..." });
     await click(".o_menu_systray .dropdown-toggle:has(i[aria-label='Messages'])");
+    await nextTick();
     assert.doesNotHaveClass(
         $('.o_menu_systray .dropdown-toggle:has(i[aria-label="Messages"])'),
         "show"

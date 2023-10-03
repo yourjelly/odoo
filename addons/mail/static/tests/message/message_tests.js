@@ -12,6 +12,17 @@ import { click, contains, insertText } from "@web/../tests/utils";
 
 const { DateTime } = luxon;
 
+const SELECTORS = {
+    // Actions
+    expand: ".o-mail-Message [title='Expand']",
+    reply: ".o-mail-Message [title='Reply']",
+    markAsTodo: ".o-mail-Message [title='Mark as Todo']",
+    // Expanded Actions
+    edit: ".o-mail-Message-actions [title='Edit']",
+    delete: ".o-mail-Message-actions [title='Delete']",
+    markAsUnread: ".o-mail-Message-actions [title='Mark as Unread']",
+};
+
 QUnit.module("message");
 
 QUnit.test("Start edition on click edit", async () => {
@@ -29,8 +40,8 @@ QUnit.test("Start edition on click edit", async () => {
     });
     const { openDiscuss } = await start();
     openDiscuss(channelId);
-    await click(".o-mail-Message [title='Expand']");
-    await click(".o-mail-Message [title='Edit']");
+    await click(SELECTORS.expand);
+    await click(SELECTORS.edit);
     await contains(".o-mail-Message-editable .o-mail-Composer-input", { value: "Hello world" });
 });
 
@@ -46,8 +57,8 @@ QUnit.test("Can edit message comment in chatter", async () => {
     });
     const { openFormView } = await start();
     openFormView("res.partner", partnerId);
-    await click(".o-mail-Message [title='Expand']");
-    await click(".o-mail-Message [title='Edit']");
+    await click(SELECTORS.expand);
+    await click(SELECTORS.edit);
     await insertText(".o-mail-Message .o-mail-Composer-input", "edited message", { replace: true });
     await click(".o-mail-Message a", { text: "save" });
     await contains(".o-mail-Message-content", { text: "edited message" });
@@ -67,8 +78,8 @@ QUnit.test("Cursor is at end of composer input on edit", async (assert) => {
     });
     const { openDiscuss } = await start();
     openDiscuss(channelId);
-    await click(".o-mail-Message [title='Expand']");
-    await click(".o-mail-Message [title='Edit']");
+    await click(SELECTORS.expand);
+    await click(SELECTORS.edit);
     const textarea = $(".o-mail-Composer-input")[0];
     const contentLength = textarea.value.length;
     assert.strictEqual(textarea.selectionStart, contentLength);
@@ -90,8 +101,8 @@ QUnit.test("Stop edition on click cancel", async () => {
     });
     const { openDiscuss } = await start();
     openDiscuss(channelId);
-    await click(".o-mail-Message [title='Expand']");
-    await click(".o-mail-Message [title='Edit']");
+    await click(SELECTORS.expand);
+    await click(SELECTORS.edit);
     await click(".o-mail-Message a", { text: "cancel" });
     await contains(".o-mail-Message-editable .o-mail-Composer", { count: 0 });
 });
@@ -111,8 +122,8 @@ QUnit.test("Stop edition on press escape", async () => {
     });
     const { openDiscuss } = await start();
     openDiscuss(channelId);
-    await click(".o-mail-Message [title='Expand']");
-    await click(".o-mail-Message [title='Edit']");
+    await click(SELECTORS.expand);
+    await click(SELECTORS.edit);
     triggerHotkey("Escape", false);
     await contains(".o-mail-Message-editable .o-mail-Composer", { count: 0 });
 });
@@ -132,8 +143,8 @@ QUnit.test("Stop edition on click save", async () => {
     });
     const { openDiscuss } = await start();
     openDiscuss(channelId);
-    await click(".o-mail-Message [title='Expand']");
-    await click(".o-mail-Message [title='Edit']");
+    await click(SELECTORS.expand);
+    await click(SELECTORS.edit);
     await click(".o-mail-Message a", { text: "save" });
     await contains(".o-mail-Message-editable .o-mail-Composer", { count: 0 });
 });
@@ -153,8 +164,8 @@ QUnit.test("Stop edition on press enter", async () => {
     });
     const { openDiscuss } = await start();
     openDiscuss(channelId);
-    await click(".o-mail-Message [title='Expand']");
-    await click(".o-mail-Message [title='Edit']");
+    await click(SELECTORS.expand);
+    await click(SELECTORS.edit);
     triggerHotkey("Enter", false);
     await contains(".o-mail-Message-editable .o-mail-Composer", { count: 0 });
 });
@@ -174,8 +185,8 @@ QUnit.test("Do not stop edition on click away when clicking on emoji", async () 
     });
     const { openDiscuss } = await start();
     openDiscuss(channelId);
-    await click(".o-mail-Message [title='Expand']");
-    await click(".o-mail-Message [title='Edit']");
+    await click(SELECTORS.expand);
+    await click(SELECTORS.edit);
     await click(".o-mail-Composer button[aria-label='Emojis']");
     await click(".o-EmojiPicker-content :nth-child(1 of .o-Emoji)");
     await contains(".o-mail-Message-editable .o-mail-Composer");
@@ -196,8 +207,8 @@ QUnit.test("Edit and click save", async () => {
     });
     const { openDiscuss } = await start();
     openDiscuss(channelId);
-    await click(".o-mail-Message [title='Expand']");
-    await click(".o-mail-Message [title='Edit']");
+    await click(SELECTORS.expand);
+    await click(SELECTORS.edit);
     await insertText(".o-mail-Message .o-mail-Composer-input", "Goodbye World", { replace: true });
     await click(".o-mail-Message a", { text: "save" });
     await contains(".o-mail-Message-body", { text: "Goodbye World" });
@@ -224,8 +235,8 @@ QUnit.test("Do not call server on save if no changes", async (assert) => {
         },
     });
     openDiscuss(channelId);
-    await click(".o-mail-Message [title='Expand']");
-    await click(".o-mail-Message [title='Edit']");
+    await click(SELECTORS.expand);
+    await click(SELECTORS.edit);
     await click(".o-mail-Message a", { text: "save" });
     assert.verifySteps([]);
 });
@@ -251,8 +262,8 @@ QUnit.test("Update the link previews when a message is edited", async (assert) =
         },
     });
     openDiscuss(channelId);
-    await click(".o-mail-Message [title='Expand']");
-    await click(".o-mail-Message [title='Edit']");
+    await click(SELECTORS.expand);
+    await click(SELECTORS.edit);
     await insertText(".o-mail-Message .o-mail-Composer-input", "Goodbye World", { replace: true });
     await click(".o-mail-Message a", { text: "save" });
     await contains(".o-mail-Message-body", { text: "Goodbye World" });
@@ -274,8 +285,8 @@ QUnit.test("Scroll bar to the top when edit starts", async (assert) => {
     });
     const { openDiscuss } = await start();
     openDiscuss(channelId);
-    await click(".o-mail-Message [title='Expand']");
-    await click(".o-mail-Message [title='Edit']");
+    await click(SELECTORS.expand);
+    await click(SELECTORS.edit);
     await contains(".o-mail-Message .o-mail-Composer-input");
     const textarea = document.querySelector(".o-mail-Message .o-mail-Composer-input");
     assert.ok(textarea.scrollHeight > textarea.clientHeight);
@@ -298,8 +309,8 @@ QUnit.test("mentions are kept when editing message", async () => {
     });
     const { openDiscuss } = await start();
     openDiscuss(channelId);
-    await click(".o-mail-Message [title='Expand']");
-    await click(".o-mail-Message [title='Edit']");
+    await click(SELECTORS.expand);
+    await click(SELECTORS.edit);
     await insertText(".o-mail-Message .o-mail-Composer-input", "Hi @Mitchell Admin", {
         replace: true,
     });
@@ -334,8 +345,8 @@ QUnit.test("can add new mentions when editing message", async () => {
     });
     const { openDiscuss } = await start();
     openDiscuss(channelId);
-    await click(".o-mail-Message [title='Expand']");
-    await click(".o-mail-Message [title='Edit']");
+    await click(SELECTORS.expand);
+    await click(SELECTORS.edit);
     await insertText(".o-mail-Message .o-mail-Composer-input", " @");
     await click(".o-mail-Composer-suggestion strong", { text: "TestPartner" });
     await contains(".o-mail-Composer-input", { value: "Hello @TestPartner " });
@@ -359,7 +370,7 @@ QUnit.test("Other messages are grayed out when replying to another one", async (
     const { openDiscuss } = await start();
     openDiscuss(channelId);
     await contains(".o-mail-Message", { count: 2 });
-    await click("[title='Reply']", {
+    await click(SELECTORS.reply, {
         parent: [".o-mail-Message", { text: "Hello world" }],
     });
     await contains(".o-mail-Message.opacity-50", { text: "Goodbye world" });
@@ -379,7 +390,7 @@ QUnit.test("Parent message body is displayed on replies", async () => {
     });
     const { openDiscuss } = await start();
     openDiscuss(channelId);
-    await click(".o-mail-Message [title='Reply']");
+    await click(SELECTORS.reply);
     await insertText(".o-mail-Composer-input", "FooBarFoo");
     await click(".o-mail-Composer-send:enabled");
     await contains(".o-mail-MessageInReply-message", { text: "Hello world" });
@@ -409,7 +420,7 @@ QUnit.test(
         const { openDiscuss } = await start();
         openDiscuss(channelId);
         await click(":nth-child(1 of .o-mail-Message) [title='Expand']");
-        await click(".o-mail-Message [title='Edit']");
+        await click(SELECTORS.edit);
         await insertText(".o-mail-Message .o-mail-Composer-input", "Goodbye World", {
             replace: true,
         });
@@ -432,11 +443,11 @@ QUnit.test("Deleting parent message of a reply should adapt reply visual", async
     });
     const { openDiscuss } = await start();
     openDiscuss(channelId);
-    await click("[title='Reply']");
+    await click(SELECTORS.reply);
     await insertText(".o-mail-Composer-input", "FooBarFoo");
     triggerHotkey("Enter", false);
-    await click(".o-mail-Message [title='Expand']");
-    await click(".o-mail-Message [title='Delete']");
+    await click(SELECTORS.expand);
+    await click(SELECTORS.delete);
     await click("button", { text: "Confirm" });
     await contains(".o-mail-MessageInReply", { text: "Original message was deleted" });
 });
@@ -455,8 +466,8 @@ QUnit.test("Can open emoji picker after edit mode", async () => {
     });
     const { openDiscuss } = await start();
     openDiscuss(channelId);
-    await click(".o-mail-Message [title='Expand']");
-    await click(".o-mail-Message [title='Edit']");
+    await click(SELECTORS.expand);
+    await click(SELECTORS.edit);
     await click(".o-mail-DiscussSidebar");
     await click("[title='Add a Reaction']");
     await contains(".o-EmojiPicker");
@@ -625,7 +636,7 @@ QUnit.test("should not be able to reply to temporary/transient messages", async 
     // these user interactions is to forge a transient message response from channel command "/who"
     await insertText(".o-mail-Composer-input", "/who");
     await click(".o-mail-Composer-send:enabled");
-    await contains(".o-mail-Message [title='Reply']", { count: 0 });
+    await contains(SELECTORS.reply, { count: 0 });
 });
 
 QUnit.test("message comment of same author within 1min. should be squashed", async () => {
@@ -734,19 +745,19 @@ QUnit.test("toggle_star message", async (assert) => {
     });
     openDiscuss(channelId);
     await contains(".o-mail-Message");
-    await contains(".o-mail-Message [title='Mark as Todo']");
-    await contains(".o-mail-Message [title='Mark as Todo'] i.fa-star-o");
+    await contains(SELECTORS.markAsTodo);
+    await contains(SELECTORS.markAsTodo + " i.fa-star-o");
     await contains("button", { text: "Starred", contains: [".badge", { count: 0 }] });
-    await click("[title='Mark as Todo']");
+    await click(SELECTORS.markAsTodo);
     await contains("button", { text: "Starred", contains: [".badge", { text: "1" }] });
     assert.verifySteps(["rpc:toggle_message_starred"]);
     await contains(".o-mail-Message");
-    await contains(".o-mail-Message [title='Mark as Todo'] i.fa-star");
-    await click("[title='Mark as Todo']");
+    await contains(SELECTORS.markAsTodo + " i.fa-star");
+    await click(SELECTORS.markAsTodo);
     await contains("button", { text: "Starred", contains: [".badge", { count: 0 }] });
     assert.verifySteps(["rpc:toggle_message_starred"]);
     await contains(".o-mail-Message");
-    await contains(".o-mail-Message [title='Mark as Todo'] i.fa-star-o");
+    await contains(SELECTORS.markAsTodo + " i.fa-star-o");
 });
 
 QUnit.test(
@@ -812,8 +823,8 @@ QUnit.test("click on message edit button should open edit composer", async () =>
     });
     const { openDiscuss } = await start();
     openDiscuss(channelId);
-    await click(".o-mail-Message [title='Expand']");
-    await click(".o-mail-Message [title='Edit']");
+    await click(SELECTORS.expand);
+    await click(SELECTORS.edit);
     await contains(".o-mail-Message .o-mail-Composer");
 });
 
@@ -941,8 +952,8 @@ QUnit.test("Editing a message to clear its composer opens message delete dialog.
     });
     const { openDiscuss } = await start();
     openDiscuss(channelId);
-    await click(".o-mail-Message [title='Expand']");
-    await click(".o-mail-Message [title='Edit']");
+    await click(SELECTORS.expand);
+    await click(SELECTORS.edit);
     await insertText(".o-mail-Message-editable .o-mail-Composer-input", "", { replace: true });
     triggerHotkey("Enter");
     await contains(".modal-body p", { text: "Are you sure you want to delete this message?" });
@@ -968,8 +979,8 @@ QUnit.test(
         });
         const { openDiscuss } = await start();
         openDiscuss(channelId);
-        await click(".o-mail-Message [title='Expand']");
-        await click(".o-mail-Message [title='Edit']");
+        await click(SELECTORS.expand);
+        await click(SELECTORS.edit);
         await insertText(".o-mail-Message-editable .o-mail-Composer-input", "", { replace: true });
         triggerHotkey("Enter");
         await contains(".o-mail-Message-textContent", { text: "" });
@@ -1102,7 +1113,7 @@ QUnit.test("Toggle star should update starred counter on all tabs", async () => 
     const tab2 = await start({ asTab: true });
     await tab1.openDiscuss(channelId);
     await tab2.openDiscuss();
-    await click(".o-mail-Message [title='Mark as Todo']", { target: tab1.target });
+    await click(SELECTORS.markAsTodo, { target: tab1.target });
     await contains("button", {
         target: tab2.target,
         text: "Starred",
@@ -1366,8 +1377,8 @@ QUnit.test(
         openDiscuss(channelId);
         await contains(".o-mail-Message");
 
-        await click("[title='Expand']");
-        await click("[title='Delete']");
+        await click(SELECTORS.expand);
+        await click(SELECTORS.delete);
         await click("button", { text: "Confirm" });
         await contains(".o-mail-Message", { count: 0 });
     }
@@ -1505,8 +1516,8 @@ QUnit.test("Can reply to chatter messages from history", async () => {
     });
     const { openDiscuss } = await start();
     openDiscuss("mail.box_history");
-    await contains(".o-mail-Message [title='Reply']");
-    await click("[title='Reply']");
+    await contains(SELECTORS.reply);
+    await click(SELECTORS.reply);
     await contains("button[title='Full composer']");
 });
 
@@ -1530,8 +1541,8 @@ QUnit.test("Mark as unread", async () => {
     });
     const { openDiscuss } = await start();
     openDiscuss(channelId);
-    await click("[title='Expand']");
-    await click("[title='Mark as Unread']");
+    await click(SELECTORS.expand);
+    await click(SELECTORS.markAsUnread);
     await contains(".o-mail-Thread-newMessage");
     await contains(".o-mail-DiscussSidebarChannel .badge", { text: "1" });
 });
