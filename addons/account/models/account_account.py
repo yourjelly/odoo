@@ -20,6 +20,11 @@ class AccountAccount(models.Model):
     @api.constrains('account_type', 'reconcile')
     def _check_reconcile(self):
         for account in self:
+
+
+
+
+            
             if account.account_type in ('asset_receivable', 'liability_payable') and not account.reconcile:
                 raise ValidationError(_('You cannot have a receivable/payable account that is not reconcilable. (account code: %s)', account.code))
 
