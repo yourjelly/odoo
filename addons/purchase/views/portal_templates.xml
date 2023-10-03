@@ -175,29 +175,28 @@
                         </ul>
                     </t>
                 </t>
+                <!-- Page content -->
+                <div id="quote_content" class="col-12 col-lg-9">
+
+                        <!-- status messages -->
+                    <div t-if="order.state == 'cancel'" class="alert alert-danger alert-dismissable d-print-none" role="alert">
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="close"></button>
+                        <strong>This purchase has been canceled.</strong>
+                    </div>
+
+                    <!-- main content -->
+                    <div id="portal_purchase_content">
+                        <div t-call="purchase.purchase_order_portal_content"/>
+                    </div>
+
+                    <!-- chatter -->
+                    <hr/>
+                    <div id="purchase_order_communication">
+                        <h4>History</h4>
+                        <t t-call="portal.message_thread"/>
+                    </div>
+                </div><!-- // #quote_content -->
             </div>
-
-            <!-- Page content -->
-            <div id="quote_content" class="col-12 col-lg-9">
-
-                    <!-- status messages -->
-                <div t-if="order.state == 'cancel'" class="alert alert-danger alert-dismissable d-print-none" role="alert">
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="close"></button>
-                    <strong>This purchase has been canceled.</strong>
-                </div>
-
-                <!-- main content -->
-                <div id="portal_purchase_content">
-                    <div t-call="purchase.purchase_order_portal_content"/>
-                </div>
-
-                <!-- chatter -->
-                <hr/>
-                <div id="purchase_order_communication">
-                    <h4>History</h4>
-                    <t t-call="portal.message_thread"/>
-                </div>
-            </div><!-- // #quote_content -->
         </xpath>
     </template>
 
