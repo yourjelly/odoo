@@ -11,22 +11,19 @@
         <field name="sequence" eval="0"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-              'factor_percent': 100,
-              'repartition_type': 'base',
-              'plus_repartition_lines':[ref('tax_report_line_26')],
+                'repartition_type': 'base',
+                'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_2_line_26_value')],
             }),
             (0,0, {
-              'factor_percent': 100,
-              'repartition_type': 'tax',
+                'repartition_type': 'tax',
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'base',
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_2_line_26_value')],
             }),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'tax',
             }),
         ]"/>
@@ -43,22 +40,19 @@
         <field name="sequence" eval="0"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-              'factor_percent': 100,
-              'repartition_type': 'base',
-              'plus_repartition_lines':[ref('tax_report_line_26')],
+                'repartition_type': 'base',
+                'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_2_line_26_value')],
             }),
             (0,0, {
-              'factor_percent': 100,
-              'repartition_type': 'tax',
+                'repartition_type': 'tax',
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'base',
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_2_line_26_value')],
             }),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'tax',
             }),
         ]"/>
@@ -75,23 +69,19 @@
         <field name="sequence" eval="0"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-              'factor_percent': 100,
-              'repartition_type': 'base',
-              'plus_repartition_lines':[ref('tax_report_line_4')],
+                'repartition_type': 'base',
+                'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_2_line_20_value')],
             }),
             (0,0, {
-              'factor_percent': 100,
-              'repartition_type': 'tax',
-              'plus_repartition_lines':[ref('tax_report_line_4')],
+                'repartition_type': 'tax',
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'base',
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_2_line_20_value')],
             }),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'tax',
             }),
         ]"/>
@@ -108,22 +98,22 @@
         <field name="sequence" eval="0"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-              'factor_percent': 100,
-              'repartition_type': 'base',
+                'repartition_type': 'base',
+                'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_4_base'), ],
             }),
             (0,0, {
-              'factor_percent': 100,
-              'repartition_type': 'tax',
+                'repartition_type': 'tax',
+                'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_4_tax'), ],
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'base',
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_4_base'), ],
             }),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'tax',
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_4_tax'), ],
             }),
         ]"/>
         <field name="tax_group_id" ref="tax_group_vat_0"/>
@@ -139,21 +129,21 @@
         <field name="sequence" eval="0"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-              'factor_percent': 100,
-              'repartition_type': 'base',
+                'repartition_type': 'base',
+                'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_2_line_20_value'), ],
+
             }),
             (0,0, {
-              'factor_percent': 100,
-              'repartition_type': 'tax',
+                'repartition_type': 'tax',
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'base',
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_2_line_20_value'), ],
+
             }),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'tax',
             }),
         ]"/>
@@ -170,22 +160,25 @@
         <field name="sequence" eval="0"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-              'factor_percent': 100,
-              'repartition_type': 'base',
+                'repartition_type': 'base',
+                'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_3_base'), ],
             }),
             (0,0, {
-              'factor_percent': 100,
-              'repartition_type': 'tax',
+                'repartition_type': 'tax',
+                'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_3_tax'), ],
+
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'base',
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_3_base'), ],
+
             }),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'tax',
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_3_tax'), ],
+
             }),
         ]"/>
         <field name="tax_group_id" ref="tax_group_vat_0"/>
@@ -202,22 +195,22 @@
         <field name="sequence" eval="0"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-              'factor_percent': 100,
-              'repartition_type': 'base',
+                'repartition_type': 'base',
+                'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_6_base'), ],
             }),
             (0,0, {
-              'factor_percent': 100,
-              'repartition_type': 'tax',
+                'repartition_type': 'tax',
+                'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_6_tax'), ],
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'base',
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_6_base'), ],
             }),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'tax',
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_6_tax'), ],
             }),
         ]"/>
         <field name="tax_group_id" ref="tax_group_vat_0"/>
@@ -234,22 +227,22 @@
         <field name="sequence" eval="0"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-              'factor_percent': 100,
-              'repartition_type': 'base',
+                'repartition_type': 'base',
+                'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_5_base'), ],
             }),
             (0,0, {
-              'factor_percent': 100,
-              'repartition_type': 'tax',
+                'repartition_type': 'tax',
+                'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_5_tax'), ],
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'base',
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_5_base'), ],
             }),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'tax',
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_5_tax'), ],
             }),
         ]"/>
         <field name="tax_group_id" ref="tax_group_vat_0"/>
@@ -266,21 +259,19 @@
         <field name="sequence" eval="0"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-              'factor_percent': 100,
-              'repartition_type': 'base',
+                'repartition_type': 'base',
+                'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_2_line_21_value'), ],
             }),
             (0,0, {
-              'factor_percent': 100,
-              'repartition_type': 'tax',
+                'repartition_type': 'tax',
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'base',
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_2_line_21_value'), ],
             }),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'tax',
             }),
         ]"/>
@@ -297,21 +288,19 @@
         <field name="sequence" eval="0"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-              'factor_percent': 100,
-              'repartition_type': 'base',
+                'repartition_type': 'base',
+                'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_2_line_20_value'), ],
             }),
             (0,0, {
-              'factor_percent': 100,
-              'repartition_type': 'tax',
+                'repartition_type': 'tax',
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'base',
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_2_line_20_value'), ],
             }),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'tax',
             }),
         ]"/>
@@ -328,21 +317,19 @@
         <field name="sequence" eval="0"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-              'factor_percent': 100,
-              'repartition_type': 'base',
+                'repartition_type': 'base',
+                'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_2_line_20_value'), ],
             }),
             (0,0, {
-              'factor_percent': 100,
-              'repartition_type': 'tax',
+                'repartition_type': 'tax',
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'base',
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_2_line_20_value'), ],
             }),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'tax',
             }),
         ]"/>
@@ -360,22 +347,24 @@
         <field name="sequence" eval="0"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-              'factor_percent': 100,
-              'repartition_type': 'base',
+                'repartition_type': 'base',
+                'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_7_base'), ],
             }),
             (0,0, {
-              'factor_percent': 100,
-              'repartition_type': 'tax',
+                'repartition_type': 'tax',
+                'account_id': ref('chart_cz_343121'),
+                'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_7_tax'), ],
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'base',
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_7_base'), ],
             }),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'tax',
+                'account_id': ref('chart_cz_343121'),
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_7_tax'), ],
             }),
         ]"/>
         <field name="tax_group_id" ref="tax_group_vat_20"/>
@@ -392,21 +381,19 @@
         <field name="sequence" eval="0"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-              'factor_percent': 100,
-              'repartition_type': 'base',
+                 'repartition_type': 'base',
+                 'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_3_line_32_value'), ],
             }),
             (0,0, {
-              'factor_percent': 100,
               'repartition_type': 'tax',
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'base',
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_3_line_32_value'), ],
             }),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'tax',
             }),
         ]"/>
@@ -424,21 +411,19 @@
         <field name="sequence" eval="0"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-              'factor_percent': 100,
-              'repartition_type': 'base',
+                'repartition_type': 'base',
+                'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_2_line_26_value'), ],
             }),
             (0,0, {
-              'factor_percent': 100,
-              'repartition_type': 'tax',
+                'repartition_type': 'tax',
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'base',
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_2_line_26_value'), ],
             }),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'tax',
             }),
         ]"/>
@@ -456,22 +441,24 @@
         <field name="sequence" eval="0"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-              'factor_percent': 100,
-              'repartition_type': 'base',
+                'repartition_type': 'base',
+                'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_8_base'), ],
             }),
             (0,0, {
-              'factor_percent': 100,
-              'repartition_type': 'tax',
+                'repartition_type': 'tax',
+                'account_id': ref('chart_cz_343110'),
+                'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_8_tax'), ],
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'base',
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_8_base'), ],
             }),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'tax',
+                'account_id': ref('chart_cz_343110'),
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_8_tax'), ],
             }),
         ]"/>
         <field name="tax_group_id" ref="tax_group_vat_10"/>
@@ -488,22 +475,22 @@
         <field name="sequence" eval="0"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-              'factor_percent': 100,
-              'repartition_type': 'base',
+                'repartition_type': 'base',
+                'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_12_base'), ],
             }),
             (0,0, {
-              'factor_percent': 100,
-              'repartition_type': 'tax',
+                'repartition_type': 'tax',
+                'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_12_tax'), ],
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'base',
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_12_base'), ],
             }),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'tax',
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_12_tax'), ],
             }),
         ]"/>
         <field name="tax_group_id" ref="tax_group_vat_0"/>
@@ -520,22 +507,22 @@
         <field name="sequence" eval="0"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-              'factor_percent': 100,
-              'repartition_type': 'base',
+                'repartition_type': 'base',
+                'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_13_base'), ],
             }),
             (0,0, {
-              'factor_percent': 100,
-              'repartition_type': 'tax',
+                'repartition_type': 'tax',
+                'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_13_tax'), ],
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'base',
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_13_base'), ],
             }),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'tax',
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_13_tax'), ],
             }),
         ]"/>
         <field name="tax_group_id" ref="tax_group_vat_0"/>
@@ -552,84 +539,22 @@
         <field name="sequence" eval="0"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-              'factor_percent': 100,
-              'repartition_type': 'base',
+                'repartition_type': 'base',
+                'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_13_base'), ],
             }),
             (0,0, {
-              'factor_percent': 100,
-              'repartition_type': 'tax',
+                'repartition_type': 'tax',
+                'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_13_tax'), ],
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'base',
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_13_base'), ],
             }),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'tax',
-            }),
-        ]"/>
-        <field name="tax_group_id" ref="tax_group_vat_0"/>
-    </record>
-
-    <record id="IZ2_sale" model="account.tax.template">
-        <field name="chart_template_id" ref="cz_chart_template"/>
-        <field name="name">Tax Codes are supported but not provisioned</field>
-        <field name="description">0%</field>
-        <field name="amount">0</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">sale</field>
-        <field name="sequence" eval="0"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-            (0,0, {
-              'factor_percent': 100,
-              'repartition_type': 'base',
-            }),
-            (0,0, {
-              'factor_percent': 100,
-              'repartition_type': 'tax',
-            }),
-        ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'base',
-            }),
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'tax',
-            }),
-        ]"/>
-        <field name="tax_group_id" ref="tax_group_vat_0"/>
-    </record>
-
-    <record id="IZ2_purchase" model="account.tax.template">
-        <field name="chart_template_id" ref="cz_chart_template"/>
-        <field name="name">Tax Codes are supported but not provisioned</field>
-        <field name="description">0%</field>
-        <field name="amount">0</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="sequence" eval="0"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-            (0,0, {
-              'factor_percent': 100,
-              'repartition_type': 'base',
-            }),
-            (0,0, {
-              'factor_percent': 100,
-              'repartition_type': 'tax',
-            }),
-        ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'base',
-            }),
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'tax',
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_13_tax'), ],
             }),
         ]"/>
         <field name="tax_group_id" ref="tax_group_vat_0"/>
@@ -646,22 +571,24 @@
         <field name="sequence" eval="0"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-              'factor_percent': 100,
-              'repartition_type': 'base',
+                  'repartition_type': 'base',
+              'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_9_base'), ],
             }),
             (0,0, {
-              'factor_percent': 100,
-              'repartition_type': 'tax',
+                'repartition_type': 'tax',
+                'account_id': ref('chart_cz_343121'),
+                'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_9_tax'), ref('l10n_cz_tax_report_section_4_line_43_reduced_claim')],
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'base',
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_9_base'), ],
             }),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'tax',
+                'account_id': ref('chart_cz_343121'),
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_9_tax'), ref('l10n_cz_tax_report_section_4_line_43_reduced_claim')],
             }),
         ]"/>
         <field name="tax_group_id" ref="tax_group_vat_21"/>
@@ -678,21 +605,19 @@
         <field name="sequence" eval="0"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-              'factor_percent': 100,
-              'repartition_type': 'base',
+                'repartition_type': 'base',
+                'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_2_line_22_value'), ],
             }),
             (0,0, {
-              'factor_percent': 100,
-              'repartition_type': 'tax',
+                'repartition_type': 'tax',
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'base',
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_2_line_22_value'), ],
             }),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'tax',
             }),
         ]"/>
@@ -710,21 +635,19 @@
         <field name="sequence" eval="0"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-              'factor_percent': 100,
-              'repartition_type': 'base',
+                'repartition_type': 'base',
+                'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_2_line_26_value'), ],
             }),
             (0,0, {
-              'factor_percent': 100,
-              'repartition_type': 'tax',
+                'repartition_type': 'tax',
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'base',
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_2_line_26_value'), ],
             }),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'tax',
             }),
         ]"/>
@@ -741,22 +664,24 @@
         <field name="sequence" eval="0"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-              'factor_percent': 100,
-              'repartition_type': 'base',
+                'repartition_type': 'base',
+                'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_12_base'), ],
             }),
             (0,0, {
-              'factor_percent': 100,
-              'repartition_type': 'tax',
+                'repartition_type': 'tax',
+                'account_id': ref('chart_cz_343221'),
+                'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_12_tax'), ],
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'base',
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_12_base'), ],
             }),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'tax',
+                'account_id': ref('chart_cz_343221'),
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_12_tax'), ],
             }),
         ]"/>
         <field name="tax_group_id" ref="tax_group_vat_21"/>
@@ -772,22 +697,24 @@
         <field name="sequence" eval="0"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-              'factor_percent': 100,
-              'repartition_type': 'base',
+                'repartition_type': 'base',
+                'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_13_base'), ],
             }),
             (0,0, {
-              'factor_percent': 100,
-              'repartition_type': 'tax',
+                'repartition_type': 'tax',
+                'account_id': ref('chart_cz_343215'),
+                'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_13_tax'), ],
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'base',
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_13_base'), ],
             }),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'tax',
+                'account_id': ref('chart_cz_343215'),
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_13_tax'), ],
             }),
         ]"/>
         <field name="tax_group_id" ref="tax_group_vat_15"/>
@@ -803,22 +730,24 @@
         <field name="sequence" eval="0"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-              'factor_percent': 100,
-              'repartition_type': 'base',
+                'repartition_type': 'base',
+                'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_13_base'), ],
             }),
             (0,0, {
-              'factor_percent': 100,
-              'repartition_type': 'tax',
+                'repartition_type': 'tax',
+                'account_id': ref('chart_cz_343210'),
+                'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_13_tax'), ],
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'base',
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_13_base'), ],
             }),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'tax',
+                'account_id': ref('chart_cz_343210'),
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_13_tax'), ],
             }),
         ]"/>
         <field name="tax_group_id" ref="tax_group_vat_10"/>
@@ -834,24 +763,24 @@
         <field name="sequence" eval="0"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'base',
+                'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_2_base')],
             }),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('chart_cz_343215'),
+                'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_2_tax')],
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'base',
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_2_base')],
             }),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('chart_cz_343215'),
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_2_tax')],
             }),
         ]"/>
         <field name="tax_group_id" ref="tax_group_vat_15"/>
@@ -867,16 +796,24 @@
         <field name="sequence" eval="0"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-              'repartition_type': 'base',
+                'repartition_type': 'base',
+                'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_4_line_41_tax_base')],
             }),
             (0,0, {
-              'repartition_type': 'tax',
+                'repartition_type': 'tax',
+                'account_id': ref('chart_cz_343215'),
+                'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_4_line_41_in_full_amount')],
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-            (0,0, {'repartition_type': 'base'}),
+            (0,0, {
+                'repartition_type': 'base',
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_4_line_41_tax_base')],
+            }),
             (0,0, {
                 'repartition_type': 'tax',
+                'account_id': ref('chart_cz_343215'),
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_4_line_41_in_full_amount')],
             }),
         ]"/>
         <field name="tax_group_id" ref="tax_group_vat_15"/>
@@ -891,23 +828,20 @@
         <field name="type_tax_use">sale</field>
         <field name="sequence" eval="0"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-            (0,0, {'repartition_type': 'base'}),
             (0,0, {
-              'factor_percent': 100,
-              'repartition_type': 'base',
+                'repartition_type': 'base',
+                'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_2_line_25_value')],
             }),
             (0,0, {
-              'factor_percent': 100,
-              'repartition_type': 'tax',
+                'repartition_type': 'tax',
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'base',
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_2_line_25_value')],
             }),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'tax',
             }),
         ]"/>
@@ -924,18 +858,22 @@
         <field name="sequence" eval="0"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-              'factor_percent': 100,
               'repartition_type': 'base',
+              'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_10_base')],
             }),
             (0,0, {
-              'factor_percent': 100,
               'repartition_type': 'tax',
+              'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_10_tax')],
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-            (0,0, {'repartition_type': 'base'}),
+            (0,0, {
+                'repartition_type': 'base',
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_10_base')],
+            }),
             (0,0, {
                 'repartition_type': 'tax',
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_10_tax')],
             }),
         ]"/>
         <field name="tax_group_id" ref="tax_group_vat_0"/>
@@ -951,22 +889,22 @@
         <field name="sequence" eval="0"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-              'factor_percent': 100,
               'repartition_type': 'base',
+              'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_12_base')],
             }),
             (0,0, {
-              'factor_percent': 100,
               'repartition_type': 'tax',
+              'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_12_tax')],
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'base',
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_12_base')],
             }),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'tax',
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_12_tax')],
             }),
         ]"/>
         <field name="tax_group_id" ref="tax_group_vat_0"/>
@@ -982,17 +920,23 @@
         <field name="sequence" eval="0"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-              'factor_percent': 100,
               'repartition_type': 'base',
+              'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_13_base')],
             }),
             (0,0, {
-              'factor_percent': 100,
               'repartition_type': 'tax',
+              'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_13_tax')],
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-            (0,0, {'repartition_type': 'base'}),
-            (0,0, {'repartition_type': 'tax'}),
+            (0,0, {
+                'repartition_type': 'base',
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_13_base')],
+            }),
+            (0,0, {
+                'repartition_type': 'tax',
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_13_tax')],
+            }),
         ]"/>
         <field name="tax_group_id" ref="tax_group_vat_0"/>
     </record>
@@ -1006,24 +950,23 @@
         <field name="type_tax_use">purchase</field>
         <field name="sequence" eval="0"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-            (0,0, {'repartition_type': 'base'}),
             (0,0, {
-              'factor_percent': 100,
               'repartition_type': 'base',
+              'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_13_base')],
             }),
             (0,0, {
-              'factor_percent': 100,
               'repartition_type': 'tax',
+              'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_13_tax')],
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'base',
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_13_base')],
             }),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'tax',
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_13_tax')],
             }),
         ]"/>
         <field name="tax_group_id" ref="tax_group_vat_0"/>
@@ -1039,18 +982,22 @@
         <field name="sequence" eval="0"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-              'factor_percent': 100,
               'repartition_type': 'base',
+              'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_11_base'), ref('l10n_cz_tax_report_section_2_line_25_value')],
             }),
             (0,0, {
-              'factor_percent': 100,
               'repartition_type': 'tax',
+              'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_11_tax')],
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-            (0,0, {'repartition_type': 'base'}),
+            (0,0, {
+                'repartition_type': 'base',
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_11_base'), ref('l10n_cz_tax_report_section_2_line_25_value')],
+            }),
             (0,0, {
                 'repartition_type': 'tax',
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_11_tax')],
             }),
         ]"/>
         <field name="tax_group_id" ref="tax_group_vat_0"/>
@@ -1065,24 +1012,21 @@
         <field name="type_tax_use">sale</field>
         <field name="sequence" eval="0"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-            (0,0, {'repartition_type': 'base'}),
             (0,0, {
-              'factor_percent': 100,
               'repartition_type': 'base',
+              'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_2_line_25_value')],
             }),
             (0,0, {
-              'factor_percent': 100,
               'repartition_type': 'tax',
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'base',
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_2_line_25_value')],
             }),
             (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'tax',
+                'repartition_type': 'tax'
             }),
         ]"/>
         <field name="tax_group_id" ref="tax_group_vat_0"/>
@@ -1098,18 +1042,22 @@
         <field name="sequence" eval="0"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-              'factor_percent': 100,
               'repartition_type': 'base',
+              'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_11_base')],
             }),
             (0,0, {
-              'factor_percent': 100,
               'repartition_type': 'tax',
+              'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_11_tax')],
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-            (0,0, {'repartition_type': 'base'}),
+            (0,0, {
+                'repartition_type': 'base',
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_11_base')],
+            }),
             (0,0, {
                 'repartition_type': 'tax',
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_11_tax')],
             }),
         ]"/>
         <field name="tax_group_id" ref="tax_group_vat_0"/>
@@ -1125,24 +1073,24 @@
         <field name="sequence" eval="0"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'base',
+                'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_1_base')],
             }),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('chart_cz_343221'),
+                'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_1_tax')],
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'base',
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_1_base')],
             }),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('chart_cz_343221'),
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_1_tax')],
             }),
         ]"/>
         <field name="tax_group_id" ref="tax_group_vat_21"/>
@@ -1157,21 +1105,25 @@
         <field name="type_tax_use">purchase</field>
         <field name="sequence" eval="0"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-            (0,0, {'repartition_type': 'base'}),
+            (0,0, {
+                'repartition_type': 'base',
+                'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_1_base')],
+            }),
             (0,0, {
                 'repartition_type': 'tax',
                 'account_id': ref('chart_cz_343121'),
+                'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_1_tax')],
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'base',
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_1_base')],
             }),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('chart_cz_343121'),
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_1_tax')],
             }),
         ]"/>
         <field name="tax_group_id" ref="tax_group_vat_21"/>
@@ -1187,18 +1139,24 @@
         <field name="sequence" eval="0"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-              'factor_percent': 100,
-              'repartition_type': 'base',
+                'repartition_type': 'base',
+                'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_2_base')],
             }),
             (0,0, {
-              'factor_percent': 100,
-              'repartition_type': 'tax',
+                'repartition_type': 'tax',
+                'account_id': ref('chart_cz_343210'),
+                'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_2_tax')],
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-            (0,0, {'repartition_type': 'base'}),
+            (0,0, {
+                'repartition_type': 'base',
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_2_base')],
+            }),
             (0,0, {
                 'repartition_type': 'tax',
+                'account_id': ref('chart_cz_343210'),
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_1_line_2_tax')],
             }),
         ]"/>
         <field name="tax_group_id" ref="tax_group_vat_10"/>
@@ -1214,24 +1172,24 @@
         <field name="sequence" eval="0"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'base',
+                'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_4_line_41_tax_base')],
             }),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'tax',
-                'account_id': ref('chart_cz_343115'),
+                'account_id': ref('chart_cz_343110'),
+                'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_4_line_41_in_full_amount')],
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'base',
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_4_line_41_tax_base')],
             }),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'tax',
-                'account_id': ref('chart_cz_343115'),
+                'account_id': ref('chart_cz_343110'),
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_4_line_41_in_full_amount')],
             }),
         ]"/>
         <field name="tax_group_id" ref="tax_group_vat_10"/>
@@ -1247,21 +1205,19 @@
         <field name="sequence" eval="0"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'base',
+                'plus_report_expression_ids': [ref('l10n_cz_tax_report_section_2_line_26_value')],
             }),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'tax',
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'base',
+                'minus_report_expression_ids': [ref('l10n_cz_tax_report_section_2_line_26_value')],
             }),
             (0,0, {
-                'factor_percent': 100,
                 'repartition_type': 'tax',
             }),
         ]"/>
