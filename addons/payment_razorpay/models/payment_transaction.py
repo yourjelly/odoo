@@ -44,7 +44,8 @@ class PaymentTransaction(models.Model):
 
     def _create_order(self, customer_id=False, is_payment_capture=False):
         # Initiate the payment and retrieve the related order id.
-        order_payload = self._razorpay_prepare_order_request_payload(customer_id)
+        # TO DO master: remove customer from context and add it into argument
+        order_payload = self.with_context(razorpay_customer_id=customer_id)._razorpay_prepare_order_request_payload()
         if is_payment_capture:
             order_payload.update(payment_capture=True)
         _logger.info(
@@ -136,7 +137,7 @@ class PaymentTransaction(models.Model):
         }
         return rendering_values
 
-    def _razorpay_prepare_order_request_payload(self, customer_id=False):
+    def _razorpay_prepare_order_request_payload(self):
         """ Create the payload for the order request based on the transaction values.
 
         :return: The request payload.
@@ -147,11 +148,11 @@ class PaymentTransaction(models.Model):
             'amount': converted_amount,
             'currency': self.currency_id.name,
         }
-        if customer_id:
+        if self.env.context.get('razorpay_customer_id'):
             if payload['currency'] != 'INR':
                 ValidationError(_("Currency should be 'INR' to create a token in razorpay recurring"))
             payload.update({
-                'customer_id': customer_id,
+                'customer_id': self.env.context['razorpay_customer_id'],
                 "method":"card",
             })
         if self.provider_id.capture_manually:  # The related payment must be only authorized.
