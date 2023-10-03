@@ -15,6 +15,10 @@ html:not(.o_mass_mailing_iframe), body:not(.o_mass_mailing_iframe), html.o_fulls
     flex-direction: column;
 }
 
+.o_inactive_modal .o_technical_modal{
+    z-index: $zindex-modal-backdrop - 1;
+}
+
 .o_mail_theme_selector {
     > a {
         height: $o-we-toolbar-height;
