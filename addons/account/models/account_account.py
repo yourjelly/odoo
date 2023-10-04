@@ -13,6 +13,9 @@ ACCOUNT_CODE_REGEX = re.compile(r'^[A-Za-z0-9.]+$')
 class AccountAccount(models.Model):
     _name = "account.account"
     _inherit = ['mail.thread']
+
+
+    
     _description = "Account"
     _order = "code, company_id"
     _check_company_auto = True
