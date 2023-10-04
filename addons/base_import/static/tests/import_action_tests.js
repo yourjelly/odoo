@@ -1042,7 +1042,7 @@ QUnit.module("Base Import Tests", (hooks) => {
         assert.strictEqual(executeImportCount, 3, "execute_import was called 3 times");
     });
 
-    QUnit.debug("Import view: execute and pause import in batches", async function (assert) {
+    QUnit.test("Import view: execute and pause import in batches", async function (assert) {
         registerFakeHTTPService();
 
         patchWithCleanup(ImportAction.prototype, {
