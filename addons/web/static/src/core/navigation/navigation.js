@@ -100,6 +100,7 @@ class Navigator {
      * @param {NavigationOptions} options
      */
     constructor(containerRef, options, hotkeyService) {
+        this.enabled = false;
         this.containerRef = containerRef;
         this.options = options;
         this.options.shouldFocusChildInput = true;
@@ -148,6 +149,8 @@ class Navigator {
             return;
         }
 
+        this.enabled = true;
+
         for (const [hotkey, callback] of Object.entries(this.hotkeyCallbacks)) {
             this.hotkeyRemoves.push(
                 this.hotkeyService.add(hotkey, callback, {
@@ -168,7 +171,7 @@ class Navigator {
 
         this.initialFocusElement = document.activeElement;
         this.currentActiveIndex = -1;
-        this.debouncedUpdate();
+        this.update();
 
         if (this.options.onOpen) {
             this.options.onOpen(this.items);
@@ -178,6 +181,12 @@ class Navigator {
     }
 
     disable() {
+        if (!this.enabled) {
+            return;
+        }
+
+        this.enabled = false;
+
         if (this.targetObserver) {
             this.targetObserver.disconnect();
             this.targetObserver = undefined;

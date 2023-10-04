@@ -337,6 +337,7 @@ export class Dropdown extends Component {
     closePopover() {
         this._closePopover?.();
         this._closePopover = undefined;
+        this.navigation.disable();
     }
 
     onOpened() {
@@ -349,7 +350,6 @@ export class Dropdown extends Component {
     }
 
     onClosed() {
-        this.navigation.disable();
         if (this.target) {
             this.target.ariaExpanded = false;
             this.target.classList.remove("show");
