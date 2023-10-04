@@ -863,9 +863,11 @@ class FilesystemSessionStore(sessions.FilesystemSessionStore):
         threshold = time.time() - max_lifetime
         for fname in glob.iglob(os.path.join(root.session_store.path, '*', '*')):
             path = os.path.join(root.session_store.path, fname)
-            with contextlib.suppress(OSError):
+            try:
                 if os.path.getmtime(path) < threshold:
                     os.unlink(path)
+            except OSError as err:
+                _logger.debug ('Vacuum error deleting session file',exc_info=err)
 
 
 class Session(collections.abc.MutableMapping):

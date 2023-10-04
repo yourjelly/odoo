@@ -199,15 +199,15 @@ class FilesystemSessionStore(SessionStore):
         try:
             rename(tmp, fn)
             os.chmod(fn, self.mode)
-        except (IOError, OSError):
-            pass
+        except (IOError, OSError) as err:
+            _logger.debug ('Error saving session file',exc_info=err)
 
     def delete(self, session):
         fn = self.get_session_filename(session.sid)
         try:
             os.unlink(fn)
-        except OSError:
-            pass
+        except OSError as err:
+            _logger.debug ('Error deleting session file',exc_info=err)
 
     def get(self, sid):
         if not self.is_valid_key(sid):
