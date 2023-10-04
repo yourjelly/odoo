@@ -28,7 +28,10 @@ export function createVirtualOperators(tree, getFieldDef) {
             const fieldDef = getFieldDef(path);
             if (fieldDef?.type === "boolean") {
                 return { ...tree, operator: operator === "=" ? "is" : "is_not" };
-            } else if (fieldDef?.type !== "many2one" && value === false) {
+            } else if (
+                !["many2one", "date", "datetime"].includes(fieldDef?.type) &&
+                value === false
+            ) {
                 return { ...tree, operator: operator === "=" ? "not_set" : "set" };
             }
         }

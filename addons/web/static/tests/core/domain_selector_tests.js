@@ -1475,8 +1475,8 @@ QUnit.module("Components", (hooks) => {
             domain: `[]`,
         });
         const toTest = [
-            { domain: `[("date", "=", False)]`, text: `Date is not set` },
-            { domain: `[("date", "!=", False)]`, text: `Date is set` },
+            { domain: `[("date", "=", False)]`, text: `Date = false` },
+            { domain: `[("date", "!=", False)]`, text: `Date != false` },
             { domain: `[("date", "=", "2023-07-03")]`, text: `Date = 2023-07-03` },
             { domain: `[("date", "=", context_today())]`, text: `Date = context_today()` },
             { domain: `[("date", "!=", "2023-07-03")]`, text: `Date != 2023-07-03` },
@@ -2132,4 +2132,28 @@ QUnit.module("Components", (hooks) => {
             assert.containsNone(target, '.form-switch label:contains("Include archived")');
         }
     );
+
+    QUnit.test("date/datetime edition: switch !=/is set", async (assert) => {
+        await makeDomainSelector({
+            isDebugMode: true,
+            domain: `[("date", "!=", False)]`,
+            update(domain) {
+                assert.step(domain);
+            },
+        });
+        assert.strictEqual(getCurrentOperator(target), "!=");
+        assert.containsOnce(target, ".o_datetime_input");
+        assert.strictEqual(getCurrentValue(target), "");
+
+        await selectOperator(target, "set");
+        assert.strictEqual(getCurrentOperator(target), "is set");
+        assert.containsNone(target, ".o_datetime_input");
+        assert.verifySteps([`[("date", "!=", False)]`]);
+
+        await selectOperator(target, "!=");
+        assert.strictEqual(getCurrentOperator(target), "!=");
+        assert.containsOnce(target, ".o_datetime_input");
+        assert.strictEqual(getCurrentValue(target), "");
+        assert.verifySteps([`[("date", "!=", False)]`]);
+    });
 });
