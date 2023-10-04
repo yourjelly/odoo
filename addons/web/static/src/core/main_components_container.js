@@ -14,7 +14,7 @@ export class MainComponentsContainer extends Component {
 
             if (detail.operation === "add" && index === -1) {
                 this.Components.push([detail.key, detail.value]);
-            } else if (detail.operation === "remove" && index >= 0) {
+            } else if (detail.operation === "delete" && index >= 0) {
                 this.Components.splice(index, 1);
             }
 

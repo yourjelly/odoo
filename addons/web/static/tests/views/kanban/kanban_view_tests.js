@@ -7615,9 +7615,11 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".o_view_nocontent");
     });
 
-    QUnit.test("empty grouped kanban with sample data: keyboard navigation", async (assert) => {
-        await makeView({
-            arch: `
+    QUnit.test(
+        "empty grouped kanban with sample data: disabled keyboard navigation, stay in search input",
+        async (assert) => {
+            await makeView({
+                arch: `
                 <kanban sample="1">
                     <field name="product_id"/>
                     <templates>
@@ -7627,28 +7629,27 @@ QUnit.module("Views", (hooks) => {
                         </div>
                     </templates>
                 </kanban>`,
-            serverData,
-            groupBy: ["product_id"],
-            resModel: "partner",
-            type: "kanban",
-            async mockRPC(route, { kwargs, method }, performRpc) {
-                const result = await performRpc(...arguments);
-                if (method === "web_read_group") {
-                    result.groups.forEach((g) => (g.product_id_count = 0));
-                }
-                return result;
-            },
-        });
+                serverData,
+                groupBy: ["product_id"],
+                resModel: "partner",
+                type: "kanban",
+                async mockRPC(route, { kwargs, method }, performRpc) {
+                    const result = await performRpc(...arguments);
+                    if (method === "web_read_group") {
+                        result.groups.forEach((g) => (g.product_id_count = 0));
+                    }
+                    return result;
+                },
+            });
 
-        await toggleColumnActions(0);
+            assert.containsN(target, ".o_kanban_record", 16);
+            assert.hasClass(document.activeElement, "o_searchview_input");
 
-        assert.containsN(target, ".o_kanban_record", 16);
-        assert.hasClass(document.activeElement, "o_searchview_input");
+            await triggerEvent(document.activeElement, null, "keydown", { key: "ArrowDown" });
 
-        await triggerEvent(document.activeElement, null, "keydown", { key: "ArrowDown" });
-
-        assert.hasClass(document.activeElement, "o_searchview_input");
-    });
+            assert.hasClass(document.activeElement, "o_searchview_input");
+        }
+    );
 
     QUnit.test("empty kanban with sample data", async (assert) => {
         serverData.models.partner.records = [];
