@@ -79,8 +79,8 @@ class HrExpense(models.Model):
         domain="[('type_tax_use', '=', 'purchase')]", string='Included taxes',
         help="Both price-included and price-excluded taxes will behave as price-included taxes for expenses.")
     amount_tax = fields.Monetary(string='Tax amount in Currency', help="Tax amount in currency", precompute=True, compute='_compute_amount_tax', store=True, currency_field='currency_id')
-    amount_tax_company = fields.Monetary('Tax amount', help="Tax amount in company currency", precompute=True, compute='_compute_total_amount_company', store=True, currency_field='company_currency_id')
-    total_amount = fields.Monetary("Total In Currency", precompute=True, compute='_compute_amount', store=True, currency_field='currency_id', tracking=True, readonly=False, inverse='_inverse_total_amount')
+    amount_tax_company = fields.Monetary('Tax amount', help="Tax amount in company currency", precompute=True, compute='_compute_amount_tax_company', store=True, currency_field='company_currency_id')
+    total_amount = fields.Monetary("Total In Currency", precompute=True, compute='_compute_total_amount', store=True, currency_field='currency_id', tracking=True, readonly=False)
     untaxed_amount = fields.Monetary("Total Untaxed Amount In Currency", precompute=True, compute='_compute_amount_tax', store=True, currency_field='currency_id')
     company_currency_id = fields.Many2one('res.currency', string="Report Company Currency", related='company_id.currency_id', readonly=True)
     total_amount_company = fields.Monetary('Total', tracking=True, precompute=True,
@@ -144,34 +144,10 @@ class HrExpense(models.Model):
         if not self.product_has_cost:
             self.quantity = 1
 
-    @api.depends('currency_id', 'total_amount', 'date')
+    @api.depends('total_amount', 'total_amount_company', 'currency_id', 'date')
     def _compute_currency_rate(self):
-        """
-            We want the default odoo rate when the following change:
-            - the currency of the expense
-            - the total amount in foreign currency
-            - the date of the expense
-            this will cause the rate to be recomputed twice with possible changes but we don't have the required fields
-            to store the override state in stable
-        """
-        date_today = fields.Date.context_today(self)
         for expense in self:
-            if not expense.same_currency:
-                if (
-                        expense.currency_id != expense._origin.currency_id
-                        or expense.total_amount != expense._origin.total_amount
-                        or expense.date != expense._origin.date
-                ):
-                    expense.currency_rate = self.env['res.currency']._get_conversion_rate(
-                        from_currency=expense.currency_id,
-                        to_currency=expense.company_currency_id,
-                        company=expense.company_id,
-                        date=expense.date or date_today,
-                    )
-                else:
-                    expense.currency_rate = expense.total_amount_company / expense.total_amount if expense.total_amount else 1.0
-            else:
-                expense.currency_rate = 1.0
+            expense.currency_rate = expense.total_amount_company / expense.total_amount if expense.total_amount else 1.0
 
     @api.depends('currency_id', 'company_currency_id')
     def _compute_same_currency(self):
@@ -202,13 +178,14 @@ class HrExpense(models.Model):
                 expense.state = 'done'
 
     @api.depends('quantity', 'unit_amount', 'tax_ids')
-    def _compute_amount(self):
+    def _compute_total_amount(self):
         for expense in self:
-            if not expense.product_has_cost:
-                continue
-            base_lines = [expense._convert_to_tax_base_line_dict(price_unit=expense.unit_amount, quantity=expense.quantity)]
-            taxes_totals = self.env['account.tax']._compute_taxes(base_lines)['totals'][expense.currency_id]
-            expense.total_amount = taxes_totals['amount_untaxed'] + taxes_totals['amount_tax']
+            if expense.product_has_cost:
+                base_lines = [expense._convert_to_tax_base_line_dict(price_unit=expense.unit_amount, quantity=expense.quantity)]
+                taxes_totals = self.env['account.tax']._compute_taxes(base_lines)['totals'][expense.currency_id]
+                expense.total_amount = taxes_totals['amount_untaxed'] + taxes_totals['amount_tax']
+            else:
+                expense.total_amount = expense.total_amount
 
     @api.depends('total_amount')
     def _compute_amount_tax(self):
@@ -221,6 +198,46 @@ class HrExpense(models.Model):
             taxes_totals = self.env['account.tax']._compute_taxes(base_lines)['totals'][expense.currency_id]
             expense.amount_tax = taxes_totals['amount_tax']
             expense.untaxed_amount = taxes_totals['amount_untaxed']
+
+    @api.depends(
+        'date',
+        'currency_id',
+        'company_id',
+        'quantity',
+        'unit_amount',
+        'tax_ids',
+        'product_id',
+        'employee_id.user_id.partner_id',
+    )
+    def _compute_total_amount_company(self):
+        date_today = fields.Date.context_today(self)
+        for expense in self:
+            if expense.total_amount or expense.total_amount_company:
+                currency_rate = expense.total_amount_company / expense.total_amount if expense.total_amount else 1.0
+            else:
+                currency_rate = self.env['res.currency']._get_conversion_rate(
+                    from_currency=expense.currency_id,
+                    to_currency=expense.company_currency_id,
+                    company=expense.company_id,
+                    date=expense.date or date_today,
+                )
+            if expense.product_has_cost:
+                base_lines = [expense._convert_to_tax_base_line_dict(price_unit=expense.unit_amount, quantity=expense.quantity)]
+                taxes_totals = self.env['account.tax']._compute_taxes(base_lines)['totals'][expense.currency_id]
+                expense.total_amount_company = (taxes_totals['amount_untaxed'] + taxes_totals['amount_tax']) * currency_rate
+            else:
+                expense.total_amount_company = expense.total_amount * currency_rate
+
+    def _inverse_total_amount_company(self):
+        for expense in self:
+            expense.unit_amount = expense.total_amount_company / expense.quantity if expense.quantity else expense.total_amount_company
+
+    @api.depends('total_amount_company')
+    def _compute_amount_tax_company(self):
+        for expense in self:
+            base_lines = [expense._convert_to_tax_base_line_dict(price_unit=expense.total_amount_company)]
+            taxes_totals = self.env['account.tax']._compute_taxes(base_lines)['totals'][expense.currency_id]
+            expense.amount_tax_company = taxes_totals['amount_tax']
 
     def _convert_to_tax_base_line_dict(self, base_line=None, currency=None, price_unit=None, quantity=None):
         self.ensure_one()
@@ -235,42 +252,6 @@ class HrExpense(models.Model):
             analytic_distribution=self.analytic_distribution,
             extra_context={'force_price_include': True},
         )
-
-    @api.depends(
-        'date',
-        'currency_id',
-        'company_id',
-        'company_currency_id',
-        'total_amount',
-        'tax_ids',
-        'product_id',
-        'employee_id.user_id.partner_id',
-        'quantity',
-    )
-    def _compute_total_amount_company(self):
-        for expense in self:
-            base_lines = [expense._convert_to_tax_base_line_dict(
-                price_unit=expense.total_amount * expense.currency_rate,
-                currency=expense.company_currency_id,
-            )]
-            taxes_totals = self.env['account.tax']._compute_taxes(base_lines)['totals'][expense.company_currency_id]
-            expense.total_amount_company = taxes_totals['amount_untaxed'] + taxes_totals['amount_tax']
-            expense.amount_tax_company = taxes_totals['amount_tax']
-
-    def _inverse_total_amount_company(self):
-        # Allows to set a custom rate on the expense
-        for expense in self:
-            if expense.same_currency:
-                expense.total_amount = expense.total_amount_company
-            base_lines = [expense._convert_to_tax_base_line_dict(
-                price_unit=expense.total_amount_company,
-                currency=expense.company_currency_id,
-            )]
-            taxes_totals = self.env['account.tax']._compute_taxes(base_lines)['totals'][expense.company_currency_id]
-
-            expense.amount_tax_company = taxes_totals['amount_tax']
-            expense.currency_rate = expense.total_amount_company / expense.total_amount if expense.total_amount else 1.0
-            expense.unit_amount = expense.total_amount_company / expense.quantity if expense.quantity else expense.total_amount_company
 
     @api.depends('currency_rate')
     def _compute_label_convert_rate(self):
@@ -404,11 +385,6 @@ class HrExpense(models.Model):
                 'company_id': expense.company_id.id,
             })
             expense.analytic_distribution = distribution or expense.analytic_distribution
-
-    @api.onchange('total_amount')
-    def _inverse_total_amount(self):
-        for expense in self:
-            expense.unit_amount = expense.total_amount_company / expense.quantity
 
     @api.constrains('payment_mode')
     def _check_payment_mode(self):
