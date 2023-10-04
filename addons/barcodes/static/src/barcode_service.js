@@ -20,6 +20,8 @@ function makeBarcodeInput() {
     return inputEl;
 }
 
+export const barcodeBus = new EventBus();
+
 export const barcodeService = {
     // Keys from a barcode scanner are usually processed as quick as possible,
     // but some scanners can use an intercharacter delay (we support <= 50 ms)
@@ -33,7 +35,6 @@ export const barcodeService = {
     },
 
     start() {
-        const bus = new EventBus();
         let timeout = null;
 
         let bufferedBarcode = "";
@@ -41,7 +42,7 @@ export const barcodeService = {
         let barcodeInput = null;
 
         function handleBarcode(barcode, target) {
-            bus.trigger('barcode_scanned', {barcode,target});
+            barcodeBus.trigger('barcode_scanned', {barcode,target});
             if (target.getAttribute('barcode_events') === "true") {
                 const barcodeScannedEvent = new CustomEvent("barcode_scanned", { detail: { barcode, target } });
                 target.dispatchEvent(barcodeScannedEvent);
@@ -129,7 +130,7 @@ export const barcodeService = {
         });
 
         return {
-            bus,
+            bus: barcodeBus,
         };
     },
 };
