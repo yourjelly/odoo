@@ -9,7 +9,7 @@
             </button>
         </t>
         <t t-else="">
-            <Dropdown>
+            <Dropdown menuClass="'state_selection_field_menu'">
                 <button class="btn btn-link d-flex p-0">
                     <div class="d-flex align-items-center" t-att-title="props.showLabel ? '' : label">
                         <span t-attf-class="o_status {{ statusColor(currentValue) }} "/>

@@ -153,7 +153,8 @@ QUnit.test("activity menu widget: activity view icon", async (assert) => {
         text: "mail.test.activity",
         contains: ["button[title='Summary'].fa-clock-o"],
     });
-    await contains(".show .dropdown-menu");
+    await contains(".o-dropdown.show");
+    await contains(".o-dropdown--menu");
     patchWithCleanup(env.services.action, {
         doAction(action) {
             if (action.name) {

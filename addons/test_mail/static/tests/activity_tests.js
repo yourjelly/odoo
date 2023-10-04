@@ -225,7 +225,7 @@ QUnit.module("test_mail", {}, function () {
 
             for (let i = 0; i < 101; i++) {
                 activityToCreate.push({
-                    display_name: "An activity " + (i * 2),
+                    display_name: "An activity " + i * 2,
                     date_deadline: serializeDate(DateTime.now().plus({ days: 3 })),
                     can_write: true,
                     state: "planned",
@@ -241,7 +241,10 @@ QUnit.module("test_mail", {}, function () {
             }
             const createdActivity = pyEnv["mail.activity"].create(activityToCreate);
             for (let i = 0; i < 101; i++) {
-                recordsToCreate.push({ name: "pagerTestRecord" + i, activity_ids: [createdActivity[i * 2], createdActivity[i * 2 + 1]] });
+                recordsToCreate.push({
+                    name: "pagerTestRecord" + i,
+                    activity_ids: [createdActivity[i * 2], createdActivity[i * 2 + 1]],
+                });
             }
             pyEnv["mail.test.activity"].create(recordsToCreate);
 
@@ -251,7 +254,7 @@ QUnit.module("test_mail", {}, function () {
             await openView({
                 res_model: "mail.test.activity",
                 views: [[false, "activity"]],
-                domain: [['name', 'like', 'pagerTestRecord']],
+                domain: [["name", "like", "pagerTestRecord"]],
             });
             assert.containsN(
                 document.body,
@@ -537,18 +540,19 @@ QUnit.module("test_mail", {}, function () {
 
         await doAction(webClient, 1);
         await toggleSearchBarMenu(document);
+
         assert.containsN(
             document.body,
-            ".o_cp_searchview .o_dropdown_container",
+            ".o-dropdown--menu .o_dropdown_container",
             2,
             "only two elements should be available in view search"
         );
         assert.isVisible(
-            document.querySelector(".o_cp_searchview .o_dropdown_container.o_filter_menu"),
+            document.querySelector(".o-dropdown--menu .o_dropdown_container.o_filter_menu"),
             "filter should be available in view search"
         );
         assert.isVisible(
-            document.querySelector(".o_cp_searchview .o_dropdown_container.o_favorite_menu"),
+            document.querySelector(".o-dropdown--menu .o_dropdown_container.o_favorite_menu"),
             "favorites should be available in view search"
         );
     });

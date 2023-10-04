@@ -117,35 +117,14 @@ QUnit.module("BaseAutomation", {}, function () {
             await toggleColumnActions(0);
 
             // check available actions in kanban header's config dropdown
-            assert.containsOnce(
-                target,
-                ".o_kanban_header:first-child .o_kanban_config .o_kanban_toggle_fold"
-            );
-            assert.containsOnce(
-                target,
-                ".o_kanban_header:first-child .o_kanban_config .o_column_automations"
-            );
-            assert.containsNone(
-                target,
-                ".o_kanban_header:first-child .o_kanban_config .o_column_edit"
-            );
-            assert.containsNone(
-                target,
-                ".o_kanban_header:first-child .o_kanban_config .o_column_delete"
-            );
-            assert.containsNone(
-                target,
-                ".o_kanban_header:first-child .o_kanban_config .o_column_archive_records"
-            );
-            assert.containsNone(
-                target,
-                ".o_kanban_header:first-child .o_kanban_config .o_column_unarchive_records"
-            );
+            assert.containsOnce(target, ".o-dropdown--menu .o_kanban_toggle_fold");
+            assert.containsOnce(target, ".o-dropdown--menu .o_column_automations");
+            assert.containsNone(target, ".o-dropdown--menu .o_column_edit");
+            assert.containsNone(target, ".o-dropdown--menu .o_column_delete");
+            assert.containsNone(target, ".o-dropdown--menu .o_column_archive_records");
+            assert.containsNone(target, ".o-dropdown--menu .o_column_unarchive_records");
             assert.verifySteps([]);
-            await click(
-                target,
-                ".o_kanban_header:first-child .o_kanban_config .o_column_automations"
-            );
+            await click(target, ".o-dropdown--menu .o_column_automations");
             assert.verifySteps(["base_automation.base_automation_act"]);
         });
     });

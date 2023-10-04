@@ -87,7 +87,7 @@ export class ChatWindow extends Component {
     }
 
     onKeydown(ev) {
-        if (ev.target.closest(".o-dropdown")) {
+        if (ev.target.closest(".o-dropdown") || ev.target.closest(".o-dropdown--menu")) {
             return;
         }
         ev.stopPropagation(); // not letting home menu steal my CTRL-C

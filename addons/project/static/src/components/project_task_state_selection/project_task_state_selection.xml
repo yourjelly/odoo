@@ -77,6 +77,7 @@
         <xpath expr="//Dropdown" position="attributes">
             <!-- <attribute name="class">toggle_dropdown</attribute> -->
             <attribute name="position">`${ getDropdownPosition() }`</attribute>
+            <attribute name="menuClass" separator=" + " add="' project_task_state_selection_menu'"></attribute>
         </xpath>
         <xpath expr="//Dropdown/button" position="attributes">
             <attribute name="tooltip">''</attribute>

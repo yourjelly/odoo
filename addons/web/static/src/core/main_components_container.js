@@ -9,8 +9,15 @@ export class MainComponentsContainer extends Component {
     setup() {
         const mainComponents = registry.category("main_components");
         this.Components = mainComponents.getEntries();
-        useBus(mainComponents, "UPDATE", () => {
-            this.Components = mainComponents.getEntries();
+        useBus(mainComponents, "UPDATE", ({ detail }) => {
+            const index = this.Components.findIndex(([compName]) => compName === detail.key);
+
+            if (detail.operation === "add" && index === -1) {
+                this.Components.push([detail.key, detail.value]);
+            } else if (detail.operation === "remove" && index >= 0) {
+                this.Components.splice(index, 1);
+            }
+
             this.render();
         });
     }
