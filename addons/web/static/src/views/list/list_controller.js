@@ -17,6 +17,7 @@ import { useSetupView } from "@web/views/view_hook";
 import { ViewButton } from "@web/views/view_button/view_button";
 import { useViewButtons } from "@web/views/view_button/view_button_hook";
 import { ExportDataDialog } from "@web/views/view_dialogs/export_data_dialog";
+import framework from "web.framework";
 
 import { Component, onWillStart, useSubEnv, useEffect, useRef } from "@odoo/owl";
 
@@ -344,6 +345,7 @@ export class ListController extends Component {
     }
 
     async downloadExport(fields, import_compat, format) {
+        framework.blockUI()
         let ids = false;
         if (!this.isDomainSelected) {
             const resIds = await this.getSelectedResIds();
@@ -372,6 +374,7 @@ export class ListController extends Component {
             },
             url: `/web/export/${format}`,
         });
+        framework.unblockUI()
     }
 
     async getExportedFields(model, import_compat, parentParams) {
