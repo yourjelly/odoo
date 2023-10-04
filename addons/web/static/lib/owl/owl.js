@@ -329,6 +329,29 @@
     function markup(value) {
         return new Markup(value);
     }
+    function possiblySync(computation, onSuccess, onError) {
+        try {
+            let result;
+            if (onError) {
+                try {
+                    result = computation();
+                }
+                catch (e) {
+                    return onError(e);
+                }
+            }
+            else {
+                result = computation();
+            }
+            if (typeof (result === null || result === void 0 ? void 0 : result.then) === "function") {
+                return result.then(onSuccess, onError);
+            }
+            return onSuccess(result);
+        }
+        catch (e) {
+            return Promise.reject(e);
+        }
+    }
 
     function createEventHandler(rawEvent) {
         const eventName = rawEvent.split(".")[0];
@@ -2361,22 +2384,25 @@
             this.app.scheduler.addFiber(fiber);
             this.initiateRender(fiber);
         }
-        async initiateRender(fiber) {
+        initiateRender(fiber) {
             this.fiber = fiber;
             if (this.mounted.length) {
                 fiber.root.mounted.push(fiber);
             }
             const component = this.component;
-            try {
-                await Promise.all(this.willStart.map((f) => f.call(component)));
-            }
-            catch (e) {
-                this.app.handleError({ node: this, error: e });
+            return possiblySync(() => {
+                const willStartResults = this.willStart.map((f) => f.call(component));
+                if (willStartResults.some((r) => typeof (r === null || r === void 0 ? void 0 : r.then) === "function")) {
+                    return Promise.all(willStartResults);
+                }
                 return;
-            }
-            if (this.status === 0 /* NEW */ && this.fiber === fiber) {
-                fiber.render();
-            }
+            }, () => {
+                if (this.status === 0 /* NEW */ && this.fiber === fiber) {
+                    fiber.render();
+                }
+            }, (e) => {
+                this.app.handleError({ node: this, error: e });
+            });
         }
         async render(deep) {
             if (this.status >= 2 /* CANCELLED */) {
@@ -2466,7 +2492,7 @@
             }
             this.status = 3 /* DESTROYED */;
         }
-        async updateAndRender(props, parentFiber) {
+        updateAndRender(props, parentFiber) {
             this.nextProps = props;
             props = Object.assign({}, props);
             // update
@@ -2485,20 +2511,26 @@
                 }
             }
             currentNode = null;
-            const prom = Promise.all(this.willUpdateProps.map((f) => f.call(component, props)));
-            await prom;
-            if (fiber !== this.fiber) {
+            return possiblySync(() => {
+                const willUpdateProps = this.willUpdateProps.map((f) => f.call(component, props));
+                if (willUpdateProps.some((p) => typeof (p === null || p === void 0 ? void 0 : p.then) === "function")) {
+                    return Promise.all(willUpdateProps);
+                }
                 return;
-            }
-            component.props = props;
-            fiber.render();
-            const parentRoot = parentFiber.root;
-            if (this.willPatch.length) {
-                parentRoot.willPatch.push(fiber);
-            }
-            if (this.patched.length) {
-                parentRoot.patched.push(fiber);
-            }
+            }, () => {
+                if (fiber !== this.fiber) {
+                    return;
+                }
+                component.props = props;
+                fiber.render();
+                const parentRoot = parentFiber.root;
+                if (this.willPatch.length) {
+                    parentRoot.willPatch.push(fiber);
+                }
+                if (this.patched.length) {
+                    parentRoot.patched.push(fiber);
+                }
+            });
         }
         /**
          * Finds a child that has dom that is not yet updated, and update it. This
@@ -6023,8 +6055,8 @@ See https://github.com/odoo/owl/blob/${hash}/doc/reference/app.md#configuration 
     Object.defineProperty(exports, '__esModule', { value: true });
 
 
-    __info__.date = '2023-09-25T11:50:11.419Z';
-    __info__.hash = '5dcee25';
+    __info__.date = '2023-10-04T10:28:14.140Z';
+    __info__.hash = '94e9788';
     __info__.url = 'https://github.com/odoo/owl';
 
 
