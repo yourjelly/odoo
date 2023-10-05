@@ -99,7 +99,6 @@ class TestFifoPrice(ValuationReconciliationTestCommon):
             })
 
         # I assign this outgoing shipment
-        outgoing_shipment.action_reset_draft()
         outgoing_shipment.action_assign()
 
         # Process the delivery of the outgoing shipment
@@ -125,7 +124,6 @@ class TestFifoPrice(ValuationReconciliationTestCommon):
             })
 
         # I assign this outgoing shipment
-        outgoing_shipment_uom.action_reset_draft()
         outgoing_shipment_uom.action_assign()
 
         # Process the delivery of the outgoing shipment
@@ -186,7 +184,6 @@ class TestFifoPrice(ValuationReconciliationTestCommon):
         })
 
         # I assign this outgoing shipment
-        outgoing_shipment_cur.action_reset_draft()
         outgoing_shipment_cur.action_assign()
 
         # Process the delivery of the outgoing shipment
@@ -209,7 +206,6 @@ class TestFifoPrice(ValuationReconciliationTestCommon):
             })
 
         # I assign this outgoing shipment
-        outgoing_shipment_ret.action_reset_draft()
         outgoing_shipment_ret.action_assign()
         res = outgoing_shipment_ret.button_validate()
         Form(self.env[res['res_model']].with_context(res['context'])).save().process()
@@ -248,7 +244,8 @@ class TestFifoPrice(ValuationReconciliationTestCommon):
 
         # Process the delivery of the first outgoing shipment
         outgoing_shipment_neg.action_confirm()
-        outgoing_shipment_neg.move_ids[0].quantity_done = 100.0
+        outgoing_shipment_neg.move_ids[0].quantity = 100.0
+        outgoing_shipment_neg.move_ids[0].picked = True
         outgoing_shipment_neg._action_done()
 
         # Check qty available = -100
@@ -274,7 +271,8 @@ class TestFifoPrice(ValuationReconciliationTestCommon):
 
         # Process the delivery of the outgoing shipments
         outgoing_shipment_neg2.action_confirm()
-        outgoing_shipment_neg2.move_ids[0].quantity_done = 400.0
+        outgoing_shipment_neg2.move_ids[0].quantity = 400.0
+        outgoing_shipment_neg2.move_ids[0].picked = True
         outgoing_shipment_neg2._action_done()
 
         # Check qty available = -500

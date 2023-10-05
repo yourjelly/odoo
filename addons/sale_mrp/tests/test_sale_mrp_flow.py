@@ -196,7 +196,9 @@ class TestSaleMrpFlow(ValuationReconciliationTestCommon):
         """
         moves_to_process = moves.filtered(lambda m: m.product_id in quantities_to_process.keys())
         for move in moves_to_process:
-            move.write({'quantity_done': quantities_to_process[move.product_id]})
+            move.write({'quantity': quantities_to_process[move.product_id],
+                        'picked': True
+                        })
 
     def _assert_quantities(self, moves, quantities_to_process):
         """ Helper to check expected quantities based on a dict following this structure :
@@ -231,7 +233,7 @@ class TestSaleMrpFlow(ValuationReconciliationTestCommon):
             move._action_confirm()
             move._action_assign()
             move_line = move.move_line_ids[0]
-            move_line.qty_done = qty_to_process[comp][0]
+            move_line.quantity = qty_to_process[comp][0]
             move._action_done()
 
     def test_00_sale_mrp_flow(self):
@@ -549,7 +551,7 @@ class TestSaleMrpFlow(ValuationReconciliationTestCommon):
 
         # deliver partially (1 of each instead of 5), check the so's invoice_status and delivered quantities
         pick = so.picking_ids
-        pick.move_ids.write({'quantity_done': 1})
+        pick.move_ids.write({'quantity': 1, 'picked': True})
         wiz_act = pick.button_validate()
         wiz = Form(self.env[wiz_act['res_model']].with_context(wiz_act['context'])).save()
         wiz.process()
@@ -561,9 +563,9 @@ class TestSaleMrpFlow(ValuationReconciliationTestCommon):
         pick_2 = so.picking_ids.filtered('backorder_id')
         for move in pick_2.move_ids:
             if move.product_id.id == product_desk_bolt.id:
-                move.write({'quantity_done': 19})
+                move.write({'quantity': 19, 'picked': True})
             else:
-                move.write({'quantity_done': 4})
+                move.write({'quantity': 4, 'picked': True})
         pick_2.button_validate()
 
         del_qty = sum(sol.qty_delivered for sol in so.order_line)
@@ -762,7 +764,7 @@ class TestSaleMrpFlow(ValuationReconciliationTestCommon):
 
         # Process only x6 each componenent in the picking
         # Then create a backorder for the missing components
-        backorder_1.move_ids.write({'quantity_done': 6})
+        backorder_1.move_ids.write({'quantity': 6, 'picked': True})
         wiz_act = backorder_1.button_validate()
         wiz = Form(self.env[wiz_act['res_model']].with_context(wiz_act['context'])).save().process()
 
@@ -778,7 +780,7 @@ class TestSaleMrpFlow(ValuationReconciliationTestCommon):
         # Process x3 more unit of each components :
         # - Now only 3 kits should be delivered
         # - A backorder will be created, the SO should have 3 picking_ids linked to it.
-        backorder_2.move_ids.write({'quantity_done': 3})
+        backorder_2.move_ids.write({'quantity': 3, 'picked': True})
 
         wiz_act = backorder_2.button_validate()
         wiz = Form(self.env[wiz_act['res_model']].with_context(wiz_act['context'])).save().process()
@@ -870,7 +872,7 @@ class TestSaleMrpFlow(ValuationReconciliationTestCommon):
 
         # Process only 7 units of each component
         qty_to_process = 7
-        move_ids.write({'quantity_done': qty_to_process})
+        move_ids.write({'quantity': qty_to_process, 'picked': True})
 
         # Create a backorder for the missing componenents
         wiz_act = picking_original.button_validate()
@@ -995,7 +997,8 @@ class TestSaleMrpFlow(ValuationReconciliationTestCommon):
         # Process all components except one of each
         for move in return_of_return_pick.move_ids:
             move.write({
-                'quantity_done': expected_quantities[move.product_id] - 1,
+                'quantity': expected_quantities[move.product_id] - 1,
+                'picked': True,
                 'to_refund': True
             })
 
@@ -1702,7 +1705,7 @@ class TestSaleMrpFlow(ValuationReconciliationTestCommon):
 
         # Validate delivery
         pick = order.picking_ids
-        pick.move_ids.write({'quantity_done': 1})
+        pick.move_ids.write({'quantity': 1, 'picked': True})
         pick.button_validate()
         qty_del_validated = sum(sol.qty_delivered for sol in order.order_line)
         self.assertEqual(qty_del_validated, 1.0, 'The order went from warehouse to client, so it has been delivered')
@@ -1718,7 +1721,7 @@ class TestSaleMrpFlow(ValuationReconciliationTestCommon):
             })
         res = return_wiz.create_returns()
         return_pick = self.env['stock.picking'].browse(res['res_id'])
-        return_pick.move_line_ids.qty_done = 1
+        return_pick.move_line_ids.quantity = 1
         return_pick.button_validate()  # validate return
 
         # Delivered quantities to the client should be 0
@@ -2139,7 +2142,7 @@ class TestSaleMrpFlow(ValuationReconciliationTestCommon):
 
         delivery = so.picking_ids
         for m in delivery.move_ids:
-            m.quantity_done = m.product_uom_qty
+            m.write({'quantity': m.product_uom_qty, 'picked': True})
         delivery.button_validate()
 
         self.assertEqual(delivery.state, 'done')
@@ -2150,7 +2153,7 @@ class TestSaleMrpFlow(ValuationReconciliationTestCommon):
         return_picking_id, dummy = return_wizard._create_returns()
         return_picking = self.env['stock.picking'].browse(return_picking_id)
         for m in return_picking.move_ids:
-            m.quantity_done = m.product_uom_qty
+            m.write({'quantity': m.product_uom_qty, 'picked': True})
         return_picking.button_validate()
 
         self.assertEqual(return_picking.state, 'done')
@@ -2197,7 +2200,7 @@ class TestSaleMrpFlow(ValuationReconciliationTestCommon):
             'price_unit': p,
         } for p in [10, 50]])
         in_moves._action_confirm()
-        in_moves.quantity_done = 1
+        in_moves.write({'quantity': 1, 'picked': True})
         in_moves._action_done()
 
         so = self.env['sale.order'].create({
@@ -2215,7 +2218,7 @@ class TestSaleMrpFlow(ValuationReconciliationTestCommon):
         so.action_confirm()
 
         picking = so.picking_ids
-        picking.move_ids.quantity_done = 1.0
+        picking.move_ids.write({'quantity': 1.0, 'picked': True})
         picking.button_validate()
 
         invoice01 = so._create_invoices()
@@ -2279,7 +2282,7 @@ class TestSaleMrpFlow(ValuationReconciliationTestCommon):
                 })],
         })
         so.action_confirm()
-        so.picking_ids.move_line_ids.qty_done = 1
+        so.picking_ids.move_line_ids.quantity = 1
         so.picking_ids.button_validate()
 
         invoice = so._create_invoices()
@@ -2310,7 +2313,7 @@ class TestSaleMrpFlow(ValuationReconciliationTestCommon):
             self.bom_kit_1.unlink()
 
         for move in so.order_line.move_ids:
-            move.quantity_done = move.product_uom_qty
+            move.write({'quantity': move.product_uom_qty, 'picked': True})
         so.picking_ids.button_validate()
 
         self.assertEqual(so.picking_ids.state, 'done')

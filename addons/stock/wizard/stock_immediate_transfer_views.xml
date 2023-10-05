@@ -5,8 +5,8 @@
         <field name="model">stock.immediate.transfer</field>
         <field name="arch" type="xml">
             <form string="Immediate transfer?">
-                <p>Do you want to validate all <b>reserved</b> quantities?</p>
-                <p>For partial quantities fill in the done column</p>
+                <p>Do you want to validate all quantities?</p>
+                <p>For partial quantities check in the picked column</p>
 
                 <!-- Added to ensure a correct default_get behavior
 

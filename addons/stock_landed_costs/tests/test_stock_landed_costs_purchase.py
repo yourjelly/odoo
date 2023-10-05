@@ -21,7 +21,6 @@ class TestLandedCosts(TestStockLandedCostsCommon):
             'picking_type_id': cls.warehouse.in_type_id.id,
             'location_id': cls.supplier_location_id,
             'state': 'draft',
-            'immediate_transfer': False,
             'location_dest_id': cls.warehouse.lot_stock_id.id})
         cls.Move.create({
             'name': cls.product_refrigerator.name,
@@ -45,7 +44,6 @@ class TestLandedCosts(TestStockLandedCostsCommon):
             'picking_type_id': cls.warehouse.out_type_id.id,
             'location_id': cls.warehouse.lot_stock_id.id,
             'state': 'draft',
-            'immediate_transfer': False,
             'location_dest_id': cls.customer_location_id})
         cls.Move.create({
             'name': cls.product_refrigerator.name,
@@ -298,7 +296,6 @@ class TestLandedCosts(TestStockLandedCostsCommon):
     def _process_incoming_shipment(self):
         """ Two product incoming shipment. """
         # Confirm incoming shipment.
-        self.picking_in.action_reset_draft()
         self.picking_in.action_confirm()
         # Transfer incoming shipment
         res_dict = self.picking_in.button_validate()
@@ -309,7 +306,6 @@ class TestLandedCosts(TestStockLandedCostsCommon):
     def _process_outgoing_shipment(self):
         """ One product Outgoing shipment. """
         # Confirm outgoing shipment.
-        self.picking_out.action_reset_draft()
         self.picking_out.action_confirm()
         # Product assign to outgoing shipments
         self.picking_out.action_assign()

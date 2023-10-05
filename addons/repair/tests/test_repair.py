@@ -271,15 +271,15 @@ class TestRepair(common.TransactionCase):
         # under_repair -> done (action_repair_end -> action_repair_done)
             # PRE
                 # state == under_repair !-> UserError
-                # lines' qty_done >= lines' product_uom_qty !-> Warning
+                # lines' quantity >= lines' product_uom_qty !-> Warning
                 # line tracked => line has lot_ids !-> ValidationError
             # POST
-                # lines with qty_done == 0 are cancelled (related sol product_uom_qty is consequently set to 0)
+                # lines with quantity == 0 are cancelled (related sol product_uom_qty is consequently set to 0)
                 # repair.product_id => repair.move_id
                 # move_ids.state == (done || cancel)
                 # state == done
-                # move_ids with qty_done (LOWER or HIGHER than) product_uom_qty MUST NOT be splitted
-        # Any line with qty_done < product_uom_qty => Warning
+                # move_ids with quantity (LOWER or HIGHER than) product_uom_qty MUST NOT be splitted
+        # Any line with quantity < product_uom_qty => Warning
         end_action = repair.action_repair_end()
         self.assertEqual(end_action.get("res_model"), "repair.warn.uncomplete.move")
         warn_uncomplete_wizard = Form(
@@ -293,10 +293,10 @@ class TestRepair(common.TransactionCase):
 
         # LineB with lots
         move_line = lineB.move_line_ids[0]
-        move_line.qty_done = move_line.reserved_uom_qty
+        move_line.quantity = move_line.reserved_uom_qty
 
-        lineA.quantity_done = 2  # qty_done = product_uom_qty
-        lineC.quantity_done = 2  # qty_done > product_uom_qty (No warning)
+        lineA.quantity_done = 2  # quantity = product_uom_qty
+        lineC.quantity_done = 2  # quantity > product_uom_qty (No warning)
         lineD = self._create_simple_part_move(repair.id, 0.0)
         repair.move_ids |= lineD  # product_uom_qty = 0   : state is cancelled
 

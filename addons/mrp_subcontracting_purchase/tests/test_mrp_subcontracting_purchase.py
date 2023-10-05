@@ -98,7 +98,7 @@ class MrpSubcontractingPurchaseTest(TestMrpSubcontractingCommon):
 
         # check that a neg qty can't proprogate once receipt is done
         for move in receipt.move_ids:
-            move.move_line_ids.qty_done = move.product_qty
+            move.move_line_ids.quantity = move.product_qty
         receipt.button_validate()
         self.assertEqual(receipt.state, 'done')
         self.assertEqual(sub_mos.state, 'done')

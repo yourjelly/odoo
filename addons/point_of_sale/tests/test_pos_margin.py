@@ -289,7 +289,7 @@ class TestPosMargin(TestPoSCommon):
         }).sudo()
         move1._action_confirm()
         move1._action_assign()
-        move1.move_line_ids.qty_done = 2
+        move1.move_line_ids.quantity = 2
         move1._action_done()
 
         move2 = self.env['stock.move'].create({
@@ -303,7 +303,7 @@ class TestPosMargin(TestPoSCommon):
         }).sudo()
         move2._action_confirm()
         move2._action_assign()
-        move2.move_line_ids.qty_done = 1
+        move2.move_line_ids.quantity = 1
         move2._action_done()
 
         # open a session
@@ -349,7 +349,7 @@ class TestPosMargin(TestPoSCommon):
         }).sudo()
         move1._action_confirm()
         move1._action_assign()
-        move1.move_line_ids.qty_done = 2
+        move1.move_line_ids.quantity = 2
         move1._action_done()
 
         move2 = self.env['stock.move'].create({
@@ -363,7 +363,7 @@ class TestPosMargin(TestPoSCommon):
         }).sudo()
         move2._action_confirm()
         move2._action_assign()
-        move2.move_line_ids.qty_done = 1
+        move2.move_line_ids.quantity = 1
         move2._action_done()
 
         # open a session

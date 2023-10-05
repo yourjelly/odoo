@@ -92,7 +92,7 @@ class TestStockValuationLCCommon(TestStockLandedCostsCommon):
 
         in_move._action_confirm()
         in_move._action_assign()
-        in_move.move_line_ids.qty_done = quantity
+        in_move.move_line_ids.quantity = quantity
         in_move._action_done()
 
         self.days += 1
@@ -129,7 +129,7 @@ class TestStockValuationLCCommon(TestStockLandedCostsCommon):
                 'location_id': out_move.location_id.id,
                 'location_dest_id': out_move.location_dest_id.id,
             })
-        out_move.move_line_ids.qty_done = quantity
+        out_move.move_line_ids.quantity = quantity
         out_move._action_done()
 
         self.days += 1
@@ -183,7 +183,7 @@ class TestStockValuationLCFIFO(TestStockValuationLCCommon):
     def test_alreadyout_3(self):
         move1 = self._make_in_move(self.product1, 10, unit_cost=10, create_picking=True)
         move2 = self._make_out_move(self.product1, 10)
-        move1.move_line_ids.qty_done = 15
+        move1.move_line_ids.quantity = 15
         lc = self._make_lc(move1, 60)
 
         self.assertEqual(self.product1.value_svl, 70)

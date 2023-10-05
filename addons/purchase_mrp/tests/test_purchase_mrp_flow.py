@@ -212,7 +212,7 @@ class TestPurchaseMrpFlow(TransactionCase):
             move._action_confirm()
             move._action_assign()
             move_line = move.move_line_ids[0]
-            move_line.qty_done = qty_to_process[comp][0]
+            move_line.quantity = qty_to_process[comp][0]
             move._action_done()
 
     def test_kit_component_cost(self):
@@ -347,7 +347,7 @@ class TestPurchaseMrpFlow(TransactionCase):
 
         # Process only 7 units of each component
         qty_to_process = 7
-        move_ids.write({'quantity_done': qty_to_process})
+        move_ids.write({'quantity': qty_to_process, 'picked': True})
 
         # Create a backorder for the missing componenents
         pick = po.picking_ids[0]

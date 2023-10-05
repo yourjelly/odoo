@@ -252,9 +252,9 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
         self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'PosSettleOrderRealTime', login="accountman")
         self.main_pos_config.current_session_id.close_session_from_ui()
         pos_order = self.env['pos.order'].search([], order='id desc', limit=1)
-        self.assertEqual(pos_order.picking_ids.move_line_ids[0].qty_done, 2)
+        self.assertEqual(pos_order.picking_ids.move_line_ids[0].quantity, 2)
         self.assertEqual(pos_order.picking_ids.move_line_ids[0].location_id.id, self.shelf_1.id)
-        self.assertEqual(pos_order.picking_ids.move_line_ids[1].qty_done, 2)
+        self.assertEqual(pos_order.picking_ids.move_line_ids[1].quantity, 2)
         self.assertEqual(pos_order.picking_ids.move_line_ids[1].location_id.id, self.shelf_2.id)
         self.assertEqual(sale_order.order_line.move_ids.move_lines_count, 0)
 

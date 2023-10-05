@@ -133,7 +133,7 @@ class TestAngloSaxonValuationPurchaseMRP(TransactionCase):
         po.button_confirm()
 
         receipt = po.picking_ids
-        receipt.move_line_ids.qty_done = 1
+        receipt.move_line_ids.quantity = 1
         receipt.button_validate()
 
         self.assertEqual(receipt.state, 'done')
@@ -156,7 +156,7 @@ class TestAngloSaxonValuationPurchaseMRP(TransactionCase):
             })],
         })
         delivery.action_confirm()
-        delivery.move_ids.move_line_ids.qty_done = 1
+        delivery.move_ids.move_line_ids.quantity = 1
         delivery.button_validate()
 
         self.assertEqual(component01.stock_valuation_layer_ids.mapped('value'), [25, -25])
@@ -173,7 +173,7 @@ class TestAngloSaxonValuationPurchaseMRP(TransactionCase):
         wizard = wizard_form.save()
         action = wizard.create_returns()
         return_picking = self.env["stock.picking"].browse(action["res_id"])
-        return_picking.move_ids.move_line_ids.qty_done = 1
+        return_picking.move_ids.move_line_ids.quantity = 1
         return_picking.button_validate()
 
         self.assertEqual(component01.stock_valuation_layer_ids.mapped('value'), [25, -25, 25])

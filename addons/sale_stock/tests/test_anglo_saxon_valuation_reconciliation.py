@@ -63,7 +63,7 @@ class TestValuationReconciliationCommon(ValuationReconciliationTestCommon):
         })
         move1._action_confirm()
         move1._action_assign()
-        move1.move_line_ids.qty_done = 11
+        move1.move_line_ids.quantity = 11
         move1._action_done()
 
 

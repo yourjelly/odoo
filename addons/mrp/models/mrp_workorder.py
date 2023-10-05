@@ -831,7 +831,7 @@ class MrpWorkorder(models.Model):
                 if self.product_id.tracking == 'serial':
                     raise UserError(_('You cannot produce the same serial number twice.'))
                 move_line.reserved_uom_qty += self.qty_producing
-                move_line.qty_done += self.qty_producing
+                move_line.quantity += self.qty_producing
             else:
                 quantity = self.product_uom_id._compute_quantity(self.qty_producing, self.product_id.uom_id, rounding_method='HALF-UP')
                 putaway_location = production_move.location_dest_id._get_putaway_strategy(self.product_id, quantity)
@@ -841,15 +841,13 @@ class MrpWorkorder(models.Model):
                     'lot_id': self.finished_lot_id.id,
                     'reserved_uom_qty': self.qty_producing,
                     'product_uom_id': self.product_uom_id.id,
-                    'qty_done': self.qty_producing,
+                    'quantity': self.qty_producing,
                     'location_id': production_move.location_id.id,
                     'location_dest_id': putaway_location.id,
                 })
         else:
             rounding = production_move.product_uom.rounding
-            production_move._set_quantity_done(
-                float_round(self.qty_producing, precision_rounding=rounding)
-            )
+            production_move.quantity = float_round(self.qty_producing, precision_rounding=rounding)
 
     def _should_start_timer(self):
         return True

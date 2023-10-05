@@ -201,7 +201,6 @@ class TestDropship(common.TransactionCase):
         self.assertTrue(purchase, "an RFQ should have been created")
         purchase.button_confirm()
         sale_order.picking_ids.move_line_ids.lot_name = '123'
-        sale_order.picking_ids.action_set_quantities_to_reservation()
         sale_order.picking_ids.button_validate()
         self.assertEqual(sale_order.picking_ids.state, 'done')
         self.assertEqual(sale_order.picking_ids.move_line_ids.lot_id.name, '123')

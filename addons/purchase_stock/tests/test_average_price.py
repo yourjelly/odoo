@@ -97,7 +97,6 @@ class TestAveragePrice(ValuationReconciliationTestCommon):
             })
 
         # Assign this outgoing shipment and process the delivery
-        outgoing_shipment.action_reset_draft()
         outgoing_shipment.action_assign()
         res = outgoing_shipment.button_validate()
         Form(self.env['stock.immediate.transfer'].with_context(res['context'])).save().process()
@@ -163,7 +162,7 @@ class TestAveragePrice(ValuationReconciliationTestCommon):
         self.assertEqual(purchase_order.order_line[0].qty_invoiced, 1.0, 'QTY invoiced should have been set to 1 on the purchase order line')
 
         picking = purchase_order.picking_ids[0]
-        picking.action_set_quantities_to_reservation()
+        picking.move_ids.picked = True
         # clear cash to ensure access rights verification
         self.env.invalidate_all()
         picking.with_user(self.res_users_stock_user).button_validate()

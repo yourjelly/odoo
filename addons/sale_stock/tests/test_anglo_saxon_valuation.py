@@ -648,7 +648,7 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
         # Create and confirm a sale order for 2@12
         sale_order = self._so_and_confirm_two_units()
         # Deliver both products (there should be two SML)
-        sale_order.picking_ids.move_line_ids.qty_done = 1
+        sale_order.picking_ids.move_line_ids.quantity = 1
         sale_order.picking_ids.button_validate()
 
         # Invoice one by one
@@ -687,7 +687,7 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
         self.env['stock.quant']._update_available_quantity(self.product, self.company_data['default_warehouse'].lot_stock_id, 2, owner_id=self.partner_b)
 
         sale_order = self._so_and_confirm_two_units()
-        sale_order.picking_ids.move_line_ids.qty_done = 2
+        sale_order.picking_ids.move_line_ids.quantity = 2
         sale_order.picking_ids.button_validate()
 
         invoice = sale_order._create_invoices()

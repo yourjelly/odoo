@@ -506,24 +506,21 @@ class TestSaleStock(TestSaleCommon, ValuationReconciliationTestCommon):
             'move_line_ids': [
                 (0, 0, {
                     'product_id': item1.id,
-                    'reserved_uom_qty': 0,
-                    'qty_done': 1,
+                            'quantity': 1,
                     'product_uom_id': uom_dozen.id,
                     'location_id': so1.picking_ids.location_id.id,
                     'location_dest_id': so1.picking_ids.location_dest_id.id,
                 }),
                 (0, 0, {
                     'product_id': item1.id,
-                    'reserved_uom_qty': 0,
-                    'qty_done': 1,
+                            'quantity': 1,
                     'product_uom_id': uom_dozen.id,
                     'location_id': so1.picking_ids.location_id.id,
                     'location_dest_id': so1.picking_ids.location_dest_id.id,
                 }),
                 (0, 0, {
                     'product_id': item1.id,
-                    'reserved_uom_qty': 0,
-                    'qty_done': 1,
+                            'quantity': 1,
                     'product_uom_id': uom_dozen.id,
                     'location_id': so1.picking_ids.location_id.id,
                     'location_dest_id': so1.picking_ids.location_dest_id.id,
@@ -748,10 +745,10 @@ class TestSaleStock(TestSaleCommon, ValuationReconciliationTestCommon):
 
         picking_form = Form(picking)
         with picking_form.move_line_ids_without_package.edit(0) as move:
-            move.qty_done = 5
+            move.quantity = 5
         with picking_form.move_line_ids_without_package.new() as new_move:
             new_move.product_id = product_inv_on_order
-            new_move.qty_done = 5
+            new_move.quantity = 5
         picking = picking_form.save()
         picking.button_validate()
 
@@ -788,10 +785,10 @@ class TestSaleStock(TestSaleCommon, ValuationReconciliationTestCommon):
 
         picking_form = Form(picking)
         with picking_form.move_line_ids_without_package.edit(0) as move:
-            move.qty_done = 5
+            move.quantity = 5
         with picking_form.move_line_ids_without_package.new() as new_move:
             new_move.product_id = product_inv_on_delivered
-            new_move.qty_done = 5
+            new_move.quantity = 5
         picking = picking_form.save()
         picking.button_validate()
 
@@ -837,13 +834,13 @@ class TestSaleStock(TestSaleCommon, ValuationReconciliationTestCommon):
 
         picking_form = Form(pick)
         with picking_form.move_line_ids_without_package.edit(0) as move:
-            move.qty_done = 10
+            move.quantity = 10
         pick = picking_form.save()
         pick.button_validate()
 
         picking_form = Form(delivery)
         with picking_form.move_line_ids_without_package.edit(0) as move:
-            move.qty_done = 10
+            move.quantity = 10
         delivery = picking_form.save()
         delivery.button_validate()
 
@@ -865,19 +862,19 @@ class TestSaleStock(TestSaleCommon, ValuationReconciliationTestCommon):
 
         picking_form = Form(pick)
         with picking_form.move_line_ids_without_package.edit(0) as move:
-            move.qty_done = 10
+            move.quantity = 10
         with picking_form.move_line_ids_without_package.new() as new_move:
             new_move.product_id = product_inv_on_order
-            new_move.qty_done = 10
+            new_move.quantity = 10
         pick = picking_form.save()
         pick.button_validate()
 
         picking_form = Form(delivery)
         with picking_form.move_line_ids_without_package.edit(0) as move:
-            move.qty_done = 10
+            move.quantity = 10
         with picking_form.move_line_ids_without_package.new() as new_move:
             new_move.product_id = product_inv_on_order
-            new_move.qty_done = 10
+            new_move.quantity = 10
         delivery = picking_form.save()
         delivery.button_validate()
 
@@ -1369,11 +1366,11 @@ class TestSaleStock(TestSaleCommon, ValuationReconciliationTestCommon):
         so.action_confirm()
         pick01, ship01 = so.picking_ids
 
-        pick01.move_line_ids.qty_done = 6
+        pick01.move_line_ids.quantity = 6
         pick01._action_done()
         pick02 = pick01.backorder_ids
 
-        ship01.move_line_ids[0].qty_done = 6
+        ship01.move_line_ids[0].quantity = 6
         ship01._action_done()
         ship02 = ship01.backorder_ids
 

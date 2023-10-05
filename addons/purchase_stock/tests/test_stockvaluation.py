@@ -127,7 +127,8 @@ class TestStockValuation(TransactionCase):
         last_po_id.button_confirm()
         picking = last_po_id.picking_ids[0]
         move = picking.move_ids[0]
-        move.quantity_done = move.product_uom_qty
+        move.quantity = move.product_uom_qty
+        move.picked = True
         picking.button_validate()
 
         self.assertEqual(move.stock_valuation_layer_ids.unit_cost,
@@ -245,14 +246,16 @@ class TestStockValuation(TransactionCase):
 
         picking1 = po1.picking_ids[0]
         move1 = picking1.move_ids[0]
-        move1.quantity_done = 15
+        move1.quantity = 15
+        move1.picked = True
         picking1.button_validate()
 
         # there should be only one move
         self.assertEqual(len(picking1.move_ids), 1)
         self.assertEqual(move1.price_unit, 100)
         self.assertEqual(move1.stock_valuation_layer_ids.unit_cost, 100)
-        self.assertEqual(move1.product_qty, 15)
+        self.assertEqual(move1.product_qty, 10)
+        self.assertEqual(move1.quantity, 15)
         self.assertEqual(self.product1.value_svl, 1500)
 
     def test_backorder_fifo_1(self):
@@ -277,7 +280,8 @@ class TestStockValuation(TransactionCase):
 
         picking1 = po1.picking_ids[0]
         move1 = picking1.move_ids[0]
-        move1.quantity_done = 5
+        move1.quantity = 5
+        move1.picked = True
         res_dict = picking1.button_validate()
         self.assertEqual(res_dict['res_model'], 'stock.backorder.confirmation')
         wizard = self.env[(res_dict.get('res_model'))].browse(res_dict.get('res_id')).with_context(res_dict['context'])
@@ -411,7 +415,8 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
         wizard.product_return_moves.quantity = qty
         action = wizard.create_returns()
         return_picking = self.env["stock.picking"].browse(action["res_id"])
-        return_picking.move_ids.move_line_ids.qty_done = qty
+        return_picking.move_ids.move_line_ids.quantity = qty
+        return_picking.move_ids.picked = True
         return_picking.button_validate()
         return return_picking
 
@@ -506,7 +511,8 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
         })
         po1.button_confirm()
         receipt_po1 = po1.picking_ids[0]
-        receipt_po1.move_ids.quantity_done = 10
+        receipt_po1.move_ids.quantity = 10
+        receipt_po1.move_ids.picked = True
         receipt_po1.button_validate()
 
         move_form = Form(self.env['account.move'].with_context(default_move_type='in_invoice'))
@@ -532,7 +538,8 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
         })
         po2.button_confirm()
         receipt_po2 = po2.picking_ids[0]
-        receipt_po2.move_ids.quantity_done = 10
+        receipt_po2.move_ids.quantity = 10
+        receipt_po2.move_ids.picked = True
         receipt_po2.button_validate()
 
         move_form = Form(self.env['account.move'].with_context(default_move_type='in_invoice'))
@@ -552,7 +559,8 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
         stock_return_picking.product_return_moves.quantity = 10
         stock_return_picking_action = stock_return_picking.create_returns()
         return_pick = self.env['stock.picking'].browse(stock_return_picking_action['res_id'])
-        return_pick.move_ids[0].move_line_ids[0].qty_done = 10
+        return_pick.move_ids[0].move_line_ids[0].quantity = 10
+        return_pick.move_ids[0].picked = True
         return_pick.button_validate()
 
         # valuation of product1 should be 200 as the first items will be sent out
@@ -598,7 +606,8 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
 
         # Receive the goods
         receipt = order.picking_ids[0]
-        receipt.move_ids.quantity_done = 1
+        receipt.move_ids.quantity = 1
+        receipt.move_ids.picked = True
         receipt.button_validate()
 
         stock_valuation_aml = self.env['account.move.line'].search([('account_id', '=', self.stock_valuation_account.id)])
@@ -665,7 +674,8 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
         })
         po1.button_confirm()
         receipt_po1 = po1.picking_ids[0]
-        receipt_po1.move_ids.quantity_done = 10
+        receipt_po1.move_ids.quantity = 10
+        receipt_po1.move_ids.picked = True
         receipt_po1.button_validate()
 
         # valuation of product1 should be 15 as the tax with no account set
@@ -719,7 +729,8 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
 
         # Receive the goods
         receipt = po.picking_ids[0]
-        receipt.move_line_ids.qty_done = 1
+        receipt.move_line_ids.quantity = 1
+        receipt.move_ids.picked = True
         receipt.button_validate()
 
         # Create a vendor bill
@@ -818,7 +829,8 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
 
         # Receive the goods
         receipt = po.picking_ids[0]
-        receipt.move_line_ids.qty_done = 1
+        receipt.move_line_ids.quantity = 1
+        receipt.move_ids.picked = True
         receipt.button_validate()
 
         # Create a vendor bill
@@ -1195,7 +1207,7 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
         picking = po.picking_ids
         (picking.move_ids
             .filtered(lambda l: l.purchase_line_id == line_product_avg)
-            .write({'quantity_done': 1.0}))
+            .write({'quantity': 1.0, 'picked': True}))
 
         picking.button_validate()
         # 5 Units received at rate 0.7 = 42.86
@@ -1294,7 +1306,7 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
         picking = po.picking_ids
         (picking.move_ids
             .filtered(lambda l: l.purchase_line_id == line_product_avg)
-            .write({'quantity_done': 1.0}))
+            .write({'quantity': 1.0, 'picked': True}))
 
         picking.button_validate()
         # 5 Units received at rate 2 = 42.86
@@ -1422,7 +1434,7 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
             picking = po.picking_ids
             (picking.move_ids
                 .filtered(lambda l: l.purchase_line_id == line_product_avg)
-                .write({'quantity_done': 5.0}))
+                .write({'quantity': 5.0, 'picked': True}))
 
             picking.button_validate()
             picking._action_done()  # Create Backorder
@@ -1456,7 +1468,7 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
             backorder_picking = self.env['stock.picking'].search([('backorder_id', '=', picking.id)])
             (backorder_picking.move_ids
                 .filtered(lambda l: l.purchase_line_id == line_product_avg)
-                .write({'quantity_done': 5.0}))
+                .write({'quantity': 5.0, 'picked': True}))
             backorder_picking.button_validate()
         # 5 Units invoiced at rate 2 (10) + 5 Units received at rate 0.8 (37.50) = 23.75
         self.assertAlmostEqual(product_avg.standard_price, 23.75)
@@ -1545,7 +1557,8 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
 
         # Receive the goods
         receipt = order.picking_ids[0]
-        receipt.move_ids.quantity_done = 1
+        receipt.move_ids.quantity = 1
+        receipt.move_ids.picked = True
         receipt.button_validate()
 
         # Create an invoice with a different price and a discount
@@ -1594,7 +1607,8 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
 
         # Receive the goods
         receipt = order.picking_ids[0]
-        receipt.move_ids.quantity_done = 1
+        receipt.move_ids.quantity = 1
+        receipt.move_ids.picked = True
         receipt.button_validate()
 
         # Create an invoice with a different price and a discount
@@ -1641,7 +1655,8 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
 
         # Receive the goods
         receipt = order.picking_ids[0]
-        receipt.move_ids.quantity_done = 1
+        receipt.move_ids.quantity = 1
+        receipt.move_ids.picked = True
         receipt.button_validate()
 
         # Create an invoice with a different price and a discount
@@ -1754,7 +1769,8 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
 
         # Receive 7 Hundred
         receipt01 = po.picking_ids[0]
-        receipt01.move_ids.move_line_ids.qty_done = 700
+        receipt01.move_ids.move_line_ids.quantity = 700
+        receipt01.move_ids.picked = True
         action = receipt01.button_validate()
         backorder_wizard = Form(self.env['stock.backorder.confirmation'].with_context(action['context'])).save()
         backorder_wizard.process()
@@ -1764,7 +1780,7 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
 
         # Receive 3 Hundred
         receipt02 = receipt01.backorder_ids
-        receipt02.move_ids._set_quantities_to_reservation()
+        receipt02.move_ids.picked = True
         receipt02.button_validate()
 
         expected_svl_values += [3 * 50]
@@ -1784,11 +1800,9 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
                 'location_dest_id': customer_location.id,
             })],
             'state': 'draft',
-            'immediate_transfer': False,
         })
-        delivery01.action_reset_draft()
         delivery01.action_confirm()
-        delivery01.move_ids._set_quantities_to_reservation()
+        delivery01.move_ids.picked = True
         delivery01.button_validate()
 
         expected_svl_values += [-5 * 50]
@@ -1858,11 +1872,9 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
                 'location_dest_id': customer_location.id,
             })],
             'state': 'draft',
-            'immediate_transfer': False,
         })
-        delivery02.action_reset_draft()
         delivery02.action_confirm()
-        delivery02.move_ids._set_quantities_to_reservation()
+        delivery02.move_ids.picked = True
         delivery02.button_validate()
 
         expected_svl_values += [-2 * 50 + -2 * 10]
@@ -1899,7 +1911,7 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
         po.button_confirm()
 
         receipt = po.picking_ids[0]
-        receipt.move_ids._set_quantities_to_reservation()
+        receipt.move_ids.picked = True
         receipt.button_validate()
 
         delivery = self.env['stock.picking'].create({
@@ -1914,11 +1926,9 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
                 'location_dest_id': customer_location.id,
             })],
             'state': 'draft',
-            'immediate_transfer': False,
         })
-        delivery.action_reset_draft()
         delivery.action_confirm()
-        delivery.move_ids._set_quantities_to_reservation()
+        delivery.move_ids.picked = True
         delivery.button_validate()
 
         bill01_form = Form(self.env['account.move'].with_context(default_move_type='in_invoice'))
@@ -1973,19 +1983,22 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
         po.button_confirm()
 
         receipt01 = po.picking_ids
-        receipt01.move_ids.move_line_ids.qty_done = 4
+        receipt01.move_ids.move_line_ids.quantity = 4
+        receipt01.move_ids.picked = True
         action = receipt01.button_validate()
         backorder_wizard = Form(self.env['stock.backorder.confirmation'].with_context(action['context'])).save()
         backorder_wizard.process()
 
         receipt02 = receipt01.backorder_ids
-        receipt02.move_ids.move_line_ids.qty_done = 3
+        receipt02.move_ids.move_line_ids.quantity = 3
+        receipt02.move_ids.picked = True
         action = receipt02.button_validate()
         backorder_wizard = Form(self.env['stock.backorder.confirmation'].with_context(action['context'])).save()
         backorder_wizard.process()
 
         receipt03 = receipt02.backorder_ids
-        receipt03.move_ids.move_line_ids.qty_done = 5
+        receipt03.move_ids.move_line_ids.quantity = 5
+        receipt03.move_ids.picked = True
         receipt03.button_validate()
 
         expected_svl_values = [40, 30, 50]
@@ -2121,7 +2134,8 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
         po.button_confirm()
 
         receipt = po.picking_ids
-        receipt.move_ids.move_line_ids.qty_done = 10
+        receipt.move_ids.move_line_ids.quantity = 10
+        receipt.move_ids.picked = True
         receipt.button_validate()
         expected_svl_values += [100.0]
         expected_svl_remaining_values += [100.0]
@@ -2149,7 +2163,8 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
             })],
         })
         delivery.action_confirm()
-        delivery.move_ids.quantity_done = 3.0
+        delivery.move_ids.quantity = 3.0
+        delivery.move_ids.picked = True
         delivery.button_validate()
         expected_svl_values += [-36.0]
         expected_svl_remaining_values += [0.0]
@@ -2185,7 +2200,8 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
             })],
         })
         delivery.action_confirm()
-        delivery.move_ids.quantity_done = 1.0
+        delivery.move_ids.quantity = 1.0
+        delivery.move_ids.picked = True
         delivery.button_validate()
         expected_svl_values += [-9.0]
         expected_svl_remaining_values += [0.0]
@@ -2274,7 +2290,8 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
         po.button_confirm()
 
         receipt = po.picking_ids
-        receipt.move_ids.move_line_ids.qty_done = 10
+        receipt.move_ids.move_line_ids.quantity = 10
+        receipt.move_ids.picked = True
         receipt.button_validate()
         expected_svl_values += [100.0]
         expected_svl_remaining_values += [100.0]
@@ -2367,13 +2384,15 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
         po.button_confirm()
 
         receipt01 = po.picking_ids
-        receipt01.move_ids.move_line_ids.qty_done = 1
+        receipt01.move_ids.move_line_ids.quantity = 1
+        receipt01.move_ids.picked = True
         action = receipt01.button_validate()
         backorder_wizard = Form(self.env['stock.backorder.confirmation'].with_context(action['context'])).save()
         backorder_wizard.process()
 
         receipt02 = receipt01.backorder_ids
-        receipt02.move_ids.move_line_ids.qty_done = 1
+        receipt02.move_ids.move_line_ids.quantity = 1
+        receipt02.move_ids.picked = True
         receipt02.button_validate()
 
         bill01 = self._bill(po, 1.0, 11)
@@ -2471,7 +2490,8 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
         po.button_confirm()
         picking = po.picking_ids[0]
         move = picking.move_ids[0]
-        move.quantity_done = 10
+        move.quantity = 10
+        move.picked = True
         res_dict = picking.button_validate()
         self.assertEqual(res_dict['res_model'], 'stock.backorder.confirmation')
         wizard = self.env[(res_dict.get('res_model'))].browse(res_dict.get('res_id')).with_context(res_dict['context'])
@@ -2482,7 +2502,8 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
 
         picking2 = po.picking_ids.filtered(lambda p: p.backorder_id)
         move2 = picking2.move_ids[0]
-        move2.quantity_done = 2
+        move2.quantity = 2
+        move2.picked = True
         picking2.button_validate()
         self.assertAlmostEqual(move2.stock_valuation_layer_ids.unit_cost, price_unit_USD)
 
@@ -2515,7 +2536,8 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
         po.button_confirm()
         picking = po.picking_ids[0]
         move = picking.move_ids[0]
-        move.quantity_done = 10
+        move.quantity = 10
+        move.picked = True
         res_dict = picking.button_validate()
         self.assertEqual(res_dict['res_model'], 'stock.backorder.confirmation')
         wizard = self.env[(res_dict.get('res_model'))].browse(res_dict.get('res_id')).with_context(res_dict['context'])
@@ -2526,6 +2548,7 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
 
         picking2 = po.picking_ids.filtered(lambda p: p.backorder_id)
         move2 = picking2.move_ids[0]
-        move2.quantity_done = 2
+        move2.quantity = 2
+        move2.picked = True
         picking2.button_validate()
         self.assertAlmostEqual(move2.stock_valuation_layer_ids.unit_cost, price_unit_USD)

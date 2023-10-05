@@ -597,6 +597,8 @@ class StockQuant(models.Model):
 
     @api.model
     def _get_removal_strategy(self, product_id, location_id):
+        product_id = product_id.sudo()
+        location_id = location_id.sudo()
         if product_id.categ_id.removal_strategy_id:
             return product_id.categ_id.removal_strategy_id.method
         loc = location_id
@@ -990,8 +992,8 @@ class StockQuant(models.Model):
         return quants_by_product
 
     @api.model
-    def _update_available_quantity(self, product_id, location_id, quantity, lot_id=None, package_id=None, owner_id=None, in_date=None):
-        """ Increase or decrease `reserved_quantity` of a set of quants for a given set of
+    def _update_available_quantity(self, product_id, location_id, quantity=False, reserved_quantity=False, lot_id=None, package_id=None, owner_id=None, in_date=None):
+        """ Increase or decrease `quantity` or 'reserved quantity' of a set of quants for a given set of
         product_id/location_id/lot_id/package_id/owner_id.
 
         :param product_id:
@@ -1005,6 +1007,8 @@ class StockQuant(models.Model):
                                  current datetime will be used.
         :return: tuple (available_quantity, in_date as a datetime)
         """
+        if not (quantity or reserved_quantity):
+            raise ValidationError(_('Quantity or Reserved Quantity should be set.'))
         self = self.sudo()
         quants = self._gather(product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=True)
         if lot_id and quantity > 0:
@@ -1033,39 +1037,42 @@ class StockQuant(models.Model):
                 quant = self.browse(stock_quant_result[0])
 
         if quant:
-            quant.write({
-                'quantity': quant.quantity + quantity,
-                'in_date': in_date,
-            })
+            vals = {'in_date': in_date}
+            if quantity:
+                vals['quantity'] = quant.quantity + quantity
+            if reserved_quantity:
+                vals['reserved_quantity'] = quant.reserved_quantity + reserved_quantity
+            quant.write(vals)
         else:
-            self.create({
+            vals = {
                 'product_id': product_id.id,
                 'location_id': location_id.id,
-                'quantity': quantity,
                 'lot_id': lot_id and lot_id.id,
                 'package_id': package_id and package_id.id,
                 'owner_id': owner_id and owner_id.id,
                 'in_date': in_date,
-            })
+            }
+            if quantity:
+                vals['quantity'] = quantity
+            if reserved_quantity:
+                vals['reserved_quantity'] = reserved_quantity
+            self.create(vals)
         return self._get_available_quantity(product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=False, allow_negative=True), in_date
 
-    def _update_reserved_quantity(self, product_id, location_id, quantity, lot_id=None, package_id=None, owner_id=None, strict=False):
-        """ Increase the reserved quantity, i.e. increase `reserved_quantity` for the set of quants
-        sharing the combination of `product_id, location_id` if `strict` is set to False or sharing
-        the *exact same characteristics* otherwise. Typically, this method is called when reserving
-        a move or updating a reserved move line. When reserving a chained move, the strict flag
-        should be enabled (to reserve exactly what was brought). When the move is MTS,it could take
-        anything from the stock, so we disable the flag. When editing a move line, we naturally
-        enable the flag, to reflect the reservation according to the edition.
+    @api.model
+    def _update_reserved_quantity(self, product_id, location_id, quantity, lot_id=None, package_id=None, owner_id=None, strict=True):
+        """ Increase or decrease `reserved_quantity` of a set of quants for a given set of
+        product_id/location_id/lot_id/package_id/owner_id.
 
-        :return: a list of tuples (quant, quantity_reserved) showing on which quant the reservation
-            was done and how much the system was able to reserve on it
+        :param product_id:
+        :param location_id:
+        :param quantity:
+        :param lot_id:
+        :param package_id:
+        :param owner_id:
+        :return: available_quantity
         """
-        self = self.sudo()
-        quants_to_reserve = self._get_reserve_quantity(product_id, location_id, quantity, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=strict)
-        for quant, qty_to_reserve in quants_to_reserve:
-            quant.reserved_quantity += qty_to_reserve
-        return quants_to_reserve
+        self._update_available_quantity(product_id, location_id, reserved_quantity=quantity, lot_id=lot_id, package_id=package_id, owner_id=owner_id)
 
     @api.model
     def _unlink_zero_quants(self):
@@ -1191,10 +1198,11 @@ class StockQuant(models.Model):
             'location_id': location_id.id,
             'location_dest_id': location_dest_id.id,
             'is_inventory': True,
+            'picked': True,
             'move_line_ids': [(0, 0, {
                 'product_id': self.product_id.id,
                 'product_uom_id': self.product_uom_id.id,
-                'qty_done': qty,
+                'quantity': qty,
                 'location_id': location_id.id,
                 'location_dest_id': location_dest_id.id,
                 'company_id': self.company_id.id or self.env.company.id,
@@ -1360,6 +1368,7 @@ class StockQuant(models.Model):
         moves = self.env['stock.move'].create(move_vals)
         moves._action_done()
 
+
 class QuantPackage(models.Model):
     """ Packages containing quants and/or other packages """
     _name = "stock.quant.package"
@@ -1440,7 +1449,7 @@ class QuantPackage(models.Model):
         action['domain'] = [('id', 'in', pickings.ids)]
         return action
 
-    def _check_move_lines_map_quant(self, move_lines, field):
+    def _check_move_lines_map_quant(self, move_lines):
         """ This method checks that all product (quants) of self (package) are well present in the `move_line_ids`. """
         precision_digits = self.env['decimal.precision'].precision_get('Product Unit of Measure')
 
@@ -1453,7 +1462,7 @@ class QuantPackage(models.Model):
 
         grouped_ops = {}
         for k, g in groupby(move_lines, key=_keys_groupby):
-            grouped_ops[k] = sum(self.env['stock.move.line'].concat(*g).mapped(field))
+            grouped_ops[k] = sum(self.env['stock.move.line'].concat(*g).mapped('quantity'))
 
         if any(not float_is_zero(grouped_quants.get(key, 0) - grouped_ops.get(key, 0), precision_digits=precision_digits) for key in grouped_quants) \
                 or any(not float_is_zero(grouped_ops.get(key, 0) - grouped_quants.get(key, 0), precision_digits=precision_digits) for key in grouped_ops):

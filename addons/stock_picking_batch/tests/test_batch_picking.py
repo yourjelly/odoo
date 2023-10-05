@@ -36,8 +36,6 @@ class TestBatchPicking(TransactionCase):
             'picking_type_id': cls.picking_type_out,
             'partner_id': cls.client_1.id,
             'company_id': cls.env.company.id,
-            'state': 'draft',
-            'immediate_transfer': False,
         })
 
         cls.env['stock.move'].create({
@@ -57,8 +55,6 @@ class TestBatchPicking(TransactionCase):
             'picking_type_id': cls.picking_type_out,
             'partner_id': cls.client_2.id,
             'company_id': cls.env.company.id,
-            'state': 'draft',
-            'immediate_transfer': False,
         })
 
         cls.env['stock.move'].create({
@@ -76,8 +72,6 @@ class TestBatchPicking(TransactionCase):
             'location_dest_id': cls.customer_location.id,
             'picking_type_id': cls.picking_type_out,
             'company_id': cls.env.company.id,
-            'state': 'draft',
-            'immediate_transfer': False,
         })
 
         cls.env['stock.move'].create({
@@ -154,9 +148,9 @@ class TestBatchPicking(TransactionCase):
         self.assertEqual(len(self.batch.picking_ids), 0)
         self.assertEqual(self.batch.scheduled_date, False)
 
-    def test_simple_batch_with_manual_qty_done(self):
+    def test_simple_batch_with_manual_quantity(self):
         """ Test a simple batch picking with all quantity for picking available.
-        The user set all the quantity_done on picking manually and no wizard are used.
+        The user set all the quantity picking manually and no wizard are used.
         """
         self.env['stock.quant']._update_available_quantity(self.productA, self.stock_location, 10.0)
         self.env['stock.quant']._update_available_quantity(self.productB, self.stock_location, 10.0)
@@ -170,8 +164,8 @@ class TestBatchPicking(TransactionCase):
         self.assertEqual(self.picking_client_1.state, 'assigned', 'Picking 1 should be ready')
         self.assertEqual(self.picking_client_2.state, 'assigned', 'Picking 2 should be ready')
 
-        self.picking_client_1.move_ids.quantity_done = 10
-        self.picking_client_2.move_ids.quantity_done = 10
+        self.picking_client_1.move_ids.write({'quantity': 10, 'picked': True})
+        self.picking_client_2.move_ids.write({'quantity': 10, 'picked': True})
         self.batch.action_done()
 
         self.assertEqual(self.picking_client_1.state, 'done', 'Picking 1 should be done')
@@ -190,7 +184,7 @@ class TestBatchPicking(TransactionCase):
 
     def test_simple_batch_with_wizard(self):
         """ Test a simple batch picking with all quantity for picking available.
-        The user use the wizard in order to complete automatically the quantity_done to
+        The user use the wizard in order to complete automatically the quantity to
         the initial demand (or reserved quantity in this test).
         """
         self.env['stock.quant']._update_available_quantity(self.productA, self.stock_location, 10.0)
@@ -207,7 +201,6 @@ class TestBatchPicking(TransactionCase):
 
         # There should be a wizard asking to process picking without quantity done
         immediate_transfer_wizard_dict = self.batch.action_done()
-        self.assertTrue(immediate_transfer_wizard_dict)
         immediate_transfer_wizard = Form(self.env[(immediate_transfer_wizard_dict.get('res_model'))].with_context(immediate_transfer_wizard_dict['context'])).save()
         self.assertEqual(len(immediate_transfer_wizard.pick_ids), 2)
         immediate_transfer_wizard.process()
@@ -239,8 +232,8 @@ class TestBatchPicking(TransactionCase):
         self.assertEqual(self.picking_client_1.state, 'assigned', 'Picking 1 should be ready')
         self.assertEqual(self.picking_client_2.state, 'assigned', 'Picking 2 should be ready')
 
-        self.picking_client_1.move_ids.quantity_done = 5
-        self.picking_client_2.move_ids.quantity_done = 10
+        self.picking_client_1.move_ids.write({'quantity': 5, 'picked': True})
+        self.picking_client_2.move_ids.write({'quantity': 10, 'picked': True})
 
         # There should be a wizard asking to process picking without quantity done
         back_order_wizard_dict = self.batch.action_done()
@@ -263,7 +256,7 @@ class TestBatchPicking(TransactionCase):
 
     def test_batch_with_immediate_transfer_and_backorder_wizard(self):
         """ Test a simple batch picking with only one product fully available.
-        Everything should be automatically. First one backorder in order to set quantity_done
+        Everything should be automatically. First one backorder in order to set quantity
         to reserved quantity. After a second wizard asking for a backorder for the quantity that
         has not been fully transfered.
         """
@@ -319,7 +312,7 @@ class TestBatchPicking(TransactionCase):
         self.assertEqual(self.picking_client_1.state, 'assigned', 'Picking 1 should be ready')
         self.assertEqual(self.picking_client_2.state, 'assigned', 'Picking 2 should be ready')
 
-        self.picking_client_1.move_ids.quantity_done = 5
+        self.picking_client_1.move_ids.write({'quantity': 5, 'picked': True})
         # There should be a wizard asking to make a backorder
         back_order_wizard_dict = self.batch.action_done()
         self.assertTrue(back_order_wizard_dict)
@@ -346,8 +339,9 @@ class TestBatchPicking(TransactionCase):
         self.assertEqual(self.picking_client_2.state, 'assigned', 'Picking 2 should be ready')
 
         # only do part of pickings + assign different destinations + try to pack (should get wizard to correct destination)
-        self.batch.move_line_ids.qty_done = 5
+        self.batch.move_line_ids.quantity = 5
         self.batch.move_line_ids[0].location_dest_id = self.stock_location.id
+        self.batch.move_ids.picked = True
         wizard_values = self.batch.action_put_in_pack()
         wizard = self.env[(wizard_values.get('res_model'))].browse(wizard_values.get('res_id'))
         wizard.location_dest_id = self.customer_location.id
@@ -355,12 +349,9 @@ class TestBatchPicking(TransactionCase):
 
         # a new package is made and done quantities should be in same package
         self.assertTrue(package)
-        done_qty_move_lines = self.batch.move_line_ids.filtered(lambda ml: ml.qty_done == 5)
+        done_qty_move_lines = self.batch.move_line_ids.filtered(lambda ml: ml.quantity == 5)
         self.assertEqual(done_qty_move_lines[0].result_package_id.id, package.id)
         self.assertEqual(done_qty_move_lines[1].result_package_id.id, package.id)
-
-        # not done quantities should be split into separate lines
-        self.assertEqual(len(self.batch.move_line_ids), 4)
 
         # confirm w/ backorder
         back_order_wizard_dict = self.batch.action_done()
@@ -407,8 +398,6 @@ class TestBatchPicking(TransactionCase):
             'location_dest_id': self.customer_location.id,
             'picking_type_id': type_special_out.id,
             'company_id': self.env.company.id,
-            'state': 'draft',
-            'immediate_transfer': False,
             'partner_id': partner_1.id
         })
         self.env['stock.move'].create({
@@ -426,8 +415,6 @@ class TestBatchPicking(TransactionCase):
             'location_dest_id': self.customer_location.id,
             'picking_type_id': type_special_out.id,
             'company_id': self.env.company.id,
-            'state': 'draft',
-            'immediate_transfer': False,
             'partner_id': partner_2.id
         })
         self.env['stock.move'].create({
@@ -445,8 +432,6 @@ class TestBatchPicking(TransactionCase):
             'location_dest_id': self.customer_location.id,
             'picking_type_id': type_special_out.id,
             'company_id': self.env.company.id,
-            'state': 'draft',
-            'immediate_transfer': False,
             'partner_id': partner_1.id
         })
         self.env['stock.move'].create({
@@ -470,7 +455,7 @@ class TestBatchPicking(TransactionCase):
         self.assertEqual(picking_out_1.batch_id.id, picking_out_3.batch_id.id)
         self.assertFalse(picking_out_2.batch_id)
         # If Picking 1 is validated without Picking 3, Picking 1 should be removed from the batch
-        picking_out_1.move_ids.quantity_done = 10
+        picking_out_1.move_ids.write({'quantity': 10, 'picked': True})
         picking_out_1.button_validate()
         self.assertFalse(picking_out_1.batch_id)
         self.assertEqual(len(picking_out_3.batch_id.picking_ids), 1)
@@ -548,7 +533,7 @@ class TestBatchPicking(TransactionCase):
                          procurement_2.stock_move_ids.picking_id.filtered(lambda p: p.picking_type_code == 'outgoing').batch_id)
 
         # Validate the batch so the next round of pickings become 'ready' -> Incoming pickings to Inter-warehouse -> WH2/Input
-        current_batch.move_ids.write({'quantity_done': 1})
+        current_batch.move_ids.write({'quantity': 1, 'picked': True})
         current_batch.action_done()
         done_batches = current_batch
         self.assertEqual(len(procurement_1.stock_move_ids.picking_id.batch_id), 2)
@@ -557,7 +542,7 @@ class TestBatchPicking(TransactionCase):
 
         # Validate the batch so the next round of pickings become 'ready' -> Internal pickings : WH2/Input -> WH2/Quality Control
         current_batch = procurement_1.stock_move_ids.picking_id.batch_id - done_batches
-        current_batch.move_ids.write({'quantity_done': 1})
+        current_batch.move_ids.write({'quantity': 1, 'picked': True})
         current_batch.action_done()
         done_batches += current_batch
         self.assertEqual(len(procurement_1.stock_move_ids.picking_id.batch_id), 3)
@@ -566,7 +551,7 @@ class TestBatchPicking(TransactionCase):
 
         # Validate the batch so the next round of pickings become 'ready' -> Internal pickings : WH2/Input -> WH2/Quality Control
         current_batch = procurement_1.stock_move_ids.picking_id.batch_id - done_batches
-        current_batch.move_ids.write({'quantity_done': 1})
+        current_batch.move_ids.write({'quantity': 1, 'picked': True})
         current_batch.action_done()
         self.assertEqual(len(procurement_1.stock_move_ids.picking_id.batch_id), 4)
         self.assertEqual(procurement_1.stock_move_ids.picking_id.filtered(lambda p: p.picking_type_code == 'internal' and p.location_dest_id == warehouse_2.lot_stock_id).batch_id,
@@ -593,8 +578,8 @@ class TestBatchPicking(TransactionCase):
         self.batch.action_confirm()
 
         self.batch.action_assign()
-        self.picking_client_1.move_ids.quantity_done = 10
-        self.picking_client_2.move_ids.quantity_done = 7
+        self.picking_client_1.move_ids.write({'quantity': 10, 'picked': True})
+        self.picking_client_2.move_ids.write({'quantity': 7, 'picked': True})
 
         action = self.batch.action_done()
         wizard = Form(self.env[action['res_model']].with_context(action['context'])).save()
@@ -604,8 +589,8 @@ class TestBatchPicking(TransactionCase):
         self.assertEqual(self.picking_client_2.state, 'done')
         self.assertEqual(self.batch.picking_ids, self.picking_client_1 | self.picking_client_2)
         self.assertRecordValues(self.batch.move_ids.sorted('id'), [
-            {'product_id': self.productA.id, 'product_uom_qty': 10.0, 'quantity_done': 10.0, 'state': 'done'},
-            {'product_id': self.productB.id, 'product_uom_qty': 10.0, 'quantity_done': 7.0, 'state': 'done'},
+            {'product_id': self.productA.id, 'product_uom_qty': 10.0, 'quantity': 10.0, 'state': 'done'},
+            {'product_id': self.productB.id, 'product_uom_qty': 10.0, 'quantity': 7.0, 'state': 'done'},
         ])
 
 @tagged('-at_install', 'post_install')
@@ -644,8 +629,6 @@ class TestBatchPicking02(TransactionCase):
             'location_id': loc1.id,
             'location_dest_id': loc2.id,
             'picking_type_id': self.picking_type_internal.id,
-            'state': 'draft',
-            'immediate_transfer': False,
             'move_ids': [(0, 0, {
                 'name': 'test_put_in_pack_from_multiple_pages',
                 'location_id': loc1.id,
@@ -664,14 +647,15 @@ class TestBatchPicking02(TransactionCase):
         batch = batch_form.save()
         batch.action_confirm()
 
-        pickings.move_line_ids[0].qty_done = 3
-        pickings.move_line_ids[1].qty_done = 7
+        pickings.move_line_ids[0].quantity = 3
+        pickings.move_line_ids[1].quantity = 7
+        pickings.move_ids.picked = True
         pickings.move_line_ids.result_package_id = package
 
         batch.action_done()
         self.assertRecordValues(pickings.move_ids, [
-            {'state': 'done', 'quantity_done': 3},
-            {'state': 'done', 'quantity_done': 7},
+            {'state': 'done', 'quantity': 3},
+            {'state': 'done', 'quantity': 7},
         ])
         self.assertEqual(pickings.move_line_ids.result_package_id, package)
 
@@ -685,8 +669,6 @@ class TestBatchPicking02(TransactionCase):
             'location_dest_id': loc2.id,
             'picking_type_id': self.picking_type_internal.id,
             'company_id': self.env.company.id,
-            'state': 'draft',
-            'immediate_transfer': False,
         })
         self.env['stock.move'].create({
             'name': self.productA.name,
@@ -703,8 +685,6 @@ class TestBatchPicking02(TransactionCase):
             'location_dest_id': loc2.id,
             'picking_type_id': self.picking_type_internal.id,
             'company_id': self.env.company.id,
-            'state': 'draft',
-            'immediate_transfer': False,
         })
         self.env['stock.move'].create({
             'name': self.productB.name,
@@ -717,7 +697,8 @@ class TestBatchPicking02(TransactionCase):
         })
         (picking_1 | picking_2).action_confirm()
         (picking_1 | picking_2).action_assign()
-        picking_2.move_ids.move_line_ids.write({'qty_done': 1})
+        picking_2.move_ids.move_line_ids.write({'quantity': 1})
+        picking_2.move_ids.picked = True
 
         batch = self.env['stock.picking.batch'].create({
             'name': 'Batch 1',

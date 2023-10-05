@@ -91,7 +91,7 @@ class StockMoveInvoice(AccountTestInvoicingCommon):
         self.assertEqual(moves[0].weight, 2.0, 'wrong move weight')
 
         # Ship
-        moves.move_line_ids.write({'qty_done': 2})
+        moves.move_line_ids.write({'quantity': 2})
         self.picking = self.sale_prepaid.picking_ids._action_done()
         self.assertEqual(moves[0].move_line_ids.sale_price, 1725.0, 'wrong shipping value')
 
@@ -133,7 +133,7 @@ class StockMoveInvoice(AccountTestInvoicingCommon):
         moves = self.sale_prepaid.picking_ids.move_ids
         # Ship
         for ml, lot in zip(moves.move_line_ids, serial_numbers):
-            ml.write({'qty_done': 1, 'lot_id': lot.id})
+            ml.write({'quantity': 1, 'lot_id': lot.id})
         self.picking = self.sale_prepaid.picking_ids._action_done()
         self.assertEqual(moves[0].move_line_ids[0].sale_price, 862.5, 'wrong shipping value')
 

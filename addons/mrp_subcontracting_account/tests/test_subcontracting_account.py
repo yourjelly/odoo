@@ -36,7 +36,7 @@ class TestAccountSubcontractingFlows(TestMrpSubcontractingCommon):
         })
         move1._action_confirm()
         move1._action_assign()
-        move1.move_line_ids.qty_done = 10.0
+        move1.move_line_ids.quantity = 10.0
         move1._action_done()
         move2 = self.env['stock.move'].create({
             'name': 'IN 10 units @ 20.00 per unit',
@@ -49,7 +49,7 @@ class TestAccountSubcontractingFlows(TestMrpSubcontractingCommon):
         })
         move2._action_confirm()
         move2._action_assign()
-        move2.move_line_ids.qty_done = 10.0
+        move2.move_line_ids.quantity = 10.0
         move2._action_done()
 
         all_amls_ids = self.env['account.move.line'].search([]).ids
@@ -66,7 +66,8 @@ class TestAccountSubcontractingFlows(TestMrpSubcontractingCommon):
         picking_receipt.action_confirm()
         # Suppose the additional cost changes:
         picking_receipt.move_ids.price_unit = 30.0
-        picking_receipt.move_ids.quantity_done = 1.0
+        picking_receipt.move_ids.quantity = 1.0
+        picking_receipt.move_ids.picked = True
         picking_receipt._action_done()
 
         mo = picking_receipt._get_subcontract_production()
@@ -106,7 +107,8 @@ class TestAccountSubcontractingFlows(TestMrpSubcontractingCommon):
         picking_receipt.move_ids.price_unit = 0
 
         picking_receipt.action_confirm()
-        picking_receipt.move_ids.quantity_done = 1.0
+        picking_receipt.move_ids.quantity = 1.0
+        picking_receipt.move_ids.picked = True
         picking_receipt._action_done()
 
         mo = picking_receipt._get_subcontract_production()
@@ -168,7 +170,7 @@ class TestAccountSubcontractingFlows(TestMrpSubcontractingCommon):
         })
         move1._action_confirm()
         move1._action_assign()
-        move1.move_line_ids.qty_done = 10.0
+        move1.move_line_ids.quantity = 10.0
         move1._action_done()
         move2 = self.env['stock.move'].create({
             'name': 'IN 10 units @ 20.00 per unit',
@@ -181,7 +183,7 @@ class TestAccountSubcontractingFlows(TestMrpSubcontractingCommon):
         })
         move2._action_confirm()
         move2._action_assign()
-        move2.move_line_ids.qty_done = 10.0
+        move2.move_line_ids.quantity = 10.0
         move2._action_done()
 
         all_amls_ids = self.env['account.move.line'].search([]).ids
@@ -195,7 +197,8 @@ class TestAccountSubcontractingFlows(TestMrpSubcontractingCommon):
         picking_receipt = picking_form.save()
         picking_receipt.move_ids.price_unit = 30.0
         picking_receipt.action_confirm()
-        picking_receipt.move_ids.quantity_done = 1.0
+        picking_receipt.move_ids.quantity = 1.0
+        picking_receipt.move_ids.picked = True
         picking_receipt._action_done()
 
         amls = self.env['account.move.line'].search([('id', 'not in', all_amls_ids)])
@@ -231,9 +234,9 @@ class TestAccountSubcontractingFlows(TestMrpSubcontractingCommon):
         picking_form.partner_id = self.subcontractor_partner1
         with picking_form.move_ids_without_package.new() as move:
             move.product_id = self.finished
-            move.quantity_done = todo_nb
+            move.quantity = todo_nb
+            move.picked = True
         picking_receipt = picking_form.save()
-        picking_receipt.action_reset_draft()
         # Mimic the extra cost on the po line
         picking_receipt.move_ids.price_unit = 50
         picking_receipt.action_confirm()
@@ -307,7 +310,6 @@ class TestAccountSubcontractingFlows(TestMrpSubcontractingCommon):
             move.product_id = self.finished
             move.product_uom_qty = 10
         receipt = receipt_form.save()
-        receipt.action_reset_draft()
         # add an extra cost
         receipt.move_ids.price_unit = 50
         receipt.action_confirm()
@@ -371,7 +373,8 @@ class TestAccountSubcontractingFlows(TestMrpSubcontractingCommon):
         picking_receipt.move_ids.price_unit = 15.0
         picking_receipt.action_confirm()
 
-        picking_receipt.move_ids.quantity_done = 1.0
+        picking_receipt.move_ids.quantity = 1.0
+        picking_receipt.move_ids.picked = True
         picking_receipt._action_done()
 
         amls = self.env['account.move.line'].search([('id', 'not in', all_amls_ids)])
