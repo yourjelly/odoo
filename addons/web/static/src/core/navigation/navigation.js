@@ -34,7 +34,7 @@ import { scrollTo } from "@web/core/utils/scrolling";
  * @param {Array<NavigationItem>} items List of all navigation items.
  */
 
-const ACTIVE_MENU_ELEMENT_CLASS = "focus";
+const ACTIVE_ELEMENT_CLASS = "focus";
 const throttledElementFocus = throttleForAnimation((el) => el?.focus());
 
 function focusElement(el) {
@@ -75,7 +75,7 @@ class NavigationItem {
     focus(event) {
         scrollTo(this.target);
         this.setActiveItem(this.index, this.target);
-        this.target.classList.add(ACTIVE_MENU_ELEMENT_CLASS);
+        this.target.classList.add(ACTIVE_ELEMENT_CLASS);
 
         if (!event && !this.options.virtualFocus) {
             focusElement(this.target);
@@ -83,7 +83,7 @@ class NavigationItem {
     }
 
     defocus() {
-        this.target.classList.remove(ACTIVE_MENU_ELEMENT_CLASS);
+        this.target.classList.remove(ACTIVE_ELEMENT_CLASS);
     }
 
     onMouseEnter() {
@@ -96,7 +96,7 @@ class NavigationItem {
 
 class Navigator {
     /**
-     * @param {Ref} containerRef
+     * @param {*} containerRef
      * @param {NavigationOptions} options
      */
     constructor(containerRef, options, hotkeyService) {
@@ -239,7 +239,7 @@ class Navigator {
 
     setActiveItem(index, target) {
         this.activeItems.forEach((el) => {
-            el.classList.remove(ACTIVE_MENU_ELEMENT_CLASS);
+            el.classList.remove(ACTIVE_ELEMENT_CLASS);
         });
         this.activeItems.clear();
         this.activeItems.add(target);
@@ -255,7 +255,7 @@ class Navigator {
 }
 
 /**
- * @param {Ref} containerRef
+ * @param {*} containerRef
  * @param {NavigationOptions} options
  */
 export function useNavigation(containerRef, options = {}) {

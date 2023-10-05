@@ -146,7 +146,7 @@ export class Dropdown extends Component {
         this.menuRef = useChildRef();
         this.props.menuRef?.(this.menuRef);
         this.state = this.props.state || useDropdown();
-        this.nesting = useDropdownNesting(this.state, this.menuRef);
+        this.nesting = useDropdownNesting(this.state);
         this.group = useDropdownGroup();
         this.navigation = useNavigation(this.menuRef, {
             itemsSelector: ":scope .o-navigable, :scope .o-dropdown",
@@ -226,17 +226,21 @@ export class Dropdown extends Component {
         }
     }
 
-    async beforeOpen() {
-        if (this.props.beforeOpen) {
-            await this.props.beforeOpen();
-        }
-    }
-
     async handleMouseEnter() {
+        if (!this.props.enabled) {
+            return;
+        }
+
         if (this.hasParent || this.group.isOpen) {
             this.target.focus();
             await this.beforeOpen();
             await this.state.open();
+        }
+    }
+
+    async beforeOpen() {
+        if (this.props.beforeOpen) {
+            await this.props.beforeOpen();
         }
     }
 
@@ -253,11 +257,15 @@ export class Dropdown extends Component {
         if (!target) {
             return;
         }
-        target.ariaExpanded = false;
 
-        const tagName = target.tagName.toLowerCase();
+        target.ariaExpanded = false;
         target.classList.add("o-dropdown");
 
+        if (this.hasParent) {
+            target.classList.add("o-dropdown--has-parent");
+        }
+
+        const tagName = target.tagName.toLowerCase();
         if (!["input", "textarea", "table", "thead", "tbody", "tr", "th", "td"].includes(tagName)) {
             target.classList.add("dropdown-toggle");
             if (this.hasParent) {
@@ -267,10 +275,6 @@ export class Dropdown extends Component {
                     target.classList.add("o-dropdown-caret");
                 }
             }
-        }
-
-        if (this.hasParent) {
-            target.classList.add("o-dropdown--has-parent");
         }
 
         this.defaultDirection = this.position.split("-")[0];

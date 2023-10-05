@@ -14,9 +14,8 @@ export const DROPDOWN = Symbol("DropdownNesting");
 const BUS = new EventBus();
 
 class DropdownNestingState {
-    constructor({ parent, close, containerRef }) {
+    constructor({ parent, close }) {
         this._isOpen = false;
-        this.containerRef = containerRef;
         this.parent = parent;
         this.children = new Set();
         this.close = close;
@@ -55,6 +54,7 @@ class DropdownNestingState {
     }
 
     handleChange(other) {
+        // Prevents closing the dropdown when a change is coming from itself or from a children.
         if (this.shouldIgnoreChanges(other)) {
             return;
         }
@@ -68,15 +68,13 @@ class DropdownNestingState {
 /**
  *
  * @param {import("@web/core/dropdown/dropdown").DropdownState} state
- * @param {*} containerRef
  * @returns
  */
-export function useDropdownNesting(state, containerRef) {
+export function useDropdownNesting(state) {
     const env = useEnv();
     const current = new DropdownNestingState({
         parent: env[DROPDOWN],
         close: () => state.close(),
-        containerRef,
     });
 
     useChildSubEnv({ [DROPDOWN]: current });
@@ -153,7 +151,6 @@ export function useDropdownItemNesting(closingMode) {
             if (!dropdown) {
                 return;
             }
-
             dropdown.closeChildren();
         },
     };
