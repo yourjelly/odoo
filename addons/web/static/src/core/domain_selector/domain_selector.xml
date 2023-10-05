@@ -4,7 +4,17 @@
     <t t-name="web.DomainSelector">
         <div class="o_domain_selector w-100" aria-atomic="true" t-att-class="className">
             <t t-if="tree">
-                <TreeEditor resModel="props.resModel" readonly="props.readonly" isDebugMode="props.isDebugMode" defaultConnector="props.defaultConnector" tree="tree"  update.bind="update" />
+                <DomainSelectorTreeEditor resModel="props.resModel" readonly="props.readonly" isDebugMode="props.isDebugMode" defaultConnector="props.defaultConnector" tree="tree"  update.bind="update">
+                    <CheckBox
+                        t-if="showArchivedCheckbox"
+                        value="includeArchived"
+                        disabled="props.readonly"
+                        className="'form-switch'"
+                        onChange.bind="toggleIncludeArchived"
+                    >
+                        Include archived
+                    </CheckBox>
+                </DomainSelectorTreeEditor>
             </t>
             <t t-else="">
                 <div class="o_domain_selector_row d-flex align-items-center">
@@ -21,6 +31,16 @@
                 </label>
             </t>
         </div>
+    </t>
+
+    <t t-name="web.DomainSelectorTreeEditor" t-inherit="web.TreeEditor" t-inherit-mode="primary">
+        <!-- <xpath expr="//div[hasclass('o_tree_editor_connector')]" position="after">
+            <t t-slot="default">
+            </t>
+        </xpath> -->
+        <xpath expr="/div" position="inside">
+            <span>test</span>
+        </xpath>
     </t>
 
 </templates>

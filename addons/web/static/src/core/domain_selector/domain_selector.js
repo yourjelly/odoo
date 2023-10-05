@@ -10,9 +10,14 @@ import { Component, onWillStart, onWillUpdateProps } from "@odoo/owl";
 import { Domain } from "@web/core/domain";
 import { TreeEditor } from "@web/core/tree_editor/tree_editor";
 import { useLoadFieldInfo } from "@web/core/model_field_selector/utils";
+import { CheckBox } from "@web/core/checkbox/checkbox";
 
 class DomainSelectorTreeEditor extends TreeEditor {
-    static template = "web.TreeEditor";
+    static template = "web.DomainSelectorTreeEditor";
+    static components = {
+        ...TreeEditor.components,
+        CheckBox,
+    };
     /** @todo get back toggleArchived */
 }
 
@@ -40,14 +45,6 @@ export class DomainSelector extends Component {
         this.loadFieldInfo = useLoadFieldInfo();
         this.tree = null;
         this.previousTree = null;
-        this.includeArchived = false;
-        this.archivedConnector = {
-            type: "condition",
-            value: [true, false],
-            negate: false,
-            path: "active",
-            operator: "in",
-        };
         onWillStart(() => this.onPropsUpdated(this.props));
         onWillUpdateProps((np) => this.onPropsUpdated(np));
     }
