@@ -26,7 +26,7 @@ patch(ActivityMenu.prototype, {
         this.notification = useService("notification");
         useEffect(
             (addingTodo) => {
-                if (addingTodo) {
+                if (addingTodo && this.todoInputRef.el) {
                     this.todoInputRef.el.focus();
                 }
             },
@@ -97,7 +97,7 @@ patch(ActivityMenu.prototype, {
             todo_description: todo,
             date_deadline: this.addingTodoDate ? this.addingTodoDate : DateTime.local(),
         });
-        document.body.click(); // hack to close dropdown
+        this.dropdown.close();
         this.notification.add(
             _t("Your to-do has been successfully added to your tasks and scheduled for completion."),
             { type: "success" },
