@@ -616,7 +616,9 @@ export function triggerEvent(
     eventName,
     options,
 ) {
-    const currentElement = closestElement(el);
+    // Now from master the closestElement will return null when el is outside of editable.
+    // So we need to check if closestElement return null and if it's the case we use el.
+    const currentElement = closestElement(el) || el;
     options = Object.assign(
         {
             view: el.ownerDocument.defaultView,
