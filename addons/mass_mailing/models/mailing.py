@@ -77,11 +77,9 @@ class MassMailing(models.Model):
             return False
 
     active = fields.Boolean(default=True, tracking=True)
-    subject = fields.Char(
-        'Subject', required=True, translate=False)
+    subject = fields.Char('Subject', required=True)
     preview = fields.Char(
-        'Preview', translate=False,
-        render_engine='inline_template', render_options={'post_process': True},
+        'Preview', render_engine='inline_template', render_options={'post_process': True},
         help='Catchy preview sentence that encourages recipients to open this email.\n'
              'In most inboxes, this is displayed next to the subject.\n'
              'Keep it empty if you prefer the first characters of your email content to appear instead.')
@@ -109,8 +107,7 @@ class MassMailing(models.Model):
         compute='_compute_calendar_date', store=True,
         copy=False,
         help="Date at which the mailing was or will be sent.")
-    # don't translate 'body_arch', the translations are only on 'body_html'
-    body_arch = fields.Html(string='Body', translate=False, sanitize=False)
+    body_arch = fields.Html(string='Body', sanitize=False)
     body_html = fields.Html(
         string='Body converted to be sent by mail', sanitize=False,
         render_engine='qweb', render_options={'post_process': True})
