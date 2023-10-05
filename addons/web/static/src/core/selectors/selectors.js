@@ -22,6 +22,7 @@ class AutoCompleteWithSources extends Component {
         multiSelect: Boolean,
         getIds: Function,
         value: String,
+        placeholder: { type: String, optional: true },
         domain: { type: [Function, Array], optional: true },
         context: { type: Object, optional: true },
         className: { type: String, optional: true },
@@ -170,6 +171,7 @@ export class MultiRecordSelector extends Component {
         resModel: String,
         update: Function,
         value: true,
+        placeholder: { type: String, optional: true },
         domain: { type: [Function, Array], optional: true },
         context: { type: Object, optional: true },
         fieldString: { type: String, optional: true },
@@ -191,6 +193,10 @@ export class MultiRecordSelector extends Component {
     async getDisplayNames(props) {
         const ids = this.getIds(props);
         return this.nameService.loadDisplayNames(props.resModel, ids);
+    }
+
+    get placeholder() {
+        return this.getIds().length ? "" : this.props.placeholder;
     }
 
     getIds(props = this.props) {
@@ -222,6 +228,7 @@ export class RecordSelector extends Component {
     static props = {
         resModel: String,
         update: Function,
+        placeholder: { type: String, optional: true },
         domain: { type: [Function, Array], optional: true },
         context: { type: Object, optional: true },
         value: true,
@@ -244,6 +251,10 @@ export class RecordSelector extends Component {
     async getDisplayNames(props) {
         const ids = this.getIds(props);
         return this.nameService.loadDisplayNames(props.resModel, ids);
+    }
+
+    get placeholder() {
+        return this.getIds().length ? "" : this.props.placeholder;
     }
 
     getDisplayName(props = this.props, displayNames) {

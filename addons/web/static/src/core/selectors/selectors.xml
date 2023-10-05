@@ -4,6 +4,7 @@
     <t t-name="web.AutoCompleteWithSources" >
         <AutoComplete
             value="props.value"
+            placeholder="props.placeholder"
             autoSelect="true"
             resetOnSelect="props.multiSelect"
             class="props.className"
@@ -19,6 +20,7 @@
             <AutoCompleteWithSources
                 resModel="props.resModel"
                 value="''"
+                placeholder="placeholder"
                 domain="props.domain"
                 context="props.context"
                 className="'o_input o_domain_leaf_value_input flex-grow-1'"
@@ -34,6 +36,7 @@
         <AutoCompleteWithSources
             resModel="props.resModel"
             value="displayName"
+            placeholder="placeholder"
             domain="props.domain"
             context="props.context"
             className="'o_input o_domain_leaf_value_input h-100 o_tag_selector'"
