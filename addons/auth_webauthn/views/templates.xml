@@ -1,0 +1,16 @@
+<odoo>
+    <template id="auth_webauthn_form" name="Webauthn Authentication">
+        <t t-call="web.login_layout">
+            <t t-call-assets="web.assets_backend"/>
+            <t t-call-assets="webauthn.assets" />
+            <t t-set="disable_footer">1</t>
+            <div class="oe_login_form">
+                <h5 class="card-title">Webauthn Authentication</h5>
+                <div class="mb-2 mt-2 text-muted">
+                    Please follow the instructions on the popup to authenticate.
+                    <br/>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

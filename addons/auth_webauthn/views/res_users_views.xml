@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record model="ir.ui.view" id="view_webauthn_form">
+        <field name="name">users preference: totp</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form_simple_modif"/>
+        <field name="arch" type="xml">
+            <group name="auth" position="after">
+                <field name="webauthn_enabled" invisible="1"/>
+                <div>
+                    <div class="o_horizontal_separator d-flex align-items-center mt-2 mb-4 text-uppercase fw-bolder small">Two-factor Authentication using Webauthn
+                        <div invisible="webauthn_enabled">
+                            <button invisible="id == uid" name="action_webauthn_enable_wizard" disabled="1" type="object" class="fa fa-toggle-off o_auth_2fa_btn disabled" aria-label="Enable Webauthn"></button>
+                            <button invisible="id != uid" name="action_webauthn_enable_wizard" type="object" class="fa fa-toggle-off o_auth_2fa_btn disabled pe-auto" aria-label="Enable Webauthn"></button>
+                        </div>
+                        <button invisible="not webauthn_enabled" name="action_webauthn_disable" type="object" class="fa fa-toggle-on o_auth_2fa_btn text-primary enabled" aria-label="Disable Webauthn"></button>
+                    </div>
+                    <span invisible="webauthn_enabled" class="text-muted">
+                            Webauthn is a system of double authentication. The first one is done with your password and the second one with a security key, your biometrics or your phone.
+                    </span>
+                    <span invisible="not webauthn_enabled" class="text-muted">This account is protected!</span>
+                </div>
+            </group>
+        </field>
+    </record>
+</odoo>
