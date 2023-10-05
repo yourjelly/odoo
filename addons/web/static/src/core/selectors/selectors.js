@@ -165,7 +165,7 @@ const getFormat = (val, displayNames) => {
     return { text, colorIndex };
 };
 
-export class TagsSelector extends Component {
+export class MultiRecordSelector extends Component {
     static props = {
         resModel: String,
         update: Function,
@@ -175,7 +175,7 @@ export class TagsSelector extends Component {
         fieldString: { type: String, optional: true },
     };
     static components = { AutoCompleteWithSources, TagsList };
-    static template = "web.TagsSelector";
+    static template = "web.MultiRecordSelector";
 
     setup() {
         this.nameService = useService("name");
@@ -218,7 +218,7 @@ export class TagsSelector extends Component {
     }
 }
 
-export class ValueSelector extends Component {
+export class RecordSelector extends Component {
     static props = {
         resModel: String,
         update: Function,
@@ -228,7 +228,7 @@ export class ValueSelector extends Component {
         fieldString: { type: String, optional: true },
     };
     static components = { AutoCompleteWithSources };
-    static template = "web.ValueSelector";
+    static template = "web.RecordSelector";
 
     setup() {
         this.nameService = useService("name");
