@@ -246,3 +246,11 @@ class MassMailController(http.Controller):
             'mailing_link': Markup(f'<a href="#" data-oe-model="mailing.mailing" data-oe-id="{mailing.id}">{escape(mailing.subject)}</a>'),
             'record_link': Markup(f'<a href="#" data-oe-model="{escape(mailing.mailing_model_real)}" data-oe-id="{int(document_id)}">{escape(mailing_model_name)}</a>'),
         }
+
+    # ------------------------------------------------------------
+    # PREVIEW
+    # ------------------------------------------------------------
+
+    @http.route('/mailing/mobile/preview', methods=['GET'], type='http', auth='user', website=True)
+    def mass_mailing_preview_mobile_content(self):
+        return request.render("mass_mailing.preview_content_mobile", {})

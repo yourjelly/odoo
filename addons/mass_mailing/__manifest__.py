@@ -38,6 +38,7 @@
         'wizard/mailing_mailing_schedule_date_views.xml',
         'report/mailing_trace_report_views.xml',
         'views/mailing_filter_views.xml',
+        'views/mailing_mobile_preview_content.xml',
         'views/mailing_trace_views.xml',
         'views/link_tracker_views.xml',
         'views/mailing_contact_views.xml',
@@ -122,6 +123,7 @@
             'mass_mailing/static/src/js/mailing_mailing_view_form_full_width.js',
             'mass_mailing/static/src/xml/mailing_filter_widget.xml',
             'mass_mailing/static/src/xml/mass_mailing.xml',
+            'mass_mailing/static/src/xml/mass_mailing_mobile_preview.xml',
             'mass_mailing/static/src/js/tours/**/*',
         ],
         'mass_mailing.assets_mail_themes': [

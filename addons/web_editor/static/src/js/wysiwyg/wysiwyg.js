@@ -144,6 +144,7 @@ export class Wysiwyg extends Component {
     setup() {
         this.orm = this._useService('orm');
         this.rpc = this._useService('rpc');
+        this.http = this._useService("http");
         this.getColorPickerTemplateService = this._useService('get_color_picker_template');
         this.notification = this._useService("notification");
         this.popover = this._useService("popover");
