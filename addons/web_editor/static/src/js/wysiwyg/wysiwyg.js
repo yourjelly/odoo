@@ -1606,7 +1606,7 @@ export class Wysiwyg extends Component {
             this.odooEditor.unbreakableStepUnactive();
             this.odooEditor.historyStep();
         } else {
-            return this.odooEditor.execCommand('insert', element);
+            return this.odooEditor.execCommand('insert', parseHTML(this.odooEditor.document, element.outerHTML));
         }
 
         if (this.snippetsMenu) {
