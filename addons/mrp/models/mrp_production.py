@@ -625,6 +625,7 @@ class MrpProduction(models.Model):
                     production.reservation_state = 'confirmed'
             elif relevant_move_state != 'draft':
                 production.reservation_state = relevant_move_state
+                production.workorder_ids._compute_state()
             else:
                 production.reservation_state = False
 
