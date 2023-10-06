@@ -54,3 +54,8 @@ class MrpWorkorder(models.Model):
     def unlink(self):
         (self.mo_analytic_account_line_ids | self.wc_analytic_account_line_ids).unlink()
         return super().unlink()
+
+    def _get_wip_vals(self):
+        return {
+            _('workcenter usage'): self.workcenter_id.costs_hour * self.duration / 60.0,
+        }
