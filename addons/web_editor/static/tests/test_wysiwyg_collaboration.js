@@ -10,7 +10,7 @@ import {
 import { Wysiwyg, stripHistoryIds } from '@web_editor/js/wysiwyg/wysiwyg';
 import { Mutex } from '@web/core/utils/concurrency';
 import { makeTestEnv } from "@web/../tests/helpers/mock_env";
-import { makeFakeNotificationService } from "@web/../tests/helpers/mock_services";
+import { makeFakeNotificationService, makeFakeHTTPService } from "@web/../tests/helpers/mock_services";
 import { mount, getFixture } from "@web/../tests/helpers/utils";
 import { registry } from "@web/core/registry";
 
@@ -166,6 +166,9 @@ async function createPeers(peers) {
             force: true,
         });
         registry.category("services").add("popover", { start: () => ({  }) }, {
+            force: true,
+        });
+        registry.category("services").add("http", makeFakeHTTPService(), {
             force: true,
         });
         const env = await makeTestEnv({

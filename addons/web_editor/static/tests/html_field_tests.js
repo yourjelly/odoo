@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { click, editInput, getFixture, makeDeferred, nextTick, patchWithCleanup } from "@web/../tests/helpers/utils";
-import { makeView, setupViewRegistries } from "@web/../tests/views/helpers";
+import { makeView, setupViewRegistries, setupHTTPServiceRegistry } from "@web/../tests/views/helpers";
 import { FormController } from '@web/views/form/form_controller';
 import { HtmlField } from "@web_editor/js/backend/html_field";
 import { parseHTML } from "@web_editor/js/editor/odoo-editor/src/utils/utils";
@@ -40,7 +40,7 @@ QUnit.module("WebEditor.HtmlField", ({ beforeEach }) => {
             },
         };
         target = getFixture();
-
+        setupHTTPServiceRegistry();
         setupViewRegistries();
     });
 
