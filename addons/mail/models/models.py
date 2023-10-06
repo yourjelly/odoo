@@ -462,7 +462,8 @@ class BaseModel(models.AbstractModel):
     def _mail_get_record_timezone(self):
         """To be override to get desired timezone of the model.
 
-        :return str: selected timezone (e.g. 'UTC' or 'Asia/Kolkata')
+        :return: selected timezone (e.g. 'UTC' or 'Asia/Kolkata')
+        :rtype: str
         """
         if self:
             self.ensure_one()
