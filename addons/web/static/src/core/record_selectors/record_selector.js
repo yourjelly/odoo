@@ -3,7 +3,7 @@
 import { Component, onWillStart, onWillUpdateProps } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { RecordAutocomplete } from "./record_autocomplete";
-import { isId, getFormat } from "./helpers";
+import { _t } from "@web/core/l10n/translation";
 
 export class RecordSelector extends Component {
     static props = {
@@ -38,12 +38,13 @@ export class RecordSelector extends Component {
         if (value === false) {
             return "";
         }
-        const { text } = getFormat(value, displayNames);
-        return text;
+        return typeof displayNames[value] === "string"
+            ? displayNames[value]
+            : _t("Inaccessible/missing record ID: %s", value);
     }
 
     getIds(props = this.props) {
-        if (isId(props.value)) {
+        if (props.value) {
             return [props.value];
         }
         return [];

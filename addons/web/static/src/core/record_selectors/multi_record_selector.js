@@ -4,7 +4,7 @@ import { Component, onWillStart, onWillUpdateProps } from "@odoo/owl";
 import { TagsList } from "@web/core/tags_list/tags_list";
 import { useService } from "@web/core/utils/hooks";
 import { RecordAutocomplete } from "./record_autocomplete";
-import { isId, getFormat } from "./helpers";
+import { _t } from "@web/core/l10n/translation";
 
 export class MultiRecordSelector extends Component {
     static props = {
@@ -35,15 +35,17 @@ export class MultiRecordSelector extends Component {
     }
 
     getIds(props = this.props) {
-        return props.value.filter((val) => isId(val));
+        return props.value;
     }
 
     getTags(props, displayNames) {
-        return props.value.map((val, index) => {
-            const { text, colorIndex } = getFormat(val, displayNames);
+        return props.value.map((id, index) => {
+            const text =
+                typeof displayNames[id] === "string"
+                    ? displayNames[id]
+                    : _t("Inaccessible/missing record ID: %s", id);
             return {
                 text,
-                colorIndex,
                 onDelete: () => {
                     this.props.update([
                         ...this.props.value.slice(0, index),
