@@ -2818,7 +2818,7 @@ class BaseModel(metaclass=MetaModel):
             return SQL.identifier(rel_alias, field.column2)
 
         elif field.translate and not self.env.context.get('prefetch_langs'):
-            sql_field = SQL.identifier(alias, fname)
+            sql_field = SQL.identifier(alias, fname, to_flush=field)
             lang = self.env.lang or 'en_US'
             if lang == 'en_US':
                 return SQL("%s->>'en_US'", sql_field)
@@ -2827,7 +2827,7 @@ class BaseModel(metaclass=MetaModel):
         elif field.type == 'properties' and property_name:
             return self._field_properties_to_sql(alias, fname, property_name, query)
 
-        return SQL.identifier(alias, fname)
+        return SQL.identifier(alias, fname, to_flush=field)
 
     def _field_properties_to_sql(self, alias: str, fname: str, property_name: str,
                                  query: Query) -> SQL:
@@ -3884,6 +3884,8 @@ class BaseModel(metaclass=MetaModel):
                     # PG 9.2 introduces conflicting pg_size_pretty(numeric) -> need ::cast
                     sql = SQL("pg_size_pretty(length(%s)::bigint)", sql)
                 sql_terms.append(sql)
+
+            self.env.flush_fields(query.to_flush)
 
             # select the given columns from the rows in the query
             self.env.cr.execute(query.select(*sql_terms))

@@ -712,6 +712,18 @@ class Environment(Mapping):
         for model_name in OrderedSet(field.model_name for field in self.cache.get_dirty_fields()):
             self[model_name].flush_model()
 
+    def flush_fields(self, fields):
+        """ Flush the pending computations and updates of the given fields. """
+        by_model = defaultdict(list)
+        for field in fields:
+            if isinstance(field, dict):
+                for model_name, field_names in field.items():
+                    by_model[model_name].extend(field_names)
+            else:
+                by_model[field.model_name].append(field.name)
+        for model_name, field_names in by_model.items():
+            self[model_name].flush_model(field_names)
+
     def is_protected(self, field, record):
         """ Return whether `record` is protected against invalidation or
             recomputation for `field`.
@@ -839,7 +851,7 @@ class Transaction:
         # pending computations {field: ids}
         self.tocompute = defaultdict(OrderedSet)
 
-    def flush(self):
+    def flush(self, fields=None):
         """ Flush pending computations and updates in the transaction. """
         env_to_flush = None
         for env in self.envs:
@@ -848,7 +860,10 @@ class Transaction:
                 if env.uid is not None:
                     break
         if env_to_flush is not None:
-            env_to_flush.flush_all()
+            if fields is None:
+                env_to_flush.flush_all()
+            else:
+                env_to_flush.flush_fields(fields)
 
     def clear(self):
         """ Clear the caches and pending computations and updates in the translations. """

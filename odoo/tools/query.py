@@ -225,6 +225,8 @@ class Query(object):
         is memoized for future use, which avoids making the same query twice.
         """
         if self._ids is None:
+            if self._cr.transaction is not None:
+                self._cr.transaction.flush(self.to_flush)
             self._cr.execute(self.select())
             self._ids = tuple(row[0] for row in self._cr.fetchall())
         return self._ids
@@ -266,6 +268,8 @@ class Query(object):
 
     def __len__(self):
         if self._ids is None:
+            if self._cr.transaction is not None:
+                self._cr.transaction.flush(self.to_flush)
             if self.limit or self.offset:
                 # optimization: generate a SELECT FROM, and then count the rows
                 sql = SQL("SELECT COUNT(*) FROM (%s) t", self.select(""))
