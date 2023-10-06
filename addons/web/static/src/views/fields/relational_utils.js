@@ -280,7 +280,7 @@ export class Many2XAutocomplete extends Component {
 
         const options = records.map((result) => this.mapRecordToOption(result));
 
-        if (this.props.quickCreate && request.length) {
+        if (this.props.quickCreate && request.length && this.props.activeActions.create) {
             options.push({
                 label: _t('Create "%s"', request),
                 classList: "o_m2o_dropdown_option o_m2o_dropdown_option_create",
