@@ -1,0 +1,13 @@
+<record model="ir.ui.view" id="view_event_form">
+    <field name="name">event.social.share.event.event.inherit.form</field>
+    <field name="model">event.event</field>
+    <field name="inherit_id" ref="event.event_event_form"/>
+    <field name="arch" type="xml">
+        <xpath expr="//div[hasclass('.oe_button_box')]" position="inside">
+            <button name="action_create_campaign" type="object" string="Create Share Campaign"/>
+            <button name="action_find_campaigns" type="object" string="Share Campaigns">
+                <field name="share_campaign_count" widget="statinfo" string="Campaigns"/>
+            </button>
+        </xpath>
+    </field>
+</record>

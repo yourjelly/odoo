@@ -1,0 +1,13 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_social_share_tag,social.share.tag,model_social_share_tag,,0,0,0,0
+access_social_share_tag_user,social.share.tag.user,model_social_share_tag,social_share.group_social_share_user,1,1,0,0
+access_social_share_tag_manager,social.share.tag.manager,model_social_share_tag,social_share.group_social_share_manager,1,1,1,1
+access_social_share_post,social.share.post,model_social_share_post,,0,0,0,0
+access_social_share_post_user,social.share.post.user,model_social_share_post,social_share.group_social_share_user,1,0,0,0
+access_social_share_post_manager,social.share.post.manager,model_social_share_post,social_share.group_social_share_manager,1,1,1,1
+access_social_share_post_template,social.share.post.template,model_social_share_post_template,,0,0,0,0
+access_social_share_post_template_user,social.share.post.template.user,model_social_share_post_template,social_share.group_social_share_user,1,0,0,0
+access_social_share_post_template_manager,social.share.post.template.manager,model_social_share_post_template,social_share.group_social_share_manager,1,1,1,1
+access_social_share_post_template_element,social.share.post.template.element,model_social_share_post_template_element,,0,0,0,0
+access_social_share_post_template_element_user,social.share.post.template.element.user,model_social_share_post_template_element,social_share.group_social_share_user,1,0,0,0
+access_social_share_post_template_element_manager,social.share.post.template.element.manager,model_social_share_post_template_element,social_share.group_social_share_manager,1,1,1,1

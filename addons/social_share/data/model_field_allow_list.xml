@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="social_share_model_field_allow_list" model="social.share.model.field.allow.list">
+            <field name="field_id" ref="base.field_res_partner__name"/>
+        </record>
+    </data>
+</odoo>
