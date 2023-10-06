@@ -8,9 +8,9 @@ import { _t } from "@web/core/l10n/translation";
 
 export class MultiRecordSelector extends Component {
     static props = {
+        resIds: { type: Array, element: Number },
         resModel: String,
         update: Function,
-        value: true,
         domain: { type: Array, optional: true },
         context: { type: Object, optional: true },
         fieldString: { type: String, optional: true },
@@ -35,11 +35,11 @@ export class MultiRecordSelector extends Component {
     }
 
     getIds(props = this.props) {
-        return props.value;
+        return props.resIds;
     }
 
     getTags(props, displayNames) {
-        return props.value.map((id, index) => {
+        return props.resIds.map((id, index) => {
             const text =
                 typeof displayNames[id] === "string"
                     ? displayNames[id]
@@ -48,8 +48,8 @@ export class MultiRecordSelector extends Component {
                 text,
                 onDelete: () => {
                     this.props.update([
-                        ...this.props.value.slice(0, index),
-                        ...this.props.value.slice(index + 1),
+                        ...this.props.resIds.slice(0, index),
+                        ...this.props.resIds.slice(index + 1),
                     ]);
                 },
             };
@@ -57,6 +57,6 @@ export class MultiRecordSelector extends Component {
     }
 
     update(resIds) {
-        this.props.update([...this.props.value, ...resIds]);
+        this.props.update([...this.props.resIds, ...resIds]);
     }
 }

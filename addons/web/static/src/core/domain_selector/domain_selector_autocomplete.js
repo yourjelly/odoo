@@ -30,23 +30,23 @@ export const getFormat = (val, displayNames) => {
 export class DomainSelectorAutocomplete extends MultiRecordSelector {
     static props = {
         ...MultiRecordSelector.props,
-        value: true,
+        resIds: true, //resIds could be an array of ids or an array of expressions
     };
 
     getIds(props = this.props) {
-        return props.value.filter((val) => isId(val));
+        return props.resIds.filter((val) => isId(val));
     }
 
     getTags(props, displayNames) {
-        return props.value.map((val, index) => {
+        return props.resIds.map((val, index) => {
             const { text, colorIndex } = getFormat(val, displayNames);
             return {
                 text,
                 colorIndex,
                 onDelete: () => {
                     this.props.update([
-                        ...this.props.value.slice(0, index),
-                        ...this.props.value.slice(index + 1),
+                        ...this.props.resIds.slice(0, index),
+                        ...this.props.resIds.slice(index + 1),
                     ]);
                 },
             };
@@ -57,21 +57,21 @@ export class DomainSelectorAutocomplete extends MultiRecordSelector {
 export class DomainSelectorSingleAutocomplete extends RecordSelector {
     static props = {
         ...RecordSelector.props,
-        value: true,
+        resId: true,
     };
 
     getDisplayName(props = this.props, displayNames) {
-        const { value } = props;
-        if (value === false) {
+        const { resId } = props;
+        if (resId === false) {
             return "";
         }
-        const { text } = getFormat(value, displayNames);
+        const { text } = getFormat(resId, displayNames);
         return text;
     }
 
     getIds(props = this.props) {
-        if (isId(props.value)) {
-            return [props.value];
+        if (isId(props.resId)) {
+            return [props.resId];
         }
         return [];
     }

@@ -32,19 +32,19 @@ QUnit.module("Web Components", (hooks) => {
     async function makeRecordSelector(props, { mockRPC } = {}) {
         class Parent extends Component {
             setup() {
-                this.state = useState({ value: props.value });
+                this.state = useState({ resId: props.resId });
             }
 
             get recordProps() {
                 return {
                     ...props,
-                    value: this.state.value,
-                    update: (value) => this._update(value),
+                    resId: this.state.resId,
+                    update: (resId) => this._update(resId),
                 };
             }
 
-            _update(value) {
-                this.state.value = value;
+            _update(resId) {
+                this.state.resId = resId;
             }
         }
         Parent.components = { RecordSelector };
@@ -65,7 +65,7 @@ QUnit.module("Web Components", (hooks) => {
     QUnit.test("Can be renderer with no values", async (assert) => {
         await makeRecordSelector({
             resModel: "partner",
-            value: false,
+            resId: false,
         });
         const input = target.querySelector(".o_record_selector input");
         assert.strictEqual(input.value, "", "The input should be empty");
@@ -75,7 +75,7 @@ QUnit.module("Web Components", (hooks) => {
     QUnit.test("Can be renderer with a value", async (assert) => {
         await makeRecordSelector({
             resModel: "partner",
-            value: 1,
+            resId: 1,
         });
         const input = target.querySelector(".o_record_selector input");
         assert.strictEqual(input.value, "Alice");
@@ -84,7 +84,7 @@ QUnit.module("Web Components", (hooks) => {
     QUnit.test("Can be updated from autocomplete", async (assert) => {
         await makeRecordSelector({
             resModel: "partner",
-            value: 1,
+            resId: 1,
         });
         const input = target.querySelector(".o_record_selector input");
         assert.strictEqual(input.value, "Alice");
@@ -100,7 +100,7 @@ QUnit.module("Web Components", (hooks) => {
         await makeRecordSelector(
             {
                 resModel: "partner",
-                value: 1,
+                resId: 1,
             },
             {
                 mockRPC: (route, args) => {
@@ -121,7 +121,7 @@ QUnit.module("Web Components", (hooks) => {
         await makeRecordSelector(
             {
                 resModel: "partner",
-                value: 1,
+                resId: 1,
                 domain: [["display_name", "=", "Bob"]],
                 context: { blip: "blop " },
             },

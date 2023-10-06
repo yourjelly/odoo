@@ -7,11 +7,11 @@ import { _t } from "@web/core/l10n/translation";
 
 export class RecordSelector extends Component {
     static props = {
+        resId: [Number, { value: false }],
         resModel: String,
         update: Function,
         domain: { type: Array, optional: true },
         context: { type: Object, optional: true },
-        value: true,
         fieldString: { type: String, optional: true },
     };
     static components = { RecordAutocomplete };
@@ -34,18 +34,18 @@ export class RecordSelector extends Component {
     }
 
     getDisplayName(props = this.props, displayNames) {
-        const { value } = props;
-        if (value === false) {
+        const { resId } = props;
+        if (resId === false) {
             return "";
         }
-        return typeof displayNames[value] === "string"
-            ? displayNames[value]
-            : _t("Inaccessible/missing record ID: %s", value);
+        return typeof displayNames[resId] === "string"
+            ? displayNames[resId]
+            : _t("Inaccessible/missing record ID: %s", resId);
     }
 
     getIds(props = this.props) {
-        if (props.value) {
-            return [props.value];
+        if (props.resId) {
+            return [props.resId];
         }
         return [];
     }
