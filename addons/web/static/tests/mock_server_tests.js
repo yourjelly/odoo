@@ -1301,4 +1301,19 @@ QUnit.module("MockServer", (hooks) => {
         const { views } = mockServer.mockGetViews("bar", { views: [[10001, "list"]], options: {} });
         assert.deepEqual(views.list.arch, expectedList);
     });
+
+    QUnit.test("performRPC: trigger onchange for new record", async function (assert) {
+        data.models.bar.onchanges = {
+            foo: (obj) => {
+                obj.bool = true;
+            },
+        };
+        const server = new MockServer(data, {});
+        const result = await server.performRPC("", {
+            model: "bar",
+            method: "onchange",
+            args: [[], {}, [], { foo: "1" }],
+        });
+        assert.deepEqual(result.value, { foo: false });
+    });
 });

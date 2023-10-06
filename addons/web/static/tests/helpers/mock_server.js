@@ -868,6 +868,13 @@ export class MockServer {
                 });
             }
         });
+
+        const fieldsFromView = new Set(Object.keys(onChangeSpec));
+        for (const fieldName in onchangeVals) {
+            if (!fieldsFromView.has(fieldName)) {
+                delete onchangeVals[fieldName];
+            }
+        }
         return {
             value: this.convertToOnChange(modelName, Object.assign({}, defaultVals, onchangeVals)),
         };
