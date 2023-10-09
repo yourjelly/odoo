@@ -15,13 +15,23 @@
                     name="timesheet_invoice_date_range"
                     attrs="{'invisible': ['|', ('invoicing_timesheet_enabled', '=', False), ('advance_payment_method', '!=', 'delivered')]}"
                 >
-                    <field
-                        name="date_start_invoice_timesheet"
+                    <label for="date_start_invoice_timesheet" string="Timesheets Period" attrs="{'invisible': [ '|', ('invoicing_timesheet_enabled', '=', False), ('advance_payment_method', '!=', 'delivered')]}"/>
+                    <div class="o_row" attrs="{'invisible': [ '|',('invoicing_timesheet_enabled', '=', False), ('advance_payment_method', '!=', 'delivered')]}">
+                        <field
+                            name="date_start_invoice_timesheet"
+                            required="1"
+                            widget="daterange"
+                            options="{'end_date_field': 'date_end_invoice_timesheet'}"
+                            title="Only timesheets not yet invoiced (and validated, if applicable) from this period will be invoiced. If the period is not indicated, all timesheets not yet invoiced (and validated, if applicable) will be invoiced without distinction."
+                        />
+                        <field
+                        name="date_end_invoice_timesheet"
+                        invisible="1"
+                        required="1"
                         widget="daterange"
-                        options="{'end_date_field': 'date_end_invoice_timesheet'}"
-                        title="Only timesheets not yet invoiced (and validated, if applicable) from this period will be invoiced. If the period is not indicated, all timesheets not yet invoiced (and validated, if applicable) will be invoiced without distinction."
-                    />
-                    <field name="date_end_invoice_timesheet" invisible="1" />
+                        options="{'start_date_field': 'date_start_invoice_timesheet'}"
+                        />
+                    </div>
                 </group>
             </group>
         </field>
