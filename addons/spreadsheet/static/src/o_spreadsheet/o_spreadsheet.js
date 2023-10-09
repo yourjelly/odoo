@@ -55109,6 +55109,7 @@
         ScorecardChartDesignPanel,
         FigureComponent,
         Menu,
+        SettingsPanel,
     };
     const hooks = {
         useDragAndDropListItems,
