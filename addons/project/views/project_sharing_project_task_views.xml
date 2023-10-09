@@ -205,7 +205,7 @@
                                     <field name="stage_id" optional="show"/>
                                     <button name="action_open_task" type="object" title="View Task" string="View Task" class="btn btn-link float-end"
                                             context="{'form_view_ref': 'project.project_sharing_project_task_view_form', 'search_view_ref': 'project.project_sharing_project_task_view_search'}"
-                                            attrs="{'invisible': &quot;['|', ('project_id', '!=', False), ('project_id', '!=', active_id)]&quot;}"/>
+                                            />
                                 </tree>
                             </field>
                         </page>
