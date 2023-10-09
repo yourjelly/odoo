@@ -38,6 +38,8 @@
                 <t t-set-slot="control-panel-navigation-additional">
                     <t t-component="searchBarToggler.component" t-props="searchBarToggler.props"/>
                 </t>
+                <t t-log="model.root.selection"/>
+                <!-- <t t-debug="1"/> -->
                 <t t-component="props.Renderer"
                     list="model.root"
                     archInfo="props.archInfo"

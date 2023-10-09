@@ -965,6 +965,9 @@ export class Record extends DataPoint {
     }
 
     toggleSelection(selected) {
+        // debugger;
+        console.log("previously selected?? --->",this.selected,"\n", this.data.display_name);
+        console.log("new selection value --->", selected);
         if (typeof selected === "boolean") {
             this.selected = selected;
         } else {
