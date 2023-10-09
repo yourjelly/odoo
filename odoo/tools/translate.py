@@ -1108,16 +1108,17 @@ class TranslationModuleReader:
                     # And export the parent field may make one value to be translated twice in transifex
                     if field.translate and field.store and str(field) != 'ir.actions.actions.name':
                         name = model + "," + field_name
+                        value_en = record[field_name] or ''
+                        value_lang = record.with_context(lang=self._lang)[field_name] or ''
+
+                        trans_type = 'model_terms' if callable(field.translate) else 'model'
                         try:
-                            value_en = record[field_name] or ''
-                            value_lang = record.with_context(lang=self._lang)[field_name] or ''
+                            for term_en, term_langs in field.get_translation_dictionary(value_en, {self._lang: value_lang}).items():
+                                term_lang = term_langs.get(self._lang)
+                                self._push_translation(module, trans_type, name, xml_name, term_en, record_id=record.id, value=term_lang if term_lang != term_en else '')
                         except Exception:
                             _logger.exception("Failed to extract terms from %s", name)
                             continue
-                        trans_type = 'model_terms' if callable(field.translate) else 'model'
-                        for term_en, term_langs in field.get_translation_dictionary(value_en, {self._lang: value_lang}).items():
-                            term_lang = term_langs.get(self._lang)
-                            self._push_translation(module, trans_type, name, xml_name, term_en, record_id=record.id, value=term_lang if term_lang != term_en else '')
 
     def _get_module_from_path(self, path):
         for (mp, rec) in self._path_list:
