@@ -1859,24 +1859,16 @@ class BaseModel(metaclass=MetaModel):
 
         query = self._search(domain)
 
-        fnames_to_flush = OrderedSet()
-
-        groupby_terms: dict[str, SQL] = {}
-        for spec in groupby:
-            groupby_terms[spec], fnames_used = self._read_group_groupby(spec, query)
-            fnames_to_flush.update(fnames_used)
-
-        select_terms: list[SQL] = []
-        for spec in aggregates:
-            sql_expr, fnames_used = self._read_group_select(spec, query)
-            select_terms.append(sql_expr)
-            fnames_to_flush.update(fnames_used)
-
-        sql_having, fnames_used = self._read_group_having(having, query)
-        fnames_to_flush.update(fnames_used)
-
-        sql_order, sql_extra_groupby, fnames_used = self._read_group_orderby(order, groupby_terms, query)
-        fnames_to_flush.update(fnames_used)
+        groupby_terms: dict[str, SQL] = {
+            spec: self._read_group_groupby(spec, query)
+            for spec in groupby
+        }
+        select_terms: list[SQL] = [
+            self._read_group_select(spec, query)
+            for spec in aggregates
+        ]
+        sql_having = self._read_group_having(having, query)
+        sql_order, sql_extra_groupby = self._read_group_orderby(order, groupby_terms, query)
 
         groupby_terms = list(groupby_terms.values())
 
@@ -1899,11 +1891,10 @@ class BaseModel(metaclass=MetaModel):
         if offset:
             query_parts.append(SQL("OFFSET %s", offset))
 
-        self._flush_search(domain, fnames_to_flush)
-        if fnames_to_flush:
-            self._read_group_check_field_access_rights(fnames_to_flush)
+        sql = SQL("\n").join(query_parts)
+        self.env.flush_fields(sql.to_flush)
+        self.env.cr.execute(sql)
 
-        self.env.cr.execute(SQL("\n").join(query_parts))
         # row_values: [(a1, b1, c1), (a2, b2, c2), ...]
         row_values = self.env.cr.fetchall()
 
@@ -1926,12 +1917,13 @@ class BaseModel(metaclass=MetaModel):
         # return [(a1, b1, c1), (a2, b2, c2), ...]
         return list(zip(*column_result))
 
-    def _read_group_select(self, aggregate_spec: str, query: Query) -> tuple[SQL, list[str]]:
-        """ Return a pair (<SQL expression>, [<field names used in SQL expression>])
-        corresponding to the given aggregation.
+    def _read_group_select(self, aggregate_spec: str, query: Query) -> SQL:
+        """ Return an SQL object corresponding to the given aggregate element.
+        This method is responsible for checking whether the corresponding field
+        can be aggregated (see :meth:`_read_group_check_field_access_rights`).
         """
         if aggregate_spec == '__count':
-            return SQL("COUNT(*)"), []
+            return SQL("COUNT(*)")
 
         fname, property_name, func = parse_read_group_spec(aggregate_spec)
 
@@ -1944,21 +1936,25 @@ class BaseModel(metaclass=MetaModel):
         if func not in READ_GROUP_AGGREGATE:
             raise ValueError(f"Invalid aggregate method {func!r} for {aggregate_spec!r}.")
 
+        self._read_group_check_field_access_rights([fname])
+
         field = self._fields[fname]
         if func == 'recordset' and not (field.relational or fname == 'id'):
             raise ValueError(f"Aggregate method {func!r} can be only used on relational field (or id) (for {aggregate_spec!r}).")
 
         sql_field = self._field_to_sql(self._table, access_fname, query)
-        sql_expr = READ_GROUP_AGGREGATE[func](self._table, sql_field)
-        return sql_expr, [fname]
+        return READ_GROUP_AGGREGATE[func](self._table, sql_field)
 
-    def _read_group_groupby(self, groupby_spec: str, query: Query) -> tuple[SQL, list[str]]:
-        """ Return a pair (<SQL expression>, [<field names used in SQL expression>])
-        corresponding to the given groupby element.
+    def _read_group_groupby(self, groupby_spec: str, query: Query) -> SQL:
+        """ Return an SQL object corresponding to the given groupby element.
+        This method is responsible for checking whether the corresponding field
+        can be grouped by (see :meth:`_read_group_check_field_access_rights`).
         """
         fname, property_name, granularity = parse_read_group_spec(groupby_spec)
         if fname not in self:
             raise ValueError(f"Invalid field {fname!r} on model {self._name!r}")
+
+        self._read_group_check_field_access_rights([fname])
 
         field = self._fields[fname]
 
@@ -2000,17 +1996,17 @@ class BaseModel(metaclass=MetaModel):
         elif field.type == 'boolean':
             sql_expr = SQL("COALESCE(%s, FALSE)", sql_expr)
 
-        return sql_expr, [fname]
+        return sql_expr
 
-    def _read_group_having(self, having_domain: list, query: Query) -> tuple[SQL, list[str]]:
-        """ Return a pair (<SQL expression>, [<used field name>]) corresponding
-        to the having domain.
+    def _read_group_having(self, having_domain: list, query: Query) -> SQL:
+        """ Return an SQL object corresponding to the having domain.
+        This method is responsible for checking whether the involved fields
+        can be used.
         """
         if not having_domain:
-            return SQL(), []
+            return SQL()
 
         stack: list[SQL] = []
-        fnames_used = []
         SUPPORTED = ('in', 'not in', '<', '>', '<=', '>=', '=', '!=')
         for item in reversed(having_domain):
             if item == '!':
@@ -2023,22 +2019,21 @@ class BaseModel(metaclass=MetaModel):
                 left, operator, right = item
                 if operator not in SUPPORTED:
                     raise ValueError(f"Invalid having clause {item!r}: supported comparators are {SUPPORTED}")
-                sql_left, fnames = self._read_group_select(left, query)
+                sql_left = self._read_group_select(left, query)
                 sql_operator = expression.SQL_OPERATORS[operator]
                 stack.append(SQL("%s %s %s", sql_left, sql_operator, right))
-                fnames_used.extend(fnames)
             else:
                 raise ValueError(f"Invalid having clause {item!r}: it should be a domain-like clause")
 
         while len(stack) > 1:
             stack.append(SQL("(%s AND %s)", stack.pop(), stack.pop()))
 
-        return stack[0], fnames_used
+        return stack[0]
 
     def _read_group_orderby(self, order: str, groupby_terms: dict[str, SQL],
-                            query: Query) -> tuple[SQL, SQL, list[str]]:
-        """ Return (<SQL expression>, <SQL expression>, [<field names used>])
-        corresponding to the given order and groupby terms.
+                            query: Query) -> tuple[SQL, SQL]:
+        """ Return a pair of SQL objects corresponding to the given order and
+        extra groupby terms.
 
         :param order: the order specification
         :param groupby_terms: the group by terms mapping ({spec: sql_expression})
@@ -2051,11 +2046,10 @@ class BaseModel(metaclass=MetaModel):
             traverse_many2one = False
 
         if not order:
-            return SQL(), SQL(), []
+            return SQL(), SQL()
 
         orderby_terms = []
         extra_groupby_terms = []
-        fnames_used = []
 
         for order_part in order.split(','):
             order_match = regex_order.match(order_part)
@@ -2070,17 +2064,18 @@ class BaseModel(metaclass=MetaModel):
 
             if term not in groupby_terms:
                 try:
-                    sql_expr, fnames = self._read_group_select(term, query)
+                    sql_expr = self._read_group_select(term, query)
                 except ValueError as e:
                     raise ValueError(f"Order term {order_part!r} is not a valid aggregate nor valid groupby") from e
                 orderby_terms.append(SQL("%s %s %s", sql_expr, sql_direction, sql_nulls))
-                fnames_used.extend(fnames)
                 continue
 
             field = self._fields.get(term)
             if traverse_many2one and field and field.type == 'many2one':
                 # this generates an extra clause to add in the group by
                 sql_order = self._order_to_sql(f'{term} {direction} {nulls}', query)
+                if not sql_order:
+                    continue
                 orderby_terms.append(sql_order)
                 sql_order_str = self.env.cr.mogrify(sql_order).decode()
                 extra_groupby_terms.extend(
@@ -2093,7 +2088,7 @@ class BaseModel(metaclass=MetaModel):
                 sql_expr = groupby_terms[term]
                 orderby_terms.append(SQL("%s %s %s", sql_expr, sql_direction, sql_nulls))
 
-        return SQL(", ").join(orderby_terms), SQL(", ").join(extra_groupby_terms), fnames_used
+        return SQL(", ").join(orderby_terms), SQL(", ").join(extra_groupby_terms)
 
     @api.model
     def _read_group_check_field_access_rights(self, field_names):
@@ -5144,7 +5139,8 @@ class BaseModel(metaclass=MetaModel):
     def _order_field_to_sql(self, alias: str, field_name: str, direction: SQL,
                             nulls: SQL, query: Query) -> SQL:
         """ Return an :class:`SQL` object that represents the ordering by the
-        given field.
+        given field. This method is responsible for checking whether the given
+        field is accessible.
 
         :param direction: one of ``SQL("ASC")``, ``SQL("DESC")``, ``SQL()``
         :param nulls: one of ``SQL("NULLS FIRST")``, ``SQL("NULLS LAST")``, ``SQL()``
@@ -5157,6 +5153,8 @@ class BaseModel(metaclass=MetaModel):
         field = self._fields.get(field_name)
         if not field:
             raise ValueError(f"Invalid field {field_name!r} on model {self._name!r}")
+
+        self.check_field_access_rights('read', [field_name])
 
         if property_name and field.type != 'properties':
             raise ValueError(f'Order a property ({property_name!r}) on a non-properties field ({field_name!r})')

@@ -259,10 +259,6 @@ class MailActivityMixin(models.AbstractModel):
         if groupby_spec != 'activity_state':
             return super()._read_group_groupby(groupby_spec, query)
 
-        self.env['mail.activity'].flush_model(['res_model', 'res_id', 'user_id', 'date_deadline'])
-        self.env['res.users'].flush_model(['partner_id'])
-        self.env['res.partner'].flush_model(['tz'])
-
         tz = 'UTC'
         if self.env.context.get('tz') in pytz.all_timezones_set:
             tz = self.env.context['tz']
@@ -284,10 +280,18 @@ class MailActivityMixin(models.AbstractModel):
             """,
             res_model=self._name,
             tz=tz,
+            to_flush={
+                'mail.activity': ['res_model', 'res_id', 'user_id', 'date_deadline'],
+                'res.users': ['partner_id'],
+                'res.partner': ['tz'],
+            },
         )
-        alias = query.join(self._table, "id", sql_join, "res_id", "last_activity_state")
+        alias = query.make_alias(self._table, 'last_activity_state')
+        query.add_join('JOIN', alias, sql_join, SQL(
+            "%s = %s", SQL.identifier(self._table, 'id'), SQL.identifier(alias, 'res_id'),
+        ))
 
-        return SQL.identifier(alias, 'activity_state'), ['activity_state']
+        return SQL.identifier(alias, 'activity_state')
 
     def toggle_active(self):
         """ Before archiving the record we should also remove its ongoing
