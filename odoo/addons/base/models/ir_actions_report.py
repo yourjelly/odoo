@@ -796,6 +796,7 @@ class IrActionsReport(models.Model):
         return collected_streams
 
     def _render_qweb_pdf(self, report_ref, res_ids=None, data=None):
+        print("RENDER QWEB PDF")
         if not data:
             data = {}
         if isinstance(res_ids, int):
@@ -879,6 +880,7 @@ class IrActionsReport(models.Model):
 
     @api.model
     def _render_qweb_html(self, report_ref, docids, data=None):
+        print("RENDER QWEB HTML")
         if not data:
             data = {}
         data.setdefault('report_type', 'html')

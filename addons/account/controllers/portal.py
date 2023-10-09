@@ -118,6 +118,8 @@ class PortalAccount(CustomerPortal):
             return request.redirect('/my')
 
         if report_type in ('html', 'pdf', 'text'):
+            #TODO: the iframe contains the html (from render_qweb_html)
+            # need to use the template account.report_invoice_document to render again the pdf
             return self._show_report(model=invoice_sudo, report_type=report_type, report_ref='account.account_invoices', download=download)
 
         values = self._invoice_get_page_view_values(invoice_sudo, access_token, **kw)

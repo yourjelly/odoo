@@ -4415,6 +4415,36 @@ class AccountMove(models.Model):
         self.ensure_one()
         return f"{self.name.replace('/', '_')}_proforma.pdf"
 
+    def _render_move_custom_report(self, invoice_data):
+        """ Render the invoice PDF but allow to set a custom report_name and custom values.
+        That way, all invoice reports are separated from the main one but don't need an extra report every time.
+        """
+        self.ensure_one()
+        IrActionsReport = type(self.env['ir.actions.report'])
+        _render_template = IrActionsReport._render_template
+
+        # use this inside the controller "portal_my_invoice_detail"
+        inv_report, inv_report_values = self.env['account.move.send']._get_invoice_pdf_report_to_render(self, invoice_data)
+
+        def render_template(records, template, values=None):
+            return _render_template(
+                records,
+                template,
+                values={
+                    **(values or {}),
+                    **inv_report_values,
+                },
+            )
+
+        with patch.object(IrActionsReport, '_render_template', side_effect=render_template, autospec=True):
+            content, _report_format = self.env['ir.actions.report'] \
+                .with_context(force_report_invoice_template=inv_report) \
+                ._render(
+                'account.account_invoices',
+                self.ids,
+            )
+        return content
+
     # -------------------------------------------------------------------------
     # TOOLING
     # -------------------------------------------------------------------------
