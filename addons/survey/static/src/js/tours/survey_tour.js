@@ -23,21 +23,29 @@ tour.register('survey_tour', {
     content: _t("Let's get started!"),
     position: 'bottom',
 }, {
-    trigger: '.o_survey_simple_choice button[type=submit]',
+    trigger: 'span:contains("Often (1-3 times per week)")',
     extra_trigger: '.js_question-wrapper span:contains("How frequently")',
     content: _t("Whenever you pick an answer, Odoo saves it for you."),
+}, {
+    trigger: 'button[type="submit"]',
     position: 'bottom', 
+}, {
+    trigger: '.o_survey_question_numerical_box',
+    run: 'text 1',
 }, {
     trigger: '.o_survey_numerical_box button[type=submit]',
     extra_trigger: '.js_question-wrapper span:contains("How many")',
     content: _t("Only a single question left!"),
     position: 'bottom',
 }, {
+    trigger: 'span:contains("A")',
+    content: _t('Selecting the Option A')
+}, {
     trigger: '.o_survey_matrix button[value=finish]',
     extra_trigger: '.js_question-wrapper span:contains("How likely")',
     content: _t("Now that you are done, submit your form."),
-    position: 'bottom',
 }, {
+    position: 'bottom',
     trigger: '.o_survey_review a',
     content: _t("Let's have a look at your answers!"),
     position: 'bottom',
