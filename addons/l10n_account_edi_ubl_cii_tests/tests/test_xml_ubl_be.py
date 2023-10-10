@@ -425,6 +425,48 @@ class TestUBLBE(TestUBLCommon):
         )
         self._assert_invoice_attachment(invoice, None, 'from_odoo/bis3_pay_term_ecotax.xml')
 
+    def test_export_with_changed_taxes(self):
+        invoice = self._generate_move(
+            self.partner_1,
+            self.partner_2,
+            move_type='out_invoice',
+            invoice_line_ids=[
+                {
+                    'product_id': self.product_a.id,
+                    'quantity': 1,
+                    'price_unit': 20,
+                    'tax_ids': [Command.set([self.tax_21.id])],
+                },
+                {
+                    'product_id': self.product_b.id,
+                    'quantity': 1,
+                    'price_unit': 10,
+                    'tax_ids': [Command.set([self.tax_12.id])],
+                },
+            ],
+        )
+        self.assertRecordValues(invoice, [{
+            'amount_untaxed': 30.0,
+            'amount_tax': 5.4,
+            'amount_total': 35.4,
+        }])
+
+        invoice.button_draft()
+        tax_lines = invoice.line_ids.filtered(lambda line: line.display_type == 'tax')
+        tax_line_21 = next((line for line in tax_lines if line.name == 'tax_21'))
+        tax_line_12 = next((line for line in tax_lines if line.name == 'tax_12'))
+        tax_line_21.amount_currency = -21000
+        tax_line_12.amount_currency = -12000
+        invoice.action_post()
+
+        self.assertRecordValues(invoice, [{
+            'amount_untaxed': 30.0,
+            'amount_tax': 33000.0,
+            'amount_total': 33030.0,
+        }])
+
+        self._assert_invoice_attachment(invoice, None, 'from_odoo/bis3_export_with_changed_taxes.xml')
+
     ####################################################
     # Test import
     ####################################################
