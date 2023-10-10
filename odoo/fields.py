@@ -4763,7 +4763,6 @@ class Many2many(_RelationalMulti):
 
         # make the query for the lines
         domain = self.get_domain_list(records)
-        comodel._flush_search(domain, order=comodel._order)
         query = comodel._where_calc(domain)
         comodel._apply_ir_rules(query, 'read')
         query.order = comodel._order_to_sql(comodel._order, query)
@@ -4778,6 +4777,7 @@ class Many2many(_RelationalMulti):
 
         # retrieve pairs (record, line) and group by record
         group = defaultdict(list)
+        records.env.flush_fields(query.to_flush)
         records.env.cr.execute(query.select(sql_id1, sql_id2))
         for row in records.env.cr.fetchall():
             group[row[0]].append(row[1])
