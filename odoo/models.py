@@ -4114,8 +4114,8 @@ class BaseModel(metaclass=MetaModel):
             return self
 
         # determine ids in database that satisfy ir.rules
-        self._flush_search([])
         query.add_where(SQL("%s IN %s", SQL.identifier(self._table, 'id'), tuple(self.ids)))
+        self.env.flush_fields(query.to_flush)
         self._cr.execute(query.select())
         valid_ids = {row[0] for row in self._cr.fetchall()}
 
