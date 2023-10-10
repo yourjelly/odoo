@@ -48,6 +48,7 @@ export function useViewButtons(model, ref, options = {}) {
             disableAction,
             enableAction,
         }) {
+            debugger;
             const manuallyDisabledButtons = disableButtons(getEl());
             if (disableAction) {
                 disableAction();
@@ -79,6 +80,7 @@ export function useViewButtons(model, ref, options = {}) {
                 if (clickParams.buttonContext) {
                     Object.assign(buttonContext, clickParams.buttonContext);
                 }
+                debugger;
                 const doActionParams = Object.assign({}, clickParams, {
                     resModel: params.resModel || model.resModel,
                     resId,

@@ -11,6 +11,7 @@ class RedirectField extends Component {
     }
 
     onClick() {
+        debugger;
         this.env.onClickViewButton({
             clickParams: {
                 type: "object",
