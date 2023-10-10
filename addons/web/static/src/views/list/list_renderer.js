@@ -1899,7 +1899,7 @@ export class ListRenderer extends Component {
     }
 
     calculateColumnWidth(column) {
-        if (column.options && column.attrs.width) {
+        if (column.attrs && column.attrs.width) {
             return { type: "absolute", value: column.attrs.width };
         }
 

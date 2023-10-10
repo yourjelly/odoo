@@ -11,6 +11,9 @@ export class MovesListRenderer extends ListRenderer {
             cols.push({
                 type: 'opendetailsop',
                 id: `column_detailOp_${cols.length}`,
+                attrs: {
+                    width: "40px",
+                },
             });
         }
         return cols;
