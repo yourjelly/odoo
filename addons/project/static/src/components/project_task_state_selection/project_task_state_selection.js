@@ -38,7 +38,7 @@ export class ProjectTaskStateSelection extends StateSelectionField {
             "02_changes_requested": "btn-outline-warning",
             "1_done": "btn-outline-success",
             "1_canceled": "btn-outline-danger",
-            "04_waiting_normal": "btn-outline-secondary",
+            "04_waiting_normal": "btn-outline-info",
         };
         if (this.props.viewType != 'form') {
             super.setup();
