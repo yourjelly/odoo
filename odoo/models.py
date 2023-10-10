@@ -5354,9 +5354,6 @@ class BaseModel(metaclass=MetaModel):
             # optimization: no need to query, as no record satisfies the domain
             return self.browse()._as_query()
 
-        # the flush must be done before the _where_calc(), as the latter can do some selects
-        self._flush_search(domain, order=order)
-
         query = self._where_calc(domain)
         self._apply_ir_rules(query, 'read')
 
