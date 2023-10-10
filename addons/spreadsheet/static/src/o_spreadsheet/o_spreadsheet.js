@@ -4284,7 +4284,7 @@
     const SORT_TYPES_ORDER = ["number", "string", "boolean", "undefined"];
     function assert(condition, message) {
         if (!condition()) {
-            throw new Error(message);
+            throw new EvaluationError(CellErrorType.GenericError, message);
         }
     }
     // -----------------------------------------------------------------------------
@@ -4929,7 +4929,7 @@
             return textCell((value || "").toString(), localeFormat);
         }
         catch (error) {
-            return errorCell((value || "").toString(), new EvaluationError(CellErrorType.GenericError, error.message || DEFAULT_ERROR_MESSAGE));
+            return errorCell(new EvaluationError(CellErrorType.GenericError, error.message || DEFAULT_ERROR_MESSAGE));
         }
     }
     function textCell(value, localeFormat) {
@@ -4996,7 +4996,7 @@
             formattedValue,
         };
     }
-    function errorCell(content, error) {
+    function errorCell(error) {
         return {
             type: CellValueType.error,
             value: error.errorType,
@@ -21801,7 +21801,7 @@
             });
         }
         canUpdateChart(figureId, updateDefinition) {
-            if (figureId !== this.figureId) {
+            if (figureId !== this.figureId || !this.env.model.getters.isChartDefined(figureId)) {
                 return;
             }
             const definition = {
@@ -35429,7 +35429,7 @@
             const evaluatedCell = this.getEvaluatedCell(position);
             if (evaluatedCell.type === CellValueType.empty) {
                 const cell = this.getters.getCell(position);
-                if (!cell || cell.content === "") {
+                if (!cell || (!cell.isFormula && cell.content === "")) {
                     return undefined;
                 }
             }
@@ -35649,7 +35649,7 @@
         constructor(context, getters) {
             this.context = context;
             this.getters = getters;
-            this.compilationParams = buildCompilationParameters(context, getters, (position) => this.computeCell(this.encodePosition(position)));
+            this.compilationParams = buildCompilationParameters(this.context, this.getters, this.computeAndSave.bind(this));
         }
         getEvaluatedCell(position) {
             return (this.evaluatedCells.get(this.encodePosition(position)) ||
@@ -35677,7 +35677,7 @@
             this.formulaDependencies().addDependencies(positionId, dependencies);
         }
         updateCompilationParameters() {
-            this.compilationParams = buildCompilationParameters(this.context, this.getters, (position) => this.computeCell(this.encodePosition(position)));
+            this.compilationParams = buildCompilationParameters(this.context, this.getters, this.computeAndSave.bind(this));
         }
         evaluateCells(positions) {
             const cells = positions.map(this.encodePosition.bind(this));
@@ -35793,15 +35793,21 @@
                 this.cellsBeingComputed.delete(cellId);
             }
         }
-        handleError(e, cell) {
-            if (!(e instanceof Error)) {
-                e = new Error(e);
+        computeAndSave(position) {
+            const positionId = this.encodePosition(position);
+            const evaluatedCell = this.computeCell(positionId);
+            if (!this.evaluatedCells.has(positionId)) {
+                this.setEvaluatedCell(positionId, evaluatedCell);
             }
-            const msg = e?.errorType || CellErrorType.GenericError;
-            // apply function name
+            return evaluatedCell;
+        }
+        handleError(e, cell) {
+            if (!(e instanceof EvaluationError)) {
+                e = new EvaluationError(CellErrorType.GenericError, e.message);
+            }
             const __lastFnCalled = this.compilationParams[2].__lastFnCalled || "";
-            const error = new EvaluationError(msg, e.message.replace("[[FUNCTION_NAME]]", __lastFnCalled), e.logLevel !== undefined ? e.logLevel : CellErrorLevel.error);
-            return errorCell(cell.content, error);
+            e.message = e.message.replace("[[FUNCTION_NAME]]", __lastFnCalled);
+            return errorCell(e);
         }
         computeFormulaCell(cellData) {
             const cellId = cellData.id;
@@ -50693,8 +50699,8 @@
 
 
     __info__.version = '16.4.8';
-    __info__.date = '2023-10-03T13:26:24.526Z';
-    __info__.hash = 'c614d64';
+    __info__.date = '2023-10-10T05:44:52.704Z';
+    __info__.hash = 'def06c3';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
