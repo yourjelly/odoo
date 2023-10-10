@@ -1153,7 +1153,6 @@ class expression(object):
                         right = comodel._search([(path[1], operator, right)])
                         operator = 'in'
                     domain = field.determine_domain(model, operator, right)
-                    model._flush_search(domain)
 
                 for elem in domain_combine_anies(domain, model):
                     push(elem, model, alias, internal=True)
