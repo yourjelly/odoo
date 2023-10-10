@@ -2,6 +2,7 @@
 <odoo>
     <menuitem name="Social Share"
         id="social_share_menu_main"
+        web_icon="social_share,static/description/icon.png"
         sequence="270"/>
 
     <menuitem name="Posts"
