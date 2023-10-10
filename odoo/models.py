@@ -5364,6 +5364,14 @@ class BaseModel(metaclass=MetaModel):
 
         return query
 
+    def _check_search_access_rights(self, left, operator, value):
+        """ Check whether one can search on the given field (sequence) condition.
+        This method may be overridden to enforce or relax access rights on some
+        conditions.
+        """
+        field_name = left.split('.', 1)[0]
+        self.check_field_access_rights('read', [field_name])
+
     def _as_query(self, ordered=True):
         """ Return a :class:`Query` that corresponds to the recordset ``self``.
         This method is convenient for making a query object with a known result.

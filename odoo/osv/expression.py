@@ -994,6 +994,7 @@ class expression(object):
             left, operator, right = leaf
             path = left.split('.', 1)
 
+            model._check_search_access_rights(left, operator, right)
             field = model._fields.get(path[0])
             comodel = model.env.get(getattr(field, 'comodel_name', None))
 
