@@ -472,7 +472,7 @@ class IrActionsServer(models.Model):
                 return field_name
         return ''
 
-    name = fields.Char(compute='_compute_name', store=True, readonly=False, required=True)
+    name = fields.Char(required=True)
     type = fields.Char(default='ir.actions.server')
     usage = fields.Selection([
         ('ir_actions_server', 'Server Action'),
@@ -563,23 +563,6 @@ class IrActionsServer(models.Model):
                                               "The id and model of the record are always sent as '_id' and '_model'. "
                                               "The name of the action that triggered the webhook is always sent as '_name'.")
     webhook_sample_payload = fields.Text(string='Sample Payload', compute='_compute_webhook_sample_payload')
-
-    @api.depends('state', 'update_field_id', 'crud_model_id', 'value', 'evaluation_type')
-    def _compute_name(self):
-        for action in self.filtered('state'):
-            if action.state == 'object_write':
-                action_type = _("Update") if action.evaluation_type == 'value' else _("Compute")
-                action.name = _("%s %s", action_type, action._stringify_path())
-            elif action.state == 'object_create':
-                action.name = _(
-                    "Create %(model_name)s with name %(value)s",
-                    model_name=action.crud_model_id.name,
-                    value=action.value
-                )
-            elif action.state == 'webhook':
-                action.name = _("Send Webhook Notification to %s", action.webhook_url)
-            else:
-                action.name = dict(action._fields['state']._description_selection(self.env))[action.state]
 
     @api.depends('state')
     def _compute_available_model_ids(self):
