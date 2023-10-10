@@ -63,34 +63,27 @@ class ReportProjectTaskBurndownChart(models.AbstractModel):
         # Build the query on `project.task` with the domain fields that are linked to that model. This is done in order
         # to be able to reduce the number of treated records in the query by limiting them to the one corresponding to
         # the ids that are returned from this sub query.
-        self.env['project.task']._flush_search(task_specific_domain, fields=self.task_specific_fields)
         project_task_query = self.env['project.task']._where_calc(task_specific_domain)
-        project_task_from_clause, project_task_where_clause, project_task_where_clause_params = project_task_query.get_sql()
 
         # Get the stage_id `ir.model.fields`'s id in order to inject it directly in the query and avoid having to join
         # on `ir_model_fields` table.
-        IrModelFieldsSudo = self.env['ir.model.fields'].sudo()
-        field_id = IrModelFieldsSudo.search([('name', '=', 'stage_id'), ('model', '=', 'project.task')]).id
+        field_id = self.env['ir.model.fields']._get('project.task', 'stage_id').id
 
         groupby = self.env.context['project_task_burndown_chart_report_groupby']
         date_groupby = [g for g in groupby if g.startswith('date')][0]
 
         # Computes the interval which needs to be used in the `SQL` depending on the date group by interval.
         interval = date_groupby.split(':')[1]
-        sql_interval = '1 %s' % interval if interval != 'quarter' else '3 month'
+        sql_interval = f'1 {interval}' if interval != 'quarter' else '3 month'
 
         simple_date_groupby_sql = self._read_group_groupby(f"date:{interval}", main_query)
         # Removing unexistant table name from the expression
         simple_date_groupby_sql = self.env.cr.mogrify(simple_date_groupby_sql).decode()
         simple_date_groupby_sql = simple_date_groupby_sql.replace('"project_task_burndown_chart_report".', '')
 
-        burndown_chart_query = """
+        burndown_chart_sql = SQL("""
             (
-              WITH task_ids AS (
-                 SELECT id
-                 FROM %(task_query_from)s
-                 %(task_query_where)s
-              ),
+              WITH task_ids AS %(select_project_tasks)s,
               all_stage_task_moves AS (
                  SELECT count(*) as __count,
                         sum(allocated_hours) as allocated_hours,
@@ -116,7 +109,7 @@ class ReportProjectTaskBurndownChart(models.AbstractModel):
                                             pt.project_id,
                                             COALESCE(LAG(mm.date) OVER (PARTITION BY mm.res_id ORDER BY mm.id), pt.create_date) as date_begin,
                                             CASE WHEN mtv.id IS NOT NULL THEN mm.date
-                                                ELSE (now() at time zone 'utc')::date + INTERVAL '%(interval)s'
+                                                ELSE (now() at time zone 'utc')::date + INTERVAL %(interval)s
                                             END as date_end,
                                             CASE WHEN mtv.id IS NOT NULL THEN mtv.old_value_integer
                                                ELSE pt.stage_id
@@ -147,7 +140,7 @@ class ReportProjectTaskBurndownChart(models.AbstractModel):
                                    pt.allocated_hours,
                                    pt.project_id,
                                    last_stage_id_change_mail_message.date as date_begin,
-                                   (now() at time zone 'utc')::date + INTERVAL '%(interval)s' as date_end,
+                                   (now() at time zone 'utc')::date + INTERVAL %(interval)s as date_end,
                                    pt.stage_id as old_value_integer
                               FROM project_task pt
                                    JOIN project_task_type ptt ON ptt.id = pt.stage_id
@@ -177,21 +170,24 @@ class ReportProjectTaskBurndownChart(models.AbstractModel):
                      date,
                      __count
                 FROM all_stage_task_moves t
-                         JOIN LATERAL generate_series(t.date_begin, t.date_end-INTERVAL '1 day', '%(interval)s')
+                         JOIN LATERAL generate_series(t.date_begin, t.date_end-INTERVAL '1 day', %(interval)s)
                             AS date ON TRUE
             )
-        """ % {
-            'task_query_from': project_task_from_clause,
-            'task_query_where': f'WHERE {project_task_where_clause}' if project_task_where_clause else '',
-            'date_begin': simple_date_groupby_sql.replace('"date"', '"date_begin"'),
-            'date_end': simple_date_groupby_sql.replace('"date"', '"date_end"'),
-            'interval': sql_interval,
-            'field_id': field_id,
-        }
+        """,
+            select_project_tasks=project_task_query.subselect(),
+            date_begin=SQL(simple_date_groupby_sql.replace('"date"', '"date_begin"')),
+            date_end=SQL(simple_date_groupby_sql.replace('"date"', '"date_end"')),
+            interval=sql_interval,
+            field_id=field_id,
+            to_flush={
+                'project.task': ['active', 'allocated_hours', 'create_date', 'project_id', 'stage_id'],
+                'mail.message': ['date', 'message_type', 'model', 'res_id'],
+                'mail.tracking.value': ['field_id', 'mail_message_id', 'old_value_integer'],
+            },
+        )
 
         # hardcode 'project_task_burndown_chart_report' as the query above
         # (with its own parameters)
-        burndown_chart_sql = SQL(burndown_chart_query, *project_task_where_clause_params)
         main_query._tables['project_task_burndown_chart_report'] = burndown_chart_sql
 
         return main_query
