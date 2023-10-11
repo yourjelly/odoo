@@ -94,11 +94,11 @@ class TestTax(TestTaxCommon):
         self._check_tax_results(
             tax_group1,
             {
-                'total_included': 220.0,
-                'total_excluded': 190.0,
+                'total_included': 231.0,
+                'total_excluded': 200.0,
                 'taxes': (
-                    (190.0, 10.0),
-                    (200.0, 20.0),
+                    (200.0, 10.0),
+                    (210.0, 21.0),
                 ),
             },
             200.0,
@@ -107,13 +107,13 @@ class TestTax(TestTaxCommon):
         self._check_tax_results(
             tax_group_of_groups,
             {
-                'total_included': 239.0,
-                'total_excluded': 180.0,
+                'total_included': 263.0,
+                'total_excluded': 200.0,
                 'taxes': (
-                    (180.0, 10.0),
-                    (190.0, 19.0),
-                    (190.0, 10.0),
-                    (200.0, 20.0),
+                    (200.0, 10.0),
+                    (210.0, 21.0),
+                    (210.0, 10.0),
+                    (220.0, 22.0),
                 ),
             },
             200.0,
@@ -800,7 +800,7 @@ class TestTax(TestTaxCommon):
                     (121.0, 2.0),
                 ),
             },
-            121.0,
+            120.0,
         )
 
         tax2.include_base_amount = True
@@ -815,7 +815,7 @@ class TestTax(TestTaxCommon):
                     (121.0, 2.0),
                 ),
             },
-            121.0,
+            120.0,
         )
 
         tax1.include_base_amount = False

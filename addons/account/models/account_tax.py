@@ -774,7 +774,9 @@ class AccountTax(models.Model):
         # First ascending computation for fixed tax.
         # In Belgium, we could have a price-excluded tax affecting the base of a price-included tax.
         # In that case, we need to compute the fix amount before the descending computation.
+        extra_base = 0.0
         for batch in ascending_batches:
+            batch['extra_base'] = extra_base
             self._ascending_process_fixed_taxes_batch(
                 batch,
                 base,
@@ -784,16 +786,18 @@ class AccountTax(models.Model):
             )
             if batch.get('computed'):
                 batch.pop('computed')
+                if batch['include_base_amount']:
+                    extra_base += sum(tax_values['tax_amount_factorized'] for tax_values in batch['taxes'])
 
         # First descending computation to compute price_included values and find the total_excluded amount.
         for batch in descending_batches:
             self._descending_process_price_included_taxes_batch(
                 batch,
-                base,
+                base + batch['extra_base'],
                 precision_rounding,
                 extra_computation_values,
             )
-            if batch.get('computed') and batch['price_include']:
+            if batch.get('computed'):
                 base -= sum(tax_values['tax_amount_factorized'] for tax_values in batch['taxes'])
 
         first_base = base
