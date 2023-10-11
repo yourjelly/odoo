@@ -815,8 +815,8 @@ class TestTaxTotals(AccountTestInvoicingCommon):
             })
 
         # Multiple tax groups.
-        for i in range(len(taxes)):
-            taxes[i].tax_group_id = tax_groups[i]
+        for i, tax in enumerate(taxes):
+            tax.tax_group_id = tax_groups[i]
         with self.subTest("Tax-excluded / Multiple tax groups"):
             self.assert_document_tax_totals(document, {
                 'amount_total': 44.15,

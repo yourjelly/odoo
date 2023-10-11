@@ -486,7 +486,6 @@ class AccountTax(models.Model):
                 batch['computed'] = True
 
                 for tax_values in tax_values_list:
-                    tax = tax_values['tax']
                     not_factorized_base = base * (1 - (tax_values['tax'].amount * tax_values['factor'] / 100.0))
                     tax_values['tax_amount'] = base - not_factorized_base
                     tax_values['tax_amount_factorized'] = float_round(
@@ -616,11 +615,10 @@ class AccountTax(models.Model):
             precision_rounding *= 1e-5
 
         # Initial base amount.
-        # All computation starts with a rounded amount because everything ends up in moneraty fields after all.
+        # All computation starts with a rounded amount because everything ends up in monetary fields after all.
         price_unit = base_line['price_unit'] * (1 - (base_line['discount'] / 100.0))
         quantity = base_line['quantity']
         base = currency.round(price_unit * quantity)
-        rate = base_line['rate'] or 1.0
         is_refund = base_line['is_refund']
 
         sign = 1
@@ -710,7 +708,6 @@ class AccountTax(models.Model):
                 )
 
             subsequent_taxes = self.env['account.tax']
-            subsequent_tags = self.env['account.account.tag']
             if batch['include_base_amount']:
 
                 # Price-included taxes are already accounted at this point.
@@ -743,7 +740,6 @@ class AccountTax(models.Model):
 
     @api.model
     def _split_base_lines_tax_details_per_repartition_lines(self, to_process, company, include_caba_tags=False):
-        results = []
         for base_line, tax_details_results in to_process:
             is_refund = base_line['is_refund']
             currency = base_line['currency'] or company.currency_id
@@ -943,7 +939,6 @@ class AccountTax(models.Model):
             handle_price_include=handle_price_include,
             extra_context={'force_price_include': self._context.get('force_price_include')},
         )
-        product = base_line['product']
         kwargs = {'need_extra_precision': True} if self._context.get('round') else {}
         tax_details_results = self._prepare_base_line_tax_details(
             base_line,

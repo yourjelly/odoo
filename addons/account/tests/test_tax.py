@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
-import math
-
 from odoo import Command
-from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 from odoo.tests import tagged
-from odoo.tools import frozendict
+from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 
 
 class TestTaxCommon(AccountTestInvoicingCommon):
@@ -75,6 +72,7 @@ class TestTaxCommon(AccountTestInvoicingCommon):
         for values, expected_values in zip(results['taxes'], expected_values['taxes']):
             self.assertAlmostEqual(values['base'], expected_values[0])
             self.assertAlmostEqual(values['amount'], expected_values[1])
+
 
 @tagged('post_install', '-at_install')
 class TestTax(TestTaxCommon):
@@ -369,7 +367,7 @@ class TestTax(TestTaxCommon):
                     'total_included': 10919.0,
                     'total_excluded': 9176.0,
                     'taxes': (
-                        (9176,  1743),
+                        (9176, 1743),
                     ),
                 },
                 9176.0,
@@ -381,7 +379,7 @@ class TestTax(TestTaxCommon):
                     'total_included': 27000.0,
                     'total_excluded': 22689.0,
                     'taxes': (
-                        (22689.0,  4311.0),
+                        (22689.0, 4311.0),
                     ),
                 },
                 27000.0,
@@ -393,7 +391,7 @@ class TestTax(TestTaxCommon):
                     'total_included': 10920.0,
                     'total_excluded': 9176.0,
                     'taxes': (
-                        (9176.0,  1744.0),
+                        (9176.0, 1744.0),
                     ),
                 },
                 10920.0,
@@ -431,7 +429,7 @@ class TestTax(TestTaxCommon):
                     'total_included': 2.80,
                     'total_excluded': 2.31,
                     'taxes': (
-                        (2.31,  0.49),
+                        (2.31, 0.49),
                     ),
                 },
                 2.80,
@@ -531,7 +529,7 @@ class TestTax(TestTaxCommon):
                     'total_included': 10919.0,
                     'total_excluded': 9176.0,
                     'taxes': (
-                        (9176,  1743.44),
+                        (9176, 1743.44),
                     ),
                 },
                 9176.0,
@@ -543,7 +541,7 @@ class TestTax(TestTaxCommon):
                     'total_included': 27000.0,
                     'total_excluded': 22689.0,
                     'taxes': (
-                        (22689.07563,  4310.92437),
+                        (22689.07563, 4310.92437),
                     ),
                 },
                 27000.0,
@@ -555,7 +553,7 @@ class TestTax(TestTaxCommon):
                     'total_included': 10920.0,
                     'total_excluded': 9176.0,
                     'taxes': (
-                        (9176.47059,  1743.52941),
+                        (9176.47059, 1743.52941),
                     ),
                 },
                 10920.0,
@@ -581,7 +579,7 @@ class TestTax(TestTaxCommon):
                     'total_included': 2.80,
                     'total_excluded': 2.31,
                     'taxes': (
-                        (2.3140496,  0.4859504),
+                        (2.3140496, 0.4859504),
                     ),
                 },
                 2.80,

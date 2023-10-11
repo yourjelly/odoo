@@ -30,7 +30,7 @@ class TestTaxPython(TestTaxCommon):
             130.0,
         )
 
-        tax.price_include=True
+        tax.price_include = True
         self._check_tax_results(
             tax,
             {
