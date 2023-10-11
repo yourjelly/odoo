@@ -4,6 +4,7 @@
 
 from collections import defaultdict
 from datetime import timedelta
+from dateutil.relativedelta import relativedelta
 from markupsafe import escape
 from operator import itemgetter
 from re import findall as regex_findall
@@ -1472,8 +1473,6 @@ Please change the quantity done or the rounding precision of your unit of measur
                 group_id = False
         product_id = self.product_id.with_context(lang=self._get_lang())
         date = self._get_mto_procurement_date()
-        if self.location_id.warehouse_id and self.location_id.warehouse_id.lot_stock_id.parent_path in self.location_id.parent_path:
-            date = self.product_id._get_date_with_security_lead_days(self.date, self.location_id, route_ids=self.route_ids)
         return {
             'product_description_variants': self.description_picking and self.description_picking.replace(product_id._get_description(self.picking_type_id), ''),
             'date_planned': date,
@@ -1488,7 +1487,7 @@ Please change the quantity done or the rounding precision of your unit of measur
         }
 
     def _get_mto_procurement_date(self):
-        return self.date
+        return self.date - relativedelta(days=self.rule_id.delay or 0)
 
     def _prepare_move_line_vals(self, quantity=None, reserved_quant=None):
         self.ensure_one()
