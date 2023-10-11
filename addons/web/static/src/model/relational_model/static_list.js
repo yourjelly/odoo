@@ -476,7 +476,7 @@ export class StaticList extends DataPoint {
         });
     }
 
-    _applyCommands(commands) {
+    async _applyCommands(commands) {
         const isOnLastPage = this.limit + this.offset >= this.count;
         const { CREATE, UPDATE, DELETE, UNLINK, LINK, SET } = x2ManyCommands;
         for (const command of commands) {
@@ -605,17 +605,16 @@ export class StaticList extends DataPoint {
                 }
             }
             const resIds = recordsToLoad.map((r) => r.resId);
-            this.model._loadRecords({ ...this.config, resIds }).then((recordValues) => {
-                for (let i = 0; i < recordsToLoad.length; i++) {
-                    const record = recordsToLoad[i];
-                    record._applyValues(recordValues[i]);
-                    const commands = this._unknownRecordCommands[record.resId];
-                    if (commands) {
-                        delete this._unknownRecordCommands[record.resId];
-                        this._applyCommands(commands);
-                    }
+            const recordValues = await this.model._loadRecords({ ...this.config, resIds });
+            for (let i = 0; i < recordsToLoad.length; i++) {
+                const record = recordsToLoad[i];
+                record._applyValues(recordValues[i]);
+                const commands = this._unknownRecordCommands[record.resId];
+                if (commands) {
+                    delete this._unknownRecordCommands[record.resId];
+                    this._applyCommands(commands);
                 }
-            });
+            }
         }
     }
 
