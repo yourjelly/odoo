@@ -277,3 +277,13 @@ class _SubTest(TestCase):
 
     def __str__(self):
         return "{} {}".format(self.test_case, self._subDescription())
+
+class CrossModule:
+    cross_module_classes = []
+
+    @classmethod
+    def __init_subclass__(cls):
+        CrossModule.cross_module_classes.append(cls)
+        cls.test_tags = {'standard', 'post_install'}
+        super().__init_subclass__()
+

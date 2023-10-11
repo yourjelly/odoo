@@ -253,6 +253,8 @@ class OdooTestResult(object):
     def getDescription(self, test):
         if isinstance(test, case._SubTest):
             return 'Subtest %s.%s %s' % (test.test_case.__class__.__qualname__, test.test_case._testMethodName, test._subDescription())
+        if isinstance(test, case.CrossModule):
+            return '%s.%s (%s)' % (test.__class__.__qualname__, test._testMethodName, test.test_module)
         if isinstance(test, case.TestCase):
             # since we have the module name in the logger, this will avoid to duplicate module info in log line
             # we only apply this for TestCase since we can receive error handler or other special case
