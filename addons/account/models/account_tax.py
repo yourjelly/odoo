@@ -1,15 +1,13 @@
 # -*- coding: utf-8 -*-
+import re
+from collections import defaultdict
+
 from odoo import api, fields, models, _, Command
 from odoo.osv import expression
 from odoo.tools.float_utils import float_round
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools.misc import formatLang
 from odoo.tools import frozendict, groupby
-
-from collections import defaultdict
-
-import math
-import re
 
 
 TYPE_TAX_USE = [
@@ -635,7 +633,7 @@ class AccountTax(models.Model):
             repartition_lines_field = 'invoice_repartition_line_ids'
 
         handle_price_include = base_line['handle_price_include']
-        force_price_include = base_line['extra_context'].get('force_price_include')
+        force_price_include = base_line['extra_context'].get('force_price_include', False)
 
         tax_values_list = []
         for tax in taxes:
@@ -666,7 +664,9 @@ class AccountTax(models.Model):
         # First ascending computation for fixed tax.
         # In Belgium, we could have a price-excluded tax affecting the base of a price-included tax.
         # In that case, we need to compute the fix amount before the descending computation.
+        extra_base = 0.0
         for batch in ascending_batches:
+            batch['extra_base'] = extra_base
             self._ascending_process_fixed_taxes_batch(
                 batch,
                 base,
@@ -676,16 +676,18 @@ class AccountTax(models.Model):
             )
             if batch.get('computed'):
                 batch.pop('computed')
+                if batch['include_base_amount']:
+                    extra_base += sum(tax_values['tax_amount_factorized'] for tax_values in batch['taxes'])
 
         # First descending computation to compute price_included values and find the total_excluded amount.
         for batch in descending_batches:
             self._descending_process_price_included_taxes_batch(
                 batch,
-                base,
+                base + batch['extra_base'],
                 precision_rounding,
                 extra_computation_values,
             )
-            if batch.get('computed') and batch['price_include']:
+            if batch.get('computed'):
                 base -= sum(tax_values['tax_amount_factorized'] for tax_values in batch['taxes'])
 
         first_base = base
@@ -937,7 +939,7 @@ class AccountTax(models.Model):
             quantity=quantity,
             is_refund=is_refund,
             handle_price_include=handle_price_include,
-            extra_context={'force_price_include': self._context.get('force_price_include')},
+            extra_context={'force_price_include': self._context.get('force_price_include', False)},
         )
         kwargs = {'need_extra_precision': True} if self._context.get('round') else {}
         tax_details_results = self._prepare_base_line_tax_details(
