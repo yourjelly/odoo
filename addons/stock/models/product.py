@@ -597,9 +597,9 @@ class Product(models.Model):
 
     def _get_date_with_security_lead_days(self, date, location, route_ids=False):
         rules = self._get_rules_from_location(location, route_ids=route_ids)
-        for action, days in location.company_id._get_security_by_rule_action().items():
-            if action in rules.mapped('action'):
-                date -= relativedelta(days=days)
+        # for action, days in location.company_id._get_security_by_rule_action().items():
+        #     if action in rules.mapped('action'):
+        #         date -= relativedelta(days=days)
         return date
 
     def _get_only_qty_available(self):
