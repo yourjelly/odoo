@@ -88,11 +88,12 @@ class SlideChannelInvite(models.TransientModel):
         """ Create mail specific for recipient """
         subject = self._render_field('subject', slide_channel_partner.ids)[slide_channel_partner.id]
         body = self._render_field('body', slide_channel_partner.ids)[slide_channel_partner.id]
+        auto_delete = self.template_id._generate_template(slide_channel_partner.ids, ['auto_delete'])[slide_channel_partner.id]['auto_delete'] if self.template_id else True
         # post the message
         mail_values = {
             'attachment_ids': [(4, att.id) for att in self.attachment_ids],
             'author_id': self.env.user.partner_id.id,
-            'auto_delete': True,
+            'auto_delete': auto_delete,
             'body_html': body,
             'email_from': self.env.user.email_formatted,
             'model': None,
