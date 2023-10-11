@@ -136,39 +136,3 @@ def run_suite(suite):
     threading.current_thread().testing = False
     module.current_test = False
     return results
-
-
-<<<<<<< HEAD
-class CrossModule():
-    cross_module_classes = []
-
-    @classmethod
-    def __init_subclass__(cls):
-        CrossModule.cross_module_classes.append(cls)
-        super().__init_subclass__()
-=======
-def unwrap_suite(test):
-    """
-    Attempts to unpack testsuites (holding suites or cases) in order to
-    generate a single stream of terminals (either test cases or customized
-    test suites). These can then be checked for run/skip attributes
-    individually.
-
-    An alternative would be to use a variant of @unittest.skipIf with a state
-    flag of some sort e.g. @unittest.skipIf(common.runstate != 'at_install'),
-    but then things become weird with post_install as tests should *not* run
-    by default there
-    """
-    if isinstance(test, unittest.TestCase):
-        yield test
-        return
-
-    subtests = list(test)
-    ## custom test suite (no test cases)
-    #if not len(subtests):
-    #    yield test
-    #    return
-
-    for item in itertools.chain.from_iterable(unwrap_suite(t) for t in subtests):
-        yield item
->>>>>>> 59d7b1d0ef27 (wip)

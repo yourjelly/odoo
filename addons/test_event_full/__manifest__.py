@@ -27,7 +27,6 @@ automatic lead generation, full Online support, ...
         'website_event_track_quiz',
     ],
     'data': [
-        # 'data/event_type_data.xml',  # uncomment to reproduce test tour
         'data/ir_actions_report_data.xml',
         'views/event_registration_templates_reports.xml',
     ],

@@ -1,12 +1,14 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import glob
 import logging
 from ast import literal_eval
+from os.path import join as opj
 
 from odoo.modules import get_modules
-from odoo.modules.module import _DEFAULT_MANIFEST, module_manifest, get_module_path, get_module_resource
+from odoo.modules.module import _DEFAULT_MANIFEST, module_manifest, get_module_path
 from odoo.tests import BaseCase, CrossModule
-from odoo.tools import file_open
+from odoo.tools.misc import file_open, file_path
 
 _logger = logging.getLogger(__name__)
 
@@ -18,6 +20,7 @@ MANIFEST_KEYS = {
 
 
 class ManifestLinter(BaseCase, CrossModule):
+
     def _load_manifest(self, module):
         """Do not rely on odoo/modules/module -> load_manifest
         as we want to check manifests content, independently of the
@@ -36,6 +39,7 @@ class ManifestLinter(BaseCase, CrossModule):
         manifest_data = self._load_manifest(self.test_module)
         self._test_manifest_keys(self.test_module, manifest_data)
         self._test_manifest_values(self.test_module, manifest_data)
+        self._test_unused_data(manifest_data)
 
     def _test_manifest_keys(self, module, manifest_data):
         manifest_keys = manifest_data.keys()
@@ -102,8 +106,9 @@ class ManifestLinter(BaseCase, CrossModule):
                 module)
         else:
             path_parts = value.split('/')
-            path = get_module_resource(path_parts[1], *path_parts[2:])
-            if not path:
+            try:
+                file_path(opj(*path_parts[1:]))
+            except FileNotFoundError:
                 _logger.warning(
                     "Icon value specified in manifest of module %s wasn't found in given path."
                     " Please specify a correct value or remove this key from the manifest.",
@@ -116,3 +121,70 @@ class ManifestLinter(BaseCase, CrossModule):
                     "Country value %s specified for the icon in manifest of module %s doesn't look like a country code"
                     "Please specify a correct value or remove this key from the manifest.",
                     value, module)
+
+    def _test_unused_data(self, manifest_data):
+        lazy_loaded = {
+            "point_of_sale" : [
+                "data/point_of_sale_onboarding.xml", # loaded manually post_init
+            ],
+            "pos_restaurant" : [
+                "data/pos_restaurant_onboarding.xml",  # similar to demo data, loaded on demand
+                "data/pos_restaurant_onboarding_open_session.xml",   # similar to demo data, loaded on demand
+            ],
+            "pos_restaurant_preparation_display" : [
+                "data/pos_restaurant_preparation_display_onboarding.xml",  # similar to demo data, loaded on demand
+                "data/main_restaurant_preparation_display_data.xml",  # loaded manually post_init
+                "data/pos_restaurant_preparation_display_demo.xml",  # loaded manually post_init
+            ],
+            "product_unspsc" : [
+                "data/product_data.xml",  # loaded manually post_init
+                "demo/product_demo.xml",  # loaded manually post_init
+            ],
+        }
+        to_fix = {
+            "mrp_workorder_hr_account" : [
+                "report/cost_structure_report.xml",  # TODO whe
+                "report/mrp_report_views.xml",  # TODO whe
+            ],
+
+            "website_event" : [
+                "data/event_registration_answer_demo.xml", # TODO pko
+            ],
+            "microsoft_calendar" : [
+                "security/microsoft_calendar_security.xml",  # TODO gdpf
+            ],
+        }
+
+        module_path = file_path(self.test_module)
+        manifests_data_paths = set(manifest_data.get('data', []))
+        manifests_demo_paths = set(manifest_data.get('demo', []))
+        all_data_path = manifests_demo_paths | manifests_data_paths
+        awaiting_fix = to_fix.get(self.test_module, [])
+        lazy = lazy_loaded.get(self.test_module, [])
+        for file in glob.glob(f'{module_path}/*/**/*.xml', recursive=True):
+            local_path = file[len(module_path)+1:]
+            if local_path.startswith('test'):
+                continue
+            if local_path.startswith('static'):
+                continue
+            if local_path in all_data_path:
+                continue
+            if local_path in lazy:
+                lazy.remove(local_path)
+                continue
+            if local_path in awaiting_fix:
+                awaiting_fix.remove(local_path)
+                continue
+            _logger.warning('%s looks unused', opj(self.test_module, local_path))
+        if awaiting_fix:
+            _logger.error('Some file are marked as awaiting but were not found: %s', awaiting_fix)
+        if lazy:
+            _logger.error('Some file are marked as lazy loaded but were not found: %s', lazy)
+
+
+    def test_unused_models(self):
+        pass
+
+    def test_unused_tests(self):
+        pass
+
