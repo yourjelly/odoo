@@ -5,7 +5,7 @@ import pprint
 
 from werkzeug.urls import url_encode, url_join
 
-from odoo import _, models
+from odoo import api, models, _
 from odoo.exceptions import UserError, ValidationError
 
 from odoo.addons.payment import utils as payment_utils
@@ -19,6 +19,28 @@ _logger = logging.getLogger(__name__)
 
 class PaymentTransaction(models.Model):
     _inherit = 'payment.transaction'
+
+    @api.model
+    def _validate_and_sanatize_phone_number(self, phone):
+        """ Sanatize and validate phone number if phone number if not
+        valid then raise validation error.
+
+        :param char phone
+        :return: Sanatized and validated phone number.
+        :rtype: char
+        """
+        phone = self.partner_phone
+        error_message = _("The phone number is missing.")
+        if phone:
+            # sanitize partner phone
+            country_code = self.partner_country_id.code
+            country_phone_code = self.partner_country_id.phone_code
+            phone_info = phone_sanitize_numbers([phone], country_code, country_phone_code)
+            phone = phone_info[self.partner_phone]['sanitized']
+            error_message = phone_info[self.partner_phone]['msg']
+        if not phone:
+            raise ValidationError("Razorpay: " + error_message)
+        return phone
 
     def _get_specific_rendering_values(self, processing_values):
         """ Override of `payment` to return razorpay-specific rendering values.
@@ -50,19 +72,7 @@ class PaymentTransaction(models.Model):
         converted_amount = payment_utils.to_minor_currency_units(self.amount, self.currency_id)
         base_url = self.provider_id.get_base_url()
         return_url_params = {'reference': self.reference}
-
-        phone = self.partner_phone
-        error_message = _("The phone number is missing.")
-        if phone:
-            # sanitize partner phone
-            country_code = self.partner_country_id.code
-            country_phone_code = self.partner_country_id.phone_code
-            phone_info = phone_sanitize_numbers([phone], country_code, country_phone_code)
-            phone = phone_info[self.partner_phone]['sanitized']
-            error_message = phone_info[self.partner_phone]['msg']
-        if not phone:
-            raise ValidationError("Razorpay: " + error_message)
-
+        phone = self._validate_and_sanatize_phone_number(self.partner_id.phone)
         rendering_values = {
             'key_id': self.provider_id.razorpay_key_id,
             'name': self.company_id.name,
