@@ -217,6 +217,8 @@
             'website/static/src/scss/website.edit_mode.scss',
             'website/static/src/js/editor/snippets.editor.js',
             'website/static/src/js/editor/snippets.options.js',
+            'web/static/src/legacy/js/core/dialog.js',
+            'web/static/src/legacy/xml/dialog.xml',
             'website/static/src/snippets/s_facebook_page/options.js',
             'website/static/src/snippets/s_image_gallery/options.js',
             'website/static/src/snippets/s_image_gallery/000.xml',

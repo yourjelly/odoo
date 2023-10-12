@@ -25,6 +25,8 @@ Odoo Web Editor widget.
         'web_editor.assets_legacy_wysiwyg': [
             'web_editor/static/src/js/editor/snippets.editor.js',
             'web_editor/static/src/js/editor/snippets.options.js',
+            'web/static/src/legacy/js/core/dialog.js',
+            'web/static/src/legacy/xml/dialog.xml',
         ],
         'web_editor.wysiwyg_iframe_editor_assets': [
             ('include', 'web._assets_helpers'),
