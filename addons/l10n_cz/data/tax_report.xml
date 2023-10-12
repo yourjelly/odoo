@@ -25,32 +25,32 @@
                         <field name="name">Delivery of goods or provision of service with a domestic delivery place (e.g. Sections 13, 14, 18)</field>
                         <field name="hierarchy_level">1</field>
                         <field name="children_ids">
-                            <record id="l10n_cz_tax_report_section_1_line_1" model="account.report.line">
+                            <record id="l10n_cz_tax_report_line_1" model="account.report.line">
                                 <field name="name">Base</field>
                                 <field name="code">l10n_cz_tax_report_line_1</field>
                                 <field name="expression_ids">
-                                    <record id="l10n_cz_tax_report_section_1_line_1_base" model="account.report.expression">
+                                    <record id="l10n_cz_tax_report_line_1_base" model="account.report.expression">
                                         <field name="label">tax_base</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">1 (base)</field>
                                     </record>
-                                    <record id="l10n_cz_tax_report_section_1_line_1_tax" model="account.report.expression">
+                                    <record id="l10n_cz_tax_report_line_1_tax" model="account.report.expression">
                                         <field name="label">output_tax</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">1 (tax)</field>
                                     </record>
                                 </field>
                             </record>
-                            <record id="l10n_cz_tax_report_section_1_line_2" model="account.report.line">
+                            <record id="l10n_cz_tax_report_line_2" model="account.report.line">
                                 <field name="name">Reduced</field>
                                 <field name="code">l10n_cz_tax_report_line_2</field>
                                 <field name="expression_ids">
-                                    <record id="l10n_cz_tax_report_section_1_line_2_base" model="account.report.expression">
+                                    <record id="l10n_cz_tax_report_line_2_base" model="account.report.expression">
                                         <field name="label">tax_base</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">2 (base)</field>
                                     </record>
-                                    <record id="l10n_cz_tax_report_section_1_line_2_tax" model="account.report.expression">
+                                    <record id="l10n_cz_tax_report_line_2_tax" model="account.report.expression">
                                         <field name="label">output_tax</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">2 (tax)</field>
@@ -63,32 +63,32 @@
                         <field name="name">Purchase of goods from another member state (Section 16; Section 17 (6) (e); Section 19 (3))</field>
                         <field name="hierarchy_level">1</field>
                         <field name="children_ids">
-                            <record id="l10n_cz_tax_report_section_1_line_3" model="account.report.line">
+                            <record id="l10n_cz_tax_report_line_3" model="account.report.line">
                                 <field name="name">Base</field>
                                 <field name="code">l10n_cz_tax_report_line_3</field>
                                 <field name="expression_ids">
-                                    <record id="l10n_cz_tax_report_section_1_line_3_base" model="account.report.expression">
+                                    <record id="l10n_cz_tax_report_line_3_base" model="account.report.expression">
                                         <field name="label">tax_base</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">3 (base)</field>
                                     </record>
-                                    <record id="l10n_cz_tax_report_section_1_line_3_tax" model="account.report.expression">
+                                    <record id="l10n_cz_tax_report_line_3_tax" model="account.report.expression">
                                         <field name="label">output_tax</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">3 (tax)</field>
                                     </record>
                                 </field>
                             </record>
-                            <record id="l10n_cz_tax_report_section_1_line_4" model="account.report.line">
+                            <record id="l10n_cz_tax_report_line_4" model="account.report.line">
                                 <field name="name">Reduced</field>
                                 <field name="code">l10n_cz_tax_report_line_4</field>
                                 <field name="expression_ids">
-                                    <record id="l10n_cz_tax_report_section_1_line_4_base" model="account.report.expression">
+                                    <record id="l10n_cz_tax_report_line_4_base" model="account.report.expression">
                                         <field name="label">tax_base</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">4 (base)</field>
                                     </record>
-                                    <record id="l10n_cz_tax_report_section_1_line_4_tax" model="account.report.expression">
+                                    <record id="l10n_cz_tax_report_line_4_tax" model="account.report.expression">
                                         <field name="label">output_tax</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">4 (tax)</field>
@@ -101,32 +101,32 @@
                         <field name="name">Receiving services with place of supply according to section 9 (1) from an entity registered for tax in another member state</field>
                         <field name="hierarchy_level">1</field>
                         <field name="children_ids">
-                            <record id="l10n_cz_tax_report_section_1_line_5" model="account.report.line">
+                            <record id="l10n_cz_tax_report_line_5" model="account.report.line">
                                 <field name="name">Base</field>
                                 <field name="code">l10n_cz_tax_report_line_5</field>
                                 <field name="expression_ids">
-                                    <record id="l10n_cz_tax_report_section_1_line_5_base" model="account.report.expression">
+                                    <record id="l10n_cz_tax_report_line_5_base" model="account.report.expression">
                                         <field name="label">tax_base</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">5 (base)</field>
                                     </record>
-                                    <record id="l10n_cz_tax_report_section_1_line_5_tax" model="account.report.expression">
+                                    <record id="l10n_cz_tax_report_line_5_tax" model="account.report.expression">
                                         <field name="label">output_tax</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">5 (tax)</field>
                                     </record>
                                 </field>
                             </record>
-                            <record id="l10n_cz_tax_report_section_1_line_6" model="account.report.line">
+                            <record id="l10n_cz_tax_report_line_6" model="account.report.line">
                                 <field name="name">Reduced</field>
                                 <field name="code">l10n_cz_tax_report_line_6</field>
                                 <field name="expression_ids">
-                                    <record id="l10n_cz_tax_report_section_1_line_6_base" model="account.report.expression">
+                                    <record id="l10n_cz_tax_report_line_6_base" model="account.report.expression">
                                         <field name="label">tax_base</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">6 (base)</field>
                                     </record>
-                                    <record id="l10n_cz_tax_report_section_1_line_6_tax" model="account.report.expression">
+                                    <record id="l10n_cz_tax_report_line_6_tax" model="account.report.expression">
                                         <field name="label">output_tax</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">6 (tax)</field>
@@ -139,32 +139,32 @@
                         <field name="name">Import of goods (Section 23 (3-5))</field>
                         <field name="hierarchy_level">1</field>
                         <field name="children_ids">
-                            <record id="l10n_cz_tax_report_section_1_line_7" model="account.report.line">
+                            <record id="l10n_cz_tax_report_line_7" model="account.report.line">
                                 <field name="name">Base</field>
                                 <field name="code">l10n_cz_tax_report_line_7</field>
                                 <field name="expression_ids">
-                                    <record id="l10n_cz_tax_report_section_1_line_7_base" model="account.report.expression">
+                                    <record id="l10n_cz_tax_report_line_7_base" model="account.report.expression">
                                         <field name="label">tax_base</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">7 (base)</field>
                                     </record>
-                                    <record id="l10n_cz_tax_report_section_1_line_7_tax" model="account.report.expression">
+                                    <record id="l10n_cz_tax_report_line_7_tax" model="account.report.expression">
                                         <field name="label">output_tax</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">7 (tax)</field>
                                     </record>
                                 </field>
                             </record>
-                            <record id="l10n_cz_tax_report_section_1_line_8" model="account.report.line">
+                            <record id="l10n_cz_tax_report_line_8" model="account.report.line">
                                 <field name="name">Reduced</field>
                                 <field name="code">l10n_cz_tax_report_line_8</field>
                                 <field name="expression_ids">
-                                    <record id="l10n_cz_tax_report_section_1_line_8_base" model="account.report.expression">
+                                    <record id="l10n_cz_tax_report_line_8_base" model="account.report.expression">
                                         <field name="label">tax_base</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">8 (base)</field>
                                     </record>
-                                    <record id="l10n_cz_tax_report_section_1_line_8_tax" model="account.report.expression">
+                                    <record id="l10n_cz_tax_report_line_8_tax" model="account.report.expression">
                                         <field name="label">output_tax</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">8 (tax)</field>
@@ -173,17 +173,17 @@
                             </record>
                         </field>
                     </record>
-                    <record id="l10n_cz_tax_report_section_1_part_5" model="account.report.line">
+                    <record id="l10n_cz_tax_report_line_9" model="account.report.line">
                         <field name="name">Purchase of new transport vehicle (Section 19 (4))</field>
                         <field name="hierarchy_level">1</field>
                         <field name="code">l10n_cz_tax_report_line_9</field>
                         <field name="expression_ids">
-                            <record id="l10n_cz_tax_report_section_1_line_9_base" model="account.report.expression">
+                            <record id="l10n_cz_tax_report_line_9_base" model="account.report.expression">
                                 <field name="label">tax_base</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">9 (base)</field>
                             </record>
-                            <record id="l10n_cz_tax_report_section_1_line_9_tax" model="account.report.expression">
+                            <record id="l10n_cz_tax_report_line_9_tax" model="account.report.expression">
                                 <field name="label">output_tax</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">9 (tax)</field>
@@ -194,32 +194,32 @@
                         <field name="name">Regime of tax liability transfer (Section 92a) - goods supplier or service provider</field>
                         <field name="hierarchy_level">1</field>
                         <field name="children_ids">
-                            <record id="l10n_cz_tax_report_section_1_line_10" model="account.report.line">
+                            <record id="l10n_cz_tax_report_line_10" model="account.report.line">
                                 <field name="name">Base</field>
                                 <field name="code">l10n_cz_tax_report_line_10</field>
                                 <field name="expression_ids">
-                                    <record id="l10n_cz_tax_report_section_1_line_10_base" model="account.report.expression">
+                                    <record id="l10n_cz_tax_report_line_10_base" model="account.report.expression">
                                         <field name="label">tax_base</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">10 (base)</field>
                                     </record>
-                                    <record id="l10n_cz_tax_report_section_1_line_10_tax" model="account.report.expression">
+                                    <record id="l10n_cz_tax_report_line_10_tax" model="account.report.expression">
                                         <field name="label">output_tax</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">10 (tax)</field>
                                     </record>
                                 </field>
                             </record>
-                            <record id="l10n_cz_tax_report_section_1_line_11" model="account.report.line">
+                            <record id="l10n_cz_tax_report_line_11" model="account.report.line">
                                 <field name="name">Reduced</field>
                                 <field name="code">l10n_cz_tax_report_line_11</field>
                                 <field name="expression_ids">
-                                    <record id="l10n_cz_tax_report_section_1_line_11_base" model="account.report.expression">
+                                    <record id="l10n_cz_tax_report_line_11_base" model="account.report.expression">
                                         <field name="label">tax_base</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">11 (base)</field>
                                     </record>
-                                    <record id="l10n_cz_tax_report_section_1_line_11_tax" model="account.report.expression">
+                                    <record id="l10n_cz_tax_report_line_11_tax" model="account.report.expression">
                                         <field name="label">output_tax</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">11 (tax)</field>
@@ -232,32 +232,32 @@
                         <field name="name">Other taxable supplies where the tax is to be declared by the taxpayer upon receipt (Section 108)</field>
                         <field name="hierarchy_level">1</field>
                         <field name="children_ids">
-                            <record id="l10n_cz_tax_report_section_1_line_12" model="account.report.line">
+                            <record id="l10n_cz_tax_report_line_12" model="account.report.line">
                                 <field name="name">Base</field>
                                 <field name="code">l10n_cz_tax_report_line_12</field>
                                 <field name="expression_ids">
-                                    <record id="l10n_cz_tax_report_section_1_line_12_base" model="account.report.expression">
+                                    <record id="l10n_cz_tax_report_line_12_base" model="account.report.expression">
                                         <field name="label">tax_base</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">12 (base)</field>
                                     </record>
-                                    <record id="l10n_cz_tax_report_section_1_line_12_tax" model="account.report.expression">
+                                    <record id="l10n_cz_tax_report_line_12_tax" model="account.report.expression">
                                         <field name="label">output_tax</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">12 (tax)</field>
                                     </record>
                                 </field>
                             </record>
-                            <record id="l10n_cz_tax_report_section_1_line_13" model="account.report.line">
+                            <record id="l10n_cz_tax_report_line_13" model="account.report.line">
                                 <field name="name">Reduced</field>
                                 <field name="code">l10n_cz_tax_report_line_13</field>
                                 <field name="expression_ids">
-                                    <record id="l10n_cz_tax_report_section_1_line_13_base" model="account.report.expression">
+                                    <record id="l10n_cz_tax_report_line_13_base" model="account.report.expression">
                                         <field name="label">tax_base</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">13 (base)</field>
                                     </record>
-                                    <record id="l10n_cz_tax_report_section_1_line_13_tax" model="account.report.expression">
+                                    <record id="l10n_cz_tax_report_line_13_tax" model="account.report.expression">
                                         <field name="label">output_tax</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">13 (tax)</field>
@@ -288,60 +288,60 @@
                 <field name="name">II. Supplies exempt from tax and with a foreign delivery place and a tax abatement claim</field>
                 <field name="hierarchy_level">0</field>
                 <field name="children_ids">
-                    <record id="l10n_cz_tax_report_section_2_line_20" model="account.report.line">
+                    <record id="l10n_cz_tax_report_line_20" model="account.report.line">
                         <field name="name">Delivery of goods to another member state (Section 64)</field>
                         <field name="code">l10n_cz_tax_report_line_20</field>
                         <field name="hierarchy_level">1</field>
                         <field name="expression_ids">
-                            <record id="l10n_cz_tax_report_section_2_line_20_value" model="account.report.expression">
+                            <record id="l10n_cz_tax_report_line_20_value" model="account.report.expression">
                                 <field name="label">value</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">20</field>
                             </record>
                         </field>
                     </record>
-                    <record id="l10n_cz_tax_report_section_2_line_21" model="account.report.line">
+                    <record id="l10n_cz_tax_report_line_21" model="account.report.line">
                         <field name="name">Provision of services with a delivery place in other member state specified in section 102 clause 1 letter d</field>
                         <field name="code">l10n_cz_tax_report_line_21</field>
                         <field name="hierarchy_level">1</field>
                         <field name="expression_ids">
-                            <record id="l10n_cz_tax_report_section_2_line_21_value" model="account.report.expression">
+                            <record id="l10n_cz_tax_report_line_21_value" model="account.report.expression">
                                 <field name="label">value</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">21</field>
                             </record>
                         </field>
                     </record>
-                    <record id="l10n_cz_tax_report_section_2_line_22" model="account.report.line">
+                    <record id="l10n_cz_tax_report_line_22" model="account.report.line">
                         <field name="name">Export of goods (Section 66)</field>
                         <field name="code">l10n_cz_tax_report_line_22</field>
                         <field name="hierarchy_level">1</field>
                         <field name="expression_ids">
-                            <record id="l10n_cz_tax_report_section_2_line_22_value" model="account.report.expression">
+                            <record id="l10n_cz_tax_report_line_22_value" model="account.report.expression">
                                 <field name="label">value</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">22</field>
                             </record>
                         </field>
                     </record>
-                    <record id="l10n_cz_tax_report_section_2_line_23" model="account.report.line">
+                    <record id="l10n_cz_tax_report_line_23" model="account.report.line">
                         <field name="name">Delivery of a new vehicle to an entity not registered for tax in another member state (Section 19 (4))</field>
                         <field name="code">l10n_cz_tax_report_line_23</field>
                         <field name="hierarchy_level">1</field>
                         <field name="expression_ids">
-                            <record id="l10n_cz_tax_report_section_2_line_23_value" model="account.report.expression">
+                            <record id="l10n_cz_tax_report_line_23_value" model="account.report.expression">
                                 <field name="label">value</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">23</field>
                             </record>
                         </field>
                     </record>
-                    <record id="l10n_cz_tax_report_section_2_line_24" model="account.report.line">
+                    <record id="l10n_cz_tax_report_line_24" model="account.report.line">
                         <field name="name">Shipment of goods to another member state (Section 18)</field>
                         <field name="code">l10n_cz_tax_report_line_24</field>
                         <field name="hierarchy_level">1</field>
                         <field name="expression_ids">
-                            <record id="l10n_cz_tax_report_section_2_line_24_value" model="account.report.expression">
+                            <record id="l10n_cz_tax_report_line_24_value" model="account.report.expression">
                                 <field name="label">value</field>
                                 <field name="engine">external</field>
                                 <field name="formula">sum</field>
@@ -349,24 +349,24 @@
                             </record>
                         </field>
                     </record>
-                    <record id="l10n_cz_tax_report_section_2_line_25" model="account.report.line">
+                    <record id="l10n_cz_tax_report_line_25" model="account.report.line">
                         <field name="name">Regime of tax liability transfer (section 92a) - goods supplier or service provider</field>
                         <field name="code">l10n_cz_tax_report_line_25</field>
                         <field name="hierarchy_level">1</field>
                         <field name="expression_ids">
-                            <record id="l10n_cz_tax_report_section_2_line_25_value" model="account.report.expression">
+                            <record id="l10n_cz_tax_report_line_25_value" model="account.report.expression">
                                 <field name="label">value</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">25</field>
                             </record>
                         </field>
                     </record>
-                    <record id="l10n_cz_tax_report_section_2_line_26" model="account.report.line">
+                    <record id="l10n_cz_tax_report_line_26" model="account.report.line">
                         <field name="name">Other performed supplies with a tax abatement claim (e.g. Sections 24a, 67, 68, 69, 70, 89, 90, 92)</field>
                         <field name="code">l10n_cz_tax_report_line_26</field>
                         <field name="hierarchy_level">1</field>
                         <field name="expression_ids">
-                            <record id="l10n_cz_tax_report_section_2_line_26_value" model="account.report.expression">
+                            <record id="l10n_cz_tax_report_line_26_value" model="account.report.expression">
                                 <field name="label">value</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">26</field>
@@ -399,11 +399,11 @@
                         <field name="name">Simplified procedure for delivery of goods in the form of a trilateral business (Section 17) by an intermediary</field>
                         <field name="hierarchy_level">1</field>
                         <field name="children_ids">
-                            <record id="l10n_cz_tax_report_section_3_line_30" model="account.report.line">
+                            <record id="l10n_cz_tax_report_line_30" model="account.report.line">
                                 <field name="name">Purchase of goods</field>
                                 <field name="code">l10n_cz_tax_report_line_30</field>
                                 <field name="expression_ids">
-                                    <record id="l10n_cz_tax_report_section_3_line_30_value" model="account.report.expression">
+                                    <record id="l10n_cz_tax_report_line_30_value" model="account.report.expression">
                                         <field name="label">value</field>
                                         <field name="engine">external</field>
                                         <field name="formula">sum</field>
@@ -411,11 +411,11 @@
                                     </record>
                                 </field>
                             </record>
-                            <record id="l10n_cz_tax_report_section_3_line_31" model="account.report.line">
+                            <record id="l10n_cz_tax_report_line_31" model="account.report.line">
                                 <field name="name">Delivery of goods</field>
                                 <field name="code">l10n_cz_tax_report_line_31</field>
                                 <field name="expression_ids">
-                                    <record id="l10n_cz_tax_report_section_3_line_31_value" model="account.report.expression">
+                                    <record id="l10n_cz_tax_report_line_31_value" model="account.report.expression">
                                         <field name="label">value</field>
                                         <field name="engine">external</field>
                                         <field name="formula">sum</field>
@@ -425,12 +425,12 @@
                             </record>
                         </field>
                     </record>
-                    <record id="l10n_cz_tax_report_section_3_line_32" model="account.report.line">
+                    <record id="l10n_cz_tax_report_line_32" model="account.report.line">
                         <field name="name">Exempted import of goods according to section 71g</field>
                         <field name="hierarchy_level">1</field>
                         <field name="code">l10n_cz_tax_report_line_32</field>
                         <field name="expression_ids">
-                            <record id="l10n_cz_tax_report_section_3_line_32_value" model="account.report.expression">
+                            <record id="l10n_cz_tax_report_line_32_value" model="account.report.expression">
                                 <field name="label">value</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">32</field>
@@ -441,11 +441,11 @@
                         <field name="name">Simplified procedure for delivery of goods in the form of a trilateral business (Section 17) by an intermediary</field>
                         <field name="hierarchy_level">1</field>
                         <field name="children_ids">
-                            <record id="l10n_cz_tax_report_section_3_line_33" model="account.report.line">
+                            <record id="l10n_cz_tax_report_line_33" model="account.report.line">
                                 <field name="name">Purchase of goods</field>
                                 <field name="code">l10n_cz_tax_report_line_33</field>
                                 <field name="expression_ids">
-                                    <record id="l10n_cz_tax_report_section_3_line_33_value" model="account.report.expression">
+                                    <record id="l10n_cz_tax_report_line_33_value" model="account.report.expression">
                                         <field name="label">value</field>
                                         <field name="engine">external</field>
                                         <field name="formula">sum</field>
@@ -453,11 +453,11 @@
                                     </record>
                                 </field>
                             </record>
-                            <record id="l10n_cz_tax_report_section_3_line_34" model="account.report.line">
+                            <record id="l10n_cz_tax_report_line_34" model="account.report.line">
                                 <field name="name">Delivery of goods</field>
                                 <field name="code">l10n_cz_tax_report_line_34</field>
                                 <field name="expression_ids">
-                                    <record id="l10n_cz_tax_report_section_3_line_34_value" model="account.report.expression">
+                                    <record id="l10n_cz_tax_report_line_34_value" model="account.report.expression">
                                         <field name="label">value</field>
                                         <field name="engine">external</field>
                                         <field name="formula">sum</field>
@@ -483,11 +483,11 @@
                 <field name='name'>Tax base</field>
                 <field name='expression_label'>tax_base</field>
             </record>
-            <record id='l10n_cz_tax_report_section_3_in_full_amount' model='account.report.column'>
+            <record id='l10n_cz_tax_report_section_4_in_full_amount' model='account.report.column'>
                 <field name='name'>In full amount</field>
                 <field name='expression_label'>in_full_amount</field>
             </record>
-            <record id='l10n_cz_tax_report_section_3_reduced_claim' model='account.report.column'>
+            <record id='l10n_cz_tax_report_section_4_reduced_claim' model='account.report.column'>
                 <field name='name'>Reduced claim</field>
                 <field name='expression_label'>reduced_claim</field>
             </record>
@@ -501,21 +501,21 @@
                         <field name="name">From received taxable supplies from taxpayers</field>
                         <field name="hierarchy_level">1</field>
                         <field name="children_ids">
-                            <record id="l10n_cz_tax_report_section_4_line_40" model="account.report.line">
+                            <record id="l10n_cz_tax_report_line_40" model="account.report.line">
                                 <field name="name">Base</field>
                                 <field name="code">l10n_cz_tax_report_line_40</field>
                                 <field name="expression_ids">
-                                    <record id="l10n_cz_tax_report_section_4_line_40_tax_base" model="account.report.expression">
+                                    <record id="l10n_cz_tax_report_line_40_tax_base" model="account.report.expression">
                                         <field name="label">tax_base</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">40 (base)</field>
                                     </record>
-                                    <record id="l10n_cz_tax_report_section_4_line_40_in_full_amount" model="account.report.expression">
+                                    <record id="l10n_cz_tax_report_line_40_in_full_amount" model="account.report.expression">
                                         <field name="label">in_full_amount</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">40 (amount)</field>
                                     </record>
-                                    <record id="l10n_cz_tax_report_section_4_line_40_reduced_claim" model="account.report.expression">
+                                    <record id="l10n_cz_tax_report_line_40_reduced_claim" model="account.report.expression">
                                         <field name="label">reduced_claim</field>
                                         <field name="engine">external</field>
                                         <field name="formula">sum</field>
@@ -523,21 +523,21 @@
                                     </record>
                                 </field>
                             </record>
-                            <record id="l10n_cz_tax_report_section_4_line_41" model="account.report.line">
+                            <record id="l10n_cz_tax_report_line_41" model="account.report.line">
                                 <field name="name">Reduced</field>
                                 <field name="code">l10n_cz_tax_report_line_41</field>
                                 <field name="expression_ids">
-                                    <record id="l10n_cz_tax_report_section_4_line_41_tax_base" model="account.report.expression">
+                                    <record id="l10n_cz_tax_report_line_41_tax_base" model="account.report.expression">
                                         <field name="label">tax_base</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">41 (base)</field>
                                     </record>
-                                    <record id="l10n_cz_tax_report_section_4_line_41_in_full_amount" model="account.report.expression">
+                                    <record id="l10n_cz_tax_report_line_41_in_full_amount" model="account.report.expression">
                                         <field name="label">in_full_amount</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">41 (amount)</field>
                                     </record>
-                                    <record id="l10n_cz_tax_report_section_4_line_41_reduced_claim" model="account.report.expression">
+                                    <record id="l10n_cz_tax_report_line_41_reduced_claim" model="account.report.expression">
                                         <field name="label">reduced_claim</field>
                                         <field name="engine">external</field>
                                         <field name="formula">sum</field>
@@ -547,24 +547,24 @@
                             </record>
                         </field>
                     </record>
-                    <record id="l10n_cz_tax_report_section_4_line_42" model="account.report.line">
+                    <record id="l10n_cz_tax_report_line_42" model="account.report.line">
                         <field name="name">Upon import of goods when the tax administrator is the customs duty office</field>
                         <field name="hierarchy_level">1</field>
                         <field name="code">l10n_cz_tax_report_line_42</field>
                         <field name="expression_ids">
-                            <record id="l10n_cz_tax_report_section_4_line_42_tax_base" model="account.report.expression">
+                            <record id="l10n_cz_tax_report_line_42_tax_base" model="account.report.expression">
                                 <field name="label">tax_base</field>
                                 <field name="engine">external</field>
                                 <field name="formula">sum</field>
                                 <field name="subformula">editable;rounding=2</field>
                             </record>
-                            <record id="l10n_cz_tax_report_section_4_line_42_in_full_amount" model="account.report.expression">
+                            <record id="l10n_cz_tax_report_line_42_in_full_amount" model="account.report.expression">
                                 <field name="label">in_full_amount</field>
                                 <field name="engine">external</field>
                                 <field name="formula">sum</field>
                                 <field name="subformula">editable;rounding=2</field>
                             </record>
-                            <record id="l10n_cz_tax_report_section_4_line_42_reduced_claim" model="account.report.expression">
+                            <record id="l10n_cz_tax_report_line_42_reduced_claim" model="account.report.expression">
                                 <field name="label">reduced_claim</field>
                                 <field name="engine">external</field>
                                 <field name="formula">sum</field>
@@ -576,46 +576,46 @@
                         <field name="name">From taxable supplies recorded on lines 3 to 13</field>
                         <field name="hierarchy_level">1</field>
                         <field name="children_ids">
-                            <record id="l10n_cz_tax_report_section_4_line_43" model="account.report.line">
+                            <record id="l10n_cz_tax_report_line_43" model="account.report.line">
                                 <field name="name">Base</field>
                                 <field name="code">l10n_cz_tax_report_line_43</field>
                                 <field name="expression_ids">
-                                    <record id="l10n_cz_tax_report_section_4_line_43_tax_base" model="account.report.expression">
+                                    <record id="l10n_cz_tax_report_line_43_tax_base" model="account.report.expression">
                                         <field name="label">tax_base</field>
                                         <field name="engine">aggregation</field>
                                         <field name="formula">l10n_cz_tax_report_line_3.tax_base + l10n_cz_tax_report_line_5.tax_base + l10n_cz_tax_report_line_7.tax_base + l10n_cz_tax_report_line_9.tax_base + l10n_cz_tax_report_line_10.tax_base + l10n_cz_tax_report_line_12.tax_base</field>
                                         <field name="subformula">cross_report</field>
                                     </record>
-                                    <record id="l10n_cz_tax_report_section_4_line_43_in_full_amount" model="account.report.expression">
+                                    <record id="l10n_cz_tax_report_line_43_in_full_amount" model="account.report.expression">
                                         <field name="label">in_full_amount</field>
                                         <field name="engine">aggregation</field>
                                         <field name="formula">l10n_cz_tax_report_line_3.output_tax + l10n_cz_tax_report_line_5.output_tax + l10n_cz_tax_report_line_7.output_tax + l10n_cz_tax_report_line_9.output_tax + l10n_cz_tax_report_line_10.output_tax + l10n_cz_tax_report_line_12.output_tax</field>
                                         <field name="subformula">cross_report</field>
                                     </record>
-                                    <record id="l10n_cz_tax_report_section_4_line_43_reduced_claim" model="account.report.expression">
+                                    <record id="l10n_cz_tax_report_line_43_reduced_claim" model="account.report.expression">
                                         <field name="label">reduced_claim</field>
                                         <field name="engine">tax_tags</field>
                                         <field name="formula">43 (reduced)</field>
                                     </record>
                                 </field>
                             </record>
-                            <record id="l10n_cz_tax_report_section_4_line_44" model="account.report.line">
+                            <record id="l10n_cz_tax_report_line_44" model="account.report.line">
                                 <field name="name">Reduced</field>
                                 <field name="code">l10n_cz_tax_report_line_44</field>
                                 <field name="expression_ids">
-                                    <record id="l10n_cz_tax_report_section_4_line_44_tax_base" model="account.report.expression">
+                                    <record id="l10n_cz_tax_report_line_44_tax_base" model="account.report.expression">
                                         <field name="label">tax_base</field>
                                         <field name="engine">aggregation</field>
                                         <field name="formula">l10n_cz_tax_report_line_4.tax_base + l10n_cz_tax_report_line_6.tax_base + l10n_cz_tax_report_line_8.tax_base + l10n_cz_tax_report_line_11.tax_base + l10n_cz_tax_report_line_13.tax_base</field>
                                         <field name="subformula">cross_report</field>
                                     </record>
-                                    <record id="l10n_cz_tax_report_section_4_line_44_in_full_amount" model="account.report.expression">
+                                    <record id="l10n_cz_tax_report_line_44_in_full_amount" model="account.report.expression">
                                         <field name="label">in_full_amount</field>
                                         <field name="engine">aggregation</field>
                                         <field name="formula">l10n_cz_tax_report_line_4.output_tax + l10n_cz_tax_report_line_6.output_tax + l10n_cz_tax_report_line_8.output_tax + l10n_cz_tax_report_line_11.output_tax + l10n_cz_tax_report_line_13.output_tax</field>
                                         <field name="subformula">cross_report</field>
                                     </record>
-                                    <record id="l10n_cz_tax_report_section_4_line_44_reduced_claim" model="account.report.expression">
+                                    <record id="l10n_cz_tax_report_line_44_reduced_claim" model="account.report.expression">
                                         <field name="label">reduced_claim</field>
                                         <field name="engine">external</field>
                                         <field name="formula">sum</field>
@@ -625,18 +625,18 @@
                             </record>
                         </field>
                     </record>
-                    <record id="l10n_cz_tax_report_section_4_line_45" model="account.report.line">
+                    <record id="l10n_cz_tax_report_line_45" model="account.report.line">
                         <field name="name">Tax deduction correction according to section 75 (4) 77 and 79</field>
                         <field name="hierarchy_level">1</field>
                         <field name="code">l10n_cz_tax_report_line_45</field>
                         <field name="expression_ids">
-                            <record id="l10n_cz_tax_report_section_4_line_45_in_full_amount" model="account.report.expression">
+                            <record id="l10n_cz_tax_report_line_45_in_full_amount" model="account.report.expression">
                                 <field name="label">in_full_amount</field>
                                 <field name="engine">external</field>
                                 <field name="formula">sum</field>
                                 <field name="subformula">editable;rounding=2</field>
                             </record>
-                            <record id="l10n_cz_tax_report_section_4_line_45_reduced_claim" model="account.report.expression">
+                            <record id="l10n_cz_tax_report_line_45_reduced_claim" model="account.report.expression">
                                 <field name="label">reduced_claim</field>
                                 <field name="engine">external</field>
                                 <field name="formula">sum</field>
@@ -644,18 +644,18 @@
                             </record>
                         </field>
                     </record>
-                    <record id="l10n_cz_tax_report_section_4_line_46" model="account.report.line">
+                    <record id="l10n_cz_tax_report_line_46" model="account.report.line">
                         <field name="name">Tax abatement total</field>
                         <field name="hierarchy_level">1</field>
                         <field name="code">l10n_cz_tax_report_line_46</field>
                         <field name="expression_ids">
-                            <record id="l10n_cz_tax_report_section_4_line_46_in_full_amount" model="account.report.expression">
+                            <record id="l10n_cz_tax_report_line_46_in_full_amount" model="account.report.expression">
                                 <field name="label">in_full_amount</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">l10n_cz_tax_report_line_40.in_full_amount + l10n_cz_tax_report_line_41.in_full_amount + l10n_cz_tax_report_line_42.in_full_amount + l10n_cz_tax_report_line_43.in_full_amount + l10n_cz_tax_report_line_44.in_full_amount + l10n_cz_tax_report_line_45.in_full_amount</field>
                                 <field name="subformula">cross_report</field>
                             </record>
-                            <record id="l10n_cz_tax_report_section_4_line_46_reduced_claim" model="account.report.expression">
+                            <record id="l10n_cz_tax_report_line_46_reduced_claim" model="account.report.expression">
                                 <field name="label">reduced_claim</field>
                                 <field name="engine">external</field>
                                 <field name="formula">sum</field>
@@ -663,24 +663,24 @@
                             </record>
                         </field>
                     </record>
-                    <record id="l10n_cz_tax_report_section_4_line_47" model="account.report.line">
+                    <record id="l10n_cz_tax_report_line_47" model="account.report.line">
                         <field name="name">Value of purchased assets specified in Section 4 (3d and 3e)</field>
                         <field name="hierarchy_level">1</field>
                         <field name="code">l10n_cz_tax_report_line_47</field>
                         <field name="expression_ids">
-                            <record id="l10n_cz_tax_report_section_4_line_47_tax_base" model="account.report.expression">
+                            <record id="l10n_cz_tax_report_line_47_tax_base" model="account.report.expression">
                                 <field name="label">tax_base</field>
                                 <field name="engine">external</field>
                                 <field name="formula">sum</field>
                                 <field name="subformula">editable;rounding=2</field>
                             </record>
-                            <record id="l10n_cz_tax_report_section_4_line_47_in_full_amount" model="account.report.expression">
+                            <record id="l10n_cz_tax_report_line_47_in_full_amount" model="account.report.expression">
                                 <field name="label">in_full_amount</field>
                                 <field name="engine">external</field>
                                 <field name="formula">sum</field>
                                 <field name="subformula">editable;rounding=2</field>
                             </record>
-                            <record id="l10n_cz_tax_report_section_4_line_47_reduced_claim" model="account.report.expression">
+                            <record id="l10n_cz_tax_report_line_47_reduced_claim" model="account.report.expression">
                                 <field name="label">reduced_claim</field>
                                 <field name="engine">external</field>
                                 <field name="formula">sum</field>
@@ -710,12 +710,12 @@
                 <field name="name">V. Reduction of tax abatement</field>
                 <field name="hierarchy_level">0</field>
                 <field name="children_ids">
-                    <record id="l10n_cz_tax_report_section_5_line_50" model="account.report.line">
+                    <record id="l10n_cz_tax_report_line_50" model="account.report.line">
                         <field name="name">Supplies exempt from tax without a tax abatement claim</field>
                         <field name="code">l10n_cz_tax_report_line_50</field>
                         <field name="hierarchy_level">1</field>
                         <field name="expression_ids">
-                            <record id="l10n_cz_tax_report_section_5_line_50_value" model="account.report.expression">
+                            <record id="l10n_cz_tax_report_line_50_value" model="account.report.expression">
                                 <field name="label">value</field>
                                 <field name="engine">external</field>
                                 <field name="formula">sum</field>
@@ -727,11 +727,11 @@
                         <field name="name">Value of supplies not included in the calculation of Section 76 (4)</field>
                         <field name="hierarchy_level">1</field>
                         <field name="children_ids">
-                            <record id="l10n_cz_tax_report_section_5_line_51_tax" model="account.report.line">
+                            <record id="l10n_cz_tax_report_line_51_tax" model="account.report.line">
                                 <field name="name">Tax abatement claim</field>
                                 <field name="code">l10n_cz_tax_report_line_51_tax</field>
                                 <field name="expression_ids">
-                                    <record id="l10n_cz_tax_report_section_5_line_51_tax_value" model="account.report.expression">
+                                    <record id="l10n_cz_tax_report_line_51_tax_value" model="account.report.expression">
                                         <field name="label">value</field>
                                         <field name="engine">external</field>
                                         <field name="formula">sum</field>
@@ -739,11 +739,11 @@
                                     </record>
                                 </field>
                             </record>
-                            <record id="l10n_cz_tax_report_section_5_line_51_no_tax" model="account.report.line">
+                            <record id="l10n_cz_tax_report_line_51_no_tax" model="account.report.line">
                                 <field name="name">No tax abatement claim</field>
                                 <field name="code">l10n_cz_tax_report_line_51_no_tax</field>
                                 <field name="expression_ids">
-                                    <record id="l10n_cz_tax_report_section_5_line_51_no_tax_value" model="account.report.expression">
+                                    <record id="l10n_cz_tax_report_line_51_no_tax_value" model="account.report.expression">
                                         <field name="label">value</field>
                                         <field name="engine">external</field>
                                         <field name="formula">sum</field>
@@ -757,11 +757,11 @@
                         <field name="name">Reduced tax deduction proportion</field>
                         <field name="hierarchy_level">1</field>
                         <field name="children_ids">
-                            <record id="l10n_cz_tax_report_section_5_line_52_coefficient" model="account.report.line">
-                                <field name="name">Coefficient (%)</field>
+                            <record id="l10n_cz_tax_report_line_52_coefficient" model="account.report.line">
+                                <field name="name">Coefficient (percent)</field>
                                 <field name="code">l10n_cz_tax_report_line_52_coefficient</field>
                                 <field name="expression_ids">
-                                    <record id="l10n_cz_tax_report_section_5_line_52_coefficient_value" model="account.report.expression">
+                                    <record id="l10n_cz_tax_report_line_52_coefficient_value" model="account.report.expression">
                                         <field name="label">value</field>
                                         <field name="engine">external</field>
                                         <field name="formula">sum</field>
@@ -770,11 +770,11 @@
                                     </record>
                                 </field>
                             </record>
-                            <record id="l10n_cz_tax_report_section_5_line_52_abatement" model="account.report.line">
+                            <record id="l10n_cz_tax_report_line_52_abatement" model="account.report.line">
                                 <field name="name">Abatement</field>
                                 <field name="code">l10n_cz_tax_report_line_52_abatement</field>
                                 <field name="expression_ids">
-                                    <record id="l10n_cz_tax_report_section_5_line_52_abatement_value" model="account.report.expression">
+                                    <record id="l10n_cz_tax_report_line_52_abatement_value" model="account.report.expression">
                                         <field name="label">value</field>
                                         <field name="engine">external</field>
                                         <field name="formula">sum</field>
@@ -788,11 +788,11 @@
                         <field name="name">Settlement of tax abatement (Section 76 (7) to (10))</field>
                         <field name="hierarchy_level">1</field>
                         <field name="children_ids">
-                            <record id="l10n_cz_tax_report_section_5_line_53_coefficient" model="account.report.line">
-                                <field name="name">Settlement coefficient (%)</field>
+                            <record id="l10n_cz_tax_report_line_53_settlement_coefficient" model="account.report.line">
+                                <field name="name">Settlement coefficient (percent)</field>
                                 <field name="code">l10n_cz_tax_report_line_53_coefficient</field>
                                 <field name="expression_ids">
-                                    <record id="l10n_cz_tax_report_section_5_line_53_coefficient_value" model="account.report.expression">
+                                    <record id="l10n_cz_tax_report_line_53_settlement_coefficient_value" model="account.report.expression">
                                         <field name="label">value</field>
                                         <field name="engine">external</field>
                                         <field name="formula">sum</field>
@@ -801,11 +801,11 @@
                                     </record>
                                 </field>
                             </record>
-                            <record id="l10n_cz_tax_report_section_5_line_53_abatement" model="account.report.line">
+                            <record id="l10n_cz_tax_report_line_53_change_abatement" model="account.report.line">
                                 <field name="name">Change of tax abatement</field>
                                 <field name="code">l10n_cz_tax_report_line_53_abatement</field>
                                 <field name="expression_ids">
-                                    <record id="l10n_cz_tax_report_section_5_line_53_abatement_value" model="account.report.expression">
+                                    <record id="l10n_cz_tax_report_line_53_change_abatement_value" model="account.report.expression">
                                         <field name="label">value</field>
                                         <field name="engine">external</field>
                                         <field name="formula">sum</field>
@@ -827,7 +827,7 @@
         <field name='filter_fiscal_position' eval='True'/>
         <field name='filter_multi_company'>tax_units</field>
         <field name='column_ids'>
-            <record id='l10n_cz_tax_report_section_2_value' model='account.report.column'>
+            <record id='l10n_cz_tax_report_section_6_value' model='account.report.column'>
                 <field name='name'>Value</field>
                 <field name='expression_label'>value</field>
             </record>
@@ -837,12 +837,12 @@
                 <field name="name">VI. Calculation of tax liability</field>
                 <field name="hierarchy_level">0</field>
                 <field name="children_ids">
-                    <record id="l10n_cz_tax_report_section_6_line_60" model="account.report.line">
+                    <record id="l10n_cz_tax_report_line_60" model="account.report.line">
                         <field name="name">Adjustment of tax abatement (Section 78 to 78c) + deduction adjustment according to section 78 and equalisation according to section 79 of the VAT Act in force until the end of the year 2010</field>
                         <field name="code">l10n_cz_tax_report_line_60</field>
                         <field name="hierarchy_level">1</field>
                         <field name="expression_ids">
-                            <record id="l10n_cz_tax_report_section_6_line_60_value" model="account.report.expression">
+                            <record id="l10n_cz_tax_report_line_60_value" model="account.report.expression">
                                 <field name="label">value</field>
                                 <field name="engine">external</field>
                                 <field name="formula">sum</field>
@@ -850,30 +850,30 @@
                             </record>
                         </field>
                     </record>
-                    <record id="l10n_cz_tax_report_section_6_line_61" model="account.report.line">
+                    <record id="l10n_cz_tax_report_line_61" model="account.report.line">
                         <field name="name">Tax return (Section 84)</field>
                         <field name="code">l10n_cz_tax_report_line_61</field>
                         <field name="hierarchy_level">1</field>
                         <field name="expression_ids">
-                            <record id="l10n_cz_tax_report_section_6_line_61_value" model="account.report.expression">
+                            <record id="l10n_cz_tax_report_line_61_value" model="account.report.expression">
                                 <field name="label">value</field>
                                 <field name="engine">external</field>
                                 <field name="formula">sum</field>
                                 <field name="subformula">editable;rounding=2</field>
                             </record>
-                            <record id="l10n_cz_tax_report_section_6_line_61_default" model="account.report.expression">
+                            <record id="l10n_cz_tax_report_line_61_default" model="account.report.expression">
                                 <field name="label">_default_value</field>
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">61</field>
                             </record>
                         </field>
                     </record>
-                    <record id="l10n_cz_tax_report_section_6_line_62" model="account.report.line">
+                    <record id="l10n_cz_tax_report_line_62" model="account.report.line">
                         <field name="name">Output tax (1+2+3+4+5+6+7+8+9+10+11+12+13-61+ tax according to Section 108 (1k))</field>
                         <field name="code">l10n_cz_tax_report_line_62</field>
                         <field name="hierarchy_level">1</field>
                         <field name="expression_ids">
-                            <record id="l10n_cz_tax_report_section_6_line_62_value" model="account.report.expression">
+                            <record id="l10n_cz_tax_report_line_62_value" model="account.report.expression">
                                 <field name="label">value</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">l10n_cz_tax_report_line_1.output_tax + l10n_cz_tax_report_line_2.output_tax + l10n_cz_tax_report_line_3.output_tax + l10n_cz_tax_report_line_4.output_tax + l10n_cz_tax_report_line_5.output_tax + l10n_cz_tax_report_line_6.output_tax + l10n_cz_tax_report_line_7.output_tax + l10n_cz_tax_report_line_8.output_tax + l10n_cz_tax_report_line_9.output_tax + l10n_cz_tax_report_line_10.output_tax + l10n_cz_tax_report_line_11.output_tax + l10n_cz_tax_report_line_12.output_tax + l10n_cz_tax_report_line_13.output_tax + l10n_cz_tax_report_line_61.value</field>
@@ -881,12 +881,12 @@
                             </record>
                         </field>
                     </record>
-                    <record id="l10n_cz_tax_report_section_6_line_63" model="account.report.line">
+                    <record id="l10n_cz_tax_report_line_63" model="account.report.line">
                         <field name="name">Tax abatement (46 in full amount + 52 abatement + 53 change of abatement + 60)</field>
                         <field name="code">l10n_cz_tax_report_line_63</field>
                         <field name="hierarchy_level">1</field>
                         <field name="expression_ids">
-                            <record id="l10n_cz_tax_report_section_6_line_63_value" model="account.report.expression">
+                            <record id="l10n_cz_tax_report_line_63_value" model="account.report.expression">
                                 <field name="label">value</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">l10n_cz_tax_report_line_46.in_full_amount + l10n_cz_tax_report_line_52_abatement.value + l10n_cz_tax_report_line_53_abatement.value + l10n_cz_tax_report_line_60.value</field>
@@ -894,36 +894,36 @@
                             </record>
                         </field>
                     </record>
-                    <record id="l10n_cz_tax_report_section_6_line_64" model="account.report.line">
+                    <record id="l10n_cz_tax_report_line_64" model="account.report.line">
                         <field name="name">Real tax liability (62-63)</field>
                         <field name="code">line_l10n_cz_tax_report_line_64</field>
                         <field name="hierarchy_level">1</field>
                         <field name="expression_ids">
-                            <record id="l10n_cz_tax_report_section_6_line_64_value" model="account.report.expression">
+                            <record id="l10n_cz_tax_report_line_64_value" model="account.report.expression">
                                 <field name="label">value</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">l10n_cz_tax_report_line_62.value - l10n_cz_tax_report_line_63.value</field>
                             </record>
                         </field>
                     </record>
-                    <record id="l10n_cz_tax_report_section_6_line_65" model="account.report.line">
+                    <record id="l10n_cz_tax_report_line_65" model="account.report.line">
                         <field name="name">Excess abatement (63-62)</field>
                         <field name="code">l10n_cz_tax_report_line_65</field>
                         <field name="hierarchy_level">1</field>
                         <field name="expression_ids">
-                            <record id="l10n_cz_tax_report_section_6_line_65_value" model="account.report.expression">
+                            <record id="l10n_cz_tax_report_line_65_value" model="account.report.expression">
                                 <field name="label">value</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">l10n_cz_tax_report_line_63.value - l10n_cz_tax_report_line_62.value</field>
                             </record>
                         </field>
                     </record>
-                    <record id="l10n_cz_tax_report_section_6_line_66" model="account.report.line">
+                    <record id="l10n_cz_tax_report_line_66" model="account.report.line">
                         <field name="name">Change of tax liability upon submission of additional declaration (62-63)</field>
                         <field name="code">l10n_cz_tax_report_line_66</field>
                         <field name="hierarchy_level">1</field>
                         <field name="expression_ids">
-                            <record id="l10n_cz_tax_report_section_6_line_66_value" model="account.report.expression">
+                            <record id="l10n_cz_tax_report_line_66_value" model="account.report.expression">
                                 <field name="label">value</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">l10n_cz_tax_report_line_62.value - l10n_cz_tax_report_line_63.value</field>
