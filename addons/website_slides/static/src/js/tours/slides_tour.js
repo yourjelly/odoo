@@ -18,7 +18,7 @@ wTourUtils.registerWebsitePreviewTour('slides_tour', {
     position: 'bottom',
     width: 210,
 }, {
-    trigger: 'input#name',
+    trigger: 'input#name_0',
     content: Markup(_t("Give your course an engaging <b>Title</b>.")),
     position: 'bottom',
     width: 280,
