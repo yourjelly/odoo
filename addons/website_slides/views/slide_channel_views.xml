@@ -234,7 +234,7 @@
                                     <div class="o_kanban_card_header_title mb16">
                                         <div class="o_primary">
                                             <a type="edit" class="mr-auto">
-                                                <span><field name="name" class="o_primary"/></span>
+                                                <span class="o_text_overflow"><field name="name" class="o_primary"/></span>
                                             </a>
                                         </div>
                                         <div t-if="record.tag_ids">
