@@ -552,7 +552,7 @@ export class FloorScreen extends Component {
             });
             delete this.pos.floors_by_id[originalSelectedFloorId];
             this.pos.floors = this.pos.floors.filter(
-                (floor) => floor.id != originalSelectedFloorId
+                (floor) => floor.id !== originalSelectedFloorId
             );
             this.pos.TICKET_SCREEN_STATE.syncedOrders.cache = {};
             if (this.pos.floors.length > 0) {

@@ -529,7 +529,7 @@ export const editorCommands = {
             // only apply one li per ul
             if (!node.oToggleList(0, mode)) {
                 target = target.filter(
-                    li => li.parentNode != node.parentNode || li.tagName != 'LI',
+                    li => li.parentNode !== node.parentNode || li.tagName !== 'LI',
                 );
             }
         }

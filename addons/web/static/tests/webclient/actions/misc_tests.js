@@ -314,7 +314,7 @@ QUnit.module("ActionManager", (hooks) => {
     });
 
     QUnit.test(
-        'executing an action with target != "new" closes all dialogs',
+        'executing an action with target !== "new" closes all dialogs',
         async function (assert) {
             serverData.views["partner,false,form"] = `
                 <form>
@@ -331,7 +331,7 @@ QUnit.module("ActionManager", (hooks) => {
             assert.containsOnce(target, ".o_form_view");
             await click(target.querySelector(".o_form_view .o_data_row .o_data_cell"));
             assert.containsOnce(document.body, ".modal .o_form_view");
-            await doAction(webClient, 1); // target != 'new'
+            await doAction(webClient, 1); // target !== 'new'
             await nextTick(); // wait for the dialog to be closed
             assert.containsNone(document.body, ".modal");
         }

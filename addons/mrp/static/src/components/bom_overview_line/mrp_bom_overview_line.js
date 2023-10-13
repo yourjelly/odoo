@@ -121,7 +121,7 @@ export class BomOverviewLine extends Component {
     get availabilityColorClass() {
         // For first line, another rule applies : green if doable now, red otherwise.
         if (this.data.hasOwnProperty('components_available')) {
-            if (this.data.components_available && this.data.availability_state != 'unavailable') {
+            if (this.data.components_available && this.data.availability_state !== 'unavailable') {
                 return "text-success";
             } else {
                 return "text-danger";

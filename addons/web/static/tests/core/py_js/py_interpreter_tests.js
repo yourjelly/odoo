@@ -181,16 +181,16 @@ QUnit.module("py", {}, () => {
         });
 
         QUnit.test("inequality", (assert) => {
-            assert.strictEqual(evaluateExpr("1 != 2"), true);
-            assert.strictEqual(evaluateExpr('"foo" != "foo"'), false);
-            assert.strictEqual(evaluateExpr('"foo" != "bar"'), true);
+            assert.strictEqual(evaluateExpr("1 !== 2"), true);
+            assert.strictEqual(evaluateExpr('"foo" !== "foo"'), false);
+            assert.strictEqual(evaluateExpr('"foo" !== "bar"'), true);
         });
 
         QUnit.test("inequality should work with free variables", (assert) => {
-            assert.strictEqual(evaluateExpr("1 != a", { a: 42 }), true);
-            assert.strictEqual(evaluateExpr('foo != "bar"', { foo: "bar" }), false);
-            assert.strictEqual(evaluateExpr('foo != "bar"', { foo: "qux" }), true);
-            assert.strictEqual(evaluateExpr("foo != bar", { foo: "qux", bar: "quux" }), true);
+            assert.strictEqual(evaluateExpr("1 !== a", { a: 42 }), true);
+            assert.strictEqual(evaluateExpr('foo !== "bar"', { foo: "bar" }), false);
+            assert.strictEqual(evaluateExpr('foo !== "bar"', { foo: "qux" }), true);
+            assert.strictEqual(evaluateExpr("foo !== bar", { foo: "qux", bar: "quux" }), true);
         });
 
         QUnit.test("should accept deprecated form", (assert) => {
@@ -384,28 +384,28 @@ QUnit.module("py", {}, () => {
         });
 
         QUnit.test("use contextual values", (assert) => {
-            assert.strictEqual(evaluateBooleanExpr("a", {a: 12}), true);
-            assert.strictEqual(evaluateBooleanExpr("a", {a: 0}), false);
-            assert.strictEqual(evaluateBooleanExpr("0 + 3 - a", {a: 1}), true);
-            assert.strictEqual(evaluateBooleanExpr("0 + 3 - a - 2", {a: 1}), false);
-            assert.strictEqual(evaluateBooleanExpr("0 + 3 - a - b", {a: 1, b: 2}), false);
-            assert.strictEqual(evaluateBooleanExpr('a', {a: "foo"}), true);
-            assert.strictEqual(evaluateBooleanExpr("a", {a: [1]}), true);
-            assert.strictEqual(evaluateBooleanExpr("a", {a: []}), false);
+            assert.strictEqual(evaluateBooleanExpr("a", { a: 12 }), true);
+            assert.strictEqual(evaluateBooleanExpr("a", { a: 0 }), false);
+            assert.strictEqual(evaluateBooleanExpr("0 + 3 - a", { a: 1 }), true);
+            assert.strictEqual(evaluateBooleanExpr("0 + 3 - a - 2", { a: 1 }), false);
+            assert.strictEqual(evaluateBooleanExpr("0 + 3 - a - b", { a: 1, b: 2 }), false);
+            assert.strictEqual(evaluateBooleanExpr("a", { a: "foo" }), true);
+            assert.strictEqual(evaluateBooleanExpr("a", { a: [1] }), true);
+            assert.strictEqual(evaluateBooleanExpr("a", { a: [] }), false);
         });
 
         QUnit.test("throw if has missing value", (assert) => {
-            assert.throws(() => evaluateBooleanExpr("a", {b: 0}));
-            assert.strictEqual(evaluateBooleanExpr("1 or a"), true);  // do not throw (lazy value)
+            assert.throws(() => evaluateBooleanExpr("a", { b: 0 }));
+            assert.strictEqual(evaluateBooleanExpr("1 or a"), true); // do not throw (lazy value)
             assert.throws(() => evaluateBooleanExpr("0 or a"));
-            assert.throws(() => evaluateBooleanExpr("a or b", {b: true}));
-            assert.throws(() => evaluateBooleanExpr("a and b", {b: true}));
+            assert.throws(() => evaluateBooleanExpr("a or b", { b: true }));
+            assert.throws(() => evaluateBooleanExpr("a and b", { b: true }));
             assert.throws(() => evaluateBooleanExpr("a()"));
             assert.throws(() => evaluateBooleanExpr("a[0]"));
             assert.throws(() => evaluateBooleanExpr("a.b"));
-            assert.throws(() => evaluateBooleanExpr("0 + 3 - a", {b: 1}));
-            assert.throws(() => evaluateBooleanExpr("0 + 3 - a - 2", {b: 1}));
-            assert.throws(() => evaluateBooleanExpr("0 + 3 - a - b", {b: 2}));
+            assert.throws(() => evaluateBooleanExpr("0 + 3 - a", { b: 1 }));
+            assert.throws(() => evaluateBooleanExpr("0 + 3 - a - 2", { b: 1 }));
+            assert.throws(() => evaluateBooleanExpr("0 + 3 - a - b", { b: 2 }));
         });
     });
 });

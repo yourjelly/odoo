@@ -25,7 +25,7 @@ const OPERATOR_DESCRIPTIONS = {
     child_of: _t("child of"),
     parent_of: _t("parent of"),
 
-    // virtual operators (replace = and != in some cases)
+    // virtual operators (replace = and !== in some cases)
     is: _t("is"),
     is_not: _t("is not"),
     set: _t("is set"),

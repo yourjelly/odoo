@@ -755,7 +755,7 @@ export class PosStore extends Reactive {
     }
     _shouldRemoveOrder(order) {
         return (
-            (!this.selectedOrder || this.selectedOrder.uid != order.uid) &&
+            (!this.selectedOrder || this.selectedOrder.uid !== order.uid) &&
             order.server_id &&
             !order.finalized
         );
@@ -764,7 +764,7 @@ export class PosStore extends Reactive {
         return removeSelected && this.selectedOrder.server_id && !this.selectedOrder.finalized;
     }
     _shouldCreateOrder(json) {
-        return json.uid != this.selectedOrder.uid;
+        return json.uid !== this.selectedOrder.uid;
     }
     _isSelectedOrder(json) {
         return json.uid == this.selectedOrder.uid;
@@ -779,7 +779,7 @@ export class PosStore extends Reactive {
     _removeSelectedOrder() {
         this.removeOrder(this.selectedOrder, false);
         const orderList = this.get_order_list();
-        if (orderList.length != 0) {
+        if (orderList.length !== 0) {
             this.set_order(orderList[0]);
         }
     }
@@ -1406,7 +1406,7 @@ export class PosStore extends Reactive {
 
         // 2) Deal with the rounding methods
 
-        var round_tax = this.company.tax_calculation_rounding_method != "round_globally";
+        var round_tax = this.company.tax_calculation_rounding_method !== "round_globally";
 
         var initial_currency_rounding = currency_rounding;
         if (!round_tax) {
@@ -1501,7 +1501,7 @@ export class PosStore extends Reactive {
                 !skip_checkpoint &&
                 tax.price_include &&
                 total_included_checkpoints[i] !== undefined &&
-                tax.sum_repartition_factor != 0
+                tax.sum_repartition_factor !== 0
             ) {
                 var tax_amount =
                     total_included_checkpoints[i] - (base + cumulated_tax_included_amount);

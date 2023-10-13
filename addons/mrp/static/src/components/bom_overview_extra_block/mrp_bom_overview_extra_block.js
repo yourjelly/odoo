@@ -17,7 +17,7 @@ export class BomOverviewExtraBlock extends Component {
         useBus(this.env.overviewBus, "unfold-all", () => this._unfold());
 
         onWillUpdateProps(newProps => {
-            if (this.props.data.product_id != newProps.data.product_id) {
+            if (this.props.data.product_id !== newProps.data.product_id) {
                 this.state.isFolded = true;
             }
         });

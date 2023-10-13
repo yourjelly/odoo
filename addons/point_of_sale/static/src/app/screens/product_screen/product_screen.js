@@ -166,7 +166,7 @@ export class ProductScreen extends ControlButtonsMixin(Component) {
                 return;
             }
             const parsedInput = (buffer && parseFloat(buffer)) || 0;
-            if (lastId != selectedLine.cid) {
+            if (lastId !== selectedLine.cid) {
                 this._showDecreaseQuantityPopup();
             } else if (currentQuantity < parsedInput) {
                 this._setValue(buffer);

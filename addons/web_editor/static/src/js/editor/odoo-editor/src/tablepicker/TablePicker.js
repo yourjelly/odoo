@@ -56,7 +56,7 @@ export class TablePicker extends EventTarget {
 
                 const bindMouseMove = () => {
                     cell.addEventListener('mouseover', () => {
-                        if (this.colNumber !== colNumber || this.rowNumber != rowNumber) {
+                        if (this.colNumber !== colNumber || this.rowNumber !== rowNumber) {
                             this.colNumber = colNumber;
                             this.rowNumber = rowNumber;
                             this.render();

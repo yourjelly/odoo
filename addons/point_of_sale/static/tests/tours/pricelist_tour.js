@@ -32,7 +32,7 @@ function assertProductPrice(product, pricelist_name, quantity, expected_price) {
             }) +
                 " DOESN'T MATCH -> " +
                 expected_price +
-                " != " +
+                " !== " +
                 frontend_price
         );
 

@@ -250,7 +250,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.test("with currency digits != 2 - float field", async function (assert) {
+    QUnit.test("with currency digits !== 2 - float field", async function (assert) {
         // need to also add it to the session (as currencies are loaded there)
         patchWithCleanup(currencies, {
             3: {
@@ -308,7 +308,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.test("with currency digits != 2 - monetary field", async function (assert) {
+    QUnit.test("with currency digits !== 2 - monetary field", async function (assert) {
         // need to also add it to the session (as currencies are loaded there)
         patchWithCleanup(currencies, {
             3: {

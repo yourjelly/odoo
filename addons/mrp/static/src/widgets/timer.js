@@ -111,7 +111,7 @@ class MrpTimerField extends Component {
     }
 
     get durationFormatted() {
-        if (this.props.record.data[this.props.name] != this.duration && this.props.record.dirty) {
+        if (this.props.record.data[this.props.name] !== this.duration && this.props.record.dirty) {
             this.duration = this.props.record.data[this.props.name];
         }
         return formatMinutes(this.duration);

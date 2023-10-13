@@ -377,7 +377,7 @@ export class Many2ManyTagsFieldColorEditable extends Many2ManyTagsField {
         const tagRecord = this.props.record.data[this.props.name].records.find(
             (record) => record.id === tag.id
         );
-        if (tagRecord.data[this.props.colorField] != 0) {
+        if (tagRecord.data[this.props.colorField] !== 0) {
             this.previousColorsMap[tagRecord.resId] = tagRecord.data[this.props.colorField];
         }
         const changes = {

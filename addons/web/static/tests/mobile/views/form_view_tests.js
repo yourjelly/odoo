@@ -252,7 +252,7 @@ QUnit.module("Mobile Views", ({ beforeEach }) => {
                         <header>
                             <button string="Just more than one" />
                             <button string="Confirm" invisible="display_name == ''" />
-                            <button string="Do it" invisible="display_name != ''" />
+                            <button string="Do it" invisible="display_name !== ''" />
                         </header>
                         <sheet>
                             <field name="display_name" />

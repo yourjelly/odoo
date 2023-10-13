@@ -16,7 +16,7 @@ export class PurchaseOrderLineProductField extends Many2OneField {
 
         useRecordObserver((record) => {
             if (record.isInEdition && this.value) {
-                if (!this.currentValue || this.currentValue[0] != record.data[this.props.name][0]) {
+                if (!this.currentValue || this.currentValue[0] !== record.data[this.props.name][0]) {
                     // Field was updated if line was open in edit mode,
                     //      field is not emptied,
                     //      new value is different than existing value.
@@ -42,7 +42,7 @@ export class PurchaseOrderLineProductField extends Many2OneField {
             [this.props.record.data.product_template_id[0]],
         );
         if(result && result.product_id) {
-            if (this.props.record.data.product_id != result.product_id.id) {
+            if (this.props.record.data.product_id !== result.product_id.id) {
                 this.props.record.update({
                     // TODO right name get (same problem as configurator)
                     product_id: [result.product_id, 'whatever'],

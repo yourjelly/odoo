@@ -483,7 +483,7 @@ export class GraphModel extends Model {
                     resModel,
                     new_domain,
                     measures,
-                    groupBy.filter((gb) => gb.fieldName != sequential_field).map((gb) => gb.spec),
+                    groupBy.filter((gb) => gb.fieldName !== sequential_field).map((gb) => gb.spec),
                     {
                         lazy: false, // what is this thing???
                         context: { ...this.searchParams.context },
@@ -495,7 +495,7 @@ export class GraphModel extends Model {
             if (start) {
                 for (const group of start.groups) {
                     const rawValues = [];
-                    for (const gb of groupBy.filter((gb) => gb.fieldName != sequential_field)) {
+                    for (const gb of groupBy.filter((gb) => gb.fieldName !== sequential_field)) {
                         rawValues.push({ [gb.spec]: group[gb.spec] });
                     }
                     cumulatedStartValue[JSON.stringify(rawValues)] = group[measure];

@@ -43,7 +43,7 @@ export class TodoDoneCheckmark extends StateSelectionField {
      * @param {InputEvent} ev
      */
     async onDoneToggled(ev) {
-        const value = this.props.record.data[this.props.name] != '1_done' ? '1_done' : this.notDoneState;
+        const value = this.props.record.data[this.props.name] !== '1_done' ? '1_done' : this.notDoneState;
         if (['kanban', 'list'].includes(this.props.viewType)) {
             await super.updateRecord(value);
         }

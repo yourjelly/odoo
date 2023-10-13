@@ -29,7 +29,7 @@ class Check {
     orderlineHas(name, totalQuantity, splitQuantity) {
         return Order.hasLine({
             productName: name,
-            quantity: splitQuantity != 0 ? `${splitQuantity} / ${totalQuantity}` : totalQuantity,
+            quantity: splitQuantity !== 0 ? `${splitQuantity} / ${totalQuantity}` : totalQuantity,
         });
     }
     subtotalIs(amount) {

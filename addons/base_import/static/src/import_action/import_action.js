@@ -191,7 +191,7 @@ export class ImportAction extends Component {
     }
 
     isFieldSet(column) {
-        return column.fieldInfo != null;
+        return column.fieldInfo !== null;
     }
 }
 

@@ -40,7 +40,7 @@ export class ProjectTaskStateSelection extends StateSelectionField {
             "1_canceled": "btn-outline-danger",
             "04_waiting_normal": "btn-outline-secondary",
         };
-        if (this.props.viewType != 'form') {
+        if (this.props.viewType !== 'form') {
             super.setup();
         } else {
             const commandName = _t("Set state as...");
@@ -77,7 +77,7 @@ export class ProjectTaskStateSelection extends StateSelectionField {
             ["1_done", _t("Done")],
         ];
         const currentState = this.props.record.data[this.props.name];
-        if (currentState != "04_waiting_normal") {
+        if (currentState !== "04_waiting_normal") {
             return [
                 ["01_in_progress", _t("In Progress")],
                 ["02_changes_requested", _t("Changes Requested")],

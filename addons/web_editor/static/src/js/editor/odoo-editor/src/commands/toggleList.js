@@ -61,7 +61,7 @@ HTMLLIElement.prototype.oToggleList = function (offset, mode) {
     if (['OLCL', 'ULCL'].includes(listMode)) {
         pnode.classList.add('o_checklist');
         for (let li = pnode.firstElementChild; li !== null; li = li.nextElementSibling) {
-            if (li.style.listStyle != 'none') {
+            if (li.style.listStyle !== 'none') {
                 li.style.listStyle = null;
                 if (!li.style.all) li.removeAttribute('style');
             }

@@ -84,7 +84,7 @@ export class PaymentPaytm extends PaymentInterface {
                     throw data?.error;
                 }
                 let resultCode = data?.resultCode;
-                if (resultCode === 'S' && data?.merchantReferenceNo != referenceId){
+                if (resultCode === 'S' && data?.merchantReferenceNo !== referenceId){
                     throw _t("Reference number mismatched");
                 } else if (resultCode === 'S') {
                     paymentLine.paytm_authcode = data?.authCode;

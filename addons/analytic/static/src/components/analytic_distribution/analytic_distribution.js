@@ -362,7 +362,7 @@ export class AnalyticDistribution extends Component {
         const currentTagIndex = allTags.findIndex((t) => t.id === id);
         const nextTag = allTags[(currentTagIndex + 1) % allTags.length];
         // remove the tag from the groups distribution
-        this.list[fromGroup].distribution = this.list[fromGroup].distribution.filter((dist_tag) => dist_tag.id != id);
+        this.list[fromGroup].distribution = this.list[fromGroup].distribution.filter((dist_tag) => dist_tag.id !== id);
         if (!this.isDropdownOpen){
             this.save();
         } else {

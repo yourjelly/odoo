@@ -2138,7 +2138,7 @@ export class OdooEditor extends EventTarget {
             }
         }
         // If the oDeleteBackward loop have emptied the start block and the
-        // range end in another element (rangeStart != rangeEnd), we delete
+        // range end in another element (rangeStart !== rangeEnd), we delete
         // the start block and move the cursor to the end block.
         if (
             startBlock &&

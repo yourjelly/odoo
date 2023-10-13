@@ -1602,10 +1602,10 @@ QUnit.module("Components", (hooks) => {
         const toTest = [
             { domain: `[("int", "=", True)]`, text: `Integer = true` },
             { domain: `[("int", "=", False)]`, text: `Integer is not set` },
-            { domain: `[("int", "!=", True)]`, text: `Integer != true` },
+            { domain: `[("int", "!=", True)]`, text: `Integer !== true` },
             { domain: `[("int", "!=", False)]`, text: `Integer is set` },
             { domain: `[("int", "=", 1)]`, text: `Integer = 1` },
-            { domain: `[("int", "!=", 1)]`, text: `Integer != 1` },
+            { domain: `[("int", "!=", 1)]`, text: `Integer !== 1` },
             { domain: `[("int", "<", 1)]`, text: `Integer < 1` },
             { domain: `[("int", "<=", 1)]`, text: `Integer <= 1` },
             { domain: `[("int", ">", 1)]`, text: `Integer > 1` },
@@ -1628,10 +1628,10 @@ QUnit.module("Components", (hooks) => {
         });
         const toTest = [
             { domain: `[("date", "=", False)]`, text: `Date = false` },
-            { domain: `[("date", "!=", False)]`, text: `Date != false` },
+            { domain: `[("date", "!=", False)]`, text: `Date !== false` },
             { domain: `[("date", "=", "2023-07-03")]`, text: `Date = 2023-07-03` },
             { domain: `[("date", "=", context_today())]`, text: `Date = context_today()` },
-            { domain: `[("date", "!=", "2023-07-03")]`, text: `Date != 2023-07-03` },
+            { domain: `[("date", "!=", "2023-07-03")]`, text: `Date !== 2023-07-03` },
             { domain: `[("date", "<", "2023-07-03")]`, text: `Date < 2023-07-03` },
             { domain: `[("date", "<=", "2023-07-03")]`, text: `Date <= 2023-07-03` },
             { domain: `[("date", ">", "2023-07-03")]`, text: `Date > 2023-07-03` },
@@ -1661,7 +1661,7 @@ QUnit.module("Components", (hooks) => {
             { domain: `[("foo", "!=", False)]`, text: `Foo is set` },
             { domain: `[("foo", "=", "abc")]`, text: `Foo = abc` },
             { domain: `[("foo", "=", expr)]`, text: `Foo = expr` },
-            { domain: `[("foo", "!=", "abc")]`, text: `Foo != abc` },
+            { domain: `[("foo", "!=", "abc")]`, text: `Foo !== abc` },
             { domain: `[("foo", "ilike", "abc")]`, text: `Foo contains abc` },
             { domain: `[("foo", "not ilike", "abc")]`, text: `Foo does not contain abc` },
             { domain: `[("foo", "in", ["abc", "def"])]`, text: `Foo is in ( abc , def )` },
@@ -1683,7 +1683,7 @@ QUnit.module("Components", (hooks) => {
             { domain: `[("state", "!=", False)]`, text: `State is set` },
             { domain: `[("state", "=", "abc")]`, text: `State = ABC` },
             { domain: `[("state", "=", expr)]`, text: `State = expr` },
-            { domain: `[("state", "!=", "abc")]`, text: `State != ABC` },
+            { domain: `[("state", "!=", "abc")]`, text: `State !== ABC` },
             { domain: `[("state", "in", ["abc", "def"])]`, text: `State is in ( ABC , DEF )` },
             {
                 domain: `[("state", "not in", ["abc", "def"])]`,
@@ -1746,7 +1746,7 @@ QUnit.module("Components", (hooks) => {
             },
             {
                 domain: `[("properties.selection_prop", "!=", "abc")]`,
-                text: `PropertiesSelection != ABC`,
+                text: `PropertiesSelection !== ABC`,
             },
         ];
         for (const { domain, text } of toTest) {
@@ -1767,7 +1767,7 @@ QUnit.module("Components", (hooks) => {
             },
             {
                 domain: `[("product_id", "!=", 37)]`,
-                text: "Product != xphone",
+                text: "Product !== xphone",
             },
             {
                 domain: `[("product_id", "=", False)]`,
@@ -1775,7 +1775,7 @@ QUnit.module("Components", (hooks) => {
             },
             {
                 domain: `[("product_id", "!=", False)]`,
-                text: "Product != false",
+                text: "Product !== false",
             },
             {
                 domain: `[("product_id", "in", [])]`,

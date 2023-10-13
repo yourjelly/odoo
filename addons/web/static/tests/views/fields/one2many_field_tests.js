@@ -397,7 +397,7 @@ QUnit.module("Fields", (hooks) => {
                 arch: `
                     <form>
                         <field name="p">
-                            <tree editable="bottom" limit="1" decoration-muted="foo != False" default_order="display_name">
+                            <tree editable="bottom" limit="1" decoration-muted="foo !== False" default_order="display_name">
                                 <field name="foo" invisible="1"/>
                                 <field name="display_name" />
                             </tree>

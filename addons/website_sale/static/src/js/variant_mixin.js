@@ -6,7 +6,7 @@ const originalOnChangeCombination = VariantMixin._onChangeCombination;
 VariantMixin._onChangeCombination = function (ev, $parent, combination) {
     const $pricePerUom = $parent.find(".o_base_unit_price:first .oe_currency_value");
     if ($pricePerUom) {
-        if (combination.is_combination_possible !== false && combination.base_unit_price != 0) {
+        if (combination.is_combination_possible !== false && combination.base_unit_price !== 0) {
             $pricePerUom.parents(".o_base_unit_price_wrapper").removeClass("d-none");
             $pricePerUom.text(this._priceToStr(combination.base_unit_price));
             $parent.find(".oe_custom_base_unit:first").text(combination.base_unit_name);

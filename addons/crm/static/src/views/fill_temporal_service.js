@@ -294,7 +294,7 @@ export const fillTemporalService = {
                     granularity,
                     minGroups
                 );
-            } else if (_fillTemporalPeriods[modelName][field.name][granularity].minGroups != minGroups) {
+            } else if (_fillTemporalPeriods[modelName][field.name][granularity].minGroups !== minGroups) {
                 _fillTemporalPeriods[modelName][field.name][granularity].setMinGroups(minGroups);
             }
             return _fillTemporalPeriods[modelName][field.name][granularity];

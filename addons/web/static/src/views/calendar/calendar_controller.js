@@ -1,6 +1,9 @@
 /** @odoo-module **/
 
-import { deleteConfirmationMessage, ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import {
+    deleteConfirmationMessage,
+    ConfirmationDialog,
+} from "@web/core/confirmation_dialog/confirmation_dialog";
 import { _t } from "@web/core/l10n/translation";
 import { useOwnedDialogs, useService } from "@web/core/utils/hooks";
 import { Layout } from "@web/search/layout";
@@ -64,7 +67,7 @@ export class CalendarController extends Component {
 
         this.state = useState({
             isWeekendVisible:
-                browser.localStorage.getItem("calendar.isWeekendVisible") != null
+                browser.localStorage.getItem("calendar.isWeekendVisible") !== null
                     ? JSON.parse(browser.localStorage.getItem("calendar.isWeekendVisible"))
                     : true,
             showSideBar: !this.env.isSmall,

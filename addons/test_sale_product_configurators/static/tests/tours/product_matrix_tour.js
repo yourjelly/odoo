@@ -68,7 +68,7 @@ registry.category("web_tour.tours").add('sale_matrix_tour', {
 
         for (let i=0; i<EXPECTED.length; ++i) {
             if (EXPECTED[i] !== texts[i]) {
-                throw new Error(`${EXPECTED[i]} != ${texts[i]}`)
+                throw new Error(`${EXPECTED[i]} !== ${texts[i]}`)
             }
         }
         // set all qties to 3

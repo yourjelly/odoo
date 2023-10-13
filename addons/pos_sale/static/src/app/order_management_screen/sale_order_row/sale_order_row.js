@@ -47,7 +47,7 @@ export class SaleOrderRow extends Component {
      * @returns {boolean}
      */
     get showAmountUnpaid() {
-        return this.order.amount_total != this.order.amount_unpaid;
+        return this.order.amount_total !== this.order.amount_unpaid;
     }
     get amountUnpaidRepr() {
         return this.env.utils.formatCurrency(this.order.amount_unpaid);

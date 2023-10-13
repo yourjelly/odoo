@@ -469,7 +469,7 @@ patch(PaymentScreen.prototype, {
                 var response = self.pos.decodeMercuryResponse(data);
 
                 if (!is_voidsale) {
-                    if (response.status != "Approved" || response.message != "REVERSED") {
+                    if (response.status !== "Approved" || response.message !== "REVERSED") {
                         // reversal was not successful, send voidsale
                         self.do_reversal(line, true);
                     } else {

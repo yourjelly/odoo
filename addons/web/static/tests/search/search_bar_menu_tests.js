@@ -1910,7 +1910,7 @@ QUnit.module("Search", (hooks) => {
             assert.deepEqual(getFacetTexts(target), [
                 "Bar = John",
                 "Bar is in ( David , Inaccessible/missing record ID: 5555 )",
-                "Bar != false",
+                "Bar !== false",
                 "ID = 2",
             ]);
             assert.deepEqual(getDomain(controlPanel), [

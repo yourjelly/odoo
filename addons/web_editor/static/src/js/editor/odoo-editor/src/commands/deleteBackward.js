@@ -149,7 +149,7 @@ HTMLElement.prototype.oDeleteBackward = function (offset, alreadyMoved = false, 
          *        <p><br></p><h1>[]def</h1> + BACKSPACE
          *   <=>  <h1>[]def</h1>
          *
-         *   E.g. (previousEl != empty)
+         *   E.g. (previousEl !== empty)
          *        <h3>abc</h3><h1>[]def</h1> + BACKSPACE
          *   <=>  <h3>abc[]def</h3>
         */
@@ -176,7 +176,7 @@ HTMLElement.prototype.oDeleteBackward = function (offset, alreadyMoved = false, 
          *      <p>abc</p><div>[]def<p>ghi</p></div> + BACKSPACE
          * <=>  <p>abc</p>[]def<div><p>ghi</p></div> + BACKSPACE
          *
-         * E.g. (prev != block)
+         * E.g. (prev !== block)
          *      abc<div>[]def<p>ghi</p></div> + BACKSPACE
          * <=>  abc[]def<div><p>ghi</p></div>
          */

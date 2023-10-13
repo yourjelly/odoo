@@ -12,7 +12,7 @@ export class SkillsListRenderer extends CommonSkillsListRenderer {
     }
 
     calculateColumnWidth(column) {
-        if (column.name != 'skill_level_id') {
+        if (column.name !== 'skill_level_id') {
             return {
                 type: 'absolute',
                 value: '90px',

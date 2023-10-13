@@ -703,7 +703,7 @@ options.registry.WebsiteSaleProductPage = options.Class.extend({
     },
 
     async _computeWidgetVisibility(widgetName, params) {
-        const hasImages = this.productDetailMain.dataset.image_width != 'none';
+        const hasImages = this.productDetailMain.dataset.image_width !== 'none';
         const isFullImage = this.productDetailMain.dataset.image_width == '100_pc';
         switch (widgetName) {
             case 'o_wsale_thumbnail_pos':

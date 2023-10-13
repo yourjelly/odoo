@@ -57,7 +57,7 @@ patch(SaleOrderLineProductField.prototype, {
             }
         );
         if(result && result.product_id) {
-            if (this.props.record.data.product_id != result.product_id.id) {
+            if (this.props.record.data.product_id !== result.product_id.id) {
                 if (result.has_optional_products) {
                     this._openProductConfigurator();
                 } else {

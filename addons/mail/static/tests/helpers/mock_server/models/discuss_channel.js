@@ -21,7 +21,7 @@ patch(MockServer.prototype, {
             if (channel) {
                 const diff = {};
                 for (const key in vals) {
-                    if (channel[key] != vals[key] && key !== "image_128") {
+                    if (channel[key] !== vals[key] && key !== "image_128") {
                         diff[key] = vals[key];
                     }
                 }

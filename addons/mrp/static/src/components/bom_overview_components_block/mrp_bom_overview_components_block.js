@@ -21,7 +21,7 @@ export class BomOverviewComponentsBlock extends Component {
         }
 
         onWillUpdateProps(newProps => {
-            if (this.data.product_id != newProps.data.product_id) {
+            if (this.data.product_id !== newProps.data.product_id) {
                 this.childIds.forEach(id => delete this.state[id]);
                 const newChildIds = this.getHasComponents(newProps.data) ? newProps.data.components.map(c => this.getIdentifier(c)) : [];
                 newChildIds.forEach(id => this.state[id] = true);

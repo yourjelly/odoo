@@ -240,8 +240,11 @@ export class BaseImportModel {
             const error = await this._executeImportStep(isTest, importRes);
             if (error) {
                 const errorData = error.data || {};
-                const message = errorData.arguments && (errorData.arguments[1] || errorData.arguments[0])
-                    || _t("An unknown issue occurred during import (possibly lost connection, data limit exceeded or memory limits exceeded). Please retry in case the issue is transient. If the issue still occurs, try to split the file rather than import it at once.");
+                const message =
+                    (errorData.arguments && (errorData.arguments[1] || errorData.arguments[0])) ||
+                    _t(
+                        "An unknown issue occurred during import (possibly lost connection, data limit exceeded or memory limits exceeded). Please retry in case the issue is transient. If the issue still occurs, try to split the file rather than import it at once."
+                    );
 
                 if (error.message) {
                     this._addMessage("danger", [error.message, message]);
@@ -323,7 +326,7 @@ export class BaseImportModel {
     }
 
     isColumnFieldSet(column) {
-        return column.fieldInfo != null;
+        return column.fieldInfo !== null;
     }
 
     /*

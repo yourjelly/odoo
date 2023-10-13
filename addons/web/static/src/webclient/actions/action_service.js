@@ -1304,7 +1304,7 @@ function makeActionManager(env) {
         await keepLast.add(Promise.resolve());
         if (dialog) {
             // we don't want to switch view when there's a dialog open, as we would
-            // not switch in the correct action (action in background != dialog action)
+            // not switch in the correct action (action in background !== dialog action)
             return;
         }
         const controller = controllerStack[controllerStack.length - 1];

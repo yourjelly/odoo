@@ -858,7 +858,7 @@ patch(Order.prototype, {
                     }
                 }
             }
-            const res = (points || program.program_type === 'coupons') ? [{ points }] : [];
+            const res = points || program.program_type === "coupons" ? [{ points }] : [];
             if (splitPoints.length) {
                 res.push(...splitPoints);
             }
@@ -1010,11 +1010,11 @@ patch(Order.prototype, {
             if (globalDiscountLines.length) {
                 const rewardId = globalDiscountLines[0].reward_id;
                 if (
-                    rewardId != reward.id &&
+                    rewardId !== reward.id &&
                     this.pos.reward_by_id[rewardId].discount >= reward.discount
                 ) {
                     return _t("A better global discount is already applied.");
-                } else if (rewardId != rewardId.id) {
+                } else if (rewardId !== rewardId.id) {
                     for (const line of globalDiscountLines) {
                         this.orderlines.remove(line);
                     }
@@ -1358,9 +1358,12 @@ patch(Order.prototype, {
                 // OPTIMIZATION: Pre-calculate the factors for each reward-product combination during the loading.
                 // For points not based on quantity, need to normalize the points to compute free quantity.
                 const appliedRulesIds = this.couponPointChanges[coupon_id].appliedRules;
-                const appliedRules = appliedRulesIds !== undefined
-                    ? reward.program_id.rules.filter(rule => appliedRulesIds.includes(rule.id))
-                    : reward.program_id.rules;
+                const appliedRules =
+                    appliedRulesIds !== undefined
+                        ? reward.program_id.rules.filter((rule) =>
+                              appliedRulesIds.includes(rule.id)
+                          )
+                        : reward.program_id.rules;
                 let factor = 0;
                 let orderPoints = 0;
                 for (const rule of appliedRules) {

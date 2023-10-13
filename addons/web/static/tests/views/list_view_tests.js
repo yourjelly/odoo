@@ -13595,7 +13595,7 @@ QUnit.module("Views", (hooks) => {
             arch: `
                 <tree editable="bottom">
                     <field name="foo"/>
-                    <field name="bar" readonly="foo != 'yop'"/>
+                    <field name="bar" readonly="foo !== 'yop'"/>
                 </tree>`,
         });
 
@@ -17477,7 +17477,7 @@ QUnit.module("Views", (hooks) => {
                             <field name="o2m">
                                 <tree editable="bottom">
                                     <field name="foo"/>
-                                    <field name="date" readonly="foo != 'yop'"/>
+                                    <field name="date" readonly="foo !== 'yop'"/>
                                     <field name="int_field"/>
                                 </tree>
                             </field>

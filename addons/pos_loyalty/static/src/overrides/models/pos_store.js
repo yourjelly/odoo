@@ -161,8 +161,10 @@ patch(PosStore.prototype, {
         const result = [];
         for (const couponProgram of allCouponPrograms) {
             const program = this.program_by_id[couponProgram.program_id];
-            if (program.pricelist_ids.length > 0
-                && (!order.pricelist || !program.pricelist_ids.includes(order.pricelist.id))) {
+            if (
+                program.pricelist_ids.length > 0 &&
+                (!order.pricelist || !program.pricelist_ids.includes(order.pricelist.id))
+            ) {
                 continue;
             }
 
@@ -207,7 +209,7 @@ patch(PosStore.prototype, {
             reward.all_discount_product_ids = new Set(reward.all_discount_product_ids);
         }
 
-        this.fieldTypes = loadedData['field_types'];
+        this.fieldTypes = loadedData["field_types"];
         await super._processData(loadedData);
         this.productId2ProgramIds = loadedData["product_id_to_program_ids"];
         this.programs = loadedData["loyalty.program"] || []; //TODO: rename to `loyaltyPrograms` etc
@@ -235,10 +237,10 @@ patch(PosStore.prototype, {
 
         try {
             products
-                .map(product => {
+                .map((product) => {
                     const modifiedProduct = { ...product };
-                    Object.keys(modifiedProduct).forEach(key => {
-                        if (this.fieldTypes['product.product'][key] === 'many2one') {
+                    Object.keys(modifiedProduct).forEach((key) => {
+                        if (this.fieldTypes["product.product"][key] === "many2one") {
                             modifiedProduct[key] = modifiedProduct[key][1];
                         }
                     });
@@ -251,7 +253,7 @@ patch(PosStore.prototype, {
                 throw error;
             }
             const index = this.rewards.indexOf(reward);
-            if (index != -1) {
+            if (index !== -1) {
                 this.env.services.popup.add(ErrorPopup, {
                     title: _t("A reward could not be loaded"),
                     body: _t(

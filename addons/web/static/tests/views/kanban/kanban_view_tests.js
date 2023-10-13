@@ -8162,7 +8162,7 @@ QUnit.module("Views", (hooks) => {
                 '<field name="bar"/>' +
                 '<field name="state"/>' +
                 '<templates><div t-name="kanban-box">' +
-                '<button class="o_btn_test_1" type="object" name="a1" invisible="foo != \'yop\'"/>' +
+                '<button class="o_btn_test_1" type="object" name="a1" invisible="foo !== \'yop\'"/>' +
                 '<button class="o_btn_test_2" type="object" name="a2" invisible="bar and state not in [\'abc\', \'def\']"/>' +
                 "</div></templates>" +
                 "</kanban>",

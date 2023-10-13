@@ -138,7 +138,7 @@ export const qwebSample = /* xml */ `
 
 <h2>t-if should be inline</h2>
 <div style="text-align: center; margin: 16px 0px 16px 0px;">
-    <t t-if="not is_online or object.state != 'accepted'">
+    <t t-if="not is_online or object.state !== 'accepted'">
         <a t-attf-href="/calendar/meeting/accept?token={{object.access_token}}&amp;id={{object.event_id.id}}" style="padding: 5px 10px; color: #FFFFFF; text-decoration: none; background-color: #875A7B; border: 1px solid #875A7B; border-radius: 3px">
             Accept</a>
         <a t-attf-href="/calendar/meeting/decline?token={{object.access_token}}&amp;id={{object.event_id.id}}" style="padding: 5px 10px; color: #FFFFFF; text-decoration: none; background-color: #875A7B; border: 1px solid #875A7B; border-radius: 3px">

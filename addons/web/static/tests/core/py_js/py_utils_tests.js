@@ -75,7 +75,7 @@ QUnit.module("py", {}, () => {
 
     QUnit.test("other operators", function (assert) {
         assert.ok(checkAST("x == y", "== operator"));
-        assert.ok(checkAST("x != y", "!= operator"));
+        assert.ok(checkAST("x !== y", "!= operator"));
         assert.ok(checkAST("x < y", "< operator"));
         assert.ok(checkAST("x is y", "is operator"));
         assert.ok(checkAST("x is not y", "is and not operator"));

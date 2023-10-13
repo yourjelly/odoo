@@ -2786,7 +2786,7 @@ export class Order extends PosModel {
      */
     _isValidEmptyOrder() {
         if (this.get_orderlines().length == 0) {
-            return this.get_paymentlines().length != 0;
+            return this.get_paymentlines().length !== 0;
         } else {
             return true;
         }
@@ -2812,7 +2812,7 @@ export class Order extends PosModel {
      */
     _generateTicketCode() {
         let code = "";
-        while (code.length != 5) {
+        while (code.length !== 5) {
             code = Math.random().toString(36).slice(2, 7);
         }
         return code;

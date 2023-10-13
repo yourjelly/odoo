@@ -1520,7 +1520,7 @@
     }
     function isLeapYear(year) {
         const _year = Math.trunc(year);
-        return (_year % 4 === 0 && _year % 100 != 0) || _year % 400 === 0;
+        return (_year % 4 === 0 && _year % 100 !== 0) || _year % 400 === 0;
     }
     function getYearFrac(startDate, endDate, _dayCountConvention) {
         if (startDate === endDate) {
@@ -3965,20 +3965,20 @@
         let col, row;
         const { left: oldLeft, right: oldRight, top: oldTop, bottom: oldBottom } = oldZone;
         const { left, right, top, bottom } = currentZone;
-        if (left != oldLeft) {
+        if (left !== oldLeft) {
             col = left;
         }
-        else if (right != oldRight) {
+        else if (right !== oldRight) {
             col = right;
         }
         else {
             // left and right don't change
             col = left;
         }
-        if (top != oldTop) {
+        if (top !== oldTop) {
             row = top;
         }
-        else if (bottom != oldBottom) {
+        else if (bottom !== oldBottom) {
             row = bottom;
         }
         else {
@@ -4213,7 +4213,7 @@
             const { sheetName } = splitReference(range);
             const sheetPrefix = sheetName ? `${sheetName}!` : "";
             const zone = toUnboundedZone(range);
-            if (zone.bottom !== zone.top && zone.left != zone.right) {
+            if (zone.bottom !== zone.top && zone.left !== zone.right) {
                 if (zone.right) {
                     for (let j = zone.left; j <= zone.right; ++j) {
                         postProcessedRanges.push(`${sheetPrefix}${zoneToXc({
@@ -6784,7 +6784,7 @@
                 //look through every row below the i'th row
                 for (let row = pivot + 1; row < dim; row++) {
                     //if the ii'th row has a non-0 in the i'th col, swap it with that row
-                    if (C[pivot][row] != 0) {
+                    if (C[pivot][row] !== 0) {
                         swapMatrixRows(C, pivot, row);
                         swapMatrixRows(I, pivot, row);
                         determinant *= -1;
@@ -8857,7 +8857,7 @@
             for (let n = 0; n < values.length - 1; n += 2) {
                 value = values[n];
                 weight = values[n + 1];
-                // if (typeof value != typeof weight) {
+                // if (typeof value !== typeof weight) {
                 //   throw new Error(rangeError);
                 // }
                 if (isMatrix(value)) {
@@ -13228,7 +13228,7 @@
                 return false;
             }
             catch (e) {
-                return e?.errorType != CellErrorType.NotAvailable;
+                return e?.errorType !== CellErrorType.NotAvailable;
             }
         },
         isExported: true,
@@ -27767,7 +27767,7 @@
     }
     function dragFigureForResize(initialFigure, dirX, dirY, { x: mouseX, y: mouseY }, { x: mouseInitialX, y: mouseInitialY }, keepRatio, minFigSize) {
         let { x, y, width, height } = initialFigure;
-        if (keepRatio && dirX != 0 && dirY != 0) {
+        if (keepRatio && dirX !== 0 && dirY !== 0) {
             const deltaX = Math.min(dirX * (mouseInitialX - mouseX), initialFigure.width - minFigSize);
             const deltaY = Math.min(dirY * (mouseInitialY - mouseY), initialFigure.height - minFigSize);
             const fraction = Math.min(deltaX / initialFigure.width, deltaY / initialFigure.height);
@@ -29980,7 +29980,7 @@
                 // browser behaviour that will select the text inside the composer
                 // (see related commit msg for more information)
                 ev.preventDefault();
-                if ((col !== prevCol && col != -1) || (row !== prevRow && row != -1)) {
+                if ((col !== prevCol && col !== -1) || (row !== prevRow && row !== -1)) {
                     prevCol = col === -1 ? prevCol : col;
                     prevRow = row === -1 ? prevRow : row;
                     this.env.model.selection.setAnchorCorner(prevCol, prevRow);
@@ -35067,7 +35067,7 @@
                 row: zone.bottom,
             });
             const sameCell = cellTopLeft.col === cellBotRight.col && cellTopLeft.row === cellBotRight.row;
-            if (topLeft != botRight && !sameCell) {
+            if (topLeft !== botRight && !sameCell) {
                 return topLeft + ":" + botRight;
             }
             return topLeft;
@@ -38336,7 +38336,7 @@
             this.history.update("orderedSheetIds", orderedSheetIds);
         }
         findIndexOfTargetSheet(currentIndex, deltaIndex) {
-            while (deltaIndex != 0 && 0 <= currentIndex && currentIndex <= this.orderedSheetIds.length) {
+            while (deltaIndex !== 0 && 0 <= currentIndex && currentIndex <= this.orderedSheetIds.length) {
                 if (deltaIndex > 0) {
                     currentIndex++;
                     if (this.isSheetVisible(this.orderedSheetIds[currentIndex])) {
@@ -45067,7 +45067,7 @@
          *
          *  Let's consider a provided zone corresponding to (C2:D3) - (left:2, right: 3, top:1, bottom:2)
          *  - the top external boundary is (B1:E1)
-         *    Since we have B1='D' != "", we expand to the top: => (C1:D3)
+         *    Since we have B1='D' !== "", we expand to the top: => (C1:D3)
          *    The top boundary having reached the top of the grid, we cannot expand in that direction anymore
          *
          *  - the left boundary is (B1:B4)
@@ -45076,7 +45076,7 @@
          *  - the right and bottom boundaries are a dead end for now as (E1:E4) and (A4:E4) are empty.
          *
          *  - the left boundary is now (A1:A4)
-         *    Since we have A2=5 != "", we can therefore expand to the left => (A1:D3)
+         *    Since we have A2=5 !== "", we can therefore expand to the left => (A1:D3)
          *
          *  This will be the final zone as left and top have reached the boundaries of the grid and
          *  the other boundaries (E1:E4) and (A4:E4) are empty.
@@ -49117,7 +49117,7 @@
                 input.setAttribute("type", "file");
                 input.setAttribute("accept", "image/*");
                 input.addEventListener("change", async () => {
-                    if (input.files === null || input.files.length != 1) {
+                    if (input.files === null || input.files.length !== 1) {
                         reject();
                     }
                     else {

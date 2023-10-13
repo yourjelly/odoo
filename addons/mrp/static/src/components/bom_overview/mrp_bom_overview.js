@@ -102,21 +102,21 @@ export class BomOverviewComponent extends Component {
     }
 
     async onChangeBomQuantity(newQuantity) {
-        if (this.state.bomQuantity != newQuantity) {
+        if (this.state.bomQuantity !== newQuantity) {
             this.state.bomQuantity = newQuantity;
             await this.getBomData();
         }
     }
 
     async onChangeVariant(variantId) {
-        if (this.state.currentVariantId != variantId) {
+        if (this.state.currentVariantId !== variantId) {
             this.state.currentVariantId = variantId;
             await this.getBomData();
         }
     }
 
     async onChangeWarehouse(warehouseId) {
-        if (this.state.currentWarehouse.id != warehouseId) {
+        if (this.state.currentWarehouse.id !== warehouseId) {
             this.state.currentWarehouse = this.warehouses.find(wh => wh.id == warehouseId);
             await this.getBomData();
         }

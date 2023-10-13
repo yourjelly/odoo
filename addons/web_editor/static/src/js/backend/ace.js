@@ -35,7 +35,7 @@ function _getCheckReturn(isValid, errorLine, errorMessage) {
  * @returns {Object} @see _getCheckReturn
  */
 function checkXML(xml) {
-    if (typeof window.DOMParser != 'undefined') {
+    if (typeof window.DOMParser !== 'undefined') {
         var xmlDoc = (new window.DOMParser()).parseFromString(xml, 'text/xml');
         var error = xmlDoc.getElementsByTagName('parsererror');
         if (error.length > 0) {
@@ -69,7 +69,7 @@ function checkXML(xml) {
             });
             return _getCheckReturn(false, parseInt(error[0].innerHTML.match(/[Ll]ine[^\d]+(\d+)/)[1], 10), errorEl.innerHTML);
         }
-    } else if (typeof window.ActiveXObject != 'undefined' && new window.ActiveXObject('Microsoft.XMLDOM')) {
+    } else if (typeof window.ActiveXObject !== 'undefined' && new window.ActiveXObject('Microsoft.XMLDOM')) {
         var xmlDocIE = new window.ActiveXObject('Microsoft.XMLDOM');
         xmlDocIE.async = 'false';
         xmlDocIE.loadXML(xml);

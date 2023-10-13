@@ -22,7 +22,7 @@ export class CustomerFacingDisplayButton extends Component {
 
         if (
             this.previousDisplayedStatus &&
-            this.previousDisplayedStatus != this.customerDisplay.status
+            this.previousDisplayedStatus !== this.customerDisplay.status
         ) {
             this.displayMessage(msg);
             this.previousDisplayedStatus = this.customerDisplay.status;

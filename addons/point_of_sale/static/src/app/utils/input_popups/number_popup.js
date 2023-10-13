@@ -104,7 +104,7 @@ export class NumberPopup extends AbstractAwaitablePopup {
         if (typeof this.props.startingValue === "number" && this.props.startingValue > 0) {
             startingPayload = this.props.startingValue.toFixed(this.props.nbrDecimal);
         }
-        if (this.state.payload != startingPayload) {
+        if (this.state.payload !== startingPayload) {
             return this.state.payload;
         }
         return this.numberBuffer.get();

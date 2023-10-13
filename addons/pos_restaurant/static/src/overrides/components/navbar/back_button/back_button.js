@@ -10,7 +10,7 @@ patch(BackButton.prototype, {
         return this.table?.floor;
     },
     get hasTable() {
-        return this.table != null;
+        return this.table !== null;
     },
     /**
      * @override
