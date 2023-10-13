@@ -6,8 +6,8 @@ import logging
 
 from datetime import datetime
 
-from odoo import api, fields, models
-
+from odoo import api, fields, models, _
+from odoo.exceptions import UserError
 _logger = logging.getLogger(__name__)
 
 
@@ -31,6 +31,13 @@ class MailMessageSchedule(models.Model):
     scheduled_datetime = fields.Datetime(
         'Scheduled Send Date', required=True,
         help='Datetime at which notification should be sent.')
+
+    @api.constrains('mail_message_id')
+    def _check_mail_model(self):
+        mail_threads = self.env['ir.model'].search([('is_mail_thread', '=', True)]).mapped('model')
+        for rec in self:
+            if rec.mail_message_id.model not in mail_threads:
+                raise UserError(_("Only messages whose model inherits mail thread can be scheduled."))
 
     @api.model_create_multi
     def create(self, vals_list):

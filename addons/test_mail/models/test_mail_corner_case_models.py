@@ -179,6 +179,7 @@ class MailTestNotMailThread(models.Model):
     """ Models not inheriting from mail.thread but using some cross models
     capabilities of mail. """
     _name = 'mail.test.nothread'
+    _inherit = ['mail.thread']
     _description = "NoThread Model"
 
     name = fields.Char()
