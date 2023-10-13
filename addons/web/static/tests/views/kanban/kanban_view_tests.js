@@ -5899,7 +5899,7 @@ QUnit.module("Views", (hooks) => {
                 if (args.method === "web_read_group") {
                     const result = await performRPC(route, args);
                     for (let i = 0; i < result.groups.length; i++) {
-                        result.groups[i].__fold = i == 2 || i == 8;
+                        result.groups[i].__fold = i === 2 || i === 8;
                     }
                     return result;
                 }
@@ -6606,7 +6606,7 @@ QUnit.module("Views", (hooks) => {
             resModel: "partner",
             serverData,
             mockRPC(route, { model, method, args }) {
-                if (model == "product" && method === "name_create") {
+                if (model === "product" && method === "name_create") {
                     serverData.models.product.records.push({ id: 6, x_name: args[0] });
                     return Promise.resolve([6, args[0]]);
                 }
@@ -6658,7 +6658,7 @@ QUnit.module("Views", (hooks) => {
             `,
             groupBy: ["product_id"],
             mockRPC(route, { model, method, args }) {
-                if (method === "name_create" || method == "write") {
+                if (method === "name_create" || method === "write") {
                     assert.step(`${method} (model: ${model}):${JSON.stringify(args)}`);
                 }
             },
@@ -8334,7 +8334,7 @@ QUnit.module("Views", (hooks) => {
                     <templates>
                         <t t-name="kanban-box">
                             <div>
-                                <field name="foo" invisible="id == 1"/>
+                                <field name="foo" invisible="id === 1"/>
                             </div>
                         </t>
                     </templates>

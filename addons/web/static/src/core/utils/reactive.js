@@ -19,7 +19,7 @@ import { reactive } from "@odoo/owl";
  * const myObj = reactive(new MyClass(bus), () => console.log(myObj.counter));
  * myObj.counter++; // logs 0;
  * bus.trigger("change"); // logs nothing!
- * myObj.counter++; // logs 2. counter == 1 was missed.
+ * myObj.counter++; // logs 2. counter === 1 was missed.
  */
 export class Reactive {
     constructor() {

@@ -30,7 +30,7 @@ export class PaymentStripe extends PaymentInterface {
             return data.secret;
         } catch (error) {
             const message = error.code === 200 ? error.data.message : error.message;
-            this._showError(message, 'Fetch Token');
+            this._showError(message, "Fetch Token");
             this.terminal = false;
         }
     }
@@ -65,7 +65,7 @@ export class PaymentStripe extends PaymentInterface {
         // We need the disconnect this reader if we want to use another one
         if (
             this.pos.connectedReader != this.payment_method.stripe_serial_number &&
-            this.terminal.getConnectionStatus() == "connected"
+            this.terminal.getConnectionStatus() === "connected"
         ) {
             const disconnectResult = await this.terminal.disconnectReader();
             if (disconnectResult.error) {
@@ -75,7 +75,7 @@ export class PaymentStripe extends PaymentInterface {
             } else {
                 return await this.connectReader();
             }
-        } else if (this.terminal.getConnectionStatus() == "not_connected") {
+        } else if (this.terminal.getConnectionStatus() === "not_connected") {
             return await this.connectReader();
         } else {
             return true;
@@ -86,7 +86,7 @@ export class PaymentStripe extends PaymentInterface {
         const line = this.pos.get_order().selected_paymentline;
         const discoveredReaders = JSON.parse(this.pos.discoveredReaders);
         for (const selectedReader of discoveredReaders) {
-            if (selectedReader.serial_number == this.payment_method.stripe_serial_number) {
+            if (selectedReader.serial_number === this.payment_method.stripe_serial_number) {
                 try {
                     const connectResult = await this.terminal.connectReader(selectedReader, {
                         fail_if_in_use: true,
@@ -119,7 +119,7 @@ export class PaymentStripe extends PaymentInterface {
         const intentCharge = processPayment.paymentIntent.charges.data[0];
         const processPaymentDetails = intentCharge.payment_method_details;
 
-        if (processPaymentDetails.type === 'interac_present') {
+        if (processPaymentDetails.type === "interac_present") {
             return intentCharge.id;
         }
 
@@ -205,7 +205,7 @@ export class PaymentStripe extends PaymentInterface {
             return data;
         } catch (error) {
             const message = error.code === 200 ? error.data.message : error.message;
-            this._showError(message, 'Capture Payment');
+            this._showError(message, "Capture Payment");
             return false;
         }
     }
@@ -223,7 +223,7 @@ export class PaymentStripe extends PaymentInterface {
             return data.client_secret;
         } catch (error) {
             const message = error.code === 200 ? error.data.message : error.message;
-            this._showError(message, 'Fetch Secret');
+            this._showError(message, "Fetch Secret");
             return false;
         }
     }

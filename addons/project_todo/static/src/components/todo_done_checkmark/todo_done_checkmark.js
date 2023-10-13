@@ -13,11 +13,11 @@ export class TodoDoneCheckmark extends StateSelectionField {
         });
         onMounted(() => {
             const fieldValue = this.props.record.data[this.props.name]
-            this.notDoneState = fieldValue == '1_done' ? '01_in_progress' : fieldValue;
+            this.notDoneState = fieldValue === '1_done' ? '01_in_progress' : fieldValue;
         });
         onRendered(() => {
             if (!this.stateDone.notReloadState) {
-                this.stateDone.isDone = this.props.record.data[this.props.name] == '1_done';
+                this.stateDone.isDone = this.props.record.data[this.props.name] === '1_done';
             }
         });
     }

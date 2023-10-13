@@ -14,7 +14,7 @@ export class ApplicantCharField extends CharField {
 
     onClick() {
         const record = this.props.record.data;
-        if (record.res_id !== undefined && record.res_model == 'hr.applicant') {
+        if (record.res_id !== undefined && record.res_model === 'hr.applicant') {
             this.action.doAction({
                 type: 'ir.actions.act_window',
                 res_model: 'hr.applicant',

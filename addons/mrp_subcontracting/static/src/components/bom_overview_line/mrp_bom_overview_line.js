@@ -8,7 +8,7 @@ patch(BomOverviewLine.prototype, {
      * @override
      */
     async goToRoute(routeType) {
-        if (routeType == "subcontract") {
+        if (routeType === "subcontract") {
             return this.goToAction(this.data.link_id, this.data.link_model);
         }
         return super.goToRoute(...arguments);

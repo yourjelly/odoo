@@ -126,7 +126,7 @@ export class ProjectTaskStateSelection extends StateSelectionField {
     }
 
     async toggleState() {
-        const toggleVal = this.currentValue == "1_done" ? "01_in_progress" : "1_done";
+        const toggleVal = this.currentValue === "1_done" ? "01_in_progress" : "1_done";
         await this.updateRecord(toggleVal);
     }
 

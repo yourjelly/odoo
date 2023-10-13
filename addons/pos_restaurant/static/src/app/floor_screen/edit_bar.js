@@ -37,7 +37,7 @@ export class EditBar extends Component {
     getSelectedTablesShape() {
         let shape = "round";
         this.props.selectedTables.forEach((table) => {
-            if (table.shape == "square") {
+            if (table.shape === "square") {
                 shape = "square";
             }
         });

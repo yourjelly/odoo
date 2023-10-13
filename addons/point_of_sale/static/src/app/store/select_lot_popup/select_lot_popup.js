@@ -87,7 +87,7 @@ export class EditListPopup extends AbstractAwaitablePopup {
     }
     removeItem(itemId) {
         this.state.array.splice(
-            this.state.array.findIndex((item) => item._id == itemId),
+            this.state.array.findIndex((item) => item._id === itemId),
             1
         );
     }

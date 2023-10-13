@@ -14,7 +14,7 @@ export class BackButton extends Component {
     }
     async onClick() {
         if (this.pos.mainScreen.component === TicketScreen) {
-            if (this.pos.ticket_screen_mobile_pane == "left") {
+            if (this.pos.ticket_screen_mobile_pane === "left") {
                 this.pos.closeScreen();
             } else {
                 this.pos.ticket_screen_mobile_pane = "left";

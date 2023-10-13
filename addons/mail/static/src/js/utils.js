@@ -60,7 +60,7 @@ const _escapeEntities = (function () {
     const testRegexp = RegExp("(?:&|<|>)");
     const replaceRegexp = RegExp("(?:&|<|>)", "g");
     return function (string) {
-        string = string == null ? "" : "" + string;
+        string = string === null ? "" : "" + string;
         return testRegexp.test(string) ? string.replace(replaceRegexp, escaper) : string;
     };
 })();
@@ -177,7 +177,7 @@ function parseEmail(text) {
     if (text) {
         var result = text.match(/"?(.*?)"? <(.*@.*)>/);
         if (result) {
-            name = (result[1] || "").trim().replace(/(^"|"$)/g, '')
+            const name = (result[1] || "").trim().replace(/(^"|"$)/g, "");
             return [name, (result[2] || "").trim()];
         }
         result = text.match(/(.*@.*)/);

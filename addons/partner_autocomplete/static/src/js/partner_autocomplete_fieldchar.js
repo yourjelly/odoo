@@ -20,7 +20,7 @@ export class PartnerAutoCompleteCharField extends CharField {
     }
 
     async validateSearchTerm(request) {
-        if (this.props.name == 'vat') {
+        if (this.props.name === 'vat') {
             return this.partner_autocomplete.isVATNumber(request);
         }
         else {

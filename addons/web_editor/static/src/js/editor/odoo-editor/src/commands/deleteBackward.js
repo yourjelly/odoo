@@ -145,7 +145,7 @@ HTMLElement.prototype.oDeleteBackward = function (offset, alreadyMoved = false, 
         /** If we are at the beninning of a block node,
          *  And the previous node is empty, remove it.
          *
-         *   E.g. (previousEl == empty)
+         *   E.g. (previousEl === empty)
          *        <p><br></p><h1>[]def</h1> + BACKSPACE
          *   <=>  <h1>[]def</h1>
          *
@@ -172,7 +172,7 @@ HTMLElement.prototype.oDeleteBackward = function (offset, alreadyMoved = false, 
          * to move the inline content at its beginning outside of the element
          * and propagate to the left block.
          *
-         * E.g. (prev == block)
+         * E.g. (prev === block)
          *      <p>abc</p><div>[]def<p>ghi</p></div> + BACKSPACE
          * <=>  <p>abc</p>[]def<div><p>ghi</p></div> + BACKSPACE
          *

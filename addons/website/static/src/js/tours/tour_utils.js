@@ -118,7 +118,7 @@ function selectNested(trigger, optionName, alt_trigger = null, optionTooltipLabe
     return {
         trigger: trigger,
         content: markup(_t("<b>Select</b> a %s.", optionTooltipLabel)),
-        alt_trigger: alt_trigger == null ? undefined : `${option_block} ${alt_trigger}`,
+        alt_trigger: alt_trigger === null ? undefined : `${option_block} ${alt_trigger}`,
         position: position,
         run: 'click',
         location: position === 'left' ? '#oe_snippets' : undefined,

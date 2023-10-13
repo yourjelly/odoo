@@ -46,7 +46,7 @@ export class FloorScreen extends Component {
         });
         const ui = useState(useService("ui"));
         const mode = localStorage.getItem("floorPlanStyle");
-        this.pos.floorPlanStyle = ui.isSmall || mode == "kanban" ? "kanban" : "default";
+        this.pos.floorPlanStyle = ui.isSmall || mode === "kanban" ? "kanban" : "default";
         this.floorMapRef = useRef("floor-map-ref");
         this.addFloorRef = useRef("add-floor-ref");
         this.map = useRef("map");
@@ -259,7 +259,7 @@ export class FloorScreen extends Component {
             });
 
         for (let i = 0; i < tablesNameNumber.length; i++) {
-            if (tablesNameNumber[i] == firstNum) {
+            if (tablesNameNumber[i] === firstNum) {
                 firstNum += 1;
             } else {
                 break;
@@ -407,7 +407,7 @@ export class FloorScreen extends Component {
         }
     }
     async duplicateTableOrFloor() {
-        if (this.selectedTables.length == 0) {
+        if (this.selectedTables.length === 0) {
             const floor = this.activeFloor;
             const tables = this.activeFloor.tables;
             const newFloorName = floor.name + " (copy)";
@@ -440,7 +440,7 @@ export class FloorScreen extends Component {
         if (selectedTables.length > 1) {
             return;
         }
-        if (selectedTables.length == 0) {
+        if (selectedTables.length === 0) {
             const { confirmed, payload: newName } = await this.popup.add(TextInputPopup, {
                 startingValue: selectedFloor.name,
                 title: _t("Floor Name ?"),
@@ -469,7 +469,7 @@ export class FloorScreen extends Component {
     }
     async changeSeatsNum() {
         const selectedTables = this.selectedTables;
-        if (selectedTables.length == 0) {
+        if (selectedTables.length === 0) {
             return;
         }
         const { confirmed, payload: inputNumber } = await this.popup.add(NumberPopup, {
@@ -496,7 +496,7 @@ export class FloorScreen extends Component {
         await this.changeShape("square");
     }
     async changeShape(form) {
-        if (this.selectedTables.length == 0) {
+        if (this.selectedTables.length === 0) {
             return;
         }
         this.selectedTables.forEach(async (selectedTable) => {
@@ -524,7 +524,7 @@ export class FloorScreen extends Component {
         this.state.isColorPicker = !this.state.isColorPicker;
     }
     async deleteFloorOrTable() {
-        if (this.selectedTables.length == 0) {
+        if (this.selectedTables.length === 0) {
             const { confirmed } = await this.popup.add(ConfirmPopup, {
                 title: `Removing floor ${this.activeFloor.name}`,
                 body: sprintf(
@@ -579,7 +579,7 @@ export class FloorScreen extends Component {
             for (const id of originalSelectedTableIds) {
                 //remove order not send to server
                 for (const order of this.pos.get_order_list()) {
-                    if (order.tableId == id) {
+                    if (order.tableId === id) {
                         this.pos.removeOrder(order, false);
                     }
                 }

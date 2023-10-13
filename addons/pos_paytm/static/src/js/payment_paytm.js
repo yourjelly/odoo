@@ -71,7 +71,7 @@ export class PaymentPaytm extends PaymentInterface {
     async pollPayment(transactionId, referenceId, timestamp) {
         const fetchPaymentStatus = async (resolve, reject) => {
             const paymentLine = this.pos.get_order()?.selected_paymentline;
-            if (!paymentLine || paymentLine.payment_status == 'retry') {
+            if (!paymentLine || paymentLine.payment_status === 'retry') {
                 return false;
             }
             try {

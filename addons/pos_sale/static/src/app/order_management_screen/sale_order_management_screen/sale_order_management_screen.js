@@ -169,7 +169,7 @@ export class SaleOrderManagementScreen extends ControlButtonsMixin(Component) {
                 currentPOSOrder.set_pricelist(orderPricelist);
             }
 
-            if (selectedOption == "settle") {
+            if (selectedOption === "settle") {
                 // settle the order
                 const lines = sale_order.order_line;
                 const product_to_add_in_pos = lines
@@ -293,7 +293,7 @@ export class SaleOrderManagementScreen extends ControlButtonsMixin(Component) {
                     const popupTotalDue = sale_order.amount_total;
                     let getInputBufferReminder = () => false;
                     const popupSubtitle = _t("Due balance: %s");
-                    if (selectedOption == "dpAmount") {
+                    if (selectedOption === "dpAmount") {
                         popupTitle = _t("Down Payment");
                         popupInputSuffix = this.pos.currency.symbol;
                     } else {
@@ -327,7 +327,7 @@ export class SaleOrderManagementScreen extends ControlButtonsMixin(Component) {
                     if (!confirmed) {
                         return;
                     }
-                    if (selectedOption == "dpAmount") {
+                    if (selectedOption === "dpAmount") {
                         down_payment = parseFloat(payload);
                     } else {
                         down_payment = (down_payment * parseFloat(payload)) / 100;

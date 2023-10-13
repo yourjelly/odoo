@@ -142,7 +142,7 @@ export class ProductConfiguratorPopup extends AbstractAwaitablePopup {
         ++this.state.quantity;
     }
     removeOneQuantity() {
-        if (this.state.quantity == 1) {
+        if (this.state.quantity === 1) {
             return;
         }
         --this.state.quantity;

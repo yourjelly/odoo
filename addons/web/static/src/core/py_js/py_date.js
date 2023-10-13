@@ -102,7 +102,7 @@ function ord2ymd(n) {
 
     n = n0;
     const year = n400 * 400 + 1 + n100 * 100 + n4 * 4 + n1;
-    if (n1 == 4 || n100 == 100) {
+    if (n1 === 4 || n100 === 100) {
         assert(n0 === 0);
         return {
             year: year - 1,
@@ -111,8 +111,8 @@ function ord2ymd(n) {
         };
     }
 
-    const leapyear = n1 === 3 && (n4 !== 24 || n100 == 3);
-    assert(leapyear == isLeap(year));
+    const leapyear = n1 === 3 && (n4 !== 24 || n100 === 3);
+    assert(leapyear === isLeap(year));
     let month = (n + 50) >> 5;
     let preceding = DAYS_BEFORE_MONTH[month] + (month > 2 && leapyear ? 1 : 0);
     if (preceding > n) {
@@ -165,7 +165,7 @@ function tmxxx(year, month, day, hour, minute, second, microsecond) {
     // but if day is, e.g., plus or minus a million, the current month
     // and year values make no sense (and may also be out of bounds
     // themselves).
-    // Saying 12 months == 1 year should be non-controversial.
+    // Saying 12 months === 1 year should be non-controversial.
     if (month < 1 || month > 12) {
         divmod(month - 1, 12, function (carry, m) {
             month = m + 1;
@@ -190,7 +190,7 @@ function tmxxx(year, month, day, hour, minute, second, microsecond) {
                 month = 12;
                 day = 31;
             }
-        } else if (day == dim + 1) {
+        } else if (day === dim + 1) {
             ++month;
             day = 1;
             if (month > 12) {
@@ -489,7 +489,14 @@ export class PyDateTime {
      * @returns {PyDateTime}
      */
     to_utc() {
-        const d = new Date(this.year, this.month -1, this.day, this.hour, this.minute, this.second);
+        const d = new Date(
+            this.year,
+            this.month - 1,
+            this.day,
+            this.hour,
+            this.minute,
+            this.second
+        );
         const timedelta = PyTimeDelta.create({ minutes: d.getTimezoneOffset() });
         return this.add(timedelta);
     }
@@ -561,9 +568,8 @@ const PERIODS = ["year", "month", "day", ...TIME_PERIODS];
 const RELATIVE_KEYS = "years months weeks days hours minutes seconds microseconds leapdays".split(
     " "
 );
-const ABSOLUTE_KEYS = "year month day hour minute second microsecond weekday nlyearday yearday".split(
-    " "
-);
+const ABSOLUTE_KEYS =
+    "year month day hour minute second microsecond weekday nlyearday yearday".split(" ");
 
 const argsSpec = ["dt1", "dt2"]; // all other arguments are kwargs
 export class PyRelativeDelta {

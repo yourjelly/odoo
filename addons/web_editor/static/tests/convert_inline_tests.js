@@ -150,7 +150,7 @@ QUnit.module('convert_inline', {}, function () {
                 getTdHtml(1, '(0, 12)', TEST_WIDTH) +
                 getTdHtml(11, '', TEST_WIDTH) + // 13 overflowed the row by 1 -> fill up
                 `</tr>` +
-                `<tr>${getTdHtml(12, '(1, 0)', TEST_WIDTH)}</tr></table>`, // 1 col with no size == col-12
+                `<tr>${getTdHtml(12, '(1, 0)', TEST_WIDTH)}</tr></table>`, // 1 col with no size === col-12
             title: "should have converted a 2x[13,1] grid to an equivalent table (overflowing)",
         });
 

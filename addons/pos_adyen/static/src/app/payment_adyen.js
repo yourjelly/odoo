@@ -179,7 +179,7 @@ export class PaymentAdyen extends PaymentInterface {
     _adyen_handle_response(response) {
         var line = this.pending_adyen_line();
 
-        if (response.error && response.error.status_code == 401) {
+        if (response.error && response.error.status_code === 401) {
             this._show_error(_t("Authentication failed. Please check your Adyen credentials."));
             line.set_payment_status("force_done");
             return false;
@@ -264,7 +264,7 @@ export class PaymentAdyen extends PaymentInterface {
         const payment_result = payment_response.PaymentResult;
 
         const cashier_receipt = payment_response.PaymentReceipt.find((receipt) => {
-            receipt.DocumentQualifier == "CashierReceipt";
+            receipt.DocumentQualifier === "CashierReceipt";
         });
 
         if (cashier_receipt) {
@@ -274,7 +274,7 @@ export class PaymentAdyen extends PaymentInterface {
         }
 
         const customer_receipt = payment_response.PaymentReceipt.find((receipt) => {
-            receipt.DocumentQualifier == "CustomerReceipt";
+            receipt.DocumentQualifier === "CustomerReceipt";
         });
 
         if (customer_receipt) {

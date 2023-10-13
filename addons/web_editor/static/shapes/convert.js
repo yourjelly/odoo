@@ -76,7 +76,7 @@ const nonConformShapes = shapes.flatMap(shape => {
         violations.nonPaletteColors = shape.nonPaletteColors;
         invalid = true;
     }
-    if (shape.position.length > 1 || shape.position.length == 0) {
+    if (shape.position.length > 1 || shape.position.length === 0) {
         violations.position = shape.position;
         invalid = true;
     }

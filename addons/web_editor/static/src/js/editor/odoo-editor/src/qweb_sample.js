@@ -107,8 +107,8 @@ export const qwebSample = /* xml */ `
     <p t-if="condition">ok</p>
 </div>
 <div>
-    <p t-if="user.birthday == today()">Happy birthday!</p>
-    <p t-elif="user.login == 'root'">Welcome master!</p>
+    <p t-if="user.birthday === today()">Happy birthday!</p>
+    <p t-elif="user.login === 'root'">Welcome master!</p>
     <p t-else="">Welcome!</p>
 </div>
 

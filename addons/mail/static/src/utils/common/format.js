@@ -22,7 +22,7 @@ const _escapeEntities = (function () {
     const testRegexp = RegExp("(?:&|<|>)");
     const replaceRegexp = RegExp("(?:&|<|>)", "g");
     return function (string) {
-        string = string == null ? "" : "" + string;
+        string = string === null ? "" : "" + string;
         return testRegexp.test(string) ? string.replace(replaceRegexp, escaper) : string;
     };
 })();

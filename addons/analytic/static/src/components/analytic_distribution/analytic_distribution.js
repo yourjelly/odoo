@@ -350,7 +350,7 @@ export class AnalyticDistribution extends Component {
 
     async percentageChanged(dist_tag, ev) {
         dist_tag.percentage = this.parse(ev.target.value);
-        if (dist_tag.percentage == 0) {
+        if (dist_tag.percentage === 0) {
             this.deleteTag(dist_tag.id, dist_tag.group_id);
         }
         this.autoFill();
@@ -393,7 +393,7 @@ export class AnalyticDistribution extends Component {
 
     get firstIncompletePlanId() {
         for (const group_id in this.list) {
-            if (this.groupStatus(group_id) == "invalid") {
+            if (this.groupStatus(group_id) === "invalid") {
                 return group_id;
             }
         }
@@ -494,7 +494,7 @@ export class AnalyticDistribution extends Component {
     autoFill() {
         for (const group of this.allPlans.filter((p) => p.all_account_count > 0)) {
             // update the first unmodified tag containing 0%
-            const tagToUpdate = this.list[group.id].distribution.find((t) => t.percentage == 0);
+            const tagToUpdate = this.list[group.id].distribution.find((t) => t.percentage === 0);
             if (tagToUpdate) {
                 tagToUpdate.percentage = this.remainderByGroup(group.id);
             }
@@ -587,7 +587,7 @@ export class AnalyticDistribution extends Component {
         if (!el) {
             el = this.dropdownRef.el;
         }
-        return direction == "next" ? getNextTabableElement(el) : getPreviousTabableElement(el);
+        return direction === "next" ? getNextTabableElement(el) : getPreviousTabableElement(el);
     }
 
     focusAdjacent(direction) {

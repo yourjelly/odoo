@@ -35,7 +35,7 @@ export class ForecastedDetails extends Component {
     }
 
     async _onClickChangePriority(modelName, record) {
-        const value = record.priority == "0" ? "1" : "0";
+        const value = record.priority === "0" ? "1" : "0";
 
         await this.orm.call(modelName, "write", [[record.id], { priority: value }]);
         this.props.reloadReport();

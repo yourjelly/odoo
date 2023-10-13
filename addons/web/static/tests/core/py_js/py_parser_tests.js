@@ -75,8 +75,8 @@ QUnit.module("py", {}, () => {
         });
     });
 
-    QUnit.test("expression with == and or", (assert) => {
-        assert.deepEqual(parseExpr("False == True and False"), {
+    QUnit.test("expression with === and or", (assert) => {
+        assert.deepEqual(parseExpr("False === True and False"), {
             type: 14 /* BooleanOperator */,
             op: "and",
             left: {
@@ -90,7 +90,7 @@ QUnit.module("py", {}, () => {
     });
 
     QUnit.test("expression with + and ==", (assert) => {
-        assert.deepEqual(parseExpr("1 + 2 == 3"), {
+        assert.deepEqual(parseExpr("1 + 2 === 3"), {
             type: 7 /* BinaryOperator */,
             op: "==",
             left: {

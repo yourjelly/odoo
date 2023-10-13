@@ -429,7 +429,7 @@ QUnit.module("Fields", (hooks) => {
                     <sheet>
                         <group>
                             <field name="int_field" />
-                            <field name="foo"  invisible="int_field == 9"/>
+                            <field name="foo"  invisible="int_field === 9"/>
                         </group>
                     </sheet>
                 </form>`,
@@ -1098,7 +1098,7 @@ QUnit.module("Fields", (hooks) => {
                 arch: `
                 <form>
                     <field name="foo" />
-                    <field name="display_name" invisible="'' == display_name"/>
+                    <field name="display_name" invisible="'' === display_name"/>
                 </form>`,
             });
             assert.containsOnce(target, "[name='display_name'] input");

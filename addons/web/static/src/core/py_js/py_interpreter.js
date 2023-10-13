@@ -379,7 +379,7 @@ export function evaluate(ast, context = {}) {
                 if (typeof left === "string") {
                     return STRING[ast.key](left);
                 }
-                if (ast.key == "get" && typeof left === "object") {
+                if (ast.key === "get" && typeof left === "object") {
                     return DICT[ast.key](toPyDict(left));
                 }
                 const result = left[ast.key];

@@ -18,7 +18,7 @@ export class BomOverviewLine extends Component {
     //---- Handlers ----
 
     async goToRoute(routeType) {
-        if (routeType == "manufacture") {
+        if (routeType === "manufacture") {
             return this.goToAction(this.data.bom_id, "mrp.bom");
         }
     }

@@ -117,7 +117,7 @@ export class BomOverviewComponent extends Component {
 
     async onChangeWarehouse(warehouseId) {
         if (this.state.currentWarehouse.id != warehouseId) {
-            this.state.currentWarehouse = this.warehouses.find(wh => wh.id == warehouseId);
+            this.state.currentWarehouse = this.warehouses.find(wh => wh.id === warehouseId);
             await this.getBomData();
         }
     }

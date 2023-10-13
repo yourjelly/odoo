@@ -107,7 +107,7 @@ export class CartPage extends Component {
 
     getPrice(line) {
         const childLines = this.getChildLines(line);
-        if (childLines.length == 0) {
+        if (childLines.length === 0) {
             return line.price_subtotal_incl;
         } else {
             let price = 0;

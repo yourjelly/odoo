@@ -119,7 +119,7 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <list>
                     <field name="selection_field" widget="badge"/>
-                    <field name="display_name" widget="badge" decoration-danger="selection_field == 'done'" decoration-warning="selection_field == 'blocked'"/>
+                    <field name="display_name" widget="badge" decoration-danger="selection_field === 'done'" decoration-warning="selection_field === 'blocked'"/>
                 </list>`,
         });
 

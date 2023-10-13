@@ -12,7 +12,7 @@ publicWidget.registry.s_website_form.include({
             const res = this._super(...arguments);
             this.cleanTurnstile();
             if (!this.isEditable && !this.$('.s_turnstile').length && session.turnstile_site_key) {
-                const mode = new URLSearchParams(window.location.search).get('cf') == 'show' ? 'always' : 'interaction-only';
+                const mode = new URLSearchParams(window.location.search).get('cf') === 'show' ? 'always' : 'interaction-only';
                 $(`<div class="s_turnstile cf-turnstile float-end"
                          data-action="website_form"
                          data-appearance="${mode}"

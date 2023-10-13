@@ -91,7 +91,7 @@ export class Table extends Component {
             padding: ${table.shape === "round" ? "4px 10px" : "4px 8px"};
             color: ${textColor};`;
 
-        if (this.pos.floorPlanStyle == "kanban") {
+        if (this.pos.floorPlanStyle === "kanban") {
             const floor = table.floor;
             const index = floor.tables.indexOf(table);
             const minWidth = 120;
@@ -165,7 +165,7 @@ export class Table extends Component {
     }
     get customerCountDisplay() {
         const customerCount = this.pos.getCustomerCount(this.props.table.id);
-        if (customerCount == 0) {
+        if (customerCount === 0) {
             return `${this.props.table.seats}`;
         } else {
             return `${customerCount}/${this.props.table.seats}`;

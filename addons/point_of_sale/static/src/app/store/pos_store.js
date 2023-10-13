@@ -541,7 +541,7 @@ export class PosStore extends Reactive {
         return new Set();
     }
     cashierHasPriceControlRights() {
-        return !this.config.restrict_price_control || this.get_cashier().role == "manager";
+        return !this.config.restrict_price_control || this.get_cashier().role === "manager";
     }
     _onReactiveOrderUpdated(order) {
         order.save_to_db();
@@ -721,7 +721,7 @@ export class PosStore extends Reactive {
             if (error.code === 200) {
                 // Business Logic Error, not a connection problem
                 //if warning do not need to display traceback!!
-                if (error.data.exception_type == "warning") {
+                if (error.data.exception_type === "warning") {
                     delete error.data.debug;
                 }
             }
@@ -767,7 +767,7 @@ export class PosStore extends Reactive {
         return json.uid != this.selectedOrder.uid;
     }
     _isSelectedOrder(json) {
-        return json.uid == this.selectedOrder.uid;
+        return json.uid === this.selectedOrder.uid;
     }
     _createOrder(json) {
         if (this._shouldCreateOrder(json)) {
@@ -1709,7 +1709,7 @@ export class PosStore extends Reactive {
                     // this should reject so that it can be captured when we wait for pos.ready
                     // in the chrome component.
                     // then, if it got really rejected, we can show the error.
-                    if (statusText == "error" && window.location.protocol == "https:") {
+                    if (statusText === "error" && window.location.protocol === "https:") {
                         // FIXME POSREF this looks like it's dead code.
                         reject({
                             title: _t("HTTPS connection to IoT Box failed"),
@@ -1857,7 +1857,7 @@ export class PosStore extends Reactive {
         }
     }
     shouldShowCashControl() {
-        return this.config.cash_control && this.pos_session.state == "opening_control";
+        return this.config.cash_control && this.pos_session.state === "opening_control";
     }
 
     preloadImages() {
@@ -1866,7 +1866,7 @@ export class PosStore extends Reactive {
             image.src = `/web/image?model=product.product&field=image_128&id=${product.id}&unique=${product.write_date}`;
         }
         for (const category of Object.values(this.db.category_by_id)) {
-            if (category.id == 0) {
+            if (category.id === 0) {
                 continue;
             }
             const image = new Image();
@@ -1892,7 +1892,7 @@ export class PosStore extends Reactive {
             (event) => {
                 if (event.key === "message" && event.newValue) {
                     const msg = JSON.parse(event.newValue);
-                    if (msg.message === "close_tabs" && msg.session == this.pos_session.id) {
+                    if (msg.message === "close_tabs" && msg.session === this.pos_session.id) {
                         console.info("POS / Session opened in another window. EXITING POS");
                         this.closePos();
                     }
@@ -1905,7 +1905,7 @@ export class PosStore extends Reactive {
     showBackButton() {
         return (
             this.mainScreen.component === PaymentScreen ||
-            (this.mainScreen.component === ProductScreen && this.mobile_pane == "left") ||
+            (this.mainScreen.component === ProductScreen && this.mobile_pane === "left") ||
             this.mainScreen.component === TicketScreen
         );
     }

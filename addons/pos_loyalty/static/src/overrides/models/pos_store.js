@@ -43,12 +43,12 @@ patch(PosStore.prototype, {
         ) {
             options.price = -orderTotal;
         }
-        if (selectedProgram && selectedProgram.program_type == "gift_card") {
+        if (selectedProgram && selectedProgram.program_type === "gift_card") {
             const shouldProceed = await this._setupGiftCardOptions(selectedProgram, options);
             if (!shouldProceed) {
                 return;
             }
-        } else if (selectedProgram && selectedProgram.program_type == "ewallet") {
+        } else if (selectedProgram && selectedProgram.program_type === "ewallet") {
             const shouldProceed = await this.setupEWalletOptions(selectedProgram, options);
             if (!shouldProceed) {
                 return;
@@ -58,14 +58,14 @@ patch(PosStore.prototype, {
         const rewardsToApply = [];
         for (const reward of potentialRewards) {
             for (const reward_product_id of reward.reward.reward_product_ids) {
-                if (reward_product_id == product.id) {
+                if (reward_product_id === product.id) {
                     rewardsToApply.push(reward);
                 }
             }
         }
         await super.addProductFromUi(product, options);
         await order._updatePrograms();
-        if (rewardsToApply.length == 1) {
+        if (rewardsToApply.length === 1) {
             const reward = rewardsToApply[0];
             order._applyReward(reward.reward, reward.coupon_id, { product: product.id });
         }
@@ -85,7 +85,7 @@ patch(PosStore.prototype, {
         options.eWalletGiftCardProgram = program;
 
         // If gift card program setting is 'scan_use', ask for the code.
-        if (this.config.gift_card_settings == "scan_use") {
+        if (this.config.gift_card_settings === "scan_use") {
             const { confirmed, payload: code } = await this.env.services.popup.add(TextInputPopup, {
                 title: _t("Generate a Gift Card"),
                 startingValue: "",
@@ -161,22 +161,24 @@ patch(PosStore.prototype, {
         const result = [];
         for (const couponProgram of allCouponPrograms) {
             const program = this.program_by_id[couponProgram.program_id];
-            if (program.pricelist_ids.length > 0
-                && (!order.pricelist || !program.pricelist_ids.includes(order.pricelist.id))) {
+            if (
+                program.pricelist_ids.length > 0 &&
+                (!order.pricelist || !program.pricelist_ids.includes(order.pricelist.id))
+            ) {
                 continue;
             }
 
             const points = order._getRealCouponPoints(couponProgram.coupon_id);
             const hasLine = order.orderlines.filter((line) => !line.is_reward_line).length > 0;
             for (const reward of program.rewards.filter(
-                (reward) => reward.reward_type == "product"
+                (reward) => reward.reward_type === "product"
             )) {
                 if (points < reward.required_points) {
                     continue;
                 }
-                // Loyalty program (applies_on == 'both') should needs an orderline before it can apply a reward.
+                // Loyalty program (applies_on === 'both') should needs an orderline before it can apply a reward.
                 const considerTheReward =
-                    program.applies_on !== "both" || (program.applies_on == "both" && hasLine);
+                    program.applies_on !== "both" || (program.applies_on === "both" && hasLine);
                 if (reward.reward_type === "product" && considerTheReward) {
                     const product = this.db.get_product_by_id(reward.reward_product_ids[0]);
                     const potentialQty = order._computePotentialFreeProductQty(
@@ -207,7 +209,7 @@ patch(PosStore.prototype, {
             reward.all_discount_product_ids = new Set(reward.all_discount_product_ids);
         }
 
-        this.fieldTypes = loadedData['field_types'];
+        this.fieldTypes = loadedData["field_types"];
         await super._processData(loadedData);
         this.productId2ProgramIds = loadedData["product_id_to_program_ids"];
         this.programs = loadedData["loyalty.program"] || []; //TODO: rename to `loyaltyPrograms` etc
@@ -235,10 +237,10 @@ patch(PosStore.prototype, {
 
         try {
             products
-                .map(product => {
+                .map((product) => {
                     const modifiedProduct = { ...product };
-                    Object.keys(modifiedProduct).forEach(key => {
-                        if (this.fieldTypes['product.product'][key] === 'many2one') {
+                    Object.keys(modifiedProduct).forEach((key) => {
+                        if (this.fieldTypes["product.product"][key] === "many2one") {
                             modifiedProduct[key] = modifiedProduct[key][1];
                         }
                     });

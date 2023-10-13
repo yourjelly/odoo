@@ -110,7 +110,7 @@ export class ComboPage extends Component {
             return;
         }
         this.state.currentComboIndex++;
-        if (this.state.currentComboIndex == this.props.product.pos_combo_ids.length) {
+        if (this.state.currentComboIndex === this.props.product.pos_combo_ids.length) {
             this.state.showResume = true;
         }
     }

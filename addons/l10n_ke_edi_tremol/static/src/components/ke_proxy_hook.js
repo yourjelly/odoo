@@ -73,7 +73,7 @@ export function useKEProxy({onAllSent}) {
                 break;
             }
         }
-        if (state.successfullySent == invoices.length) {
+        if (state.successfullySent === invoices.length) {
             onAllSent();
         }
     }

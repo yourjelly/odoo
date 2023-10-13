@@ -162,7 +162,11 @@ export class PartnerListScreen extends Component {
     createPartner() {
         // initialize the edit screen with default details about country, state, and lang
         const { country_id, state_id } = this.pos.company;
-        this.state.editModeProps.partner = { country_id, state_id, lang: session.user_context.lang };
+        this.state.editModeProps.partner = {
+            country_id,
+            state_id,
+            lang: session.user_context.lang,
+        };
         this.activateEditMode();
     }
     async saveChanges(processedChanges) {
@@ -177,7 +181,7 @@ export class PartnerListScreen extends Component {
         }
         const result = await this.getNewPartners();
         this.pos.addPartners(result);
-        if (this.state.previousQuery == this.state.query) {
+        if (this.state.previousQuery === this.state.query) {
             this.state.currentOffset += result.length;
         } else {
             this.state.previousQuery = this.state.query;

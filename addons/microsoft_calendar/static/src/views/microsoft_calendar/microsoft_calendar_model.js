@@ -55,7 +55,7 @@ patch(AttendeeCalendarModel.prototype, {
         } else if (result.status === "no_new_event_from_microsoft" || result.status === "need_refresh") {
             this.microsoftIsSync = true;
         }
-        this.microsoftIsPaused = result.status == "sync_paused";
+        this.microsoftIsPaused = result.status === "sync_paused";
         this.microsoftPendingSync = false;
         return result;
     },

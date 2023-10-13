@@ -232,8 +232,8 @@ export class PropertyDefinitionSelection extends Component {
 
         let options = this.optionsVisible;
         // if destinationOption is null, destinationOptionIndex will be -1 which is intended
-        let destinationOptionIndex = options.findIndex((option) => option[0] == destinationOption);
-        const movedOptionIndex = options.findIndex((option) => option[0] == movedOption);
+        let destinationOptionIndex = options.findIndex((option) => option[0] === destinationOption);
+        const movedOptionIndex = options.findIndex((option) => option[0] === movedOption);
         if (destinationOptionIndex < movedOptionIndex) {
             // the first splice operation won't change the index (and we except it to decrease it)
             // for example if we have [A, B, C], and we move C such that it becomes [A, C, B]

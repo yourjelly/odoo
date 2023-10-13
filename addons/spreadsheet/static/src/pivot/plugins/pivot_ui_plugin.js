@@ -299,7 +299,7 @@ export default class PivotUIPlugin extends spreadsheet.UIPlugin {
                         }
                         break;
                     case "relation":
-                        if (typeof value == "string") {
+                        if (typeof value === "string") {
                             value = Number(value);
                             if (Number.isNaN(value)) {
                                 break;

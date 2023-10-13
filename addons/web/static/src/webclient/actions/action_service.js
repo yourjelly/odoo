@@ -990,7 +990,7 @@ function makeActionManager(env) {
      * @returns {Object|undefined} the requested view if it could be found
      */
     function _findView(views, multiRecord, viewType) {
-        return views.find((v) => v.type === viewType && v.multiRecord == multiRecord);
+        return views.find((v) => v.type === viewType && v.multiRecord === multiRecord);
     }
 
     // ---------------------------------------------------------------------------

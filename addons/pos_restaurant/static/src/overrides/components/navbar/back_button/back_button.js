@@ -21,7 +21,7 @@ patch(BackButton.prototype, {
         if (this.pos.mainScreen.component && this.pos.config.module_pos_restaurant) {
             if (
                 (this.pos.mainScreen.component === ProductScreen &&
-                    this.pos.mobile_pane == "right") ||
+                    this.pos.mobile_pane === "right") ||
                 this.pos.mainScreen.component === TipScreen
             ) {
                 this.pos.showScreen("FloorScreen", { floor: this.floor });

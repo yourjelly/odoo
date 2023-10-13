@@ -614,7 +614,7 @@ registry.Parallax = Animation.extend({
      * @param {integer} scrollOffset
      */
     _onWindowScroll: function (scrollOffset) {
-        // Speed == 0 is no effect and speed == 1 is handled by CSS only
+        // Speed === 0 is no effect and speed === 1 is handled by CSS only
         if (this.speed === 0 || this.speed === 1) {
             return;
         }

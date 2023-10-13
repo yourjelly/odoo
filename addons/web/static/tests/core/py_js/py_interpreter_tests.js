@@ -99,26 +99,32 @@ QUnit.module("py", {}, () => {
             assert.strictEqual(evaluateExpr("not foo", { foo: false }), true);
             assert.strictEqual(evaluateExpr("not None"), true);
             assert.strictEqual(evaluateExpr("not []"), true);
-            assert.strictEqual(evaluateExpr("True == False or True == True"), true);
-            assert.strictEqual(evaluateExpr("False == True and False"), false);
+            assert.strictEqual(evaluateExpr("True === False or True === True"), true);
+            assert.strictEqual(evaluateExpr("False === True and False"), false);
         });
 
         QUnit.test("get value from context", (assert) => {
-            assert.strictEqual(evaluateExpr("foo == 'foo' or foo == 'bar'", { foo: "bar" }), true);
             assert.strictEqual(
-                evaluateExpr("foo == 'foo' and bar == 'bar'", { foo: "foo", bar: "bar" }),
+                evaluateExpr("foo === 'foo' or foo === 'bar'", { foo: "bar" }),
+                true
+            );
+            assert.strictEqual(
+                evaluateExpr("foo === 'foo' and bar === 'bar'", { foo: "foo", bar: "bar" }),
                 true
             );
         });
 
         QUnit.test("should be lazy", (assert) => {
             // second clause should nameerror if evaluated
-            assert.throws(() => evaluateExpr("foo == 'foo' and bar == 'bar'", { foo: "foo" }));
+            assert.throws(() => evaluateExpr("foo === 'foo' and bar === 'bar'", { foo: "foo" }));
             assert.strictEqual(
-                evaluateExpr("foo == 'foo' and bar == 'bar'", { foo: "bar" }),
+                evaluateExpr("foo === 'foo' and bar === 'bar'", { foo: "bar" }),
                 false
             );
-            assert.strictEqual(evaluateExpr("foo == 'foo' or bar == 'bar'", { foo: "foo" }), true);
+            assert.strictEqual(
+                evaluateExpr("foo === 'foo' or bar === 'bar'", { foo: "foo" }),
+                true
+            );
         });
 
         QUnit.test("should return the actual object", (assert) => {
@@ -161,23 +167,23 @@ QUnit.module("py", {}, () => {
         QUnit.module("comparisons");
 
         QUnit.test("equality", (assert) => {
-            assert.strictEqual(evaluateExpr("1 == 1"), true);
-            assert.strictEqual(evaluateExpr('"foo" == "foo"'), true);
-            assert.strictEqual(evaluateExpr('"foo" == "bar"'), false);
-            assert.strictEqual(evaluateExpr("1 == True"), true);
-            assert.strictEqual(evaluateExpr("True == 1"), true);
-            assert.strictEqual(evaluateExpr("1 == False"), false);
-            assert.strictEqual(evaluateExpr("False == 1"), false);
-            assert.strictEqual(evaluateExpr("0 == False"), true);
-            assert.strictEqual(evaluateExpr("False == 0"), true);
-            assert.strictEqual(evaluateExpr("None == None"), true);
-            assert.strictEqual(evaluateExpr("None == False"), false);
+            assert.strictEqual(evaluateExpr("1 === 1"), true);
+            assert.strictEqual(evaluateExpr('"foo" === "foo"'), true);
+            assert.strictEqual(evaluateExpr('"foo" === "bar"'), false);
+            assert.strictEqual(evaluateExpr("1 === True"), true);
+            assert.strictEqual(evaluateExpr("True === 1"), true);
+            assert.strictEqual(evaluateExpr("1 === False"), false);
+            assert.strictEqual(evaluateExpr("False === 1"), false);
+            assert.strictEqual(evaluateExpr("0 === False"), true);
+            assert.strictEqual(evaluateExpr("False === 0"), true);
+            assert.strictEqual(evaluateExpr("None === None"), true);
+            assert.strictEqual(evaluateExpr("None === False"), false);
         });
 
         QUnit.test("equality should work with free variables", (assert) => {
-            assert.strictEqual(evaluateExpr("1 == a", { a: 1 }), true);
-            assert.strictEqual(evaluateExpr('foo == "bar"', { foo: "bar" }), true);
-            assert.strictEqual(evaluateExpr('foo == "bar"', { foo: "qux" }), false);
+            assert.strictEqual(evaluateExpr("1 === a", { a: 1 }), true);
+            assert.strictEqual(evaluateExpr('foo === "bar"', { foo: "bar" }), true);
+            assert.strictEqual(evaluateExpr('foo === "bar"', { foo: "qux" }), false);
         });
 
         QUnit.test("inequality", (assert) => {
@@ -211,7 +217,7 @@ QUnit.module("py", {}, () => {
         QUnit.test("should support comparison chains", (assert) => {
             assert.strictEqual(evaluateExpr("1 < 3 < 5"), true);
             assert.strictEqual(evaluateExpr("5 > 3 > 1"), true);
-            assert.strictEqual(evaluateExpr("1 < 3 > 2 == 2 > -2"), true);
+            assert.strictEqual(evaluateExpr("1 < 3 > 2 === 2 > -2"), true);
             assert.strictEqual(evaluateExpr("1 < 2 < 3 < 4 < 5 < 6"), true);
         });
 
@@ -384,28 +390,28 @@ QUnit.module("py", {}, () => {
         });
 
         QUnit.test("use contextual values", (assert) => {
-            assert.strictEqual(evaluateBooleanExpr("a", {a: 12}), true);
-            assert.strictEqual(evaluateBooleanExpr("a", {a: 0}), false);
-            assert.strictEqual(evaluateBooleanExpr("0 + 3 - a", {a: 1}), true);
-            assert.strictEqual(evaluateBooleanExpr("0 + 3 - a - 2", {a: 1}), false);
-            assert.strictEqual(evaluateBooleanExpr("0 + 3 - a - b", {a: 1, b: 2}), false);
-            assert.strictEqual(evaluateBooleanExpr('a', {a: "foo"}), true);
-            assert.strictEqual(evaluateBooleanExpr("a", {a: [1]}), true);
-            assert.strictEqual(evaluateBooleanExpr("a", {a: []}), false);
+            assert.strictEqual(evaluateBooleanExpr("a", { a: 12 }), true);
+            assert.strictEqual(evaluateBooleanExpr("a", { a: 0 }), false);
+            assert.strictEqual(evaluateBooleanExpr("0 + 3 - a", { a: 1 }), true);
+            assert.strictEqual(evaluateBooleanExpr("0 + 3 - a - 2", { a: 1 }), false);
+            assert.strictEqual(evaluateBooleanExpr("0 + 3 - a - b", { a: 1, b: 2 }), false);
+            assert.strictEqual(evaluateBooleanExpr("a", { a: "foo" }), true);
+            assert.strictEqual(evaluateBooleanExpr("a", { a: [1] }), true);
+            assert.strictEqual(evaluateBooleanExpr("a", { a: [] }), false);
         });
 
         QUnit.test("throw if has missing value", (assert) => {
-            assert.throws(() => evaluateBooleanExpr("a", {b: 0}));
-            assert.strictEqual(evaluateBooleanExpr("1 or a"), true);  // do not throw (lazy value)
+            assert.throws(() => evaluateBooleanExpr("a", { b: 0 }));
+            assert.strictEqual(evaluateBooleanExpr("1 or a"), true); // do not throw (lazy value)
             assert.throws(() => evaluateBooleanExpr("0 or a"));
-            assert.throws(() => evaluateBooleanExpr("a or b", {b: true}));
-            assert.throws(() => evaluateBooleanExpr("a and b", {b: true}));
+            assert.throws(() => evaluateBooleanExpr("a or b", { b: true }));
+            assert.throws(() => evaluateBooleanExpr("a and b", { b: true }));
             assert.throws(() => evaluateBooleanExpr("a()"));
             assert.throws(() => evaluateBooleanExpr("a[0]"));
             assert.throws(() => evaluateBooleanExpr("a.b"));
-            assert.throws(() => evaluateBooleanExpr("0 + 3 - a", {b: 1}));
-            assert.throws(() => evaluateBooleanExpr("0 + 3 - a - 2", {b: 1}));
-            assert.throws(() => evaluateBooleanExpr("0 + 3 - a - b", {b: 2}));
+            assert.throws(() => evaluateBooleanExpr("0 + 3 - a", { b: 1 }));
+            assert.throws(() => evaluateBooleanExpr("0 + 3 - a - 2", { b: 1 }));
+            assert.throws(() => evaluateBooleanExpr("0 + 3 - a - b", { b: 2 }));
         });
     });
 });

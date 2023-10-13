@@ -68,7 +68,7 @@ publicWidget.registry.websiteSaleDelivery = publicWidget.Widget.extend({
                 continue;
             }
             const orderLoc = carrier.querySelector(".o_order_location");
-            if (data[deliveryType + '_access_point'] && data.delivery_name == deliveryName) {
+            if (data[deliveryType + '_access_point'] && data.delivery_name === deliveryName) {
                 orderLoc.querySelector(".o_order_location_name").innerText = data.name
                 orderLoc.querySelector(".o_order_location_address").innerText = data[deliveryType + '_access_point']
                 orderLoc.parentElement.classList.remove("d-none");
@@ -94,7 +94,7 @@ publicWidget.registry.websiteSaleDelivery = publicWidget.Widget.extend({
         }
         const currentCarrierChecked = docCarrier.closest("li").getElementsByTagName("input")[0].checked;
         const span = document.createElement("em");
-        if (!currentCarrierChecked || this.carriers.length == 1) {
+        if (!currentCarrierChecked || this.carriers.length === 1) {
             span.textContent = _t("select to see available Pick-Up Locations");
             span.classList.add("text-muted");
         }
@@ -165,7 +165,7 @@ publicWidget.registry.websiteSaleDelivery = publicWidget.Widget.extend({
 
         for (const showLoc of showLocations) {
             const currentCarrierId = showLoc.closest("li").getElementsByTagName("input")[0].value;
-            if (currentCarrierId == currentId) {
+            if (currentCarrierId === currentId) {
                 this._specificDropperDisplay(showLoc);
                 break;
             }
@@ -200,7 +200,7 @@ publicWidget.registry.websiteSaleDelivery = publicWidget.Widget.extend({
 
         document.querySelectorAll('.error_no_pick_up_point').forEach(el => el.remove());
 
-        if (isPickUp.length > 1 && (address == "" || isPickUp[0].classList.contains("d-none"))) {
+        if (isPickUp.length > 1 && (address === "" || isPickUp[0].classList.contains("d-none"))) {
             var payButton = document.querySelector('button[name="o_payment_submit_button"]');
             payButton? payButton.disabled = true : null;
             const errorNode = document.createElement("i");
@@ -287,7 +287,7 @@ publicWidget.registry.websiteSaleDelivery = publicWidget.Widget.extend({
 
         const address = carrierChecked.querySelector('.o_order_location_address').innerText
         const isPickUp = carrierChecked.lastChild.previousSibling.children;
-        if (isPickUp.length > 1 && (address == "" || isPickUp[0].classList.contains("d-none"))) {
+        if (isPickUp.length > 1 && (address === "" || isPickUp[0].classList.contains("d-none"))) {
             return false;
         }
         return true;

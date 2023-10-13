@@ -9,7 +9,7 @@ function testDelta(assert, expr, res) {
 }
 
 function testEquality(assert, expr1, expr2, ctx) {
-    const equality = `${expr1} == ${expr2}`;
+    const equality = `${expr1} === ${expr2}`;
     assert.ok(
         evaluateExpr(equality, Object.assign({ td: PyTimeDelta }, ctx)),
         `evaluating ${equality}`

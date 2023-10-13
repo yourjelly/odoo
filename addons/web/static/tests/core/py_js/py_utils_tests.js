@@ -74,7 +74,7 @@ QUnit.module("py", {}, () => {
     });
 
     QUnit.test("other operators", function (assert) {
-        assert.ok(checkAST("x == y", "== operator"));
+        assert.ok(checkAST("x === y", "== operator"));
         assert.ok(checkAST("x != y", "!= operator"));
         assert.ok(checkAST("x < y", "< operator"));
         assert.ok(checkAST("x is y", "is operator"));
@@ -84,7 +84,7 @@ QUnit.module("py", {}, () => {
     });
 
     QUnit.test("equality", function (assert) {
-        assert.ok(checkAST("a == b", "simple equality"));
+        assert.ok(checkAST("a === b", "simple equality"));
     });
 
     QUnit.test("strftime", function (assert) {
@@ -107,7 +107,7 @@ QUnit.module("py", {}, () => {
 
     QUnit.test("various expressions", function (assert) {
         assert.ok(checkAST("(a - b).days", "substraction and .days"));
-        assert.ok(checkAST("a + day == date(2002, 3, 3)"));
+        assert.ok(checkAST("a + day === date(2002, 3, 3)"));
         const expr = `[("type", "=", "in"), ("day", "<=", time.strftime("%Y-%m-%d")), ("day", ">", (context_today() - datetime.timedelta(days = 15)).strftime("%Y-%m-%d"))]`;
         assert.ok(checkAST(expr));
     });

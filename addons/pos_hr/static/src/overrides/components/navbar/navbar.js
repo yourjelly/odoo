@@ -6,7 +6,7 @@ import { patch } from "@web/core/utils/patch";
 patch(Navbar.prototype, {
     get showCashMoveButton() {
         const { cashier } = this.pos;
-        return super.showCashMoveButton && (!cashier || cashier.role == "manager");
+        return super.showCashMoveButton && (!cashier || cashier.role === "manager");
     },
     get showCloseSessionButton() {
         return (

@@ -76,7 +76,7 @@ patch(PaymentScreen.prototype, {
                 await this.pos.sendDraftToServer();
             } catch (error) {
                 // Code from _finalizeValidation():
-                if (error.code == 700 || error.code == 701) {
+                if (error.code === 700 || error.code === 701) {
                     this.error = true;
                 }
 
@@ -97,7 +97,7 @@ patch(PaymentScreen.prototype, {
             }
 
             const qrCodeData = this.currentOrder._get_online_payment_qr_code_data();
-            if (!qrCodeData || qrCodeData.length == 0) {
+            if (!qrCodeData || qrCodeData.length === 0) {
                 this.cancelOnlinePayment(this.currentOrder);
                 this.popup.add(ErrorPopup, {
                     title: _t("Online payment unavailable"),

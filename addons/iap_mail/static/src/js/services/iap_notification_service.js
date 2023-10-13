@@ -10,7 +10,7 @@ export const iapNotificationService = {
 
     start(env, { bus_service, notification }) {
         bus_service.subscribe("iap_notification", (params) => {
-            if (params.type == "no_credit") {
+            if (params.type === "no_credit") {
                 displayCreditErrorNotification(params);
             } else {
                 displayNotification(params);

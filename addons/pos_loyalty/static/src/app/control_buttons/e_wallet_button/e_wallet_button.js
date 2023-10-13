@@ -19,21 +19,21 @@ export class eWalletButton extends Component {
     _getEWalletRewards(order) {
         const claimableRewards = order.getClaimableRewards();
         const eWalletRewards = claimableRewards.filter(
-            ({ reward }) => reward.program_id.program_type == "ewallet"
+            ({ reward }) => reward.program_id.program_type === "ewallet"
         );
         return eWalletRewards;
     }
     _getEWalletPrograms() {
-        return this.pos.programs.filter((p) => p.program_type == "ewallet");
+        return this.pos.programs.filter((p) => p.program_type === "ewallet");
     }
     async _onClickWalletButton() {
         const order = this.pos.get_order();
-        const eWalletPrograms = this.pos.programs.filter((p) => p.program_type == "ewallet");
+        const eWalletPrograms = this.pos.programs.filter((p) => p.program_type === "ewallet");
         const orderTotal = order.get_total_with_tax();
         const eWalletRewards = this._getEWalletRewards(order);
         if (orderTotal < 0 && eWalletPrograms.length >= 1) {
             let selectedProgram = null;
-            if (eWalletPrograms.length == 1) {
+            if (eWalletPrograms.length === 1) {
                 selectedProgram = eWalletPrograms[0];
             } else {
                 const { confirmed, payload } = await this.popup.add(SelectionPopup, {
@@ -60,7 +60,7 @@ export class eWalletButton extends Component {
             }
         } else if (eWalletRewards.length >= 1) {
             let eWalletReward = null;
-            if (eWalletRewards.length == 1) {
+            if (eWalletRewards.length === 1) {
                 eWalletReward = eWalletRewards[0];
             } else {
                 const { confirmed, payload } = await this.popup.add(SelectionPopup, {
@@ -109,6 +109,6 @@ export class eWalletButton extends Component {
 ProductScreen.addControlButton({
     component: eWalletButton,
     condition: function () {
-        return this.pos.programs.filter((p) => p.program_type == "ewallet").length > 0;
+        return this.pos.programs.filter((p) => p.program_type === "ewallet").length > 0;
     },
 });

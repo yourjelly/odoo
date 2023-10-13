@@ -75,7 +75,7 @@ QUnit.module("py", {}, () => {
             patchDate(2021, 9, 17, 10, 0, 0);
             patchWithCleanup(Date.prototype, {
                 getTimezoneOffset() {
-                    const month = this.getMonth() // starts at 0;
+                    const month = this.getMonth(); // starts at 0;
                     if (10 <= month || month <= 2) {
                         //rough approximation
                         return -60;
@@ -84,8 +84,7 @@ QUnit.module("py", {}, () => {
                     }
                 },
             });
-            const expr =
-                "datetime.datetime(2022, 10, 17).to_utc()";
+            const expr = "datetime.datetime(2022, 10, 17).to_utc()";
             assert.strictEqual(JSON.stringify(evaluateExpr(expr)), `"2022-10-16 22:00:00"`);
         });
 
@@ -186,22 +185,22 @@ QUnit.module("py", {}, () => {
                 date: PyDate,
             };
 
-            assert.ok(evaluateExpr("a + day == date(2002, 3, 3)", ctx));
-            assert.ok(evaluateExpr("day + a == date(2002, 3, 3)", ctx)); // 5
-            assert.ok(evaluateExpr("a - day == date(2002, 3, 1)", ctx));
-            assert.ok(evaluateExpr("-day + a == date(2002, 3, 1)", ctx));
-            assert.ok(evaluateExpr("a + week == date(2002, 3, 9)", ctx));
-            assert.ok(evaluateExpr("a - week == date(2002, 2, 23)", ctx));
-            assert.ok(evaluateExpr("a + 52*week == date(2003, 3, 1)", ctx)); // 10
-            assert.ok(evaluateExpr("a - 52*week == date(2001, 3, 3)", ctx));
-            assert.ok(evaluateExpr("(a + week) - a == week", ctx));
-            assert.ok(evaluateExpr("(a + day) - a == day", ctx));
-            assert.ok(evaluateExpr("(a - week) - a == -week", ctx));
-            assert.ok(evaluateExpr("(a - day) - a == -day", ctx)); // 15
-            assert.ok(evaluateExpr("a - (a + week) == -week", ctx));
-            assert.ok(evaluateExpr("a - (a + day) == -day", ctx));
-            assert.ok(evaluateExpr("a - (a - week) == week", ctx));
-            assert.ok(evaluateExpr("a - (a - day) == day", ctx));
+            assert.ok(evaluateExpr("a + day === date(2002, 3, 3)", ctx));
+            assert.ok(evaluateExpr("day + a === date(2002, 3, 3)", ctx)); // 5
+            assert.ok(evaluateExpr("a - day === date(2002, 3, 1)", ctx));
+            assert.ok(evaluateExpr("-day + a === date(2002, 3, 1)", ctx));
+            assert.ok(evaluateExpr("a + week === date(2002, 3, 9)", ctx));
+            assert.ok(evaluateExpr("a - week === date(2002, 2, 23)", ctx));
+            assert.ok(evaluateExpr("a + 52*week === date(2003, 3, 1)", ctx)); // 10
+            assert.ok(evaluateExpr("a - 52*week === date(2001, 3, 3)", ctx));
+            assert.ok(evaluateExpr("(a + week) - a === week", ctx));
+            assert.ok(evaluateExpr("(a + day) - a === day", ctx));
+            assert.ok(evaluateExpr("(a - week) - a === -week", ctx));
+            assert.ok(evaluateExpr("(a - day) - a === -day", ctx)); // 15
+            assert.ok(evaluateExpr("a - (a + week) === -week", ctx));
+            assert.ok(evaluateExpr("a - (a + day) === -day", ctx));
+            assert.ok(evaluateExpr("a - (a - week) === week", ctx));
+            assert.ok(evaluateExpr("a - (a - day) === day", ctx));
 
             // assert.throws(function () {
             //     evaluateExpr("a + 1", ctx);

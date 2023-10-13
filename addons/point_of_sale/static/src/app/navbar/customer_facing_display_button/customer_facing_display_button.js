@@ -32,7 +32,7 @@ export class CustomerFacingDisplayButton extends Component {
     }
     displayMessage(message) {
         if (this.notification) {
-            if (message.length == 0) {
+            if (message.length === 0) {
                 message = "Connected";
             }
             this.notification.add("Customer Display : " + message, 3000);

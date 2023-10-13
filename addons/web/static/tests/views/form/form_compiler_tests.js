@@ -229,18 +229,18 @@ QUnit.module("Form Compiler", (hooks) => {
         // ```<form>
         //      <field name="display_name" invisible="1" />
         //      <div class="visible3" invisible="0"/>
-        //      <div invisible="display_name == 'take'"/>
+        //      <div invisible="display_name === 'take'"/>
         //    </form>````
         const arch = /*xml*/ `
             <form>
                 <field field_id="display_name" name="display_name" invisible="True" />
                 <div class="visible3" invisible="False"/>
-                <div invisible="display_name == &quot;take&quot;"/>
+                <div invisible="display_name === &quot;take&quot;"/>
             </form>`;
 
         const expected = /*xml*/ `
             <div class="visible3" />
-            <div t-if="!__comp__.evaluateBooleanExpr(&quot;display_name == \\&quot;take\\&quot;&quot;,__comp__.props.record.evalContextWithVirtualIds)" />
+            <div t-if="!__comp__.evaluateBooleanExpr(&quot;display_name === \\&quot;take\\&quot;&quot;,__comp__.props.record.evalContextWithVirtualIds)" />
         `;
 
         assert.areContentEquivalent(compileTemplate(arch), expected);
@@ -251,12 +251,12 @@ QUnit.module("Form Compiler", (hooks) => {
             <form>
                 <field name="display_name" invisible="True" />
                 <div class="visible3" invisible="False"/>
-                <div invisible="display_name == 'take'"/>
+                <div invisible="display_name === 'take'"/>
             </form>`;
 
         const expected = /*xml*/ `
             <div class="visible3" />
-            <div t-if="!__comp__.evaluateBooleanExpr(&quot;display_name == 'take'&quot;,__comp__.props.record.evalContextWithVirtualIds)" />
+            <div t-if="!__comp__.evaluateBooleanExpr(&quot;display_name === 'take'&quot;,__comp__.props.record.evalContextWithVirtualIds)" />
         `;
         assert.areContentEquivalent(compileTemplate(arch), expected);
     });
@@ -355,10 +355,10 @@ QUnit.module("Form Renderer", (hooks) => {
         serverData.views = {
             "partner,1,form": /*xml*/ `
                 <form>
-                    <div invisible="display_name == uid">
+                    <div invisible="display_name === uid">
                         <field name="charfield"/>
                     </div>
-                    <field name="display_name" readonly="display_name == uid"/>
+                    <field name="display_name" readonly="display_name === uid"/>
                 </form>`,
         };
 
@@ -380,7 +380,7 @@ QUnit.module("Form Renderer", (hooks) => {
                 <form>
                     <sheet>
                         <notebook>
-                            <page name="p1" invisible="display_name == 'lol'"><field name="charfield"/></page>
+                            <page name="p1" invisible="display_name === 'lol'"><field name="charfield"/></page>
                             <page name="p2"><field name="display_name"/></page>
                         </notebook>
                     </sheet>
@@ -483,9 +483,9 @@ QUnit.module("Form Renderer", (hooks) => {
             },
         });
 
-        const arch = `<myNode invisible="field == 'value'" />`;
+        const arch = `<myNode invisible="field === 'value'" />`;
 
-        const expected = `<t><div class="myNode" t-if="( myCondition or myOtherCondition ) and !__comp__.evaluateBooleanExpr(&quot;field == 'value'&quot;,__comp__.props.record.evalContextWithVirtualIds)" t-ref="compiled_view_root"/></t>`;
+        const expected = `<t><div class="myNode" t-if="( myCondition or myOtherCondition ) and !__comp__.evaluateBooleanExpr(&quot;field === 'value'&quot;,__comp__.props.record.evalContextWithVirtualIds)" t-ref="compiled_view_root"/></t>`;
         assert.areEquivalent(compileTemplate(arch), expected);
     });
 });

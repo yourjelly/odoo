@@ -62,24 +62,24 @@ export const ControlButtonsMixin = (x) => {
     Extended.sortControlButtons = function () {
         sortedControlButtons = [...orderedControlButtons];
         function setControlButton(locator, index, cb) {
-            if (locator == "replace") {
+            if (locator === "replace") {
                 sortedControlButtons[index] = cb;
-            } else if (locator == "before") {
+            } else if (locator === "before") {
                 sortedControlButtons.splice(index, 0, cb);
-            } else if (locator == "after") {
+            } else if (locator === "after") {
                 sortedControlButtons.splice(index + 1, 0, cb);
             }
         }
         function locate(cb) {
             const [locator, reference] = cb.position;
-            const index = sortedControlButtons.findIndex((cb) => cb.name == reference);
+            const index = sortedControlButtons.findIndex((cb) => cb.name === reference);
             return [locator, index];
         }
         const cbMissingReference = [];
         // 1. First pass. If the reference control button isn't there, collect it for second pass.
         for (const cb of controlButtonsToPosition) {
             const [locator, index] = locate(cb);
-            if (index == -1) {
+            if (index === -1) {
                 cbMissingReference.push(cb);
                 continue;
             }
@@ -94,7 +94,7 @@ export const ControlButtonsMixin = (x) => {
         // Thus, we have to iterate the cb with missing reference in reverse.
         for (const cb of cbMissingReference.reverse()) {
             const [locator, index] = locate(cb);
-            if (index == -1) {
+            if (index === -1) {
                 sortedControlButtons.push(cb);
             } else {
                 setControlButton(locator, index, cb);

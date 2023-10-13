@@ -360,7 +360,7 @@ patch(Order.prototype, {
                         reward.program_id.rewards.length === 1 &&
                         !reward.program_id.is_nominative &&
                         (reward.reward_type !== "product" ||
-                            (reward.reward_type == "product" && !reward.multi_product))
+                            (reward.reward_type === "product" && !reward.multi_product))
                     ) {
                         this._applyReward(reward, coupon_id);
                         changed = true;
@@ -830,7 +830,7 @@ patch(Order.prototype, {
                             if (pointsPerUnit > 0) {
                                 splitPoints.push(
                                     ...Array.apply(null, Array(line.get_quantity())).map(() => {
-                                        if (line.giftBarcode && line.get_quantity() == 1) {
+                                        if (line.giftBarcode && line.get_quantity() === 1) {
                                             return {
                                                 points: pointsPerUnit,
                                                 barcode: line.giftBarcode,
@@ -858,7 +858,7 @@ patch(Order.prototype, {
                     }
                 }
             }
-            const res = (points || program.program_type === 'coupons') ? [{ points }] : [];
+            const res = points || program.program_type === "coupons" ? [{ points }] : [];
             if (splitPoints.length) {
                 res.push(...splitPoints);
             }
@@ -895,7 +895,7 @@ patch(Order.prototype, {
     _canGenerateRewards(couponProgram, orderTotalWithTax, orderTotalWithoutTax) {
         for (const rule of couponProgram.rules) {
             const amountToCompare =
-                rule.minimum_amount_tax_mode == "incl" ? orderTotalWithTax : orderTotalWithoutTax;
+                rule.minimum_amount_tax_mode === "incl" ? orderTotalWithTax : orderTotalWithoutTax;
             if (rule.minimum_amount > amountToCompare) {
                 return false;
             }
@@ -943,7 +943,7 @@ patch(Order.prototype, {
             ) {
                 continue;
             }
-            if (program.trigger == "with_code") {
+            if (program.trigger === "with_code") {
                 // For coupon programs, the rules become conditions.
                 // Points to purchase rewards will only come from the scanned coupon.
                 if (!this._canGenerateRewards(program, totalWithTax, totalWithoutTax)) {
@@ -1345,7 +1345,7 @@ patch(Order.prototype, {
             if (line.get_product().id === product.id) {
                 available += line.get_quantity();
             } else if (line.reward_product_id === product.id) {
-                if (line.reward_id == reward.id) {
+                if (line.reward_id === reward.id) {
                     claimed += line.get_quantity();
                 } else {
                     shouldCorrectRemainingPoints = true;
@@ -1353,14 +1353,17 @@ patch(Order.prototype, {
             }
         }
         let freeQty;
-        if (reward.program_id.trigger == "auto") {
+        if (reward.program_id.trigger === "auto") {
             if (this._isRewardProductPartOfRules(reward, product)) {
                 // OPTIMIZATION: Pre-calculate the factors for each reward-product combination during the loading.
                 // For points not based on quantity, need to normalize the points to compute free quantity.
                 const appliedRulesIds = this.couponPointChanges[coupon_id].appliedRules;
-                const appliedRules = appliedRulesIds !== undefined
-                    ? reward.program_id.rules.filter(rule => appliedRulesIds.includes(rule.id))
-                    : reward.program_id.rules;
+                const appliedRules =
+                    appliedRulesIds !== undefined
+                        ? reward.program_id.rules.filter((rule) =>
+                              appliedRulesIds.includes(rule.id)
+                          )
+                        : reward.program_id.rules;
                 let factor = 0;
                 let orderPoints = 0;
                 for (const rule of appliedRules) {
@@ -1399,7 +1402,7 @@ patch(Order.prototype, {
                     (remainingPoints / reward.required_points) * reward.reward_product_qty
                 );
             }
-        } else if (reward.program_id.trigger == "with_code") {
+        } else if (reward.program_id.trigger === "with_code") {
             freeQty = Math.floor(
                 (remainingPoints / reward.required_points) * reward.reward_product_qty
             );
@@ -1407,7 +1410,7 @@ patch(Order.prototype, {
         return Math.min(available, freeQty) - claimed;
     },
     _computePotentialFreeProductQty(reward, product, remainingPoints) {
-        if (reward.program_id.trigger == "auto") {
+        if (reward.program_id.trigger === "auto") {
             if (this._isRewardProductPartOfRules(reward, product)) {
                 const line = this.get_orderlines().find(
                     (line) => line.reward_product_id === product.id
@@ -1424,7 +1427,7 @@ patch(Order.prototype, {
                     (remainingPoints / reward.required_points) * reward.reward_product_qty
                 );
             }
-        } else if (reward.program_id.trigger == "with_code") {
+        } else if (reward.program_id.trigger === "with_code") {
             return Math.floor(
                 (remainingPoints / reward.required_points) * reward.reward_product_qty
             );

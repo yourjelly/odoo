@@ -129,7 +129,7 @@ QUnit.module("Board", (hooks) => {
                     assert.step("edit custom");
                     return true;
                 }
-                if (args.method === "get_views" && args.model == "partner") {
+                if (args.method === "get_views" && args.model === "partner") {
                     assert.deepEqual(
                         args.kwargs.views.find((v) => v[1] === "list"),
                         [4, "list"]

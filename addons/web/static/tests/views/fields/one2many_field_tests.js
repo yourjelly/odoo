@@ -2312,7 +2312,7 @@ QUnit.module("Fields", (hooks) => {
             serverData.views = {
                 "turtle,false,form": `
                 <form>
-                <field name="display_name" invisible="turtle_foo == 'yop'"/>
+                <field name="display_name" invisible="turtle_foo === 'yop'"/>
                 <field name="turtle_foo"/>
             </form>`,
             };
@@ -5310,7 +5310,7 @@ QUnit.module("Fields", (hooks) => {
                     <form>
                         <field name="turtles">
                             <tree editable="bottom">
-                                <field name="turtle_foo" widget="char" readonly="turtle_int == 11111"/>
+                                <field name="turtle_foo" widget="char" readonly="turtle_int === 11111"/>
                                 <field name="turtle_int"/>
                             </tree>
                         </field>
@@ -5862,7 +5862,7 @@ QUnit.module("Fields", (hooks) => {
             assert.expect(4);
             serverData.views = {
                 "turtle,false,form":
-                    '<form><field name="turtle_foo"/><field name="turtle_int" readonly="context.get(\'abc\') == 10"/></form>',
+                    '<form><field name="turtle_foo"/><field name="turtle_int" readonly="context.get(\'abc\') === 10"/></form>',
             };
 
             await makeView({
@@ -6578,7 +6578,7 @@ QUnit.module("Fields", (hooks) => {
                         <field name="turtles">
                             <tree editable="top" limit="2">
                                 <field name="turtle_foo"/>
-                                <field name="partner_ids" widget="many2many_tags" readonly="turtle_foo == 'a'"/>
+                                <field name="partner_ids" widget="many2many_tags" readonly="turtle_foo === 'a'"/>
                             </tree>
                         </field>
                     </form>`,
@@ -7914,7 +7914,7 @@ QUnit.module("Fields", (hooks) => {
                         <field name="turtles">
                             <tree editable="top">
                                 <field name="turtle_int"/>
-                                <field name="turtle_foo" required='turtle_int == 0'/>
+                                <field name="turtle_foo" required='turtle_int === 0'/>
                             </tree>
                         </field>
                     </form>`,
@@ -8402,7 +8402,7 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                     <form>
                         <field name="name"/>
-                        <field name="p" readonly="name == 'readonly'">
+                        <field name="p" readonly="name === 'readonly'">
                             <tree><field name="display_name"/></tree>
                             <form>
                                 <field name="display_name"/>
@@ -11509,7 +11509,7 @@ QUnit.module("Fields", (hooks) => {
                     <field name="p">
                         <tree editable="bottom">
                             <field name="int_field"/>
-                            <field name="color" widget="badge" decoration-warning="int_field == 9"/>
+                            <field name="color" widget="badge" decoration-warning="int_field === 9"/>
                         </tree>
                     </field>
                 </form>`,
@@ -11842,7 +11842,7 @@ QUnit.module("Fields", (hooks) => {
                         <sheet>
                             <group>
                                 <field name="turtles">
-                                    <tree editable="bottom" limit="1" decoration-muted="turtle_bar == False">
+                                    <tree editable="bottom" limit="1" decoration-muted="turtle_bar === False">
                                         <field name="turtle_foo"/>
                                         <field name="turtle_bar"/>
                                     </tree>

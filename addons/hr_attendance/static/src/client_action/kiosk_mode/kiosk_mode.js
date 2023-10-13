@@ -76,7 +76,7 @@ export class KioskMode extends Component {
 
 class KioskModeBarcodeScanner extends BarcodeScanner {
     get facingMode() {
-        if (this.props.barcodeSource == "front") {
+        if (this.props.barcodeSource === "front") {
             return "user";
         }
         return super.facingMode;

@@ -4675,7 +4675,7 @@ QUnit.module("Views", ({ beforeEach }) => {
             arch: `
                 <calendar date_start="start" date_stop="stop" all_day="allday" mode="month">
                     <field name="delay" invisible="True" />
-                    <field name="name" readonly="delay == 42" />
+                    <field name="name" readonly="delay === 42" />
                 </calendar>
             `,
         });
@@ -4693,7 +4693,7 @@ QUnit.module("Views", ({ beforeEach }) => {
             arch: `
                 <calendar date_start="start" date_stop="stop" all_day="allday" mode="month" scales="month,year">
                     <field name="delay" invisible="True" />
-                    <field name="name" readonly="delay == 42" />
+                    <field name="name" readonly="delay === 42" />
                 </calendar>
             `,
         });

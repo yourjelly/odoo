@@ -14,7 +14,7 @@ export class ComboSelection extends Component {
     }
 
     productClicked(lineId) {
-        const comboLine = this.props.combo.combo_line_ids.find((line) => line.id == lineId);
+        const comboLine = this.props.combo.combo_line_ids.find((line) => line.id === lineId);
         const productSelected = this.selfOrder.productByIds[comboLine.product_id[0]];
         if (!productSelected.self_order_available) {
             return;

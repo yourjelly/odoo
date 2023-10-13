@@ -55,7 +55,7 @@ patch(AttendeeCalendarModel.prototype, {
         } else if (result.status === "no_new_event_from_google" || result.status === "need_refresh") {
             this.googleIsSync = true;
         }
-        this.googleIsPaused = result.status == "sync_paused";
+        this.googleIsPaused = result.status === "sync_paused";
         this.googlePendingSync = false;
         return result;
     },

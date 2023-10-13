@@ -21,7 +21,7 @@ publicWidget.registry.websiteSaleOffcanvas = publicWidget.Widget.extend({
      */
     _toggleFilters: function (ev) {
         for (const btn of this.el.querySelectorAll('button[data-status]')) {
-            if(btn.classList.contains('collapsed') && btn.dataset.status == "active" || ! btn.classList.contains('collapsed') && btn.dataset.status == "inactive" ) {
+            if(btn.classList.contains('collapsed') && btn.dataset.status === "active" || ! btn.classList.contains('collapsed') && btn.dataset.status === "inactive" ) {
                 btn.click();
             }
         }

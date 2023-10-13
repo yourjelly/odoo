@@ -41,8 +41,8 @@ export class RewardButton extends Component {
                 ({ reward }) => reward.program_id.program_type !== "ewallet"
             );
         }
-        const discountRewards = rewards.filter(({ reward }) => reward.reward_type == "discount");
-        const freeProductRewards = rewards.filter(({ reward }) => reward.reward_type == "product");
+        const discountRewards = rewards.filter(({ reward }) => reward.reward_type === "discount");
+        const freeProductRewards = rewards.filter(({ reward }) => reward.reward_type === "product");
         const potentialFreeProductRewards = this.pos.getPotentialFreeProductRewards();
         return discountRewards.concat(
             this._mergeFreeProductRewards(freeProductRewards, potentialFreeProductRewards)
@@ -82,8 +82,8 @@ export class RewardButton extends Component {
             args["product"] = selectedProduct;
         }
         if (
-            (reward.reward_type == "product" && reward.program_id.applies_on !== "both") ||
-            (reward.program_id.applies_on == "both" && potentialQty)
+            (reward.reward_type === "product" && reward.program_id.applies_on !== "both") ||
+            (reward.program_id.applies_on === "both" && potentialQty)
         ) {
             this.pos.addProductToCurrentOrder(args["product"] || reward.reward_product_ids[0]);
             return true;

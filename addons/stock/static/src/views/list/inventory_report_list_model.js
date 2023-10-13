@@ -29,7 +29,7 @@ export class InventoryReportListModel extends RelationalModel {
             return;
         }
 
-        const justCreated = reloadedRecord.id == this._lastCreatedRecordId;
+        const justCreated = reloadedRecord.id === this._lastCreatedRecordId;
         if (justCreated && serverValues.create_date !== serverValues.write_date) {
             this.notification.add(
                 _t(

@@ -177,7 +177,7 @@ export class ProductScreen extends ControlButtonsMixin(Component) {
         }
         const val = buffer === null ? "remove" : buffer;
         this._setValue(val);
-        if (val == "remove") {
+        if (val === "remove") {
             this.numberBuffer.reset();
             this.pos.numpadMode = "quantity";
         }
@@ -332,7 +332,7 @@ export class ProductScreen extends ControlButtonsMixin(Component) {
                 return true;
             }
             if (newQuantity >= selectedLine.saved_quantity) {
-                if (newQuantity == 0) {
+                if (newQuantity === 0) {
                     order._unlinkOrderline(selectedLine);
                 }
                 selectedLine.set_quantity(newQuantity);

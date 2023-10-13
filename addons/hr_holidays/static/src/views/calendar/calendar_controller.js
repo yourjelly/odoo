@@ -38,7 +38,7 @@ export class TimeOffCalendarController extends CalendarController {
         if (this.employeeId) {
             context["default_employee_id"] = this.employeeId;
         }
-        if (this.model.meta.scale == "day") {
+        if (this.model.meta.scale === "day") {
             context["default_date_from"] = serializeDate(
                 this.model.data.range.start.set({ hours: 7 }),
                 "datetime"

@@ -54,7 +54,7 @@ export class ProductTemplateAttributeLine extends Component {
      */
     updateSelectedPTAV(event) {
         this.env.updateProductTemplateSelectedPTAV(
-            this.props.productTmplId, this.props.id, event.target.value, this.props.attribute.display_type == 'multi'
+            this.props.productTmplId, this.props.id, event.target.value, this.props.attribute.display_type === 'multi'
         );
     }
 

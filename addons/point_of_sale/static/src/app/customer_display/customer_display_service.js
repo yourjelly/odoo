@@ -66,7 +66,7 @@ export class LocalDisplay extends Reactive {
             return;
         }
 
-        if (displayHead.innerHTML.trim().length == 0 || refreshResources) {
+        if (displayHead.innerHTML.trim().length === 0 || refreshResources) {
             displayHead.textContent = "";
             displayHead.appendChild(container.querySelector(".resources"));
             // The scripts must be evaluated because adding an element containing

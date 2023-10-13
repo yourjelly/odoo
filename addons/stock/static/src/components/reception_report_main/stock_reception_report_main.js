@@ -113,7 +113,7 @@ export class ReceptionReportMain extends Component {
         for (const [tabIndex, lines] of Object.entries(this.state.sourcesToLines)) {
             if (tableIndex && tableIndex != tabIndex) continue;
             lines.forEach(line => {
-                if (isNaN(lineIndex) || lineIndex == line.index) {
+                if (isNaN(lineIndex) || lineIndex === line.index) {
                     line.is_assigned = isAssigned;
                 }
             });

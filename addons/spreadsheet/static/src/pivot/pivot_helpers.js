@@ -44,7 +44,7 @@ export function getFirstPivotFunction(formula) {
 export function makePivotFormula(formula, args) {
     return `=${formula}(${args
         .map((arg) =>
-            typeof arg == "number" || (typeof arg == "string" && !isNaN(arg))
+            typeof arg === "number" || (typeof arg === "string" && !isNaN(arg))
                 ? `${arg}`
                 : `"${arg.toString().replace(/"/g, '\\"')}"`
         )

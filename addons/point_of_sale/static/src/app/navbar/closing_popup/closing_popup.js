@@ -149,7 +149,7 @@ export class ClosePosPopup extends AbstractAwaitablePopup {
     hasUserAuthority() {
         return (
             this.props.is_manager ||
-            this.props.amount_authorized_diff == null ||
+            this.props.amount_authorized_diff === null ||
             this.getMaxDifference() <= this.props.amount_authorized_diff
         );
     }
@@ -195,7 +195,7 @@ export class ClosePosPopup extends AbstractAwaitablePopup {
 
         try {
             const bankPaymentMethodDiffPairs = this.props.other_payment_methods
-                .filter((pm) => pm.type == "bank")
+                .filter((pm) => pm.type === "bank")
                 .map((pm) => [pm.id, this.getDifference(pm.id)]);
             const response = await this.orm.call("pos.session", "close_session_from_ui", [
                 this.pos.pos_session.id,

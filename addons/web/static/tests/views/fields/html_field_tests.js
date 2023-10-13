@@ -378,7 +378,7 @@ QUnit.module("Fields", ({ beforeEach }) => {
                 arch: `
                 <form>
                     <field name="foo" />
-                    <field name="txt" invisible="'' == txt"/>
+                    <field name="txt" invisible="'' === txt"/>
                 </form>`,
             });
             assert.containsOnce(target, "[name='txt'] textarea");

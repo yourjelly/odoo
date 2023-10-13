@@ -15,7 +15,7 @@ patch(MockServer.prototype, {
      */
     mockWrite(model, args) {
         const notifications = [];
-        if (model == "discuss.channel") {
+        if (model === "discuss.channel") {
             const vals = args[1];
             const [channel] = this.getRecords(model, [["id", "=", args[0][0]]]);
             if (channel) {

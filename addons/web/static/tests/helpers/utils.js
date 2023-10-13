@@ -73,7 +73,7 @@ export function patchDate(year, month, day, hours, minutes, seconds) {
             let date;
             if (arguments.length > 0) {
                 date =
-                    length == 1 && String(Y) === Y // isString(Y)
+                    length === 1 && String(Y) === Y // isString(Y)
                         ? // We explicitly pass it through parse:
                           new NativeDate(Date.parse(Y))
                         : // We have to manually make calls depending on argument

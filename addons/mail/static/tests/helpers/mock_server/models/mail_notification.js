@@ -29,7 +29,7 @@ patch(MockServer.prototype, {
             const subtypes = message.subtype_id
                 ? this.getRecords("mail.message.subtype", [["id", "=", message.subtype_id]])
                 : [];
-            return subtypes.length == 0 || subtypes[0].track_recipients;
+            return subtypes.length === 0 || subtypes[0].track_recipients;
         });
     },
     /**

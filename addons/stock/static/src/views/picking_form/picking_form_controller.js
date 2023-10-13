@@ -18,7 +18,7 @@ export class StockPickingFormController extends FormController {
         let record;
         if (id) {
             record = this.model.root.data.move_ids_without_package.records.find(
-                (e) => e.resId == id
+                (e) => e.resId === id
             );
         } else {
             const moveByIdsDesc = sortBy(
@@ -26,7 +26,7 @@ export class StockPickingFormController extends FormController {
                 "id",
                 "desc"
             );
-            record = moveByIdsDesc.find((e) => e.data.product_id[0] == ev.detail.product_id[0]);
+            record = moveByIdsDesc.find((e) => e.data.product_id[0] === ev.detail.product_id[0]);
             id = record.resId;
         }
         const action = await this.model.orm.call("stock.move", "action_show_details", [id]);

@@ -8,7 +8,7 @@ patch(registry.category("web_tour.tours").get("account_tour"), {
         const originalSteps = super.steps();
         // Remove the step suggesting to change the name as it is done another way (document number)
         const filteredSteps = originalSteps.filter((step) => step.trigger != "input[name=name]");
-        const stepIndex = filteredSteps.findIndex((step) => step.trigger == 'div[name=partner_id] input');
+        const stepIndex = filteredSteps.findIndex((step) => step.trigger === 'div[name=partner_id] input');
         filteredSteps.splice(stepIndex + 2, 0, {
             trigger: "div[name=l10n_ar_afip_responsibility_type_id] input",
             extra_trigger: "[name=move_type] [raw-value=out_invoice]",

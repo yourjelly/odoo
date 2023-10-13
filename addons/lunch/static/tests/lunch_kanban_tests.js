@@ -27,9 +27,9 @@ async function makeLunchView(extraArgs = {}) {
                 </templates>
             </kanban>`,
             mockRPC: (route, args) => {
-                if (route == '/lunch/user_location_get') {
+                if (route === '/lunch/user_location_get') {
                     return Promise.resolve(serverData.models['lunch.location'].records[0].id);
-                } else if (route == '/lunch/infos') {
+                } else if (route === '/lunch/infos') {
                     return Promise.resolve(lunchInfos);
                 }
             }
@@ -152,9 +152,9 @@ QUnit.module('LunchKanban', (hooks) => {
         };
         await makeLunchView({
             mockRPC: (route, args) => {
-                if (route == '/lunch/user_location_get') {
+                if (route === '/lunch/user_location_get') {
                     return Promise.resolve(userInfos.user_location[0]);
-                } else if (route == '/lunch/infos') {
+                } else if (route === '/lunch/infos') {
                     return Promise.resolve(userInfos);
                 }
             }
@@ -186,11 +186,11 @@ QUnit.module('LunchKanban', (hooks) => {
         let userInfos = { ...lunchInfos };
         await makeLunchView({
             mockRPC: (route, args) => {
-                if (route == '/lunch/user_location_get') {
+                if (route === '/lunch/user_location_get') {
                     return Promise.resolve(userInfos.user_location[0]);
-                } else if (route == '/lunch/infos') {
+                } else if (route === '/lunch/infos') {
                     return Promise.resolve(userInfos);
-                } else if (route == '/lunch/user_location_set') {
+                } else if (route === '/lunch/user_location_set') {
                     assert.equal(args.location_id, 2);
                     userInfos.user_location = [2, "New Office"];
                     return Promise.resolve(true);
@@ -216,9 +216,9 @@ QUnit.module('LunchKanban', (hooks) => {
         let expectedUserId = false; // false as we are requesting for the current user
         await makeLunchView({
             mockRPC: (route, args) => {
-                if (route == '/lunch/user_location_get') {
+                if (route === '/lunch/user_location_get') {
                     return Promise.resolve(userInfos.user_location[0]);
-                } else if (route == '/lunch/infos') {
+                } else if (route === '/lunch/infos') {
                     assert.equal(expectedUserId, args.user_id);
 
                     if (expectedUserId === 2) {
@@ -230,7 +230,7 @@ QUnit.module('LunchKanban', (hooks) => {
                     }
 
                     return Promise.resolve(userInfos);
-                } else if (route == '/lunch/user_location_set') {
+                } else if (route === '/lunch/user_location_set') {
                     assert.equal(args.location_id, 2);
                     userInfos.user_location = [2, "New Office"];
                     return Promise.resolve(true);
@@ -284,11 +284,11 @@ QUnit.module('LunchKanban', (hooks) => {
         };
         await makeLunchView({
             mockRPC: (route, args) => {
-                if (route == '/lunch/user_location_get') {
+                if (route === '/lunch/user_location_get') {
                     return Promise.resolve(userInfos.user_location[0]);
-                } else if (route == '/lunch/infos') {
+                } else if (route === '/lunch/infos') {
                     return Promise.resolve(userInfos);
-                } else if (route == '/lunch/trash') {
+                } else if (route === '/lunch/trash') {
                     userInfos = {
                         ...userInfos,
                         lines: [],
@@ -335,11 +335,11 @@ QUnit.module('LunchKanban', (hooks) => {
         };
         await makeLunchView({
             mockRPC: (route, args) => {
-                if (route == '/lunch/user_location_get') {
+                if (route === '/lunch/user_location_get') {
                     return Promise.resolve(userInfos.user_location[0]);
-                } else if (route == '/lunch/infos') {
+                } else if (route === '/lunch/infos') {
                     return Promise.resolve(userInfos);
-                } else if (route == '/web/dataset/call_kw/lunch.order/update_quantity') {
+                } else if (route === '/web/dataset/call_kw/lunch.order/update_quantity') {
                     assert.equal(args.args[1], 1, 'should increment order quantity by 1');
                     userInfos = {
                         ...userInfos,
@@ -387,11 +387,11 @@ QUnit.module('LunchKanban', (hooks) => {
         };
         await makeLunchView({
             mockRPC: (route, args) => {
-                if (route == '/lunch/user_location_get') {
+                if (route === '/lunch/user_location_get') {
                     return Promise.resolve(userInfos.user_location[0]);
-                } else if (route == '/lunch/infos') {
+                } else if (route === '/lunch/infos') {
                     return Promise.resolve(userInfos);
-                } else if (route == '/lunch/pay') {
+                } else if (route === '/lunch/pay') {
                     assert.equal(args.user_id, false); // Should confirm order of current user
                     userInfos = {
                         ...userInfos,

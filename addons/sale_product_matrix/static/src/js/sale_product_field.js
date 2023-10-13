@@ -47,7 +47,7 @@ patch(SaleOrderLineProductField.prototype, {
     },
 
     async _openProductConfigurator(edit=false) {
-        if (edit && this.props.record.data.product_add_mode == 'matrix') {
+        if (edit && this.props.record.data.product_add_mode === 'matrix') {
             this._openGridConfigurator(true);
         } else {
             super._openProductConfigurator(...arguments);

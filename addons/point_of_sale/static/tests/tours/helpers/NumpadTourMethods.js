@@ -7,7 +7,7 @@ export const Numpad = {
         trigger: buttonTriger(buttonValue),
         run: () => {
             [...$(buttonTriger(buttonValue))]
-                .filter((el) => el.innerHTML == buttonValue)[0]
+                .filter((el) => el.innerHTML === buttonValue)[0]
                 ?.click();
         },
         mobile: options.mobile,

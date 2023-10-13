@@ -16,7 +16,7 @@ patch(ProductScreen.prototype, {
                 orderline_name += " (" + orderline.description + ")";
             }
             const changes = Object.values(order.getOrderChanges().orderlines).find(
-                (change) => change.name == orderline_name
+                (change) => change.name === orderline_name
             );
             return changes ? changes.quantity : false;
         }

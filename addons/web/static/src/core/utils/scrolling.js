@@ -10,7 +10,7 @@
  */
 export function scrollTo(element, options = { scrollable: null, isAnchor: false }) {
     function _getScrollParent(node) {
-        if (node == null) {
+        if (node === null) {
             return null;
         }
 

@@ -834,7 +834,7 @@ QUnit.module("Views", (hooks) => {
                 arch: `
                 <tree>
                     <button name="a" type="object" icon="fa-car"/>
-                    <field name="foo" invisible="foo == 'blip'"/>
+                    <field name="foo" invisible="foo === 'blip'"/>
                     <button name="x" type="object" icon="fa-star"/>
                     <button name="y" type="object" icon="fa-refresh"/>
                     <button name="z" type="object" icon="fa-exclamation"/>
@@ -887,9 +887,9 @@ QUnit.module("Views", (hooks) => {
             arch: `
                 <tree>
                     <field name="foo"/>
-                    <button name="x" type="object" icon="fa-star" invisible="foo == 'blip'"/>
-                    <button name="y" type="object" icon="fa-refresh" invisible="foo == 'yop'"/>
-                    <button name="z" type="object" icon="fa-exclamation" invisible="foo == 'gnap'"/>
+                    <button name="x" type="object" icon="fa-star" invisible="foo === 'blip'"/>
+                    <button name="y" type="object" icon="fa-refresh" invisible="foo === 'yop'"/>
+                    <button name="z" type="object" icon="fa-exclamation" invisible="foo === 'gnap'"/>
                 </tree>`,
         });
 
@@ -1543,8 +1543,8 @@ QUnit.module("Views", (hooks) => {
                             <field name="foo_o2m">
                                 <tree>
                                     <field name="date" column_invisible="True"/>
-                                    <field name="foo" column_invisible="parent.int_field == 3"/>
-                                    <field name="bar" column_invisible="parent.int_field == 10"/>
+                                    <field name="foo" column_invisible="parent.int_field === 3"/>
+                                    <field name="bar" column_invisible="parent.int_field === 10"/>
                                     <field name="qux" column_invisible="parent.m2m"/>
                                     <field name="amount" column_invisible="parent.properties"/>
                                 </tree>
@@ -1748,7 +1748,7 @@ QUnit.module("Views", (hooks) => {
             arch: `
                 <tree>
                     <field name="foo"/>
-                    <field name="bar" invisible="id == 1"/>
+                    <field name="bar" invisible="id === 1"/>
                     <field name="int_field"/>
                 </tree>`,
         });
@@ -1765,7 +1765,7 @@ QUnit.module("Views", (hooks) => {
             serverData,
             arch: `
                 <tree>
-                    <field name="foo" invisible="id == 1"/>
+                    <field name="foo" invisible="id === 1"/>
                 </tree>`,
         });
 
@@ -7367,7 +7367,7 @@ QUnit.module("Views", (hooks) => {
             resModel: "foo",
             serverData,
             arch: `
-                <tree decoration-info="datetime == '2017-02-27 12:51:35'" decoration-danger="datetime &gt; '2017-02-27 12:51:35' and datetime &lt; '2017-02-27 10:51:35'">
+                <tree decoration-info="datetime === '2017-02-27 12:51:35'" decoration-danger="datetime &gt; '2017-02-27 12:51:35' and datetime &lt; '2017-02-27 10:51:35'">
                     <field name="datetime"/>
                     <field name="int_field"/>
                 </tree>`,
@@ -8151,7 +8151,7 @@ QUnit.module("Views", (hooks) => {
                     <field name="foo"/>
                     <groupby name="currency_id">
                         <field name="position"/>
-                        <button string="Button 1" type="object" name="button_method" invisible="position == 'after'"/>
+                        <button string="Button 1" type="object" name="button_method" invisible="position === 'after'"/>
                     </groupby>
                 </tree>`,
             mockRPC(route, args) {
@@ -8230,7 +8230,7 @@ QUnit.module("Views", (hooks) => {
                     <field name="foo"/>
                     <groupby name="currency_id">
                         <field name="position"/>
-                        <button string="Button 1" type="object" name="button_method" invisible="position == 'after'"/>
+                        <button string="Button 1" type="object" name="button_method" invisible="position === 'after'"/>
                     </groupby>
                 </tree>`,
             groupBy: ["currency_id"],
@@ -8252,7 +8252,7 @@ QUnit.module("Views", (hooks) => {
                     <field name="foo"/>
                     <groupby name="currency_id">
                         <field name="position"/>
-                        <button string="Button 1" type="object" name="button_method" invisible="position == 'after'"/>
+                        <button string="Button 1" type="object" name="button_method" invisible="position === 'after'"/>
                     </groupby>
                 </tree>`,
             groupBy: ["currency_id"],
@@ -8702,10 +8702,10 @@ QUnit.module("Views", (hooks) => {
             serverData,
             arch: `
                 <tree editable="top">
-                    <button string="a button" name="button_action" icon="fa-car" type="object" invisible="id == 1"/>
+                    <button string="a button" name="button_action" icon="fa-car" type="object" invisible="id === 1"/>
                     <field name="int_field"/>
                     <field name="qux"/>
-                    <field name="foo" invisible="id == 1"/>
+                    <field name="foo" invisible="id === 1"/>
                 </tree>`,
         });
 
@@ -9339,7 +9339,7 @@ QUnit.module("Views", (hooks) => {
                     <form>
                         <field name="o2m">
                             <tree editable="top">
-                                <field name="display_name" invisible="stage == 'open'"/>
+                                <field name="display_name" invisible="stage === 'open'"/>
                                 <field name="stage"/>
                             </tree>
                         </field>

@@ -1287,7 +1287,7 @@ QUnit.module("Views", (hooks) => {
                             <group>
                                 <field name="int_field"/>
                                 <field name="timmy" invisible="1"/>
-                                <field name="foo" invisible="int_field == 10"/>
+                                <field name="foo" invisible="int_field === 10"/>
                                 <field name="bar" invisible="not bar and not timmy"/>
                             </group>
                         </sheet>
@@ -1321,12 +1321,12 @@ QUnit.module("Views", (hooks) => {
             serverData,
             arch: `
                 <form>
-                    <div class="a" invisible="foo == False">b</div>
-                    <div class="b" invisible="foo == ''">b</div>
+                    <div class="a" invisible="foo === False">b</div>
+                    <div class="b" invisible="foo === ''">b</div>
                     <div class="c" invisible="not display_name">c</div>
-                    <div class="d" invisible="display_name == ''">d</div>
+                    <div class="d" invisible="display_name === ''">d</div>
                     <div class="e" invisible="not foo">e</div>
-                    <div class="f" invisible="display_name == False">f</div>
+                    <div class="f" invisible="display_name === False">f</div>
                     <field name="foo" invisible="1"/>
                 </form>`,
             resId: 1,
@@ -1351,7 +1351,7 @@ QUnit.module("Views", (hooks) => {
                     <form>
                         <sheet>
                             <field name="int_field"/>
-                            <notebook name="test_name" class="new_class" invisible="int_field == 10">
+                            <notebook name="test_name" class="new_class" invisible="int_field === 10">
                                 <page string="Foo">
                                     <field name="foo"/>
                                 </page>
@@ -1481,7 +1481,7 @@ QUnit.module("Views", (hooks) => {
                     <sheet>
                         <field name="int_field"/>
                         <notebook>
-                            <page string="Foo" invisible='int_field == 44'>
+                            <page string="Foo" invisible='int_field === 44'>
                                 <field name="foo"/>
                             </page>
                             <page string="Bar">
@@ -1775,7 +1775,7 @@ QUnit.module("Views", (hooks) => {
                     <form>
                         <sheet>
                             <field name="foo"/>
-                            <group invisible='int_field == 0.0'>
+                            <group invisible='int_field === 0.0'>
                                 <div class="hello">this should be invisible</div>
                                 <field name="int_field"/>
                             </group>
@@ -2019,7 +2019,7 @@ QUnit.module("Views", (hooks) => {
             start() {
                 return {
                     async doActionButton(params) {
-                        if (params.name == "action_to_perform") {
+                        if (params.name === "action_to_perform") {
                             assert.containsN(
                                 target,
                                 "button.oe_stat_button[disabled]",
@@ -2433,7 +2433,7 @@ QUnit.module("Views", (hooks) => {
                         <field name="bar"/>
                         <field name="int_field"/>
                         <field name="foo" required="not bar"/>
-                        <field name="foo" required="int_field == 44"/>
+                        <field name="foo" required="int_field === 44"/>
                     </group>
                 </form>`,
             mockRPC(route, args) {
@@ -2489,7 +2489,7 @@ QUnit.module("Views", (hooks) => {
                         <field name="bar"/>
                         <field name="int_field"/>
                         <field name="foo" readonly="not bar"/>
-                        <field name="foo" readonly="int_field == 0"/>
+                        <field name="foo" readonly="int_field === 0"/>
                     </group>
                 </form>`,
             mockRPC(route, args) {
@@ -2543,7 +2543,7 @@ QUnit.module("Views", (hooks) => {
                         <field name="bar"/>
                         <field name="int_field"/>
                         <field name="foo" required="1" invisible="not bar"/>
-                        <field name="foo" invisible="int_field == 0"/>
+                        <field name="foo" invisible="int_field === 0"/>
                     </group>
                 </form>`,
             mockRPC(route, args) {
@@ -2907,7 +2907,7 @@ QUnit.module("Views", (hooks) => {
                     <form>
                         <group>
                             <field name="foo"/>
-                            <field name="display_name" readonly="foo == 'readonly'"/>
+                            <field name="display_name" readonly="foo === 'readonly'"/>
                         </group>
                     </form>`,
                 resId: 2,
@@ -8731,7 +8731,7 @@ QUnit.module("Views", (hooks) => {
                     <form>
                         <sheet>
                             <notebook>
-                                <page string="Foo" invisible='id == 2'>
+                                <page string="Foo" invisible='id === 2'>
                                     <field name="foo"/>
                                 </page>
                                 <page string="Bar">
@@ -9236,8 +9236,8 @@ QUnit.module("Views", (hooks) => {
             <form>
                 <field name="foo" />
                 <group>
-                    <div class="cell1" invisible='foo == "1"' />
-                    <div class="cell2" invisible='foo == "2"' />
+                    <div class="cell1" invisible='foo === "1"' />
+                    <div class="cell2" invisible='foo === "2"' />
                 </group>
             </form>`,
         });
@@ -10125,7 +10125,7 @@ QUnit.module("Views", (hooks) => {
                         <tree><field name="display_name"/></tree>
                         <form>
                             <field name="display_name"/>
-                            <field name="foo" readonly="display_name == 'readonly'"/>
+                            <field name="foo" readonly="display_name === 'readonly'"/>
                         </form>
                     </field>
                 </form>`,
@@ -10322,7 +10322,7 @@ QUnit.module("Views", (hooks) => {
             arch: `
                 <form>
                     <header>
-                        <button name="some_method" class="oe_highlight" string="Button" type="object" title="This is title" readonly="display_name == 'readonly'"/>
+                        <button name="some_method" class="oe_highlight" string="Button" type="object" title="This is title" readonly="display_name === 'readonly'"/>
                         <button name="empty_method" string="Empty Button" type="object"/>
                     </header>
                     <button name="other_method" class="oe_highlight" string="Button2" type="object" help="help Button2"/>
@@ -10340,7 +10340,7 @@ QUnit.module("Views", (hooks) => {
         await nextTick();
         assert.strictEqual(
             target.querySelector(".o-tooltip").textContent,
-            ` Button : ButtonThis is titleObject:partnerReadonly:display_name == 'readonly'Button Type:objectMethod:some_method`
+            ` Button : ButtonThis is titleObject:partnerReadonly:display_name === 'readonly'Button Type:objectMethod:some_method`
         );
 
         await mouseEnter(target.querySelector("button[name='other_method']"));
@@ -10730,7 +10730,7 @@ QUnit.module("Views", (hooks) => {
             arch: `
                 <form>
                     <sheet>
-                        <field name="product_id" context="{'lang': 'en_US'}" invisible="product_id == 33" widget="many2one"/>
+                        <field name="product_id" context="{'lang': 'en_US'}" invisible="product_id === 33" widget="many2one"/>
                     </sheet>
                 </form>`,
         });
@@ -10756,7 +10756,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(
             target.querySelector('.o-tooltip--technical > li[data-item="invisible"]').lastChild
                 .textContent,
-            "product_id == 33",
+            "product_id === 33",
             "invisible should be properly stringified"
         );
 
@@ -13020,7 +13020,7 @@ QUnit.module("Views", (hooks) => {
 
         patchWithCleanup(browser, {
             setTimeout: (fn) => fn(),
-            clearTimeout: () => { },
+            clearTimeout: () => {},
         });
 
         await makeView({

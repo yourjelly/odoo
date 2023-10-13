@@ -316,7 +316,7 @@ export class GraphModel extends Model {
         let lineOverlayDataset = null;
         if (stacked) {
             const stacks = groupBy(data.datasets, (dataset) => dataset.originIndex);
-            if (Object.keys(stacks).length == 1) {
+            if (Object.keys(stacks).length === 1) {
                 const [[originIndex, datasets]] = Object.entries(stacks);
                 if (datasets.length > 1) {
                     const data = [];
@@ -469,7 +469,7 @@ export class GraphModel extends Model {
                 cumulatedStart &&
                 sequential_field &&
                 data.groups.length &&
-                domain.arrayRepr.some((leaf) => leaf.length === 3 && leaf[0] == sequential_field)
+                domain.arrayRepr.some((leaf) => leaf.length === 3 && leaf[0] === sequential_field)
             ) {
                 const first_date = data.groups[0].__range[sequential_spec].from;
                 const new_domain = Domain.combine(

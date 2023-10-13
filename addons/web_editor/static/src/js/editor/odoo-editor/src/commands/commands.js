@@ -484,17 +484,17 @@ export const editorCommands = {
             const cli = closestElement(node,'li');
             if (
                 cli &&
-                cli.tagName == 'LI' &&
+                cli.tagName === 'LI' &&
                 !li.has(cli) &&
                 !cli.classList.contains('oe-nested') &&
                 cli.isContentEditable
             ) {
                 li.add(cli);
             }
-            if (node == end) break;
+            if (node === end) break;
         }
         for (const node of li) {
-            if (mode == 'indent') {
+            if (mode === 'indent') {
                 node.oTab(0);
             } else {
                 node.oShiftTab(0);
@@ -518,7 +518,7 @@ export const editorCommands = {
                 if (!['OL', 'UL'].includes(block.tagName) && block.isContentEditable) {
                     block = block.closest('li') || block;
                     const ublock = block.closest('ol, ul');
-                    ublock && getListMode(ublock) == mode ? li.add(block) : blocks.add(block);
+                    ublock && getListMode(ublock) === mode ? li.add(block) : blocks.add(block);
                 }
             }
         }

@@ -34,13 +34,13 @@ const { DateTime } = luxon;
  */
 export class PosCollection extends Array {
     getByCID(cid) {
-        return this.find((item) => item.cid == cid);
+        return this.find((item) => item.cid === cid);
     }
     add(item) {
         this.push(item);
     }
     remove(item) {
-        const index = this.findIndex((_item) => item.cid == _item.cid);
+        const index = this.findIndex((_item) => item.cid === _item.cid);
         if (index < 0) {
             return index;
         }
@@ -80,9 +80,9 @@ class PosModel {
      */
     _getCID(obj) {
         if (obj.id) {
-            if (typeof obj.id == "string") {
+            if (typeof obj.id === "string") {
                 return obj.id;
-            } else if (typeof obj.id == "number") {
+            } else if (typeof obj.id === "number") {
                 return `c${obj.id}`;
             }
         }
@@ -328,7 +328,7 @@ export class Product extends PosModel {
         // This return value has to be rounded with round_di before
         // being used further. Note that this cannot happen here,
         // because it would cause inconsistencies with the backend for
-        // pricelist that have base == 'pricelist'.
+        // pricelist that have base === 'pricelist'.
         return price;
     }
     get_display_price({
@@ -599,7 +599,7 @@ export class Orderline extends PosModel {
                     ),
                 });
                 return false;
-            } else if (quant == 0) {
+            } else if (quant === 0) {
                 toRefundDetail.qty = 0;
             } else if (-quant <= maxQtyToRefund) {
                 toRefundDetail.qty = -quant;
@@ -667,7 +667,7 @@ export class Orderline extends PosModel {
     get_required_number_of_lots() {
         var lots_required = 1;
 
-        if (this.product.tracking == "serial") {
+        if (this.product.tracking === "serial") {
             lots_required = Math.abs(this.quantity);
         }
 
@@ -798,7 +798,7 @@ export class Orderline extends PosModel {
             id: this.id,
             quantity: this.get_quantity(),
             unit_name: this.get_unit().name,
-            is_in_unit: this.get_unit().id == this.pos.uom_unit_id,
+            is_in_unit: this.get_unit().id === this.pos.uom_unit_id,
             price: this.get_unit_display_price(),
             discount: this.get_discount(),
             product_name: this.get_product().display_name,
@@ -1638,7 +1638,7 @@ export class Order extends PosModel {
         receipt.header = (isHeaderOrFooter && this.pos.config.receipt_header) || "";
         receipt.footer = (isHeaderOrFooter && this.pos.config.receipt_footer) || "";
 
-        if (!receipt.date.localestring && (!this.state || this.state == "draft")) {
+        if (!receipt.date.localestring && (!this.state || this.state === "draft")) {
             receipt.date.localestring = formatDateTime(DateTime.local());
         }
 
@@ -2559,7 +2559,7 @@ export class Order extends PosModel {
             const paymentlines = this.get_paymentlines();
             const last_line = paymentlines ? paymentlines[paymentlines.length - 1] : false;
             const last_line_is_cash = last_line
-                ? last_line.payment_method.is_cash_count == true
+                ? last_line.payment_method.is_cash_count === true
                 : false;
             if (!only_cash || (only_cash && last_line_is_cash)) {
                 var rounding_method = this.pos.cash_rounding[0].rounding_method;
@@ -2785,7 +2785,7 @@ export class Order extends PosModel {
      * @returns {boolean}
      */
     _isValidEmptyOrder() {
-        if (this.get_orderlines().length == 0) {
+        if (this.get_orderlines().length === 0) {
             return this.get_paymentlines().length != 0;
         } else {
             return true;
