@@ -1750,6 +1750,19 @@ Please change the quantity done or the rounding precision of your unit of measur
             if move.product_id.tracking == 'serial':
                 move.next_serial_count = move.product_uom_qty
 
+            if move.purchase_line_id:
+                company = self.env["res.company"].search([('partner_id', '=', move.picking_id.partner_id.id)])
+                if company and move.product_id.tracking == "serial":
+                    lot = move.purchase_line_id.order_id.with_company(company).auto_sale_order_id.picking_ids.move_line_ids.lot_id
+                    data = {
+                        'name': lot.name,
+                        'product_id': lot.product_id.id,
+                        'company_id': move.purchase_line_id.order_id.picking_ids.company_id.id,
+                    }
+                    new_lot = self.env["stock.lot"].create(data)
+                    for move in move_line_vals_list:
+                        move['lot_id'] = new_lot.id,
+
         self.env['stock.move.line'].create(move_line_vals_list)
         StockMove.browse(partially_available_moves_ids).write({'state': 'partially_available'})
         StockMove.browse(assigned_moves_ids).write({'state': 'assigned'})
