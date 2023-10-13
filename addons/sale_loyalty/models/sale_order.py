@@ -97,8 +97,8 @@ class SaleOrder(models.Model):
 
     def action_open_reward_wizard(self):
         self.ensure_one()
-        self._update_programs_and_rewards()
-        claimable_rewards = self._get_claimable_rewards()
+        self._update_programs_and_rewards() #investigate here as this might re add stupid pens
+        claimable_rewards = self._get_claimable_rewards() #investigate also here
         if len(claimable_rewards) == 1:
             coupon = next(iter(claimable_rewards))
             if len(claimable_rewards[coupon]) == 1:
@@ -141,7 +141,7 @@ class SaleOrder(models.Model):
             raise UserError(_('Invalid product to claim.'))
         taxes = self.fiscal_position_id.map_tax(product.taxes_id.filtered(lambda t: t.company_id == self.company_id))
         points = self._get_real_points_for_coupon(coupon)
-        claimable_count = float_round(points / reward.required_points, precision_rounding=1, rounding_method='DOWN') if not reward.clear_wallet else 1
+        claimable_count = float_round(points / reward.required_points, precision_rounding=1, rounding_method='DOWN') if not reward.clear_wallet else 1 #I don't like it, I don't think it should by default give all
         cost = points if reward.clear_wallet else claimable_count * reward.required_points
         return [{
             'name': _("Free Product - %(product)s", product=product.name),
@@ -522,7 +522,7 @@ class SaleOrder(models.Model):
         Updates (or creates) an entry in coupon_point_ids for the given coupons.
         """
         self.ensure_one()
-        if self.state == 'sale':
+        if self.state == 'sale': #podczas zatwierdzenia so dodaje pinkty do karty
             for coupon, points in coupon_points.items():
                 coupon.sudo().points += points
         for pe in self.coupon_point_ids.sudo():
@@ -649,7 +649,7 @@ class SaleOrder(models.Model):
                 ('points', '>', 0), ('program_id.program_type', '=', 'ewallet')])
             if ewallet_coupons:
                 self.applied_coupon_ids += ewallet_coupons
-        # Programs that are applied to the order and count points
+        # Programs that are applied to the order and count points #maybe clean it?
         points_programs = self._get_points_programs()
         # Coupon programs that require the program's rules to match but do not count for points
         coupon_programs = self.applied_coupon_ids.program_id
@@ -749,7 +749,7 @@ class SaleOrder(models.Model):
         # |       STEP 3: Update reward lines        |
         # +==========================================+
 
-        # We will reuse these lines as much as possible, this resets the order in a reward-less state
+        # We will reuse these lines as much as possible, this resets the order in a reward-less state #i think somewhere here might lie the problem
         reward_line_pool = self.order_line.filtered(lambda l: l.reward_id and l.coupon_id)._reset_loyalty()
         seen_rewards = set()
         line_rewards = []
@@ -766,18 +766,18 @@ class SaleOrder(models.Model):
 
         for reward_key in itertools.chain(line_rewards, payment_rewards):
             coupon = reward_key[1]
-            reward = reward_key[0]
+            reward = reward_key[0] #this is weird
             program = reward.program_id
             points = self._get_real_points_for_coupon(coupon)
             if coupon not in all_coupons or points < reward.required_points or program not in domain_matching_programs:
                 # Reward is not applicable anymore, the reward lines will simply be removed at the end of this function
                 continue
             try:
-                values_list = self._get_reward_line_values(reward, coupon, product=reward_key[3])
+                values_list = self._get_reward_line_values(reward, coupon, product=reward_key[3]) #here is gives me not what I want
             except UserError:
                 # It could happen that we have nothing to discount after changing the order.
                 values_list = []
-            reward_line_pool = self._write_vals_from_reward_vals(values_list, reward_line_pool, delete=False)
+            reward_line_pool = self._write_vals_from_reward_vals(values_list, reward_line_pool, delete=False) #without this it removes the line? But why
 
         lines_to_unlink |= reward_line_pool
 
@@ -795,9 +795,9 @@ class SaleOrder(models.Model):
         # |       STEP 5: Cleanup                    |
         # +==========================================+
 
-        order_line_update = [(Command.DELETE, line.id) for line in lines_to_unlink]
-        if order_line_update:
-            self.write({'order_line': order_line_update})
+        #order_line_update = [(Command.DELETE, line.id) for line in lines_to_unlink]
+        #if order_line_update:
+        #    self.write({'order_line': order_line_update})
         if coupons_to_unlink:
             coupons_to_unlink.sudo().unlink()
         if point_entries_to_unlink:
@@ -826,7 +826,7 @@ class SaleOrder(models.Model):
         base_tax_amount = self.amount_tax - sum(line.price_tax for line in no_effect_lines)
         amounts_per_program = {p: {'untaxed': base_untaxed_amount, 'tax': base_tax_amount} for p in programs}
         for line in self.order_line:
-            if not line.reward_id or line.reward_id.reward_type != 'discount':
+            if not line.reward_id or line.reward_id.reward_type != 'discount': #jeżeli linia nie jest linią od produktu co jest nagrodą
                 continue
             for program in programs:
                 # Do not consider the program's discount + automatic discount lines for the amount to check.
