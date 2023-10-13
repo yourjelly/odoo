@@ -71,6 +71,14 @@ class StockPicking(models.Model):
 
     sale_id = fields.Many2one(related="group_id.sale_id", string="Sales Order", store=True, readonly=False, index='btree_not_null')
 
+    @api.model_create_multi
+    def create(self, vals_list):
+        pickings = super().create(vals_list)
+        for picking in pickings:
+            if not picking.group_id:
+                picking.group_id = self.env.context.get('default_group_id')
+        return pickings
+
     def _auto_init(self):
         """
         Create related field here, too slow
