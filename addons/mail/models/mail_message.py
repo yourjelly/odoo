@@ -8,7 +8,7 @@ from binascii import Error as binascii_error
 from collections import defaultdict
 
 from odoo import _, api, Command, fields, models, modules, tools
-from odoo.exceptions import AccessError
+from odoo.exceptions import AccessError, UserError
 from odoo.osv import expression
 from odoo.tools.misc import clean_context, groupby as tools_groupby
 
@@ -179,6 +179,13 @@ class Message(models.Model):
     mail_ids = fields.One2many('mail.mail', 'mail_message_id', string='Mails', groups="base.group_system")
     canned_response_ids = fields.One2many('mail.shortcode', 'message_ids', string="Canned Responses", store=False)
     reaction_ids = fields.One2many('mail.message.reaction', 'message_id', string="Reactions", groups="base.group_system")
+
+    @api.constrains('model')
+    def _check_model_validity(self):
+        for message in self:
+            valid_models = self.env['ir.model'].search([]).mapped('model')
+            if message.model not in valid_models:
+                raise UserError(_("Model %s is not a valid model", message.model))
 
     @api.depends('body', 'subject')
     def _compute_description(self):

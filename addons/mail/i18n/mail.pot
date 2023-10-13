@@ -6152,6 +6152,13 @@ msgid "Model"
 msgstr ""
 
 #. module: mail
+#. odoo-python
+#: code:addons/mail/models/mail_message.py:0
+#, python-format
+msgid "Model %s is not a valid model"
+msgstr ""
+
+#. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_activity_type__res_model_change
 msgid "Model has change"
 msgstr ""
@@ -6985,6 +6992,13 @@ msgstr ""
 msgid ""
 "Only messages type comment can have their content updated on model "
 "'discuss.channel'"
+msgstr ""
+
+#. module: mail
+#. odoo-python
+#: code:addons/mail/models/mail_message_schedule.py:0
+#, python-format
+msgid "Only messages whose model inherits mail thread can be scheduled."
 msgstr ""
 
 #. module: mail
