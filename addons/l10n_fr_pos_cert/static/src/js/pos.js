@@ -36,10 +36,10 @@ patch(Order.prototype, {
         this.l10n_fr_hash = this.l10n_fr_hash || false;
         this.save_to_db();
     },
-    export_for_printing() {
-        var result = super.export_for_printing(...arguments);
-        result.l10n_fr_hash = this.get_l10n_fr_hash();
-        return result;
+    getOrderScreenValues(printing=false) {
+        cont values = super.getOrderScreenValues(...arguments);
+        values.l10n_fr_hash = this.get_l10n_fr_hash();
+        return values;
     },
     set_l10n_fr_hash(l10n_fr_hash) {
         this.l10n_fr_hash = l10n_fr_hash;

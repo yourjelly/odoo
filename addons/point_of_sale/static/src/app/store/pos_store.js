@@ -3,9 +3,10 @@
 
 import { PosCollection, Order, Product } from "@point_of_sale/app/store/models";
 import { Mutex } from "@web/core/utils/concurrency";
+import { evaluateExpr } from "@web/core/py_js/py";
 import { PosDB } from "@point_of_sale/app/store/db";
 import { markRaw, reactive } from "@odoo/owl";
-import { roundPrecision as round_pr, floatIsZero } from "@web/core/utils/numbers";
+import { roundDecimals, floatIsZero } from "@web/core/utils/numbers";
 import { registry } from "@web/core/registry";
 import { ConfirmPopup } from "@point_of_sale/app/utils/confirm_popup/confirm_popup";
 import { deduceUrl } from "@point_of_sale/utils";
@@ -250,6 +251,7 @@ export class PosStore extends Reactive {
         this.countries = loadedData["res.country"];
         this.langs = loadedData["res.lang"];
         this.taxes = loadedData["account.tax"];
+        this.taxes_computation = loadedData.taxes_computation;
         this.taxes_by_id = loadedData["taxes_by_id"];
         this.pos_session = loadedData["pos.session"];
         this._loadPosSession();
@@ -901,45 +903,7 @@ export class PosStore extends Reactive {
     sortOrders() {
         this.orders.sort((a, b) => (a.name > b.name ? 1 : -1));
     }
-    async getProductInfo(product, quantity) {
-        const order = this.get_order();
-        // check back-end method `get_product_info_pos` to see what it returns
-        // We do this so it's easier to override the value returned and use it in the component template later
-        const productInfo = await this.orm.call("product.product", "get_product_info_pos", [
-            [product.id],
-            product.get_price(order.pricelist, quantity),
-            quantity,
-            this.config.id,
-        ]);
 
-        const priceWithoutTax = productInfo["all_prices"]["price_without_tax"];
-        const margin = priceWithoutTax - product.standard_price;
-        const orderPriceWithoutTax = order.get_total_without_tax();
-        const orderCost = order.get_total_cost();
-        const orderMargin = orderPriceWithoutTax - orderCost;
-
-        const costCurrency = this.env.utils.formatCurrency(product.standard_price);
-        const marginCurrency = this.env.utils.formatCurrency(margin);
-        const marginPercent = priceWithoutTax
-            ? Math.round((margin / priceWithoutTax) * 10000) / 100
-            : 0;
-        const orderPriceWithoutTaxCurrency = this.env.utils.formatCurrency(orderPriceWithoutTax);
-        const orderCostCurrency = this.env.utils.formatCurrency(orderCost);
-        const orderMarginCurrency = this.env.utils.formatCurrency(orderMargin);
-        const orderMarginPercent = orderPriceWithoutTax
-            ? Math.round((orderMargin / orderPriceWithoutTax) * 10000) / 100
-            : 0;
-        return {
-            costCurrency,
-            marginCurrency,
-            marginPercent,
-            orderPriceWithoutTaxCurrency,
-            orderCostCurrency,
-            orderMarginCurrency,
-            orderMarginPercent,
-            productInfo,
-        };
-    }
     async getClosePosInfo() {
         return await this.orm.call("pos.session", "get_closing_control_data", [
             [this.pos_session.id],
@@ -976,47 +940,13 @@ export class PosStore extends Reactive {
     }
 
     computePriceAfterFp(price, taxes) {
-        const order = this.get_order();
-        if (order && order.fiscal_position) {
-            const mapped_included_taxes = [];
-            let new_included_taxes = [];
-            taxes.forEach((tax) => {
-                const line_taxes = this.get_taxes_after_fp([tax.id], order.fiscal_position);
-                if (line_taxes.length && line_taxes[0].price_include) {
-                    new_included_taxes = new_included_taxes.concat(line_taxes);
-                }
-                if (tax.price_include && !line_taxes.includes(tax)) {
-                    mapped_included_taxes.push(tax);
-                }
-            });
+        let taxesKey = this.taxes_key;
 
-            if (mapped_included_taxes.length > 0) {
-                if (new_included_taxes.length > 0) {
-                    const price_without_taxes = this.compute_all(
-                        mapped_included_taxes,
-                        price,
-                        1,
-                        this.currency.rounding,
-                        true
-                    ).total_excluded;
-                    return this.compute_all(
-                        new_included_taxes,
-                        price_without_taxes,
-                        1,
-                        this.currency.rounding,
-                        false
-                    ).total_included;
-                } else {
-                    return this.compute_all(
-                        mapped_included_taxes,
-                        price,
-                        1,
-                        this.currency.rounding,
-                        true
-                    ).total_excluded;
-                }
-            }
+        const order = this.get_order();
+        if(order && order.fiscal_position){
+            return this.evalPriceUnitAfterFiscalPosition(taxesKey, price, order.fiscal_position)
         }
+
         return price;
     }
 
@@ -1330,214 +1260,68 @@ export class PosStore extends Reactive {
         }
     }
 
-    /**
-     * Mirror JS method of:
-     * _compute_amount in addons/account/models/account.py
-     */
-    _compute_all(tax, base_amount, quantity, price_exclude) {
-        if (price_exclude === undefined) {
-            var price_include = tax.price_include;
-        } else {
-            price_include = !price_exclude;
+    evalEquations(equations, values){
+        const localResults = Object.assign({}, values);
+        for(const equation of equations){
+            const equalIndex = equation[1].indexOf("=");
+            const formula = equation[1].slice(equalIndex + 1);
+            localResults[equation[0]] = evaluateExpr(formula, localResults);
         }
-        if (tax.amount_type === "fixed") {
-            // Use sign on base_amount and abs on quantity to take into account the sign of the base amount,
-            // which includes the sign of the quantity and the sign of the price_unit
-            // Amount is the fixed price for the tax, it can be negative
-            // Base amount included the sign of the quantity and the sign of the unit price and when
-            // a product is returned, it can be done either by changing the sign of quantity or by changing the
-            // sign of the price unit.
-            // When the price unit is equal to 0, the sign of the quantity is absorbed in base_amount then
-            // a "else" case is needed.
-            if (base_amount) {
-                return Math.sign(base_amount) * Math.abs(quantity) * tax.amount;
-            } else {
-                return quantity * tax.amount;
-            }
-        }
-        if (tax.amount_type === "percent" && !price_include) {
-            return (base_amount * tax.amount) / 100;
-        }
-        if (tax.amount_type === "percent" && price_include) {
-            return base_amount - base_amount / (1 + tax.amount / 100);
-        }
-        if (tax.amount_type === "division" && !price_include) {
-            return base_amount / (1 - tax.amount / 100) - base_amount;
-        }
-        if (tax.amount_type === "division" && price_include) {
-            return base_amount - base_amount * (tax.amount / 100);
-        }
-        return false;
+        return localResults;
     }
 
-    /**
-     * Mirror JS method of:
-     * compute_all in addons/account/models/account.py
-     *
-     * Read comments in the python side method for more details about each sub-methods.
-     */
-    compute_all(taxes, price_unit, quantity, currency_rounding, handle_price_include = true) {
-        var self = this;
-
-        // 1) Flatten the taxes.
-
-        var _collect_taxes = function (taxes, all_taxes) {
-            taxes = [...taxes].sort(function (tax1, tax2) {
-                return tax1.sequence - tax2.sequence;
-            });
-            taxes.forEach((tax) => {
-                if (tax.amount_type === "group") {
-                    all_taxes = _collect_taxes(tax.children_tax_ids, all_taxes);
-                } else {
-                    all_taxes.push(tax);
-                }
-            });
-            return all_taxes;
-        };
-        var collect_taxes = function (taxes) {
-            return _collect_taxes(taxes, []);
-        };
-
-        taxes = collect_taxes(taxes);
-
-        // 2) Deal with the rounding methods
-
-        var round_tax = this.company.tax_calculation_rounding_method != "round_globally";
-
-        var initial_currency_rounding = currency_rounding;
-        if (!round_tax) {
-            currency_rounding = currency_rounding * 0.00001;
+    evalPriceUnitAfterFiscalPosition(taxesKey, priceUnit, fiscalPosition){
+        if(!fiscalPosition.price_unit_mapping.hasOwnProperty(taxesKey)){
+            return priceUnit;
         }
 
-        // 3) Iterate the taxes in the reversed sequence order to retrieve the initial base of the computation.
-        var recompute_base = function (base_amount, fixed_amount, percent_amount, division_amount) {
-            return (
-                (((base_amount - fixed_amount) / (1.0 + percent_amount / 100.0)) *
-                    (100 - division_amount)) /
-                100
-            );
-        };
-
-        var base = round_pr(price_unit * quantity, initial_currency_rounding);
-
-        var sign = 1;
-        if (base < 0) {
-            base = -base;
-            sign = -1;
-        }
-
-        var total_included_checkpoints = {};
-        var i = taxes.length - 1;
-        var store_included_tax_total = true;
-
-        var incl_fixed_amount = 0.0;
-        var incl_percent_amount = 0.0;
-        var incl_division_amount = 0.0;
-
-        var cached_tax_amounts = {};
-        if (handle_price_include) {
-            taxes.reverse().forEach(function (tax) {
-                if (tax.include_base_amount) {
-                    base = recompute_base(
-                        base,
-                        incl_fixed_amount,
-                        incl_percent_amount,
-                        incl_division_amount
-                    );
-                    incl_fixed_amount = 0.0;
-                    incl_percent_amount = 0.0;
-                    incl_division_amount = 0.0;
-                    store_included_tax_total = true;
-                }
-                if (tax.price_include) {
-                    if (tax.amount_type === "percent") {
-                        incl_percent_amount += tax.amount * tax.sum_repartition_factor;
-                    } else if (tax.amount_type === "division") {
-                        incl_division_amount += tax.amount * tax.sum_repartition_factor;
-                    } else if (tax.amount_type === "fixed") {
-                        incl_fixed_amount +=
-                            Math.abs(quantity) * tax.amount * tax.sum_repartition_factor;
-                    } else {
-                        var tax_amount = self._compute_all(tax, base, quantity);
-                        incl_fixed_amount += tax_amount;
-                        cached_tax_amounts[i] = tax_amount;
-                    }
-                    if (store_included_tax_total) {
-                        total_included_checkpoints[i] = base;
-                        store_included_tax_total = false;
-                    }
-                }
-                i -= 1;
-            });
-        }
-
-        var total_excluded = round_pr(
-            recompute_base(base, incl_fixed_amount, incl_percent_amount, incl_division_amount),
-            initial_currency_rounding
+        const taxesComputation = this.price_unit_mapping[taxesKey];
+        const currency = this.currency;
+        const localResults = this.evalEquations(
+            taxesComputation.equations,
+            {
+                price_unit: priceUnit,
+                quantity: quantity,
+                round: roundDecimals,
+            },
         );
-        var total_included = total_excluded;
+        return localResults[taxesComputation.price_unit];
+    }
 
-        // 4) Iterate the taxes in the sequence order to fill missing base/amount values.
+    evalTaxesComputation(taxesKey, priceUnit, quantity){
+        const taxesComputation = this.taxes_computation[taxesKey].taxes_computation;
+        const currency = this.currency;
+        const localResults = this.evalEquations(
+            taxesComputation.equations,
+            {
+                price_unit: priceUnit,
+                quantity: quantity,
+                round: roundDecimals,
+            },
+        );
+        for(const equation of taxesComputation.equations){
+            const equalIndex = equation[1].indexOf("=");
+            const formula = equation[1].slice(equalIndex + 1);
+            localResults[equation[0]] = evaluateExpr(formula, localResults);
+        }
 
-        base = total_excluded;
-
-        var skip_checkpoint = false;
-
-        var taxes_vals = [];
-        i = 0;
-        var cumulated_tax_included_amount = 0;
-        taxes.reverse().forEach(function (tax) {
-            if (tax.price_include || tax.is_base_affected) {
-                var tax_base_amount = base;
-            } else {
-                tax_base_amount = total_excluded;
-            }
-
-            if (
-                !skip_checkpoint &&
-                tax.price_include &&
-                total_included_checkpoints[i] !== undefined &&
-                tax.sum_repartition_factor != 0
-            ) {
-                var tax_amount =
-                    total_included_checkpoints[i] - (base + cumulated_tax_included_amount);
-                cumulated_tax_included_amount = 0;
-            } else {
-                tax_amount = self._compute_all(tax, tax_base_amount, quantity, true);
-            }
-
-            tax_amount = round_pr(tax_amount, currency_rounding);
-            var factorized_tax_amount = round_pr(
-                tax_amount * tax.sum_repartition_factor,
-                currency_rounding
-            );
-
-            if (tax.price_include && total_included_checkpoints[i] === undefined) {
-                cumulated_tax_included_amount += factorized_tax_amount;
-            }
-
-            taxes_vals.push({
-                id: tax.id,
-                name: tax.name,
-                amount: sign * factorized_tax_amount,
-                base: sign * round_pr(tax_base_amount, currency_rounding),
+        const evalTaxValuesList = [];
+        for(const taxValues of taxesComputation.tax_values_list){
+            const taxAmount = localResults[taxValues.tax_amount_factorized];
+            evalTaxValuesList.push({
+                taxId: taxValues.tax_id,
+                taxName: taxValues.tax__name,
+                taxPercent: taxValues.tax__amount_type === "percent" ? taxValues.tax__amount : null,
+                taxAmount: taxAmount,
+                base: localResults[taxValues.base],
             });
-
-            if (tax.include_base_amount) {
-                base += factorized_tax_amount;
-                if (!tax.price_include) {
-                    skip_checkpoint = true;
-                }
-            }
-
-            total_included += factorized_tax_amount;
-            i += 1;
-        });
+        }
 
         return {
-            taxes: taxes_vals,
-            total_excluded: sign * round_pr(total_excluded, this.currency.rounding),
-            total_included: sign * round_pr(total_included, this.currency.rounding),
+            taxValuesList: evalTaxValuesList,
+            totalExcluded: localResults[taxesComputation.total_excluded],
+            totalIncluded: localResults[taxesComputation.total_included],
+            totalCost: priceUnit * quantity,
         };
     }
 

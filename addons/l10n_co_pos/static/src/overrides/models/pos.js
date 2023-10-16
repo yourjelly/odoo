@@ -11,10 +11,10 @@ patch(PosStore.prototype, {
 });
 
 patch(Order.prototype, {
-    export_for_printing() {
-        const result = super.export_for_printing(...arguments);
-        result.l10n_co_dian = this.get_l10n_co_dian();
-        return result;
+    getOrderScreenValues(printing=false) {
+        const values = super.getOrderScreenValues(...arguments);
+        values.l10n_co_dian = this.get_l10n_co_dian();
+        return values;
     },
     set_l10n_co_dian(l10n_co_dian) {
         this.l10n_co_dian = l10n_co_dian;

@@ -5,6 +5,7 @@ from odoo.tools.float_utils import float_round
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools.misc import clean_context, formatLang
 from odoo.tools import frozendict, groupby
+from odoo.tools.safe_eval import safe_eval
 
 from collections import Counter, defaultdict
 from markupsafe import Markup
@@ -79,6 +80,40 @@ class AccountTaxGroup(models.Model):
             ('tax_group_id.tax_payable_account_id', '=', False),
             ('tax_group_id.tax_receivable_account_id', '=', False),
         ], limit=1))
+
+
+class TaxComputer:
+    def __init__(self):
+        self.var_counter = 0
+        self.equations = []
+
+    def next_variable(self):
+        var_number = self.var_counter
+        self.var_counter += 1
+        return f"x{var_number}"
+
+    def new_equation(self, formula, standalone=False):
+        if standalone:
+            variable = None
+            self.equations.append((variable, formula))
+        else:
+            variable = self.next_variable()
+            self.equations.append((variable, f"{variable} = {formula}"))
+        return variable
+
+    def eval(self, values):
+        equations = [x[1] for x in self.equations]
+        expression = ';'.join(equations)
+
+        local_results = dict(values)
+        try:
+            safe_eval(expression, local_results, mode="exec", nocopy=True)
+        except Exception as e:
+            raise UserError(_(
+                "Invalid expression found somewhere in: \n%s",
+                '\n'.join(equations),
+            ))
+        return local_results
 
 
 class AccountTax(models.Model):
@@ -514,6 +549,13 @@ class AccountTax(models.Model):
 
     @api.model
     def _prepare_taxes_batches(self, tax_values_list):
+        """ Group the taxes passed as parameter by nature because some taxes must be computed all together
+        like price-included percent or division taxes.
+
+        :param tax_values_list: A list of dictionaries, each one containing one tax.
+        :return: A list of dictionaries, each one containing:
+            * taxes: A subset of 'tax_values_list'.
+        """
         batches = []
 
         def batch_key(tax):
@@ -530,13 +572,13 @@ class AccountTax(models.Model):
 
             if current_batch is not None:
                 force_new_batch = (tax.include_base_amount and is_base_affected)
-                if current_batch['key'] != batch_key(tax) or force_new_batch:
+                if current_batch['batch_key'] != batch_key(tax) or force_new_batch:
                     append_batch(current_batch)
                     current_batch = None
 
             if current_batch is None:
                 current_batch = {
-                    'key': batch_key(tax),
+                    'batch_key': batch_key(tax),
                     'taxes': [],
                     'amount_type': tax.amount_type,
                     'include_base_amount': tax.include_base_amount,
@@ -552,19 +594,20 @@ class AccountTax(models.Model):
         return batches
 
     @api.model
-    def _ascending_process_fixed_taxes_batch(self, batch, base, precision_rounding, extra_computation_values, fixed_multiplicator=1):
+    def _ascending_process_fixed_taxes_batch(self, batch, tax_computer, extra_base_variable, fixed_multiplicator=1):
         if batch['amount_type'] == 'fixed':
-            batch['computed'] = True
-            quantity = abs(extra_computation_values['quantity'])
+            batch['computed'] = 'tax'
             for tax_values in batch['taxes']:
-                tax_values['tax_amount'] = quantity * tax_values['tax'].amount * abs(fixed_multiplicator)
-                tax_values['tax_amount_factorized'] = float_round(
-                    tax_values['tax_amount'] * tax_values['factor'],
-                    precision_rounding=precision_rounding,
+                multiplicator = tax_values['tax'].amount * abs(fixed_multiplicator)
+                tax_values['tax_amount'] = tax_computer.new_equation(
+                    f"{multiplicator} * quantity"
+                )
+                tax_values['tax_amount_factorized'] = tax_computer.new_equation(
+                    f"{tax_values['tax_amount']} * {tax_values['factor']}"
                 )
 
     @api.model
-    def _descending_process_price_included_taxes_batch(self, batch, base, precision_rounding, extra_computation_values):
+    def _descending_process_price_included_taxes_batch(self, batch, tax_computer, extra_base_variable):
         tax_values_list = batch['taxes']
         amount_type = batch['amount_type']
         price_include = batch['price_include']
@@ -576,40 +619,68 @@ class AccountTax(models.Model):
                     tax_values['tax'].amount * tax_values['factor']
                     for tax_values in tax_values_list
                 ) / 100.0
-                computation_base = base / (1 + total_percent)
-                for tax_values in tax_values_list:
-                    tax_values['tax_amount'] = computation_base * tax_values['tax'].amount / 100.0
-                    tax_values['tax_amount_factorized'] = float_round(
-                        tax_values['tax_amount'] * tax_values['factor'],
-                        precision_rounding=precision_rounding,
-                    )
+                base_variable = tax_computer.new_equation(
+                    f"(price_unit * quantity) + {extra_base_variable}"
+                )
+                computation_base_variable = tax_computer.new_equation(
+                    f"{base_variable} / (1 + {total_percent})"
+                )
 
-                batch_base = base - sum(tax_values['tax_amount_factorized'] for tax_values in tax_values_list)
+                amounts_variable = []
                 for tax_values in tax_values_list:
-                    tax_values['base'] = tax_values['display_base'] = batch_base
+                    tax_values['tax_amount'] = tax_computer.new_equation(
+                        f"{computation_base_variable} * {tax_values['tax'].amount} / 100.0"
+                    )
+                    tax_values['tax_amount_factorized'] = tax_computer.new_equation(
+                        f"{tax_values['tax_amount']} * {tax_values['factor']}"
+                    )
+                    amounts_variable.append(tax_values['tax_amount_factorized'])
+
+                batch_base_variable = tax_computer.new_equation(
+                    f"{base_variable} - {' - '.join(amounts_variable)}"
+                )
+                for tax_values in tax_values_list:
+                    tax_values['base'] = tax_values['display_base'] = batch_base_variable
 
             elif amount_type == 'division':
                 batch['computed'] = True
+                base_variable = tax_computer.new_equation(
+                    f"(price_unit * quantity) + {extra_base_variable}"
+                )
 
+                amounts_variable = []
                 for tax_values in tax_values_list:
                     tax = tax_values['tax']
-                    not_factorized_base = base * (1 - (tax_values['tax'].amount * tax_values['factor'] / 100.0))
-                    tax_values['tax_amount'] = base - not_factorized_base
-                    tax_values['tax_amount_factorized'] = float_round(
-                        tax_values['tax_amount'] * tax_values['factor'],
-                        precision_rounding=precision_rounding,
+                    multiplicator = 1 - (tax_values['tax'].amount * tax_values['factor'] / 100.0)
+                    not_factorized_base_variable = tax_computer.new_equation(
+                        f"{base_variable} * {multiplicator}"
                     )
-                    tax_values['display_base'] = base
-                    tax_values['base'] = base - tax_values['tax_amount_factorized']
+                    tax_values['tax_amount'] = tax_computer.new_equation(
+                        f"{base_variable} - {not_factorized_base_variable}"
+                    )
+                    tax_values['tax_amount_factorized'] = tax_computer.new_equation(
+                        f"{tax_values['tax_amount']} * {tax_values['factor']}"
+                    )
+                    tax_values['display_base'] = base_variable
+                    amounts_variable.append(tax_values['tax_amount_factorized'])
+
+                batch_base_variable = tax_computer.new_equation(
+                    f"{base_variable} - {' - '.join(amounts_variable)}"
+                )
+                for tax_values in tax_values_list:
+                    tax_values['base'] = batch_base_variable
 
             elif amount_type == 'fixed':
                 batch['computed'] = True
-                batch_base = base - sum(tax_values['tax_amount_factorized'] for tax_values in tax_values_list)
+                amounts_variable = [tax_values['tax_amount_factorized'] for tax_values in batch['taxes']]
+                batch_base_variable = tax_computer.new_equation(
+                    f"((price_unit * quantity) + {extra_base_variable}) - {' - '.join(amounts_variable)}"
+                )
                 for tax_values in tax_values_list:
-                    tax_values['base'] = tax_values['display_base'] = batch_base
+                    tax_values['base'] = tax_values['display_base'] = batch_base_variable
 
     @api.model
-    def _ascending_process_taxes_batch(self, batch, base, precision_rounding, extra_computation_values):
+    def _ascending_process_taxes_batch(self, batch, tax_computer, extra_base_variable):
         tax_values_list = batch['taxes']
         amount_type = tax_values_list[0]['tax'].amount_type
         price_include = batch['price_include']
@@ -618,64 +689,390 @@ class AccountTax(models.Model):
 
             if amount_type == 'percent':
                 batch['computed'] = True
+                base_variable = tax_computer.new_equation(
+                    f"(price_unit * quantity) + {extra_base_variable}"
+                )
                 for tax_values in tax_values_list:
-                    tax_values['tax_amount'] = base * tax_values['tax'].amount / 100.0
-                    tax_values['tax_amount_factorized'] = float_round(
-                        tax_values['tax_amount'] * tax_values['factor'],
-                        precision_rounding=precision_rounding,
+                    multiplicator = tax_values['tax'].amount / 100.0
+                    tax_values['tax_amount'] = tax_computer.new_equation(
+                        f"{base_variable} * {multiplicator}"
                     )
-                    tax_values['base'] = tax_values['display_base'] = base
+                    tax_values['tax_amount_factorized'] = tax_computer.new_equation(
+                        f"{tax_values['tax_amount']} * {tax_values['factor']}"
+                    )
+                    tax_values['base'] = tax_values['display_base'] = base_variable
 
             elif amount_type == 'division':
                 batch['computed'] = True
+                base_variable = tax_computer.new_equation(
+                    f"(price_unit * quantity) + {extra_base_variable}"
+                )
                 for tax_values in tax_values_list:
-                    base_tax_included = base / (1 - (tax_values['tax'].amount / 100.0))
-                    tax_values['tax_amount'] = base_tax_included - base
-                    tax_values['tax_amount_factorized'] = float_round(
-                        tax_values['tax_amount'] * tax_values['factor'],
-                        precision_rounding=precision_rounding,
+                    multiplicator = 1 - (tax_values['tax'].amount * tax_values['factor'] / 100.0)
+                    base_tax_included_variable = tax_computer.new_equation(
+                        f"{base_variable} / {multiplicator}"
                     )
-                    tax_values['base'] = tax_values['display_base'] = base
+                    tax_values['tax_amount'] = tax_computer.new_equation(
+                        f"{base_tax_included_variable} - {base_variable}"
+                    )
+                    tax_values['tax_amount_factorized'] = tax_computer.new_equation(
+                        f"{tax_values['tax_amount']} * {tax_values['factor']}"
+                    )
+                    tax_values['base'] = tax_values['display_base'] = base_variable
 
             elif amount_type == 'fixed':
                 batch['computed'] = True
-                quantity = abs(extra_computation_values['quantity'])
+                base_variable = tax_computer.new_equation(
+                    f"(price_unit * quantity) + {extra_base_variable}"
+                )
                 for tax_values in tax_values_list:
-                    tax_values['tax_amount'] = quantity * tax_values['tax'].amount
-                    tax_values['tax_amount_factorized'] = float_round(
-                        tax_values['tax_amount'] * tax_values['factor'],
-                        precision_rounding=precision_rounding,
+                    tax_values['base'] = tax_values['display_base'] = base_variable
+
+    def _prepare_taxes_computation(
+        self,
+        fixed_multiplicator=1,
+        handle_price_include=True,
+        force_price_include=False,
+        is_refund=False,
+        include_caba_tags=False,
+        exclude_python_taxes=False,
+        rounding_method='round_per_line',
+        currency=None,
+        tax_computer=None,
+    ):
+        taxes = self._origin
+
+        # Flatten the taxes to handle the group of taxes.
+        taxes, groups_map = taxes.flatten_taxes_hierarchy(create_map=True)
+
+        # Select the right repartition lines.
+        if is_refund:
+            repartition_lines_field = 'refund_repartition_line_ids'
+        else:
+            repartition_lines_field = 'invoice_repartition_line_ids'
+
+        # Convert each tax into a dictionary.
+        tax_values_list = []
+        for tax in taxes:
+
+            # Exclude python taxes.
+            if tax.amount_type == 'code' and exclude_python_taxes:
+                continue
+
+            tax_values = {
+                'tax': tax,
+                'price_include': handle_price_include and (tax.price_include or force_price_include),
+            }
+            repartition_lines = tax[repartition_lines_field].filtered(lambda x: x.repartition_type == "tax")
+            tax_values['factor'] = sum(repartition_lines.mapped('factor'))
+            tax_values_list.append(tax_values)
+
+        # Group the taxes by batch of computation.
+        descending_batches = self._prepare_taxes_batches(tax_values_list)
+        ascending_batches = list(reversed(descending_batches))
+
+        # Prepare the computation.
+        tax_computer = tax_computer or TaxComputer()
+
+        # First ascending computation for fixed tax.
+        # In Belgium, we could have a price-excluded tax affecting the base of a price-included tax.
+        # In that case, we need to compute the fix amount before the descending computation.
+        base_delta_variable = "0.0"
+        for batch in ascending_batches:
+            batch['ascending_extra_delta_variable'] = base_delta_variable
+            self._ascending_process_fixed_taxes_batch(
+                batch,
+                tax_computer,
+                base_delta_variable,
+                fixed_multiplicator=fixed_multiplicator,
+            )
+            if batch.get('computed') in (True, 'tax') and batch['include_base_amount']:
+                amounts_variable = [tax_values['tax_amount_factorized'] for tax_values in batch['taxes']]
+                base_delta_variable = tax_computer.new_equation(
+                    f"{base_delta_variable} + {' + '.join(amounts_variable)}"
+                )
+
+        # First descending computation to compute price_included values.
+        base_delta_variable = "0.0"
+        for batch in descending_batches:
+            computed = batch.get('computed')
+            batch['descending_extra_delta_variable'] = base_delta_variable
+            if not computed or computed == 'tax':
+                batch['base_delta_variable'] = tax_computer.new_equation(
+                    f"{base_delta_variable} + {batch['ascending_extra_delta_variable']}"
+                )
+                self._descending_process_price_included_taxes_batch(
+                    batch,
+                    tax_computer,
+                    batch['base_delta_variable'],
+                )
+            if batch.get('computed') is True:
+                amounts_variable = [tax_values['tax_amount_factorized'] for tax_values in batch['taxes']]
+                base_delta_variable = tax_computer.new_equation(
+                    f"{base_delta_variable} - {' - '.join(amounts_variable)}"
+                )
+
+        # Second ascending computation to compute the missing values for price-excluded taxes.
+        # Build the final results.
+        base_delta_variable = "0.0"
+        tax_values_list = []
+        for i, batch in enumerate(ascending_batches):
+            computed = batch.get('computed')
+            if computed is not True:
+                batch['base_delta_variable'] = tax_computer.new_equation(
+                    f"{base_delta_variable} + {batch['ascending_extra_delta_variable']} + {batch['descending_extra_delta_variable']}"
+                )
+                self._ascending_process_taxes_batch(
+                    batch,
+                    tax_computer,
+                    batch['base_delta_variable'],
+                )
+
+                if not computed and batch['include_base_amount']:
+                    amounts_variable = [tax_values['tax_amount_factorized'] for tax_values in batch['taxes']]
+                    base_delta_variable = tax_computer.new_equation(
+                        f"{base_delta_variable} + {' + '.join(amounts_variable)}"
                     )
-                    tax_values['base'] = tax_values['display_base'] = base
+
+            # Compute the subsequent taxes.
+            subsequent_taxes = self.env['account.tax']
+            if batch['include_base_amount']:
+                for next_batch in ascending_batches[i + 1:]:
+                    for next_tax_values in next_batch['taxes']:
+                        subsequent_taxes |= next_tax_values['tax']
+
+            # Compute the subsequent tags.
+            taxes_for_subsequent_tags = subsequent_taxes
+            if not include_caba_tags:
+                taxes_for_subsequent_tags = subsequent_taxes.filtered(lambda x: x.tax_exigibility != 'on_payment')
+            subsequent_tags = taxes_for_subsequent_tags.get_tax_tags(is_refund, 'base')
+
+            for tax_values in batch['taxes']:
+                tax = tax_values.pop('tax')
+                tax_values.update({
+                    'tax_id': tax.id,
+                    'tax__name': tax.name,
+                    'tax__amount': tax.amount,
+                    'tax__amount_type': tax.amount_type,
+                    'group_id': groups_map.get(tax, self.env['account.tax']).id,
+                    'tax_ids': subsequent_taxes.ids,
+                    'tag_ids': subsequent_tags.ids,
+                    'price_include': batch['price_include'],
+                })
+                tax_values_list.append(tax_values)
+
+        # Round per line.
+        if rounding_method == 'round_per_line':
+            for batch in ascending_batches:
+                if batch['price_include']:
+                    # The total amount price-included must remain the same as before even after rounding.
+                    total_included = batch['taxes'][0]['base']
+                    amounts_variable = [tax_values['tax_amount_factorized'] for tax_values in tax_values_list]
+                    for tax_values in batch['taxes']:
+                        tax_values['tax_amount_factorized'] = tax_computer.new_equation(
+                            f"round({tax_values['tax_amount_factorized']}, {currency.decimal_places})"
+                        )
+                        tax_values['display_base'] = tax_computer.new_equation(
+                            f"round({tax_values['display_base']}, {currency.decimal_places})"
+                        )
+                    amounts_variable_rounded = [tax_values['tax_amount_factorized'] for tax_values in tax_values_list]
+                    total_included = tax_computer.new_equation(
+                        f"round({total_included} + {' + '.join(amounts_variable)} - {' - '.join(amounts_variable_rounded)}, {currency.decimal_places})"
+                    )
+                    for tax_values in batch['taxes']:
+                        tax_values['base'] = total_included
+                else:
+                    # The total amount price-excluded must remain the same as before even after rounding.
+                    amounts_variable = [tax_values['tax_amount_factorized'] for tax_values in tax_values_list]
+                    total_rounded_at_the_end = tax_computer.new_equation(
+                        f"round({tax_values_list[0]['base']} + {' + '.join(amounts_variable)}, {currency.decimal_places})"
+                    )
+                    for tax_values in tax_values_list:
+                        tax_values['base'] = tax_computer.new_equation(
+                            f"round({tax_values['base']}, {currency.decimal_places})"
+                        )
+                        tax_values['display_base'] = tax_computer.new_equation(
+                            f"round({tax_values['display_base']}, {currency.decimal_places})"
+                        )
+                        tax_values['tax_amount_factorized'] = tax_computer.new_equation(
+                            f"round({tax_values['tax_amount_factorized']}, {currency.decimal_places})"
+                        )
+                    amounts_variable = [tax_values['tax_amount_factorized'] for tax_values in tax_values_list]
+                    total_rounded = tax_computer.new_equation(
+                        f"{tax_values_list[0]['base']} + {' + '.join(amounts_variable)}"
+                    )
+                    tax_values_list[-1]['tax_amount_factorized'] = tax_computer.new_equation(
+                        f"{total_rounded_at_the_end} - {total_rounded} + {tax_values_list[-1]['tax_amount_factorized']}"
+                    )
+
+        # Compute total_included / total_excluded.
+        if tax_values_list:
+            total_included = total_excluded = tax_values_list[0]['base']
+            amounts_variable = [tax_values['tax_amount_factorized'] for tax_values in tax_values_list]
+            total_included = tax_computer.new_equation(
+                f"{total_included} + {' + '.join(amounts_variable)}"
+            )
+        elif rounding_method == 'round_per_line':
+            total_included = total_excluded = tax_computer.new_equation(
+                f"round(quantity * price_unit, {currency.decimal_places})"
+            )
+        else:
+            total_included = total_excluded = tax_computer.new_equation(
+                "quantity * price_unit"
+            )
+
+        return {
+            'tax_values_list': tax_values_list,
+            'total_excluded': total_excluded,
+            'total_included': total_included,
+            'tax_computer': tax_computer,
+        }
+
+    def _prepare_price_unit_after_fiscal_position(
+        self,
+        fiscal_position,
+        fixed_multiplicator=1,
+        exclude_python_taxes=False,
+        rounding_method='round_per_line',
+        currency=None,
+    ):
+        # No Taxes.
+        if not self:
+            return None
+
+        flattened_taxes_before_fp, flattened_taxes_after_fp, mode = fiscal_position._prepare_to_adapt_price_unit(self)
+
+        # Nothing to map.
+        if not mode:
+            return None
+
+        if mode == 'same_price':
+            return {
+                'taxes': flattened_taxes_after_fp,
+            }
+
+        taxes_computation = flattened_taxes_before_fp._prepare_taxes_computation(
+            fixed_multiplicator=fixed_multiplicator,
+            exclude_python_taxes=exclude_python_taxes,
+            rounding_method=rounding_method,
+            currency=currency,
+        )
+        price_unit_variable = taxes_computation['total_excluded']
+
+        if mode == 'excluded_then_included':
+            taxes_computation = flattened_taxes_after_fp._prepare_taxes_computation(
+                fixed_multiplicator=fixed_multiplicator,
+                handle_price_include=False,
+                exclude_python_taxes=exclude_python_taxes,
+                rounding_method=rounding_method,
+                currency=currency,
+                tax_computer=taxes_computation['tax_computer'],
+            )
+            amounts_variable = [
+                tax_values['tax_amount_factorized']
+                for tax_values in taxes_computation['tax_values_list']
+                if tax_values['price_include']
+            ]
+            if amounts_variable:
+                price_unit_variable = tax_computer.new_equation(
+                    f"{price_unit_variable} + {' + '.join(amounts_variable)})"
+                )
+
+        return {
+            'price_unit': price_unit_variable,
+            'taxes': flattened_taxes_after_fp,
+            'tax_computer': taxes_computation['tax_computer'],
+        }
 
     @api.model
-    def _prepare_tax_repartition_line_results(self, tax_values, currency, precision_rounding):
-        repartition_line_amounts = [
-            float_round(tax_values['tax_amount'] * line.factor, precision_rounding=precision_rounding)
-            for line in tax_values['repartition_lines']
-        ]
-        total_rounding_error = float_round(
-            tax_values['tax_amount_factorized'] - sum(repartition_line_amounts),
-            precision_rounding=precision_rounding,
-        )
-        nber_rounding_steps = int(abs(total_rounding_error / currency.rounding))
-        rounding_error = float_round(
-            total_rounding_error / nber_rounding_steps if nber_rounding_steps else 0.0,
-            precision_rounding=precision_rounding,
-        )
+    def _eval_taxes_computation(self, taxes_computation, price_unit, quantity, extra_computation_values=None):
+        tax_computer = taxes_computation['tax_computer']
+        tax_values_list = taxes_computation['tax_values_list']
 
-        tax_repartition_values_list = []
-        for repartition_line, line_amount in zip(tax_values['repartition_lines'], repartition_line_amounts):
+        # Evaluate the expressions.
+        local_results = tax_computer.eval({
+            **(extra_computation_values or {}),
+            'price_unit': price_unit,
+            'quantity': quantity,
+            'round': lambda v, pd: float_round(v, precision_digits=pd),
+        })
 
-            if nber_rounding_steps:
-                line_amount += rounding_error
-                nber_rounding_steps -= 1
-
-            tax_repartition_values_list.append({
-                'tax_amount': line_amount,
-                'repartition_line': repartition_line,
+        # Build the results.
+        eval_tax_values_list = []
+        for tax_values in tax_values_list:
+            eval_tax_values_list.append({
+                'tax_id': tax_values['tax_id'],
+                'group_id': tax_values['group_id'],
+                'tax_ids': tax_values['tax_ids'],
+                'tag_ids': tax_values['tag_ids'],
+                'price_include': tax_values['price_include'],
+                'tax_amount': local_results[tax_values['tax_amount']],
+                'tax_amount_factorized': local_results[tax_values['tax_amount_factorized']],
+                'base': local_results[tax_values['base']],
+                'display_base': local_results[tax_values['display_base']],
             })
-        return tax_repartition_values_list
+
+        return {
+            'tax_values_list': eval_tax_values_list,
+            'total_excluded': local_results[taxes_computation['total_excluded']],
+            'total_included': local_results[taxes_computation['total_included']],
+        }
+
+    @api.model
+    def _apply_taxes_computation_split_repartition_lines(
+        self,
+        tax_values_list,
+        currency,
+        is_refund=False,
+        include_caba_tags=False,
+    ):
+        if is_refund:
+            repartition_lines_field = 'refund_repartition_line_ids'
+        else:
+            repartition_lines_field = 'invoice_repartition_line_ids'
+
+        tax_rep_values_list = []
+        for tax_values in tax_values_list:
+            tax = tax_values['tax']
+            subsequent_tags = tax_values['tags']
+            rep_lines = tax[repartition_lines_field].filtered(lambda x: x.repartition_type == 'tax')
+
+            repartition_line_amounts = [
+                currency.round(tax_values['tax_amount'] * line.factor)
+                for line in rep_lines
+            ]
+            total_rounding_error = currency.round(
+                tax_values['tax_amount_factorized'] - sum(repartition_line_amounts)
+            )
+            nber_rounding_steps = int(abs(total_rounding_error / currency.rounding))
+            rounding_error = currency.round(
+                total_rounding_error / nber_rounding_steps if nber_rounding_steps else 0.0
+            )
+
+            for rep_line, line_amount in zip(rep_lines, repartition_line_amounts):
+
+                # The error is smoothly dispatched on repartition lines.
+                # If you have 5 repartition lines and 0.03 to dispatch, three of them will take 0.01 instead of
+                # only one getting 0.03.
+                if nber_rounding_steps:
+                    line_amount += rounding_error
+                    nber_rounding_steps -= 1
+
+                # Tags.
+                if not include_caba_tags and tax.tax_exigibility == 'on_payment':
+                    rep_line_tags = self.env['account.account.tag']
+                else:
+                    rep_line_tags = rep_line.tag_ids
+
+                tax_rep_values = {
+                    **tax_values,
+                    'tax_amount_factorized': line_amount,
+                    'tax_amount': line_amount,
+                    'repartition_line': rep_line,
+                    'tags': subsequent_tags | rep_line_tags,
+                }
+                tax_rep_values_list.append(tax_rep_values)
+        return tax_rep_values_list
 
     def flatten_taxes_hierarchy(self, create_map=False):
         # Flattens the taxes contained in this recordset, returning all the
@@ -707,57 +1104,61 @@ class AccountTax(models.Model):
             .mapped('tag_ids')
 
     @api.model
-    def _prepare_base_line_tax_details(self, base_line, company, fixed_multiplicator=1, need_extra_precision=None):
-        currency = base_line['currency'] or company.currency_id
-
-        # Flatten the taxes to handle the group of taxes.
-        taxes = base_line['taxes']._origin
-        taxes, groups_map = taxes.flatten_taxes_hierarchy(create_map=True)
-
-        # Currency precision.
-        precision_rounding = currency.rounding
-        if need_extra_precision is None:
-            need_extra_precision = company.tax_calculation_rounding_method == 'round_globally'
-        if need_extra_precision:
-            precision_rounding *= 1e-5
-
-        # Initial base amount.
-        # All computation starts with a rounded amount because everything ends up in moneraty fields after all.
+    def _prepare_base_line_tax_details(
+        self,
+        base_line,
+        company,
+        fixed_multiplicator=1,
+        need_extra_precision=None,
+        include_caba_tags=False,
+        split_repartition_lines=False,
+    ):
+        # Prepare computation of python taxes (see the 'account_tax_python' module).
         price_unit = base_line['price_unit'] * (1 - (base_line['discount'] / 100.0))
         quantity = base_line['quantity']
-        base = currency.round(price_unit * quantity)
-        rate = base_line['rate'] or 1.0
+        product = base_line['product']
+        partner = base_line['partner']
+
+        # Prepare the tax computation.
+        taxes = base_line['taxes']._origin
+        handle_price_include = base_line['handle_price_include']
+        force_price_include = base_line['extra_context'].get('force_price_include')
         is_refund = base_line['is_refund']
+        if need_extra_precision is None:
+            rounding_method = company.tax_calculation_rounding_method
+        elif need_extra_precision:
+            rounding_method = 'round_globally'
+        else:
+            rounding_method = 'round_per_line'
+        currency = base_line['currency'] or company.currency_id
+        taxes_computation = taxes._prepare_taxes_computation(
+            fixed_multiplicator=fixed_multiplicator,
+            handle_price_include=handle_price_include,
+            force_price_include=force_price_include,
+            is_refund=is_refund,
+            include_caba_tags=include_caba_tags,
+            rounding_method=rounding_method,
+            currency=currency,
+        )
 
-        sign = 1
-        if currency.is_zero(base):
-            sign = -1 if fixed_multiplicator < 0 else 1
-        elif base < 0:
-            sign = -1
-            base = -base
-
-        # Convert each tax into a dictionary.
+        # Select the right repartition lines.
         if is_refund:
             repartition_lines_field = 'refund_repartition_line_ids'
         else:
             repartition_lines_field = 'invoice_repartition_line_ids'
 
-        handle_price_include = base_line['handle_price_include']
-        force_price_include = base_line['extra_context'].get('force_price_include')
+        # Tags on the base line.
+        base_taxes_for_tags = self.env['account.tax']
+        for tax_values in taxes_computation['tax_values_list']:
+            tax = self.browse(tax_values['tax_id'])
+            if include_caba_tags or tax.tax_exigibility != 'on_payment':
+                base_taxes_for_tags |= tax
+        base_rep_lines = base_taxes_for_tags[repartition_lines_field].filtered(lambda x: x.repartition_type == 'base')
+        base_tags = base_rep_lines.tag_ids
+        if product:
+            base_tags |= product.account_tag_ids
 
-        tax_values_list = []
-        for tax in taxes:
-            tax_values = {
-                'tax': tax,
-                'price_include': handle_price_include and (tax.price_include or force_price_include),
-                'repartition_lines': tax[repartition_lines_field].filtered(lambda x: x.repartition_type == "tax"),
-            }
-            tax_values['factor'] = sum(tax_values['repartition_lines'].mapped('factor'))
-            tax_values_list.append(tax_values)
-
-        # Prepare computation of python taxes (see the 'account_tax_python' module).
-        product = base_line['product']
-        partner = base_line['partner']
+        # Eval.
         extra_computation_values = {
             'price_unit': price_unit,
             'quantity': quantity,
@@ -766,231 +1167,56 @@ class AccountTax(models.Model):
             'fixed_multiplicator': fixed_multiplicator,
             'company': company,
         }
+        taxes_computation = self.env['account.tax']._eval_taxes_computation(
+            taxes_computation,
+            price_unit,
+            quantity,
+            extra_computation_values=extra_computation_values,
+        )
 
-        # Group the taxes by batch of computation.
-        descending_batches = self._prepare_taxes_batches(tax_values_list)
-        ascending_batches = list(reversed(descending_batches))
-
-        # First ascending computation for fixed tax.
-        # In Belgium, we could have a price-excluded tax affecting the base of a price-included tax.
-        # In that case, we need to compute the fix amount before the descending computation.
-        extra_base = 0.0
-        for batch in ascending_batches:
-            batch['extra_base'] = extra_base
-            self._ascending_process_fixed_taxes_batch(
-                batch,
-                base,
-                precision_rounding,
-                extra_computation_values,
-                fixed_multiplicator=fixed_multiplicator,
-            )
-            if batch.get('computed'):
-                batch.pop('computed')
-                if batch['include_base_amount']:
-                    extra_base += sum(tax_values['tax_amount_factorized'] for tax_values in batch['taxes'])
-
-        # First descending computation to compute price_included values and find the total_excluded amount.
-        for batch in descending_batches:
-            self._descending_process_price_included_taxes_batch(
-                batch,
-                base + batch['extra_base'],
-                precision_rounding,
-                extra_computation_values,
-            )
-            if batch.get('computed'):
-                base -= sum(tax_values['tax_amount_factorized'] for tax_values in batch['taxes'])
-
-        first_base = base
-
-        # Second ascending computation to compute the missing values for price-excluded taxes.
-        # Build the final results.
-        tax_details_list = []
-        for i, batch in enumerate(ascending_batches):
-            is_computed = batch.get('computed')
-            if is_computed:
-                # All already computed batches are considered as include in price. It's the trade-off
-                # when dealing with both price-included and price-excluded taxes.
-                base += sum(tax_values['tax_amount_factorized'] for tax_values in batch['taxes'])
-            else:
-                self._ascending_process_taxes_batch(
-                    batch,
-                    base,
-                    precision_rounding,
-                    extra_computation_values,
-                )
-
-            subsequent_taxes = self.env['account.tax']
-            subsequent_tags = self.env['account.account.tag']
-            if batch['include_base_amount']:
-
-                # Price-included taxes are already accounted at this point.
-                if not is_computed:
-                    base += sum(tax_values['tax_amount_factorized'] for tax_values in batch['taxes'])
-
-                for next_batch in ascending_batches[i + 1:]:
-                    for next_tax_values in next_batch['taxes']:
-                        subsequent_taxes |= next_tax_values['tax']
-
-            for tax_values in batch['taxes']:
-                tax = tax_values['tax']
-                tax_values.update({
-                    'name': tax.with_context(lang=partner.lang).name if partner else tax.name,
-                    'group': groups_map.get(tax),
-                    'taxes': subsequent_taxes,
-                    'price_include': batch['price_include'],
-                })
-                for field_to_sign in ('tax_amount', 'tax_amount_factorized', 'base', 'display_base'):
-                    tax_values[field_to_sign] *= sign
-
-                tax_details_list.append(tax_values)
-
-        return {
-            'base': sign * first_base,
-            'precision_rounding': precision_rounding,
-            'repartition_lines_field': repartition_lines_field,
-            'tax_details_list': tax_details_list,
-        }
-
-    @api.model
-    def _split_base_lines_tax_details_per_repartition_lines(self, to_process, company, include_caba_tags=False):
-        results = []
-        for base_line, tax_details_results in to_process:
-            is_refund = base_line['is_refund']
-            currency = base_line['currency'] or company.currency_id
-            product = base_line['product']
-            rate = base_line['rate'] or 1.0
-
-            tax_details_list = tax_details_results['tax_details_list']
-            tax_details_list = tax_details_results['tax_details_list']
-            base = tax_details_results['base']
-            precision_rounding = tax_details_results['precision_rounding']
-            repartition_lines_field = tax_details_results['repartition_lines_field']
-
-            total_included = total_void = total_excluded = base
-            base_taxes_for_tags = self.env['account.tax']
-            repartition_tax_details_list = []
-            for tax_values in tax_details_list:
-                tax = tax_values['tax']
-                subsequent_taxes = tax_values['taxes']
-
-                # Compute the subsequent tags.
-                taxes_for_subsequent_tags = subsequent_taxes
-                if not include_caba_tags:
-                    taxes_for_subsequent_tags = subsequent_taxes.filtered(lambda x: x.tax_exigibility != 'on_payment')
-                subsequent_tags = taxes_for_subsequent_tags.get_tax_tags(is_refund, 'base')
-
-                # Dispatch the amount onto the repartition lines.
-                # Take care of rounding errors: the sum of each sub-amount must be exactly equal to the tax amount.
-                repartition_line_amounts = [
-                    float_round(tax_values['tax_amount'] * line.factor, precision_rounding=precision_rounding)
-                    for line in tax_values['repartition_lines']
-                ]
-                total_rounding_error = float_round(
-                    tax_values['tax_amount_factorized'] - sum(repartition_line_amounts),
-                    precision_rounding=precision_rounding,
-                )
-                nber_rounding_steps = int(abs(total_rounding_error / currency.rounding))
-                rounding_error = float_round(
-                    total_rounding_error / nber_rounding_steps if nber_rounding_steps else 0.0,
-                    precision_rounding=precision_rounding,
-                )
-
-                # Create the result for each repartition lines.
-                for repartition_line, line_amount in zip(tax_values['repartition_lines'], repartition_line_amounts):
-
-                    # The error is smoothly dispatched on repartition lines.
-                    # If you have 5 repartition lines and 0.03 to dispatch, three of them will take 0.01 instead of
-                    # only one getting 0.03.
-                    if nber_rounding_steps:
-                        line_amount += rounding_error
-                        nber_rounding_steps -= 1
-
-                    if not include_caba_tags and tax.tax_exigibility == 'on_payment':
-                        repartition_line_tags = self.env['account.account.tag']
-                    else:
-                        repartition_line_tags = repartition_line.tag_ids
-
-                    repartition_tax_details_list.append({
-                        'tax': tax,
-                        'name': tax_values['name'],
-                        'tax_amount_currency': line_amount,
-                        'tax_amount': line_amount / rate,
-                        'base_amount_currency': tax_values['base'],
-                        'base_amount': tax_values['base'] / rate,
-                        'display_base_amount_currency': tax_values['display_base'],
-                        'display_base_amount': tax_values['display_base'] / rate,
-                        'account': repartition_line._get_aml_target_tax_account(force_caba_exigibility=include_caba_tags),
-                        'tax_repartition_line': repartition_line,
-                        'group': tax_values['group'] or self.env['account.tax'],
-                        'tags': repartition_line_tags + subsequent_tags,
-                        'taxes': subsequent_taxes,
-                    })
-
-                    if not repartition_line.account_id:
-                        total_void += line_amount
-                    total_included += line_amount
-
-                if include_caba_tags or tax.tax_exigibility != 'on_payment':
-                    base_taxes_for_tags |= tax
-
-            base_rep_lines = base_taxes_for_tags \
-                .mapped(repartition_lines_field) \
-                .filtered(lambda x: x.repartition_type == 'base')
-
-            tax_details_results.update({
-                'base_tags': base_rep_lines.tag_ids + product.account_tag_ids,
-                'taxes': repartition_tax_details_list,
-                'total_excluded': currency.round(total_excluded),
-                'total_included': currency.round(total_included),
-                'total_void': currency.round(total_void),
+        # Convert id to records.
+        tax_values_list = taxes_computation['tax_values_list']
+        for tax_values in tax_values_list:
+            tax = tax_values['tax'] = self.browse(tax_values['tax_id'])
+            subsequent_taxes = self.browse(tax_values['tax_ids'])
+            subsequent_tags = self.env['account.account.tag'].browse(tax_values['tag_ids'])
+            group = self.browse(tax_values['group_id']) if tax_values['group_id'] else self.env['account.tax']
+            tax_values.update({
+                'tax': tax,
+                'group': group,
+                'taxes': subsequent_taxes,
+                'tags': subsequent_tags,
             })
 
-    @api.model
-    def _round_base_lines_tax_details(self, to_process, company, tax_lines=None):
-        amount_per_grouping_key = defaultdict(lambda: {
-            'base_amount_currency': 0.0,
-            'tax_amount_currency': 0.0,
-            'tax_details_list': [],
-        })
+        # Repartition lines.
+        if split_repartition_lines:
+            tax_values_list = self._apply_taxes_computation_split_repartition_lines(
+                tax_values_list,
+                currency,
+                is_refund=is_refund,
+                include_caba_tags=include_caba_tags,
+            )
 
-        # Map the tax lines.
-        tax_line_mapping = {}
-        for tax_line in tax_lines or []:
-            grouping_key = frozendict(self._get_generation_dict_from_tax_line(tax_line))
-            tax_line_mapping[grouping_key] = tax_line
+        # Apply the rate.
+        for tax_values in tax_values_list:
+            rate = base_line.get('rate') or 1.0
+            tax_values['display_base_amount_currency'] = tax_values['display_base']
+            tax_values['display_base_amount'] = tax_values['display_base_amount_currency'] / rate if rate else 0.0
+            tax_values['base_amount_currency'] = tax_values['base']
+            tax_values['base_amount'] = tax_values['base_amount_currency'] / rate if rate else 0.0
+            tax_values['tax_amount_currency'] = tax_values['tax_amount_factorized']
+            tax_values['tax_amount'] = tax_values['tax_amount_currency'] / rate if rate else 0.0
+            if rounding_method == 'round_per_line':
+                tax_values['display_base_amount'] = currency.round(tax_values['display_base_amount'])
+                tax_values['base_amount'] = currency.round(tax_values['base_amount'])
+                tax_values['tax_amount'] = currency.round(tax_values['tax_amount'])
 
-        # Aggregate the tax details according the grouping key.
-        for base_line, tax_details_results in to_process:
-            currency = base_line['currency'] or company.currency_id
-            for tax_values in tax_details_results['taxes']:
-                grouping_key = frozendict(self._get_generation_dict_from_base_line(base_line, tax_values))
-                amounts = amount_per_grouping_key[grouping_key]
-                amounts['base_amount_currency'] += tax_values['base_amount_currency']
-                amounts['tax_amount_currency'] += tax_values['tax_amount_currency']
-                amounts['tax_details_list'].append(tax_values)
-
-        # Round and dispatch the error.
-        for grouping_key, amounts in amount_per_grouping_key.items():
-
-            if grouping_key in tax_line_mapping:
-                amounts['tax_amount_currency'] = tax_line_mapping[grouping_key]['tax_amount']
-
-            for key_to_fix in ('base_amount_currency', 'tax_amount_currency'):
-                total_value = 0.0
-                for tax_values in amounts['tax_details_list']:
-                    tax_values[key_to_fix] = currency.round(tax_values[key_to_fix])
-                    total_value += tax_values[key_to_fix]
-
-                total_rounding_error = currency.round(amounts[key_to_fix]) - total_value
-                nber_rounding_steps = int(abs(total_rounding_error / currency.rounding))
-                rounding_error = currency.round(total_rounding_error / nber_rounding_steps if nber_rounding_steps else 0.0)
-
-                for tax_values in amounts['tax_details_list']:
-                    if not nber_rounding_steps:
-                        break
-
-                    tax_values[key_to_fix] += rounding_error
-                    nber_rounding_steps -= 1
+        return {
+            'base_tags': base_tags,
+            'total_excluded': taxes_computation['total_excluded'],
+            'total_included': taxes_computation['total_included'],
+            'tax_values_list': tax_values_list,
+        }
 
     def compute_all(self, price_unit, currency=None, quantity=1.0, product=None, partner=None, is_refund=False, handle_price_include=True, include_caba_tags=False, fixed_multiplicator=1):
         """Compute all information required to apply taxes (in self + their children in case of a tax group).
@@ -1054,50 +1280,54 @@ class AccountTax(models.Model):
             extra_context={'force_price_include': self._context.get('force_price_include')},
         )
         product = base_line['product']
-        kwargs = {'need_extra_precision': True} if self._context.get('round') else {}
-        tax_details_results = self._prepare_base_line_tax_details(
+        results = self._prepare_base_line_tax_details(
             base_line,
             company,
             fixed_multiplicator=fixed_multiplicator,
-            **kwargs,
-        )
-        self._split_base_lines_tax_details_per_repartition_lines(
-            [(base_line, tax_details_results)],
-            company,
+            need_extra_precision=True if self._context.get('round') else None,
             include_caba_tags=include_caba_tags,
+            split_repartition_lines=True,
+        )
+        tax_values_list = results['tax_values_list']
+        base_tags = results['base_tags']
+        total_excluded = results['total_excluded']
+        total_included = results['total_included']
+
+        total_void = total_excluded + sum(
+            tax_values['tax_amount']
+            for tax_values in tax_values_list
+            if not tax_values['repartition_line'].account_id
         )
 
         # Convert to the 'old' compute_all api.
-        results = {
-            k: v
-            for k, v in tax_details_results.items()
-            if k in ('base_tags', 'taxes', 'total_excluded', 'total_included', 'total_void')
-        }
-        base_tags = results.pop('base_tags')
-        results['base_tags'] = base_tags.ids
-
-        for tax_values in results['taxes']:
-            tax = tax_values.pop('tax')
-            tax_rep = tax_values.pop('tax_repartition_line')
-            account = tax_values.pop('account')
-            tags = tax_values.pop('tags')
-            taxes = tax_values.pop('taxes')
-            tax_values.update({
+        taxes = []
+        for tax_values in tax_values_list:
+            tax = tax_values['tax']
+            rep_line = tax_values['repartition_line']
+            taxes.append({
                 'id': tax.id,
-                'name': tax_values['name'],
+                'name': partner and tax.with_context(lang=partner.lang).name or tax.name,
+                'amount': tax_values['tax_amount'],
+                'base': tax_values['base'],
                 'sequence': tax.sequence,
-                'account_id': account.id,
+                'account_id': rep_line._get_aml_target_tax_account(force_caba_exigibility=include_caba_tags).id,
                 'analytic': tax.analytic,
+                'use_in_tax_closing': rep_line.use_in_tax_closing,
+                'price_include': tax_values['price_include'],
                 'tax_exigibility': tax.tax_exigibility,
-                'tax_repartition_line_id': tax_rep.id,
-                'use_in_tax_closing': tax_rep.use_in_tax_closing,
-                'tag_ids': tags.ids,
-                'tax_ids': taxes.ids,
-                'base': tax_values['base_amount_currency'],
-                'amount': tax_values['tax_amount_currency'],
+                'tax_repartition_line_id': rep_line.id,
+                'group': tax_values['group'],
+                'tag_ids': tax_values['tags'].ids,
+                'tax_ids': tax_values['taxes'].ids,
             })
 
-        return results
+        return {
+            'base_tags': base_tags.ids,
+            'taxes': taxes,
+            'total_excluded': total_excluded,
+            'total_included': total_included,
+            'total_void': total_void,
+        }
 
     @api.model
     def _convert_to_tax_base_line_dict(
@@ -1132,7 +1362,7 @@ class AccountTax(models.Model):
     def _convert_to_tax_line_dict(
             self, tax_line,
             partner=None, currency=None, taxes=None, tax_tags=None, tax_repartition_line=None,
-            group_tax=None, account=None, analytic_distribution=None, tax_amount=None,
+            group_tax=None, account=None, analytic_distribution=None, tax_amount_currency=None, tax_amount=None,
     ):
         return {
             'record': tax_line,
@@ -1144,6 +1374,7 @@ class AccountTax(models.Model):
             'group_tax': group_tax or self.env['account.tax'],
             'account': account or self.env['account.account'],
             'analytic_distribution': analytic_distribution,
+            'tax_amount_currency': tax_amount_currency or 0.0,
             'tax_amount': tax_amount or 0.0,
         }
 
@@ -1249,7 +1480,7 @@ class AccountTax(models.Model):
 
             base_added = False
             base_grouping_key_added = set()
-            for tax_values in tax_details_results['taxes']:
+            for tax_values in tax_details_results['tax_values_list']:
                 grouping_key = frozendict(grouping_key_generator(base_line, tax_values))
 
                 base_amount_currency = currency.round(tax_values['base_amount_currency'])
@@ -1344,14 +1575,13 @@ class AccountTax(models.Model):
         # Prepare the tax details for each line.
         to_process = []
         for base_line in base_lines:
-            tax_details_results = self._prepare_base_line_tax_details(base_line, company)
+            tax_details_results = self._prepare_base_line_tax_details(
+                base_line,
+                company,
+                include_caba_tags=include_caba_tags,
+                split_repartition_lines=True,
+            )
             to_process.append((base_line, tax_details_results))
-
-        # Split the tax details per repartition lines.
-        self._split_base_lines_tax_details_per_repartition_lines(to_process, company, include_caba_tags=include_caba_tags)
-
-        # Round according '_get_generation_dict_from_base_line' to avoid rounding issues when dealing with 'round_globally'.
-        self._round_base_lines_tax_details(to_process, company, tax_lines=tax_lines)
 
         # Fill 'base_lines_to_update' and 'totals'.
         for base_line, tax_details_results in to_process:
@@ -1468,17 +1698,30 @@ class AccountTax(models.Model):
 
         # ==== Compute the taxes ====
 
+        # Round according the tax lines.
+        target_tax_details_by_tax = defaultdict(lambda: [0.0, 0.0])
+        for tax_line in tax_lines or []:
+            tax_id = tax_line['tax_repartition_line'].tax_id.id
+            target_tax_details_by_tax[tax_id][0] += tax_line['tax_amount']
+            target_tax_details_by_tax[tax_id][1] += tax_line['tax_amount_currency']
+
         # Prepare the tax details for each line.
+        tax_details_by_tax = defaultdict(list)
         to_process = []
         for base_line in base_lines:
             tax_details_results = self._prepare_base_line_tax_details(base_line, company)
             to_process.append((base_line, tax_details_results))
+            for tax_values in tax_details_results['tax_values_list']:
+                tax_details_by_tax[tax_values['tax_id']].append(tax_values)
+                if tax_values['tax_id'] in target_tax_details_by_tax:
+                    target_tax_details_by_tax[tax_values['tax_id']][0] -= tax_values['tax_amount']
+                    target_tax_details_by_tax[tax_values['tax_id']][1] -= tax_values['tax_amount_currency']
 
-        # Split the tax details per repartition lines.
-        self._split_base_lines_tax_details_per_repartition_lines(to_process, company)
-
-        # Round according '_get_generation_dict_from_base_line' to avoid rounding issues when dealing with 'round_globally'.
-        self._round_base_lines_tax_details(to_process, company, tax_lines=tax_lines)
+        # Round according the tax lines.
+        for tax_id, tax_amount in target_tax_details_by_tax.items():
+            if tax_id in tax_details_by_tax:
+                tax_details_by_tax[tax_id][-1]['tax_amount'] += target_tax_details_by_tax[tax_id][0]
+                tax_details_by_tax[tax_id][-1]['tax_amount_currency'] += target_tax_details_by_tax[tax_id][1]
 
         # Compute the untaxed amounts.
         amount_untaxed = 0.0
@@ -1488,8 +1731,7 @@ class AccountTax(models.Model):
             amount_untaxed_currency += tax_details_results['total_excluded']
 
         def grouping_key_generator(base_line, tax_values):
-            source_tax = tax_values['tax_repartition_line'].tax_id
-            return {'tax_group': source_tax.tax_group_id}
+            return {'tax_group': tax_values['tax'].tax_group_id}
 
         global_tax_details = self._aggregate_taxes(to_process, company, grouping_key_generator=grouping_key_generator)
         tax_group_details_list = sorted(

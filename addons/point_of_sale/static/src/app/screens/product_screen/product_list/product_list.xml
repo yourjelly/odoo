@@ -18,12 +18,13 @@
             <div class="product-list-container flex-grow-1 overflow-y-auto">
                 <div t-if="productsToDisplay.length != 0 and pos.posHasValidProduct()" t-attf-class="product-list {{this.pos.productListViewMode}} p-1">
                     <t t-foreach="productsToDisplay" t-as="product" t-key="product.id">
+                        <t t-set="cardInfo" t-value="product.getProductCardValues()"/>
                         <ProductCard
                             class="pos.productViewMode"
                             name="product.display_name"
                             productId="product.id"
-                            price="product.getFormattedUnitPrice()"
-                            imageUrl="product.getImageUrl()"
+                            price="cardInfo.displayPrice"
+                            imageUrl="cardInfo.imageUrl"
                             onClick="() =>this.pos.addProductToCurrentOrder(product)"
                             productInfo="true"
                             onProductInfoClick="() => this.onProductInfoClick(product)"

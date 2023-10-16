@@ -1649,11 +1649,82 @@ class PosSession(models.Model):
 
         return res
 
+    def _add_pos_taxes_computation(self, loaded_data):
+        self.ensure_one()
+        all_tax_ids = set()
+        taxes_computation = loaded_data['taxes_computation'] = {}
+
+        # Precompute the taxes for products.
+        for product_data in loaded_data['product.product']:
+            tax_ids = product_data['taxes_id']
+            taxes_key = product_data['taxes_key'] = '-'.join(str(x) for x in tax_ids)
+            for tax_id in tax_ids:
+                all_tax_ids.add(tax_id)
+            taxes_computation[taxes_key] = {'tax_ids': tax_ids}
+
+        # Prefetch the taxes.
+        self.env['account.tax'].with_prefetch(list(all_tax_ids))
+        taxes_map = {}
+        for results in taxes_computation.values():
+            tax_ids = results['tax_ids']
+            taxes = self.env['account.tax'].browse(tax_ids).sorted()
+            taxes_map[tuple(tax_ids)] = taxes
+
+        # Fetch the fiscal positions to precompute the taxes.
+        fp_mapping = {}
+        for fp_data in loaded_data['account.fiscal.position']:
+            fp_mapping[fp_data['id']] = fp_data
+        fiscal_positions = self.env['account.fiscal.position'].browse(list(fp_mapping.keys()))
+        for fp in fiscal_positions:
+            fp_data = fp_mapping[fp.id] = {}
+            fp_data['taxes_key_mapping'] = {}
+            fp_data['price_unit_mapping'] = {}
+            for taxes_key, taxes in taxes_map.items():
+                fp_computation = taxes._prepare_price_unit_after_fiscal_position(
+                    fp,
+                    exclude_python_taxes=True,
+                    rounding_method=self.company_id.tax_calculation_rounding_method,
+                    currency=self.currency_id,
+                )
+                if not fp_computation:
+                    continue
+
+                new_taxes = fp_computation['taxes']
+                new_tax_ids = new_taxes.ids
+                new_taxes_key = '-'.join(str(x) for x in new_tax_ids)
+                taxes_computation[new_taxes_key] = {'tax_ids': new_tax_ids}
+                fp_data['taxes_key_mapping'][taxes_key] = new_taxes_key
+
+                if 'price_unit' in fp_computation:
+                    fp_data['price_unit_mapping'][taxes_key] = {
+                        'price_unit': fp_computation['price_unit'],
+                        'equations': fp_computation['tax_computer'].equations,
+                    }
+
+        # Prepare the tax computation.
+        for results in taxes_computation.values():
+            tax_ids = results['tax_ids']
+            taxes = taxes_map[tuple(tax_ids)]
+
+            taxes_computation = taxes._prepare_taxes_computation(
+                exclude_python_taxes=True,
+                rounding_method=self.company_id.tax_calculation_rounding_method,
+                currency=self.currency_id,
+            )
+            results['taxes_computation'] = {
+                'tax_values_list': taxes_computation['tax_values_list'],
+                'total_excluded': taxes_computation['total_excluded'],
+                'total_included': taxes_computation['total_included'],
+                'equations': taxes_computation['tax_computer'].equations,
+            }
+
     def _pos_data_process(self, loaded_data):
         """
         This is where we need to process the data if we can't do it in the loader/getter
         """
         loaded_data['version'] = exp_version()
+
+        self._add_pos_taxes_computation(loaded_data)
 
         loaded_data['units_by_id'] = {unit['id']: unit for unit in loaded_data['uom.uom']}
 

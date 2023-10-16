@@ -358,7 +358,7 @@ export class PaymentScreen extends Component {
 
             if (this.hardwareProxy.printer && invoiced_finalized) {
                 const printResult = await this.printer.print(OrderReceipt, {
-                    data: this.pos.get_order().export_for_printing(),
+                    data: this.pos.get_order().getOrderScreenValues(true),
                     formatCurrency: this.env.utils.formatCurrency,
                 });
 

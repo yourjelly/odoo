@@ -21,7 +21,7 @@ export class ReprintReceiptButton extends Component {
         }
         // Need to await to have the result in case of automatic skip screen.
         (await this.printer.print(OrderReceipt, {
-            data: this.props.order.export_for_printing(),
+            data: this.props.order.getOrderLineScreenValues(true),
             formatCurrency: this.env.utils.formatCurrency,
         })) || this.pos.showScreen("ReprintReceiptScreen", { order: this.props.order });
     }

@@ -16,12 +16,11 @@ patch(Order.prototype, {
     },
     //@override
     export_as_JSON() {
-        const json = super.export_as_JSON(...arguments);
+        const json = super.export_as_JSON();
         if (this.pos.config.module_pos_restaurant) {
             json.table_id = this.tableId;
-            json.customer_count = this.customerCount;
+            json.customer_count = this.getCustomerCount();
         }
-
         return json;
     },
     //@override

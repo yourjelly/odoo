@@ -135,14 +135,114 @@ export class Product extends PosModel {
     get isScaleAvailable() {
         return true;
     }
-    getFormattedUnitPrice() {
-        const formattedUnitPrice = this.env.utils.formatCurrency(this.get_display_price());
+
+    getProductPriceUnit(quantity){
+        const pricelist = this.pos.getDefaultPricelist();
+        return this.get_price(pricelist, quantity);
+    }
+
+    /**
+     *  Collect the info about price/taxes.
+     */
+     getProductAmounts(quantity, priceUnit, discount, fiscalPosition){
+        let taxesKey = this.taxes_key;
+
+        // Fiscal position.
+        if(fiscalPosition){
+            priceUnit = this.evalPriceUnitAfterFiscalPosition(taxesKey, priceUnit, fiscalPosition)
+            if(fiscalPosition.taxes_key_mapping.hasOwnProperty(taxesKey)){
+                taxesKey = fiscalPosition.taxes_key_mapping[taxesKey];
+            }
+        }
+
+        // Taxes computation.
+        const taxesResults = this.pos.evalTaxesComputation(taxesKey, priceUnit, quantity);
+
+        return {
+            ...taxesResults,
+            priceUnit: priceUnit,
+            quantity: quantity,
+            discount: discount,
+            fiscalPosition: fiscalPosition,
+            taxIds: taxesResults.taxValuesList.map(x => x.taxId),
+        };
+     }
+
+    /**
+     *  Collect the info to be displayed on the card representing the product.
+     */
+    getProductCardValues(){
+        const priceMode = this.pos.config.iface_tax_included;
+        const quantity = 1.0;
+        const priceUnit = this.getProductPriceUnit(quantity);
+        const fiscalPosition = this.pos.get_order()?.fiscal_position;
+        const amounts = this.getProductAmounts(quantity, priceUnit, 0.0, fiscalPosition);
+        const price = priceMode === "total" ? amounts.totalIncluded : amounts.totalExcluded;
+
+        let displayPrice = this.env.utils.formatCurrency(price);
         if (this.to_weight) {
-            return `${formattedUnitPrice}/${this.get_unit().name}`;
-        } else {
-            return formattedUnitPrice;
+            displayPrice = `${displayPrice}/${this.get_unit().name}`;
+        }
+
+        return {
+            ...amounts,
+            record: this,
+            imageUrl: this.getImageUrl(),
+            displayPrice: displayPrice,
         }
     }
+
+    async getProductInfoPopupValues(){
+
+        function computeMargin(totalExcluded, totalCost){
+            const marginPrice = totalExcluded - totalCost;
+            const marginPercent = totalExcluded ? marginPrice * 100 / totalExcluded : 0;
+            return {
+                marginPrice: marginPrice,
+                marginPercentStr: marginPercent.toFixed(2),
+            }
+        }
+
+        const values = this.getProductCardValues();
+
+        // Extra product info not available js-side.
+        const productInfo = await this.pos.orm.call("product.product", "get_product_info_pos", [
+            [this.id],
+            1.0,
+            this.pos.config.id,
+        ]);
+
+        // Display code below the product name.
+        const displayCodes = [];
+        if(this.default_code){
+            displayCodes.push(this.default_code);
+        }
+        if(this.barcode){
+            displayCodes.push(this.barcode);
+        }
+        const displayCode = displayCodes.join(" - ");
+
+        // Margin.
+        const { marginPrice, marginPercentStr } = computeMargin(values.totalExcluded, this.standard_price);
+
+        // Order.
+        const order = this.pos.get_order();
+        const orderValues = order.getOrderScreenValues();
+        const orderMarginValues = computeMargin(orderValues.totalExcluded, orderValues.totalCost);
+
+        return {
+            ...values,
+            ...productInfo,
+            displayCode: displayCode,
+            marginPrice: marginPrice,
+            marginPercentStr: marginPercentStr,
+            orderTotalCost: orderValues.totalCost,
+            orderTotalExcluded: orderValues.totalExcluded,
+            orderMarginPrice: orderMarginValues.marginPrice,
+            orderMarginPercentStr: orderMarginValues.marginPercentStr,
+        }
+    }
+
     async getAddProductOptions(code) {
         let price_extra = 0.0;
         let draftPackLotLines, packLotLinesToEdit, attribute_value_ids;
@@ -338,15 +438,24 @@ export class Product extends PosModel {
         price = this.get_price(pricelist, quantity),
         iface_tax_included = this.pos.config.iface_tax_included,
     } = {}) {
+        let taxesKey = this.taxes_key;
+
+        // Fiscal position.
         const order = this.pos.get_order();
-        const taxes = this.pos.get_taxes_after_fp(this.taxes_id, order && order.fiscal_position);
-        const currentTaxes = this.pos.getTaxesByIds(this.taxes_id);
-        const priceAfterFp = this.pos.computePriceAfterFp(price, currentTaxes);
-        const allPrices = this.pos.compute_all(taxes, priceAfterFp, 1, this.pos.currency.rounding);
+        if(order && order.fiscal_position){
+            price = this.evalPriceUnitAfterFiscalPosition(taxesKey, price, order.fiscal_position)
+            if(order.fiscal_position.taxes_key_mapping.hasOwnProperty(taxesKey)){
+                taxesKey = order.fiscal_position.taxes_key_mapping[taxesKey];
+            }
+        }
+
+        // Taxes computation.
+        const results = this.pos.evalTaxesComputation(taxesKey, price, 1);
+
         if (iface_tax_included === "total") {
-            return allPrices.total_included;
+            return results.totalIncluded;
         } else {
-            return allPrices.total_excluded;
+            return results.totalExcluded;
         }
     }
 }
@@ -763,30 +872,79 @@ export class Orderline extends PosModel {
         this.order.assert_editable();
         this.set_quantity(this.get_quantity() + orderline.get_quantity());
     }
-    export_as_JSON() {
-        var pack_lot_ids = [];
-        if (this.has_product_lot) {
-            this.pack_lot_lines.forEach((item) => {
-                return pack_lot_ids.push([0, 0, item.export_as_JSON()]);
-            });
-        }
+
+    getOrderLineAmounts(discount=this.get_discount()){
+        const fiscalPosition = this.order.fiscal_position;
+
+        const quantity = this.get_quantity();
+        const unitPrice = this.get_unit_price();
+        const product = this.get_product();
+
+        const amounts = product.getProductAmounts(quantity, unitPrice, discount, fiscalPosition);
+
+        const priceMode = this.pos.config.iface_tax_included;
+        const rounding = this.pos.currency.rounding;
+
+        const displayPriceTotal = priceMode === "total" ? amounts.totalIncluded : amounts.totalExcluded;
+        const displayPriceUnit = round_pr((displayPriceTotal * (1 - discount / 100)) / (quantity || 1.0), rounding);
+
         return {
+            ...amounts,
+            displayPriceTotal: displayPriceTotal,
+            displayPriceUnit: displayPriceUnit,
+        }
+    }
+
+    getOrderLineScreenValues(printing=false){
+        const amounts = this.getOrderLineAmounts();
+        const product = this.get_product();
+
+        const discountPolicy = this.display_discount_policy();
+        let unitPriceWoDiscount = null;
+        if(amounts.discountPolicy === "without_discount" && amounts.discount){
+            const amountsWoDiscount = this.getOrderLineAmounts(0.0);
+            unitPriceWoDiscount = amountsWoDiscount.displayPriceUnit;
+        }
+
+        let packLotIds = [];
+        if (this.has_product_lot) {
+            packLotIds = this.pack_lot_lines.map((item) => item.export_as_JSON());
+        }
+
+        return {
+            record: this,
+            ...amounts,
+            displayClasses: this.getDisplayClasses(),
+            quantityStr: this.get_quantity_str(),
+            discountStr: this.get_discount_str(),
+            unit: this.get_unit(),
+            packLotIds: packLotIds,
+            product: product,
+            fullProductName: this.get_full_product_name(),
+            priceExtra: this.get_price_extra(),
+            customerNote: this.get_customer_note(),
+            internalNote: this.getNote(),
+        };
+    }
+
+    convertToJSON(values){
+        return {
+            id: this.id,
             uuid: this.uuid,
             skip_change: this.skipChange,
+            qty: values.quantity,
             custom_attribute_value_ids: this.custom_attribute_value_ids.map((attr) => [0, 0, attr]),
-            qty: this.get_quantity(),
-            price_unit: this.get_unit_price(),
-            price_subtotal: this.get_price_without_tax(),
-            price_subtotal_incl: this.get_price_with_tax(),
-            discount: this.get_discount(),
-            product_id: this.get_product().id,
-            tax_ids: [[6, false, this.get_applicable_taxes().map((tax) => tax.id)]],
-            id: this.id,
-            pack_lot_ids: pack_lot_ids,
+            price_unit: values.priceUnit,
+            price_subtotal: values.totalExcluded,
+            price_subtotal_incl: values.totalIncluded,
+            discount: values.discount,
+            product_id: values.product.id,
+            tax_ids: [[6, false, values.taxIds]],
+            pack_lot_ids: values.packLotIds.map((item) => [0, 0, item]),
             attribute_value_ids: this.attribute_value_ids || [],
-            full_product_name: this.get_full_product_name(),
-            price_extra: this.get_price_extra(),
-            customer_note: this.get_customer_note(),
+            full_product_name: values.fullProductName,
+            price_extra: values.priceExtra,
+            customer_note: values.customerNote,
             refunded_orderline_id: this.refunded_orderline_id,
             price_type: this.price_type,
             combo_line_ids: this.comboLines?.map((line) => line.id || line.cid),
@@ -809,25 +967,6 @@ export class Orderline extends PosModel {
         // round and truncate to mimic _symbol_set behavior
         return parseFloat(round_di(this.price || 0, digits).toFixed(digits));
     }
-    get_unit_display_price() {
-        if (this.pos.config.iface_tax_included === "total") {
-            return this.get_all_prices(1).priceWithTax;
-        } else {
-            return this.get_all_prices(1).priceWithoutTax;
-        }
-    }
-    /**
-     * This is the price that will appear as striked through.
-     * @returns {number | false}
-     */
-    get_old_unit_display_price() {
-        return (
-            this.display_discount_policy() === "without_discount" &&
-            this.env.utils.roundCurrency(this.get_unit_display_price()) <
-                this.env.utils.roundCurrency(this.get_taxed_lst_unit_price()) &&
-            this.get_taxed_lst_unit_price()
-        );
-    }
     getUnitDisplayPriceBeforeDiscount() {
         if (this.pos.config.iface_tax_included === "total") {
             return this.get_all_prices(1).priceWithTaxBeforeDiscount;
@@ -842,25 +981,6 @@ export class Orderline extends PosModel {
             rounding
         );
     }
-    get_display_price_one() {
-        var rounding = this.pos.currency.rounding;
-        var price_unit = this.get_unit_price();
-        if (this.pos.config.iface_tax_included !== "total") {
-            return round_pr(price_unit * (1.0 - this.get_discount() / 100.0), rounding);
-        } else {
-            var product = this.get_product();
-            var taxes_ids = this.tax_ids || product.taxes_id;
-            var product_taxes = this.pos.get_taxes_after_fp(taxes_ids, this.order.fiscal_position);
-            var all_taxes = this.compute_all(
-                product_taxes,
-                price_unit,
-                1,
-                this.pos.currency.rounding
-            );
-
-            return round_pr(all_taxes.total_included * (1 - this.get_discount() / 100), rounding);
-        }
-    }
     get_display_price() {
         if (this.pos.config.iface_tax_included === "total") {
             return this.get_price_with_tax();
@@ -869,15 +989,21 @@ export class Orderline extends PosModel {
         }
     }
     get_taxed_lst_unit_price() {
-        const lstPrice = this.compute_fixed_price(this.get_lst_price());
+        const priceUnit = this.compute_fixed_price(this.get_lst_price());
         const product = this.get_product();
-        const taxesIds = product.taxes_id;
-        const productTaxes = this.pos.get_taxes_after_fp(taxesIds, this.order.fiscal_position);
-        const unitPrices = this.compute_all(productTaxes, lstPrice, 1, this.pos.currency.rounding);
+
+        let taxesKey = product.taxes_key;
+
+        // Fiscal position.
+        if(this.order.fiscal_position){
+            taxesKey = this.order.fiscal_position.taxes_key_mapping[taxesKey];
+        }
+
+        const taxesData = this.pos.evalTaxesComputation(taxesKey, priceUnit, 1);
         if (this.pos.config.iface_tax_included === "total") {
-            return unitPrices.total_included;
+            return taxesData.totalIncluded;
         } else {
-            return unitPrices.total_excluded;
+            return taxesData.totalExcluded;
         }
     }
     get_price_without_tax() {
@@ -931,28 +1057,6 @@ export class Orderline extends PosModel {
         return this.pos._map_tax_fiscal_position(tax, order);
     }
     /**
-     * Mirror JS method of:
-     * _compute_amount in addons/account/models/account.py
-     */
-    _compute_all(tax, base_amount, quantity, price_exclude) {
-        return this.pos._compute_all(tax, base_amount, quantity, price_exclude);
-    }
-    /**
-     * Mirror JS method of:
-     * compute_all in addons/account/models/account.py
-     *
-     * Read comments in the python side method for more details about each sub-methods.
-     */
-    compute_all(taxes, price_unit, quantity, currency_rounding, handle_price_include = true) {
-        return this.pos.compute_all(
-            taxes,
-            price_unit,
-            quantity,
-            currency_rounding,
-            handle_price_include
-        );
-    }
-    /**
      * Calculates the taxes for a product, and converts the taxes based on the fiscal position of the order.
      *
      * @returns {Object} The calculated product taxes after filtering and fiscal position conversion.
@@ -964,42 +1068,37 @@ export class Orderline extends PosModel {
         return this.pos.get_taxes_after_fp(taxesIds, this.order.fiscal_position);
     }
     get_all_prices(qty = this.get_quantity()) {
-        var price_unit = this.get_unit_price() * (1.0 - this.get_discount() / 100.0);
-        var taxtotal = 0;
+        const product = this.get_product();
+        const priceUnit = this.get_unit_price();
+        const discount = this.get_discount();
+        const priceUnitAfterDiscount = priceUnit * (1.0 - discount / 100.0);
 
-        var product = this.get_product();
-        var taxes_ids = this.tax_ids || product.taxes_id;
-        taxes_ids = taxes_ids.filter((t) => t in this.pos.taxes_by_id);
-        var taxdetail = {};
-        var product_taxes = this.pos.get_taxes_after_fp(taxes_ids, this.order.fiscal_position);
+        let taxesKey = this.product.taxes_key;
 
-        var all_taxes = this.compute_all(
-            product_taxes,
-            price_unit,
-            qty,
-            this.pos.currency.rounding
-        );
-        var all_taxes_before_discount = this.compute_all(
-            product_taxes,
-            this.get_unit_price(),
-            qty,
-            this.pos.currency.rounding
-        );
-        all_taxes.taxes.forEach(function (tax) {
-            taxtotal += tax.amount;
-            taxdetail[tax.id] = {
-                amount: tax.amount,
-                base: tax.base,
+        // Fiscal position.
+        if(this.order.fiscal_position){
+            taxesKey = this.order.fiscal_position.taxes_key_mapping[taxesKey];
+        }
+
+        const taxesData = this.pos.evalTaxesComputation(taxesKey, priceUnitAfterDiscount, qty);
+        const taxesDataBeforeDiscount = this.pos.evalTaxesComputation(taxesKey, priceUnit, qty);
+
+        // Tax details.
+        const taxDetails = {};
+        for(const taxValues of taxesData.taxValuesList){
+            taxDetails[taxValues.taxId] = {
+                amount: taxValues.taxAmount,
+                base: taxValues.base,
             };
-        });
+        }
 
         return {
-            priceWithTax: all_taxes.total_included,
-            priceWithoutTax: all_taxes.total_excluded,
-            priceWithTaxBeforeDiscount: all_taxes_before_discount.total_included,
-            priceWithoutTaxBeforeDiscount: all_taxes_before_discount.total_excluded,
-            tax: taxtotal,
-            taxDetails: taxdetail,
+            priceWithTax: taxesData.totalIncluded,
+            priceWithoutTax: taxesData.totalExcluded,
+            priceWithTaxBeforeDiscount: taxesDataBeforeDiscount.totalIncluded,
+            priceWithoutTaxBeforeDiscount: taxesDataBeforeDiscount.totalExcluded,
+            tax: taxesData.totalIncluded - taxesData.totalExcluded,
+            taxDetails: taxDetails,
         };
     }
     display_discount_policy() {
@@ -1068,20 +1167,6 @@ export class Orderline extends PosModel {
     }
     isPartOfCombo() {
         return Boolean(this.comboParent || this.comboLines?.length);
-    }
-    getDisplayData() {
-        return {
-            productName: this.get_full_product_name(),
-            price: this.env.utils.formatCurrency(this.get_display_price()),
-            qty: this.get_quantity_str(),
-            unit: this.get_unit().name,
-            unitPrice: this.env.utils.formatCurrency(this.get_unit_display_price()),
-            oldUnitPrice: this.env.utils.formatCurrency(this.get_old_unit_display_price()),
-            discount: this.get_discount_str(),
-            customerNote: this.get_customer_note(),
-            internalNote: this.getNote(),
-            comboParent: this.comboParent?.get_full_product_name(),
-        };
     }
 }
 
@@ -1220,11 +1305,19 @@ export class Payment extends PosModel {
 
     // returns the associated cashregister
     //exports as JSON for server communication
-    export_as_JSON() {
+    getPaymentScreenValues() {
         return {
+            record: this,
             name: serializeDateTime(DateTime.local()),
-            payment_method_id: this.payment_method.id,
             amount: this.get_amount(),
+        };
+    }
+
+    convertToJSON(values){
+        return {
+            name: values.name,
+            payment_method_id: this.payment_method.id,
+            amount: values.amount,
             payment_status: this.payment_status,
             can_be_reversed: this.can_be_reversed,
             ticket: this.ticket,
@@ -1233,14 +1326,7 @@ export class Payment extends PosModel {
             transaction_id: this.transaction_id,
         };
     }
-    //exports as JSON for receipt printing
-    export_for_printing() {
-        return {
-            amount: this.get_amount(),
-            name: this.name,
-            ticket: this.ticket,
-        };
-    }
+
     // If payment status is a non-empty string, then it is an electronic payment.
     // TODO: There has to be a less confusing way to distinguish simple payments
     // from electronic transactions. Perhaps use a flag?
@@ -1453,38 +1539,122 @@ export class Order extends PosModel {
             json.last_order_preparation_change && JSON.parse(json.last_order_preparation_change);
         this.trackingNumber = json.tracking_number || "";
     }
-    export_as_JSON() {
-        var orderLines, paymentLines;
-        orderLines = [];
-        this.orderlines.forEach((item) => {
-            return orderLines.push([0, 0, item.export_as_JSON()]);
-        });
-        paymentLines = [];
-        this.paymentlines.forEach((item) => {
-            const itemAsJson = item.export_as_JSON();
-            if (itemAsJson) {
-                return paymentLines.push([0, 0, itemAsJson]);
+
+    getOrderScreenValues(printing=false){
+        const orderLines = this.orderlines.map(x => x.getOrderLineScreenValues(...arguments));
+
+        const orderTaxValuesMap = {};
+        let totalCost = 0.0;
+        for(const line of orderLines){
+            totalCost += line.totalCost;
+            for(const taxValues of line.taxValuesList){
+                const taxId = taxValues.taxId;
+
+                orderTaxValuesMap[taxId] = orderTaxValuesMap[taxId] || {
+                    taxAmount: 0.0,
+                    base: 0.0,
+                };
+
+                orderTaxValuesMap[taxId].taxAmount += taxValues.taxAmount;
+                orderTaxValuesMap[taxId].base += taxValues.base;
             }
-        });
-        var json = {
+        }
+
+        let totalExcluded = 0.0;
+        let totalTax = 0.0;
+        const taxValuesList = [];
+        for(const [taxId, taxValues] of Object.entries(orderTaxValuesMap)){
+            const taxAmount = round_pr(taxValues.taxAmount, this.pos.currency.rounding);
+            const base = round_pr(taxValues.base, this.pos.currency.rounding);
+            totalExcluded += base;
+            totalTax += taxAmount;
+            taxValuesList.push({
+                taxId: taxId,
+                taxAmount: taxAmount,
+                base: base,
+            });
+        }
+
+        const values = {
+            record: this,
+            taxValuesList: taxValuesList,
+            totalExcluded: totalExcluded,
+            totalTax: totalTax,
+            totalIncluded: totalExcluded + totalTax,
+            totalCost: totalCost,
+            orderLines: orderLines,
+
             name: this.get_name(),
+            partner: this.get_partner(),
+            company: this.pos.company,
+            config: this.pos.config,
+            userId: this.pos.user.id,
+            dateOrder: serializeDateTime(this.date_order),
+
+            roundingApplied: this.get_rounding_applied(),
+            paymentLines: this.paymentlines.map(item => item.getPaymentScreenValues()),
+            ticketCode: this.pos.company.point_of_sale_ticket_unique_code ? this.ticketCode : null,
+            baseUrl: this.pos.base_url,
+        };
+
+        // Don't go further if it's not for the printing screen.
+        if(!printing){
+            return values;
+        }
+
+        // Qr-code.
+        if(this.pos.company.point_of_sale_use_ticket_qr_code){
+            values.qrCode = qrCodeSrc(`${this.pos.base_url}/pos/ticket/validate?access_token=${this.access_token}`);
+        }
+
+        // Receipt Header.
+        Object.assign(values, {
+            companyLogoSrc: `/web/image?model=res.company&amp;id=${this.pos.company.id}&amp;field=logo`,
+            cashier: this.pos.get_cashier()?.name,
+            header: this.pos.config.receipt_header,
+            footer: this.pos.config.receipt_footer,
+            shippingDate: this.shippingDate ? formatDate(DateTime.fromJSDate(new Date(this.shippingDate))) : null,
+        });
+
+        // Change.
+        values.change = this.locked ? this.amount_return : this.get_change();
+
+        // Total discount.
+        values.totalDiscount = 0.0;
+        const ignoredProductIds = this._get_ignored_product_ids_total_discount();
+        for(const line of orderLines){
+            if(ignoredProductIds.includes(line.product.id)){
+                continue;
+            }
+
+
+        }
+
+        return values;
+    }
+
+    export_as_JSON() {
+        const values = this.getOrderScreenValues();
+
+        var json = {
+            name: values.name,
             amount_paid: this.get_total_paid() - this.get_change(),
-            amount_total: this.get_total_with_tax(),
-            amount_tax: this.get_total_tax(),
+            amount_total: values.totalIncluded,
+            amount_tax: values.totalTax,
             amount_return: this.get_change(),
-            lines: orderLines,
-            statement_ids: paymentLines,
+            lines: values.orderLines.map(item => [0, 0, item.record.convertToJSON(item)]),
+            statement_ids: values.paymentLines.map(item => [0, 0, item.record.convertToJSON(item)]),
             pos_session_id: this.pos_session_id,
-            pricelist_id: this.pricelist ? this.pricelist.id : false,
-            partner_id: this.get_partner() ? this.get_partner().id : false,
-            user_id: this.pos.user.id,
+            pricelist_id: this.pricelist?.id || false,
+            partner_id: values.partner?.id || false,
+            user_id: values.userId,
             uid: this.uid,
             sequence_number: this.sequence_number,
-            date_order: serializeDateTime(this.date_order),
-            fiscal_position_id: this.fiscal_position ? this.fiscal_position.id : false,
-            server_id: this.server_id ? this.server_id : false,
-            to_invoice: this.to_invoice ? this.to_invoice : false,
-            shipping_date: this.shippingDate ? this.shippingDate : false,
+            date_order: values.dateOrder,
+            fiscal_position_id: this.fiscal_position?.id || false,
+            server_id: this.server_id || false,
+            to_invoice: this.to_invoice || false,
+            shipping_date: this.shippingDate || false,
             is_tipped: this.is_tipped || false,
             tip_amount: this.tip_amount || 0,
             access_token: this.access_token || "",
@@ -1496,43 +1666,7 @@ export class Order extends PosModel {
         }
         return json;
     }
-    export_for_printing() {
-        // If order is locked (paid), the 'change' is saved as negative payment,
-        // and is flagged with is_change = true. A receipt that is printed first
-        // time doesn't show this negative payment so we filter it out.
-        const paymentlines = this.paymentlines
-            .filter((p) => !p.is_change)
-            .map((p) => p.export_for_printing());
-        this.receiptDate ||= formatDateTime(luxon.DateTime.now());
-        return {
-            orderlines: this.orderlines.map((l) => omit(l.getDisplayData(), "internalNote")),
-            paymentlines,
-            amount_total: this.get_total_with_tax(),
-            total_without_tax: this.get_total_without_tax(),
-            amount_tax: this.get_total_tax(),
-            total_paid: this.get_total_paid(),
-            total_discount: this.get_total_discount(),
-            rounding_applied: this.get_rounding_applied(),
-            tax_details: this.get_tax_details(),
-            change: this.locked ? this.amount_return : this.get_change(),
-            name: this.get_name(),
-            invoice_id: null, //TODO
-            cashier: this.cashier?.name,
-            date: this.receiptDate,
-            pos_qr_code:
-                this.pos.company.point_of_sale_use_ticket_qr_code &&
-                qrCodeSrc(
-                    `${this.pos.base_url}/pos/ticket/validate?access_token=${this.access_token}`
-                ),
-            ticket_code: this.pos.company.point_of_sale_ticket_unique_code && this.ticketCode,
-            base_url: this.pos.base_url,
-            footer: this.pos.config.receipt_footer,
-            // FIXME: isn't there a better way to handle this date?
-            shippingDate:
-                this.shippingDate && formatDate(DateTime.fromJSDate(new Date(this.shippingDate))),
-            headerData: this.pos.getReceiptHeaderData(),
-        };
-    }
+
     // This function send order change to printer
     // For sending changes to preparation display see sendChanges function.
     async printChanges(cancelled) {
@@ -1846,30 +1980,6 @@ export class Order extends PosModel {
             ._getProductTaxesAfterFiscalPosition()
             .map((tax) => tax.id)
             .join(",");
-    }
-    /**
-     * Calculate the amount that will be used as a base in order to apply a downpayment or discount product in PoS.
-     * In our calculation we take into account taxes that are included in the price.
-     *
-     * @param  {String} tax_ids a string of the tax ids that are applied on the orderlines, in csv format
-     * e.g. if taxes with ids 2, 5 and 6 are applied tax_ids will be "2,5,6"
-     * @param  {Orderline[]} lines an srray of Orderlines
-     * @return {Number} the base amount on which we will apply a percentile reduction
-     */
-    calculate_base_amount(tax_ids_array, lines) {
-        // Consider price_include taxes use case
-        const has_taxes_included_in_price = tax_ids_array.filter(
-            (tax_id) => this.pos.taxes_by_id[tax_id].price_include
-        ).length;
-
-        const base_amount = lines.reduce(
-            (sum, line) =>
-                sum +
-                line.get_price_without_tax() +
-                (has_taxes_included_in_price ? line.get_total_taxes_included_in_price() : 0),
-            0
-        );
-        return base_amount;
     }
     get_last_orderline() {
         const orderlines = this.orderlines;
@@ -2299,16 +2409,6 @@ export class Order extends PosModel {
     _get_ignored_product_ids_total_discount() {
         return [];
     }
-    _reduce_total_discount_callback(sum, orderLine) {
-        let discountUnitPrice =
-            orderLine.getUnitDisplayPriceBeforeDiscount() * (orderLine.get_discount() / 100);
-        if (orderLine.display_discount_policy() === "without_discount") {
-            discountUnitPrice +=
-                orderLine.get_taxed_lst_unit_price() -
-                orderLine.getUnitDisplayPriceBeforeDiscount();
-        }
-        return sum + discountUnitPrice * orderLine.get_quantity();
-    }
     get_total_discount() {
         const ignored_product_ids = this._get_ignored_product_ids_total_discount();
         return round_pr(
@@ -2404,31 +2504,6 @@ export class Order extends PosModel {
         }
 
         return fulldetails;
-    }
-    get_total_for_taxes(tax_id) {
-        var total = 0;
-
-        if (!(tax_id instanceof Array)) {
-            tax_id = [tax_id];
-        }
-
-        var tax_set = {};
-
-        for (var i = 0; i < tax_id.length; i++) {
-            tax_set[tax_id[i]] = true;
-        }
-
-        this.orderlines.forEach((line) => {
-            var taxes_ids = this.tax_ids || line.get_product().taxes_id;
-            for (var i = 0; i < taxes_ids.length; i++) {
-                if (tax_set[taxes_ids[i]]) {
-                    total += line.get_price_with_tax();
-                    return;
-                }
-            }
-        });
-
-        return total;
     }
     get_change(paymentline) {
         if (!paymentline) {

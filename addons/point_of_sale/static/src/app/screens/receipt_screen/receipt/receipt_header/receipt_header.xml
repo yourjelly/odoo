@@ -1,26 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates id="template" xml:space="preserve">
     <t t-name="point_of_sale.ReceiptHeader">
-        <img t-attf-src="/web/image?model=res.company&amp;id={{props.data.company.id}}&amp;field=logo" alt="Logo" class="pos-receipt-logo"/>
+        <img t-att-src="values.companyLogoSrc" alt="Logo" class="pos-receipt-logo"/>
         <br/>
-        <h1 class="text-center" style="font-size: 100px" t-if="props.data.trackingNumber" t-esc="props.data.trackingNumber" />
+        <h1 class="text-center" style="font-size: 100px" t-if="order.trackingNumber" t-esc="order.trackingNumber"/>
         <div class="pos-receipt-contact">
             <!-- contact address -->
-            <div t-if="props.data.company.partner_id?.[1]" t-esc="props.data.company.partner_id[1]" />
-            <t t-if="props.data.company.phone">
-                <div>Tel:<t t-esc="props.data.company.phone" /></div>
+            <div t-if="values.company.partner_id?.[1]" t-esc="values.company.partner_id[1]"/>
+            <t t-if="values.company.phone">
+                <div>Tel:<t t-esc="values.company.phone"/></div>
             </t>
-            <t t-if="props.data.company.vat">
-                <div><t t-esc="props.data.company.country?.vat_label || 'Tax ID'"/>: <t t-esc="props.data.company.vat" /></div>
+            <t t-if="values.company.vat">
+                <div><t t-esc="values.company.country?.vat_label || 'Tax ID'"/>: <t t-esc="values.company.vat"/></div>
             </t>
-            <div t-if="props.data.company.email" t-esc="props.data.company.email" />
-            <div t-if="props.data.company.website" t-esc="props.data.company.website" />
-            <div t-if="props.data.header" style="white-space:pre-line" t-esc="props.data.header" />
-            <div t-if="props.data.cashier" class="cashier">
+            <div t-if="values.company.email" t-esc="values.company.email"/>
+            <div t-if="values.company.website" t-esc="values.company.website"/>
+            <div t-if="values.header" style="white-space:pre-line" t-esc="values.header"/>
+            <div t-if="values.cashier" class="cashier">
                     <div>--------------------------------</div>
-                    <div>Served by <t t-esc="props.data.cashier" /></div>
+                    <div>Served by <t t-esc="values.cashier"/></div>
             </div>
         </div>
-        <br /><br />
+        <br/><br/>
     </t>
 </templates>

@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import models, fields, _
-from odoo.tools.float_utils import float_round
-from odoo.tools.safe_eval import safe_eval
-from odoo.exceptions import UserError
+from odoo import _, api, fields, models
 
 
 class AccountTaxPython(models.Model):
@@ -30,44 +27,41 @@ class AccountTaxPython(models.Model):
             ":param product: product.product recordset singleton or None\n"
             ":param partner: res.partner recordset singleton or None")
 
-    def _ascending_process_fixed_taxes_batch(self, batch, base, precision_rounding, extra_computation_values, fixed_multiplicator=1):
+    @api.model
+    def _ascending_process_fixed_taxes_batch(self, batch, tax_computer, extra_base_variable, fixed_multiplicator=1):
         # EXTENDS 'account'
-        super()._ascending_process_fixed_taxes_batch(batch, base, precision_rounding, extra_computation_values, fixed_multiplicator=fixed_multiplicator)
+        super()._ascending_process_fixed_taxes_batch(batch, tax_computer, extra_base_variable, fixed_multiplicator=fixed_multiplicator)
 
         if batch['amount_type'] == 'code':
-            batch['computed'] = True
+            batch['computed'] = 'tax'
             for tax_values in batch['taxes']:
-                localdict = {**extra_computation_values}
-                tax = tax_values['tax']
-                try:
-                    safe_eval(tax.python_compute, localdict, mode="exec", nocopy=True)
-                except Exception as e:
-                    raise UserError(_(
-                        "You entered invalid code %r in %r taxes\n\nError : %s",
-                        tax.python_compute,
-                        tax.name,
-                        e,
-                    ))
-                tax_values['tax_amount'] = localdict.get('result', 0.0)
-                tax_values['tax_amount_factorized'] = float_round(
-                    tax_values['tax_amount'] * tax_values['factor'],
-                    precision_rounding=precision_rounding,
+                tax_computer.new_equation(tax_values['tax'].python_compute, standalone=True)
+                tax_values['tax_amount'] = tax_computer.new_equation('result')
+                tax_values['tax_amount_factorized'] = tax_computer.new_equation(
+                    f"{tax_values['tax_amount']} * {tax_values['factor']}"
                 )
 
-    def _descending_process_price_included_taxes_batch(self, batch, base, precision_rounding, extra_computation_values):
+    @api.model
+    def _descending_process_price_included_taxes_batch(self, batch, tax_computer, extra_base_variable):
         # EXTENDS 'account'
-        super()._descending_process_price_included_taxes_batch(batch, base, precision_rounding, extra_computation_values)
+        super()._descending_process_price_included_taxes_batch(batch, tax_computer, extra_base_variable)
         if batch['price_include'] and batch['amount_type'] == 'code':
             batch['computed'] = True
-            tax_values_list = batch['taxes']
-            batch_base = base - sum(tax_values['tax_amount_factorized'] for tax_values in tax_values_list)
-            for tax_values in tax_values_list:
-                tax_values['base'] = tax_values['display_base'] = batch_base
+            amounts_variable = [tax_values['tax_amount_factorized'] for tax_values in batch['taxes']]
+            batch_base_variable = tax_computer.new_equation(
+                f"((price_unit * quantity) + {extra_base_variable}) - {' - '.join(amounts_variable)}"
+            )
+            for tax_values in batch['taxes']:
+                tax_values['base'] = tax_values['display_base'] = batch_base_variable
 
-    def _ascending_process_taxes_batch(self, batch, base, precision_rounding, extra_computation_values):
+    @api.model
+    def _ascending_process_taxes_batch(self, batch, tax_computer, extra_base_variable):
         # EXTENDS 'account'
-        super()._ascending_process_taxes_batch(batch, base, precision_rounding, extra_computation_values)
+        super()._ascending_process_taxes_batch(batch, tax_computer, extra_base_variable)
         if not batch['price_include'] and batch['amount_type'] == 'code':
             batch['computed'] = True
+            base_variable = tax_computer.new_equation(
+                f"(price_unit * quantity) + {extra_base_variable}"
+            )
             for tax_values in batch['taxes']:
-                tax_values['base'] = tax_values['display_base'] = base
+                tax_values['base'] = tax_values['display_base'] = base_variable

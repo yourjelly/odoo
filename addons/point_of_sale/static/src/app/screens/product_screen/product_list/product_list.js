@@ -207,7 +207,7 @@ export class ProductsWidget extends Component {
         window.open("/web#action=point_of_sale.action_client_product_menu", "_self");
     }
     async onProductInfoClick(product) {
-        const info = await this.pos.getProductInfo(product, 1);
-        this.popup.add(ProductInfoPopup, { info: info, product: product });
+        const values = await product.getProductInfoPopupValues();
+        this.popup.add(ProductInfoPopup, { values: values });
     }
 }

@@ -57,27 +57,9 @@ class ProductProduct(models.Model):
                     "Deleting a product available in a session would be like attempting to snatch a"
                     "hamburger from a customer’s hand mid-bite; chaos will ensue as ketchup and mayo go flying everywhere!"))
 
-    def get_product_info_pos(self, price, quantity, pos_config_id):
+    def get_product_info_pos(self, quantity, pos_config_id):
         self.ensure_one()
         config = self.env['pos.config'].browse(pos_config_id)
-
-        # Tax related
-        taxes = self.taxes_id.compute_all(price, config.currency_id, quantity, self)
-        grouped_taxes = {}
-        for tax in taxes['taxes']:
-            if tax['id'] in grouped_taxes:
-                grouped_taxes[tax['id']]['amount'] += tax['amount']/quantity if quantity else 0
-            else:
-                grouped_taxes[tax['id']] = {
-                    'name': tax['name'],
-                    'amount': tax['amount']/quantity if quantity else 0
-                }
-
-        all_prices = {
-            'price_without_tax': taxes['total_excluded']/quantity if quantity else 0,
-            'price_with_tax': taxes['total_included']/quantity if quantity else 0,
-            'tax_details': list(grouped_taxes.values()),
-        }
 
         # Pricelists
         if config.use_pricelist:
@@ -114,7 +96,6 @@ class ProductProduct(models.Model):
                         for attribute_line in self.attribute_line_ids]
 
         return {
-            'all_prices': all_prices,
             'pricelists': pricelist_list,
             'warehouses': warehouse_list,
             'suppliers': supplier_list,

@@ -68,7 +68,6 @@ class TestTaxCommon(AccountTestInvoicingCommon):
 
     def _check_tax_results(self, taxes, expected_values, price_unit, **kwargs):
         results = taxes.compute_all(price_unit, **kwargs)
-
         self.assertAlmostEqual(results['total_included'], expected_values['total_included'])
         self.assertAlmostEqual(results['total_excluded'], expected_values['total_excluded'])
         self.assertEqual(len(results['taxes']), len(expected_values['taxes']))
@@ -121,7 +120,7 @@ class TestTax(TestTaxCommon):
 
     def test_forced_price_include_context_key(self):
         """ Test the 'force_price_include' context key that force all taxes to act as price included taxes. """
-        taxes = (self.percent_tax(10.0) + self.percent_tax(10.0)).with_context({'force_price_include':True})
+        taxes = (self.percent_tax(10.0) + self.percent_tax(10.0)).with_context({'force_price_include': True})
         self._check_tax_results(
             taxes,
             {
@@ -742,11 +741,11 @@ class TestTax(TestTaxCommon):
                 'total_included': 48.0,
                 'total_excluded': 32.33,
                 'taxes': (
-                    (45.6, 2.4),
-                    (46.56, 1.44),
-                    (47.69, 0.31),
-                    (43.68, 4.32),
-                    (40.8, 7.2),
+                    (32.33, 2.4),
+                    (32.33, 1.44),
+                    (32.33, 0.31),
+                    (32.33, 4.32),
+                    (32.33, 7.2),
                 ),
             },
             48.0,

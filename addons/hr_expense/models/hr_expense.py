@@ -327,7 +327,7 @@ class HrExpense(models.Model):
                     price_unit=expense.total_amount_currency * expense.currency_rate,
                     currency=expense.company_currency_id,
                 )]
-                taxes_totals = self.env['account.tax']._compute_taxes(base_lines)['totals'][expense.company_currency_id]
+                taxes_totals = self.env['account.tax']._compute_taxes(base_lines, expense.company_id)['totals'][expense.company_currency_id]
                 expense.total_amount = taxes_totals['amount_untaxed'] + taxes_totals['amount_tax']
             else:  # Mono-currency case computation shortcut
                 expense.total_amount = expense.total_amount_currency
@@ -340,7 +340,7 @@ class HrExpense(models.Model):
                     price_unit=expense.total_amount,
                     currency=expense.company_currency_id,
                 )]
-                taxes_totals = self.env['account.tax']._compute_taxes(base_lines)['totals'][expense.company_currency_id]
+                taxes_totals = self.env['account.tax']._compute_taxes(base_lines, expense.company_id)['totals'][expense.company_currency_id]
                 expense.tax_amount = taxes_totals['amount_tax']
             else:
                 expense.total_amount_currency = expense.total_amount
@@ -363,7 +363,7 @@ class HrExpense(models.Model):
         """
         for expense in self:
             base_lines = [expense._convert_to_tax_base_line_dict(price_unit=expense.total_amount_currency)]
-            taxes_totals = self.env['account.tax']._compute_taxes(base_lines)['totals'][expense.currency_id]
+            taxes_totals = self.env['account.tax']._compute_taxes(base_lines, expense.company_id)['totals'][expense.currency_id]
             expense.tax_amount_currency = taxes_totals['amount_tax']
             expense.untaxed_amount_currency = taxes_totals['amount_untaxed']
 
@@ -379,7 +379,7 @@ class HrExpense(models.Model):
                     price_unit=expense.total_amount,
                     currency=expense.company_currency_id,
                 )]
-                taxes_totals = self.env['account.tax']._compute_taxes(base_lines)['totals'][expense.company_currency_id]
+                taxes_totals = self.env['account.tax']._compute_taxes(base_lines, expense.company_id)['totals'][expense.company_currency_id]
                 expense.tax_amount = taxes_totals['amount_tax']
             else:  # Mono-currency case computation shortcut
                 expense.tax_amount = expense.tax_amount_currency
@@ -748,7 +748,7 @@ class HrExpense(models.Model):
             raise UserError(_("You need to add a manual payment method on the journal (%s)", journal.name))
         move_lines = []
         tax_data = self.env['account.tax']._compute_taxes([
-            self._convert_to_tax_base_line_dict(price_unit=self.total_amount_currency, currency=self.currency_id)
+            self._convert_to_tax_base_line_dict(price_unit=self.total_amount_currency, currency=self.currency_id),
             self.company_id,
         ])
         rate = abs(self.total_amount_currency / self.total_amount) if self.total_amount else 1.0

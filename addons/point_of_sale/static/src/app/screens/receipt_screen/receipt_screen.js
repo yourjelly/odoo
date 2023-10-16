@@ -24,6 +24,7 @@ export class ReceiptScreen extends Component {
         this.buttonMailReceipt = useRef("order-mail-receipt-button");
         this.buttonPrintReceipt = useRef("order-print-receipt-button");
         this.currentOrder = this.pos.get_order();
+//        this.currentOrderValues = this.currentOrder.getOrderScreenValues(true);
         const partner = this.currentOrder.get_partner();
         this.orderUiState = this.currentOrder.uiState.ReceiptScreen;
         this.orderUiState.inputEmail =
@@ -119,7 +120,7 @@ export class ReceiptScreen extends Component {
         const isPrinted = await this.printer.print(
             OrderReceipt,
             {
-                data: this.pos.get_order().export_for_printing(),
+                data: this.pos.get_order().getOrderScreenValues(true),
                 formatCurrency: this.env.utils.formatCurrency,
             },
             { webPrintFallback: true }
@@ -145,7 +146,7 @@ export class ReceiptScreen extends Component {
         const ticketImage = await this.renderer.toJpeg(
             OrderReceipt,
             {
-                data: this.pos.get_order().export_for_printing(),
+                data: this.pos.get_order().getOrderScreenValues(true),
                 formatCurrency: this.env.utils.formatCurrency,
             },
             { addClass: "pos-receipt-print" }
