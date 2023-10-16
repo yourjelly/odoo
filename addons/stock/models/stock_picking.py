@@ -24,11 +24,6 @@ class PickingType(models.Model):
     _rec_names_search = ['name', 'warehouse_id.name']
     _check_company_auto = True
 
-    def _default_show_operations(self):
-        return self.user_has_groups('stock.group_production_lot,'
-                                    'stock.group_stock_multi_locations,'
-                                    'stock.group_tracking_lot')
-
     name = fields.Char('Operation Type', required=True, translate=True)
     color = fields.Integer('Color')
     sequence = fields.Integer('Sequence', help="Used to order the 'All Operations' kanban view")
@@ -67,9 +62,6 @@ class PickingType(models.Model):
     print_label = fields.Boolean(
         'Print Label',
         help="If this checkbox is ticked, label will be print in this operation.")
-    show_operations = fields.Boolean(
-        'Show Detailed Operations', default=_default_show_operations,
-        help="If this checkbox is ticked, the pickings lines will represent detailed stock operations. If not, the picking lines will represent an aggregate of detailed stock operations.")
     show_reserved = fields.Boolean(
         'Pre-fill Detailed Operations', default=True,
         compute='_compute_show_reserved', store=True,
@@ -276,15 +268,6 @@ class PickingType(models.Model):
             elif picking_type.code == 'outgoing':
                 picking_type.print_label = True
 
-    @api.depends('code')
-    def _compute_show_operations(self):
-        for picking_type in self:
-            picking_type.show_operations = picking_type.code != 'incoming' and picking_type.user_has_groups(
-                'stock.group_production_lot,'
-                'stock.group_stock_multi_locations,'
-                'stock.group_tracking_lot'
-            )
-
     @api.onchange('code')
     def _onchange_picking_code(self):
         if self.code == 'internal' and not self.user_has_groups('stock.group_stock_multi_locations'):
@@ -305,10 +288,10 @@ class PickingType(models.Model):
             else:
                 picking_type.warehouse_id = False
 
-    @api.depends('show_operations', 'code')
+    @api.depends('code')
     def _compute_show_reserved(self):
         for picking_type in self:
-            if picking_type.show_operations and picking_type.code != 'incoming':
+            if picking_type.code != 'incoming':
                 picking_type.show_reserved = True
 
     @api.constrains('default_location_dest_id')
@@ -503,8 +486,6 @@ class Picking(models.Model):
     # Used to search on pickings
     product_id = fields.Many2one('product.product', 'Product', related='move_ids.product_id', readonly=True)
     lot_id = fields.Many2one('stock.lot', 'Lot/Serial Number', related='move_line_ids.lot_id', readonly=True)
-
-    show_operations = fields.Boolean(compute='_compute_show_operations')
     show_reserved = fields.Boolean(related='picking_type_id.show_reserved')
     show_lots_text = fields.Boolean(compute='_compute_show_lots_text')
     has_tracking = fields.Boolean(compute='_compute_has_tracking')
@@ -588,20 +569,6 @@ class Picking(models.Model):
                 if forecast_date:
                     picking.products_availability = _('Exp %s', format_date(self.env, forecast_date))
                     picking.products_availability_state = 'late' if picking.scheduled_date and picking.scheduled_date < forecast_date else 'expected'
-
-    @api.depends('picking_type_id.show_operations')
-    def _compute_show_operations(self):
-        for picking in self:
-            if self.env.context.get('force_detailed_view'):
-                picking.show_operations = True
-                continue
-            if picking.picking_type_id.show_operations:
-                if (picking.state == 'draft') or picking.state != 'draft':
-                    picking.show_operations = True
-                else:
-                    picking.show_operations = False
-            else:
-                picking.show_operations = False
 
     @api.depends('move_line_ids', 'picking_type_id.use_create_lots', 'picking_type_id.use_existing_lots', 'state')
     def _compute_show_lots_text(self):
@@ -950,6 +917,25 @@ class Picking(models.Model):
         self.write({'is_locked': True})
         self.filtered(lambda x: not x.move_ids).state = 'cancel'
         return True
+
+    def action_detailed_operations_view(self):
+        view_id = self.env.ref('stock.view_stock_move_line_detailed_operation_tree').id
+        return {
+            'name': _('Detailed Operations'),
+            'view_mode': 'tree',
+            'type': 'ir.actions.act_window',
+            'res_model': 'stock.move.line',
+            'views': [(view_id, 'tree')],
+            'domain': [('id', 'in', self.move_line_ids.ids)],
+            'context': {
+                'default_picking_id': self.id,
+                'default_location_id': self.location_id.id,
+                'default_location_dest_id': self.location_dest_id.id,
+                'default_company_id': self.company_id.id,
+                'show_lots_text': self.show_lots_text,
+                'picking_code': self.picking_type_code,
+            }
+        }
 
     def _action_done(self):
         """Call `_action_done` on the `stock.move` of the `stock.picking` in `self`.
@@ -1504,8 +1490,14 @@ class Picking(models.Model):
                 res = self._pre_put_in_pack_hook(move_line_ids)
                 if not res:
                     package = self._put_in_pack(move_line_ids)
+                    # for move in move_line_ids.move_id:
+                    #     qty_reserved = sum(move.move_line_ids.mapped('quantity'))
+                    #     missing_demand = max(move.product_uom_qty - qty_reserved, 0)
+                    #     # if the user sets a specific qty to put in a pack,
+                    #     # try to reserve the rest of the demand qty
+                    #     if missing_demand:
                     self.action_assign()
-                    return self._post_put_in_pack_hook(package)
+                    res = self._post_put_in_pack_hook(package)
                 return res
             raise UserError(_("Please add 'Done' quantities to the picking to create a new pack."))
 

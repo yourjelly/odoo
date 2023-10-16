@@ -434,11 +434,9 @@ class TestPacking(TestPackingCommon):
         self.env.user.write({'groups_id': [(3, grp_pack.id)]})
         self.warehouse.reception_steps = 'two_steps'
         # Settings of receipt.
-        self.warehouse.in_type_id.show_operations = True
         self.warehouse.in_type_id.show_entire_packs = True
         self.warehouse.in_type_id.show_reserved = True
         # Settings of internal transfer.
-        self.warehouse.int_type_id.show_operations = True
         self.warehouse.int_type_id.show_entire_packs = True
         self.warehouse.int_type_id.show_reserved = True
 
@@ -520,11 +518,6 @@ class TestPacking(TestPackingCommon):
 
         # Cancels the internal transfer and creates a new one.
         internal_transfer.action_cancel()
-        # @api.depends('picking_type_id.show_operations')
-        # def _compute_show_operations(self):
-        #     ...
-        #     if self.env.context.get('force_detailed_view'):
-        #         picking.show_operations = True
         picking = self.env['stock.picking'].create({
             'state': 'draft',
             'picking_type_id':  self.warehouse.int_type_id.id,
@@ -578,11 +571,9 @@ class TestPacking(TestPackingCommon):
         self.env.user.write({'groups_id': [(3, grp_pack.id)]})
         self.warehouse.reception_steps = 'two_steps'
         # Settings of receipt.
-        self.warehouse.in_type_id.show_operations = True
         self.warehouse.in_type_id.show_entire_packs = True
         self.warehouse.in_type_id.show_reserved = True
         # Settings of internal transfer.
-        self.warehouse.int_type_id.show_operations = True
         self.warehouse.int_type_id.show_entire_packs = True
         self.warehouse.int_type_id.show_reserved = True
 
@@ -671,11 +662,6 @@ class TestPacking(TestPackingCommon):
 
         # Cancels the internal transfer and creates a new one.
         internal_transfer.action_cancel()
-        # @api.depends('picking_type_id.show_operations')
-        # def _compute_show_operations(self):
-        #     ...
-        #     if self.env.context.get('force_detailed_view'):
-        #         picking.show_operations = True
         picking = self.env['stock.picking'].create({
             'state': 'draft',
             'picking_type_id':  self.warehouse.int_type_id.id,
@@ -823,11 +809,6 @@ class TestPacking(TestPackingCommon):
         self.warehouse.delivery_steps = 'ship_only'
         package = self.env["stock.quant.package"].create({"name": "Src Pack"})
         self.env['stock.quant']._update_available_quantity(self.productA, self.stock_location, 100, package_id=package)
-        # Required for `package_level_ids_details` to be visible in the view
-        # <page string="Detailed Operations" invisible="not show_operations">
-        # <field name="package_level_ids_details"
-        #   invisible="not picking_type_entire_packs or not show_operations"
-        self.warehouse.out_type_id.show_operations = True
         self.warehouse.out_type_id.show_entire_packs = True
         picking = self.env['stock.picking'].create({
             'location_id': self.stock_location.id,
@@ -840,6 +821,7 @@ class TestPacking(TestPackingCommon):
                 move.product_id = self.productA
                 move.product_uom_qty = 75
         picking.action_confirm()
+        # TODO: how to handle pack level without detailed operations??
         picking.action_assign()
         with Form(picking) as picking_form:
             with picking_form.package_level_ids_details.new() as package_level:
@@ -885,11 +867,6 @@ class TestPacking(TestPackingCommon):
                 move.product_id = self.productA
                 move.product_uom_qty = 75
         picking.action_assign()
-        # @api.depends('picking_type_id.show_operations')
-        # def _compute_show_operations(self):
-        #     ...
-        #     if self.env.context.get('force_detailed_view'):
-        #         picking.show_operations = True
         with Form(picking.with_context(force_detailed_view=True)) as picking_form:
             with picking_form.package_level_ids_details.new() as package_level:
                 package_level.package_id = package
@@ -972,18 +949,10 @@ class TestPacking(TestPackingCommon):
         moveB.picked = True
         picking.action_put_in_pack()
         picking.button_validate()
-
-        # Required for `package_level_ids_details` to be visible in the view
-        # <page string="Detailed Operations" invisible="not show_operations">
-        # <field name="package_level_ids_details"
-        #   invisible="not picking_type_entire_packs or not show_operations"
-        delivery_type.show_operations = True
         delivery_type.show_entire_packs = True
         picking, _, _ = create_picking(delivery_type, delivery_type.default_location_src_id, self.customer_location)
         packB = picking.package_level_ids[1]
-        with Form(picking) as picking_form:
-            with picking_form.package_level_ids_details.edit(0) as package_level:
-                package_level.is_done = True
+        picking.package_level_ids_details[0].is_done = True
 
         action_data = picking.button_validate()
         backorder_wizard = Form(self.env['stock.backorder.confirmation'].with_context(action_data['context'])).save()
