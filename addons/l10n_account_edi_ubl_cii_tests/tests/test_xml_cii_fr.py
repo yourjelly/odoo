@@ -330,7 +330,7 @@ class TestCIIFR(TestUBLCommon):
 
     def test_export_with_fixed_taxes_case3(self):
         # CASE 3: same as Case 1 but taxes are Price Included
-        self.recupel.price_include = True
+        self.recupel.include_base_amount = True
         self.tax_21.price_include = True
 
         # Price TTC = 121 = (99 + 1 ) * 1.21
@@ -342,7 +342,7 @@ class TestCIIFR(TestUBLCommon):
                 {
                     'product_id': self.product_a.id,
                     'quantity': 1,
-                    'price_unit': 121,
+                    'price_unit': 120,
                     'tax_ids': [(6, 0, [self.recupel.id, self.tax_21.id])],
                 }
             ],
