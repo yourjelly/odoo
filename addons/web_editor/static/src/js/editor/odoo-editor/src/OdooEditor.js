@@ -3144,20 +3144,18 @@ export class OdooEditor extends EventTarget {
         const range = sel.getRangeAt(0);
         const isSelForward =
             sel.anchorNode === range.startContainer && sel.anchorOffset === range.startOffset;
-        const startRect = range.startContainer.getBoundingClientRect && range.startContainer.getBoundingClientRect();
-        const selRect = range.getBoundingClientRect();
-        // In some undetermined circumstance in chrome, the selection rect is
-        // wrongly defined and result with all the values for x, y, width, and
-        // height to be 0. In that case, use the rect of the startContainer if
+        let rangeRects = [...range.getClientRects()];
+        // If getClientRects returns an empty list, use the rect of the startContainer if
         // possible.
-        const isSelectionPotentiallyBugged = [selRect.x, selRect.y, selRect.width, selRect.height].every( x => x === 0 );
-        let correctedSelectionRect = isSelectionPotentiallyBugged && startRect ? startRect : selRect;
+        if (!rangeRects.length) {
+            rangeRects = [range.startContainer.getBoundingClientRect?.() || range.getBoundingClientRect()];
+        }
         const selAncestors = [sel.anchorNode, ...ancestors(sel.anchorNode, this.editable)];
         // If a table is selected, we want to position the toolbar in function
         // of the table, rather than follow the DOM selection.
         const selectedTable = selAncestors.find(node => node.classList && node.classList.contains('o_selected_table'));
         if (selectedTable) {
-            correctedSelectionRect = selectedTable.getBoundingClientRect();
+            rangeRects = [selectedTable.getBoundingClientRect()];
         }
         const toolbarWidth = this.toolbar.offsetWidth;
         const toolbarHeight = this.toolbar.offsetHeight;
@@ -3167,14 +3165,14 @@ export class OdooEditor extends EventTarget {
         const editorTopPos = Math.max(0, editorRect.top);
         const scrollX = document.defaultView.scrollX;
         const scrollY = document.defaultView.scrollY;
-        const rangeRects = [...range.getClientRects()];
-        const rangeSpansMultipleLines =
-            rangeRects.length > 1 && rangeRects.at(-1).bottom - rangeRects[0].bottom > 2;
+        const rangeStartRect = rangeRects[0];
+        const rangeEndRect = rangeRects.at(-1);
+        const rangeSpansMultipleLines = rangeEndRect.bottom - rangeStartRect.bottom > 2;
 
         // Get left position.
-        let left = isSelForward || rangeSpansMultipleLines ?
-            correctedSelectionRect.left - OFFSET :
-            correctedSelectionRect.right + OFFSET - toolbarWidth;
+        let left = isSelForward ?
+            rangeStartRect.left - OFFSET :
+            rangeEndRect.right + OFFSET - toolbarWidth;
         // Ensure the toolbar doesn't overflow the editor on the left.
         left = Math.max(OFFSET, left);
         // Ensure the toolbar doesn't overflow the editor on the right.
@@ -3184,11 +3182,11 @@ export class OdooEditor extends EventTarget {
         this.toolbar.style.left = scrollX + adjustedLeft + 'px';
 
         // Get top position.
-        let top = correctedSelectionRect.top - toolbarHeight - OFFSET;
+        let top = rangeStartRect.top - toolbarHeight - OFFSET;
         // Ensure the toolbar doesn't overflow the editor or scroll container on the top.
         if (top < editorTopPos || top + parentContextRect.top - scrollContainerRect.top < OFFSET / 2) {
             // Position the toolbar below the selection.
-            top = correctedSelectionRect.bottom + OFFSET;
+            top = rangeEndRect.bottom + OFFSET;
             isBottom = true;
         }
         // Offset top to compensate for parent context position (eg. Iframe).
@@ -3202,7 +3200,7 @@ export class OdooEditor extends EventTarget {
         let toolbarBottom = top + toolbarHeight;
         if (hasArrow) {
             // Position the arrow.
-            let arrowLeftPos = (isSelForward && !isSelectionPotentiallyBugged ? correctedSelectionRect.right : correctedSelectionRect.left) - left - OFFSET;
+            let arrowLeftPos = (isSelForward ? rangeEndRect.right : rangeStartRect.left) - left - OFFSET;
             // Ensure the arrow doesn't overflow the toolbar on the left.
             arrowLeftPos = Math.max(OFFSET, arrowLeftPos);
             // Ensure the arrow doesn't overflow the toolbar on the right.
