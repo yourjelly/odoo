@@ -247,6 +247,13 @@ class StockForecasted(models.AbstractModel):
         def _reconcile_out_with_ins(lines, out, ins, demand, product_rounding, only_matching_move_dest=True, read=True):
             index_to_remove = []
             for index, in_ in enumerate(ins):
+                if in_['move'].picking_id:
+                    move = self.env['stock.move'].search([('id', 'in', list(in_['move_dests'])), ('location_dest_id', 'in', wh_stock_sub_location_ids)], limit=1)
+                    if move:
+                        in_.update({
+                            'qty': move.product_qty,
+                            'move': move,
+                        })
                 if float_is_zero(in_['qty'], precision_rounding=product_rounding):
                     index_to_remove.append(index)
                     continue
@@ -364,9 +371,12 @@ class StockForecasted(models.AbstractModel):
                 lines.append(self._prepare_report_line(free_stock, product=product, read=read))
             # In moves not used.
             for in_ in ins_per_product[product.id]:
+                move = self.env['stock.move']
+                if in_['move'].picking_id:
+                    move = self.env['stock.move'].search([('id', 'in', list(in_['move_dests'])), ('location_dest_id', 'in', wh_stock_sub_location_ids)], limit=1)
                 if float_is_zero(in_['qty'], precision_rounding=product_rounding):
                     continue
-                lines.append(self._prepare_report_line(in_['qty'], move_in=in_['move'], read=read))
+                lines.append(self._prepare_report_line(move.product_qty or in_['qty'], move_in=move or in_['move'], read=read))
         return lines
 
     @api.model
