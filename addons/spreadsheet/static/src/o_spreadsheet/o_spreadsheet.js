@@ -7685,7 +7685,7 @@
         });
         return {
             chartJsConfig: config,
-            background: getters.getBackgroundOfSingleCellChart(chart.background, dataRange),
+            background: getters.getStyleOfSingleCellChart(chart.background, dataRange).background,
         };
     }
 
@@ -8359,7 +8359,7 @@
             const baselineZone = chart.baseline.zone;
             baselineCell = getters.getCell(chart.baseline.sheetId, baselineZone.left, baselineZone.top);
         }
-        const background = getters.getBackgroundOfSingleCellChart(chart.background, chart.keyValue);
+        const { background, fontColor } = getters.getStyleOfSingleCellChart(chart.background, chart.keyValue);
         return {
             title: _t(chart.title),
             keyValue: formattedKeyValue || keyValue,
@@ -8367,7 +8367,7 @@
             baselineArrow: getBaselineArrowDirection(baselineCell === null || baselineCell === void 0 ? void 0 : baselineCell.evaluated, keyValueCell === null || keyValueCell === void 0 ? void 0 : keyValueCell.evaluated, chart.baselineMode),
             baselineColor: getBaselineColor(baselineCell === null || baselineCell === void 0 ? void 0 : baselineCell.evaluated, chart.baselineMode, keyValueCell === null || keyValueCell === void 0 ? void 0 : keyValueCell.evaluated, chart.baselineColorUp, chart.baselineColorDown),
             baselineDescr: chart.baselineDescr ? _t(chart.baselineDescr) : "",
-            fontColor: chartFontColor(background),
+            fontColor,
             background,
             baselineStyle: chart.baselineMode !== "percentage" ? baselineCell === null || baselineCell === void 0 ? void 0 : baselineCell.style : undefined,
             keyValueStyle: keyValueCell === null || keyValueCell === void 0 ? void 0 : keyValueCell.style,
@@ -32753,22 +32753,26 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
          *
          *  - the chart background color if one is defined
          *  - the fill color of the cell if one is defined
+         *  - the text color of the cell if one is defined
          *  - the fill color of the cell from conditional formats if one is defined
+         *  - the text color of the cell from conditional formats if one is defined
          *  - the default chart color if no other color is defined
+         *  - the default text color if no other color is defined
          */
-        getBackgroundOfSingleCellChart(chartBackground, mainRange) {
+        getStyleOfSingleCellChart(chartBackground, mainRange) {
             if (chartBackground)
-                return chartBackground;
+                return { background: chartBackground, fontColor: chartFontColor(chartBackground) };
             if (!mainRange) {
-                return BACKGROUND_CHART_COLOR;
+                return { background: BACKGROUND_CHART_COLOR, fontColor: chartFontColor(BACKGROUND_CHART_COLOR) };
             }
             const col = mainRange.zone.left;
             const row = mainRange.zone.top;
-            const style = this.getters.getCellComputedStyle(mainRange.sheetId, col, row);
-            return style.fillColor || BACKGROUND_CHART_COLOR;
+            const sheetId = mainRange.sheetId;
+            const style = this.getters.getCellComputedStyle(sheetId, col, row);
+            return { background: style.fillColor || BACKGROUND_CHART_COLOR, fontColor: style.textColor || chartFontColor(style.fillColor) };
         }
     }
-    EvaluationChartPlugin.getters = ["getChartRuntime", "getBackgroundOfSingleCellChart"];
+    EvaluationChartPlugin.getters = ["getChartRuntime", "getStyleOfSingleCellChart"];
 
     // -----------------------------------------------------------------------------
     // Constants
@@ -42983,7 +42987,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
 
 
     __info__.version = '16.0.21';
-    __info__.date = '2023-10-10T07:45:46.154Z';
+    __info__.date = '2023-10-16T09:52:10.800Z';
     __info__.hash = '5f66b12';
 
 
