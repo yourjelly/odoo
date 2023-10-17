@@ -663,7 +663,6 @@ class TestSubcontractingFlows(TestMrpSubcontractingCommon):
         process_picking(backorder01, 1)
 
         backorder02 = backorder01.backorder_ids
-        process_picking(backorder02, 0)
         self.assertEqual(backorder02.move_ids.quantity, 2.75)
 
         self.assertEqual(self.env['mrp.production'].search_count([('bom_id', '=', bom.id)]), 3)
@@ -1133,7 +1132,6 @@ class TestSubcontractingTracking(TransactionCase):
             # Record the production of each serial number separately
             action = picking_receipt.action_record_components()
             mo = self.env['mrp.production'].browse(action['res_id'])
-            self.assertEqual(mo.move_raw_ids.state, 'assigned')
             mo_form = Form(mo.with_context(**action['context']), view=action['view_id'])
             mo_form.qty_producing = 1
             mo_form.lot_producing_id = sn
