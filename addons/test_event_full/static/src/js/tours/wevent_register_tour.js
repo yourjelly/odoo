@@ -169,3 +169,32 @@ registry.category("web_tour.tours").add('wevent_register', {
         registerSteps,
     )
 });
+
+
+/**
+ * Agenda STEPS
+ */
+
+var discoverAgendaSteps = function (AgendaTitle) {
+    var steps;
+    steps = [{
+        content: 'Go on "' + AgendaTitle + '" Event page',
+        trigger: 'a:contains("' + AgendaTitle + '")',
+    }];
+    return steps;
+};
+
+var browseAgendaSteps = [{
+    content: 'Browse Agenda',
+    trigger: 'a:contains("Agenda")',
+}];
+
+registry.category("web_tour.tours").add('event_agenda', {
+    test: true,
+    steps: () => [].concat(
+        browseAgendaSteps,
+        discoverAgendaSteps('What This Event Is All About'),
+        discoverAgendaSteps('Live Testimonial'),
+        discoverAgendaSteps('Our Last Day Together!'),
+    )
+});
