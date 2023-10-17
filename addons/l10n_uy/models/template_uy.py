@@ -36,6 +36,7 @@ class AccountChartTemplate(models.AbstractModel):
                 'account_purchase_tax_id': 'vat4',
                 'deferred_expense_account_id': 'uy_code_11407',
                 'deferred_revenue_account_id': 'uy_code_21321',
+                'not_a_real_account_id': 'uy_code_21321',
             },
         }
 
