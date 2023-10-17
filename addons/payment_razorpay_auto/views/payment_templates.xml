@@ -1,5 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <template id="inline_form">
+        <div t-attf-id="razorpay-container-{{provider_id}}">
+            <div class="row">
+                <div class="input-group mt-0">
+                    <label class="me-2 my-0">
+                        <b>Payment Method:</b>
+                    </label>
+                    <label class="radio-inline mt-0">
+                        <input type="radio" name="pament_method_option" id="pament_method_card" value="card" checked="True"/>Card
+                    </label>
+                    <label class="radio-inline ms-2 mt-0">
+                        <input type="radio" name="pament_method_option" id="pament_method_upi" value="upi"/>UPI/QR
+                    </label>
+                </div>
+            </div>
+        </div>
+    </template>
 
     <template id="checkout" inherit_id="payment.checkout">
         <xpath expr="." position="inside">
@@ -16,5 +33,4 @@
     <template id="sdk_assets">
         <script src="https://checkout.razorpay.com/v1/checkout.js"/>
     </template>
-
 </odoo>

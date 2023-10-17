@@ -2,8 +2,12 @@
 
 import logging
 import pprint
+import time
 
-from odoo import models, _
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
+
+from odoo import fields, models, _
 from odoo.exceptions import ValidationError, UserError
 
 
@@ -12,6 +16,8 @@ _logger = logging.getLogger(__name__)
 
 class PaymentTransaction(models.Model):
     _inherit = 'payment.transaction'
+
+    razorpay_payment_method = fields.Selection(([('card', 'Card'), ('upi', 'UPI/QR')]), default=False)
 
     def _get_specific_processing_values(self, processing_values):
         """ Override of `payment` to return razorpay-specific processing values.
@@ -59,14 +65,27 @@ class PaymentTransaction(models.Model):
     def _should_rendering_values_return_condition(self):
         return super()._should_rendering_values_return_condition() or self.tokenize
 
+    def _get_razorpay_order_token_data(self):
+        self.ensure_one()
+        today = datetime.today()
+        token_expiry_date = today + relativedelta(year=999)
+        token_expiry_timeslamp = time.mktime(token_expiry_date.timetuple())
+        print("\n\n\n token_expiry_timeslamp", token_expiry_timeslamp)
+        return {
+            "max_amount": self.provider_id.maximum_amount or 9999900,
+            "expire_at": token_expiry_timeslamp,
+            "frequency": "monthly",
+        }
+
     def _razorpay_prepare_order_request_payload(self):
         payload = super()._razorpay_prepare_order_request_payload()
         if self.env.context.get('razorpay_customer_id'):
             if payload['currency'] != 'INR':
                 ValidationError(_("Currency should be 'INR' to create a token in razorpay recurring"))
             payload.update({
+                "token": self._get_razorpay_order_token_data(),
                 'customer_id': self.env.context['razorpay_customer_id'],
-                "method":"card",
+                "method":self.razorpay_payment_method,
             })
         return payload
 

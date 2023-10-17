@@ -3,6 +3,7 @@
 
     <record id="payment.payment_provider_razorpay" model="payment.provider">
         <field name="allow_tokenization">True</field>
+        <field name="inline_form_view_id" ref="inline_form"/>
     </record>
 
 </odoo>
