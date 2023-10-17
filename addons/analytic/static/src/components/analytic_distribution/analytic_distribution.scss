@@ -41,7 +41,7 @@
     }
 
     .analytic_distribution_popup {
-        // width: 400px;
+        min-width: 400px;
         max-width: $o-form-sheet-min-width;
         max-height: 50vh;
         cursor: default;

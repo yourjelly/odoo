@@ -281,4 +281,9 @@ QUnit.module("Analytic", (hooks) => {
             "should have rendered tag '30.3% Belgium | 69.7% Berlin'"
         );
     });
+
+    QUnit.test("Analytic Account Deleted after json is saved", (assert) => { assert.expect(0) });
+    QUnit.test("No Plans Available", (assert) => { assert.expect(0) });
+    QUnit.test("amount_field Column", (assert) => { assert.expect(0) });
+    QUnit.test("save as model", (assert) => { assert.expect(0) });
 });

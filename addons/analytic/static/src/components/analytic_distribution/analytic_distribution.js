@@ -107,6 +107,7 @@ export class AnalyticDistribution extends Component {
     // Lifecycle
     async willStart() {
         if (this.editingRecord) {
+            // for performance in list views, plans are not retrieved until they are required.
             await this.fetchAllPlans();
         }
         await this.jsonToData();
@@ -220,33 +221,27 @@ export class AnalyticDistribution extends Component {
             planId: plan.id,
             planName: plan.name,
             planColor: plan.color,
-            // planApplicability: plan.applicability,
-        }))
+        }));
     }
 
     async jsonToData() {
         const jsonFieldValue = this.props.record.data[this.props.name];
         const analyticAccountIds = jsonFieldValue ? Object.keys(jsonFieldValue).map((key) => key.split(',')).flat().map((id) => parseInt(id)) : [];
-        const records = analyticAccountIds.length ? await this.fetchAnalyticAccounts([["id", "in", analyticAccountIds]]) : [];
-        // move this line to fetchAnalyticAccounts
-        const analyticAccountDict = Object.assign({}, ...records.map((r) => {
-            const {id, ...rest} = r;
-            return {[id]: rest};
-        }));
+        const analyticAccountDict = analyticAccountIds.length ? await this.fetchAnalyticAccounts([["id", "in", analyticAccountIds]]) : [];
+
         let distribution = [];
+        let accountNotFound = false;
 
         for (const [accountIds, percentage] of Object.entries(jsonFieldValue)) {
-            // TODO: try to remove the following line as it implies the plans need to be loaded (performance)
-            const defaultVals = this.plansToArray();
+            const defaultVals = this.plansToArray(); // empty if the popup was not opened
             const ids = accountIds.split(',');
 
             for (const id of ids) {
-                // TODO: an account may not be found (if it was deleted)
-                // TODO: the list of ids should be clean, no need for `if (id)`
-                if (id) {
-                    const account = analyticAccountDict[parseInt(id)];
-                    //TODO: A plan might not be found (for example change the AML account)
-                    //TODO: clean up next line - it was done because allPlans might not have been called, so we just push analytic accounts into the defaultValues for the tags to display properly
+                const account = analyticAccountDict[parseInt(id)];
+                if (account) {
+                    // since tags are displayed even though plans might not be retrieved (ie defaultVals is empty)
+                    // push the accounts anyway, as order doesn't matter
+                    // once the popup is opened, plans are fetched and the analyticAccounts list will be ordered
                     Object.assign(defaultVals.find((plan) => plan.planId == account.root_plan_id[0]) || defaultVals.push({}) && defaultVals[defaultVals.length-1],
                     {
                         accountId: parseInt(id),
@@ -254,6 +249,8 @@ export class AnalyticDistribution extends Component {
                         accountColor: account.color,
                         accountRootPlanId: account.root_plan_id[0],
                     });
+                } else {
+                    accountNotFound = true;
                 }
             }
             distribution.push({
@@ -263,6 +260,11 @@ export class AnalyticDistribution extends Component {
             })
         }
         this.state.formattedData = distribution;
+        if (accountNotFound) {
+            // Analytic accounts in the json were not found, save the json without them
+            await this.save();
+            // await this.props.record.save();
+        }
     }
 
     recordProps(line) {
@@ -289,7 +291,7 @@ export class AnalyticDistribution extends Component {
                 // company domain might be required here
                 domain: [["root_plan_id", "=", account.planId]],
             };
-            values[fieldName] =  account?.accountId || false; //[account.accountId || false, account.accountDisplayName || "", account.planId ] //[...account?.accountId, account.planId] || false;
+            values[fieldName] =  account?.accountId || false;
         });
         // Percentage field
         recordFields['percentage'] = {
@@ -306,6 +308,7 @@ export class AnalyticDistribution extends Component {
             values[name] = this.props.record.data[name] * values['percentage'];
             // Currency field
             if (currency_field) {
+                // TODO: check web_read network request
                 const { string, name, type, relation } = this.props.record.fields[currency_field];
                 recordFields[currency_field] = { name, string, type, relation, invisible: true };
                 values[currency_field] = this.props.record.data[currency_field][0];
@@ -325,21 +328,6 @@ export class AnalyticDistribution extends Component {
 
     lineIsValid(line) {
         return this.accountCount(line) && line.percentage;
-    }
-
-    cleanUp() {
-        // remove lines having no analytic account set
-        this.state.formattedData = this.state.formattedData.filter((line) => this.accountCount(line));
-    }
-
-    dataToJson() {
-        const result = {};
-        //TODO: filter out empty lines
-        this.state.formattedData.map((line) => {
-            const key = line.analyticAccounts.reduce((p, n) => p.concat(n.accountId ? n.accountId : []), []);
-            result[key] = (result[key] || 0) + line.percentage * 100;
-        });
-        return result;
     }
 
     // ORM
@@ -376,21 +364,18 @@ export class AnalyticDistribution extends Component {
         this.allPlans = await this.orm.call("account.analytic.plan", "get_relevant_plans", [], argsPlan);
     }
 
-    async fetchAnalyticAccounts(domain, limit=null) {
+    async fetchAnalyticAccounts(domain) {
         const args = {
             domain: domain,
             fields: ["id", "display_name", "root_plan_id", "color"],
             context: [],
         }
-        if (limit) {
-            args['limit'] = limit;
-        }
-        if (domain.length === 1 && domain[0][0] === "id") {
-            //batch these orm calls
-            return await this.props.record.model.orm.read("account.analytic.account", domain[0][2], args.fields, {});
-        }
-        // search is handled by the many2one field, this can be removed, so can the condition above
-        // return await this.orm.call("account.analytic.account", "search_read", [], args);
+        // batched call
+        const records = await this.props.record.model.orm.read("account.analytic.account", domain[0][2], args.fields, {});
+        return Object.assign({}, ...records.map((r) => {
+            const {id, ...rest} = r;
+            return {[id]: rest};
+        }));
     }
 
     // Editing Distributions
@@ -465,15 +450,31 @@ export class AnalyticDistribution extends Component {
         }
     }
 
+    cleanUp() {
+        // remove lines having no analytic account set
+        // move this to dataToJson
+        this.state.formattedData = this.state.formattedData.filter((line) => this.accountCount(line));
+    }
+
+    dataToJson() {
+        const result = {};
+        this.cleanUp();
+        this.state.formattedData.map((line) => {
+            const key = line.analyticAccounts.reduce((p, n) => p.concat(n.accountId ? n.accountId : []), []);
+            result[key] = (result[key] || 0) + line.percentage * 100;
+        });
+        return result;
+    }
+
     async save() {
         await this.props.record.update({ [this.props.name]: this.dataToJson() });
     }
 
     onSaveNew() {
+        this.closeAnalyticEditor();
         this.openTemplate({ resId: false, context: {
             'default_analytic_distribution': this.dataToJson(),
         }});
-        this.closeAnalyticEditor();
     }
 
     forceCloseEditor() {
@@ -485,7 +486,6 @@ export class AnalyticDistribution extends Component {
     }
 
     closeAnalyticEditor() {
-        this.cleanUp();
         this.save();
         this.state.showDropdown = false;
     }
@@ -503,16 +503,16 @@ export class AnalyticDistribution extends Component {
         this.state.showDropdown = true;
     }
 
-    tagClicked(ev) {
+    async tagClicked(ev) {
         if (this.editingRecord && !this.isDropdownOpen) {
-            this.openAnalyticEditor();
-            // TODO: focus is not working
+            // TODO: focus is not working when tag is clicked while on an editable line
+            await this.openAnalyticEditor();
         }
-        // if (this.isDropdownOpen) {
-        //     this.setFocusSelector("[name='line_0'] td:first-of-type");
-        //     this.focusToSelector();
-        //     ev.stopPropagation();
-        // }
+        if (this.isDropdownOpen) {
+            this.setFocusSelector("[name='line_0'] td:first-of-type");
+            this.focusToSelector();
+            ev.stopPropagation();
+        }
     }
 
     // Focus
