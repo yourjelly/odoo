@@ -445,23 +445,23 @@
                     <!-- Social -->
                     <t t-call="website.placeholder_header_social_links"/>
                     <!-- Language Selector -->
-                    <t t-call="website.placeholder_header_language_selector">
+                    <!-- <t t-call="website.placeholder_header_language_selector">
                         <t t-set="_btn_class" t-valuef="btn-outline-secondary border-0"/>
                         <t t-set="_txt_class" t-valuef="small"/>
                         <t t-set="_dropdown_menu_class" t-valuef="dropdown-menu-end"/>
-                    </t>
+                    </t> -->
                     <!-- Sign In -->
                     <t t-call="portal.placeholder_user_sign_in">
                         <t t-set="_link_class" t-valuef="btn btn-outline-secondary"/>
                     </t>
                     <!-- User Dropdown -->
-                    <t t-call="portal.user_dropdown">
+                    <!-- <t t-call="portal.user_dropdown">
                         <t t-set="_user_name" t-value="True"/>
                         <t t-set="_item_class" t-valuef="dropdown"/>
                         <t t-set="_link_class" t-valuef="btn-outline-secondary border-0 fw-bold"/>
                         <t t-set="_user_name_class" t-valuef="small"/>
                         <t t-set="_dropdown_menu_class" t-valuef="dropdown-menu-end"/>
-                    </t>
+                    </t> -->
                     <!-- Call To Action -->
                     <t t-call="website.placeholder_header_call_to_action"/>
                 </ul>
