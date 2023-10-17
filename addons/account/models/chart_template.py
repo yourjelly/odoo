@@ -374,8 +374,10 @@ class AccountChartTemplate(models.AbstractModel):
             and key in company._fields
         )
 
+        filter_not_defined_yet = lambda key: key in company._fields or self.env.context.get('l10n_check_fields_complete')
+
         # Set the currency to the fiscal country's currency
-        vals = {key: val for key, val in template_data.items() if filter_properties(key)}
+        vals = {key: val for key, val in template_data.items() if filter_properties(key) and filter_not_defined_yet(key)}
         if not company._existing_accounting():
             vals['currency_id'] = fiscal_country.currency_id.id
         if not company.country_id:
@@ -500,9 +502,13 @@ class AccountChartTemplate(models.AbstractModel):
                 else:
                     xml_id = f"{('account.' + str(self.env.company.id) + '_') if '.' not in xml_id else ''}{xml_id}"
 
+                values = {}
+                for key, val in deref(record, self.env[model]).items():
+                    if key in self.env[model]._fields or self.env.context.get('l10n_check_fields_complete'):
+                         values[key] = val
                 create_vals.append({
                     'xml_id': xml_id,
-                    'values': deref(record, self.env[model]),
+                    'values': values,
                     'noupdate': True,
                 })
             created_vals[model] = self.with_context(lang='en_US').env[model]._load_records(create_vals)

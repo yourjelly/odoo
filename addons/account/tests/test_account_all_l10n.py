@@ -47,6 +47,6 @@ def test_all_l10n(env):
         _logger.info('Testing COA: %s (company: %s)', template_code, company.name)
         try:
             with env.cr.savepoint():
-                env['account.chart.template'].try_loading(template_code, company, install_demo=True)
+                env['account.chart.template'].with_context(l10n_check_fields_complete=True).try_loading(template_code, company, install_demo=True)
         except Exception:
             _logger.error("Error when creating COA %s", template_code, exc_info=True)
