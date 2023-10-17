@@ -1,12 +1,7 @@
 .s_dynamic {
-  .carousel-control-prev, .carousel-control-next {
-    position: absolute;
-    width: 4rem;
-
-    > span.fa {
-      color: map-get($grays, '700');
-      background: radial-gradient($white 50%, transparent 50%);
-    }
+  .carousel-control-prev .fa, .carousel-control-next .fa {
+    width: 2.6rem;
+    height: 2.6rem;
   }
   .dynamic_snippet_template .card-footer a, .dynamic_snippet_template .card-footer button, .o_dynamic_snippet_btn_wrapper {
     z-index: 2;
