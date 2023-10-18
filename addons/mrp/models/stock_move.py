@@ -69,15 +69,6 @@ class StockMoveLine(models.Model):
             lines |= raw_moves_lines.filtered(lambda ml: ml.product_id == self.product_id and (ml.lot_id or ml.lot_name))
         return lines
 
-    def _reservation_is_updatable(self, quantity, reserved_quant):
-        self.ensure_one()
-        if self.produce_line_ids.lot_id:
-            ml_remaining_qty = self.quantity - self.reserved_uom_qty
-            ml_remaining_qty = self.product_uom_id._compute_quantity(ml_remaining_qty, self.product_id.uom_id, rounding_method="HALF-UP")
-            if float_compare(ml_remaining_qty, quantity, precision_rounding=self.product_id.uom_id.rounding) < 0:
-                return False
-        return super(StockMoveLine, self)._reservation_is_updatable(quantity, reserved_quant)
-
     def write(self, vals):
         for move_line in self:
             production = move_line.move_id.production_id or move_line.move_id.raw_material_production_id
