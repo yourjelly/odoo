@@ -4225,10 +4225,7 @@ class StockMove(TransactionCase):
         })
         picking.action_confirm()
         picking.action_assign()
-        res_dict = picking.button_validate()
-        self.assertEqual(res_dict.get('res_model'), 'stock.immediate.transfer')
-        wizard = Form(self.env[res_dict['res_model']].with_context(res_dict['context'])).save()
-        wizard.process()
+        picking.button_validate()
         self.assertEqual(self.env['stock.quant']._get_available_quantity(self.product, self.stock_location), 10.0)
 
     def test_immediate_validate_2(self):
@@ -4259,10 +4256,7 @@ class StockMove(TransactionCase):
         picking.action_confirm()
         picking.action_assign()
         # Only 5 products are reserved on the move of 10, click on `button_validate`.
-        res_dict = picking.button_validate()
-        self.assertEqual(res_dict.get('res_model'), 'stock.immediate.transfer')
-        wizard = Form(self.env[res_dict['res_model']].with_context(res_dict['context'])).save()
-        res_dict_for_back_order = wizard.process()
+        res_dict_for_back_order = picking.button_validate()
         self.assertEqual(res_dict_for_back_order.get('res_model'), 'stock.backorder.confirmation')
         backorder_wizard = self.env[(res_dict_for_back_order.get('res_model'))].browse(res_dict_for_back_order.get('res_id')).with_context(res_dict_for_back_order['context'])
         # Chose to create a backorder.
@@ -4327,9 +4321,6 @@ class StockMove(TransactionCase):
         self.assertEqual(product5_move.state, 'confirmed')
 
         action = picking.button_validate()
-        self.assertEqual(action.get('res_model'), 'stock.immediate.transfer')
-        wizard = Form(self.env[action['res_model']].with_context(action['context'])).save()
-        action = wizard.process()
         self.assertTrue(isinstance(action, dict), 'Should open backorder wizard')
         self.assertEqual(action.get('res_model'), 'stock.backorder.confirmation')
         wizard = self.env[(action.get('res_model'))].browse(action.get('res_id')).with_context(action.get('context'))
@@ -4375,10 +4366,7 @@ class StockMove(TransactionCase):
         picking.action_confirm()
         picking.action_assign()
         # No quantities filled, immediate transfer wizard should pop up.
-        immediate_trans_wiz_dict = picking.button_validate()
-        self.assertEqual(immediate_trans_wiz_dict.get('res_model'), 'stock.immediate.transfer')
-        immediate_trans_wiz = Form(self.env[immediate_trans_wiz_dict['res_model']].with_context(immediate_trans_wiz_dict['context'])).save()
-        immediate_trans_wiz.process()
+        picking.button_validate()
 
         self.assertEqual(picking.move_ids.quantity, 5.0)
         # Check move_lines data
@@ -4555,41 +4543,10 @@ class StockMove(TransactionCase):
             'product_uom_qty': 10.0,
         })
         receipt2.action_confirm()
-        receipt3 = self.env['stock.picking'].create({
-            'location_id': self.supplier_location.id,
-            'location_dest_id': self.stock_location.id,
-            'partner_id': partner.id,
-            'picking_type_id': self.env.ref('stock.picking_type_in').id,
-            'state': 'draft',
-        })
-        self.env['stock.move'].create({
-            'name': 'test_immediate_validate_8_3',
-            'location_id': receipt3.location_id.id,
-            'location_dest_id': receipt3.location_dest_id.id,
-            'picking_id': receipt3.id,
-            'product_id': self.product.id,
-            'product_uom': self.uom_unit.id,
-            'product_uom_qty': 10.0,
-        })
-        receipt3.action_confirm()
 
-        immediate_trans_wiz_dict = (receipt1 + receipt2).button_validate()
-        immediate_trans_wiz = Form(self.env[immediate_trans_wiz_dict['res_model']].with_context(immediate_trans_wiz_dict['context'])).save()
-        # The different transfers are displayed to the users.
-        self.assertTrue(immediate_trans_wiz.show_transfers)
-        # All transfers are processed by default
-        self.assertEqual(immediate_trans_wiz.immediate_transfer_line_ids.mapped('to_immediate'), [True, True])
-        # Only transfer receipt1
-        immediate_trans_wiz.immediate_transfer_line_ids.filtered(lambda line: line.picking_id == receipt2).to_immediate = False
-        immediate_trans_wiz.process()
+        (receipt1 + receipt2).button_validate()
         self.assertEqual(receipt1.state, 'done')
-        self.assertEqual(receipt2.state, 'assigned')
-        # Transfer receipt2 and receipt3.
-        immediate_trans_wiz_dict = (receipt3 + receipt2).button_validate()
-        immediate_trans_wiz = Form(self.env[immediate_trans_wiz_dict['res_model']].with_context(immediate_trans_wiz_dict['context'])).save()
-        immediate_trans_wiz.process()
         self.assertEqual(receipt2.state, 'done')
-        self.assertEqual(receipt3.state, 'done')
 
     def test_immediate_validate_9_tracked_move_with_0_quantity(self):
         """When trying to validate a picking as an immediate transfer, the done
@@ -4613,11 +4570,7 @@ class StockMove(TransactionCase):
         receipt = picking_form.save()
         receipt.action_confirm()
 
-        immediate_wizard = receipt.button_validate()
-        immediate_wizard_form = Form(
-            self.env[immediate_wizard['res_model']].with_context(immediate_wizard['context'])
-        ).save()
-        immediate_wizard_form.process()
+        receipt.button_validate()
         self.assertEqual(receipt.state, 'done')
 
     def test_immediate_validate_10_tracked_move_without_backorder(self):
@@ -4646,11 +4599,7 @@ class StockMove(TransactionCase):
         internal_transfer = picking_form.save()
         internal_transfer.action_confirm()
 
-        immediate_wizard = internal_transfer.button_validate()
-        immediate_wizard_form = Form(
-            self.env[immediate_wizard['res_model']].with_context(immediate_wizard['context'])
-        ).save()
-        immediate_wizard_form.process()
+        internal_transfer.button_validate()
         self.assertEqual(internal_transfer.state, 'done')
 
     def test_set_quantity_1(self):
