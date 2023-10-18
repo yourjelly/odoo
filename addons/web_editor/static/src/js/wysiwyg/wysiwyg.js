@@ -3341,6 +3341,7 @@ export class Wysiwyg extends Component {
     // Legacy compatibility layer
     // Remove me when all legacy widgets using wysiwyg are converted to OWL.
     // -----------------------------------------------------------------------------
+    _trigger_up() {}
     _serviceRpc(route, params, settings = {}) {
         if (status(this) === "destroyed") {
             return;

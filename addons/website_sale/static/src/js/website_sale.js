@@ -63,6 +63,7 @@ export const WebsiteSale = publicWidget.Widget.extend(VariantMixin, cartHandlerM
 
         this.rpc = this.bindService("rpc");
         this.dialog = this.bindService("dialog");
+        this.showCartNotification = wSaleUtils.makeCartNotifier(this);
     },
     /**
      * @override

@@ -25,6 +25,7 @@ publicWidget.registry.ProductWishlist = publicWidget.Widget.extend(VariantMixin,
         this._super.apply(this, arguments);
         this.wishlistProductIDs = JSON.parse(sessionStorage.getItem('website_sale_wishlist_product_ids') || '[]');
         this.rpc = this.bindService("rpc");
+        this.showCartNotification = wSaleUtils.makeCartNotifier(this);
     },
     /**
      * Gets the current wishlist items.
@@ -184,13 +185,12 @@ publicWidget.registry.ProductWishlist = publicWidget.Widget.extend(VariantMixin,
             productTrackingInfo.quantity = qty;
             $tr.trigger('add_to_cart_event', [productTrackingInfo]);
         }
-        const callService = this.call.bind(this)
         return this.rpc("/shop/cart/update_json", {
             ...this._getCartUpdateJsonParams(productID, qty),
             display: false,
-        }).then(function (data) {
+        }).then((data) => {
             wSaleUtils.updateCartNavBar(data);
-            wSaleUtils.showCartNotification(callService, data.notification_info);
+            this.showCartNotification(data.notification_info);
             wSaleUtils.showWarning(data.warning);
         });
     },

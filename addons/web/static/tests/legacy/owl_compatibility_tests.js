@@ -35,9 +35,6 @@
                 start() {
                     this.$el.text("Hello World!");
                 },
-                callTriggerUp() {
-                    this.call("test", "call", { [this.params[0]]: this.params[1] });
-                },
             });
 
             class ComponentAdapter extends Component {
@@ -56,14 +53,6 @@
             }
 
             const target = getFixture();
-            registry.category("services").add("test", {
-                start: () => ({
-                    call: (p) => {
-                        assert.step("triggered up");
-                        assert.deepEqual(p, { a: 1 });
-                    },
-                }), 
-            });
             const component = await mount(Toggle, target, {
                 env: await makeTestEnv(),
             });
@@ -73,9 +62,6 @@
                 target.querySelector("#adapter").textContent,
                 "Hello World!"
             );
-
-            widget.callTriggerUp();
-            assert.verifySteps(["triggered up"]);
 
             component.state.active = false;
             await nextTick();

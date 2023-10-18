@@ -11,7 +11,7 @@ import { isMediaElement } from '@web_editor/js/editor/odoo-editor/src/utils/util
 import { EditMenuDialog, MenuDialog } from "../dialog/edit_menu";
 import { WebsiteDialog } from '../dialog/dialog';
 import { PageOption } from "./page_options";
-import { Component, onWillStart, useEffect, onWillUnmount } from "@odoo/owl";
+import { onWillStart, useEffect, onWillUnmount } from "@odoo/owl";
 import { EditHeadBodyDialog } from "../edit_head_body_dialog/edit_head_body_dialog";
 
 /**

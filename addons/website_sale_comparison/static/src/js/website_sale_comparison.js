@@ -30,6 +30,7 @@ var ProductComparison = publicWidget.Widget.extend(VariantMixin, {
         this.product_compare_limit = 4;
         this.guard = new Mutex();
         this.rpc = this.bindService("rpc");
+        this.showCartNotification = website_sale_utils.makeCartNotifier(this);
     },
     /**
      * @override

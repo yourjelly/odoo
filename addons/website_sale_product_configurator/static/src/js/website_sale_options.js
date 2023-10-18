@@ -100,19 +100,18 @@ publicWidget.registry.WebsiteSale.include({
             }
         }
 
-        const callService = this.call.bind(this)
         this.optionalProductsModal.getAndCreateSelectedProducts()
             .then((products) => {
                 const productAndOptions = JSON.stringify(products);
                 this.rpc('/shop/cart/update_option', {
                     product_and_options: productAndOptions,
                     ...this._getOptionalCombinationInfoParam(),
-                }).then(function (values) {
+                }).then((values) => {
                     if (goToShop) {
                         window.location.pathname = "/shop/cart";
                     } else {
                         wSaleUtils.updateCartNavBar(values);
-                        wSaleUtils.showCartNotification(callService, values.notification_info);
+                        this.showCartNotification(values.notification_info);
                     }
                 }).then(() => {
                     this._getCombinationInfo($.Event('click', {target: $("#add_to_cart")}));

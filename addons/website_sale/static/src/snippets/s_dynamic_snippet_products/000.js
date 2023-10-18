@@ -116,6 +116,7 @@ const DynamicSnippetProductsCard = publicWidget.Widget.extend({
         const parent = options.parent || root;
         this._super(parent, options);
         this.rpc = this.bindService("rpc");
+        this.showCartNotification = wSaleUtils.makeCartNotifier(this);
     },
 
     start() {
@@ -139,7 +140,7 @@ const DynamicSnippetProductsCard = publicWidget.Widget.extend({
             display: false,
         });
         wSaleUtils.updateCartNavBar(data);
-        wSaleUtils.showCartNotification(this.call.bind(this), data.notification_info);
+        this.showCartNotification(data.notification_info);
         if (this.add2cartRerender) {
             this.trigger_up('widgets_start_request', {
                 $target: this.$el.closest('.s_dynamic'),
