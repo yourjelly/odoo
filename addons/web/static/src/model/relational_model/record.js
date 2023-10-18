@@ -10,7 +10,7 @@ import { evaluateBooleanExpr } from "@web/core/py_js/py";
 import { escape } from "@web/core/utils/strings";
 import { DataPoint } from "./datapoint";
 import {
-    FetchRecordError,
+    // FetchRecordError,
     createPropertyActiveField,
     getBasicEvalContext,
     getFieldContext,
@@ -980,13 +980,9 @@ export class Record extends DataPoint {
             return false;
         }
         let fieldSpec = {};
-        if (reload) {
-            fieldSpec = getFieldsSpec(
-                this.activeFields,
-                this.fields,
-                getBasicEvalContext(this.config)
-            );
-        }
+        // if (reload) {
+        fieldSpec = getFieldsSpec(this.activeFields, this.fields, getBasicEvalContext(this.config));
+        // }
         const kwargs = {
             context: this.context,
             specification: fieldSpec,
@@ -1009,35 +1005,35 @@ export class Record extends DataPoint {
             }
             throw e;
         }
-        if (reload && !records.length) {
-            throw new FetchRecordError(nextId || this.resId);
-        }
+        // if (reload && !records.length) {
+        //     throw new FetchRecordError(nextId || this.resId);
+        // }
         if (creation) {
             const resId = records[0].id;
             const resIds = this.resIds.concat([resId]);
             this.model._updateConfig(this.config, { resId, resIds }, { reload: false });
         }
         await this.model.hooks.onRecordSaved(this, changes);
-        if (reload) {
-            if (this.resId) {
-                this.model._updateSimilarRecords(this, records[0]);
-            }
-            if (nextId) {
-                this.model._updateConfig(this.config, { resId: nextId }, { reload: false });
-            }
-            if (this.config.isRoot) {
-                this.model.hooks.onWillLoadRoot(this.config);
-            }
-            this._setData(records[0]);
-        } else {
-            this._values = markRaw({ ...this._values, ...this._changes });
-            if ("id" in this.activeFields) {
-                this._values.id = records[0].id;
-            }
-            this._changes = markRaw({});
-            this.data = { ...this._values };
-            this.dirty = false;
+        // if (reload) {
+        if (this.resId) {
+            this.model._updateSimilarRecords(this, records[0]);
         }
+        if (nextId) {
+            this.model._updateConfig(this.config, { resId: nextId }, { reload: false });
+        }
+        if (this.config.isRoot) {
+            this.model.hooks.onWillLoadRoot(this.config);
+        }
+        this._setData(records[0]);
+        // } else {
+        //     this._values = markRaw({ ...this._values, ...this._changes });
+        //     if ("id" in this.activeFields) {
+        //         this._values.id = records[0].id;
+        //     }
+        //     this._changes = markRaw({});
+        //     this.data = { ...this._values };
+        //     this.dirty = false;
+        // }
         return true;
     }
 
