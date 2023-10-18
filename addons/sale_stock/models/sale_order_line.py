@@ -238,7 +238,7 @@ class SaleOrderLine(models.Model):
         outgoing_moves, incoming_moves = self._get_outgoing_incoming_moves()
         for move in outgoing_moves:
             if move.state == 'done':
-                qty += move.product_uom._compute_quantity(move.quantity_done, self.product_uom, rounding_method='HALF-UP')
+                qty += move.product_uom._compute_quantity(move.quantity, self.product_uom, rounding_method='HALF-UP')
             else:
                 qty += move.product_uom._compute_quantity(move.product_uom_qty, self.product_uom, rounding_method='HALF-UP')
         for move in incoming_moves:
