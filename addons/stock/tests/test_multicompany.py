@@ -596,10 +596,7 @@ class TestMultiCompany(TransactionCase):
         self.assertEqual(move_transit_to_wha.state, "assigned")
         self.assertEqual(move_whb_to_transit.state, "assigned")
 
-        res_dict = move_whb_to_transit.picking_id.button_validate()
-        self.assertEqual(res_dict.get('res_model'), 'stock.immediate.transfer')
-        wizard = Form(self.env[res_dict['res_model']].with_context(res_dict['context'])).save()
-        wizard.process()
+        move_whb_to_transit.picking_id.button_validate()
         self.assertEqual(self.env['stock.quant']._get_available_quantity(product_lot, intercom_location, lot_b), 1.0)
         with self.assertRaises(UserError):
             move_transit_to_wha.picking_id.button_validate()
@@ -613,10 +610,7 @@ class TestMultiCompany(TransactionCase):
 
         move_wha_to_cus._action_assign()
         self.assertEqual(move_wha_to_cus.state, "assigned")
-        res_dict = move_wha_to_cus.picking_id.button_validate()
-        self.assertEqual(res_dict.get('res_model'), 'stock.immediate.transfer')
-        wizard = Form(self.env[res_dict['res_model']].with_context(res_dict['context'])).save()
-        wizard.process()
+        move_wha_to_cus.picking_id.button_validate()
         self.assertEqual(self.env['stock.quant']._get_available_quantity(product_lot, customer_location, lot_a), 1.0)
 
         self.assertEqual(lot_a.company_id, self.company_a)

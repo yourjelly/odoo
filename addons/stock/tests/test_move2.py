@@ -2256,9 +2256,7 @@ class TestSinglePicking(TestStockCommon):
         receipt = Form(receipt)
         receipt.owner_id = owner1
         receipt = receipt.save()
-        wiz = receipt.button_validate()
-        wiz = Form(self.env['stock.immediate.transfer'].with_context(wiz['context'])).save()
-        wiz.process()
+        receipt.button_validate()
 
         supplier_location = self.env['stock.location'].browse(self.supplier_location)
         stock_location = self.env['stock.location'].browse(self.stock_location)
@@ -2307,7 +2305,7 @@ class TestSinglePicking(TestStockCommon):
         # <field name="location_id" invisible="picking_type_code' == 'incoming'"
         receipt_form.location_dest_id = stock_location
         receipt = receipt_form.save()
-        
+
         with receipt_form.move_line_ids_without_package.new() as move_line:
             move_line.product_id = self.productA
             move_line.quantity = 1.0

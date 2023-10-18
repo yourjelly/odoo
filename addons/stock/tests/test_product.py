@@ -159,9 +159,7 @@ class TestVirtualAvailable(TestStockCommon):
             'picking_id': picking.id,
         })
         picking.action_confirm()
-        wizard_data = picking.button_validate()
-        wizard = Form(self.env[wizard_data['res_model']].with_context(wizard_data['context'])).save()
-        wizard.process()
+        picking.button_validate()
 
         product.company_id = company1.id
         with self.assertRaises(UserError):
