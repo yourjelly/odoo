@@ -99,6 +99,7 @@ class TestPacking(TestPackingCommon):
         })
         self.assertEqual(picking_ship.state, 'assigned', 'Delivery state should be assigned.')
         self.assertFalse(picking_ship.sale_id.id, 'Sale order shouldn\'t be set')
+        picking_ship.move_ids.picked = True
         picking_ship.button_validate()
         self.assertEqual(picking_ship.state, 'done')
 
@@ -127,7 +128,8 @@ class TestPacking(TestPackingCommon):
         # Confirm the picking and send to shipper
         picking_ship = so.picking_ids.filtered(lambda p: p.picking_type_id.name == 'Pick')
         picking_ship.action_confirm()
-        picking_ship.move_ids.quantity_done = 1.0
+        picking_ship.move_ids.quantity = 1.0
+        picking_ship.move_ids.picked = True
         picking_ship.button_validate()
 
         # Mock carrier shipping method
