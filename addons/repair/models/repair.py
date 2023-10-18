@@ -264,7 +264,7 @@ class Repair(models.Model):
     @api.depends('move_ids', 'state', 'move_ids.product_uom_qty')
     def _compute_unreserve_visible(self):
         for repair in self:
-            already_reserved = repair.state not in ('done', 'cancel') and any(repair.mapped('move_ids.move_line_ids.reserved_qty'))
+            already_reserved = repair.state not in ('done', 'cancel') and any(repair.mapped('move_ids.move_line_ids.quantity'))
 
             repair.unreserve_visible = already_reserved
             repair.reserve_visible = repair.state in ('confirmed', 'under_repair') and any(move.product_uom_qty and move.state in ['confirmed', 'partially_available'] for move in repair.move_ids)

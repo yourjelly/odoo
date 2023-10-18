@@ -301,8 +301,8 @@ class TestRepair(common.TransactionCase):
         repair.move_ids |= lineD  # product_uom_qty = 0   : state is cancelled
 
         self.assertEqual(lineD.state, 'assigned')
-        num_of_lines = repair.move_ids.__len__()
-        self.assertEqual(repair.move_id.__len__(), 0)
+        num_of_lines = len(repair.move_ids)
+        self.assertFalse(repair.move_id)
         repair.action_repair_end()
 
         self.assertEqual(repair.state, "done")
@@ -310,8 +310,8 @@ class TestRepair(common.TransactionCase):
         #line a,b,c are 'done', line d is 'cancel'
         self.assertTrue(all(m.state == 'done' for m in done_moves))
         self.assertEqual(lineD.state, 'cancel')
-        self.assertEqual(repair.move_id.__len__(), 1)
-        self.assertEqual(repair.move_ids.__len__(), num_of_lines)  # No split
+        self.assertEqual(len(repair.move_id), 1)
+        self.assertEqual(len(repair.move_ids), num_of_lines)  # No split
 
         # (*) -> cancel (action_repair_cancel)
             # PRE
