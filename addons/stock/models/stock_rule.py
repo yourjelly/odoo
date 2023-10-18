@@ -295,8 +295,13 @@ class StockRule(models.Model):
         elif self.group_propagation_option == 'fixed':
             group_id = self.group_id.id
 
-        date_scheduled = values.get('date_planned')
-        date_deadline = values.get('date_deadline') or False
+        date_scheduled = fields.Datetime.to_string(
+            fields.Datetime.from_string(values['date_planned']) - relativedelta(days=self.delay or 0)
+        )
+        date_deadline = values.get('date_deadline') and (fields.Datetime.to_datetime(values['date_deadline']) - relativedelta(days=self.delay or 0)) or False
+        if self.action == 'pull_push':
+            date_scheduled = values.get('date_planned')
+            date_deadline = values.get('date_deadline') or False
         partner = self.partner_address_id or (values.get('group_id', False) and values['group_id'].partner_id)
         if partner:
             product_id = product_id.with_context(lang=partner.lang or self.env.user.lang)

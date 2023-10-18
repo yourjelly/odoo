@@ -484,9 +484,9 @@ class StockWarehouseOrderpoint(models.Model):
         be used in move/po creation.
         """
         date_planned = date or fields.Date.today()
-        # breakpoint()
-        print("_prepare_procurement_values ,, stock-->>stock_orderpoint")
         date_deadline = date - relativedelta.relativedelta(days=self.rule_ids.delay_deadline())
+        if 'pull_push' not in self.rule_ids.mapped('action'):
+            date_planned = self.product_id._get_date_with_security_lead_days(date_planned, self.location_id, route_ids=self.route_id)
         return {
             'route_ids': self.route_id,
             'date_planned': date_planned,
