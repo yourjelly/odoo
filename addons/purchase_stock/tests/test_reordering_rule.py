@@ -720,9 +720,7 @@ class TestReorderingRule(TransactionCase):
 
         po.button_confirm()
         picking = po.picking_ids
-        action = picking.button_validate()
-        wizard = Form(self.env[(action.get('res_model'))].with_context(action['context'])).save()
-        wizard.process()
+        picking.button_validate()
 
         self.assertRecordValues(picking.move_line_ids, [
             {'product_id': self.product_01.id, 'quantity': 1.0, 'state': 'done', 'location_dest_id': stock_location.id},

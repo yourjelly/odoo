@@ -190,9 +190,7 @@ class TestPurchaseOrder(ValuationReconciliationTestCommon):
         po1.button_confirm()
 
         picking = po1.picking_ids
-        wiz_act = picking.button_validate()
-        wiz = Form(self.env[wiz_act['res_model']].with_context(wiz_act['context'])).save()
-        wiz.process()
+        picking.button_validate()
 
         # Return 5 units
         stock_return_picking_form = Form(self.env['stock.return.picking'].with_context(
@@ -208,9 +206,7 @@ class TestPurchaseOrder(ValuationReconciliationTestCommon):
             })
         res = return_wiz.create_returns()
         return_pick = self.env['stock.picking'].browse(res['res_id'])
-        wiz_act = return_pick.button_validate()
-        wiz = Form(self.env[wiz_act['res_model']].with_context(wiz_act['context'])).save()
-        wiz.process()
+        return_pick.button_validate()
 
         self.assertEqual(po1.order_line.qty_received, 5)
 
@@ -248,9 +244,7 @@ class TestPurchaseOrder(ValuationReconciliationTestCommon):
         )
 
         # receive products
-        wiz_act = po.picking_ids.button_validate()
-        wiz = Form(self.env[wiz_act['res_model']].with_context(wiz_act['context'])).save()
-        wiz.process()
+        po.picking_ids.button_validate()
 
         # update second line
         old_date = po.order_line[1].date_planned
@@ -447,21 +441,18 @@ class TestPurchaseOrder(ValuationReconciliationTestCommon):
 
         first_picking = _purchase_order.picking_ids[0]
         first_picking.move_ids.quantity = 5
-        first_picking.move_ids.picked = True
         backorder_wizard_dict = first_picking.button_validate()
         backorder_wizard = Form(self.env[backorder_wizard_dict['res_model']].with_context(backorder_wizard_dict['context'])).save()
         backorder_wizard.process()
 
         second_picking = _purchase_order.picking_ids[1]
         second_picking.move_ids.quantity = 5
-        second_picking.move_ids.picked = True
         backorder_wizard_dict = second_picking.button_validate()
         backorder_wizard = Form(self.env[backorder_wizard_dict['res_model']].with_context(backorder_wizard_dict['context'])).save()
         backorder_wizard.process()
 
         third_picking = _purchase_order.picking_ids[2]
         third_picking.move_ids.quantity = 5
-        third_picking.move_ids.picked = True
         backorder_wizard_dict = third_picking.button_validate()
         backorder_wizard = Form(self.env[backorder_wizard_dict['res_model']].with_context(backorder_wizard_dict['context'])).save()
         backorder_wizard.process()

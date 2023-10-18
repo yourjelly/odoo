@@ -50,8 +50,7 @@ class TestFifoPrice(ValuationReconciliationTestCommon):
 
         # Process the reception of purchase order 1 and set date
         picking = purchase_order_1.picking_ids[0]
-        res = picking.button_validate()
-        Form(self.env[res['res_model']].with_context(res['context'])).save().process()
+        picking.button_validate()
 
         # Check the standard price of the product (fifo icecream), that should have changed
         # because the unit cost of the purchase order is 50
@@ -75,8 +74,7 @@ class TestFifoPrice(ValuationReconciliationTestCommon):
 
         # Process the reception of purchase order 2
         picking = purchase_order_2.picking_ids[0]
-        res = picking.button_validate()
-        Form(self.env[res['res_model']].with_context(res['context'])).save().process()
+        picking.button_validate()
 
         # Check the standard price of the product, that should have not changed because we
         # still have icecream in stock
@@ -102,8 +100,7 @@ class TestFifoPrice(ValuationReconciliationTestCommon):
         outgoing_shipment.action_assign()
 
         # Process the delivery of the outgoing shipment
-        res = outgoing_shipment.button_validate()
-        Form(self.env[res['res_model']].with_context(res['context'])).save().process()
+        outgoing_shipment.button_validate()
 
         # Check stock value became 1600 .
         self.assertEqual(product_cable_management_box.value_svl, 1600.0, 'Stock valuation should be 1600')
@@ -127,8 +124,7 @@ class TestFifoPrice(ValuationReconciliationTestCommon):
         outgoing_shipment_uom.action_assign()
 
         # Process the delivery of the outgoing shipment
-        res = outgoing_shipment_uom.button_validate()
-        Form(self.env[res['res_model']].with_context(res['context'])).save().process()
+        outgoing_shipment_uom.button_validate()
 
         # Check stock valuation and qty in stock
         self.assertEqual(product_cable_management_box.value_svl, 1560.0, 'Stock valuation should be 1560')
@@ -165,8 +161,7 @@ class TestFifoPrice(ValuationReconciliationTestCommon):
         purchase_order_usd.button_confirm()
         # Process the reception of purchase order with USD
         picking = purchase_order_usd.picking_ids[0]
-        res = picking.button_validate()
-        Form(self.env[res['res_model']].with_context(res['context'])).save().process()
+        picking.button_validate()
 
         # Create delivery order of 49.5 kg
         outgoing_shipment_cur = self.env['stock.picking'].create({
@@ -187,8 +182,7 @@ class TestFifoPrice(ValuationReconciliationTestCommon):
         outgoing_shipment_cur.action_assign()
 
         # Process the delivery of the outgoing shipment
-        res = outgoing_shipment_cur.button_validate()
-        Form(self.env[res['res_model']].with_context(res['context'])).save().process()
+        outgoing_shipment_cur.button_validate()
 
         # Do a delivery of an extra 10 kg
         outgoing_shipment_ret = self.env['stock.picking'].create({
@@ -207,8 +201,7 @@ class TestFifoPrice(ValuationReconciliationTestCommon):
 
         # I assign this outgoing shipment
         outgoing_shipment_ret.action_assign()
-        res = outgoing_shipment_ret.button_validate()
-        Form(self.env[res['res_model']].with_context(res['context'])).save().process()
+        outgoing_shipment_ret.button_validate()
 
         # Check rounded price is 150.0 / 1.2834
         self.assertEqual(round(product_cable_management_box.qty_available), 0.0, 'Wrong quantity in stock after first reception.')
@@ -295,8 +288,7 @@ class TestFifoPrice(ValuationReconciliationTestCommon):
 
         # Process the reception of purchase order neg
         picking = purchase_order_neg.picking_ids[0]
-        res = picking.button_validate()
-        Form(self.env[res['res_model']].with_context(res['context'])).save().process()
+        picking.button_validate()
 
         # Receive purchase order with 600 kg FIFO Ice Cream at 80 euro/kg
         purchase_order_neg2 = self.env['purchase.order'].create({
@@ -315,8 +307,7 @@ class TestFifoPrice(ValuationReconciliationTestCommon):
 
         # Process the reception of purchase order neg2
         picking = purchase_order_neg2.picking_ids[0]
-        res = picking.button_validate()
-        Form(self.env[res['res_model']].with_context(res['context'])).save().process()
+        picking.button_validate()
 
         original_out_move = outgoing_shipment_neg.move_ids[0]
         self.assertEqual(original_out_move.product_id.value_svl,  12000.0, 'Value of the move should be 12000')
@@ -360,8 +351,7 @@ class TestFifoPrice(ValuationReconciliationTestCommon):
         self.assertEqual(purchase_order.state, 'purchase')
 
         picking = purchase_order.picking_ids[0]
-        res = picking.button_validate()
-        Form(self.env[res['res_model']].with_context(res['context'])).save().process()
+        picking.button_validate()
 
         self.assertEqual(super_product.standard_price, 0.035)
         self.assertEqual(super_product.value_svl, 35.0)

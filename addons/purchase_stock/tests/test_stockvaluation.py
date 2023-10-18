@@ -167,9 +167,7 @@ class TestStockValuation(TransactionCase):
 
 
         # validate the receipt
-        res_dict = picking1.button_validate()
-        wizard = Form(self.env[(res_dict.get('res_model'))].with_context(res_dict['context'])).save()
-        wizard.process()
+        picking1.button_validate()
 
         # the unit price of the valuationlayer used the latest value
         self.assertEqual(move1.stock_valuation_layer_ids.unit_cost, 200)
@@ -215,9 +213,7 @@ class TestStockValuation(TransactionCase):
         self.assertEqual(move1.price_unit, 11)
 
         # validate the receipt
-        res_dict = picking1.button_validate()
-        wizard = Form(self.env[(res_dict.get('res_model'))].with_context(res_dict['context'])).save()
-        wizard.process()
+        picking1.button_validate()
 
         # the unit price of the valuation layer used the latest value
         self.assertEqual(move1.stock_valuation_layer_ids.unit_cost, 12)
@@ -481,9 +477,7 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
         self.assertAlmostEqual(move1.price_unit, price_unit_usd, places=2)
 
         # validate the receipt
-        res_dict = picking1.button_validate()
-        wizard = Form(self.env[(res_dict.get('res_model'))].with_context(res_dict['context'])).save()
-        wizard.process()
+        picking1.button_validate()
 
         # the unit price of the valuation layer used the latest value
         self.assertAlmostEqual(move1.stock_valuation_layer_ids.unit_cost, price_unit_usd_new_rate)

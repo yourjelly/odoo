@@ -118,9 +118,7 @@ class TestPurchaseStockReports(TestReportsCommon):
         receipt = po.picking_ids
 
         # Receives 4 products.
-        res_dict = receipt.button_validate()
-        wizard = Form(self.env[res_dict['res_model']].with_context(res_dict['context'])).save()
-        wizard.process()
+        receipt.button_validate()
         report_values, docs, lines = self.get_report_forecast(product_template_ids=self.product_template.ids)
         draft_picking_qty_in = docs['draft_picking_qty']['in']
         draft_purchase_qty = docs['draft_purchase_qty']
@@ -310,8 +308,7 @@ class TestPurchaseStockReports(TestReportsCommon):
         receipt01_move = receipt01.move_ids
         receipt01_move.quantity = 6
         receipt01_move.picked = True
-        action = receipt01.button_validate()
-        Form(self.env[action['res_model']].with_context(action['context'])).save().process()
+        receipt01.button_validate()
 
         data = self.env['vendor.delay.report'].read_group(
             [('partner_id', '=', self.partner.id)],

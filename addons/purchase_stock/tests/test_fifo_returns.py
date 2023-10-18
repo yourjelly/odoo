@@ -58,8 +58,7 @@ class TestFifoReturns(ValuationReconciliationTestCommon):
 
         # Process the reception of purchase order 1
         picking = purchase_order_1.picking_ids[0]
-        res = picking.button_validate()
-        Form(self.env[res['res_model']].with_context(res['context'])).save().process()
+        picking.button_validate()
 
         # Check the standard price of the product (fifo icecream)
         self.assertAlmostEqual(product_fiforet_icecream.standard_price, 50)
@@ -67,8 +66,7 @@ class TestFifoReturns(ValuationReconciliationTestCommon):
         # Confirm the second purchase order
         purchase_order_2.button_confirm()
         picking = purchase_order_2.picking_ids[0]
-        res = picking.button_validate()
-        Form(self.env[res['res_model']].with_context(res['context'])).save().process()
+        picking.button_validate()
 
         # Return the goods of purchase order 2
         picking = purchase_order_2.picking_ids[0]
