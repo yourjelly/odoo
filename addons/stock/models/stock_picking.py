@@ -1105,11 +1105,9 @@ class Picking(models.Model):
         self.move_ids.filtered(lambda m: not m.picked)._do_unreserve()
 
     def _pre_action_done_hook(self):
-        if not self.env.context.get('skip_immediate'):
-            pickings_to_immediate = self._check_immediate()
-            if pickings_to_immediate:
-                return pickings_to_immediate._action_generate_immediate_wizard(show_transfers=self._should_show_transfers())
-
+        for picking in self:
+            if all(not move.picked for move in picking.move_ids):
+                picking.move_ids.picked = True
         if not self.env.context.get('skip_backorder'):
             pickings_to_backorder = self._check_backorder()
             if pickings_to_backorder:
@@ -1183,13 +1181,6 @@ class Picking(models.Model):
             ):
                 backorder_pickings |= picking
         return backorder_pickings
-
-    def _check_immediate(self):
-        immediate_pickings = self.browse()
-        for picking in self:
-            if all(not move.picked for move in picking.move_ids.filtered(lambda m: m.state not in ('done', 'cancel'))):
-                immediate_pickings |= picking
-        return immediate_pickings
 
     def _autoconfirm_picking(self):
         """ Automatically run `action_confirm` on `self` if one of the

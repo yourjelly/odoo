@@ -109,7 +109,7 @@ class StockMove(models.Model):
              "* Done: The product has been transferred and the transfer has been confirmed.")
     picked = fields.Boolean(
         'Picked', compute='_compute_picked', inverse='_inverse_picked',
-        store=True, readonly=False, copy=False)
+        store=True, readonly=False, copy=False, default=False)
 
     # used to record the product cost set by the user during a picking confirmation (when costing
     # method used is 'average price' or 'real'). Value given in company currency and in product uom.
@@ -203,7 +203,6 @@ class StockMove(models.Model):
 
     @api.depends('move_line_ids.picked', 'state')
     def _compute_picked(self):
-        self.picked = False
         for move in self:
             if move.state == 'done' or any(ml.picked for ml in move.move_line_ids):
                 move.picked = True
