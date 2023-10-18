@@ -3341,18 +3341,6 @@ export class Wysiwyg extends Component {
     // Legacy compatibility layer
     // Remove me when all legacy widgets using wysiwyg are converted to OWL.
     // -----------------------------------------------------------------------------
-    _trigger_up(ev) {
-        const evType = ev.name;
-        const payload = ev.data;
-        if (evType === 'call_service') {
-            this._callService(payload);
-        }
-    }
-    _callService(payload) {
-        const service = this.env.services[payload.service];
-        const result = service[payload.method].apply(service, payload.args || []);
-        payload.callback(result);
-    }
     _serviceRpc(route, params, settings = {}) {
         if (status(this) === "destroyed") {
             return;

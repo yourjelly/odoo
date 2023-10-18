@@ -7,8 +7,6 @@ import { registry } from '@web/core/registry';
 
 import lazyloader from "@web/legacy/js/public/lazyloader";
 
-import { createWidgetParent } from "../../utils";
-
 import { makeEnv, startServices } from "@web/env";
 import { loadJS, templates } from '@web/core/assets';
 import { MainComponentsContainer } from "@web/core/main_components_container";
@@ -41,7 +39,6 @@ export const PublicRoot = publicWidget.RootWidget.extend({
         'click .js_disable_on_click': '_onDisableOnClick',
     }),
     custom_events: Object.assign({}, publicWidget.RootWidget.prototype.custom_events || {}, {
-        call_service: '_onCallService',
         context_get: '_onContextGet',
         main_object_request: '_onMainObjectRequest',
         widgets_start_request: '_onWidgetsStartRequest',
@@ -208,20 +205,6 @@ export const PublicRoot = publicWidget.RootWidget.extend({
     //--------------------------------------------------------------------------
 
     /**
-     * Calls the requested service from the env. Automatically adds the global
-     * context to RPCs.
-     *
-     * @private
-     * @param {OdooEvent} event
-     */
-    _onCallService: function (ev) {
-        const payload = ev.data;
-        const service = this.env.services[payload.service];
-        const result = service[payload.method].apply(service, payload.args || []);
-        payload.callback(result);
-        ev.stopPropagation();
-    },
-    /**
      * Called when someone asked for the global public context.
      *
      * @private
@@ -316,7 +299,7 @@ export async function createPublicRoot(RootWidget) {
     await startServices(env);
     Component.env = env;
     await env.services.public_component.mountComponents();
-    const publicRoot = new RootWidget(createWidgetParent(env), env);
+    const publicRoot = new RootWidget(null, env);
     const app = new App(MainComponentsContainer, {
         templates,
         env,

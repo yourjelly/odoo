@@ -1586,25 +1586,6 @@ export class PosStore extends Reactive {
                 !paymentLine.is_done()
         );
     }
-    /**
-     * TODO: We can probably remove this here and put it somewhere else.
-     * And that somewhere else becomes the parent of the proxy.
-     * Directly calls the requested service, instead of triggering a
-     * 'call_service' event up, which wouldn't work as services have no parent
-     *
-     * @param {OdooEvent} ev
-     */
-    _trigger_up(ev) {
-        if (ev.is_stopped()) {
-            return;
-        }
-        const payload = ev.data;
-        if (ev.name === "call_service") {
-            const service = this.env.services[payload.service];
-            const result = service[payload.method].apply(service, ev.data.args || []);
-            payload.callback(result);
-        }
-    }
 
     isProductQtyZero(qty) {
         return floatIsZero(qty, this.dp["Product Unit of Measure"]);

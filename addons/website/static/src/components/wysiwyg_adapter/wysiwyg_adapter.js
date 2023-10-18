@@ -781,13 +781,8 @@ export class WysiwygAdapterComponent extends Wysiwyg {
 
 
         const evType = ev.name;
-        const payload = ev.data;
         if (evType in triggers) {
             triggers[evType](ev);
-        } else if (evType === 'call_service') {
-            const service = Component.env.services[payload.service];
-            const result = service[payload.method].apply(service, payload.args || []);
-            payload.callback(result);
         } else {
             super._trigger_up(...arguments);
         }

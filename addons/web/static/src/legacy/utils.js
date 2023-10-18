@@ -6,7 +6,6 @@ import {
     onMounted,
     onWillStart,
     onWillUnmount,
-    useEnv,
     useRef,
     useState,
     xml,
@@ -28,25 +27,9 @@ export function cleanDomFromBootstrap() {
     }
 }
 
-export function createWidgetParent(env) {
-    return {
-        env,
-        _trigger_up: (ev) => {
-            if (ev.name === "call_service") {
-                const service = env.services[ev.data.service];
-                const result = service[ev.data.method].apply(service, ev.data.args || []);
-                ev.data.callback(result);
-            }
-        },
-    };
-}
-
 export function useWidget(refName, widgetClass, params = []) {
     const ref = useRef(refName);
-    const env = useEnv();
-
-    const parent = createWidgetParent(env);
-    const widget = new widgetClass(parent, ...params);
+    const widget = new widgetClass(null, ...params);
 
     onWillStart(() => {
         return widget._widgetRenderAndInsert(() => {});
