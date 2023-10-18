@@ -242,6 +242,7 @@ class TestSubcontractingDropshippingFlows(TestMrpSubcontractingCommon):
 
         delivery = po.picking_ids
         delivery.move_line_ids.quantity = 2.0
+        delivery.move_ids.picked = True
         delivery.button_validate()
 
         self.assertEqual(delivery.state, 'done')
@@ -260,6 +261,7 @@ class TestSubcontractingDropshippingFlows(TestMrpSubcontractingCommon):
 
         delivery_return01 = self.env['stock.picking'].browse(return_picking_id)
         delivery_return01.move_line_ids.quantity = 1.0
+        delivery_return01.move_ids.picked = True
         delivery_return01.button_validate()
 
         self.assertEqual(delivery_return01.state, 'done')
@@ -277,6 +279,7 @@ class TestSubcontractingDropshippingFlows(TestMrpSubcontractingCommon):
 
         delivery_return02 = self.env['stock.picking'].browse(return_picking_id)
         delivery_return02.move_line_ids.quantity = 1.0
+        delivery_return02.move_ids.picked = True
         delivery_return02.button_validate()
 
         self.assertEqual(delivery_return02.state, 'done')
@@ -344,6 +347,7 @@ class TestSubcontractingDropshippingFlows(TestMrpSubcontractingCommon):
         self.assertTrue(delivery.is_dropship)
 
         delivery.move_line_ids.quantity = 1.0
+        delivery.move_ids.picked = True
         delivery.button_validate()
 
         self.assertEqual(po.order_line.qty_received, 1.0)
