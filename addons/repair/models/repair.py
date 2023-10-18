@@ -375,7 +375,6 @@ class Repair(models.Model):
         # Clean the context to get rid of residual default_* keys that could cause issues
         # during the creation of stock.move.
         self = self.with_context(clean_context(self._context))
-        self._check_product_tracking()
 
         precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')
         product_move_vals = []
@@ -529,15 +528,6 @@ class Repair(models.Model):
         repairs_to_confirm.move_ids._trigger_scheduler()
         repairs_to_confirm.write({'state': 'confirmed'})
         return True
-
-    def _check_product_tracking(self):
-        invalid_lines = self.move_ids.filtered(lambda x: x.has_tracking != 'none' and not x.lot_ids)
-        if invalid_lines:
-            products = invalid_lines.product_id
-            raise ValidationError(_(
-                "Serial number is required for operation lines with products: %s",
-                ", ".join(products.mapped('display_name')),
-            ))
 
     def _get_location(self, field):
         return self.picking_type_id[MAP_REPAIR_TO_PICKING_LOCATIONS[field]]

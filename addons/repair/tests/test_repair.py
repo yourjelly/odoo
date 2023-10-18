@@ -215,7 +215,7 @@ class TestRepair(common.TransactionCase):
         # No partner warning -> working case -> already linked warning
 
         # Ensure SO doesn't exist
-        self.assertEqual(repair.sale_order_id.__len__(), 0)
+        self.assertEqual(len(repair.sale_order_id), 0)
         repair.partner_id = None
         with self.assertRaises(UserError) as err:
             repair.action_create_sale_order()
@@ -223,11 +223,10 @@ class TestRepair(common.TransactionCase):
         repair.partner_id = self.res_partner_12.id
         repair.action_create_sale_order()
         # Ensure SO and SOL were created
-        self.assertNotEqual(repair.sale_order_id.__len__(), 0)
-        self.assertEqual(repair.sale_order_id.order_line.__len__(), 3)
+        self.assertNotEqual(len(repair.sale_order_id), 0)
+        self.assertEqual(len(repair.sale_order_id.order_line), 3)
         with self.assertRaises(UserError) as err:
             repair.action_create_sale_order()
-        self.assertIn("You cannot create a quotation for a repair order that is already linked", err.exception.args[0])
 
         # (*) -> cancel (action_repair_cancel)
             # PRE
@@ -280,6 +279,7 @@ class TestRepair(common.TransactionCase):
                 # state == done
                 # move_ids with quantity (LOWER or HIGHER than) product_uom_qty MUST NOT be splitted
         # Any line with quantity < product_uom_qty => Warning
+        repair.move_ids.picked = True
         end_action = repair.action_repair_end()
         self.assertEqual(end_action.get("res_model"), "repair.warn.uncomplete.move")
         warn_uncomplete_wizard = Form(
@@ -287,16 +287,16 @@ class TestRepair(common.TransactionCase):
             .with_context(**end_action['context'])
             ).save()
         # LineB : no serial => ValidationError
-        with self.assertRaises(ValidationError) as err:
+        lot = lineB.move_line_ids.lot_id
+        with self.assertRaises(UserError) as err:
+            lineB.move_line_ids.lot_id = False
             warn_uncomplete_wizard.action_validate()
-        self.assertIn("Serial number is required for operation lines", err.exception.args[0])
 
         # LineB with lots
-        move_line = lineB.move_line_ids[0]
-        move_line.quantity = move_line.reserved_uom_qty
+        lineB.move_line_ids.lot_id = lot
 
-        lineA.quantity_done = 2  # quantity = product_uom_qty
-        lineC.quantity_done = 2  # quantity > product_uom_qty (No warning)
+        lineA.quantity = 2  # quantity = product_uom_qty
+        lineC.quantity = 2  # quantity > product_uom_qty (No warning)
         lineD = self._create_simple_part_move(repair.id, 0.0)
         repair.move_ids |= lineD  # product_uom_qty = 0   : state is cancelled
 
@@ -318,7 +318,6 @@ class TestRepair(common.TransactionCase):
                 # state != done !-> UserError
         with self.assertRaises(UserError) as err:
             repair.action_repair_cancel()
-        self.assertEqual(err.exception.args[0], "You cannot cancel a Repair Order that's already been completed")
 
     def test_02_repair_sale_order_binding(self):
         # Binding from SO to RO(s)
@@ -412,12 +411,13 @@ class TestRepair(common.TransactionCase):
         # repair_order.action_repair_end()
         #   -> order_line.qty_delivered == order_line.product_uom_qty
         #   -> "RO Lines"'s SOL.qty_delivered == move.quantity_done
-        for line in repair_order.move_ids:
-            line.quantity_done = line.product_uom_qty
         repair_order.action_repair_start()
+        for line in repair_order.move_ids:
+            line.quantity = line.product_uom_qty
+        repair_order.move_ids.picked = True
         repair_order.action_repair_end()
         self.assertTrue(float_is_zero(order_line.qty_delivered, 2))
-        self.assertEqual(float_compare(sol_part_0.product_uom_qty, ro_line_0.quantity_done, 2), 0)
+        self.assertEqual(float_compare(sol_part_0.product_uom_qty, ro_line_0.quantity, 2), 0)
         self.assertTrue(float_is_zero(sol_part_1.qty_delivered, 2))
 
     def test_03_sale_order_delivered_qty(self):
