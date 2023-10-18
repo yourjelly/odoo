@@ -751,7 +751,7 @@ class TestSaleMrpFlow(ValuationReconciliationTestCommon):
         self._assert_quantities(move_ids, expected_quantities)
 
         # Process only x1 of the first component then create a backorder for the missing components
-        picking_original.move_ids.sorted()[0].write({'quantity_done': 1})
+        picking_original.move_ids.sorted()[0].write({'quantity': 1, 'picked': True})
 
         wiz_act = so.picking_ids[0].button_validate()
         wiz = Form(self.env[wiz_act['res_model']].with_context(wiz_act['context'])).save().process()
@@ -2053,7 +2053,7 @@ class TestSaleMrpFlow(ValuationReconciliationTestCommon):
             {'product_id': self.component_g.id, 'product_uom_qty': 200},
         ])
 
-        delivery.action_set_quantities_to_reservation()
+        delivery.move_ids.picked = True
         delivery.button_validate()
 
         # Return 2 [uom_ten] x kit_3
@@ -2063,7 +2063,7 @@ class TestSaleMrpFlow(ValuationReconciliationTestCommon):
         return_wizard.product_return_moves[1].quantity = 40
         action = return_wizard.create_returns()
         return_picking = self.env['stock.picking'].browse(action['res_id'])
-        return_picking.action_set_quantities_to_reservation()
+        return_picking.move_ids.picked = True
         return_picking.button_validate()
 
         # Adapt the SOL qty according to the delivered one
@@ -2072,10 +2072,10 @@ class TestSaleMrpFlow(ValuationReconciliationTestCommon):
                 line.product_uom_qty = 8
 
         self.assertRecordValues(so.picking_ids.sorted('id').move_ids, [
-            {'product_id': self.component_f.id, 'location_dest_id': custo_location.id, 'quantity_done': 100, 'state': 'done'},
-            {'product_id': self.component_g.id, 'location_dest_id': custo_location.id, 'quantity_done': 200, 'state': 'done'},
-            {'product_id': self.component_f.id, 'location_dest_id': stock_location.id, 'quantity_done': 20, 'state': 'done'},
-            {'product_id': self.component_g.id, 'location_dest_id': stock_location.id, 'quantity_done': 40, 'state': 'done'},
+            {'product_id': self.component_f.id, 'location_dest_id': custo_location.id, 'quantity': 100, 'state': 'done'},
+            {'product_id': self.component_g.id, 'location_dest_id': custo_location.id, 'quantity': 200, 'state': 'done'},
+            {'product_id': self.component_f.id, 'location_dest_id': stock_location.id, 'quantity': 20, 'state': 'done'},
+            {'product_id': self.component_g.id, 'location_dest_id': stock_location.id, 'quantity': 40, 'state': 'done'},
         ])
 
     def test_kit_decrease_sol_qty_to_zero(self):
@@ -2283,6 +2283,7 @@ class TestSaleMrpFlow(ValuationReconciliationTestCommon):
         })
         so.action_confirm()
         so.picking_ids.move_line_ids.quantity = 1
+        so.picking_ids.move_ids.picked = True
         so.picking_ids.button_validate()
 
         invoice = so._create_invoices()

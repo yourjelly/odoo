@@ -514,6 +514,7 @@ class TestSaleMRPAngloSaxonValuation(ValuationReconciliationTestCommon):
         })
         so.action_confirm()
         so.picking_ids.move_line_ids.quantity = 1
+        so.picking_ids.move_ids.picked = True
         so.picking_ids.button_validate()
 
         invoice = so._create_invoices()
