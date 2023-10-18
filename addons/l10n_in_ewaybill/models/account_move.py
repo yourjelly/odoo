@@ -10,20 +10,22 @@ from odoo.tools import html_escape, html2plaintext
 class AccountMove(models.Model):
     _inherit = 'account.move'
 
-    ewaybill_id = fields.Many2one(
-        comodel_name='l10n.in.ewaybill',
-        string='Ewaybill', readonly=True, ondelete='cascade',
-        check_company=True)
+    l10n_in_ewaybill_ids = fields.One2many('l10n.in.ewaybill', 'account_move_id' ,string='e-Way bill',readonly=True)
 
     def action_open_ewaybill_form(self):
         self.ensure_one()
-        return {
-            'name' : "Ewaybill",
+        action = {
+            'name' : "e-Way bill",
             'res_model': 'l10n.in.ewaybill',
             'type': 'ir.actions.act_window',
             'view_mode': 'form',
-            'view_id': self.env.ref('l10n_in_ewaybill.ewaybill_invoice_form_view').id,
             'context': {
                 'default_account_move_id': self.id,
             }
         }
+        if len(self.l10n_in_ewaybill_ids) == 1:
+            action['res_id'] = self.l10n_in_ewaybill_ids.id
+        elif self.l10n_in_ewaybill_ids:
+            action['view_mode'] = 'tree,form'
+            action['domain'] = [('id', 'in', self.l10n_in_ewaybill_ids.ids)]
+        return action

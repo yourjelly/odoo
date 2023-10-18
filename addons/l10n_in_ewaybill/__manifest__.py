@@ -10,6 +10,7 @@
     ],
     "description": """Ewaybill""",
     "data": [
+        "data/cron.xml",
         "security/ir.model.access.csv",
         "views/account_move_views.xml",
         "views/l10n_in_ewaybill_views.xml",

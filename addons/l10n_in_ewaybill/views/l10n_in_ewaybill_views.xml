@@ -30,12 +30,31 @@
         <field name="arch" type="xml">
             <form string="Stock Picking">
                 <header>
-                    <button name="ewaybill_send" string="Send E-waybill" class="oe_highlight" type="object" invisible="state in ('sent','cancel')"/>
+                    <button name="generate_ewaybill" string="Generate E-waybill" class="oe_highlight" type="object" invisible="state in ('sent','cancel')"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,sent"/>
                 </header>
+                <div class="alert alert-info" role="alert" style="margin-bottom:0px;"
+                    invisible="state not in ('to_generate')">
+                     <div>The e-Way Bill will Generate soon
+                         <button name="process_now" type="object" class="oe_link ps-0 text-decoration-underline" string="Process now"/>
+                     </div>
+                </div>
+                <div class="alert alert-info" role="alert" style="margin-bottom:0px;"
+                    invisible="state not in ('to_cancel')">
+                     <div>The e-Way Bill will cancel soon
+                         <button name="process_now" type="object" class="oe_link ps-0 text-decoration-underline" string="Process now"/>
+                     </div>
+                </div>
                 <div class="alert alert-danger" role="alert" style="margin-bottom:0px;" invisible="state != 'error'">
                     <div class="o_row">
                         <field name="error_message"/>
+                        <button name="process_now" string="retry" class="oe_highlight" type="object"/>
+                    </div>
+                </div>
+                 <div class="alert alert-info" role="alert" style="margin-bottom:0px;" invisible="state != 'error'">
+                    <div class="o_row">
+                        <field name="error_message"/>
+                        <button name="process_now" string="retry" class="oe_highlight" type="object"/>
                     </div>
                 </div>
                 <sheet>
