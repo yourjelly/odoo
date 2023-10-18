@@ -888,9 +888,9 @@ class TestSubcontractingTracking(TransactionCase):
         with picking_form.move_ids_without_package.new() as move:
             move.product_id = self.finished_product
             move.quantity = nb_finished_product
-            move.picked = True
         picking_receipt = picking_form.save()
         picking_receipt.action_confirm()
+        picking_receipt.action_clear_quantities_to_zero()
 
         # We shouldn't be able to call the 'record_components' button
         self.assertEqual(picking_receipt.display_action_record_components, 'hide')
@@ -904,7 +904,7 @@ class TestSubcontractingTracking(TransactionCase):
                 ml.quantity = 1
                 ml.lot_name = lot_name
         move_details.save()
-
+        picking_receipt.move_ids.picked = True
         picking_receipt.button_validate()
         # Check the created manufacturing order
         # Should have one mo by serial number
