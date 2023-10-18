@@ -2,7 +2,7 @@
 
 from odoo import api, fields, models, Command, tools, _
 from odoo.tools import float_compare, float_is_zero
-from odoo.osv.expression import get_unaccent_wrapper
+from odoo.tools.misc import remove_accents
 from odoo.exceptions import UserError, ValidationError
 import re
 from math import copysign
@@ -811,15 +811,23 @@ class AccountReconcileModel(models.Model):
                     'amls': self.env['account.move.line'].browse(candidate_ids),
                 }
 
-        # Search without any matching based on textual information.
-        if partner:
-
+        if not self.env.context.get('lastcall'):
             if self.matching_order == 'new_first':
                 order = 'date_maturity DESC, date DESC, id DESC'
             else:
                 order = 'date_maturity ASC, date ASC, id ASC'
 
             amls = self.env['account.move.line'].search(aml_domain, order=order)
+
+            if not partner:
+                ref = remove_accents(st_line.payment_ref)
+                matching_partner_ids = []
+                for partner in amls.mapped('partner_id'):
+                    matching_string = '.*' + '.*'.join([r'\b' + token + r'\b' for token in remove_accents(partner.name).split()]) + '.*'
+                    if re.match(matching_string, ref, re.IGNORECASE):
+                        matching_partner_ids.append(partner.id)
+                amls = amls.filtered_domain([('partner_id', 'in', matching_partner_ids)])
+
             if amls:
                 return {
                     'allow_auto_reconcile': False,
