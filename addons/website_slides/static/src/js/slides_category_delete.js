@@ -13,6 +13,7 @@ publicWidget.registry.websiteSlidesCategoryDelete = publicWidget.Widget.extend({
     init() {
         this._super(...arguments);
         this.orm = this.bindService("orm");
+        this.dialog = this.bindService("dialog");
     },
 
     //--------------------------------------------------------------------------
@@ -25,7 +26,7 @@ publicWidget.registry.websiteSlidesCategoryDelete = publicWidget.Widget.extend({
      */
     _onClickDeleteCateogry(ev) {
         const categoryId = parseInt(ev.currentTarget.dataset.categoryId);
-        this.call("dialog", "add", ConfirmationDialog, {
+        this.dialog.add(ConfirmationDialog, {
             title: _t("Delete Category"),
             body: _t("Are you sure you want to delete this category?"),
             confirmLabel: _t("Delete"),

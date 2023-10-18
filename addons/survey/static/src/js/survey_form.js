@@ -42,6 +42,8 @@ publicWidget.registry.SurveyFormWidget = publicWidget.Widget.extend(SurveyPreloa
     init() {
         this._super(...arguments);
         this.rpc = this.bindService("rpc");
+        this.busService = this.bindService("bus_service");
+        this.multiTab = this.bindService("multi_tab");
     },
 
     /**
@@ -880,7 +882,7 @@ publicWidget.registry.SurveyFormWidget = publicWidget.Widget.extend(SurveyPreloa
     _initSessionManagement: function () {
         var self = this;
         if (this.options.surveyToken && this.options.sessionInProgress) {
-            this.call('bus_service', 'addChannel', this.options.surveyToken);
+            this.busService.addChannel(this.options.surveyToken);
 
             if (!this._checkisOnMainTab()) {
                 this.shouldReloadMasterTab = true;
@@ -891,7 +893,7 @@ publicWidget.registry.SurveyFormWidget = publicWidget.Widget.extend(SurveyPreloa
                 }, 2000);
             }
 
-            this.call('bus_service', 'addEventListener', 'notification', this._onNotification.bind(this));
+            this.busService.addEventListener('notification', this._onNotification.bind(this));
         }
     },
 
@@ -988,7 +990,7 @@ publicWidget.registry.SurveyFormWidget = publicWidget.Widget.extend(SurveyPreloa
     * @private
     */
     _checkisOnMainTab: function () {
-        var isOnMainTab = this.call('multi_tab', 'isOnMainTab');
+        var isOnMainTab = this.multiTab.isOnMainTab();
         var $errorModal = this.$('#MasterTabErrorModal');
         if (isOnMainTab) {
             // Force reload the page when survey is ready to be followed, to force restart long polling

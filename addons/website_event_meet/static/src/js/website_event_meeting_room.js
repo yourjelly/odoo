@@ -15,6 +15,7 @@ publicWidget.registry.websiteEventMeetingRoom = publicWidget.Widget.extend({
     init() {
         this._super(...arguments);
         this.orm = this.bindService("orm");
+        this.dialog = this.bindService("dialog");
     },
 
     start: function () {
@@ -36,7 +37,7 @@ publicWidget.registry.websiteEventMeetingRoom = publicWidget.Widget.extend({
         event.preventDefault();
         event.stopPropagation();
 
-        this.call("dialog", "add", ConfirmationDialog, {
+        this.dialog.add(ConfirmationDialog, {
             body: _t("Are you sure you want to close this room?"),
             confirm: async () => {
                 await this.orm.write(
@@ -60,7 +61,7 @@ publicWidget.registry.websiteEventMeetingRoom = publicWidget.Widget.extend({
     _onDuplicateClick: function (event) {
         event.preventDefault();
         event.stopPropagation();
-        this.call("dialog", "add", ConfirmationDialog, {
+        this.dialog.add(ConfirmationDialog, {
             body: _t("Are you sure you want to duplicate this room?"),
             confirm: async () => {
                 await this.orm.call("event.meeting.room", "copy", [this.meetingRoomId], {

@@ -24,6 +24,8 @@ publicWidget.registry.PaymentForm = publicWidget.Widget.extend({
         this._super(...arguments);
         this.rpc = this.bindService("rpc");
         this.orm = this.bindService("orm");
+        this.dialog = this.bindService("dialog");
+        this.ui = this.bindService("orm");
     },
 
     /**
@@ -168,7 +170,7 @@ publicWidget.registry.PaymentForm = publicWidget.Widget.extend({
             this._getSubmitButton().removeAttribute('disabled');
         }
         if (unblockUI) {
-            this.call('ui', 'unblock');
+            this.ui.unblock();
         }
     },
 
@@ -182,7 +184,7 @@ publicWidget.registry.PaymentForm = publicWidget.Widget.extend({
     _disableButton(blockUI = false) {
         this._getSubmitButton().setAttribute('disabled', true);
         if (blockUI) {
-            this.call('ui', 'block');
+            this.ui.block();
         }
     },
 
@@ -285,7 +287,7 @@ publicWidget.registry.PaymentForm = publicWidget.Widget.extend({
      * @return {void}
      */
     _displayErrorDialog(title, errorMessage = '') {
-        this.call('dialog', 'add', ConfirmationDialog, { title: title, body: errorMessage || "" });
+        this.dialog.add(ConfirmationDialog, { title: title, body: errorMessage || "" });
     },
 
     /**
@@ -298,7 +300,7 @@ publicWidget.registry.PaymentForm = publicWidget.Widget.extend({
      */
     _challengeTokenDeletion(tokenId, linkedRecordsInfo) {
         const body = renderToMarkup('payment.deleteTokenDialog', { linkedRecordsInfo });
-        this.call('dialog', 'add', ConfirmationDialog, {
+        this.dialog.add(ConfirmationDialog, {
             title: _t("Warning!"),
             body,
             confirmLabel: _t("Confirm Deletion"),

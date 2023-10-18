@@ -32,7 +32,7 @@ publicWidget.registry.NewAPIKeyButton = publicWidget.Widget.extend({
             this.dialog
         );
 
-        this.call("dialog", "add", InputConfirmationDialog, {
+        this.dialog.add(InputConfirmationDialog, {
             title: _t("New API Key"),
             body: renderToMarkup("portal.keydescription"),
             confirmLabel: _t("Confirm"),
@@ -45,7 +45,7 @@ publicWidget.registry.NewAPIKeyButton = publicWidget.Widget.extend({
                     this.dialog
                 );
 
-                this.call("dialog", "add", ConfirmationDialog, {
+                this.dialog.add(ConfirmationDialog, {
                     title: _t("API Key Ready"),
                     body: renderToMarkup("portal.keyshow", { key: res.context.default_key }),
                     confirmLabel: _t("Close"),
@@ -119,13 +119,14 @@ publicWidget.registry.RevokeSessionsButton = publicWidget.Widget.extend({
     init() {
         this._super(...arguments);
         this.orm = this.bindService("orm");
+        this.dialog = this.bindService("dialog");
     },
 
     async _onClick() {
         const { res_id: checkId } = await this.orm.call("res.users", "api_key_wizard", [
             session.user_id,
         ]);
-        this.call("dialog", "add", InputConfirmationDialog, {
+        this.dialog.add(InputConfirmationDialog, {
             title: _t("Log out from all devices?"),
             body: renderToMarkup("portal.revoke_all_devices_popup_template"),
             confirmLabel: _t("Log out from all devices"),

@@ -13,6 +13,7 @@ publicWidget.registry.websiteSlidesSlideArchive = publicWidget.Widget.extend({
     init() {
         this._super(...arguments);
         this.rpc = this.bindService("rpc");
+        this.dialog = this.bindService("dialog");
     },
 
     //--------------------------------------------------------------------------
@@ -21,7 +22,7 @@ publicWidget.registry.websiteSlidesSlideArchive = publicWidget.Widget.extend({
 
     _openDialog: function ($slideTarget) {
         const slideId = $slideTarget.data("slideId");
-        this.call("dialog", "add", ConfirmationDialog, {
+        this.dialog.add(ConfirmationDialog, {
             title: _t("Archive Content"),
             body: _t("Are you sure you want to archive this content?"),
             confirmLabel: _t("Archive"),

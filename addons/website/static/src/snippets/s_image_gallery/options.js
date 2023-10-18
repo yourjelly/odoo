@@ -343,6 +343,13 @@ options.registry.GalleryImageList = options.registry.GalleryLayout.extend({
     /**
      * @override
      */
+    init() {
+        this._super(...arguments);
+        this.dialog = this.bindService("dialog");
+    },
+    /**
+     * @override
+     */
     start() {
         // Make sure image previews are updated if images are changed
         this.$target.on('image_changed.gallery', 'img', ev => {
@@ -439,7 +446,7 @@ options.registry.GalleryImageList = options.registry.GalleryLayout.extend({
                     }
                 },
             };
-            this.call("dialog", "add", MediaDialog, props, {
+            this.dialog.add(MediaDialog, props, {
                 onClose: () => {
                     savedPromise.then(resolve);
                 },

@@ -218,6 +218,7 @@ var ViewEditor = Widget.extend({
 
         this.rpc = this.bindService("rpc");
         this.orm = this.bindService("orm");
+        this.dialog = this.bindService("dialog");
     },
     /**
      * Loads everything the ace library needs to work.
@@ -710,7 +711,7 @@ var ViewEditor = Widget.extend({
                 <br/>
                 ${error}
             `);
-            this.call("dialog", "add", AlertDialog, {
+            this.dialog.add(AlertDialog, {
                 title: _t("Server error"),
                 body,
             });
@@ -1020,7 +1021,7 @@ var ViewEditor = Widget.extend({
      * @private
      */
     _onResetClick: function () {
-        this.call("dialog", "add", ConfirmationDialog, {
+        this.dialog.add(ConfirmationDialog, {
             title: _t("Careful"),
             body: _t("If you reset this file, all your customizations will be lost as it will be reverted to the default file."),
             confirm: () => {

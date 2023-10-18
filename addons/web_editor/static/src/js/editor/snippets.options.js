@@ -1799,6 +1799,13 @@ const MediapickerUserValueWidget = UserValueWidget.extend({
     /**
      * @override
      */
+    init() {
+        this._super(...arguments);
+        this.dialog = this.bindService("dialog");
+    },
+    /**
+     * @override
+     */
     async start() {
         await this._super(...arguments);
         if (this.options.dataAttributes.buttonStyle) {
@@ -1828,7 +1835,7 @@ const MediapickerUserValueWidget = UserValueWidget.extend({
     _openDialog(el, {images = false, videos = false, save}) {
         el.src = this._value;
         const $editable = this.$target.closest('.o_editable');
-        this.call("dialog", "add", MediaDialog, {
+        this.dialog.add(MediaDialog, {
             noImages: !images,
             noVideos: !videos,
             noIcons: true,
@@ -1925,6 +1932,7 @@ const DatetimePickerUserValueWidget = InputUserValueWidget.extend({
     init: function () {
         this._super(...arguments);
         this._value = DateTime.now().toUnixInteger().toString();
+        this.datetimePicker = this.bindService("datetime_picker");
     },
     /**
      * @override
@@ -1935,7 +1943,7 @@ const DatetimePickerUserValueWidget = InputUserValueWidget.extend({
         this.el.classList.add('o_we_large');
         this.inputEl.classList.add('datetimepicker-input', 'mx-0', 'text-start');
 
-        this.picker = this.call("datetime_picker", "create", {
+        this.picker = this.datetimePicker.create({
             target: this.inputEl,
             onChange: this._onDateTimePickerChange.bind(this),
             pickerProps: {
@@ -2028,6 +2036,13 @@ const ListUserValueWidget = UserValueWidget.extend({
         'blur table input': '_onListItemBlurInput',
     },
 
+    /**
+     * @override
+     */
+    init() {
+        this._super(...arguments);
+        this.sortable = this.bindService("sortable");
+    },
     /**
      * @override
      */
@@ -2235,9 +2250,7 @@ const ListUserValueWidget = UserValueWidget.extend({
         if (this.el.dataset.unsortable) {
             return;
         }
-        this.bindedSortable = this.call(
-            "sortable",
-            "create",
+        this.bindedSortable = this.sortable.create(
             {
                 ref: { el: this.listTable },
                 elements: "tr",

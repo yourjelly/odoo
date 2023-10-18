@@ -75,6 +75,7 @@
 
             this.rpc = this.bindService("rpc");
             this.orm = this.bindService("orm");
+            this.sortable = this.bindService("sortable");
         },
 
         /**
@@ -146,9 +147,7 @@
          * @private
          */
         _bindSortable: function () {
-            this.bindedSortable = this.call(
-                "sortable",
-                "create",
+            this.bindedSortable = this.sortable.create(
                 {
                     ref: { el: this.el },
                     handle: ".o_wslides_js_quiz_sequence_handler",

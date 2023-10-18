@@ -7,6 +7,10 @@ import { SlideCoursePage } from '@website_slides/js/slides_course_page';
 publicWidget.registry.websiteSlidesCourseSlidesList = SlideCoursePage.extend({
     selector: '.o_wslides_slides_list',
 
+    init() {
+        this._super(...arguments);
+        this.sortable = this.bindService("sortable");
+    },
     start: function () {
         this._super.apply(this,arguments);
 
@@ -42,9 +46,7 @@ publicWidget.registry.websiteSlidesCourseSlidesList = SlideCoursePage.extend({
         };
 
         const container = this.el.querySelector('ul.o_wslides_js_slides_list_container');
-        this.bindedSortable.push(this.call(
-            "sortable",
-            "create",
+        this.bindedSortable.push(this.sortable.create(
             {
                 ...sortableBaseParam,
                 ref: { el: container },
@@ -54,9 +56,7 @@ publicWidget.registry.websiteSlidesCourseSlidesList = SlideCoursePage.extend({
             },
         ).enable());
 
-        this.bindedSortable.push(this.call(
-            "sortable",
-            "create",
+        this.bindedSortable.push(this.sortable.create(
             {
                 ...sortableBaseParam,
                 ref: { el: container },

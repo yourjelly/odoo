@@ -38,6 +38,7 @@ publicWidget.registry.websiteForum = publicWidget.Widget.extend({
         this.rpc = this.bindService("rpc");
         this.orm = this.bindService("orm");
         this.notification = this.bindService("notification");
+        this.dialog = this.bindService("dialog");
     },
 
     /**
@@ -574,7 +575,7 @@ publicWidget.registry.websiteForum = publicWidget.Widget.extend({
     async _onFlagMarkAsOffensiveClick(ev) {
         ev.preventDefault();
         const template = await this.rpc($(ev.currentTarget).data('action'));
-        this.call("dialog", "add", FlagMarkAsOffensiveDialog, {
+        this.dialog.add(FlagMarkAsOffensiveDialog, {
             title: _t("Offensive Post"),
             body: markup(template),
         });

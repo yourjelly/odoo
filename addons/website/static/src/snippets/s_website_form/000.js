@@ -63,6 +63,7 @@ const { DateTime } = luxon;
             this._visibilityFunctionByFieldEl = new Map();
             this.__started = new Promise(resolve => this.__startResolve = resolve);
             this.orm = this.bindService("orm");
+            this.datetimePicker = this.bindService("datetime_picker");
         },
         willStart: async function () {
             const res = this._super(...arguments);
@@ -108,7 +109,7 @@ const { DateTime } = luxon;
             for (const field of this.$allDates) {
                 const input = field.querySelector("input");
                 const defaultValue = input.getAttribute("value");
-                this.call("datetime_picker", "create", {
+                this.datetimePicker.create({
                     target: input,
                     pickerProps: {
                         type: field.matches('.s_website_form_date, .o_website_form_date') ? 'date' : 'datetime',

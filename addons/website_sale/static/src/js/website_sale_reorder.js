@@ -14,6 +14,11 @@ publicWidget.registry.SaleOrderPortalReorderWidget = publicWidget.Widget.extend(
         "click .o_wsale_reorder_button": "_onReorder",
     },
 
+    init() {
+        this._super(...arguments);
+        this.dialog = this.bindService("dialog");
+    },
+
     _onReorder(ev) {
         const orderId = parseInt(ev.currentTarget.dataset.saleOrderId);
         const urlSearchParams = new URLSearchParams(window.location.search);
@@ -21,7 +26,7 @@ publicWidget.registry.SaleOrderPortalReorderWidget = publicWidget.Widget.extend(
             return;
         }
         // Open the modal
-        this.call("dialog", "add", ReorderDialog, {
+        this.dialog.add(ReorderDialog, {
             orderId: orderId,
             accessToken: urlSearchParams.get("access_token"),
         });

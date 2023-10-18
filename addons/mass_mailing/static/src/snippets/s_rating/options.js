@@ -7,6 +7,13 @@ options.registry.Rating = options.Class.extend({
     /**
      * @override
      */
+    init() {
+        this._super(...arguments);
+        this.dialog = this.bindService("dialog");
+    },
+    /**
+     * @override
+     */
     start: function () {
         this.iconType = this.$target[0].dataset.icon;
         this.faClassActiveCustomIcons = this.$target[0].dataset.activeCustomIcon || '';
@@ -38,7 +45,7 @@ options.registry.Rating = options.Class.extend({
     customIcon: async function (previewMode, widgetValue, params) {
         const media = document.createElement('i');
         media.className = params.customActiveIcon === 'true' ? this.faClassActiveCustomIcons : this.faClassInactiveCustomIcons;
-        this.call("dialog", "add", MediaDialog, {
+        this.dialog.add(MediaDialog, {
             noImages: true,
             noDocuments: true,
             noVideos: true,

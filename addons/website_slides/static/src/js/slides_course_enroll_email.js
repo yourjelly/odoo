@@ -13,13 +13,14 @@ export const WebsiteSlidesEnroll = publicWidget.Widget.extend({
     init() {
         this._super(...arguments);
         this.orm = this.bindService("orm");
+        this.dialog = this.bindService("dialog");
     },
     async _onSendRequestClick(ev) {
         ev.preventDefault();
         const clickedEl = ev.currentTarget;
         const channelId = parseInt(clickedEl.dataset.channelId);
         await new Promise((resolve) =>
-            this.call("dialog", "add", ConfirmationDialog, {
+            this.dialog.add(ConfirmationDialog, {
                 confirm: resolve,
                 title: _t("Request Access."),
                 body: _t("Do you want to request access to this course?"),

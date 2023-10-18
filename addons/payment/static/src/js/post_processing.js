@@ -14,10 +14,11 @@ publicWidget.registry.PaymentPostProcessing = publicWidget.Widget.extend({
     init() {
         this._super(...arguments);
         this.rpc = this.bindService("rpc");
+        this.ui = this.bindService("ui");
     },
 
     async start() {
-        this.call('ui', 'block', {
+        this.ui.block({
             'message': _t("We are processing your payment. Please wait."),
         });
         this._poll();
@@ -88,7 +89,7 @@ publicWidget.registry.PaymentPostProcessing = publicWidget.Widget.extend({
     },
 
     _renderTemplate(xmlid, display_values={}) {
-        this.call('ui', 'unblock');
+        this.ui.unblock();
         const statusContainer = document.querySelector('div[name="o_payment_status_content"]');
         statusContainer.innerHTML = renderToElement(xmlid, display_values).innerHTML;
     },

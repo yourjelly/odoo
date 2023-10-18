@@ -6,21 +6,24 @@ export const PurchaseDatePicker = PublicWidget.Widget.extend({
     init() {
         this._super(...arguments);
         this.rpc = this.bindService("rpc");
+        this.datetimePicker = this.bindService("datetime_picker");
     },
     start() {
-        this.call("datetime_picker", "create", {
-            target: this.el,
-            onChange: (newDate) => {
-                const { accessToken, orderId, lineId } = this.el.dataset;
-                this.rpc(`/my/purchase/${orderId}/update?access_token=${accessToken}`, {
-                    [lineId]: newDate.toISODate(),
-                });
-            },
-            pickerProps: {
-                type: "date",
-                value: luxon.DateTime.fromISO(this.el.dataset.value),
-            },
-        }).enable();
+        this.datetimePicker
+            .create({
+                target: this.el,
+                onChange: (newDate) => {
+                    const { accessToken, orderId, lineId } = this.el.dataset;
+                    this.rpc(`/my/purchase/${orderId}/update?access_token=${accessToken}`, {
+                        [lineId]: newDate.toISODate(),
+                    });
+                },
+                pickerProps: {
+                    type: "date",
+                    value: luxon.DateTime.fromISO(this.el.dataset.value),
+                },
+            })
+            .enable();
     },
 });
 

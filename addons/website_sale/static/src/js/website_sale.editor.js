@@ -460,6 +460,7 @@ options.registry.WebsiteSaleProductPage = options.Class.extend({
         this.rpc = this.bindService("rpc");
         this.orm = this.bindService("orm");
         this.notification = this.bindService("notification");
+        this.dialog = this.bindService("dialog");
     },
 
     /**
@@ -567,7 +568,7 @@ options.registry.WebsiteSaleProductPage = options.Class.extend({
             );
         }
         let extraImageEls;
-        this.call("dialog", "add", AttachmentMediaDialog, {
+        this.dialog.add(AttachmentMediaDialog, {
             multiImages: true,
             onlyImages: true,
             // Kinda hack-ish but the regular save does not get the information we need

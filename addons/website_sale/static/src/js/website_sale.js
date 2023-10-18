@@ -62,6 +62,7 @@ export const WebsiteSale = publicWidget.Widget.extend(VariantMixin, cartHandlerM
         delete this.events['change [data-attribute_exclusions]'];
 
         this.rpc = this.bindService("rpc");
+        this.dialog = this.bindService("dialog");
     },
     /**
      * @override
@@ -376,7 +377,7 @@ export const WebsiteSale = publicWidget.Widget.extend(VariantMixin, cartHandlerM
                             flyout.remove();
                         }
                     }
-                    this.call("dialog", "add", ProductImageViewer, {
+                    this.dialog.add(ProductImageViewer, {
                         selectedImageIdx: [...images].indexOf(image),
                         images,
                     });

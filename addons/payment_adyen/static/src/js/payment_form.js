@@ -177,7 +177,7 @@ paymentForm.include({
         }).then(paymentResponse => {
             if (paymentResponse.action) { // An additional action is required from the shopper.
                 this._hideInputs(); // Only the inputs of the inline form should be used.
-                this.call('ui', 'unblock'); // The page is blocked at this point, unblock it.
+                this.ui.unblock(); // The page is blocked at this point, unblock it.
                 component.handleAction(paymentResponse.action);
             } else { // The payment reached a final state; redirect to the status page.
                 window.location = '/payment/status';

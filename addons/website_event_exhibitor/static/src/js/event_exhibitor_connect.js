@@ -13,6 +13,7 @@ publicWidget.registry.eventExhibitorConnect = publicWidget.Widget.extend({
     init: function () {
         this._super(...arguments);
         this._onConnectClick = debounce(this._onConnectClick, 500, true);
+        this.dialog = this.bindService("dialog");
     },
 
     /**
@@ -61,7 +62,7 @@ publicWidget.registry.eventExhibitorConnect = publicWidget.Widget.extend({
 
     _openClosedDialog: function ($element) {
         const sponsorId = this.$el.data('sponsorId');
-        this.call("dialog", "add", ExhibitorConnectClosedDialog, { sponsorId });
+        this.dialog.add(ExhibitorConnectClosedDialog, { sponsorId });
     },
 
 });

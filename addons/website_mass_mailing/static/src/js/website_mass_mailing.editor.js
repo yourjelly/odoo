@@ -9,6 +9,7 @@ options.registry.mailing_list_subscribe = options.Class.extend({
     init() {
         this._super(...arguments);
         this.orm = this.bindService("orm");
+        this.dialog = this.bindService("dialog");
     },
 
     /**
@@ -19,7 +20,7 @@ options.registry.mailing_list_subscribe = options.Class.extend({
         if (this.mailingLists.length) {
             this.$target.attr("data-list-id", this.mailingLists[0][0]);
         } else {
-            this.call("dialog", "add", ConfirmationDialog, {
+            this.dialog.add(ConfirmationDialog, {
                 body: _t("No mailing list found, do you want to create a new one? This will save all your changes, are you sure you want to proceed?"),
                 confirm: () => {
                     this.trigger_up("request_save", {

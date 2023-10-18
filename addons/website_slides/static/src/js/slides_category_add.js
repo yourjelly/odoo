@@ -10,12 +10,17 @@ publicWidget.registry.websiteSlidesCategoryAdd = publicWidget.Widget.extend({
         'click': '_onAddSectionClick',
     },
 
+    init() {
+        this._super(...arguments);
+        this.dialog = this.bindService("dialog");
+    },
+
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
 
     _openDialog: function (channelId) {
-        this.call("dialog", "add", CategoryAddDialog, {
+        this.dialog.add(CategoryAddDialog, {
             title: _t("Add a section"),
             confirmLabel: _t("Save"),
             confirm: ({ formEl }) => {

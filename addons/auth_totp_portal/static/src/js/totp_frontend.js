@@ -172,7 +172,7 @@ publicWidget.registry.TOTPButton = publicWidget.Widget.extend({
         const xmlBody = doc.querySelector('sheet *');
         const [body, ,] = fixupViewBody(xmlBody, record);
 
-        this.call("dialog", "add", InputConfirmationDialog, {
+        this.dialog.add(InputConfirmationDialog, {
             body: markup(body.outerHTML),
             onInput: ({ inputEl }) => {
                 inputEl.setCustomValidity("");
