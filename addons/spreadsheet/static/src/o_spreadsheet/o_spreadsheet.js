@@ -3948,13 +3948,16 @@
             super(...arguments);
             this.spreadsheetPosition = useSpreadsheetPosition();
         }
+        get maxHeight() {
+            return Math.max(0, this.viewportDimension.height - BOTTOMBAR_HEIGHT - SCROLLBAR_WIDTH$1);
+        }
         get style() {
             // the props's position is expressed relative to the "body" element
             // but we teleport the element in ".o-spreadsheet" to keep everything
             // within our control and to avoid leaking into external DOM
             const horizontalPosition = `left:${this.horizontalPosition() - this.spreadsheetPosition.x}`;
             const verticalPosition = `top:${this.verticalPosition() - this.spreadsheetPosition.y}`;
-            const maxHeight = Math.max(0, this.viewportDimension.height - BOTTOMBAR_HEIGHT - SCROLLBAR_WIDTH$1);
+            const maxHeight = this.maxHeight;
             const height = `max-height:${maxHeight}`;
             const shadow = maxHeight !== 0 ? "box-shadow: 1px 2px 5px 2px rgb(51 51 51 / 15%);" : "";
             return `
@@ -3978,7 +3981,7 @@
         }
         get shouldRenderBottom() {
             const { y } = this.props.position;
-            return (y + this.props.childHeight <
+            return (y + Math.min(this.props.childHeight, this.maxHeight) <
                 this.viewportDimension.height + (this.env.isDashboard() ? 0 : TOPBAR_HEIGHT));
         }
         horizontalPosition() {
@@ -34762,11 +34765,18 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             }
         }
         getStatisticFnResults() {
+            const sheetId = this.getters.getActiveSheetId();
             // get deduplicated cells in zones
             const cells = new Set(this.gridSelection.zones
-                .map((zone) => this.getters.getCellsInZone(this.getters.getActiveSheetId(), zone))
+                .map((zone) => this.getters.getCellsInZone(sheetId, zone))
                 .flat()
-                .filter((cell) => cell !== undefined));
+                .filter((cell) => {
+                if (!cell) {
+                    return false;
+                }
+                const { col, row } = this.getters.getCellPosition(cell === null || cell === void 0 ? void 0 : cell.id);
+                return !this.getters.isRowHidden(sheetId, row) && !this.getters.isColHidden(sheetId, col);
+            }));
             let cellsTypes = new Set();
             let cellsValues = [];
             for (let cell of cells) {
@@ -35308,15 +35318,15 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
      * This plugin handles this internal state.
      */
     class SelectionInputsManagerPlugin extends UIPlugin {
-        get currentInput() {
-            return this.focusedInputId ? this.inputs[this.focusedInputId] : null;
-        }
         constructor(getters, state, dispatch, config, selection) {
             super(getters, state, dispatch, config, selection);
             this.state = state;
             this.config = config;
             this.inputs = {};
             this.focusedInputId = null;
+        }
+        get currentInput() {
+            return this.focusedInputId ? this.inputs[this.focusedInputId] : null;
         }
         // ---------------------------------------------------------------------------
         // Command Handling
@@ -42983,8 +42993,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
 
 
     __info__.version = '16.0.21';
-    __info__.date = '2023-10-10T07:45:46.154Z';
-    __info__.hash = '5f66b12';
+    __info__.date = '2023-10-18T07:03:29.152Z';
+    __info__.hash = '261f1e4';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
