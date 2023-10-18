@@ -89,7 +89,7 @@ class BinaryController(http.Controller):
         return (
             request.env["ir.binary"]
             ._get_image_stream_from(channel_sudo, field_name="avatar_128")
-            .get_response()
+            .get_response(immutable=True)
         )
 
     @http.route(
