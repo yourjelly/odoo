@@ -2,7 +2,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import datetime
-import random
 
 from odoo import models
 from odoo.tools import populate
@@ -50,22 +49,20 @@ class HolidaysRequest(models.Model):
             company_id = company_by_type[values['holiday_status_id']]
             return random.choice(employee_by_company[company_id]).id
 
-        def compute_date_from(counter, **kwargs):
-            date_from = datetime.datetime.now().replace(hour=0, minute=0, second=0)\
-                + relativedelta(days=int(3 * int(counter)))
-            return date_from
+        def compute_request_date_from(counter, **kwargs):
+            request_date_from = datetime.date.today() + relativedelta(days=int(3 * int(counter)))
+            return request_date_from
 
-        def compute_date_to(counter, **kwargs):
-            date_to = datetime.datetime.now().replace(hour=23, minute=59, second=59)\
-                + relativedelta(days=int(3 * int(counter))  + random.randint(0, 2))
-            return date_to
+        def compute_request_date_to(counter, random=None, **kwargs):
+            request_date_to = datetime.date.today() + relativedelta(days=int(3 * int(counter))  + random.randint(0, 2))
+            return request_date_to
 
         return [
             ('holiday_status_id', populate.randomize(allocationless_leave_type_ids)),
             ('employee_id', populate.compute(compute_employee_id)),
             ('holiday_type', populate.constant('employee')),
-            ('date_from', populate.compute(compute_date_from)),
-            ('date_to', populate.compute(compute_date_to)),
+            ('request_date_from', populate.compute(compute_request_date_from)),
+            ('request_date_to', populate.compute(compute_request_date_to)),
             ('state', populate.randomize([
                 'draft',
                 'confirm',

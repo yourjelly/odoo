@@ -396,6 +396,7 @@ class HolidaysRequest(models.Model):
                 holiday.date_from = self._to_utc(compensated_request_date_from, hour_from, holiday.employee_id or holiday)
                 holiday.date_to = self._to_utc(compensated_request_date_to, hour_to, holiday.employee_id or holiday)
 
+
     @api.depends('holiday_status_id', 'request_unit_hours')
     def _compute_request_unit_half(self):
         for holiday in self:
@@ -1573,7 +1574,6 @@ class HolidaysRequest(models.Model):
         attendances = sorted([DummyAttendance(hour_from, hour_to, dayofweek, day_period, week_type) for week_type, dayofweek, day_period, hour_from, hour_to in attendances], key=lambda att: (att.dayofweek, att.day_period != 'morning'))
 
         default_value = DummyAttendance(0, 0, 0, 'morning', False)
-
         if self.resource_calendar_id.two_weeks_calendar:
             # find week type of start_date
             start_week_type = self.env['resource.calendar.attendance'].get_week_type(request_date_from)
@@ -1598,9 +1598,13 @@ class HolidaysRequest(models.Model):
             attendance_to = attendance_filtred_reversed[0]
         else:
             # find first attendance coming after first_day
-            attendance_from = next((att for att in attendances if int(att.dayofweek) >= request_date_from.weekday()), attendances[0] if attendances else default_value)
+            attendance_from = next((att for att in attendances if int(att.dayofweek) == request_date_from.weekday()),
+                default_value
+            )
             # find last attendance coming before last_day
-            attendance_to = next((att for att in reversed(attendances) if int(att.dayofweek) <= request_date_to.weekday()), attendances[-1] if attendances else default_value)
+            attendance_to = next((att for att in reversed(attendances) if int(att.dayofweek) == request_date_to.weekday()),
+                default_value
+            )
 
         return (attendance_from, attendance_to)
 
