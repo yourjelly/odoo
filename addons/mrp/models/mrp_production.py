@@ -1792,6 +1792,7 @@ class MrpProduction(models.Model):
                     moves.append(move)
 
         backorder_moves = self.env['stock.move'].create(new_moves_vals)
+        move_to_assign = backorder_moves
         # Split `stock.move.line`s. 2 options for this:
         # - do_unreserve -> action_assign
         # - Split the reserved amounts manually
@@ -1865,8 +1866,6 @@ class MrpProduction(models.Model):
                             quantity=taken_qty_uom,
                             move_id=move.id
                         )
-                        if set_consumed_qty:
-                            new_ml_vals['quantity'] = taken_qty_uom
                         move_lines_vals.append(new_ml_vals)
                     quantity -= taken_qty
                     move_qty_to_reserve -= taken_qty
@@ -1889,15 +1888,17 @@ class MrpProduction(models.Model):
                 partially_assigned_moves.add(move.id)
 
             move_lines_to_unlink.update(initial_move.move_line_ids.filtered(lambda ml: not ml.quantity).ids)
-            backorder_moves.filtered(
-                lambda move: move.state in ('confirmed', 'partially_available')
-                and (move._should_bypass_reservation()
-                    or move.picking_type_id.reservation_method == 'at_confirm'
-                    or (move.reservation_date and move.reservation_date <= fields.Date.today())))\
-            ._action_assign()
 
+        # reserve new backorder moves depending on the picking type
         self.env['stock.move'].browse(assigned_moves).write({'state': 'assigned'})
         self.env['stock.move'].browse(partially_assigned_moves).write({'state': 'partially_available'})
+        move_to_assign = move_to_assign.filtered(
+            lambda move: move.state in ('confirmed', 'partially_available')
+            and (move._should_bypass_reservation()
+                or move.picking_type_id.reservation_method == 'at_confirm'
+                or (move.reservation_date and move.reservation_date <= fields.Date.today())))
+        move_to_assign._action_assign()
+
         # Avoid triggering a useless _recompute_state
         self.env['stock.move.line'].browse(move_lines_to_unlink).write({'move_id': False})
         self.env['stock.move.line'].browse(move_lines_to_unlink).unlink()

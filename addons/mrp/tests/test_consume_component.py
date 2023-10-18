@@ -328,10 +328,9 @@ class TestConsumeComponent(TestConsumeComponentCommon):
 
         for mov in mo_all.move_raw_ids:
             if mov.has_tracking == 'none':
-                self.assertEqual(mov.product_qty, mov.quantity, "Done quantity shall be equal to To Consume quantity.")
                 self.assertTrue(mov.picked, "components should be picked even without no quantity reserved")
             else:
-                self.assertEqual(0, mov.quantity, "Done quantity shall be equal to To Consume quantity.")
+                self.assertEqual(mov.product_qty, mov.quantity, "Done quantity shall be equal to To Consume quantity.")
 
     def test_option_enabled_and_qty_partially_available(self):
         """Option enabled, qty partially available
@@ -376,10 +375,9 @@ class TestConsumeComponent(TestConsumeComponentCommon):
 
             for mov in mo.move_raw_ids:
                 if mov.has_tracking == "none":
-                    self.assertEqual(mov.product_qty, mov.quantity, "Done quantity shall be equal to To Consume quantity.")
                     self.assertTrue(mov.picked, "non tracked components should be picked")
                 else:
-                    self.assertEqual(raw_tracked_qty, mov.quantity, "Done quantity shall be equal to " + str(raw_tracked_qty)+ ".")
+                    self.assertEqual(mov.product_qty, mov.quantity, "Done quantity shall be equal to To Consume quantity.")
             mo.action_cancel()
 
         testUnit(self.mo_none_tmpl)
