@@ -936,7 +936,6 @@ class TestSubcontractingTracking(TransactionCase):
         with picking_form.move_ids_without_package.new() as move:
             move.product_id = self.finished_product
             move.quantity = todo_nb
-            move.picked = True
         picking_receipt = picking_form.save()
         picking_receipt.action_confirm()
 
@@ -987,6 +986,7 @@ class TestSubcontractingTracking(TransactionCase):
         # We should not be able to call the 'record_components' button
         self.assertEqual(picking_receipt.display_action_record_components, 'hide')
 
+        picking_receipt.move_ids.picked = True
         picking_receipt.button_validate()
         self.assertEqual(mo.state, 'done')
         self.assertEqual(mo.procurement_group_id.mrp_production_ids.mapped("state"), ['done'] * todo_nb)
