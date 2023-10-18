@@ -89,7 +89,6 @@ This module provides the core of the Odoo Web Client.
             'web/static/src/legacy/js/libs/autocomplete.js',
             'web/static/src/legacy/js/libs/bootstrap.js',
             'web/static/src/legacy/js/libs/jquery.js',
-            'web/static/src/legacy/js/core/bus.js',
             'web/static/src/legacy/js/core/class.js',
             'web/static/src/legacy/js/core/dialog.js',
             'web/static/src/legacy/xml/dialog.xml',
@@ -97,7 +96,6 @@ This module provides the core of the Odoo Web Client.
             'web/static/src/legacy/js/core/mixins.js',
             'web/static/src/legacy/js/core/service_mixins.js',
             'web/static/src/legacy/js/core/widget.js',
-            'web/static/src/legacy/js/services/core.js',
 
             'base/static/src/css/modules.css',
 
@@ -211,7 +209,6 @@ This module provides the core of the Odoo Web Client.
             'web/static/src/legacy/js/libs/autocomplete.js',
             'web/static/src/legacy/js/libs/bootstrap.js',
             'web/static/src/legacy/js/libs/jquery.js',
-            'web/static/src/legacy/js/core/bus.js',
             'web/static/src/legacy/js/core/class.js',
             'web/static/src/legacy/js/core/dialog.js',
             'web/static/src/legacy/xml/dialog.xml',
@@ -219,7 +216,6 @@ This module provides the core of the Odoo Web Client.
             'web/static/src/legacy/js/core/mixins.js',
             'web/static/src/legacy/js/core/service_mixins.js',
             'web/static/src/legacy/js/core/widget.js',
-            'web/static/src/legacy/js/services/core.js',
 
             'web/static/src/env.js',
             'web/static/src/core/utils/transitions.scss',  # included early because used by other files
