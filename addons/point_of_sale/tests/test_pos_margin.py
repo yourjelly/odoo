@@ -304,6 +304,7 @@ class TestPosMargin(TestPoSCommon):
         move2._action_confirm()
         move2._action_assign()
         move2.move_line_ids.quantity = 1
+        move2.picked = True
         move2._action_done()
 
         # open a session
