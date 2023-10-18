@@ -1,5 +1,6 @@
 /** @odoo-module **/
 
+import { strftimeToLuxonFormat } from "../l10n/dates";
 import { parseArgs } from "./py_parser";
 
 // -----------------------------------------------------------------------------
@@ -224,7 +225,7 @@ export class PyDate {
      * @returns {PyDate}
      */
     static today() {
-        return this.convertDate(new Date());
+        return this.convertDate(luxon.DateTime.now());
     }
 
     /**
@@ -233,9 +234,7 @@ export class PyDate {
      * @returns {PyDate}
      */
     static convertDate(date) {
-        const year = date.getFullYear();
-        const month = date.getMonth() + 1;
-        const day = date.getDate();
+        const {year, month, day} = date;
         return new PyDate(year, month, day);
     }
 
@@ -331,7 +330,7 @@ export class PyDateTime {
      * @returns {PyDateTime}
      */
     static now() {
-        return this.convertDate(new Date());
+        return this.convertDate(luxon.DateTime.now());
     }
 
     /**
@@ -340,12 +339,7 @@ export class PyDateTime {
      * @returns {PyDateTime}
      */
     static convertDate(date) {
-        const year = date.getFullYear();
-        const month = date.getMonth() + 1;
-        const day = date.getDate();
-        const hour = date.getHours();
-        const minute = date.getMinutes();
-        const second = date.getSeconds();
+        const { year, month, day, hour, minute, second} = date;
         return new PyDateTime(year, month, day, hour, minute, second, 0);
     }
 
@@ -489,8 +483,8 @@ export class PyDateTime {
      * @returns {PyDateTime}
      */
     to_utc() {
-        const d = new Date(this.year, this.month -1, this.day, this.hour, this.minute, this.second);
-        const timedelta = PyTimeDelta.create({ minutes: d.getTimezoneOffset() });
+        const d = luxon.DateTime.local(this.year, this.month, this.day, this.hour, this.minute, this.second);
+        const timedelta = PyTimeDelta.create({ minutes: d.offset });
         return this.add(timedelta);
     }
 }
@@ -509,10 +503,10 @@ export class PyTime extends PyDate {
     }
 
     constructor(hour, minute, second) {
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = now.getMonth();
-        const day = now.getDate();
+        const now = luxon.DateTime.local();
+        const year = now.year();
+        const month = now.month();
+        const day = now.day();
         super(year, month, day);
         this.hour = hour;
         this.minute = minute;
@@ -675,8 +669,8 @@ export class PyRelativeDelta {
         // Final pass: target the wanted day of the week (if necessary)
         if (delta.weekday !== null) {
             const wantedDow = delta.weekday + 1; // python: Monday is 0 ; JS: Monday is 1;
-            const _date = new Date(returnDate.year, returnDate.month - 1, returnDate.day);
-            const days = (7 - _date.getDay() + wantedDow) % 7;
+            const _date = luxon.DateTime.local(returnDate.year, returnDate.month , returnDate.day);
+            const days = (7 - _date.day + wantedDow) % 7;
             return returnDate.add(new PyTimeDelta(days, 0, 0));
         }
         return returnDate;

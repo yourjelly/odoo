@@ -9,9 +9,11 @@ QUnit.module("py", {}, () => {
         QUnit.module("time");
 
         function check(expr, fn) {
+            debugger;
             const d0 = new Date();
             const result = evaluateExpr(expr);
             const d1 = new Date();
+            debugger;
             return fn(d0) <= result && result <= fn(d1);
         }
         const format = (n) => String(n).padStart(2, "0");
@@ -465,6 +467,7 @@ QUnit.module("py", {}, () => {
         });
 
         QUnit.test("now", (assert) => {
+            debugger
             assert.ok(check("now", formatDateTime));
         });
 
