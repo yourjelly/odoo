@@ -701,12 +701,7 @@ stepUtils.openBurgerMenu(".o_breadcrumb .active:contains('OP/')"),
 ...stepUtils.statusbarButtonsSteps('Confirm Order', _t("Confirm quotation")),
 ...stepUtils.statusbarButtonsSteps('Receive Products', _t("Receive Product"), ".o_statusbar_status .btn.dropdown-toggle:contains('Purchase Order')"),
 ...stepUtils.statusbarButtonsSteps('Validate', _t("Validate"), ".o_statusbar_status .btn.dropdown-toggle:contains('Ready')"),
-{
-    trigger: ".modal-footer .btn-primary",
-    extra_trigger: ".modal-dialog",
-    content: _t("Apply"),
-    position: "bottom",
-}, {
+, {
     trigger: ".o_back_button, .breadcrumb-item:not('.active'):last",
     content: _t('go back to the purchase order'),
     position: 'bottom',
@@ -755,21 +750,22 @@ stepUtils.openBurgerMenu(".o_breadcrumb .active:contains('Manufacturing Orders')
 },
 ...stepUtils.statusbarButtonsSteps('Unreserve', _t("Unreserve")),
 {
-    trigger: ".o_field_widget[name=qty_producing] input",
-    extra_trigger: ".o_field_widget[name=move_raw_ids] tr[data-id]:first .o_field_widget[name=forecast_availability]:contains('Available')",
-    position: 'left',
-    content: _t("Produce"),
-    run: "text 1",
+    trigger: ".o_field_widget[name=move_raw_ids] tr[data-id]:first td",
+    position: 'bottom',
+},
+{
+    trigger: ".o_field_widget[name=picked] input",
+    position: 'right',
 },
 ...stepUtils.statusbarButtonsSteps('Check availability', _t("Check availability")),
 {
-    trigger: ".o_field_widget[name=qty_producing] input",
-    extra_trigger: ".o_field_widget[name=move_raw_ids] tr[data-id]:first .o_field_widget[name=forecast_availability]:contains('1')",
-    position: 'left',
-    content: _t("Produce"),
-    run: "text 1",
+    trigger: ".o_field_widget[name=move_raw_ids] tr[data-id]:last td",
+    position: 'right',
 },
-
+{
+    trigger: ".o_field_widget[name=picked] input",
+    position: 'right',
+},
 ...stepUtils.statusbarButtonsSteps('Produce All', _t("Produce All"), ".o_statusbar_status .btn.dropdown-toggle:contains('To Close')"),
 {
     edition: "enterprise",
