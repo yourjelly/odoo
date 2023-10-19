@@ -149,9 +149,9 @@ class HolidaysRequest(models.Model):
 
     employee_id = fields.Many2one(
         'hr.employee', compute='_compute_from_employee_ids', store=True, string='Employee', index=True, readonly=False, ondelete="restrict",
-        tracking=True, compute_sudo=False)
-    employee_company_id = fields.Many2one(related='employee_id.company_id', string="Employee Company", store=True)
-    company_id = fields.Many2one('res.company', compute='_compute_company_id', store=True)
+        tracking=True, compute_sudo=False, precompute=True)
+    employee_company_id = fields.Many2one(related='employee_id.company_id', string="Employee Company", store=True, precompute=True)
+    company_id = fields.Many2one('res.company', compute='_compute_company_id', store=True, precompute=True)
     active_employee = fields.Boolean(related='employee_id.active', string='Employee Active')
     tz_mismatch = fields.Boolean(compute='_compute_tz_mismatch')
     tz = fields.Selection(_tz_get, compute='_compute_tz')
@@ -163,9 +163,9 @@ class HolidaysRequest(models.Model):
     # These dates are computed based on request_date_{to,from} and should
     # therefore never be set directly.
     date_from = fields.Datetime(
-        'Start Date', compute='_compute_date_from_to', store=True, index=True, tracking=True)
+        'Start Date', compute='_compute_date_from_to', store=True, index=True, tracking=True, compute_sudo=True)
     date_to = fields.Datetime(
-        'End Date', compute='_compute_date_from_to', store=True, tracking=True)
+        'End Date', compute='_compute_date_from_to', store=True, tracking=True, compute_sudo=True)
     number_of_days = fields.Float(
         'Duration (Days)', compute='_compute_duration', store=True, tracking=True,
         help='Number of days of the time off request. Used in the calculation.')
@@ -193,15 +193,15 @@ class HolidaysRequest(models.Model):
         string='Allocation Mode', readonly=False, required=True, default='employee',
         help='By Employee: Allocation/Request for individual Employee, By Employee Tag: Allocation/Request for group of employees in category')
     employee_ids = fields.Many2many(
-        'hr.employee', compute='_compute_from_holiday_type', store=True, string='Employees', readonly=False, groups="hr_holidays.group_hr_holidays_user")
+        'hr.employee', compute='_compute_from_holiday_type', store=True, precompute=True, string='Employees', readonly=False, groups="hr_holidays.group_hr_holidays_user")
     multi_employee = fields.Boolean(
-        compute='_compute_from_employee_ids', store=True, compute_sudo=False,
+        compute='_compute_from_employee_ids', store=True, compute_sudo=False, precompute=True,
         help='Holds whether this allocation concerns more than 1 employee')
     category_id = fields.Many2one(
-        'hr.employee.category', compute='_compute_from_holiday_type', store=True, string='Employee Tag',
+        'hr.employee.category', compute='_compute_from_holiday_type', store=True, precompute=True, string='Employee Tag',
         readonly=False, help='Category of Employee')
     mode_company_id = fields.Many2one(
-        'res.company', compute='_compute_from_holiday_type', store=True, string='Company Mode',
+        'res.company', compute='_compute_from_holiday_type', store=True, string='Company Mode', precompute=True,
         readonly=False)
     first_approver_id = fields.Many2one(
         'hr.employee', string='First Approval', readonly=True, copy=False,
