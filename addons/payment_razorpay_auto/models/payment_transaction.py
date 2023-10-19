@@ -19,6 +19,47 @@ class PaymentTransaction(models.Model):
 
     razorpay_payment_method = fields.Selection(([('card', 'Card'), ('upi', 'UPI/QR')]), default=False)
 
+    # TO-DO: Move this method directly into payment_razorpay
+     @api.model
+    def _validate_and_sanatize_phone_number(self, phone):
+        """ Sanatize and validate phone number if phone number if not
+        valid then raise validation error.
+
+        :param char phone
+        :return: Sanatized and validated phone number.
+        :rtype: char
+        """
+        phone = self.partner_phone
+        error_message = _("The phone number is missing.")
+        if phone:
+            # sanitize partner phone
+            country_code = self.partner_country_id.code
+            country_phone_code = self.partner_country_id.phone_code
+            phone_info = phone_sanitize_numbers([phone], country_code, country_phone_code)
+            phone = phone_info[self.partner_phone]['sanitized']
+            error_message = phone_info[self.partner_phone]['msg']
+        if not phone:
+            raise ValidationError("Razorpay: " + error_message)
+        return phone
+
+    # TO-DO: Move this method directly into payment_razorpay
+    def _create_order(self, customer_id=False, is_payment_capture=False):
+        # Initiate the payment and retrieve the related order id.
+        # TO DO master: remove customer from context and add it into argument
+        order_payload = self.with_context(razorpay_customer_id=customer_id)._razorpay_prepare_order_request_payload()
+        if is_payment_capture:
+            order_payload.update(payment_capture=True)
+        _logger.info(
+            "Payload of '/orders' request for transaction with reference %s:\n%s",
+            self.reference, pprint.pformat(order_payload)
+        )
+        order_response = self.provider_id._razorpay_make_request(endpoint='orders', payload=order_payload)
+        _logger.info(
+            "Response of '/orders' request for transaction with reference %s:\n%s",
+            self.reference, pprint.pformat(order_response)
+        )
+        return order_response
+
     def _get_specific_processing_values(self, processing_values):
         """ Override of `payment` to return razorpay-specific processing values.
 
