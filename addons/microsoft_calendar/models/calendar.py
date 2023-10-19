@@ -40,7 +40,6 @@ class Meeting(models.Model):
     _inherit = ['calendar.event', 'microsoft.calendar.sync']
 
     # contains organizer event id and universal event id separated by a ':'
-    microsoft_id = fields.Char('Microsoft Calendar Event Id')
     microsoft_recurrence_master_id = fields.Char('Microsoft Recurrence Master Id')
 
     def _get_organizer(self):

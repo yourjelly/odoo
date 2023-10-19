@@ -13,8 +13,6 @@ class RecurrenceRule(models.Model):
     # Don't sync by default. Sync only when the recurrence is applied
     need_sync_m = fields.Boolean(default=False)
 
-    microsoft_id = fields.Char('Microsoft Calendar Recurrence Id')
-
     def _compute_rrule(self):
         # Note: 'need_sync_m' is set to False to avoid syncing the updated recurrence with
         # Outlook, as this update may already come from Outlook. If not, this modification will
