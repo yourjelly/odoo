@@ -43,9 +43,7 @@ class TestPurchaseStockReports(TestReportsCommon):
 
         # Receives 5 products.
         receipt = po.picking_ids
-        res_dict = receipt.button_validate()
-        wizard = Form(self.env[res_dict['res_model']].with_context(res_dict['context'])).save()
-        wizard.process()
+        receipt.button_validate()
         report_values, docs, lines = self.get_report_forecast(product_template_ids=self.product_template.ids)
         draft_picking_qty_in = docs['draft_picking_qty']['in']
         draft_purchase_qty = docs['draft_purchase_qty']

@@ -92,7 +92,6 @@ class TestRepairTraceability(TestMrpCommon):
             with mo_form.move_raw_ids.new() as raw_line:
                 raw_line.product_id = component
                 raw_line.product_uom_qty = 1
-            import pudb; pudb.set_trace()
             mo = mo_form.save()
             mo.action_confirm()
             mo.action_assign()

@@ -93,6 +93,7 @@ class TestStockValuationLCCommon(TestStockLandedCostsCommon):
         in_move._action_confirm()
         in_move._action_assign()
         in_move.move_line_ids.quantity = quantity
+        in_move.picked = True
         in_move._action_done()
 
         self.days += 1
@@ -130,6 +131,7 @@ class TestStockValuationLCCommon(TestStockLandedCostsCommon):
                 'location_dest_id': out_move.location_dest_id.id,
             })
         out_move.move_line_ids.quantity = quantity
+        out_move.picked = True
         out_move._action_done()
 
         self.days += 1
@@ -330,8 +332,7 @@ class TestStockValuationLCFIFOVB(TestStockValuationLCCommon):
 
         # Process the receipt
         receipt = rfq.picking_ids
-        wiz = receipt.button_validate()
-        wiz = Form(self.env['stock.immediate.transfer'].with_context(wiz['context'])).save().process()
+        receipt.button_validate()
         self.assertEqual(rfq.order_line.qty_received, 10)
 
         input_aml = self._get_stock_input_move_lines()[-1]
@@ -419,9 +420,7 @@ class TestStockValuationLCFIFOVB(TestStockValuationLCCommon):
 
         # Process the receipt
         receipt = rfq.picking_ids
-        wiz = receipt.button_validate()
-        wiz = Form(self.env['stock.immediate.transfer'].with_context(wiz['context'])).save()
-        wiz.process()
+        receipt.button_validate()
         self.assertEqual(rfq.order_line.qty_received, 10)
 
         input_aml = self._get_stock_input_move_lines()[-1]
@@ -474,8 +473,7 @@ class TestStockValuationLCFIFOVB(TestStockValuationLCCommon):
 
         # Process the receipt
         receipt = rfq.picking_ids
-        wiz = receipt.button_validate()
-        wiz = Form(self.env['stock.immediate.transfer'].with_context(wiz['context'])).save().process()
+        receipt.button_validate()
         self.assertEqual(rfq.order_line.qty_received, 10)
 
         input_aml = self._get_stock_input_move_lines()[-1]

@@ -16,11 +16,6 @@ def main():
         for i, line in enumerate(lines):
             if 'action_reset_draft' in line:
                 lines_to_delete.append(i)
-            if 'quantity_done' in line and 'self.assert' not in line:
-                replace_line = replace(line)
-                new_line = add_picked(line)
-                # replace the current line in file by replace_line and new_line
-                lines[i] = "%s%s\n" % (replace_line, new_line)
             elif 'quantity_done' in line:
                 lines[i] = replace(line)
             elif 'reserved_availability' in line:
