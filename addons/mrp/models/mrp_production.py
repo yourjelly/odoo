@@ -1204,10 +1204,7 @@ class MrpProduction(models.Model):
 
             new_qty = float_round((self.qty_producing - self.qty_produced) * move.unit_factor, precision_rounding=move.product_uom.rounding)
             move._set_quantity_done(new_qty)
-            if (
-                    (not move.manual_consumption and not move._origin.manual_consumption) and
-                    (move.has_tracking not in ('serial', 'lot') or all(line.lot_id for line in move.move_line_ids if line.quantity))
-            ):
+            if (not move.manual_consumption and not move._origin.manual_consumption):
                 move.picked = True
 
     def _update_raw_moves(self, factor):

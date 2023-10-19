@@ -546,9 +546,8 @@ class TestRepair(common.TransactionCase):
         picking = picking_form.save()
         picking.action_confirm()
         picking.action_assign()
-        res_dict = picking.button_validate()
-        wizard = Form(self.env[res_dict['res_model']].with_context(res_dict['context'])).save()
-        wizard.process()
+        picking.button_validate()
+
         self.assertEqual(picking.state, 'done')
         # Create a return
         stock_return_picking_form = Form(self.env['stock.return.picking']
@@ -558,7 +557,7 @@ class TestRepair(common.TransactionCase):
         stock_return_picking.product_return_moves.quantity = 1.0
         stock_return_picking_action = stock_return_picking.create_returns()
         return_picking = self.env['stock.picking'].browse(stock_return_picking_action['res_id'])
-        return_picking.action_set_quantities_to_reservation()
+        return_picking.move_ids.picked = True
         return_picking.button_validate()
         self.assertEqual(return_picking.state, 'done')
 
