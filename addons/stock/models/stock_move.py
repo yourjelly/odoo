@@ -368,7 +368,7 @@ class StockMove(models.Model):
                 quantity -= move.product_uom._compute_quantity(qty_ml_dec, move.product_uom, round=False)
 
         def _process_increase(move, quantity):
-            move._action_assign(move.quantity)
+            # move._action_assign(quantity)
             move._set_quantity_done(move.quantity)
 
         err = []
@@ -1549,6 +1549,7 @@ Please change the quantity done or the rounding precision of your unit of measur
         # Read the `reserved_availability` field of the moves out of the loop to prevent unwanted
         # cache invalidation when actually reserving the move.
         reserved_availability = {move: move.quantity for move in self}
+
         roundings = {move: move.product_id.uom_id.rounding for move in self}
         move_line_vals_list = []
         # Once the quantities are assigned, we want to find a better destination location thanks
@@ -1559,7 +1560,7 @@ Please change the quantity done or the rounding precision of your unit of measur
             moves_to_assign = moves_to_assign.filtered(
                 lambda m: not m.picked and m.state in ['confirmed', 'waiting', 'partially_available']
             )
-        moves_to_reserve = self.filtered(lambda m: not m._should_bypass_reservation())
+        moves_to_reserve = moves_to_assign.filtered(lambda m: not m._should_bypass_reservation())
         quants_by_product = self.env['stock.quant']._get_quants_by_products_locations(moves_to_reserve.product_id, moves_to_reserve.location_id)
 
         for move in moves_to_assign:
@@ -1567,7 +1568,7 @@ Please change the quantity done or the rounding precision of your unit of measur
             if not force_qty:
                 missing_reserved_uom_quantity = move.product_uom_qty - reserved_availability[move]
             else:
-                missing_reserved_uom_quantity = force_qty - reserved_availability[move]
+                missing_reserved_uom_quantity = force_qty
             if float_compare(missing_reserved_uom_quantity, 0, precision_rounding=rounding) <= 0:
                 assigned_moves_ids.add(move.id)
                 continue
