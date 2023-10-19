@@ -178,6 +178,7 @@ class TestPurchaseMrpFlow(TransactionCase):
         moves_to_process = moves.filtered(lambda m: m.product_id in quantities_to_process.keys())
         for move in moves_to_process:
             move.quantity = quantities_to_process[move.product_id]
+            move.picked = True
 
     def _assert_quantities(self, moves, quantities_to_process):
         """ Helper to check expected quantities based on a dict following this structure :
@@ -452,9 +453,7 @@ class TestPurchaseMrpFlow(TransactionCase):
         return_pick = self.env['stock.picking'].browse(res['res_id'])
 
         # Process all components and validate the picking
-        wiz_act = return_pick.button_validate()
-        wiz = Form(self.env[wiz_act['res_model']].with_context(wiz_act['context'])).save()
-        wiz.process()
+        return_pick.button_validate()
 
         # Now quantity received should be 3 again
         self.assertEqual(order_line.qty_received, 3)
@@ -471,7 +470,7 @@ class TestPurchaseMrpFlow(TransactionCase):
         # Process all components except one of each
         for move in return_of_return_pick.move_ids:
             move.write({
-                'quantity_done': expected_quantities[move.product_id] - 1,
+                'quantity': expected_quantities[move.product_id] - 1,
                 'to_refund': True
             })
 
