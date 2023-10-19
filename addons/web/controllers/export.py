@@ -8,6 +8,8 @@ import json
 import logging
 import operator
 from collections import OrderedDict
+from markupsafe import Markup
+import re
 
 from werkzeug.exceptions import InternalServerError
 
@@ -358,6 +360,14 @@ class Export(http.Controller):
                 record['params'] = {'model': ref, 'prefix': ident, 'name': name, 'parent_field': field}
                 record['children'] = True
 
+            if record['field_type'] == 'html':
+                temp = {'id': ident+'-strippedText', 'string': name+'(stripped Text)',
+                      'value': val, 'children': False,
+                      'field_type': field.get('type'),
+                      'required': field.get('required'),
+                      'relation_field': field.get('relation_field'),
+                      'default_export': import_compat and field.get('default_export_compatible')}
+                records.append(temp)
         return records
 
     @http.route('/web/export/namelist', type='json', auth="user")
@@ -475,6 +485,7 @@ class ExportFormat(object):
             fields = [field for field in fields if field['name'] != 'id']
 
         field_names = [f['name'] for f in fields]
+        field_label = [f['label'] for f in fields]
         if import_compat:
             columns_headers = field_names
         else:
@@ -495,9 +506,17 @@ class ExportFormat(object):
             response_data = self.from_group_data(fields, tree)
         else:
             records = Model.browse(ids) if ids else Model.search(domain, offset=0, limit=False, order=False)
-
+            for i in range(len(field_names)):
+                if '-strippedText' in field_names[i]:
+                    field_names[i] = field_names[i].replace('-strippedText','')
             export_data = records.export_data(field_names).get('datas', [])
+            for i in range(len(field_label)):
+                if '(stripped Text)' in field_label[i]:
+                    markup = export_data[0][i]
+                    rawText = re.sub(r'<[^>]*>', '', str(markup))
+                    export_data[0][i] = rawText
             response_data = self.from_data(columns_headers, export_data)
+            
 
         # TODO: call `clean_filename` directly in `content_disposition`?
         return request.make_response(response_data,
