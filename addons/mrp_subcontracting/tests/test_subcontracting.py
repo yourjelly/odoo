@@ -1048,9 +1048,7 @@ class TestSubcontractingTracking(TransactionCase):
         # Process the delivery of the components
         compo_picking = mo.picking_ids
         compo_picking.action_assign()
-        wizard_data = compo_picking.button_validate()
-        wizard = Form(self.env[wizard_data['res_model']].with_context(wizard_data['context'])).save()
-        wizard.process()
+        compo_picking.button_validate()
 
         for qty in [3, 1]:
             # Record the receiption of <qty> finished products
@@ -1123,9 +1121,7 @@ class TestSubcontractingTracking(TransactionCase):
         # Process the delivery of the components
         compo_picking = mo.picking_ids
         compo_picking.action_assign()
-        wizard_data = compo_picking.button_validate()
-        wizard = Form(self.env[wizard_data['res_model']].with_context(wizard_data['context'])).save()
-        wizard.process()
+        compo_picking.button_validate()
 
         picking_receipt = self.env['stock.picking'].search([('partner_id', '=', self.subcontractor_partner1.id), ('state', '!=', 'done')])
         for sn in finished_serials:
@@ -1332,9 +1328,6 @@ class TestSubcontractingSerialMassReceipt(TransactionCase):
         picking_deliver = self.env['mrp.production'].search([('bom_id', '=', self.bom.id)]).picking_ids
         picking_deliver.action_assign()
         picking_deliver.button_validate()
-        wizard_data = picking_deliver.button_validate()
-        wizard = Form(self.env[wizard_data['res_model']].with_context(wizard_data['context'])).save()
-        wizard.process()
         # Receive
         for quantity in quantities:
             # Receive <quantity> finished products

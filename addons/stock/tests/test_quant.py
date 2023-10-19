@@ -835,7 +835,6 @@ class StockQuant(TransactionCase):
             'lot_name': 'Michel',
             'quantity': 1.0
         })
-        receipt01.move_ids.picked = True
         receipt01.button_validate()
 
         quant = self.env['stock.quant'].search([('product_id', '=', self.product_serial.id), ('location_id', '=', stock_location.id)])
@@ -848,6 +847,7 @@ class StockQuant(TransactionCase):
         return_pick = self.env['stock.picking'].browse(stock_return_picking_action['res_id'])
         return_pick.move_ids.move_line_ids.quantity = 1.0
         return_pick.action_put_in_pack()
+        return_pick.move_ids.picked = True
         return_pick._action_done()
 
         self.assertEqual(return_pick.move_line_ids.lot_id, quant.lot_id)
