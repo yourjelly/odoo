@@ -3,9 +3,9 @@
 
 
 {
-    'name': 'Task Logs',
+    'name': 'Time Tracking',
     'version': '1.0',
-    'category': 'Services/Timesheets',
+    'category': 'Timesheets',
     'sequence': 23,
     'summary': 'Track employee time on tasks',
     'description': """

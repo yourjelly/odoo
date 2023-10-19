@@ -5,9 +5,9 @@
     'name': 'Project',
     'version': '1.3',
     'website': 'https://www.odoo.com/app/project',
-    'category': 'Services/Project',
+    'category': 'Project',
     'sequence': 45,
-    'summary': 'Organize and plan your projects',
+    'summary': 'Manage projects collaboratively and meet deadlines.',
     'depends': [
         'analytic',
         'base_setup',
