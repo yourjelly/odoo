@@ -57,6 +57,7 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
         sale_order.action_confirm()
         picking = sale_order.picking_ids
         picking.move_ids.quantity_done = 300
+        picking.move_ids.picked = True
         action = picking.button_validate()
         wizard = Form(self.env[action['res_model']].with_context(action['context']))
         wizard.save().process()
@@ -242,9 +243,9 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
         })
         sale_order.action_confirm()
 
-        self.assertEqual(sale_order.order_line.move_ids.move_line_ids[0].reserved_qty, 2)
+        self.assertEqual(sale_order.order_line.move_ids.move_line_ids[0].quantity, 2)
         self.assertEqual(sale_order.order_line.move_ids.move_line_ids[0].location_id.id, self.shelf_1.id)
-        self.assertEqual(sale_order.order_line.move_ids.move_line_ids[1].reserved_qty, 2)
+        self.assertEqual(sale_order.order_line.move_ids.move_line_ids[1].quantity, 2)
         self.assertEqual(sale_order.order_line.move_ids.move_line_ids[1].location_id.id, self.shelf_2.id)
 
         self.main_pos_config.company_id.write({'point_of_sale_update_stock_quantities': 'real'})
