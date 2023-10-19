@@ -249,9 +249,7 @@ class TestSaleMrpKitBom(TransactionCase):
         self.assertEqual(so.order_line.qty_delivered, 0)
 
         picking = so.picking_ids
-        action = picking.button_validate()
-        wizard = Form(self.env[action['res_model']].with_context(action['context'])).save()
-        wizard.process()
+        picking.button_validate()
 
         # Checks the delivery amount (must be 1).
         self.assertEqual(so.order_line.qty_delivered, 1)

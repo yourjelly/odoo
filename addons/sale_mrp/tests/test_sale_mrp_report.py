@@ -57,9 +57,7 @@ class TestSaleMrpInvoices(common.TransactionCase):
         })
         so.action_confirm()
 
-        action = so.picking_ids.button_validate()
-        wizard = Form(self.env[action['res_model']].with_context(action['context'])).save()
-        wizard.process()
+        so.picking_ids.button_validate()
 
         invoice = so._create_invoices()
         invoice.action_post()

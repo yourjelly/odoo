@@ -196,9 +196,10 @@ class TestSaleMrpFlow(ValuationReconciliationTestCommon):
         """
         moves_to_process = moves.filtered(lambda m: m.product_id in quantities_to_process.keys())
         for move in moves_to_process:
-            move.write({'quantity': quantities_to_process[move.product_id],
-                        'picked': True
-                        })
+            move.write({
+                'quantity': quantities_to_process[move.product_id],
+                'picked': True
+            })
 
     def _assert_quantities(self, moves, quantities_to_process):
         """ Helper to check expected quantities based on a dict following this structure :
@@ -672,9 +673,7 @@ class TestSaleMrpFlow(ValuationReconciliationTestCommon):
         pick = self.so.picking_ids
         # To check the products on the picking
         self.assertEqual(pick.move_ids.mapped('product_id'), self.component1 | self.component2)
-        wiz_act = pick.button_validate()
-        wiz = Form(self.env[wiz_act['res_model']].with_context(wiz_act['context'])).save()
-        wiz.process()
+        pick.button_validate()
         # Create the invoice
         self.so._create_invoices()
         self.invoice = self.so.invoice_ids
@@ -978,9 +977,7 @@ class TestSaleMrpFlow(ValuationReconciliationTestCommon):
         return_pick = self.env['stock.picking'].browse(res['res_id'])
 
         # Process all components and validate the picking
-        wiz_act = return_pick.button_validate()
-        wiz = Form(self.env[wiz_act['res_model']].with_context(wiz_act['context'])).save()
-        wiz.process()
+        return_pick.button_validate()
 
         # Now quantity delivered should be 3 again
         self.assertEqual(order_line.qty_delivered, 3)
@@ -1769,9 +1766,7 @@ class TestSaleMrpFlow(ValuationReconciliationTestCommon):
         so = so_form.save()
         so.action_confirm()
 
-        wiz_act = so.picking_ids.button_validate()
-        wiz = Form(self.env[wiz_act['res_model']].with_context(wiz_act['context'])).save()
-        wiz.process()
+        so.picking_ids.button_validate()
 
         p2_bom.type = "normal"
 
@@ -1905,8 +1900,7 @@ class TestSaleMrpFlow(ValuationReconciliationTestCommon):
         so.action_confirm()
         # Deliver the products
         pick = so.picking_ids
-        wiz_act = pick.button_validate()
-        Form(self.env[wiz_act['res_model']].with_context(wiz_act['context'])).save().process()
+        pick.button_validate()
         # Create the invoice
         so._create_invoices()
         # Validate the invoice
@@ -1949,9 +1943,7 @@ class TestSaleMrpFlow(ValuationReconciliationTestCommon):
         # Check picking creation
         self.assertEqual(len(so.picking_ids), 1, "A picking should be created after the SO validation")
 
-        wiz_act = so.picking_ids.button_validate()
-        wiz = Form(self.env[wiz_act['res_model']].with_context(wiz_act['context'])).save()
-        wiz.process()
+        so.picking_ids.button_validate()
 
         so._action_cancel()
         so.action_draft()
@@ -1992,9 +1984,7 @@ class TestSaleMrpFlow(ValuationReconciliationTestCommon):
         self.assertEqual(price, 10)
 
         picking = so.picking_ids
-        action = picking.button_validate()
-        wizard = Form(self.env[action['res_model']].with_context(action['context'])).save()
-        wizard.process()
+        picking.button_validate()
 
         ctx = {'active_ids':picking.ids, 'active_id': picking.ids[0], 'active_model': 'stock.picking'}
         return_picking_wizard_form = Form(self.env['stock.return.picking'].with_context(ctx))

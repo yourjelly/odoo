@@ -61,10 +61,10 @@ class TestTourManualConsumption(HttpCase):
         self.assertEqual(move_nt.quantity, 5)
         self.assertTrue(move_nt.picked)
         self.assertEqual(move_sn.manual_consumption, True)
-        self.assertEqual(move_sn.quantity, 0)
+        self.assertEqual(move_sn.quantity, 5)
         self.assertFalse(move_sn.picked)
         self.assertEqual(move_lot.manual_consumption, True)
-        self.assertEqual(move_lot.quantity, 0)
+        self.assertEqual(move_lot.quantity, 5)
         self.assertFalse(move_lot.picked)
 
         action_id = self.env.ref('mrp.menu_mrp_production_action').action

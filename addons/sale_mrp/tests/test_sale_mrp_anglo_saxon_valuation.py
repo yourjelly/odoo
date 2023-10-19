@@ -190,9 +190,7 @@ class TestSaleMRPAngloSaxonValuation(ValuationReconciliationTestCommon):
             # Deliver the three finished products
             pick = so.picking_ids
             # To check the products on the picking
-            wiz_act = pick.button_validate()
-            wiz = Form(self.env[wiz_act['res_model']].with_context(wiz_act['context'])).save()
-            wiz.process()
+            pick.button_validate()
             # Create the invoice
             so._create_invoices()
             invoice = so.invoice_ids
