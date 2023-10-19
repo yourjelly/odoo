@@ -59,9 +59,7 @@ class TestStockValuation(ValuationReconciliationTestCommon):
 
         # validate the dropshipping picking
         self.assertEqual(len(self.sale_order1.picking_ids), 1)
-        wizard = self.sale_order1.picking_ids.button_validate()
-        immediate_transfer = Form(self.env[wizard['res_model']].with_context(wizard['context'])).save()
-        immediate_transfer.process()
+        self.sale_order1.picking_ids.button_validate()
         self.assertEqual(self.sale_order1.picking_ids.state, 'done')
 
         # create the vendor bill
