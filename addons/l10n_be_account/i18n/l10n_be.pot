@@ -405,7 +405,7 @@ msgstr ""
 
 #. module: l10n_be
 #: model:ir.model.fields.selection,name:l10n_be.selection__account_journal__invoice_reference_model__be
-#: model:ir.ui.menu,name:l10n_be.account_reports_be_statements_menu
+#: model:ir.ui.menu,name:l10n_be_account.account_reports_be_statements_menu
 msgid "Belgium"
 msgstr ""
 
