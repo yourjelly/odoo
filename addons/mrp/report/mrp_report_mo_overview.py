@@ -107,8 +107,8 @@ class ReportMoOverview(models.AbstractModel):
         for move in record.move_raw_ids:
             if move.product_id.detailed_type != 'product':
                 continue
-            components_qty_to_produce[move.product_id] += move.product_uom._compute_quantity(move.product_uom_qty, move.product_id.uom_id)
-            components_qty_reserved[move.product_id] += move.product_uom._compute_quantity(move.reserved_availability, move.product_id.uom_id)
+            components_qty_to_produce[move.product_id] += move.product_qty
+            components_qty_reserved[move.product_id] += move.product_uom._compute_quantity(move.quantity, move.product_id.uom_id)
         producible_qty = record.product_qty
         for product_id, comp_qty_to_produce in components_qty_to_produce.items():
             if float_is_zero(comp_qty_to_produce, precision_rounding=product_id.uom_id.rounding):
@@ -530,7 +530,7 @@ class ReportMoOverview(models.AbstractModel):
                 if move.state not in ('partially_available', 'assigned'):
                     continue
                 # count reserved stock in move_raw's uom
-                reserved = move.product_uom._compute_quantity(move.reserved_availability, move_raw.product_uom)
+                reserved = move.product_uom._compute_quantity(move.quantity, move_raw.product_uom)
                 # check if the move reserved qty was counted before (happens if multiple outs share pick/pack)
                 reserved = min(reserved - move.product_uom._compute_quantity(replenish_data['qty_already_reserved'][move], move_raw.product_uom), move_raw.product_uom_qty)
                 total_reserved += reserved

@@ -60,9 +60,7 @@ class TestAngloSaxonValuationPurchaseMRP(TransactionCase):
         po = po_form.save()
         po.button_confirm()
 
-        action = po.picking_ids.button_validate()
-        wizard = Form(self.env[action['res_model']].with_context(action['context'])).save()
-        wizard.process()
+        po.picking_ids.button_validate()
 
         action = po.action_create_invoice()
         invoice = self.env['account.move'].browse(action['res_id'])

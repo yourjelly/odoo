@@ -307,7 +307,6 @@ class TestPurchaseStockReports(TestReportsCommon):
         receipt01 = po.picking_ids
         receipt01_move = receipt01.move_ids
         receipt01_move.quantity = 6
-        receipt01_move.picked = True
         receipt01.button_validate()
 
         data = self.env['vendor.delay.report'].read_group(

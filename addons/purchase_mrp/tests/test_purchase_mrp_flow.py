@@ -177,7 +177,7 @@ class TestPurchaseMrpFlow(TransactionCase):
         """
         moves_to_process = moves.filtered(lambda m: m.product_id in quantities_to_process.keys())
         for move in moves_to_process:
-            move.write({'quantity_done': quantities_to_process[move.product_id]})
+            move.quantity = quantities_to_process[move.product_id]
 
     def _assert_quantities(self, moves, quantities_to_process):
         """ Helper to check expected quantities based on a dict following this structure :
@@ -230,7 +230,6 @@ class TestPurchaseMrpFlow(TransactionCase):
             line.price_unit = 1260
         po = po.save()
         po.button_confirm()
-        po.picking_ids.action_set_quantities_to_reservation()
         po.picking_ids.button_validate()
 
         # Unit price equaly dived among bom lines (cost share not set)
@@ -283,7 +282,6 @@ class TestPurchaseMrpFlow(TransactionCase):
 
         po = po.save()
         po.button_confirm()
-        po.picking_ids.action_set_quantities_to_reservation()
         po.picking_ids.button_validate()
 
         layer = po.picking_ids.move_ids.stock_valuation_layer_ids
