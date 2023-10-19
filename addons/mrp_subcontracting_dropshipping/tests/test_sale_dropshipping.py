@@ -64,9 +64,7 @@ class TestSaleDropshippingFlows(TestMrpSubcontractingCommon):
 
         # Deliver the third one
         picking = sale_order.picking_ids.filtered(lambda p: p.partner_id == partners[2])
-        action = picking.button_validate()
-        wizard = Form(self.env[action['res_model']].with_context(action['context'])).save()
-        wizard.process()
+        picking.button_validate()
         self.assertEqual(sale_order.order_line.qty_delivered, 0)
 
         # Cancel the second one
@@ -106,9 +104,7 @@ class TestSaleDropshippingFlows(TestMrpSubcontractingCommon):
         self.assertEqual(sale_order.order_line.qty_delivered, 0.0)
 
         picking = sale_order.picking_ids
-        action = picking.button_validate()
-        wizard = Form(self.env[action['res_model']].with_context(action['context'])).save()
-        wizard.process()
+        picking.button_validate()
         self.assertEqual(sale_order.order_line.qty_delivered, 1.0)
 
         for case in ['return', 'deliver again']:
@@ -120,9 +116,7 @@ class TestSaleDropshippingFlows(TestMrpSubcontractingCommon):
             picking = self.env['stock.picking'].browse(action['res_id'])
             self.assertEqual(sale_order.order_line.qty_delivered, delivered_before_case, "Incorrect delivered qty for case '%s'" % case)
 
-            action = picking.button_validate()
-            wizard = Form(self.env[action['res_model']].with_context(action['context'])).save()
-            wizard.process()
+            picking.button_validate()
             self.assertEqual(sale_order.order_line.qty_delivered, delivered_after_case, "Incorrect delivered qty for case '%s'" % case)
 
     def test_partial_return_kit_and_delivered_qty(self):
