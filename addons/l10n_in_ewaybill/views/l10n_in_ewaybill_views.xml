@@ -17,8 +17,10 @@
         <field name="model">l10n.in.ewaybill</field>
         <field name="arch" type="xml">
             <tree>
-                <field name="account_move_id"/>
-                <field name="date"/>
+                <field name="name"/>
+                <field name="ewaybill_date"/>
+                <field name="document_number"/>
+                <field name="document_date"/>
                 <field name="state"/>
             </tree>
         </field>
@@ -30,11 +32,13 @@
         <field name="arch" type="xml">
             <form string="Stock Picking">
                 <header>
-                    <button name="generate_ewaybill" string="Generate E-waybill" class="oe_highlight" type="object" invisible="state in ('sent','cancel')"/>
-                    <field name="state" widget="statusbar" statusbar_visible="draft,sent"/>
+                    <button name="generate_ewaybill" string="Generate E-waybill" class="oe_highlight" type="object" invisible="state != 'pending'"/>
+                    <button name="action_export_json" string="Download JSON" class="oe_highlight" type="object" invisible="not error_message" groups="base.group_no_one"/>
+                    <field name="state" widget="statusbar" statusbar_visible="pending,to_generate,generated"/>
                 </header>
+                <field name="blocking_level" invisible="1"/>
                 <div class="alert alert-info" role="alert" style="margin-bottom:0px;"
-                    invisible="state not in ('to_generate')">
+                    invisible="state != 'to_generate' or error_message">
                      <div>The e-Way Bill will Generate soon
                          <button name="process_now" type="object" class="oe_link ps-0 text-decoration-underline" string="Process now"/>
                      </div>
@@ -45,38 +49,46 @@
                          <button name="process_now" type="object" class="oe_link ps-0 text-decoration-underline" string="Process now"/>
                      </div>
                 </div>
-                <div class="alert alert-danger" role="alert" style="margin-bottom:0px;" invisible="state != 'error'">
+                <div class="alert alert-danger" role="alert" style="margin-bottom:0px;" invisible="not error_message or blocking_level == 'error'">
                     <div class="o_row">
                         <field name="error_message"/>
-                        <button name="process_now" string="retry" class="oe_highlight" type="object"/>
+                        <button name="process_now" string="retry" class="oe_link ps-0 text-decoration-underline" type="object"/>
                     </div>
                 </div>
-                 <div class="alert alert-info" role="alert" style="margin-bottom:0px;" invisible="state != 'error'">
+                <div class="alert alert-warning" role="alert" style="margin-bottom:0px;" invisible="not error_message or blocking_level == 'warning'">
                     <div class="o_row">
                         <field name="error_message"/>
-                        <button name="process_now" string="retry" class="oe_highlight" type="object"/>
+                        <button name="process_now" string="retry" class="oe_link ps-0 text-decoration-underline" type="object"/>
                     </div>
                 </div>
                 <sheet>
                     <div class="oe_title">
-                        <h1>
-                            <field name="display_name" readonly="1"/>
+                        <h1 invisible="not name">
+                            <field name="name" readonly="1"/>
                         </h1>
                     </div>
-                    <group>
-                     <group>
-                        <field string="Invoice" name="account_move_id"/>
-                        <field name="type_id" domain="[('code', 'in', ('INV', 'BIL', 'BOE'))]"/>
-                     </group>
-                     <group>
-                        <field name="partner_id" string="Customer" />
-                        <field name="date"/>
-                        <field name="state_id"/>
-                     </group>
+                    <group name="document_details" string="Document Details">
+                        <group>
+                            <field name="account_move_id" invisible="1"/>
+                            <field name="type_id" domain="[('code', 'in', ('INV', 'BIL', 'BOE'))]"/>
+                        </group>
+                        <group>
+                            <field name="ewaybill_date" invisible="not ewaybill_date"/>
+                            <field name="document_number"/>
+                            <field name="document_date"/>
+                        </group>
                     </group>
-                    <group>
+                    <group name="partners" string="Address Details">
+                        <group>
+                            <field name="partner_bill_to_id"/>
+                            <field name="partner_bill_from_id"/>
+                        </group>
+                        <group>
+                            <field name="partner_ship_to_id"/>
+                            <field name="partner_ship_from_id"/>
+                        </group>
                     </group>
-                    <group name="part-b">
+                    <group name="part_b" string="Transportation Details">
                         <group>
                             <field name="mode"/>
                             <field name="vehicle_type" invisible="mode != '1'" required="mode == '1'"/>

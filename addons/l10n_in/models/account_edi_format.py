@@ -46,7 +46,6 @@ class AccountEdiFormat(models.Model):
 
     @api.model
     def _l10n_in_validate_partner(self, partner):
-        self.ensure_one()
         message = []
         if not re.match("^.{3,100}$", partner.street or ""):
             message.append(_("\n- Street required min 3 and max 100 characters"))

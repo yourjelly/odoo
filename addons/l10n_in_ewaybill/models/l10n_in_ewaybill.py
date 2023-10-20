@@ -38,19 +38,21 @@ class Ewaybill(models.Model):
     account_move_id = fields.Many2one("account.move", store=True)
     account_move_line_ids = fields.One2many("account.move.line", related="account_move_id.invoice_line_ids")
 
-    document_date = fields.Datetime("Document Date", compute="_compute_document_date")
-    company_id = fields.Many2one("res.company", compute="_compute_company_id")
+    document_date = fields.Datetime("Document Date", compute="_compute_document_details")
+    document_number = fields.Char("Document", compute="_compute_document_details")
+    company_id = fields.Many2one("res.company", compute="_compute_document_details")
+    is_overseas = fields.Boolean("Is Overseas", compute="_compute_document_details")
     
     supply_type = fields.Selection(string="Supply Type", compute="_compute_supply_type",
         selection=[
             ("O", "Outward"),
             ("I", "Inward")
         ])
-    is_overseas = fields.boolean("Is Overseas", compute="_compute_document_details")
-    partner_bill_to_id = fields.Many2one("res.partner", string='Bill To', compute="_compute_document_details")
-    partner_bill_from_id = fields.Many2one("res.partner", string='Bill From', compute="_compute_document_details")
-    partner_ship_to_id = fields.Many2one('res.partner', string='Ship To', compute='_compute_partner_ship_details', store=True, readonly=False)
-    partner_ship_from_id = fields.Many2one("res.partner", string='Ship From', compute="_compute_partner_ship_details", store=True, readonly=False)
+
+    partner_bill_to_id = fields.Many2one("res.partner", string='Bill To', compute="_compute_document_partners_details", store=True, readonly=False)
+    partner_bill_from_id = fields.Many2one("res.partner", string='Bill From', compute="_compute_document_partners_details", store=True, readonly=False)
+    partner_ship_to_id = fields.Many2one('res.partner', string='Ship To', compute='_compute_document_partners_details', store=True, readonly=False)
+    partner_ship_from_id = fields.Many2one("res.partner", string='Ship From', compute="_compute_document_partners_details", store=True, readonly=False)
 
     state = fields.Selection(string='Status', required=True, readonly=True, copy=False, tracking=True, default='pending',
         selection=[
@@ -60,8 +62,6 @@ class Ewaybill(models.Model):
             ('to_cancel', 'To Cancel'),
             ('cancel', 'Cancelled'),
         ])
-    state_id = fields.Many2one('res.country.state', string="Place of supply", compute="_compute_state_id", store=True, readonly=False)
-
     # Transaction Details
     type_id = fields.Many2one("l10n.in.ewaybill.type", "E-waybill Document Type", tracking=True)
     sub_type_code = fields.Char(related="type_id.sub_type_code")
@@ -85,11 +85,11 @@ class Ewaybill(models.Model):
 
     # Document number and date required in case of transportation mode is Rail, Air or Ship.
     transportation_doc_no = fields.Char(
-        string="E-waybill Document Number",
+        string="Transporter's Doc No",
         help="""Transport document number. If it is more than 15 chars, last 15 chars may be entered""",
         copy=False, tracking=True)
     transportation_doc_date = fields.Date(
-        string="Document Date",
+        string="Transporter's Doc Date",
         help="Date on the transporter document",
         copy=False,
         tracking=True)
@@ -125,30 +125,35 @@ class Ewaybill(models.Model):
             ewaybill.is_overseas = False
             account_move_id = ewaybill.account_move_id
             if account_move_id:
+                is_purchase = account_move_id.is_purchase_document(include_receipts=True)
+                if is_purchase:
+                    ewaybill.document_number = account_move_id.ref
+                else:
+                    ewaybill.document_number = account_move_id.name
                 ewaybill.company_id = account_move_id.company_id
                 ewaybill.document_date = account_move_id.invoice_date
-
                 if account_move_id.l10n_in_gst_treatment in ('overseas', 'special_economic_zone'):
                     ewaybill.is_overseas = True
 
+    @api.depends('account_move_id')
+    def _compute_document_partners_details(self):
+        for ewaybill in self:
+            ewaybill.partner_bill_to_id = False
+            ewaybill.partner_bill_from_id = False
+            ewaybill.partner_ship_to_id = False
+            ewaybill.partner_ship_from_id = False
+            account_move_id = ewaybill.account_move_id
+            if account_move_id:
                 if ewaybill.account_move_id.is_inbound():
                     ewaybill.partner_bill_to_id = account_move_id.partner_id.commercial_partner_id
                     ewaybill.partner_bill_from_id = account_move_id.company_id.partner_id
+                    ewaybill.partner_ship_to_id = account_move_id.partner_shipping_id
+                    ewaybill.partner_ship_from_id = account_move_id._l10n_in_get_warehouse_address() or account_move_id.company_id.partner_id
                 else:
                     ewaybill.partner_bill_to_id = account_move_id.company_id.partner_id
                     ewaybill.partner_bill_from_id = account_move_id.partner_id.commercial_partner_id
-
-    @api.append('account_move_id')
-    def _compute_partner_ship_details(self):
-        for ewaybill in self:
-            ewaybill.partner_ship_to_id = ewaybill.account_move_id.partner_shipping_id
-            ewaybill.partner_ship_from_id = ewaybill.account_move_id.partner_id
-            if ewaybill.account_move_id.is_inbound():
-                ewaybill.partner_ship_to_id = account_move_id.partner_shipping_id
-                ewaybill.partner_ship_from_id = account_move_id._l10n_in_get_warehouse_address()
-            else:
-                ewaybill.partner_ship_to_id = account_move_id._l10n_in_get_warehouse_address()
-                ewaybill.partner_ship_from_id = account_move_id.partner_shipping_id
+                    ewaybill.partner_ship_to_id = account_move_id._l10n_in_get_warehouse_address() or account_move_id.company_id.partner_id
+                    ewaybill.partner_ship_from_id = account_move_id.partner_shipping_id
 
     @api.depends('state')
     def _compute_content(self):
@@ -156,13 +161,32 @@ class Ewaybill(models.Model):
             res = b''
             base = ewaybill._get_ewaybill_mode()
             if base == "direct":
-                res = base64.b64encode(ewaybill._l10n_in_edi_ewaybill_json_invoice_content(ewaybill))
+                res = base64.b64encode(
+                    json.dumps(ewaybill._ewaybill_generate_direct_json()).encode()
+                )
+            print(res)
             ewaybill.content = res
 
-    def _l10n_in_edi_ewaybill_json_invoice_content(self, move):
-        return json.dumps(self._l10n_in_edi_ewaybill_generate_json(move)).encode()
+    @api.depends('name', 'state')
+    def _compute_display_name(self):
+        for account in self:
+            if self.name:
+                account.display_name = self.name
+            else:
+                account.display_name = _('Pending')
 
-    def action_export_xml(self):
+    def view_related_document(self):
+        self.ensure_one()
+        if account_move_id:
+            return {
+                'type': 'ir.actions.act_window',
+                'name': _('Related Document'),
+                'res_model': 'account.move',
+                'view_mode': 'form',
+                'res_id': self.account_move_id.id,
+            }
+
+    def action_export_json(self):
         self.ensure_one()
         return {
             'type': 'ir.actions.act_url',
@@ -183,10 +207,10 @@ class Ewaybill(models.Model):
             if ewaybill.state != "pending":
                 state = dict(self._fields['state'].get_values(ewaybill.env))[ewaybill.state]
                 raise UserError(_("E-waybill can't generated from %s state", state))
-            errors = self._check_ewaybill_configuration(ewaybill)
+            errors = ewaybill._check_ewaybill_configuration()
             if errors:
-                raise UserError(_("Invalid ewaybill configuration:\n\n%s") % '\n'.join(errors))
-            ewaybill.state = 'to_send'
+                raise UserError('\n'.join(errors))
+            ewaybill.state = 'to_generate'
         if self:
             self.env.ref('l10n_in_ewaybill.ir_cron_process_ewaybill')._trigger()
 
@@ -216,35 +240,39 @@ class Ewaybill(models.Model):
     def _check_ewaybill_transportation_details(self):
         self.ensure_one()
         error_message = []
+        base = self._get_ewaybill_mode()
+        if not self.type_id and base == "direct":
+            error_message.append(_("- Document Type is required"))
         if not self.mode:
             error_message.append(_("- Transportation Mode"))
-        elif self.mode == "0" and not self.l10n_in_transporter_id:
+        elif self.mode == "0" and not self.transporter_id:
             error_message.append(_("- Transporter is required when E-waybill is managed by transporter"))
-        elif self.mode == "0" and self.l10n_in_transporter_id and not self.l10n_in_transporter_id.vat:
+        elif self.mode == "0" and self.transporter_id and not self.transporter_id.vat:
             error_message.append(_("- Selected Transporter is missing GSTIN"))
         elif self.mode == "1":
-            if not self.l10n_in_vehicle_no and self.l10n_in_vehicle_type:
+            if not self.vehicle_no and self.vehicle_type:
                 error_message.append(_("- Vehicle Number and Type is required when Transportation Mode is By Road"))
         elif self.mode in ("2", "3", "4"):
             if not self.transportation_doc_no and self.transportation_doc_date:
                 error_message.append(_("- Transport document number and date is required when Transportation Mode is Rail,Air or Ship"))
         if error_message:
-            error_message.insert(0, _("The following information are missing on the invoice (see eWayBill tab):"))
+            error_message.insert(0, _("The following information are missing"))
         return error_message
 
     def _check_ewaybill_partners(self):
         self.ensure_one()
         error_message = []
-        error_message += self._l10n_in_validate_partner(move.partner_bill_to_id)
-        error_message += self._l10n_in_validate_partner(move.partner_bill_from_id)
-        error_message += self._l10n_in_validate_partner(move.partner_ship_to_id)
-        error_message += self._l10n_in_validate_partner(move.partner_ship_to_id)
+        AccountEdiFormat = self.env['account.edi.format']
+        error_message += AccountEdiFormat._l10n_in_validate_partner(self.partner_bill_to_id)
+        error_message += AccountEdiFormat._l10n_in_validate_partner(self.partner_bill_from_id)
+        error_message += AccountEdiFormat._l10n_in_validate_partner(self.partner_ship_to_id)
+        error_message += AccountEdiFormat._l10n_in_validate_partner(self.partner_ship_to_id)
         return error_message
 
     def _check_ewaybill_document_number(self):
         self.ensure_one()
         if self.account_move_id:
-            if not re.match("^.{1,16}$", self.account_move_id.ref or self.account_move_id.name):
+            if not re.match("^.{1,16}$", self.document_number):
                 is_purchase = move.account_move_id.is_purchase_document(include_receipts=True)
                 return[_("%s number should be set and not more than 16 characters",
                     is_purchase and _("Bill Reference") or _("Invoice"))]
@@ -254,7 +282,8 @@ class Ewaybill(models.Model):
         error_message = []
         if self.account_move_id:
             goods_line_is_available = False
-            for line in self.account_move_id.account_move_line_ids.filtered(lambda line: not line.display_type in ('line_section', 'line_note', 'rounding') and not line.product_id.type != "service"):
+            print(self.account_move_id.invoice_line_ids)
+            for line in self.account_move_id.invoice_line_ids.filtered(lambda line: not line.display_type in ('line_section', 'line_note', 'rounding') and line.product_id.type != "service"):
                 goods_line_is_available = True
                 if line.product_id:
                     hsn_code = self._l10n_in_edi_extract_digits(line.product_id.l10n_in_hsn_code)
@@ -267,27 +296,24 @@ class Ewaybill(models.Model):
                 else:
                     error_message.append(_("Product is required to get HSN code"))
             if not goods_line_is_available:
-                error_message.append(_('You need at least one product having "Product Type" as stockable or consumable.'))
+                error_message.append(_('You need at least one product having "Product Type" as stockable or consumable'))
         return error_message
 
     def _check_ewaybill_configuration(self):
+        self.ensure_one()
         error_message = []
         base = self._get_ewaybill_mode()
-        if not move.type_id and base == "direct":
-            error_message.append(_("- Document Type"))
         error_message += self._check_ewaybill_transportation_details()
         # only send this details if this is direct mode
         if base == "direct":
             error_message += self._check_ewaybill_partners()
             error_message += self._check_ewaybill_document_number()
             error_message += self._check_lines()
-        
-        if error_message:
-            error_message.insert(0, _("Unable to send the Ewaybill."))
         return error_message
 
     def _write_error(self, error_message, blocking_level='error'):
         self.ensure_one()
+        print(self, error_message, blocking_level)
         self.write({
             'error_message': error_message,
             'blocking_level': blocking_level,
@@ -300,6 +326,7 @@ class Ewaybill(models.Model):
             'error_message': False,
             'blocking_level': False,
         })
+        print(self, response_vals)
         self.write(response_vals)
 
 
@@ -307,8 +334,8 @@ class Ewaybill(models.Model):
         self.ensure_one()
         cancel_json = {
             "ewbNo": self.name,
-            "cancelRsnCode": int(self.l10n_in_edi_cancel_reason),
-            "CnlRem": self.l10n_in_edi_cancel_remarks,
+            "cancelRsnCode": int(self.edi_cancel_reason),
+            "CnlRem": self.edi_cancel_remarks,
         }
         ewb_api = EWayBillApi(self.company_id)
         response = ewb_api._ewaybill_cancel(cancel_json)
@@ -352,14 +379,14 @@ class Ewaybill(models.Model):
             self._write_response({'state': 'cancel'})
 
     def _process_ewaybill_cron(self, job_count=None):
-        ewaybills_to_process = self.env['l10n.in.ewaybill'].search([('state', 'in', ['to_send', 'to_cancel'])], limit=job_count)
+        ewaybills_to_process = self.env['l10n.in.ewaybill'].search([('state', 'in', ['to_generate', 'to_cancel'])], limit=job_count)
         ewaybills_to_process._process_ewaybill(with_commit=True)
         # If job_count and record count is same then we assume that there are more records to process
         if job_count and len(ewaybills_to_process) == job_count:
             self.env.ref('l10n_in_ewaybill.ir_cron_process_ewaybill')._trigger()
 
     def _process_ewaybill(self, with_commit=False):
-        for ewaybill in self.filtered(lambda ewaybill: ewaybill.state in ['to_send', 'to_cancel'])
+        for ewaybill in self.filtered(lambda ewaybill: ewaybill.state in ['to_generate', 'to_cancel']):
             try:
                 with self.env.cr.savepoint(flush=False):
                     self._cr.execute('SELECT * FROM l10n_in_ewaybill WHERE id IN %s FOR UPDATE NOWAIT', [tuple(ewaybill.ids)])
@@ -371,7 +398,7 @@ class Ewaybill(models.Model):
                     continue
                 else:
                     raise e
-            if self.state == "to_send":
+            if self.state == "to_generate":
                 mode = self._get_ewaybill_mode()
                 method = "_generate_ewaybill_%s" % mode
                 generate_ewaybill_function = getattr(self, method)
@@ -388,7 +415,9 @@ class Ewaybill(models.Model):
         if not self.account_move_id or self._get_ewaybill_mode() != "direct":
             return
         ewb_api = EWayBillApi(self.company_id)
+        generate_json = self._ewaybill_generate_direct_json()
         response = ewb_api._ewaybill_generate(generate_json)
+        print(response)
         if response.get("error"):
             error = response["error"]
             error_codes = [e.get("code") for e in error]
@@ -423,12 +452,12 @@ class Ewaybill(models.Model):
                 self._write_error(error_message, blocking_level)
         if not response.get("error"):
             response_data = response_data.get("data")
+            print(response_data)
             self._write_response({
                 'name': response_data.get("EwbNo"),
                 'ewaybill_date': response_data.get('EwbDtTm'),
                 'ewaybill_expiry_date': response_data.get('ValidUpto')
             })
-        return res
 
     def _l10n_in_edi_ewaybill_get_error_message(self, code):
         error_message = ERROR_CODES.get(code)
@@ -476,6 +505,8 @@ class Ewaybill(models.Model):
         partner_bill_from_id = self.partner_bill_from_id
         partner_ship_to_id = self.partner_ship_to_id
         partner_ship_from_id = self.partner_ship_from_id
+        AccountEdiFormat = self.env['account.edi.format']
+        extract_digits =  AccountEdiFormat._l10n_in_edi_extract_digits
         json_payload = {
             # document details
             "supplyType": self.supply_type,
@@ -508,8 +539,8 @@ class Ewaybill(models.Model):
         }
         if self.mode == "0":
             json_payload.update({
-                "transporterId": self.l10n_in_transporter_id.vat or "",
-                "transporterName": self.l10n_in_transporter_id.name or "",
+                "transporterId": self.transporter_id.vat or "",
+                "transporterName": self.transporter_id.name or "",
             })
         if self.mode in ("2", "3", "4"):
             json_payload.update({
@@ -525,47 +556,46 @@ class Ewaybill(models.Model):
                 "vehicleType": self.vehicle_type or "",
             })
         if self.account_move_id:
-            account_edi = self.env['account.edi.format']
             sign = self.account_move_id.is_inbound() and -1 or 1
-            extract_digits = self._l10n_in_edi_extract_digits
-            tax_details = account_edi._l10n_in_prepare_edi_tax_details(self.account_move_id)
-            tax_details_by_code = account_edi._get_l10n_in_tax_details_by_line_code(tax_details.get("tax_details", {}))
+            tax_details = AccountEdiFormat._l10n_in_prepare_edi_tax_details(self.account_move_id)
+            tax_details_by_code = AccountEdiFormat._get_l10n_in_tax_details_by_line_code(tax_details.get("tax_details", {}))
             invoice_line_tax_details = tax_details.get("tax_details_per_record")
+            round_value = AccountEdiFormat._l10n_in_round_value
             json_payload.update({
                 "itemList": [
                     self._get_ewaybill_line_details_invoice(line, line_tax_details, sign)
                     for line, line_tax_details in invoice_line_tax_details.items()
                 ],
-                "totalValue": account_edi._l10n_in_round_value(tax_details.get("base_amount")),
-                "cgstValue": account_edi._l10n_in_round_value(tax_details_by_code.get("cgst_amount", 0.00)),
-                "sgstValue": account_edi._l10n_in_round_value(tax_details_by_code.get("sgst_amount", 0.00)),
-                "igstValue": account_edi._l10n_in_round_value(tax_details_by_code.get("igst_amount", 0.00)),
-                "cessValue": account_edi._l10n_in_round_value(tax_details_by_code.get("cess_amount", 0.00)),
-                "cessNonAdvolValue": account_edi._l10n_in_round_value(tax_details_by_code.get("cess_non_advol_amount", 0.00)),
-                "otherValue": account_edi._l10n_in_round_value(tax_details_by_code.get("other_amount", 0.00)),
-                "totInvValue": account_edi._l10n_in_round_value((tax_details.get("base_amount") + tax_details.get("tax_amount"))),
+                "totalValue": round_value(tax_details.get("base_amount")),
+                "cgstValue": round_value(tax_details_by_code.get("cgst_amount", 0.00)),
+                "sgstValue": round_value(tax_details_by_code.get("sgst_amount", 0.00)),
+                "igstValue": round_value(tax_details_by_code.get("igst_amount", 0.00)),
+                "cessValue": round_value(tax_details_by_code.get("cess_amount", 0.00)),
+                "cessNonAdvolValue": round_value(tax_details_by_code.get("cess_non_advol_amount", 0.00)),
+                "otherValue": round_value(tax_details_by_code.get("other_amount", 0.00)),
+                "totInvValue": round_value((tax_details.get("base_amount") + tax_details.get("tax_amount"))),
             })
+            print(json_payload)
         return json_payload
 
     def _get_ewaybill_line_details_invoice(self, line, line_tax_details, sign):
-        account_edi = self.env['account.edi.format']
-        extract_digits = 
-        tax_details_by_code = account_edi._get_l10n_in_tax_details_by_line_code(line_tax_details.get("tax_details", {}))
+        AccountEdiFormat = self.env['account.edi.format']
+        tax_details_by_code = AccountEdiFormat._get_l10n_in_tax_details_by_line_code(line_tax_details.get("tax_details", {}))
         line_details = {
             "productName": line.product_id.name,
-            "hsnCode": account_edi._l10n_in_edi_extract_digits(line.product_id.l10n_in_hsn_code),
+            "hsnCode": AccountEdiFormat._l10n_in_edi_extract_digits(line.product_id.l10n_in_hsn_code),
             "productDesc": line.name,
             "quantity": line.quantity,
             "qtyUnit": line.product_id.uom_id.l10n_in_code and line.product_id.uom_id.l10n_in_code.split("-")[0] or "OTH",
-            "taxableAmount": account_edi._l10n_in_round_value(line.balance * sign),
+            "taxableAmount": AccountEdiFormat._l10n_in_round_value(line.balance * sign),
         }
         if tax_details_by_code.get("igst_rate") or (self.partner_bill_to_id.state_id != self.partner_bill_from_id.state_id):
-            line_details.update({"igstRate": account_edi._l10n_in_round_value(tax_details_by_code.get("igst_rate", 0.00))})
+            line_details.update({"igstRate": AccountEdiFormat._l10n_in_round_value(tax_details_by_code.get("igst_rate", 0.00))})
         else:
             line_details.update({
-                "cgstRate": account_edi._l10n_in_round_value(tax_details_by_code.get("cgst_rate", 0.00)),
-                "sgstRate": account_edi._l10n_in_round_value(tax_details_by_code.get("sgst_rate", 0.00)),
+                "cgstRate": AccountEdiFormat._l10n_in_round_value(tax_details_by_code.get("cgst_rate", 0.00)),
+                "sgstRate": AccountEdiFormat._l10n_in_round_value(tax_details_by_code.get("sgst_rate", 0.00)),
             })
         if tax_details_by_code.get("cess_rate"):
-            line_details.update({"cessRate": account_edi._l10n_in_round_value(tax_details_by_code.get("cess_rate"))})
+            line_details.update({"cessRate": AccountEdiFormat._l10n_in_round_value(tax_details_by_code.get("cess_rate"))})
         return line_details

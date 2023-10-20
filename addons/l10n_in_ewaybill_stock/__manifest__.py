@@ -20,6 +20,6 @@
         "report/ewaybill_report_views.xml",
         "report/ewaybill_report.xml",
     ],
-    "installable": True,
+    "installable": False,
     "license": "LGPL-3",
 }
