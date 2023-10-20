@@ -1969,32 +1969,40 @@ class BaseModel(metaclass=MetaModel):
             raise ValueError(f"Granularity set on a no-datetime field or property: {groupby_spec!r}")
 
         sql_expr = self._field_to_sql(self._table, access_fname, query)
-        if field.type == 'datetime' and self.env.context.get('tz') in pytz.all_timezones_set:
-            sql_expr = SQL("timezone(%s, timezone('UTC', %s))", self.env.context['tz'], sql_expr)
 
         if field.type in ('datetime', 'date') or (field.type == 'properties' and granularity):
             if not granularity:
                 raise ValueError(f"Granularity not set on a date(time) field: {groupby_spec!r}")
-            if granularity not in READ_GROUP_TIME_GRANULARITY:
-                raise ValueError(f"Granularity specification isn't correct: {granularity!r}")
-
-            if granularity == 'week':
-                # first_week_day: 0=Monday, 1=Tuesday, ...
-                first_week_day = int(get_lang(self.env).week_start) - 1
-                days_offset = first_week_day and 7 - first_week_day
-                interval = f"-{days_offset} DAY"
-                sql_expr = SQL(
-                    "(date_trunc('week', %s::timestamp - INTERVAL %s) + INTERVAL %s)",
-                    sql_expr, interval, interval,
-                )
-            else:
-                sql_expr = SQL("date_trunc(%s, %s::timestamp)", granularity, sql_expr)
-
-            if field.type == 'date':
-                sql_expr = SQL("%s::date", sql_expr)
+            sql_expr = self._read_group_date_trunk(sql_expr, granularity, field.type)
 
         elif field.type == 'boolean':
             sql_expr = SQL("COALESCE(%s, FALSE)", sql_expr)
+
+        return sql_expr
+
+    def _read_group_date_trunk(self, sql_expr: SQL, granularity: str, type_: str = 'datetime'):
+        assert type_ in ('datetime', 'date', 'properties') and granularity
+
+        if granularity not in READ_GROUP_TIME_GRANULARITY:
+            raise ValueError(f"Granularity specification isn't correct: {granularity!r}")
+
+        if type_ == 'datetime' and self.env.context.get('tz') in pytz.all_timezones_set:
+            sql_expr = SQL("timezone(%s, timezone('UTC', %s))", self.env.context['tz'], sql_expr)
+
+        if granularity == 'week':
+            # first_week_day: 0=Monday, 1=Tuesday, ...
+            first_week_day = int(get_lang(self.env).week_start) - 1
+            days_offset = first_week_day and 7 - first_week_day
+            interval = f"-{days_offset} DAY"
+            sql_expr = SQL(
+                "(date_trunc('week', %s::timestamp - INTERVAL %s) + INTERVAL %s)",
+                sql_expr, interval, interval,
+            )
+        else:
+            sql_expr = SQL("date_trunc(%s, %s::timestamp)", granularity, sql_expr)
+
+        if type_ == 'date':
+            sql_expr = SQL("%s::date", sql_expr)
 
         return sql_expr
 

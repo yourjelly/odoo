@@ -73,15 +73,11 @@ class ReportProjectTaskBurndownChart(models.AbstractModel):
         date_groupby = [g for g in groupby if g.startswith('date')][0]
 
         # Computes the interval which needs to be used in the `SQL` depending on the date group by interval.
-        interval = date_groupby.split(':')[1]
-        sql_interval = f'1 {interval}' if interval != 'quarter' else '3 month'
+        granularity = date_groupby.split(':')[1]
+        interval = '3 month' if granularity == 'quarter' else f'1 {granularity}'
 
-        simple_date_groupby_sql = self._read_group_groupby(f"date:{interval}", main_query)
-        # Removing unexistant table name from the expression
-        simple_date_groupby_sql = self.env.cr.mogrify(simple_date_groupby_sql).decode()
-        simple_date_groupby_sql = simple_date_groupby_sql.replace('"project_task_burndown_chart_report".', '')
-
-        burndown_chart_sql = SQL("""
+        burndown_chart_sql = SQL(
+            """
             (
               WITH task_ids AS %(select_project_tasks)s,
               all_stage_task_moves AS (
@@ -173,11 +169,11 @@ class ReportProjectTaskBurndownChart(models.AbstractModel):
                          JOIN LATERAL generate_series(t.date_begin, t.date_end-INTERVAL '1 day', %(interval)s)
                             AS date ON TRUE
             )
-        """,
+            """,
             select_project_tasks=project_task_query.subselect(),
-            date_begin=SQL(simple_date_groupby_sql.replace('"date"', '"date_begin"')),
-            date_end=SQL(simple_date_groupby_sql.replace('"date"', '"date_end"')),
-            interval=sql_interval,
+            date_begin=self._read_group_date_trunk(SQL.identifier('date_begin'), granularity),
+            date_end=self._read_group_date_trunk(SQL.identifier('date_end'), granularity),
+            interval=interval,
             field_id=field_id,
             to_flush={
                 'project.task': ['active', 'allocated_hours', 'create_date', 'project_id', 'stage_id'],
