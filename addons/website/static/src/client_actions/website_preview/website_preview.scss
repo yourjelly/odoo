@@ -99,9 +99,8 @@ header {
     z-index: $zindex-dropdown - 1 !important;
 }
 
-.o_ace_view_editor_wrapper {
+.o_resource_editor_wrapper {
     @include o-position-absolute($o-navbar-height, 0, 0);
-    position: fixed;
     z-index: $zindex-modal;
 
     .o_website_fullscreen & {

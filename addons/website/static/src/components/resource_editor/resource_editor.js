@@ -10,7 +10,7 @@ import { sortBy } from "@web/core/utils/arrays";
 import { KeepLast } from "@web/core/utils/concurrency";
 import { useService } from "@web/core/utils/hooks";
 
-import { AceEditorWarningOverlay } from "../ace_warning/ace_warning";
+import { ResourceEditorWarningOverlay } from "./resource_editor_warning";
 import { checkSCSS, checkXML, formatXML } from "./utils";
 
 import { Component, onWillUnmount, onWillStart, reactive, useRef, useState } from "@odoo/owl";
@@ -32,16 +32,16 @@ CheckableDropdownItem.props = {
     },
 };
 
-export class AceEditor extends Component {
+export class ResourceEditor extends Component {
     static components = {
-        AceEditorWarningOverlay,
+        ResourceEditorWarningOverlay,
         CodeEditor,
         Dropdown,
         DropdownItem,
         CheckableDropdownItem,
         SelectMenu,
     };
-    static template = "website.AceEditor";
+    static template = "website.ResourceEditor";
     static props = {
         close: { type: Function, optional: true },
     };

@@ -32,7 +32,7 @@ wTourUtils.registerWebsitePreviewTour('html_editor_multiple_templates', {
             content: "add something in the generic view",
             trigger: 'div.ace_line .ace_xml:contains("Generic")',
             run: function () {
-                ace.edit(document.querySelector('#ace-view-editor div')).getSession().insert({row: 3, column: 1}, '<p>somenewcontent</p>\n');
+                ace.edit(document.querySelector('#resource-editor div')).getSession().insert({row: 3, column: 1}, '<p>somenewcontent</p>\n');
             },
         },
         // 3. Edit oe_structure specific view
@@ -43,24 +43,24 @@ wTourUtils.registerWebsitePreviewTour('html_editor_multiple_templates', {
         },
         {
             content: "open file selector menu",
-            trigger: ".o_ace_view_editor .o_select_menu_toggler",
+            trigger: ".o_resource_editor .o_select_menu_toggler",
         },
         {
             content: "open oe_structure_test_ui view",
-            trigger: ".o_ace_view_editor .o_select_menu_item:contains(oe_structure_test_ui)",
+            trigger: ".o_resource_editor .o_select_menu_item:contains(oe_structure_test_ui)",
         },
         {
             content: "add something in the oe_structure specific view",
-            extra_trigger: '.o_ace_view_editor .o_select_menu_toggler:contains("oe_structure_test_ui")',
+            extra_trigger: '.o_resource_editor .o_select_menu_toggler:contains("oe_structure_test_ui")',
             trigger: 'div.ace_line .ace_xml:contains("s_cover")',
             run: function () {
-                ace.edit(document.querySelector('#ace-view-editor div')).getSession().insert({row: 2, column: 1}, '<p>anothernewcontent</p>\n');
+                ace.edit(document.querySelector('#resource-editor div')).getSession().insert({row: 2, column: 1}, '<p>anothernewcontent</p>\n');
             },
         },
         {
             content: "save the html editor",
             extra_trigger: 'div.ace_line .ace_xml:contains("anothernewcontent")',
-            trigger: ".o_ace_view_editor button:contains(Save)",
+            trigger: ".o_resource_editor button:contains(Save)",
         },
         {
            content: "check that the page has both modification",
@@ -88,15 +88,15 @@ wTourUtils.registerWebsitePreviewTour('test_html_editor_scss', {
         },
         {
             content: "open type switcher",
-            trigger: '.o_ace_type_switcher button',
+            trigger: '.o_resource_editor_type_switcher button',
         },
         {
             content: "select scss files",
-            trigger: '.o_ace_type_switcher .dropdown-item:contains("SCSS")',
+            trigger: '.o_resource_editor_type_switcher .dropdown-item:contains("SCSS")',
         },
         {
             content: "select 'user_custom_rules'",
-            trigger: '.o_ace_view_editor .o_select_menu_toggler:contains("user_custom_rules")',
+            trigger: '.o_resource_editor .o_select_menu_toggler:contains("user_custom_rules")',
             run: () => {},
         },
         // 2. Edit that file and ensure it was saved then reset it
@@ -104,13 +104,13 @@ wTourUtils.registerWebsitePreviewTour('test_html_editor_scss', {
             content: "add some scss content in the file",
             trigger: 'div.ace_line .ace_comment:contains("footer {")',
             run: function () {
-                ace.edit(document.querySelector('#ace-view-editor div')).getSession().insert({row: 2, column: 0}, `${adminCssModif}\n`);
+                ace.edit(document.querySelector('#resource-editor div')).getSession().insert({row: 2, column: 0}, `${adminCssModif}\n`);
             },
         },
         {
             content: "save the html editor",
             extra_trigger: `div.ace_line:contains("${adminCssModif}")`,
-            trigger: ".o_ace_view_editor_title button:contains(Save)",
+            trigger: ".o_resource_editor_title button:contains(Save)",
         },
         {
             content: "check that the scss modification got applied",
@@ -120,7 +120,7 @@ wTourUtils.registerWebsitePreviewTour('test_html_editor_scss', {
         },
         {
             content: "reset view (after reload, html editor should have been reopened where it was)",
-            trigger: '#ace-view-id button:contains(Reset)',
+            trigger: '#resource-editor-id button:contains(Reset)',
         },
         {
             content: "confirm reset warning",
@@ -138,13 +138,13 @@ wTourUtils.registerWebsitePreviewTour('test_html_editor_scss', {
             content: "add some scss content in the file",
             trigger: 'div.ace_line .ace_comment:contains("footer {")',
             run: function () {
-                ace.edit(document.querySelector('#ace-view-editor div')).getSession().insert({row: 2, column: 0}, `${adminCssModif}\n`);
+                ace.edit(document.querySelector('#resource-editor div')).getSession().insert({row: 2, column: 0}, `${adminCssModif}\n`);
             },
         },
         {
             content: "save the html editor",
             extra_trigger: `div.ace_line:contains("${adminCssModif}")`,
-            trigger: ".o_ace_view_editor_title button:contains(Save)",
+            trigger: ".o_resource_editor_title button:contains(Save)",
         },
         {
             content: "check that the scss modification got applied",
@@ -173,15 +173,15 @@ wTourUtils.registerWebsitePreviewTour('test_html_editor_scss_2', {
         },
         {
             content: "open type switcher",
-            trigger: '.o_ace_type_switcher button',
+            trigger: '.o_resource_editor_type_switcher button',
         },
         {
             content: "select scss files",
-            trigger: '.o_ace_type_switcher .dropdown-item:contains("SCSS")',
+            trigger: '.o_resource_editor_type_switcher .dropdown-item:contains("SCSS")',
         },
         {
             content: "select 'user_custom_rules'",
-            trigger: '.o_ace_view_editor .o_select_menu_toggler:contains("user_custom_rules")',
+            trigger: '.o_resource_editor .o_select_menu_toggler:contains("user_custom_rules")',
             run: () => {},
         },
         // 5. Edit that file and ensure it was saved then reset it
@@ -189,17 +189,17 @@ wTourUtils.registerWebsitePreviewTour('test_html_editor_scss_2', {
             content: "add some scss content in the file",
             trigger: `div.ace_line:contains("${adminCssModif}")`, // ensure the admin modification is here
             run: function () {
-                ace.edit(document.querySelector('#ace-view-editor div')).getSession().insert({row: 2, column: 0}, `${demoCssModif}\n`);
+                ace.edit(document.querySelector('#resource-editor div')).getSession().insert({row: 2, column: 0}, `${demoCssModif}\n`);
             },
         },
         {
             content: "save the html editor",
             extra_trigger: `div.ace_line:contains("${demoCssModif}")`,
-            trigger: ".o_ace_view_editor button:contains(Save)",
+            trigger: ".o_resource_editor button:contains(Save)",
         },
         {
             content: "reset view (after reload, html editor should have been reopened where it was)",
-            trigger: '#ace-view-id button:contains(Reset)',
+            trigger: '#resource-editor-id button:contains(Reset)',
             timeout: 30000, // SCSS compilation might take some time
         },
         {

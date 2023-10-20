@@ -8,10 +8,10 @@
         </xpath>
     </t>
     
-    <t t-name="website.AceEditor">
-        <div class="o_ace_view_editor w-100 h-100">
-            <div class="o_ace_view_editor_title">
-                <Dropdown class="'btn-group o_ace_type_switcher'" togglerClass="'btn btn-info'">
+    <t t-name="website.ResourceEditor">
+        <div class="o_resource_editor w-100 h-100">
+            <div class="o_resource_editor_title">
+                <Dropdown class="'btn-group o_resource_editor_type_switcher'" togglerClass="'btn btn-info'">
                     <t t-set-slot="toggler"><t t-esc="types[state.type]"/></t>
                     <t t-foreach="Object.keys(types)" t-as="type" t-key="type">
                         <DropdownItem onSelected="() => this.onFileTypeChange(type)">
@@ -19,20 +19,20 @@
                         </DropdownItem>
                     </t>
                 </Dropdown>
-                <SelectMenu t-props="selectMenuProps" class="'o_res_list'">
-                    <t t-call="website.AceEditor.Resource">
+                <SelectMenu t-props="selectMenuProps" class="'o_resource_editor_resource_list'">
+                    <t t-call="website.ResourceEditor.ResourceLabel">
                         <t t-set="resource" t-value="state.currentResource"/>
                         <t t-set="label" t-value="state.type === 'xml' ? resource.name : resource.label"/>
                     </t>
                     <t t-set-slot="choice" t-slot-scope="scope">
-                        <t t-call="website.AceEditor.Resource">
+                        <t t-call="website.ResourceEditor.ResourceLabel">
                             <t t-set="resource" t-value="state.resources[state.type][scope.data.value]"/>
                             <t t-set="label" t-value="scope.data.label"/>
                         </t>
                     </t>
                 </SelectMenu>
-                <label t-if="state.type === 'xml' and debug" class="o_include_option">
-                    <Dropdown class="'btn-group o_ace_type_switcher'" togglerClass="'btn btn-primary'">
+                <label t-if="state.type === 'xml' and debug" class="o_resource_editor_filter">
+                    <Dropdown class="'btn-group o_resource_editor_type_switcher'" togglerClass="'btn btn-primary'">
                         <t t-set-slot="toggler">Filter</t>
                         <t t-foreach="Object.keys(xmlFilters)" t-as="filter" t-key="filter">
                             <CheckableDropdownItem class="{ selected: state.xmlFilter === filter }" checked="state.xmlFilter === filter" onSelected="() => this.onFilterChange('xml', filter)">
@@ -41,8 +41,8 @@
                         </t>
                     </Dropdown>
                 </label>
-                <label t-if="state.type === 'scss' and debug" class="o_include_option">
-                    <Dropdown class="'btn-group o_ace_type_switcher'" togglerClass="'btn btn-primary'">
+                <label t-if="state.type === 'scss' and debug" class="o_resource_editor_filter">
+                    <Dropdown class="'btn-group o_resource_editor_type_switcher'" togglerClass="'btn btn-primary'">
                         <t t-set-slot="toggler">Filter</t>
                         <t t-foreach="Object.keys(scssFilters)" t-as="filter" t-key="filter">
                             <CheckableDropdownItem class="{ selected: state.scssFilter === filter }" checked="state.scssFilter === filter" onSelected="() => this.onFilterChange('scss', filter)">
@@ -56,7 +56,7 @@
                     <button class="btn btn-secondary" t-on-click="this.props.close">Close</button>
                 </div>
             </div>
-            <div t-if="state.currentResource" id="ace-view-id">
+            <div t-if="state.currentResource" id="resource-editor-id">
                 <div class="float-end">
                     <button t-if="state.type !== 'xml' and isCustomResource(state.currentResource.url)" type="button" class="btn btn-sm btn-danger" t-on-click="onReset">
                         <i class="fa fa-undo"/>
@@ -64,16 +64,22 @@
                     </button>
                     <button t-if="state.type === 'xml'" type="button" class="btn btn-sm btn-link" t-on-click="onFormat">Format</button>
                 </div>
-                <span class="o_ace_editor_resource_info" t-esc="resourceInfo"/>
+                <span class="o_resource_editor_resource_info" t-esc="resourceInfo"/>
             </div>
-            <div t-if="state.currentResource" id="ace-view-editor" t-ref="editor">
-                <CodeEditor class="'h-100'" value="state.currentResource.arch" sessionId="state.currentResource.id" mode="state.type === 'xml' ? 'qweb' : state.type" theme="'monokai'" onChange.bind="onEditorChange"/>
+            <div t-if="state.currentResource" id="resource-editor" t-ref="editor">
+                <CodeEditor
+                    class="'h-100'"
+                    value="state.currentResource.arch"
+                    sessionId="state.currentResource.id"
+                    mode="state.type === 'xml' ? 'qweb' : state.type"
+                    theme="'monokai'"
+                    onChange.bind="onEditorChange"/>
             </div>
         </div>
-        <AceEditorWarningOverlay/>
+        <ResourceEditorWarningOverlay/>
     </t>
 
-    <t t-name="website.AceEditor.Resource">
+    <t t-name="website.ResourceEditor.ResourceLabel">
         <i t-if="resource.customized or resource.dirty" t-att-class="{ 'fa fa-floppy-o mr8': true, 'text-warning': resource.dirty, 'text-success': resource.customized }"/>
         <t t-esc="label"/>
     </t>

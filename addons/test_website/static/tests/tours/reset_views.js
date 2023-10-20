@@ -39,13 +39,13 @@ wTourUtils.registerWebsitePreviewTour('test_reset_page_view_complete_flow_part1'
             content: "add a broken t-field in page DOM",
             trigger: 'div.ace_line .ace_xml:contains("placeholder")',
             run: function () {
-                ace.edit(document.querySelector('#ace-view-editor div')).getSession().insert({row: 4, column: 1}, '<t t-field="not.exist"/>\n');
+                ace.edit(document.querySelector('#resource-editor div')).getSession().insert({row: 4, column: 1}, '<t t-field="not.exist"/>\n');
             },
         },
         {
             content: "save the html editor",
             extra_trigger: '.ace_content:contains("not.exist")',
-            trigger: ".o_ace_view_editor button:contains(Save)",
+            trigger: ".o_resource_editor button:contains(Save)",
         },
         BROKEN_STEP
     ]
@@ -77,22 +77,22 @@ wTourUtils.registerWebsitePreviewTour('test_reset_page_view_complete_flow_part2'
         },
         {
             content: "select oe_structure view",
-            trigger: '.o_ace_view_editor_title .o_select_menu_toggler',
+            trigger: '.o_resource_editor_title .o_select_menu_toggler',
         },
         {
             content: "select oe_structure view",
-            trigger: '.o_ace_view_editor_title .o_select_menu_item:contains(Test Page View)',
+            trigger: '.o_resource_editor_title .o_select_menu_item:contains(Test Page View)',
         },
         {
             content: "add a broken t-field in page DOM",
             trigger: 'div.ace_line .ace_xml:contains("oe_structure_test_website_page")',
             run: function () {
-                ace.edit(document.querySelector('#ace-view-editor div')).getSession().insert({row: 4, column: 1}, '<t t-field="not.exist"/>\n');
+                ace.edit(document.querySelector('#resource-editor div')).getSession().insert({row: 4, column: 1}, '<t t-field="not.exist"/>\n');
             },
         },
         {
             content: "save the html editor",
-            trigger: ".o_ace_view_editor button:contains(Save)",
+            trigger: ".o_resource_editor button:contains(Save)",
         },
         BROKEN_STEP
     ]
