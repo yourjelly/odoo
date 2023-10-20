@@ -6,10 +6,11 @@
     "version": "1.0",
     "category": "Accounting/Localizations/EDI",
     "depends": [
-        "stock", "l10n_in", "l10n_in_edi", "l10n_in_edi_ewaybill",
+        "stock", "l10n_in", "l10n_in_edi", "l10n_in_ewaybill",
     ],
     "description": """Ewaybill for Stock Movement""",
     "data": [
+        'data/ewaybill_type_data.xml',
         "security/ir.model.access.csv",
         "wizard/ewaybill_update_part_b_views.xml",
         "wizard/ewaybill_update_transporter_views.xml",
@@ -20,6 +21,5 @@
         "report/ewaybill_report_views.xml",
         "report/ewaybill_report.xml",
     ],
-    "installable": False,
     "license": "LGPL-3",
 }

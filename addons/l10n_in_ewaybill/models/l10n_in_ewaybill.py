@@ -177,7 +177,7 @@ class Ewaybill(models.Model):
 
     def view_related_document(self):
         self.ensure_one()
-        if account_move_id:
+        if self.account_move_id:
             return {
                 'type': 'ir.actions.act_window',
                 'name': _('Related Document'),
@@ -400,6 +400,7 @@ class Ewaybill(models.Model):
                     raise e
             if self.state == "to_generate":
                 mode = self._get_ewaybill_mode()
+                print(mode)
                 method = "_generate_ewaybill_%s" % mode
                 generate_ewaybill_function = getattr(self, method)
                 if generate_ewaybill_function is None:
@@ -412,7 +413,8 @@ class Ewaybill(models.Model):
 
     def _generate_ewaybill_direct(self):
         self.ensure_one()
-        if not self.account_move_id or self._get_ewaybill_mode() != "direct":
+        # if not self.account_move_id or self._get_ewaybill_mode() != "direct":
+        if self._get_ewaybill_mode() != "direct":
             return
         ewb_api = EWayBillApi(self.company_id)
         generate_json = self._ewaybill_generate_direct_json()
@@ -506,7 +508,7 @@ class Ewaybill(models.Model):
         partner_ship_to_id = self.partner_ship_to_id
         partner_ship_from_id = self.partner_ship_from_id
         AccountEdiFormat = self.env['account.edi.format']
-        extract_digits =  AccountEdiFormat._l10n_in_edi_extract_digits
+        extract_digits = AccountEdiFormat._l10n_in_edi_extract_digits
         json_payload = {
             # document details
             "supplyType": self.supply_type,
