@@ -411,7 +411,7 @@
                             <span t-field="opp.probability" />%
                         </td>
                         <td>
-                            <span class="badge text-bg-info rounded-pill" title="Current stage of the opportunity" t-esc="opp.stage_id.name" />
+                            <span class="badge text-bg-info rounded-pill" title="Current stage of the opportunity" t-esc="opp.sudo().stage_id.name" />
                         </td>
                     </tr>
                 </tbody>
@@ -603,7 +603,7 @@
                                 <small class="me-2 mt-1 float-start"><b>Stage:</b></small>
                                 <div t-foreach="stages[::-1]" t-as="stage" class="float-start">
                                     <i t-if="not stage_first" class="oi oi-chevron-right ms-2 me-1 small" style="opacity: 0.5"/>
-                                    <button type="button" t-att-data="stage.id" t-att-opp="opportunity.id" t-attf-class="btn btn-sm px-2 opp-stage-button #{'btn-secondary' if opportunity.stage_id.name != stage.name else 'btn-primary disabled'}">
+                                    <button type="button" t-att-data="stage.id" t-att-opp="opportunity.id" t-attf-class="btn btn-sm px-2 opp-stage-button #{'btn-secondary' if opportunity.sudo().stage_id.name != stage.name else 'btn-primary disabled'}">
                                         <span t-field="stage.name"/>
                                     </button>
                                 </div>
