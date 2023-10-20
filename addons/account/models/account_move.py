@@ -686,7 +686,7 @@ class AccountMove(models.Model):
     def _compute_company_id(self):
         for move in self:
             if move.journal_id.company_id not in move.company_id.parent_ids:
-                move.company_id = (move.journal_id.company_id or self.env.company)._accessible_branches()[:1]
+                move.company_id = (move.journal_id.company_id or self.env.company)._accessible_branches()[0]
 
     @api.depends('move_type')
     def _compute_journal_id(self):
