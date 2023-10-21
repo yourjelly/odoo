@@ -35,3 +35,10 @@ class AccountFullReconcile(models.Model):
             moves_to_reverse._reverse_moves(default_values_list, cancel=True)
 
         return res
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        fulls = super().create(vals_list)
+        for full in fulls:
+            full.reconciled_line_ids.matching_number = str(full.id)
+        return fulls

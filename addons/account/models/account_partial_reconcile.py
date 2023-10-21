@@ -106,6 +106,7 @@ class AccountPartialReconcile(models.Model):
 
         # Retrieve the matching number to unlink.
         full_to_unlink = self.full_reconcile_id
+        all_reconciled = (self.debit_move_id + self.credit_move_id)._all_reconciled_lines()
 
         # Retrieve the CABA entries to reverse.
         moves_to_reverse = self.env['account.move'].search([('tax_cash_basis_rec_id', 'in', self.ids)])
@@ -126,7 +127,58 @@ class AccountPartialReconcile(models.Model):
             } for move in moves_to_reverse]
             moves_to_reverse._reverse_moves(default_values_list, cancel=True)
 
+        self._update_matching_number(all_reconciled)
         return res
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        partials = super().create(vals_list)
+        all_reconciled = (partials.debit_move_id + partials.credit_move_id)._all_reconciled_lines()
+        self._update_matching_number(all_reconciled)
+        return partials
+
+    def _update_matching_number(self, to_update):
+        self.env.cr.execute("""
+            WITH RECURSIVE partials (line_id, partial_id, direction) AS (
+                    SELECT line.id,
+                           COALESCE(credit.id, debit.id),
+                           CASE WHEN debit.id IS NOT NULL THEN 'debit' ELSE 'credit' END
+                      FROM account_move_line line
+                 LEFT JOIN account_partial_reconcile debit ON debit.credit_move_id = line.id
+                 LEFT JOIN account_partial_reconcile credit ON credit.debit_move_id = line.id
+                     WHERE COALESCE(credit.id, debit.id) IS NOT NULL
+                       AND line.full_reconcile_id IS NULL
+                       AND line.id = ANY(%s)
+
+                                                UNION
+
+                    SELECT p.line_id,
+                           CASE WHEN direction = 'debit' THEN debit.id ELSE credit.id END,
+                           CASE WHEN direction = 'debit' THEN 'credit' ELSE 'debit' END
+                      FROM partials p
+                 LEFT JOIN account_partial_reconcile this ON this.id = partial_id
+                 LEFT JOIN account_partial_reconcile debit ON this.debit_move_id = debit.debit_move_id
+                 LEFT JOIN account_partial_reconcile credit ON this.credit_move_id = credit.credit_move_id
+                     WHERE CASE WHEN direction = 'debit' THEN debit.id ELSE credit.id END != this.id
+            ), new_vals AS (
+               SELECT line_id, 'P' || MIN(partial_id)::text AS matching_number
+                 FROM partials
+             GROUP BY line_id
+            )
+            UPDATE account_move_line line
+               SET matching_number = new_vals.matching_number
+              FROM new_vals
+             WHERE new_vals.line_id = line.id
+        """, [
+            to_update.ids,
+        ])
+        to_update.invalidate_recordset(['matching_number'])
+        for line in to_update:
+            if line.full_reconcile_id:
+                line.matching_number = str(line.full_reconcile_id.id)
+            elif not line.matched_debit_ids and not line.matched_credit_ids:
+                line.matching_number = False
+
 
     # -------------------------------------------------------------------------
     # RECONCILIATION METHODS
