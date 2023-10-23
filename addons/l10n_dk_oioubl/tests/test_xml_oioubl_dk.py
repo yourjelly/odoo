@@ -146,6 +146,7 @@ class TestUBLDK(TestUBLCommon, TestAccountMoveSendCommon):
                 print(error.xpath("//Pattern")[0].text)
         if err:
             write_oioubl_xml(xml_content)
+            print("Check generated xml in `~/Downloads/OIOUBL.xml`")
         self.assertFalse(err, "There is some error detected by the schematron")
 
     @freeze_time('2017-01-01')

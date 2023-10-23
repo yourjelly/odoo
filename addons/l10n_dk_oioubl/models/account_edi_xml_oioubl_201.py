@@ -211,7 +211,10 @@ class AccountEdiXmlOIOUBL201(models.AbstractModel):
     def _get_invoice_payment_terms_vals_list(self, invoice):
         # cleaned atm because it's not mandatory and the standard payment terms gets the document rejected for validation
         # https://www.oioubl.info/Classes/en/PaymentTerms.html
-        return []
+        return super()._get_invoice_payment_terms_vals_list(invoice)
+        if invoice.invoice_payment_term_id:
+            invoice.payment_term_details
+            return []
 
     def _get_tax_category_list(self, invoice, taxes):
         # EXTENDS account.edi.common
