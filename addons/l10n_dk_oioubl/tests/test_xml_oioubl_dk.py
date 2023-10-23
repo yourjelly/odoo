@@ -8,6 +8,14 @@ from odoo.modules.module import get_resource_path
 from odoo.tests import tagged
 from odoo.tools import file_open
 
+import base64
+
+from lxml import etree
+from pathlib import Path
+
+def write_oioubl_xml(xml_content):
+    with Path("~/Downloads/OIOUBL.xml").expanduser().open("wb") as f:
+        f.write(xml_content)
 
 @tagged('post_install_l10n', 'post_install', '-at_install')
 class TestUBLDK(TestUBLCommon, TestAccountMoveSendCommon):
@@ -107,38 +115,72 @@ class TestUBLDK(TestUBLCommon, TestAccountMoveSendCommon):
         invoice._generate_pdf_and_send_invoice(self.move_template, from_cron=False, allow_fallback_pdf=False)
         return invoice
 
+    def _assert_invoice_attachment(self, attachment, xpaths, expected_file_path):
+        pass
+
     #########
     # EXPORT
     #########
+
+    def check_invoice(self, invoice, refund=False):
+        print("=" * 25)
+        print("testing content")
+        print("=" * 25)
+        doc = "CreditNote" if refund else "Invoice"
+        xml_content = base64.b64decode(invoice.ubl_cii_xml_id.with_context(bin_size=False).datas)
+        xml_etree = self.get_xml_tree_from_string(xml_content)
+        with file_open(f"l10n_account_edi_ubl_cii_tests/tests/OIOUBL_{doc}_Schematron.xsl", "rb") as schematron_file:
+            xsl = etree.parse(schematron_file)
+            transform = etree.XSLT(xsl)
+            result_tree = transform(xml_etree)
+
+            errors = result_tree.xpath("//Error")
+            err = False
+            for error in errors:
+                err = True
+                print("")
+                print("")
+                print(error.xpath("//Xpath")[0].text)
+                print(error.xpath("//Description")[0].text)
+                print("")
+                print(error.xpath("//Pattern")[0].text)
+        if err:
+            write_oioubl_xml(xml_content)
+        self.assertFalse(err, "There is some error detected by the schematron")
 
     @freeze_time('2017-01-01')
     def test_export_invoice_two_line_partner_dk(self):
         invoice = self.create_post_and_send_invoice()
         self.assertTrue(invoice.ubl_cii_xml_id)
+        self.check_invoice(invoice)
         self._assert_invoice_attachment(invoice.ubl_cii_xml_id, xpaths=None, expected_file_path="from_odoo/oioubl_out_invoice_partner_dk.xml")
 
     @freeze_time('2017-01-01')
     def test_export_invoice_two_line_foreign_partner_be(self):
         invoice = self.create_post_and_send_invoice(partner=self.partner_b)
         self.assertTrue(invoice.ubl_cii_xml_id)
+        self.check_invoice(invoice)
         self._assert_invoice_attachment(invoice.ubl_cii_xml_id, xpaths=None, expected_file_path="from_odoo/oioubl_out_invoice_foreign_partner_be.xml")
 
     @freeze_time('2017-01-01')
     def test_export_invoice_two_line_foreign_partner_fr(self):
         invoice = self.create_post_and_send_invoice(partner=self.partner_c)
         self.assertTrue(invoice.ubl_cii_xml_id)
+        self.check_invoice(invoice)
         self._assert_invoice_attachment(invoice.ubl_cii_xml_id, xpaths=None, expected_file_path="from_odoo/oioubl_out_invoice_foreign_partner_fr.xml")
 
     @freeze_time('2017-01-01')
     def test_export_credit_note_two_line_partner_dk(self):
         refund = self.create_post_and_send_invoice(move_type='out_refund')
         self.assertTrue(refund.ubl_cii_xml_id)
+        self.check_invoice(refund, True)
         self._assert_invoice_attachment(refund.ubl_cii_xml_id, xpaths=None, expected_file_path="from_odoo/oioubl_out_refund_partner_dk.xml")
 
     @freeze_time('2017-01-01')
     def test_export_credit_note_two_line_partner_fr(self):
         refund = self.create_post_and_send_invoice(partner=self.partner_c, move_type='out_refund')
         self.assertTrue(refund.ubl_cii_xml_id)
+        self.check_invoice(refund, True)
         self._assert_invoice_attachment(refund.ubl_cii_xml_id, xpaths=None, expected_file_path="from_odoo/oioubl_out_refund_foreign_partner_fr.xml")
 
     @freeze_time('2017-01-01')
@@ -146,6 +188,7 @@ class TestUBLDK(TestUBLCommon, TestAccountMoveSendCommon):
         self.company_data['company'].currency_id.rounding = 0.001
         invoice = self.create_post_and_send_invoice()
         self.assertTrue(invoice.ubl_cii_xml_id)
+        self.check_invoice(invoice)
         self._assert_invoice_attachment(invoice.ubl_cii_xml_id, xpaths=None, expected_file_path="from_odoo/oioubl_out_invoice_partner_dk.xml")
 
     @freeze_time('2017-01-01')
@@ -166,6 +209,7 @@ class TestUBLDK(TestUBLCommon, TestAccountMoveSendCommon):
         self.partner_a.vat = 'DK12345674'
         invoice = self.create_post_and_send_invoice()
         self.assertTrue(invoice.ubl_cii_xml_id)
+        self.check_invoice(invoice)
         self._assert_invoice_attachment(invoice.ubl_cii_xml_id, xpaths=None, expected_file_path="from_odoo/oioubl_out_invoice_partner_dk.xml")
 
     @freeze_time('2017-01-01')
