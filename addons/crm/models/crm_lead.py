@@ -933,7 +933,7 @@ class Lead(models.Model):
                 message = _('You just beat your personal record for the past 30 days.')
             elif query_result['max_user_7'] == self.expected_revenue:
                 message = _('You just beat your personal record for the past 7 days.')
-        return message
+        return _(message)
 
     def action_schedule_meeting(self):
         """ Open meeting's calendar view to schedule meeting on current opportunity.
