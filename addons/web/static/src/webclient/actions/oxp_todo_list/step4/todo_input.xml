@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+  <t t-name="step4.TodoInput" >
+        <input t-on-change="onInputChange" type="text" class="form-control" placeholder="What needs to be done ?"/>
+  </t>
+
+</templates>

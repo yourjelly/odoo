@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+  <t t-name="step1.TodoList" >
+    <div class="container py-5 h-100">
+        <div class="row d-flex justify-content-center align-items-center h-100">
+        <div class="col col-xl-7">
+            <div class="p-5">
+                <div class="form-outline flex-fill">
+                    <input t-on-change="onInputChange" type="text" class="form-control" placeholder="What needs to be done ?"/>
+                </div>
+
+                <ul class="list-group mb-0">
+                    <li t-foreach="state.todoItems"
+                        t-as="todo"
+                        t-key="todo.id"
+                        class="list-group-item d-flex align-items-center border-0 mb-2 rounded justify-content-between"
+                        style="background-color: #f4f6f7;">
+                        <input t-if="todo.id === state.itemInEdition" t-att-value="todo.message" t-on-change="editMessage" class="form-control"/>
+                        <t t-else="" >
+                          <span t-esc="todo.message"
+                            t-att-class="todo.isDone ? 'text-decoration-line-through' : ''"
+                            t-on-click="() => this.toggleDone(todo.id)"/>
+                          <div>
+                            <button t-on-click="() => this.switchEditMode(todo.id)" type="button" class="btn btn-primary me-1">Edit</button>
+                            <button t-on-click="() => this.delete(todo.id)" type="button" class="btn btn-danger">Delete</button>
+                          </div>
+                        </t>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+  </t>
+
+</templates>
