@@ -2,24 +2,21 @@
 
 import json
 import re
-import markupsafe
 import logging
 import base64
+from psycopg2 import OperationalError
 
 
 from odoo import fields, models, api, _
-from odoo.fields import Command
-from odoo.exceptions import UserError, AccessError, ValidationError
+from odoo.exceptions import UserError
 from odoo.tools import html_escape, html2plaintext
 
-from odoo.addons.iap import jsonrpc
 from odoo.addons.l10n_in_ewaybill.tools.ewaybill_api import EWayBillApi
 
 
 from .error_codes import ERROR_CODES
 
 
-from datetime import timedelta
 from markupsafe import Markup
 
 
@@ -34,6 +31,14 @@ class Ewaybill(models.Model):
     name = fields.Char("e-Way bill Number", copy=False, readonly=True)
     ewaybill_date = fields.Date("e-Way bill Date", copy=False, readonly=True)
     ewaybill_expiry_date = fields.Date("e-Way bill Valid Upto", copy=False, readonly=True)
+    ewaybill_number = fields.Char("Ewaybill Number", compute="_compute_ewaybill_number", store=True)
+    cancel_reason = fields.Selection(selection=[
+        ("1", "Duplicate"),
+        ("2", "Data Entry Mistake"),
+        ("3", "Order Cancelled"),
+        ("4", "Others"),
+    ], string="Cancel reason", copy=False, tracking=True)
+    cancel_remarks = fields.Char("Cancel remarks", copy=False, tracking=True)
 
     account_move_id = fields.Many2one("account.move", store=True)
     account_move_line_ids = fields.One2many("account.move.line", related="account_move_id.invoice_line_ids")
@@ -110,6 +115,15 @@ class Ewaybill(models.Model):
 
     content = fields.Binary(compute='_compute_content', compute_sudo=True)
 
+    @api.depends('attachment_id')
+    def _compute_ewaybill_number(self):
+        for ewaybill in self:
+            ewaybill_response_json = ewaybill._get_l10n_in_ewaybill_response_json()
+            if ewaybill_response_json:
+                ewaybill.ewaybill_number = ewaybill_response_json.get("ewayBillNo") or ewaybill_response_json.get("EwbNo")
+            else:
+                ewaybill.ewaybill_number = False
+
     def _compute_supply_type(self):
         for ewaybill in self:
             if ewaybill.account_move_id.is_inbound():
@@ -175,17 +189,6 @@ class Ewaybill(models.Model):
             else:
                 account.display_name = _('Pending')
 
-    def view_related_document(self):
-        self.ensure_one()
-        if self.account_move_id:
-            return {
-                'type': 'ir.actions.act_window',
-                'name': _('Related Document'),
-                'res_model': 'account.move',
-                'view_mode': 'form',
-                'res_id': self.account_move_id.id,
-            }
-
     def action_export_json(self):
         self.ensure_one()
         return {
@@ -201,6 +204,14 @@ class Ewaybill(models.Model):
         """
         self.ensure_one()
         return "direct"
+
+    def _get_l10n_in_ewaybill_response_json(self):
+        self.ensure_one()
+        for ewaybill in self:
+            if ewaybill.state == "generated" and ewaybill.attachment_id:
+                return json.loads(ewaybill.sudo().attachment_id.raw.decode("utf-8"))
+            else:
+                return {}
 
     def generate_ewaybill(self):
         for ewaybill in self:
@@ -220,7 +231,7 @@ class Ewaybill(models.Model):
                 state = dict(self._fields['state'].get_values(ewaybill.env))[ewaybill.state]
                 raise UserError(_("E-waybill can't cancel from %s state", state))
 
-            if not (ewaybill.l10n_in_edi_cancel_reason or ewaybill.l10n_in_edi_cancel_remarks):
+            if not (ewaybill.cancel_reason or ewaybill.cancel_remarks):
                 raise UserError(_("Set cancel reason and remarks to cancel E-waybill"))
             ewaybill.state = 'to_cancel'
         if self:
@@ -241,6 +252,9 @@ class Ewaybill(models.Model):
         self.ensure_one()
         error_message = []
         base = self._get_ewaybill_mode()
+        if base == "irn":
+            # already checked by E-invoice (l10n_in_edi) so no need to check
+            return error_message
         if not self.type_id and base == "direct":
             error_message.append(_("- Document Type is required"))
         if not self.mode:
@@ -273,7 +287,7 @@ class Ewaybill(models.Model):
         self.ensure_one()
         if self.account_move_id:
             if not re.match("^.{1,16}$", self.document_number):
-                is_purchase = move.account_move_id.is_purchase_document(include_receipts=True)
+                is_purchase = self.account_move_id.is_purchase_document(include_receipts=True)
                 return[_("%s number should be set and not more than 16 characters",
                     is_purchase and _("Bill Reference") or _("Invoice"))]
         return []
@@ -282,7 +296,6 @@ class Ewaybill(models.Model):
         error_message = []
         if self.account_move_id:
             goods_line_is_available = False
-            print(self.account_move_id.invoice_line_ids)
             for line in self.account_move_id.invoice_line_ids.filtered(lambda line: not line.display_type in ('line_section', 'line_note', 'rounding') and line.product_id.type != "service"):
                 goods_line_is_available = True
                 if line.product_id:
@@ -334,8 +347,8 @@ class Ewaybill(models.Model):
         self.ensure_one()
         cancel_json = {
             "ewbNo": self.name,
-            "cancelRsnCode": int(self.edi_cancel_reason),
-            "CnlRem": self.edi_cancel_remarks,
+            "cancelRsnCode": int(self.cancel_reason),
+            "CnlRem": self.cancel_remarks,
         }
         ewb_api = EWayBillApi(self.company_id)
         response = ewb_api._ewaybill_cancel(cancel_json)
@@ -344,18 +357,18 @@ class Ewaybill(models.Model):
             error_codes = [e.get("code") for e in error]
             if "238" in error_codes:
                 # Invalid token eror then create new token and send generate request again.
-                # This happen when authenticate called from another odoo instance with same credentials (like. Demo/Test)
+                # This happens when authenticate called from another odoo instance with same credentials (like. Demo/Test)
                 authenticate_response = self._ewaybill_authenticate()
                 if not authenticate_response.get("error"):
                     error = []
-                    response = self._ewaybill_cancel(cancel_json)
+                    response = ewb_api._ewaybill_cancel(cancel_json)
                     if response.get("error"):
                         error = response["error"]
                         error_codes = [e.get("code") for e in error]
             if "312" in error_codes:
                 # E-waybill is already canceled
                 # this happens when timeout from the Government portal but IRN is generated
-                error_message = Markup("<br/>").join([Markup("[%s] %s") % (e.get("code"), e.get("message") or self._get_error_message(e.get('code'))) for e in error])
+                error_message = Markup("<br/>").join([Markup("[%s] %s") % (e.get("code"), e.get("message") or self._l10n_in_ewaybill_get_error_message(e.get('code'))) for e in error])
                 error = []
                 response = {"data": ""}
                 odoobot = self.env.ref("base.partner_root")
@@ -370,7 +383,7 @@ class Ewaybill(models.Model):
                 error_message = self.env['account.edi.format']._l10n_in_edi_get_iap_buy_credits_message(self.company_id)
                 self._write_error(error_message)
             elif error:
-                error_message = Markup("<br/>").join([Markup("[%s] %s") % (e.get("code"), e.get("message") or self._l10n_in_edi_ewaybill_get_error_message(e.get('code'))) for e in error])
+                error_message = Markup("<br/>").join([Markup("[%s] %s") % (e.get("code"), e.get("message") or self._l10n_in_ewaybill_get_error_message(e.get('code'))) for e in error])
                 blocking_level = "error"
                 if "404" in error_codes:
                     blocking_level = "warning"
@@ -425,11 +438,11 @@ class Ewaybill(models.Model):
             error_codes = [e.get("code") for e in error]
             if "238" in error_codes:
                 # Invalid token eror then create new token and send generate request again.
-                # This happen when authenticate called from another odoo instance with same credentials (like. Demo/Test)
+                # This happens when authenticate called from another odoo instance with same credentials (like. Demo/Test)
                 authenticate_response = self._ewaybill_authenticate()
                 if not authenticate_response.get("error"):
                     error = []
-                    response = ewb_api._generate_ewaybill_direct(generate_json)
+                    response = self._generate_ewaybill_direct()
                     if response.get("error"):
                         error = response["error"]
                         error_codes = [e.get("code") for e in error]
@@ -440,20 +453,20 @@ class Ewaybill(models.Model):
                 if not response.get("error"):
                     error = []
                     odoobot = self.env.ref("base.partner_root")
-                    invoices.message_post(author_id=odoobot.id, body=
+                    self.message_post(author_id=odoobot.id, body=
                         _("Somehow this E-waybill has been generated in the government portal before. You can verify by checking the invoice details into the government (https://ewaybillgst.gov.in/Others/EBPrintnew.asp)")
                     )
             if "no-credit" in error_codes:
                 error_message = self.env['account.edi.format']._l10n_in_edi_get_iap_buy_credits_message(self.company_id)
                 self._write_error(error_message)
             elif error:
-                error_message = "<br/>".join(["[%s] %s" % (e.get("code"), html_escape(e.get("message") or self._l10n_in_edi_ewaybill_get_error_message(e.get('code')))) for e in error])
+                error_message = "<br/>".join(["[%s] %s" % (e.get("code"), html_escape(e.get("message") or self._l10n_in_ewaybill_get_error_message(e.get('code')))) for e in error])
                 blocking_level = "error"
                 if "404" in error_codes:
                     blocking_level = "warning"
                 self._write_error(error_message, blocking_level)
         if not response.get("error"):
-            response_data = response_data.get("data")
+            response_data = response.get("data")
             print(response_data)
             self._write_response({
                 'name': response_data.get("EwbNo"),
@@ -461,7 +474,7 @@ class Ewaybill(models.Model):
                 'ewaybill_expiry_date': response_data.get('ValidUpto')
             })
 
-    def _l10n_in_edi_ewaybill_get_error_message(self, code):
+    def _l10n_in_ewaybill_get_error_message(self, code):
         error_message = ERROR_CODES.get(code)
         return error_message or _("We don't know the error message for this error code. Please contact support.")
 

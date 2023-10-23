@@ -111,6 +111,32 @@ class Ewaybill(models.Model):
                     ewaybill.partner_ship_to_id = stock_picking_id.partner_id
                     ewaybill.partner_ship_from_id = stock_picking_id.company_id.partner_id
 
+    def _check_ewaybill_document_number(self):
+        for ewaybill in self:
+            if ewaybill.account_move_id:
+                return super()._check_ewaybill_document_number()
+            #TODO check if this is required
+
+    def _check_lines(self):
+        if self.account_move_id:
+            return super()._check_lines()
+        goods_line_is_available = False
+        error_message = []
+        for line in self.move_ids:
+            goods_line_is_available = True
+            if line.product_id:
+                hsn_code = self._l10n_in_edi_extract_digits(line.product_id.l10n_in_hsn_code)
+                if not hsn_code:
+                    error_message.append(_("HSN code is not set in product %s", line.product_id.name))
+                elif not re.match("^[0-9]+$", hsn_code):
+                    error_message.append(_(
+                        "Invalid HSN Code (%s) in product %s", hsn_code, line.product_id.name
+                    ))
+            else:
+                error_message.append(_("Product is required to get HSN code"))
+        if not goods_line_is_available:
+            error_message.append(_('You need at least one product having "Product Type" as stockable or consumable'))
+
     def _l10n_in_prepare_edi_tax_details(self):
         for ewaybill in self:
             if ewaybill.account_move_id:
@@ -250,7 +276,6 @@ class Ewaybill(models.Model):
             json_payload = super()._ewaybill_generate_direct_json()
             if ewaybill.stock_picking_id:
                 AccountEdiFormat = self.env['account.edi.format']
-                round_value = AccountEdiFormat._l10n_in_round_value
                 tax_details = self._l10n_in_tax_details(ewaybill)
                 json_payload.update({
                     "itemList": [

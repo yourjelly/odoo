@@ -1,9 +1,16 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import logging
+
 from odoo import fields, _
 from datetime import timedelta
 from odoo.addons.iap import jsonrpc
-from odoo.addons.l10n_in_edi.models.account_edi_format import DEFAULT_IAP_ENDPOINT, DEFAULT_IAP_TEST_ENDPOINT
+from odoo.exceptions import AccessError
+
+_logger = logging.getLogger(__name__)
+
+DEFAULT_IAP_ENDPOINT = "https://l10n-in-edi.api.odoo.com"
+DEFAULT_IAP_TEST_ENDPOINT = "https://l10n-in-edi-demo.api.odoo.com"
 
 
 class EWayBillApi:
@@ -35,7 +42,7 @@ class EWayBillApi:
                 "error": [{
                     "code": "access_error",
                     "message": _("Unable to connect to the E-WayBill service."
-                        "The web service may be temporary down. Please try again in a moment.")
+                                 "The web service may be temporary down. Please try again in a moment.")
                 }]
             }
 

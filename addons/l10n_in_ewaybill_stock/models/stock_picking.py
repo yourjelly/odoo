@@ -27,7 +27,7 @@ class StockPicking(models.Model):
             }
 
         return {
-            'name' : "Ewaybill",
+            'name': "Ewaybill",
             'res_model': 'l10n.in.ewaybill',
             'type': 'ir.actions.act_window',
             'view_mode': 'form',

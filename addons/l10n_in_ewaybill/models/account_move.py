@@ -10,12 +10,12 @@ from odoo.tools import html_escape, html2plaintext
 class AccountMove(models.Model):
     _inherit = 'account.move'
 
-    l10n_in_ewaybill_ids = fields.One2many('l10n.in.ewaybill', 'account_move_id' ,string='e-Way bill',readonly=True)
+    l10n_in_ewaybill_ids = fields.One2many('l10n.in.ewaybill', 'account_move_id', string='e-Way bill', readonly=True)
 
     def action_open_ewaybill_form(self):
         self.ensure_one()
         action = {
-            'name' : "e-Way bill",
+            'name': "e-Way bill",
             'res_model': 'l10n.in.ewaybill',
             'type': 'ir.actions.act_window',
             'view_mode': 'form',
