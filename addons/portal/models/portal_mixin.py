@@ -114,7 +114,7 @@ class PortalMixin(models.AbstractModel):
                              **literal_eval(action['context'])}
         return action
 
-    def get_portal_url(self, suffix=None, report_type=None, download=None, query_string=None, anchor=None):
+    def get_portal_url(self, suffix=None, report_type=None, download=None, query_string=None, anchor=None, sale_order=None):
         """
             Get a portal url for this model, including access_token.
             The associated route must handle the flags for them to have any effect.
@@ -125,7 +125,8 @@ class PortalMixin(models.AbstractModel):
             - anchor: string to append after the anchor #
         """
         self.ensure_one()
-        url = self.access_url + '%s?access_token=%s%s%s%s%s' % (
+        access_url = f'\my\orders\{self.id}' if sale_order else self.access_url
+        url = access_url + '%s?access_token=%s%s%s%s%s' % (
             suffix if suffix else '',
             self._portal_ensure_token(),
             '&report_type=%s' % report_type if report_type else '',
