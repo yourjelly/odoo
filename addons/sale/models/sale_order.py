@@ -1805,45 +1805,19 @@ class SaleOrder(models.Model):
 
         return generated_invoices
 
-    def _get_product_catalog_order_line_info(self, product_ids, **kwargs):
-        """ Returns products information to be shown in the catalog.
-        :param list product_ids: The products currently displayed in the product catalog, as a list
-                                 of `product.product` ids.
-        :rtype: dict
-        :return: A dict with the following structure:
-            {
-                'productId': int
-                'quantity': float (optional)
-                'price': float
-                'readOnly': bool (optional)
-            }
-        """
-        order_line_info = {}
-        for product, lines in groupby(
-            self.order_line.filtered(lambda line: not line.display_type),
-            lambda line: line.product_id
-        ):
-            if product.id not in product_ids:
-                continue
-
-            sale_order_lines = self.env['sale.order.line'].browse(line.id for line in lines)
-            order_line_info[product.id] = sale_order_lines._get_catalog_info(**kwargs)
-            product_ids.remove(product.id)
-
-        default_data = self.env['sale.order.line']._get_catalog_info(**kwargs)
-        default_data['readOnly'] = self._is_readonly() if self else False
-
+    def _get_product_catalog_order_line_info(self, products, **kwargs):
         pricelist = self.pricelist_id._get_products_price(
             quantity=1.0,
-            products=self.env['product.product'].browse(product_ids),
+            products=products,
             currency=self.currency_id,
             date=self.date_order,
+            **kwargs,
         )
-        for product_id, price in pricelist.items():
-            product_data = {**default_data, 'price': price}
-            order_line_info.update({product_id: product_data})
+        return {id: {'price': price} for id, price in pricelist.items()}
 
-        return order_line_info
+    @api.model
+    def _get_record_and_lines_field_name(self, res_id):
+        return (self.browse(res_id), 'order_line')
 
     def _get_product_documents(self):
         self.ensure_one()

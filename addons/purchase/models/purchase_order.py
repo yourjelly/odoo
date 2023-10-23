@@ -827,27 +827,8 @@ class PurchaseOrder(models.Model):
             ('company_id', 'in', [self.company_id.id, False]),
         ]
 
-    def _get_product_catalog_order_line_info(self, product_ids, **kwargs):
-        order_line_info = {}
-        for product, lines in groupby(
-            self.order_line.filtered(lambda line: not line.display_type),
-            lambda line: line.product_id
-        ):
-            if product.id not in product_ids:
-                continue
-
-            purchase_order_lines = self.env['purchase.order.line'].browse(line.id for line in lines)
-            order_line_info[product.id] = purchase_order_lines._get_catalog_info()
-            product_ids.remove(product.id)
-
-        default_data = self.env['purchase.order.line']._get_catalog_info()
-        default_data['readOnly'] = self._is_readonly()
-
-        products = self.env['product.product'].browse(product_ids) - self.order_line.product_id
-        for product in products:
-            product_data = {**default_data, **self._get_product_price_and_data(product)}
-            order_line_info.update({product.id: product_data})
-        return order_line_info
+    def _get_product_catalog_order_line_info(self, products, **kwargs):
+        return {product.id: self._get_product_price_and_data(product) for product in products}
 
     def _get_product_price_and_data(self, product):
         """ Fetch the product's data used by the purchase's catalog.
@@ -898,6 +879,10 @@ class PurchaseOrder(models.Model):
                 }
             )
         return product_infos
+
+    @api.model
+    def _get_record_and_lines_field_name(self, res_id):
+        return (self.browse(res_id), 'order_line')
 
     def get_confirm_url(self, confirm_type=None):
         """Create url for confirm reminder or purchase reception email for sending
