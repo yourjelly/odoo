@@ -13,6 +13,7 @@
 
 <t t-name="web.Form.InnerGroup" owl="1">
     <div t-attf-class="{{ allClasses }}" class="o_inner_group grid" t-att-style="props.style">
+        <t t-out="allClasses"/>
         <div t-if="props.slots and props.slots.title" t-attf-class="g-col-sm-{{ props.maxCols }}">
             <t t-slot="title" />
         </div>

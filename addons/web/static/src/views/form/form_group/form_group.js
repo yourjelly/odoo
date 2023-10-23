@@ -52,7 +52,7 @@ export class InnerGroup extends Group {
     }
     getRows() {
         const maxCols = this.props.maxCols;
-
+        // debugger
         const rows = [];
         let currentRow = [];
         let reservedSpace = 0;
