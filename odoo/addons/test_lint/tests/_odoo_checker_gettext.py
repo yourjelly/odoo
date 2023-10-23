@@ -1,11 +1,11 @@
-import astroid
-from pylint.checkers import BaseChecker
-try:
-    from pylint.checkers.utils import only_required_for_messages
-except ImportError:
-    from pylint.checkers.utils import check_messages as only_required_for_messages
+import os
 
-class OdooBaseChecker(BaseChecker):
+import astroid
+from pylint import checkers, interfaces
+
+
+class OdooBaseChecker(checkers.BaseChecker):
+    __implements__ = interfaces.IAstroidChecker
     name = 'odoo'
 
     msgs = {
@@ -16,7 +16,7 @@ class OdooBaseChecker(BaseChecker):
         )
     }
 
-    @only_required_for_messages('gettext-variable')
+    @checkers.utils.check_messages('gettext-variable')
     def visit_call(self, node):
         if isinstance(node.func, astroid.Name) and node.func.name in ('_', '_lt'):
             first_arg = node.args[0]

@@ -1,8 +1,9 @@
 import astroid
-from pylint import checkers
+from pylint import checkers, interfaces
 
 
 class OdooBaseChecker(checkers.BaseChecker):
+    __implements__ = interfaces.IAstroidChecker
     name = 'odoo'
 
     msgs = {

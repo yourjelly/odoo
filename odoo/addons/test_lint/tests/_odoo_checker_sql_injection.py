@@ -1,7 +1,6 @@
 import contextlib
 import contextvars
 import os
-from collections import deque
 from contextlib import ExitStack
 from typing import Optional
 
@@ -10,13 +9,10 @@ try:
     from astroid import NodeNG
 except ImportError:
     from astroid.node_classes import NodeNG
-
-import pylint.interfaces
+from pylint import checkers, interfaces
 from pylint.checkers import BaseChecker, utils
-try:
-    from pylint.checkers.utils import only_required_for_messages
-except ImportError:
-    from pylint.checkers.utils import check_messages as only_required_for_messages
+from collections import deque
+
 
 DFTL_CURSOR_EXPR = [
     'self.env.cr', 'self._cr',  # new api
@@ -45,16 +41,8 @@ def push_call(node: astroid.Call):
             s.callback(root_call.reset, t)
         yield
 
-def parse_version(s):
-    # can't use odoo.tools.parse_version because pythonpath is screwed from
-    # inside pylint on runbot
-    return [s.rjust(3, '0') for s in s.split('.')]
-
 class OdooBaseChecker(BaseChecker):
-    # `test_printf` fails if this is not set in 2.5 (???), but it's deprecated
-    # in 2.14, so make conditional
-    if parse_version(pylint.__version__) < parse_version('2.14.0'):
-        __implements__ = pylint.interfaces.IAstroidChecker
+    __implements__ = interfaces.IAstroidChecker
     name = 'odoo'
 
     msgs = {
@@ -337,16 +325,16 @@ class OdooBaseChecker(BaseChecker):
             return is_concatenation
         return True
 
-    @only_required_for_messages('sql-injection')
+    @checkers.utils.check_messages('sql-injection')
     def visit_call(self, node):
-        if not self.linter.is_message_enabled('E8501', node.lineno):
+        if not self.linter.is_message_enabled('E8501', node.lineno, node.lineno):
             return
         if self._check_sql_injection_risky(node):
             self.add_message('sql-injection', node=node, args='')
 
-    @only_required_for_messages('sql-injection')
+    @checkers.utils.check_messages('sql-injection')
     def visit_functiondef(self, node):
-        if not self.linter.is_message_enabled('E8501', node.lineno):
+        if not self.linter.is_message_enabled('E8501', node.lineno, node.lineno):
             return
         if os.path.basename(self.linter.current_file).startswith('test_'):
             return
