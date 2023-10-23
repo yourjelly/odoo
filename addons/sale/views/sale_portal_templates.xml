@@ -107,7 +107,7 @@
                 </thead>
                 <t t-foreach="orders" t-as="order">
                     <tr>
-                        <td><a t-att-href="order.get_portal_url()"><t t-out="order.name"/></a></td>
+                        <td><a t-att-href="order.get_portal_url(subscription=True)"><t t-out="order.name"/></a></td>
                         <td class="text-end">
                             <span t-field="order.date_order" t-options="{'widget': 'date'}"/>&amp;nbsp;
                             <span class='d-none d-md-inline' t-field="order.date_order" t-options="{'time_only': True}"/>
