@@ -30,6 +30,10 @@ class Project(models.Model):
         # account_move_line__move_id is the alias of the joined table account_move in the query
         # we can use it, because of the "move_id.move_type" clause in the domain of the query, which generates the join
         # this is faster than a search_read followed by a browse on the move_id to retrieve the move_type of each account.move.line
+        self.env.flush_fields([*query.to_flush, {
+            'account.move.line': ['price_subtotal', 'parent_state', 'currency_id', 'analytic_distribution', 'move_id'],
+            'account.move': ['move_type'],
+        }])
         query_string, query_param = query.select('price_subtotal', 'parent_state', 'account_move_line.currency_id', 'account_move_line.analytic_distribution', 'account_move_line__move_id.move_type', 'move_id')
         self._cr.execute(query_string, query_param)
         bills_move_line_read = self._cr.dictfetchall()
