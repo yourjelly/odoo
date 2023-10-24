@@ -1,5 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from odoo.fields import Command
 from odoo.tests import TransactionCase
 
 
@@ -379,7 +380,24 @@ class TestFlushSearch(TransactionCase):
             self.brussels.name = "Bruxelles"
             self.model.search([('name', 'like', 'foo')], order='id')
 
-        # same for indirect fields (subsearches)
+    def test_flush_fields_in_subdomain(self):
+        with self.assertQueries(['''
+            UPDATE "test_new_api_city"
+            SET "country_id" = %s, "write_date" = %s, "write_uid" = %s
+            WHERE id IN %s
+        ''', '''
+            SELECT "test_new_api_city"."id"
+            FROM "test_new_api_city"
+            WHERE ("test_new_api_city"."country_id" IN (
+                SELECT "test_new_api_country"."id"
+                FROM "test_new_api_country"
+                WHERE ("test_new_api_country"."name"::text LIKE %s)
+            ))
+            ORDER BY "test_new_api_city"."id"
+        ''']):
+            self.brussels.country_id = self.france
+            self.model.search([('country_id.name', 'like', 'foo')], order='id')
+
         with self.assertQueries(['''
             UPDATE "test_new_api_country"
             SET "name" = %s, "write_date" = %s, "write_uid" = %s
@@ -396,6 +414,58 @@ class TestFlushSearch(TransactionCase):
         ''']):
             self.belgium.name = "Belgique"
             self.model.search([('country_id.name', 'like', 'foo')], order='id')
+
+    def test_flush_auto_join_field_in_domain(self):
+        self.patch(type(self.brussels).country_id, 'auto_join', True)
+
+        with self.assertQueries(['''
+            UPDATE "test_new_api_city"
+            SET "country_id" = %s, "write_date" = %s, "write_uid" = %s
+            WHERE id IN %s
+        ''', '''
+            SELECT "test_new_api_city"."id"
+            FROM "test_new_api_city"
+            LEFT JOIN "test_new_api_country" AS "test_new_api_city__country_id"
+                ON ("test_new_api_city"."country_id" = "test_new_api_city__country_id"."id")
+            WHERE ("test_new_api_city__country_id"."name"::text LIKE %s)
+            ORDER BY "test_new_api_city"."id"
+        ''']):
+            self.brussels.country_id = self.france
+            self.model.search([('country_id.name', 'like', 'foo')], order='id')
+
+    def test_flush_inherited_field_in_domain(self):
+        payment = self.env['test_new_api.payment'].create({})
+        move = self.env['test_new_api.move'].create({})
+
+        with self.assertQueries(['''
+            UPDATE "test_new_api_payment"
+            SET "move_id" = %s, "write_date" = %s, "write_uid" = %s
+            WHERE id IN %s
+        ''', '''
+            SELECT "test_new_api_payment"."id"
+            FROM "test_new_api_payment"
+            LEFT JOIN "test_new_api_move" AS "test_new_api_payment__move_id"
+                ON ("test_new_api_payment"."move_id" = "test_new_api_payment__move_id"."id")
+            WHERE ("test_new_api_payment__move_id"."tag_repeat" > %s)
+            ORDER BY "test_new_api_payment"."id"
+        ''']):
+            payment.move_id = move
+            payment.search([('tag_repeat', '>', 0)], order='id')
+
+        with self.assertQueries(['''
+            UPDATE "test_new_api_move"
+            SET "tag_repeat" = %s, "write_date" = %s, "write_uid" = %s
+            WHERE id IN %s
+        ''', '''
+            SELECT "test_new_api_payment"."id"
+            FROM "test_new_api_payment"
+            LEFT JOIN "test_new_api_move" AS "test_new_api_payment__move_id"
+                ON ("test_new_api_payment"."move_id" = "test_new_api_payment__move_id"."id")
+            WHERE ("test_new_api_payment__move_id"."tag_repeat" > %s)
+            ORDER BY "test_new_api_payment"."id"
+        ''']):
+            payment.move_id.tag_repeat = 1
+            payment.search([('tag_repeat', '>', 0)], order='id')
 
     def test_flush_fields_in_access_rules(self):
         model = self.model.with_user(self.env.ref('base.user_admin'))
