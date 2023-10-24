@@ -4165,7 +4165,6 @@ class AccountMove(models.Model):
             aggregates=['id:recordset'],
             limit=limit,
         )
-        need_retrigger = len(to_process) > job_count
         if not to_process:
             return
 
@@ -4181,8 +4180,42 @@ class AccountMove(models.Model):
                 else:
                     raise
 
-            self.env['account.move.send']._process_send_and_print(moves)
+            # Filter moves in error with too many retries
+            max_retry = 1
+            no_retry_moves = moves.filtered(lambda move: move.send_and_print_values.get('error_nb_retry', 0) > max_retry)
+            no_retry_moves.send_and_print_values = False
+            moves = moves - no_retry_moves
+            if not moves:
+                continue
 
+            # Retrieve res.partner that executed the Send & Print wizard
+            sp_partner_ids = set(moves.mapped(lambda move: move.send_and_print_values and move.send_and_print_values['sp_partner_id']))
+            sp_partners = self.env['res.partner'].browse(sp_partner_ids)
+
+            # Process the Send & Print
+            self.env['account.move.send']._process_send_and_print(moves)
+            error_moves = moves.filtered(lambda move: move.send_and_print_values and move.send_and_print_values.get('error_nb_retry'))
+
+            # Send notification to let the user know we processed invoices
+            self.env['bus.bus']._sendmany([
+                [
+                    partner,
+                    'account_notification', {
+                        'type': 'warning' if error_moves else 'success',
+                        'title': _("Invoices Sent"),
+                        'message': _("One or more invoices couldn't be processed.") if error_moves else _('Invoices sent successfully.'),
+                        'action_button': {
+                            'name': _('Open'),
+                            'action_name': _('Sent invoices'),
+                            'model': 'account.move',
+                            'resIds': moves.ids,
+                        },
+                    }
+                ]
+                for partner in sp_partners
+            ])
+
+        need_retrigger = len(to_process) > job_count or error_moves
         if need_retrigger:
             self.env.ref('account.ir_cron_account_move_send')._trigger()
 

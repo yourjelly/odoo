@@ -434,7 +434,9 @@ class AccountMoveSend(models.TransientModel):
             if allow_raising:
                 raise UserError(self._format_error_text(error))
 
-            move.with_context(no_new_invoice=True).message_post(body=self._format_error_html(error))
+            is_retry = move.send_and_print_values and move.send_and_print_values.get('error_nb_retry', 0) > 1
+            if not is_retry:
+                move.with_context(no_new_invoice=True).message_post(body=error)
 
     @api.model
     def _hook_if_success(self, moves_data, from_cron=False, allow_fallback_pdf=False):
@@ -672,8 +674,13 @@ class AccountMoveSend(models.TransientModel):
             self._hook_if_success(success, from_cron=from_cron, allow_fallback_pdf=allow_fallback_pdf)
 
         # Update send and print values of moves
-        for move in moves:
-            if move.send_and_print_values:
+        for move, move_data in moves_data.items():
+            if from_cron and move_data.get('error'):
+                move.send_and_print_values = {
+                    **move.send_and_print_values,
+                    'error_nb_retry': move.send_and_print_values.get('error_nb_retry', 0) + 1,
+                }
+            else:
                 move.send_and_print_values = False
 
         to_download = {move: move_data for move, move_data in moves_data.items() if move_data.get('download')}
@@ -705,9 +712,18 @@ class AccountMoveSend(models.TransientModel):
         if process_later:
             # Set sending information on moves
             for move in self.move_ids:
-                move.send_and_print_values = self._get_wizard_values()
+                move.send_and_print_values = {'sp_partner_id': self.env.user.partner_id.id, **self._get_wizard_values()}
             self.env.ref('account.ir_cron_account_move_send')._trigger()
-            return {'type': 'ir.actions.act_window_close'}
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'type': 'info',
+                    'title': _('Sending invoices'),
+                    'message': _('Invoices are being sent in the background.'),
+                    'next': {'type': 'ir.actions.act_window_close'},
+                },
+            }
 
         return self._process_send_and_print(
             self.move_ids,
