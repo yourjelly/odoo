@@ -130,6 +130,9 @@ class Project(models.Model):
                 '|', ('qty_to_invoice', '>', 0), ('product_uom_qty', '>', 0),
             ], order=self.env['purchase.order.line']._order)
             query.add_where('purchase_order_line.analytic_distribution ? %s', [str(self.analytic_account_id.id)])
+            self.env.flush_fields([*query.to_flush, {
+                'purchase.order.line': ['qty_invoiced', 'qty_to_invoice', 'product_uom_qty', 'price_unit', 'currency_id', 'analytic_distribution'],
+            }])
             query_string, query_param = query.select('"purchase_order_line".id', 'qty_invoiced', 'qty_to_invoice', 'product_uom_qty', 'price_unit', 'purchase_order_line.currency_id', '"purchase_order_line".analytic_distribution')
             self._cr.execute(query_string, query_param)
             purchase_order_line_read = [{
