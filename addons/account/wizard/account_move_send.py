@@ -631,6 +631,12 @@ class AccountMoveSend(models.TransientModel):
         # Update send and print values of moves
         for move in moves:
             if move.send_and_print_values:
+                if from_cron:
+                    sp_partner = self.env['res.partner'].browse(move.send_and_print_values['sp_partner_id'])
+                    self.env['bus.bus']._sendone(sp_partner, 'simple_notification', {
+                        'type': 'info',
+                        'title': _("%(invoice_name)s sent", invoice_name=move.display_name),
+                    })
                 move.send_and_print_values = False
 
         to_download = {move: move_data for move, move_data in moves_data.items() if move_data.get('download')}
@@ -662,7 +668,13 @@ class AccountMoveSend(models.TransientModel):
         if process_later:
             # Set sending information on moves
             for move in self.move_ids:
-                move.send_and_print_values = self._get_wizard_values()
+                move.send_and_print_values = {'sp_partner_id': self.env.user.partner_id.id, **self._get_wizard_values()}
+            self.env['bus.bus']._sendone(self.env.user.partner_id, 'simple_notification', {
+                'type': 'success',
+                'title': _("Sending invoices"),
+                'message': _('Invoices are being sent in background.'),
+            })
+
             self.env.ref('account.ir_cron_account_move_send')._trigger()
             return {'type': 'ir.actions.act_window_close'}
 

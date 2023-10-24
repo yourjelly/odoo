@@ -4101,7 +4101,21 @@ class AccountMove(models.Model):
                 else:
                     raise
 
+            sp_partner_ids = set(moves.mapped(lambda move: move.send_and_print_values and move.send_and_print_values['sp_partner_id']))
+            sp_partners = self.env['res.partner'].browse(sp_partner_ids)
             self.env['account.move.send']._process_send_and_print(moves)
+            self.env['bus.bus']._sendmany([
+                [
+                    partner,
+                    'simple_notification', {
+                        'type': 'warning',
+                        'title': _("Invoice Sent"),
+                        'message': _('%(number_processed)s invoices have been sent !', number_processed=len(moves)),
+                        'sticky': True,
+                    }
+                ]
+                for partner in sp_partners
+            ])
 
         if need_retrigger:
             self.env.ref('account.ir_cron_account_move_send')._trigger()
