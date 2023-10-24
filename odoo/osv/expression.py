@@ -1012,9 +1012,13 @@ class expression(object):
             if field.inherited:
                 parent_model = model.env[field.related_field.model_name]
                 parent_fname = model._inherits[parent_model._name]
-                parent_alias = self.query.left_join(
-                    alias, parent_fname, parent_model._table, 'id', parent_fname,
-                )
+                # LEFT JOIN parent_model._table AS parent_alias ON alias.parent_fname = parent_alias.id
+                parent_alias = self.query.make_alias(alias, parent_fname)
+                self.query.add_join('LEFT JOIN', parent_alias, parent_model._table, SQL(
+                    "%s = %s",
+                    model._field_to_sql(alias, parent_fname, self.query),
+                    SQL.identifier(parent_alias, 'id'),
+                ))
                 push(leaf, parent_model, parent_alias)
 
             elif left == 'id' and operator in HIERARCHY_FUNCS:
@@ -1104,9 +1108,12 @@ class expression(object):
 
             elif operator in ('any', 'not any') and field.store and field.type == 'many2one' and field.auto_join:
                 # res_partner.state_id = res_partner__state_id.id
-                coalias = self.query.left_join(
-                    alias, field.name, comodel._table, 'id', field.name,
-                )
+                coalias = self.query.make_alias(alias, field.name)
+                self.query.add_join('LEFT JOIN', coalias, comodel._table, SQL(
+                    "%s = %s",
+                    model._field_to_sql(alias, field.name, self.query),
+                    SQL.identifier(coalias, 'id'),
+                ))
 
                 if operator == 'not any':
                     right = ['|', ('id', '=', False), '!', *right]
