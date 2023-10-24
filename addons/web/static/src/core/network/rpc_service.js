@@ -45,6 +45,8 @@ export function makeErrorFromResponse(reponse) {
 
 let rpcId = 0;
 export function jsonrpc(url, params = {}, settings = {}) {
+    if (url.includes("web_save"))
+        localStorage.setItem("___call_route___", url);
     const bus = settings.bus;
     const XHR = browser.XMLHttpRequest;
     const data = {

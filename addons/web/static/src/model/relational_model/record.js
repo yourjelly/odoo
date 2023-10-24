@@ -264,6 +264,7 @@ export class Record extends DataPoint {
     }
 
     urgentSave() {
+        localStorage.removeItem("___call_route___")
         this.model._urgentSave = true;
         this.model.bus.trigger("WILL_SAVE_URGENTLY");
         this._save({ reload: false });
