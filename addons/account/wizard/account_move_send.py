@@ -350,7 +350,7 @@ class AccountMoveSend(models.TransientModel):
 
         invoice_data['proforma_pdf_attachment_values'] = {
             'raw': content,
-            'name': invoice._get_invoice_proforma_pdf_report_filename(),
+            'name': invoice._get_invoice_report_filename(proforma=True),
             'mimetype': 'application/pdf',
             'res_model': invoice._name,
             'res_id': invoice.id,

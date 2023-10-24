@@ -4301,15 +4301,10 @@ class AccountMove(models.Model):
         pdf_name = self._get_invoice_report_filename() if len(self) == 1 else "Invoices.pdf"
         return pdf_content, pdf_name
 
-    def _get_invoice_report_filename(self, extension='pdf'):
+    def _get_invoice_report_filename(self, extension='pdf', proforma=False):
         """ Get the filename of the generated invoice report with extension file. """
         self.ensure_one()
-        return f"{self.name.replace('/', '_')}.{extension}"
-
-    def _get_invoice_proforma_pdf_report_filename(self):
-        """ Get the filename of the generated proforma PDF invoice report. """
-        self.ensure_one()
-        return f"{self.name.replace('/', '_')}_proforma.pdf"
+        return f"{self.name.replace('/', '_')}{'_proforma' if proforma else ''}.{extension}"
 
     def _prepare_edi_vals_to_export(self):
         ''' The purpose of this helper is to prepare values in order to export an invoice through the EDI system.
