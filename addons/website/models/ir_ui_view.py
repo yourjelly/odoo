@@ -484,6 +484,7 @@ class View(models.Model):
             ], limit=1)
             if website_specific_view:
                 self = website_specific_view
+        value = self._sign_contact_form(value)
         super(View, self).save(value, xpath=xpath)
 
     @api.model
@@ -494,10 +495,10 @@ class View(models.Model):
             'data-bg-video-src', 'data-shape', 'data-scroll-background-ratio',
         ]
 
-    def _get_combined_arch(self):
-        root = super(View, self)._get_combined_arch()
-        if not root.findall('.//form'):  # Most efficient way to discard the function if there is no form in the view
-            return root
+    def _sign_contact_form(self, value):
+        if b"/website/form/" not in value:  # Most efficient way to discard the function if there is no form in the view
+            return value
+        root = etree.fromstring(value)
         nodes = root.xpath('.//form[contains(@action, "/website/form/")]')
         for form in nodes:
             existing_hash_node = form.find('.//input[@type="hidden"][@name="website_form_signature"]')
@@ -523,7 +524,7 @@ class View(models.Model):
                 hash_value += ':email_cc'
             form_values['email_to'].addnext(etree.fromstring(hash_node))
             form_values['email_to'].getnext().attrib['value'] = hash_value
-        return root
+        return etree.tostring(root)
 
     # --------------------------------------------------------------------------
     # Snippet saving
