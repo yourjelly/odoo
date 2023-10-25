@@ -1097,14 +1097,60 @@ actual arch.
                     # the node has been removed, stop processing here
                     continue
 
+            # get mandatory fields
+            for attr, expr in node.items():
+                if attr in VIEW_MODIFIERS or attr.startswith('decoration-'):
+                    vnames = get_expression_field_names(expr)
+                    name_manager.must_have_fields(node, vnames, (attr, expr))
+
             # if present, iterate on node_info['children'] instead of node
             for child in reversed(node_info.get('children', node)):
                 stack.append((child, node_info['editable']))
 
+        self._add_missing_fields(name_manager, root)
         name_manager.update_available_fields()
+
         root.set('model_access_rights', model._name)
 
         return name_manager
+
+    def _add_missing_fields(self, name_manager, root):
+        missing_fields = name_manager.get_missing_fields()
+        for name, (missing_groups, reasons) in missing_fields.items():
+            if name not in name_manager.model._fields:
+                continue
+            if missing_groups is False:
+                # This case can happen if the access rights are modified after the view has been validated.
+                self._log_view_warning(_(
+                    "There is no combination of groups that can guarantee the visibility of the field %(name)r on model %(model)r.\n"
+                    "Please check the access rights on the model and the field description.",
+                    name=name, model=name_manager.model._name,
+                ), root)
+
+            mandatory_groups = sorted(set(chain(*missing_groups))) if missing_groups else []
+
+            # If the available fields have different groups then to avoid it being missing for
+            # certain users, we virtually add a field with common groups.
+            name_manager.available_fields[name].setdefault('info', {})
+            name_manager.available_fields[name].setdefault('groups', []).append(mandatory_groups)
+            name_manager.available_names.add(name)
+
+            # If the field is not in the view without any group restriction,
+            # add the field node with all mandatory groups (or without group if
+            # the mandatory field does not have groups).
+            attrs = {
+                'name': name,
+                'invisible': 'True',
+                'readonly': 'True',
+                'data-used-by': '; '.join([f"{attr}='{expr}' ({node.tag},{node.get('name')})" for _groups, (attr, expr), node in reasons])
+            }
+            if root.tag == 'tree':
+                attrs['column_invisible'] = 'True'
+            if mandatory_groups:
+                attrs['groups'] = ','.join(mandatory_groups)
+            item = etree.Element('field', attrs)
+            item.tail = '\n'
+            root.append(item)
 
     def _postprocess_on_change(self, arch, model):
         """ Add attribute on_change="1" on fields that are dependencies of
@@ -2980,11 +3026,6 @@ class NameManager:
                         )
                     )
                 error_msg = '\n'.join(msg)
-            else:
-                error_msg = _(
-                    "Field %(name)r in %(use)s is not present in this view.",
-                    name=name, use=use, model=self.model._name,
-                )
 
             if error_msg:
                 if self.model.pool._init and not config['test_enable'] and not getattr(threading.current_thread(), 'testing', False):
