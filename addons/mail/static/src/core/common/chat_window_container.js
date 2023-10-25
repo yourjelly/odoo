@@ -8,15 +8,7 @@ import {
 } from "@mail/core/common/chat_window_service";
 import { useMessaging, useStore } from "@mail/core/common/messaging_hook";
 
-import {
-    Component,
-    onWillStart,
-    useExternalListener,
-    useState,
-    onMounted,
-    useRef,
-    useEffect,
-} from "@odoo/owl";
+import { Component, useExternalListener, useState, onMounted, useRef, useEffect } from "@odoo/owl";
 
 import { browser } from "@web/core/browser/browser";
 import { Dropdown } from "@web/core/dropdown/dropdown";
@@ -47,11 +39,21 @@ export class ChatWindowContainer extends Component {
         this.chatWindowService = useState(useService("mail.chat_window"));
         this.ui = useState(useService("ui"));
         this.hiddenMenuRef = useRef("hiddenMenu");
+        if (new URLSearchParams(document.location.search).has("old")) {
+            this.state = { ready: true };
+            owl.onWillStart(() => this.messaging.isReady);
+        } else {
+            this.state = useState({ ready: false });
+            this.messaging.isReady.then(() => {
+                // do not wait for messaging to be ready in onWillStart to prevent
+                // from slowing down the whole webclient initial rendering
+                this.state.ready = true;
+            });
+        }
         useEffect(
             () => this.setHiddenMenuOffset(),
-            () => [this.chatWindowService.hidden]
+            () => [this.chatWindowService.hidden, this.state.ready]
         );
-        onWillStart(() => this.messaging.isReady);
         onMounted(() => this.setHiddenMenuOffset());
 
         this.onResize();

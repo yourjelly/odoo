@@ -27,10 +27,13 @@ export async function startWebClient(Webclient) {
         isEnterprise: session.server_version_info.slice(-1)[0] === "e",
     };
     odoo.isReady = false;
+    console.time("webclient mounted");
 
     // setup environment
     const env = makeEnv();
+    console.time("startService");
     await startServices(env);
+    console.timeEnd("startService");
 
     // start web client
     await whenReady();
@@ -48,6 +51,7 @@ export async function startWebClient(Webclient) {
     renderToString.app = app;
     setLoadXmlDefaultApp(app);
     const root = await app.mount(document.body);
+    console.timeEnd("webclient mounted");
     const classList = document.body.classList;
     if (localization.direction === "rtl") {
         classList.add("o_rtl");
