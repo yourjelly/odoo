@@ -69,8 +69,6 @@
                     <setting id="pricelists_setting" title="With the first mode you can set several prices in the product config form (from Sales tab). With the second one, you set prices and computation rules from Pricelists." help="Manage pricelists to apply specific prices per country, customer, products, etc">
                         <field name="group_product_pricelist"/>
                         <div class="content-group mt16" invisible="not group_product_pricelist">
-                            <field name="group_sale_pricelist" invisible="1"/>
-                            <field name="group_product_pricelist" invisible="1"/>
                             <field name="product_pricelist_setting" class="o_light_label w-75" widget="radio"/>
                         </div>
                         <div invisible="not group_product_pricelist">

@@ -28,7 +28,6 @@
             <field name="model">account.tour.upload.bill.email.confirm</field>
             <field name="arch" type="xml">
                 <form>
-                    <field name="email_alias" invisible="1"/>
                     <sheet>
                         <p invisible="not email_alias">Send your email to <field name="email_alias" class="oe_inline" widget="email"/> with a pdf of an invoice as attachment.</p>
                         <p invisible="not email_alias">Once done, press continue.</p>

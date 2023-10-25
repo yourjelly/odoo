@@ -47,7 +47,6 @@
                         </div>
                         <group>
                             <group>
-                                <field name="active" invisible="1"/>
                                 <field name="type"/>
                             </group>
                             <group>

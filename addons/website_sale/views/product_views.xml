@@ -159,7 +159,6 @@
             </group>
             <xpath expr="//page[@name='sales']/group[@name='sale']" position="inside">
                 <group string="eCommerce Shop" name="shop" invisible="not sale_ok">
-                    <field name="website_url" invisible="1"/>
                     <field name="website_id" options="{'no_create': True}" groups="website.group_multi_website"/>
                     <field name="website_sequence" groups="base.group_no_one"/>
                     <field name="public_categ_ids" widget="many2many_tags" string="Categories"/>
@@ -285,7 +284,6 @@
         <field name="arch" type="xml">
             <group name="pricelist_availability" position="after">
                 <group name="pricelist_website" string="Website">
-                    <field name="company_id" invisible="1"/>
                     <field name="website_id" options="{'no_create': True}"/>
                     <field name="selectable"/>
                     <field name="code"/>
@@ -312,7 +310,6 @@
         <field name="model">product.image</field>
         <field name="arch" type="xml">
             <form string="Product Images">
-                <field name="sequence" invisible="1"/>
                 <div class="row o_website_sale_image_modal">
                     <div class="col-md-6 col-xl-5">
                         <label for="name" string="Image Name"/>

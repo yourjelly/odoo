@@ -5,10 +5,6 @@
         <field name="model">res.company</field>
         <field name="inherit_id" ref="base.view_company_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//field[@name='country_id']" position="after">
-                <field name="country_code" invisible="1"/>
-                <field name="account_enabled_tax_country_ids" invisible="1"/>
-            </xpath>
             <xpath expr="//sheet" position="after">
                 <div class="oe_chatter">
                     <field name="message_follower_ids" groups="base.group_user"/>
