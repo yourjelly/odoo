@@ -492,6 +492,7 @@ class Post(models.Model):
     def create(self, vals):
         if 'content' in vals and vals.get('forum_id'):
             vals['content'] = self._update_content(vals['content'], vals['forum_id'])
+            vals['content'] = vals['content'].replace('\\', '')
 
         post = super(Post, self.with_context(mail_create_nolog=True)).create(vals)
         # deleted or closed questions
