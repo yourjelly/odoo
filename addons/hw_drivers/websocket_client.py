@@ -44,10 +44,11 @@ def on_message(ws, messages):
             payload = document['message']['payload']
             if helpers.get_mac_address() in payload['iotDevice']['iotIdentifiers']:
                 #send box confirmation
-                for device in payload['iotDevice']['identifiers']:
-                    if device['identifier'] in main.iot_devices:
-                        main.iot_devices[device["identifier"]]._action_default(payload) #I need the str id here
-                        send_to_controller(payload['print_id'], device['identifer'])
+                identifiers = payload['identifiers']
+                for identifier in identifiers:
+                    if identifier in main.iot_devices:
+                        main.iot_devices[identifier]._action_default(payload) #I need the str id here
+                        send_to_controller(payload['print_id'], identifier)
 
 
 def on_error(ws, error):
