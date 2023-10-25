@@ -27,8 +27,9 @@ export async function startWebClient(Webclient) {
 
     // setup environment
     const env = makeEnv();
+    console.time("startService");
     await startServices(env);
-
+    console.timeEnd("startService");
     Component.env = env;
 
     // start web client
@@ -43,6 +44,8 @@ export async function startWebClient(Webclient) {
         translateFn: _t,
     });
     const root = await app.mount(document.body);
+    console.log("webclient mounted");
+    console.timeEnd("pageload");
     const classList = document.body.classList;
     if (localization.direction === "rtl") {
         classList.add("o_rtl");

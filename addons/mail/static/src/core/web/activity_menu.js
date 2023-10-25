@@ -21,7 +21,9 @@ export class ActivityMenu extends Component {
     }
 
     async fetchSystrayActivities() {
+        console.log("systray_get_activities (init)");
         const groups = await this.env.services.orm.call("res.users", "systray_get_activities");
+        console.log("systray_get_activities");
         let total = 0;
         for (const group of groups) {
             total += group.total_count || 0;

@@ -254,6 +254,7 @@
                 <script type="text/javascript">
                     // Block to avoid leaking variables in the script scope
                     {
+                        console.time("pageload");
                         odoo.__session_info__ = <t t-out="json.dumps(session_info)"/>;
                         const { user_context,  cache_hashes } = odoo.__session_info__;
                         const lang = new URLSearchParams(document.location.search).get("lang");
