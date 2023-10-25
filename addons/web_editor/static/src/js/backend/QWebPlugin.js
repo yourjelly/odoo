@@ -135,13 +135,21 @@ export class QWebPlugin {
     }
     _selectQwebNode(editor) {
         editor.addDomListener(editor.document, 'selectionchange', e => {
-            const selection = e.target.getSelection();
-            const qwebNode = selection.anchorNode && closestElement(selection.anchorNode, '[t-field],[t-esc],[t-out]');
-            if (qwebNode){
-                const range = new Range();
-                range.selectNode(qwebNode);
-                selection.removeAllRanges();
-                selection.addRange(range);
+            if (e.target.tagName === 'TEXTAREA') {
+                // Handle the textarea selection differently
+                const start = e.target.selectionStart;
+                const end = e.target.selectionEnd;
+                e.target.setSelectionRange(start, end);
+            } else {
+                const selection = e.target.getSelection();
+                console.log(selection, 'sele');
+                const qwebNode = selection.anchorNode && closestElement(selection.anchorNode, '[t-field],[t-esc],[t-out]');
+                if (qwebNode) {
+                    const range = new Range();
+                    range.selectNode(qwebNode);
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+                }
             }
         });
     }
