@@ -92,8 +92,8 @@ const ImageCropWidget = Widget.extend({
         this._onDocumentKeydown = this._onDocumentKeydown.bind(this);
         // We use capture so that the handler is called before other editor handlers
         // like save, such that we can restore the src before a save.
-        this.document.addEventListener('mousedown', this._onDocumentMousedown, {capture: true});
-        this.document.addEventListener('keydown', this._onDocumentKeydown, {capture: true});
+        document.addEventListener('mousedown', this._onDocumentMousedown, {capture: true});
+        document.addEventListener('keydown', this._onDocumentKeydown, {capture: true});
         return _super(...arguments);
     },
     /**
@@ -102,8 +102,8 @@ const ImageCropWidget = Widget.extend({
     destroy() {
         if (this.$cropperImage) {
             this.$cropperImage.cropper('destroy');
-            this.document.removeEventListener('mousedown', this._onDocumentMousedown, {capture: true});
-            this.document.removeEventListener('keydown', this._onDocumentKeydown, {capture: true});
+            document.removeEventListener('mousedown', this._onDocumentMousedown, {capture: true});
+            document.removeEventListener('keydown', this._onDocumentKeydown, {capture: true});
         }
         this.media.setAttribute('src', this.initialSrc);
         this.$media.trigger('image_cropper_destroyed');
