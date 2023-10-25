@@ -19,7 +19,7 @@ from odoo.addons.http_routing.models.ir_http import slug, unslug
 from odoo.exceptions import UserError, ValidationError
 from odoo.modules.module import get_resource_path
 from odoo.tools.mimetypes import guess_mimetype
-from odoo.tools.image import image_data_uri, base64_to_image
+from odoo.tools.image import ImageProcess, image_data_uri, base64_to_image
 from odoo.addons.base.models.assetsbundle import AssetsBundle
 
 from ..models.ir_attachment import SUPPORTED_IMAGE_EXTENSIONS, SUPPORTED_IMAGE_MIMETYPES
@@ -191,7 +191,8 @@ class Web_Editor(http.Controller):
             try:
                 data = tools.image_process(data, size=(width, height), quality=quality, verify_resolution=True)
                 mimetype = guess_mimetype(b64decode(data))
-                if mimetype not in SUPPORTED_IMAGE_MIMETYPES:
+                img = ImageProcess(data, verify_resolution=False)
+                if not img.image or mimetype not in SUPPORTED_IMAGE_MIMETYPES:
                     return {'error': format_error_msg}
             except UserError:
                 # considered as an image by the browser file input, but not
