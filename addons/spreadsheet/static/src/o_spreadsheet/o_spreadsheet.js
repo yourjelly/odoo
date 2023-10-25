@@ -30510,6 +30510,16 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             if (count) {
                 this.setPaneDivisions(sheet.id, sheet.panes.ySplit - count, "ROW");
             }
+            // Remove the filter tables whose data filter headers are in the removed rows.
+            const filterTables = this.getters.getFilterTables(sheet.id);
+            for (let filterTable of filterTables) {
+                if (rows.includes(filterTable.zone.top)) {
+                    this.dispatch("REMOVE_FILTER_TABLE", {
+                        sheetId: sheet.id,
+                        target: [filterTable.zone],
+                    });
+                }
+            }
         }
         addColumns(sheet, column, position, quantity) {
             const index = position === "before" ? column : column + 1;
@@ -33199,6 +33209,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                     break;
                 case "HIDE_COLUMNS_ROWS":
                 case "UNHIDE_COLUMNS_ROWS":
+                case "ADD_COLUMNS_ROWS":
+                case "REMOVE_COLUMNS_ROWS":
                     this.updateHiddenRows();
                     break;
                 case "UPDATE_FILTER":
@@ -42997,8 +43009,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
 
 
     __info__.version = '16.0.22';
-    __info__.date = '2023-10-19T15:24:20.617Z';
-    __info__.hash = '7f76b56';
+    __info__.date = '2023-10-25T09:13:09.153Z';
+    __info__.hash = '142d757';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
