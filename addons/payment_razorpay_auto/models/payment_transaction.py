@@ -68,9 +68,8 @@ class PaymentTransaction(models.Model):
     def _get_razorpay_order_token_data(self):
         self.ensure_one()
         today = datetime.today()
-        token_expiry_date = today + relativedelta(year=999)
+        token_expiry_date = today + relativedelta(years=10)
         token_expiry_timeslamp = time.mktime(token_expiry_date.timetuple())
-        print("\n\n\n token_expiry_timeslamp", token_expiry_timeslamp)
         return {
             "max_amount": self.provider_id.maximum_amount or 9999900,
             "expire_at": token_expiry_timeslamp,
@@ -97,11 +96,16 @@ class PaymentTransaction(models.Model):
         :return: None
         """
         # Create the token.
+        if self.razorpay_payment_method == 'card':
+            payment_details = notification_data.get('card', {}).get('last4', '')
+        elif  self.razorpay_payment_method == 'upi':
+            payment_details = notification_data.get('vpa', '')
+
         token = self.env['payment.token'].create({
             'provider_id': self.provider_id.id,
-            'payment_details': notification_data['token_id'],
+            'payment_details': payment_details,
             'partner_id': self.partner_id.id,
-            'provider_ref': notification_data['customer_id'],
+            'provider_ref': f"{notification_data['customer_id']},{notification_data['token_id']}",
             'verified': True,
         })
         self.write({
@@ -136,14 +140,15 @@ class PaymentTransaction(models.Model):
         order_response = self._create_order(is_payment_capture=True)
         # Create recurring payment
         phone = self._validate_and_sanatize_phone_number(self.partner_id.phone)
+        customer_id, token_id = self.token_id.provider_ref.split(',')
         recurring_payment_payload = {
             'email': self.partner_id.email,
             'contact': phone,
             'amount': order_response['amount'],
             'currency': self.currency_id.name,
             'order_id': order_response['id'],
-            'customer_id': self.token_id.provider_ref,
-            'token': self.token_id.payment_details,
+            'customer_id': customer_id,
+            'token': token_id,
             'description': self.reference,
             'recurring': "1",
         }
