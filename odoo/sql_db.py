@@ -14,6 +14,7 @@ import re
 import threading
 import time
 import uuid
+import warnings
 from contextlib import contextmanager
 from datetime import datetime, timedelta
 from inspect import currentframe
@@ -321,6 +322,8 @@ class Cursor(BaseCursor):
         if isinstance(query, SQL):
             assert params is None, "Unexpected parameters for SQL query object"
             query, params = query.code, query.params
+        else:
+            warnings.warn("Deprecated use of Cursor.execute() without SQL", DeprecationWarning, 2)
 
         if params and not isinstance(params, (tuple, list, dict)):
             # psycopg2's TypeError is not clear if you mess up the params
