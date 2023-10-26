@@ -46,6 +46,7 @@ import {
 import { isCSSColor } from '@web/core/utils/colors';
 import { EmojiPicker } from '@web/core/emoji_picker/emoji_picker';
 import { Tooltip } from "@web/core/tooltip/tooltip";
+import { DateTimePicker } from "@web/core/datetime/datetime_picker";
 
 const OdooEditor = OdooEditorLib.OdooEditor;
 const getDeepRange = OdooEditorLib.getDeepRange;
@@ -1621,6 +1622,47 @@ export class Wysiwyg extends Component {
             { position: `bottom-${position}`}
         );
     }
+
+    showDateTime () {
+        const targetEl = this.odooEditor.document.getSelection();
+        const closest = closestBlock(targetEl.anchorNode);
+        const restoreSelection = preserveCursor(this.odooEditor.document);
+        this.popover.add(closest, DateTimePicker, {
+            onSelect: async (str) => {
+                restoreSelection();
+                this.odooEditor.execCommand('insert', parseHTML(this.odooEditor.document, `
+                <span>
+                    <span class="o_datetimepicker_icon fa fa-calendar"></span>
+                    <span class="o_datetimepicker_value">${str.c.year+"-"+str.c.month+"-"+str.c.day+" "+str.c.hour+":"+(str.c.minute < 10 ? "0"+str.c.minute : str.c.minute)}</span>
+                </span>
+                `));
+                const popoverEl = document.querySelector('.o_popover').childNodes;
+                // remove datetime picker as well as tooltip from popover.
+                popoverEl && popoverEl.forEach(el => el.remove());
+                const datePickerIcon = document.querySelector('.o_datetimepicker_icon');
+                datePickerIcon && datePickerIcon?.addEventListener('click', async (ev) => {
+                    ev.preventDefault();
+                    ev.stopPropagation();
+                    const dateValue = datePickerIcon.nextElementSibling;
+                    setSelection(dateValue, 0, dateValue, dateValue.childNodes.length, false);
+                    this.showDateTime();
+                    datePickerIcon.remove();
+                });
+            }
+        },  {
+            onPositioned: (popover, position) => {
+                restoreSelection();
+                const rangePosition = getRangePosition(popover, this.options.document, this.options.getContextFromParentRect());
+                popover.style.top = rangePosition.top + 'px';
+                popover.style.left = (rangePosition.left - 9) + 'px';
+                popover.classList = [
+                    "o_popover popover mw-100",
+                    `bs-popover-${position.direction}`,
+                    `o-popover-${position.direction}`,
+                ].join(" ");
+            },
+        });
+    }
     /**
      * Sets custom CSS Variables on the snippet menu element.
      * Used for color previews and color palette to get the color
@@ -2442,6 +2484,16 @@ export class Wysiwyg extends Component {
                     fontawesome: 'fa-smile-o',
                     callback: () => {
                         this.showEmojiPicker();
+                    },
+                },
+                {
+                    category: _t('Widgets'),
+                    name: _t('Date and Time'),
+                    priority: 72,
+                    description: _t('Add date and time to content'),
+                    fontawesome: 'fa-clock-o',
+                    callback: () => {
+                        this.showDateTime();
                     },
                 },
             );
