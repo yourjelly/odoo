@@ -7,52 +7,16 @@
     <div class="o_event_foldable_badge_container">
         <div class="row">
             <!-- Front -->
-            <div class="page p-1 col-6 o_event_foldable_badge_top">
+            <div class="page col-6 o_event_foldable_badge_top o_event_foldable_badge_ticket pt-4">
                 <div class="oe_structure"/>
+                <t t-call="event.event_report_template_foldable_badge_content" />
             </div>
             <!-- Back -->
             <div class="page col-6 o_event_foldable_badge_top o_event_foldable_badge_ticket pt-4">
                 <div class="oe_structure"/>
-                <div class="o_event_foldable_badge_ticket_wrapper p-2">
-                    <div class="o_event_foldable_badge_ticket_wrapper_top page">
-                        <h5 class="o_event_foldable_badge_event_name text-primary fw-bold text-center" t-field="event.name"/>
-                        <div class="text-center o_event_foldable_badge_font_small">
-                            <span itemprop="startDate" t-field="event.date_begin"
-                                t-options='{"widget": "datetime", "date_only": True}'
-                                class="fw-bold"/>
-                            <span itemprop="startDateTime" t-field="event.date_begin"
-                                class="fw-bold"
-                                t-options='{"widget": "datetime", "time_only": True, "tz_name": event.date_tz, "hide_seconds": True}'/>
-                            <span class="oi oi-arrow-right o_event_foldable_badge_font_faded"/>
-                            <span t-if="not event.is_one_day"
-                                itemprop="endDate" t-field="event.date_end"
-                                t-options='{"widget": "datetime", "date_only": True}'
-                                class="fw-bold"/>
-                            <span itemprop="endDateTime" t-field="event.date_end"
-                                class="fw-bold"
-                                t-options='{"widget": "datetime", "time_only": True, "tz_name": event.date_tz, "hide_seconds": True}'/>
-                        </div>
-                        <div class="o_event_foldable_badge_font_faded o_event_foldable_badge_font_small text-center">
-                            (<span itemprop="timezone" t-out="event.date_tz"/>)
-                        </div>
-                        <div t-if="event.address_id" class="o_event_foldable_badge_font_faded o_event_foldable_badge_font_small text-center">
-                            <t t-call="event.event_report_template_formatted_event_address"/>
-                        </div>
-                        <div class="text-center mt-5 pt-2">
-                            <h2 t-if="attendee" t-field="attendee.name"/>
-                            <h2 t-elif="not attendee"><span>John Doe</span></h2>
-                            <t t-set="first_ticket" t-value="event.event_ticket_ids[0] if event.event_ticket_ids else None"/>
-                            <div t-if="attendee" class="o_event_foldable_badge_font_faded" t-field="attendee.event_ticket_id"/>
-                            <div t-elif="first_ticket" t-out="first_ticket.name"
-                                class="o_event_foldable_badge_font_faded"/>
-                        </div>
-                    </div>
-                    <div class="o_event_foldable_badge_barcode mt-2">
-                        <div class="o_event_foldable_badge_barcode_container">
-                        </div>
-                    </div>
-                </div>
+                <t t-call="event.event_report_template_foldable_badge_content" />
             </div>
+
         </div>
         <div class="row">
             <!-- Inner left -->
@@ -66,23 +30,70 @@
                 <div class="h-50 col-12 row m-0">
                     <div class="col-6 h-100 p-0">
                         <div class="o_event_foldable_badge_step fw-bold">1</div>
-                        <img src="/event/static/src/img/how_to_fold_1.png" class="w-100 h-100" alt="How to Fold (1)"/>
+                        <img src="/event/static/src/img/how_to_fold_1.png" class="w-100 h-75" alt="How to Fold (1)"/>
                     </div>
                     <div class="col-6 h-100 p-0">
                         <div class="o_event_foldable_badge_step fw-bold">2</div>
-                        <img src="/event/static/src/img/how_to_fold_2.png" class="w-100 h-100" alt="How to Fold (2)"/>
+                        <img src="/event/static/src/img/how_to_fold_2.png" class="w-100 h-75" alt="How to Fold (2)"/>
                     </div>
                 </div>
                 <div class="h-50 col-12 row m-0">
                     <div class="col-6 h-100 p-0">
                         <div class="o_event_foldable_badge_step fw-bold">3</div>
-                        <img src="/event/static/src/img/how_to_fold_3.png" class="w-100 h-100" alt="How to Fold (3)"/>
+                        <img src="/event/static/src/img/how_to_fold_3.png" class="w-100 h-75" alt="How to Fold (3)"/>
                     </div>
                     <div class="col-6 h-100 p-0">
                         <div class="o_event_foldable_badge_step fw-bold">4</div>
-                        <img src="/event/static/src/img/how_to_fold_4.png" class="w-100 h-100" alt="How to Fold (4)"/>
+                        <img src="/event/static/src/img/how_to_fold_4.png" class="w-100 h-75" alt="How to Fold (4)"/>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+<template id="event_report_template_foldable_badge_content">
+    <div class="o_event_foldable_badge_ticket_wrapper p-2">
+        <div class="o_event_foldable_badge_ticket_wrapper_top page">
+            <h5 class="o_event_foldable_badge_event_name text-odoo fw-bold text-odoo" t-field="event.name"/>
+            <div class="text-center o_event_foldable_badge_font_small">
+                <span itemprop="startDate" t-field="event.date_begin"
+                    t-options='{"widget": "datetime", "date_only": True}'
+                    class="fw-bold"/>
+                <span itemprop="startDateTime" t-field="event.date_begin"
+                    class="fw-bold"
+                    t-options='{"widget": "datetime", "time_only": True, "tz_name": event.date_tz, "hide_seconds": True}'/>
+                <span class="oi oi-arrow-right o_event_foldable_badge_font_faded"/>
+                <span t-if="not event.is_one_day"
+                    itemprop="endDate" t-field="event.date_end"
+                    t-options='{"widget": "datetime", "date_only": True}'
+                    class="fw-bold"/>
+                <span itemprop="endDateTime" t-field="event.date_end"
+                    class="fw-bold"
+                    t-options='{"widget": "datetime", "time_only": True, "tz_name": event.date_tz, "hide_seconds": True}'/>
+            </div>
+            <div class="o_event_foldable_badge_font_faded o_event_foldable_badge_font_small text-center">
+                (<span itemprop="timezone" t-out="event.date_tz"/>)
+            </div>
+            <div t-if="event.address_id" class="o_event_foldable_badge_font_faded o_event_foldable_badge_font_small text-center">
+                <t t-call="event.event_report_template_formatted_event_address"/>
+            </div>
+            <div class="text-center mt-5 pt-2">
+                <t t-if="attendee">
+                    <h2 t-field="attendee.name"/>
+                    <h4 t-field="attendee.company_name" class="o_event_foldable_badge_font_faded"/>
+                </t>
+                <t t-elif="not attendee">
+                    <h2><span>John Doe</span></h2>
+                    <h4><span>The company</span></h4>
+                </t>
+            </div>
+        </div>
+        <div class="o_event_foldable_badge_barcode mt-2">
+            <div class="o_event_foldable_badge_barcode_container text-center">
+                <t t-set="first_ticket" t-value="event.event_ticket_ids[0] if event.event_ticket_ids else None"/>
+                <div t-if="attendee" class="h2 ticket_name" t-field="attendee.event_ticket_id"/>
+                <div t-elif="first_ticket" t-out="first_ticket.name" class="h2 ticket_name"/>
             </div>
         </div>
     </div>
