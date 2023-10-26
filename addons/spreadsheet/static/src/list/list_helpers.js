@@ -1,5 +1,6 @@
 /** @odoo-module */
 
+import { memoize } from "@web/core/utils/functions";
 import { getOdooFunctions } from "../helpers/odoo_functions_helpers";
 
 /**
@@ -10,9 +11,9 @@ import { getOdooFunctions } from "../helpers/odoo_functions_helpers";
  *
  * @returns {number}
  */
-export function getNumberOfListFormulas(formula) {
+export const getNumberOfListFormulas = memoize(function getNumberOfListFormulas(formula) {
     return getOdooFunctions(formula, ["ODOO.LIST", "ODOO.LIST.HEADER"]).length;
-}
+});
 
 /**
  * Get the first List function description of the given formula.
@@ -21,6 +22,6 @@ export function getNumberOfListFormulas(formula) {
  *
  * @returns {import("../helpers/odoo_functions_helpers").OdooFunctionDescription|undefined}
  */
-export function getFirstListFunction(formula) {
+export const getFirstListFunction = memoize(function getFirstListFunction(formula) {
     return getOdooFunctions(formula, ["ODOO.LIST", "ODOO.LIST.HEADER"])[0];
-}
+});

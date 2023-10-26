@@ -2,6 +2,7 @@
 
 import { _t } from "@web/core/l10n/translation";
 import { getOdooFunctions } from "../helpers/odoo_functions_helpers";
+import { memoize } from "@web/core/utils/functions";
 
 export const pivotFormulaRegex = /^=.*PIVOT/;
 
@@ -17,14 +18,14 @@ export const pivotFormulaRegex = /^=.*PIVOT/;
  *
  * @returns {number}
  */
-export function getNumberOfPivotFormulas(formula) {
+export const getNumberOfPivotFormulas = memoize(function getNumberOfPivotFormulas(formula) {
     return getOdooFunctions(formula, [
         "ODOO.PIVOT",
         "ODOO.PIVOT.HEADER",
         "ODOO.PIVOT.POSITION",
         "ODOO.PIVOT.TABLE",
     ]).length;
-}
+});
 
 /**
  * Get the first Pivot function description of the given formula.
@@ -33,14 +34,14 @@ export function getNumberOfPivotFormulas(formula) {
  *
  * @returns {import("../helpers/odoo_functions_helpers").OdooFunctionDescription|undefined}
  */
-export function getFirstPivotFunction(formula) {
+export const getFirstPivotFunction = memoize(function getFirstPivotFunction(formula) {
     return getOdooFunctions(formula, [
         "ODOO.PIVOT",
         "ODOO.PIVOT.HEADER",
         "ODOO.PIVOT.POSITION",
         "ODOO.PIVOT.TABLE",
     ])[0];
-}
+});
 
 /**
  * Build a pivot formula expression
