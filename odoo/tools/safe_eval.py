@@ -634,30 +634,10 @@ def allow_instance(t):
     return t
 
 
-def check_keys(d, reserved_keys):
-    """
-    Checks if no reserved keys are used in a dictionary
-
-    :param d: The dictionary to check
-    :param reserved_keys: The reserved keys
-
-    :raises NameError: If a reserved key is used
-
-    :return: The dictionary if no reserved keys are used
-    """
-    if not d:
-        return d
-
-    new_dict = d.copy()
-
-    for k in d:
-        if k in reserved_keys:
-            del new_dict[k]
-
-    d = new_dict
-
-def safe_eval(expr, globals_dict=None, locals_dict=None, mode="eval",
-        nocopy=False, locals_builtins=False, filename=None, sandboxed_instances=(), sandboxed_types=(), ast_subset=_ALLOWED_NODES):
+def safe_eval(
+        expr, locals_dict=None, globals_dict=None, mode="eval", filename=None, sandboxed_instances=(), sandboxed_types=(), nocopy=False,
+        ast_subset=_ALLOWED_NODES
+    ):
     """safe_eval(expression[, globals[, locals[, mode[, nocopy]]]]) -> result
 
     System-restricted Python expression evaluation
@@ -671,18 +651,13 @@ def safe_eval(expr, globals_dict=None, locals_dict=None, mode="eval",
 
     :param expr: the expression to evaluate
 
-    :param globals_dict: a dictionary of global variables to use
-
     :param locals_dict: a dictionary of local variables to use
+    :param globals_dict: deprecated. Merged with locals_dict
 
     :param mode: the mode in which to evaluate the expression
                             (see the built-in function eval() for details)
 
-    :param nocopy: if False, the globals and locals dictionaries are
-                            copied before being passed to eval() to prevent
-                            alteration of the local/globals
-
-    :param locals_builtins: if True, the builtins are added to the locals
+    :param nocopy: deprecated
 
     :param filename: optional pseudo-filename for the compiled expression,
                             displayed for example in traceback frames
@@ -700,7 +675,6 @@ def safe_eval(expr, globals_dict=None, locals_dict=None, mode="eval",
     :throws NameError: If the expression provided accesses forbidden names
     :throws ValueError: If the expression provided uses forbidden bytecode
     """
-
     if type(expr) is types.CodeType: # noqa: E721 (Reason: legacy code) # pylint: disable=unidiomatic-typecheck
         raise TypeError(
             "safe_eval does not allow direct evaluation of code objects."
@@ -711,49 +685,37 @@ def safe_eval(expr, globals_dict=None, locals_dict=None, mode="eval",
             raise ValueError(
                 f"Node {node} is not allowed in the subset of nodes."
             )
-
-    # prevent altering the globals/locals from within the sandbox
-    # by taking a copy.
-    if not nocopy:
-        # isinstance() does not work below, we want *exactly* the dict class
-        if (globals_dict is not None and type(globals_dict) is not dict) \
-                or (locals_dict is not None and type(locals_dict) is not dict):
-            _logger.warning(
-                "Looks like you are trying to pass a dynamic environment, "
-                "you should probably pass nocopy=True to safe_eval().")
-        if globals_dict is not None:
-            globals_dict = dict(globals_dict)
-        if locals_dict is not None:
-            locals_dict = dict(locals_dict)
-
     code_checker = CodeChecker(sandboxed_instances, sandboxed_types, ast_subset)
     safe_env = code_checker.get_environment()
 
-    check_keys(locals_dict, safe_env.keys())
-    check_keys(globals_dict, safe_env.keys())
+    locals_dict = {} if locals_dict is None else locals_dict
+    if globals_dict:
+        locals_dict.update({k: v for k, v in globals_dict.items() if k not in locals_dict})
+    for k in locals_dict:
+        if k in safe_env:
+            raise ValueError(
+                f"The key {k} is not allowed in the locals dict."
+            )
 
-    if globals_dict is None:
-        globals_dict = {}
-
-    globals_dict['__builtins__'] = _BUILTINS
-
-    if locals_builtins:
-        if locals_dict is None:
-            locals_dict = {}
-
-        locals_dict.update(_BUILTINS)
+    # `locals_dict` injected into `globals_dict` as a work-around for variables missing in higher frames:
+    # e.g.
+    # ```py
+    # globals_dict, locals_dict = {}, {"data": {'a': 2, 'b': 3}}
+    # code = """
+    # result = sum(data.get(k, 0) for k in ['a', 'b', 'c'])
+    # """
+    # eval(compile(code, "", "exec"), globals_dict, locals_dict)
+    # ```
+    globals_dict = dict(_BUILTINS, **locals_dict, **safe_env)
 
     if type(expr) is bytes: # noqa: E721 (Reason: legacy code) # pylint: disable=unidiomatic-typecheck
         expr = expr.decode('utf-8')
-
     code = code_checker.visit(ast.parse(expr.strip(), filename=filename or ""))
     c = ast.unparse(code)
 
-    globals_dict.update(safe_env)
-
     try:
-        return unsafe_eval(compile(c, filename or "<sandbox>", mode),
-                           globals_dict, locals_dict)
+        # from an eval standpoint, `globals_dict` is the locals context
+        return unsafe_eval(compile(c, filename or "<sandbox>", mode), globals_dict, locals_dict)
     except odoo.exceptions.UserError:
         raise
     except odoo.exceptions.RedirectWarning:
