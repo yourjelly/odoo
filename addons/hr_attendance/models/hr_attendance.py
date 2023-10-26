@@ -228,6 +228,24 @@ class HrAttendance(models.Model):
     def _get_overtime_leave_domain(self):
         return []
 
+    def _get_attendance_intervals(self, start, stop, employee):
+        calendars = employee._get_calendars(start, stop)
+        expected_attendances = Intervals()
+        for cal in calendars:
+            employee_calendar = cal["calendar"]
+            start_c = pytz.utc.localize(fields.Datetime.to_datetime(cal["date_start"]))
+            stop_c = pytz.utc.localize(fields.Datetime.to_datetime(cal["date_end"]))
+            if start_c < start < stop_c:
+                used_start = max(start, start_c)
+                used_stop = min(stop_c, stop)
+                calendar_expetected_attendances = employee_calendar._attendance_intervals_batch(used_start, used_stop, employee.resource_id)[employee.resource_id.id]
+                calendar_leave_intervals = employee_calendar._leave_intervals_batch(
+                    start_c, stop_c, employee.resource_id, domain=self._get_overtime_leave_domain()
+                )
+                calendar_expetected_attendances -= calendar_leave_intervals[False] | calendar_leave_intervals[employee.resource_id.id]
+                expected_attendances |= calendar_expetected_attendances
+        return expected_attendances
+
     def _update_overtime(self, employee_attendance_dates=None):
         if employee_attendance_dates is None:
             employee_attendance_dates = self._get_attendances_dates()
@@ -258,15 +276,7 @@ class HrAttendance(models.Model):
 
             # Retrieve expected attendance intervals
             calendar = emp.resource_calendar_id or emp.company_id.resource_calendar_id
-            expected_attendances = calendar._attendance_intervals_batch(
-                start, stop, emp.resource_id
-            )[emp.resource_id.id]
-            # Substract Global Leaves and Employee's Leaves
-            leave_intervals = calendar._leave_intervals_batch(
-                start, stop, emp.resource_id, domain=self._get_overtime_leave_domain()
-            )
-            expected_attendances -= leave_intervals[False] | leave_intervals[emp.resource_id.id]
-
+            expected_attendances = self._get_attendance_intervals(start, stop, emp)
             # working_times = {date: [(start, stop)]}
             working_times = defaultdict(lambda: [])
             for expected_attendance in expected_attendances:

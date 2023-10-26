@@ -140,6 +140,22 @@ class Employee(models.Model):
             ))
         return unusual_days
 
+    def _get_calendars(self, start, stop):
+        self.ensure_one()
+        valid_contracts = self.sudo()._get_contracts(start, stop, states=['open', 'close'])
+        if valid_contracts:
+            return [{'date_start': contract.date_start,
+                     'date_end': contract.date_end,
+                     'calendar': contract.resource_calendar_id} for contract in valid_contracts]
+        else:
+            calendar = self.resource_calendar_id or self.company_id.resource_calendar_id
+            return [{
+                'date_start': start,
+                'date_stop': stop,
+                'calendar': calendar
+            }]
+
+
     def _get_calendar_attendances(self, date_from, date_to):
         self.ensure_one()
         valid_contracts = self.sudo()._get_contracts(date_from, date_to, states=['open', 'close'])
