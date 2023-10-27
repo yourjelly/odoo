@@ -81,6 +81,7 @@ var SnippetEditor = Widget.extend({
         this.$body = $(this.ownerDocument.body);
         this.$target = $(target);
         this.$target.data('snippet-editor', this);
+        this.$target[0].dataset.withSnippetEditor = true;
         this.templateOptions = templateOptions;
         this.isTargetParentEditable = false;
         this.isTargetMovable = false;
@@ -179,6 +180,7 @@ var SnippetEditor = Widget.extend({
         }
         this._super(...arguments);
         this.$target.removeData('snippet-editor');
+        delete this.$target[0].dataset.withSnippetEditor;
         this.$target.off('.snippet_editor');
     },
 
@@ -455,7 +457,7 @@ var SnippetEditor = Widget.extend({
 
         // Potentially remove ancestors (like when removing the last column of a
         // snippet).
-        if ($parent.closest(':data("snippet-editor")').length) {
+        if ($parent.closest('[data-with-snippet-editor]').length) {
             const isEmptyAndRemovable = ($el, editor) => {
                 editor = editor || $el.data('snippet-editor');
                 const isEmpty = $el.text().trim() === ''
