@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <template id="ubl_21_AddressType" inherit_id="account_edi_ubl_cii.ubl_20_AddressType">
+        <xpath expr="//*[local-name()='CountrySubentityCode']" position="after">
+            <t xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+               xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+                <cac:AddressLine t-foreach="vals.get('address_line_vals_list', [])" t-as="address_line_vals">
+                    <cbc:Line t-out="address_line_vals"/>
+                </cac:AddressLine>
+            </t>
+        </xpath>
+    </template>
 
     <template id="ubl_21_PaymentTermsType" inherit_id="account_edi_ubl_cii.ubl_20_PaymentTermsType">
         <xpath expr="//*[local-name()='Amount']" position="before">
@@ -39,7 +49,11 @@
     </template>
 
     <template id="ubl_21_InvoiceType" inherit_id="account_edi_ubl_cii.ubl_20_InvoiceType" primary="True">
-        <xpath expr="//*[local-name()='IssueDate']" position="after">
+        <xpath expr="//*[local-name()='ProfileID']" position="after">
+            <cbc:ProfileExecutionID xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+                t-out="vals.get('profile_execution_id')"/>
+        </xpath>
+        <xpath expr="//*[local-name()='InvoiceTypeCode']" position="before">
             <t xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
                 <cbc:DueDate t-out="vals.get('due_date')"/>
             </t>
@@ -49,10 +63,35 @@
                 <cbc:BuyerReference t-out="vals.get('buyer_reference')"/>
             </t>
         </xpath>
+        <xpath expr="//*[local-name()='LegalMonetaryTotal']" position="before">
+            <t xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+                <cac:WithholdingTaxTotal t-foreach="vals.get('withholding_tax_total_vals_list', [])" t-as="foreach_vals">
+                    <t t-call="{{TaxTotalType_template}}">
+                        <t t-set="vals" t-value="foreach_vals"/>
+                    </t>
+                </cac:WithholdingTaxTotal>
+            </t>
+        </xpath>
+    </template>
+
+    <template id="ubl_21_InvoiceLineType" inherit_id="account_edi_ubl_cii.ubl_20_InvoiceLineType" primary="True">
+        <xpath expr="//*[local-name()='TaxTotal']" position="after">
+            <t xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+                <cac:WithholdingTaxTotal t-foreach="vals.get('withholding_tax_total_vals_list', [])" t-as="foreach_vals">
+                    <t t-call="{{TaxTotalType_template}}">
+                        <t t-set="vals" t-value="foreach_vals"/>
+                    </t>
+                </cac:WithholdingTaxTotal>
+            </t>
+        </xpath>
     </template>
 
     <template id="ubl_21_CreditNoteType" inherit_id="account_edi_ubl_cii.ubl_20_CreditNoteType" primary="True">
-        <xpath expr="//*[local-name()='IssueDate']" position="after">
+        <xpath expr="//*[local-name()='ProfileID']" position="after">
+            <cbc:ProfileExecutionID xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+                t-out="vals.get('profile_execution_id')"/>
+        </xpath>
+        <xpath expr="//*[local-name()='IssueTime']" position="after">
             <t xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
                 <cbc:CreditNoteTypeCode
                     t-att="vals.get('document_type_code_attrs', {})"
@@ -86,6 +125,10 @@
     </template>
 
     <template id="ubl_21_DebitNoteType" inherit_id="account_edi_ubl_cii.ubl_20_DebitNoteType" primary="True">
+        <xpath expr="//*[local-name()='ProfileID']" position="after">
+            <cbc:ProfileExecutionID xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+                t-out="vals.get('profile_execution_id')"/>
+        </xpath>
         <xpath expr="//*[local-name()='TaxCurrencyCode']" position="after">
             <t xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
                 <cbc:BuyerReference t-out="vals.get('buyer_reference')"/>

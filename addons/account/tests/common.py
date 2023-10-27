@@ -626,6 +626,9 @@ class AccountTestInvoicingCommon(TransactionCase):
                 )
 
             # Check children.
+            ignored_tags = [child['tag'] for child in expected_node_dict['children'] if child['text'] == '___ignore___']
+            node_dict['children'] = [child for child in node_dict['children'] if child['tag'] not in ignored_tags]
+            expected_node_dict['children'] = [child for child in expected_node_dict['children'] if child['tag'] not in ignored_tags]
             self.assertEqual(
                 [child['tag'] for child in node_dict['children']],
                 [child['tag'] for child in expected_node_dict['children']],
