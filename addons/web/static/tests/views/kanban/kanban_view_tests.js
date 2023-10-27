@@ -8521,7 +8521,7 @@ QUnit.module("Views", (hooks) => {
             arch: `
                 <kanban>
                     <field name="bar" />
-                    <field name="product_id" readonly="not bar"/>
+                    <field name="product_id"/>
                     <templates>
                         <t t-name="kanban-box">
                             <div><field name="id"/></div>

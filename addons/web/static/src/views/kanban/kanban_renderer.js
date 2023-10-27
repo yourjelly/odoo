@@ -14,6 +14,7 @@ import { KanbanColumnQuickCreate } from "./kanban_column_quick_create";
 import { KanbanHeader } from "./kanban_header";
 import { KanbanRecord } from "./kanban_record";
 import { KanbanRecordQuickCreate } from "./kanban_record_quick_create";
+import { evaluateBooleanExpr } from "@web/core/py_js/py";
 
 import { Component, onPatched, onWillDestroy, onWillPatch, useRef, useState } from "@odoo/owl";
 
@@ -229,7 +230,9 @@ export class KanbanRenderer extends Component {
             fieldNodes.length &&
             fieldNodes.some((fieldNode) => "readonly" in fieldNode)
         ) {
-            isReadonly = fieldNodes.every((fieldNode) => fieldNode.readonly === "True");
+            isReadonly = fieldNodes.every(
+                (fieldNode) => evaluateBooleanExpr(fieldNode.readonly)
+            );
         }
         return !isReadonly && this.isMovableField(groupByField);
     }
