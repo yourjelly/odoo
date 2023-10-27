@@ -534,8 +534,6 @@ class BaseAutomation(models.Model):
         """
         # Note: we keep the old action naming for the method and context variable
         # to avoid breaking existing code/downstream modules
-        if '__action_done' not in self._context:
-            self = self.with_context(__action_done={})
         domain = [('model_name', '=', records._name), ('trigger', 'in', triggers)]
         automations = self.with_context(active_test=True).sudo().search(domain)
         return automations.with_env(self.env)
@@ -608,17 +606,16 @@ class BaseAutomation(models.Model):
     def _process(self, records, domain_post=None):
         """ Process automation ``self`` on the ``records`` that have not been done yet. """
         # filter out the records on which self has already been done
-        automation_done = self._context.get('__action_done', {})
+        if not hasattr(self.env.transaction, '_automation_done'):
+            self.env.transaction._automation_done = {}
+        automation_done = self.env.transaction._automation_done
         records_done = automation_done.get(self, records.browse())
         records -= records_done
         if not records:
             return
 
         # mark the remaining records as done (to avoid recursive processing)
-        automation_done = dict(automation_done)
         automation_done[self] = records_done + records
-        self = self.with_context(__action_done=automation_done)
-        records = records.with_context(__action_done=automation_done)
 
         # modify records
         if 'date_automation_last' in records._fields:
@@ -644,6 +641,8 @@ class BaseAutomation(models.Model):
                 except Exception as e:
                     self._add_postmortem(e)
                     raise
+
+        automation_done[self] -= records
 
     def _check_trigger_fields(self, record):
         """ Return whether any of the trigger fields has been modified on ``record``. """
@@ -888,8 +887,6 @@ class BaseAutomation(models.Model):
     @api.model
     def _check(self, automatic=False, use_new_cursor=False):
         """ This Function is called by scheduler. """
-        if '__action_done' not in self._context:
-            self = self.with_context(__action_done={})
 
         # retrieve all the automation rules to run based on a timed condition
         for automation in self.with_context(active_test=True).search([('trigger', 'in', TIME_TRIGGERS)]):
