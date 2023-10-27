@@ -229,7 +229,9 @@ export class KanbanRenderer extends Component {
             fieldNodes.length &&
             fieldNodes.some((fieldNode) => "readonly" in fieldNode)
         ) {
-            isReadonly = fieldNodes.every((fieldNode) => fieldNode.readonly === "True");
+            isReadonly = fieldNodes.every(
+                (fieldNode) => fieldNode.readonly === "True" || fieldNode.readonly === "1"
+            );
         }
         return !isReadonly && this.isMovableField(groupByField);
     }
