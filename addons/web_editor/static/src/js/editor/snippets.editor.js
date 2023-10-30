@@ -455,7 +455,7 @@ var SnippetEditor = Widget.extend({
 
         // Potentially remove ancestors (like when removing the last column of a
         // snippet).
-        if ($parent.closest(':data("snippet-editor")').length) {
+        if (false) {
             const isEmptyAndRemovable = ($el, editor) => {
                 editor = editor || $el.data('snippet-editor');
                 const isEmpty = $el.text().trim() === ''
