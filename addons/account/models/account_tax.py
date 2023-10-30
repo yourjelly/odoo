@@ -1068,7 +1068,7 @@ class AccountTax(models.Model):
                     **tax_values,
                     'tax_amount_factorized': line_amount,
                     'tax_amount': line_amount,
-                    'repartition_line': rep_line,
+                    'tax_repartition_line': rep_line,
                     'tags': subsequent_tags | rep_line_tags,
                 }
                 tax_rep_values_list.append(tax_rep_values)
@@ -1296,14 +1296,14 @@ class AccountTax(models.Model):
         total_void = total_excluded + sum(
             tax_values['tax_amount']
             for tax_values in tax_values_list
-            if not tax_values['repartition_line'].account_id
+            if not tax_values['tax_repartition_line'].account_id
         )
 
         # Convert to the 'old' compute_all api.
         taxes = []
         for tax_values in tax_values_list:
             tax = tax_values['tax']
-            rep_line = tax_values['repartition_line']
+            rep_line = tax_values['tax_repartition_line']
             taxes.append({
                 'id': tax.id,
                 'name': partner and tax.with_context(lang=partner.lang).name or tax.name,
