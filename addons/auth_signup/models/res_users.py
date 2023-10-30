@@ -148,15 +148,22 @@ class ResUsers(models.Model):
             # copy may failed if asked login is not available.
             raise SignupError(ustr(e))
 
+    @api.model
+    def _get_reset_password_users(self, login):
+        users = self.search([('login', '=', login)])
+        if not users:
+            users = self.search([('email', '=', login)])
+        return users
+
     def reset_password(self, login):
         """ retrieve the user corresponding to login (login or email),
             and reset their password
         """
-        users = self.search([('login', '=', login)])
+        users = self._get_reset_password_users(login)
         if not users:
-            users = self.search([('email', '=', login)])
-        if len(users) != 1:
             raise Exception(_('No account found for this login'))
+        if len(users) > 1:
+            raise Exception(_('Multiple accounts found for this login'))
         return users.action_reset_password()
 
     def action_reset_password(self):

@@ -66,12 +66,37 @@ class TestWebsiteResUsers(TransactionCase):
         with TestCase.assertRaises(self, ValidationError), mute_logger('odoo.sql_db'):
             retrying(create_user_pou, env)
 
-    def _create_user_via_website(self, website, login):
+    def test_reset_password_user_same_website(self):
+        # Create same user on different websites with 'Specific User Account' option enabled
+        # and then reset password. Only the user from the current website should be reset.
+        self.website_1.specific_user_account = True
+        self.website_2.specific_user_account = True
+        # Permit uninvited signup.
+        self.website_1.auth_signup_uninvited = 'b2c'
+        self.website_2.auth_signup_uninvited = 'b2c'
+
+        login = 'user@example.com'
+        user_1 = self._create_user_via_website(self.website_1, login, email=login)
+        user_2 = self._create_user_via_website(self.website_2, login, email=login)
+
+        # Invalidate signup_url to skip signup process
+        self.env.invalidate_all()
+
+        self.assertFalse(user_1.signup_valid)
+        self.assertFalse(user_2.signup_valid)
+
+        self.env['res.users'].with_context(website_id=self.website_1.id).reset_password(login)
+
+        self.assertTrue(user_1.signup_valid)
+        self.assertFalse(user_2.signup_valid)
+
+    def _create_user_via_website(self, website, login, email=None):
         # We need a fake request to _signup_create_user.
         with MockRequest(self.env, website=website):
             return self.env['res.users'].with_context(website_id=website.id)._signup_create_user({
                 'name': login,
                 'login': login,
+                'email': email,
             })
 
     def _create_and_check_portal_user(self, website_specific, company_1, company_2, website_1, website_2):

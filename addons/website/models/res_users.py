@@ -90,3 +90,18 @@ class ResUsers(models.Model):
                 visitor_pre_authenticate_sudo.access_token = user_partner.id
                 visitor_pre_authenticate_sudo._update_visitor_last_visit()
         return uid
+
+    @api.model
+    def _get_reset_password_users(self, login):
+        """
+        Only returns current website users or multi-website users
+        """
+        users = super()._get_reset_password_users(login)
+        if not users:
+            return users
+        current_website = self.env['website'].get_current_website()
+        current_website_users = users.filtered(lambda user: user.website_id == current_website)
+        if current_website_users:
+            return current_website_users
+        all_websites_users = users.filtered(lambda user: not user.website_id)
+        return all_websites_users
