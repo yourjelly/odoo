@@ -26,8 +26,8 @@ async function loadFont(name, url) {
         `)
     );
     const loadPromise = new Promise((res, rej) => {
-        link.addEventListener("load", res);
-        link.addEventListener("error", rej);
+        link.addEventListener("load", () => res());
+        link.addEventListener("error", () => rej());
     });
     document.head.appendChild(link);
     document.head.appendChild(style);
@@ -57,8 +57,8 @@ export async function makeShadow(root) {
     link.rel = "stylesheet";
     link.href = `${serverUrl}/im_livechat/assets_embed.css`;
     const stylesLoadedPromise = new Promise((res, rej) => {
-        link.addEventListener("load", res);
-        link.addEventListener("error", rej);
+        link.addEventListener("load", () => res());
+        link.addEventListener("error", () => rej());
     });
     const shadow = root.attachShadow({ mode: "open" });
     shadow.appendChild(link);
