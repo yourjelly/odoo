@@ -768,6 +768,25 @@ QUnit.module("Views", ({ beforeEach }) => {
         }
     );
 
+    QUnit.test(`click outside the popover shouldn't open the quick create dialog`, async (assert) => {
+        assert.expect(1);
+
+        await makeView({
+            type: "calendar",
+            resModel: "event",
+            serverData,
+            arch: `
+                <calendar event_open_popup="1" date_start="start" date_stop="stop" all_day="allday" mode="month" />
+            `,
+        });
+
+        // click on an existing event to open the popover
+        await clickEvent(target, 4);
+
+        await click(target.querySelector(".fc-content-skeleton td:nth-child(1)"));
+        assert.containsNone(target, '.modal-dialog', "shouldn't open the quick create dialog");
+    })
+
     QUnit.test(`create and change events`, async (assert) => {
         assert.expect(29);
 

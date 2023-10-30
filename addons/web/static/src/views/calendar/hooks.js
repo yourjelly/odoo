@@ -25,18 +25,21 @@ export function useCalendarPopover(component) {
     const dialog = useService("dialog");
     let removeDialog = null;
     let fcPopover;
+    let isPopoverClose;
     useExternalListener(
         window,
         "mousedown",
         (ev) => {
-            if (fcPopover) {
+            if (fcPopover || isPopoverClose) {
                 // do not let fullcalendar popover close when our own popover is open
                 ev.stopPropagation();
+                isPopoverClose = false;
             }
         },
         { capture: true }
     );
     function cleanup() {
+        isPopoverClose = true;
         fcPopover = null;
         removeDialog = null;
     }
