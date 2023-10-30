@@ -1,25 +1,24 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* partner_autocomplete
-# 
+#
 # Translators:
-# Martin Trigaux, 2022
-# Sergio Zanchetta <primes2h@gmail.com>, 2022
-# Luca Carlo, 2023
-# Marianna Ciofani, 2023
-# 
+# Francesco Garganese <francesco.garganese@aeromnia.aero>, 2020
+# Paolo Valier, 2020
+# Sergio Zanchetta <primes2h@gmail.com>, 2023
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0beta\n"
+"Project-Id-Version: Odoo Server saas~13.5\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-10-10 10:23+0000\n"
-"PO-Revision-Date: 2022-09-22 05:53+0000\n"
-"Last-Translator: Marianna Ciofani, 2023\n"
+"PO-Revision-Date: 2020-09-07 08:15+0000\n"
+"Last-Translator: Sergio Zanchetta <primes2h@gmail.com>, 2023\n"
 "Language-Team: Italian (https://app.transifex.com/odoo/teams/41243/it/)\n"
+"Language: it\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: it\n"
 "Plural-Forms: nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;\n"
 
 #. module: partner_autocomplete
@@ -44,9 +43,7 @@ msgstr "Aziende"
 #: code:addons/partner_autocomplete/models/res_company.py:0
 #, python-format
 msgid "Company auto-completed by Odoo Partner Autocomplete Service"
-msgstr ""
-"Azienda completata automaticamente dal servizio di autocompletamento partner"
-" di Odoo"
+msgstr "Azienda completata automaticamente dal servizio di autocompletamento partner di Odoo"
 
 #. module: partner_autocomplete
 #: model:ir.model.fields,field_description:partner_autocomplete.field_res_company__partner_gid
@@ -110,7 +107,7 @@ msgstr "ID"
 #. module: partner_autocomplete
 #: model:ir.model.fields,field_description:partner_autocomplete.field_res_config_settings__partner_autocomplete_insufficient_credit
 msgid "Insufficient credit"
-msgstr "Credito insufficiente"
+msgstr "Credito non sufficiente"
 
 #. module: partner_autocomplete
 #: model:ir.model.fields,field_description:partner_autocomplete.field_res_partner_autocomplete_sync__synched
@@ -155,7 +152,7 @@ msgstr "Partner"
 #: model:ir.cron,cron_name:partner_autocomplete.ir_cron_partner_autocomplete
 #: model:ir.cron,name:partner_autocomplete.ir_cron_partner_autocomplete
 msgid "Partner Autocomplete : Sync with remote DB"
-msgstr "Autocompletamento partner: sincronizzazione con DB remoto"
+msgstr "Autocompletamento partner: sincronizza con DB remoto"
 
 #. module: partner_autocomplete
 #: model:ir.model,name:partner_autocomplete.model_res_partner_autocomplete_sync
@@ -166,11 +163,10 @@ msgstr "Sincronizzazione autocompletamento partner"
 #: code:addons/partner_autocomplete/models/res_partner.py:0
 #, python-format
 msgid "Partner created by Odoo Partner Autocomplete Service"
-msgstr "Partner creato dal servizio di autocompletamento Odoo"
+msgstr "Partner creato dal servizio di autocompletamento di Odoo"
 
 #. module: partner_autocomplete
 #. openerp-web
-#: code:addons/partner_autocomplete/static/src/xml/partner_autocomplete.xml:0
 #: code:addons/partner_autocomplete/static/src/xml/partner_autocomplete.xml:0
 #, python-format
 msgid "Placeholder"
@@ -189,7 +185,7 @@ msgstr "Ricerca autocompletamento..."
 #: code:addons/partner_autocomplete/static/src/xml/partner_autocomplete.xml:0
 #, python-format
 msgid "Set Your Account Token"
-msgstr "Imposta il token del tuo account"
+msgstr "Imposta token del conto"
 
 #. module: partner_autocomplete
 #: code:addons/partner_autocomplete/models/iap_autocomplete_api.py:0

@@ -1,14 +1,14 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* mail_plugin
-# 
+#
 # Translators:
 # Friederike Fasterling-Nesselbosch, 2022
 # Martin Trigaux, 2022
 # Sergio Zanchetta <primes2h@gmail.com>, 2022
 # Marianna Ciofani, 2023
 # Wil Odoo, 2023
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0beta\n"
@@ -17,10 +17,10 @@ msgstr ""
 "PO-Revision-Date: 2022-09-22 05:53+0000\n"
 "Last-Translator: Wil Odoo, 2023\n"
 "Language-Team: Italian (https://app.transifex.com/odoo/teams/41243/it/)\n"
+"Language: it\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: it\n"
 "Plural-Forms: nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;\n"
 
 #. module: mail_plugin
@@ -55,8 +55,7 @@ msgstr "Consenti"
 #: code:addons/mail_plugin/static/src/to_translate/translations_outlook.xml:0
 #, python-format
 msgid "An error has occurred when trying to fetch translations."
-msgstr ""
-"Si è verificato un errore durante il tentativo di recuperare le traduzioni."
+msgstr "Si è verificato un errore durante il tentativo di recuperare le traduzioni."
 
 #. module: mail_plugin
 #. openerp-web
@@ -69,12 +68,8 @@ msgstr "Reddito annuale"
 #. openerp-web
 #: code:addons/mail_plugin/static/src/to_translate/translations_gmail.xml:0
 #, python-format
-msgid ""
-"Attachments could not be logged in Odoo because their total size exceeded "
-"the allowed maximum."
-msgstr ""
-"Gli allegati non possono essere registrati in Odoo perché la loro dimensione"
-" totale supera il massimo consentito."
+msgid "Attachments could not be logged in Odoo because their total size exceeded the allowed maximum."
+msgstr "Gli allegati non possono essere registrati in Odoo perché la loro dimensione totale supera il massimo consentito."
 
 #. module: mail_plugin
 #: code:addons/mail_plugin/controllers/mail_plugin.py:0
@@ -195,17 +190,14 @@ msgstr "Contatti trovati (%(count)s)"
 #: code:addons/mail_plugin/static/src/to_translate/translations_outlook.xml:0
 #, python-format
 msgid "Could not autocomplete the company. Internal error. Try again later..."
-msgstr ""
-"Impossibile completare automaticamente l'azienda. Errore interno. Riprova "
-"più tardi..."
+msgstr "Impossibile completare automaticamente l'azienda. Errore interno. Riprova più tardi..."
 
 #. module: mail_plugin
 #. openerp-web
 #: code:addons/mail_plugin/static/src/to_translate/translations_gmail.xml:0
 #, python-format
 msgid "Could not connect to database. Try to log out and in."
-msgstr ""
-"Impossibile connettersi al database. Prova a fare il logout e a rientrare."
+msgstr "Impossibile connettersi al database. Prova a fare il logout e a rientrare."
 
 #. module: mail_plugin
 #. openerp-web
@@ -219,9 +211,7 @@ msgstr "Impossibile connettersi al tuo database. Riprova per favore."
 #: code:addons/mail_plugin/static/src/to_translate/translations_outlook.xml:0
 #, python-format
 msgid "Could not display image %(attachmentName)s, size is over limit."
-msgstr ""
-"Impossibile visualizzare l'immagine %(attachmentName)s, la dimensione è "
-"oltre il limite."
+msgstr "Impossibile visualizzare l'immagine %(attachmentName)s, la dimensione è oltre il limite."
 
 #. module: mail_plugin
 #. openerp-web
@@ -511,9 +501,7 @@ msgstr "Nessuna azienda legata a questo contatto ha potuto essere arricchita"
 #: code:addons/mail_plugin/static/src/to_translate/translations_outlook.xml:0
 #, python-format
 msgid "No company linked to this contact could be enriched or found in Odoo"
-msgstr ""
-"Nessuna azienda legata a questo contatto può essere arricchita o trovata in "
-"Odoo"
+msgstr "Nessuna azienda legata a questo contatto può essere arricchita o trovata in Odoo"
 
 #. module: mail_plugin
 #. openerp-web
@@ -580,12 +568,8 @@ msgstr "È consentito un solo IAP per un partner"
 #. openerp-web
 #: code:addons/mail_plugin/static/src/to_translate/translations_gmail.xml:0
 #, python-format
-msgid ""
-"Oops, looks like you have exhausted your free enrichment requests. Please "
-"log in to try again."
-msgstr ""
-"Oops, sembra che tu abbia esaurito le tue richieste di arricchimento "
-"gratuite. Per favore, accedi per riprovare."
+msgid "Oops, looks like you have exhausted your free enrichment requests. Please log in to try again."
+msgstr "Oops, sembra che tu abbia esaurito le tue richieste di arricchimento gratuite. Per favore, accedi per riprovare."
 
 #. module: mail_plugin
 #. openerp-web
@@ -721,8 +705,7 @@ msgstr "È successo qualcosa di brutto. Per favore, riprova più tardi."
 #: code:addons/mail_plugin/controllers/mail_plugin.py:0
 #, python-format
 msgid "The email of this contact is not valid and we can not enrich it"
-msgstr ""
-"L'indirizzo e-mail del contatto non è valido e non possiamo arricchirlo."
+msgstr "L'indirizzo e-mail del contatto non è valido e non possiamo arricchirlo."
 
 #. module: mail_plugin
 #: code:addons/mail_plugin/controllers/mail_plugin.py:0
@@ -735,8 +718,7 @@ msgstr "Il partner ha già un'azienda collegata a lui"
 #: code:addons/mail_plugin/static/src/to_translate/translations_outlook.xml:0
 #, python-format
 msgid "This company has no email address and could not be enriched."
-msgstr ""
-"Questa azienda non ha un indirizzo e-mail e non può essere arricchita."
+msgstr "Questa azienda non ha un indirizzo e-mail e non può essere arricchita."
 
 #. module: mail_plugin
 #. openerp-web
@@ -750,12 +732,9 @@ msgstr "Questo contatto non esiste nel database di Odoo."
 #: code:addons/mail_plugin/static/src/to_translate/translations_outlook.xml:0
 #, python-format
 msgid "This contact has no email address, no company could be enriched."
-msgstr ""
-"Questo contatto non ha un indirizzo e-mail, nessuna azienda ha potuto essere"
-" arricchita."
+msgstr "Questo contatto non ha un indirizzo e-mail, nessuna azienda ha potuto essere arricchita."
 
 #. module: mail_plugin
-#: code:addons/mail_plugin/controllers/mail_plugin.py:0
 #: code:addons/mail_plugin/controllers/mail_plugin.py:0
 #, python-format
 msgid "This partner does not exist"
@@ -765,24 +744,15 @@ msgstr "Questo partner non esiste"
 #. openerp-web
 #: code:addons/mail_plugin/static/src/to_translate/translations_outlook.xml:0
 #, python-format
-msgid ""
-"Warning: Attachments could not be logged in Odoo because their total size "
-"exceeded the allowed maximum."
-msgstr ""
-"Avviso: Gli allegati non possono essere registrati in Odoo perché la loro "
-"dimensione totale supera il massimo consentito."
+msgid "Warning: Attachments could not be logged in Odoo because their total size exceeded the allowed maximum."
+msgstr "Avviso: Gli allegati non possono essere registrati in Odoo perché la loro dimensione totale supera il massimo consentito."
 
 #. module: mail_plugin
 #. openerp-web
 #: code:addons/mail_plugin/static/src/to_translate/translations_outlook.xml:0
 #, python-format
-msgid ""
-"Warning: Could not fetch the attachments %(attachments)s as their sizes are "
-"bigger then the maximum size of %(size)sMB per each attachment."
-msgstr ""
-"Avviso: non è stato possibile recuperare gli allegati %(attachments)s in "
-"quanto le dimensioni sono più grandi della dimensione massima di %(size)sMB "
-"per ogni allegato."
+msgid "Warning: Could not fetch the attachments %(attachments)s as their sizes are bigger then the maximum size of %(size)sMB per each attachment."
+msgstr "Avviso: non è stato possibile recuperare gli allegati %(attachments)s in quanto le dimensioni sono più grandi della dimensione massima di %(size)sMB per ogni allegato."
 
 #. module: mail_plugin
 #. openerp-web

@@ -1,24 +1,22 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* account_payment
-# 
+#
 # Translators:
-# Sergio Zanchetta <primes2h@gmail.com>, 2022
-# Martin Trigaux, 2022
-# Marianna Ciofani, 2023
-# 
+# Sergio Zanchetta <primes2h@gmail.com>, 2021
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0\n"
+"Project-Id-Version: Odoo Server 14.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-02-02 10:33+0000\n"
-"PO-Revision-Date: 2022-09-22 05:44+0000\n"
-"Last-Translator: Marianna Ciofani, 2023\n"
+"PO-Revision-Date: 2020-09-07 08:10+0000\n"
+"Last-Translator: Sergio Zanchetta <primes2h@gmail.com>, 2021\n"
 "Language-Team: Italian (https://app.transifex.com/odoo/teams/41243/it/)\n"
+"Language: it\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: it\n"
 "Plural-Forms: nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;\n"
 
 #. module: account_payment
@@ -28,12 +26,8 @@ msgstr "<b>Informazioni: </b>"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_my_invoices_payment
-msgid ""
-"<i class=\"fa fa-arrow-circle-right\"/><span class=\"d-none d-md-inline\"> "
-"Pay Now</span>"
-msgstr ""
-"<i class=\"fa fa-arrow-circle-right\"/><span class=\"d-none d-md-inline\"> "
-"Paga ora</span>"
+msgid "<i class=\"fa fa-arrow-circle-right\"/><span class=\"d-none d-md-inline\"> Pay Now</span>"
+msgstr "<i class=\"fa fa-arrow-circle-right\"/><span class=\"d-none d-md-inline\"> Paga ora</span>"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_page_inherit_payment
@@ -52,68 +46,38 @@ msgstr "<i class=\"fa fa-fw fa-check-circle\"/> In sospeso"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_page_inherit_payment
-msgid ""
-"<i class=\"fa fa-info\"/> You have credits card registered, you can log-in "
-"to be able to use them."
-msgstr ""
-"<i class=\"fa fa-info\"/> Sono presenti carte di credito registrate, "
-"accedere per poterle utilizzare."
+msgid "<i class=\"fa fa-info\"/> You have credits card registered, you can log-in to be able to use them."
+msgstr "<i class=\"fa fa-info\"/> Sono presenti carte di credito registrate, accedere per poterle utilizzare."
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_my_invoices_payment
-msgid ""
-"<span class=\"badge rounded-pill text-bg-danger\"><i class=\"fa fa-fw fa-"
-"remove\"/><span class=\"d-none d-md-inline\"> Cancelled</span></span>"
-msgstr ""
-"<span class=\"badge rounded-pill text-bg-danger\"><i class=\"fa fa-fw fa-"
-"remove\"/><span class=\"d-none d-md-inline\"> Annullato</span></span>"
+msgid "<span class=\"badge rounded-pill text-bg-danger\"><i class=\"fa fa-fw fa-remove\"/><span class=\"d-none d-md-inline\"> Cancelled</span></span>"
+msgstr "<span class=\"badge rounded-pill text-bg-danger\"><i class=\"fa fa-fw fa-remove\"/><span class=\"d-none d-md-inline\"> Annullato</span></span>"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_my_invoices_payment
-msgid ""
-"<span class=\"badge rounded-pill text-bg-info\"><i class=\"fa fa-fw fa-"
-"clock-o\"/><span class=\"d-none d-md-inline\"> Waiting for "
-"Payment</span></span>"
-msgstr ""
-"<span class=\"badge rounded-pill text-bg-info\"><i class=\"fa fa-fw fa-"
-"clock-o\"/><span class=\"d-none d-md-inline\">In attesa di "
-"pagamento</span></span>"
+msgid "<span class=\"badge rounded-pill text-bg-info\"><i class=\"fa fa-fw fa-clock-o\"/><span class=\"d-none d-md-inline\"> Waiting for Payment</span></span>"
+msgstr "<span class=\"badge rounded-pill text-bg-info\"><i class=\"fa fa-fw fa-clock-o\"/><span class=\"d-none d-md-inline\">In attesa di pagamento</span></span>"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_my_invoices_payment
-msgid ""
-"<span class=\"badge rounded-pill text-bg-primary\"><i class=\"fa fa-fw fa-"
-"check\"/><span class=\"d-none d-md-inline\"> Authorized</span></span>"
-msgstr ""
-"<span class=\"badge rounded-pill text-bg-primary\"><i class=\"fa fa-fw fa-"
-"check\"/><span class=\"d-none d-md-inline\"> Autorizzato</span></span>"
+msgid "<span class=\"badge rounded-pill text-bg-primary\"><i class=\"fa fa-fw fa-check\"/><span class=\"d-none d-md-inline\"> Authorized</span></span>"
+msgstr "<span class=\"badge rounded-pill text-bg-primary\"><i class=\"fa fa-fw fa-check\"/><span class=\"d-none d-md-inline\"> Autorizzato</span></span>"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_my_invoices_payment
-msgid ""
-"<span class=\"badge rounded-pill text-bg-success\"><i class=\"fa fa-fw fa-"
-"check\"/><span class=\"d-none d-md-inline\"> Paid</span></span>"
-msgstr ""
-"<span class=\"badge rounded-pill text-bg-success\"><i class=\"fa fa-fw fa-"
-"check\"/><span class=\"d-none d-md-inline\"> Pagato</span></span>"
+msgid "<span class=\"badge rounded-pill text-bg-success\"><i class=\"fa fa-fw fa-check\"/><span class=\"d-none d-md-inline\"> Paid</span></span>"
+msgstr "<span class=\"badge rounded-pill text-bg-success\"><i class=\"fa fa-fw fa-check\"/><span class=\"d-none d-md-inline\"> Pagato</span></span>"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_my_invoices_payment
-msgid ""
-"<span class=\"badge rounded-pill text-bg-success\"><i class=\"fa fa-fw fa-"
-"check\"/><span class=\"d-none d-md-inline\"> Reversed</span></span>"
-msgstr ""
-"<span class=\"badge rounded-pill text-bg-success\"><i class=\"fa fa-fw fa-"
-"check\"/><span class=\"d-none d-md-inline\"> Stornato</span></span>"
+msgid "<span class=\"badge rounded-pill text-bg-success\"><i class=\"fa fa-fw fa-check\"/><span class=\"d-none d-md-inline\"> Reversed</span></span>"
+msgstr "<span class=\"badge rounded-pill text-bg-success\"><i class=\"fa fa-fw fa-check\"/><span class=\"d-none d-md-inline\"> Stornato</span></span>"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_my_invoices_payment
-msgid ""
-"<span class=\"badge rounded-pill text-bg-warning\"><span class=\"d-none "
-"d-md-inline\"> Pending</span></span>"
-msgstr ""
-"<span class=\"badge rounded-pill text-bg-warning\"><span class=\"d-none "
-"d-md-inline\"> In sospeso</span></span>"
+msgid "<span class=\"badge rounded-pill text-bg-warning\"><span class=\"d-none d-md-inline\"> Pending</span></span>"
+msgstr "<span class=\"badge rounded-pill text-bg-warning\"><span class=\"d-none d-md-inline\"> In sospeso</span></span>"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_payment
@@ -163,12 +127,8 @@ msgstr "Importo pagato"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.account_invoice_view_form_inherit_payment
-msgid ""
-"Are you sure you want to void the authorized transaction? This action can't "
-"be undone."
-msgstr ""
-"Annullare veramente la transazione autorizzata? Questa azione non può essere"
-" revocata."
+msgid "Are you sure you want to void the authorized transaction? This action can't be undone."
+msgstr "Annullare veramente la transazione autorizzata? Questa azione non può essere revocata."
 
 #. module: account_payment
 #: model:ir.model.fields,field_description:account_payment.field_account_bank_statement_line__authorized_transaction_ids
@@ -215,12 +175,8 @@ msgstr "Nome visualizzato"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_success
-msgid ""
-"Done, your online payment has been successfully processed. Thank you for "
-"your order."
-msgstr ""
-"Completato. Il pagamento è stato elaborato correttamente, grazie per aver "
-"effettuato l'ordine."
+msgid "Done, your online payment has been successfully processed. Thank you for your order."
+msgstr "Completato. Il pagamento è stato elaborato correttamente, grazie per aver effettuato l'ordine."
 
 #. module: account_payment
 #: model:ir.model,name:account_payment.model_payment_link_wizard
@@ -301,22 +257,13 @@ msgstr "Massimo rimborso consentito"
 
 #. module: account_payment
 #: model:ir.model.fields,help:account_payment.field_account_payment__payment_token_id
-msgid ""
-"Note that only tokens from providers allowing to capture the amount are "
-"available."
-msgstr ""
-"Nota che sono disponibili solo i token di fornitori che permettono di "
-"acquisire l'importo."
+msgid "Note that only tokens from providers allowing to capture the amount are available."
+msgstr "Nota che sono disponibili solo i token di fornitori che permettono di acquisire l'importo."
 
 #. module: account_payment
 #: model:ir.model.fields,help:account_payment.field_account_payment_register__payment_token_id
-msgid ""
-"Note that tokens from providers set to only authorize transactions (instead "
-"of capturing the amount) are not available."
-msgstr ""
-"Nota che i token dei fornitori configurati esclusivamente per "
-"l'autorizzazione delle transazioni (invece di acquisire l'importo) non sono "
-"disponibili."
+msgid "Note that tokens from providers set to only authorize transactions (instead of capturing the amount) are not available."
+msgstr "Nota che i token dei fornitori configurati esclusivamente per l'autorizzazione delle transazioni (invece di acquisire l'importo) non sono disponibili."
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_my_invoices_payment
@@ -331,7 +278,7 @@ msgstr "Paga ora"
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_payment
 msgid "Pay with"
-msgstr "Pagare con"
+msgstr "Paga con"
 
 #. module: account_payment
 #: model:ir.model.fields,field_description:account_payment.field_payment_refund_wizard__payment_id
@@ -387,7 +334,7 @@ msgstr "Token di pagamento"
 #: model:ir.model.fields,field_description:account_payment.field_payment_refund_wizard__transaction_id
 #: model_terms:ir.ui.view,arch_db:account_payment.account_invoice_view_form_inherit_payment
 msgid "Payment Transaction"
-msgstr "Operazione di pagamento"
+msgstr "Transazione di pagamento"
 
 #. module: account_payment
 #: model:ir.ui.menu,name:account_payment.payment_transaction_menu
@@ -408,7 +355,6 @@ msgstr "Fornitore"
 
 #. module: account_payment
 #. odoo-python
-#: code:addons/account_payment/models/account_payment.py:0
 #: code:addons/account_payment/models/account_payment.py:0
 #: model_terms:ir.ui.view,arch_db:account_payment.payment_refund_wizard_view_form
 #: model_terms:ir.ui.view,arch_db:account_payment.view_account_payment_form_inherit_payment
@@ -483,11 +429,8 @@ msgstr "Il token di accesso non è valido."
 #. odoo-python
 #: code:addons/account_payment/wizards/payment_refund_wizard.py:0
 #, python-format
-msgid ""
-"The amount to be refunded must be positive and cannot be superior to %s."
-msgstr ""
-"L'importo da rimborsare deve essere positivo e non può essere superiore a "
-"%s."
+msgid "The amount to be refunded must be positive and cannot be superior to %s."
+msgstr "L'importo da rimborsare deve essere positivo e non può essere superiore a %s."
 
 #. module: account_payment
 #: model:ir.model.fields,help:account_payment.field_payment_provider__journal_id
@@ -498,16 +441,11 @@ msgstr "Giornale in cui sono registrate le transazioni avvenute con successo."
 #. odoo-python
 #: code:addons/account_payment/models/payment_transaction.py:0
 #, python-format
-msgid ""
-"The payment related to the transaction with reference %(ref)s has been "
-"posted: %(link)s"
-msgstr ""
-"Il pagamento relativo alla transazione con riferimento %(ref)s è stato "
-"pubblicato: %(link)s"
+msgid "The payment related to the transaction with reference %(ref)s has been posted: %(link)s"
+msgstr "Il pagamento relativo alla transazione con riferimento %(ref)s è stato pubblicato: %(link)s"
 
 #. module: account_payment
 #. odoo-python
-#: code:addons/account_payment/controllers/payment.py:0
 #: code:addons/account_payment/controllers/payment.py:0
 #, python-format
 msgid "The provided parameters are invalid."
@@ -525,24 +463,18 @@ msgstr "Errore durante l'elaborazione del pagamento: fattura non valida."
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_error
-msgid ""
-"There was an error processing your payment: issue with credit card ID "
-"validation."
-msgstr ""
-"Errore durante l'elaborazione del pagamento: problema di conferma ID della "
-"carta di credito."
+msgid "There was an error processing your payment: issue with credit card ID validation."
+msgstr "Errore durante l'elaborazione del pagamento: problema di conferma ID della carta di credito."
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_error
 msgid "There was an error processing your payment: transaction failed.<br/>"
-msgstr ""
-"Errore durante l'elaborazione del pagamento: transazione non riuscita.<br/>"
+msgstr "Errore durante l'elaborazione del pagamento: transazione non riuscita.<br/>"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_error
 msgid "There was en error processing your payment: invalid credit card ID."
-msgstr ""
-"Errore durante l'elaborazione del pagamento: ID carta di credito non valido."
+msgstr "Errore durante l'elaborazione del pagamento: ID carta di credito non valido."
 
 #. module: account_payment
 #: model:ir.model.fields,field_description:account_payment.field_account_bank_statement_line__transaction_ids
@@ -582,12 +514,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/account_payment/models/payment_provider.py:0
 #, python-format
-msgid ""
-"You cannot uninstall this module as payment method transactions already "
-"exist."
-msgstr ""
-"Non è possibile disinstallare questo modulo in quanto esistono già "
-"transazioni per il metodo di pagamento."
+msgid "You cannot uninstall this module as payment method transactions already exist."
+msgstr "Non è possibile disinstallare questo modulo in quanto esistono già transazioni per il metodo di pagamento."
 
 #. module: account_payment
 #. odoo-python

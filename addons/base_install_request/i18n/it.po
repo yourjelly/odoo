@@ -1,13 +1,13 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* base_install_request
-# 
+#
 # Translators:
 # Martin Trigaux, 2022
 # Sergio Zanchetta <primes2h@gmail.com>, 2022
 # Luca Carlo, 2023
 # Marianna Ciofani, 2023
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
@@ -16,10 +16,10 @@ msgstr ""
 "PO-Revision-Date: 2022-09-22 05:45+0000\n"
 "Last-Translator: Marianna Ciofani, 2023\n"
 "Language-Team: Italian (https://app.transifex.com/odoo/teams/41243/it/)\n"
+"Language: it\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: it\n"
 "Plural-Forms: nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;\n"
 
 #. module: base_install_request
@@ -213,13 +213,8 @@ msgstr "Il modulo è stato già installato."
 
 #. module: base_install_request
 #: model_terms:ir.ui.view,arch_db:base_install_request.base_module_install_request_view_form
-msgid ""
-"This app is included in your subscription. It's free to activate, but only "
-"an administrator can do it. Fill this form to send an activation request."
-msgstr ""
-"Quest'applicazione è inclusa nel tuo abbonamento. L'attivazione è gratuita "
-"ma solo un amministratore può farlo. Completa il modulo per inviare una "
-"richiesta di attivazione."
+msgid "This app is included in your subscription. It's free to activate, but only an administrator can do it. Fill this form to send an activation request."
+msgstr "Quest'applicazione è inclusa nel tuo abbonamento. L'attivazione è gratuita ma solo un amministratore può farlo. Completa il modulo per inviare una richiesta di attivazione."
 
 #. module: base_install_request
 #: model:ir.model.fields,field_description:base_install_request.field_base_module_install_request__user_id
@@ -245,10 +240,5 @@ msgstr "La tua richiesta è stata inviata con successo"
 
 #. module: base_install_request
 #: model_terms:ir.ui.view,arch_db:base_install_request.base_module_install_request_view_form
-msgid ""
-"e.g. I'd like to use the SMS Marketing module to organize the promotion of "
-"our internal events, and exhibitions. I need access for 3 people of my team."
-msgstr ""
-"ad es. Vorrei utilizzare il modulo Marketing SMS per organizzare la "
-"promozione dei nostri eventi interni e delle mostre. Ho biosgno di un "
-"accesso per 3 persone del mio team."
+msgid "e.g. I'd like to use the SMS Marketing module to organize the promotion of our internal events, and exhibitions. I need access for 3 people of my team."
+msgstr "ad es. Vorrei utilizzare il modulo Marketing SMS per organizzare la promozione dei nostri eventi interni e delle mostre. Ho biosgno di un accesso per 3 persone del mio team."

@@ -1,13 +1,13 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* google_gmail
-# 
+#
 # Translators:
 # Friederike Fasterling-Nesselbosch, 2022
 # Martin Trigaux, 2022
 # Sergio Zanchetta <primes2h@gmail.com>, 2022
 # Marianna Ciofani, 2023
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 15.5alpha1\n"
@@ -16,10 +16,10 @@ msgstr ""
 "PO-Revision-Date: 2022-09-22 05:46+0000\n"
 "Last-Translator: Marianna Ciofani, 2023\n"
 "Language-Team: Italian (https://app.transifex.com/odoo/teams/41243/it/)\n"
+"Language: it\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: it\n"
 "Plural-Forms: nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;\n"
 
 #. module: google_gmail
@@ -75,7 +75,6 @@ msgid "Access Token Expiration Timestamp"
 msgstr "Timestamp di scadenza del token di accesso"
 
 #. module: google_gmail
-#: code:addons/google_gmail/controllers/main.py:0
 #: code:addons/google_gmail/controllers/main.py:0
 #, python-format
 msgid "An error occur during the authentication process."
@@ -163,12 +162,8 @@ msgstr "Server per e-mail in arrivo"
 #. module: google_gmail
 #: code:addons/google_gmail/models/ir_mail_server.py:0
 #, python-format
-msgid ""
-"Incorrect Connection Security for Gmail mail server %r. Please set it to "
-"\"TLS (STARTTLS)\"."
-msgstr ""
-"Sicurezza connessione non corretta per il server mail %r di Gmail. Impostalo"
-" su \"TLS (STARTTLS)\"."
+msgid "Incorrect Connection Security for Gmail mail server %r. Please set it to \"TLS (STARTTLS)\"."
+msgstr "Sicurezza connessione non corretta per il server mail %r di Gmail. Impostalo su \"TLS (STARTTLS)\"."
 
 #. module: google_gmail
 #: model:ir.model,name:google_gmail.model_ir_mail_server
@@ -190,24 +185,14 @@ msgstr "Configura le credenziali Gmail."
 #. module: google_gmail
 #: code:addons/google_gmail/models/ir_mail_server.py:0
 #, python-format
-msgid ""
-"Please fill the \"Username\" field with your Gmail username (your email "
-"address). This should be the same account as the one used for the Gmail "
-"OAuthentication Token."
-msgstr ""
-"Completa il campo \"Nome utente\" con il nome utente di Gmail (indirizzo "
-"e-mail). Questo dovrebbe essere lo stesso account utilizzato per il token di"
-" OAutenticazione di Gmail."
+msgid "Please fill the \"Username\" field with your Gmail username (your email address). This should be the same account as the one used for the Gmail OAuthentication Token."
+msgstr "Completa il campo \"Nome utente\" con il nome utente di Gmail (indirizzo e-mail). Questo dovrebbe essere lo stesso account utilizzato per il token di OAutenticazione di Gmail."
 
 #. module: google_gmail
 #: code:addons/google_gmail/models/ir_mail_server.py:0
 #, python-format
-msgid ""
-"Please leave the password field empty for Gmail mail server %r. The OAuth "
-"process does not require it"
-msgstr ""
-"Lascia il campo della password vuoto per il server mail %r di Gmail. Il "
-"processo OAuth non la richiede"
+msgid "Please leave the password field empty for Gmail mail server %r. The OAuth process does not require it"
+msgstr "Lascia il campo della password vuoto per il server mail %r di Gmail. Il processo OAuth non la richiede"
 
 #. module: google_gmail
 #: model_terms:ir.ui.view,arch_db:google_gmail.ir_mail_server_view_form
@@ -239,12 +224,8 @@ msgstr "Tipo server"
 #. module: google_gmail
 #: model_terms:ir.ui.view,arch_db:google_gmail.fetchmail_server_view_form
 #: model_terms:ir.ui.view,arch_db:google_gmail.ir_mail_server_view_form
-msgid ""
-"Setup your Gmail API credentials in the general settings to link a Gmail "
-"account."
-msgstr ""
-"Imposta le tue credenziali API di Gmail nelle impostazioni generali per "
-"collegare un account Gmail."
+msgid "Setup your Gmail API credentials in the general settings to link a Gmail account."
+msgstr "Imposta le tue credenziali API di Gmail nelle impostazioni generali per collegare un account Gmail."
 
 #. module: google_gmail
 #: model:ir.model.fields,help:google_gmail.field_fetchmail_server__google_gmail_uri
@@ -256,12 +237,8 @@ msgstr "L'URL per generare il codice di autorizzazione di Google"
 #. module: google_gmail
 #: code:addons/google_gmail/models/ir_mail_server.py:0
 #, python-format
-msgid ""
-"This server %r can only be used for your personal email address. Please fill"
-" the \"from_filter\" field with %r."
-msgstr ""
-"Il server %r può essere utilizzato solo per l'indirizzo e-mail personale. "
-"Compila il campo \"from_filter\" con %r."
+msgid "This server %r can only be used for your personal email address. Please fill the \"from_filter\" field with %r."
+msgstr "Il server %r può essere utilizzato solo per l'indirizzo e-mail personale. Compila il campo \"from_filter\" con %r."
 
 #. module: google_gmail
 #: model:ir.model.fields,field_description:google_gmail.field_fetchmail_server__google_gmail_uri

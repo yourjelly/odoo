@@ -1,12 +1,12 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* product_images
-# 
+#
 # Translators:
 # Martin Trigaux, 2022
 # Sergio Zanchetta <primes2h@gmail.com>, 2022
 # Marianna Ciofani, 2023
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 15.5alpha1\n"
@@ -15,21 +15,17 @@ msgstr ""
 "PO-Revision-Date: 2022-09-22 05:54+0000\n"
 "Last-Translator: Marianna Ciofani, 2023\n"
 "Language-Team: Italian (https://app.transifex.com/odoo/teams/41243/it/)\n"
+"Language: it\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: it\n"
 "Plural-Forms: nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;\n"
 
 #. module: product_images
 #: code:addons/product_images/wizard/product_fetch_image_wizard.py:0
 #, python-format
-msgid ""
-"%(matching_images_count)s matching images have been found for "
-"%(product_count)s products."
-msgstr ""
-"Sono state trovate %(matching_images_count)s immagini corrispondenti per "
-"%(product_count)s prodotti."
+msgid "%(matching_images_count)s matching images have been found for %(product_count)s products."
+msgstr "Sono state trovate %(matching_images_count)s immagini corrispondenti per %(product_count)s prodotti."
 
 #. module: product_images
 #: model_terms:ir.ui.view,arch_db:product_images.product_fetch_image_wizard_view_form
@@ -47,12 +43,8 @@ msgstr ""
 #. module: product_images
 #: code:addons/product_images/wizard/product_fetch_image_wizard.py:0
 #, python-format
-msgid ""
-"A task to process products in the background is already running. Please try "
-"againlater."
-msgstr ""
-"Un compito per elaborare i prodotti in background è già in esecuzione. Si "
-"prega di riprovare più tardi."
+msgid "A task to process products in the background is already running. Please try againlater."
+msgstr "Un compito per elaborare i prodotti in background è già in esecuzione. Si prega di riprovare più tardi."
 
 #. module: product_images
 #: model_terms:ir.ui.view,arch_db:product_images.res_config_settings_view_form
@@ -86,12 +78,8 @@ msgstr "Nome visualizzato"
 
 #. module: product_images
 #: model:ir.model,name:product_images.model_product_fetch_image_wizard
-msgid ""
-"Fetch product images from Google Images based on the product's barcode "
-"number."
-msgstr ""
-"Recupera le immagini del prodotto da Google Immagini in base al numero del "
-"codice a barre del prodotto stesso."
+msgid "Fetch product images from Google Images based on the product's barcode number."
+msgstr "Recupera le immagini del prodotto da Google Immagini in base al numero del codice a barre del prodotto stesso."
 
 #. module: product_images
 #: model_terms:ir.ui.view,arch_db:product_images.product_fetch_image_wizard_view_form
@@ -184,12 +172,8 @@ msgstr "Prodotti da elaborare"
 #. module: product_images
 #: code:addons/product_images/wizard/product_fetch_image_wizard.py:0
 #, python-format
-msgid ""
-"Products are processed in the background. Images will be updated "
-"progressively."
-msgstr ""
-"I prodotti vengono elaborati nello sfondo. Le immagini saranno aggiornate "
-"gradualmente."
+msgid "Products are processed in the background. Images will be updated progressively."
+msgstr "I prodotti vengono elaborati nello sfondo. Le immagini saranno aggiornate gradualmente."
 
 #. module: product_images
 #: model_terms:ir.ui.view,arch_db:product_images.res_config_settings_view_form
@@ -200,22 +184,13 @@ msgstr "ID motore di ricerca"
 #: code:addons/product_images/wizard/product_fetch_image_wizard.py:0
 #, python-format
 msgid "The API Key and Search Engine ID must be set in the General Settings."
-msgstr ""
-"La chiave API e l'ID del motore di ricerca devono essere impostati in "
-"Impostazioni generali."
+msgstr "La chiave API e l'ID del motore di ricerca devono essere impostati in Impostazioni generali."
 
 #. module: product_images
 #: code:addons/product_images/wizard/product_fetch_image_wizard.py:0
 #, python-format
-msgid ""
-"The Custom Search API is not enabled in your Google project. Please visit "
-"your Google Cloud Platform project page and enable it, then retry. If you "
-"enabled this API recently, please wait a few minutes and retry."
-msgstr ""
-"L'API della ricerca personalizzata non è abilitato nel tuo progetto Google. "
-"Visita la pagina del progetto nella piattaforma Google Cloud e attivala per "
-"poi riprovare. Se hai abilitato l'API di recente, aspetta qualche minuto e "
-"riprova."
+msgid "The Custom Search API is not enabled in your Google project. Please visit your Google Cloud Platform project page and enable it, then retry. If you enabled this API recently, please wait a few minutes and retry."
+msgstr "L'API della ricerca personalizzata non è abilitato nel tuo progetto Google. Visita la pagina del progetto nella piattaforma Google Cloud e attivala per poi riprovare. Se hai abilitato l'API di recente, aspetta qualche minuto e riprova."
 
 #. module: product_images
 #: model:ir.model.fields,field_description:product_images.field_res_config_settings__google_pse_id
@@ -224,25 +199,14 @@ msgstr "L'identificatore del motore di ricerca programmabile di Google"
 
 #. module: product_images
 #: model:ir.model.fields,help:product_images.field_product_fetch_image_wizard__products_to_process
-msgid ""
-"The list of selected products that meet the criteria (have a barcode and no "
-"image)"
-msgstr ""
-"L'elenco dei prodotti selezionati che soddisfano i criteri (hanno un codice "
-"a barre e nessuna immagine)"
+msgid "The list of selected products that meet the criteria (have a barcode and no image)"
+msgstr "L'elenco dei prodotti selezionati che soddisfano i criteri (hanno un codice a barre e nessuna immagine)"
 
 #. module: product_images
 #: code:addons/product_images/wizard/product_fetch_image_wizard.py:0
-#: code:addons/product_images/wizard/product_fetch_image_wizard.py:0
 #, python-format
-msgid ""
-"The scheduled action \"Product Images: Get product images from Google\" has "
-"been deleted. Please contact your administrator to have the action restored "
-"or to reinstall the module \"product_images\"."
-msgstr ""
-"L'azione pianificata \"Immagini prodotto: ottieni immagini del prodotto da "
-"Google\" è stata eliminata. Contatta l'amministratore per ripristinare "
-"l'azione o installare di nuovo il modulo \"product_images\"."
+msgid "The scheduled action \"Product Images: Get product images from Google\" has been deleted. Please contact your administrator to have the action restored or to reinstall the module \"product_images\"."
+msgstr "L'azione pianificata \"Immagini prodotto: ottieni immagini del prodotto da Google\" è stata eliminata. Contatta l'amministratore per ripristinare l'azione o installare di nuovo il modulo \"product_images\"."
 
 #. module: product_images
 #: code:addons/product_images/models/ir_cron_trigger.py:0
@@ -258,9 +222,7 @@ msgstr "Azioni attivate"
 #. module: product_images
 #: model:ir.model.fields,help:product_images.field_product_product__image_fetch_pending
 msgid "Whether an image must be fetched for this product. Handled by a cron."
-msgstr ""
-"Se un'immagine deve essere recuperata per questo prodotto. Gestito da un "
-"cron."
+msgstr "Se un'immagine deve essere recuperata per questo prodotto. Gestito da un cron."
 
 #. module: product_images
 #: model_terms:ir.ui.view,arch_db:product_images.product_fetch_image_wizard_view_form

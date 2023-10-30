@@ -1,13 +1,13 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* spreadsheet_dashboard_sale_expense
-# 
+#
 # Translators:
 # Martin Trigaux, 2022
 # Sergio Zanchetta <primes2h@gmail.com>, 2022
 # Luca Carlo, 2023
 # Marianna Ciofani, 2023
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0+e\n"
@@ -16,16 +16,14 @@ msgstr ""
 "PO-Revision-Date: 2022-12-16 09:48+0000\n"
 "Last-Translator: Marianna Ciofani, 2023\n"
 "Language-Team: Italian (https://app.transifex.com/odoo/teams/41243/it/)\n"
+"Language: it\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: it\n"
 "Plural-Forms: nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;\n"
 
 #. module: spreadsheet_dashboard_sale_expense
 #. odoo-javascript
-#: code:addons/spreadsheet_dashboard_sale_expense/data/files/expense_dashboard.json:0
-#: code:addons/spreadsheet_dashboard_sale_expense/data/files/expense_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_sale_expense/data/files/expense_dashboard.json:0
 #, python-format
 msgid "# Expenses"
@@ -40,8 +38,6 @@ msgstr "Categoria"
 
 #. module: spreadsheet_dashboard_sale_expense
 #. odoo-javascript
-#: code:addons/spreadsheet_dashboard_sale_expense/data/files/expense_dashboard.json:0
-#: code:addons/spreadsheet_dashboard_sale_expense/data/files/expense_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_sale_expense/data/files/expense_dashboard.json:0
 #, python-format
 msgid "Employee"
@@ -106,7 +102,6 @@ msgstr "ICP-Da convalidare"
 #. module: spreadsheet_dashboard_sale_expense
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale_expense/data/files/expense_dashboard.json:0
-#: code:addons/spreadsheet_dashboard_sale_expense/data/files/expense_dashboard.json:0
 #, python-format
 msgid "Order"
 msgstr "Ordina"
@@ -149,7 +144,6 @@ msgstr "Da convalidare"
 #. module: spreadsheet_dashboard_sale_expense
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale_expense/data/files/expense_dashboard.json:0
-#: code:addons/spreadsheet_dashboard_sale_expense/data/files/expense_dashboard.json:0
 #, python-format
 msgid "Top Categories"
 msgstr "Categorie principali"
@@ -157,14 +151,12 @@ msgstr "Categorie principali"
 #. module: spreadsheet_dashboard_sale_expense
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_sale_expense/data/files/expense_dashboard.json:0
-#: code:addons/spreadsheet_dashboard_sale_expense/data/files/expense_dashboard.json:0
 #, python-format
 msgid "Top Employees"
 msgstr "Dipendenti migliori"
 
 #. module: spreadsheet_dashboard_sale_expense
 #. odoo-javascript
-#: code:addons/spreadsheet_dashboard_sale_expense/data/files/expense_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_sale_expense/data/files/expense_dashboard.json:0
 #, python-format
 msgid "Top Expenses"
@@ -179,9 +171,6 @@ msgstr "Ordini rifatturati migliori"
 
 #. module: spreadsheet_dashboard_sale_expense
 #. odoo-javascript
-#: code:addons/spreadsheet_dashboard_sale_expense/data/files/expense_dashboard.json:0
-#: code:addons/spreadsheet_dashboard_sale_expense/data/files/expense_dashboard.json:0
-#: code:addons/spreadsheet_dashboard_sale_expense/data/files/expense_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_sale_expense/data/files/expense_dashboard.json:0
 #, python-format
 msgid "Total"
