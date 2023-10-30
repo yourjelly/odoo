@@ -119,6 +119,7 @@ class AccountInvoiceSend(models.TransientModel):
             self.composer_id.with_context(no_new_invoice=True,
                                           mail_notify_author=self.env.user.partner_id in self.composer_id.partner_ids,
                                           mailing_document_based=True,
+                                          send_to_followers=True,
                                           )._action_send_mail()
             if self.env.context.get('mark_invoice_as_sent'):
                 #Salesman send posted invoice, without the right to write

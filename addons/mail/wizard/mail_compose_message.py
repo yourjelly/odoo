@@ -420,6 +420,17 @@ class MailComposer(models.TransientModel):
                 mail_values['body_html'] = mail_values.get('body', '')
                 mail_values['recipient_ids'] = [Command.link(id) for id in mail_values.pop('partner_ids', [])]
 
+                if self.env.context.get('send_to_followers'):
+                    msg_vals = {
+                        'partner_ids': set(record.message_follower_ids.partner_id.ids) - set(record.partner_id.ids),
+                        'message_type': self.message_type,
+                        'subtype_id': self.subtype_id.id,
+                        'author_id': self.author_id.id,
+                    }
+                    rdata = self.env['mail.thread']._notify_compute_recipients(self.env['mail.message'], msg_vals)
+                    for recipient in rdata:
+                        mail_values['recipient_ids'].append(Command.link(recipient['id']))
+
                 # process attachments: should not be encoded before being processed by message_post / mail_mail create
                 mail_values['attachments'] = [(name, base64.b64decode(enc_cont)) for name, enc_cont in email_dict.pop('attachments', list())]
                 attachment_ids = []
