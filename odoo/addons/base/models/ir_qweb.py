@@ -1015,7 +1015,7 @@ class IrQWeb(models.AbstractModel):
             code += f' % ({", ".join(values)},)'
         return code
 
-    def _compile_expr_tokens(self, tokens, allowed_keys, argument_names=None, raise_on_missing=False):
+    def _compile_expr_tokens(self, tokens, allowed_keys=ALLOWED_KEYWORD, argument_names=None, raise_on_missing=False):
         """ Transform the list of token coming into a python instruction in
             textual form by adding the namepaces for the dynamic values.
 
@@ -1171,18 +1171,10 @@ class IrQWeb(models.AbstractModel):
 
         return ''.join(code)
 
-    def _compile_expr(self, expr, raise_on_missing=False):
+    def _compile_namespaced_expr(self, expr, raise_on_missing=False):
         """Transform string coming into a python instruction in textual form by
-        adding the namepaces for the dynamic values.
-        This method tokenize the string and call ``_compile_expr_tokens``
-        method.
-
-        :param expr: string: python expression
-        :param [raise_on_missing]: boolean:
-            Compile has `values['product'].price` instead of
-            `values.get('product').price` to raise an error when get the
-            'product' value and not an 'NoneType' object has no attribute
-            'price' error.
+        adding the namepaces for the dynamic values.This method namespaces the expression by calling ``_compile_namespaced_expr``
+        This method tokenize the string and call ``_compile_expr_tokens`` method.
         """
         # Parentheses are useful for compiling multi-line expressions such as
         # conditions existing in some templates. (see test_compile_expr tests)
@@ -1191,8 +1183,22 @@ class IrQWeb(models.AbstractModel):
             tokens = list(tokenize.tokenize(readable.readline))
         except tokenize.TokenError:
             raise ValueError(f"Can not compile expression: {expr}")
+        return self._compile_expr_tokens(tokens, raise_on_missing=raise_on_missing)
 
-        expression = self._compile_expr_tokens(tokens, ALLOWED_KEYWORD, raise_on_missing=raise_on_missing)
+    def _compile_expr(self, expr, raise_on_missing=False):
+        """Transform string coming into a python instruction in textual form by
+        adding the namepaces for the dynamic values and wrapping objects with the `safe_eval` wrapper.
+        This method namespaces the expression by calling ``_compile_namespaced_expr``
+        and then wraps objects calling ``codeChecker.visit``.
+
+        :param expr: string: python expression
+        :param [raise_on_missing]: boolean:
+            Compile has `values['product'].price` instead of
+            `values.get('product').price` to raise an error when get the
+            'product' value and not an 'NoneType' object has no attribute
+            'price' error.
+        """
+        expression = self._compile_namespaced_expr(expr, raise_on_missing=raise_on_missing)
         wrapped_expr = codeChecker.visit(ast_parse(expression))
 
         return f"({ast_unparse(wrapped_expr)})"
