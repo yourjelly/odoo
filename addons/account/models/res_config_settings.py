@@ -190,6 +190,7 @@ class ResConfigSettings(models.TransientModel):
         ], limit=1)
         if not self.tax_exigibility and tax:
             self.tax_exigibility = True
+            self.tax_exigibility = True
             res['warning'] = {
                 'title': _('Error!'),
                 'message': _('You cannot disable this setting because some of your taxes are cash basis. '
