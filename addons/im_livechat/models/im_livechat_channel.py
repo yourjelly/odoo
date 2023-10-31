@@ -278,8 +278,11 @@ class ImLivechatChannelRule(models.Model):
             for rule in rules:
                 # url might not be set because it comes from referer, in that
                 # case match the first rule with no regex_url
-                if re.search(rule.regex_url or '', url or ''):
-                    return rule
+                try:
+                    if re.search(rule.regex_url or '', url or ''):
+                        return rule
+                except re.error:
+                    pass
             return False
         # first, search the country specific rules (the first match is returned)
         if country_id: # don't include the country in the research if geoIP is not installed
