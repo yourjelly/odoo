@@ -166,7 +166,7 @@
                                 <field name="product_qty" readonly="1" column_invisible="True"/>
                                 <field name="quantity" string="Done" readonly="not product_id"/>
                                 <field name="product_uom" readonly="state != 'draft' and not additional" options="{'no_open': True, 'no_create': True}" string="Unit of Measure" groups="uom.group_uom"/>
-                                <field name="picked" string="Used"/>
+                                <field name="picked" string="Used" optional="hide"/>
                                 <field name="lot_ids" widget="many2many_tags"
                                     groups="stock.group_production_lot"
                                     invisible="not show_details_visible or has_tracking != 'serial'"
