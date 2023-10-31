@@ -42,11 +42,17 @@ export function useViewButtons(model, ref, options = {}) {
 
             async function execute() {
                 let _continue = true;
-                if (beforeExecute) {
-                    _continue = undefinedAsTrue(await beforeExecute());
+                try {
+                    if (beforeExecute) {
+                        _continue = undefinedAsTrue(await beforeExecute());
+                    }
+
+                    _continue = _continue && undefinedAsTrue(await beforeExecuteAction(clickParams));
+                } catch (error) {
+                    enableButtons(getEl(), manuallyDisabledButtons);
+                    throw error;
                 }
 
-                _continue = _continue && undefinedAsTrue(await beforeExecuteAction(clickParams));
                 if (!_continue) {
                     enableButtons(getEl(), manuallyDisabledButtons);
                     return;
