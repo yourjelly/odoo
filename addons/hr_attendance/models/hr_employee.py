@@ -14,6 +14,7 @@ class HrEmployee(models.Model):
     attendance_manager_id = fields.Many2one(
         'res.users', store=True, readonly=False,
         domain="[('share', '=', False), ('company_ids', 'in', company_id)]",
+        compute='_compute_attendance_manager_id',
         groups="hr_attendance.group_hr_attendance_manager",
         help="The user set in Attendance will access the attendance of the employee through the dedicated app and will be able to edit them.")
     attendance_ids = fields.One2many(
@@ -59,6 +60,16 @@ class HrEmployee(models.Model):
         if group_updates:
             officer_group.sudo().write({'users': group_updates})
         return super().create(vals_list)
+
+    @api.depends('parent_id')
+    def _compute_attendance_manager_id(self):
+        for employee in self:
+            previous_manager = employee._origin.parent_id.user_id
+            manager = employee.parent_id.user_id
+            if manager and employee.attendance_manager_id == previous_manager or not employee.attendance_manager_id:
+                employee.attendance_manager_id = manager
+            elif not employee.attendance_manager_id:
+                employee.attendance_manager_id = False
 
     def write(self, values):
         old_officers = self.env['res.users']
