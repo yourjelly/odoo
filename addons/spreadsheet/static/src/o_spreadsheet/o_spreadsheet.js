@@ -23517,7 +23517,7 @@
                 left: `${x - 1}px`,
                 border: `1px solid ${color}`,
                 "background-color": color,
-                opacity: this.props.active ? "opacity:1 !important" : undefined,
+                opacity: this.props.active ? "1 !important" : undefined,
             });
         }
     }
@@ -36527,10 +36527,8 @@
                 invalidateCFEvaluationCommands.has(cmd.type) ||
                 cmd.type === "EVALUATE_CELLS" ||
                 cmd.type === "UPDATE_CELL") {
-                if (cmd.type !== "UNDO" && cmd.type !== "REDO") {
-                    for (const chartId in this.charts) {
-                        this.history.update("charts", chartId, undefined);
-                    }
+                for (const chartId in this.charts) {
+                    this.history.update("charts", chartId, undefined);
                 }
             }
             switch (cmd.type) {
@@ -43557,11 +43555,19 @@
             }
         }
         getStatisticFnResults() {
-            // get deduplicated cells in zones
-            const cells = new Set(this.gridSelection.zones
-                .map((zone) => this.getters.getEvaluatedCellsInZone(this.getters.getActiveSheetId(), zone))
-                .flat()
-                .filter((cell) => cell.type !== CellValueType.empty));
+            const sheetId = this.getters.getActiveSheetId();
+            const cells = new Set();
+            for (const zone of this.gridSelection.zones) {
+                for (const { col, row } of positions(zone)) {
+                    if (this.getters.isRowHidden(sheetId, row) || this.getters.isColHidden(sheetId, col)) {
+                        continue; // Skip hidden cells
+                    }
+                    const evaluatedCell = this.getters.getEvaluatedCell({ sheetId, col, row });
+                    if (evaluatedCell.type !== CellValueType.empty) {
+                        cells.add(evaluatedCell);
+                    }
+                }
+            }
             let cellsTypes = new Set();
             let cellsValues = [];
             for (let cell of cells) {
@@ -46145,6 +46151,7 @@
     css /* scss */ `
   .o-border-selector {
     padding: 4px;
+    background-color: white;
   }
   .o-divider {
     border-right: 1px solid #e0e2e4;
@@ -50761,9 +50768,9 @@
     Object.defineProperty(exports, '__esModule', { value: true });
 
 
-    __info__.version = '16.4.10';
-    __info__.date = '2023-10-19T15:28:18.011Z';
-    __info__.hash = 'bc7546f';
+    __info__.version = '16.4.11';
+    __info__.date = '2023-11-01T10:06:52.641Z';
+    __info__.hash = 'cfe3a0d';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
