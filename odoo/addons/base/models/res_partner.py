@@ -718,9 +718,8 @@ class Partner(models.Model):
             result = super(Partner, self.sudo()).write({'is_company': vals.get('is_company')})
             del vals['is_company']
         result = result and super(Partner, self).write(vals)
+        self._check_write_on_internal_user(vals)
         for partner in self:
-            if any(u._is_internal() for u in partner.user_ids if u != self.env.user):
-                self.env['res.users'].check_access_rights('write')
             partner._fields_sync(vals)
         return result
 
@@ -1103,6 +1102,15 @@ class Partner(models.Model):
                                     ('country_id', '=', country_id)]
                     state = States.search(state_domain, limit=1)
                     vals['state_id'] = state.id  # replace state or remove it if not found
+
+    @api.model
+    def _fields_whitelist_write_on_internal_user(self):
+        return []
+
+    def _check_write_on_internal_user(self, vals):
+        if set(vals.keys()) - set(self._fields_whitelist_write_on_internal_user()):
+            if any(u._is_internal() for u in self.user_ids if u != self.env.user):
+                self.env['res.users'].check_access_rights('write')
 
     def _get_country_name(self):
         return self.country_id.name or ''
