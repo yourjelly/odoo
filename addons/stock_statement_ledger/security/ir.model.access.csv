@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+stock_statement_ledger.access_stock_statement_ledger_line,access_stock_statement_ledger_line,stock_statement_ledger.model_stock_statement_ledger_line,base.group_user,1,1,1,1
+stock_statement_ledger.access_stock_statement_ledger,access_stock_statement_ledger,stock_statement_ledger.model_stock_statement_ledger,base.group_user,1,1,1,1
