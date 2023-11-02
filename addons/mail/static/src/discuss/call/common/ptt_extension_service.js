@@ -1,6 +1,7 @@
 /* @odoo-module */
 
 import { browser } from "@web/core/browser/browser";
+import { isBrowserChrome } from "@web/core/browser/feature_detection";
 import { registry } from "@web/core/registry";
 
 export const pttExtensionHookService = {
@@ -61,6 +62,10 @@ export const pttExtensionHookService = {
             get isEnabled() {
                 return isEnabled;
             },
+            get downloadURL() {
+                return "https://chrome.google.com/webstore/category/extensions";
+            },
+            isAvailable: isBrowserChrome(),
         };
     },
 };
