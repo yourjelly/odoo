@@ -3,6 +3,7 @@
 
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
+from odoo.osv.expression import OR
 
 
 class PosConfig(models.Model):
@@ -31,3 +32,9 @@ class PosConfig(models.Model):
             if not self.current_session_id and config.module_pos_discount and not config.discount_product_id:
                 raise UserError(_('A discount product is needed to use the Global Discount feature. Go to Point of Sale > Configuration > Settings to set it.'))
         return super().open_ui()
+
+    def _get_available_product_domain(self):
+        domain = super(PosConfig, self)._get_available_product_domain()
+        if self.module_pos_discount:
+            domain = OR([domain, [('id', '=', self.discount_product_id.id)]])
+        return domain
