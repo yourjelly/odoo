@@ -2,7 +2,6 @@
 
 import { markup } from "@odoo/owl";
 import { FlagMarkAsOffensiveDialog } from "../components/flag_mark_as_offensive/flag_mark_as_offensive";
-import dom from "@web/legacy/js/core/dom";
 import { cookie } from "@web/core/browser/cookie";;
 import { loadWysiwygFromTextarea } from "@web_editor/js/frontend/loadWysiwygFromTextarea";
 import publicWidget from "@web/legacy/js/public/public_widget";
@@ -10,6 +9,7 @@ import { session } from "@web/session";
 import { escape } from "@web/core/utils/strings";
 import { _t } from "@web/core/l10n/translation";
 import { renderToElement } from "@web/core/utils/render";
+import { scrollTo } from "@web/core/utils/scrolling";
 
 publicWidget.registry.websiteForum = publicWidget.Widget.extend({
     selector: '.website_forum',
@@ -170,10 +170,7 @@ publicWidget.registry.websiteForum = publicWidget.Widget.extend({
 
         this.$('#post_reply').on('shown.bs.collapse', function (e) {
             const replyEl = document.querySelector('#post_reply');
-            const scrollingElement = $(replyEl.parentNode).closestScrollable()[0];
-            dom.scrollTo(replyEl, {
-                forcedOffset: $(scrollingElement).innerHeight() - $(replyEl).innerHeight(),
-            });
+            scrollTo(replyEl);
         });
         document.querySelectorAll('.o_wforum_question, .o_wforum_answer, .o_wforum_post_comment, .o_wforum_last_activity')
             .forEach((post) => {

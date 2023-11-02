@@ -17,6 +17,7 @@ import {
     serializeDate,
     serializeDateTime,
 } from "@web/core/l10n/dates";
+import { scrollTo } from "@web/core/utils/scrolling";
 const { DateTime } = luxon;
 
     publicWidget.registry.EditModeWebsiteForm = publicWidget.Widget.extend({
@@ -420,10 +421,7 @@ const { DateTime } = luxon;
                                         // popup.
                                         window.location.href = successPage;
                                     } else {
-                                        await dom.scrollTo(successAnchorEl, {
-                                            duration: 500,
-                                            extraOffset: 0,
-                                        });
+                                        await scrollTo(successAnchorEl, { isAnchor: true });
                                     }
                                 }
                                 break;

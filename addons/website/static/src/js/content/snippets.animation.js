@@ -9,7 +9,6 @@ import { uniqueId } from "@web/core/utils/functions";
 import { escape } from "@web/core/utils/strings";
 import { debounce, throttleForAnimation } from "@web/core/utils/timing";
 import Class from "@web/legacy/js/core/class";
-import dom from "@web/legacy/js/core/dom";
 import mixins from "@web/legacy/js/core/mixins";
 import publicWidget from "@web/legacy/js/public/public_widget";
 import wUtils from "@website/js/utils";
@@ -987,18 +986,6 @@ registry.anchorSlide = publicWidget.Widget.extend({
 
     /**
      * @private
-     * @param {jQuery} $el the element to scroll to.
-     * @param {string} [scrollValue='true'] scroll value
-     * @returns {Promise}
-     */
-    async _scrollTo($el, scrollValue = 'true') {
-        return dom.scrollTo($el[0], {
-            duration: scrollValue === 'true' ? 500 : 0,
-            extraOffset: this._computeExtraOffset(),
-        });
-    },
-    /**
-     * @private
      */
     _computeExtraOffset() {
         return 0;
@@ -1023,10 +1010,7 @@ registry.anchorSlide = publicWidget.Widget.extend({
             // parameter, the "scrollTo" function handles the scroll to the top
             // or to the bottom of the document even if the header or the
             // footer is removed from the DOM.
-            dom.scrollTo(hash, {
-                duration: 500,
-                extraOffset: this._computeExtraOffset(),
-            });
+            scrollTo(hash);
             return;
         }
         if (!hash.length) {
@@ -1040,7 +1024,7 @@ registry.anchorSlide = publicWidget.Widget.extend({
             return;
         }
         ev.preventDefault();
-        this._scrollTo($anchor, scrollValue);
+        scrollTo($anchor[0], { isAnchor: true })
     },
 });
 
@@ -1116,7 +1100,7 @@ registry.ScrollButton = registry.anchorSlide.extend({
         let nextEl = currentSectionEl.nextElementSibling;
         while (nextEl) {
             if ($(nextEl).is(':visible')) {
-                this._scrollTo($(nextEl));
+                scrollTo(nextEl);
                 return;
             }
             nextEl = nextEl.nextElementSibling;

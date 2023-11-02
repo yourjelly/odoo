@@ -3,7 +3,6 @@
 import { attachComponent } from "@web/legacy/utils";
 import { MediaDialog } from "@web_editor/components/media_dialog/media_dialog";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
-import dom from "@web/legacy/js/core/dom";
 import { throttleForAnimation, debounce } from "@web/core/utils/timing";
 import { clamp } from "@web/core/utils/numbers";
 import Widget from "@web/legacy/js/core/widget";
@@ -41,6 +40,7 @@ import {
  } from '@web/core/utils/colors';
 import { renderToElement } from "@web/core/utils/render";
 import { jsonrpc } from "@web/core/network/rpc_service";
+import { scrollTo } from "@web/core/utils/scrolling";
 
 const preserveCursor = OdooEditorLib.preserveCursor;
 const { DateTime } = luxon;
@@ -5685,12 +5685,7 @@ registry.SnippetMove = SnippetOptionWidget.extend(ColumnLayoutMixin, {
             const bottomHidden = heightDiff < elTop;
             const hidden = elTop < 0 || bottomHidden;
             if (hidden) {
-                dom.scrollTo(this.$target[0], {
-                    extraOffset: 50,
-                    forcedOffset: bottomHidden ? heightDiff - 50 : undefined,
-                    easing: 'linear',
-                    duration: 500,
-                });
+                scrollTo(this.$target[0]);
             }
         }
         this.trigger_up('option_update', {
@@ -8282,7 +8277,7 @@ registry.BackgroundPosition = SnippetOptionWidget.extend({
                 ? Math.min(viewportBottom, rect.bottom) - rect.top // Starts inside
                 : 0; // Starts after
         if (visibleHeight < 200) {
-            await dom.scrollTo(this.$target[0], {extraOffset: 50});
+            await scrollTo(this.$target[0]);
         }
         this._toggleBgOverlay(true);
     },

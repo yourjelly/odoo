@@ -27,6 +27,7 @@ import { touching, closest } from "@web/core/utils/ui";
 import { _t } from "@web/core/l10n/translation";
 import { renderToElement } from "@web/core/utils/render";
 import { RPCError } from "@web/core/network/rpc_service";
+import { scrollTo } from "@web/core/utils/scrolling";
 
 let cacheSnippetTemplate = {};
 
@@ -3573,7 +3574,7 @@ var SnippetsMenu = Widget.extend({
         if (modalEl && !$(modalEl).hasScrollableContent()) {
             return;
         }
-        return dom.scrollTo($el[0], {extraOffset: 50, $scrollable: $scrollable});
+        return scrollTo($el[0], {scrollable: $scrollable ? $scrollable[0] : null});
     },
     /**
      * @private

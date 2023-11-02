@@ -1,8 +1,8 @@
 /** @odoo-module **/
 
-import dom from "@web/legacy/js/core/dom";
 import publicWidget from "@web/legacy/js/public/public_widget";
 import PortalSidebar from "@portal/js/portal_sidebar";
+import { scrollTo } from "@web/core/utils/scrolling";
 
 publicWidget.registry.AccountPortalSidebar = PortalSidebar.extend({
     selector: '.o_portal_invoice_sidebar',
@@ -57,7 +57,7 @@ publicWidget.registry.AccountPortalSidebar = PortalSidebar.extend({
         if (!$target.length) {
             return;
         }
-        dom.scrollTo($target[0], {duration: 0});
+        scrollTo($target[0]);
     },
     /**
      * @private
