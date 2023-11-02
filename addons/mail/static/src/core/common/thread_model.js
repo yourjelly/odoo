@@ -225,6 +225,9 @@ export class Thread extends Record {
     name;
     /** @type {number|false} */
     seen_message_id;
+
+    /** @type {number|false|null} */
+    previous_last_seen_message_id = null;
     /** @type {'open' | 'folded' | 'closed'} */
     state;
     status = "new";

@@ -9,7 +9,15 @@ import {
     useVisible,
 } from "@mail/utils/common/hooks";
 
-import { Component, onMounted, onWillUpdateProps, useEffect, useRef, useState } from "@odoo/owl";
+import {
+    Component,
+    onMounted,
+    onWillUpdateProps,
+    onWillStart,
+    useEffect,
+    useRef,
+    useState,
+} from "@odoo/owl";
 
 import { Transition } from "@web/core/transition";
 import { useBus, useService } from "@web/core/utils/hooks";
@@ -51,7 +59,7 @@ export class Thread extends Component {
         showDates: true,
         showEmptyMessage: true,
         showJumpPresent: true,
-        messageActions: true
+        messageActions: true,
     };
     static template = "mail.Thread";
 
@@ -128,6 +136,14 @@ export class Thread extends Component {
                 this.oldestPersistentMessage = this.props.thread.oldestPersistentMessage?.id;
                 this.newestPersistentMessage = this.props.thread.newestPersistentMessage?.id;
             },
+        });
+        onWillStart(() => {
+            if (this.props.thread.newestMessage?.id === this.props.thread.seen_message_id) {
+                this.props.thread.previous_last_seen_message_id = null;
+            } else {
+                this.props.thread.previous_last_seen_message_id = this.props.thread.seen_message_id;
+            }
+            this.threadService.markAsRead(this.props.thread);
         });
         useEffect(
             () => this.updateShowJumpPresent(),
@@ -242,5 +258,13 @@ export class Thread extends Component {
             return false;
         }
         return msg.datetime.ts - prevMsg.datetime.ts < 60 * 1000;
+    }
+
+    isNewMessageSeparatorVisible(previousMessage) {
+        const lastSeenId =
+            this.props.thread.previous_last_seen_message_id ??
+            this.props.thread.seen_message_id ??
+            false;
+        return lastSeenId === (previousMessage?.id ?? false);
     }
 }

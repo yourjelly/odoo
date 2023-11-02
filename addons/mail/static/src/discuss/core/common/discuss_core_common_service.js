@@ -224,6 +224,7 @@ export class DiscussCoreCommon {
             }
             if (message.isSelfAuthored) {
                 channel.seen_message_id = message.id;
+                channel.previous_last_seen_message_id = null;
             } else {
                 if (notif.id > this.store.initBusId) {
                     channel.message_unread_counter++;
@@ -243,6 +244,7 @@ export class DiscussCoreCommon {
                         }
                     }
                 }
+                channel.previous_last_seen_message_id = null;
             }
         }
         if (

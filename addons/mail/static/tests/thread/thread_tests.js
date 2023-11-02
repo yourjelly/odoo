@@ -5,8 +5,7 @@ import { startServer } from "@bus/../tests/helpers/mock_python_environment";
 import { Command } from "@mail/../tests/helpers/command";
 import { start } from "@mail/../tests/helpers/test_utils";
 
-import { config as transitionConfig } from "@web/core/transition";
-import { makeDeferred, nextTick, patchWithCleanup } from "@web/../tests/helpers/utils";
+import { makeDeferred, nextTick } from "@web/../tests/helpers/utils";
 import {
     click,
     contains,
@@ -237,7 +236,7 @@ QUnit.test('mention a channel with "&" in the name', async () => {
 });
 
 QUnit.test(
-    "mark channel as fetched when a new message is loaded and as seen when focusing composer [REQUIRE FOCUS]",
+    "mark channel as fetched when a new message is loaded [REQUIRE FOCUS]",
     async (assert) => {
         const pyEnv = await startServer();
         const partnerId = pyEnv["res.partner"].create({
@@ -259,9 +258,6 @@ QUnit.test(
                     assert.strictEqual(args.args[0][0], channelId);
                     assert.strictEqual(args.model, "discuss.channel");
                     assert.step("rpc:channel_fetch");
-                } else if (route === "/discuss/channel/set_last_seen_message") {
-                    assert.strictEqual(args.channel_id, channelId);
-                    assert.step("rpc:set_last_seen_message");
                 }
             },
         });
@@ -275,11 +271,6 @@ QUnit.test(
         );
         await contains(".o-mail-Message");
         assert.verifySteps(["rpc:channel_fetch"]);
-        await contains(".o-mail-Thread-newMessage hr + span", { text: "New messages" });
-        await focus(".o-mail-Composer-input");
-        await contains(".o-mail-Thread-newMessage hr + span", { count: 0, text: "New messages" });
-
-        assert.verifySteps(["rpc:set_last_seen_message"]);
     }
 );
 
@@ -470,54 +461,6 @@ QUnit.test("no new messages separator on posting message (some message history)"
     await insertText(".o-mail-Composer-input", "hey!");
     await click(".o-mail-Composer-send:enabled");
     await contains(".o-mail-Message", { count: 2 });
-    await contains(".o-mail-Thread-newMessage hr + span", { count: 0, text: "New messages" });
-});
-
-QUnit.test("new messages separator on receiving new message [REQUIRE FOCUS]", async () => {
-    patchWithCleanup(transitionConfig, { disabled: true });
-    const pyEnv = await startServer();
-    const partnerId = pyEnv["res.partner"].create({ name: "Foreigner partner" });
-    const userId = pyEnv["res.users"].create({
-        name: "Foreigner user",
-        partner_id: partnerId,
-    });
-    const channelId = pyEnv["discuss.channel"].create({
-        channel_member_ids: [
-            Command.create({ message_unread_counter: 0, partner_id: pyEnv.currentPartnerId }),
-            Command.create({ partner_id: partnerId }),
-        ],
-        channel_type: "channel",
-        name: "General",
-    });
-    const messageId = pyEnv["mail.message"].create({
-        body: "blah",
-        model: "discuss.channel",
-        res_id: channelId,
-    });
-    const [memberId] = pyEnv["discuss.channel.member"].search([
-        ["channel_id", "=", channelId],
-        ["partner_id", "=", pyEnv.currentPartnerId],
-    ]);
-    pyEnv["discuss.channel.member"].write([memberId], { seen_message_id: messageId });
-    const { env, openDiscuss } = await start();
-    openDiscuss(channelId);
-    await contains(".o-mail-Message");
-    await contains(".o-mail-Thread-newMessage hr + span", { count: 0, text: "New messages" });
-
-    $(".o-mail-Composer-input")[0].blur();
-    // simulate receiving a message
-    pyEnv.withUser(userId, () =>
-        env.services.rpc("/mail/message/post", {
-            post_data: { body: "hu", message_type: "comment" },
-            thread_id: channelId,
-            thread_model: "discuss.channel",
-        })
-    );
-    await contains(".o-mail-Message", { count: 2 });
-    await contains(".o-mail-Thread-newMessage hr + span", { text: "New messages" });
-    await contains(".o-mail-Thread-newMessage ~ .o-mail-Message", { text: "hu" });
-    await focus(".o-mail-Composer-input");
-    await nextTick();
     await contains(".o-mail-Thread-newMessage hr + span", { count: 0, text: "New messages" });
 });
 
@@ -725,12 +668,8 @@ QUnit.test("basic rendering of canceled notification", async () => {
 });
 
 QUnit.test(
-    "first unseen message should be directly preceded by the new message separator if there is a transient message just before it while composer is not focused [REQUIRE FOCUS]",
+    "first unseen message should be directly preceded by the new message separator if there is a transient message just before it while on another thread",
     async () => {
-        // The goal of removing the focus is to ensure the thread is not marked as seen automatically.
-        // Indeed that would trigger set_last_seen_message no matter what, which is already covered by other tests.
-        // The goal of this test is to cover the conditions specific to transient messages,
-        // and the conditions from focus would otherwise shadow them.
         const pyEnv = await startServer();
         // Needed partner & user to allow simulation of message reception
         const partnerId = pyEnv["res.partner"].create({ name: "Foreigner partner" });
@@ -738,14 +677,20 @@ QUnit.test(
             name: "Foreigner user",
             partner_id: partnerId,
         });
-        const channelId = pyEnv["discuss.channel"].create({
-            channel_type: "channel",
-            name: "General",
-            channel_member_ids: [
-                Command.create({ partner_id: partnerId }),
-                Command.create({ partner_id: pyEnv.currentPartnerId }),
-            ],
-        });
+        const [channelId] = pyEnv["discuss.channel"].create([
+            {
+                channel_type: "channel",
+                name: "General",
+                channel_member_ids: [
+                    Command.create({ partner_id: partnerId }),
+                    Command.create({ partner_id: pyEnv.currentPartnerId }),
+                ],
+            },
+            {
+                channel_type: "channel",
+                name: "Sales",
+            },
+        ]);
         pyEnv["mail.message"].create([
             {
                 body: "not empty",
@@ -759,16 +704,16 @@ QUnit.test(
         await insertText(".o-mail-Composer-input", "/who");
         await click(".o-mail-Composer-send:enabled");
         await contains(".o-mail-Message", { count: 2 });
-        // composer is focused by default, we remove that focus
-        $(".o-mail-Composer-input")[0].blur();
+        await click(".o-mail-DiscussSidebarChannel", { text: "Sales" });
         // simulate receiving a message
-        pyEnv.withUser(userId, () =>
+        await pyEnv.withUser(userId, () =>
             env.services.rpc("/mail/message/post", {
                 post_data: { body: "test", message_type: "comment" },
                 thread_id: channelId,
                 thread_model: "discuss.channel",
             })
         );
+        await click(".o-mail-DiscussSidebarChannel", { text: "General" });
         await contains(".o-mail-Message", { count: 3 });
         await contains(".o-mail-Thread-newMessage hr + span", { text: "New messages" });
         await contains(".o-mail-Message[aria-label='Note'] + .o-mail-Thread-newMessage");

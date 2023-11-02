@@ -703,7 +703,8 @@ export class ThreadService {
                 { html: true }
             );
             thread.messages.push(tmpMsg);
-            thread.seen_message_id = tmpMsg.id;
+            thread.seen_message_id = tmpId;
+            thread.previous_last_seen_message_id = null;
         }
         const data = await this.rpc(this.getMessagePostRoute(thread), params);
         tmpMsg?.delete();
@@ -715,6 +716,7 @@ export class ThreadService {
         }
         const message = this.store.Message.insert(data, { html: true });
         thread.messages.add(message);
+        this.updateSeen(thread);
         if (!message.isEmpty && this.store.hasLinkPreviewFeature) {
             this.rpc("/mail/link_preview", { message_id: data.id }, { silent: true });
         }

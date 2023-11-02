@@ -374,17 +374,18 @@ export class Message extends Component {
         await this.attachmentService.delete(attachment);
     }
 
-    onClickMarkAsUnread() {
+    async onClickMarkAsUnread() {
         const previousMessageId =
             this.message.originThread.getPreviousMessage(this.message)?.id ?? false;
         if (this.props.thread.seen_message_id === previousMessageId) {
             return;
         }
-        return this.rpc("/discuss/channel/set_last_seen_message", {
+        await this.rpc("/discuss/channel/set_last_seen_message", {
             channel_id: this.message.originThread.id,
             last_message_id: previousMessageId,
             allow_older: true,
         });
+        this.props.thread.previous_last_seen_message_id = null;
     }
 
     /**

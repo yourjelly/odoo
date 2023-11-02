@@ -5,7 +5,7 @@ import { startServer } from "@bus/../tests/helpers/mock_python_environment";
 import { Command } from "@mail/../tests/helpers/command";
 import { start } from "@mail/../tests/helpers/test_utils";
 
-import { patchWithCleanup } from "@web/../tests/helpers/utils";
+import { patchDate, patchWithCleanup } from "@web/../tests/helpers/utils";
 import { click, contains, triggerEvents } from "@web/../tests/utils";
 
 QUnit.module("notification");
@@ -267,6 +267,8 @@ QUnit.test("marked as read thread notifications are ordered by last message date
 
 QUnit.test("thread notifications are re-ordered on receiving a new message", async () => {
     const pyEnv = await startServer();
+    const bobPartnerId = pyEnv["res.partner"].create({ name: "Bob" });
+    const bobUserId = pyEnv["res.users"].create({ name: "Bob", partner_id: bobPartnerId });
     const [channelId_1, channelId_2] = pyEnv["discuss.channel"].create([
         { name: "Channel 2019" },
         { name: "Channel 2020" },
@@ -283,22 +285,16 @@ QUnit.test("thread notifications are re-ordered on receiving a new message", asy
             res_id: channelId_2,
         },
     ]);
-    await start();
+    const { env } = await start();
     await click(".o_menu_systray i[aria-label='Messages']");
     await contains(".o-mail-NotificationItem", { count: 2 });
-    const channel_1 = pyEnv["discuss.channel"].searchRead([["id", "=", channelId_1]])[0];
-    pyEnv["bus.bus"]._sendone(channel_1, "discuss.channel/new_message", {
-        id: channelId_1,
-        message: {
-            author: { id: 7, name: "Demo User" },
-            body: "<p>New message !</p>",
-            date: "2020-03-23 10:00:00",
-            id: 44,
-            message_type: "comment",
-            model: "discuss.channel",
-            record_name: "Channel 2019",
-            res_id: channelId_1,
-        },
+    pyEnv.withUser(bobUserId, () => {
+        patchDate(2020, 3, 23, 10, 0, 0);
+        env.services.rpc("/mail/message/post", {
+            post_data: { body: "Hello", message_type: "comment" },
+            thread_id: channelId_1,
+            thread_model: "discuss.channel",
+        });
     });
     await contains(":nth-child(1 of .o-mail-NotificationItem)", { text: "Channel 2019" });
     await contains(":nth-child(2 of .o-mail-NotificationItem)", { text: "Channel 2020" });

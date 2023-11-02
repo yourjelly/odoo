@@ -59,7 +59,7 @@ export class Composer extends Component {
         className: "",
         sidebar: true,
         showFullComposer: true,
-        allowUpload: true
+        allowUpload: true,
     };
     static props = [
         "composer",
@@ -76,7 +76,7 @@ export class Composer extends Component {
         "sidebar?",
         "type?",
         "showFullComposer?",
-        "allowUpload?"
+        "allowUpload?",
     ];
     static template = "mail.Composer";
 
@@ -595,8 +595,5 @@ export class Composer extends Component {
 
     onFocusin() {
         this.props.composer.isFocused = true;
-        if (this.props.composer.thread) {
-            this.threadService.markAsRead(this.props.composer.thread);
-        }
     }
 }
