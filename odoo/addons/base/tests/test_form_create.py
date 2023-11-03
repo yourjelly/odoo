@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import contextlib
+
+from odoo.exceptions import UserError
 from odoo.tests import TransactionCase, tagged, Form
 
 
@@ -64,3 +67,22 @@ class TestFormCreate(TransactionCase):
         lang_form.name = 'a lang name'
         lang_form.code = 'a lang code'
         lang_form.save()
+
+    def test_every_form_model(self):
+        IGNORE_MODEL_NAMES = {
+            'ir.attachment',
+            'test_new_api.attachment',
+            'payment.link.wizard',
+            'account.multicurrency.revaluation.wizard',
+            'account_followup.manual_reminder',
+        }
+        for model_name in self.registry:
+            model = self.env[model_name]
+            if model._abstract or not model._auto or model._transient or model_name in IGNORE_MODEL_NAMES:
+                continue
+
+            with self.subTest(
+                msg="Cannot create a new record (first onchange call).",
+                model=model_name,
+            ), contextlib.suppress(UserError):
+                Form(model)
