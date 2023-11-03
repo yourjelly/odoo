@@ -439,24 +439,25 @@ class SurveyUserInput(models.Model):
             question_section = question.page_id.title or _('Uncategorized')
             for user_input in self:
                 user_input_lines = user_input.user_input_line_ids.filtered(lambda line: line.question_id == question)
-                if question.question_type == 'simple_choice':
-                    answer_result_key = self._simple_choice_question_answer_result(user_input_lines, question_correct_suggested_answers, question_incorrect_scored_answers)
-                elif question.question_type == 'multiple_choice':
-                    answer_result_key = self._multiple_choice_question_answer_result(user_input_lines, question_correct_suggested_answers)
-                else:
-                    answer_result_key = self._simple_question_answer_result(user_input_lines)
+                if(user_input_lines):
+                    if question.question_type == 'simple_choice':
+                        answer_result_key = self._simple_choice_question_answer_result(user_input_lines, question_correct_suggested_answers, question_incorrect_scored_answers)
+                    elif question.question_type == 'multiple_choice':
+                        answer_result_key = self._multiple_choice_question_answer_result(user_input_lines, question_correct_suggested_answers)
+                    else:
+                        answer_result_key = self._simple_question_answer_result(user_input_lines)
 
-                if question_section not in res[user_input]['by_section']:
-                    res[user_input]['by_section'][question_section] = {
-                        'question_count': 0,
-                        'correct': 0,
-                        'partial': 0,
-                        'incorrect': 0,
-                        'skipped': 0,
-                    }
+                    if question_section not in res[user_input]['by_section']:
+                        res[user_input]['by_section'][question_section] = {
+                            'question_count': 0,
+                            'correct': 0,
+                            'partial': 0,
+                            'incorrect': 0,
+                            'skipped': 0,
+                        }
 
-                res[user_input]['by_section'][question_section]['question_count'] += 1
-                res[user_input]['by_section'][question_section][answer_result_key] += 1
+                    res[user_input]['by_section'][question_section]['question_count'] += 1
+                    res[user_input]['by_section'][question_section][answer_result_key] += 1
 
         for user_input in self:
             correct_count = 0
