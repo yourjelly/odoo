@@ -2,6 +2,8 @@
 
 import logging
 from ast import literal_eval
+import sys
+import inspect
 
 from odoo.modules import get_modules
 from odoo.modules.module import _DEFAULT_MANIFEST, module_manifest, get_module_path, get_module_resource
@@ -85,6 +87,8 @@ class ManifestLinter(BaseCase):
                         self._test_manifest_countries_value(module, value)
             elif key == 'icon':
                 self._test_manifest_icon_value(module, value)
+            if key in ('pre_init_hook', 'post_init_hook', 'uninstall_hook'):
+                self._test_manifest_hooks(module, value)
 
     def _test_manifest_icon_value(self, module, value):
         self.assertTrue(
@@ -119,3 +123,11 @@ class ManifestLinter(BaseCase):
                     "Country value %s specified for the icon in manifest of module %s doesn't look like a country code"
                     "Please specify a correct value or remove this key from the manifest.",
                     value, module)
+
+    def _test_manifest_hooks(self, module, value):
+        py_module = sys.modules['odoo.addons.%s' % (module,)]
+        hook_fun = getattr(py_module, value)
+        if len(inspect.signature(hook_fun).parameters) != 1:
+            _logger.warning(
+                "Hook %s in module %s should take a single argument `env`",
+                value, module)
