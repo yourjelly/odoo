@@ -2,7 +2,7 @@
 
 import { Component, onWillDestroy, useExternalListener, xml } from "@odoo/owl";
 import { useHotkey } from "../hotkeys/hotkey_hook";
-import { useChildRef } from "../utils/hooks";
+import { useChildRef, useService } from "../utils/hooks";
 import { Popover } from "./popover";
 
 export class PopoverController extends Component {
@@ -22,6 +22,7 @@ export class PopoverController extends Component {
     ];
 
     setup() {
+        this.uiActiveElement = useService("ui").activeElement;
         if (this.props.target.isConnected) {
             this.popoverRef = useChildRef();
             useExternalListener(window, "mousedown", this.onClickAway, { capture: true });
@@ -36,6 +37,7 @@ export class PopoverController extends Component {
 
     onClickAway(ev) {
         if (
+            this.uiActiveElement.contains(ev.target) &&
             this.props.closeOnClickAway(ev.target) &&
             !this.props.target.contains(ev.target) &&
             !this.popoverRef.el.contains(ev.target)
