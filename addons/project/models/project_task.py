@@ -1186,6 +1186,7 @@ class Task(models.Model):
             for dom in domain:
                 if len(dom) == 3:
                     _, op, value = dom
+                    print(f'-------comodel-------------{_}-------------------{op}-----------{value}')
                     op = "ilike" if op == "child_of" else op
                     if isinstance(value, list) and all(isinstance(val, int) for val in value):
                         new_domain.append(("id", op, value))
@@ -1199,6 +1200,7 @@ class Task(models.Model):
                         new_domain.append(("id", op, [value]))
                 else:
                     new_domain.append(dom)
+                    print('-----------------------------------',new_domain)
             return new_domain
 
         filtered_domain = filter_domain_leaf(domain, lambda field_to_check: field_to_check in [
@@ -1210,9 +1212,10 @@ class Task(models.Model):
             f"{field}.id": "id",
             f"{field}.name": "name",
         })
-        if additional_domain:
-            filtered_domain = expression.AND([_change_operator(filtered_domain), additional_domain])
-        return self.env[comodel].search(filtered_domain, order=order) if filtered_domain else False
+        if not filtered_domain:
+            return False
+        filtered_domain = expression.AND([_change_operator(filtered_domain), additional_domain]) if additional_domain else _change_operator(filtered_domain)
+        return self.env[comodel].search(filtered_domain, order=order)
 
     # ---------------------------------------------------
     # Subtasks
@@ -1691,6 +1694,7 @@ class Task(models.Model):
 
     def action_convert_to_subtask(self):
         self.ensure_one()
+        print('------------------action_convert_to_subtask----------------------------',self)
         if self.project_id:
             return {
                 'name': _('Convert to Task/Sub-Task'),

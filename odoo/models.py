@@ -1845,7 +1845,7 @@ class BaseModel(metaclass=MetaModel):
         :raise AccessError: if user is not allowed to access requested information
         """
         self.check_access_rights('read')
-
+        print(f'````````````````{domain}`````````````````````````` {groupby}```````````````````````````{aggregates}``````')
         if expression.is_false(self, domain):
             if not groupby:
                 # when there is no group, postgresql always return a row
@@ -2748,6 +2748,7 @@ class BaseModel(metaclass=MetaModel):
                 row['__context'] = {'group_by': groupby[len(lazy_groupby):]}
 
         self._read_group_format_result(rows_dict, lazy_groupby)
+        print('////////////////////////////////////////////////////////',rows_dict)
 
         return rows_dict
 

@@ -111,3 +111,17 @@ class TestProjectUpdate(TestProjectCommon):
             .execute()
         panel_data = self.project_pigs.get_panel_data()
         self.assertNotIn('milestones', panel_data, 'Since the "Milestones" feature is globally disabled, the "Milestones" section is not loaded.')
+
+    def test_project_update_tasks_kanban(self):
+        self.project_pigs.write({'allow_timesheets': 1})
+        self.task_1.write({'state': '1_done'})
+        self.task_2.write({'state': '1_done'})
+
+        with Form(self.env['project.update'].with_context({'default_project_id': self.project_pigs.id})) as update_form:
+            update_form.name = "Test Review"
+            update_form.progress = 100
+        update = update_form.save()
+
+        self.assertEqual(update.closed_task_count, 2, msg="At creation of project update the closed task in the project and project update should be equal")
+
+        self.assertEqual(update.task_count, 2, msg="At creation of project update the total task in the project and project update should be equal")
