@@ -216,7 +216,17 @@ class MetaModel(api.Meta):
             if '_name' not in attrs:
                 attrs['_name'] = inherit[0] if len(inherit) == 1 else name
 
-        return super().__new__(meta, name, bases, attrs)
+        super_ = super()
+        for method_name, method in attrs.items():
+            if not method_name.startswith('_') and callable(method):
+                super_method = getattr(super_, method_name, None)
+                if _api := getattr(method, '_api', None):
+                    if super_method and getattr(super_method, '_api', None) != _api:
+                        raise Exception('API attributes mismatch %s.%s' % (attrs['_name'], method_name))
+                elif super_method and (super_api := getattr(super_method, '_api')):
+                    method._api = super_api
+
+        return super_.__new__(meta, name, bases, attrs)
 
     def __init__(self, name, bases, attrs):
         super().__init__(name, bases, attrs)
