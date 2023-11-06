@@ -226,6 +226,13 @@ function makeActionManager(env) {
         }
 
         // actionRequest is an object describing the action
+        if (actionRequest.help && actionRequest.id) {
+            const key = `${JSON.stringify(actionRequest.id)},${JSON.stringify(context)}`;
+            actionCache[key] = await _loadAction(actionRequest.id);
+            if (actionCache[key].help && actionCache[key].help == actionRequest.help) {
+                actionRequest.help = markup(actionRequest.help);
+            }
+        }
         return actionRequest;
     }
 
