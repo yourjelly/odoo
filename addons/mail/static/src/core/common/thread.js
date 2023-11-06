@@ -138,12 +138,12 @@ export class Thread extends Component {
             },
         });
         onWillStart(() => {
-            if (this.props.thread.newestMessage?.id === this.props.thread.seen_message_id) {
-                this.props.thread.previous_last_seen_message_id = null;
-            } else {
-                this.props.thread.previous_last_seen_message_id = this.props.thread.seen_message_id;
-            }
-            this.threadService.markAsRead(this.props.thread);
+            // if (this.props.thread.newestMessage?.id === this.props.thread.seen_message_id) {
+            //     this.props.thread.previous_last_seen_message_id = null;
+            // } else {
+            //     this.props.thread.previous_last_seen_message_id = this.props.thread.seen_message_id;
+            // }
+            // this.threadService.markAsRead(this.props.thread);
         });
         useEffect(
             () => this.updateShowJumpPresent(),
@@ -177,6 +177,12 @@ export class Thread extends Component {
         onMounted(async () => {
             this.lastJumpPresent = this.props.jumpPresent;
             await this.threadService.fetchNewMessages(this.props.thread);
+            if (this.props.thread.seen_message_id) {
+                await this.threadService.loadAround(
+                    this.props.thread,
+                    this.props.thread.seen_message_id
+                );
+            }
             this.state.mountedAndLoaded = true;
         });
         useBus(this.env.bus, "MAIL:RELOAD-THREAD", ({ detail }) => {

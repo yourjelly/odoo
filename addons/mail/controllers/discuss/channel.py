@@ -34,6 +34,10 @@ class ChannelController(http.Controller):
     @add_guest_to_context
     def discuss_channel_messages(self, channel_id, search_term=None, before=None, after=None, limit=30, around=None):
         channel = request.env["discuss.channel"].search([("id", "=", channel_id)])
+        current_partner, current_guest = request.env["res.partner"]._get_current_persona()
+        member_of_current_user = channel.channel_member_ids.filtered(
+            lambda m: m.partner_id == current_partner or m.guest_id == current_guest
+        )
         if not channel:
             raise NotFound()
         domain = [
