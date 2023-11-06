@@ -21,6 +21,7 @@ class SaleOrderLine(models.Model):
         index=True, copy=False)
     # used to know if generate a task and/or a project, depending on the product settings
     reached_milestones_ids = fields.One2many('project.milestone', 'sale_line_id', string='Reached Milestones', domain=[('is_reached', '=', True)])
+    product_service_policy = fields.Selection(related="product_id.service_policy")
 
     def default_get(self, fields):
         res = super().default_get(fields)

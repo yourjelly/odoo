@@ -29,6 +29,12 @@
                     'default_detailed_type': 'service',
                 }</attribute>
             </field>
+            <field name="qty_delivered" position="before">
+                <field name="product_service_policy" invisible="1"/>
+            </field>
+            <field name="qty_delivered" position="attributes">
+                <attribute name="readonly">product_service_policy != 'delivered_manual'</attribute>
+            </field>
         </field>
     </record>
 
