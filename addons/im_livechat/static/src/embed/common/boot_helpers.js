@@ -2,7 +2,7 @@
 
 import { url } from "@web/core/utils/urls";
 
-async function loadFont(name, url) {
+export async function loadFont(name, url) {
     await document.fonts.ready;
     if ([...document.fonts].some(({ family }) => family === name)) {
         // Font already loaded.
@@ -56,16 +56,11 @@ export async function makeShadow(root) {
     const link = document.createElement("link");
     link.rel = "stylesheet";
     link.href = url("/im_livechat/assets_embed.css");
-    const stylesLoadedPromise = new Promise((res, rej) => {
+    const shadow = root.attachShadow({ mode: "open" });
+    shadow.appendChild(link);
+    await new Promise((res, rej) => {
         link.addEventListener("load", res);
         link.addEventListener("error", rej);
     });
-    const shadow = root.attachShadow({ mode: "open" });
-    shadow.appendChild(link);
-    await Promise.all([
-        stylesLoadedPromise,
-        loadFont("FontAwesome", url("/im_livechat/font-awesome")),
-        loadFont("odoo_ui_icons", url("/im_livechat/odoo_ui_icons")),
-    ]);
     return shadow;
 }
