@@ -7,6 +7,7 @@ from odoo.tools import DEFAULT_SERVER_DATE_FORMAT
 from odoo.addons.account.tests.common import AccountTestInvoicingHttpCommon
 from odoo.addons.point_of_sale.tests.common_setup_methods import setup_pos_combo_items
 from datetime import date, timedelta
+from odoo.addons.point_of_sale.tests.common import archive_products
 
 import odoo.tests
 
@@ -89,11 +90,13 @@ class TestPointOfSaleHttpCommon(AccountTestInvoicingHttpCommon):
             'sequence': 10,
         })
 
-        # Archive all existing product to avoid noise during the tours
-        all_pos_product = env['product.product'].search([('available_in_pos', '=', True)])
-        discount = env.ref('point_of_sale.product_product_consumable')
-        cls.tip = env.ref('point_of_sale.product_product_tip')
-        (all_pos_product - discount - cls.tip)._write({'active': False})
+        # # Archive all existing product to avoid noise during the tours
+        # all_pos_product = env['product.product'].search([('available_in_pos', '=', True)])
+        # discount = env.ref('point_of_sale.product_product_consumable')
+        # cls.tip = env.ref('point_of_sale.product_product_tip')
+        # (all_pos_product - discount - cls.tip)._write({'active': False})
+
+        archive_products(env)
 
         # In DESKS categ: Desk Pad
         pos_categ_desks = env.ref('point_of_sale.pos_category_desks')

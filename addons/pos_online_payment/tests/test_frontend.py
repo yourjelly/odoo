@@ -10,6 +10,7 @@ from odoo.addons.pos_online_payment.models.pos_order import PosOrder
 from odoo.addons.pos_online_payment.tests.online_payment_common import OnlinePaymentCommon
 from odoo.addons.account.models.account_payment_method import AccountPaymentMethod
 from odoo.osv.expression import AND
+from odoo.addons.point_of_sale.tests.common import archive_products
 
 import odoo.tests
 
@@ -108,6 +109,15 @@ class TestUi(AccountTestInvoicingCommon, OnlinePaymentCommon):
         cls.pos_user.partner_id.email = 'pos_op_user@test.com'
         # End of code from addons/point_of_sale/tests/test_frontend.py
 
+        archive_products(cls.env)
+
+        cls.letter_tray = cls.env['product.product'].create({
+            'name': 'Letter Tray',
+            'type': 'product',
+            'list_price': 4.8,
+            'taxes_id': False,
+            'available_in_pos': True,
+        })
     # Code from addons/account_payment/tests/common.py
     @classmethod
     def _prepare_provider(cls, provider_code='none', company=None, update_values=None):

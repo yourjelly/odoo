@@ -4,6 +4,8 @@
 import odoo.tests
 
 from odoo import Command
+from odoo.addons.point_of_sale.tests.common import archive_products
+from odoo.addons.point_of_sale.tests.common_setup_methods import setup_pos_combo_items
 
 
 @odoo.tests.tagged("post_install", "-at_install")
@@ -14,6 +16,7 @@ class SelfOrderCommonTest(odoo.tests.HttpCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        archive_products(cls.env)
         cls.pos_user = cls.env['res.users'].create({
             'name': 'POS User',
             'login': 'pos_user',
@@ -32,6 +35,70 @@ class SelfOrderCommonTest(odoo.tests.HttpCase):
                 (4, cls.env.ref('point_of_sale.group_pos_manager').id),
             ],
         })
+
+        cls.cola = cls.env['product.product'].create({
+            'name': 'Coca-Cola',
+            'type': 'product',
+            'list_price': 2.2,
+            'taxes_id': False,
+            'available_in_pos': True,
+        })
+        cls.fanta = cls.env['product.product'].create({
+            'name': 'Fanta',
+            'type': 'product',
+            'list_price': 2.2,
+            'taxes_id': False,
+            'available_in_pos': True,
+        })
+
+        #desk organizer
+        cls.desk_organizer = cls.env['product.product'].create({
+            'name': 'Desk Organizer',
+            'available_in_pos': True,
+        })
+        desk_size_attribute = cls.env['product.attribute'].create({
+            'name': 'Size',
+            'display_type': 'radio',
+            'create_variant': 'no_variant',
+        })
+        desk_size_s = cls.env['product.attribute.value'].create({
+            'name': 'S',
+            'attribute_id': desk_size_attribute.id,
+        })
+        desk_size_m = cls.env['product.attribute.value'].create({
+            'name': 'M',
+            'attribute_id': desk_size_attribute.id,
+        })
+        desk_size_l = cls.env['product.attribute.value'].create({
+            'name': 'L',
+            'attribute_id': desk_size_attribute.id,
+        })
+        cls.env['product.template.attribute.line'].create({
+            'product_tmpl_id': cls.desk_organizer.product_tmpl_id.id,
+            'attribute_id': desk_size_attribute.id,
+            'value_ids': [(6, 0, [desk_size_s.id, desk_size_m.id, desk_size_l.id])]
+        })
+        desk_fabrics_attribute = cls.env['product.attribute'].create({
+            'name': 'Fabric',
+            'display_type': 'select',
+            'create_variant': 'no_variant',
+        })
+        desk_fabrics_leather = cls.env['product.attribute.value'].create({
+            'name': 'Leather',
+            'attribute_id': desk_fabrics_attribute.id,
+        })
+        desk_fabrics_other = cls.env['product.attribute.value'].create({
+            'name': 'Custom',
+            'attribute_id': desk_fabrics_attribute.id,
+            'is_custom': True,
+        })
+        cls.env['product.template.attribute.line'].create({
+            'product_tmpl_id': cls.desk_organizer.product_tmpl_id.id,
+            'attribute_id': desk_fabrics_attribute.id,
+            'value_ids': [(6, 0, [desk_fabrics_leather.id, desk_fabrics_other.id])]
+        })
+
+        cls.office_combo = setup_pos_combo_items(cls)
 
     def _add_tax_to_product_from_different_company(self):
         new_company = self.env['res.company'].create({
