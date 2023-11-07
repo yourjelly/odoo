@@ -275,18 +275,7 @@
                             <tns:NazwaBanku t-out="record.partner_bank_id.bank_name"/>
                             <!-- OpisRachunku additional info on bank account if we want -->
                         </tns:RachunekBankowy>
-                        <!-- don't know what RachunekBankowyFaktora is
-                        <tns:RachunekBankowyFaktora t-if="record.partner_bank_id and record.partner_bank_id.partner_id != company.partner_id">
-                            <t t-if="_get_account_number_NRB(record)">
-                                <tns:NrRBPL t-out="_get_account_number_NRB(record)"/>
-                            </t>
-                            <t t-else="">
-                                <tns:NrRBZagr t-out="record.partner_bank_id.acc_number"/>
-                            </t>
-                            <tns:SWIFT t-out="record.partner_bank_id.bank_bic"/>
-                             RachunekWlasnyBanku type of bank's own accounts
-                            <tns:NazwaBanku t-out="record.partner_bank_id.bank_name"/>
-                        </tns:RachunekBankowyFaktora> -->
+                        <!-- don't know what RachunekBankowyFaktora is-->
                         <tns:Skonto t-if="record.invoice_payment_term_id.early_discount">
                             <tns:WarunkiSkonta t-out="f'Pay Before this number of days: {record.invoice_payment_term_id.discount_days}' "/>
                             <tns:WysokoscSkonta t-out="f'{record.invoice_payment_term_id.discount_percentage}% Discounted' "/>
