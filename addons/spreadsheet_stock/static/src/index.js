@@ -2,12 +2,13 @@
 
 import { _lt } from "@web/core/l10n/translation";
 import spreadsheet from "@spreadsheet/o_spreadsheet/o_spreadsheet_extended";
-import StockPlugin from "./plugins/stock_plugins"; // Make sure you have this plugin
-import { getFirstStockFunction, getNumberOfStockFormulas } from "./utils"; // You will need these utility functions
-import { parseStockDate } from "./stock_functions"; // Make sure this function is available
+import StockPlugin from "./plugins/stock_plugins";
+import { getFirstStockFunction, getNumberOfStockFormulas } from "./utils";
+import { parseStockDate } from "./stock_functions";
 import { camelToSnakeObject } from "@spreadsheet/helpers/helpers";
 
 const { cellMenuRegistry, uiPluginRegistry } = spreadsheet.registries;
+const { astToFormula } = spreadsheet;
 
 uiPluginRegistry.add("odooStockAggregates", StockPlugin);
 

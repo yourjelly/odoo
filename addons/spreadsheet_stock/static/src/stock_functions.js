@@ -5,62 +5,51 @@ import spreadsheet from "@spreadsheet/o_spreadsheet/o_spreadsheet_extended";
 import { sprintf } from "@web/core/utils/strings";
 
 const { functionRegistry } = spreadsheet.registries;
-const { args, toBoolean, toString, toNumber, toJsDate } = spreadsheet.helpers;
+const { args, toString, toNumber } = spreadsheet.helpers;
 
-const ODOO_STOCK_ARGS = `
+const commonArgs = args(`
     product_id (number) ${_t("ID of the product.")}
     location_id (number) ${_t("ID of the location.")}
-    date_range (string, date) ${_t(`The date range. Supported formats are "21/12/2022", "Q1/2022", "12/2022", and "2022".`)}
+    date_range (string, date) ${_t("The date range. Supported formats are '21/12/2022', 'Q1/2022', '12/2022', and '2022'.")}
     posted (boolean, default=FALSE) ${_t("Set to TRUE to include posted entries.")}
-`;
+`);
 
 functionRegistry.add("ODOO.STOCK.IN", {
-    description: _t("Get the stock in data for the specified product and location."),
-    args: args(ODOO_STOCK_ARGS),
+    description: _t("Get the incoming stock data for the specified product and location."),
+    args: commonArgs,
     returns: ["NUMBER"],
     compute: function (product_id, location_id, date_range, posted = false) {
-        product_id = toNumber(product_id);
-        location_id = toNumber(location_id);
-        date_range = parseStockDate(date_range);
-        return this.getters.getStockIn(product_id, location_id, date_range, posted);
+        return this.getters.getStockIn(product_id, location_id, parseStockDate(date_range), posted);
     },
 });
 
 functionRegistry.add("ODOO.STOCK.OUT", {
-    description: _t("Get the stock out data for the specified product and location."),
-    args: args(ODOO_STOCK_ARGS),
+    description: _t("Get the outgoing stock data for the specified product and location."),
+    args: commonArgs,
     returns: ["NUMBER"],
     compute: function (product_id, location_id, date_range, posted = false) {
-        product_id = toNumber(product_id);
-        location_id = toNumber(location_id);
-        date_range = parseStockDate(date_range);
-        return this.getters.getStockOut(product_id, location_id, date_range, posted);
+        return this.getters.getStockOut(product_id, location_id, parseStockDate(date_range), posted);
     },
 });
 
 functionRegistry.add("ODOO.STOCK.OPENING", {
     description: _t("Get the opening stock data for the specified product and location."),
-    args: args(ODOO_STOCK_ARGS),
+    args: commonArgs,
     returns: ["NUMBER"],
     compute: function (product_id, location_id, date_range, posted = false) {
-        product_id = toNumber(product_id);
-        location_id = toNumber(location_id);
-        date_range = parseStockDate(date_range);
-        return this.getters.getStockOpening(product_id, location_id, date_range, posted);
+        return this.getters.getStockOpening(product_id, location_id, parseStockDate(date_range), posted);
     },
 });
 
 functionRegistry.add("ODOO.STOCK.CLOSING", {
     description: _t("Get the closing stock data for the specified product and location."),
-    args: args(ODOO_STOCK_ARGS),
+    args: commonArgs,
     returns: ["NUMBER"],
     compute: function (product_id, location_id, date_range, posted = false) {
-        product_id = toNumber(product_id);
-        location_id = toNumber(location_id);
-        date_range = parseStockDate(date_range);
-        return this.getters.getStockClosing(product_id, location_id, date_range, posted);
+        return this.getters.getStockClosing(product_id, location_id, parseStockDate(date_range), posted);
     },
 });
+
 
 const QuarterRegexp = /^q([1-4])\/(\d{4})$/i;
 const MonthRegexp = /^0?([1-9]|1[0-2])\/(\d{4})$/i;

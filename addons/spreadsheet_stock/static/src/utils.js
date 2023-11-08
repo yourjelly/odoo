@@ -8,7 +8,7 @@ import { getOdooFunctions } from "@spreadsheet/helpers/odoo_functions_helpers";
  * @returns {number}
  */
 export function getNumberOfStockFormulas(formula) {
-    return getOdooFunctions(formula, ["ODOO.STOCK.IN", "ODOO.STOCK.OUT", "ODOO.STOCK.OPENING", "ODOO.STOCK.CLOSING"]).filter(
+    return getOdooFunctions(formula, ["ODOO.STOCK"]).filter(
         (fn) => fn.isMatched
     ).length;
 }
@@ -20,7 +20,7 @@ export function getNumberOfStockFormulas(formula) {
  * @returns {OdooFunctionDescription | undefined}
  */
 export function getFirstStockFunction(formula) {
-    return getOdooFunctions(formula, ["ODOO.STOCK.IN", "ODOO.STOCK.OUT", "ODOO.STOCK.OPENING", "ODOO.STOCK.CLOSING"]).find(
+    return getOdooFunctions(formula, ["ODOO.STOCK"]).find(
         (fn) => fn.isMatched
     );
 }

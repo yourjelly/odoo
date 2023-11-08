@@ -1,78 +1,79 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from datetime import date
-import calendar
+from datetime import datetime
 from odoo import api, models
 from dateutil.relativedelta import relativedelta
 
 class StockMoveLine(models.Model):
     _inherit = "stock.move.line"
 
-    def _convert_to_actual_dates(self, date_range_obj):
-        if date_range_obj['range_type'] == 'year':
-            return date(date_range_obj['year'], 1, 1), date(date_range_obj['year'], 12, 31)
-        elif date_range_obj['range_type'] == 'quarter':
-            month_start = (date_range_obj['quarter'] - 1) * 3 + 1
-            month_end = month_start + 2
-            return date(date_range_obj['year'], month_start, 1), date(date_range_obj['year'], month_end, calendar.monthrange(date_range_obj['year'], month_end)[1])
-        elif date_range_obj['range_type'] == 'month':
-            return date(date_range_obj['year'], date_range_obj['month'], 1), date(date_range_obj['year'], date_range_obj['month'], calendar.monthrange(date_range_obj['year'], date_range_obj['month'])[1])
-        elif date_range_obj['range_type'] == 'day':
-            return date(date_range_obj['year'], date_range_obj['month'], date_range_obj['day']), date(date_range_obj['year'], date_range_obj['month'], date_range_obj['day'])
-        
     @api.model
-    def get_stock_in(self, args):
+    def get_stock_data(self, args):
         location_id = args[0]['location_id']
         product_id = args[0]['product_id']
-        date_range = args[0]['date_range']
-        start_date, end_date = self._convert_to_actual_dates(date_range)
+        start_date = args[0]['start_date']
+        end_date = args[0]['end_date']
+        posted = False
+
+        # product_id = self.env['product.template'].search([('name', 'ilike' ,product_id)]).id
+        # location_id = self.env['stock.location'].search([('complete_name', '=', location_id)]).id
+
+        # Helper to create domain based on parameters
+        def create_domain(loc_field, extra_domain=None):
+            domain = [
+                (loc_field, '=', location_id),
+                ('product_id', '=', product_id),
+                ('date', '>=', start_date),
+                ('date', '<=', end_date),
+                ('state', '=', 'done' if posted else 'draft')
+            ]
+            if extra_domain:
+                domain.extend(extra_domain)
+            return domain
+
+        # Get opening stock
+        opening_domain = create_domain('location_id', [('date', '<', start_date)])
+        opening_moves = self.search(opening_domain)
+        opening_stock = sum(opening_moves.mapped('qty_done'))
+
+        # Get incoming quantities
+        in_domain = create_domain('location_dest_id')
+        in_moves = self.search(in_domain)
+        in_qty = sum(in_moves.mapped('qty_done'))
+
+        # Get outgoing quantities
+        out_domain = create_domain('location_id')
+        out_moves = self.search(out_domain)
+        out_qty = sum(out_moves.mapped('qty_done'))
+
+        # Calculate closing stock
+        closing_stock = opening_stock + in_qty - out_qty
+
+        # Return a dictionary with all the data
+        return [{
+            'opening_stock': opening_stock,
+            'in_qty': in_qty,
+            'out_qty': out_qty,
+            'closing_stock': closing_stock
+        }]
+       
+    @api.model
+    def spreadsheet_stock_line_action(self, args):
         domain = [
-            ('location_dest_id', '=', location_id),
-            ('product_id', '=', product_id),
-            ('date', '>=', start_date),
-            ('date', '<=', end_date),
+            ('location_id', '=', args[0]['location_id']),
+            ('product_id', '=', args[0]['product_id']),
+            ('date', '>=', args[0]['start_date']),
+            ('date', '<=', args[0]['end_date']),
             ('state', '=', 'done')
         ]
-        stock_in_lines = self.search(domain)
-        return [sum(stock_in_lines.mapped('qty_done'))]
 
-    @api.model
-    def get_stock_out(self, args):
-        location_id = args[0]['location_id']
-        product_id = args[0]['product_id']
-        date_range = args[0]['date_range']
-        start_date, end_date = self._convert_to_actual_dates(date_range)
-
-        domain = [
-            ('location_id', '=', location_id),
-            ('product_id', '=', product_id),
-            ('date', '>=', start_date),
-            ('date', '<=', end_date),
-            ('state', '=', 'done')
-        ]
-        stock_out_lines = self.search(domain)
-        return [sum(stock_out_lines.mapped('qty_done'))]
-
-    @api.model
-    def get_stock_opening(self, args):
-         # Assuming the opening stock for a day is the closing stock of the previous day
-        location_id = args[0]['location_id']
-        product_id = args[0]['product_id']
-        date = args[0]['date_range']
-        previous_day = date - relativedelta(days=1)
-        breakpoint()
-        closing_previous_day = self.get_stock_closing(location_id, product_id, previous_day)
-        in_qty_today = self.get_stock_in(location_id, product_id, date)
-        out_qty_today = self.get_stock_out(location_id, product_id, date)
-        return [closing_previous_day - out_qty_today + in_qty_today]
-
-    @api.model
-    def get_stock_closing(self, args):
-        location_id = args[0]['location_id']
-        product_id = args[0]['product_id']
-        date = args[0]['date_range']
-        opening_today = self.get_stock_opening(location_id, product_id, date)
-        in_qty_today = self.get_stock_in(location_id, product_id, date)
-        out_qty_today = self.get_stock_out(location_id, product_id, date)
-        return [opening_today + in_qty_today - out_qty_today]
+        return {
+            "type": "ir.actions.act_window",
+            "res_model": "stock.move.line",
+            "view_mode": "list",
+            "views": [[False, "list"]],
+            "target": "current",
+            "domain": domain,
+            "name": "Stock Moves",
+        }

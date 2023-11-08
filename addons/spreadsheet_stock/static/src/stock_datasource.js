@@ -9,29 +9,32 @@ export class StockDataSource {
         });
     }
 
-    getIn(product_id, location_id,  date_range, posted) {
-        return this._fetchStockData("get_stock_in", product_id, location_id,  date_range, posted);
+    getIn(product_id, location_id, startDate, endDate, posted) {
+        const data = this._fetchStockData(product_id, location_id, startDate, endDate, posted);
+        debugger;
+        return data.in_qty;
     }
 
-    getOut(product_id, location_id,  date_range, posted) {
-        return this._fetchStockData("get_stock_out", product_id, location_id,  date_range, posted);
+    getOut(product_id, location_id, startDate, endDate, posted) {
+        const data = this._fetchStockData(product_id, location_id, startDate, endDate, posted);
+        return data.out_qty;
     }
 
-    getOpening(product_id, location_id,  date, posted) {
-        return this._fetchStockData("get_stock_opening", product_id, location_id,  date, posted);
+    getOpening(product_id, location_id, startDate, endDate, posted) {
+        const data = this._fetchStockData(product_id, location_id, startDate, endDate, posted);
+        return data.opening_stock;
     }
 
-    getClosing(product_id, location_id,  date, posted) {
-        return this._fetchStockData("get_stock_closing", product_id, location_id,  date, posted);
+    getClosing(product_id, location_id, startDate, endDate, posted) {
+        const data = this._fetchStockData(product_id, location_id, startDate, endDate, posted);
+        return data.closing_stock;
     }
 
-    _fetchStockData(method_name, product_id, location_id,  date_range, posted) {
-        const vals =this.serverData.batch.get(
+    _fetchStockData(product_id, location_id, startDate, endDate, posted) {
+        return this.serverData.batch.get(
             "stock.move.line",
-            method_name,
-            camelToSnakeObject({ product_id, location_id,  date_range, posted })
+            "get_stock_data",
+            camelToSnakeObject({ product_id, location_id,  startDate, endDate, posted })
         );
-        debugger
-        return vals
     }
 }
