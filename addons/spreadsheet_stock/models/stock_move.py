@@ -16,8 +16,9 @@ class StockMoveLine(models.Model):
         end_date = args[0]['end_date']
         posted = False
 
-        # product_id = self.env['product.template'].search([('name', 'ilike' ,product_id)]).id
-        # location_id = self.env['stock.location'].search([('complete_name', '=', location_id)]).id
+        product_id = self.env['product.product'].search([('name', 'ilike' ,product_id)]).id
+        location_id = self.env['stock.location'].search([('complete_name', '=', location_id)]).id
+        # breakpoint()
 
         # Helper to create domain based on parameters
         def create_domain(loc_field, extra_domain=None):

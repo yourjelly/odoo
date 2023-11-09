@@ -8,8 +8,8 @@ const { functionRegistry } = spreadsheet.registries;
 const { args, toString, toNumber } = spreadsheet.helpers;
 
 const commonArgs = args(`
-    product_id (number) ${_t("ID of the product.")}
-    location_id (number) ${_t("ID of the location.")}
+    product_id (string) ${_t("Name of the product.")}
+    location_id (string) ${_t("Name of the location.")}
     date_range (string, date) ${_t("The date range. Supported formats are '21/12/2022', 'Q1/2022', '12/2022', and '2022'.")}
     posted (boolean, default=FALSE) ${_t("Set to TRUE to include posted entries.")}
 `);
