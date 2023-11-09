@@ -97,11 +97,10 @@ class HrEmployee(models.Model):
             start_naive = start_tz.astimezone(pytz.utc).replace(tzinfo=None)
             end_tz = now_tz
             end_naive = end_tz.astimezone(pytz.utc).replace(tzinfo=None)
-
             hours = sum(
                 att.worked_hours or 0
                 for att in employee.attendance_ids.filtered(
-                    lambda att: att.check_in >= start_naive and att.check_out <= end_naive
+                    lambda att: att.check_in >= start_naive and att.check_out and att.check_out <= end_naive
                 )
             )
 
