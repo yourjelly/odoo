@@ -21,7 +21,9 @@
 
         <xpath expr="//*[@t-esc='item.label']" position="inside">
             <span t-esc="item.label" />
-            <span t-if="item.shortTimeInStage" t-att-title="item.fullTimeInStage" class="ms-2 opacity-50 small">
+            <span t-if="item.fullTimeInStage" t-att-title="item.fullTimeInStage" class="ms-2 opacity-50 small">
+                <!-- <t t-debug="pdb"/> -->
+                <!-- <t t-log="item"/> -->
                 <t t-esc="item.shortTimeInStage" />
             </span>
         </xpath>

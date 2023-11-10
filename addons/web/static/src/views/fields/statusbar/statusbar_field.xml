@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
     <t t-name="web.StatusBarField.Dropdown">
+        <t t-log="items"/>
         <Dropdown toggler="'parent'">
             <t t-foreach="items" t-as="item" t-key="item.value">
                 <DropdownItem
@@ -22,10 +23,10 @@
                 type="button"
                 class="btn btn-secondary dropdown-toggle o_arrow_button o_first"
             >
-                <t t-call="web.StatusBarField.Dropdown">
+                <!-- <t t-call="web.StatusBarField.Dropdown">
                     <t t-set="label">...</t>
                     <t t-set="items" t-value="items.after" />
-                </t>
+                </t> -->
             </button>
             <t t-foreach="items.inline" t-as="item" t-key="item.value">
                 <button

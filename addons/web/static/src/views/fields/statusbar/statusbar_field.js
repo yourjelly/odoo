@@ -110,7 +110,6 @@ export class StatusBarField extends Component {
                 return orm.searchRead(relation, domain, fieldNames);
             });
         }
-
         // Command palette
         if (this.props.withCommand) {
             const moveToCommandName = _t("Move to %s...", escape(this.field.string));
@@ -237,6 +236,7 @@ export class StatusBarField extends Component {
      * @returns {StatusBarItem[]}
      */
     getAllItems() {
+        // debugger
         const { foldField, name, record } = this.props;
         const currentValue = record.data[name];
         if (this.field.type === "many2one") {
@@ -246,7 +246,7 @@ export class StatusBarField extends Component {
                 label: option.display_name,
                 isFolded: option[foldField],
                 isSelected: Boolean(currentValue && option.id === currentValue[0]),
-            }));
+            })); 
         } else {
             // Selection
             let { selection } = this.field;

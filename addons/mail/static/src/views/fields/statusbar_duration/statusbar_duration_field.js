@@ -9,6 +9,7 @@ export class StatusBarDurationField extends StatusBarField {
     static template = "mail.StatusBarDurationField";
 
     getAllItems() {
+        // debugger
         const items = super.getAllItems();
         const durationTracking = this.props.record.data.duration_tracking || {};
         if (Object.keys(durationTracking).length) {
@@ -22,6 +23,7 @@ export class StatusBarDurationField extends StatusBarField {
                 }
             }
         }
+        // this.items = items;
         return items;
     }
 }
