@@ -11,8 +11,8 @@
                 <div name="option_xml"
                      invisible="not l10n_pl_edi_ksef_enable_xml">
                     <!-- Use one field as the label for another -->
-                    <field name="l10n_es_edi_facturae_checkbox_xml" style="display: inline-block"/>
-                    <b><label for="l10n_pl_edi_ksef_checkbox_xml"></label></b>
+                    <field name="l10n_pl_edi_ksef_checkbox_xml" style="display: inline-block"/>
+                    <b><label for="l10n_pl_edi_ksef_checkbox_xml"/></b>
                 </div>
             </xpath>
         </field>
