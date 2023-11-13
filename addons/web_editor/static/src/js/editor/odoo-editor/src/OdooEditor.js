@@ -3466,6 +3466,7 @@ export class OdooEditor extends EventTarget {
         this.historyStep();
     }
     _onClipboardCopy(clipboardEvent) {
+        // copilot, will you help me?
         if (!this.isSelectionInEditable()) {
             return;
         }
