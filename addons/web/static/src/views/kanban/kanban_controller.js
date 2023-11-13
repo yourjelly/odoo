@@ -26,6 +26,32 @@ const QUICK_CREATE_FIELD_TYPES = ["char", "boolean", "many2one", "selection", "m
 // -----------------------------------------------------------------------------
 
 export class KanbanController extends Component {
+    static template = `web.KanbanView`;
+    static components = { Layout, KanbanRenderer, MultiRecordViewButton, SearchBar, CogMenu };
+    static props = {
+        ...standardViewProps,
+        defaultGroupBy: {
+            validate: (dgb) => !dgb || typeof dgb === "string",
+            optional: true,
+        },
+        editable: { type: Boolean, optional: true },
+        forceGlobalClick: { type: Boolean, optional: true },
+        onSelectionChanged: { type: Function, optional: true },
+        showButtons: { type: Boolean, optional: true },
+        Compiler: { type: Function, optional: true }, // optional in stable for backward compatibility
+        Model: Function,
+        Renderer: Function,
+        buttonTemplate: String,
+        archInfo: Object,
+    };
+
+    static defaultProps = {
+        createRecord: () => {},
+        forceGlobalClick: false,
+        selectRecord: () => {},
+        showButtons: true,
+    };
+
     setup() {
         this.actionService = useService("action");
         this.dialog = useService("dialog");
@@ -289,29 +315,3 @@ export class KanbanController extends Component {
         return field && QUICK_CREATE_FIELD_TYPES.includes(field.type);
     }
 }
-
-KanbanController.template = `web.KanbanView`;
-KanbanController.components = { Layout, KanbanRenderer, MultiRecordViewButton, SearchBar, CogMenu };
-KanbanController.props = {
-    ...standardViewProps,
-    defaultGroupBy: {
-        validate: (dgb) => !dgb || typeof dgb === "string",
-        optional: true,
-    },
-    editable: { type: Boolean, optional: true },
-    forceGlobalClick: { type: Boolean, optional: true },
-    onSelectionChanged: { type: Function, optional: true },
-    showButtons: { type: Boolean, optional: true },
-    Compiler: { type: Function, optional: true }, // optional in stable for backward compatibility
-    Model: Function,
-    Renderer: Function,
-    buttonTemplate: String,
-    archInfo: Object,
-};
-
-KanbanController.defaultProps = {
-    createRecord: () => {},
-    forceGlobalClick: false,
-    selectRecord: () => {},
-    showButtons: true,
-};

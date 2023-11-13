@@ -9,6 +9,12 @@ import { SelectionField, selectionField } from "@web/views/fields/selection/sele
  * that uses different possible sets of values on the same selection field.
  */
 export class FilterableSelectionField extends SelectionField {
+    static props = {
+        ...SelectionField.props,
+        whitelisted_values: { type: Array, optional: true },
+        blacklisted_values: { type: Array, optional: true },
+    };
+
     /**
      * @override
      */
@@ -25,12 +31,6 @@ export class FilterableSelectionField extends SelectionField {
         }
         return options;
     }
-};
-
-FilterableSelectionField.props = {
-    ...SelectionField.props,
-    whitelisted_values: { type: Array, optional: true },
-    blacklisted_values: { type: Array, optional: true },
 };
 
 export const filterableSelectionField = {

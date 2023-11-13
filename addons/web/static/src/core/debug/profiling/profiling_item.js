@@ -6,6 +6,12 @@ import { useBus, useService } from "@web/core/utils/hooks";
 import { Component, EventBus } from "@odoo/owl";
 
 export class ProfilingItem extends Component {
+    static components = { DropdownItem };
+    static template = "web.DebugMenu.ProfilingItem";
+    static props = {
+        bus: { type: EventBus },
+    };
+
     setup() {
         this.profiling = useService("profiling");
         useBus(this.props.bus, "UPDATE", this.render);
@@ -28,8 +34,3 @@ export class ProfilingItem extends Component {
         }
     }
 }
-ProfilingItem.components = { DropdownItem };
-ProfilingItem.template = "web.DebugMenu.ProfilingItem";
-ProfilingItem.props = {
-    bus: { type: EventBus },
-};

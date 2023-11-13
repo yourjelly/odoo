@@ -9,6 +9,9 @@ import { useService } from "@web/core/utils/hooks";
 import { useEnvDebugContext } from "./debug_context";
 
 export class DebugMenu extends DebugMenuBasic {
+    static components = { Dropdown, DropdownItem };
+    static props = {};
+
     setup() {
         super.setup();
         const debugContext = useEnvDebugContext();
@@ -59,5 +62,3 @@ export class DebugMenu extends DebugMenuBasic {
         );
     }
 }
-DebugMenu.components = { Dropdown, DropdownItem };
-DebugMenu.props = {};

@@ -192,15 +192,16 @@ QUnit.module("Components", (hooks) => {
     QUnit.test("notebook pages rendered by a template component", async (assert) => {
         const env = await makeTestEnv();
 
-        class NotebookPageRenderer extends Component {}
-        NotebookPageRenderer.template = xml`
-                <h3 t-esc="props.heading"></h3>
-                <p t-esc="props.text" />
-            `;
-        NotebookPageRenderer.props = {
-            heading: String,
-            text: String,
-        };
+        class NotebookPageRenderer extends Component {
+            static template = xml`
+                    <h3 t-esc="props.heading"></h3>
+                    <p t-esc="props.text" />
+                `;
+            static props = {
+                heading: String,
+                text: String,
+            };
+        }
 
         class Parent extends Component {
             setup() {

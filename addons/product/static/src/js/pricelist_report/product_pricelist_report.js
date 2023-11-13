@@ -20,6 +20,13 @@ function sendCustomNotification(type, message) {
 }
 
 export class ProductPricelistReport extends Component {
+    static props = {
+        action: { type: Object },
+        "*": true,
+    }
+    static components = { Layout };
+    static template = "product.ProductPricelistReport";
+
     setup() {
         this.action = useService("action");
         this.orm = useService("orm");
@@ -50,7 +57,7 @@ export class ProductPricelistReport extends Component {
         });
 
         /*
-        When following the link of a product and coming back we need to keep the 
+        When following the link of a product and coming back we need to keep the
         precedent state:
             - if the pricelist was being showed
             - wich pricelist is selected at the moment
@@ -190,7 +197,7 @@ export class ProductPricelistReport extends Component {
     }
 
     onSelectPricelist(ev) {
-        this.state.selectedPricelist = this.pricelists.filter(pricelist => 
+        this.state.selectedPricelist = this.pricelists.filter(pricelist =>
             pricelist.id === parseInt(ev.target.value)
         )[0];
 
@@ -203,10 +210,4 @@ export class ProductPricelistReport extends Component {
     }
 }
 
-ProductPricelistReport.props = {
-    action: { type: Object },
-    "*": true,
-}
-ProductPricelistReport.components = { Layout };
-ProductPricelistReport.template = "product.ProductPricelistReport";
 registry.category("actions").add("generate_pricelist_report", ProductPricelistReport);

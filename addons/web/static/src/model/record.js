@@ -23,6 +23,9 @@ class StandaloneRelationalModel extends RelationalModel {
 }
 
 class _Record extends Component {
+    static template = xml`<t t-slot="default" record="model.root"/>`;
+    static props = ["slots", "info", "fields", "values?"];
+
     setup() {
         this.orm = useService("orm");
         const resModel = this.props.info.resModel;
@@ -144,10 +147,24 @@ class _Record extends Component {
         );
     }
 }
-_Record.template = xml`<t t-slot="default" record="model.root"/>`;
-_Record.props = ["slots", "info", "fields", "values?"];
 
 export class Record extends Component {
+    static template = xml`<_Record fields="fields" slots="props.slots" values="props.values" info="props" />`;
+    static components = { _Record };
+    static props = [
+        "slots",
+        "resModel?",
+        "fieldNames?",
+        "activeFields?",
+        "fields?",
+        "resId?",
+        "mode?",
+        "values?",
+        "onRecordChanged?",
+        "onRecordSaved?",
+        "onWillSaveRecord?",
+    ];
+
     setup() {
         if (this.props.fields) {
             this.fields = this.props.fields;
@@ -164,18 +181,3 @@ export class Record extends Component {
         }
     }
 }
-Record.template = xml`<_Record fields="fields" slots="props.slots" values="props.values" info="props" />`;
-Record.components = { _Record };
-Record.props = [
-    "slots",
-    "resModel?",
-    "fieldNames?",
-    "activeFields?",
-    "fields?",
-    "resId?",
-    "mode?",
-    "values?",
-    "onRecordChanged?",
-    "onRecordSaved?",
-    "onWillSaveRecord?",
-];

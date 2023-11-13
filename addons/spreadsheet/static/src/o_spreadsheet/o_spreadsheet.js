@@ -4660,6 +4660,9 @@
 
     class ChartJsComponent extends owl.Component {
         static template = "o-spreadsheet-ChartJsComponent";
+        static props = {
+            figure: Object,
+        };
         canvas = owl.useRef("graphContainer");
         chart;
         get background() {
@@ -4712,9 +4715,6 @@
             this.chart.update("active");
         }
     }
-    ChartJsComponent.props = {
-        figure: Object,
-    };
 
     /**
      * AbstractChart is the class from which every Chart should inherit.
@@ -5565,6 +5565,9 @@
 
     class ScorecardChart extends owl.Component {
         static template = "o-spreadsheet-ScorecardChart";
+        static props = {
+            figure: Object,
+        };
         canvas = owl.useRef("chartContainer");
         get runtime() {
             return this.env.model.getters.getChartRuntime(this.props.figure.id);
@@ -5582,9 +5585,6 @@
             drawScoreChart(config, canvas);
         }
     }
-    ScorecardChart.props = {
-        figure: Object,
-    };
 
     /**
      * Registry
@@ -6261,11 +6261,11 @@
     class ErrorToolTip extends owl.Component {
         static maxSize = { maxHeight: ERROR_TOOLTIP_MAX_HEIGHT };
         static template = "o-spreadsheet-ErrorToolTip";
+        static props = {
+            errors: Array,
+            onClosed: { type: Function, optional: true },
+        };
     }
-    ErrorToolTip.props = {
-        errors: Array,
-        onClosed: { type: Function, optional: true },
-    };
     const ErrorToolTipPopoverBuilder = {
         onHover: (position, getters) => {
             const cell = getters.getEvaluatedCell(position);
@@ -6307,6 +6307,14 @@
 `;
     class FilterMenuValueItem extends owl.Component {
         static template = "o-spreadsheet-FilterMenuValueItem";
+        static props = {
+            value: String,
+            isChecked: Boolean,
+            isSelected: Boolean,
+            onMouseMove: Function,
+            onClick: Function,
+            scrolledTo: { type: String, optional: true },
+        };
         itemRef = owl.useRef("menuValueItem");
         setup() {
             owl.onWillPatch(() => {
@@ -6324,14 +6332,6 @@
             });
         }
     }
-    FilterMenuValueItem.props = {
-        value: String,
-        isChecked: Boolean,
-        isSelected: Boolean,
-        onMouseMove: Function,
-        onClick: Function,
-        scrolledTo: { type: String, optional: true },
-    };
 
     const FILTER_MENU_HEIGHT = 295;
     const CSS$2 = css /* scss */ `
@@ -6432,6 +6432,10 @@
     class FilterMenu extends owl.Component {
         static size = { width: MENU_WIDTH, height: FILTER_MENU_HEIGHT };
         static template = "o-spreadsheet-FilterMenu";
+        static props = {
+            filterPosition: Object,
+            onClosed: { type: Function, optional: true },
+        };
         static style = CSS$2;
         static components = { FilterMenuValueItem };
         state = owl.useState({
@@ -6584,10 +6588,6 @@
             this.props.onClosed?.();
         }
     }
-    FilterMenu.props = {
-        filterPosition: Object,
-        onClosed: { type: Function, optional: true },
-    };
     const FilterMenuPopoverBuilder = {
         onOpen: (position, getters) => {
             return {
@@ -6777,6 +6777,19 @@
 `;
     class Popover extends owl.Component {
         static template = "o-spreadsheet-Popover";
+        static props = {
+            anchorRect: Object,
+            containerRect: { type: Object, optional: true },
+            positioning: { type: String, optional: true },
+            maxWidth: { type: Number, optional: true },
+            maxHeight: { type: Number, optional: true },
+            verticalOffset: { type: Number, optional: true },
+            onMouseWheel: { type: Function, optional: true },
+            onPopoverHidden: { type: Function, optional: true },
+            onPopoverMoved: { type: Function, optional: true },
+            zIndex: { type: Number, optional: true },
+            slots: Object,
+        };
         static defaultProps = {
             positioning: "BottomLeft",
             verticalOffset: 0,
@@ -6833,19 +6846,6 @@
             });
         }
     }
-    Popover.props = {
-        anchorRect: Object,
-        containerRect: { type: Object, optional: true },
-        positioning: { type: String, optional: true },
-        maxWidth: { type: Number, optional: true },
-        maxHeight: { type: Number, optional: true },
-        verticalOffset: { type: Number, optional: true },
-        onMouseWheel: { type: Function, optional: true },
-        onPopoverHidden: { type: Function, optional: true },
-        onPopoverMoved: { type: Function, optional: true },
-        zIndex: { type: Number, optional: true },
-        slots: Object,
-    };
     class PopoverPositionContext {
         anchorRect;
         containerRect;
@@ -7038,6 +7038,15 @@
     class Menu extends owl.Component {
         static template = "o-spreadsheet-Menu";
         static components = { Menu, Popover };
+        static props = {
+            position: Object,
+            menuItems: Array,
+            depth: { type: Number, optional: true },
+            maxHeight: { type: Number, optional: true },
+            onClose: Function,
+            onMenuClicked: { type: Function, optional: true },
+            menuId: { type: String, optional: true },
+        };
         static defaultProps = {
             depth: 1,
         };
@@ -7193,15 +7202,6 @@
             }
         }
     }
-    Menu.props = {
-        position: Object,
-        menuItems: Array,
-        depth: { type: Number, optional: true },
-        maxHeight: { type: Number, optional: true },
-        onClose: Function,
-        onMenuClicked: { type: Function, optional: true },
-        menuId: { type: String, optional: true },
-    };
 
     const LINK_TOOLTIP_HEIGHT = 32;
     const LINK_TOOLTIP_WIDTH = 220;
@@ -7256,6 +7256,10 @@
     class LinkDisplay extends owl.Component {
         static components = { Menu };
         static template = "o-spreadsheet-LinkDisplay";
+        static props = {
+            cellPosition: Object,
+            onClosed: { type: Function, optional: true },
+        };
         get cell() {
             const { col, row } = this.props.cellPosition;
             const sheetId = this.env.model.getters.getActiveSheetId();
@@ -7309,10 +7313,6 @@
                 cellCorner: "BottomLeft",
             };
         },
-    };
-    LinkDisplay.props = {
-        cellPosition: Object,
-        onClosed: { type: Function, optional: true },
     };
 
     /**
@@ -7946,6 +7946,10 @@
     class LinkEditor extends owl.Component {
         static template = "o-spreadsheet-LinkEditor";
         static components = { Menu };
+        static props = {
+            cellPosition: Object,
+            onClosed: { type: Function, optional: true },
+        };
         menuItems = linkMenuRegistry.getMenuItems();
         link = owl.useState(this.defaultState);
         menu = owl.useState({
@@ -8041,10 +8045,6 @@
                 cellCorner: "BottomLeft",
             };
         },
-    };
-    LinkEditor.props = {
-        cellPosition: Object,
-        onClosed: { type: Function, optional: true },
     };
 
     const cellPopoverRegistry = new Registry();
@@ -9611,6 +9611,10 @@
     class ChartFigure extends owl.Component {
         static template = "o-spreadsheet-ChartFigure";
         static components = {};
+        static props = {
+            figure: Object,
+            onFigureDeleted: Function,
+        };
         onDoubleClick() {
             this.env.model.dispatch("SELECT_FIGURE", { id: this.props.figure.id });
             this.env.openSidePanel("ChartPanel");
@@ -9627,14 +9631,14 @@
             return component;
         }
     }
-    ChartFigure.props = {
-        figure: Object,
-        onFigureDeleted: Function,
-    };
 
     class ImageFigure extends owl.Component {
         static template = "o-spreadsheet-ImageFigure";
         static components = {};
+        static props = {
+            figure: Object,
+            onFigureDeleted: Function,
+        };
         // ---------------------------------------------------------------------------
         // Getters
         // ---------------------------------------------------------------------------
@@ -9645,10 +9649,6 @@
             return this.env.model.getters.getImagePath(this.figureId);
         }
     }
-    ImageFigure.props = {
-        figure: Object,
-        onFigureDeleted: Function,
-    };
 
     function centerFigurePosition(getters, size) {
         const { x: offsetCorrectionX, y: offsetCorrectionY } = getters.getMainViewportCoordinates();
@@ -21312,6 +21312,15 @@
      */
     class SelectionInput extends owl.Component {
         static template = "o-spreadsheet-SelectionInput";
+        static props = {
+            ranges: Function,
+            hasSingleRange: { type: Boolean, optional: true },
+            required: { type: Boolean, optional: true },
+            isInvalid: { type: Boolean, optional: true },
+            class: { type: String, optional: true },
+            onSelectionChanged: { type: Function, optional: true },
+            onSelectionConfirmed: { type: Function, optional: true },
+        };
         id = uuidGenerator$1.uuidv4();
         previousRanges = this.props.ranges() || [];
         originSheet = this.env.model.getters.getActiveSheetId();
@@ -21474,15 +21483,6 @@
             this.env.model.dispatch("UNFOCUS_SELECTION_INPUT");
         }
     }
-    SelectionInput.props = {
-        ranges: Function,
-        hasSingleRange: { type: Boolean, optional: true },
-        required: { type: Boolean, optional: true },
-        isInvalid: { type: Boolean, optional: true },
-        class: { type: String, optional: true },
-        onSelectionChanged: { type: Function, optional: true },
-        onSelectionConfirmed: { type: Function, optional: true },
-    };
 
     css /* scss */ `
   .o-validation-error,
@@ -21498,6 +21498,10 @@
 `;
     class ValidationMessages extends owl.Component {
         static template = "o-spreadsheet-ValidationMessages";
+        static props = {
+            messages: Array,
+            msgType: String,
+        };
         get divClasses() {
             if (this.props.msgType === "warning") {
                 return "o-validation-warning text-warning";
@@ -21505,14 +21509,16 @@
             return "o-validation-error text-danger";
         }
     }
-    ValidationMessages.props = {
-        messages: Array,
-        msgType: String,
-    };
 
     class LineBarPieConfigPanel extends owl.Component {
         static template = "o-spreadsheet-LineBarPieConfigPanel";
         static components = { SelectionInput, ValidationMessages };
+        static props = {
+            figureId: String,
+            definition: Object,
+            updateChart: Function,
+            canUpdateChart: Function,
+        };
         state = owl.useState({
             datasetDispatchResult: undefined,
             labelsDispatchResult: undefined,
@@ -21600,12 +21606,6 @@
             return undefined;
         }
     }
-    LineBarPieConfigPanel.props = {
-        figureId: String,
-        definition: Object,
-        updateChart: Function,
-        canUpdateChart: Function,
-    };
 
     class BarConfigPanel extends LineBarPieConfigPanel {
         static template = "o-spreadsheet-BarConfigPanel";
@@ -21946,6 +21946,12 @@
         static template = "o-spreadsheet-ColorPicker";
         static defaultProps = { currentColor: "" };
         static components = { Popover };
+        static props = {
+            onColorPicked: Function,
+            currentColor: { type: String, optional: true },
+            maxHeight: { type: Number, optional: true },
+            anchorRect: Object,
+        };
         COLORS = COLOR_PICKER_DEFAULTS;
         state = owl.useState({
             showGradient: false,
@@ -22079,12 +22085,6 @@
             return isSameColor(color1, color2);
         }
     }
-    ColorPicker.props = {
-        onColorPicked: Function,
-        currentColor: { type: String, optional: true },
-        maxHeight: { type: Number, optional: true },
-        anchorRect: Object,
-    };
 
     css /* scss */ `
   .o-color-picker-widget {
@@ -22123,6 +22123,17 @@
     class ColorPickerWidget extends owl.Component {
         static template = "o-spreadsheet-ColorPickerWidget";
         static components = { ColorPicker };
+        static props = {
+            currentColor: { type: String, optional: true },
+            toggleColorPicker: Function,
+            showColorPicker: Boolean,
+            onColorPicked: Function,
+            icon: String,
+            title: { type: String, optional: true },
+            disabled: { type: Boolean, optional: true },
+            dropdownMaxHeight: { type: Number, optional: true },
+            class: { type: String, optional: true },
+        };
         colorPickerButtonRef = owl.useRef("colorPickerButton");
         get iconStyle() {
             return this.props.currentColor
@@ -22140,21 +22151,16 @@
             };
         }
     }
-    ColorPickerWidget.props = {
-        currentColor: { type: String, optional: true },
-        toggleColorPicker: Function,
-        showColorPicker: Boolean,
-        onColorPicked: Function,
-        icon: String,
-        title: { type: String, optional: true },
-        disabled: { type: Boolean, optional: true },
-        dropdownMaxHeight: { type: Number, optional: true },
-        class: { type: String, optional: true },
-    };
 
     class LineBarPieDesignPanel extends owl.Component {
         static template = "o-spreadsheet-LineBarPieDesignPanel";
         static components = { ColorPickerWidget };
+        static props = {
+            figureId: String,
+            definition: Object,
+            updateChart: Function,
+            canUpdateChart: Function,
+        };
         state = owl.useState({
             title: "",
             fillColorTool: false,
@@ -22185,12 +22191,6 @@
             });
         }
     }
-    LineBarPieDesignPanel.props = {
-        figureId: String,
-        definition: Object,
-        updateChart: Function,
-        canUpdateChart: Function,
-    };
 
     class BarChartDesignPanel extends LineBarPieDesignPanel {
         static template = "o-spreadsheet-BarChartDesignPanel";
@@ -22199,6 +22199,12 @@
     class GaugeChartConfigPanel extends owl.Component {
         static template = "o-spreadsheet-GaugeChartConfigPanel";
         static components = { SelectionInput, ValidationMessages };
+        static props = {
+            figureId: String,
+            definition: Object,
+            updateChart: Function,
+            canUpdateChart: Function,
+        };
         state = owl.useState({
             dataRangeDispatchResult: undefined,
         });
@@ -22225,12 +22231,6 @@
             return this.dataRange || "";
         }
     }
-    GaugeChartConfigPanel.props = {
-        figureId: String,
-        definition: Object,
-        updateChart: Function,
-        canUpdateChart: Function,
-    };
 
     css /* scss */ `
   .o-gauge-color-set {
@@ -22266,6 +22266,12 @@
     class GaugeChartDesignPanel extends owl.Component {
         static template = "o-spreadsheet-GaugeChartDesignPanel";
         static components = { ColorPickerWidget, ValidationMessages };
+        static props = {
+            figureId: String,
+            definition: Object,
+            updateChart: Function,
+            canUpdateChart: Function,
+        };
         state = owl.useState({
             title: "",
             openedMenu: undefined,
@@ -22339,12 +22345,6 @@
             this.state.openedMenu = undefined;
         }
     }
-    GaugeChartDesignPanel.props = {
-        figureId: String,
-        definition: Object,
-        updateChart: Function,
-        canUpdateChart: Function,
-    };
 
     class LineConfigPanel extends LineBarPieConfigPanel {
         static template = "o-spreadsheet-LineConfigPanel";
@@ -22384,6 +22384,12 @@
     class ScorecardChartConfigPanel extends owl.Component {
         static template = "o-spreadsheet-ScorecardChartConfigPanel";
         static components = { SelectionInput, ValidationMessages };
+        static props = {
+            figureId: String,
+            definition: Object,
+            updateChart: Function,
+            canUpdateChart: Function,
+        };
         state = owl.useState({
             keyValueDispatchResult: undefined,
             baselineDispatchResult: undefined,
@@ -22435,16 +22441,16 @@
             this.props.updateChart(this.props.figureId, { baselineMode: ev.target.value });
         }
     }
-    ScorecardChartConfigPanel.props = {
-        figureId: String,
-        definition: Object,
-        updateChart: Function,
-        canUpdateChart: Function,
-    };
 
     class ScorecardChartDesignPanel extends owl.Component {
         static template = "o-spreadsheet-ScorecardChartDesignPanel";
         static components = { ColorPickerWidget };
+        static props = {
+            figureId: String,
+            definition: Object,
+            updateChart: Function,
+            canUpdateChart: Function,
+        };
         state = owl.useState({
             title: "",
             openedColorPicker: undefined,
@@ -22490,12 +22496,6 @@
             this.state.openedColorPicker = undefined;
         }
     }
-    ScorecardChartDesignPanel.props = {
-        figureId: String,
-        definition: Object,
-        updateChart: Function,
-        canUpdateChart: Function,
-    };
 
     const chartSidePanelComponentRegistry = new Registry();
     chartSidePanelComponentRegistry
@@ -22546,6 +22546,9 @@
 `;
     class ChartPanel extends owl.Component {
         static template = "o-spreadsheet-ChartPanel";
+        static props = {
+            onCloseSidePanel: Function,
+        };
         state;
         get figureId() {
             return this.state.figureId;
@@ -22632,9 +22635,6 @@
             this.state.panel = panel;
         }
     }
-    ChartPanel.props = {
-        onCloseSidePanel: Function,
-    };
 
     css /* scss */ `
   .o-spreadsheet {
@@ -22745,6 +22745,9 @@
 `;
     class IconPicker extends owl.Component {
         static template = "o-spreadsheet-IconPicker";
+        static props = {
+            onIconPicked: Function,
+        };
         icons = ICONS;
         iconSets = ICON_SETS;
         onIconClick(icon) {
@@ -22753,9 +22756,6 @@
             }
         }
     }
-    IconPicker.props = {
-        onIconPicked: Function,
-    };
 
     function useDragAndDropListItems() {
         let dndHelper;
@@ -23110,6 +23110,11 @@
 `;
     class ConditionalFormatPreviewList extends owl.Component {
         static template = "o-spreadsheet-ConditionalFormatPreviewList";
+        static props = {
+            conditionalFormats: Array,
+            onPreviewClick: Function,
+            onAddConditionalFormat: Function,
+        };
         icons = ICONS;
         dragAndDrop = useDragAndDropListItems();
         cfListRef = owl.useRef("cfList");
@@ -23190,11 +23195,6 @@
             }
         }
     }
-    ConditionalFormatPreviewList.props = {
-        conditionalFormats: Array,
-        onPreviewClick: Function,
-        onAddConditionalFormat: Function,
-    };
 
     css /* scss */ `
   label {
@@ -23372,6 +23372,10 @@
             IconPicker,
             ColorPickerWidget,
             ConditionalFormatPreviewList,
+        };
+        static props = {
+            editedCf: { type: Object, optional: true },
+            onExitEdition: Function,
         };
         icons = ICONS;
         cellIsOperators = CellIsOperators;
@@ -23631,16 +23635,16 @@
             this.state.rules.iconSet.icons[target] = icon;
         }
     }
-    ConditionalFormattingEditor.props = {
-        editedCf: { type: Object, optional: true },
-        onExitEdition: Function,
-    };
 
     class ConditionalFormattingPanel extends owl.Component {
         static template = "o-spreadsheet-ConditionalFormattingPanel";
         static components = {
             ConditionalFormatPreviewList,
             ConditionalFormattingEditor,
+        };
+        static props = {
+            selection: { type: Object, optional: true },
+            onCloseSidePanel: Function,
         };
         activeSheetId;
         state = owl.useState({
@@ -23696,10 +23700,6 @@
             this.state.editedCf = cf;
         }
     }
-    ConditionalFormattingPanel.props = {
-        selection: { type: Object, optional: true },
-        onCloseSidePanel: Function,
-    };
 
     css /* scss */ `
   .o-custom-currency {
@@ -23710,6 +23710,9 @@
 `;
     class CustomCurrencyPanel extends owl.Component {
         static template = "o-spreadsheet-CustomCurrencyPanel";
+        static props = {
+            onCloseSidePanel: Function,
+        };
         availableCurrencies;
         state;
         setup() {
@@ -23832,9 +23835,6 @@
             return currency.name + (currency.code ? ` (${currency.code})` : "");
         }
     }
-    CustomCurrencyPanel.props = {
-        onCloseSidePanel: Function,
-    };
 
     css /* scss */ `
   .o-find-and-replace {
@@ -23858,6 +23858,9 @@
 `;
     class FindAndReplacePanel extends owl.Component {
         static template = "o-spreadsheet-FindAndReplacePanel";
+        static props = {
+            onCloseSidePanel: Function,
+        };
         state = owl.useState(this.initialState());
         debounceTimeoutId;
         showFormulaState = false;
@@ -23949,9 +23952,6 @@
             };
         }
     }
-    FindAndReplacePanel.props = {
-        onCloseSidePanel: Function,
-    };
 
     css /* scss */ `
   .o-more-formats-panel {
@@ -23983,13 +23983,13 @@
     ]);
     class MoreFormatsPanel extends owl.Component {
         static template = "o-spreadsheet-MoreFormatsPanel";
+        static props = {
+            onCloseSidePanel: Function,
+        };
         get dateFormatsActions() {
             return DATE_FORMAT_ACTIONS;
         }
     }
-    MoreFormatsPanel.props = {
-        onCloseSidePanel: Function,
-    };
 
     css /* scss */ `
   .o-checkbox-selection {
@@ -24087,6 +24087,9 @@
 `;
     class SettingsPanel extends owl.Component {
         static template = "o-spreadsheet-SettingsPanel";
+        static props = {
+            onCloseSidePanel: Function,
+        };
         loadedLocales = [];
         setup() {
             owl.onWillStart(() => this.loadLocales());
@@ -24135,9 +24138,6 @@
             return this.loadedLocales;
         }
     }
-    SettingsPanel.props = {
-        onCloseSidePanel: Function,
-    };
 
     const SplitToColumnsInteractiveContent = {
         SplitIsDestructive: _t("This will overwrite data in the subsequent columns. Split anyway?"),
@@ -24726,6 +24726,9 @@
     class SplitIntoColumnsPanel extends owl.Component {
         static template = "o-spreadsheet-SplitIntoColumnsPanel";
         static components = { ValidationMessages };
+        static props = {
+            onCloseSidePanel: Function,
+        };
         state = owl.useState({ separatorValue: "auto", addNewColumns: false, customSeparator: "" });
         setup() {
             owl.onWillUpdateProps(() => {
@@ -24804,14 +24807,16 @@
             return !this.separatorValue || this.errorMessages.length > 0;
         }
     }
-    SplitIntoColumnsPanel.props = {
-        onCloseSidePanel: Function,
-    };
 
     /** This component looks like a select input, but on click it opens a Menu with the items given as props instead of a dropdown */
     class SelectMenu extends owl.Component {
         static template = "o-spreadsheet-SelectMenu";
         static components = { Menu };
+        static props = {
+            menuItems: Array,
+            selectedValue: String,
+            class: { type: String, optional: true },
+        };
         selectRef = owl.useRef("select");
         selectRect = useAbsoluteBoundingRect(this.selectRef);
         state = owl.useState({
@@ -24830,13 +24835,13 @@
             };
         }
     }
-    SelectMenu.props = {
-        menuItems: Array,
-        selectedValue: String,
-        class: { type: String, optional: true },
-    };
 
     class DataValidationCriterionForm extends owl.Component {
+        static props = {
+            criterion: Object,
+            onCriterionChanged: Function,
+        };
+
         setup() {
             owl.onMounted(() => {
                 interactiveStopEdition(this.env);
@@ -24850,10 +24855,6 @@
             this.props.onCriterionChanged(filteredCriterion);
         }
     }
-    DataValidationCriterionForm.props = {
-        criterion: Object,
-        onCriterionChanged: Function,
-    };
 
     css /* scss */ `
   .o-dv-input {
@@ -24868,6 +24869,15 @@
 `;
     class DataValidationInput extends owl.Component {
         static template = "o-spreadsheet-DataValidationInput";
+        static props = {
+            value: { type: String, optional: true },
+            criterionType: String,
+            onValueChanged: Function,
+            onKeyDown: { type: Function, optional: true },
+            focused: { type: Boolean, optional: true },
+            onBlur: { type: Function, optional: true },
+            onFocus: { type: Function, optional: true },
+        };
         static defaultProps = {
             value: "",
             onKeyDown: () => { },
@@ -24906,15 +24916,6 @@
             return this.env.model.getters.getDataValidationInvalidCriterionValueMessage(this.props.criterionType, canonicalizeContent(this.props.value, this.env.model.getters.getLocale()));
         }
     }
-    DataValidationInput.props = {
-        value: { type: String, optional: true },
-        criterionType: String,
-        onValueChanged: Function,
-        onKeyDown: { type: Function, optional: true },
-        focused: { type: Boolean, optional: true },
-        onBlur: { type: Function, optional: true },
-        onFocus: { type: Function, optional: true },
-    };
 
     const DATES_VALUES = {
         today: _t("today"),
@@ -25251,6 +25252,10 @@
     class DataValidationEditor extends owl.Component {
         static template = "o-spreadsheet-DataValidationEditor";
         static components = { SelectionInput, SelectMenu };
+        static props = {
+            rule: { type: Object, optional: true },
+            onExit: Function,
+        };
         state = owl.useState({ rule: this.defaultDataValidationRule });
         setup() {
             if (this.props.rule) {
@@ -25326,10 +25331,6 @@
             return dataValidationPanelCriteriaRegistry.get(this.state.rule.criterion.type).component;
         }
     }
-    DataValidationEditor.props = {
-        rule: { type: Object, optional: true },
-        onExit: Function,
-    };
 
     css /* scss */ `
   .o-sidePanel {
@@ -25359,6 +25360,10 @@
 `;
     class DataValidationPreview extends owl.Component {
         static template = "o-spreadsheet-DataValidationPreview";
+        static props = {
+            onClick: Function,
+            rule: Object,
+        };
         deleteDataValidation() {
             const sheetId = this.env.model.getters.getActiveSheetId();
             this.env.model.dispatch("REMOVE_DATA_VALIDATION_RULE", { sheetId, id: this.props.rule.id });
@@ -25375,14 +25380,13 @@
                 .getPreview(this.props.rule.criterion, this.env.model.getters);
         }
     }
-    DataValidationPreview.props = {
-        onClick: Function,
-        rule: Object,
-    };
 
     class DataValidationPanel extends owl.Component {
         static template = "o-spreadsheet-DataValidationPanel";
         static components = { DataValidationPreview, DataValidationEditor };
+        static props = {
+            onCloseSidePanel: Function,
+        };
         state = owl.useState({ mode: "list", activeRule: undefined });
         onPreviewClick(id) {
             const sheetId = this.env.model.getters.getActiveSheetId();
@@ -25411,9 +25415,6 @@
             return this.env.model.getters.getDataValidationRules(sheetId);
         }
     }
-    DataValidationPanel.props = {
-        onCloseSidePanel: Function,
-    };
 
     const sidePanelRegistry = new Registry();
     sidePanelRegistry.add("ConditionalFormatting", {
@@ -25546,6 +25547,13 @@
     class FigureComponent extends owl.Component {
         static template = "o-spreadsheet-FigureComponent";
         static components = { Menu };
+        static props = {
+            figure: Object,
+            style: { type: String, optional: true },
+            onFigureDeleted: { type: Function, optional: true },
+            onMouseDown: { type: Function, optional: true },
+            onClickAnchor: { type: Function, optional: true },
+        };
         static defaultProps = {
             onFigureDeleted: () => { },
             onMouseDown: () => { },
@@ -25687,13 +25695,6 @@
                 .menuBuilder(this.props.figure.id, this.props.onFigureDeleted, this.env);
         }
     }
-    FigureComponent.props = {
-        figure: Object,
-        style: { type: String, optional: true },
-        onFigureDeleted: { type: Function, optional: true },
-        onMouseDown: { type: Function, optional: true },
-        onClickAnchor: { type: Function, optional: true },
-    };
 
     const ToggleGroupInteractiveContent = {
         CannotHideAllRows: _t("Cannot hide all the rows of a sheet."),
@@ -25831,6 +25832,10 @@
 `;
     class Autofill extends owl.Component {
         static template = "o-spreadsheet-Autofill";
+        static props = {
+            position: Object,
+            isVisible: Boolean,
+        };
         state = owl.useState({
             position: { left: 0, top: 0 },
             handler: false,
@@ -25899,18 +25904,14 @@
             this.env.model.dispatch("AUTOFILL_AUTO");
         }
     }
-    Autofill.props = {
-        position: Object,
-        isVisible: Boolean,
-    };
     class TooltipComponent extends owl.Component {
+        static props = {
+            content: String,
+        };
         static template = owl.xml /* xml */ `
     <div t-esc="props.content"/>
   `;
     }
-    TooltipComponent.props = {
-        content: String,
-    };
 
     css /* scss */ `
   .o-client-tag {
@@ -25924,6 +25925,13 @@
 `;
     class ClientTag extends owl.Component {
         static template = "o-spreadsheet-ClientTag";
+        static props = {
+            active: Boolean,
+            name: String,
+            color: String,
+            col: Number,
+            row: Number,
+        };
         get tagStyle() {
             const { col, row, color } = this.props;
             const { height } = this.env.model.getters.getSheetViewDimensionWithHeaders();
@@ -25941,13 +25949,6 @@
             });
         }
     }
-    ClientTag.props = {
-        active: Boolean,
-        name: String,
-        color: String,
-        col: Number,
-        row: Number,
-    };
 
     function getHtmlContentFromPattern(pattern, value, highlightColor, className) {
         const pendingHtmlContent = [];
@@ -25987,14 +25988,14 @@
 `;
     class TextValueProvider extends owl.Component {
         static template = "o-spreadsheet-TextValueProvider";
+        static props = {
+            values: Array,
+            selectedIndex: { type: Number, optional: true },
+            getHtmlContent: Function,
+            onValueSelected: Function,
+            onValueHovered: Function,
+        };
     }
-    TextValueProvider.props = {
-        values: Array,
-        selectedIndex: { type: Number, optional: true },
-        getHtmlContent: Function,
-        onValueSelected: Function,
-        onValueHovered: Function,
-    };
 
     class ContentEditableHelper {
         // todo make el private and expose dedicated methods
@@ -26356,6 +26357,11 @@
 `;
     class FunctionDescriptionProvider extends owl.Component {
         static template = "o-spreadsheet-FunctionDescriptionProvider";
+        static props = {
+            functionName: String,
+            functionDescription: Object,
+            argToFocus: Number,
+        };
         assistantState = owl.useState({
             allowCellSelectionBehind: false,
         });
@@ -26380,11 +26386,6 @@
             }, 2000);
         }
     }
-    FunctionDescriptionProvider.props = {
-        functionName: String,
-        functionDescription: Object,
-        argToFocus: Number,
-    };
 
     const functions$2 = functionRegistry.content;
     const ASSISTANT_WIDTH = 300;
@@ -26451,6 +26452,14 @@
     class Composer extends owl.Component {
         static template = "o-spreadsheet-Composer";
         static components = { TextValueProvider, FunctionDescriptionProvider };
+        static props = {
+            focus: { validate: (value) => ["inactive", "cellFocus", "contentFocus"].includes(value) },
+            onComposerContentFocused: Function,
+            inputStyle: { type: String, optional: true },
+            rect: { type: Object, optional: true },
+            delimitation: { type: Object, optional: true },
+            onComposerUnmounted: { type: Function, optional: true },
+        };
         static defaultProps = {
             inputStyle: "",
         };
@@ -27006,14 +27015,6 @@
             this.autoCompleteState.getHtmlContent = (value) => [{ value }];
         }
     }
-    Composer.props = {
-        focus: { validate: (value) => ["inactive", "cellFocus", "contentFocus"].includes(value) },
-        onComposerContentFocused: Function,
-        inputStyle: { type: String, optional: true },
-        rect: { type: Object, optional: true },
-        delimitation: { type: Object, optional: true },
-        onComposerUnmounted: { type: Function, optional: true },
-    };
 
     const COMPOSER_BORDER_WIDTH = 3 * 0.4 * window.devicePixelRatio || 1;
     const GRID_CELL_REFERENCE_TOP_OFFSET = 28;
@@ -27046,6 +27047,12 @@
     class GridComposer extends owl.Component {
         static template = "o-spreadsheet-GridComposer";
         static components = { Composer };
+        static props = {
+            focus: { validate: (value) => ["inactive", "cellFocus", "contentFocus"].includes(value) },
+            onComposerUnmounted: Function,
+            onComposerContentFocused: Function,
+            gridDims: Object,
+        };
         gridComposerRef;
         zone;
         rect;
@@ -27151,12 +27158,6 @@
             });
         }
     }
-    GridComposer.props = {
-        focus: { validate: (value) => ["inactive", "cellFocus", "contentFocus"].includes(value) },
-        onComposerUnmounted: Function,
-        onComposerContentFocused: Function,
-        gridDims: Object,
-    };
 
     const CSS$1 = css /* scss */ `
   .o-grid-cell-icon {
@@ -27167,6 +27168,13 @@
     class GridCellIcon extends owl.Component {
         static style = CSS$1;
         static template = "o-spreadsheet-GridCellIcon";
+        static props = {
+            cellPosition: Object,
+            horizontalAlign: { type: String, optional: true },
+            verticalAlign: { type: String, optional: true },
+            offset: { type: Object, optional: true },
+            slots: Object,
+        };
         get iconStyle() {
             const x = this.getIconHorizontalPosition();
             const y = this.getIconVerticalPosition();
@@ -27215,13 +27223,6 @@
             return !(rect.width === 0 || rect.height === 0);
         }
     }
-    GridCellIcon.props = {
-        cellPosition: Object,
-        horizontalAlign: { type: String, optional: true },
-        verticalAlign: { type: String, optional: true },
-        offset: { type: Object, optional: true },
-        slots: Object,
-    };
 
     const CSS = css /* scss */ `
   .o-filter-icon {
@@ -27240,6 +27241,9 @@
     class FilterIcon extends owl.Component {
         static style = CSS;
         static template = "o-spreadsheet-FilterIcon";
+        static props = {
+            cellPosition: Object,
+        };
         onClick() {
             const position = this.props.cellPosition;
             const activePopoverType = this.env.model.getters.getPersistentPopoverTypeAtPosition(position);
@@ -27258,15 +27262,15 @@
             return this.env.model.getters.isFilterActive(this.props.cellPosition);
         }
     }
-    FilterIcon.props = {
-        cellPosition: Object,
-    };
 
     class FilterIconsOverlay extends owl.Component {
         static template = "o-spreadsheet-FilterIconsOverlay";
         static components = {
             GridCellIcon,
             FilterIcon,
+        };
+        static props = {
+            gridPosition: { type: Object, optional: true },
         };
         static defaultProps = {
             gridPosition: { x: 0, y: 0 },
@@ -27277,9 +27281,6 @@
             return headerPositions.map((position) => ({ sheetId, ...position }));
         }
     }
-    FilterIconsOverlay.props = {
-        gridPosition: { type: Object, optional: true },
-    };
 
     const CHECKBOX_WIDTH = 15;
     const MARGIN = (GRID_ICON_EDGE_LENGTH - CHECKBOX_WIDTH) / 2;
@@ -27293,6 +27294,9 @@
 `;
     class DataValidationCheckbox extends owl.Component {
         static template = "o-spreadsheet-DataValidationCheckbox";
+        static props = {
+            cellPosition: Object,
+        };
         onCheckboxChange(ev) {
             const newValue = ev.target.checked;
             const { sheetId, col, row } = this.props.cellPosition;
@@ -27307,9 +27311,6 @@
             return !!cell?.isFormula;
         }
     }
-    DataValidationCheckbox.props = {
-        cellPosition: Object,
-    };
 
     const ICON_WIDTH = 13;
     css /* scss */ `
@@ -27332,19 +27333,21 @@
 `;
     class DataValidationListIcon extends owl.Component {
         static template = "o-spreadsheet-DataValidationListIcon";
+        static props = {
+            cellPosition: Object,
+        };
         onClick() {
             const { col, row } = this.props.cellPosition;
             this.env.model.selection.selectCell(col, row);
             this.env.startCellEdition();
         }
     }
-    DataValidationListIcon.props = {
-        cellPosition: Object,
-    };
 
     class DataValidationOverlay extends owl.Component {
         static template = "o-spreadsheet-DataValidationOverlay";
         static components = { GridCellIcon, DataValidationCheckbox, DataValidationListIcon };
+        static props = {};
+
         get checkBoxCellPositions() {
             return this.env.model.getters.getDataValidationCheckBoxCellPositions();
         }
@@ -27354,7 +27357,6 @@
                 : this.env.model.getters.getDataValidationListCellsPositions();
         }
     }
-    DataValidationOverlay.props = {};
 
     /**
      * Transform a figure with coordinates from the model, to coordinates as they are shown on the screen,
@@ -27691,6 +27693,9 @@
     class FiguresContainer extends owl.Component {
         static template = "o-spreadsheet-FiguresContainer";
         static components = { FigureComponent };
+        static props = {
+            onFigureDeleted: Function,
+        };
         dnd = owl.useState({
             draggedFigure: undefined,
             horizontalSnap: undefined,
@@ -27939,9 +27944,6 @@
             }
         }
     }
-    FiguresContainer.props = {
-        onFigureDeleted: Function,
-    };
 
     css /* scss */ `
   .o-grid-add-rows {
@@ -27961,6 +27963,9 @@
     class GridAddRowsFooter extends owl.Component {
         static template = "o-spreadsheet-GridAddRowsFooter";
         static components = { ValidationMessages };
+        static props = {
+            focusGrid: Function,
+        };
         inputRef = owl.useRef("inputRef");
         state = owl.useState({
             inputValue: "100",
@@ -28026,9 +28031,6 @@
             this.props.focusGrid();
         }
     }
-    GridAddRowsFooter.props = {
-        focusGrid: Function,
-    };
 
     /**
      * Manages an event listener on a ref. Useful for hooks that want to manage
@@ -28185,6 +28187,16 @@
     class GridOverlay extends owl.Component {
         static template = "o-spreadsheet-GridOverlay";
         static components = { FiguresContainer, DataValidationOverlay, GridAddRowsFooter };
+        static props = {
+            onCellHovered: { type: Function, optional: true },
+            onCellDoubleClicked: { type: Function, optional: true },
+            onCellClicked: { type: Function, optional: true },
+            onCellRightClicked: { type: Function, optional: true },
+            onGridResized: { type: Function, optional: true },
+            onFigureDeleted: { type: Function, optional: true },
+            onGridMoved: Function,
+            gridOverlayDimensions: String,
+        };
         static defaultProps = {
             onCellHovered: () => { },
             onCellDoubleClicked: () => { },
@@ -28254,20 +28266,16 @@
             return [colIndex, rowIndex];
         }
     }
-    GridOverlay.props = {
-        onCellHovered: { type: Function, optional: true },
-        onCellDoubleClicked: { type: Function, optional: true },
-        onCellClicked: { type: Function, optional: true },
-        onCellRightClicked: { type: Function, optional: true },
-        onGridResized: { type: Function, optional: true },
-        onFigureDeleted: { type: Function, optional: true },
-        onGridMoved: Function,
-        gridOverlayDimensions: String,
-    };
 
     class GridPopover extends owl.Component {
         static template = "o-spreadsheet-GridPopover";
         static components = { Popover };
+        static props = {
+            hoveredCell: Object,
+            onClosePopover: Function,
+            onMouseWheel: Function,
+            gridRect: Object,
+        };
         zIndex = ComponentsImportance.GridPopover;
         get cellPopover() {
             const popover = this.env.model.getters.getCellPopover(this.props.hoveredCell);
@@ -28286,14 +28294,11 @@
             };
         }
     }
-    GridPopover.props = {
-        hoveredCell: Object,
-        onClosePopover: Function,
-        onMouseWheel: Function,
-        gridRect: Object,
-    };
 
     class AbstractResizer extends owl.Component {
+        static props = {
+            onOpenContextMenu: Function,
+        };
         PADDING = 0;
         MAX_SIZE_MARGIN = 0;
         MIN_ELEMENT_SIZE = 0;
@@ -28554,11 +28559,11 @@
     }
   }
 `;
-    AbstractResizer.props = {
-        onOpenContextMenu: Function,
-    };
     class ColResizer extends AbstractResizer {
         static template = "o-spreadsheet-ColResizer";
+        static props = {
+            onOpenContextMenu: Function,
+        };
         colResizerRef;
         setup() {
             super.setup();
@@ -28727,11 +28732,11 @@
     }
   }
 `;
-    ColResizer.props = {
-        onOpenContextMenu: Function,
-    };
     class RowResizer extends AbstractResizer {
         static template = "o-spreadsheet-RowResizer";
+        static props = {
+            onOpenContextMenu: Function,
+        };
         setup() {
             super.setup();
             this.rowResizerRef = owl.useRef("rowResizer");
@@ -28850,19 +28855,16 @@
     }
   }
 `;
-    RowResizer.props = {
-        onOpenContextMenu: Function,
-    };
     class HeadersOverlay extends owl.Component {
         static template = "o-spreadsheet-HeadersOverlay";
         static components = { ColResizer, RowResizer };
+        static props = {
+            onOpenContextMenu: Function,
+        };
         selectAll() {
             this.env.model.selection.selectAll();
         }
     }
-    HeadersOverlay.props = {
-        onOpenContextMenu: Function,
-    };
 
     function useGridDrawing(refName, model, canvasSize) {
         const canvasRef = owl.useRef(refName);
@@ -28920,6 +28922,12 @@
 `;
     class Border extends owl.Component {
         static template = "o-spreadsheet-Border";
+        static props = {
+            zone: Object,
+            orientation: String,
+            isMoving: Boolean,
+            onMoveHighlight: Function,
+        };
         get style() {
             const isTop = ["n", "w", "e"].includes(this.props.orientation);
             const isLeft = ["n", "w", "s"].includes(this.props.orientation);
@@ -28948,12 +28956,6 @@
             this.props.onMoveHighlight(ev.clientX, ev.clientY);
         }
     }
-    Border.props = {
-        zone: Object,
-        orientation: String,
-        isMoving: Boolean,
-        onMoveHighlight: Function,
-    };
 
     css /* scss */ `
   .o-corner {
@@ -28980,6 +28982,13 @@
 `;
     class Corner extends owl.Component {
         static template = "o-spreadsheet-Corner";
+        static props = {
+            zone: Object,
+            color: String,
+            orientation: String,
+            isResizing: Boolean,
+            onResizeHighlight: Function,
+        };
         isTop = this.props.orientation[0] === "n";
         isLeft = this.props.orientation[1] === "w";
         get style() {
@@ -29008,13 +29017,6 @@
             this.props.onResizeHighlight(this.isLeft, this.isTop);
         }
     }
-    Corner.props = {
-        zone: Object,
-        color: String,
-        orientation: String,
-        isResizing: Boolean,
-        onResizeHighlight: Function,
-    };
 
     css /*SCSS*/ `
   .o-highlight {
@@ -29026,6 +29028,10 @@
         static components = {
             Corner,
             Border,
+        };
+        static props = {
+            zone: Object,
+            color: String,
         };
         highlightState = owl.useState({
             shiftingMode: "none",
@@ -29106,10 +29112,6 @@
             dragAndDropBeyondTheViewport(this.env, mouseMove, mouseUp);
         }
     }
-    Highlight.props = {
-        zone: Object,
-        color: String,
-    };
 
     let ScrollBar$1 = class ScrollBar {
         direction;
@@ -29158,6 +29160,14 @@
       <div t-att-style="sizeCss"/>
     </div>
   `;
+        static props = {
+            width: { type: Number, optional: true },
+            height: { type: Number, optional: true },
+            direction: String,
+            position: Object,
+            offset: Number,
+            onScroll: Function,
+        };
         static defaultProps = {
             width: 1,
             height: 1,
@@ -29192,17 +29202,12 @@
             }
         }
     }
-    ScrollBar.props = {
-        width: { type: Number, optional: true },
-        height: { type: Number, optional: true },
-        direction: String,
-        position: Object,
-        offset: Number,
-        onScroll: Function,
-    };
 
     class HorizontalScrollBar extends owl.Component {
         static components = { ScrollBar };
+        static props = {
+            leftOffset: { type: Number, optional: true },
+        };
         static template = owl.xml /*xml*/ `
       <ScrollBar
         t-if="isDisplayed"
@@ -29242,12 +29247,12 @@
             });
         }
     }
-    HorizontalScrollBar.props = {
-        leftOffset: { type: Number, optional: true },
-    };
 
     class VerticalScrollBar extends owl.Component {
         static components = { ScrollBar };
+        static props = {
+            topOffset: { type: Number, optional: true },
+        };
         static template = owl.xml /*xml*/ `
     <ScrollBar
       t-if="isDisplayed"
@@ -29287,9 +29292,6 @@
             });
         }
     }
-    VerticalScrollBar.props = {
-        topOffset: { type: Number, optional: true },
-    };
 
     const registries$1 = {
         ROW: rowMenuRegistry,
@@ -29303,6 +29305,13 @@
     // -----------------------------------------------------------------------------
     class Grid extends owl.Component {
         static template = "o-spreadsheet-Grid";
+        static props = {
+            sidePanelIsOpen: Boolean,
+            exposeFocus: Function,
+            focusComposer: String,
+            onComposerContentFocused: Function,
+            onGridComposerCellFocused: Function,
+        };
         static components = {
             GridComposer,
             GridOverlay,
@@ -29907,13 +29916,6 @@
             }
         }
     }
-    Grid.props = {
-        sidePanelIsOpen: Boolean,
-        exposeFocus: Function,
-        focusComposer: String,
-        onComposerContentFocused: Function,
-        onGridComposerCellFocused: Function,
-    };
 
     /**
      * Represent a raw XML string
@@ -39457,7 +39459,7 @@
          *                               | |                    ˅ ˅ | |                  _ _                - [C=>D]
          * Groups:                       ˅ ˅                    _ _ ˅ |                  _ _ _              - [C=>E]
          * Groups:                   _ _ _ _ _              _ _ _ _ _ ˅              _ _ _ _ _ _            - [A=>F]
-      
+
          * @param groups
          * @param start start of the range where to add/remove headers
          * @param end end of the range where to add/remove headers
@@ -40155,7 +40157,7 @@
             const nbRows = formulaReturn[0].length;
             forEachSpreadPositionInMatrix(nbColumns, nbRows, this.updateSpreadRelation(formulaPosition));
             forEachSpreadPositionInMatrix(nbColumns, nbRows, this.checkCollision(formulaPosition));
-            forEachSpreadPositionInMatrix(nbColumns, nbRows, 
+            forEachSpreadPositionInMatrix(nbColumns, nbRows,
             // thanks to the isMatrix check above, we know that formulaReturn is MatrixFunctionReturn
             this.spreadValues(formulaPosition, formulaReturn));
             return createEvaluatedCell(formulaReturn[0][0].value, {
@@ -44443,7 +44445,7 @@
              * opacity, we filter highlights to remove duplicates.
              */
             const highlights = this.getHighlights();
-            for (let h of highlights.filter((highlight, index) => 
+            for (let h of highlights.filter((highlight, index) =>
             // For every highlight in the sheet, deduplicated by zone
             highlights.findIndex((h) => isEqual(h.zone, highlight.zone) && h.sheetId === sheetId) ===
                 index)) {
@@ -49874,6 +49876,20 @@
 `;
     class RippleEffect extends owl.Component {
         static template = "o-spreadsheet-RippleEffect";
+        static props = {
+            x: String,
+            y: String,
+            color: String,
+            opacity: Number,
+            duration: Number,
+            width: Number,
+            height: Number,
+            offsetY: Number,
+            offsetX: Number,
+            allowOverflow: Boolean,
+            onAnimationEnd: Function,
+            style: String,
+        };
         rippleRef = owl.useRef("ripple");
         setup() {
             let animation = undefined;
@@ -49909,23 +49925,24 @@
             });
         }
     }
-    RippleEffect.props = {
-        x: String,
-        y: String,
-        color: String,
-        opacity: Number,
-        duration: Number,
-        width: Number,
-        height: Number,
-        offsetY: Number,
-        offsetX: Number,
-        allowOverflow: Boolean,
-        onAnimationEnd: Function,
-        style: String,
-    };
     class Ripple extends owl.Component {
         static template = "o-spreadsheet-Ripple";
         static components = { RippleEffect };
+        static props = {
+            color: { type: String, optional: true },
+            opacity: { type: Number, optional: true },
+            duration: { type: Number, optional: true },
+            ignoreClickPosition: { type: Boolean, optional: true },
+            width: { type: Number, optional: true },
+            height: { type: Number, optional: true },
+            offsetY: { type: Number, optional: true },
+            offsetX: { type: Number, optional: true },
+            allowOverflow: { type: Boolean, optional: true },
+            enabled: { type: Boolean, optional: true },
+            onAnimationEnd: { type: Function, optional: true },
+            slots: Object,
+            class: { type: String, optional: true },
+        };
         static defaultProps = {
             color: "#aaaaaa",
             opacity: 0.4,
@@ -50010,21 +50027,6 @@
             };
         }
     }
-    Ripple.props = {
-        color: { type: String, optional: true },
-        opacity: { type: Number, optional: true },
-        duration: { type: Number, optional: true },
-        ignoreClickPosition: { type: Boolean, optional: true },
-        width: { type: Number, optional: true },
-        height: { type: Number, optional: true },
-        offsetY: { type: Number, optional: true },
-        offsetX: { type: Number, optional: true },
-        allowOverflow: { type: Boolean, optional: true },
-        enabled: { type: Boolean, optional: true },
-        onAnimationEnd: { type: Function, optional: true },
-        slots: Object,
-        class: { type: String, optional: true },
-    };
 
     function interactiveRenameSheet(env, sheetId, name, errorCallback) {
         const result = env.model.dispatch("RENAME_SHEET", { sheetId, name });
@@ -50083,6 +50085,12 @@
     class BottomBarSheet extends owl.Component {
         static template = "o-spreadsheet-BottomBarSheet";
         static components = { Ripple };
+        static props = {
+            sheetId: String,
+            openContextMenu: Function,
+            style: { type: String, optional: true },
+            onMouseDown: { type: Function, optional: true },
+        };
         static defaultProps = {
             onMouseDown: () => { },
             style: "",
@@ -50203,12 +50211,6 @@
             return this.env.model.getters.getSheetName(this.props.sheetId);
         }
     }
-    BottomBarSheet.props = {
-        sheetId: String,
-        openContextMenu: Function,
-        style: { type: String, optional: true },
-        onMouseDown: { type: Function, optional: true },
-    };
 
     // -----------------------------------------------------------------------------
     // SpreadSheet
@@ -50227,6 +50229,10 @@
     class BottomBarStatistic extends owl.Component {
         static template = "o-spreadsheet-BottomBarStatisic";
         static components = { Ripple };
+        static props = {
+            openContextMenu: Function,
+            closeContextMenu: Function,
+        };
         selectedStatisticFn = "";
         statisticFnResults = {};
         setup() {
@@ -50272,10 +50278,6 @@
             return fnName + ": " + (fnValue !== undefined ? formatValue(fnValue, { locale }) : "__");
         }
     }
-    BottomBarStatistic.props = {
-        openContextMenu: Function,
-        closeContextMenu: Function,
-    };
 
     // -----------------------------------------------------------------------------
     // SpreadSheet
@@ -50327,6 +50329,9 @@
     class BottomBar extends owl.Component {
         static template = "o-spreadsheet-BottomBar";
         static components = { Menu, Ripple, BottomBarSheet, BottomBarStatistic };
+        static props = {
+            onClick: Function,
+        };
         bottomBarRef = owl.useRef("bottomBar");
         sheetListRef = owl.useRef("sheetList");
         dragAndDrop = useDragAndDropListItems();
@@ -50511,9 +50516,6 @@
             return this.sheetListRef.el.scrollWidth - this.sheetListRef.el.clientWidth;
         }
     }
-    BottomBar.props = {
-        onClick: Function,
-    };
 
     css /* scss */ `
   .o-dashboard-clickable-cell {
@@ -50524,6 +50526,7 @@
     let tKey = 1;
     class SpreadsheetDashboard extends owl.Component {
         static template = "o-spreadsheet-SpreadsheetDashboard";
+        static props = {};
         static components = {
             GridOverlay,
             GridPopover,
@@ -50642,7 +50645,6 @@
             return { ...this.canvasPosition, ...this.env.model.getters.getSheetViewDimensionWithHeaders() };
         }
     }
-    SpreadsheetDashboard.props = {};
 
     css /* scss */ `
   .o-header-group {
@@ -50670,6 +50672,11 @@
 `;
     class AbstractHeaderGroup extends owl.Component {
         static template = "o-spreadsheet-HeaderGroup";
+        static props = {
+            group: Object,
+            layerOffset: Number,
+            openContextMenu: Function,
+        };
         toggleGroup() {
             const sheetId = this.env.model.getters.getActiveSheetId();
             const { start, end } = this.props.group;
@@ -50706,11 +50713,6 @@
             this.props.openContextMenu(position, menuItems);
         }
     }
-    AbstractHeaderGroup.props = {
-        group: Object,
-        layerOffset: Number,
-        openContextMenu: Function,
-    };
     class RowGroup extends AbstractHeaderGroup {
         dimension = "ROW";
         get groupBorderStyle() {
@@ -50842,6 +50844,10 @@
     class HeaderGroupContainer extends owl.Component {
         static template = "o-spreadsheet-HeaderGroupContainer";
         static components = { RowGroup, ColGroup, Menu };
+        static props = {
+            dimension: String,
+            layers: Array,
+        };
         menu = owl.useState({ isOpen: false, position: null, menuItems: [] });
         getLayerOffset(layerIndex) {
             return layerIndex * GROUP_LAYER_WIDTH;
@@ -50903,10 +50909,6 @@
             }
         }
     }
-    HeaderGroupContainer.props = {
-        dimension: String,
-        layers: Array,
-    };
 
     css /* scss */ `
   .o-sidePanel {
@@ -51065,6 +51067,11 @@
 `;
     class SidePanel extends owl.Component {
         static template = "o-spreadsheet-SidePanel";
+        static props = {
+            component: String,
+            panelProps: { type: Object, optional: true },
+            onCloseSidePanel: Function,
+        };
         state;
         setup() {
             this.state = owl.useState({
@@ -51078,11 +51085,6 @@
                 : this.state.panel.title;
         }
     }
-    SidePanel.props = {
-        component: String,
-        panelProps: { type: Object, optional: true },
-        onCloseSidePanel: Function,
-    };
 
     css /* scss */ `
   .o-menu-item-button {
@@ -51100,6 +51102,13 @@
 `;
     class ActionButton extends owl.Component {
         static template = "o-spreadsheet-ActionButton";
+        static props = {
+            action: Object,
+            hasTriangleDownIcon: { type: Boolean, optional: true },
+            selectedColor: { type: String, optional: true },
+            class: { type: String, optional: true },
+            onClick: { type: Function, optional: true },
+        };
         actionButton = createAction(this.props.action);
         setup() {
             owl.onWillUpdateProps((nextProps) => {
@@ -51142,13 +51151,6 @@
             return "";
         }
     }
-    ActionButton.props = {
-        action: Object,
-        hasTriangleDownIcon: { type: Boolean, optional: true },
-        selectedColor: { type: String, optional: true },
-        class: { type: String, optional: true },
-        onClick: { type: Function, optional: true },
-    };
 
     /**
      * List the available borders positions and the corresponding icons.
@@ -51246,6 +51248,17 @@
     class BorderEditor extends owl.Component {
         static template = "o-spreadsheet-BorderEditor";
         static components = { ColorPickerWidget, Popover };
+        static props = {
+            class: { type: String, optional: true },
+            currentBorderColor: { type: String, optional: false },
+            currentBorderStyle: { type: String, optional: false },
+            currentBorderPosition: { type: String, optional: true },
+            onBorderColorPicked: Function,
+            onBorderStylePicked: Function,
+            onBorderPositionPicked: Function,
+            maxHeight: { type: Number, optional: true },
+            anchorRect: Object,
+        };
         BORDER_POSITIONS = BORDER_POSITIONS;
         lineStyleButtonRef = owl.useRef("lineStyleButton");
         borderStyles = borderStyles;
@@ -51300,21 +51313,17 @@
             };
         }
     }
-    BorderEditor.props = {
-        class: { type: String, optional: true },
-        currentBorderColor: { type: String, optional: false },
-        currentBorderStyle: { type: String, optional: false },
-        currentBorderPosition: { type: String, optional: true },
-        onBorderColorPicked: Function,
-        onBorderStylePicked: Function,
-        onBorderPositionPicked: Function,
-        maxHeight: { type: Number, optional: true },
-        anchorRect: Object,
-    };
 
     class BorderEditorWidget extends owl.Component {
         static template = "o-spreadsheet-BorderEditorWidget";
         static components = { BorderEditor };
+        static props = {
+            toggleBorderEditor: Function,
+            showBorderEditor: Boolean,
+            disabled: { type: Boolean, optional: true },
+            dropdownMaxHeight: { type: Number, optional: true },
+            class: { type: String, optional: true },
+        };
         borderEditorButtonRef = owl.useRef("borderEditorButton");
         state = owl.useState({
             currentColor: DEFAULT_BORDER_DESC.color,
@@ -51358,13 +51367,6 @@
             });
         }
     }
-    BorderEditorWidget.props = {
-        toggleBorderEditor: Function,
-        showBorderEditor: Boolean,
-        disabled: { type: Boolean, optional: true },
-        dropdownMaxHeight: { type: Number, optional: true },
-        class: { type: String, optional: true },
-    };
 
     const COMPOSER_MAX_HEIGHT = 100;
     /* svg free of use from https://uxwing.com/formula-fx-icon/ */
@@ -51394,6 +51396,10 @@
     class TopBarComposer extends owl.Component {
         static template = "o-spreadsheet-TopBarComposer";
         static components = { Composer };
+        static props = {
+            focus: { validate: (value) => ["inactive", "cellFocus", "contentFocus"].includes(value) },
+            onComposerContentFocused: Function,
+        };
         get composerStyle() {
             const style = {
                 padding: "5px 0px 5px 8px",
@@ -51415,10 +51421,6 @@
             });
         }
     }
-    TopBarComposer.props = {
-        focus: { validate: (value) => ["inactive", "cellFocus", "contentFocus"].includes(value) },
-        onComposerContentFocused: Function,
-    };
 
     css /* scss */ `
   .o-font-size-editor {
@@ -51448,6 +51450,11 @@
     class FontSizeEditor extends owl.Component {
         static template = "o-spreadsheet-FontSizeEditor";
         static components = {};
+        static props = {
+            onToggle: Function,
+            dropdownStyle: String,
+            class: String,
+        };
         fontSizes = FONT_SIZES;
         dropdown = owl.useState({ isOpen: false });
         inputRef = owl.useRef("inputFontSize");
@@ -51503,14 +51510,12 @@
             }
         }
     }
-    FontSizeEditor.props = {
-        onToggle: Function,
-        dropdownStyle: String,
-        class: String,
-    };
 
     class PaintFormatButton extends owl.Component {
         static template = "o-spreadsheet-PaintFormatButton";
+        static props = {
+            class: { type: String, optional: true },
+        };
         get isActive() {
             return this.env.model.getters.isPaintingFormat();
         }
@@ -51526,9 +51531,6 @@
             }
         }
     }
-    PaintFormatButton.props = {
-        class: { type: String, optional: true },
-    };
 
     // -----------------------------------------------------------------------------
     // TopBar
@@ -51634,6 +51636,12 @@
             PaintFormatButton,
             BorderEditorWidget,
         };
+        static props = {
+            onClick: Function,
+            focusComposer: String,
+            onComposerContentFocused: Function,
+            dropdownMaxHeight: Number,
+        };
         state = owl.useState({
             menuState: { isOpen: false, position: null, menuItems: [] },
             activeTool: "",
@@ -51737,12 +51745,6 @@
             this.onClick();
         }
     }
-    TopBar.props = {
-        onClick: Function,
-        focusComposer: String,
-        onComposerContentFocused: Function,
-        dropdownMaxHeight: Number,
-    };
 
     function instantiateClipboard() {
         return new WebClipboardWrapper(navigator.clipboard);
@@ -51973,6 +51975,9 @@
 `;
     class Spreadsheet extends owl.Component {
         static template = "o-spreadsheet-Spreadsheet";
+        static props = {
+            model: Object,
+        };
         static components = {
             TopBar,
             Grid,
@@ -52172,9 +52177,6 @@
             return this.env.model.getters.getVisibleGroupLayers(sheetId, "COL");
         }
     }
-    Spreadsheet.props = {
-        model: Object,
-    };
 
     class LocalTransportService {
         listeners = [];

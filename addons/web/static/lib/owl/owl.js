@@ -2769,6 +2769,14 @@
         };
     }
     class Portal extends Component {
+        static template = "__portal__";
+        static props = {
+            target: {
+                type: String,
+            },
+            slots: true,
+        };
+
         setup() {
             const node = this.__owl__;
             onMounted(() => {
@@ -2789,13 +2797,6 @@
             });
         }
     }
-    Portal.template = "__portal__";
-    Portal.props = {
-        target: {
-            type: String,
-        },
-        slots: true,
-    };
 
     // -----------------------------------------------------------------------------
     // helpers

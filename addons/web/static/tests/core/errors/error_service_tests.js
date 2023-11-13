@@ -118,10 +118,11 @@ QUnit.test(
     "handle custom RPC_ERROR of type='server' and associated custom dialog class",
     async (assert) => {
         assert.expect(2);
-        class CustomDialog extends Component {}
-        CustomDialog.template = xml`<RPCErrorDialog title="'Strange Error'"/>`;
-        CustomDialog.components = { RPCErrorDialog };
-        CustomDialog.props = { ...standardErrorDialogProps };
+        class CustomDialog extends Component {
+            static template = xml`<RPCErrorDialog title="'Strange Error'"/>`;
+            static components = { RPCErrorDialog };
+            static props = { ...standardErrorDialogProps };
+        }
         const error = new RPCError();
         error.code = 701;
         error.message = "Some strange error occured";

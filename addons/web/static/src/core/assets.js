@@ -158,6 +158,13 @@ export const loadBundle = function (bundleName) {
  * Utility component that loads an asset bundle before instanciating a component
  */
 export class LazyComponent extends Component {
+    static template = xml`<t t-component="Component" t-props="props.props"/>`;
+    static props = {
+        Component: String,
+        bundle: String,
+        props: { type: Object, optional: true },
+    };
+
     setup() {
         onWillStart(async () => {
             await loadBundle(this.props.bundle);
@@ -165,9 +172,3 @@ export class LazyComponent extends Component {
         });
     }
 }
-LazyComponent.template = xml`<t t-component="Component" t-props="props.props"/>`;
-LazyComponent.props = {
-    Component: String,
-    bundle: String,
-    props: { type: Object, optional: true },
-};
