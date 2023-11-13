@@ -210,7 +210,7 @@ var Session = core.Class.extend(mixins.EventDispatcherMixin, {
             self._configureLocale();
         });
     },
-    load_translations: function () {
+    load_translations: function (moduleNames) {
         var lang = this.user_context.lang
         /* We need to get the website lang at this level.
            The only way is to get it is to take the HTML tag lang
@@ -222,7 +222,7 @@ var Session = core.Class.extend(mixins.EventDispatcherMixin, {
             lang = htmlLang.replace('-', '_');
         }
 
-        return _t.database.load_translations(this, this.module_list, lang, this.translationURL);
+        return _t.database.load_translations(this, moduleNames || this.module_list, lang, this.translationURL);
     },
     load_css: function (files) {
         var self = this;

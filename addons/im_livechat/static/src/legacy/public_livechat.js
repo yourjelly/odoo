@@ -2025,7 +2025,7 @@ var _t = core._t;
 
 /**
  * This is an abstract widget for rendering thread windows.
- * AbstractThreadWindow is kept for legacy reasons. 
+ * AbstractThreadWindow is kept for legacy reasons.
  */
 var AbstractThreadWindow = Widget.extend({
     template: 'im_livechat.legacy.mail.AbstractThreadWindow',
