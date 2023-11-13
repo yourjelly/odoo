@@ -152,6 +152,12 @@
         <field name="search_view_id" ref="view_account_invoice_report_search"/>
         <field name="help">From this report, you can have an overview of the amount invoiced to your customers. The search tool can also be used to personalise your Invoices reports and so, match this analysis to your needs.</field>
     </record>
+    <record id="different_action" model="ir.actions.client">
+        <field name="name">Chalse</field>
+        <field name="tag">action_open_spreadsheet</field>
+        <field name="res_model">account.invoice.report</field>
+        <field name="params" eval="{'spreadsheet_id': 14}" />
+    </record>
 
 </data>
 </odoo>
