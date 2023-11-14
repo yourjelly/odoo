@@ -250,13 +250,13 @@ class MetaModel(api.Meta):
 
             if attrs.get('_log_access', self._auto):
                 add_default('create_uid', fields.Many2one(
-                    'res.users', string='Created by', automatic=True, readonly=True))
+                    'res.users', string='Created by', automatic=True, readonly=True, prefetch='access_field'))
                 add_default('create_date', fields.Datetime(
-                    string='Created on', automatic=True, readonly=True))
+                    string='Created on', automatic=True, readonly=True, prefetch='access_field'))
                 add_default('write_uid', fields.Many2one(
-                    'res.users', string='Last Updated by', automatic=True, readonly=True))
+                    'res.users', string='Last Updated by', automatic=True, readonly=True, prefetch='access_field'))
                 add_default('write_date', fields.Datetime(
-                    string='Last Updated on', automatic=True, readonly=True))
+                    string='Last Updated on', automatic=True, readonly=True, prefetch='access_field'))
 
 
 class NewId(object):
