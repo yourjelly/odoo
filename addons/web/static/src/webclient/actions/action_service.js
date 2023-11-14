@@ -187,6 +187,9 @@ function makeActionManager(env) {
         }
 
         // actionRequest is an object describing the action
+        if (actionRequest.helpismarkup) {
+            actionRequest.help = markup(actionRequest.help)
+        }
         return actionRequest;
     }
 

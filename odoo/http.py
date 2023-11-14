@@ -120,6 +120,7 @@ import hmac
 import inspect
 import json
 import logging
+import markupsafe
 import mimetypes
 import os
 import re
@@ -1820,6 +1821,8 @@ class JsonRPCDispatcher(Dispatcher):
             result = self.request.registry['ir.http']._dispatch(endpoint)
         else:
             result = endpoint(**self.request.params)
+        if isinstance(result, dict) and result.get('help'):
+            result['helpismarkup'] = isinstance(result['help'], markupsafe.Markup)
         return self._response(result)
 
     def handle_error(self, exc: Exception) -> collections.abc.Callable:
