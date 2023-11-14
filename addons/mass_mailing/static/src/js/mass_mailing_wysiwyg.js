@@ -1,10 +1,8 @@
 /** @odoo-module **/
 
 import { loadBundle } from "@web/core/assets";
-import { attachComponent } from "@web/legacy/utils";
 import { Wysiwyg } from "@web_editor/js/wysiwyg/wysiwyg";
 import { closestElement } from "@web_editor/js/editor/odoo-editor/src/OdooEditor";
-import { Toolbar } from "@web_editor/js/editor/toolbar";
 import "@web_editor/js/wysiwyg/wysiwyg_iframe";
 
 export class MassMailingWysiwyg extends Wysiwyg {
@@ -45,36 +43,32 @@ export class MassMailingWysiwyg extends Wysiwyg {
     async setSnippetsMenuFolded(fold = true) {
         if (fold) {
             this.snippetsMenu.setFolded(true);
-            if (!this.floatingToolbar) {
-                // The wysiwyg can be instanciated inside an iframe. The dialog
-                // component is mounted on the global document.
-                const toolbarWrapperElement = document.createElement('div');
-                toolbarWrapperElement.style.display = 'contents';
-                document.body.append(toolbarWrapperElement);
-                // Instantiate and configure new toolbar.
-                await attachComponent({}, toolbarWrapperElement, Toolbar, this.state.toolbarProps);
-                this.toolbarEl = toolbarWrapperElement.firstChild;
-                this.floatingToolbarEl = this.toolbarEl;
-
+            if (!this.floatingToolbarEl) {
+                this.toolbarEl = this.toolbarRef.el.firstChild;
+                // Setup toolbar.
                 this._configureToolbar({ snippets: false });
                 this._updateEditorUI();
                 this.setCSSVariables(this.toolbarEl);
-                this.odooEditor.setupToolbar(this.toolbarEl);
+                // TODO: consider changing the snippets options code that add this to style, use the class instead.
+                this.toolbarEl.style.removeProperty('display');
+                // Position the toolbar element.
                 if (this.odooEditor.isMobile) {
                     document.body.querySelector('.o_mail_body').prepend(this.toolbarEl);
                 } else {
                     document.body.append(this.toolbarEl);
                 }
+                this.floatingToolbarEl = this.toolbarEl;
             } else {
                 this.toolbarEl = this.floatingToolbarEl;
             }
-            this.toolbarEl.classList.remove('d-none');
+            this.floatingToolbarEl.classList.remove('d-none');
+            this.odooEditor.toolbar = this.toolbarEl;
             this.odooEditor.autohideToolbar = true;
             this.odooEditor.toolbarHide();
         } else {
             this.snippetsMenu.setFolded(false);
             this.toolbarEl = this.snippetsMenuToolbarEl;
-
+            this.odooEditor.toolbar = this.toolbarEl;
             this.odooEditor.autohideToolbar = false;
             if (this.floatingToolbarEl) {
                 this.floatingToolbarEl.classList.add('d-none');
