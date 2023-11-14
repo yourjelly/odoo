@@ -164,7 +164,7 @@ class Macro {
 export class MacroEngine {
     constructor(params = {}) {
         this.isRunning = false;
-        this.timeout = null;
+        this.timeouts = [];
         this.target = params.target || document.body;
         this.defaultCheckDelay = params.defaultCheckDelay ?? 750;
         this.macros = new Set();
@@ -218,42 +218,33 @@ export class MacroEngine {
     stop() {
         if (this.isRunning) {
             this.isRunning = false;
-            browser.clearTimeout(this.timeout);
-            this.timeout = null;
+            for (const timeout of this.timeouts) {
+                browser.clearTimeout(timeout);
+            }
+            this.timeouts = [];
             this.observer.disconnect();
             this.iframeObserver.disconnect();
         }
     }
 
     delayedCheck() {
-        if (this.timeout) {
-            browser.clearTimeout(this.timeout);
+        for (const timeout of this.timeouts) {
+            browser.clearTimeout(timeout);
         }
-        this.timeout = browser.setTimeout(
-            () => mutex.exec(this.advanceMacros.bind(this)),
-            this.getCheckDelay() || this.defaultCheckDelay
-        );
-    }
-
-    getCheckDelay() {
-        // If a macro has a checkDelay different from 0, use it. Select the minimum.
-        // For example knowledge has a macro with a delay of 10ms. We don't want to wait
-        // longer because of other running tours.
-        return [...this.macros]
-            .map((m) => m.checkDelay)
-            .filter((delay) => delay > 0)
-            .reduce((m, v) => Math.min(m, v), this.defaultCheckDelay);
-    }
-
-    async advanceMacros() {
-        await Promise.all([...this.macros].map((macro) => macro.advance()));
-        for (const macro of this.macros) {
-            if (macro.isComplete) {
-                this.macros.delete(macro);
-            }
-        }
-        if (this.macros.size === 0) {
-            this.stop();
-        }
+        this.timeouts = [...this.macros].map((macro) => {
+            browser.setTimeout(
+                () =>
+                    mutex.exec(async () => {
+                        await macro.advance();
+                        if (macro.isComplete) {
+                            this.macros.delete(macro);
+                            if (this.macros.size === 0) {
+                                this.stop();
+                            }
+                        }
+                    }),
+                macro.checkDelay || this.defaultCheckDelay
+            );
+        });
     }
 }
