@@ -22,6 +22,7 @@ wTourUtils.registerWebsitePreviewTour('snippet_translation', {
 wTourUtils.registerWebsitePreviewTour('snippet_translation_changing_lang', {
     url: '/',
     test: true,
+    checkDelay: 250,
 }, [
     {
         content: "Change language to Parseltongue",

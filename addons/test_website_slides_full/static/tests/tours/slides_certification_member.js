@@ -156,6 +156,7 @@ var profileSteps = [{
 registry.category("web_tour.tours").add('certification_member', {
     url: '/slides',
     test: true,
+    checkDelay: 250,
     steps: [].concat(
         initTourSteps,
         buyCertificationSteps,
