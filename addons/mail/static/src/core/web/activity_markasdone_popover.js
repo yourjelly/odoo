@@ -35,7 +35,9 @@ export class ActivityMarkAsDone extends Component {
         const thread = this.threadService.getThread(res_model, res_id);
         await this.env.services["mail.activity"].markAsDone(this.props.activity);
         if (this.props.reload) {
-            this.props.reload(this.props.activity.res_id, ["activities"]);
+            this.props.reload(this.props.activity.res_model, this.props.activity.res_id, [
+                "activities",
+            ]);
         }
         await this.threadService.fetchNewMessages(thread);
     }
@@ -54,7 +56,10 @@ export class ActivityMarkAsDone extends Component {
         );
         this.threadService.fetchNewMessages(thread);
         if (this.props.reload) {
-            this.props.reload(this.props.activity.res_id, ["activities", "attachments"]);
+            this.props.reload(this.props.activity.res_model, this.props.activity.res_id, [
+                "activities",
+                "attachments",
+            ]);
         }
         if (!action) {
             return;
@@ -65,7 +70,9 @@ export class ActivityMarkAsDone extends Component {
             });
         });
         if (this.props.reload) {
-            this.props.reload(this.props.activity.res_id, ["activities"]);
+            this.props.reload(this.props.activity.res_model, this.props.activity.res_id, [
+                "activities",
+            ]);
         }
     }
 }

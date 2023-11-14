@@ -29,7 +29,7 @@ import { browser } from "@web/core/browser/browser";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { _t } from "@web/core/l10n/translation";
 import { usePopover } from "@web/core/popover/popover_hook";
-import { useService } from "@web/core/utils/hooks";
+import { useBus, useService } from "@web/core/utils/hooks";
 import { escape } from "@web/core/utils/strings";
 import { useThrottleForAnimation } from "@web/core/utils/timing";
 import { FileUploader } from "@web/views/fields/file_handler";
@@ -149,31 +149,24 @@ export class Chatter extends Component {
                     name: this.props.webRecord?.data?.display_name || undefined,
                 });
             }
-            await this.load(this.props.threadId, [
+            await this.load(this.props.threadModel, this.props.threadId, [
                 "followers",
                 "attachments",
                 "suggestedRecipients",
             ]);
+            this.changeThread(this.props.threadModel, this.props.threadId);
             this.scrollPosition.restore();
         });
         onPatched(this.scrollPosition.restore);
+        useBus(this.env.bus, "MAIL:RELOAD-CHATTER", ({ detail }) => {
+            const thread = this.store.Thread.get({ model: detail.model, id: detail.id });
+            if (!thread) {
+                return;
+            }
+            this.load(thread.model, thread.id, ["followers", "attachments", "suggestedRecipients"]);
+        });
         onWillUpdateProps((nextProps) => {
-            this.load(nextProps.threadId, ["followers", "attachments", "suggestedRecipients"]);
-            if (nextProps.threadId === false) {
-                this.state.composerType = false;
-            }
-            this.attachmentUploader.thread = this.threadService.getThread(
-                nextProps.threadModel,
-                nextProps.threadId
-            );
-            if (this.onNextUpdate) {
-                if (!this.onNextUpdate(nextProps)) {
-                    this.onNextUpdate = null;
-                }
-            }
-            if (nextProps.threadId) {
-                this.closeSearch();
-            }
+            this.changeThread(nextProps.threadModel, nextProps.threadId);
         });
         useEffect(
             () => {
@@ -212,7 +205,8 @@ export class Chatter extends Component {
                     );
                 } else {
                     this.state.showAttachmentLoading = false;
-                    this.state.isAttachmentBoxOpened = this.props.isAttachmentBoxVisibleInitially && this.attachments.length > 0;
+                    this.state.isAttachmentBoxOpened =
+                        this.props.isAttachmentBoxVisibleInitially && this.attachments.length > 0;
                 }
                 return () => browser.clearTimeout(this.loadingAttachmentTimeout);
             },
@@ -269,23 +263,51 @@ export class Chatter extends Component {
     }
 
     /**
+     * Fetch data for the thread according to the request list.
+     * @param {string} threadModel
      * @param {number} threadId
      * @param {['activities'|'followers'|'attachments'|'messages'|'suggestedRecipients']} requestList
      */
     load(
+        threadModel = this.props.threadModel,
         threadId = this.props.threadId,
         requestList = ["followers", "attachments", "messages", "suggestedRecipients"]
     ) {
-        const { threadModel } = this.props;
-        this.state.thread = this.threadService.getThread(threadModel, threadId);
-        this.scrollPosition.model = this.state.thread?.scrollPosition;
+        const thread = this.threadService.getThread(threadModel, threadId);
         if (!threadId) {
             return;
         }
         if (this.props.hasActivities && !requestList.includes("activities")) {
             requestList.push("activities");
         }
-        this.threadService.fetchData(this.state.thread, requestList);
+        this.threadService.fetchData(thread, requestList);
+    }
+
+    /**
+     * @param {string} threadModel
+     * @param {number} threadId
+     * Visually refresh the chatter.
+     */
+    changeThread(threadModel, threadId) {
+        this.state.thread = this.threadService.getThread(threadModel, threadId);
+        this.scrollPosition.model = this.state.thread?.scrollPosition;
+        if (threadId === false) {
+            this.state.composerType = false;
+        }
+        this.attachmentUploader.thread = this.state.thread;
+        if (this.onNextUpdate) {
+            if (
+                !this.onNextUpdate({
+                    threadId,
+                    threadModel,
+                })
+            ) {
+                this.onNextUpdate = null;
+            }
+        }
+        if (threadId) {
+            this.closeSearch();
+        }
     }
 
     async _follow(threadModel, threadId) {
@@ -318,7 +340,11 @@ export class Chatter extends Component {
     onFollowerChanged() {
         document.body.click(); // hack to close dropdown
         this.reloadParentView();
-        this.load(this.props.threadId, ["followers", "suggestedRecipients"]);
+        this.load(this.props.threadModel, this.props.threadId, [
+            "followers",
+            "suggestedRecipients",
+        ]);
+        this.changeThread(this.props.threadModel, this.props.threadId);
     }
 
     onPostCallback() {
@@ -328,11 +354,20 @@ export class Chatter extends Component {
         this.toggleComposer();
         this.state.jumpThreadPresent++;
         // Load new messages to fetch potential new messages from other users (useful due to lack of auto-sync in chatter).
-        this.load(this.props.threadId, ["followers", "messages", "suggestedRecipients"]);
+        this.load(this.props.threadModel, this.props.threadId, [
+            "followers",
+            "messages",
+            "suggestedRecipients",
+        ]);
+        this.changeThread(this.props.threadModel, this.props.threadId);
     }
 
     onAddFollowers() {
-        this.load(this.state.thread.id, ["followers", "suggestedRecipients"]);
+        this.load(this.state.thread.model, this.state.thread.id, [
+            "followers",
+            "suggestedRecipients",
+        ]);
+        this.changeThread(this.props.threadModel, this.props.threadId);
         if (this.props.hasParentReloadOnFollowersUpdate) {
             this.reloadParentView();
         }
@@ -379,7 +414,7 @@ export class Chatter extends Component {
         this.closeSearch();
         const schedule = async (threadId) => {
             await this.activityService.schedule(this.props.threadModel, [threadId]);
-            this.load(this.props.threadId, ["activities", "messages"]);
+            this.load(this.props.threadModel, this.props.threadId, ["activities", "messages"]);
         };
         if (this.props.threadId) {
             schedule(this.props.threadId);
