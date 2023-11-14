@@ -74,7 +74,8 @@ kbd {
 // == Boostrap Dropdown
 // ----------------------------------------------------------------------------
 .dropdown-menu {
-  max-height: 70vh;
+  max-height: 70vh; /* old iOS 15.4 (before 14/03/2022) */
+  max-height: 70svh;
   overflow: auto;
   background-clip: border-box;
 }
