@@ -7,7 +7,6 @@ from odoo.exceptions import UserError
 import logging
 
 _logger = logging.getLogger(__name__)
-_phonenumbers_lib_warning = False
 
 
 try:
@@ -42,9 +41,12 @@ try:
         :type force_format: str
         :rtype: str
         """
+        _logger.info(f"Formatting number {number} with country_code '{country_code}'")
+        _logger.info(f"phonenumbers version is {phonenumbers.__version__}")
         try:
             phone_nbr = phone_parse(number, country_code)
         except (phonenumbers.phonenumberutil.NumberParseException, UserError) as e:
+            _logger.info(f"An exception {type(e)} occurred: {e}")
             if raise_exception:
                 raise
             else:
@@ -57,7 +59,9 @@ try:
             phone_fmt = phonenumbers.PhoneNumberFormat.INTERNATIONAL
         else:
             phone_fmt = phonenumbers.PhoneNumberFormat.NATIONAL
-        return phonenumbers.format_number(phone_nbr, phone_fmt)
+        result = phonenumbers.format_number(phone_nbr, phone_fmt)
+        _logger.info(f"Result is: {result}")
+        return result
 
 except ImportError:
 
@@ -65,13 +69,10 @@ except ImportError:
         return False
 
     def phone_format(number, country_code, country_phone_code, force_format='INTERNATIONAL', raise_exception=True):
-        global _phonenumbers_lib_warning
-        if not _phonenumbers_lib_warning:
-            _logger.info(
-                "The `phonenumbers` Python module is not installed, contact numbers will not be "
-                "verified. Please install the `phonenumbers` Python module."
-            )
-            _phonenumbers_lib_warning = True
+        _logger.info(
+            "The `phonenumbers` Python module is not installed, contact numbers will not be "
+            "verified. Please install the `phonenumbers` Python module."
+        )
         return number
 
 
@@ -97,6 +98,7 @@ def phone_sanitize_numbers(numbers, country_code, country_phone_code, force_form
                 stripped, country_code, country_phone_code,
                 force_format=force_format, raise_exception=True)
         except Exception as e:
+            _logger.info(f"An unexpected {type(e)} occurred during phone validation: {e}")
             result[number] = {'sanitized': False, 'code': 'invalid', 'msg': str(e)}
         else:
             result[number] = {'sanitized': sanitized, 'code': False, 'msg': False}
