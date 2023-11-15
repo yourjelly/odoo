@@ -154,7 +154,7 @@
 
         <t t-set="current_subtotal" t-value="current_subtotal + line.price_subtotal" position="before">
             <t t-set="l10n_cl_values" t-value="line._l10n_cl_prices_and_taxes()"/>
-            <t t-set="line_amounts" t-value="l10n_cl_values['line_amounts']"/>
+            <t t-set="line_amounts" t-value="line._l10n_cl_get_line_amounts()"/>
         </t>
 
         <xpath expr="//span[@t-field='line.price_unit']" position="before">

@@ -10,14 +10,9 @@ class AccountMoveLine(models.Model):
 
     def _l10n_cl_prices_and_taxes(self):
         self.ensure_one()
-        if self.display_type != 'product':
-            return {
-                'line_amounts': {'line_description': self.name},
-                'price_subtotal': 0,
-            }
         invoice = self.move_id
         included_taxes = self.tax_ids.filtered(lambda x: x.l10n_cl_sii_code == 14) if self.move_id._l10n_cl_include_sii() else self.tax_ids
-        if included_taxes:
+        if not included_taxes:
             price_unit = self.tax_ids.with_context(round=False).compute_all(
                 self.price_unit, invoice.currency_id, 1.0, self.product_id, invoice.partner_id)
             price_unit = price_unit['total_excluded']
@@ -29,15 +24,8 @@ class AccountMoveLine(models.Model):
             price_subtotal = included_taxes.compute_all(
                 price, invoice.currency_id, self.quantity, self.product_id, invoice.partner_id)['total_included']
         price_net = price_unit * (1 - (self.discount or 0.0) / 100.0)
-        values = self._l10n_cl_get_line_amounts()
-        values['line_description'] = '%s (%s: %s @ %s)' % (
-            self.name,
-            values['second_currency']['currency_name'],
-            float_repr(values['second_currency']['price'], values['second_currency']['round_currency']),
-            self.move_id._float_repr_float_round(values['second_currency']['conversion_rate'], values['second_currency']['round_currency']),
-        ) if values.get('second_currency') and not self.l10n_latam_document_type_id._is_doc_type_export() else self.name
+
         return {
-            'line_amounts': values,
             'price_unit': price_unit,
             'price_subtotal': price_subtotal,
             'price_net': price_net
@@ -116,4 +104,11 @@ class AccountMoveLine(models.Model):
                 'total_amount': second_currency.round(price_subtotal_second),
                 'round_currency': second_currency.decimal_places,
             }
+
+        values['line_description'] = '%s (%s: %s @ %s)' % (
+            self.name,
+            values['second_currency']['currency_name'],
+            float_repr(values['second_currency']['price'], values['second_currency']['round_currency']),
+            self.move_id._float_repr_float_round(values['second_currency']['conversion_rate'], values['second_currency']['round_currency']),
+        ) if values.get('second_currency') and not self.l10n_latam_document_type_id._is_doc_type_export() else self.name
         return values
