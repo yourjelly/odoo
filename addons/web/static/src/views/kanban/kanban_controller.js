@@ -152,6 +152,7 @@ export class KanbanController extends Component {
 
     get modelParams() {
         const { resModel, archInfo, limit, defaultGroupBy } = this.props;
+        debugger;
         const { activeFields, fields } = extractFieldsFromArchInfo(archInfo, this.props.fields);
         addFieldDependencies(activeFields, fields, this.progressBarAggregateFields);
         const modelConfig = this.props.state?.modelState?.config || {

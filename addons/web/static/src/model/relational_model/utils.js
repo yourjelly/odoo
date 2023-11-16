@@ -128,6 +128,7 @@ export function createPropertyActiveField(property) {
 }
 
 export function combineModifiers(mod1, mod2, operator) {
+    debugger;
     if (operator === "AND") {
         if (!mod1 || mod1 === "False" || !mod2 || mod2 === "False") {
             return "False";
@@ -187,6 +188,7 @@ export function patchActiveFields(activeField, patch) {
 }
 
 export function extractFieldsFromArchInfo({ fieldNodes, widgetNodes }, fields) {
+    debugger;
     const activeFields = {};
     for (const fieldNode of Object.values(fieldNodes)) {
         const fieldName = fieldNode.name;

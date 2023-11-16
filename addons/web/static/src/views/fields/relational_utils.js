@@ -729,7 +729,7 @@ export function useOpenX2ManyRecord({
             userService,
             env,
         });
-
+        debugger;
         const { activeFields, fields } = extractFieldsFromArchInfo(archInfo, _fields);
 
         let deleteRecord;

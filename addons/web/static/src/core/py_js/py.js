@@ -33,6 +33,7 @@ export function parseExpr(expr) {
  * @returns {any}
  */
 export function evaluateExpr(expr, context = {}) {
+    debugger;
     let ast;
     try {
         ast = parseExpr(expr);
@@ -54,6 +55,7 @@ export function evaluateExpr(expr, context = {}) {
  * @returns {any}
  */
 export function evaluateBooleanExpr(expr, context = {}) {
+    debugger;
     if (!expr || expr === 'False' || expr === '0') {
         return false;
     }

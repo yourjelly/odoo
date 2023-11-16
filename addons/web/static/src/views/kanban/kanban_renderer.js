@@ -221,6 +221,7 @@ export class KanbanRenderer extends Component {
         if (!groupByField) {
             return true;
         }
+        debugger;
         const fieldNodes = Object.values(this.props.archInfo.fieldNodes).filter(
             (fieldNode) => fieldNode.name === groupByField.name
         );
@@ -229,9 +230,9 @@ export class KanbanRenderer extends Component {
             !isReadonly &&
             fieldNodes.length &&
             fieldNodes.some((fieldNode) => "readonly" in fieldNode)
-        ) {
+        ) {debugger;
             isReadonly = fieldNodes.every(
-                (fieldNode) => evaluateBooleanExpr(fieldNode.readonly)
+                (fieldNode) => fieldNode.readonly === "True"
             );
         }
         return !isReadonly && this.isMovableField(groupByField);

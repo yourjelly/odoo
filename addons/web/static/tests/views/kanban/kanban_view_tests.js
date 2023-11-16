@@ -4928,7 +4928,7 @@ QUnit.module("Views", (hooks) => {
             serverData,
             arch:
                 '<kanban on_create="quick_create">' +
-                '<field name="product_id"/>' +
+                '<field name="product_id" readonly="0"/>' +
                 '<templates><t t-name="kanban-box">' +
                 '<div class="oe_kanban_global_click"><field name="foo"/>' +
                 '<t t-if="widget.editable"><span class="thisiseditable">edit</span></t>' +
@@ -4953,7 +4953,7 @@ QUnit.module("Views", (hooks) => {
             ".o_kanban_group:first-child .o_kanban_record",
             ".o_kanban_group:nth-child(2)"
         );
-
+        debugger;
         assert.containsOnce(target, ".o_kanban_group:first-child .o_kanban_record");
         assert.containsN(target, ".o_kanban_group:nth-child(2) .o_kanban_record", 3);
         assert.containsN(target, ".thisiseditable", 4);
@@ -5053,7 +5053,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["resequence"]);
     });
 
-    QUnit.test("prevent drag and drop of record if grouped by readonly", async (assert) => {
+    QUnit.debug("prevent drag and drop of record if grouped by readonly", async (assert) => {
         // Whether the kanban is grouped by state, foo, bar or product_id
         // the user must not be able to drag and drop from one group to another,
         // as state, foo bar, product_id are made readonly one way or another.

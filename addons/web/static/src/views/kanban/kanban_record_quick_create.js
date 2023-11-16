@@ -57,7 +57,7 @@ class KanbanQuickCreateController extends Component {
         this.rootRef = useRef("root");
         this.state = useState({ disabled: false });
         this.addDialog = useOwnedDialogs();
-
+        debugger;
         const { activeFields, fields } = extractFieldsFromArchInfo(
             this.props.archInfo,
             this.props.fields
