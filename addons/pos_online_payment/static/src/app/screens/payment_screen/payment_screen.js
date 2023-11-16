@@ -248,7 +248,7 @@ patch(PaymentScreen.prototype, "pos_online_payment.PaymentScreen", {
                     body: this.env._t("The invoice could not be generated."),
                 });
             } else {
-                await this.report.download("account.account_invoices", [
+                await this.report.doAction("account.account_invoices", [
                     this.currentOrder.account_move,
                 ]);
             }
