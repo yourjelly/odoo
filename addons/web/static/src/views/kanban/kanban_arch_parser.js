@@ -26,6 +26,7 @@ export const KANBAN_TOOLTIP_ATTRIBUTE = "kanban-tooltip";
 
 export class KanbanArchParser {
     parse(xmlDoc, models, modelName) {
+        debugger;
         const fields = models[modelName];
         const className = xmlDoc.getAttribute("class") || null;
         let defaultOrder = stringToOrderBy(xmlDoc.getAttribute("default_order") || null);
@@ -60,6 +61,7 @@ export class KanbanArchParser {
         let button_id = 0;
         // Root level of the template
         visitXML(xmlDoc, (node) => {
+            debugger;
             if (node.hasAttribute("t-name")) {
                 templateDocs[node.getAttribute("t-name")] = node;
                 return;
@@ -98,6 +100,7 @@ export class KanbanArchParser {
                 if (!widget && models[modelName][node.getAttribute("name")].type === "many2many") {
                     node.setAttribute("widget", "many2many_tags");
                 }
+                debugger;
                 const fieldInfo = Field.parseFieldNode(node, models, modelName, "kanban", jsClass);
                 if (!node.hasAttribute("force_save")) {
                     // Force save is true by default on kanban views:

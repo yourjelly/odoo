@@ -266,6 +266,7 @@ Field.parseFieldNode = function (node, models, modelName, viewType, jsClass) {
     };
 
     for (const attr of ["invisible", "column_invisible", "readonly", "required"]) {
+        debugger;
         fieldInfo[attr] = node.getAttribute(attr);
         if (fieldInfo[attr] === "True") {
             if (attr === "column_invisible") {

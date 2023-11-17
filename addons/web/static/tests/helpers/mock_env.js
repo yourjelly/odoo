@@ -104,6 +104,7 @@ export function prepareRegistriesWithCleanup() {
  */
 export async function makeTestEnv(config = {}) {
     // add all missing dependencies if necessary
+    debugger;
     const serviceRegistry = registry.category("services");
     const servicesToProcess = serviceRegistry.getAll();
     while (servicesToProcess.length) {

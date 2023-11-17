@@ -25,6 +25,7 @@ export const kanbanView = {
     props: (genericProps, view) => {
         const { arch, relatedModels, resModel } = genericProps;
         const { ArchParser } = view;
+        debugger;
         const archInfo = new ArchParser().parse(arch, relatedModels, resModel);
         const defaultGroupBy =
             genericProps.searchMenuTypes.includes("groupBy") && archInfo.defaultGroupBy;

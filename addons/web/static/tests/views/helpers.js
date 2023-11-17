@@ -52,7 +52,7 @@ async function _makeView(params, inDialog = false) {
     delete props.serverData;
     delete props.mockRPC;
     delete props.config;
-
+    debugger;
     if (props.arch) {
         serverData.views = serverData.views || {};
         props.viewId = params.viewId || 100000001; // hopefully will not conflict with an id already in views
@@ -90,6 +90,7 @@ async function _makeView(params, inDialog = false) {
     } else {
         const view = await mount(View, target, { env: viewEnv, props });
         await nextTick();
+        debugger;
         viewNode = view.__owl__;
     }
     const withSearchNode = Object.values(viewNode.children)[0];

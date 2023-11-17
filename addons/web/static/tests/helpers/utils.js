@@ -754,6 +754,7 @@ export function mockAnimationFrame() {
 }
 
 export async function mount(Comp, target, config = {}) {
+    debugger;
     let { props, env } = config;
     env = env || {};
     const configuration = {
