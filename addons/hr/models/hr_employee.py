@@ -577,7 +577,7 @@ class HrEmployeePrivate(models.Model):
             .get_work_duration_data(
                 date_from,
                 date_to,
-                domain=[('company_id', 'in', [False, self.company_id.id])])
+                domain=[('company_ids', 'in', [False, self.company_id.id])])
 
     def _get_marital_status_selection(self):
         return [

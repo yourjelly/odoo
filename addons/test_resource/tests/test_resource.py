@@ -100,19 +100,17 @@ class TestErrors(TestResourceCommon):
     def test_create_negative_leave(self):
         # from > to
         with self.assertRaises(ValidationError):
-            self.env['resource.calendar.leaves'].create({
+            self.env['resource.public.leave'].create({
                 'name': 'error cannot return in the past',
-                'resource_id': False,
-                'calendar_id': self.calendar_jean.id,
+                'resource_calendar_ids': self.calendar_jean.id,
                 'date_from': datetime_str(2018, 4, 3, 20, 0, 0, tzinfo=self.jean.tz),
                 'date_to': datetime_str(2018, 4, 3, 0, 0, 0, tzinfo=self.jean.tz),
             })
 
         with self.assertRaises(ValidationError):
-            self.env['resource.calendar.leaves'].create({
+            self.env['resource.public.leave'].create({
                 'name': 'error caused by timezones',
-                'resource_id': False,
-                'calendar_id': self.calendar_jean.id,
+                'resource_calendar_ids': self.calendar_jean.id,
                 'date_from': datetime_str(2018, 4, 3, 10, 0, 0, tzinfo='UTC'),
                 'date_to': datetime_str(2018, 4, 3, 12, 0, 0, tzinfo='Etc/GMT-6')
             })
@@ -123,12 +121,11 @@ class TestCalendar(TestResourceCommon):
         super(TestCalendar, self).setUp()
 
     def test_get_work_hours_count(self):
-        self.env['resource.calendar.leaves'].create({
+        self.env['resource.public.leave'].create({
             'name': 'Global Time Off',
-            'resource_id': False,
-            'calendar_id': self.calendar_jean.id,
-            'date_from': datetime_str(2018, 4, 3, 0, 0, 0, tzinfo=self.jean.tz),
-            'date_to': datetime_str(2018, 4, 3, 23, 59, 59, tzinfo=self.jean.tz),
+            'calendar_ids': self.calendar_jean.ids,
+            'date_from': datetime_str(2018, 4, 3),
+            'date_to': datetime_str(2018, 4, 3),
         })
 
         self.env['resource.calendar.leaves'].create({

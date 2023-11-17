@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from datetime import datetime
+from datetime import date, datetime
 from dateutil.relativedelta import relativedelta
 from freezegun import freeze_time
 
@@ -180,11 +180,11 @@ class TestTimesheetHolidays(TestCommonTimesheet):
         leave_end_datetime = datetime(2022, 1, 28, 18, 0, 0, 0)
 
         # Create a public holiday
-        self.env['resource.calendar.leaves'].create({
+        self.env['resource.public.leave'].create({
             'name': 'Test',
-            'calendar_id': self.employee_working_calendar.id,
-            'date_from': datetime(2022, 1, 26, 7, 0, 0, 0),  # This is Wednesday and India Independence
-            'date_to': datetime(2022, 1, 26, 18, 0, 0, 0),
+            'calendar_ids': self.employee_working_calendar.ids,
+            'date_from': date(2022, 1, 26),  # This is Wednesday and India Independence
+            'date_to': date(2022, 1, 26),
         })
 
         holiday = self.Requests.with_user(self.user_employee).create({

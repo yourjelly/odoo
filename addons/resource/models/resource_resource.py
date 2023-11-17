@@ -33,6 +33,7 @@ class ResourceResource(models.Model):
         ('user', 'Human'),
         ('material', 'Material')], string='Type',
         default='user', required=True)
+    resource_link_model = fields.Char()
     user_id = fields.Many2one('res.users', string='User', help='Related user name for the resource to manage its access.')
     avatar_128 = fields.Image(compute='_compute_avatar_128')
     share = fields.Boolean(related='user_id.share')

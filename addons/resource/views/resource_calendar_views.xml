@@ -30,13 +30,18 @@
                 <sheet string="Working Time">
                     <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
                     <div class="oe_button_box" name="button_box">
-                        <button name="%(resource_calendar_leaves_action_from_calendar)d" type="action"
-                                icon="fa-plane"
-                                class="oe_stat_button"
-                                groups="base.group_no_one">
-                                <div class="o_field_widget o_stat_info">
-                                    <span class="o_stat_text">Time Off</span>
-                                </div>
+                        <field name="public_leave_ids" invisible="1"/>
+                        <button name="%(resource_public_leave_action_from_calendar)d" type="action"
+                            invisible="not public_leave_ids"
+                            icon="fa-sun-o" class="oe_stat_button">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_text">
+                                    <field name="public_leaves_count"/> Public
+                                </span>
+                                <span class="o_stat_text">
+                                    Leave(s)
+                                </span>
+                            </div>
                         </button>
                         <button name="%(resource_resource_action_from_calendar)d" type="action"
                                 icon="fa-cogs"

@@ -311,15 +311,14 @@ class HrEmployee(models.Model):
     @api.model
     def get_public_holidays_data(self, date_start, date_end):
         self = self._get_contextual_employee()
-        employee_tz = pytz.timezone(self._get_tz() if self else self.env.user.tz or 'utc')
         public_holidays = self._get_public_holidays(date_start, date_end).sorted('date_from')
         return list(map(lambda bh: {
             'id': -bh.id,
             'colorIndex': 0,
-            'end': datetime.combine(bh.date_to.astimezone(employee_tz), datetime.max.time()).isoformat(),
+            'end': bh.datetime_to.isoformat(),
             'endType': "datetime",
             'isAllDay': True,
-            'start': datetime.combine(bh.date_from.astimezone(employee_tz), datetime.min.time()).isoformat(),
+            'start': bh.datetime_from.isoformat(),
             'startType': "datetime",
             'title': bh.name,
         }, public_holidays))
@@ -334,8 +333,7 @@ class HrEmployee(models.Model):
 
     def _get_public_holidays(self, date_start, date_end):
         domain = [
-            ('resource_id', '=', False),
-            ('company_id', 'in', self.env.companies.ids),
+            ('company_ids', 'in', self.env.companies.ids),
             ('date_from', '<=', date_end),
             ('date_to', '>=', date_start),
         ]
@@ -344,11 +342,11 @@ class HrEmployee(models.Model):
         if not self._is_leave_user():
             domain += [
                 '|',
-                ('calendar_id', '=', False),
-                ('calendar_id', '=', self.resource_calendar_id.id),
+                ('calendar_ids', '=', False),
+                ('calendar_ids', 'in', self.resource_calendar_id.id),
             ]
 
-        return self.env['resource.calendar.leaves'].search(domain)
+        return self.env['resource.public.leave'].search(domain)
 
     @api.model
     def get_mandatory_days_data(self, date_start, date_end):

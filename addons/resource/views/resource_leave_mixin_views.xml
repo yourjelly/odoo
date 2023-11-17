@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_resource_leave_mixin_search" model="ir.ui.view">
+        <field name="name">resource.leave.mixin.search</field>
+        <field name="model">resource.leave.mixin</field>
+        <field name="arch" type="xml">
+            <search string="Search Working Period Time Off">
+                <field name="description"/>
+                <field name="resource_id"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <filter name="filter_date" date="date_from" default_period="this_year" string="Period"/>
+                <group expand="0" string="Group By">
+                    <filter string="Resource" name="resource" domain="[]" context="{'group_by':'resource_id'}"/>
+                    <filter string="Company" name="company" domain="[]" context="{'group_by':'company_id'}" groups="base.group_multi_company"/>
+                    <filter string="Date" name="leave_month" domain="[]" context="{'group_by':'date_from'}" help="Starting Date of Time Off"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_resource_leave_mixin_calendar" model="ir.ui.view">
+        <field name="name">resource.leave.mixin.calendar</field>
+        <field name="model">resource.leave.mixin</field>
+        <field name="arch" type="xml">
+            <calendar date_start="date_from" date_stop="date_to" mode="month" string="Resource" color="resource_id" event_limit="5">
+                <field name="resource_id" avatar_field="image_128" filters="1"/>
+                <field name="company_id"/>
+                <field name="description"/>
+            </calendar>
+        </field>
+    </record>
+
+    <record id="view_resource_leave_mixin_form" model="ir.ui.view">
+        <field name="name">resource.leave.mixin.form</field>
+        <field name="model">resource.leave.mixin</field>
+        <field name="arch" type="xml">
+            <form string="Time Off Detail">
+            <field name="company_id" invisible="1"/>
+            <sheet>
+                <group>
+                    <group name="leave_details">
+                        <field name="description"/>
+                        <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company"/>
+                        <field name="resource_id"/>
+                    </group>
+                    <group name="leave_dates">
+                        <field name="date_from" string="Dates" widget="daterange" options="{'end_date_field': 'date_to'}"/>
+                        <field name="date_to" invisible="1"/>
+                    </group>
+                </group>
+            </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_resource_leave_mixin_tree" model="ir.ui.view">
+        <field name="name">resource.leave.mixin.tree</field>
+        <field name="model">resource.leave.mixin</field>
+        <field name="priority">1</field>
+        <field name="arch" type="xml">
+            <tree string="Time Off Detail">
+                <field name="description"/>
+                <field name="resource_id" />
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+                <field name="date_from" />
+                <field name="date_to" />
+            </tree>
+        </field>
+    </record>
+</odoo>

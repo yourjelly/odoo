@@ -112,7 +112,7 @@ class LeaveReport(models.Model):
                         WHEN request.state IN ('validate1', 'validate') THEN 'taken'
                         WHEN request.state = 'confirm' THEN 'planned'
                     END as holiday_status,
-                    request.employee_company_id as company_id
+                    request.company_id as company_id
                 FROM hr_leave as request
                 INNER JOIN hr_employee as employee ON (request.employee_id = employee.id)
                 WHERE request.state IN ('confirm', 'validate', 'validate1')) leaves

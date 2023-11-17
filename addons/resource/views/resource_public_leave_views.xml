@@ -1,0 +1,68 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<odoo>
+    <record id="resource_public_leave_view_tree" model="ir.ui.view">
+        <field name="name">resource.public.leave.tree</field>
+        <field name="model">resource.public.leave</field>
+        <field name="mode">primary</field>
+        <field name="priority">10</field>
+        <field name="arch" type="xml">
+            <tree string="Public Holidays" editable="bottom">
+                <field name="name"/>
+                <field name="date_from"/>
+                <field name="date_to"/>
+                <field name="is_full_day" optional="hide"/>
+                <field name="hour_from" optional="hide"/>
+                <field name="hour_to" optional="hide"/>
+                <field name="company_ids" groups="base.group_multi_company"/>
+                <field name="allowed_calendar_ids" invisible="1"/>
+                <field name="resource_calendar_ids" optional="hide"/>
+                <field name="time_type" optional="hide"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="resource_public_leave_view_search" model="ir.ui.view">
+        <field name="name">resource.public.leave.search</field>
+        <field name="model">resource.public.leave</field>
+        <field name="arch" type="xml">
+            <search string="Search Public Holidays">
+                <field name="name"/>
+                <field name="date_from" />
+                <field name="date_to" />
+                <field name="is_full_day"/>
+                <field name="company_ids" groups="base.group_multi_company"/>
+                <field name="allowed_calendar_ids" invisible="1"/>
+                <field name="resource_calendar_ids"/>
+                <field name="time_type"/>
+                <filter name="filter_date" date="date_from" default_period="this_year" string="Period"/>
+                <group expand="0" string="Group By">
+                    <filter string="Company" name="company" domain="[]" context="{'group_by':'company_ids'}" groups="base.group_multi_company"/>
+                    <filter string="Calendar" name="calendar" domain="[]" context="{'group_by':'resource_calendar_ids'}"/>
+                    <filter string="Date" name="holiday_month" domain="[]" context="{'group_by':'date_from'}"/>
+                    <filter string="Time Type" name="time_type" domain="[]" context="{'group_by':'time_type'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_resource_public_leave" model="ir.actions.act_window">
+        <field name="name">Public Holidays</field>
+        <field name="res_model">resource.public.leave</field>
+        <field name="view_mode">tree</field>
+    </record>
+
+    <record id="resource_public_leave_action_from_calendar" model="ir.actions.act_window">
+        <field name="name">Public Holidays</field>
+        <field name="res_model">resource.public.leave</field>
+        <field name="view_mode">tree</field>
+        <field name="domain">[
+            '|',
+            ('resource_calendar_ids', 'in', active_id),
+            ('resource_calendar_ids', '=', False),
+        ]</field>
+        <field name="context">{
+            'default_resource_calendar_ids': [active_id],
+            'search_default_filter_date': True,
+        }</field>
+    </record>
+</odoo>

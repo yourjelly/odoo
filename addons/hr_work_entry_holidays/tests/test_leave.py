@@ -157,36 +157,6 @@ class TestWorkEntryLeave(TestWorkEntryHolidaysBase):
             # Work entries locked
             self.assertFalse(leave.can_cancel, "The leave should not be cancellable")
 
-    def test_work_entry_generation_company_time_off(self):
-        existing_leaves = self.env['hr.leave'].search([])
-        existing_leaves.action_refuse()
-        existing_leaves.action_draft()
-        existing_leaves.unlink()
-        start = date(2022, 8, 1)
-        end = date(2022, 8, 31)
-        self.contract_cdi.generate_work_entries(start, end)
-        work_entries = self.env['hr.work.entry'].search([
-            ('employee_id', '=', self.jules_emp.id),
-            ('date_start', '>=', start),
-            ('date_stop', '<=', end),
-        ])
-        self.assertEqual(len(work_entries.work_entry_type_id), 1)
-        leave = self.env['hr.leave'].create({
-            'name': 'Holiday!!!',
-            'holiday_type': 'company',
-            'mode_company_id': self.env.company.id,
-            'holiday_status_id': self.leave_type.id,
-            'request_date_from': datetime(2022, 8, 8),
-            'request_date_to': datetime(2022, 8, 8),
-        })
-        leave.action_validate()
-        work_entries = self.env['hr.work.entry'].search([
-            ('employee_id', '=', self.jules_emp.id),
-            ('date_start', '>=', start),
-            ('date_stop', '<=', end),
-        ])
-        self.assertEqual(len(work_entries.work_entry_type_id), 2)
-
     def test_time_off_duration_contract_state_change(self):
         # check that setting a contract without end state from
         # expired to running won't erase the time off duration

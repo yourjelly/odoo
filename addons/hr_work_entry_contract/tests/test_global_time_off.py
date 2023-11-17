@@ -3,7 +3,7 @@
 
 from .common import TestWorkEntryBase
 
-from datetime import datetime
+from datetime import date, datetime, time
 
 from odoo.tests import tagged
 
@@ -16,12 +16,12 @@ class TestGlobalTimeOff(TestWorkEntryBase):
         other_calendar = self.env['resource.calendar'].create({
             'name': 'other calendar',
         })
-        start = datetime(2018, 1, 1, 0, 0, 0)
-        end = datetime(2018, 1, 1, 23, 59, 59)
-        leave = self.env['resource.calendar.leaves'].create({
+        start = date(2018, 1, 1)
+        end = date(2018, 1, 1)
+        leave = self.env['resource.public.leave'].create({
             'date_from': start,
             'date_to': end,
-            'calendar_id': other_calendar.id,
+            'calendar_ids': other_calendar.ids,
             'work_entry_type_id': self.work_entry_type_leave.id,
         })
         contract = self.richard_emp.contract_ids
@@ -38,16 +38,16 @@ class TestGlobalTimeOff(TestWorkEntryBase):
         self.assertEqual(work_entries.work_entry_type_id, leave.work_entry_type_id)
 
     def test_gto_no_calendar(self):
-        start = datetime(2018, 1, 1, 0, 0, 0)
-        end = datetime(2018, 1, 1, 23, 59, 59)
-        leave = self.env['resource.calendar.leaves'].create({
+        start = date(2018, 1, 1)
+        end = date(2018, 1, 1)
+        leave = self.env['resource.public.leave'].create({
             'date_from': start,
             'date_to': end,
             'work_entry_type_id': self.work_entry_type_leave.id,
         })
         contract = self.richard_emp.contract_ids
         contract.state = 'open'
-        contract.date_generated_from = start
-        contract.date_generated_to = start
-        work_entries = contract.generate_work_entries(start.date(), end.date())
+        contract.date_generated_from = datetime.combine(start, time.min)
+        contract.date_generated_to = datetime.combine(start, time.min)
+        work_entries = contract.generate_work_entries(start, end)
         self.assertEqual(work_entries.work_entry_type_id, leave.work_entry_type_id)

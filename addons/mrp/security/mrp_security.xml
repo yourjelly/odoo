@@ -105,5 +105,12 @@
         <field name="domain_force">[('company_id', 'in', company_ids)]</field>
     </record>
 
+    <record model="ir.rule" id="mrp_resource_resource_leave">
+        <field name="name">resource_resource_leave workcenter leaves only</field>
+        <field name="model_id" search="model_resource_resource_leave')]" model="ir.model"/>
+        <field name="domain_force">[('resource_id.resource_link_model', '=', 'mrp.workcenter')]</field>
+        <field name="groups" eval="[(4, ref('mrp.group_mrp_user')), (4, ref('mrp.group_mrp_manager'))]"/>
+    </record>
+
 </data>
 </odoo>

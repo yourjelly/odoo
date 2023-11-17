@@ -8,7 +8,7 @@
                 <h3 class="mb32">Time Off Summary</h3>
                 <t t-set="info" t-value="get_header_info"/>
                 <h3 class="text-center mb32">
-                    Analyze from <u><t t-esc="info['start_date']"/></u> to <u><t t-esc="info['end_date']"/></u> of the <u><t t-esc="info['holiday_type']"/></u> Time Off.
+                    Analyze from <u><t t-esc="info['start_date']"/></u> to <u><t t-esc="info['end_date']"/></u> of the Time Off.
                 </h3>
 
                 <table class="table table-bordered mb32" style="table-layout:auto">

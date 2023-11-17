@@ -201,11 +201,11 @@ class TestWorkeEntryHolidaysWorkEntry(TestWorkEntryHolidaysBase):
             'is_leave': True,
             'code': 'LEAVETEST500'
         })
-        self.env['resource.calendar.leaves'].create({
+        self.env['resource.public.leave'].create({
             'name': 'Public Holiday',
-            'date_from': datetime(2023, 2, 6, 0, 0, 0),
-            'date_to': datetime(2023, 2, 7, 23, 59, 59),
-            'calendar_id': self.richard_emp.resource_calendar_id.id,
+            'date_from': date(2023, 2, 6),
+            'date_to': date(2023, 2, 7),
+            'calendar_ids': self.richard_emp.resource_calendar_id.ids,
             'work_entry_type_id': work_entry_type_holiday.id,
         })
         leave = self.env['hr.leave'].create({

@@ -65,7 +65,7 @@ class Holidays(models.Model):
         vals_list = []
         leave_ids = []
         for leave in self:
-            if leave.holiday_type != 'employee' or not leave.holiday_status_id.timesheet_generate:
+            if not leave.holiday_status_id.timesheet_generate:
                 continue
 
             if leave.holiday_status_id.company_id:

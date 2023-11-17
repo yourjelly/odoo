@@ -71,7 +71,7 @@ class HrContract(models.Model):
     def _get_sub_leave_domain(self):
         return [('calendar_id', 'in', [False] + self.resource_calendar_id.ids)]
 
-    def _get_leave_domain(self, start_dt, end_dt):
+    def _get_leave_domain(self, start_dt, end_dt):  # TODO BEDO
         domain = [
             ('resource_id', 'in', [False] + self.employee_id.resource_id.ids),
             ('date_from', '<=', end_dt),

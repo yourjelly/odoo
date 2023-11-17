@@ -2,7 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from collections import defaultdict
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from freezegun import freeze_time
 
 from odoo import Command
@@ -87,11 +87,11 @@ class TestTimesheetGlobalTimeOff(common.TransactionCase):
         leave_start_datetime = datetime(2021, 1, 4, 7, 0, 0, 0)  # This is a monday
         leave_end_datetime = datetime(2021, 1, 8, 18, 0, 0, 0)  # This is a friday
 
-        global_time_off = self.env['resource.calendar.leaves'].create({
+        global_time_off = self.env['resource.public.leave'].create({
             'name': 'Test',
-            'calendar_id': self.test_company.resource_calendar_id.id,
-            'date_from': leave_start_datetime,
-            'date_to': leave_end_datetime,
+            'calendar_ids': self.test_company.resource_calendar_id.ids,
+            'date_from': leave_start_datetime.date(),
+            'date_to': leave_end_datetime.date(),
         })
 
         # 5 Timesheets should have been created for full_time_employee and full_time_employee_2
@@ -119,11 +119,11 @@ class TestTimesheetGlobalTimeOff(common.TransactionCase):
         leave_start_datetime = today + timedelta(days=-today.weekday(), weeks=1)  # Next monday
         leave_end_datetime = leave_start_datetime + timedelta(days=5)  # Next friday
 
-        self.env['resource.calendar.leaves'].create({
+        self.env['resource.public.leave'].create({
             'name': 'Test',
-            'calendar_id': self.test_company.resource_calendar_id.id,
-            'date_from': leave_start_datetime,
-            'date_to': leave_end_datetime,
+            'calendar_ids': self.test_company.resource_calendar_id.ids,
+            'date_from': leave_start_datetime.date(),
+            'date_to': leave_end_datetime.date(),
         })
 
         # Create a global time-off in the same company (not specific a to calendar)
@@ -165,11 +165,11 @@ class TestTimesheetGlobalTimeOff(common.TransactionCase):
         leave_end_datetime = datetime(2021, 1, 8, 18, 0, 0, 0)  # This is a friday
         day_off = datetime(2021, 1, 6, 0, 0, 0)  # part_time_employee does not work on wednesday
 
-        self.env['resource.calendar.leaves'].create({
+        self.env['resource.public.leave'].create({
             'name': 'Test',
             'calendar_id': self.part_time_calendar.id,
-            'date_from': leave_start_datetime,
-            'date_to': leave_end_datetime,
+            'date_from': leave_start_datetime.date(),
+            'date_to': leave_end_datetime.date(),
         })
 
         # The total number of hours for the timesheet created should be equal to the
@@ -187,11 +187,11 @@ class TestTimesheetGlobalTimeOff(common.TransactionCase):
         leave_start_datetime = datetime(2021, 1, 4, 7, 0, 0, 0)  # This is a monday
         leave_end_datetime = datetime(2021, 1, 8, 18, 0, 0, 0)  # This is a friday
 
-        global_time_off = self.env['resource.calendar.leaves'].create({
+        global_time_off = self.env['resource.public.leave'].create({
             'name': 'Test',
-            'calendar_id': self.test_company.resource_calendar_id.id,
-            'date_from': leave_start_datetime,
-            'date_to': leave_end_datetime,
+            'calendar_ids': self.test_company.resource_calendar_id.ids,
+            'date_from': leave_start_datetime.date(),
+            'date_to': leave_end_datetime.date(),
         })
 
         # 5 Timesheets should have been created for full_time_employee and full_time_employee_2
@@ -199,12 +199,12 @@ class TestTimesheetGlobalTimeOff(common.TransactionCase):
         leave_task = self.test_company.leave_timesheet_task_id
 
         # Now we delete the calendar_id. The timesheets should be deleted too.
-        global_time_off.calendar_id = False
+        global_time_off.calendar_ids = False
 
         self.assertFalse(leave_task.timesheet_ids.ids)
 
         # Now we reset the calendar_id. The timesheets should be created and have the right value.
-        global_time_off.calendar_id = self.test_company.resource_calendar_id.id
+        global_time_off.calendar_ids = self.test_company.resource_calendar_id.ids
 
         timesheets_by_employee = self._get_timesheets_by_employee(leave_task)
         self.assertFalse(timesheets_by_employee.get(self.part_time_employee.id, False))
@@ -228,11 +228,11 @@ class TestTimesheetGlobalTimeOff(common.TransactionCase):
         leave_start_datetime = datetime(2021, 1, 4, 7, 0)  # This is a monday
         leave_end_datetime = datetime(2021, 1, 8, 18, 0)  # This is a friday
 
-        global_time_off = self.env['resource.calendar.leaves'].with_company(self.test_company).create({
+        global_time_off = self.env['resource.public.leave'].with_company(self.test_company).create({
             'name': 'Test',
-            'calendar_id': False,
-            'date_from': leave_start_datetime,
-            'date_to': leave_end_datetime,
+            'calendar_ids': False,
+            'date_from': leave_start_datetime.date(),
+            'date_to': leave_end_datetime.date(),
         })
 
         leave_task = self.test_company.leave_timesheet_task_id
@@ -265,11 +265,11 @@ class TestTimesheetGlobalTimeOff(common.TransactionCase):
             'name': 'Winterfell',
         })
 
-        self.env['resource.calendar.leaves'].with_company(new_company).create({
+        self.env['resource.public.leave'].with_company(new_company).create({
             'name': 'Test',
-            'calendar_id': False,
-            'date_from': leave_start_datetime,
-            'date_to': leave_end_datetime,
+            'calendar_ids': False,
+            'date_from': leave_start_datetime.date(),
+            'date_to': leave_end_datetime.date(),
         })
 
         leave_task = self.test_company.leave_timesheet_task_id
@@ -281,18 +281,16 @@ class TestTimesheetGlobalTimeOff(common.TransactionCase):
         self.assertEqual(leave_task.effective_hours, 0)
 
     def test_timesheet_creation_for_global_time_off_wo_calendar_in_batch(self):
-        self.env['resource.calendar.leaves'].with_company(self.test_company).create([{
+        self.env['resource.public.leave'].with_company(self.test_company).create([{
             'name': "Easter Monday",
-            'calendar_id': False,
-            'date_from': datetime(2022, 4, 18, 5, 0, 0),
-            'date_to': datetime(2022, 4, 18, 18, 0, 0),
-            'resource_id': False,
-            'time_type': "leave",
+            'calendar_ids': False,
+            'date_from': date(2022, 4, 18),
+            'date_to': date(2022, 4, 18),
         }, {
             'name': "Ascension Day",
-            'calendar_id': False,
-            'date_from': datetime(2022, 4, 26, 5, 0, 0),
-            'date_to': datetime(2022, 4, 26, 18, 0, 0),
+            'calendar_ids': False,
+            'date_from': date(2022, 4, 26),
+            'date_to': date(2022, 4, 26),
         }])
 
         # 2 Timesheets for 2 global leaves should have been created for current companies all calendar employees
@@ -349,29 +347,29 @@ class TestTimesheetGlobalTimeOff(common.TransactionCase):
                 'attendance_ids': attendance_ids_35h,
             }
         ])
-        gto_09_04, gto_09_11, gto_11_06, gto_11_13 = self.env['resource.calendar.leaves'].create([
+        gto_09_04, gto_09_11, gto_11_06, gto_11_13 = self.env['resource.public.leave'].create([
             {
-                'name': 'Global Time Off 4 Setpember',
-                'date_from': datetime(2023, 9, 4, 7, 0, 0, 0),
-                'date_to': datetime(2023, 9, 4, 18, 0, 0, 0),
+                'name': 'Global Time Off 4 September',
+                'date_from': date(2023, 9, 4),
+                'date_to': date(2023, 9, 4),
                 'calendar_id': calendar_40h.id,
             },
             {
-                'name': 'Global Time Off 11 Setpember',
-                'date_from': datetime(2023, 9, 11, 7, 0, 0, 0),
-                'date_to': datetime(2023, 9, 11, 18, 0, 0, 0),
+                'name': 'Global Time Off 11 September',
+                'date_from': date(2023, 9, 11),
+                'date_to': date(2023, 9, 11),
                 'calendar_id': calendar_35h.id,
             },
             {
                 'name': 'Global Time Off 6 November',
-                'date_from': datetime(2023, 11, 6, 7, 0, 0, 0),
-                'date_to': datetime(2023, 11, 6, 18, 0, 0, 0),
+                'date_from': date(2023, 11, 6),
+                'date_to': date(2023, 11, 6),
                 'calendar_id': calendar_40h.id,
             },
             {
                 'name': 'Global Time Off 13 November',
-                'date_from': datetime(2023, 11, 13, 7, 0, 0, 0),
-                'date_to': datetime(2023, 11, 13, 18, 0, 0, 0),
+                'date_from': date(2023, 11, 13),
+                'date_to': date(2023, 11, 13),
                 'calendar_id': calendar_35h.id,
             }
         ])

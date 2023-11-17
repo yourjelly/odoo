@@ -1,8 +1,8 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from collections import defaultdict
-from pytz import utc
+from pytz import UTC
+from datetime import datetime, time
 
 from odoo import api, fields, models
 from .utils import timezone_datetime
@@ -49,7 +49,10 @@ class ResourceMixin(models.AbstractModel):
         return super(ResourceMixin, self.with_context(check_idempotence=True)).create(vals_list)
 
     def _prepare_resource_values(self, vals, tz):
-        resource_vals = {'name': vals.get(self._rec_name)}
+        resource_vals = {
+            'name': vals.get(self._rec_name),
+            'resource_link_model': self.env.context.get('active_model'),
+        }
         if tz:
             resource_vals['tz'] = tz
         company_id = vals.get('company_id', self.env.company.id)
@@ -80,6 +83,15 @@ class ResourceMixin(models.AbstractModel):
 
     def _get_calendars(self, date_from=None):
         return {resource.id: resource.resource_calendar_id or resource.company_id.resource_calendar_id for resource in self}
+
+    def _get_unusual_days(self, date_from, date_to=None):
+        # Checking the calendar directly allows to not grey out the leaves taken
+        # by the resource or fallback to the company calendar
+        return (self.resource_calendar_id or self.env.company.resource_calendar_id)._get_unusual_days(
+            datetime.combine(fields.Date.from_string(date_from), time.min).replace(tzinfo=UTC),
+            datetime.combine(fields.Date.from_string(date_to), time.max).replace(tzinfo=UTC),
+            self.company_id,
+        )
 
     def _get_work_days_data_batch(self, from_datetime, to_datetime, compute_leaves=True, calendar=None, domain=None):
         """
@@ -188,9 +200,10 @@ class ResourceMixin(models.AbstractModel):
 
         # naive datetimes are made explicit in UTC
         if not from_datetime.tzinfo:
-            from_datetime = from_datetime.replace(tzinfo=utc)
+            from_datetime = from_datetime.replace(tzinfo=UTC)
         if not to_datetime.tzinfo:
-            to_datetime = to_datetime.replace(tzinfo=utc)
+            to_datetime = to_datetime.replace(tzinfo=UTC)
+
         compute_leaves = self.env.context.get('compute_leaves', True)
 
         for calendar, records in records_by_calendar.items():
@@ -212,7 +225,7 @@ class ResourceMixin(models.AbstractModel):
             `domain` is used in order to recognise the leaves to take,
             None means default value ('time_type', '=', 'leave')
 
-            Returns a list of tuples (day, hours, resource.calendar.leaves)
+            Returns a list of tuples (day, hours, record)
             for each leave in the calendar.
         """
         resource = self.resource_id
@@ -220,9 +233,9 @@ class ResourceMixin(models.AbstractModel):
 
         # naive datetimes are made explicit in UTC
         if not from_datetime.tzinfo:
-            from_datetime = from_datetime.replace(tzinfo=utc)
+            from_datetime = from_datetime.replace(tzinfo=UTC)
         if not to_datetime.tzinfo:
-            to_datetime = to_datetime.replace(tzinfo=utc)
+            to_datetime = to_datetime.replace(tzinfo=UTC)
 
         attendances = calendar._attendance_intervals_batch(from_datetime, to_datetime, resource)[resource.id]
         leaves = calendar._leave_intervals_batch(from_datetime, to_datetime, resource, domain)[resource.id]

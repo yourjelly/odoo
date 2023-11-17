@@ -51,57 +51,57 @@ class TestGlobalLeaves(TestHrHolidaysCommon):
             ]
         })
 
-        cls.global_leave = cls.env['resource.calendar.leaves'].create({
+        cls.global_leave = cls.env['resource.public.leave'].create({
             'name': 'Global Time Off',
             'date_from': date(2022, 3, 7),
             'date_to': date(2022, 3, 7),
         })
 
-        cls.calendar_leave = cls.env['resource.calendar.leaves'].create({
+        cls.calendar_leave = cls.env['resource.public.leave'].create({
             'name': 'Global Time Off',
             'date_from': date(2022, 3, 8),
             'date_to': date(2022, 3, 8),
-            'calendar_id': cls.calendar_1.id,
+            'calendar_ids': cls.calendar_1.ids,
         })
 
     def test_leave_on_global_leave(self):
         with self.assertRaises(ValidationError):
-            self.env['resource.calendar.leaves'].create({
+            self.env['resource.public.leave'].create({
                 'name': 'Wrong Time Off',
                 'date_from': date(2022, 3, 7),
                 'date_to': date(2022, 3, 7),
-                'calendar_id': self.calendar_1.id,
+                'calendar_ids': self.calendar_1.ids,
             })
 
         with self.assertRaises(ValidationError):
-            self.env['resource.calendar.leaves'].create({
+            self.env['resource.public.leave'].create({
                 'name': 'Wrong Time Off',
                 'date_from': date(2022, 3, 7),
                 'date_to': date(2022, 3, 7),
             })
 
     def test_leave_on_calendar_leave(self):
-        self.env['resource.calendar.leaves'].create({
-                'name': 'Correct Time Off',
-                'date_from': date(2022, 3, 8),
-                'date_to': date(2022, 3, 8),
-                'calendar_id': self.calendar_2.id,
-            })
+        self.env['resource.public.leave'].create({
+            'name': 'Correct Time Off',
+            'date_from': date(2022, 3, 8),
+            'date_to': date(2022, 3, 8),
+            'calendar_ids': self.calendar_2.ids,
+        })
 
         with self.assertRaises(ValidationError):
-            self.env['resource.calendar.leaves'].create({
+            self.env['resource.public.leave'].create({
                 'name': 'Wrong Time Off',
                 'date_from': date(2022, 3, 8),
                 'date_to': date(2022, 3, 8),
             })
 
-        with self.assertRaises(ValidationError):
-            self.env['resource.calendar.leaves'].create({
-                'name': 'Wrong Time Off',
-                'date_from': date(2022, 3, 8),
-                'date_to': date(2022, 3, 8),
-                'calendar_id': self.calendar_1.id,
-            })
+        # the leave should be able to be created as it's concerning a different calendar
+        self.env['resource.public.holiday'].create({
+            'name': 'Wrong Time Off',
+            'date_from': date(2022, 3, 8),
+            'date_to': date(2022, 3, 8),
+            'calendar_ids': self.calendar_1.ids,
+        })
 
     @freeze_time('2023-05-12')
     def test_global_leave_timezone(self):
@@ -111,25 +111,23 @@ class TestGlobalLeaves(TestHrHolidaysCommon):
         """
         calendar_asia = self.env['resource.calendar'].create({
             'name': 'Asia calendar',
-            'tz': 'Asia/Calcutta', # UTC +05:30
+            'tz': 'Asia/Calcutta',  # UTC +05:30
             'hours_per_day': 8.0,
             'attendance_ids': []
         })
         self.env.user.tz = 'Europe/Brussels'
-        global_leave = self.env['resource.calendar.leaves'].with_user(self.env.user).create({
+        global_leave = self.env['resource.public.leave'].with_user(self.env.user).create({
             'name': 'Public holiday',
-            'date_from': "2023-05-15 06:00:00", # utc from 8:00:00 for Europe/Brussels (UTC +02:00)
-            'date_to': "2023-05-15 15:00:00", # utc from 17:00:00 for Europe/Brussels (UTC +02:00)
-            'calendar_id': calendar_asia.id,
+            'date_from': '2023-05-15',
+            'date_to': '2023-05-15',
+            'is_full_day': False,
+            'hour_from': '8',
+            'hour_to': '17',
+            'calendar_ids': calendar_asia.ids,
         })
-        # Expectation:
-        # 6:00:00 in UTC (data from the browser) --> 8:00:00 for Europe/Brussel (UTC +02:00)
-        # 8:00:00 for Asia/Calcutta (UTC +05:30) --> 2:30:00 in UTC
-        self.assertEqual(global_leave.date_from, datetime(2023, 5, 15, 2, 30))
-        self.assertEqual(global_leave.date_to, datetime(2023, 5, 15, 11, 30))
-        # Note:
-        # The user in Europe/Brussels timezone see 4:30 and not 2:30 because he is in UTC +02:00.
-        # The user in Asia/Calcutta timezone (determined via the browser) see 8:00 because he is in UTC +05:30
+        # datetime unchanged whichever timezone we're in
+        self.assertEqual(global_leave.datetime_from, datetime(2023, 5, 15, 8))
+        self.assertEqual(global_leave.datetime_to, datetime(2023, 5, 15, 17))
 
     def test_global_leave_number_of_days_with_new(self):
         """

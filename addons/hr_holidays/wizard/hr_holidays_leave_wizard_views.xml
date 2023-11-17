@@ -1,0 +1,87 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<odoo>
+    <record id="hr_holidays_leave_wizard_view_form" model="ir.ui.view">
+        <field name="name">hr.holidays.leave.wizard.view.form</field>
+        <field name="model">hr.holidays.leave.wizard</field>
+        <field name="priority">32</field>
+        <field name="arch" type="xml">
+            <form string="Time Off Request" class="o_hr_leave_form">
+            <sheet>
+                <!-- <div class="alert alert-info" role="alert" invisible="not request_unit_hours or not tz_mismatch">
+                    <span>
+                        The employee has a different timezone than yours! Here dates and times are displayed in the employee's timezone
+                    </span>
+                    (<field name="tz"/>).
+                </div> -->
+                <!-- <field name="tz_mismatch" invisible="1"/> -->
+                <field name="leave_type_request_unit" invisible="1"/>
+                <div class="o_hr_leave_content row my-n4">
+                    <div class="o_hr_leave_column col_left col-md-6 col-12">
+                        <div name="title" class="o_hr_leave_title">
+                            <field name="employee_ids" force_save="1"/>
+                        </div>
+                        <!-- <field name="leave_type_increases_duration" invisible="True"/>
+                        <div name="duration_warning" invisible="not leave_type_increases_duration" class="alert alert-warning mb-0" role="alert">
+                            <span >You can only take this time off in whole days, so if your schedule has half days, it won't be used efficiently.</span>
+                        </div><br/> -->
+                        <group name="col_left">
+                            <field name="leave_type_id" force_save="1"
+                                options="{'no_create': True, 'no_open': True}"/>
+                            <field name="date_from" invisible="1"/>
+                            <field name="date_to" invisible="1"/>
+                            <field name="request_date_from" invisible="1"/>
+                            <field name="request_date_to" invisible="1"/>
+                            <label for="request_date_from" invisible="not request_unit_half and not request_unit_hours" string="Date"/>
+                            <label for="request_date_from" invisible="request_unit_half or request_unit_hours"/>
+                            <div class="o_row">
+                                <!-- full days: show date start/end with daterange -->
+                                <div class="o_row" invisible="request_unit_half or request_unit_hours">
+                                    <field
+                                        name="request_date_from"
+                                        widget="daterange"
+                                        required="not date_from or not date_to"
+                                        options="{'end_date_field': 'request_date_to'}"/>
+                                    <field name="request_date_to" invisible="1"/>
+                                </div>
+                                <!-- half day or custom hours: only show one date -->
+                                <div class="o_row" invisible="not request_unit_half and not request_unit_hours">
+                                    <field name="request_date_from" class="oe_inline" string="Date"/>
+                                    <field name="request_date_from_period" invisible="not request_unit_half" required="request_unit_half"/>
+                                </div>
+                                <div class="o_row o_row_readonly oe_edit_only" style="margin-left: -2px;" invisible="leave_type_request_unit == 'day'">
+                                    <field name="request_unit_half" class="oe_inline"/>
+                                    <label for="request_unit_half"/>
+                                    <field name="request_unit_hours" invisible="leave_type_request_unit != 'hour'" class="ms-5"/>
+                                    <label for="request_unit_hours" invisible="leave_type_request_unit != 'hour'"/>
+                                </div>
+                                <div class="o_row o_row_readonly" invisible="not request_unit_hours">
+                                    <label for="request_hour_from"/>
+                                    <field name="request_hour_from" required="request_unit_hours"/>
+                                    <label for="request_hour_to"/>
+                                    <field name="request_hour_to" required="request_unit_hours"/>
+                                </div>
+                            </div>
+
+                            <label for="number_of_days" string="Duration" invisible="request_unit_half and leave_type_request_unit != 'hour'"/>
+                            <div name="duration_display" invisible="request_unit_half and leave_type_request_unit != 'hour'">
+                                <div invisible="request_unit_half or request_unit_hours">
+                                    <field name="number_of_days" class="oe_inline"/>
+                                    <span class="ms-3">Days</span>
+                                </div>
+                                <div invisible="leave_type_request_unit != 'hour'" class="o_row">
+                                    <field name="number_of_hours"/>
+                                    <span class="ms-3">Hours</span>
+                                </div>
+                            </div>
+                            <field name="notes" widget="text" placeholder="Add a description..."/>
+                        </group>
+                        <div class="o_hr_leave_column col_right col-md-6 col-12">
+                            <widget name="hr_leave_stats"/>
+                        </div>
+                    </div>
+                </div>
+            </sheet>
+            </form>
+        </field>
+    </record>
+</odoo>

@@ -65,7 +65,7 @@ class MrpWorkorder(models.Model):
         compute='_compute_state', store=True,
         default='pending', copy=False, readonly=True, recursive=True, index=True)
     leave_id = fields.Many2one(
-        'resource.calendar.leaves',
+        'resource.resource.leave',
         help='Slot into workcenter calendar once planned',
         check_company=True, copy=False)
     date_start = fields.Datetime(
@@ -251,13 +251,13 @@ class MrpWorkorder(models.Model):
                 })
             elif wo.date_start:
                 wo.date_finished = wo._calculate_date_finished()
-                wo.leave_id = wo.env['resource.calendar.leaves'].create({
+                wo.leave_id = wo.env['resource.resource.leave'].create({
                     'name': wo.display_name,
-                    'calendar_id': wo.workcenter_id.resource_calendar_id.id,
                     'date_from': wo.date_start,
                     'date_to': wo.date_finished,
                     'resource_id': wo.workcenter_id.resource_id.id,
                     'time_type': 'other',
+                    'resource_model': 'mrp.workcenter',
                 })
 
     @api.constrains('blocked_by_workorder_ids')
@@ -530,13 +530,14 @@ class MrpWorkorder(models.Model):
         if best_date_finished == datetime.max:
             raise UserError(_('Impossible to plan the workorder. Please check the workcenter availabilities.'))
         # Create leave on chosen workcenter calendar
-        leave = self.env['resource.calendar.leaves'].create({
+        leave = self.env['resource.resource.leave'].create({
             'name': self.display_name,
-            'calendar_id': best_workcenter.resource_calendar_id.id,
+            # 'calendar_id': best_workcenter.resource_calendar_id.id, TODO BEDO
             'date_from': best_date_start,
             'date_to': best_date_finished,
             'resource_id': best_workcenter.resource_id.id,
-            'time_type': 'other'
+            'time_type': 'other',
+            'resource_model': 'mrp.workcenter',
         })
         vals['leave_id'] = leave.id
         self.write(vals)
@@ -614,13 +615,14 @@ class MrpWorkorder(models.Model):
                 'date_start': date_start,
             }
             if not wo.leave_id:
-                leave = self.env['resource.calendar.leaves'].create({
+                leave = self.env['resource.resource.leave'].create({
                     'name': wo.display_name,
-                    'calendar_id': wo.workcenter_id.resource_calendar_id.id,
+                    # 'calendar_id': wo.workcenter_id.resource_calendar_id.id, # TODO BEDO
                     'date_from': date_start,
                     'date_to': date_start + relativedelta(minutes=wo.duration_expected),
                     'resource_id': wo.workcenter_id.resource_id.id,
-                    'time_type': 'other'
+                    'time_type': 'other',
+                    'resource_model': 'mrp.workcenter',
                 })
                 vals['date_finished'] = leave.date_to
                 vals['leave_id'] = leave.id

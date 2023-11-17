@@ -1,7 +1,5 @@
-# -*- coding:utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from collections import defaultdict
 from datetime import datetime, time
 from dateutil.relativedelta import relativedelta
 
@@ -11,19 +9,34 @@ from odoo.osv.expression import AND
 from odoo.tools import format_date
 
 
-class HrLeaveType(models.Model):
-    _inherit = 'hr.leave.type'
-
-    work_entry_type_id = fields.Many2one('hr.work.entry.type', string='Work Entry Type')
-
-
 class HrLeave(models.Model):
     _inherit = 'hr.leave'
 
-    def _prepare_resource_leave_vals(self):
-        vals = super(HrLeave, self)._prepare_resource_leave_vals()
-        vals['work_entry_type_id'] = self.holiday_status_id.work_entry_type_id.id
-        return vals
+    def _compute_resource_calendar_id(self):
+        super()._compute_resource_calendar_id()
+        for leave in self:
+            # We use the request dates to find the contracts, because date_from
+            # and date_to are not set yet at this point. Since these dates are
+            # used to get the contracts for which these leaves apply and
+            # contract start- and end-dates are just dates (and not datetimes)
+            # these dates are comparable.
+            if leave.employee_id:
+                contracts = self.env['hr.contract'].search([
+                    '|',
+                        ('state', 'in', ['open', 'close']),
+                        '&',
+                            ('state', '=', 'draft'),
+                            ('kanban_state', '=', 'done'),
+                    ('employee_id', '=', leave.employee_id.id),
+                    ('date_start', '<=', leave.request_date_to),
+                    '|',
+                        ('date_end', '=', False),
+                        ('date_end', '>=', leave.request_date_from),
+                ])
+                if contracts:
+                    # If there are more than one contract they should all have the
+                    # same calendar, otherwise a constraint is violated.
+                    leave.resource_calendar_id = contracts[:1].resource_calendar_id
 
     def _cancel_work_entry_conflict(self):
         """
@@ -108,7 +121,7 @@ class HrLeave(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        if any(vals.get('holiday_type', 'employee') == 'employee' and not vals.get('multi_employee', False) and not vals.get('employee_id', False) for vals in vals_list):
+        if any(not vals.get('employee_id', False) for vals in vals_list):
             raise ValidationError(_("There is no employee set on the time off. Please make sure you're logged in the correct company."))
         employee_ids = {v['employee_id'] for v in vals_list if v.get('employee_id')}
         # We check a whole day before and after the interval of the earliest

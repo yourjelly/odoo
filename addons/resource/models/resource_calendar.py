@@ -27,7 +27,7 @@ class ResourceCalendar(models.Model):
 
      - attendance_ids: list of resource.calendar.attendance that are a working
                        interval in a given weekday.
-     - leave_ids: list of leaves linked to this calendar. A leave can be general
+     - public_leave_ids: list of leaves linked to this calendar. A leave can be general
                   or linked to a specific resource, depending on its resource_id.
 
     All methods in this class use intervals. An interval is a tuple holding
@@ -85,13 +85,6 @@ class ResourceCalendar(models.Model):
     attendance_ids = fields.One2many(
         'resource.calendar.attendance', 'calendar_id', 'Working Time',
         compute='_compute_attendance_ids', store=True, readonly=False, copy=True)
-    leave_ids = fields.One2many(
-        'resource.calendar.leaves', 'calendar_id', 'Time Off')
-    global_leave_ids = fields.One2many(
-        'resource.calendar.leaves', 'calendar_id', 'Global Time Off',
-        compute='_compute_global_leave_ids', store=True, readonly=False,
-        domain=[('resource_id', '=', False)], copy=True,
-    )
     hours_per_day = fields.Float("Average Hour per Day", store=True, compute="_compute_hours_per_day", digits=(2, 2),
                                  help="Average hours per day a resource is supposed to work with this calendar.")
     tz = fields.Selection(
@@ -101,6 +94,14 @@ class ResourceCalendar(models.Model):
     tz_offset = fields.Char(compute='_compute_tz_offset', string='Timezone offset')
     two_weeks_calendar = fields.Boolean(string="Calendar in 2 weeks mode")
     two_weeks_explanation = fields.Char('Explanation', compute="_compute_two_weeks_explanation")
+    public_leave_ids = fields.Many2many(
+        comodel_name='resource.public.leave',
+        relation='calendar_ids',
+        string='Public Holidays',
+        compute='_compute_public_holidays', store=True, readonly=False,
+        domain=[('resource_id', '=', False)], copy=True,
+    )
+    public_leaves_count = fields.Integer(string="Public Leaves Count", compute='_compute_public_leaves_count')
 
     @api.depends('attendance_ids', 'attendance_ids.hour_from', 'attendance_ids.hour_to', 'two_weeks_calendar')
     def _compute_hours_per_day(self):
@@ -119,18 +120,28 @@ class ResourceCalendar(models.Model):
                     (0, 0, attendance._copy_attendance_vals()) for attendance in company_calendar.attendance_ids if not attendance.resource_id]
             })
 
-    @api.depends('company_id')
-    def _compute_global_leave_ids(self):
-        for calendar in self.filtered(lambda c: not c._origin or c._origin.company_id != c.company_id):
-            calendar.update({
-                'global_leave_ids': [(5, 0, 0)] + [
-                    (0, 0, leave._copy_leave_vals()) for leave in calendar.company_id.resource_calendar_id.global_leave_ids]
-            })
-
     @api.depends('tz')
     def _compute_tz_offset(self):
         for calendar in self:
             calendar.tz_offset = datetime.now(timezone(calendar.tz or 'GMT')).strftime('%z')
+
+    @api.depends('company_id')
+    def _compute_public_leaves(self):
+        public_leaves = self.env['resource.public.leave'].search([
+            ('resource_calendar_ids', 'in', [False, *self.ids]),
+            ('company_ids', 'in', [False, *self.company_id.ids]),
+        ])
+        for calendar in self:
+            for public_leave in public_leaves:
+                if calendar in public_leave.calendar_ids\
+                        or (not public_leave.calendar_ids and calendar.company_id in public_leave.company_ids)\
+                        or (not public_leave.calendar_ids and not public_leave.company_ids):
+                    calendar.public_leave_ids |= public_leave
+
+    @api.depends('public_leave_ids')
+    def _compute_public_leaves_count(self):
+        for calendar in self:
+            calendar.public_leaves_count = len(calendar.public_leaves_ids)
 
     def copy_data(self, default=None):
         vals_list = super().copy_data(default=default)
@@ -151,8 +162,11 @@ class ResourceCalendar(models.Model):
         week_type_str = _("second") if week_type else _("first")
         first_day = date_utils.start_of(today, 'week')
         last_day = date_utils.end_of(today, 'week')
-        self.two_weeks_explanation = _("The current week (from %s to %s) correspond to the  %s one.", first_day,
-                                       last_day, week_type_str)
+        self.two_weeks_explanation = _(
+            "The current week (from %(first_day)s to %(last_day)s) correspond to the  %(week_type_str)s one.",
+            first_day=first_day,
+            last_day=last_day,
+            week_type_str=week_type_str)
 
     def _get_global_attendances(self):
         return self.attendance_ids.filtered(lambda attendance:
@@ -335,7 +349,6 @@ class ResourceCalendar(models.Model):
                 else:
                     base_result.append((day_from, day_to, attendance))
 
-
         # Copy the result localized once per necessary timezone
         # Strictly speaking comparing start_dt < time or start_dt.astimezone(tz) < time
         # should always yield the same result. however while working with dates it is easier
@@ -360,62 +373,60 @@ class ResourceCalendar(models.Model):
                     result_per_resource_id[resource.id] = res_intervals
         return result_per_resource_id
 
-    def _leave_intervals(self, start_dt, end_dt, resource=None, domain=None, tz=None):
-        if resource is None:
-            resource = self.env['resource.resource']
-        return self._leave_intervals_batch(
-            start_dt, end_dt, resources=resource, domain=domain, tz=tz
-        )[resource.id]
-
-    def _leave_intervals_batch(self, start_dt, end_dt, resources=None, domain=None, tz=None, any_calendar=False):
+    def _leave_intervals_batch(self, start_dt, end_dt, resources=None, domain=None, tz=None, any_calendar=False):  # TODO BEDO
         """ Return the leave intervals in the given datetime range.
             The returned intervals are expressed in specified tz or in the calendar's timezone.
         """
         assert start_dt.tzinfo and end_dt.tzinfo
         self.ensure_one()
-
-        if not resources:
-            resources = self.env['resource.resource']
-            resources_list = [resources]
-        else:
-            resources_list = list(resources) + [self.env['resource.resource']]
-        if domain is None:
-            domain = [('time_type', '=', 'leave')]
-        if not any_calendar:
-            domain = domain + [('calendar_id', 'in', [False, self.id])]
-        # for the computation, express all datetimes in UTC
-        # Public leave don't have a resource_id
-        domain = domain + [
-            ('resource_id', 'in', [False] + [r.id for r in resources_list]),
-            ('date_from', '<=', datetime_to_string(end_dt)),
-            ('date_to', '>=', datetime_to_string(start_dt)),
-        ]
-
-        # retrieve leave intervals in (start_dt, end_dt)
-        result = defaultdict(lambda: [])
+        resources_list = [self.env['resource.resource']]
+        if resources:
+            resources_list += list(resources)
         tz_dates = {}
-        all_leaves = self.env['resource.calendar.leaves'].search(domain)
-        for leave in all_leaves:
-            leave_resource = leave.resource_id
-            leave_company = leave.company_id
-            leave_date_from = leave.date_from
-            leave_date_to = leave.date_to
+        result = defaultdict(lambda: [])
+
+        def get_timezoned_date(target_date, tz):
+            if (tz, target_date) not in tz_dates:
+                tz_dates[(tz, target_date)] = target_date.astimezone(tz)
+            return tz_dates[(tz, target_date)]
+
+        if resources:
+            leave_models = self.env['resource.leave.mixin']._get_leave_models()
+            resource_leaves = []
+            for leave_model in leave_models:
+                resource_leaves |= list(self.env[leave_model].search([
+                    ('resource_id', 'in', resources.ids),
+                    ('time_type', '=', 'leave'),
+                ]))
+
+            # retrieve leave intervals in (start_dt, end_dt) TODO BEDO
+            for leave in resource_leaves:
+                leave_resource = leave.resource_id
+                leave_date_from = leave.date_from
+                leave_date_to = leave.date_to
+                tz = tz if tz else timezone(leave_resource.tz)
+                start = get_timezoned_date(start_dt, tz)
+                end = get_timezoned_date(end_dt, tz)
+                result[leave_resource.id].append((max(start, leave_date_from), min(end, leave_date_to), leave))
+
+        public_leaves_domain = domain or [('time_type', '=', 'leave')]
+        if not any_calendar:
+            public_leaves_domain += [('resource_calendar_ids', 'in', [False, self.id])]
+        public_leaves_domain += [
+            ('datetime_from', '<=', end_dt),
+            ('datetime_to', '>=', start_dt),
+        ]
+        public_leaves = self.env['resource.public.leave'].search(public_leaves_domain)
+
+        for leave in public_leaves:
+            leave_date_from = leave.datetime_from
+            leave_date_to = leave.datetime_to
             for resource in resources_list:
-                if leave_resource.id not in [False, resource.id] or (not leave_resource and resource and resource.company_id != leave_company):
-                    continue
                 tz = tz if tz else timezone((resource or self).tz)
-                if (tz, start_dt) in tz_dates:
-                    start = tz_dates[(tz, start_dt)]
-                else:
-                    start = start_dt.astimezone(tz)
-                    tz_dates[(tz, start_dt)] = start
-                if (tz, end_dt) in tz_dates:
-                    end = tz_dates[(tz, end_dt)]
-                else:
-                    end = end_dt.astimezone(tz)
-                    tz_dates[(tz, end_dt)] = end
-                dt0 = string_to_datetime(leave_date_from).astimezone(tz)
-                dt1 = string_to_datetime(leave_date_to).astimezone(tz)
+                start = get_timezoned_date(start_dt, tz)
+                end = get_timezoned_date(end_dt, tz)
+                dt0 = get_timezoned_date(string_to_datetime(leave_date_from), tz)
+                dt1 = get_timezoned_date(string_to_datetime(leave_date_to), tz)
                 result[resource.id].append((max(start, dt0), min(end, dt1), leave))
 
         return {r.id: Intervals(result[r.id]) for r in resources_list}
@@ -596,7 +607,7 @@ class ResourceCalendar(models.Model):
     def get_work_hours_count(self, start_dt, end_dt, compute_leaves=True, domain=None):
         """
             `compute_leaves` controls whether or not this method is taking into
-            account the global leaves.
+            account the public leaves.
 
             `domain` controls the way leaves are recognized.
             None means default value ('time_type', '=', 'leave')
@@ -647,7 +658,7 @@ class ResourceCalendar(models.Model):
     def plan_hours(self, hours, day_dt, compute_leaves=False, domain=None, resource=None):
         """
         `compute_leaves` controls whether or not this method is taking into
-        account the global leaves.
+        account the public leaves.
 
         `domain` controls the way leaves are recognized.
         None means default value ('time_type', '=', 'leave')
@@ -692,7 +703,7 @@ class ResourceCalendar(models.Model):
     def plan_days(self, days, day_dt, compute_leaves=False, domain=None):
         """
         `compute_leaves` controls whether or not this method is taking into
-        account the global leaves.
+        account the public leaves.
 
         `domain` controls the way leaves are recognized.
         None means default value ('time_type', '=', 'leave')

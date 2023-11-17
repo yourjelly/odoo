@@ -1,14 +1,8 @@
-# -*- coding: utf-8 -*-
-# Part of Odoo. See LICENSE file for full copyright and licensing details.
-
-# Copyright (c) 2005-2006 Axelor SARL. (http://www.axelor.com)
-
 from datetime import datetime, date, time
 from dateutil.relativedelta import relativedelta
 
-from odoo import api, fields, models, _
+from odoo import api, Command, fields, models, _
 from odoo.addons.resource.models.utils import HOURS_PER_DAY
-from odoo.addons.hr_holidays.models.hr_leave import get_employee_from_context
 from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.tools.float_utils import float_round
 from odoo.tools.date_utils import get_timedelta
@@ -576,12 +570,20 @@ class HolidaysAllocation(models.Model):
     # ORM Overrides methods
     ####################################################
 
+    def get_employee_from_context(values, context, user_employee_id):
+        employee_ids_list = [value[2]
+            for value in values.get('employee_ids', [])
+            if len(value) == 3 and value[0] == Command.SET]
+        employee_ids = employee_ids_list[-1] if employee_ids_list else []
+        employee_id_value = employee_ids[0] if employee_ids else False
+        return employee_id_value or context.get('default_employee_id', context.get('employee_id', user_employee_id))
+
     def onchange(self, values, field_names, fields_spec):
         # Try to force the leave_type display_name when creating new records
         # This is called right after pressing create and returns the display_name for
         # most fields in the view.
         if values and 'employee_id' in fields_spec and 'employee_id' not in self._context:
-            employee_id = get_employee_from_context(values, self._context, self.env.user.employee_id.id)
+            employee_id = self.get_employee_from_context(values, self._context, self.env.user.employee_id.id)
             self = self.with_context(employee_id=employee_id)
         return super().onchange(values, field_names, fields_spec)
 

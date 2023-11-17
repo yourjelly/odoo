@@ -205,7 +205,7 @@ class Employee(models.Model):
                 .get_work_duration_data(
                     max(date_from, contract_start),
                     min(date_to, contract_end),
-                    domain=[('company_id', 'in', [False, contract.company_id.id])])
+                    domain=[('company_ids', 'in', [False, contract.company_id.id])])
             duration_data['days'] += contract_duration_data['days']
             duration_data['hours'] += contract_duration_data['hours']
         return duration_data
@@ -214,7 +214,6 @@ class Employee(models.Model):
         res = super().write(vals)
         if vals.get('contract_id'):
             for employee in self:
-                employee.resource_calendar_id.transfer_leaves_to(employee.contract_id.resource_calendar_id, employee.resource_id)
                 if employee.resource_calendar_id:
                     employee.resource_calendar_id = employee.contract_id.resource_calendar_id
         return res

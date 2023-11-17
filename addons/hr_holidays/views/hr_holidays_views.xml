@@ -108,8 +108,8 @@
 
     <menuitem
         id="hr_holidays_public_time_off_menu_configuration"
-        action="open_view_public_holiday"
-        name="Public Holidays"
+        action="resource.action_resource_public_leave"
+        name="Public Leaves"
         parent="menu_hr_holidays_configuration"
         groups="hr_holidays.group_hr_holidays_manager"
         sequence="3"/>

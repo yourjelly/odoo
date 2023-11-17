@@ -38,11 +38,11 @@ class Employee(models.Model):
         return result
 
     def _delete_future_public_holidays_timesheets(self):
-        future_timesheets = self.env['account.analytic.line'].sudo().search([('global_leave_id', '!=', False), ('date', '>=', fields.date.today()), ('employee_id', 'in', self.ids)])
-        future_timesheets.write({'global_leave_id': False})
+        future_timesheets = self.env['account.analytic.line'].sudo().search([('public_leave_id', '!=', False), ('date', '>=', fields.date.today()), ('employee_id', 'in', self.ids)])
+        future_timesheets.write({'public_leave_id': False})
         future_timesheets.unlink()
 
-    def _create_future_public_holidays_timesheets(self, employees):
+    def _create_future_public_holidays_timesheets(self, employees):  # TODO BEDO
         lines_vals = []
         today = fields.Datetime.today()
         global_leaves_wo_calendar = defaultdict(lambda: self.env["resource.calendar.leaves"])
@@ -50,14 +50,14 @@ class Employee(models.Model):
             [('calendar_id', '=', False), ('date_from', '>=', today)],
             groupby=['company_id'],
             aggregates=['id:recordset'],
-        )))
+        )))  # TODO BEDO
         for employee in employees:
             if not employee.active:
                 continue
             # First we look for the global time off that are already planned after today
-            global_leaves = employee.resource_calendar_id.global_leave_ids.filtered(lambda l: l.date_from >= today) + global_leaves_wo_calendar[employee.company_id]
-            work_hours_data = global_leaves._work_time_per_day()
-            for global_time_off in global_leaves:
+            public_leaves = employee.resource_calendar_id.public_holiday_ids.filtered(lambda l: l.date_from >= today) + global_leaves_wo_calendar[employee.company_id]
+            work_hours_data = public_leaves._work_time_per_day()
+            for global_time_off in public_leaves:
                 for index, (day_date, work_hours_count) in enumerate(work_hours_data[employee.resource_calendar_id.id][global_time_off.id]):
                     lines_vals.append(
                         global_time_off._timesheet_prepare_line_values(

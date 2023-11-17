@@ -7,10 +7,10 @@ from pytz import timezone, utc
 from odoo import api, fields, models, _
 
 
-class ResourceCalendarLeaves(models.Model):
+class ResourceCalendarLeaves(models.Model):  # TODO BEDO
     _inherit = "resource.calendar.leaves"
 
-    timesheet_ids = fields.One2many('account.analytic.line', 'global_leave_id', string="Analytic Lines")
+    timesheet_ids = fields.One2many('account.analytic.line', 'public_leave_id', string="Analytic Lines")
 
     def _get_resource_calendars(self):
         leaves_with_calendar = self.filtered('calendar_id')
@@ -189,7 +189,7 @@ class ResourceCalendarLeaves(models.Model):
             'unit_amount': work_hours_count,
             'user_id': employee_id.user_id.id,
             'date': day_date,
-            'global_leave_id': self.id,
+            'public_leave_id': self.id,
             'employee_id': employee_id.id,
             'company_id': employee_id.company_id.id,
         }
@@ -246,7 +246,7 @@ class ResourceCalendarLeaves(models.Model):
             global_time_off_updated = self.filtered(lambda r: (date_from is not None and r.date_from != date_from) or (date_to is not None and r.date_to != date_to) or (calendar_id is None or r.calendar_id.id != calendar_id))
             timesheets = global_time_off_updated.sudo().timesheet_ids
             if timesheets:
-                timesheets.write({'global_leave_id': False})
+                timesheets.write({'public_leave_id': False})
                 timesheets.unlink()
         result = super(ResourceCalendarLeaves, self).write(vals)
         global_time_off_updated and global_time_off_updated.sudo()._generate_timesheeets()
