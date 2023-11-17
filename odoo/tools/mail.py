@@ -174,6 +174,38 @@ def tag_quote(el):
     if el.getparent() is not None and (el.getparent().get('data-o-mail-quote') or el.getparent().get('data-o-mail-quote-container')) and not el.getparent().get('data-o-mail-quote-node'):
         el.set('data-o-mail-quote', '1')
 
+def remove_element(element):
+    """Remove an element from an element tree but keep its text and children in place."""
+    parent = element.getparent()
+    children = element.getchildren()
+    parent.remove(element)
+
+    previous = element.getprevious()
+    if element.text:
+        if previous:
+            origin_text = f"{previous.tail} " if previous.tail else ''
+            previous.tail = origin_text + element.text
+        else:
+            origin_text = f"{parent.text} " if parent.tail else ''
+            parent.text = origin_text + element.text
+
+    if element.tail:
+        if children:
+            origin_text = f"{children[-1].tail} " if children[-1].tail else ''
+            children[-1].tail = origin_text + element.tail
+        else:
+            origin_text = f"{parent.tail} " if parent.tail else ''
+            parent.text = origin_text + element.tail
+
+    if children:
+        if not previous:
+            child = children.pop(0)
+            parent.append(child)
+            previous = child
+        while children:
+            child = children.pop(0)
+            previous.addnext(child)
+            previous = child
 
 def html_normalize(src, filter_callback=None):
     """ Normalize `src` for storage as an html field value.
@@ -198,9 +230,23 @@ def html_normalize(src, filter_callback=None):
     doctype = re.compile(r'(<[^>]*\s)(encoding=(["\'][^"\']*?["\']|[^\s\n\r>]+)(\s[^>]*|/)?>)', re.IGNORECASE | re.DOTALL)
     src = doctype.sub(u"", src)
 
+    src = src.replace('--!>', '-->')
+    src = re.sub(r'(<!-->|<!--->)', '<!-- -->', src)
+
+    # remove namespace prefixes to avoid the html parser 'fixing' non-html elements
+    # e.g. <o:p> should not become <p> but just be ignored
     try:
-        src = src.replace('--!>', '-->')
-        src = re.sub(r'(<!-->|<!--->)', '<!-- -->', src)
+        doc = etree.fromstring(src, etree.XMLParser(recover=True))
+    except etree.ParseError:
+        pass
+    else:
+        root = doc.getroottree()
+        for element in root.getiterator():
+            if ':' in element.tag:
+                remove_element(element)
+        src = etree.tostring(root, method='html')
+
+    try:
         doc = html.fromstring(src)
     except etree.ParserError as e:
         # HTML comment only string, whitespace only..
