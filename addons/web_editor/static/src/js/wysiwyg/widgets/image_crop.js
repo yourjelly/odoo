@@ -21,6 +21,7 @@ export class ImageCrop extends Component {
         activeOnStart: { type: Boolean, optional: true },
         media: { optional: true },
         mimetype: { type: String, optional: true },
+        sidebarCropButtons: NodeList,
     };
     static defaultProps = {
         activeOnStart: false,
@@ -56,6 +57,15 @@ export class ImageCrop extends Component {
             if (this.props.activeOnStart) {
                 this.state.active = true;
                 await this._show(this.props);
+            }
+            if (this.props.sidebarCropButtons?.length) {
+                this.elRef.el.querySelector(".o_we_crop_buttons").classList.toggle("d-none");
+                this.props.sidebarCropButtons.forEach(btn => {
+                    btn.addEventListener('click', (ev) => {
+                        const targetButton = ev.target.nodeName === 'WE-BUTTON' ? ev.target : ev.target.closest('.o_we_user_value_widget.cropBtn');
+                        targetButton && this._onCropOptionClick(targetButton.dataset);
+                    });
+                });
             }
             this.mountedResolve();
         });
@@ -233,7 +243,7 @@ export class ImageCrop extends Component {
      * @param {MouseEvent} ev
      */
     _onCropOptionClick(ev) {
-        const {action, value, scaleDirection} = ev.currentTarget.dataset;
+        const {action, value, scaleDirection} = ev.currentTarget ? ev.currentTarget.dataset : ev;
         switch (action) {
             case 'ratio':
                 this.$cropperImage.cropper('reset');
@@ -242,6 +252,7 @@ export class ImageCrop extends Component {
                 break;
             case 'zoom':
             case 'reset':
+                this.$cropperImage.cropper('setAspectRatio',0);
                 this.$cropperImage.cropper(action, value);
                 break;
             case 'rotate':

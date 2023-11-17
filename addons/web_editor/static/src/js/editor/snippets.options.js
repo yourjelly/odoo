@@ -3871,6 +3871,13 @@ const SnippetOptionWidget = Widget.extend({
             }
             el.querySelector('.o_we_collapse_toggler').classList.toggle('d-none', hasNoVisibleElInCollapseMenu);
         }
+
+        for(const el of this.$el.parent().children()){
+            const classNames = el.classList
+            if(classNames.contains("snippet-option-CropTools")){
+                classNames.add("d-none");
+            }
+        }
     },
 
     //--------------------------------------------------------------------------
@@ -6407,17 +6414,29 @@ registry.ImageTools = ImageHandlerOption.extend({
      * @see this.selectClass for parameters
      */
     async crop() {
+        const siblingNodes = this.$el.parent().children();
+        let sidebarCropButtons;
+        for(const child of siblingNodes){
+            if(child.tagName === "WE-CUSTOMIZEBLOCK-OPTION" && !child.classList.contains("snippet-option-CropTools")){
+                child.classList.add("d-none")
+            } else {
+                child.classList.remove("d-none")
+                sidebarCropButtons = child;
+            }
+        }
         this.trigger_up('hide_overlay');
         this.trigger_up('disable_loading_effect');
         const img = this._getImg();
-        const document = this.$el[0].ownerDocument;
+        const document = this.ownerDocument;
         const imageCropWrapperElement = document.createElement('div');
         document.body.append(imageCropWrapperElement);
+        sidebarCropButtons = sidebarCropButtons.querySelectorAll('WE-BUTTON');
         const imageCropWrapper = await attachComponent(this, imageCropWrapperElement, ImageCrop, {
             rpc: this.rpc,
             activeOnStart: true,
             media: img,
             mimetype: this._getImageMimetype(img),
+            sidebarCropButtons: sidebarCropButtons,
         });
 
         await new Promise(resolve => {
@@ -6432,6 +6451,11 @@ registry.ImageTools = ImageHandlerOption.extend({
         imageCropWrapperElement.remove();
         imageCropWrapper.destroy();
         this.trigger_up('enable_loading_effect');
+        for(const child of siblingNodes){
+            if(child.tagName === "WE-CUSTOMIZEBLOCK-OPTION" && !child.classList.contains("snippet-option-CropTools")){
+                child.classList.remove("d-none")
+            }
+        }
     },
     /**
      * Displays the image transformation tools
