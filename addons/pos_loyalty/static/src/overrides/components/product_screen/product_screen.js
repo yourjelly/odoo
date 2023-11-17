@@ -38,7 +38,7 @@ patch(ProductScreen.prototype, {
             !selectedLine.manual_reward &&
             (key === "Backspace" || key === "Delete")
         ) {
-            const reward = this.pos.reward_by_id[selectedLine.reward_id];
+            const reward = this.pos.models["loyalty.reward"].get(selectedLine.reward_id);
             const confirmed = await ask(this.dialog, {
                 title: _t("Deactivating reward"),
                 body: _t(

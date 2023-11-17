@@ -4,15 +4,12 @@ import { Order, Payment } from "@point_of_sale/app/store/models";
 import { floatIsZero } from "@web/core/utils/numbers";
 
 patch(Order.prototype, {
-    async update_online_payments_data_with_server(orm, next_online_payment_amount) {
+    async update_online_payments_data_with_server(next_online_payment_amount) {
         if (!this.server_id) {
             return false;
         }
         try {
-            const opData = await orm.call("pos.order", "get_and_set_online_payments_data", [
-                this.server_id,
-                next_online_payment_amount,
-            ]);
+            const opData = await this.pos.data.call("pos.order", "get_and_set_online_payments_data", [this.server_id, next_online_payment_amount]);
             return this.process_online_payments_data_from_server(opData);
         } catch (ex) {
             console.error("update_online_payments_data_with_server failed: ", ex);
@@ -64,7 +61,7 @@ patch(Order.prototype, {
                     {},
                     {
                         order: this,
-                        payment_method: this.pos.payment_methods_by_id[op.payment_method_id],
+                        payment_method: this.pos.models["pos.payment.method"].get(op.payment_method_id),
                         pos: this.pos,
                     }
                 );

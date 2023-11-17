@@ -2,8 +2,7 @@
 <templates id="template" xml:space="preserve">
     <t t-name="point_of_sale.ProductScreen">
         <div class="product-screen d-flex h-100 bg-100">
-            <div t-if="!ui.isSmall || pos.mobile_pane === 'left'"
-                t-att-class="{'flex-grow-1': ui.isSmall}"
+            <div t-att-class="{'flex-grow-1': ui.isSmall, 'd-none': ui.isSmall and pos.mobile_pane !== 'left'}"
                 class="leftpane d-flex flex-column border-end bg-200" >
                 <OrderWidget lines="currentOrder.orderlines" t-slot-scope="scope"
                     total="env.utils.formatCurrency(currentOrder.get_total_with_tax())"
@@ -38,9 +37,23 @@
                     </div>
                 </div>
             </div>
-            <div class="rightpane d-flex flex-grow-1 flex-column bg-300 w-60" t-if="!ui.isSmall || pos.mobile_pane === 'right'">
+            <div class="rightpane d-flex flex-grow-1 flex-column bg-300 w-60" t-att-class="{'d-none': ui.isSmall and pos.mobile_pane !== 'right'}">
                 <div t-att-class="{'d-none': scrollDirection.down and ui.isSmall}" class="d-flex bg-view shadow-sm control-top-bar">
-                    <CategorySelector categories="getCategories()" onClick="(id) => this.pos.setSelectedCategoryId(id)" />
+                    <div class="d-flex overflow-auto w-100">
+                        <div class="d-flex align-items-center">
+                            <button t-on-click="() => this.pos.setSelectedCategoryId(0)"
+                                class="category-button btn btn-light d-flex flex-column align-items-center justify-content-center p-1 h-100">
+                                <i class="fa fa-home fa-2x" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                        <div t-foreach="getCategories()" t-as="category" t-key="category.id" class="d-flex align-items-center">
+                            <i t-if="category.getAllChildren().includes(this.pos.selectedCategoryId) || this.pos.selectedCategoryId === category.id" t-attf-class="pe-2 fa fa-caret-right" aria-hidden="true" />
+                            <button t-on-click="() =>  this.pos.setSelectedCategoryId(category.id)" class="category-button btn btn-light d-flex flex-column align-items-center justify-content-center p-1 h-100" style="width: 3rem;">
+                                <img t-if="category.has_image" t-att-src="computeImageUrl(category)" style="height: 3rem;" alt="Category" />
+                                <span t-if="category.name" class="text-center fs-5" t-esc="category.name" />
+                            </button>
+                        </div>
+                    </div>
                     <Input tModel="[pos, 'searchProductWord']"
                         class="'p-2'"
                         isSmall="ui.isSmall"
@@ -54,7 +67,7 @@
                             class="pos.productViewMode"
                             name="product.display_name"
                             productId="product.id"
-                            price="product.getFormattedUnitPrice()"
+                            price="pos.getProductPriceFormatted(product)"
                             imageUrl="product.getImageUrl()"
                             onClick="() =>this.pos.addProductToCurrentOrder(product)"
                             productInfo="true"

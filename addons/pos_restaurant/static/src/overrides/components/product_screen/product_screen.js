@@ -10,7 +10,10 @@ patch(ProductScreen.prototype, {
     get selectedOrderlineQuantity() {
         const order = this.pos.get_order();
         const orderline = order.get_selected_orderline();
-        if (this.pos.config.module_pos_restaurant && this.pos.orderPreparationCategories.size) {
+        if (
+            this.pos.config.module_pos_restaurant &&
+            this.pos.orderPreparationCategories.size
+        ) {
             let orderline_name = orderline.product.display_name;
             if (orderline.description) {
                 orderline_name += " (" + orderline.description + ")";
@@ -31,7 +34,9 @@ patch(ProductScreen.prototype, {
         return this.currentOrder.getOrderChanges().nbrOfChanges;
     },
     get swapButton() {
-        return this.pos.config.module_pos_restaurant && this.pos.orderPreparationCategories.size;
+        return (
+            this.pos.config.module_pos_restaurant && this.pos.orderPreparationCategories.size
+        );
     },
     submitOrder() {
         this.pos.sendOrderInPreparationUpdateLastChange(this.pos.get_order());
