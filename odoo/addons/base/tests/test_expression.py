@@ -9,6 +9,7 @@ from unittest.mock import patch
 import psycopg2
 
 from odoo.addons.base.tests.common import SavepointCaseWithUserDemo
+from odoo.domain import Domain
 from odoo.tests.common import BaseCase, TransactionCase
 from odoo.tools import mute_logger
 from odoo.osv import expression
@@ -2073,6 +2074,12 @@ class TestPrettifyDomain(BaseCase):
 class TestAnyfy(TransactionCase):
     def _test_combine_anies(self, domain, expected):
         anyfied_domain = expression.domain_combine_anies(domain, self.env['res.partner'])
+        new_domain_obj = Domain(domain, self.env['res.partner'])
+        self.assertEqual(
+            new_domain_obj.as_domain_list(),
+            expected,
+            f"New Domain Object:\n{new_domain_obj.as_domain_list()}\nVS\n{expected}"
+        )
         return self.assertEqual(anyfied_domain, expected,
                                 f'\nFor initial domain: {domain}\nBecame: {anyfied_domain}')
 
