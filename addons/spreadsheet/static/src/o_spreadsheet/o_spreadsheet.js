@@ -1062,6 +1062,22 @@
             return matrix;
         return matrix[0].map((_, i) => matrix.map((row) => row[i]));
     }
+    /**
+     * Creates a version of the function that's memoized on the value of its first
+     * argument, if any.
+     */
+    function memoize(func) {
+        const cache = new Map();
+        const funcName = func.name ? func.name + " (memoized)" : "memoized";
+        return {
+            [funcName](...args) {
+                if (!cache.has(args[0])) {
+                    cache.set(args[0], func(...args));
+                }
+                return cache.get(args[0]);
+            },
+        }[funcName];
+    }
 
     const RBA_REGEX = /rgba?\(|\s+|\)/gi;
     const HEX_MATCH = /^#([A-F\d]{2}){3,4}$/g;
@@ -8020,12 +8036,12 @@
         }
     }
     /** Normalize string by setting it to lowercase and replacing accent letters with plain letters */
-    function normalizeString(str) {
+    const normalizeString = memoize(function normalizeString(str) {
         return str
             .toLowerCase()
             .normalize("NFD")
             .replace(/[\u0300-\u036f]/g, "");
-    }
+    });
     /**
      * Normalize a value.
      * If the cell value is a string, this will set it to lowercase and replacing accent letters with plain letters
@@ -28600,14 +28616,9 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
          */
         getCellById(cellId) {
             // this must be as fast as possible
-            for (const sheetId in this.cells) {
-                const sheet = this.cells[sheetId];
-                const cell = sheet[cellId];
-                if (cell) {
-                    return cell;
-                }
-            }
-            return undefined;
+            const position = this.getters.getCellPosition(cellId);
+            const sheet = this.cells[position.sheetId];
+            return sheet[cellId];
         }
         /*
          * Reconstructs the original formula string based on a normalized form and its dependencies
@@ -32527,6 +32538,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 }
                 return evaluatedCell;
             };
+            const rangeCache = {};
             /**
              * Return the values of the cell(s) used in reference, but always in the format of a range even
              * if a single cell is referenced. It is a list of col values. This is useful for the formulas that describe parameters as
@@ -32543,21 +32555,26 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 // Performance issue: Avoid fetching data on positions that are out of the spreadsheet
                 // e.g. A1:ZZZ9999 in a sheet with 10 cols and 10 rows should ignore everything past J10 and return a 10x10 array
                 const sheetZone = getters.getSheetZone(sheetId);
-                const result = [];
                 const zone = intersection(range.zone, sheetZone);
                 if (!zone) {
-                    result.push([]);
-                    return result;
+                    return [[]];
                 }
+                const { top, left, bottom, right } = zone;
+                const cacheKey = `${sheetId}-${top}-${left}-${bottom}-${right}`;
+                if (cacheKey in rangeCache) {
+                    return rangeCache[cacheKey];
+                }
+                const result = new Array(right - left + 1);
                 // Performance issue: nested loop is faster than a map here
-                for (let col = zone.left; col <= zone.right; col++) {
-                    const rowValues = [];
-                    for (let row = zone.top; row <= zone.bottom; row++) {
+                for (let col = left; col <= right; col++) {
+                    const rowValues = new Array(bottom - top + 1);
+                    for (let row = top; row <= bottom; row++) {
                         const cell = evalContext.getters.getCell({ sheetId: range.sheetId, col, row });
-                        rowValues.push(cell ? getEvaluatedCell(cell) : undefined);
+                        rowValues[row - top] = cell ? getEvaluatedCell(cell) : undefined;
                     }
-                    result.push(rowValues);
+                    result[col - left] = rowValues;
                 }
+                rangeCache[cacheKey] = result;
                 return result;
             }
             /**
@@ -34463,24 +34480,27 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
          * autofiller
          */
         autofillAuto() {
+            var _a, _b;
             const zone = this.getters.getSelectedZone();
             const sheetId = this.getters.getActiveSheetId();
             let col = zone.left;
             let row = zone.bottom;
             if (col > 0) {
-                let left = this.getters.getEvaluatedCell({ sheetId, col: col - 1, row });
-                while (left.type !== CellValueType.empty) {
+                let position = { sheetId, col: col - 1, row };
+                while (((_a = this.getters.getCell(position)) === null || _a === void 0 ? void 0 : _a.content) ||
+                    this.getters.getEvaluatedCell(position).type !== CellValueType.empty) {
                     row += 1;
-                    left = this.getters.getEvaluatedCell({ sheetId, col: col - 1, row });
+                    position = { sheetId, col: col - 1, row };
                 }
             }
             if (row === zone.bottom) {
                 col = zone.right;
                 if (col <= this.getters.getNumberCols(sheetId)) {
-                    let right = this.getters.getEvaluatedCell({ sheetId, col: col + 1, row });
-                    while (right.type !== CellValueType.empty) {
+                    let position = { sheetId, col: col + 1, row };
+                    while (((_b = this.getters.getCell(position)) === null || _b === void 0 ? void 0 : _b.content) ||
+                        this.getters.getEvaluatedCell(position).type !== CellValueType.empty) {
                         row += 1;
-                        right = this.getters.getEvaluatedCell({ sheetId, col: col + 1, row });
+                        position = { sheetId, col: col + 1, row };
                     }
                 }
             }
@@ -41671,9 +41691,9 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
      * Apply the changes of the given HistoryChange to the state
      */
     function applyChange(change, target) {
-        let val = change.root;
-        let key = change.path[change.path.length - 1];
-        for (let pathIndex = 0; pathIndex < change.path.slice(0, -1).length; pathIndex++) {
+        let val = change.path[0];
+        const key = change.path[change.path.length - 1];
+        for (let pathIndex = 1; pathIndex < change.path.slice(0, -1).length; pathIndex++) {
             const p = change.path[pathIndex];
             if (val[p] === undefined) {
                 const nextPath = change.path[pathIndex + 1];
@@ -42428,13 +42448,14 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         }
         addChange(...args) {
             const val = args.pop();
-            const [root, ...path] = args;
+            const root = args[0];
             let value = root;
-            let key = path[path.length - 1];
-            for (let pathIndex = 0; pathIndex <= path.length - 2; pathIndex++) {
-                const p = path[pathIndex];
+            let key = args[args.length - 1];
+            const pathLength = args.length - 2;
+            for (let pathIndex = 1; pathIndex <= pathLength; pathIndex++) {
+                const p = args[pathIndex];
                 if (value[p] === undefined) {
-                    const nextPath = path[pathIndex + 1];
+                    const nextPath = args[pathIndex + 1];
                     value[p] = createEmptyStructure(nextPath);
                 }
                 value = value[p];
@@ -42443,8 +42464,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 return;
             }
             this.changes.push({
-                root,
-                path,
+                path: args,
                 before: value[key],
                 after: val,
             });
@@ -44218,7 +44238,10 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
          */
         checkDispatchAllowed(command) {
             const results = this.handlers.map((handler) => handler.allowDispatch(command));
-            return new DispatchResult(results.flat());
+            if (results.some((r) => r !== 0 /* CommandResult.Success */)) {
+                return new DispatchResult(results.flat());
+            }
+            return DispatchResult.Success;
         }
         finalize() {
             this.status = 3 /* Status.Finalizing */;
@@ -44449,8 +44472,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
 
 
     __info__.version = '16.1.27';
-    __info__.date = '2023-11-16T13:23:20.660Z';
-    __info__.hash = '81f7214';
+    __info__.date = '2023-11-20T13:24:34.648Z';
+    __info__.hash = '2c92482';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
