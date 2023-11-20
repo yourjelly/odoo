@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 /**
  * XML document to create new elements from. The fact that this is a "text/xml"
  * document ensures that tagNames and attribute names are case sensitive.

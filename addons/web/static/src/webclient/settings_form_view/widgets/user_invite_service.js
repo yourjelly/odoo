@@ -1,5 +1,3 @@
-/** @odoo-modules */
-
 import { registry } from "@web/core/registry";
 
 export const userInviteService = {

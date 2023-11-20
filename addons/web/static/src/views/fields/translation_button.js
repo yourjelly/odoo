@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { localization } from "@web/core/l10n/localization";
 import { useOwnedDialogs, useService } from "@web/core/utils/hooks";
 import { TranslationDialog } from "./translation_dialog";

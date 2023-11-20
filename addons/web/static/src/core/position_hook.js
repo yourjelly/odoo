@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { useThrottleForAnimation } from "./utils/timing";
 import {
     EventBus,

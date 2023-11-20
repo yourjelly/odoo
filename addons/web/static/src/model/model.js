@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { useBus, useService } from "@web/core/utils/hooks";
 import { SEARCH_KEYS } from "@web/search/with_search/with_search";
 import { useSetupView } from "@web/views/view_hook";

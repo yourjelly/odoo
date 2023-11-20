@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { markRaw } from "@odoo/owl";
 import { registry } from "../registry";
 import { POPOVER_SYMBOL, PopoverController } from "./popover_controller";

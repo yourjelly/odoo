@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { Component } from "@odoo/owl";
 import { useForwardRefToParent } from "../utils/hooks";
 import { usePosition } from "@web/core/position_hook";

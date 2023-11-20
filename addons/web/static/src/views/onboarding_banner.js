@@ -1,5 +1,3 @@
-/**@odoo-module */
-
 import { loadCSS, loadJS } from "@web/core/assets";
 import { useService } from "@web/core/utils/hooks";
 import { useActionLinks } from "@web/views/view_hook";

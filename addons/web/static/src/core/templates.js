@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { App } from "@odoo/owl";
 
 const parser = new DOMParser();

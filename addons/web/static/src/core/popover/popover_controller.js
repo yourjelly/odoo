@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { Component, onWillDestroy, useExternalListener, useSubEnv, xml } from "@odoo/owl";
 import { useHotkey } from "../hotkeys/hotkey_hook";
 import { useChildRef } from "../utils/hooks";

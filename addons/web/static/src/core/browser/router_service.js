@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { registry } from "../registry";
 import { shallowEqual } from "../utils/objects";
 import { objectToUrlEncodedString } from "../utils/urls";

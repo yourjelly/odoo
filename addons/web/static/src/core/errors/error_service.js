@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { browser } from "../browser/browser";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "../registry";

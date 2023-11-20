@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { useEnv, useChildSubEnv, useState, onWillRender } from "@odoo/owl";
 
 /**

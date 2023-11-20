@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 /**
  * Ensures that `element` will be visible in its `scrollable`.
  *

@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { clamp } from "@web/core/utils/numbers";
 import { setRecurringAnimationFrame } from "@web/core/utils/timing";
 import { browser } from "../browser/browser";

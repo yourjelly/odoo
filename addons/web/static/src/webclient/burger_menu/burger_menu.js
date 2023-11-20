@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { registry } from "@web/core/registry";
 import { Transition } from "@web/core/transition";
 import { useService } from "@web/core/utils/hooks";

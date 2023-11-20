@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { registry } from "./registry";
 import { session } from "@web/session";
 import { Cache } from "./utils/cache";
