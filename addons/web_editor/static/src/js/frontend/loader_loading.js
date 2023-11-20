@@ -1,3 +1,5 @@
+// @odoo-module keepraw
+
 (function () {
 'use strict';
 

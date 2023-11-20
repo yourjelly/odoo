@@ -1,3 +1,4 @@
+// @odoo-module keepraw
 odoo.loader.bus.addEventListener("module-started", (e) => {
     if (e.detail.moduleName === "@web_editor/js/frontend/loadWysiwygFromTextarea") {
         const publicWidget = odoo.loader.modules.get("@web/legacy/js/public/public_widget")[Symbol.for('default')];

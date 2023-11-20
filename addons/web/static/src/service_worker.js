@@ -1,3 +1,5 @@
+// @odoo-module keepraw
+
 /* eslint-disable no-restricted-globals */
 const cacheName = "odoo-sw-cache";
 const cachedRequests = ["/web/offline"];
