@@ -136,6 +136,7 @@
             </t>
         </div>
         <button t-if="event.event_registrations_open" type="button" data-bs-toggle="modal" data-bs-target="#modal_ticket_registration" class="btn btn-primary w-100">Register</button>
+        <a t-attf-href="/event/{{event.id}}/register/tickets">test</a>
     </div>
     <div t-if="toast_message" class="o_wevent_register_toaster d-none" t-att-data-message="toast_message"/>
     <div t-if="not event.event_registrations_open" class="mb-3">
@@ -244,6 +245,12 @@
     <t t-else="">
         <textarea t-attf-name="#{registration_index}-#{question.question_type}-#{question.id}"
                   class="col-lg-12 form-control" t-att-required="question.is_mandatory_answer"/>
+    </t>
+</template>
+
+<template id="event_tickets_full" name="Event Tickets">
+    <t t-call="website_event.layout">
+        <div class="o_wevent_registration_title fs-5" id="staticBackdropLabel">Tickets</div>
     </t>
 </template>
 

@@ -218,6 +218,11 @@ class WebsiteEventController(http.Controller):
             'quantity': count,
         } for tid, count in ticket_order.items() if count]
 
+    @http.route('''/event/<model("event.event"):event>/register/tickets/''', type='http', auth="public", website=True, sitemap=False)
+    def event_register_ticket_form(self, event):
+        ticket_data = {ticket.id: {'name': ticket.name, 'price': 10.0} for ticket in event.event_ticket_ids}     
+        return request.render("website_event.event_tickets_full", {'tickets': ticket_data, 'event': event})
+
     @http.route(['/event/<model("event.event"):event>/registration/new'], type='json', auth="public", methods=['POST'], website=True)
     def registration_new(self, event, **post):
         tickets = self._process_tickets_form(event, post)
