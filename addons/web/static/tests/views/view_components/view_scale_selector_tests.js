@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { Component, useState, xml } from "@odoo/owl";
 import { ViewScaleSelector } from "@web/views/view_components/view_scale_selector";
 import { makeTestEnv } from "@web/../tests/helpers/mock_env";

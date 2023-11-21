@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { browser } from "@web/core/browser/browser";
 import { TagsList } from "@web/core/tags_list/tags_list";
 import { makeTestEnv } from "../helpers/mock_env";

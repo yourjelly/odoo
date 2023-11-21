@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { getFixture, nextTick } from "@web/../tests/helpers/utils";
 import { ControlPanel } from "@web/search/control_panel/control_panel";
 import { makeWithSearch, setupControlPanelServiceRegistry } from "@web/../tests/search/helpers";

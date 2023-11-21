@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { RecordSelector } from "@web/core/record_selectors/record_selector";
 import { makeTestEnv } from "../../helpers/mock_env";
 import { getFixture, mount, click } from "../../helpers/utils";

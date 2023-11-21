@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { findElement, triggerEvent } from "../helpers/utils";
 
 async function swipe(target, selector, direction) {

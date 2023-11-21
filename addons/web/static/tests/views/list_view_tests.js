@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { Component, markup, onRendered, onWillStart, xml } from "@odoo/owl";
 import { browser } from "@web/core/browser/browser";
 import { Domain } from "@web/core/domain";

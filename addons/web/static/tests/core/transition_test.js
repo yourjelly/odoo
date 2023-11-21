@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { Transition, useTransition, config as transitionConfig } from "@web/core/transition";
 import { getFixture, mockTimeout, mount, nextTick, patchWithCleanup } from "../helpers/utils";
 

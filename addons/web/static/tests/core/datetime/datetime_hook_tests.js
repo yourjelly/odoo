@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { Component, reactive, useState, xml } from "@odoo/owl";
 import { clearRegistryWithCleanup, makeTestEnv } from "@web/../tests/helpers/mock_env";
 import { makeFakeLocalizationService } from "@web/../tests/helpers/mock_services";

@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { overlayService } from "@web/core/overlay/overlay_service";
 import { browser } from "@web/core/browser/browser";
 import { notificationService } from "@web/core/notifications/notification_service";

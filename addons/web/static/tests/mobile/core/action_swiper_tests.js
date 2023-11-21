@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { ActionSwiper } from "@web/core/action_swiper/action_swiper";
 import { registry } from "@web/core/registry";
 import { makeFakeLocalizationService } from "@web/../tests/helpers/mock_services";

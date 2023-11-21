@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { drag, dragAndDrop, getFixture, mount, nextTick, patchWithCleanup } from "@web/../tests/helpers/utils";
 import { useDraggable } from "@web/core/utils/draggable";
 import { browser } from "@web/core/browser/browser";

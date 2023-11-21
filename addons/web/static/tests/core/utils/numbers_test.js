@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { range } from "@web/core/utils/numbers";
 
 QUnit.module("utils", () => {

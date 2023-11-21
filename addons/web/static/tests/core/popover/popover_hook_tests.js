@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { usePopover } from "@web/core/popover/popover_hook";
 import { popoverService } from "@web/core/popover/popover_service";
 import { registry } from "@web/core/registry";

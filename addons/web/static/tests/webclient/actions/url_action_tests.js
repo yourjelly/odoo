@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { registry } from "@web/core/registry";
 import { makeTestEnv } from "../../helpers/mock_env";
 import { setupWebClientRegistries, doAction, getActionManagerServerData } from "./../helpers";

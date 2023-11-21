@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { assets } from "@web/core/assets";
 import { templates } from "@web/core/templates";
 import { browser, makeRAMLocalStorage } from "@web/core/browser/browser";

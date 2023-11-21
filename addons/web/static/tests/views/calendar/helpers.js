@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { uiService } from "@web/core/ui/ui_service";
 import { createElement } from "@web/core/utils/xml";
 import { registry } from "@web/core/registry";

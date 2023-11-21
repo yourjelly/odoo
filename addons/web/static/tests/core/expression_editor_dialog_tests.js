@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { Component, xml } from "@odoo/owl";
 import { ExpressionEditorDialog } from "@web/core/expression_editor_dialog/expression_editor_dialog";
 import { makeDialogTestEnv } from "../helpers/mock_env";

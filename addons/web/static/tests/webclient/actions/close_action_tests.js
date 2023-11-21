@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import testUtils from "@web/../tests/legacy/helpers/test_utils";
 import { click, getFixture, nextTick, patchWithCleanup } from "../../helpers/utils";
 import { createWebClient, doAction, getActionManagerServerData } from "./../helpers";

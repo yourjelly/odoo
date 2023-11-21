@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { Notebook } from "@web/core/notebook/notebook";
 import { makeTestEnv } from "@web/../tests/helpers/mock_env";
 import { click, getFixture, mount, nextTick } from "@web/../tests/helpers/utils";

@@ -1,4 +1,3 @@
-/** @odoo-module */
 import { makeTestEnv } from "../helpers/mock_env";
 import { viewService } from "@web/views/view_service";
 import { registry } from "@web/core/registry";

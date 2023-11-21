@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import * as dsHelpers from "@web/../tests/core/domain_selector_tests";
 import {
     click,

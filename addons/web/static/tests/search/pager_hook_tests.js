@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { ControlPanel } from "@web/search/control_panel/control_panel";
 import { usePager } from "@web/search/pager_hook";
 import { click, getFixture, nextTick } from "../helpers/utils";

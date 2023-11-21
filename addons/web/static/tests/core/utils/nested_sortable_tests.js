@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { drag, getFixture, mount, nextTick } from "@web/../tests/helpers/utils";
 import { registerCleanup } from "@web/../tests/helpers/cleanup";
 import { useNestedSortable } from "@web/core/utils/nested_sortable";

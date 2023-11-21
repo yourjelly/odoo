@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { makeView, setupViewRegistries } from "@web/../tests/views/helpers";
 import { click, getFixture, patchWithCleanup } from "@web/../tests/helpers/utils";
 import { AnimatedNumber } from "@web/views/view_components/animated_number";

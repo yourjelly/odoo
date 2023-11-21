@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { Component, xml } from "@odoo/owl";
 import { makeFakeLocalizationService } from "@web/../tests/helpers/mock_services";
 import { click, clickSave, editInput, getFixture, triggerEvent } from "@web/../tests/helpers/utils";

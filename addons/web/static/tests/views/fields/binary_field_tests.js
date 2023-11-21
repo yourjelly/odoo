@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { registerCleanup } from "@web/../tests/helpers/cleanup";
 import { makeServerError } from "@web/../tests/helpers/mock_server";
 import { makeMockXHR } from "@web/../tests/helpers/mock_services";

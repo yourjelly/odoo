@@ -1,4 +1,3 @@
-/** @odoo-module **/
 import { KanbanCompiler } from "@web/views/kanban/kanban_compiler";
 import { registry } from "@web/core/registry";
 import { makeFakeLocalizationService } from "@web/../tests/helpers/mock_services";

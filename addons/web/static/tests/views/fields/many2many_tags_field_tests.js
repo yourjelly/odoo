@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { makeServerError } from "@web/../tests/helpers/mock_server";
 import { AutoComplete } from "@web/core/autocomplete/autocomplete";
 import { browser } from "@web/core/browser/browser";

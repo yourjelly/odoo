@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { makeFakeLocalizationService } from "@web/../tests/helpers/mock_services";
 import { registry } from "@web/core/registry";
 import { getFixture, nextTick, patchWithCleanup, triggerEvent } from "@web/../tests/helpers/utils";

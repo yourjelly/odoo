@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { makeFakeUserService } from "@web/../tests/helpers/mock_services";
 import {
     click,

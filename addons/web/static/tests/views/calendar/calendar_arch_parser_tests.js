@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { CalendarArchParser } from "@web/views/calendar/calendar_arch_parser";
 import { FAKE_FIELDS } from "./helpers";
 

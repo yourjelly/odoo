@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { getFixture, mount, nextTick } from "@web/../tests/helpers/utils";
 import { makeWithSearch, setupControlPanelServiceRegistry } from "@web/../tests/search/helpers";
 import { Layout } from "@web/search/layout";

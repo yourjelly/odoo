@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
     /**
      * Field Test Utils
      *

@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { CalendarFilterPanel } from "@web/views/calendar/filter_panel/calendar_filter_panel";
 import { click, getFixture } from "../../helpers/utils";
 import { makeEnv, makeFakeModel, mountComponent } from "./helpers";

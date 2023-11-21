@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { patchDate, patchWithCleanup } from "@web/../tests/helpers/utils";
 import { makeWithSearch, setupControlPanelServiceRegistry } from "./helpers";
 

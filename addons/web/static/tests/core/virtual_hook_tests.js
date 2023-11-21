@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { Component, useRef, xml } from "@odoo/owl";
 import { useVirtual } from "@web/core/virtual_hook";
 import { getFixture, mount, patchWithCleanup, triggerEvent } from "../helpers/utils";

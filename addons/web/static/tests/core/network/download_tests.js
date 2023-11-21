@@ -1,4 +1,3 @@
-/** @odoo-module */
 import { browser } from "@web/core/browser/browser";
 import { makeDeferred, patchWithCleanup } from "../../helpers/utils";
 import { download } from "@web/core/network/download";

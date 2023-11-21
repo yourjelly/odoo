@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { registry } from "@web/core/registry";
 import { userService } from "@web/core/user_service";
 import { makeTestEnv } from "../helpers/mock_env";

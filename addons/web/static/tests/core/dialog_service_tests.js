@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { dialogService } from "@web/core/dialog/dialog_service";
 import { ErrorDialog } from "@web/core/errors/error_dialogs";
 import { errorService } from "@web/core/errors/error_service";

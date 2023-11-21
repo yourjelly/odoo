@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { assets } from "@web/core/assets";
 import { browser } from "@web/core/browser/browser";
 import { Domain } from "@web/core/domain";

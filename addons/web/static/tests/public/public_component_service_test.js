@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { registry } from "@web/core/registry";
 import { publicComponentService } from "@web/public/public_component_service";
 import { getFixture, mount, nextTick } from "../helpers/utils";

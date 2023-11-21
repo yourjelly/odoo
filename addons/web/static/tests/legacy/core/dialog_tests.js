@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import Dialog from "@web/legacy/js/core/dialog";
 import testUtils from "@web/../tests/legacy/helpers/test_utils";
 import Widget from "@web/legacy/js/core/widget";

@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { browser } from "@web/core/browser/browser";
 import { ConnectionAbortedError, ConnectionLostError, rpcService } from "@web/core/network/rpc_service";
 import { notificationService } from "@web/core/notifications/notification_service";

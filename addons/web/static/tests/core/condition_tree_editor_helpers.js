@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { getNodesTextContent, editInput, click, editSelect } from "../helpers/utils";
 import { getModelFieldSelectorValues } from "./model_field_selector_tests";
 import { fieldService } from "@web/core/field_service";

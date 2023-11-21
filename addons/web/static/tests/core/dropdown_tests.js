@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { App, Component, onMounted, onPatched, useRef, useState, xml } from "@odoo/owl";
 import { templates } from "@web/core/templates";
 import { browser } from "@web/core/browser/browser";

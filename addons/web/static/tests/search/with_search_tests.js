@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { makeTestEnv } from "@web/../tests/helpers/mock_env";
 import { getFixture, nextTick } from "@web/../tests/helpers/utils";
 import { SearchBarMenu } from "@web/search/search_bar_menu/search_bar_menu";

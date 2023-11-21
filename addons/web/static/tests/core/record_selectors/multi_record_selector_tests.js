@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { MultiRecordSelector } from "@web/core/record_selectors/multi_record_selector";
 import { makeTestEnv } from "../../helpers/mock_env";
 import { getFixture, mount, click, triggerEvent, editInput } from "../../helpers/utils";

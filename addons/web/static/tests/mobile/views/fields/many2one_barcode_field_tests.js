@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { AutoComplete } from "@web/core/autocomplete/autocomplete";
 import { browser } from "@web/core/browser/browser";
 import { click, clickSave, getFixture, patchWithCleanup } from "@web/../tests/helpers/utils";

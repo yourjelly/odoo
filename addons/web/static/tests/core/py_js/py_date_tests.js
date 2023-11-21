@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { evaluateExpr } from "@web/core/py_js/py";
 import { patchDate, patchWithCleanup } from "@web/../tests/helpers/utils";
 import { PyDate, PyTimeDelta } from "@web/core/py_js/py_date";

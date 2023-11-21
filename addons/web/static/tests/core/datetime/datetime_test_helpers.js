@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { patchWithCleanup } from "@web/../tests/helpers/utils";
 import { localization } from "@web/core/l10n/localization";
 import { ensureArray } from "@web/core/utils/arrays";

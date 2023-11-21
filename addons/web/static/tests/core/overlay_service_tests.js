@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { Component, xml } from "@odoo/owl";
 import { MainComponentsContainer } from "@web/core/main_components_container";
 import { overlayService } from "@web/core/overlay/overlay_service";

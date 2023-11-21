@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { ormService } from "@web/core/orm_service";
 import { registry } from "@web/core/registry";
 import { hotkeyService } from "@web/core/hotkeys/hotkey_service";

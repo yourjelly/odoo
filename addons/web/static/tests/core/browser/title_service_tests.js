@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { titleService } from "@web/core/browser/title_service";
 import { registry } from "@web/core/registry";
 import { makeTestEnv } from "../../helpers/mock_env";

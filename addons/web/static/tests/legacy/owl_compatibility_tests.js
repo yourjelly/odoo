@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
     import { attachComponent } from "@web/legacy/utils";
 
     import { getFixture } from "@web/../tests/helpers/utils";

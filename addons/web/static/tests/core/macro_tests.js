@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { MacroEngine } from "@web/core/macro";
 import { getFixture, mockTimeout } from "../helpers/utils";
 

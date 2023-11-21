@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { MockServer } from "./helpers/mock_server";
 
 let data;

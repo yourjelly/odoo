@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { assets, loadJS, loadCSS } from "@web/core/assets";
 
 QUnit.module("utils", () => {

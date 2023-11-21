@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { Component, status } from "@odoo/owl";
 import { browser } from "@web/core/browser/browser";
 import { routerService } from "@web/core/browser/router_service";

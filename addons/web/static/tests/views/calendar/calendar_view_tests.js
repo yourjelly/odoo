@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { registerCleanup } from "../../helpers/cleanup";
 import { defaultLocalization, makeFakeDialogService } from "../../helpers/mock_services";
 import {

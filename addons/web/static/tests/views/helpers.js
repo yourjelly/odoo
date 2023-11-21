@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { makeTestEnv } from "@web/../tests/helpers/mock_env";
 import { getFixture, mount, nextTick } from "@web/../tests/helpers/utils";
 import { createDebugContext } from "@web/core/debug/debug_context";

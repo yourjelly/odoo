@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { Pager } from "@web/core/pager/pager";
 import { makeTestEnv } from "../helpers/mock_env";
 import {

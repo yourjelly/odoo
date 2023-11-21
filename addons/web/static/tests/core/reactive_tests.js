@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { EventBus, reactive } from "@odoo/owl";
 import { Reactive, effect, withComputedProperties } from "@web/core/utils/reactive";
 

@@ -1,4 +1,3 @@
-/** @odoo-module **/
 /* global ZXing */
 
 import { browser } from "@web/core/browser/browser";

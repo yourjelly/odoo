@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { makeTestEnv } from "@web/../tests/helpers/mock_env";
 import { makeFakeLocalizationService } from "@web/../tests/helpers/mock_services";
 import { click, editSelect, getFixture, mount, patchDate } from "@web/../tests/helpers/utils";

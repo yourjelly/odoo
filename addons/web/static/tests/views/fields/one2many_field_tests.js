@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { registerCleanup } from "@web/../tests/helpers/cleanup";
 import {
     addRow,

@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { Component, reactive, xml } from "@odoo/owl";
 import { browser } from "@web/core/browser/browser";
 import { ResizablePanel } from "@web/core/resizable_panel/resizable_panel";

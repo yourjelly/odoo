@@ -1,4 +1,3 @@
-/** @odoo-module **/
 import { makeView } from "../helpers";
 import { setupViewRegistries } from "@web/../tests/views/helpers";
 import { FormCompiler } from "@web/views/form/form_compiler";

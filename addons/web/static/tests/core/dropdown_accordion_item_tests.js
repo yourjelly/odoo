@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { Component, xml } from "@odoo/owl";
 import { browser } from "@web/core/browser/browser";
 import { Dropdown } from "@web/core/dropdown/dropdown";

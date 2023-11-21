@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { browser } from "@web/core/browser/browser";
 import { usePosition } from "@web/core/position_hook";
 import { registerCleanup } from "../helpers/cleanup";

@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 /**
  * @param {string} folder folder that can only import from `allowedFolders`
  * @param {string[]} allowedFolders folders from which `folder` can import

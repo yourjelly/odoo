@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { createWebClient, getActionManagerServerData } from "@web/../tests/webclient/helpers";
 import { browser } from "@web/core/browser/browser";
 import { registry } from "@web/core/registry";

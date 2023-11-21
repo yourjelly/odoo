@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { registry } from "@web/core/registry";
 import { createWebClient } from "./helpers";
 import { makeDeferred, patchDate, patchWithCleanup } from "@web/../tests/helpers/utils";

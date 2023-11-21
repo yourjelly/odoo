@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { humanSize } from "@web/core/utils/binary";
 
 QUnit.module("utils", () => {

@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { defaultLocalization } from "@web/../tests/helpers/mock_services";
 import { patchDate, patchTimeZone, patchWithCleanup } from "@web/../tests/helpers/utils";
 import { Domain } from "@web/core/domain";

@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { tokenize } from "@web/core/py_js/py";
 
 QUnit.module("py", {}, () => {

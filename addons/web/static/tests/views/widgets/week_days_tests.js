@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { registry } from "@web/core/registry";
 import { makeFakeLocalizationService } from "../../helpers/mock_services";
 import { getFixture, click, clickSave } from "../../helpers/utils";

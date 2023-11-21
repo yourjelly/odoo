@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { registry } from "@web/core/registry";
 import { scrollerService } from "@web/core/scroller_service";
 import { scrollTo } from "@web/core/utils/scrolling";

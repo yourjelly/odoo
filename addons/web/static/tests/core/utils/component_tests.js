@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { ErrorHandler } from "@web/core/utils/components";
 import { makeTestEnv } from "../../helpers/mock_env";
 import { getFixture, mount } from "../../helpers/utils";

@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { makeServerError } from "@web/../tests/helpers/mock_server";
 import { makeFakeUserService } from "@web/../tests/helpers/mock_services";
 import * as cpHelpers from "@web/../tests/search/helpers";

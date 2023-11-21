@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { evaluateExpr, evaluateBooleanExpr } from "@web/core/py_js/py";
 
 QUnit.module("py", {}, () => {

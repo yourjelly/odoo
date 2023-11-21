@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { Domain } from "@web/core/domain";
 import { PyDate } from "../../src/core/py_js/py_date";
 import { patchWithCleanup } from "../helpers/utils";

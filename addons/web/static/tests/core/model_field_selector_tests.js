@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { Component, useState, xml } from "@odoo/owl";
 import { browser } from "@web/core/browser/browser";
 import { fieldService } from "@web/core/field_service";

@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { notificationService } from "@web/core/notifications/notification_service";
 import { registry } from "@web/core/registry";
 import { effectService } from "@web/core/effects/effect_service";

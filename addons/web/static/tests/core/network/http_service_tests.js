@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { browser } from "@web/core/browser/browser";
 import { patchWithCleanup } from "../../helpers/utils";
 import { get, post } from "@web/core/network/http_service";

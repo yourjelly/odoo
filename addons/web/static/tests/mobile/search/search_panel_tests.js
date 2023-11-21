@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { click, getFixture } from "@web/../tests/helpers/utils";
 import { SearchPanel } from "@web/search/search_panel/search_panel";
 import { makeWithSearch, setupControlPanelServiceRegistry } from "@web/../tests/search/helpers";

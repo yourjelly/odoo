@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { browser } from "@web/core/browser/browser";
 import { ormService } from "@web/core/orm_service";
 import { registry } from "@web/core/registry";

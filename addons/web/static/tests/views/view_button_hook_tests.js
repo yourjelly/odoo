@@ -1,4 +1,3 @@
-/** @odoo-module */
 import { ViewButton } from "@web/views/view_button/view_button";
 import { useViewButtons } from "@web/views/view_button/view_button_hook";
 import { setupViewRegistries } from "./helpers";
