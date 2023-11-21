@@ -124,3 +124,17 @@ class PosConfig(models.Model):
                 'has_source_order': coupon._has_source_order(),
             },
         }
+
+    def _get_limited_product_loading_order_by(self):
+        """ Overriden to ensure that loyalty reward products are loaded first when opening the POS. """
+        order_by, order_by_params = super()._get_limited_product_loading_order_by()
+
+        program_ids = self.with_context(display_default_code=False)._get_program_ids()
+        rewards = program_ids.reward_ids
+        products = rewards.discount_line_product_id | rewards.reward_product_ids
+        products |= program_ids.filtered(lambda p: p.program_type == 'ewallet').trigger_product_ids
+
+        if not products:
+            return order_by, order_by_params
+
+        return "CASE WHEN product_product.id IN %s THEN 0 ELSE 1 END," + order_by, [tuple(products.ids)] + order_by_params

@@ -14,6 +14,7 @@ registry.category("mock_server").add("pos.session/load_pos_data", async function
         "pos.combo": [...(this.models["pos.combo"]?.records || [])],
         "pos.combo.line": [...(this.models["pos.combo.line"]?.records || [])],
         "product.pricelist": [...(this.models["product.pricelist"]?.records || [])],
+        "product.pricelist.item": [...(this.models["product.pricelist.item"]?.records || [])],
         "pos.payment.method": [...(this.models["pos.payment.method"]?.records || [])],
         attributes_by_ptal_id: {},
         "res.currency": {

@@ -4,13 +4,15 @@ import secrets
 from collections import defaultdict
 from datetime import timedelta
 from itertools import groupby
+
+from dateutil.relativedelta import relativedelta
 from markupsafe import Markup, escape
 
 from odoo import api, fields, models, _, Command
 from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.tools import float_is_zero, float_compare, convert
 from odoo.service.common import exp_version
-from odoo.osv.expression import AND
+from odoo.osv.expression import AND, OR
 
 
 class PosSession(models.Model):
@@ -1665,14 +1667,6 @@ class PosSession(models.Model):
         for tax in loaded_data['taxes_by_id'].values():
             tax['children_tax_ids'] = [loaded_data['taxes_by_id'][id] for id in tax['children_tax_ids']]
 
-        if self.config_id.use_pricelist:
-            default_pricelist = next(
-                (pl for pl in loaded_data['product.pricelist'] if pl['id'] == self.config_id.pricelist_id.id),
-                False
-            )
-            if default_pricelist:
-                loaded_data['default_pricelist'] = default_pricelist
-
         fiscal_position_by_id = {fpt['id']: fpt for fpt in self._get_pos_ui_account_fiscal_position_tax(
             self._loader_params_account_fiscal_position_tax())}
         for fiscal_position in loaded_data['account.fiscal.position']:
@@ -1711,6 +1705,7 @@ class PosSession(models.Model):
             'account.cash.rounding',
             'pos.payment.method',
             'account.fiscal.position',
+            'product.pricelist.item',
         ]
 
         return models_to_load
@@ -1924,6 +1919,9 @@ class PosSession(models.Model):
             domain = [('id', '=', self.config_id.pricelist_id.id)]
         return {'search_params': {'domain': domain, 'fields': ['name', 'display_name', 'discount_policy']}}
 
+    def _get_pos_ui_product_pricelist(self, params):
+        return self.env['product.pricelist'].search_read(**params['search_params'])
+
     def _product_pricelist_item_fields(self):
         return [
                 'id',
@@ -1948,12 +1946,23 @@ class PosSession(models.Model):
                 'min_quantity',
                 ]
 
-    def _get_pos_ui_product_pricelist(self, params):
-        pricelists = self.env['product.pricelist'].search_read(**params['search_params'])
-        for pricelist in pricelists:
-            pricelist['items'] = []
+    def _loader_params_product_pricelist_item(self):
+        if self.config_id.use_pricelist:
+            pricelist_domain = [('pricelist_id', 'in', self.config_id.available_pricelist_ids.ids)]
+        else:
+            pricelist_domain = [('pricelist_id', '=', self.config_id.pricelist_id.id)]
+        # Only pricelist items that will affect the price of the product during the session is needed.
+        # To that end, we will only return pricelist items that starts before tomorrow and ends after tomorrow.
+        tomorrow = fields.Date.today() + relativedelta(days=1)
+        date_domain = AND([
+            OR([[('date_start', '=', False)], [('date_start', '<=', tomorrow)]]),
+            OR([[('date_end', '=', False)], [('date_end', '>=', tomorrow)]])
+        ])
+        domain = AND([pricelist_domain, date_domain])
+        return {'search_params': {'domain': domain, 'fields': self._product_pricelist_item_fields()}}
 
-        return self._prepare_product_pricelists(pricelists)
+    def _get_pos_ui_product_pricelist_item(self, params):
+        return self.env['product.pricelist.item'].search_read(**params['search_params'])
 
     def _loader_params_product_category(self):
         return {'search_params': {'domain': [], 'fields': ['name', 'parent_id']}}
@@ -2043,7 +2052,7 @@ class PosSession(models.Model):
 
     def _get_pos_ui_product_product(self, params):
         self = self.with_context(**params['context'])
-        products = self.config_id.get_limited_products_loading(params['search_params']['fields'])
+        products = self.config_id.get_limited_products_loading(params['search_params'])
 
         self._process_pos_ui_product_product(products)
         return products

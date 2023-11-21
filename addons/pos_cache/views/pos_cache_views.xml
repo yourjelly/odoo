@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_pos_cache_list" model="ir.ui.view" >
+        <field name="model">pos.cache</field>
+        <field name="arch" type="xml">
+            <tree string="POS Caches" edit="0" create="0" export_xlsx="0">
+                <field name="model"/>
+                <field name="config_ids" widget="many2many_tags"/>
+                <field name="cache_size"/>
+                <field name="last_refresh_duration"/>
+                <field name="last_refresh_date"/>
+                <button name="action_refresh_cache" type="object" title="Refresh" icon="fa-refresh" class="btn-link"/>
+                <button name="unlink" type="object" icon="fa-trash" title="Remove" class="btn-link"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_pos_caches_list" model="ir.actions.act_window">
+        <field name="name">POS Caches</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">pos.cache</field>
+        <field name="view_mode">list</field>
+        <field name="target">inline</field>
+    </record>
+
+    <record id="action_pos_caches_reset" model="ir.actions.server">
+        <field name="name">Reset POS Caches</field>
+        <field name="model_id" ref="model_pos_cache"/>
+        <field name="state">code</field>
+        <field name="code">
+            action = model.action_pos_hard_reset_cache()
+        </field>
+    </record>
+
+    <menuitem
+        id="menu_pos_caches"
+        name="POS Caches"
+        parent="base.menu_administration"
+        sequence="4"
+        groups="base.group_system"/>
+
+    <menuitem
+        id="menu_view_pos_caches"
+        name="View POS Caches"
+        parent="pos_cache.menu_pos_caches"
+        action="action_pos_caches_list"
+        groups="base.group_system"/>
+
+    <menuitem
+        id="menu_reset_pos_caches"
+        name="Reset POS Caches"
+        parent="pos_cache.menu_pos_caches"
+        action="action_pos_caches_reset"
+        groups="base.group_system"/>
+</odoo>

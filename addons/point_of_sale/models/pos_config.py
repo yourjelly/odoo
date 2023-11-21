@@ -695,10 +695,9 @@ class PosConfig(models.Model):
         })
         self.payment_method_ids = [Command.link(cash_pm.id)]
 
-    def get_limited_products_loading(self, fields):
-        tables, where_clause, params = self.env['product.product']._where_calc(
-            self._get_available_product_domain()
-        ).get_sql()
+    def get_limited_products_loading(self, search_params):
+        tables, where_clause, params = self.env['product.product']._where_calc(search_params['domain']).get_sql()
+        order_by, order_by_params = self._get_limited_product_loading_order_by()
         query = f"""
             WITH pm AS (
                   SELECT product_id,
@@ -710,18 +709,27 @@ class PosConfig(models.Model):
                  FROM {tables}
             LEFT JOIN pm ON product_product.id=pm.product_id
                 WHERE {where_clause}
-             ORDER BY product_product__product_tmpl_id.priority DESC,
-                      product_product__product_tmpl_id.detailed_type DESC,
-                      COALESCE(pm.date, product_product.write_date) DESC
+             ORDER BY {order_by}
                 LIMIT %s
+                OFFSET %s
         """
-        self.env.cr.execute(query, params + [20000])
+        params.extend(order_by_params)
+        params.append(search_params.get('limit', 20000))
+        params.append(search_params.get('offset', 0))
+        self.env.cr.execute(query, params)
         product_ids = self.env.cr.fetchall()
         products = self.env['product.product'].search([('id', 'in', product_ids)])
         product_combo = products.filtered(lambda p: p['detailed_type'] == 'combo')
         product_in_combo = product_combo.combo_ids.combo_line_ids.product_id
         products_available = products | product_in_combo
-        return products_available.read(fields)
+        return products_available.read(search_params['fields'])
+
+    def _get_limited_product_loading_order_by(self):
+        return """
+            product_product__product_tmpl_id.priority DESC,
+            product_product__product_tmpl_id.detailed_type DESC,
+            COALESCE(pm.date, product_product.write_date) DESC
+        """, []
 
     def get_limited_partners_loading(self):
         self.env.cr.execute("""

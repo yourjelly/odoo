@@ -59,19 +59,6 @@ class PosSession(models.Model):
     def _get_pos_ui_loyalty_reward(self, params):
         return self.env['loyalty.reward'].search_read(**params['search_params'])
 
-    def _get_pos_ui_product_product(self, params):
-        result = super()._get_pos_ui_product_product(params)
-        self = self.with_context(**params['context'])
-        rewards = self.config_id._get_program_ids().reward_ids
-        products = rewards.discount_line_product_id | rewards.reward_product_ids
-        products |= self.config_id._get_program_ids().filtered(lambda p: p.program_type == 'ewallet').trigger_product_ids
-        # Only load products that are not already in the result
-        products = list(set(products.ids) - set(product['id'] for product in result))
-        products = self.env['product.product'].search_read([('id', 'in', products)], fields=params['search_params']['fields'])
-        self._process_pos_ui_product_product(products)
-        result.extend(products)
-        return result
-
     def _get_pos_ui_res_partner(self, params):
         partners = super()._get_pos_ui_res_partner(params)
         self._set_loyalty_cards(partners)
@@ -128,4 +115,11 @@ class PosSession(models.Model):
         params = super()._loader_params_product_product()
         # this is usefull to evaluate reward domain in frontend
         params['search_params']['fields'].append('all_product_tag_ids')
+        # Make sure that we load reward products
+        program_ids = self.config_id.with_context(display_default_code=False)._get_program_ids()
+        rewards = program_ids.reward_ids
+        products = rewards.discount_line_product_id | rewards.reward_product_ids
+        products |= program_ids.filtered(lambda p: p.program_type == 'ewallet').trigger_product_ids
+
+        params['search_params']['domain'] = OR([params['search_params']['domain'], [('id', 'in', products.ids)]])
         return params

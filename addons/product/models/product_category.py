@@ -16,7 +16,7 @@ class ProductCategory(models.Model):
     name = fields.Char('Name', index='trigram', required=True)
     complete_name = fields.Char(
         'Complete Name', compute='_compute_complete_name', recursive=True,
-        store=True)
+        store=True, index='trigram')
     parent_id = fields.Many2one('product.category', 'Parent Category', index=True, ondelete='cascade')
     parent_path = fields.Char(index=True)
     child_id = fields.One2many('product.category', 'parent_id', 'Child Categories')

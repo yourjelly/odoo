@@ -260,8 +260,7 @@ export class PosStore extends Reactive {
         this.addPartners(this.partners);
         this.picking_type = loadedData["stock.picking.type"];
         this.user = loadedData["res.users"];
-        this.pricelists = loadedData["product.pricelist"];
-        this.default_pricelist = loadedData["default_pricelist"];
+        this._loadPosPricelists(loadedData)
         this.currency = loadedData["res.currency"];
         this.db.add_attributes(loadedData["attributes_by_ptal_id"]);
         this.db.add_categories(loadedData["pos.category"]);
@@ -287,6 +286,27 @@ export class PosStore extends Reactive {
         const sequences = orders.map((order) => order.data.sequence_number + 1);
         this.pos_session.sequence_number = Math.max(this.pos_session.sequence_number, ...sequences);
         this.pos_session.login_number = odoo.login_number;
+    }
+    _loadPosPricelists(loadedData) {
+        // Link the pos.pricelists to their items
+        let pricelist_per_id = {};
+        loadedData['product.pricelist'].forEach((pricelist) => {
+            pricelist.items = [];
+            pricelist_per_id[pricelist.id] = pricelist;
+        });
+        loadedData['product.pricelist.item'].forEach((item) => {
+            pricelist_per_id[item.pricelist_id[0]].items.push(item);
+        });
+        // Now that we did the post_process, we remove the items from the loadedData, to free up memory.
+        delete loadedData['product.pricelist.item'];
+        this.pricelists = loadedData["product.pricelist"];
+        // Finally, set the default pricelist if applicable.
+        if (this.config.use_pricelist) {
+            let default_pricelist = this.pricelists.find((pricelist) => pricelist.id === this.config.pricelist_id[0]);
+            if (default_pricelist) {
+                this.default_pricelist = default_pricelist;
+            }
+        }
     }
     _loadPosPrinters(printers) {
         this.unwatched.printers = [];
