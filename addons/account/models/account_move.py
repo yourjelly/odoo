@@ -2918,19 +2918,17 @@ class AccountMove(models.Model):
                     ]
                     if not self.env.company.tax_calculation_rounding_method == 'round_per_line':
                         tax_repartition_line_amounts = [self.currency_id.round(x) for x in tax_repartition_line_amounts]
-                    # TODO: ?: round in case we do not round_per_line ?
                     computed_tax_amount = sum(tax_repartition_line_amounts)
 
                     # distribute difference over all lines
-                    manual_tax_surplus = manual_tax_amount - computed_tax_amount
-                    _surplus_in_rounding_units = divmod(manual_tax_surplus, self.currency_id.rounding)
-                    common_surplus_per_line = _surplus_in_rounding_units[0] * self.currency_id.rounding
-                    # TODO: rounding of leftover_surplus
-                    leftover_surplus_in_rounding_units = int(_surplus_in_rounding_units[1])
+                    tax_difference = abs(manual_tax_amount - computed_tax_amount)
+                    tax_difference_sign = -1 if manual_tax_amount < computed_tax_amount else 1
+                    difference_in_rounding_units = tax_difference / self.currency_id.rounding
+                    common_surplus_per_line = (difference_in_rounding_units / len(matched_tax_values)) * self.currency_id.rounding * tax_difference_sign
+                    remaining_surplus = (tax_difference - (difference_in_rounding_units * self.currency_id.rounding)) * tax_difference_sign
                     for tax_value in matched_tax_values:
                         tax_value['tax_amount_currency'] += common_surplus_per_line
-                    for i in range(leftover_surplus_in_rounding_units - 1):
-                        matched_tax_values[i] += self.currency_id.rounding
+                    matched_tax_values[-1]['tax_amount_currency'] += remaining_surplus
 
         return self.env['account.tax']._aggregate_taxes(
             to_process,
