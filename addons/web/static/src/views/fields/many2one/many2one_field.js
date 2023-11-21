@@ -2,7 +2,6 @@
 
 import { browser } from "@web/core/browser/browser";
 import { isMobileOS } from "@web/core/browser/feature_detection";
-import { makeContext } from "@web/core/context";
 import { Dialog } from "@web/core/dialog/dialog";
 import { _lt } from "@web/core/l10n/translation";
 import { evaluateExpr } from "@web/core/py_js/py";
@@ -169,11 +168,7 @@ export class Many2OneField extends Component {
         return this.props.canOpen && !!this.value && !this.state.isFloating;
     }
     get context() {
-        const { context, record } = this.props;
-        const evalContext = record.getEvalContext
-            ? record.getEvalContext(false)
-            : record.evalContext;
-        return makeContext([context], evalContext);
+        return this.props.context;
     }
     get classFromDecoration() {
         const evalContext = this.props.record.evalContext;
@@ -352,7 +347,7 @@ export const many2OneField = {
         },
     ],
     supportedTypes: ["many2one"],
-    extractProps({ attrs, context, decorations, options, string }, dynamicInfo) {
+    extractProps({ attrs, decorations, options, string }, dynamicInfo) {
         const canCreate =
             options.no_create ? false : attrs.can_create && Boolean(JSON.parse(attrs.can_create));
         return {
@@ -362,7 +357,7 @@ export const many2OneField = {
             canWrite: attrs.can_write && Boolean(JSON.parse(attrs.can_write)),
             canQuickCreate: canCreate && !options.no_quick_create,
             canCreateEdit: canCreate && !options.no_create_edit,
-            context: context,
+            context: dynamicInfo.context,
             decorations,
             domain: dynamicInfo.domain,
             nameCreateField: options.create_name_field,
