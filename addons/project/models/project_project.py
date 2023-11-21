@@ -242,6 +242,8 @@ class Project(models.Model):
             # if a new restriction is put on the account, the restriction on the project is updated.
             if project.analytic_account_id.company_id:
                 project.company_id = project.analytic_account_id.company_id
+            else:
+                project.company_id = self.env.company
 
     @api.depends_context('company')
     @api.depends('company_id', 'company_id.resource_calendar_id')
