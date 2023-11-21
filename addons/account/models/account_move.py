@@ -2900,31 +2900,43 @@ class AccountMove(models.Model):
             to_update_vals, tax_values_list = self.env['account.tax']._compute_taxes_for_single_line(base_line)
             to_process.append((base_line, to_update_vals, tax_values_list))
 
-        tax_details = self.env['account.tax']._aggregate_taxes(
+        # Handle manually changed tax amounts (via quick-edit or journal entry manipulation)
+        tax_lines = self.line_ids.filtered(lambda x: x.display_type == 'tax')
+        if tax_lines is not None:
+            tax_line_dicts = [x._convert_to_tax_line_dict() for x in tax_lines]
+            for tax_line_dict in tax_line_dicts:
+                matched_tax_values = [tax_value
+                                      for _base_line, _to_update_vals, tax_values_list in to_process
+                                      for tax_value in tax_values_list
+                                      if tax_value['id'] == tax_line_dict['tax_repartition_line'].tax_id.id]
+                if matched_tax_values:
+                    manual_tax_amount = tax_line_dict['tax_amount']
+
+                    tax_repartition_line_amounts = [
+                        tax_values['tax_amount_currency'] * tax_values['tax_repartition_line'].factor
+                        for tax_values in matched_tax_values
+                    ]
+                    if not self.env.company.tax_calculation_rounding_method == 'round_per_line':
+                        tax_repartition_line_amounts = [self.currency_id.round(x) for x in tax_repartition_line_amounts]
+                    # TODO: ?: round in case we do not round_per_line ?
+                    computed_tax_amount = sum(tax_repartition_line_amounts)
+
+                    # distribute difference over all lines
+                    manual_tax_surplus = manual_tax_amount - computed_tax_amount
+                    _surplus_in_rounding_units = divmod(manual_tax_surplus, self.currency_id.rounding)
+                    common_surplus_per_line = _surplus_in_rounding_units[0] * self.currency_id.rounding
+                    # TODO: rounding of leftover_surplus
+                    leftover_surplus_in_rounding_units = int(_surplus_in_rounding_units[1])
+                    for tax_value in matched_tax_values:
+                        tax_value['tax_amount_currency'] += common_surplus_per_line
+                    for i in range(leftover_surplus_in_rounding_units - 1):
+                        matched_tax_values[i] += self.currency_id.rounding
+
+        return self.env['account.tax']._aggregate_taxes(
             to_process,
             filter_tax_values_to_apply=filter_tax_values_to_apply,
             grouping_key_generator=grouping_key_generator,
         )
-
-        # Handle manually changed tax amounts (via quick-edit or journal entry manipulation)
-        tax_lines = self.line_ids.filtered(lambda x: x.display_type == 'tax')
-        if tax_lines is not None:
-            def _in_company_currency(value):
-                return self.currency_id._convert(value, self.company_currency_id, self.company_id, self.invoice_date)
-            tax_line_values = [x._convert_to_tax_line_dict() for x in tax_lines]
-            for tax_detail in tax_details['tax_details'].values():
-                tax_ids = [tax['id'] for tax in tax_detail['group_tax_details']]
-                matched_tax_lines = [
-                    x for x in tax_line_values
-                    if x['tax_repartition_line'].tax_id.id in tax_ids
-                ]
-                if matched_tax_lines:
-                    tax_detail['tax_amount_currency'] = sum(x['tax_amount'] for x in matched_tax_lines)
-                    tax_detail['tax_amount'] = _in_company_currency(tax_details['tax_amount_currency'])
-            tax_details['tax_amount_currency'] = sum(tax_detail['tax_amount_currency'] for tax_detail in tax_details['tax_details'].values())
-            tax_details['tax_amount'] = _in_company_currency(tax_details['tax_amount_currency'])
-
-        return tax_details
 
     def _get_invoice_counterpart_amls_for_early_payment_discount_per_payment_term_line(self):
         """ Helper to get the values to create the counterpart journal items on the register payment wizard and the
