@@ -1128,19 +1128,30 @@ class AccountMoveLine(models.Model):
             ):
                 line.balance = line.company_id.currency_id.round(line.amount_currency / line.currency_rate)
 
+    def _update_balance_and_amount_currency_from_debit_credit(self):
+        self.ensure_one()
+        self.balance = self.debit - self.credit
+        if self.move_id.is_invoice():
+            if self.currency_id == self.company_id.currency_id:
+                amount_currency = self.balance
+            else:
+                amount_currency = self.currency_id.round(self.balance * self.currency_rate)
+            if amount_currency != self.amount_currency:
+                self.amount_currency = amount_currency
+
     @api.onchange('debit')
     def _inverse_debit(self):
         for line in self:
             if line.debit:
                 line.credit = 0
-            line.balance = line.debit - line.credit
+            line._update_balance_and_amount_currency_from_debit_credit()
 
     @api.onchange('credit')
     def _inverse_credit(self):
         for line in self:
             if line.credit:
                 line.debit = 0
-            line.balance = line.debit - line.credit
+            line._update_balance_and_amount_currency_from_debit_credit()
 
     @api.onchange('analytic_distribution')
     def _inverse_analytic_distribution(self):
