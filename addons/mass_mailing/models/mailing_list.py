@@ -38,7 +38,7 @@ class MassMailingList(models.Model):
         string='Subscription Information',
         copy=True, depends=['contact_ids'])
     is_public = fields.Boolean(
-        string='Show In Preferences', default=True,
+        string='Show In Preferences', default=False,
         help='The mailing list can be accessible by recipients in the subscription '
              'management page to allows them to update their preferences.')
 

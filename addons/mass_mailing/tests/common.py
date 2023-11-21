@@ -299,6 +299,7 @@ class MassMailCommon(MailCommon, MassMailCase):
                     (0, 0, {'name': 'Ybrant', 'email': 'ybrant@example.com'}),
                 ],
                 'name': 'List1',
+                'is_public': True,
             }, {
                 'contact_ids': [
                     (0, 0, {'name': 'Gilberte', 'email': 'gilberte@example.com'}),
@@ -307,13 +308,14 @@ class MassMailCommon(MailCommon, MassMailCase):
                     (0, 0, {'name': 'Ybrant', 'email': 'ybrant@example.com'}),
                 ],
                 'name': 'List2',
+                'is_public': True,
             }, {
                 'contact_ids': [
                     (0, 0, {'name': 'Déboulonneur', 'email': 'fleurus@example.com'}),
                 ],
                 'name': 'List3',
+                'is_public': True,
             }, {
-                'is_public': False,
                 'name': 'List4',
             }
         ])
