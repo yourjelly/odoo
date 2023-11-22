@@ -560,7 +560,7 @@ var FieldMany2One = AbstractField.extend({
      * @private
      */
     _renderEdit: function () {
-        debugger;
+        // debugger;
         var value = this.m2o_value;
 
         this.$('.o_field_many2one_extra').html(this._renderValueLines(false));
@@ -930,7 +930,7 @@ const Many2OneAvatar = FieldMany2One.extend({
     _template: 'web.Many2OneAvatar',
 
     init() {
-        debugger
+        // debugger
         this._super.apply(this, arguments);
         if (this.mode === 'readonly') {
             this.template = null;
@@ -940,7 +940,7 @@ const Many2OneAvatar = FieldMany2One.extend({
         }
     },
     start() {
-        debugger
+        // debugger
         this.el.classList.add('o_field_many2one_avatar');
         return this._super(...arguments);
     },

@@ -209,7 +209,7 @@ export class Many2OneField extends Component {
         return "value" in this.props ? this.props.value : this.props.record.data[this.props.name];
     }
     get Many2XAutocompleteProps() {
-        debugger;
+        // debugger;
         return {
             value: this.displayName,
             id: this.props.id,
