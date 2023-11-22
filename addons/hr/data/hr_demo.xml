@@ -242,6 +242,11 @@ If you have development competencies, we can propose you specific traineeships</
             <field name="email">m.demo@fake.odoo.com</field>
         </record>
 
+        <record id="work_contact_abc" model="res.partner">
+            <field name="name">abc</field>
+            <field name="email">m.abc@fake.odoo.com</field>
+        </record>
+
         <record id="employee_qdp" model="hr.employee">
             <field name="name">Marc Demo</field>
             <field name="user_id" ref="base.user_demo"/>
@@ -259,6 +264,25 @@ If you have development competencies, we can propose you specific traineeships</
             <field name="work_location_id" ref="work_location_1"/>
             <field name="work_phone">+3281813700</field>
             <field name="work_contact_id" ref="hr.work_contact_qdp"/>
+            <field name="create_date">2010-01-01 00:00:00</field>
+        </record>
+
+        <record id="employee_abc" model="hr.employee">
+            <field name="name">Demo Demo</field>
+            <field name="department_id" ref="dep_rd"/>
+            <field name="parent_id" ref="employee_admin"/>
+            <field name="private_street">361-7936 Feugiat St.</field>
+            <field name="private_zip">58521</field>
+            <field name="private_city">Williston</field>
+            <field name="private_country_id" ref="base.us"/>
+            <field name="private_phone">+1 555-555-5757</field>
+            <field name="private_email">demo@yourcompany.example.com</field>
+            <field name="job_id" ref="hr.job_developer"/>
+            <field name="job_title">Experienced Developer</field>
+            <field name="category_ids" eval="[Command.set([ref('employee_category_4')])]"/>
+            <field name="work_location_id" ref="work_location_1"/>
+            <field name="work_phone">+3281813700</field>
+            <field name="work_contact_id" ref="hr.work_contact_abc"/>
             <field name="create_date">2010-01-01 00:00:00</field>
         </record>
 
