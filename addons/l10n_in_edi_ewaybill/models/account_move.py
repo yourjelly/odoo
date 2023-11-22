@@ -84,7 +84,7 @@ class AccountMove(models.Model):
             return {}
 
     def button_cancel_posted_moves(self):
-        """Mark the edi.document related to this move to be canceled."""
+        """Mark the edi.document related to this move to be cancelled."""
         reason_and_remarks_not_set = self.env["account.move"]
         for move in self:
             send_l10n_in_edi_ewaybill = move.edi_document_ids.filtered(lambda doc: doc.edi_format_id.code == "in_ewaybill_1_03")

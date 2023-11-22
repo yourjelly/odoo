@@ -81,7 +81,7 @@ class SMSResend(models.TransientModel):
         to_resend_ids = [r.notification_id.id for r in sudo_self.recipient_ids if r.resend]
 
         if to_cancel_ids:
-            all_notifications.filtered(lambda n: n.id in to_cancel_ids).write({'notification_status': 'canceled'})
+            all_notifications.filtered(lambda n: n.id in to_cancel_ids).write({'notification_status': 'cancelled'})
 
         if to_resend_ids:
             record = self.env[self.mail_message_id.model].browse(self.mail_message_id.res_id)
@@ -109,7 +109,7 @@ class SMSResend(models.TransientModel):
         self._check_access()
 
         sudo_self = self.sudo()
-        sudo_self.mapped('recipient_ids.notification_id').write({'notification_status': 'canceled'})
+        sudo_self.mapped('recipient_ids.notification_id').write({'notification_status': 'cancelled'})
         self.mail_message_id._notify_message_notification_update()
         return {'type': 'ir.actions.act_window_close'}
 

@@ -38,7 +38,7 @@ class SMSComposer(models.TransientModel):
         if sms_values['state'] == 'error':
             trace_values['failure_type'] = sms_values['failure_type']
             trace_values['trace_status'] = 'error'
-        elif sms_values['state'] == 'canceled':
+        elif sms_values['state'] == 'cancelled':
             trace_values['failure_type'] = sms_values['failure_type']
             trace_values['trace_status'] = 'cancel'
         else:

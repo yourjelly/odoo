@@ -19,7 +19,7 @@ patch(Notification.prototype, {
                     return "fa fa-check";
                 case "ready":
                     return "fa fa-clock-o";
-                case "canceled":
+                case "cancelled":
                     return "fa fa-trash-o";
                 default:
                     return "fa fa-exclamation text-danger";
@@ -35,8 +35,8 @@ patch(Notification.prototype, {
                     return _t("Sent");
                 case "ready":
                     return _t("Awaiting Dispatch");
-                case "canceled":
-                    return _t("Canceled");
+                case "cancelled":
+                    return _t("Cancelled");
                 default:
                     return _t("Error");
             }

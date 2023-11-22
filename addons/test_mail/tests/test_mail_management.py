@@ -49,6 +49,6 @@ class TestMailManagement(MailCommon, TestRecipients):
 
         self.test_record.with_user(self.user_employee).notify_cancel_by_type('email')
         self.assertEqual((self.notif_p1 | self.notif_p2 | self.notif_p3).mapped('notification_status'),
-                         ['canceled', 'canceled', 'sent'])
+                         ['cancelled', 'cancelled', 'sent'])
 
         self.assertMessageBusNotifications(self.msg)

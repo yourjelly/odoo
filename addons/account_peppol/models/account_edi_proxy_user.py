@@ -228,5 +228,5 @@ class AccountEdiProxyClientUser(models.Model):
                 _logger.error('Error while updating Peppol participant status: %s', e)
                 continue
 
-            if proxy_user['peppol_state'] in {'active', 'rejected', 'canceled'}:
+            if proxy_user['peppol_state'] in {'active', 'rejected', 'cancelled'}:
                 edi_user.company_id.account_peppol_proxy_state = proxy_user['peppol_state']

@@ -230,13 +230,13 @@ class ResConfigSettings(models.TransientModel):
 
     def button_cancel_peppol_registration(self):
         """
-        Sets the peppol registration to canceled
+        Sets the peppol registration to cancelled
         - If the user is active on the SMP, we can't just cancel it.
           They have to request a migration key using the `button_migrate_peppol_registration` action
           or deregister.
-        - 'not_registered', 'rejected', 'canceled' proxy states mean that canceling the registration
+        - 'not_registered', 'rejected', 'cancelled' proxy states mean that cancelling the registration
           makes no sense, so we don't do it
-        - Calls the IAP server first before setting the state as canceled on the client side,
+        - Calls the IAP server first before setting the state as cancelled on the client side,
           in case they've been activated on the IAP side in the meantime
         """
         self.ensure_one()
@@ -248,7 +248,7 @@ class ResConfigSettings(models.TransientModel):
         if self.account_peppol_proxy_state == 'active':
             raise UserError(_("Can't cancel an active registration. Please request a migration or deregister instead."))
 
-        if self.account_peppol_proxy_state in {'not_registered', 'rejected', 'canceled'}:
+        if self.account_peppol_proxy_state in {'not_registered', 'rejected', 'cancelled'}:
             raise UserError(_(
                 "Can't cancel registration with this status: %s", self.account_peppol_proxy_state
             ))

@@ -2985,7 +2985,7 @@ class MailThread(models.AbstractModel):
             notif_ids, msg_ids = zip(*records)
             msg_ids = list(set(msg_ids))
             if notif_ids:
-                self.env['mail.notification'].browse(notif_ids).sudo().write({'notification_status': 'canceled'})
+                self.env['mail.notification'].browse(notif_ids).sudo().write({'notification_status': 'cancelled'})
             if msg_ids:
                 self.env['mail.message'].browse(msg_ids)._notify_message_notification_update()
         return True

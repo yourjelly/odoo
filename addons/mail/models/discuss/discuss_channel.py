@@ -426,7 +426,7 @@ class Channel(models.Model):
 
     def _rtc_cancel_invitations(self, member_ids=None):
         """ Cancels the invitations of the RTC call from all invited members,
-            if member_ids is provided, only the invitations of the specified members are canceled.
+            if member_ids is provided, only the invitations of the specified members are cancelled.
 
             :param list member_ids: list of the members ids from which the invitation has to be removed
         """

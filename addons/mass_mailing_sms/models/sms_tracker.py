@@ -10,7 +10,7 @@ class SmsTracker(models.Model):
         'error': 'error',
         'process': 'process',
         'outgoing': 'outgoing',
-        'canceled': 'cancel',
+        'cancelled': 'cancel',
         'pending': 'pending',
         'sent': 'sent',
     }

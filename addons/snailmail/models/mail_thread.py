@@ -11,7 +11,7 @@ class MailThread(models.AbstractModel):
     def _notify_cancel_snail(self):
         author_id = self.env.user.id
         letters = self.env['snailmail.letter'].search([
-            ('state', 'not in', ['sent', 'canceled', 'pending']),
+            ('state', 'not in', ['sent', 'cancelled', 'pending']),
             ('user_id', '=', author_id),
             ('model', '=', self._name)
         ])

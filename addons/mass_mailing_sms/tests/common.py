@@ -60,7 +60,7 @@ class MassSMSCase(SMSCase, MockLinkTracker):
             'sent': 'sent',
             'outgoing': 'outgoing',
             'error': 'error',
-            'cancel': 'canceled',
+            'cancel': 'cancelled',
             'bounce': 'error',
             'process': 'process',
             'pending': 'pending',

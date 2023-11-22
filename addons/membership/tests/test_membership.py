@@ -158,4 +158,4 @@ class TestMembership(TestMembershipCommon):
 
         self.partner_1._compute_membership_state()
         self.assertEqual(invoice.state, 'cancel')
-        self.assertEqual(self.partner_1.membership_state, 'canceled')
+        self.assertEqual(self.partner_1.membership_state, 'cancelled')

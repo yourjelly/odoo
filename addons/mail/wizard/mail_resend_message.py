@@ -65,7 +65,7 @@ class MailResendMessage(models.TransientModel):
             to_cancel = wizard.partner_ids.filtered(lambda p: not p.resend).mapped("partner_id")
             to_send = wizard.partner_ids.filtered(lambda p: p.resend)
             notif_to_cancel = wizard.notification_ids.filtered(lambda notif: notif.notification_type == 'email' and notif.res_partner_id in to_cancel and notif.notification_status in ('exception', 'bounce'))
-            notif_to_cancel.sudo().write({'notification_status': 'canceled'})
+            notif_to_cancel.sudo().write({'notification_status': 'cancelled'})
             if to_send:
                 # this will update the notification already
                 to_send.action_resend()
@@ -76,7 +76,7 @@ class MailResendMessage(models.TransientModel):
     def cancel_mail_action(self):
         for wizard in self:
             for notif in wizard.notification_ids:
-                notif.filtered(lambda notif: notif.notification_type == 'email' and notif.notification_status in ('exception', 'bounce')).sudo().write({'notification_status': 'canceled'})
+                notif.filtered(lambda notif: notif.notification_type == 'email' and notif.notification_status in ('exception', 'bounce')).sudo().write({'notification_status': 'cancelled'})
             wizard.mail_message_id._notify_message_notification_update()
         return {'type': 'ir.actions.act_window_close'}
 

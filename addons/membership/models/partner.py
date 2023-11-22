@@ -74,7 +74,7 @@ class Partner(models.Model):
                     if mline.account_invoice_id and mline.account_invoice_id.payment_state in ('in_payment', 'paid'):
                         partner.membership_state = 'old'
                     elif mline.account_invoice_id and mline.account_invoice_id.state == 'cancel':
-                        partner.membership_state = 'canceled'
+                        partner.membership_state = 'cancelled'
                     break
             else:
                 partner.membership_state = 'none'

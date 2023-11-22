@@ -15,7 +15,7 @@ class AccountMove(models.Model):
             ('to_send', 'Queued'),
             ('skipped', 'Skipped'),
             ('processing', 'Pending Reception'),
-            ('canceled', 'Canceled'),
+            ('cancelled', 'Cancelled'),
             ('done', 'Done'),
             ('error', 'Error'),
         ],
@@ -43,7 +43,7 @@ class AccountMove(models.Model):
         # then it means it has been already sent to peppol proxy and we can't cancel
         if any(move.peppol_move_state in {'processing', 'done'} for move in self):
             raise UserError(_("Cannot cancel an entry that has already been sent to PEPPOL"))
-        self.peppol_move_state = 'canceled'
+        self.peppol_move_state = 'cancelled'
         self.send_and_print_values = False
 
     @api.depends('peppol_message_uuid')

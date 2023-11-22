@@ -698,7 +698,7 @@ QUnit.test(
     }
 );
 
-QUnit.test("basic rendering of canceled notification", async () => {
+QUnit.test("basic rendering of cancelled notification", async () => {
     const pyEnv = await startServer();
     const channelId = pyEnv["discuss.channel"].create({ name: "test" });
     const partnerId = pyEnv["res.partner"].create({ name: "Someone" });
@@ -711,7 +711,7 @@ QUnit.test("basic rendering of canceled notification", async () => {
     pyEnv["mail.notification"].create({
         failure_type: "SMTP",
         mail_message_id: messageId,
-        notification_status: "canceled",
+        notification_status: "cancelled",
         notification_type: "email",
         res_partner_id: partnerId,
     });

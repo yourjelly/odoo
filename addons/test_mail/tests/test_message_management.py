@@ -102,7 +102,7 @@ class TestMailResend(MailCommon):
         self.assertMailNotifications(message, [
             {'content': '', 'message_type': 'notification',
              'notif': [{'partner': partner, 'type': 'email',
-                        'status': (partner == self.user1.partner_id and 'exception') or (partner == self.partner1 and 'canceled') or 'sent'} for partner in self.partners]}]
+                        'status': (partner == self.user1.partner_id and 'exception') or (partner == self.partner1 and 'cancelled') or 'sent'} for partner in self.partners]}]
         )
 
     @mute_logger('odoo.addons.mail.models.mail_mail')
@@ -125,5 +125,5 @@ class TestMailResend(MailCommon):
             {'content': '', 'message_type': 'notification',
              'notif': [{'partner': partner, 'type': 'email',
                         'check_send': partner in self.user1.partner_id | self.partner1,
-                        'status': 'canceled' if partner in self.user1.partner_id | self.partner1 else 'sent'} for partner in self.partners]}]
+                        'status': 'cancelled' if partner in self.user1.partner_id | self.partner1 else 'sent'} for partner in self.partners]}]
         )

@@ -32,7 +32,7 @@ class MailNotification(models.Model):
         ('sent', 'Delivered'),
         ('bounce', 'Bounced'),
         ('exception', 'Exception'),
-        ('canceled', 'Canceled')
+        ('cancelled', 'Cancelled')
         ], string='Status', default='ready', index=True)
     is_read = fields.Boolean('Is Read', index=True)
     read_date = fields.Datetime('Read Date', copy=False)
@@ -97,7 +97,7 @@ class MailNotification(models.Model):
             ('is_read', '=', True),
             ('read_date', '<', fields.Datetime.now() - relativedelta(days=max_age_days)),
             ('res_partner_id.partner_share', '=', False),
-            ('notification_status', 'in', ('sent', 'canceled'))
+            ('notification_status', 'in', ('sent', 'cancelled'))
         ]
         return self.search(domain).unlink()
 
@@ -119,7 +119,7 @@ class MailNotification(models.Model):
     def _filtered_for_web_client(self):
         """Returns only the notifications to show on the web client."""
         def _filter_unimportant_notifications(notif):
-            if notif.notification_status in ['bounce', 'exception', 'canceled'] \
+            if notif.notification_status in ['bounce', 'exception', 'cancelled'] \
                     or notif.res_partner_id.partner_share:
                 return True
             subtype = notif.mail_message_id.subtype_id

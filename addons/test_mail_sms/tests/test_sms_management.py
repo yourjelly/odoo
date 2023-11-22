@@ -69,36 +69,36 @@ class TestSMSActions(TestSMSActionsCommon):
 
         with self.with_user('employee'):
             self.test_record.with_user(self.env.user).notify_cancel_by_type('sms')
-            self.assertEqual((self.notif_p1 | self.notif_p2).mapped('notification_status'), ['canceled', 'canceled'])
+            self.assertEqual((self.notif_p1 | self.notif_p2).mapped('notification_status'), ['cancelled', 'cancelled'])
 
         self.assertMessageBusNotifications(self.msg)
 
     def test_sms_set_cancel(self):
         self._reset_bus()
         self.sms_p1.action_set_canceled()
-        self.assertEqual(self.sms_p1.state, 'canceled')
+        self.assertEqual(self.sms_p1.state, 'cancelled')
 
         self.assertMessageBusNotifications(self.msg)
         self.assertSMSNotification([
-            {'partner': self.partner_1, 'number': self.notif_p1.sms_number, 'state': 'canceled', 'failure_type': 'sms_number_format'},
+            {'partner': self.partner_1, 'number': self.notif_p1.sms_number, 'state': 'cancelled', 'failure_type': 'sms_number_format'},
             {'partner': self.partner_2, 'number': self.notif_p2.sms_number, 'state': 'exception', 'failure_type': 'sms_credit'}
         ], 'TEST BODY', self.msg, check_sms=False)    # do not check new sms as they already exist
 
         self._reset_bus()
         self.sms_p2.with_context(sms_skip_msg_notification=True).action_set_canceled()
-        self.assertEqual(self.sms_p2.state, 'canceled')
+        self.assertEqual(self.sms_p2.state, 'cancelled')
 
         self.assertEqual(self.env['bus.bus'].search([]), self.env['bus.bus'], 'SMS: no bus notifications unless asked')
         self.assertSMSNotification([
-            {'partner': self.partner_1, 'number': self.notif_p1.sms_number, 'state': 'canceled', 'failure_type': 'sms_number_format'},
-            {'partner': self.partner_2, 'number': self.notif_p2.sms_number, 'state': 'canceled', 'failure_type': 'sms_credit'}
+            {'partner': self.partner_1, 'number': self.notif_p1.sms_number, 'state': 'cancelled', 'failure_type': 'sms_number_format'},
+            {'partner': self.partner_2, 'number': self.notif_p2.sms_number, 'state': 'cancelled', 'failure_type': 'sms_credit'}
         ], 'TEST BODY', self.msg, check_sms=False)    # do not check new sms as they already exist
 
     def test_sms_set_error(self):
         self._reset_bus()
         (self.sms_p1 + self.sms_p2).with_context(sms_skip_msg_notification=True).action_set_canceled()
-        self.assertEqual(self.sms_p1.state, 'canceled')
-        self.assertEqual(self.sms_p2.state, 'canceled')
+        self.assertEqual(self.sms_p1.state, 'cancelled')
+        self.assertEqual(self.sms_p2.state, 'cancelled')
         self.assertEqual(self.env['bus.bus'].search([]), self.env['bus.bus'], 'SMS: no bus notifications unless asked')
 
         (self.sms_p1 + self.sms_p2).action_set_error('sms_server')
@@ -168,8 +168,8 @@ class TestSMSWizards(TestSMSActionsCommon):
                 wizard.action_cancel()
 
         self.assertSMSNotification([
-            {'partner': self.partner_1, 'state': 'canceled', 'number': self.notif_p1.sms_number, 'failure_type': 'sms_number_format'},
-            {'partner': self.partner_2, 'state': 'canceled', 'number': self.notif_p2.sms_number, 'failure_type': 'sms_credit'}
+            {'partner': self.partner_1, 'state': 'cancelled', 'number': self.notif_p1.sms_number, 'failure_type': 'sms_number_format'},
+            {'partner': self.partner_2, 'state': 'cancelled', 'number': self.notif_p2.sms_number, 'failure_type': 'sms_credit'}
         ], 'TEST BODY', self.msg, check_sms=False)
         self.assertMessageBusNotifications(self.msg)
 
@@ -200,5 +200,5 @@ class TestSMSWizards(TestSMSActionsCommon):
                 wizard.action_resend()
 
         self.assertSMSNotification([{'partner': self.partner_1, 'state': 'pending'}], 'TEST BODY', self.msg, check_sms=True)
-        self.assertSMSNotification([{'partner': self.partner_2, 'state': 'canceled', 'number': self.notif_p2.sms_number, 'failure_type': 'sms_credit'}], 'TEST BODY', self.msg, check_sms=False)
+        self.assertSMSNotification([{'partner': self.partner_2, 'state': 'cancelled', 'number': self.notif_p2.sms_number, 'failure_type': 'sms_credit'}], 'TEST BODY', self.msg, check_sms=False)
         self.assertMessageBusNotifications(self.msg)

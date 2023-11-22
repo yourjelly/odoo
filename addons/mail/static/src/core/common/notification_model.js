@@ -80,7 +80,7 @@ export class Notification extends Record {
                 return "fa fa-exclamation";
             case "ready":
                 return "fa fa-send-o";
-            case "canceled":
+            case "cancelled":
                 return "fa fa-trash-o";
         }
         return "";
@@ -100,8 +100,8 @@ export class Notification extends Record {
                 return _t("Error");
             case "ready":
                 return _t("Ready");
-            case "canceled":
-                return _t("Canceled");
+            case "cancelled":
+                return _t("Cancelled");
         }
         return "";
     }

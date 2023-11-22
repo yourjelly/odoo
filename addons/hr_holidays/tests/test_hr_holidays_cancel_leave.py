@@ -37,7 +37,7 @@ class TestHrHolidaysCancelLeave(TestHrHolidaysCommon):
         self.env['hr.holidays.cancel.leave'].with_user(self.user_employee).with_context(default_leave_id=self.holiday.id) \
             .new({'reason': 'Test remove holiday'}) \
             .action_cancel_leave()
-        self.assertFalse(self.holiday.active, 'The validated leave should be canceled, that is archived.')
+        self.assertFalse(self.holiday.active, 'The validated leave should be cancelled, that is archived.')
 
     def test_action_cancel_leave_in_past(self):
         """ Test if the user may cancel a validated leave in the past. """
@@ -56,7 +56,7 @@ class TestHrHolidaysCancelLeave(TestHrHolidaysCommon):
 
     @freeze_time('2018-02-05')  # useful to be able to cancel the validated time off
     def test_user_cannot_unarchive_leave(self):
-        """ Test the user cannot manually unarchive a canceled leave """
+        """ Test the user cannot manually unarchive a cancelled leave """
         self.env['hr.holidays.cancel.leave'].with_user(self.user_employee).with_context(default_leave_id=self.holiday.id) \
             .new({'reason': 'Test remove holiday'}) \
             .action_cancel_leave()

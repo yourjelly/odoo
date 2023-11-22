@@ -728,7 +728,7 @@ class MailCase(MockEmail):
         Notif type:  ('inbox', 'Inbox'), ('email', 'Email')
         Notif status: ('ready', 'Ready to Send'), ('sent', 'Sent'),
                       ('bounce', 'Bounced'), ('exception', 'Exception'),
-                      ('canceled', 'Canceled')
+                      ('cancelled', 'Cancelled')
         Notif failure type: ("SMTP", "Connection failed (outgoing mail server problem)"),
                             ("RECIPIENT", "Invalid email address"),
                             ("BOUNCE", "Email address rejected by destination"),
@@ -1056,13 +1056,13 @@ class MailCase(MockEmail):
                         mail_groups['outgoing'].append(partner)
                         if ncheck_send:
                             email_groups[ngroup].append(partner)
-                    # canceled: currently nothing checked
+                    # cancelled: currently nothing checked
                     elif nstatus == 'exception':
                         mail_groups['failure'].append(partner)
                         if ncheck_send:
                             email_groups[ngroup].append(partner)
-                    # canceled: currently nothing checked
-                    elif nstatus == 'canceled':
+                    # cancelled: currently nothing checked
+                    elif nstatus == 'cancelled':
                         pass
                     else:
                         raise NotImplementedError()

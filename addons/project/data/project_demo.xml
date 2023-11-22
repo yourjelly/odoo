@@ -95,7 +95,7 @@
         </record>
         <record id="project_stage_3" model="project.task.type">
             <field name="sequence">30</field>
-            <field name="name">Canceled</field>
+            <field name="name">Cancelled</field>
             <field name="fold" eval="True"/>
         </record>
 
@@ -223,7 +223,7 @@
         </record>
         <record id="project_personal_stage_admin_6" model="project.task.type">
             <field name="sequence">7</field>
-            <field name="name">Canceled</field>
+            <field name="name">Cancelled</field>
             <field name="fold" eval="True"/>
             <field name="user_id" ref="base.user_admin"/>
         </record>
@@ -262,7 +262,7 @@
         </record>
         <record id="project_personal_stage_demo_6" model="project.task.type">
             <field name="sequence">7</field>
-            <field name="name">Canceled</field>
+            <field name="name">Cancelled</field>
             <field name="fold" eval="True"/>
             <field name="user_id" ref="base.user_demo"/>
         </record>

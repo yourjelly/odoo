@@ -23,7 +23,7 @@ class Message(models.Model):
 
     * mail.notification
       * notification_status
-        'ready', 'sent', 'bounce', 'exception', 'canceled'
+        'ready', 'sent', 'bounce', 'exception', 'cancelled'
       * notification_type
         'inbox', 'email', 'sms' (SMS addon), 'snail' (snailmail addon)
       * failure_type
@@ -46,7 +46,7 @@ class Message(models.Model):
 
     * sms.sms (SMS addon)
       * state
-        'outgoing', 'sent', 'error', 'canceled'
+        'outgoing', 'sent', 'error', 'cancelled'
       * error_code
         'sms_number_missing', 'sms_number_format', 'sms_credit',
         'sms_server', 'sms_acc',
@@ -55,7 +55,7 @@ class Message(models.Model):
 
     * snailmail.letter (snailmail addon)
       * state
-        'pending', 'sent', 'error', 'canceled'
+        'pending', 'sent', 'error', 'cancelled'
       * error_code
         'CREDIT_ERROR', 'TRIAL_ERROR', 'NO_PRICE_AVAILABLE', 'FORMAT_ERROR',
         'UNKNOWN_ERROR',

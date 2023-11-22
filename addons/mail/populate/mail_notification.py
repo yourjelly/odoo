@@ -45,7 +45,7 @@ class MailNotification(models.Model):
                         "sent"
                         if notification_type == "inbox"
                         else random.choices(
-                            ["ready", "process", "pending", "sent", "bounce", "exception", "canceled"],
+                            ["ready", "process", "pending", "sent", "bounce", "exception", "cancelled"],
                             [1, 1, 1, 10, 10000 if force_error else 10, 10000 if force_error else 10, 2],
                             k=1,
                         )[0]

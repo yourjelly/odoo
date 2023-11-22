@@ -469,7 +469,7 @@ class Challenge(models.Model):
                     'rank': <user ranking>,
                     'user_id': <res.users id>,
                     'name': <res.users name>,
-                    'state': <gamification.goal state {draft,inprogress,reached,failed,canceled}>,
+                    'state': <gamification.goal state {draft,inprogress,reached,failed,cancelled}>,
                     'completeness': <percentage>,
                     'current': <current value>,
                 }
@@ -487,7 +487,7 @@ class Challenge(models.Model):
             'action': <{True,False}>,
             'display_mode': <{progress,boolean}>,
             'target': <challenge line target>,
-            'state': <gamification.goal state {draft,inprogress,reached,failed,canceled}>,
+            'state': <gamification.goal state {draft,inprogress,reached,failed,cancelled}>,
             'completeness': <percentage>,
             'current': <current value>,
         }

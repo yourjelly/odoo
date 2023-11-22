@@ -18,7 +18,7 @@ patch(MockServer.prototype, {
                 ["id", "=", notification.res_partner_id],
             ])[0];
             if (
-                ["bounce", "exception", "canceled"].includes(notification.notification_status) ||
+                ["bounce", "exception", "cancelled"].includes(notification.notification_status) ||
                 (partner && partner.partner_share)
             ) {
                 return true;

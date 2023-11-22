@@ -254,7 +254,7 @@ class SendSMS(models.TransientModel):
     # ------------------------------------------------------------
 
     def _get_blacklist_record_ids(self, records, recipients_info):
-        """ Get a list of blacklisted records. Those will be directly canceled
+        """ Get a list of blacklisted records. Those will be directly cancelled
         with the right error code. """
         if self.mass_use_blacklist:
             bl_numbers = self.env['phone.blacklist'].sudo().search([]).mapped('number')
@@ -301,16 +301,16 @@ class SendSMS(models.TransientModel):
             recipients = all_recipients[record.id]
             sanitized = recipients['sanitized']
             if sanitized and record.id in blacklist_ids:
-                state = 'canceled'
+                state = 'cancelled'
                 failure_type = 'sms_blacklist'
             elif sanitized and record.id in optout_ids:
-                state = 'canceled'
+                state = 'cancelled'
                 failure_type = 'sms_optout'
             elif sanitized and record.id in done_ids:
-                state = 'canceled'
+                state = 'cancelled'
                 failure_type = 'sms_duplicate'
             elif not sanitized:
-                state = 'canceled'
+                state = 'cancelled'
                 failure_type = 'sms_number_format' if recipients['number'] else 'sms_number_missing'
             else:
                 state = 'outgoing'

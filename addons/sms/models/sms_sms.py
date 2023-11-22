@@ -49,7 +49,7 @@ class SmsSms(models.Model):
         ('pending', 'Sent'),
         ('sent', 'Delivered'),  # As for notifications and traces
         ('error', 'Error'),
-        ('canceled', 'Canceled')
+        ('cancelled', 'Cancelled')
     ], 'SMS Status', readonly=True, copy=False, default='outgoing', required=True)
     failure_type = fields.Selection([
         ("unknown", "Unknown error"),
@@ -84,7 +84,7 @@ class SmsSms(models.Model):
             sms.sms_tracker_id = tracker_ids_by_sms_uuid[sms.uuid]
 
     def action_set_canceled(self):
-        self._update_sms_state_and_trackers('canceled')
+        self._update_sms_state_and_trackers('cancelled')
 
     def action_set_error(self, failure_type):
         self._update_sms_state_and_trackers('error', failure_type=failure_type)

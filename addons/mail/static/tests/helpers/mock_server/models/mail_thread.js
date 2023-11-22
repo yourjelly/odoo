@@ -449,7 +449,7 @@ patch(MockServer.prototype, {
         // Update notification status
         this.pyEnv["mail.notification"].write(
             notifications.map((notification) => notification.id),
-            { notification_status: "canceled" }
+            { notification_status: "cancelled" }
         );
         // Send bus notifications to update status of notifications in the web client
         this.pyEnv["bus.bus"]._sendone(

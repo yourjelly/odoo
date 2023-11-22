@@ -20,7 +20,7 @@ class SmsTracker(models.Model):
     _description = "Link SMS to mailing/sms tracking models"
 
     SMS_STATE_TO_NOTIFICATION_STATUS = {
-        'canceled': 'canceled',
+        'cancelled': 'cancelled',
         'process': 'process',
         'error': 'exception',
         'outgoing': 'ready',
@@ -61,7 +61,7 @@ class SmsTracker(models.Model):
         # canceled is a state which means that the SMS sending order should not be sent to the SMS service.
         # `process`, `pending` are sent to IAP which is not revertible (as `sent` which means "delivered").
         notifications_statuses_to_ignore = {
-            'canceled': ['canceled', 'process', 'pending', 'sent'],
+            'cancelled': ['cancelled', 'process', 'pending', 'sent'],
             'ready': ['ready', 'process', 'pending', 'sent'],
             'process': ['process', 'pending', 'sent'],
             'pending': ['pending', 'sent'],

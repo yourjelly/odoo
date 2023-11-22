@@ -53,7 +53,7 @@ class SnailmailLetter(models.Model):
         ('pending', 'In Queue'),
         ('sent', 'Sent'),
         ('error', 'Error'),
-        ('canceled', 'Canceled')
+        ('cancelled', 'Cancelled')
         ], 'Status', readonly=True, copy=False, default='pending', required=True,
         help="When a letter is created, the status is 'Pending'.\n"
              "If the letter is correctly sent, the status goes in 'Sent',\n"
@@ -426,9 +426,9 @@ class SnailmailLetter(models.Model):
             self._snailmail_print()
 
     def cancel(self):
-        self.write({'state': 'canceled', 'error_code': False})
+        self.write({'state': 'cancelled', 'error_code': False})
         self.notification_ids.sudo().write({
-            'notification_status': 'canceled',
+            'notification_status': 'cancelled',
         })
         self.message_id._notify_message_notification_update()
 

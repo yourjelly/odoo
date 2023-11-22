@@ -5,7 +5,7 @@ from odoo import api, fields, models
 
 STATE = [
     ('none', 'Non Member'),
-    ('canceled', 'Cancelled Member'),
+    ('cancelled', 'Cancelled Member'),
     ('old', 'Old Member'),
     ('waiting', 'Waiting Member'),
     ('invoiced', 'Invoiced Member'),
@@ -67,7 +67,7 @@ class MembershipLine(models.Model):
             elif move_state == 'posted':
                 if payment_state == 'paid':
                     if reverse_map.get(line.account_invoice_id.id):
-                        line.state = 'canceled'
+                        line.state = 'cancelled'
                     else:
                         line.state = 'paid'
                 elif payment_state == 'in_payment':
@@ -75,4 +75,4 @@ class MembershipLine(models.Model):
                 elif payment_state in ('not_paid', 'partial'):
                     line.state = 'invoiced'
             elif move_state == 'cancel':
-                line.state = 'canceled'
+                line.state = 'cancelled'

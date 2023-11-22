@@ -18,7 +18,7 @@ class ResPartner(models.Model):
 
         if letter_address_vals:
             letters = self.env['snailmail.letter'].search([
-                ('state', 'not in', ['sent', 'canceled']),
+                ('state', 'not in', ['sent', 'cancelled']),
                 ('partner_id', 'in', self.ids),
             ])
             letters.write(letter_address_vals)
