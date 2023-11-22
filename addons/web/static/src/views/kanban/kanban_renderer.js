@@ -50,6 +50,7 @@ export class KanbanRenderer extends Component {
         "archInfo",
         "Compiler?", // optional in stable for backward compatibility
         "list",
+        "context",
         "deleteRecord",
         "openRecord",
         "readonly",
@@ -226,13 +227,14 @@ export class KanbanRenderer extends Component {
             (fieldNode) => fieldNode.name === groupByField.name
         );
         let isReadonly = this.props.list.fields[groupByField.name].readonly;
+        debugger;
         if (
             !isReadonly &&
             fieldNodes.length &&
             fieldNodes.some((fieldNode) => "readonly" in fieldNode)
-        ) {debugger;
+        ) { 
             isReadonly = fieldNodes.every(
-                (fieldNode) => fieldNode.readonly === "True"
+                (fieldNode) => evaluateBooleanExpr(fieldNode.readonly,{ context: this.props.context })
             );
         }
         return !isReadonly && this.isMovableField(groupByField);

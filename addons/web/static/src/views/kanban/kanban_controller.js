@@ -30,7 +30,7 @@ export class KanbanController extends Component {
         this.actionService = useService("action");
         this.dialog = useService("dialog");
         const { Model, archInfo } = this.props;
-
+        debugger;
         class KanbanSampleModel extends Model {
             setup() {
                 super.setup(...arguments);
@@ -212,6 +212,7 @@ export class KanbanController extends Component {
     }
 
     evalViewModifier(modifier) {
+        debugger;
         return evaluateBooleanExpr(modifier, { context: this.props.context });
     }
 

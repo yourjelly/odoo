@@ -41,7 +41,9 @@ export function evaluateExpr(expr, context = {}) {
         throw new EvalError(`Can not parse python expression: (${expr})\nError: ${error.message}`);
     }
     try {
-        return evaluate(ast, context);
+        let y = evaluate(ast, context);
+        // debugger;
+        return y;
     } catch (error) {
         throw new EvalError(`Can not evaluate python expression: (${expr})\nError: ${error.message}`);
     }
@@ -62,5 +64,7 @@ export function evaluateBooleanExpr(expr, context = {}) {
     if (expr === 'True' || expr === '1') {
         return true;
     }
-    return evaluateExpr(`bool(${expr})`, context);
+    let x = evaluateExpr(`bool(${expr})`, context);
+    // debugger;
+    return x;
 }

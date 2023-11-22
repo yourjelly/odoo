@@ -346,6 +346,7 @@ const SET = {
  * @returns {any}
  */
 export function evaluate(ast, context = {}) {
+    // debugger;
     const dicts = new Set();
     let pyContext;
     const evalContext = Object.create(context);
