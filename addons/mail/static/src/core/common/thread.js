@@ -8,6 +8,7 @@ import {
     Component,
     onMounted,
     onWillPatch,
+    onWillUnmount,
     onWillUpdateProps,
     toRaw,
     useChildSubEnv,
@@ -68,6 +69,8 @@ export class Thread extends Component {
             isReplyingTo: false,
             mountedAndLoaded: false,
             showJumpPresent: false,
+            isScrollRestored: false,
+            visibleAfterMount: { older: false, newer: false },
         });
         this.lastJumpPresent = this.props.jumpPresent;
         this.threadService = useState(useService("mail.thread"));
@@ -84,15 +87,28 @@ export class Thread extends Component {
          */
         this.scrollableRef = this.props.scrollRef ?? useRef("messages");
         this.loadOlderState = useVisible("load-older", () => {
-            if (this.loadOlderState.isVisible && !this.isJumpingRecent) {
+            if (
+                this.loadOlderState.isVisible &&
+                !this.isJumpingRecent &&
+                this.state.visibleAfterMount.older
+            ) {
+                console.warn("==load older==");
                 this.threadService.fetchMoreMessages(this.props.thread);
             }
+            this.state.visibleAfterMount.older = true;
         });
         this.loadNewerState = useVisible("load-newer", () => {
-            if (this.loadNewerState.isVisible && !this.isJumpingRecent) {
+            if (
+                this.loadNewerState.isVisible &&
+                !this.isJumpingRecent &&
+                this.state.visibleAfterMount.newer
+            ) {
+                console.warn("== load newer ==");
                 this.threadService.fetchMoreMessages(this.props.thread, "newer");
             }
+            this.state.visibleAfterMount.newer = true;
         });
+        onWillUnmount(() => (this.state.visibleAfterMount = { older: false, newer: false }));
         this.presentThresholdState = useVisible(
             "present-treshold",
             () => this.updateShowJumpPresent(),
@@ -139,6 +155,7 @@ export class Thread extends Component {
             await this.threadService.fetchNewMessages(this.props.thread);
             this.state.mountedAndLoaded = true;
         });
+        onWillUnmount(() => (this.visibleDetectedAfterMount = false));
         useBus(this.env.bus, "MAIL:RELOAD-THREAD", ({ detail }) => {
             const { model, id } = this.props.thread;
             if (detail.model === model && detail.id === id) {
@@ -211,6 +228,7 @@ export class Thread extends Component {
          * in place (point 1).
          */
         let loadNewer;
+
         const saveScroll = () => {
             this.props.thread.scrollTop =
                 ref.el.scrollHeight - ref.el.scrollTop - ref.el.clientHeight < 30
