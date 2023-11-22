@@ -54,7 +54,7 @@ export class Popover extends Component {
             validate: (target) => {
                 // target may be inside an iframe, so get the Element constructor
                 // to test against from its owner document's default view
-                const Element = target?.ownerDocument?.defaultView.Element;
+                const Element = target?.ownerDocument?.defaultView?.Element;
                 return (
                     Boolean(Element) &&
                     (target instanceof Element || target instanceof window.Element)
