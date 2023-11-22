@@ -7,6 +7,7 @@
             <field name="arch" type="xml">
                 <pivot string="Tasks Analysis" display_quantity="1" sample="1">
                     <field name="project_id" type="row"/>
+                    <field name="rating_avg" type="measure" invisible="1"/>
                 </pivot>
             </field>
         </record>
@@ -19,6 +20,7 @@
                      <field name="project_id"/>
                      <field name="stage_id"/>
                      <field name="nbr" invisible="1"/>
+                     <field name="rating_avg" type="measure" invisible="1"/>
                  </graph>
              </field>
         </record>
