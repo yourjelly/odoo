@@ -2,27 +2,19 @@
 <templates id="template" xml:space="preserve">
 
     <t t-name="point_of_sale.RadioProductAttribute">
-        <div class="configurator_radio" t-ref="root">
-            <div class="d-flex flex-column gap-3">
-                <t t-foreach="values" t-as="value" t-key="value.id">
-                    <div class="attribute-name-cell form-check">
-                        <input class="form-check-input" type="radio" t-model="state.attribute_value_ids" t-att-name="attribute.id"
-                                t-attf-id="{{ attribute.id }}_{{ value.id }}" t-att-value="value.id"/>
-                        <label class="form-check-label" t-att-name="value.name" t-attf-for="{{ attribute.id }}_{{ value.id }}">
-                            <span t-esc="value.name"/>
-                        </label>
-                        <div t-if="value.price_extra" class="price-extra-cell d-inline-block ms-3">
-                            <span class="price_extra px-2 py-1 rounded-pill text-bg-info">
-                                + <t t-esc="env.utils.formatCurrency(value.price_extra)"/>
-                            </span>
-                        </div>
+        <Selection items="values" name="attribute.name" tModel="[state, 'attribute_value_ids']" t-slot-scope="scope">
+            <t t-set="item" t-value="scope.item" />
+            <div class="card" t-att-class="{'border-primary': scope.isSelected}" style="width: 18rem;">
+                <div class="card-body">
+                    <h4 t-esc="item.name" class="card-title text-center" />
+                    <div t-if="item.price_extra" class="price-extra-cell d-inline-block ms-3">
+                        <span class="price_extra px-2 py-1 rounded-pill text-bg-info">
+                            + <t t-esc="env.utils.formatCurrency(item.price_extra)"/>
+                        </span>
                     </div>
-                    <div t-if="value.id == state.attribute_value_ids and value.is_custom" class="custom-value-cell">
-                        <input class="custom_value form-control form-control-lg mt-2" type="text" t-model="state.custom_value"/>
-                    </div>
-                </t>
+                </div>
             </div>
-        </div>
+        </Selection>
     </t>
 
     <t t-name="point_of_sale.SelectProductAttribute">

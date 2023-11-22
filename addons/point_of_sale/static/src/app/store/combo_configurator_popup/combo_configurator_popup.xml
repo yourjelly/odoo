@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates id="template" xml:space="preserve">
     <t t-name="point_of_sale.ComboConfiguratorPopup">
-        <Dialog title="props.product.display_name" contentClass="'combo-configurator-popup'">
+        <Dialog title="props.product.display_name" contentClass="'styled-choise'">
             <div t-foreach="props.product.combo_ids" t-as="combo_id" t-key="combo_id"
                 class="d-flex flex-column m-3 mb-4">
                 <t t-set="combo" t-value="pos.db.combo_by_id[combo_id]"/>

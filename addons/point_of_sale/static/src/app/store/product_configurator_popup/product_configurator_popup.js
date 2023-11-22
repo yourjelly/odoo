@@ -1,6 +1,7 @@
 /** @odoo-module */
 import { Dialog } from "@web/core/dialog/dialog";
-import { Component, onMounted, useRef, useState, useSubEnv } from "@odoo/owl";
+import { Component, useState, useSubEnv } from "@odoo/owl";
+import { Selection } from "@point_of_sale/app/generic_components/inputs/selection/selection";
 
 export class BaseProductAttribute extends Component {
     setup() {
@@ -40,20 +41,8 @@ export class BaseProductAttribute extends Component {
 }
 
 export class RadioProductAttribute extends BaseProductAttribute {
+    static components = { Selection };
     static template = "point_of_sale.RadioProductAttribute";
-
-    setup() {
-        super.setup();
-        this.root = useRef("root");
-        onMounted(this.onMounted);
-    }
-    onMounted() {
-        // With radio buttons `t-model` selects the default input by searching for inputs with
-        // a matching `value` attribute. In our case, we use `t-att-value` so `value` is
-        // not found yet and no radio is selected by default.
-        // We then manually select the first input of each radio attribute.
-        this.root.el.querySelector("input[type=radio]").checked = true;
-    }
 }
 
 export class SelectProductAttribute extends BaseProductAttribute {

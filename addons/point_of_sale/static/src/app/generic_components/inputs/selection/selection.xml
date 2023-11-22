@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="point_of_sale.Selection">
+        <div t-attf-class="{{props.class}}">
+            <h3 t-if="props.name" class="me-auto mb-3" t-esc="props.name"/>
+            <div class="d-flex justify-content-center">
+                <t t-foreach="props.items" t-as="item" t-key="item_index" t-slot="default"
+                    item="item" isSelected="getValue() === item.id" t-on-click="() => this.setValue(item.id)" />
+            </div>
+        </div>
+    </t>
+</templates>
