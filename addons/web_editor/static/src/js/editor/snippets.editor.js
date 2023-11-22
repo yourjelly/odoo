@@ -3240,6 +3240,10 @@ var SnippetsMenu = Widget.extend({
         return Object.assign({}, options, {
             iframeWindow,
             cursor: "move",
+            edgeScrolling: {
+                speed: 35,
+                threshold: 100,
+            }
         });
     },
     /**
