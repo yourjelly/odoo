@@ -1768,10 +1768,10 @@ class AccountMove(models.Model):
                 move.tax_totals_json = None
                 continue
 
+            move = move.with_context(lang=move.partner_id.lang)
             tax_lines_data = move._prepare_tax_lines_data_for_totals_from_invoice()
-
             move.tax_totals_json = json.dumps({
-                **self._get_tax_totals(move.partner_id, tax_lines_data, move.amount_total, move.amount_untaxed, move.currency_id),
+                **move._get_tax_totals(move.partner_id, tax_lines_data, move.amount_total, move.amount_untaxed, move.currency_id),
                 'allow_tax_edition': move.is_purchase_document(include_receipts=True) and move.state == 'draft',
             })
 
