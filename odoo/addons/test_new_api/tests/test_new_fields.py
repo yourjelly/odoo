@@ -4259,6 +4259,147 @@ class TestSubqueries(common.TransactionCase):
                     ('tags.name', 'like', 'z'),
             ])
 
+    def test_many2many_ir_rule_in_subquery(self):
+        self.env['ir.rule'].create({
+            'name': 'rule',
+            'model_id': self.env['ir.model']._get('test_new_api.multi.tag').id,
+            'domain_force': "[('name', '=like', 'ALLOW%')]",
+            'groups': [Command.link(self.ref('base.group_user'))],
+        })
+        user = self.env['res.users'].create({
+            'name': 'Aaaah',
+            'login': 'a',
+            'groups_id': [Command.link(self.ref('base.group_user'))],
+        })
+        Model = self.env['test_new_api.multi.line'].with_user(user)
+        Model.search([('tags.name', 'like', 'x')])
+
+        with self.assertQueries([
+            """
+            SELECT "test_new_api_multi_line"."id"
+            FROM "test_new_api_multi_line"
+            WHERE
+                EXISTS (
+                    SELECT 1
+                    FROM "test_new_api_multi_line_test_new_api_multi_tag_rel" AS "test_new_api_multi_line__tags"
+                    WHERE "test_new_api_multi_line__tags"."test_new_api_multi_line_id" = "test_new_api_multi_line"."id"
+                    AND "test_new_api_multi_line__tags"."test_new_api_multi_tag_id" IN (
+                        SELECT "test_new_api_multi_tag"."id"
+                        FROM "test_new_api_multi_tag"
+                        WHERE ("test_new_api_multi_tag"."name"::text ILIKE %s)
+                        AND ("test_new_api_multi_tag"."name"::text LIKE %s)
+                    )
+                )
+            ORDER BY "test_new_api_multi_line"."id"
+            """,
+        ]):
+            Model.search([('tags.name', 'ilike', 'search on name')])
+
+        with self.assertQueries([
+            """
+            SELECT "test_new_api_multi_line"."id"
+            FROM "test_new_api_multi_line"
+            WHERE
+                EXISTS (
+                    SELECT 1
+                    FROM "test_new_api_multi_line_test_new_api_multi_tag_rel" AS "test_new_api_multi_line__tags"
+                    WHERE "test_new_api_multi_line__tags"."test_new_api_multi_line_id" = "test_new_api_multi_line"."id"
+                    AND "test_new_api_multi_line__tags"."test_new_api_multi_tag_id" IN (
+                        SELECT "test_new_api_multi_tag"."id"
+                        FROM "test_new_api_multi_tag"
+                        WHERE ("test_new_api_multi_tag"."name"::text ILIKE %s)
+                        AND ("test_new_api_multi_tag"."name"::text LIKE %s)
+                    )
+                )
+            ORDER BY "test_new_api_multi_line"."id"
+            """,
+        ]):
+            Model.search([('tags', 'any', [('name', 'ilike', 'search on name')])])
+
+        with self.assertQueries([
+            """
+            SELECT "test_new_api_multi_line"."id"
+            FROM "test_new_api_multi_line"
+            WHERE NOT EXISTS (
+                SELECT 1
+                FROM "test_new_api_multi_line_test_new_api_multi_tag_rel" AS "test_new_api_multi_line__tags"
+                WHERE "test_new_api_multi_line__tags"."test_new_api_multi_line_id" = "test_new_api_multi_line"."id"
+            )
+            ORDER BY "test_new_api_multi_line"."id"
+            """,
+        ]):
+            Model.search([('tags', '=', False)])
+
+        with self.assertQueries([
+            """
+            SELECT "test_new_api_multi_line"."id"
+            FROM "test_new_api_multi_line"
+            WHERE
+                EXISTS (
+                    SELECT 1
+                    FROM "test_new_api_multi_line_test_new_api_multi_tag_rel" AS "test_new_api_multi_line__tags"
+                    WHERE "test_new_api_multi_line__tags"."test_new_api_multi_line_id" = "test_new_api_multi_line"."id"
+                    AND "test_new_api_multi_line__tags"."test_new_api_multi_tag_id" IN (
+                        SELECT "test_new_api_multi_tag"."id"
+                        FROM "test_new_api_multi_tag"
+                        WHERE ("test_new_api_multi_tag"."name"::text ILIKE %s)
+                        AND ("test_new_api_multi_tag"."name"::text LIKE %s)
+                    )
+                )
+            ORDER BY "test_new_api_multi_line"."id"
+            """,
+        ]):
+            Model.search([('tags', 'ilike', 'search on display name')])
+
+        with self.assertQueries([
+            """
+            SELECT "test_new_api_multi_line"."id"
+            FROM "test_new_api_multi_line"
+            WHERE EXISTS (
+                SELECT 1
+                FROM "test_new_api_multi_line_test_new_api_multi_tag_rel" AS "test_new_api_multi_line__tags"
+                WHERE "test_new_api_multi_line__tags"."test_new_api_multi_line_id" = "test_new_api_multi_line"."id"
+                AND "test_new_api_multi_line__tags"."test_new_api_multi_tag_id" IN %s
+                )
+            ORDER BY "test_new_api_multi_line"."id"
+            """,
+        ]):
+            Model.search([('tags', '=', 1)])
+
+        with self.assertQueries([
+            """
+            SELECT "test_new_api_multi_line"."id"
+            FROM "test_new_api_multi_line"
+            WHERE EXISTS (
+                SELECT 1
+                FROM "test_new_api_multi_line_test_new_api_multi_tag_rel" AS "test_new_api_multi_line__tags"
+                WHERE "test_new_api_multi_line__tags"."test_new_api_multi_line_id" = "test_new_api_multi_line"."id"
+                AND "test_new_api_multi_line__tags"."test_new_api_multi_tag_id" IN %s
+            )
+            ORDER BY "test_new_api_multi_line"."id"
+            """,
+        ]):
+            Model.search([('tags', 'in', [1, 2])])
+
+        with self.assertQueries([
+            """
+            SELECT "test_new_api_multi_line"."id"
+            FROM "test_new_api_multi_line"
+            WHERE NOT EXISTS (
+                SELECT 1
+                FROM "test_new_api_multi_line_test_new_api_multi_tag_rel" AS "test_new_api_multi_line__tags"
+                WHERE "test_new_api_multi_line__tags"."test_new_api_multi_line_id" = "test_new_api_multi_line"."id"
+                AND "test_new_api_multi_line__tags"."test_new_api_multi_tag_id" IN %s
+            )
+            ORDER BY "test_new_api_multi_line"."id"
+            """,
+        ]):
+            Model.search([('tags', 'not in', [1, 2])])
+
+        # Add child_of/parent_of test
+        # Add subquery in right test
+        # Add testing for no sense leaf with many2many
+
 
 class TestComputeQueries(common.TransactionCase):
     """ Test the queries made by create() with computed fields. """
