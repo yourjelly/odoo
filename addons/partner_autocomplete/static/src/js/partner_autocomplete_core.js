@@ -328,5 +328,5 @@ export function usePartnerAutocomplete() {
             notification.add(title);
         }
     }
-    return { autocomplete, getCreateData, isVATNumber };
+    return { autocomplete, getCreateData, isVATNumber, checkGSTNumber };
 }
