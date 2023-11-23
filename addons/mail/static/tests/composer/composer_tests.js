@@ -436,7 +436,7 @@ QUnit.test("pending mentions are kept when toggling composer", async (assert) =>
     assert.containsOnce($, ".o-mail-Message-body a.o_mail_redirect:contains(@Mitchell Admin)");
 });
 
-QUnit.debug('suggestion list is switchable between commands', async (assert) => {
+QUnit.test('suggestion list is switchable between commands', async (assert) => {
     const pyEnv = await startServer();
     const partnerId = pyEnv["res.partner"].create({
         email: "testpartner@odoo.com",
