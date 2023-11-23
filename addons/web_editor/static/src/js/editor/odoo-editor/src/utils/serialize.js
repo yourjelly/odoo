@@ -34,16 +34,16 @@ export function serializeNode(node, nodesToStripFromChildren = new Set()) {
     return result;
 }
 
-export function unserializeNode(obj) {
+export function unserializeNode(obj, doc=document) {
     let result = undefined;
     if (obj.nodeType === Node.TEXT_NODE) {
-        result = document.createTextNode(obj.textValue);
+        result = doc.createTextNode(obj.textValue);
     } else if (obj.nodeType === Node.ELEMENT_NODE) {
-        result = document.createElement(obj.tagName);
+        result = doc.createElement(obj.tagName);
         for (const key in obj.attributes) {
             result.setAttribute(key, obj.attributes[key]);
         }
-        obj.children.forEach(child => result.append(unserializeNode(child)));
+        obj.children.forEach(child => result.append(unserializeNode(child, doc)));
     } else {
         console.warn('unknown node type');
     }

@@ -319,6 +319,9 @@ export class OdooEditor extends EventTarget {
             this._pluginAdd(plugin);
         }
 
+        // Setup DOMPurify to use the correct window.
+        this.DOMPurify = DOMPurify(this.document.defaultView);
+
         // -------------------
         // Alter the editable
         // -------------------
@@ -967,7 +970,7 @@ export class OdooEditor extends EventTarget {
     }
 
     unserializeNode(node) {
-        return this._collabClientId ? unserializeNode(node) : node;
+        return this._collabClientId ? unserializeNode(node, this.document) : node;
     }
 
     automaticStepActive(label) {
@@ -1352,9 +1355,9 @@ export class OdooEditor extends EventTarget {
             } else if (record.type === 'add') {
                 let node = this.idFind(record.oid) || this.unserializeNode(record.node);
                 if (this._collabClientId) {
-                    const fakeNode = document.createElement('fake-el');
+                    const fakeNode = this.document.createElement('fake-el');
                     fakeNode.appendChild(node);
-                    DOMPurify.sanitize(fakeNode, { IN_PLACE: true });
+                    this.DOMPurify.sanitize(fakeNode, { IN_PLACE: true });
                     node = fakeNode.childNodes[0];
                     if (!node) {
                         continue;
@@ -1504,9 +1507,9 @@ export class OdooEditor extends EventTarget {
                     let nodeToRemove = this.idFind(mutation.id);
                     if (!nodeToRemove) {
                         nodeToRemove = this.unserializeNode(mutation.node);
-                        const fakeNode = document.createElement('fake-el');
+                        const fakeNode = this.document.createElement('fake-el');
                         fakeNode.appendChild(nodeToRemove);
-                        DOMPurify.sanitize(fakeNode, { IN_PLACE: true });
+                        this.DOMPurify.sanitize(fakeNode, { IN_PLACE: true });
                         nodeToRemove = fakeNode.childNodes[0];
                         if (!nodeToRemove) {
                             continue;
@@ -3493,7 +3496,7 @@ export class OdooEditor extends EventTarget {
         this.observer.takeRecords();
         node.setAttribute(attributeName, attributeValue);
         this.observerFlush();
-        DOMPurify.sanitize(node, { IN_PLACE: true });
+        this.DOMPurify.sanitize(node, { IN_PLACE: true });
         if (next) {
             next.before(node);
         } else if (parent) {
@@ -4738,8 +4741,7 @@ export class OdooEditor extends EventTarget {
             setSelection(...start, ...start, false);
         }
         if (odooEditorHtml && targetSupportsHtmlContent) {
-            const fragment = parseHTML(this.document, odooEditorHtml);
-            DOMPurify.sanitize(fragment, { IN_PLACE: true });
+            const fragment = this.DOMPurify.sanitize(odooEditorHtml, { RETURN_DOM_FRAGMENT: true });
             if (fragment.hasChildNodes()) {
                 this._applyCommand('insert', fragment);
             }
