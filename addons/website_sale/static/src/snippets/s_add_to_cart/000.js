@@ -23,7 +23,16 @@ publicWidget.registry.AddToCartSnippet = WebsiteSale.extend(cartHandlerMixin, {
         }
 
         if (visitorChoice) {
-            this._handleAdd($(ev.currentTarget.closest('div')));
+            // clone `Add to Cart` button to retrieve the productId from hidden
+            // input and append to `o_shared_block` to make the modal behaviour
+            // possible, and remove it from o_shared_block after modal.
+            const clonedBtnEl = ev.currentTarget.cloneNode(true);
+            clonedBtnEl.classList.add('d-none');
+            // TODO: remove jQuery, check for _handleAdd .find
+            const $selector = $('#o_shared_blocks');
+            $selector[0].appendChild(clonedBtnEl);
+            await this._handleAdd($selector);
+            $selector[0].removeChild(clonedBtnEl);
         } else {
             const isAddToCartAllowed = await this._rpc({
                 route: `/shop/product/is_add_to_cart_allowed`,
