@@ -102,7 +102,7 @@ class AccountEdiFormat(models.Model):
             return error_message
         is_purchase = move.is_purchase_document(include_receipts=True)
         error_message += self._l10n_in_validate_partner(move.partner_id)
-        error_message += self._l10n_in_validate_partner(move.company_id.partner_id, is_company=True)
+        error_message += self._l10n_in_validate_partner(move.company_id.partner_id)
         if not re.match("^.{1,16}$", is_purchase and move.ref or move.name):
             error_message.append(_("%s number should be set and not more than 16 characters",
                 (is_purchase and "Bill Reference" or "Invoice")))
