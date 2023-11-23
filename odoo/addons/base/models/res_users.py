@@ -738,9 +738,10 @@ class Users(models.Model):
 
     @tools.ormcache('self.id')
     def _get_company_ids(self):
-        # use search() instead of `self.company_ids` to avoid extra query for `active_test`
-        domain = [('active', '=', True), ('user_ids', 'in', self.id)]
-        return self.env['res.company'].search(domain)._ids
+        # TODO remove: Use `company_ids` to have `active_test=False` by default and
+        # it actually not making extra request as mentioned before, because in 17 active_test
+        # don't add extra query
+        return self.company_ids._ids
 
     @api.model
     def action_get(self):

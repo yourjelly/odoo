@@ -377,6 +377,7 @@ def _anyfy_leaves(domain, model):
         field = model._fields.get(path[0])
         if not field:
             raise ValueError(f"Invalid field {model._name}.{path[0]} in leaf {item}")
+
         if len(path) > 1 and field.relational:  # skip properties
             subdomain = [(path[1], operator, right)]
             comodel = model.env[field.comodel_name]
@@ -384,6 +385,25 @@ def _anyfy_leaves(domain, model):
         elif operator in ('any', 'not any'):
             comodel = model.env[field.comodel_name]
             result.append((left, operator, _anyfy_leaves(right, comodel)))
+        elif (
+            field.type == 'many2many' and
+            not isinstance(right, (str, Query)) and operator not in ('child_of', 'parent_of')
+        ):
+            # right is False or right list of ids or id
+            if right is False or right is None:
+                result.append((
+                    path[0],
+                    'any' if operator in NEGATIVE_TERM_OPERATORS else 'not any',
+                    [],
+                ))
+            elif isinstance(right, (int, collections.abc.Iterable)):
+                result.append((
+                    path[0],
+                    'not any' if operator in NEGATIVE_TERM_OPERATORS else 'any',
+                    [('id', 'in', [right] if isinstance(right, int) else tuple(right))],
+                ))
+            else:
+                raise NotImplementedError(f"{item} doesn't make sense")
         else:
             result.append(item)
 
@@ -1135,6 +1155,7 @@ class expression(object):
 
             # Making search easier when there is a left operand as one2many or many2many
             elif operator in ('any', 'not any') and field.store and field.type in ('many2many', 'one2many'):
+                # TODO: Should we add field.domain in the right value ?
                 right_ids = comodel.with_context(**field.context)._search(right)
                 push((left, ANY_IN[operator], right_ids), model, alias)
 
@@ -1240,77 +1261,42 @@ class expression(object):
                 rel_table, rel_id1, rel_id2 = field.relation, field.column1, field.column2
 
                 if operator in HIERARCHY_FUNCS:
-                    # determine ids2 in comodel
                     ids2 = to_ids(right, comodel, leaf)
                     domain = HIERARCHY_FUNCS[operator]('id', ids2, comodel)
-                    ids2 = comodel._search(domain)
+                    right = comodel._search(domain)
 
-                    # rewrite condition in terms of ids2
-                    if comodel == model:
-                        push(('id', 'in', ids2), model, alias)
-                    else:
-                        rel_alias = self.query.make_alias(alias, field.name)
-                        push_result(SQL(
-                            "EXISTS (SELECT 1 FROM %s AS %s WHERE %s = %s AND %s IN %s)",
-                            SQL.identifier(rel_table),
-                            SQL.identifier(rel_alias),
-                            SQL.identifier(rel_alias, rel_id1),
-                            SQL.identifier(alias, 'id'),
-                            SQL.identifier(rel_alias, rel_id2),
-                            tuple(ids2) or (None,),
-                        ))
+                if isinstance(right, str):
+                    domain = field.get_domain_list(model)
+                    op2 = (TERM_OPERATORS_NEGATION[operator]
+                            if operator in NEGATIVE_TERM_OPERATORS else operator)
+                    right = comodel._name_search(right, domain or [], op2)
+                    if not isinstance(right, Query):
+                        right = comodel.browse(right)._as_query(False)
 
-                elif right is not False:
-                    # determine ids2 in comodel
-                    if isinstance(right, str):
-                        domain = field.get_domain_list(model)
-                        op2 = (TERM_OPERATORS_NEGATION[operator]
-                               if operator in NEGATIVE_TERM_OPERATORS else operator)
-                        ids2 = comodel._name_search(right, domain or [], op2)
-                    elif isinstance(right, collections.abc.Iterable):
-                        ids2 = right
-                    else:
-                        ids2 = [right]
-
-                    if isinstance(ids2, Query):
-                        # rewrite condition in terms of ids2
-                        sql_ids2 = ids2.subselect()
-                    else:
-                        # rewrite condition in terms of ids2
-                        sql_ids2 = SQL("%s", tuple(it for it in ids2 if it) or (None,))
-
-                    if operator in NEGATIVE_TERM_OPERATORS:
-                        sql_exists = SQL('NOT EXISTS')
-                    else:
-                        sql_exists = SQL('EXISTS')
-
-                    rel_alias = self.query.make_alias(alias, field.name)
-                    push_result(SQL(
-                        "%s (SELECT 1 FROM %s AS %s WHERE %s = %s AND %s IN %s)",
-                        sql_exists,
-                        SQL.identifier(rel_table),
-                        SQL.identifier(rel_alias),
-                        SQL.identifier(rel_alias, rel_id1),
-                        SQL.identifier(alias, 'id'),
-                        SQL.identifier(rel_alias, rel_id2),
-                        sql_ids2,
-                    ))
-
+                if operator in NEGATIVE_TERM_OPERATORS:
+                    sql_exists = SQL('NOT EXISTS')
                 else:
-                    # rewrite condition to match records with/without relations
-                    if operator in NEGATIVE_TERM_OPERATORS:
-                        sql_exists = SQL('EXISTS')
-                    else:
-                        sql_exists = SQL('NOT EXISTS')
-                    rel_alias = self.query.make_alias(alias, field.name)
-                    push_result(SQL(
-                        "%s (SELECT 1 FROM %s AS %s WHERE %s = %s)",
-                        sql_exists,
-                        SQL.identifier(rel_table),
-                        SQL.identifier(rel_alias),
-                        SQL.identifier(rel_alias, rel_id1),
-                        SQL.identifier(alias, 'id'),
-                    ))
+                    sql_exists = SQL('EXISTS')
+
+                rel_alias = self.query.make_alias(alias, field.name)
+                if not right._where_clauses or right.where_clause.code == 'TRUE':
+                    ir_rule_condition = SQL()
+                else:
+                    ir_rule_condition = SQL(
+                        'AND %s IN %s',
+                        SQL.identifier(rel_alias, rel_id2),
+                        right.subselect(),
+                    )
+
+                push_result(SQL(
+                    "%s (SELECT 1 FROM %s AS %s WHERE %s = %s%s)",
+                    sql_exists,
+                    SQL.identifier(rel_table),
+                    SQL.identifier(rel_alias),
+                    SQL.identifier(rel_alias, rel_id1),
+                    SQL.identifier(alias, 'id'),
+                    ir_rule_condition,
+                ))
 
             elif field.type == 'many2one':
                 if operator in HIERARCHY_FUNCS:

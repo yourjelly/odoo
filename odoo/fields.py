@@ -4796,6 +4796,7 @@ class Many2many(_RelationalMulti):
 
         # make the query for the lines
         domain = self.get_domain_list(records)
+        # TODO: Should we call _search instead ?
         comodel._flush_search(domain, order=comodel._order)
         query = comodel._where_calc(domain)
         comodel._apply_ir_rules(query, 'read')
