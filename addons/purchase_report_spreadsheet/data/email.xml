@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="email_template_monthly_report">
+        <div>
+            <h1>STANDARD TERMS AND CONDITIONS OF SALE</h1>
+        </div>
+    </template>
+</odoo>
