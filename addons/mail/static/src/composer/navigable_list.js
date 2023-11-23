@@ -29,6 +29,7 @@ export class NavigableList extends Component {
             activeOption: null,
             open: false,
             options: [],
+            optionTemplate: null,
         });
         this.hotkey = useService("hotkey");
         this.hotkeysToRemove = [];
@@ -81,6 +82,7 @@ export class NavigableList extends Component {
             });
         };
         this.props.options.forEach((opt) => this.state.options.push(makeOption(opt)));
+        this.state.optionTemplate = this.props.optionTemplate;
     }
 
     isActiveOption(option) {
