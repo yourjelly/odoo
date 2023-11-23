@@ -33,6 +33,7 @@
             <form string="Ewaybill">
                 <header>
                     <button name="generate_ewaybill" string="Generate E-waybill" class="oe_highlight" type="object" invisible="state != 'pending'"/>
+                    <button name="move_to_pending" string="Move to Pending" type="object" invisible="state != 'to_generate' or not error_message"/>
                     <button name="cancel_ewaybill" string="Cancel E-waybill" class="oe_highlight" type="object" invisible="state != 'generated'"/>
                     <button name="action_export_json" string="Download JSON" class="oe_highlight" type="object" invisible="not error_message" groups="base.group_no_one"/>
                     <field name="state" widget="statusbar" statusbar_visible="pending,to_generate,generated"/>
@@ -125,7 +126,7 @@
                                 <field name="currency_id" column_invisible="1"/>
                                 <field name="company_id" column_invisible="1"/>
                                 <field name="product_id" readonly="1"/>
-                                <field name="quantity_done" string="Quantity" readonly="1"/>
+                                <field name="quantity" string="Quantity" readonly="1"/>
                                 <field name="price_unit" readonly="parent.state != 'pending'"/>
                                 <field name="ewaybill_tax_ids" widget="many2many_tags" readonly="parent.state != 'pending'"/>
                                 <field name="ewaybill_price_subtotal"/>

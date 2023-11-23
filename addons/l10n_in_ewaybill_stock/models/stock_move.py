@@ -9,8 +9,7 @@ class StockMove(models.Model):
     _description = "Stock Move Ewaybill"
 
     ewaybill_id = fields.Many2one(
-        comodel_name='l10n.in.ewaybill',
-        required=True)
+        comodel_name='l10n.in.ewaybill')
 
     currency_id = fields.Many2one(
         comodel_name='res.currency',
@@ -38,7 +37,7 @@ class StockMove(models.Model):
         compute='_compute_amount', readonly=True,
         store=True)
 
-    @api.depends('product_id', 'product_uom', 'quantity_done')
+    @api.depends('product_id', 'product_uom', 'quantity')
     def _compute_price_unit(self):
         for line in self:
             if line.picking_code == "outgoing":
@@ -73,12 +72,12 @@ class StockMove(models.Model):
             product=self.product_id,
             taxes=self.ewaybill_tax_ids,
             price_unit=self.price_unit,
-            quantity=self.quantity_done,
+            quantity=self.quantity,
             price_subtotal=self.ewaybill_price_subtotal,
             **kwargs,
         )
 
-    @api.depends('quantity_done', 'price_unit', 'ewaybill_tax_ids')
+    @api.depends('quantity', 'price_unit', 'ewaybill_tax_ids')
     def _compute_amount(self):
         for line in self:
             tax_results = self.env['account.tax']._compute_taxes([

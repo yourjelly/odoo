@@ -471,9 +471,14 @@ class Ewaybill(models.Model):
             response_data = response.get("data")
             self._write_response({
                 'name': response_data.get("ewayBillNo"),
-                'ewaybill_date': self.env['account.edi.format']._indian_timezone_to_odoo_utc(response_data.get('ewayBillDate'), '%d/%m/%Y %I:%M:%S %p'),
-                'ewaybill_expiry_date': self.env['account.edi.format']._indian_timezone_to_odoo_utc(response_data.get('validUpto'), '%d/%m/%Y %I:%M:%S %p'),
+                'ewaybill_date': self.env['account.edi.format']._indian_timezone_to_odoo_utc(response_data.get('ewayBillDate'), self._asume_datetime_formate(response_data.get('ewayBillDate'))),
+                'ewaybill_expiry_date': self.env['account.edi.format']._indian_timezone_to_odoo_utc(response_data.get('validUpto'), self._asume_datetime_formate(response_data.get('validUpto'))),
             })
+
+    def _asume_datetime_formate(self, str_date):
+        if len(str_date) == 20:
+            return '%d/%m/%Y %H:%M:%S '
+        return '%d/%m/%Y %I:%M:%S %p'
 
     def _l10n_in_ewaybill_get_error_message(self, code):
         error_message = ERROR_CODES.get(code)
@@ -501,7 +506,7 @@ class Ewaybill(models.Model):
         return state_code
 
     def _l10n_in_tax_details_by_line(self, move):
-        taxes = move.ewaybill_tax_ids.compute_all(price_unit=move.price_unit, quantity=move.quantity_done)
+        taxes = move.ewaybill_tax_ids.compute_all(price_unit=move.price_unit, quantity=move.quantity)
         igst_rate = 0.0
         igst_amount = 0.0
         cgst_rate = 0.0
@@ -563,7 +568,7 @@ class Ewaybill(models.Model):
             "productName": line.product_id.name,
             "hsnCode": extract_digits(line.product_id.l10n_in_hsn_code),
             "productDesc": line.product_id.name,
-            "quantity": line.quantity_done,
+            "quantity": line.quantity,
             "qtyUnit": line.product_id.uom_id.l10n_in_code and line.product_id.uom_id.l10n_in_code.split("-")[
                 0] or "OTH",
             "taxableAmount": round_value(line.price_unit),
@@ -727,3 +732,6 @@ class Ewaybill(models.Model):
             line_details.update(
                 {"cessRate": AccountEdiFormat._l10n_in_round_value(tax_details_by_code.get("cess_rate"))})
         return line_details
+
+    def move_to_pending(self):
+        self.state = 'pending'
