@@ -15,6 +15,7 @@ from . import test_move_lines
 from . import test_multicompany
 from . import test_robustness
 from . import test_packing
+from . import test_picking
 from . import test_packing_neg
 from . import test_proc_rule
 from . import test_report
