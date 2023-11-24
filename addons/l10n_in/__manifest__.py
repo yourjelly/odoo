@@ -21,7 +21,9 @@ Sheet, now only Vertical format has been permitted Which is Supported By Odoo.
     'depends': [
         'account_tax_python',
         'base_vat',
+        'account',
     ],
+    'auto_install': ['account'],
     'data': [
         'security/l10n_in_security.xml',
         'security/ir.model.access.csv',
