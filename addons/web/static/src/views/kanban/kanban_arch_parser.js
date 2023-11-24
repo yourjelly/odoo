@@ -73,7 +73,7 @@ export class KanbanArchParser extends XMLParser {
                 if (!node.hasAttribute("force_save")) {
                     // Force save is true by default on kanban views:
                     // this allows to write on any field regardless of its modifiers.
-                    fieldInfo.forceSave = true;
+                    // fieldInfo.forceSave = true;
                 }
                 const name = fieldInfo.name;
                 fieldNodes[name] = fieldInfo;
