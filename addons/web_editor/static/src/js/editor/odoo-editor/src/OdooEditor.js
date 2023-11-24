@@ -1965,7 +1965,7 @@ export class OdooEditor extends EventTarget {
             const size = infos.size;
             if (size > 1) {
                 const [left, top] = overlapKey.split('|').map((n) => parseInt(n, 10));
-                const div = document.createElement('div');
+                const div = this.document.createElement('div');
                 div.className = 'oe-overlapping-counter';
                 div.style.left = left + 10 + 'px';
                 div.style.top = top + 10 + 'px';
@@ -2131,8 +2131,8 @@ export class OdooEditor extends EventTarget {
         }
         if (!this.editable.childElementCount) {
             // Ensure the editable has content.
-            const p = document.createElement('p');
-            p.append(document.createElement('br'));
+            const p = this.document.createElement('p');
+            p.append(this.document.createElement('br'));
             this.editable.append(p);
             setSelection(p, 0);
             return;
@@ -2175,7 +2175,7 @@ export class OdooEditor extends EventTarget {
             // Eg, <h1><font>[...]</font></h1> will preserve the styles of the
             // <font> node. If it remains empty, it will be cleaned up later by
             // the sanitizer.
-            const zws = document.createTextNode('\u200B');
+            const zws = this.document.createTextNode('\u200B');
             range.startContainer.before(zws);
             insertedZws = zws;
         }
@@ -2342,7 +2342,7 @@ export class OdooEditor extends EventTarget {
                 // If no full row or column is selected, empty the selected cells.
                 for (const td of selectedTds) {
                     [...td.childNodes].forEach(child => child.remove());
-                    td.append(document.createElement('br'));
+                    td.append(this.document.createElement('br'));
                 }
             }
             this.historyUnpauseSteps();
@@ -3359,13 +3359,13 @@ export class OdooEditor extends EventTarget {
         // particular case in all of those functions. In fact, this case cannot
         // happen on a new document created using this editor, but will happen
         // instantly when editing a document that was created from Etherpad.
-        const fragment = document.createDocumentFragment();
-        let p = document.createElement('p');
+        const fragment = this.document.createDocumentFragment();
+        let p = this.document.createElement('p');
         for (const child of [...container.childNodes]) {
             if (isBlock(child)) {
                 if (p.childNodes.length > 0) {
                     fragment.appendChild(p);
-                    p = document.createElement('p');
+                    p = this.document.createElement('p');
                 }
                 fragment.appendChild(child);
             } else {
@@ -3506,7 +3506,7 @@ export class OdooEditor extends EventTarget {
     }
     _insertLinkZws(side, link) {
         this.observerUnactive('_insertLinkZws');
-        const span = document.createElement('span');
+        const span = this.document.createElement('span');
         span.setAttribute('data-o-link-zws', side);
         if (side !== 'end') {
             span.setAttribute('contenteditable', 'false');
@@ -3699,11 +3699,11 @@ export class OdooEditor extends EventTarget {
                         textNode.before(codeElement);
                         codeElement.append(textNode);
                         if (!codeElement.previousSibling || codeElement.previousSibling.nodeType !== Node.TEXT_NODE) {
-                            codeElement.before(document.createTextNode('\u200B'));
+                            codeElement.before(this.document.createTextNode('\u200B'));
                         }
                         if (isClosingForward) {
                             // Move selection out of code element.
-                            codeElement.after(document.createTextNode('\u200B'));
+                            codeElement.after(this.document.createTextNode('\u200B'));
                             setSelection(codeElement.nextSibling, 1);
                         } else {
                             setSelection(codeElement.firstChild, 0);
@@ -4221,8 +4221,8 @@ export class OdooEditor extends EventTarget {
         );
         if (orphanInlineChildNodes && !this.options.allowInlineAtRoot) {
             const childNodes = [...element.childNodes];
-            const tempEl = document.createElement('temp-container');
-            let currentP = document.createElement('p');
+            const tempEl = this.document.createElement('temp-container');
+            let currentP = this.document.createElement('p');
             currentP.style.marginBottom = '0';
             do {
                 const node = childNodes.shift();
@@ -4702,7 +4702,7 @@ export class OdooEditor extends EventTarget {
     addImagesFiles(imageFiles) {
         const promises = [];
         for (const imageFile of imageFiles) {
-            const imageNode = document.createElement('img');
+            const imageNode = this.document.createElement('img');
             imageNode.classList.add('img-fluid');
             // Mark images as having to be saved as attachments.
             if (this.options.dropImageAsAttachment) {
@@ -4715,7 +4715,7 @@ export class OdooEditor extends EventTarget {
             }));
         }
         return Promise.all(promises).then(nodes => {
-            const fragment = document.createDocumentFragment();
+            const fragment = this.document.createDocumentFragment();
             fragment.append(...nodes);
             return fragment;
         });
@@ -4784,7 +4784,7 @@ export class OdooEditor extends EventTarget {
                 // An image can be embedded inside an existing link, a video cannot.
                 if (selectionIsInsideALink) {
                     if (isImageUrl) {
-                        const img = document.createElement('IMG');
+                        const img = this.document.createElement('IMG');
                         img.setAttribute('src', url);
                         this._applyCommand('insert', img);
                     } else {
@@ -4823,7 +4823,7 @@ export class OdooEditor extends EventTarget {
                             fontawesome: 'fa-image',
                             callback: () => {
                                 revertTextInsertion();
-                                const img = document.createElement('IMG');
+                                const img = this.document.createElement('IMG');
                                 img.setAttribute('src', url);
                                 this._applyRawCommand('insert', img);
                             },
@@ -4841,7 +4841,7 @@ export class OdooEditor extends EventTarget {
                                 if (this.options.getYoutubeVideoElement) {
                                     videoElement = this.options.getYoutubeVideoElement(youtubeUrl[0]);
                                 } else {
-                                    videoElement = document.createElement('iframe');
+                                    videoElement = this.document.createElement('iframe');
                                     videoElement.setAttribute('width', '560');
                                     videoElement.setAttribute('height', '315');
                                     videoElement.setAttribute(
