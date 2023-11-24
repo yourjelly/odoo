@@ -1,6 +1,10 @@
 {%- set countryPascal = name|pascal -%}
 {%- set codeUpper = code|upper -%}
 <odoo>
+    <record id="base.demo_company_{{code}}" model="res.company">
+        <field name="active" eval="True"/>
+    </record>
+
     <record id="l10n_{{code}}_res_company_{{code}}" model="res.company">
         <field name="name">My ''country-ish'' Company</field>
         <field name="currency_id" ref="base.EUR"/>
@@ -124,7 +128,6 @@
         <field name="company_id" ref="l10n_{{code}}_hr_payroll.res_company_{{code}}"/>
         <field name="date_start" eval="(DateTime.today() + relativedelta(years=-2, month=1, day=1))"/>
         <field name="date_end" eval="(DateTime.today() + relativedelta(years=-1, month=1, day=1, days=-2))"/>
-        <field name="resource_calendar_id" model="resource.calendar" eval="obj().search([('company_id', '=', obj().env.ref('l10n_{{code}}_hr_payroll.res_company_{{code}}').id)], limit=1)"/>
     </record>
 
     <record id="l10n_{{code}}_hr_contract_cdi_antonina" model="hr.contract">
@@ -138,7 +141,6 @@
         <field name="hr_responsible_id" ref="base.user_demo"/>
         <field name="company_id" ref="l10n_{{code}}_hr_payroll.res_company_{{code}}"/>
         <field name="date_start" eval="(DateTime.today() + relativedelta(years=-1, month=1, day=1, days=-1))"/>
-        <field name="resource_calendar_id" model="resource.calendar" eval="obj().search([('company_id', '=', obj().env.ref('l10n_{{code}}_hr_payroll.res_company_{{code}}').id)], limit=1)"/>
     </record>
 
     <record id="l10n_{{code}}_hr_employee_antonina" model="hr.employee">

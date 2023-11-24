@@ -35,8 +35,8 @@ class Contract(models.Model):
     trial_date_end = fields.Date('End of Trial Period',
         help="End date of the trial period (if there is one).")
     resource_calendar_id = fields.Many2one(
-        'resource.calendar', 'Working Schedule', compute='_compute_employee_contract', store=True, readonly=False,
-        default=lambda self: self.env.company.resource_calendar_id.id, copy=False, index=True,
+        'resource.calendar', 'Working Schedule', compute='_compute_resource_calendar_id', store=True, readonly=False, precompute=True,
+        copy=False, index=True,
         domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]")
     wage = fields.Monetary('Wage', required=True, tracking=True, help="Employee's monthly gross wage.", group_operator="avg")
     contract_wage = fields.Monetary('Contract Wage', compute='_compute_contract_wage')
@@ -48,8 +48,8 @@ class Contract(models.Model):
         ('cancel', 'Cancelled')
     ], string='Status', group_expand='_expand_states', copy=False,
         tracking=True, help='Status of the contract', default='draft')
-    company_id = fields.Many2one('res.company', compute='_compute_employee_contract', store=True, readonly=False,
-        default=lambda self: self.env.company, required=True)
+    company_id = fields.Many2one('res.company', compute='_compute_company_id', store=True, readonly=False, precompute=True,
+        required=True)
     company_country_id = fields.Many2one('res.country', string="Company country", related='company_id.country_id', readonly=True)
     country_code = fields.Char(related='company_country_id.code', depends=['company_country_id'], readonly=True)
     contract_type_id = fields.Many2one('hr.contract.type', "Contract Type")
@@ -91,8 +91,16 @@ class Contract(models.Model):
         for contract in self.filtered('employee_id'):
             contract.job_id = contract.employee_id.job_id
             contract.department_id = contract.employee_id.department_id
-            contract.resource_calendar_id = contract.employee_id.resource_calendar_id
-            contract.company_id = contract.employee_id.company_id
+
+    @api.depends('employee_id')
+    def _compute_company_id(self):
+        for contract in self:
+            contract.company_id = contract.company_id or self.env.company
+
+    @api.depends('employee_id', 'company_id')
+    def _compute_resource_calendar_id(self):
+        for contract in self:
+            contract.resource_calendar_id = (contract.employee_id or contract.company_id).resource_calendar_id
 
     @api.depends('company_id')
     def _compute_structure_type_id(self):
