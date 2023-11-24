@@ -51,6 +51,7 @@ class TestPrivacyWizard(TransactionCase):
             'domain_force': "['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]"
         })
         company_2 = self.env['res.company'].create({'name': 'Company 2'})
+        self.env.ref('base.user_admin').company_ids -= company_2
         other_partner = self.env['res.partner'].create({
             'name': 'Rintin Tin',
             'email': 'rintin.tin@gmail.com',
@@ -92,7 +93,7 @@ class TestPrivacyWizard(TransactionCase):
         self.assertEqual(wizard.line_ids[1].res_model, bank._name)
 
     def test_wizard_indirect_reference(self):
-        self.env.company.partner_id = self.partner
+        self.env.user.partner_id = self.partner
 
         wizard = self.env['privacy.lookup.wizard'].with_context(
             default_email=self.partner.email,
@@ -105,8 +106,8 @@ class TestPrivacyWizard(TransactionCase):
         self.assertEqual(wizard.line_ids[0].res_id, self.partner.id)
         self.assertEqual(wizard.line_ids[0].res_model, self.partner._name)
 
-        self.assertEqual(wizard.line_ids[1].res_id, self.env.company.id)
-        self.assertEqual(wizard.line_ids[1].res_model, self.env.company._name)
+        self.assertEqual(wizard.line_ids[1].res_id, self.env.user.id)
+        self.assertEqual(wizard.line_ids[1].res_model, self.env.user._name)
 
     def test_wizard_indirect_reference_cascade(self):
         # Don't retrieve ondelete cascade records

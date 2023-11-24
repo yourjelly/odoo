@@ -91,8 +91,8 @@ class TestStandardPerformance(UtilPerf):
         # not published user, get the not found image placeholder
         self.assertEqual(self.env['res.users'].sudo().browse(2).website_published, False)
         url = '/web/image/res.users/2/image_256'
-        self.assertEqual(self._get_url_hot_query(url), 8)
-        self.assertEqual(self._get_url_hot_query(url, cache=False), 8)
+        self.assertEqual(self._get_url_hot_query(url), 9)
+        self.assertEqual(self._get_url_hot_query(url, cache=False), 9)
 
     @mute_logger('odoo.http')
     def test_11_perf_sql_img_controller(self):
@@ -176,10 +176,10 @@ class TestWebsitePerformance(UtilPerf):
             # Check if `view.track` to track visitor or not
         }
         self._check_url_hot_query(self.page.url, 6, select_tables_perf)
-        self.assertEqual(self._get_url_hot_query(self.page.url, cache=False), 10)
+        self.assertEqual(self._get_url_hot_query(self.page.url, cache=False), 11)
         self.menu.unlink()  # page being or not in menu shouldn't add queries
         self._check_url_hot_query(self.page.url, 6, select_tables_perf)
-        self.assertEqual(self._get_url_hot_query(self.page.url, cache=False), 10)
+        self.assertEqual(self._get_url_hot_query(self.page.url, cache=False), 11)
 
     def test_15_perf_sql_queries_page(self):
         # standard tracked website.page
@@ -200,11 +200,11 @@ class TestWebsitePerformance(UtilPerf):
         }
         self.page.track = True
         self._check_url_hot_query(self.page.url, 7, select_tables_perf, insert_tables_perf)
-        self.assertEqual(self._get_url_hot_query(self.page.url, cache=False), 11)
+        self.assertEqual(self._get_url_hot_query(self.page.url, cache=False), 12)
 
         self.menu.unlink()  # page being or not in menu shouldn't add queries
         self._check_url_hot_query(self.page.url, 7, select_tables_perf, insert_tables_perf)
-        self.assertEqual(self._get_url_hot_query(self.page.url, cache=False), 11)
+        self.assertEqual(self._get_url_hot_query(self.page.url, cache=False), 12)
 
     def test_20_perf_sql_queries_homepage(self):
         # homepage "/" has its own controller
@@ -224,7 +224,7 @@ class TestWebsitePerformance(UtilPerf):
             # Visitor upsert
         }
         self._check_url_hot_query('/', 7, select_tables_perf, insert_tables_perf)
-        self.assertEqual(self._get_url_hot_query('/', cache=False), 9)
+        self.assertEqual(self._get_url_hot_query('/', cache=False), 10)
 
     def test_30_perf_sql_queries_page_no_layout(self):
         # untrack website.page with no call to layout templates
@@ -270,7 +270,7 @@ class TestWebsitePerformance(UtilPerf):
             # Check if `view.track` to track visitor or not
         }
         self._check_url_hot_query(self.page.url, 6, select_tables_perf)
-        self.assertEqual(self._get_url_hot_query(self.page.url, cache=False), 10)
+        self.assertEqual(self._get_url_hot_query(self.page.url, cache=False), 11)
 
 
 @tagged('-at_install', 'post_install')

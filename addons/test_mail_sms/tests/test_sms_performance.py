@@ -133,5 +133,5 @@ class TestSMSMassPerformance(BaseMailPerformance, sms_common.MockSMS):
             'mass_keep_log': True,
         })
 
-        with self.mockSMSGateway(sms_allow_unlink=True), self.assertQueryCount(employee=58):
+        with self.mockSMSGateway(sms_allow_unlink=True), self.assertQueryCount(employee=59):
             composer.action_send_sms()

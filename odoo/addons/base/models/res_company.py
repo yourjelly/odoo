@@ -14,6 +14,7 @@ _logger = logging.getLogger(__name__)
 
 class Company(models.Model):
     _name = "res.company"
+    _inherits = {'res.partner': 'partner_id'}
     _description = 'Companies'
     _order = 'sequence, name'
     _parent_store = True
@@ -25,11 +26,6 @@ class Company(models.Model):
         with file_open('base/static/img/res_company_logo.png', 'rb') as file:
             return base64.b64encode(file.read())
 
-    def _default_currency_id(self):
-        return self.env.user.company_id.currency_id
-
-    name = fields.Char(related='partner_id.name', string='Company Name', required=True, store=True, readonly=False)
-    active = fields.Boolean(default=True)
     sequence = fields.Integer(help='Used to order Companies in the company switcher', default=10)
     parent_id = fields.Many2one('res.company', string='Parent Company', index=True)
     child_ids = fields.One2many('res.company', 'parent_id', string='Branches')
@@ -37,7 +33,7 @@ class Company(models.Model):
     parent_path = fields.Char(index=True)
     parent_ids = fields.Many2many('res.company', compute='_compute_parent_ids', compute_sudo=True)
     root_id = fields.Many2one('res.company', compute='_compute_parent_ids', compute_sudo=True)
-    partner_id = fields.Many2one('res.partner', string='Partner', required=True)
+    partner_id = fields.Many2one('res.partner', string='Partner', required=True, ondelete="cascade")
     report_header = fields.Html(string='Company Tagline', translate=True, help="Company tagline, which is included in a printed document's header or footer (depending on the selected layout).")
     report_footer = fields.Html(string='Report Footer', translate=True, help="Footer text displayed at the bottom of all reports.")
     company_details = fields.Html(string='Company Details', translate=True, help="Header text displayed at the top of all reports.")
@@ -47,24 +43,15 @@ class Company(models.Model):
     # performance reasons (see addons/web/controllers/main.py, Binary.company_logo)
     logo_web = fields.Binary(compute='_compute_logo_web', store=True, attachment=False)
     uses_default_logo = fields.Boolean(compute='_compute_uses_default_logo', store=True)
-    currency_id = fields.Many2one('res.currency', string='Currency', required=True, default=lambda self: self._default_currency_id())
-    user_ids = fields.Many2many('res.users', 'res_company_users_rel', 'cid', 'user_id', string='Accepted Users')
-    street = fields.Char(compute='_compute_address', inverse='_inverse_street')
-    street2 = fields.Char(compute='_compute_address', inverse='_inverse_street2')
-    zip = fields.Char(compute='_compute_address', inverse='_inverse_zip')
-    city = fields.Char(compute='_compute_address', inverse='_inverse_city')
-    state_id = fields.Many2one(
-        'res.country.state', compute='_compute_address', inverse='_inverse_state',
-        string="Fed. State", domain="[('country_id', '=?', country_id)]"
+    currency_id = fields.Many2one(
+        'res.currency',
+        string='Currency',
+        required=True,
+        store=True, readonly=False, precompute=True,
+        compute='_compute_currency_id',
+        inverse='_inverse_currency_id',
     )
-    bank_ids = fields.One2many(related='partner_id.bank_ids', readonly=False)
-    country_id = fields.Many2one('res.country', compute='_compute_address', inverse='_inverse_country', string="Country")
-    email = fields.Char(related='partner_id.email', store=True, readonly=False)
-    phone = fields.Char(related='partner_id.phone', store=True, readonly=False)
-    mobile = fields.Char(related='partner_id.mobile', store=True, readonly=False)
-    website = fields.Char(related='partner_id.website', readonly=False)
-    vat = fields.Char(related='partner_id.vat', string="Tax ID", readonly=False)
-    company_registry = fields.Char(related='partner_id.company_registry', string="Company ID", readonly=False)
+    user_ids = fields.Many2many('res.users', 'res_company_users_rel', 'cid', 'user_id', string='Accepted Users')
     paperformat_id = fields.Many2one('report.paperformat', 'Paper format', default=lambda self: self.env.ref('base.paperformat_euro', raise_if_not_found=False))
     external_report_layout_id = fields.Many2one('ir.ui.view', 'Document Template')
     font = fields.Selection([("Lato", "Lato"), ("Roboto", "Roboto"), ("Open_Sans", "Open Sans"), ("Montserrat", "Montserrat"), ("Oswald", "Oswald"), ("Raleway", "Raleway"), ('Tajawal', 'Tajawal')], default="Lato")
@@ -73,9 +60,9 @@ class Company(models.Model):
     color = fields.Integer(compute='_compute_color', inverse='_inverse_color')
     layout_background = fields.Selection([('Blank', 'Blank'), ('Geometric', 'Geometric'), ('Custom', 'Custom')], default="Blank", required=True)
     layout_background_image = fields.Binary("Background Image")
-    _sql_constraints = [
-        ('name_uniq', 'unique (name)', 'The company name must be unique!')
-    ]
+    # _sql_constraints = [
+    #     ('name_uniq', 'unique (name)', 'The company name must be unique!')
+    # ]
 
     def init(self):
         for company in self.search([('paperformat_id', '=', False)]):
@@ -96,61 +83,19 @@ class Company(models.Model):
         """
         return ['currency_id']
 
-    def _get_company_address_field_names(self):
-        """ Return a list of fields coming from the address partner to match
-        on company address fields. Fields are labeled same on both models. """
-        return ['street', 'street2', 'city', 'zip', 'state_id', 'country_id']
-
-    def _get_company_address_update(self, partner):
-        return dict((fname, partner[fname])
-                    for fname in self._get_company_address_field_names())
-
     @api.depends('parent_path')
     def _compute_parent_ids(self):
         for company in self.with_context(active_test=False):
             company.parent_ids = self.browse(int(id) for id in company.parent_path.split('/') if id) if company.parent_path else company
             company.root_id = company.parent_ids[0]
 
-    # TODO @api.depends(): currently now way to formulate the dependency on the
-    # partner's contact address
-    def _compute_address(self):
-        for company in self.filtered(lambda company: company.partner_id):
-            address_data = company.partner_id.sudo().address_get(adr_pref=['contact'])
-            if address_data['contact']:
-                partner = company.partner_id.browse(address_data['contact']).sudo()
-                company.update(company._get_company_address_update(partner))
-
-    def _inverse_street(self):
-        for company in self:
-            company.partner_id.street = company.street
-
-    def _inverse_street2(self):
-        for company in self:
-            company.partner_id.street2 = company.street2
-
-    def _inverse_zip(self):
-        for company in self:
-            company.partner_id.zip = company.zip
-
-    def _inverse_city(self):
-        for company in self:
-            company.partner_id.city = company.city
-
-    def _inverse_state(self):
-        for company in self:
-            company.partner_id.state_id = company.state_id
-
-    def _inverse_country(self):
-        for company in self:
-            company.partner_id.country_id = company.country_id
-
-    @api.depends('partner_id.image_1920')
+    @api.depends('image_1920')
     def _compute_logo_web(self):
         for company in self:
-            img = company.partner_id.image_1920
+            img = company.image_1920
             company.logo_web = img and base64.b64encode(tools.image_process(base64.b64decode(img), size=(180, 0)))
 
-    @api.depends('partner_id.image_1920')
+    @api.depends('image_1920')
     def _compute_uses_default_logo(self):
         default_logo = self._get_logo()
         for company in self:
@@ -159,21 +104,35 @@ class Company(models.Model):
     @api.depends('root_id')
     def _compute_color(self):
         for company in self:
-            company.color = company.root_id.partner_id.color or (company.root_id._origin.id % 12)
+            company.color = company.root_id.color or (company.root_id._origin.id % 12)
 
     def _inverse_color(self):
         for company in self:
-            company.root_id.partner_id.color = company.color
+            company.root_id.color = company.color
 
     @api.onchange('state_id')
     def _onchange_state(self):
         if self.state_id.country_id:
             self.country_id = self.state_id.country_id
 
-    @api.onchange('country_id')
-    def _onchange_country_id(self):
-        if self.country_id:
-            self.currency_id = self.country_id.currency_id
+    @api.depends('country_id')
+    def _compute_currency_id(self):
+        for company in self:
+            company.currency_id = company.country_id.currency_id or self.env.company.currency_id
+
+    def _inverse_currency_id(self):
+        self._activate_currency()
+
+    def _inverse_active(self):
+        self._activate_currency()
+        active_companies = self.filtered('active')
+        if active_companies:
+            (self.env.user | self.env.ref('base.group_system').users | self.env['res.users'].browse(SUPERUSER_ID)).write({
+                'company_ids': [Command.link(company.id) for company in active_companies],
+            })
+
+    def _activate_currency(self):
+        self.filtered(lambda c: c.active).currency_id.sudo().filtered(lambda c: not c.active).active = True
 
     @api.onchange('parent_id')
     def _onchange_parent_id(self):
@@ -224,33 +183,8 @@ class Company(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-
-        # create missing partners
-        no_partner_vals_list = [
-            vals
-            for vals in vals_list
-            if vals.get('name') and not vals.get('partner_id')
-        ]
-        if no_partner_vals_list:
-            partners = self.env['res.partner'].create([
-                {
-                    'name': vals['name'],
-                    'is_company': True,
-                    'image_1920': vals.get('logo'),
-                    'email': vals.get('email'),
-                    'phone': vals.get('phone'),
-                    'website': vals.get('website'),
-                    'vat': vals.get('vat'),
-                    'country_id': vals.get('country_id'),
-                }
-                for vals in no_partner_vals_list
-            ])
-            # compute stored fields, for example address dependent fields
-            partners.flush_model()
-            for vals, partner in zip(no_partner_vals_list, partners):
-                vals['partner_id'] = partner.id
-
         for vals in vals_list:
+            vals.setdefault('is_company', True)
             # Copy delegated fields from root to branches
             if parent := self.browse(vals.get('parent_id')):
                 for fname in self._get_company_root_delegated_field_names():
@@ -258,16 +192,7 @@ class Company(models.Model):
 
         self.env.registry.clear_cache()
         companies = super().create(vals_list)
-
-        # The write is made on the user to set it automatically in the multi company group.
-        if companies:
-            (self.env.user | self.env['res.users'].browse(SUPERUSER_ID)).write({
-                'company_ids': [Command.link(company.id) for company in companies],
-            })
-
-        # Make sure that the selected currencies are enabled
-        companies.currency_id.sudo().filtered(lambda c: not c.active).active = True
-
+        companies._inverse_active()
         return companies
 
     def cache_invalidation_fields(self):
@@ -291,12 +216,12 @@ class Company(models.Model):
         if 'parent_id' in values:
             raise UserError(_("The company hierarchy cannot be changed."))
 
-        if values.get('currency_id'):
-            currency = self.env['res.currency'].browse(values['currency_id'])
-            if not currency.active:
-                currency.write({'active': True})
-
         res = super(Company, self).write(values)
+
+        if values.get('country_id'):
+            self._activate_currency()
+        if values.get('active'):
+            self._inverse_active()
 
         for company in self:
             # Copy modified delegated fields from root to branches
@@ -308,11 +233,6 @@ class Company(models.Model):
                 for fname in sorted(changed):
                     branches[fname] = company[fname]
 
-        # invalidate company cache to recompute address based on updated partner
-        company_address_fields = self._get_company_address_field_names()
-        company_address_fields_upd = set(company_address_fields) & set(values.keys())
-        if company_address_fields_upd:
-            self.invalidate_model(company_address_fields)
         return res
 
     @api.constrains('active')
@@ -395,3 +315,14 @@ class Company(models.Model):
             },
             'views': [[False, 'tree'], [False, 'kanban'], [False, 'form']],
         }
+
+class IrRule(models.Model):
+    _inherit = 'ir.rule'
+
+    def _compute_domain(self, model_name, mode="read"):
+        if not self.env.su and (self.env.user.has_group('base.group_portal') or self.env.user.has_group('base.group_public')):
+            if model_name == 'res.company':
+                return []  # we shouldn't check for res_partner_portal_public_rule to access companies
+            if model_name == 'res.partner':
+                return ['|', ('id', '=', self.env.company.partner_id.id)] + super()._compute_domain(model_name, mode)
+        return super()._compute_domain(model_name, mode)

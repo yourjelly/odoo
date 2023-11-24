@@ -169,7 +169,7 @@ class ResCompany(models.Model):
     account_storno = fields.Boolean(string="Storno accounting", readonly=False)
 
     # Multivat
-    fiscal_position_ids = fields.One2many(comodel_name="account.fiscal.position", inverse_name="company_id")
+    fiscal_position_ids = fields.One2many(string="Fiscal Positions", comodel_name="account.fiscal.position", inverse_name="company_id")
     multi_vat_foreign_country_ids = fields.Many2many(
         string="Foreign VAT countries",
         help="Countries for which the company has a VAT number",

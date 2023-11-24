@@ -34,16 +34,6 @@ class ResCompany(models.Model):
         help="Specifies which API the system should use", required=True,
         default='sandbox', copy=False)
 
-    l10n_sa_edi_building_number = fields.Char(compute='_compute_address',
-                                              inverse='_l10n_sa_edi_inverse_building_number')
-    l10n_sa_edi_plot_identification = fields.Char(compute='_compute_address',
-                                                  inverse='_l10n_sa_edi_inverse_plot_identification')
-
-    l10n_sa_additional_identification_scheme = fields.Selection(
-        related='partner_id.l10n_sa_additional_identification_scheme', readonly=False)
-    l10n_sa_additional_identification_number = fields.Char(
-        related='partner_id.l10n_sa_additional_identification_number', readonly=False)
-
     def _get_company_root_delegated_field_names(self):
         return super()._get_company_root_delegated_field_names() + [
             'l10n_sa_api_mode',
@@ -59,11 +49,6 @@ class ResCompany(models.Model):
                 journals._l10n_sa_reset_certificates()
                 journals.l10n_sa_latest_submission_hash = False
         return super().write(vals)
-
-    def _get_company_address_field_names(self):
-        """ Override to add ZATCA specific address fields """
-        return super()._get_company_address_field_names() + \
-            ['l10n_sa_edi_building_number', 'l10n_sa_edi_plot_identification']
 
     def _l10n_sa_edi_inverse_building_number(self):
         for company in self:

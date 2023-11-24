@@ -66,7 +66,7 @@
         </record>
 
         <function model="stock.warehouse" name="write">
-          <value model="stock.warehouse" search="[('partner_id', '=', ref('stock.res_partner_company_1'))]"/>
+          <value model="stock.warehouse" search="[('company_id', '=', ref('stock.res_company_1'))]"/>
           <value eval="{'buy_to_resupply': True}"/>
         </function>
 
