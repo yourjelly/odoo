@@ -91,7 +91,7 @@ class TestTaxCommon(AccountTestInvoicingCommon):
             'amount': 0,
             'sequence': 8,
         })
-        some_account = cls.env['account.account'].search([], limit=1)
+        some_account = cls.env['account.account'].search([('company_id', '=', cls.env.company.id)], limit=1)
         cls.tax_with_account = cls.env['account.tax'].create({
             'name': "Tax with account",
             'amount_type': 'fixed',

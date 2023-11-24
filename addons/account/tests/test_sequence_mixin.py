@@ -346,7 +346,7 @@ class TestSequenceMixin(TestSequenceMixinCommon):
             'code': f'J{i}',
             'type': 'general',
         } for i in range(2)])
-        account = self.env['account.account'].search([], limit=1)
+        account = self.env['account.account'].search([('company_id', '=', self.env.company.id)], limit=1)
         moves = self.env['account.move'].create([{
             'journal_id': journals[i].id,
             'line_ids': [(0, 0, {'account_id': account.id, 'name': 'line'})],

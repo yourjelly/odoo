@@ -14,7 +14,10 @@ class TestSaleOrderDownPayment(TestSaleCommon):
 
         SaleOrder = cls.env['sale.order'].with_context(tracking_disable=True)
 
-        cls.tax_account = cls.env['account.account'].search([('account_type', '=', 'liability_current')], limit=1)
+        cls.tax_account = cls.env['account.account'].search([
+            ('account_type', '=', 'liability_current'),
+            ('company_id', '=', cls.env.company.id),
+        ], limit=1)
         cls.tax_10 = cls.create_tax(10)
         cls.tax_15 = cls.create_tax(15)
 

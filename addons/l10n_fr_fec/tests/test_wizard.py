@@ -45,7 +45,10 @@ class TestAccountFrFec(AccountTestInvoicingCommon):
                 Command.create({
                     'repartition_type': 'tax',
                     'factor_percent': 100.0,
-                    'account_id': cls.env['account.account'].search([('code', '=', "445710")], limit=1).id,
+                    'account_id': cls.env['account.account'].search([
+                        ('code', '=', "445710"),
+                        ('company_id', '=', cls.env.company.id),
+                    ], limit=1).id,
                 })
             ]
         })
