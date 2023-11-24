@@ -172,6 +172,9 @@ export const editorCommands = {
             container.textContent = content;
         } else {
             container.replaceChildren(content);
+            if (!(content instanceof editor.document.defaultView.Node)) {
+                console.warn("Mixed origin node inserted.");
+            }
         }
 
         // In case the html inserted starts with a list and will be inserted within
@@ -315,7 +318,7 @@ export const editorCommands = {
         return [...firstInsertedNodes, ...insertedNodes, ...lastInsertedNodes];
     },
     insertFontAwesome: (editor, faClass = 'fa fa-star') => {
-        const insertedNode = editorCommands.insert(editor, document.createElement('i'))[0];
+        const insertedNode = editorCommands.insert(editor, editor.document.createElement('i'))[0];
         insertedNode.className = faClass;
         const position = rightPos(insertedNode);
         setSelection(...position, ...position, false);
@@ -633,7 +636,7 @@ export const editorCommands = {
                     font = previous;
                 } else {
                     // No <font> found: insert a new one.
-                    font = document.createElement('font');
+                    font = editor.document.createElement('font');
                     node.after(font);
                 }
                 if (node.textContent) {
@@ -720,6 +723,7 @@ export const editorCommands = {
             totalWidth += newWidth;
         }
         referenceColumn.forEach((cell, rowIndex) => {
+            const document = editor.document;
             const newCell = document.createElement('td');
             const p = document.createElement('p');
             p.append(document.createElement('br'));
@@ -742,6 +746,7 @@ export const editorCommands = {
             referenceRow = getInSelection(editor.document, 'tr');
             if (!referenceRow) return;
         }
+        const document = editor.document;
         const referenceRowHeight = referenceRow.style.height ? pxToFloat(referenceRow.style.height) : referenceRow.clientHeight;
         const newRow = document.createElement('tr');
         newRow.style.height = referenceRowHeight + 'px';
@@ -811,8 +816,8 @@ export const editorCommands = {
     deleteTable: (editor, table) => {
         table = table || getInSelection(editor.document, 'table');
         if (!table) return;
-        const p = document.createElement('p');
-        p.appendChild(document.createElement('br'));
+        const p = editor.document.createElement('p');
+        p.appendChild(editor.document.createElement('br'));
         table.before(p);
         table.remove();
         setSelection(p, 0);
@@ -822,6 +827,7 @@ export const editorCommands = {
         const sel = editor.document.getSelection();
         const anchor = sel.anchorNode;
         const hasColumns = !!closestElement(anchor, '.o_text_columns');
+        const document = editor.document;
         if (!numberOfColumns && hasColumns) {
             // Remove columns.
             const restore = preserveCursor(editor.document);
