@@ -4236,7 +4236,11 @@ class BaseModel(metaclass=MetaModel):
             ir_attachment_unlink.unlink()
 
         # auditing: deletions are infrequent and leave no trace in the database
-        _unlink.info('User #%s deleted %s records with IDs: %r', self._uid, self._name, self.ids)
+        from odoo.http import request
+        if request and request.session.source:
+            _unlink.info('User #%s (%s) deleted %s records with IDs: %r', self._uid, request.session.source, self._name, self.ids)
+        else:
+            _unlink.info('User #%s deleted %s records with IDs: %r', self._uid, self._name, self.ids)
 
         return True
 
