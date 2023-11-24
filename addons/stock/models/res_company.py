@@ -191,10 +191,9 @@ class Company(models.Model):
     def _create_per_company_rules(self):
         self.ensure_one()
 
-    @api.model_create_multi
-    def create(self, vals_list):
-        companies = super().create(vals_list)
-        for company in companies:
+    def _inverse_active(self):
+        active_companies = self.filtered(lambda c: c.active and not c.internal_transit_location_id)
+        for company in active_companies:
             company.sudo()._create_per_company_locations()
             company.sudo()._create_per_company_sequences()
             company.sudo()._create_per_company_picking_types()
@@ -204,5 +203,5 @@ class Company(models.Model):
             'code': self.env.context.get('default_code') or company.name[:5],
             'company_id': company.id,
             'partner_id': company.partner_id.id
-        } for company in companies])
-        return companies
+        } for company in active_companies])
+        super()._inverse_active()

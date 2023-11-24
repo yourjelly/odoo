@@ -14,7 +14,7 @@ class ResCompany(models.Model):
 
     @api.model
     def _init_data_resource_calendar(self):
-        self.search([('resource_calendar_id', '=', False)])._create_resource_calendar()
+        self.with_context(active_test=False).search([('resource_calendar_id', '=', False)])._create_resource_calendar()
 
     def _create_resource_calendar(self):
         vals_list = [

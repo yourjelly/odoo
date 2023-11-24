@@ -775,7 +775,7 @@ class PosConfig(models.Model):
                                 partner.id = pm.partner_id)
             WHERE (
                 partner.company_id=%s OR partner.company_id IS NULL
-            )
+            ) AND partner.active IS TRUE
             ORDER BY  COALESCE(pm.order_count, 0) DESC,
                       NAME limit %s;
         """, [self.company_id.id, str(100)])
