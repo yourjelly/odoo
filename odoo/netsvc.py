@@ -115,6 +115,11 @@ class DBFormatter(logging.Formatter):
     def format(self, record):
         record.pid = os.getpid()
         record.dbname = getattr(threading.current_thread(), 'dbname', '?')
+        try:
+            from odoo.http import request
+            record.uid = request.session.sid
+        except Exception:
+            record.uid = ''
         return logging.Formatter.format(self, record)
 
 class ColoredFormatter(DBFormatter):
@@ -177,7 +182,7 @@ def init_logger():
     resetlocale()
 
     # create a format for log messages and dates
-    format = '%(asctime)s %(pid)s %(levelname)s %(dbname)s %(name)s: %(message)s %(perf_info)s'
+    format = '%(asctime)s %(pid)s %(uid)s %(levelname)s %(dbname)s %(name)s: %(message)s %(perf_info)s'
     # Normal Handler on stderr
     handler = logging.StreamHandler()
 
