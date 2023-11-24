@@ -259,6 +259,7 @@ QUnit.module("Fields", (hooks) => {
                             </tree>
                         </field>
                     </form>`,
+
                 mockRPC(route, args) {
                     if (startAssert) {
                         assert.step(args.method + " " + args.model);
@@ -444,6 +445,58 @@ QUnit.module("Fields", (hooks) => {
             assert.containsOnce(target, ".modal");
 
             assert.verifySteps(["read turtle", "read turtle"]);
+        }
+    );
+
+    QUnit.skip(
+        "clicking twice on a record in a one2many will open it once",
+        async function (assert) {
+            serverData.views = {
+                "turtle,false,kanban": `
+                        <kanban>
+                            <field name="display_name" readonly="1"/>
+                            <field name="turtle_foo"/>
+                            <templates>
+                                <t t-name="kanban-box">
+                                    <div><t t-esc="record.display_name.raw_value"/></div>
+                                </t>
+                            </templates>
+                        </kanban>`,
+            };
+
+            serverData.models.turtle.onchanges = {
+                display_name: function () {},
+            };
+            await makeView({
+                type: "form",
+                resModel: "partner",
+                serverData,
+                arch: `
+                <form>
+                    <field name="turtles" mode="kanban">
+                        <tree>
+                            <field name="display_name"/>
+                            <field name="turtle_foo"/>
+                        </tree>
+                        <form>
+                            <field name="display_name"/>
+                        </form>
+                    </field>
+                </form>`,
+            });
+            // await click(target, ".o_data_cell");
+            // await click(target, ".o_data_cell");
+            // def.resolve();
+            // await nextTick();
+            // assert.containsOnce(target, ".modal");
+
+            // await click(target, ".modal .btn-close");
+            // assert.containsNone(target, ".modal");
+
+            // await click(target, ".o_data_cell");
+            // assert.containsOnce(target, ".modal");
+
+            // assert.verifySteps(["read turtle", "read turtle"]);
         }
     );
 
