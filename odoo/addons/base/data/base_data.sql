@@ -12,6 +12,12 @@ CREATE TABLE ir_act_url (primary key(id)) INHERITS (ir_actions);
 CREATE TABLE ir_act_server (primary key(id)) INHERITS (ir_actions);
 CREATE TABLE ir_act_client (primary key(id)) INHERITS (ir_actions);
 
+CREATE TABLE res_country (
+    id serial NOT NULL,
+    code varchar(2) NOT NULL,
+    primary key(id)
+);
+
 CREATE TABLE res_users (
     id serial NOT NULL,
     -- No FK references below, will be added later by ORM
@@ -76,6 +82,11 @@ CREATE TABLE ir_module_module_dependency (
     primary key(id)
 );
 
+CREATE TABLE module_country (
+    module_id integer REFERENCES ir_module_module ON DELETE cascade,
+    country_id integer REFERENCES res_country ON DELETE cascade
+);
+
 CREATE TABLE ir_model_data (
     id serial NOT NULL,
     create_uid integer,
@@ -99,6 +110,7 @@ CREATE TABLE res_currency (
 
 CREATE TABLE res_company (
     id serial,
+    active boolean DEFAULT true,
     name varchar NOT NULL,
     partner_id integer,
     currency_id integer,
@@ -110,6 +122,7 @@ CREATE TABLE res_company (
 CREATE TABLE res_partner (
     id serial,
     company_id integer,
+    country_id integer,
     create_date timestamp without time zone,
     name varchar,
     primary key(id)

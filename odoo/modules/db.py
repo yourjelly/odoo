@@ -91,6 +91,21 @@ def initialize(cr):
             WHERE d.module_id = m.id
               AND d.auto_install_required
               AND mdep.state != 'to install'
+        )
+        AND (
+            NOT EXISTS (
+                SELECT 1
+                  FROM module_country mc
+                 WHERE mc.module_id = m.id
+            )
+            OR EXISTS (
+                SELECT 1
+                  FROM module_country mc
+                  JOIN res_partner partner ON mc.country_id = partner.country_id
+                  JOIN res_company company ON company.partner_id = partner.id
+                 WHERE mc.module_id = m.id
+                   AND company.active
+            )
         )""")
         to_auto_install = [x[0] for x in cr.fetchall()]
         # however if the module has non-required deps we need to install
