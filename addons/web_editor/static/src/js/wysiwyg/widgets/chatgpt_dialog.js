@@ -50,6 +50,11 @@ export class ChatGPTDialog extends Component {
     // Private
     //--------------------------------------------------------------------------
 
+    /**
+     * 
+     * @param {string} content 
+     * @returns {DocumentFragment}
+     */
     _postprocessGeneratedContent(content) {
         const lines = content.split('\n').filter(line => line.trim().length);
         const fragment = document.createDocumentFragment();

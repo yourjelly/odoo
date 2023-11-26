@@ -74,6 +74,7 @@ patch(Wysiwyg.prototype, {
                 option.partner ? option.partner.id : option.channel.id
             }`,
         });
+        const document = this.odooEditor.document;
         const nameNode = document.createTextNode(`${option.partner ? "@" : "#"}${option.label}`);
         const space = document.createTextNode("\u00A0");
         mentionBlock.appendChild(nameNode);

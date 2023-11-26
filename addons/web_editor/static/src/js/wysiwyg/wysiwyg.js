@@ -1439,8 +1439,11 @@ export class Wysiwyg extends Component {
     openChatGPTDialog(mode = 'prompt') {
         const restore = preserveCursor(this.odooEditor.document);
         const params = {
+            /** @param {DocumentFragment} content */
             insert: content => {
                 this.odooEditor.historyPauseSteps();
+                // TODO: test this
+                content = this.odooEditor.document.importNode(content, true);
                 const insertedNodes = this.odooEditor.execCommand('insert', content);
                 this.odooEditor.historyUnpauseSteps();
                 this.notification.add(_t('Your content was successfully generated.'), {
@@ -1663,6 +1666,7 @@ export class Wysiwyg extends Component {
         if (!element) {
             return;
         }
+        element = this.odooEditor.document.importNode(element, true);
 
         if (params.node) {
             const isIcon = (el) => el.matches('i.fa, span.fa');

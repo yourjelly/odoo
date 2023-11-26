@@ -3325,7 +3325,7 @@ export class OdooEditor extends EventTarget {
      * @returns {Element}
      */
     _prepareClipboardData(clipboardData) {
-        const container = document.createElement('fake-container');
+        const container = this.document.createElement('fake-container');
         container.append(parseHTML(this.document, clipboardData));
 
         for (const tableElement of container.querySelectorAll('table')) {
