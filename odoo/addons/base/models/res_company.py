@@ -28,6 +28,8 @@ class Company(models.Model):
 
     sequence = fields.Integer(help='Used to order Companies in the company switcher', default=10)
     parent_id = fields.Many2one('res.company', string='Parent Company', index=True)
+    active = fields.Boolean(related="partner_id.active", store=True, readonly=False)
+    name = fields.Char(related="partner_id.name", store=True, readonly=False)
     child_ids = fields.One2many('res.company', 'parent_id', string='Branches')
     all_child_ids = fields.One2many('res.company', 'parent_id', context={'active_test': False})
     parent_path = fields.Char(index=True)
@@ -60,9 +62,9 @@ class Company(models.Model):
     color = fields.Integer(compute='_compute_color', inverse='_inverse_color')
     layout_background = fields.Selection([('Blank', 'Blank'), ('Geometric', 'Geometric'), ('Custom', 'Custom')], default="Blank", required=True)
     layout_background_image = fields.Binary("Background Image")
-    # _sql_constraints = [
-    #     ('name_uniq', 'unique (name)', 'The company name must be unique!')
-    # ]
+    _sql_constraints = [
+        ('name_uniq', 'unique (name)', 'The company name must be unique!')
+    ]
 
     def init(self):
         for company in self.search([('paperformat_id', '=', False)]):
@@ -191,7 +193,11 @@ class Company(models.Model):
                     vals.setdefault(fname, self._fields[fname].convert_to_write(parent[fname], parent))
 
         self.env.registry.clear_cache()
+        self._fields['name'].inherited = True  # set the name on both the parter and the company at insert time
+        self._fields['active'].inherited = True  # set the active on both the parter and the company at insert time
         companies = super().create(vals_list)
+        self._fields['name'].inherited = False
+        self._fields['active'].inherited = False
         companies._inverse_active()
         return companies
 
