@@ -15,6 +15,8 @@ from base64 import b64decode, b64encode
 from datetime import datetime
 from math import floor
 from os.path import join as opj
+import random
+import math
 
 from odoo.http import request, Response
 from odoo import http, tools, _, SUPERUSER_ID, release
@@ -26,6 +28,7 @@ from odoo.tools.mimetypes import guess_mimetype
 from odoo.tools.image import image_data_uri, binary_to_image
 from odoo.addons.iap.tools import iap_tools
 from odoo.addons.base.models.assetsbundle import AssetsBundle
+from odoo.addons.mail.tools import jwt, discuss
 
 from ..models.ir_attachment import SUPPORTED_IMAGE_MIMETYPES
 
@@ -742,9 +745,77 @@ class Web_Editor(http.Controller):
 
         return attachments
 
-    @http.route("/web_editor/get_ice_servers", type='json', auth="user")
-    def get_ice_servers(self):
-        return request.env['mail.ice.server']._get_ice_servers()
+    @http.route("/web_editor/get_collab_infos", type='json', auth="user")
+    def get_collab_infos(self, model_name, field_name, res_id, client_id):
+
+        print('get_collab_infos', model_name, field_name, res_id, client_id)
+
+        document = request.env[model_name].browse([res_id])
+        document.check_access_rights('read')
+        document.check_field_access_rights('read', [field_name])
+        document.check_access_rule('read')
+        document.check_access_rights('write')
+        document.check_field_access_rights('write', [field_name])
+        document.check_access_rule('write')
+
+
+        sfu_server_url = discuss.get_sfu_url(request.env)
+        # if not sfu_server_url:
+        #     return
+        channel_id = f"editor_collaboration:{model_name}:{field_name}:{int(res_id)}"
+        key = discuss.get_sfu_key(request.env)
+        import pprint; print('key: ',end='');pprint.pprint(key)
+
+        json_web_token = jwt.sign(
+            # issuer
+            {"iss": f"{document.get_base_url()}:{channel_id}"},
+
+            key=key,
+            ttl=30,
+            algorithm=jwt.ALGORITHM.HS256,
+        )
+
+        response = None
+        try:
+            response = requests.get(
+                sfu_server_url + "/v1/channel?webRTC=false",
+                headers={"Authorization": "jwt " + json_web_token},
+                timeout=3,
+            )
+            response.raise_for_status()
+        except (requests.exceptions.HTTPError, requests.exceptions.ConnectionError, requests.exceptions.Timeout):
+            logger.warning("Failed to obtain a channel from the SFU server, user will stay in p2p")
+
+
+        import pprint; print('response: ',end='');pprint.pprint(response)
+        import pprint; print('response.ok: ',end='');pprint.pprint(response.ok)
+        if response and response.ok:
+            response_dict = response.json()
+
+            channel_uuid = response_dict["uuid"]
+            server_url = response_dict["url"]
+
+        session_id = f"{math.floor(random.random() * math.pow(2, 52))}:{client_id}"
+        claims = {
+            "sfu_channel_uuid": channel_uuid,
+            "session_id": session_id,
+        }
+        json_web_token = jwt.sign(claims, key=key, ttl=60 * 60 * 8, algorithm=jwt.ALGORITHM.HS256)  # 8 hours
+
+        return {
+            'ice_servers': request.env['mail.ice.server']._get_ice_servers(),
+            # 'session_id': session_id,
+            'sfu_config': {
+                'url': server_url,
+                'json_web_token': json_web_token,
+            }
+        }
+
+    # def _get_rtc_server_info(self, rtc_session, key=None):
+
+    #     }
+    #     json_web_token = jwt.sign(claims, key=key, ttl=60 * 60 * 8, algorithm=jwt.ALGORITHM.HS256)  # 8 hours
+    #     return {"url": sfu_server_url, "jsonWebToken": json_web_token}
 
     @http.route("/web_editor/bus_broadcast", type="json", auth="user")
     def bus_broadcast(self, model_name, field_name, res_id, bus_data):

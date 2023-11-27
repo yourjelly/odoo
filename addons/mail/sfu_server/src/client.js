@@ -306,6 +306,7 @@ export class SfuClient extends EventTarget {
             // if we reach the max error count, we restart the whole connection from scratch
             if (this.errors.length > MAX_ERRORS) {
                 // not awaited
+                debugger
                 this._handleConnectionEnd();
                 return;
             }
@@ -355,6 +356,7 @@ export class SfuClient extends EventTarget {
             this._bus = await this._createBus();
             this.state = SFU_CLIENT_STATE.AUTHENTICATED;
         } catch {
+            debugger;
             this._handleConnectionEnd();
             return;
         }
@@ -385,8 +387,14 @@ export class SfuClient extends EventTarget {
                 reject(error);
                 return;
             }
-            webSocket.addEventListener("close", this._handleConnectionEnd);
-            webSocket.addEventListener("error", this._handleConnectionEnd);
+            webSocket.addEventListener("close", (...args) => {
+                console.log('close');
+                this._handleConnectionEnd(...args);
+            });
+            webSocket.addEventListener("error", (...args) => {
+                console.log('error');
+                this._handleConnectionEnd(...args);
+            });
             this._onCleanup(() => {
                 webSocket.removeEventListener("close", this._handleConnectionEnd);
                 webSocket.removeEventListener("error", this._handleConnectionEnd);

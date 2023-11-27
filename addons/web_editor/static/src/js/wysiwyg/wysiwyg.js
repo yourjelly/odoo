@@ -47,6 +47,15 @@ import { isCSSColor } from '@web/core/utils/colors';
 import { EmojiPicker } from '@web/core/emoji_picker/emoji_picker';
 import { Tooltip } from "@web/core/tooltip/tooltip";
 
+import { loadBundle } from "@web/core/assets";
+import { memoize } from "@web/core/utils/functions";
+
+/**
+ * @return {Promise<{ SfuClient: import("@mail/static/libs/discuss_sfu/discuss_sfu").SfuClient, SFU_CLIENT_STATE: import("@mail/static/libs/discuss_sfu/discuss_sfu").SFU_CLIENT_STATE }>}
+ */
+const loadSfuAssets = memoize(async () => await loadBundle("mail.assets_discuss_sfu"));
+
+
 const OdooEditor = OdooEditorLib.OdooEditor;
 const getDeepRange = OdooEditorLib.getDeepRange;
 const getInSelection = OdooEditorLib.getInSelection;
@@ -751,11 +760,21 @@ export class Wysiwyg extends Component {
             }
         }, CHECK_OFFLINE_TIME);
 
+        console.log('here1');
         this._peerToPeerLoading = new Promise(async (resolve) => {
-            if (!ICE_SERVERS) {
-                ICE_SERVERS = await this._serviceRpc('/web_editor/get_ice_servers');
-            }
+            // if (!ICE_SERVERS) {
+            console.log('here2');
+            const infos = await this._serviceRpc('/web_editor/get_collab_infos', {
+                    model_name: modelName,
+                    field_name: fieldName,
+                    res_id: resId,
+                    client_id: this._currentClientId,
+            });
+            console.log(`infos:`, infos);
+            ICE_SERVERS = infos.ice_servers;
+            // }
             let iceServers = ICE_SERVERS;
+            console.log(`iceServers:`, iceServers);
             if (!iceServers.length) {
                 iceServers = [
                     {
@@ -767,6 +786,33 @@ export class Wysiwyg extends Component {
                 ];
             }
             this._iceServers = iceServers;
+            this._suf_config = infos.sfu_config;
+
+            try {
+                await loadSfuAssets();
+                const sfuModule = odoo.loader.modules.get("@mail/../lib/discuss_sfu/discuss_sfu");
+                // this.disconnectFromSfu();
+                this._SFU_CLIENT_STATE = sfuModule.SFU_CLIENT_STATE;
+                this.sfuClient = new sfuModule.SfuClient();
+                this.sfuClient.addEventListener("update", this._handleSfuClientUpdates.bind(this));
+                this.sfuClient.addEventListener("stateChange", this._handleSfuClientStateChange.bind(this));
+                // this.sfuClient.connect(this._suf_config.url, this._suf_config.json_web_token, {
+                //     iceServers
+                // });
+                console.log(`this._suf_config:`, this._suf_config);
+                console.log(`this._suf_config.json_web_token:`, this._suf_config.json_web_token);
+                this.sfuClient.connect(this._suf_config.url, this._suf_config.json_web_token);
+            } catch (e) {
+                // TODO Verify if p2p and server can exist in parallel inside the same call. In theory, it should work.
+                this.notification.add(
+                    _t("Failed to load the SFU server, falling back to peer-to-peer"),
+                    {
+                        type: "warning",
+                    }
+                );
+                console.log(`e:`, e);
+                // this.log(this.state.selfSession, "failed to load sfu server", { error: e });
+            }
 
             this.ptp = this._getNewPtp();
 
@@ -801,6 +847,66 @@ export class Wysiwyg extends Component {
             editorCollaborationOptions.postProcessExternalSteps = this.options.postProcessExternalSteps;
         }
         return editorCollaborationOptions;
+    }
+
+    /**
+     * @param {CustomEvent} param0
+     * @param {Object} param0.detail
+     * @param {String} param0.detail.name
+     * @param {any} param0.detail.payload
+     */
+    async _handleSfuClientUpdates({ detail: { name, payload } }) {
+        // if (!this.state.channel) {
+        //     return;
+        // }
+        console.log(`payload:`, payload);
+        switch (name) {
+            case "disconnect":
+                // {
+                //     const { sessionId } = payload;
+                //     const session = this.store.RtcSession.get(sessionId);
+                //     this.disconnect(session);
+                // }
+                break;
+            case "broadcast":
+                console.log(`payload:`, payload);
+                break;
+        }
+    }
+
+    async _handleSfuClientStateChange({ detail: { state, cause } }) {
+        // this.state.serverState = state;
+        console.log(`state:`, state);
+        switch (state) {
+            case this._SFU_CLIENT_STATE.AUTHENTICATED:
+                // if we are hot-swapping connection type, we clear the p2p as late as possible
+                // this.clearPeerToPeer();
+                console.log('authenticated');
+                this.sfuClient.broadcast('hello world');
+                break;
+            // case this._SFU_CLIENT_STATE.CONNECTED:
+            //     this.sfuClient.updateInfo(this.formatInfo(), {
+            //         needRefresh: true, // asks the server to send the info from all the channel
+            //     });
+            //     this.sfuClient.updateUpload("audio", this.state.audioTrack);
+            //     this.sfuClient.updateUpload("camera", this.state.cameraTrack);
+            //     this.sfuClient.updateUpload("screen", this.state.screenTrack);
+            //     return;
+            case this._SFU_CLIENT_STATE.CLOSED:
+                {
+                    let text;
+                    if (cause === "full") {
+                        text = _t("Channel full");
+                    } else {
+                        text = _t("Connection to SFU server closed by the server");
+                    }
+                    this.notification.add(text, {
+                        type: "warning",
+                    });
+                    // await this.leaveCall();
+                }
+                return;
+        }
     }
     setupToolbar(toolbarEl) {
         this.toolbarEl = toolbarEl;
