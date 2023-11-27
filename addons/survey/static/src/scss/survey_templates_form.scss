@@ -184,6 +184,12 @@ _::-webkit-full-page-media, _:future, :root .o_survey_wrap {
             }
         }
     }
+
+    .o_survey_form_choice {
+        .o_scale_label {
+            color: $primary;
+        }
+    }
 }
 
 .o_survey_quick_access {

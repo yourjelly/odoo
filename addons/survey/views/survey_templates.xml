@@ -446,7 +446,7 @@
                 <!--Used for print mode with corrections -->
                 <t t-set="answer_class" t-value="'' if not has_correct_answer else 'bg-success' if label.is_correct else 'bg-danger'"/>
 
-                <div t-attf-class="col-sm-12 #{use_half_col_lg}">
+                <div t-attf-class="#{'col' if question.simple_choice_layout == 'scale' else 'col-sm-12 ' + (use_half_col_lg if use_half_col_lg else '')}">
                     <label t-att-for="str(question.id) + '_' + str(label.id)"
                         t-attf-class="o_survey_choice_btn py-1 px-3 w-100 h-100 rounded #{answer_class} #{'o_survey_selected' if answer_selected else ''}">
                         <t t-call="survey.survey_selection_key">
@@ -469,6 +469,12 @@
                         <span class="ms-2 text-break" t-field='label.value'/>
                         <t t-call="survey.question_suggested_value_image"/>
                     </label>
+                </div>
+            </t>
+            <t t-if="question.simple_choice_layout == 'scale' and (question.scale_min_label or question.scale_max_label)">
+                <div class="col-sm-12 d-flex d-flex justify-content-between o_scale_label">
+                    <div t-out="question.scale_min_label"/>
+                    <div t-out="question.scale_max_label"/>
                 </div>
             </t>
             <t t-if='question.comments_allowed and question.comment_count_as_answer'>

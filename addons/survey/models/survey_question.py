@@ -99,6 +99,13 @@ class SurveyQuestion(models.Model):
     suggested_answer_ids = fields.One2many(
         'survey.question.answer', 'question_id', string='Types of answers', copy=True,
         help='Labels used for proposed choices: simple choice, multiple choice and columns of matrix')
+    # -- simple choice
+    simple_choice_layout = fields.Selection([
+        ('standard', 'Standard'),
+        ('scale', 'Scale'),
+    ], string='Layout', default='standard', required=True)
+    scale_min_label = fields.Char('Scale Minimum Label', translate=True)
+    scale_max_label = fields.Char('Scale Maximum Label', translate=True)
     # -- matrix
     matrix_subtype = fields.Selection([
         ('simple', 'One choice per row'),

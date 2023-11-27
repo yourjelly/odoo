@@ -44,6 +44,18 @@
                                     <div class="o_preview_questions_choice mb-2"><i class="fa fa-dot-circle-o fa-lg me-2"/>answer</div>
                                     <div class="o_preview_questions_choice"><i class="fa fa-circle-o  fa-lg me-2"/>answer</div>
                                 </div>
+                                <div invisible="question_type != 'simple_choice'" class="mt-3" role="img" aria-label="Scale layout">
+                                    <h5>Scale layout</h5>
+                                    <div class="btn-group w-100" role="group" aria-label="Scale">
+                                        <a role="button" type="button" class="btn btn-secondary disabled">1</a>
+                                        <a role="button" type="button" class="btn btn-secondary disabled">2</a>
+                                        <a role="button" type="button" class="btn btn-secondary disabled">3</a>
+                                    </div>
+                                    <div class="d-flex d-flex justify-content-between">
+                                        <div>Label 1</div>
+                                        <div>Label 2</div>
+                                    </div>
+                                </div>
                                 <!-- Multiple choice: multiple answers allowed -->
                                 <div invisible="question_type != 'multiple_choice'" role="img" aria-label="Multiple choice with multiple answers"
                                     title="Multiple choice with multiple answers">
@@ -216,6 +228,9 @@
                                            placeholder="If other, please specify:"/>
                                     <field name='comment_count_as_answer'
                                         invisible="question_type not in ['simple_choice', 'multiple_choice', 'matrix'] or not comments_allowed"/>
+                                    <field name="simple_choice_layout" invisible="question_type != 'simple_choice'"/>
+                                    <field name="scale_min_label" invisible="question_type != 'simple_choice' or simple_choice_layout != 'scale'" placeholder="Not likely at all"/>
+                                    <field name="scale_max_label" invisible="question_type != 'simple_choice' or simple_choice_layout != 'scale'" placeholder="Extremely likely"/>
                                 </group>
                                 <group string="Conditional display">
                                     <p class="text-muted" colspan="2" invisible="questions_selection == 'all'">
