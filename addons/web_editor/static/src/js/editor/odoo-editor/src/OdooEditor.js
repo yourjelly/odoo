@@ -4105,8 +4105,9 @@ export class OdooEditor extends EventTarget {
         }
 
         // Clean custom selections
-        if (this.deselectTable() && hasValidSelection(this.editable)) {
-            this.document.getSelection().collapseToStart();
+        if (this.deselectTable()) {
+            const selection = this.document.getSelection();
+            selection.rangeCount && selection.collapseToStart();
         }
     }
     /**
