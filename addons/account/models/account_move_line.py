@@ -123,6 +123,7 @@ class AccountMoveLine(models.Model):
         help="Cumulated balance depending on the domain and the order chosen in the view.")
     currency_rate = fields.Float(
         compute='_compute_currency_rate',
+        store=True, precompute=True,
         help="Currency rate from company currency to document currency.",
     )
     amount_currency = fields.Monetary(
@@ -137,6 +138,19 @@ class AccountMoveLine(models.Model):
         required=True,
     )
     is_same_currency = fields.Boolean(compute='_compute_same_currency')
+    # TODO: id suffix for all those rates
+    company_res_currency_rate = fields.Many2one(
+        comodel_name='res.currency.rate',
+        compute='_compute_company_res_currency_rate',
+        store=True, precompute=True,
+        help="res_currency_rate of company currency.",
+    )
+    res_currency_rate = fields.Many2one(
+        comodel_name='res.currency.rate',
+        compute='_compute_res_currency_rate',
+        store=True, precompute=True,
+        help="res_currency_rate of document currency.",
+    )
     partner_id = fields.Many2one(
         comodel_name='res.partner',
         string='Partner',
@@ -654,18 +668,40 @@ class AccountMoveLine(models.Model):
                 line.debit = line.balance if line.balance < 0.0 else 0.0
                 line.credit = -line.balance if line.balance > 0.0 else 0.0
 
-    @api.depends('currency_id', 'company_id', 'move_id.date')
+    @api.depends('res_currency_rate', 'company_res_currency_rate')
     def _compute_currency_rate(self):
         for line in self:
-            if line.currency_id:
-                line.currency_rate = self.env['res.currency']._get_conversion_rate(
-                    from_currency=line.company_currency_id,
-                    to_currency=line.currency_id,
-                    company=line.company_id,
-                    date=line.move_id.invoice_date or line.move_id.date or fields.Date.context_today(line),
-                )
+            line_currency_rate = line.res_currency_rate.rate if line.res_currency_rate else 1
+            company_currency_rate = line.company_res_currency_rate.rate if line.company_res_currency_rate else 1
+            line.currency_rate = line_currency_rate / company_currency_rate
+
+    @api.depends('currency_id', 'company_id', 'move_id.date')
+    def _compute_res_currency_rate(self):
+        for line in self:
+            if line.currency_id and line.company_id:
+                # c.f. _get_rates
+                line.res_currency_rate = self.env['res.currency.rate'].search([
+                        ('name', '<=', line.date),
+                        ('currency_id', '=', line.currency_id.id),
+                        ('company_id', '=', line.company_id.id)  # TODO: NULL ; also need to order by company_id then
+                    ],
+                    order='name desc', limit=1)
             else:
-                line.currency_rate = 1
+                line.res_currency_rate = False
+
+    @api.depends('company_currency_id', 'company_id', 'move_id.date')
+    def _compute_company_res_currency_rate(self):
+        for line in self:
+            if line.currency_id and line.company_id:
+                # c.f. _get_rates
+                line.company_res_currency_rate = self.env['res.currency.rate'].search([
+                        ('name', '<=', line.date),
+                        ('currency_id', '=', line.company_currency_id.id),
+                        ('company_id', '=', line.company_id.id)  # TODO: NULL ; also need to order by company_id then
+                    ],
+                    order='name desc', limit=1)
+            else:
+                line.company_res_currency_rate = False
 
     @api.depends('currency_id', 'company_currency_id')
     def _compute_same_currency(self):
