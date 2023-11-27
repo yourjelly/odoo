@@ -289,6 +289,49 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
+    QUnit.debug(
+        "New record with a o2m also with 2 new records, ordered, and resequenced",
+        async function (assert) {
+            serverData.models.partner.records[0].p = [2, 4];
+            serverData.models.partner.onchanges = {
+                int_field: function (obj) {
+                    obj.bar = obj.int_field === 5;
+                },
+            };
+
+            await makeView({
+                type: "form",
+                resModel: "partner",
+                serverData,
+                arch: `
+                    <form>
+                        <field name="foo"/>
+
+                        <field name="p">
+                            <tree editable="bottom">
+
+                                <field name="bar" invisible="1"/>
+                                <field name="int_field"/>
+
+                                <field name="display_name" invisible="not bar" nolabel="1"/>
+                            </tree>
+                        </field>
+
+                    </form>`,
+                resId: 1,
+            });
+
+            await clickCreate(target);
+
+            // change the int_field through drag and drop
+            // that way, we'll trigger the sorting and the display_name read
+            // of the lines of "p"
+            await dragAndDrop("tbody tr:nth-child(2) .o_handle_cell", "tbody tr", "top");
+
+            assert.verifySteps(["onchange partner"]);
+        }
+    );
+
     QUnit.test("one2many in a list x2many editable use the right context", async function (assert) {
         await makeView({
             type: "form",

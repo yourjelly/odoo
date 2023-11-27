@@ -108,6 +108,7 @@ export class ListRenderer extends Component {
         this.state = useState({
             columns: this.getActiveColumns(this.props.list),
         });
+        //* debugger
         this.withHandleColumn = this.state.columns.some((col) => col.widget === "handle");
         useExternalListener(document, "click", this.onGlobalClick.bind(this));
         this.tableRef = useRef("table");
@@ -344,10 +345,12 @@ export class ListRenderer extends Component {
             // Squeeze the table by applying a max-width on largest columns to
             // ensure that it doesn't overflow
             this.columnWidths = this.computeColumnWidthsFromContent(allowedWidth);
+            //* debugger
             table.style.tableLayout = "fixed";
         }
         headers.forEach((th, index) => {
             if (!th.style.width) {
+                //* debugger
                 th.style.width = `${Math.floor(this.columnWidths[index])}px`;
             }
         });
@@ -383,7 +386,7 @@ export class ListRenderer extends Component {
         // computation algorithm (e.g. prevent text fields from being wrapped during the
         // computation, to prevent them from being completely crushed)
         table.classList.add("o_list_computing_widths");
-
+        //* debugger
         const headers = [...table.querySelectorAll("thead th")];
         const columnWidths = headers.map((th) => th.getBoundingClientRect().width);
         const getWidth = (th) => columnWidths[headers.indexOf(th)] || 0;
@@ -2003,6 +2006,7 @@ export class ListRenderer extends Component {
             const newWidth = Math.max(10, initialWidth + delta);
             const tableDelta = newWidth - initialWidth;
             th.style.width = `${Math.floor(newWidth)}px`;
+            //* debugger
             th.style.maxWidth = `${Math.floor(newWidth)}px`;
             table.style.width = `${Math.floor(initialTableWidth + tableDelta)}px`;
         };
