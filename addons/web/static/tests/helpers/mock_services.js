@@ -167,7 +167,11 @@ export function makeMockFetch(mockRPC) {
             status = 500;
         }
         const blob = new Blob([JSON.stringify(res || {})], { type: "application/json" });
-        return new Response(blob, { status });
+        const response = new Response(blob, { status });
+        response.json = () => {
+            return Promise.resolve(JSON.parse(JSON.stringify(res || {})));
+        };
+        return response;
     };
 }
 
