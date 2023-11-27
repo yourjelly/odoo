@@ -38,7 +38,7 @@ const preserveCursor = OdooEditorLib.preserveCursor;
 const closestElement = OdooEditorLib.closestElement;
 const setSelection = OdooEditorLib.setSelection;
 const endPos = OdooEditorLib.endPos;
-const hasValidSelection = OdooEditorLib.hasValidSelection;
+const hasTableSelection = OdooEditorLib.hasTableSelection;
 const parseHTML = OdooEditorLib.parseHTML;
 
 var id = 0;
@@ -1547,7 +1547,7 @@ const Wysiwyg = Widget.extend({
         const selection = this.odooEditor.document.getSelection();
         const range = selection.rangeCount && selection.getRangeAt(0);
         const targetNode = range && range.startContainer;
-        const targetElement = targetNode && targetNode.nodeType === Node.ELEMENT_NODE
+        const targetElement = targetNode && targetNode.nodeType === Node.ELEMENT_NODE && !targetNode.closest('td')
             ? targetNode
             : targetNode && targetNode.parentNode;
         const backgroundImage = $(targetElement).css('background-image');
@@ -1618,7 +1618,10 @@ const Wysiwyg = Widget.extend({
                         // Deselect tables so the applied color can be seen
                         // without using `!important` (otherwise the selection
                         // hides it).
-                        if (this.odooEditor.deselectTable() && hasValidSelection(this.odooEditor.editable)) {
+                        if (!ev.data.target.classList.contains('o_custom_gradient_btn')) {
+                            this.odooEditor.deselectTable();
+                        }
+                        if ((hasTableSelection(this.odooEditor.editable))) {
                             this.odooEditor.document.getSelection().collapseToStart();
                         }
                         this._updateEditorUI(this.lastMediaClicked && { target: this.lastMediaClicked });
