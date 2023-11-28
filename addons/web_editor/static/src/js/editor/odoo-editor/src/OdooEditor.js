@@ -1383,7 +1383,7 @@ export class OdooEditor extends EventTarget {
         return false;
     }
     historySetSelection(step) {
-        this.deselectTable();
+        // this.deselectTable();
         if (step.selection && step.selection.anchorNodeOid) {
             const anchorNode = this.idFind(step.selection.anchorNodeOid);
             const focusNode = this.idFind(step.selection.focusNodeOid) || anchorNode;
@@ -2364,6 +2364,7 @@ export class OdooEditor extends EventTarget {
      */
     _handleSelectionInTable(ev=undefined) {
         const selection = this.document.getSelection();
+        const selectedCells = this.editable.querySelectorAll('td.o_selected_td');
         // Selection could be gone if the document comes from an iframe that has been removed.
         const anchorNode = selection && selection.rangeCount && selection.getRangeAt(0) && selection.anchorNode;
         if (anchorNode && !ancestors(anchorNode).includes(this.editable)) {
@@ -2445,6 +2446,10 @@ export class OdooEditor extends EventTarget {
                 this._selectTableCells(range);
                 appliedCustomSelection = true;
             }
+        }  else if (selectedCells.length === 1 && selectedCells[0] === startTd) {
+            // The selection goes through a single cell -> select the cell.
+            this._selectTableCells(range);
+            appliedCustomSelection = true;
         }
         return appliedCustomSelection;
     }
@@ -4105,7 +4110,10 @@ export class OdooEditor extends EventTarget {
         }
 
         // Clean custom selections
-        if (this.deselectTable()) {
+        if (hasValidSelection(this.editable)) {
+            if (!(this.options.customGradientButtonEl && this.options.customGradientButtonEl.classList.contains('o_we_color_btn'))) {
+                this.deselectTable();
+            }
             const selection = this.document.getSelection();
             selection.rangeCount && selection.collapseToStart();
         }

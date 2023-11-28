@@ -1589,6 +1589,8 @@ const Wysiwyg = Widget.extend({
                     const oldColorpicker = colorpicker;
                     const hookEl = oldColorpicker ? oldColorpicker.el : elem;
                     const selectedColor = this._getSelectedColor($, eventName);
+                    const selectedTds = [...this.$editable[0].querySelectorAll('.o_selected_td')];
+                    setSelection(selectedTds[0], 0, selectedTds[selectedTds.length - 1], selectedTds.length - 1);
                     const selection = this.odooEditor.document.getSelection();
                     const range = selection.rangeCount && selection.getRangeAt(0);
                     const hadNonCollapsedSelection = range && !selection.isCollapsed;
