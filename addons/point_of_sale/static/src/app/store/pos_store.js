@@ -1292,7 +1292,8 @@ export class PosStore extends Reactive {
         for(const equation of equations){
             const equalIndex = equation[1].indexOf("=");
             const formula = equation[1].slice(equalIndex + 1);
-            localResults[equation[0]] = evaluateExpr(formula, localResults);
+            const variable = equation[0] ? equation[0] : equation[1].slice(0, equalIndex - 1);
+            localResults[variable] = evaluateExpr(formula, localResults);
         }
         return localResults;
     }
@@ -1334,6 +1335,15 @@ export class PosStore extends Reactive {
     }
 
     getTaxesValues(taxIds, priceUnit, quantity){
+
+        function max(...args){
+            return Math.max(...args.slice(0, args.length - 1));
+        }
+
+        function min(...args){
+            return Math.min(...args.slice(0, args.length - 1));
+        }
+
         const taxesKey = this.taxIdsToTaxesKey(taxIds);
         const taxesComputation = this.taxes_computation.taxes_results[taxesKey];
         const localResults = this.evalEquations(
@@ -1342,6 +1352,8 @@ export class PosStore extends Reactive {
                 price_unit: priceUnit,
                 quantity: quantity,
                 round: round_pr,
+                max: max,
+                min: min,
             },
         );
         for(const equation of taxesComputation.equations){

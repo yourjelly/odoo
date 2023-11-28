@@ -5,7 +5,7 @@ from odoo.tools.float_utils import float_round
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools.misc import clean_context, formatLang
 from odoo.tools import frozendict, groupby, split_every
-from odoo.tools.safe_eval import safe_eval
+from odoo.tools.safe_eval import safe_eval, _BUILTINS
 
 from collections import defaultdict
 from markupsafe import Markup
@@ -108,7 +108,11 @@ class TaxComputer:
 
         local_results = dict(values)
         try:
-            safe_eval(expression, local_results, mode="exec", nocopy=True)
+            safe_eval(expression, local_results, mode="exec", nocopy=True, custom_builtins={
+                k: v
+                for k, v in _BUILTINS.items()
+                if k in ('True', 'False', 'None', 'min', 'max')
+            })
         except Exception: # noqa: BLE001
             raise UserError(_(
                 "Invalid expression found somewhere in: \n%s",
@@ -780,7 +784,6 @@ class AccountTax(models.Model):
         force_price_include=False,
         is_refund=False,
         include_caba_tags=False,
-        exclude_python_taxes=False,
         rounding_method='round_per_line',
         currency=None,
         tax_computer=None,
@@ -799,11 +802,6 @@ class AccountTax(models.Model):
         # Convert each tax into a dictionary.
         tax_values_list = []
         for tax in taxes:
-
-            # Exclude python taxes.
-            if tax.amount_type == 'code' and exclude_python_taxes:
-                continue
-
             tax_values = {
                 'tax': tax,
                 'price_include': handle_price_include and (tax.price_include or force_price_include),
@@ -989,17 +987,20 @@ class AccountTax(models.Model):
         # Build the results.
         eval_tax_values_list = []
         for tax_values in tax_values_list:
-            eval_tax_values_list.append({
+            eval_tax_values = {
                 'tax_id': tax_values['tax_id'],
                 'group_id': tax_values['group_id'],
                 'tax_ids': tax_values['tax_ids'],
                 'tag_ids': tax_values['tag_ids'],
                 'price_include': tax_values['price_include'],
+                'skip': local_results[tax_values['skip']] if tax_values.get('skip') else False,
                 'tax_amount': local_results[tax_values['tax_amount']],
                 'tax_amount_factorized': local_results[tax_values['tax_amount_factorized']],
                 'base': local_results[tax_values['base']],
                 'display_base': local_results[tax_values['display_base']],
-            })
+            }
+            if not eval_tax_values['skip']:
+                eval_tax_values_list.append(eval_tax_values)
 
         return {
             'tax_values_list': eval_tax_values_list,
@@ -1011,7 +1012,6 @@ class AccountTax(models.Model):
         self,
         fiscal_position,
         fixed_multiplicator=1,
-        exclude_python_taxes=False,
         rounding_method='round_per_line',
         currency=None,
     ):
@@ -1032,7 +1032,6 @@ class AccountTax(models.Model):
 
         taxes_computation = flattened_taxes_before_fp._prepare_taxes_computation(
             fixed_multiplicator=fixed_multiplicator,
-            exclude_python_taxes=exclude_python_taxes,
             rounding_method=rounding_method,
             currency=currency,
         )
@@ -1043,7 +1042,6 @@ class AccountTax(models.Model):
             taxes_computation = flattened_taxes_after_fp._prepare_taxes_computation(
                 fixed_multiplicator=fixed_multiplicator,
                 handle_price_include=False,
-                exclude_python_taxes=exclude_python_taxes,
                 rounding_method=rounding_method,
                 currency=currency,
                 tax_computer=taxes_computation['tax_computer'],
@@ -1172,6 +1170,30 @@ class AccountTax(models.Model):
             .mapped('tag_ids')
 
     @api.model
+    def _get_extra_fields_for_python_taxes(self):
+        """ Hook to add new fields to be loaded when evaluating a python tax.
+
+        :return: A mapping <model> => <fields> where
+            * 'model' is the name of a model in odoo.
+            * 'field_names' is a set of fields.
+        """
+        return {
+            'product': {'lst_price'},
+            'company': {},
+        }
+
+    @api.model
+    def _load_python_taxes_fields(self, record, field_names):
+        results = {}
+        for field_name in field_names:
+            # Don't manage relational fields yet until we have a valid reason for that.
+            if record._fields[field_name].relational:
+                continue
+
+            results[field_name] = record[field_name]
+        return results
+
+    @api.model
     def _prepare_base_line_tax_details(
         self,
         base_line,
@@ -1227,13 +1249,13 @@ class AccountTax(models.Model):
             base_tags |= product.account_tag_ids
 
         # Eval.
+        extra_fields_python_taxes = self._get_extra_fields_for_python_taxes()
         extra_computation_values = {
+            'product': self._load_python_taxes_fields(product, extra_fields_python_taxes['product']),
+            'company': self._load_python_taxes_fields(company, extra_fields_python_taxes['company']),
             'price_unit': price_unit,
             'quantity': quantity,
-            'product': product,
-            'partner': partner,
             'fixed_multiplicator': fixed_multiplicator,
-            'company': company,
         }
         taxes_computation = self.env['account.tax']._eval_taxes_computation(
             taxes_computation,

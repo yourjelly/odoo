@@ -35,8 +35,10 @@ class AccountTaxPython(models.Model):
         if batch['amount_type'] == 'code':
             batch['computed'] = 'tax'
             for tax_values in batch['taxes']:
+                tax_computer.new_equation(tax_values['tax'].python_applicable, standalone=True)
+                tax_values['skip'] = tax_computer.new_equation('not result')
                 tax_computer.new_equation(tax_values['tax'].python_compute, standalone=True)
-                tax_values['tax_amount'] = tax_computer.new_equation('result')
+                tax_values['tax_amount'] = tax_computer.new_equation(f"not {tax_values['skip']} and result or 0.0")
                 tax_values['tax_amount_factorized'] = tax_computer.new_equation(
                     f"{tax_values['tax_amount']} * {tax_values['factor']}"
                 )

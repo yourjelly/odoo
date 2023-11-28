@@ -1643,7 +1643,6 @@ class PosSession(models.Model):
 
                 fp_computation = taxes._prepare_price_unit_after_fiscal_position(
                     fiscal_position,
-                    exclude_python_taxes=True,
                     rounding_method=self.company_id.tax_calculation_rounding_method,
                     currency=self.currency_id,
                 )
@@ -1667,7 +1666,6 @@ class PosSession(models.Model):
         for tax_ids, taxes_key in tax_ids_to_taxes_key.items():
             taxes = self.env['account.tax'].browse(tax_ids)
             prepared_taxes = taxes._prepare_taxes_computation(
-                exclude_python_taxes=True,
                 rounding_method=self.company_id.tax_calculation_rounding_method,
                 currency=self.currency_id,
             )
@@ -1839,24 +1837,7 @@ class PosSession(models.Model):
         }
 
     def _get_pos_ui_account_tax(self, params):
-        taxes = self.env['account.tax'].search_read(**params['search_params'])
-
-        # Add the 'sum_repartition_factor' as needed in the compute_all
-        # Note that the factor = factor_percent/100
-        groups = self.env['account.tax.repartition.line']._read_group(
-            domain=[
-                ('tax_id', 'in', tuple([t['id'] for t in taxes])),
-                ('document_type', '=', 'invoice'),
-                ('repartition_type', '=', 'tax'),
-            ],
-            groupby=["tax_id"],
-            aggregates=["factor_percent:sum"],
-        )
-        tax_id_to_factor_sum = {tax.id: factor_sum / 100 for tax, factor_sum in groups}
-        for tax in filter(lambda t: t['amount_type'] != 'group', taxes):
-            tax['sum_repartition_factor'] = tax_id_to_factor_sum.get(tax['id'], 0)
-
-        return taxes
+        return self.env['account.tax'].search_read(**params['search_params'])
 
     def _ensure_access_token(self):
         # Code taken from addons/portal/models/portal_mixin.py

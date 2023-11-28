@@ -16,29 +16,75 @@ class TestTaxPython(TestTaxCommon):
             'python_compute': python_compute,
         })
 
-    def test_tax_python(self):
-        tax = self.python_tax('result = ((price_unit * quantity) - ((price_unit * quantity) / 1.12)) * 0.5')
+    def test_python_taxes_for_l10n_in(self):
+        tax1 = self.python_tax("result = max(quantity * price_unit * 0.21, quantity * 4.17)")
         self._check_tax_results(
-            tax,
+            tax1,
             {
-                'total_included': 136.96,
+                'total_included': 157.3,
                 'total_excluded': 130.0,
                 'taxes': (
-                    (130.0, 6.96),
+                    (130.0, 27.3),
                 ),
             },
             130.0,
         )
 
-        tax.price_include = True
+        tax1.price_include = True
         self._check_tax_results(
-            tax,
+            tax1,
             {
                 'total_included': 130.0,
-                'total_excluded': 123.04,
+                'total_excluded': 102.7,
                 'taxes': (
-                    (123.04, 6.96),
+                    (102.7, 27.3),
                 ),
             },
             130.0,
+        )
+
+        tax1.python_applicable = "result = False"
+        self._check_tax_results(
+            tax1,
+            {
+                'total_included': 130.0,
+                'total_excluded': 130.0,
+                'taxes': [],
+            },
+            130.0,
+        )
+
+        product1 = self.env['product.product'].create({
+            'name': "product1",
+            'lst_price': 200.0,
+        })
+        tax2 = self.python_tax("result = product['lst_price'] > 100 and 10 or 5")
+        self._check_tax_results(
+            tax2,
+            {
+                'total_included': 110.0,
+                'total_excluded': 100.0,
+                'taxes': (
+                    (100.0, 10.0),
+                ),
+            },
+            100.0,
+            product=product1,
+        )
+
+        product2 = self.env['product.product'].create({
+            'name': "product1",
+            'lst_price': 50.0,
+        })
+        self._check_tax_results(
+            tax2,
+            {
+                'total_included': 105.0,
+                'total_excluded': 100.0,
+                'taxes': (
+                    (100.0, 5.0),
+                ),
+            },
+            100.0,
+            product=product2,
         )
