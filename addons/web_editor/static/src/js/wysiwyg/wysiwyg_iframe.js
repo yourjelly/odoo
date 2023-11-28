@@ -77,11 +77,6 @@ patch(Wysiwyg.prototype, {
     _loadIframe() {
         var self = this;
         const isEditableRoot = this.$editable === this.$root;
-        this.$editable = $('<div class="note-editable oe_structure odoo-editor-editable"></div>');
-        this.$el.removeClass('note-editable oe_structure odoo-editor-editable');
-        if (isEditableRoot) {
-            this.$root = this.$editable;
-        }
         this.$iframe = $('<iframe class="wysiwyg_iframe o_iframe">').css({
             width: '100%'
         });
@@ -96,26 +91,36 @@ patch(Wysiwyg.prototype, {
                 }
                 delete window.top[self._onUpdateIframeId];
                 var $iframeTarget = self.$iframe.contents().find('#iframe_target');
-                // copy the html in itself to have the node prototypes relative
-                // to this window rather than the iframe window.
-                const $targetClone = $iframeTarget.clone();
-                $targetClone.find('script').remove();
-                $iframeTarget.html($targetClone.html());
+                $iframeTarget.find('script').remove();
                 self.$iframeBody = $iframeTarget;
                 $iframeTarget.attr("isMobile", isMobileOS());
-                const $utilsZone = $('<div class="iframe-utils-zone">');
-                self.$utilsZone = $utilsZone;
 
-                const $iframeWrapper = $('<div class="iframe-editor-wrapper odoo-editor">');
-                const $codeview = $('<textarea class="o_codeview d-none"/>');
-                self.$editable.addClass('o_editable oe_structure');
+                const iframeDocument = self.$iframe[0].contentDocument;
 
-                $iframeTarget.append($codeview);
-                $iframeTarget.append($iframeWrapper);
-                $iframeTarget.append($utilsZone);
-                $iframeWrapper.append(self.$editable);
+                const editable = iframeDocument.createElement('div');
+                editable.classList.add('note-editable', 'oe_structure', 'odoo-editor-editable', 'o_editable');
+                self.$editable = $(editable);
+                self.$el.removeClass('note-editable oe_structure odoo-editor-editable');
+                if (isEditableRoot) {
+                    self.$root = self.$editable;
+                }
 
-                self.options.toolbarHandler = $('#web_editor-top-edit', self.$iframe[0].contentWindow.document);
+                const utilsZone = iframeDocument.createElement('div');
+                utilsZone.classList.add('iframe-utils-zone');
+                self.$utilsZone = $(utilsZone);
+
+                const iframeWrapper = iframeDocument.createElement('div');
+                iframeWrapper.classList.add("iframe-editor-wrapper", "odoo-editor")
+
+                const codeview = iframeDocument.createElement('textarea');
+                codeview.classList.add("o_codeview", "d-none");
+
+                $iframeTarget.append(codeview);
+                $iframeTarget.append(iframeWrapper);
+                $iframeTarget.append(utilsZone);
+                iframeWrapper.append(editable);
+
+                self.options.toolbarHandler = $('#web_editor-top-edit', iframeDocument);
                 $iframeTarget.on('click', '.o_fullscreen_btn', function () {
                     $("body").toggleClass("o_field_widgetTextHtml_fullscreen");
                     var full = $("body").hasClass("o_field_widgetTextHtml_fullscreen");
