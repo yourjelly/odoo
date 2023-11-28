@@ -11,8 +11,11 @@ export class MassMailingWysiwyg extends Wysiwyg {
     //--------------------------------------------------------------------------
 
     async startEdition() {
-        this.floatingToolbarEl = this.toolbarRef.el.firstChild;
-        this.floatingToolbarEl.classList.add('d-none');
+        // The initial toolbar of the Wysiwyg component will be used as the
+        // mainToolbar (sticky on mobile and floating on desktop).
+        this.mainToolbarEl = this.toolbarRef.el.firstChild;
+        this.mainToolbarEl.classList.add('d-none');
+
         const res = await super.startEdition(...arguments);
         // Prevent selection change outside of snippets.
         this.$editable.on('mousedown', e => {
@@ -20,6 +23,8 @@ export class MassMailingWysiwyg extends Wysiwyg {
                 e.preventDefault();
             }
         });
+        // toolbarEl has been set by the `SnippetMenu` through `setupToolbar`
+        // while calling `super.startEdition`.
         this.snippetsMenuToolbarEl = this.toolbarEl;
         return res;
     }
@@ -44,8 +49,11 @@ export class MassMailingWysiwyg extends Wysiwyg {
      */
     setSnippetsMenuFolded(fold = true) {
         this.snippetsMenu.setFolded(fold);
-        this.toolbarEl = fold ? this.floatingToolbarEl : this.snippetsMenuToolbarEl;
-        if (fold && !this.isFloatingToolbarReady) {
+        this.toolbarEl = fold ? this.mainToolbarEl : this.snippetsMenuToolbarEl;
+        // At the startup, the `SnippetMenu` setted its toolbar before the
+        // `mainToolbarEl` had the chance to be configured so we configure it now
+        // as we need it.
+        if (fold && !this._isMainToolbarReady) {
             // Setup toolbar.
             this._configureToolbar({ snippets: false });
             this._updateEditorUI();
@@ -56,12 +64,12 @@ export class MassMailingWysiwyg extends Wysiwyg {
             } else {
                 document.body.append(this.toolbarEl);
             }
-            this.isFloatingToolbarReady = true;
+            this._isMainToolbarReady = true;
         }
         this.odooEditor.toolbar = this.toolbarEl;
         this.odooEditor.autohideToolbar = !!fold;
         this.odooEditor.toolbarHide();
-        this.floatingToolbarEl.classList.toggle('d-none', !fold);
+        this.mainToolbarEl.classList.toggle('d-none', !fold);
     }
 
     /**
