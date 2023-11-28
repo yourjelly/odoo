@@ -317,8 +317,8 @@ export function closestElement(node, predicate = "*") {
     } else {
         element = element?.closest(predicate);
     }
-
-    return element?.closest('.odoo-editor-editable') && element;
+    // If not in editable simply return element closest to node.
+    return element?.closest('.odoo-editor-editable') ? element : element?.closest(node.nodeName);
 }
 
 /**
