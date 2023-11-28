@@ -84,26 +84,19 @@ def handle_history_divergence(record, html_field_name, vals):
     # Save only the latest id.
     vals[html_field_name] = incoming_html[0:incoming_history_matches.start(1)] + last_step_id + incoming_html[incoming_history_matches.end(1):]
 
-def get_existing_attachment(ir_attachment, vals):
+def get_existing_attachment(IrAttachment, vals):
     """
     Check if an attachment already exists for the same vals. Return it if
     so, None otherwise.
     """
+    if not (raw or datas):
+        return None
     fields = dict(vals)
+    # Add a comment to explain why 0.
     fields['res_id'] = fields.get('res_id') or 0
     raw, datas = fields.pop('raw', None), fields.pop('datas', None)
     domain = [(field, '=', value) for field, value in fields.items()]
-    if raw or datas:
-        domain.append(('checksum', '=', ir_attachment._compute_checksum(raw or b64decode(datas))))
-    try:
-        # Might raise AccessError.
-        existing_attachment = ir_attachment.search(domain, limit=1)
-        if existing_attachment:
-            # Might raise AccessError or UserError.
-            existing_attachment.check('read')
-        return existing_attachment or None
-    except (AccessError, UserError):
-        return None
+    return IrAttachment.search(domain, limit=1)
 
 class Web_Editor(http.Controller):
     #------------------------------------------------------
