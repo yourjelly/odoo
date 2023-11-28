@@ -15846,6 +15846,7 @@ class SfuClient extends EventTarget {
      * @param message any JSON serializable object
      */
     broadcast(message) {
+        console.log('broadcast', message);
         this._bus.send(
             {
                 name: CLIENT_MESSAGE.BROADCAST,

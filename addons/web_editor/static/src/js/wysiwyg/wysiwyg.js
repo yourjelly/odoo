@@ -699,10 +699,13 @@ export class Wysiwyg extends Component {
             return;
         }
 
+        this._historyResetMutex = new Mutex();
+
         this._collaborationChannelName = channelName;
         this._historyStepsBuffer = [];
         Wysiwyg.activeCollaborationChannelNames.add(channelName);
 
+        // todo: do not try to connect to the bus if we use the sfu
         const collaborationBusListener = ({ detail: notifications}) => {
             for (const { payload, type } of notifications) {
                 if (
@@ -786,33 +789,9 @@ export class Wysiwyg extends Component {
                 ];
             }
             this._iceServers = iceServers;
-            this._suf_config = infos.sfu_config;
+            this._sfu_config = infos.sfu_config;
 
-            try {
-                await loadSfuAssets();
-                const sfuModule = odoo.loader.modules.get("@mail/../lib/discuss_sfu/discuss_sfu");
-                // this.disconnectFromSfu();
-                this._SFU_CLIENT_STATE = sfuModule.SFU_CLIENT_STATE;
-                this.sfuClient = new sfuModule.SfuClient();
-                this.sfuClient.addEventListener("update", this._handleSfuClientUpdates.bind(this));
-                this.sfuClient.addEventListener("stateChange", this._handleSfuClientStateChange.bind(this));
-                // this.sfuClient.connect(this._suf_config.url, this._suf_config.json_web_token, {
-                //     iceServers
-                // });
-                console.log(`this._suf_config:`, this._suf_config);
-                console.log(`this._suf_config.json_web_token:`, this._suf_config.json_web_token);
-                this.sfuClient.connect(this._suf_config.url, this._suf_config.json_web_token);
-            } catch (e) {
-                // TODO Verify if p2p and server can exist in parallel inside the same call. In theory, it should work.
-                this.notification.add(
-                    _t("Failed to load the SFU server, falling back to peer-to-peer"),
-                    {
-                        type: "warning",
-                    }
-                );
-                console.log(`e:`, e);
-                // this.log(this.state.selfSession, "failed to load sfu server", { error: e });
-            }
+            // await this._loadSFU();
 
             this.ptp = this._getNewPtp();
 
@@ -848,6 +827,29 @@ export class Wysiwyg extends Component {
         }
         return editorCollaborationOptions;
     }
+    async _loadSFU() {
+        try {
+            await loadSfuAssets();
+            const sfuModule = odoo.loader.modules.get("@mail/../lib/discuss_sfu/discuss_sfu");
+            // this.disconnectFromSfu();
+            this._SFU_CLIENT_STATE = sfuModule.SFU_CLIENT_STATE;
+            this.sfuClient = new sfuModule.SfuClient();
+            this.sfuClient.addEventListener("update", this._handleSfuClientUpdates.bind(this));
+            this.sfuClient.addEventListener("stateChange", this._handleSfuClientStateChange.bind(this));
+            this.sfuClient.connect(this._sfu_config.url, this._sfu_config.json_web_token);
+            return true;
+        } catch (e) {
+            // TODO Verify if p2p and server can exist in parallel inside the same call. In theory, it should work.
+            this.notification.add(
+                _t("Failed to load the SFU server, falling back to peer-to-peer"),
+                {
+                    type: "warning",
+                }
+            );
+            return false;
+            // this.log(this.state.selfSession, "failed to load sfu server", { error: e });
+        }
+    }
 
     /**
      * @param {CustomEvent} param0
@@ -859,7 +861,7 @@ export class Wysiwyg extends Component {
         // if (!this.state.channel) {
         //     return;
         // }
-        console.log(`payload:`, payload);
+        console.log(`name, payload:`, name, payload);
         switch (name) {
             case "disconnect":
                 // {
@@ -869,7 +871,6 @@ export class Wysiwyg extends Component {
                 // }
                 break;
             case "broadcast":
-                console.log(`payload:`, payload);
                 break;
         }
     }
@@ -881,17 +882,9 @@ export class Wysiwyg extends Component {
             case this._SFU_CLIENT_STATE.AUTHENTICATED:
                 // if we are hot-swapping connection type, we clear the p2p as late as possible
                 // this.clearPeerToPeer();
-                console.log('authenticated');
+                console.log('this.sfuClient', this.sfuClient);
                 this.sfuClient.broadcast('hello world');
                 break;
-            // case this._SFU_CLIENT_STATE.CONNECTED:
-            //     this.sfuClient.updateInfo(this.formatInfo(), {
-            //         needRefresh: true, // asks the server to send the info from all the channel
-            //     });
-            //     this.sfuClient.updateUpload("audio", this.state.audioTrack);
-            //     this.sfuClient.updateUpload("camera", this.state.cameraTrack);
-            //     this.sfuClient.updateUpload("screen", this.state.screenTrack);
-            //     return;
             case this._SFU_CLIENT_STATE.CLOSED:
                 {
                     let text;
@@ -903,6 +896,7 @@ export class Wysiwyg extends Component {
                     this.notification.add(text, {
                         type: "warning",
                     });
+                    // todo: think about what todo in this case
                     // await this.leaveCall();
                 }
                 return;
@@ -3010,6 +3004,46 @@ export class Wysiwyg extends Component {
                         this.ptp.removeClient(fromClientId);
                         this.odooEditor.multiselectionRemove(fromClientId);
                         break;
+                    case 'centralized_join': {
+                        this.ptp.notifyClient(
+                            fromClientId,
+                            'history_status',
+                            {
+                                startTime: this._startCollaborationTime,
+                                historyShareId: this._historyShareId,
+                            },
+                            { transport: 'rtc' }
+                        );
+                        break;
+                    }
+                    case 'history_status': {
+                        const { startTime, historyShareId } = notificationPayload;
+                        this._historyResetMutex.exec(async () => {
+                            if (this._startCollaborationTime > startTime && this._historyShareId !== historyShareId) {
+                                const response = await this._resetFromClient(fromClientId, this._lastCollaborationResetId);
+                                if (response === REQUEST_ERROR) {
+                                    return;
+                                }
+
+                                const getClientNamePromise = this.requestClient(
+                                    fromClientId, 'get_client_name', undefined, { transport: 'rtc' }
+                                ).then((clientName) => {
+                                    if (clientName === REQUEST_ERROR) return;
+                                    this.ptp.clientsInfos[fromClientId].clientName = clientName;
+                                    this.odooEditor.multiselectionRefresh();
+                                });
+                                const getClientAvatar = this.requestClient(
+                                    fromClientId, 'get_client_avatar', undefined, { transport: 'rtc' }
+                                ).then(clientAvatarUrl => {
+                                    if (clientAvatarUrl === REQUEST_ERROR) return;
+                                    this.ptp.clientsInfos[fromClientId].clientAvatarUrl = clientAvatarUrl;
+                                    this.odooEditor.multiselectionRefresh();
+                                });
+                                await Promise.all([getClientAvatar, getClientNamePromise]);
+                            }
+                        });
+                        break;
+                    }
                     case 'rtc_data_channel_open': {
                         fromClientId = notificationPayload.connectionClientId;
                         const remoteStartTime = await this.requestClient(fromClientId, 'get_start_time', undefined, { transport: 'rtc' });
@@ -3093,7 +3127,13 @@ export class Wysiwyg extends Component {
                     const success = await this._resetFromServerAndResyncWithClients();
                     if (!success) return;
                 }
-                this.ptp.notifyAllClients('ptp_join');
+                let sfuLoaded = false;
+                if (this._sfu_config) {
+                    sfuLoaded = await this._loadSFU();
+                } else {
+                    this._startCollaborationTime = new Date().getTime();
+                    this.ptp.notifyAllClients('ptp_join');
+                }
                 this._joiningPtp = false;
                 this._ptpJoined = true;
             });

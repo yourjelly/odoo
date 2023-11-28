@@ -758,6 +758,10 @@ class Web_Editor(http.Controller):
         document.check_field_access_rights('write', [field_name])
         document.check_access_rule('write')
 
+        result = {
+            'ice_servers': request.env['mail.ice.server']._get_ice_servers(),
+        }
+
 
         sfu_server_url = discuss.get_sfu_url(request.env)
         # if not sfu_server_url:
@@ -787,35 +791,25 @@ class Web_Editor(http.Controller):
             logger.warning("Failed to obtain a channel from the SFU server, user will stay in p2p")
 
 
-        import pprint; print('response: ',end='');pprint.pprint(response)
-        import pprint; print('response.ok: ',end='');pprint.pprint(response.ok)
         if response and response.ok:
             response_dict = response.json()
 
             channel_uuid = response_dict["uuid"]
             server_url = response_dict["url"]
 
-        session_id = f"{math.floor(random.random() * math.pow(2, 52))}:{client_id}"
-        claims = {
-            "sfu_channel_uuid": channel_uuid,
-            "session_id": session_id,
-        }
-        json_web_token = jwt.sign(claims, key=key, ttl=60 * 60 * 8, algorithm=jwt.ALGORITHM.HS256)  # 8 hours
+            session_id = f"{math.floor(random.random() * math.pow(2, 52))}:{client_id}"
+            claims = {
+                "sfu_channel_uuid": channel_uuid,
+                "session_id": session_id,
+            }
+            json_web_token = jwt.sign(claims, key=key, ttl=60 * 60 * 8, algorithm=jwt.ALGORITHM.HS256)  # 8 hours
 
-        return {
-            'ice_servers': request.env['mail.ice.server']._get_ice_servers(),
-            # 'session_id': session_id,
-            'sfu_config': {
+            result['sfu_config'] = {
                 'url': server_url,
                 'json_web_token': json_web_token,
             }
-        }
 
-    # def _get_rtc_server_info(self, rtc_session, key=None):
-
-    #     }
-    #     json_web_token = jwt.sign(claims, key=key, ttl=60 * 60 * 8, algorithm=jwt.ALGORITHM.HS256)  # 8 hours
-    #     return {"url": sfu_server_url, "jsonWebToken": json_web_token}
+        return result
 
     @http.route("/web_editor/bus_broadcast", type="json", auth="user")
     def bus_broadcast(self, model_name, field_name, res_id, bus_data):

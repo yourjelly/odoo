@@ -223,7 +223,7 @@ export class PeerToPeer {
             await this.options.broadcastAll(transportPayload);
         } else if (transport === 'rtc') {
             for (const cliendId of Object.keys(this.clientsInfos)) {
-                this._channelNotify(cliendId, transportPayload);
+                this.channelNotify(cliendId, transportPayload);
             }
         } else {
             throw new Error(
@@ -274,7 +274,7 @@ export class PeerToPeer {
         if (transport === 'server') {
             this.options.broadcastAll(transportPayload);
         } else if (transport === 'rtc') {
-            this._channelNotify(clientId, transportPayload);
+            this.channelNotify(clientId, transportPayload);
         } else {
             throw new Error(
                 `Transport "${transport}" is not supported. Use "server" or "rtc" transport.`,
@@ -531,7 +531,7 @@ export class PeerToPeer {
         }
     }
 
-    _channelNotify(clientId, transportPayload) {
+    channelNotify(clientId, transportPayload) {
         if (this._stopped) {
             return;
         }

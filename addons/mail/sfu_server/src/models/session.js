@@ -195,6 +195,9 @@ export class Session extends EventEmitter {
                 );
                 continue;
             }
+            logger.verbose(
+                `${this.name} -> ${session.name} has no bus but tried to send message: ${message?.name}`
+            );
             session.bus.send(message, { batch: true });
         }
     }
