@@ -5986,19 +5986,6 @@ class BaseModel(metaclass=MetaModel):
     # Record traversal and update
     #
 
-    def _mapped_func(self, func):
-        """ Apply function ``func`` on all records in ``self``, and return the
-            result as a list or a recordset (if ``func`` returns recordsets).
-        """
-        if self:
-            vals = [func(rec) for rec in self]
-            if isinstance(vals[0], BaseModel):
-                return vals[0].union(*vals)         # union of all recordsets
-            return vals
-        else:
-            vals = func(self)
-            return vals if isinstance(vals, BaseModel) else []
-
     def mapped(self, func):
         """Apply ``func`` on all records in ``self``, and return the result as a
         list or a recordset (if ``func`` return recordsets). In the latter
@@ -6034,8 +6021,14 @@ class BaseModel(metaclass=MetaModel):
             for name in func.split('.'):
                 recs = recs._fields[name].mapped(recs)
             return recs
+        elif self:
+            vals = [func(rec) for rec in self]
+            if isinstance(vals[0], BaseModel):
+                return vals[0].union(*vals)         # union of all recordsets
+            return vals
         else:
-            return self._mapped_func(func)
+            vals = func(self)
+            return vals if isinstance(vals, BaseModel) else []
 
     def filtered(self, func):
         """Return the records in ``self`` satisfying ``func``.
