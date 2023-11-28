@@ -831,7 +831,7 @@ class AccountTax(models.Model):
                 base_delta_variable,
                 fixed_multiplicator=fixed_multiplicator,
             )
-            if batch.get('computed') in (True, 'tax') and batch['include_base_amount']:
+            if batch.get('computed') in (True, 'tax') and (batch['include_base_amount'] and not batch['price_include']):
                 amounts_variable = [tax_values['tax_amount_factorized'] for tax_values in batch['taxes']]
                 base_delta_variable = tax_computer.new_equation(
                     f"{base_delta_variable} + {' + '.join(amounts_variable)}"

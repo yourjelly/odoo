@@ -767,6 +767,11 @@ class TestTax(TestTaxCommon):
             quantity=5,
         )
 
+        # tax       price_incl      incl_base_amount
+        # -----------------------------------------------
+        # tax1                      T
+        # tax2
+        # tax3
         tax1.include_base_amount = True
         self._check_tax_results(
             tax1 + tax2 + tax3,
@@ -783,6 +788,11 @@ class TestTax(TestTaxCommon):
             quantity=5,
         )
 
+        # tax       price_incl      incl_base_amount
+        # -----------------------------------------------
+        # tax1                      T
+        # tax2      T
+        # tax3
         tax2.price_include = True
         self._check_tax_results(
             tax1 + tax2 + tax3,
@@ -798,6 +808,11 @@ class TestTax(TestTaxCommon):
             120.0,
         )
 
+        # tax       price_incl      incl_base_amount
+        # -----------------------------------------------
+        # tax1                      T
+        # tax2      T               T
+        # tax3
         tax2.include_base_amount = True
         self._check_tax_results(
             tax1 + tax2 + tax3,
@@ -813,6 +828,11 @@ class TestTax(TestTaxCommon):
             120.0,
         )
 
+        # tax       price_incl      incl_base_amount
+        # -----------------------------------------------
+        # tax1
+        # tax2      T               T
+        # tax3
         tax1.include_base_amount = False
         self._check_tax_results(
             tax1 + tax2 + tax3,
@@ -828,7 +848,32 @@ class TestTax(TestTaxCommon):
             121.0,
         )
 
+        # tax       price_incl      incl_base_amount
+        # -----------------------------------------------
+        # tax1      T
+        # tax2      T               T
+        # tax3
         tax1.price_include = True
+        self._check_tax_results(
+            tax1 + tax2 + tax3,
+            {
+                'total_included': 123.0,
+                'total_excluded': 99.0,
+                'taxes': (
+                    (99.0, 1.0),
+                    (100.0, 21.0),
+                    (121.0, 2.0),
+                ),
+            },
+            121.0,
+        )
+
+        # tax       price_incl      incl_base_amount
+        # -----------------------------------------------
+        # tax1      T               T
+        # tax2      T               T
+        # tax3
+        tax1.include_base_amount = True
         self._check_tax_results(
             tax1 + tax2 + tax3,
             {
