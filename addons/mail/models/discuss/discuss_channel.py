@@ -196,6 +196,7 @@ class Channel(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
+        all_channel_members = []
         for vals in vals_list:
             # find partners to add from partner_ids
             partner_ids_cmd = vals.get('channel_partner_ids') or []
@@ -205,28 +206,49 @@ class Channel(models.Model):
             partner_ids += [cmd[2] for cmd in partner_ids_cmd if cmd[0] == 6]
 
             # find partners to add from channel_member_ids
-            membership_ids_cmd = vals.get('channel_member_ids', [])
-            if any(cmd[0] != 0 for cmd in membership_ids_cmd):
-                raise ValidationError(_('Invalid value when creating a channel with memberships, only 0 is allowed.'))
-            membership_pids = [cmd[2]['partner_id'] for cmd in membership_ids_cmd if cmd[0] == 0]
+            channel_members = []
+            membership_pids = []
+            membership_ids_cmd = vals.pop('channel_member_ids', [])
+            for cmd in membership_ids_cmd:
+                if cmd[0] != 0:
+                    raise ValidationError(_('Invalid value when creating a channel with memberships, only 0 is allowed.'))
+                for field_name in cmd[2]:
+                    if field_name not in ["partner_id", "guest_id", "is_pinned"]:
+                        raise ValidationError(
+                            _(
+                                "Invalid field “%(field_name)s” when creating a channel with member.",
+                                field_name=field_name,
+                            )
+                        )
+                channel_members.append(cmd[2])
+                membership_pids.append(cmd[2]['partner_id'])
 
             partner_ids_to_add = partner_ids
             # always add current user to new channel to have right values for
             # is_pinned + ensure they have rights to see channel
             if not self.env.context.get('install_mode') and not self.env.user._is_public():
                 partner_ids_to_add = list(set(partner_ids + [self.env.user.partner_id.id]))
-            vals['channel_member_ids'] = membership_ids_cmd + [
-                (0, 0, {'partner_id': pid})
+
+            channel_members += [
+                {'partner_id': pid}
                 for pid in partner_ids_to_add if pid not in membership_pids
             ]
+
+            all_channel_members.append(channel_members)
 
             # clean vals
             vals.pop('channel_partner_ids', False)
 
-        # Create channel and alias
-        channels = super(Channel, self.with_context(mail_create_bypass_create_check=self.env['discuss.channel.member']._bypass_create_check, mail_create_nolog=True, mail_create_nosubscribe=True)).create(vals_list)
-        # pop the mail_create_bypass_create_check key to avoid leaking it outside of create)
-        channels = channels.with_context(mail_create_bypass_create_check=None)
+        # Create channel, members and alias
+        channels = super(Channel, self.with_context(mail_create_nolog=True, mail_create_nosubscribe=True)).create(vals_list)
+
+        vals_list_channel_members = []
+        for channel, channel_members in zip(channels, all_channel_members):
+            for channel_member in channel_members:
+                channel_member['channel_id'] = channel.id
+                vals_list_channel_members.append(channel_member)
+        self.env['discuss.channel.member'].sudo().create(vals_list_channel_members)
+
         channels._subscribe_users_automatically()
 
         return channels
