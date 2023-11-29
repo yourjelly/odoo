@@ -71,6 +71,7 @@ class WebsiteForm(http.Controller):
                 if model_name == 'mail.mail':
                     form_has_email_cc = {'email_cc', 'email_bcc'} & kwargs.keys() or \
                         'email_cc' in kwargs["website_form_signature"]
+                        
                     # remove the email_cc information from the signature
                     kwargs["website_form_signature"] = kwargs["website_form_signature"].split(':')[0]
                     if kwargs.get("email_to"):
