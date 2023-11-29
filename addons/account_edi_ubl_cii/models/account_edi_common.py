@@ -666,21 +666,33 @@ class AccountEdiCommon(models.AbstractModel):
         inv_line_vals['taxes'] = []
         for tax_node in tax_nodes:
             amount = float(tax_node.text)
+            # TODO BIB: isn't it going to severly degrades edi import performances?
+            tax = None
+            # TODO BIB: didn't check_company in tax prediction
+            # ALSO! Can't do it that straight forward because prediction is in enterprise while this is community
+            predicted_tax_id = invoice_line\
+                    ._predict_specific_tax('percent', amount, invoice_line.move_id.journal_id.type)
             domain = [
                 *self.env['account.journal']._check_company_domain(invoice_line.company_id),
                 ('amount_type', '=', 'percent'),
                 ('type_tax_use', '=', invoice_line.move_id.journal_id.type),
                 ('amount', '=', amount),
             ]
-            tax_excl = self.env['account.tax'].search(domain + [('price_include', '=', False)], limit=1)
-            tax_incl = self.env['account.tax'].search(domain + [('price_include', '=', True)], limit=1)
-            if tax_excl:
-                inv_line_vals['taxes'].append(tax_excl.id)
-            elif tax_incl:
-                inv_line_vals['taxes'].append(tax_incl.id)
-                inv_line_vals['price_unit'] *= (1 + tax_incl.amount / 100)
-            else:
+            if predicted_tax_id:
+                tax = self.env['account.tax'].browse(predicted_tax_id)
+            if not tax:
+                tax = self.env['account.tax'].search(domain + [('price_include', '=', False)], limit=1)
+            if not tax:
+                tax = self.env['account.tax'].search(domain + [('price_include', '=', True)], limit=1)
+
+            if not tax:
                 logs.append(_("Could not retrieve the tax: %s %% for line '%s'.", amount, invoice_line.name))
+            elif tax.price_include:
+                inv_line_vals['taxes'].append(tax.id)
+                inv_line_vals['price_unit'] *= (1 + tax.amount / 100)
+            else:
+                inv_line_vals['taxes'].append(tax.id)
+
 
         # Handle Fixed Taxes
         for fixed_tax_vals in inv_line_vals['fixed_taxes_list']:
