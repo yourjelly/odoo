@@ -131,6 +131,8 @@ HANDLED_WEBHOOK_EVENTS = [
     'payment.authorized',
     'payment.captured',
     'payment.failed',
+    'payment.dispute.created'
     'refund.failed',
     'refund.processed',
+    'refund.created'
 ]

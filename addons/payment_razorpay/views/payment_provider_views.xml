@@ -6,6 +6,18 @@
         <field name="model">payment.provider</field>
         <field name="inherit_id" ref="payment.payment_provider_form"/>
         <field name="arch" type="xml">
+            <group name="provider_credentials" position="before">
+                <div
+                     name="razorpay_onboarding_group"
+                     invisible="context.get('razorpay_onboarding', False) or (code != 'razorpay' or razorpay_key_secret or razorpay_key_id)">
+                    <button string="Connect Razorpay"
+                            name="action_razorpay_connect_account"
+                            type="object"
+                            class="btn-primary"
+                            colspan="2"
+                            invisible="state == 'enabled'"/>
+                </div>
+            </group>
             <group name="provider_credentials" position='inside'>
                 <group name="razorpay_credentials"
                        invisible="code != 'razorpay'">
@@ -16,10 +28,20 @@
                            string="Key Secret"
                            required="code == 'razorpay' and state != 'disabled'"
                            password="True"/>
-                    <field name="razorpay_webhook_secret"
-                           string="Webhook Secret"
-                           required="code == 'razorpay' and state != 'disabled'"
-                           password="True"/>
+                            <!-- <field name="razorpay_webhook_secret"
+                                string="Webhook Secret"
+                                required="code == 'razorpay' and state != 'disabled'"
+                                password="True"/> -->
+                    <label for="razorpay_webhook_secret"/>
+                    <div class="o_row" col="2">
+                        <field name="razorpay_webhook_secret"
+                               password="True"/>
+                        <button string="Generate your webhook"
+                                type="object"
+                                name="action_razorpay_create_webhook"
+                                class="btn-primary"
+                                invisible="razorpay_webhook_secret or not razorpay_key_secret"/>
+                    </div>
                 </group>
             </group>
             <field name="allow_tokenization" position="after">
@@ -35,6 +57,13 @@
                 </div>
             </field>
         </field>
+    </record>
+
+    <record id="action_razorpay_payment_provider_onboarding" model="ir.actions.act_window">
+        <field name="name">Payment Providers</field>
+        <field name="res_model">payment.provider</field>
+        <field name="view_mode">form</field>
+        <field name="context">{'razorpay_onboarding': True}</field>
     </record>
 
 </odoo>
