@@ -97,10 +97,24 @@ class StockMoveLine(models.Model):
         """
         aggregated_move_lines = super()._get_aggregated_product_quantities(**kwargs)
         kit_name = kwargs.get('kit_name')
-        if kit_name:
-            for aggregated_move_line in aggregated_move_lines:
-                if aggregated_move_lines[aggregated_move_line]['description'] == kit_name:
+
+        to_be_removed = []
+        for aggregated_move_line in aggregated_move_lines:
+            bom = aggregated_move_lines[aggregated_move_line]['bom_id']
+            is_phantom = bom.type == 'phantom' if bom else False
+            description = aggregated_move_lines[aggregated_move_line]['description']
+
+            if kit_name:
+                if not is_phantom or bom.display_name not in kit_name:
+                    to_be_removed.append(aggregated_move_line)
+                elif description == kit_name:
                     aggregated_move_lines[aggregated_move_line]['description'] = ""
+            elif not kwargs and is_phantom:
+                to_be_removed.append(aggregated_move_line)
+
+        for move_line in to_be_removed:
+            del aggregated_move_lines[move_line]
+
         return aggregated_move_lines
 
 

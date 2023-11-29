@@ -770,7 +770,8 @@ class StockMoveLine(models.Model):
                 description = False
             product = move.product_id
             line_key = f'{product.id}_{product.display_name}_{description or ""}_{uom.id}'
-            return (line_key, name, description, uom)
+            bom = move.bom_line_id.bom_id if getattr(move, 'bom_line_id', None) else False
+            return (line_key, name, description, uom, bom)
 
         # Loops to get backorders, backorders' backorders, and so and so...
         backorders = self.env['stock.picking']
@@ -782,7 +783,7 @@ class StockMoveLine(models.Model):
         for move_line in self:
             if kwargs.get('except_package') and move_line.result_package_id:
                 continue
-            line_key, name, description, uom = get_aggregated_properties(move_line=move_line)
+            line_key, name, description, uom, bom = get_aggregated_properties(move_line=move_line)
 
             qty_done = move_line.product_uom_id._compute_quantity(move_line.qty_done, uom)
             if line_key not in aggregated_move_lines:
@@ -804,6 +805,7 @@ class StockMoveLine(models.Model):
                                                    'description': description,
                                                    'qty_done': qty_done,
                                                    'qty_ordered': qty_ordered or qty_done,
+                                                   'bom_id': bom,
                                                    'product_uom': uom,
                                                    'product': move_line.product_id}
             else:
@@ -819,7 +821,7 @@ class StockMoveLine(models.Model):
             if not (empty_move.state == "cancel" and empty_move.product_uom_qty
                     and float_is_zero(empty_move.quantity_done, precision_rounding=empty_move.product_uom.rounding)):
                 continue
-            line_key, name, description, uom = get_aggregated_properties(move=empty_move)
+            line_key, name, description, uom, bom = get_aggregated_properties(move=empty_move)
 
             if line_key not in aggregated_move_lines:
                 qty_ordered = empty_move.product_uom_qty
@@ -828,6 +830,7 @@ class StockMoveLine(models.Model):
                     'description': description,
                     'qty_done': False,
                     'qty_ordered': qty_ordered,
+                    'bom_id': bom,
                     'product_uom': uom,
                     'product': empty_move.product_id,
                 }
