@@ -28,9 +28,9 @@ class AccountTaxPython(models.Model):
             ":param partner: res.partner recordset singleton or None")
 
     @api.model
-    def _ascending_process_fixed_taxes_batch(self, batch, tax_computer, extra_base_variable, fixed_multiplicator=1):
+    def _ascending_process_fixed_taxes_batch(self, batch, tax_computer, fixed_multiplicator=1):
         # EXTENDS 'account'
-        super()._ascending_process_fixed_taxes_batch(batch, tax_computer, extra_base_variable, fixed_multiplicator=fixed_multiplicator)
+        super()._ascending_process_fixed_taxes_batch(batch, tax_computer, fixed_multiplicator=fixed_multiplicator)
 
         if batch['amount_type'] == 'code':
             batch['computed'] = 'tax'
@@ -44,9 +44,9 @@ class AccountTaxPython(models.Model):
                 )
 
     @api.model
-    def _descending_process_price_included_taxes_batch(self, batch, tax_computer, extra_base_variable):
+    def _descending_process_price_included_taxes_batch(self, batch, tax_computer):
         # EXTENDS 'account'
-        super()._descending_process_price_included_taxes_batch(batch, tax_computer, extra_base_variable)
+        super()._descending_process_price_included_taxes_batch(batch, tax_computer)
         if batch['price_include'] and batch['amount_type'] == 'code':
             batch['computed'] = True
             amounts_variable = [tax_values['tax_amount_factorized'] for tax_values in batch['taxes']]
@@ -57,9 +57,9 @@ class AccountTaxPython(models.Model):
                 tax_values['base'] = tax_values['display_base'] = batch_base_variable
 
     @api.model
-    def _ascending_process_taxes_batch(self, batch, tax_computer, extra_base_variable):
+    def _ascending_process_taxes_batch(self, batch, tax_computer):
         # EXTENDS 'account'
-        super()._ascending_process_taxes_batch(batch, tax_computer, extra_base_variable)
+        super()._ascending_process_taxes_batch(batch, tax_computer)
         if not batch['price_include'] and batch['amount_type'] == 'code':
             batch['computed'] = True
             base_variable = tax_computer.new_equation(
