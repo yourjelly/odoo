@@ -56,8 +56,9 @@ export class Popover extends Component {
                 // to test against from its owner document's default view
                 const Element = target?.ownerDocument?.defaultView?.Element;
                 return (
-                    Boolean(Element) &&
-                    (target instanceof Element || target instanceof window.Element)
+                    (Boolean(Element) &&
+                        (target instanceof Element || target instanceof window.Element)) ||
+                    (typeof target === "object" && target?.constructor?.name?.endsWith("Element"))
                 );
             },
         },
