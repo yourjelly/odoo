@@ -1288,14 +1288,14 @@ export class PosStore extends Reactive {
     }
 
     evalEquations(equations, values){
-        const localResults = Object.assign({}, values);
-        for(const equation of equations){
-            const equalIndex = equation[1].indexOf("=");
-            const formula = equation[1].slice(equalIndex + 1);
-            const variable = equation[0] ? equation[0] : equation[1].slice(0, equalIndex - 1);
-            localResults[variable] = evaluateExpr(formula, localResults);
+        const localsDict = Object.assign({}, values);
+        for(const [key, value] of Object.entries(localsDict)){
+            window[key] = value;
         }
-        return localResults;
+        for(const [variable, formula] of equations){
+            window[variable] = localsDict[variable] = eval(formula);
+        }
+        return localsDict;
     }
 
     taxIdsToTaxesKey(taxIds){
@@ -1356,11 +1356,6 @@ export class PosStore extends Reactive {
                 min: min,
             },
         );
-        for(const equation of taxesComputation.equations){
-            const equalIndex = equation[1].indexOf("=");
-            const formula = equation[1].slice(equalIndex + 1);
-            localResults[equation[0]] = evaluateExpr(formula, localResults);
-        }
 
         const evalTaxValuesList = [];
         for(const taxValues of taxesComputation.tax_values_list){

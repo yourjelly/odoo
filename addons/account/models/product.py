@@ -191,7 +191,7 @@ class ProductProduct(models.Model):
                 fiscal_position,
                 rounding_method='round_globally',
             )
-            if taxes_computation and taxes_computation.get('tax_computer'):
+            if taxes_computation and taxes_computation.get('computer'):
                 eval_taxes_computation = product_taxes._eval_price_unit_after_fiscal_position(taxes_computation, product_price_unit)
                 product_price_unit = eval_taxes_computation['price_unit']
 

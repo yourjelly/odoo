@@ -17,7 +17,7 @@ class TestTaxPython(TestTaxCommon):
         })
 
     def test_python_taxes_for_l10n_in(self):
-        tax1 = self.python_tax("result = max(quantity * price_unit * 0.21, quantity * 4.17)")
+        tax1 = self.python_tax("max(quantity * price_unit * 0.21, quantity * 4.17)")
         self._check_tax_results(
             tax1,
             {
@@ -43,7 +43,7 @@ class TestTaxPython(TestTaxCommon):
             130.0,
         )
 
-        tax1.python_applicable = "result = False"
+        tax1.python_applicable = "False"
         self._check_tax_results(
             tax1,
             {
@@ -58,7 +58,7 @@ class TestTaxPython(TestTaxCommon):
             'name': "product1",
             'lst_price': 200.0,
         })
-        tax2 = self.python_tax("result = product['lst_price'] > 100 and 10 or 5")
+        tax2 = self.python_tax("product['lst_price'] > 100 and 10 or 5")
         self._check_tax_results(
             tax2,
             {

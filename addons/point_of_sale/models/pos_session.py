@@ -1659,7 +1659,7 @@ class PosSession(models.Model):
                 if 'price_unit' in fp_computation:
                     taxes_computation['price_unit'][taxes_key] = {
                         'price_unit': fp_computation['price_unit'],
-                        'equations': fp_computation['tax_computer'].equations,
+                        'equations': fp_computation['computer'].to_js(),
                     }
 
         # Prepare the tax computation.
@@ -1673,7 +1673,7 @@ class PosSession(models.Model):
                 'tax_values_list': prepared_taxes['tax_values_list'],
                 'total_excluded': prepared_taxes['total_excluded'],
                 'total_included': prepared_taxes['total_included'],
-                'equations': prepared_taxes['tax_computer'].equations,
+                'equations': prepared_taxes['computer'].to_js(),
             }
 
     def _pos_data_process(self, loaded_data):
