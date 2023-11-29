@@ -69,13 +69,10 @@ class WebsocketClient(Thread):
             self.url = url.replace("http", "ws")
             Thread.__init__(self)
 
-    def start_client(self):
+    def run(self):
         self.ws = websocket.WebSocketApp(self.url + "/websocket",
-                                         on_open=self.on_open, on_message=on_message,
-                                         on_error=on_error)
+            on_open=self.on_open, on_message=on_message,
+            on_error=on_error)
         while 1:
             self.ws.run_forever()
             time.sleep(10)
-
-    def run(self):
-        self.start_client()
