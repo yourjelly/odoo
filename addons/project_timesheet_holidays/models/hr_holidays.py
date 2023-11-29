@@ -11,19 +11,19 @@ class HolidaysType(models.Model):
     timesheet_generate = fields.Boolean(
         'Generate Timesheets', compute='_compute_timesheet_generate', store=True, readonly=False,
         help="If checked, when validating a time off, timesheet will be generated in the Vacation Project of the company.")
-    timesheet_project_id = fields.Many2one('project.project', string="Project", domain="[('company_id', '=', company_id)]",
-        compute="_compute_timesheet_project_id", store=True, readonly=False)
+    timesheet_project_id = fields.Many2one('project.project', string="Project", domain="['|', ('company_id', '=', company_id), ('company_id', '=', False)]",
+        compute="_compute_timesheet_project_id", store=True, readonly=False, company_dependent=True)
     timesheet_task_id = fields.Many2one(
         'project.task', string="Task", compute='_compute_timesheet_task_id',
-        store=True, readonly=False,
+        store=True, readonly=False, company_dependent=True,
         domain="[('project_id', '=', timesheet_project_id),"
                 "('project_id', '!=', False),"
-                "('company_id', '=', company_id)]")
+                "'|', ('company_id', '=', company_id), ('company_id', '=', False)]")
 
     @api.depends('timesheet_task_id', 'timesheet_project_id')
     def _compute_timesheet_generate(self):
         for leave_type in self:
-            leave_type.timesheet_generate = not leave_type.company_id or (leave_type.timesheet_task_id and leave_type.timesheet_project_id)
+            leave_type.timesheet_generate = leave_type.timesheet_task_id and leave_type.timesheet_project_id
 
     @api.depends('company_id')
     def _compute_timesheet_project_id(self):
@@ -68,10 +68,7 @@ class Holidays(models.Model):
             if leave.holiday_type != 'employee' or not leave.holiday_status_id.timesheet_generate:
                 continue
 
-            if leave.holiday_status_id.company_id:
-                project, task = leave.holiday_status_id.timesheet_project_id, leave.holiday_status_id.timesheet_task_id
-            else:
-                project, task = leave.employee_id.company_id.internal_project_id, leave.employee_id.company_id.leave_timesheet_task_id
+            project, task = leave.holiday_status_id.timesheet_project_id, leave.holiday_status_id.timesheet_task_id
 
             if not project or not task:
                 continue
