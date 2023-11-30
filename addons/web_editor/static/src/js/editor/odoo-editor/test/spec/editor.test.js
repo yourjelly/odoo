@@ -4324,7 +4324,7 @@ X[]
                 contentBefore: '<p>user@domain.com[]</p>',
                 stepFunction: async (editor) => {
                     editor.testMode = false;
-                    const selection = document.getSelection();
+                    const selection = editor.document.getSelection();
                     const anchorOffset = selection.anchorOffset;
                     const p = editor.editable.querySelector('p');
                     const textNode = p.childNodes[0];
@@ -4343,7 +4343,7 @@ X[]
                 contentBefore: '<p>a http://test.com b http://test.com [] c http://test.com d</p>',
                 stepFunction: async (editor) => {
                     editor.testMode = false;
-                    const selection = document.getSelection();
+                    const selection = editor.document.getSelection();
                     const anchorOffset = selection.anchorOffset;
                     const p = editor.editable.querySelector('p');
                     const textNode = p.childNodes[0];

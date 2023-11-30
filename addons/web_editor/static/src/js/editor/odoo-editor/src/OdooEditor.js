@@ -232,7 +232,7 @@ export class OdooEditor extends EventTarget {
                 getReadOnlyAreas: () => [],
                 getContentEditableAreas: () => [],
                 getPowerboxElement: () => {
-                    const selection = document.getSelection();
+                    const selection = this.document.getSelection();
                     if (selection.isCollapsed && selection.rangeCount) {
                         return closestElement(selection.anchorNode, 'P, DIV');
                     }

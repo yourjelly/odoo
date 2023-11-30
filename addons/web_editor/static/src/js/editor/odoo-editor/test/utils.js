@@ -276,7 +276,7 @@ export function renderTextualSelection(doc = document) {
 /**
  * Return a more readable test error messages
  */
-export function customErrorMessage(assertLocation, value, expected) {
+export function customErrorMessage(assertLocation, value, expected, testVariants=[]) {
     const zws = '//zws//';
     value = value.replaceAll('\u200B', zws);
     expected = expected.replaceAll('\u200B', zws);
@@ -284,7 +284,12 @@ export function customErrorMessage(assertLocation, value, expected) {
     value = value.replaceAll('\u0009', tab);
     expected = expected.replaceAll('\u0009', tab);
 
-    return `${(isMobileTest ? '[MOBILE VERSION: ' : '[')}${assertLocation}]\nactual  : '${value}'\nexpected: '${expected}'\n\nStackTrace `;
+    let variants = "";
+    for (const variant of testVariants) {
+        variants += `[${variant}] `;
+    }
+
+    return `${variants}[${assertLocation}]\nactual  : '${value}'\nexpected: '${expected}'\n\nStackTrace `;
 }
 
 /**
@@ -295,19 +300,70 @@ export function _isMobile(){
 }
 
 export async function testEditor(Editor = OdooEditor, spec, options = {}) {
-    hasMobileTest = false;
-    isMobileTest = options.isMobile;
-
-    const testNode = document.createElement('div');
+    // Reset mobile test flags.
+    hasMobileTest = isMobileTest = false;
+    const { testIframe, testMobile, ...editorOptions } = options;
+    const testVariants = [];
+    if (testMobile) {
+        isMobileTest = true;
+        testVariants.push("mobile");
+    }
     const testContainer = document.querySelector('#editor-test-container');
-    testContainer.innerHTML = '';
-    testContainer.append(testNode);
-    testContainer.append(document.createTextNode('')); // Formatting spaces.
+
+    // Test with editable in top window.
+    const setup = () => {
+        testContainer.innerHTML = '';
+        const testNode = document.createElement('div');
+        testContainer.append(testNode);
+
+        return { testNode, document, cleanUp: () => testNode.remove() };
+    }
+    await _testEditor(Editor, spec, editorOptions, setup, testVariants);
+
+    // Test with editable in iframe.
+    if (1 || testIframe) {
+        const setup = () => {
+            testContainer.innerHTML = '';
+            const iframe = document.createElement('iframe');
+            testContainer.append(iframe);
+            // TODO: fix this, is not enough for some tests
+            patchEditorIframe(iframe);
+            const iframeDocument = iframe.contentDocument;
+            const testNode = iframeDocument.createElement('div');
+            iframeDocument.body.append(testNode);
+
+            return { testNode, document: iframeDocument, cleanUp: () => iframe.remove() };
+        }
+        await _testEditor(Editor, spec, editorOptions, setup, [...testVariants, 'iframe']);
+    }
+
+    // Repeat tests with mobile version.
+    if (hasMobileTest && !isMobileTest) {
+        const li = document.createElement('li');
+        li.classList.add('test', 'pass', 'pending');
+        const h2 = document.createElement('h2');
+        h2.textContent = 'FIXME: [Mobile Test] skipped';
+        li.append(h2);
+        const mochaSuite = [...document.querySelectorAll('#mocha-report li.suite > ul')].pop();
+        if (mochaSuite) {
+            mochaSuite.append(li);
+        }
+        // Mobile tests are temporarily disabled because they are not
+        // representative of reality. They will be re-enabled when the mobile
+        // editor will be ready.
+        // await testEditor(Editor, spec, { ...options, testMobile: true });
+    }
+}
+
+async function _testEditor(Editor, spec, options, setup, testVariants) {
+    const { testNode, document, cleanUp } = setup();
+
+    testNode.after(document.createTextNode('')); // Formatting spaces.
     let styleTag;
     if (spec.styleContent) {
         styleTag = document.createElement('style');
         styleTag.textContent = spec.styleContent;
-        testContainer.append(styleTag);
+        testNode.after(styleTag);
     }
 
     // Add the content to edit and remove the "[]" markers *before* initializing
@@ -319,16 +375,16 @@ export async function testEditor(Editor = OdooEditor, spec, options = {}) {
     await setTestSelection({
         anchorNode: testNode.parentElement, anchorOffset: 0,
         focusNode: testNode.parentElement, focusOffset: 0,
-    });
+    }, document);
     const selection = parseTextualSelection(testNode);
 
-    const editor = new Editor(testNode, Object.assign({ toSanitize: false }, options));
+    const editor = new Editor(testNode, Object.assign({ toSanitize: false, document }, options));
     let error = false;
     try {
         editor.keyboardType = 'PHYSICAL';
         editor.testMode = true;
         if (selection) {
-            await setTestSelection(selection);
+            await setTestSelection(selection, document);
             editor._recordHistorySelection();
         } else {
             document.getSelection().removeAllRanges();
@@ -339,37 +395,32 @@ export async function testEditor(Editor = OdooEditor, spec, options = {}) {
         sanitize(editor.editable);
 
         if (spec.contentBeforeEdit) {
-            renderTextualSelection();
+            renderTextualSelection(document);
             const beforeEditValue = testNode.innerHTML;
             window.chai.expect(beforeEditValue).to.be.equal(
                 spec.contentBeforeEdit,
-                customErrorMessage('contentBeforeEdit', beforeEditValue, spec.contentBeforeEdit));
+                customErrorMessage('contentBeforeEdit', beforeEditValue, spec.contentBeforeEdit, testVariants));
             const selection = parseTextualSelection(testNode);
             if (selection) {
-                await setTestSelection(selection);
+                await setTestSelection(selection, document);
             }
         }
 
         if (spec.stepFunction) {
             editor.observerActive('beforeUnitTests');
-            try {
-                await spec.stepFunction(editor);
-            } catch (e) {
-                e.message = (isMobileTest ? '[MOBILE VERSION] ' : '') + e.message;
-                throw e;
-            }
+            await spec.stepFunction(editor);
             editor.observerUnactive('afterUnitTests');
         }
 
         if (spec.contentAfterEdit) {
-            renderTextualSelection();
+            renderTextualSelection(document);
             const afterEditValue = testNode.innerHTML;
             window.chai.expect(afterEditValue).to.be.equal(
                 spec.contentAfterEdit,
-                customErrorMessage('contentAfterEdit', afterEditValue, spec.contentAfterEdit));
+                customErrorMessage('contentAfterEdit', afterEditValue, spec.contentAfterEdit, testVariants));
             const selection = parseTextualSelection(testNode);
             if (selection) {
-                await setTestSelection(selection);
+                await setTestSelection(selection, document);
             }
         }
     } catch (err) {
@@ -384,11 +435,11 @@ export async function testEditor(Editor = OdooEditor, spec, options = {}) {
     if (!error) {
         try {
             if (spec.contentAfter) {
-                renderTextualSelection();
+                renderTextualSelection(document);
 
                 // remove all check-ids (checklists, stars)
                 if (spec.removeCheckIds) {
-                    for (const li of document.querySelectorAll('#editor-test-container li[id^=checkId-')) {
+                    for (const li of testNode.querySelectorAll('li[id^=checkId-')) {
                         li.removeAttribute('id');
                     }
                 }
@@ -396,32 +447,18 @@ export async function testEditor(Editor = OdooEditor, spec, options = {}) {
                 const value = testNode.innerHTML;
                 window.chai.expect(value).to.be.equal(
                     spec.contentAfter,
-                    customErrorMessage('contentAfter', value, spec.contentAfter));
+                    customErrorMessage('contentAfter', value, spec.contentAfter, testVariants));
             }
         } catch (err) {
             error = err;
         }
     }
 
-    await testNode.remove();
+    cleanUp();
 
     if (error) {
         throw error;
-    } else if (hasMobileTest && !isMobileTest) {
-        const li = document.createElement('li');
-        li.classList.add('test', 'pass', 'pending');
-        const h2 = document.createElement('h2');
-        h2.textContent = 'FIXME: [Mobile Test] skipped';
-        li.append(h2);
-        const mochaSuite = [...document.querySelectorAll('#mocha-report li.suite > ul')].pop();
-        if (mochaSuite) {
-            mochaSuite.append(li);
-        }
-        // Mobile tests are temporarily disabled because they are not
-        // representative of reality. They will be re-enabled when the mobile
-        // editor will be ready.
-        // await testEditor(Editor, spec, { ...options, isMobile: true });
-    }
+    } 
 }
 
 /**
@@ -683,7 +720,9 @@ export const pasteHtml = async (editor, html) => pasteData(editor, html, 'text/h
 export const pasteOdooEditorHtml = async (editor, html) => pasteData(editor, html, 'text/odoo-editor');
 const overridenDomClass = [
     'HTMLBRElement',
+    'HTMLElement',
     'HTMLHeadingElement',
+    'HTMLLIElement',
     'HTMLParagraphElement',
     'HTMLPreElement',
     'HTMLQuoteElement',
