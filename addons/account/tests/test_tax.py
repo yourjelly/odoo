@@ -65,6 +65,8 @@ class TestTaxCommon(AccountTestInvoicingCommon):
 
     def _check_tax_results(self, taxes, expected_values, price_unit, **kwargs):
         results = taxes.compute_all(price_unit, **kwargs)
+        import pprint
+        print(pprint.pformat(results))
         self.assertAlmostEqual(results['total_included'], expected_values['total_included'])
         self.assertAlmostEqual(results['total_excluded'], expected_values['total_excluded'])
         self.assertEqual(len(results['taxes']), len(expected_values['taxes']))
@@ -271,329 +273,386 @@ class TestTax(TestTaxCommon):
                     sign * 1.0,
                 )
 
-    def test_specific_taxes_computation_in_both_round_per_line_round_globally(self):
-        currency_dp_0 = self.new_currency(rounding=1.0)
-        currency_dp_2 = self.new_currency(rounding=0.01)
-        currency_dp_6 = self.new_currency(rounding=0.000001)
-        currency_dp_half = self.new_currency(rounding=0.05)
-        tax_percent_19 = self.percent_tax(19.0)
-        tax_percent_0_price_included = self.percent_tax(0.0, price_include=True)
-        tax_percent_5_price_included = self.percent_tax(5.0, price_include=True)
+    def test_random_case_1(self):
         tax_percent_8_price_included = self.percent_tax(8.0, price_include=True)
-        tax_percent_19_price_included = self.percent_tax(19.0, price_include=True)
+        tax_percent_0_price_included = self.percent_tax(0.0, price_include=True)
+
+        self.env.company.tax_calculation_rounding_method = 'round_per_line'
+        self._check_tax_results(
+            tax_percent_8_price_included + tax_percent_0_price_included,
+            {
+                'total_included': 124.40,
+                'total_excluded': 115.19,
+                'taxes': (
+                    (115.19, 9.21),
+                    (115.19, 0.0),
+                ),
+            },
+            124.40,
+        )
+        self.env.company.tax_calculation_rounding_method = 'round_globally'
+        self._check_tax_results(
+            tax_percent_8_price_included + tax_percent_0_price_included,
+            {
+                'total_included': 124.40,
+                'total_excluded': 115.19,
+                'taxes': (
+                    (115.185185, 9.214815),
+                    (115.185185, 0.0),
+                ),
+            },
+            124.40,
+        )
+
+    def test_random_case_2(self):
+        tax_percent_5_price_included = self.percent_tax(5.0, price_include=True)
+        currency_dp_half = self.new_currency(rounding=0.05)
+
+        self.env.company.tax_calculation_rounding_method = 'round_per_line'
+        self._check_tax_results(
+            tax_percent_5_price_included,
+            {
+                'total_included': 5.0,
+                'total_excluded': 4.75,
+                'taxes': (
+                    (4.75, 0.25),
+                ),
+            },
+            5.0,
+            currency=currency_dp_half,
+        )
+        self._check_tax_results(
+            tax_percent_5_price_included,
+            {
+                'total_included': 10.0,
+                'total_excluded': 9.5,
+                'taxes': (
+                    (9.5, 0.5),
+                ),
+            },
+            10.0,
+            currency=currency_dp_half,
+        )
+        self._check_tax_results(
+            tax_percent_5_price_included,
+            {
+                'total_included': 50.0,
+                'total_excluded': 47.6,
+                'taxes': (
+                    (47.6, 2.4),
+                ),
+            },
+            50.0,
+            currency=currency_dp_half,
+        )
+        self.env.company.tax_calculation_rounding_method = 'round_globally'
+        self._check_tax_results(
+            tax_percent_5_price_included,
+            {
+                'total_included': 5.0,
+                'total_excluded': 4.75,
+                'taxes': (
+                    (4.761905, 0.238095),
+                ),
+            },
+            5.0,
+            currency=currency_dp_half,
+        )
+        self._check_tax_results(
+            tax_percent_5_price_included,
+            {
+                'total_included': 10.0,
+                'total_excluded': 9.5,
+                'taxes': (
+                    (9.52381, 0.47619),
+                ),
+            },
+            10.0,
+            currency=currency_dp_half,
+        )
+        self._check_tax_results(
+            tax_percent_5_price_included,
+            {
+                'total_included': 50.0,
+                'total_excluded': 47.6,
+                'taxes': (
+                    (47.619048, 2.380952),
+                ),
+            },
+            50.0,
+            currency=currency_dp_half,
+        )
+
+    def test_random_case_3(self):
+        tax_percent_15_price_excluded = self.percent_tax(15.0)
+        tax_percent_5_5_price_included = self.percent_tax(5.5, price_include=True)
+
+        self.env.company.tax_calculation_rounding_method = 'round_per_line'
+        self._check_tax_results(
+            tax_percent_15_price_excluded + tax_percent_5_5_price_included,
+            {
+                'total_included': 2627.01,
+                'total_excluded': 2180.09,
+                'taxes': (
+                    (2180.09, 327.01),
+                    (2180.09, 119.91),
+                ),
+            },
+            2300.0,
+        )
+        self.env.company.tax_calculation_rounding_method = 'round_globally'
+        self._check_tax_results(
+            tax_percent_15_price_excluded + tax_percent_5_5_price_included,
+            {
+                'total_included': 2627.01,
+                'total_excluded': 2180.09,
+                'taxes': (
+                    (2180.094787, 327.014218),
+                    (2180.094787, 119.905213),
+                ),
+            },
+            2300.0,
+        )
+
+    def test_random_case_4(self):
         tax_percent_12_price_included = self.percent_tax(12.0, price_include=True)
+
+        self.env.company.tax_calculation_rounding_method = 'round_per_line'
+        self._check_tax_results(
+            tax_percent_12_price_included,
+            {
+                'total_included': 52.50,
+                'total_excluded': 46.87,
+                'taxes': (
+                    (46.87, 5.63),
+                ),
+            },
+            52.50,
+        )
+        self.env.company.tax_calculation_rounding_method = 'round_globally'
+        self._check_tax_results(
+            tax_percent_12_price_included,
+            {
+                'total_included': 52.50,
+                'total_excluded': 46.88,
+                'taxes': (
+                    (46.875, 5.625),
+                ),
+            },
+            52.50,
+        )
+
+    def test_random_case_5(self):
+        tax_percent_19 = self.percent_tax(19.0)
+        tax_percent_19_price_included = self.percent_tax(19.0, price_include=True)
+        currency_dp_0 = self.new_currency(rounding=1.0)
+
+        self.env.company.tax_calculation_rounding_method = 'round_per_line'
+        self._check_tax_results(
+            tax_percent_19,
+            {
+                'total_included': 27000.0,
+                'total_excluded': 22689.0,
+                'taxes': (
+                    (22689, 4311),
+                ),
+            },
+            22689.0,
+            currency=currency_dp_0,
+        )
+        self._check_tax_results(
+            tax_percent_19,
+            {
+                'total_included': 10919.0,
+                'total_excluded': 9176.0,
+                'taxes': (
+                    (9176, 1743),
+                ),
+            },
+            9176.0,
+            currency=currency_dp_0,
+        )
+        self._check_tax_results(
+            tax_percent_19_price_included,
+            {
+                'total_included': 27000.0,
+                'total_excluded': 22689.0,
+                'taxes': (
+                    (22689.0, 4311.0),
+                ),
+            },
+            27000.0,
+            currency=currency_dp_0,
+        )
+        self._check_tax_results(
+            tax_percent_19_price_included,
+            {
+                'total_included': 10920.0,
+                'total_excluded': 9176.0,
+                'taxes': (
+                    (9176.0, 1744.0),
+                ),
+            },
+            10920.0,
+            currency=currency_dp_0,
+        )
+        self.env.company.tax_calculation_rounding_method = 'round_globally'
+        self._check_tax_results(
+            tax_percent_19,
+            {
+                'total_included': 27000.0,
+                'total_excluded': 22689.0,
+                'taxes': (
+                    (22689, 4310.91),
+                ),
+            },
+            22689.0,
+            currency=currency_dp_0,
+        )
+        self._check_tax_results(
+            tax_percent_19,
+            {
+                'total_included': 10919.0,
+                'total_excluded': 9176.0,
+                'taxes': (
+                    (9176, 1743.44),
+                ),
+            },
+            9176.0,
+            currency=currency_dp_0,
+        )
+        self._check_tax_results(
+            tax_percent_19_price_included,
+            {
+                'total_included': 27000.0,
+                'total_excluded': 22689.0,
+                'taxes': (
+                    (22689.07563, 4310.92437),
+                ),
+            },
+            27000.0,
+            currency=currency_dp_0,
+        )
+        self._check_tax_results(
+            tax_percent_19_price_included,
+            {
+                'total_included': 10920.0,
+                'total_excluded': 9176.0,
+                'taxes': (
+                    (9176.470588, 1743.529412),
+                ),
+            },
+            10920.0,
+            currency=currency_dp_0,
+        )
+
+    def test_random_case_6(self):
         tax_percent_20_price_included = self.percent_tax(20.0, price_include=True)
+        currency_dp_6 = self.new_currency(rounding=0.000001)
+
+        self.env.company.tax_calculation_rounding_method = 'round_per_line'
+        self._check_tax_results(
+            tax_percent_20_price_included,
+            {
+                'total_included': 399.999999,
+                'total_excluded': 333.333332,
+                'taxes': (
+                    # 399.999999 / 1.20 * 0.20 ~= 66.666667
+                    # 399.999999 - 66.666667 = 333.333332
+                    (333.333332, 66.666667),
+                ),
+            },
+            399.999999,
+            currency=currency_dp_6,
+        )
+        self.env.company.tax_calculation_rounding_method = 'round_globally'
+        self._check_tax_results(
+            tax_percent_20_price_included,
+            {
+                'total_included': 399.999999,
+                'total_excluded': 333.333333,
+                'taxes': (
+                    (333.333332, 66.666667),
+                ),
+            },
+            399.999999,
+            currency=currency_dp_6,
+        )
+
+    def test_random_case_7(self):
         tax_percent_21_price_included = self.percent_tax(21.0, price_include=True)
+        currency_dp_6 = self.new_currency(rounding=0.000001)
 
-        with self.subTest('round_per_line'):
-            self.env.company.tax_calculation_rounding_method = 'round_per_line'
-            self._check_tax_results(
-                tax_percent_8_price_included + tax_percent_0_price_included,
-                {
-                    'total_included': 124.40,
-                    'total_excluded': 115.19,
-                    'taxes': (
-                        (115.19, 9.21),
-                        (115.19, 0.00),
-                    ),
-                },
-                124.40,
-                currency=currency_dp_2,
-            )
-            self._check_tax_results(
-                tax_percent_5_price_included,
-                {
-                    'total_included': 5.0,
-                    'total_excluded': 4.75,
-                    'taxes': (
-                        (4.75, 0.25),
-                    ),
-                },
-                5.0,
-                currency=currency_dp_half,
-            )
-            self._check_tax_results(
-                tax_percent_5_price_included,
-                {
-                    'total_included': 10.0,
-                    'total_excluded': 9.5,
-                    'taxes': (
-                        (9.5, 0.5),
-                    ),
-                },
-                10.0,
-                currency=currency_dp_half,
-            )
-            self._check_tax_results(
-                tax_percent_5_price_included,
-                {
-                    'total_included': 50.0,
-                    'total_excluded': 47.6,
-                    'taxes': (
-                        (47.6, 2.4),
-                    ),
-                },
-                50.0,
-                currency=currency_dp_half,
-            )
-            self._check_tax_results(
-                tax_percent_12_price_included,
-                {
-                    'total_included': 52.50,
-                    'total_excluded': 46.87,
-                    'taxes': (
-                        (46.87, 5.63),
-                    ),
-                },
-                52.50,
-                currency=currency_dp_2,
-            )
-            self._check_tax_results(
-                tax_percent_19,
-                {
-                    'total_included': 27000.0,
-                    'total_excluded': 22689.0,
-                    'taxes': (
-                        (22689, 4311),
-                    ),
-                },
-                22689.0,
-                currency=currency_dp_0,
-            )
-            self._check_tax_results(
-                tax_percent_19,
-                {
-                    'total_included': 10919.0,
-                    'total_excluded': 9176.0,
-                    'taxes': (
-                        (9176, 1743),
-                    ),
-                },
-                9176.0,
-                currency=currency_dp_0,
-            )
-            self._check_tax_results(
-                tax_percent_19_price_included,
-                {
-                    'total_included': 27000.0,
-                    'total_excluded': 22689.0,
-                    'taxes': (
-                        (22689.0, 4311.0),
-                    ),
-                },
-                27000.0,
-                currency=currency_dp_0,
-            )
-            self._check_tax_results(
-                tax_percent_19_price_included,
-                {
-                    'total_included': 10920.0,
-                    'total_excluded': 9176.0,
-                    'taxes': (
-                        (9176.0, 1744.0),
-                    ),
-                },
-                10920.0,
-                currency=currency_dp_0,
-            )
-            self._check_tax_results(
-                tax_percent_20_price_included,
-                {
-                    'total_included': 399.999999,
-                    'total_excluded': 333.333332,
-                    'taxes': (
-                        # 399.999999 / 1.20 * 0.20 ~= 66.666667
-                        # 399.999999 - 66.666667 = 333.333332
-                        (333.333332, 66.666667),
-                    ),
-                },
-                399.999999,
-                currency=currency_dp_6,
-            )
-            self._check_tax_results(
-                tax_percent_21_price_included,
-                {
-                    'total_included': 11.90,
-                    'total_excluded': 9.83,
-                    'taxes': (
-                        (9.83, 2.07),
-                    ),
-                },
-                11.90,
-                currency=currency_dp_2,
-            )
-            self._check_tax_results(
-                tax_percent_21_price_included,
-                {
-                    'total_included': 2.80,
-                    'total_excluded': 2.31,
-                    'taxes': (
-                        (2.31, 0.49),
-                    ),
-                },
-                2.80,
-                currency=currency_dp_2,
-            )
-            self._check_tax_results(
-                tax_percent_21_price_included,
-                {
-                    'total_included': 7.0,
-                    'total_excluded': 5.785124,
-                    'taxes': (
-                        (5.785124, 1.214876),
-                    ),
-                },
-                7.0,
-                currency=currency_dp_6,
-            )
-
-        with self.subTest('round_globally'):
-            self.env.company.tax_calculation_rounding_method = 'round_globally'
-            self._check_tax_results(
-                tax_percent_8_price_included + tax_percent_0_price_included,
-                {
-                    'total_included': 124.40,
-                    'total_excluded': 115.19,
-                    'taxes': (
-                        (115.185185, 9.214815),
-                        (115.185185, 0.00),
-                    ),
-                },
-                124.40,
-                currency=currency_dp_2,
-            )
-            self._check_tax_results(
-                tax_percent_5_price_included,
-                {
-                    'total_included': 5.0,
-                    'total_excluded': 4.75,
-                    'taxes': (
-                        (4.761905, 0.238095),
-                    ),
-                },
-                5.0,
-                currency=currency_dp_half,
-            )
-            self._check_tax_results(
-                tax_percent_5_price_included,
-                {
-                    'total_included': 10.0,
-                    'total_excluded': 9.5,
-                    'taxes': (
-                        (9.52381, 0.47619),
-                    ),
-                },
-                10.0,
-                currency=currency_dp_half,
-            )
-            self._check_tax_results(
-                tax_percent_5_price_included,
-                {
-                    'total_included': 50.0,
-                    'total_excluded': 47.6,
-                    'taxes': (
-                        (47.619048, 2.380952),
-                    ),
-                },
-                50.0,
-                currency=currency_dp_half,
-            )
-            self._check_tax_results(
-                tax_percent_12_price_included,
-                {
-                    'total_included': 52.50,
-                    'total_excluded': 46.88,
-                    'taxes': (
-                        (46.875, 5.625),
-                    ),
-                },
-                52.50,
-                currency=currency_dp_2,
-            )
-            self._check_tax_results(
-                tax_percent_19,
-                {
-                    'total_included': 27000.0,
-                    'total_excluded': 22689.0,
-                    'taxes': (
-                        (22689, 4310.91),
-                    ),
-                },
-                22689.0,
-                currency=currency_dp_0,
-            )
-            self._check_tax_results(
-                tax_percent_19,
-                {
-                    'total_included': 10919.0,
-                    'total_excluded': 9176.0,
-                    'taxes': (
-                        (9176, 1743.44),
-                    ),
-                },
-                9176.0,
-                currency=currency_dp_0,
-            )
-            self._check_tax_results(
-                tax_percent_19_price_included,
-                {
-                    'total_included': 27000.0,
-                    'total_excluded': 22689.0,
-                    'taxes': (
-                        (22689.07563, 4310.92437),
-                    ),
-                },
-                27000.0,
-                currency=currency_dp_0,
-            )
-            self._check_tax_results(
-                tax_percent_19_price_included,
-                {
-                    'total_included': 10920.0,
-                    'total_excluded': 9176.0,
-                    'taxes': (
-                        (9176.470588, 1743.529412),
-                    ),
-                },
-                10920.0,
-                currency=currency_dp_0,
-            )
-            self._check_tax_results(
-                tax_percent_20_price_included,
-                {
-                    'total_included': 399.999999,
-                    'total_excluded': 333.333333,
-                    'taxes': (
-                        (333.333332, 66.666667),
-                    ),
-                },
-                399.999999,
-                currency=currency_dp_6,
-            )
-            self._check_tax_results(
-                tax_percent_21_price_included,
-                {
-                    'total_included': 2.80,
-                    'total_excluded': 2.31,
-                    'taxes': (
-                        (2.31405, 0.48595),
-                    ),
-                },
-                2.80,
-                currency=currency_dp_2,
-            )
-            self._check_tax_results(
-                tax_percent_21_price_included,
-                {
-                    'total_included': 7.0,
-                    'total_excluded': 5.785124,
-                    'taxes': (
-                        (5.785124, 1.214876),
-                    ),
-                },
-                7.0,
-                currency=currency_dp_6,
-            )
+        self.env.company.tax_calculation_rounding_method = 'round_per_line'
+        self._check_tax_results(
+            tax_percent_21_price_included,
+            {
+                'total_included': 11.90,
+                'total_excluded': 9.83,
+                'taxes': (
+                    (9.83, 2.07),
+                ),
+            },
+            11.90,
+        )
+        self._check_tax_results(
+            tax_percent_21_price_included,
+            {
+                'total_included': 2.80,
+                'total_excluded': 2.31,
+                'taxes': (
+                    (2.31, 0.49),
+                ),
+            },
+            2.80,
+        )
+        self._check_tax_results(
+            tax_percent_21_price_included,
+            {
+                'total_included': 7.0,
+                'total_excluded': 5.785124,
+                'taxes': (
+                    (5.785124, 1.214876),
+                ),
+            },
+            7.0,
+            currency=currency_dp_6,
+        )
+        self.env.company.tax_calculation_rounding_method = 'round_globally'
+        self._check_tax_results(
+            tax_percent_21_price_included,
+            {
+                'total_included': 11.90,
+                'total_excluded': 9.83,
+                'taxes': (
+                    (9.834711, 2.065289),
+                ),
+            },
+            11.90,
+        )
+        self._check_tax_results(
+            tax_percent_21_price_included,
+            {
+                'total_included': 2.80,
+                'total_excluded': 2.31,
+                'taxes': (
+                    (2.31405, 0.48595),
+                ),
+            },
+            2.80,
+        )
+        self._check_tax_results(
+            tax_percent_21_price_included,
+            {
+                'total_included': 7.0,
+                'total_excluded': 5.785124,
+                'taxes': (
+                    (5.785124, 1.214876),
+                ),
+            },
+            7.0,
+            currency=currency_dp_6,
+        )
 
     def test_fixed_tax_price_included_affect_base_on_0(self):
         tax = self.fixed_tax(0.05, price_include=True, include_base_amount=True)

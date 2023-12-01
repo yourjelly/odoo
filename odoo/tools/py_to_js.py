@@ -214,6 +214,7 @@ class Computer:
 
     def eval_python(self, locals_dict):
         for variable in self._variables.values():
+            print((variable.to_js(), variable.get_node().to_js()))
             locals_dict[variable.get_name()] = variable.get_node().eval_python(locals_dict)
         return locals_dict
 

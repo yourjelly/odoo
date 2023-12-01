@@ -554,7 +554,7 @@ class AccountTax(models.Model):
             self.include_base_amount = True
 
     # -------------------------------------------------------------------------
-    # TAXES COMPUTATION
+    # PREPARE TAXES COMPUTATION
     # -------------------------------------------------------------------------
 
     @api.model
@@ -760,91 +760,38 @@ class AccountTax(models.Model):
                     tax_values['base'] = tax_values['display_base'] = price_excluded_base_var.get_name()
 
     @api.model
-    def _apply_round_per_line_on_price_include_batch(self, computer, currency, batch):
-        """ Apply the round_per_line taxes computation on the price-included batch passed as parameter.
-
-        :param computer:    An instance of Computer setup by '_prepare_computer'.
-        :param currency:    The currency to perform the rounding.
-        :param batch:       A batch of taxes setup by '_prepare_taxes_batches'.
-        """
-        tax_values_list = batch['taxes']
-
-        # The total amount price-included must remain the same as before even after rounding.
-        raw_tax_amount_vars = [
-            computer.get_variable(tax_values['tax_amount_factorized'])
-            for tax_values in tax_values_list
-        ]
-        total_raw_tax_amount_node = computer.sum(*raw_tax_amount_vars)
-
-        # Adapt the tax amounts.
-        rounded_tax_amount_vars = []
-        for tax_values, raw_tax_amount_var in zip(batch['taxes'], raw_tax_amount_vars):
-            tax_amount_var = computer.create_var(computer.round(raw_tax_amount_var, currency.rounding))
-            tax_values['tax_amount_factorized'] = tax_amount_var.get_name()
-            rounded_tax_amount_vars.append(tax_amount_var)
-
-            display_base_var = computer.get_variable(tax_values['display_base'])
-            rounded_display_base_var = computer.create_var(computer.round(display_base_var, currency.rounding))
-            tax_values['display_base'] = rounded_display_base_var.get_name()
-
-        # Adapt the base amounts.
-        total_excluded_var = computer.get_variable(batch['taxes'][0]['base'])
-        total_rounded_tax_amount_node = computer.sum(*rounded_tax_amount_vars)
-        base_var = computer.create_var(
-            computer.round(
-                total_excluded_var + total_raw_tax_amount_node - total_rounded_tax_amount_node,
-                currency.rounding,
-            )
-        )
-        for tax_values in batch['taxes']:
-            tax_values['base'] = base_var.get_name()
-
-    @api.model
-    def _apply_round_per_line_on_price_excluded_batch(self, computer, currency, batch):
-        """ Apply the round_per_line taxes computation on the price-excluded batch passed as parameter.
-
-        :param computer:    An instance of Computer setup by '_prepare_computer'.
-        :param currency:    The currency to perform the rounding.
-        :param batch:       A batch of taxes setup by '_prepare_taxes_batches'.
-        """
-        tax_values_list = batch['taxes']
-
-        # The total amount price-excluded must remain the same as before even after rounding.
-        # To do so, we compare the total_included before and after rounding and we put the difference on the last tax if any.
-        total_raw_tax_amount_node = computer.sum(*[
-            computer.get_variable(tax_values['tax_amount_factorized'])
-            for tax_values in tax_values_list
-        ])
-        total_raw_excluded_var = computer.get_variable(tax_values_list[0]['base'])
-        total_raw_included_rounded_node = computer.round(total_raw_excluded_var + total_raw_tax_amount_node, currency.rounding)
-
-        tax_amounts_nodes = []
-        for tax_values in tax_values_list:
-            base_var = computer.get_variable(tax_values['base'])
-            base_var = computer.create_var(computer.round(base_var, currency.rounding))
-            tax_values['base'] = base_var.get_name()
-            display_base_var = computer.get_variable(tax_values['display_base'])
-            display_base_var = computer.create_var(computer.round(display_base_var, currency.rounding))
-            tax_values['display_base'] = display_base_var.get_name()
-            tax_amount_var = computer.get_variable(tax_values['tax_amount_factorized'])
-            tax_amount_var = computer.create_var(computer.round(tax_amount_var, currency.rounding))
-            tax_values['tax_amount_factorized'] = tax_amount_var.get_name()
-            tax_amounts_nodes.append(tax_amount_var)
-
-        total_rounded_tax_amount_node = computer.sum(*tax_amounts_nodes)
-        total_excluded_rounded_var = computer.get_variable(tax_values_list[0]['base'])
-        total_included_rounded_node = computer.round(total_excluded_rounded_var + total_rounded_tax_amount_node, currency.rounding)
-        last_tax_amount_node = total_raw_included_rounded_node - total_included_rounded_node + tax_amounts_nodes[-1]
-        last_tax_amount_var = computer.create_var(last_tax_amount_node)
-        tax_values_list[-1]['tax_amount_factorized'] = last_tax_amount_var.get_name()
-
-    @api.model
     def _apply_round_per_line(self, computer, currency, batches):
         for batch in batches:
-            if batch['price_include']:
-                self._apply_round_per_line_on_price_include_batch(computer, currency, batch)
-            else:
-                self._apply_round_per_line_on_price_excluded_batch(computer, currency, batch)
+            tax_values_list = batch['taxes']
+
+            total_tax_amount_before_node = computer.sum(*[
+                computer.get_variable(tax_values['tax_amount_factorized'])
+                for tax_values in tax_values_list
+            ])
+            total_excluded_before_var = computer.get_variable(tax_values_list[0]['base'])
+            total_included_before_var = total_excluded_before_var + total_tax_amount_before_node
+
+            tax_amounts_nodes = []
+            for tax_values in tax_values_list:
+                base_var = computer.get_variable(tax_values['base'])
+                base_var = computer.create_var(computer.round(base_var, currency.rounding))
+                tax_values['base'] = base_var.get_name()
+                display_base_var = computer.get_variable(tax_values['display_base'])
+                display_base_var = computer.create_var(computer.round(display_base_var, currency.rounding))
+                tax_values['display_base'] = display_base_var.get_name()
+                tax_amount_var = computer.get_variable(tax_values['tax_amount_factorized'])
+                tax_amount_var = computer.create_var(computer.round(tax_amount_var, currency.rounding))
+                tax_values['tax_amount_factorized'] = tax_amount_var.get_name()
+                tax_amounts_nodes.append(tax_amount_var)
+
+            total_tax_amount_after_node = computer.sum(*tax_amounts_nodes)
+            total_excluded_after_var = computer.get_variable(tax_values_list[0]['base'])
+            total_included_after_node = total_excluded_after_var + total_tax_amount_after_node
+            last_tax_amount_node = tax_amounts_nodes[-1]
+
+            delta_node = computer.round(total_included_before_var, currency.rounding) - total_included_after_node
+            tax_amount_var = computer.create_var(last_tax_amount_node + delta_node)
+            tax_values_list[-1]['tax_amount_factorized'] = tax_amount_var.get_name()
 
     def _prepare_taxes_computation(
         self,
@@ -857,6 +804,9 @@ class AccountTax(models.Model):
         currency=None,
         computer=None,
     ):
+        if rounding_method == 'round_per_line':
+            assert currency
+
         taxes = self._origin
 
         # Flatten the taxes to handle the group of taxes.
@@ -1065,6 +1015,10 @@ class AccountTax(models.Model):
             'total_included': local_results[taxes_computation['total_included']],
         }
 
+    # -------------------------------------------------------------------------
+    # PREPARE FISCAL POSITION MAPPING
+    # -------------------------------------------------------------------------
+
     def _prepare_price_unit_after_fiscal_position(
         self,
         fiscal_position,
@@ -1134,6 +1088,10 @@ class AccountTax(models.Model):
             'price_unit': local_results[taxes_computation['price_unit']],
             'taxes': taxes_computation['taxes'],
         }
+
+    # -------------------------------------------------------------------------
+    # FISCAL POSITION MAPPING
+    # -------------------------------------------------------------------------
 
     @api.model
     def _apply_taxes_computation_split_repartition_lines(
