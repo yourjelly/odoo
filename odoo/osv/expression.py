@@ -742,17 +742,12 @@ def check_leaf(element, internal=False):
 # SQL utils
 # --------------------------------------------------
 
-def _unaccent_wrapper(x):
-    if isinstance(x, SQL):
-        return SQL("unaccent(%s)", x)
-    if isinstance(x, psycopg2.sql.Composable):
-        return psycopg2.sql.SQL('unaccent({})').format(x)
-    return 'unaccent({})'.format(x)
-
 def get_unaccent_wrapper(cr):
-    if odoo.registry(cr.dbname).has_unaccent:
-        return _unaccent_wrapper
-    return lambda x: x
+    warnings.warn(
+        "Since 18.0, deprecated method, use env.registry.unaccent_wrapper instead",
+        DeprecationWarning, 2,
+    )
+    return odoo.registry(cr.dbname).unaccent_wrapper
 
 
 class expression(object):
@@ -776,7 +771,7 @@ class expression(object):
             :attr result: the result of the parsing, as a pair (query, params)
             :attr query: Query object holding the final result
         """
-        self._unaccent_wrapper = get_unaccent_wrapper(model._cr)
+        self._unaccent_wrapper = model.pool.unaccent_wrapper
         self._has_trigram = model.pool.has_trigram
         self.root_model = model
         self.root_alias = alias or model._table
