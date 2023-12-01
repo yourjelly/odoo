@@ -1096,6 +1096,11 @@ publicWidget.registry.SurveyFormWidget = publicWidget.Widget.extend(SurveyPreloa
             }
             const hasNoSelectedTriggers = !this.options.triggeringAnswersByQuestion[questionId]
                 .some(answerId => this.selectedAnswers.includes(parseInt(answerId)));
+            const sectionId = dependingQuestion.getAttribute('section-id');
+            if(sectionId){
+                const dependingSection = document.querySelector(`.js_section_wrapper[id="${sectionId}"]`);
+                dependingSection.classList.toggle('d-none',hasNoSelectedTriggers);
+            }
             dependingQuestion.classList.toggle('d-none', hasNoSelectedTriggers);
             if (hasNoSelectedTriggers) {
                 // Clear / Un-select all the input from the given question
