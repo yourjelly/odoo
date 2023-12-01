@@ -437,6 +437,11 @@ class ProductTemplate(models.Model):
             if record.type != type_mapping.get(record.detailed_type, record.detailed_type):
                 raise ValidationError(_("The Type of this product doesn't match the Detailed Type"))
 
+    @api.constrains('standard_price')
+    def _constrains_standard_price(self):
+        if any(template.standard_price < 0 for template in self):
+            raise ValidationError(_("Template - Cost should be positive"))
+
     @api.constrains('uom_id', 'uom_po_id')
     def _check_uom(self):
         if any(template.uom_id and template.uom_po_id and template.uom_id.category_id != template.uom_po_id.category_id for template in self):

@@ -347,6 +347,11 @@ class ProductProduct(models.Model):
         if self.uom_id:
             self.uom_po_id = self.uom_id.id
 
+    @api.constrains('standard_price')
+    def _constrains_standard_price(self):
+        if any(variant.standard_price < 0 for variant in self):
+            raise ValidationError(_("Variant - Cost should be positive"))
+
     @api.onchange('uom_po_id')
     def _onchange_uom(self):
         if self.uom_id and self.uom_po_id and self.uom_id.category_id != self.uom_po_id.category_id:
