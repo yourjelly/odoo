@@ -759,7 +759,7 @@ describe('Utils', () => {
                     </div></div>
                     <p><br></p>`),
                 stepFunction: async editor => {
-                    const sel = document.getSelection();
+                    const sel = editor.document.getSelection();
                     const element = sel.anchorNode;
                     await triggerEvent(editor.editable, 'keydown', { key: '/' });
                     await insertText(editor, '/');
@@ -767,7 +767,7 @@ describe('Utils', () => {
                     await insertText(editor, 'h2');
                     await triggerEvent(element, 'keyup', { key: '2' });
                     await triggerEvent(editor.editable, 'keydown', { key: 'Enter' });
-                    const activeElement = document.activeElement;
+                    const activeElement = editor.document.activeElement;
                     setCursorStart(activeElement.lastElementChild);
                     await nextTickFrame();
                 },
@@ -788,14 +788,14 @@ describe('Utils', () => {
                 stepFunction: async editor => {
                     ensureFocus(editor.editable);
                     await nextTickFrame();
-                    let activeElement = document.activeElement;
+                    let activeElement = editor.document.activeElement;
                     setCursorStart(activeElement.lastElementChild);
                     await insertText(editor, 'focusWasConserved');
                     // Proof that a simple call to Element.focus would change
                     // the focus in this case.
                     editor.editable.focus();
                     await nextTickFrame();
-                    activeElement = document.activeElement;
+                    activeElement = editor.document.activeElement;
                     setCursorStart(activeElement.lastElementChild);
                     await nextTickFrame();
                 },

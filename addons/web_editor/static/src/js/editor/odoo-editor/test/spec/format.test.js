@@ -459,7 +459,7 @@ describe('Format', () => {
                         focusOffset: 2,
                         direction: Direction.FORWARD,
                     };
-                    await setTestSelection(selection);
+                    await setTestSelection(selection, editor.document);
                     await strikeThrough(editor);
                 },
                 contentAfter: `<p>ab<s>c</s>[ ]<s>d</s>ef</p>`,
@@ -478,7 +478,7 @@ describe('Format', () => {
                         focusOffset: 1,
                         direction: Direction.FORWARD,
                     };
-                    await setTestSelection(selection);
+                    await setTestSelection(selection, editor.document);
                     await strikeThrough(editor);
                 },
                 contentAfter: `<p>ab${s(`[c d]`)}ef</p>`,
@@ -495,7 +495,7 @@ describe('Format', () => {
                         focusOffset: 1,
                         direction: Direction.FORWARD,
                     };
-                    await setTestSelection(selection);
+                    await setTestSelection(selection, editor.document);
                     await strikeThrough(editor);
                     await strikeThrough(editor);
                 },

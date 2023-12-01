@@ -232,6 +232,7 @@ export class OdooEditor extends EventTarget {
                 getReadOnlyAreas: () => [],
                 getContentEditableAreas: () => [],
                 getPowerboxElement: () => {
+                    // This breaks some tests in Collaboration
                     const selection = this.document.getSelection();
                     if (selection.isCollapsed && selection.rangeCount) {
                         return closestElement(selection.anchorNode, 'P, DIV');
@@ -3455,6 +3456,7 @@ export class OdooEditor extends EventTarget {
      * @returns {boolean}
      */
     _isWhitelisted(item) {
+        // TODO: fixme (broken in iframe)
         if (item instanceof Attr) {
             return CLIPBOARD_WHITELISTS.attributes.includes(item.name);
         } else if (typeof item === 'string') {
@@ -4482,7 +4484,7 @@ export class OdooEditor extends EventTarget {
         const node = ev.target;
         // handle checkbox lists
         if (node.tagName == 'LI' && getListMode(node.parentElement) == 'CL') {
-            const beforStyle = window.getComputedStyle(node, ':before');
+            const beforStyle = this.document.defaultView.getComputedStyle(node, ':before');
             const style1 = {
                 left: parseInt(beforStyle.getPropertyValue('left'), 10),
                 top: parseInt(beforStyle.getPropertyValue('top'), 10),

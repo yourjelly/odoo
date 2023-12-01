@@ -322,17 +322,33 @@ export async function testEditor(Editor = OdooEditor, spec, options = {}) {
 
     // Test with editable in iframe.
     if (1 || testIframe) {
-        const setup = () => {
-            testContainer.innerHTML = '';
-            const iframe = document.createElement('iframe');
-            testContainer.append(iframe);
-            // TODO: fix this, is not enough for some tests
-            patchEditorIframe(iframe);
+        // TODO: move this setup to a separate function
+        const setup = async () => {
+            let iframe = document.querySelector('#editor-iframe-test-container');
+            if (!iframe) {
+                iframe = document.createElement('iframe');
+                iframe.id = 'editor-iframe-test-container';
+                testContainer.after(iframe);
+                // Add custom editor methods to prototypes.
+                patchEditorIframe(iframe);
+                // Load stylesheel as some checklist tests depend on it.
+                const linkElement = document.querySelector('link[href*="assets"][href*="styles"]').cloneNode();
+                iframe.contentDocument.head.append(linkElement);
+                await new Promise(resolve => linkElement.addEventListener('load', resolve));
+                console.log('iframe ready');
+            }
             const iframeDocument = iframe.contentDocument;
+            iframeDocument.body.innerHTML = "";
             const testNode = iframeDocument.createElement('div');
             iframeDocument.body.append(testNode);
+            iframe.style.display = '';
 
-            return { testNode, document: iframeDocument, cleanUp: () => iframe.remove() };
+            return { testNode, document: iframeDocument, 
+                cleanUp: () => {
+                    testNode.remove();
+                    iframe.style.display = 'none';
+                }
+            }
         }
         await _testEditor(Editor, spec, editorOptions, setup, [...testVariants, 'iframe']);
     }
@@ -356,7 +372,7 @@ export async function testEditor(Editor = OdooEditor, spec, options = {}) {
 }
 
 async function _testEditor(Editor, spec, options, setup, testVariants) {
-    const { testNode, document, cleanUp } = setup();
+    const { testNode, document, cleanUp } = await setup();
 
     testNode.after(document.createTextNode('')); // Formatting spaces.
     let styleTag;
