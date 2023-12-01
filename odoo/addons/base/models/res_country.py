@@ -6,7 +6,7 @@ import logging
 from odoo import api, fields, models, tools
 from odoo.osv import expression
 from odoo.exceptions import UserError
-from psycopg2 import IntegrityError
+from odoo.tools.sql import SQL
 from odoo.tools.translate import _
 _logger = logging.getLogger(__name__)
 
@@ -85,17 +85,21 @@ class Country(models.Model):
     def _name_search(self, name, domain=None, operator='ilike', limit=None, order=None):
         if domain is None:
             domain = []
+        domain = expression.AND([domain, [('name', operator, name)]])
 
-        ids = []
         if len(name) == 2:
-            ids = list(self._search([('code', 'ilike', name)] + domain, limit=limit, order=order))
+            domain = expression.OR([domain, [('code', 'ilike', name)]])
 
-        search_domain = [('name', operator, name)]
-        if ids:
-            search_domain.append(('id', 'not in', ids))
-        ids += list(self._search(search_domain + domain, limit=limit, order=order))
+        query = super()._search(domain, limit=limit, order=order or self._order)
 
-        return ids
+        if len(name) == 2:
+            query.order = SQL(
+                "%s, %s",
+                self._leaf_to_sql(self._table, ('code', 'ilike', name), query),
+                query.order,
+            )
+
+        return query
 
     @api.model
     @tools.ormcache('code')

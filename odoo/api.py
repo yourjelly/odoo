@@ -15,7 +15,6 @@ __all__ = [
 ]
 
 import logging
-import warnings
 from collections import defaultdict
 from collections.abc import Mapping
 from contextlib import contextmanager
@@ -28,6 +27,7 @@ try:
 except ImportError:
     from decorator import decorator
 
+from odoo.sql_db import Cursor
 from .exceptions import AccessError, CacheMiss
 from .tools import clean_context, frozendict, lazy_property, OrderedSet, Query, SQL, StackMap
 from .tools.translate import _
@@ -459,6 +459,12 @@ class Environment(Mapping):
     names to models. It also holds a cache for records, and a data
     structure to manage recomputations.
     """
+
+    cr: Cursor
+    uid: int
+    context: frozendict
+    su: bool
+
     def reset(self):
         """ Reset the transaction, see :meth:`Transaction.reset`. """
         self.transaction.reset()
@@ -798,6 +804,27 @@ class Environment(Mapping):
             self._cache_key[field] = result
             return result
 
+    def query_flush_and_groups_check(self, query: SQL):
+        all_metadata = tuple(query._all_metadata)
+        if all_metadata:
+            fields_to_flush = defaultdict(OrderedSet)
+            fields_to_check = defaultdict(OrderedSet)
+
+            for field, to_flush, to_check in all_metadata:
+                if to_flush:
+                    fields_to_flush[field.model_name].add(field.name)
+                if to_check:
+                    fields_to_check[field.model_name].add(field.name)
+
+            for model_name, field_names in fields_to_check.items():
+                self[model_name].check_field_access_rights('read', field_names)
+            for model_name, field_names in fields_to_flush.items():
+                self[model_name].flush_model(field_names)
+
+    def get_select_result(self, query: SQL):
+        self.query_flush_and_groups_check(query)
+        self.cr.execute(query)
+        return self.cr.fetchall() if self.cr.rowcount > 0 else []
 
 class Transaction:
     """ A object holding ORM data structures for a transaction. """
@@ -1237,7 +1264,7 @@ class Cache(object):
                 return
 
             # select the column for the given ids
-            query = Query(env.cr, model._table, model._table_query)
+            query = Query(env, model._table, model._table_query)
             sql_id = SQL.identifier(model._table, 'id')
             sql_field = model._field_to_sql(model._table, field.name, query)
             if field.type == 'binary' and (

@@ -26,6 +26,7 @@ from odoo.tools import config, ConstantMapping, get_diff, pycompat, apply_inheri
 from odoo.tools import safe_eval, lazy, lazy_property, frozendict
 from odoo.tools.convert import _fix_multiple_roots
 from odoo.tools.misc import file_path
+from odoo.tools.sql import SQL
 from odoo.tools.translate import xml_translate, TRANSLATED_ATTRS
 from odoo.tools.view_validation import valid_view, get_domain_value_names, get_expression_field_names, get_dict_asts
 from odoo.models import check_method_name
@@ -584,15 +585,14 @@ actual arch.
         self.check_access_rights('read')
         domain = self._get_inheriting_views_domain()
         e = expression(domain, self.env['ir.ui.view'])
-        from_clause, where_clause, where_params = e.query.get_sql()
-        assert from_clause == '"ir_ui_view"', f"Unexpected from clause: {from_clause}"
+        where_clause = e.query.where_clause
 
-        self._flush_search(domain, fields=['inherit_id', 'priority', 'model', 'mode'])
-        query = f"""
+        self.flush_model(['inherit_id', 'priority', 'model', 'mode'])
+        query = SQL("""
             WITH RECURSIVE ir_ui_view_inherits AS (
                 SELECT id, inherit_id, priority, mode, model
                 FROM ir_ui_view
-                WHERE id IN %s AND ({where_clause})
+                WHERE id IN %(ids)s AND (%(where_clause)s)
             UNION
                 SELECT ir_ui_view.id, ir_ui_view.inherit_id, ir_ui_view.priority,
                        ir_ui_view.mode, ir_ui_view.model
@@ -600,13 +600,13 @@ actual arch.
                 INNER JOIN ir_ui_view_inherits parent ON parent.id = ir_ui_view.inherit_id
                 WHERE coalesce(ir_ui_view.model, '') = coalesce(parent.model, '')
                       AND ir_ui_view.mode = 'extension'
-                      AND ({where_clause})
+                      AND (%(where_clause)s)
             )
             SELECT
                 v.id, v.inherit_id, v.mode
             FROM ir_ui_view_inherits v
             ORDER BY v.priority, v.id
-        """
+        """, ids=tuple(self.ids), where_clause=where_clause)
         # ORDER BY v.priority, v.id:
         # 1/ sort by priority: abritrary value set by developers on some
         #    views to solve "dependency hell" problems and force a view
@@ -615,9 +615,7 @@ actual arch.
         # 2/ sort by view id: the order the views were inserted in the
         #    database. e.g. base views are placed before stock ones.
 
-        self.env.cr.execute(query, [tuple(self.ids)] + where_params + where_params)
-        rows = self.env.cr.fetchall()
-
+        rows = self.env.get_select_result(query)
         views = self.browse(row[0] for row in rows)
 
         # optimization: fill in cache of inherit_id and mode

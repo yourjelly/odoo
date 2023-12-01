@@ -9,7 +9,7 @@ import logging
 import re
 from binascii import crc32
 from collections import defaultdict
-from typing import Iterable, Union
+from collections.abc import Iterable
 
 import psycopg2
 
@@ -59,7 +59,8 @@ class SQL:
     made with ``code`` is guaranteed to be safe, provided the SQL objects
     within its parameters are themselves safe.
     """
-    __slots__ = ('__code', '__args')
+    # _metadata is used by the ORM in tuple format (field_used, to_flush, to_check)
+    __slots__ = ('__code', '__args', '_metadata')
 
     # pylint: disable=keyword-arg-before-vararg
     def __new__(cls, code: (str | SQL) = "", /, *args, **kwargs):
@@ -77,7 +78,16 @@ class SQL:
         self = object.__new__(cls)
         self.__code = code
         self.__args = args
+        self._metadata = None
         return self
+
+    @property
+    def _all_metadata(self):
+        if self._metadata:
+            yield self._metadata
+        for arg in self.__args:
+            if isinstance(arg, SQL):
+                yield from arg._all_metadata
 
     @property
     def code(self) -> str:
@@ -171,7 +181,7 @@ class TableKind(enum.Enum):
     Other = None
 
 
-def table_kind(cr, tablename: str) -> Union[TableKind, None]:
+def table_kind(cr, tablename: str) -> TableKind | None:
     """ Return the kind of a table, if ``tablename`` is a regular or foreign
     table, or a view (ignores indexes, sequences, toast tables, and partitioned
     tables; unlogged tables are considered regular)

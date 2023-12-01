@@ -23,7 +23,6 @@
 
 import collections
 import contextlib
-import copy
 import datetime
 import dateutil
 import fnmatch
@@ -37,12 +36,11 @@ import pytz
 import re
 import uuid
 import warnings
-from collections import defaultdict, OrderedDict, deque
-from collections.abc import MutableMapping
+from collections import defaultdict, deque
+from collections.abc import MutableMapping, Iterable
 from contextlib import closing
-from inspect import getmembers, currentframe
+from inspect import getmembers
 from operator import attrgetter, itemgetter
-from typing import Dict, List
 
 import babel
 import babel.dates
@@ -61,6 +59,7 @@ from .tools import (
     DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT, frozendict,
     get_lang, LastOrderedSet, lazy_classproperty, OrderedSet, ormcache,
     partition, populate, Query, ReversedIterable, split_every, unique, SQL,
+    pycompat,
 )
 from .tools.lru import LRU
 from .tools.translate import _, _lt
@@ -527,6 +526,10 @@ class BaseModel(metaclass=MetaModel):
     the :attr:`~odoo.models.BaseModel._register` attribute may be set to False.
     """
     __slots__ = ['env', '_ids', '_prefetch_ids']
+
+    env: api.Environment
+    _ids: tuple[int]
+    _prefetch_ids: Iterable[int]
 
     _auto = False
     """Whether a database table should be created.
@@ -1897,13 +1900,10 @@ class BaseModel(metaclass=MetaModel):
         if offset:
             query_parts.append(SQL("OFFSET %s", offset))
 
-        self._flush_search(domain, fnames_to_flush)
-        if fnames_to_flush:
-            self._read_group_check_field_access_rights(fnames_to_flush)
+        # TODO: self._read_group_check_field_access_rights(fnames_to_flush)
 
-        self.env.cr.execute(SQL("\n").join(query_parts))
         # row_values: [(a1, b1, c1), (a2, b2, c2), ...]
-        row_values = self.env.cr.fetchall()
+        row_values = self.env.get_select_result(SQL("\n").join(query_parts))
 
         if not row_values:
             return row_values
@@ -2751,7 +2751,7 @@ class BaseModel(metaclass=MetaModel):
 
         return rows_dict
 
-    def _field_to_sql(self, alias: str, fname: str, query: (Query | None) = None) -> SQL:
+    def _field_to_sql(self, alias: str, fname: str, query: (Query | None) = None, flush: bool = True) -> SQL:
         """ Return an :class:`SQL` object that represents the value of the given
         field from the given table alias, in the context of the given query.
         The query object is necessary for inherited fields, many2one fields and
@@ -2806,18 +2806,22 @@ class BaseModel(metaclass=MetaModel):
             query.add_join("LEFT JOIN", rel_alias, field.relation, condition)
             return SQL.identifier(rel_alias, field.column2)
 
-        elif field.translate and not self.env.context.get('prefetch_langs'):
-            sql_field = SQL.identifier(alias, fname)
+        if field.type == 'properties' and property_name:
+            return self._field_properties_to_sql(alias, fname, property_name, query)
+
+        base_identifier = SQL.identifier(alias, fname)
+        if flush or not self.env.su:
+            base_identifier._metadata = (field, flush, not self.env.su)
+
+        if field.translate and not self.env.context.get('prefetch_langs'):
+            sql_field = base_identifier
             langs = field.get_translation_fallback_langs(self.env)
             sql_field_langs = [SQL("%s->>%s", sql_field, lang) for lang in langs]
             if len(sql_field_langs) == 1:
                 return sql_field_langs[0]
             return SQL("COALESCE(%s)", SQL(", ").join(sql_field_langs))
 
-        elif field.type == 'properties' and property_name:
-            return self._field_properties_to_sql(alias, fname, property_name, query)
-
-        return SQL.identifier(alias, fname)
+        return base_identifier
 
     def _field_properties_to_sql(self, alias: str, fname: str, property_name: str,
                                  query: Query) -> SQL:
@@ -2922,6 +2926,122 @@ class BaseModel(metaclass=MetaModel):
 
         # if the key is not present in the dict, fallback to false instead of none
         return SQL("COALESCE(%s, 'false')", sql_property)
+
+    def _leaf_to_sql(self, alias: str, leaf: tuple, query: Query) -> SQL:
+        left, operator, right = leaf
+
+        # final sanity checks - should never fail
+        assert operator in (expression.TERM_OPERATORS + ('inselect', 'not inselect')), \
+            "Invalid operator %r in domain term %r" % (operator, leaf)
+        assert leaf in (expression.TRUE_LEAF, expression.FALSE_LEAF) or left in self._fields, \
+            "Invalid field %r in domain term %r" % (left, leaf)
+        assert not isinstance(right, BaseModel), \
+            "Invalid value %r in domain term %r" % (right, leaf)
+
+        if leaf == expression.TRUE_LEAF:
+            return SQL("TRUE")
+
+        if leaf == expression.FALSE_LEAF:
+            return SQL("FALSE")
+
+        field = self._fields[left]
+        sql_field = self._field_to_sql(alias, left, query)
+
+        if operator == 'inselect':
+            subquery, subparams = right
+            return SQL("(%s IN (%s))", sql_field, SQL(subquery, *subparams))
+
+        if operator == 'not inselect':
+            subquery, subparams = right
+            return SQL("(%s NOT IN (%s))", sql_field, SQL(subquery, *subparams))
+
+        if operator == '=?':
+            if right is False or right is None:
+                # '=?' is a short-circuit that makes the term TRUE if right is None or False
+                return SQL("TRUE")
+            else:
+                # '=?' behaves like '=' in other cases
+                return self._leaf_to_sql(alias, (left, '=', right), query)
+
+        sql_operator = expression.SQL_OPERATORS[operator]
+
+        if operator in ('in', 'not in'):
+            # Two cases: right is a boolean or a list. The boolean case is an
+            # abuse and handled for backward compatibility.
+            if isinstance(right, bool):
+                _logger.warning("The domain term '%s' should use the '=' or '!=' operator." % (leaf,))
+                if (operator == 'in' and right) or (operator == 'not in' and not right):
+                    return SQL("(%s IS NOT NULL)", sql_field)
+                else:
+                    return SQL("(%s IS NULL)", sql_field)
+
+            elif isinstance(right, SQL):
+                return SQL("(%s %s %s)", sql_field, sql_operator, right)
+
+            elif isinstance(right, Query):
+                return SQL("(%s %s %s)", sql_field, sql_operator, right.subselect())
+
+            elif isinstance(right, (list, tuple)):
+                if field.type == "boolean":
+                    params = [it for it in (True, False) if it in right]
+                    check_null = False in right
+                else:
+                    params = [it for it in right if it is not False and it is not None]
+                    check_null = len(params) < len(right)
+
+                if params:
+                    if left != 'id':
+                        params = [field.convert_to_column(p, self, validate=False) for p in params]
+                    sql = SQL("(%s %s %s)", sql_field, sql_operator, tuple(params))
+                else:
+                    # The case for (left, 'in', []) or (left, 'not in', []).
+                    sql = SQL("FALSE") if operator == 'in' else SQL("TRUE")
+
+                if (operator == 'in' and check_null) or (operator == 'not in' and not check_null):
+                    sql = SQL("(%s OR %s IS NULL)", sql, sql_field)
+                elif operator == 'not in' and check_null:
+                    sql = SQL("(%s AND %s IS NOT NULL)", sql, sql_field)  # needed only for TRUE
+                return sql
+
+            else:  # Must not happen
+                raise ValueError(f"Invalid domain term {leaf!r}")
+
+        if field.type == 'boolean' and operator in ('=', '!=') and isinstance(right, bool):
+            value = (not right) if operator in expression.NEGATIVE_TERM_OPERATORS else right
+            if value:
+                return SQL("(%s = TRUE)", sql_field)
+            else:
+                return SQL("(%s IS NULL OR %s = FALSE)", sql_field, sql_field)
+
+        if operator == '=' and (right is False or right is None):
+            return SQL("%s IS NULL", sql_field)
+
+        if operator == '!=' and (right is False or right is None):
+            return SQL("%s IS NOT NULL", sql_field)
+
+        # general case
+        need_wildcard = operator in ('like', 'ilike', 'not like', 'not ilike')
+
+        if isinstance(right, SQL):
+            sql_right = right
+        elif need_wildcard:
+            sql_right = SQL("%s", f"%{pycompat.to_text(right)}%")
+        else:
+            sql_right = SQL("%s", field.convert_to_column(right, self, validate=False))
+
+        sql_left = sql_field
+        if operator.endswith('like'):
+            sql_left = SQL("%s::text", sql_field)
+        if operator.endswith('ilike'):
+            sql_left = self.env.registry.unaccent_wrapper(sql_left)
+            sql_right = self.env.registry.unaccent_wrapper(sql_right)
+
+        sql = SQL("(%s %s %s)", sql_left, sql_operator, sql_right)
+
+        if (need_wildcard and not right) or (right and operator in expression.NEGATIVE_TERM_OPERATORS):
+            sql = SQL("(%s OR %s IS NULL)", sql, sql_field)
+
+        return sql
 
     @api.model
     def get_property_definition(self, full_name):
@@ -3800,7 +3920,7 @@ class BaseModel(metaclass=MetaModel):
             if forbidden:
                 raise self.env['ir.rule']._make_access_error('read', forbidden)
 
-    def _determine_fields_to_fetch(self, field_names, ignore_when_in_cache=False) -> List["Field"]:
+    def _determine_fields_to_fetch(self, field_names, ignore_when_in_cache=False) -> list["Field"]:
         """
         Return the fields to fetch from database among the given field names,
         and following the dependencies of computed fields. The method is used
@@ -3860,18 +3980,14 @@ class BaseModel(metaclass=MetaModel):
             assert field.store
             (column_fields if field.column_type else other_fields).add(field)
 
-        # necessary to retrieve the en_US value of fields without a translation
-        translated_field_names = [field.name for field in column_fields if field.translate]
-        if translated_field_names:
-            self.flush_model(translated_field_names)
-
         context = self.env.context
 
         if column_fields:
             # the query may involve several tables: we need fully-qualified names
             sql_terms = [SQL.identifier(self._table, 'id')]
             for field in column_fields:
-                sql = self._field_to_sql(self._table, field.name, query)
+                # fluch necessary to retrieve the en_US value of fields without a translation
+                sql = self._field_to_sql(self._table, field.name, query, flush=field.translate)
                 if field.type == 'binary' and (
                         context.get('bin_size') or context.get('bin_size_' + field.name)):
                     # PG 9.2 introduces conflicting pg_size_pretty(numeric) -> need ::cast
@@ -3879,8 +3995,7 @@ class BaseModel(metaclass=MetaModel):
                 sql_terms.append(sql)
 
             # select the given columns from the rows in the query
-            self.env.cr.execute(query.select(*sql_terms))
-            rows = self.env.cr.fetchall()
+            rows = self.env.get_select_result(query.select(*sql_terms))
 
             if not rows:
                 return self.browse()
@@ -3898,7 +4013,6 @@ class BaseModel(metaclass=MetaModel):
                 values = next(column_values)
                 # store values in cache, but without overwriting
                 self.env.cache.insert_missing(fetched, field, values)
-
         else:
             fetched = self.browse(query)
 
@@ -4104,16 +4218,14 @@ class BaseModel(metaclass=MetaModel):
         if not self._ids:
             return self
 
-        query = Query(self.env.cr, self._table, self._table_query)
+        query = Query(self.env, self._table, self._table_query)
         self._apply_ir_rules(query, operation)
         if not query.where_clause:
             return self
 
         # determine ids in database that satisfy ir.rules
-        self._flush_search([])
         query.add_where(SQL("%s IN %s", SQL.identifier(self._table, 'id'), tuple(self.ids)))
-        self._cr.execute(query.select())
-        valid_ids = {row[0] for row in self._cr.fetchall()}
+        valid_ids = {id_ for id_, in self.env.get_select_result(query.select())}
 
         # return new ids without origin and ids with origin in valid_ids
         return self.browse([
@@ -5067,7 +5179,7 @@ class BaseModel(metaclass=MetaModel):
         if domain:
             return expression.expression(domain, self).query
         else:
-            return Query(self.env.cr, self._table, self._table_query)
+            return Query(self.env, self._table, self._table_query)
 
     def _check_qorder(self, word):
         if not regex_order.match(word):
@@ -5217,98 +5329,6 @@ class BaseModel(metaclass=MetaModel):
         return SQL("%s %s %s", sql_field, direction, nulls)
 
     @api.model
-    def _flush_search(self, domain, fields=None, order=None, seen=None):
-        """ Flush all the fields appearing in `domain`, `fields` and `order`.
-
-        Note that ``order=None`` actually means no order, so if you expect some
-        fallback order, you have to provide it yourself.
-        """
-        if seen is None:
-            seen = set()
-        elif self._name in seen:
-            return
-        seen.add(self._name)
-
-        to_flush = defaultdict(OrderedSet)             # {model_name: field_names}
-        if fields:
-            to_flush[self._name].update(fields)
-
-        def collect_from_domain(model, domain):
-            for arg in domain:
-                if isinstance(arg, str):
-                    continue
-                if not isinstance(arg[0], str):
-                    continue
-                comodel = collect_from_path(model, arg[0])
-                if arg[1] in ('child_of', 'parent_of') and comodel._parent_store:
-                    # hierarchy operators need the parent field
-                    collect_from_path(comodel, comodel._parent_name)
-                if arg[1] in ('any', 'not any'):
-                    collect_from_domain(comodel, arg[2])
-
-        def collect_from_path(model, path):
-            # path is a dot-separated sequence of field names
-            for fname in path.split('.'):
-                field = model._fields.get(fname)
-                if not field:
-                    break
-                to_flush[model._name].add(fname)
-                if field.type == 'one2many' and field.inverse_name:
-                    to_flush[field.comodel_name].add(field.inverse_name)
-                    field_domain = field.get_domain_list(model)
-                    if field_domain:
-                        collect_from_domain(self.env[field.comodel_name], field_domain)
-                # DLE P111: `test_message_process_email_partner_find`
-                # Search on res.users with email_normalized in domain
-                # must trigger the recompute and flush of res.partner.email_normalized
-                if field.related:
-                    # DLE P129: `test_transit_multi_companies`
-                    # `self.env['stock.picking'].search([('product_id', '=', product.id)])`
-                    # Should flush `stock.move.picking_ids` as `product_id` on `stock.picking` is defined as:
-                    # `product_id = fields.Many2one('product.product', 'Product', related='move_lines.product_id', readonly=False)`
-                    collect_from_path(model, field.related)
-                if field.relational:
-                    model = self.env[field.comodel_name]
-            # return the model found by traversing all fields (used in collect_from_domain)
-            return model
-
-        # flush the order fields
-        if order:
-            for order_part in order.split(','):
-                order_field = order_part.split()[0]
-                field = self._fields.get(order_field)
-                if field is not None:
-                    to_flush[self._name].add(order_field)
-                    if field.relational:
-                        comodel = self.env[field.comodel_name]
-                        comodel._flush_search([], order=comodel._order, seen=seen)
-
-        if self._active_name and self.env.context.get('active_test', True):
-            to_flush[self._name].add(self._active_name)
-
-        collect_from_domain(self, domain)
-
-        # Check access of fields with groups
-        for model_name, field_names in to_flush.items():
-            self.env[model_name].check_field_access_rights('read', field_names)
-
-        # also take into account the fields in the record rules
-        if ir_rule_domain := self.env['ir.rule']._compute_domain(self._name, 'read'):
-            collect_from_domain(self, ir_rule_domain)
-
-        # flush model dependencies (recursively)
-        if self._depends:
-            models = [self]
-            while models:
-                model = models.pop()
-                for model_name, field_names in model._depends.items():
-                    to_flush[model_name].update(field_names)
-                    models.append(self.env[model_name])
-
-        for model_name, field_names in to_flush.items():
-            self.env[model_name].flush_model(field_names)
-
-    @api.model
     def _search(self, domain, offset=0, limit=None, order=None, access_rights_uid=None):
         """
         Private implementation of search() method, allowing specifying the uid to use for the access right check.
@@ -5335,9 +5355,6 @@ class BaseModel(metaclass=MetaModel):
             # optimization: no need to query, as no record satisfies the domain
             return self.browse()._as_query()
 
-        # the flush must be done before the _where_calc(), as the latter can do some selects
-        self._flush_search(domain, order=order)
-
         query = self._where_calc(domain)
         self._apply_ir_rules(query, 'read')
 
@@ -5354,7 +5371,7 @@ class BaseModel(metaclass=MetaModel):
 
         :param ordered: whether the recordset order must be enforced by the query
         """
-        query = Query(self.env.cr, self._table, self._table_query)
+        query = Query(self.env, self._table, self._table_query)
         query.set_result_ids(self._ids, ordered)
         return query
 
@@ -5527,7 +5544,7 @@ class BaseModel(metaclass=MetaModel):
         new_ids, ids = partition(lambda i: isinstance(i, NewId), self._ids)
         if not ids:
             return self
-        query = Query(self.env.cr, self._table, self._table_query)
+        query = Query(self.env, self._table, self._table_query)
         query.add_where(SQL("%s IN %s", SQL.identifier(self._table, 'id'), tuple(ids)))
         self.env.cr.execute(query.select())
         valid_ids = set([r[0] for r in self._cr.fetchall()] + new_ids)
@@ -5662,7 +5679,7 @@ class BaseModel(metaclass=MetaModel):
 
         :param domain: Search domain, see ``args`` parameter in :meth:`search`.
             Defaults to an empty domain that will match all records.
-        :param fields: List of fields to read, see ``fields`` parameter in :meth:`read`.
+        :param fields: list of fields to read, see ``fields`` parameter in :meth:`read`.
             Defaults to all fields.
         :param int offset: Number of records to skip, see ``offset`` parameter in :meth:`search`.
             Defaults to 0.
@@ -5673,7 +5690,7 @@ class BaseModel(metaclass=MetaModel):
         :param read_kwargs: All read keywords arguments used to call
             ``read(..., **read_kwargs)`` method e.g. you can use
             ``search_read(..., load='')`` in order to avoid computing display_name
-        :return: List of dictionaries containing the asked fields.
+        :return: list of dictionaries containing the asked fields.
         :rtype: list(dict).
         """
         fields = self.check_field_access_rights('read', fields)
@@ -6856,7 +6873,7 @@ class BaseModel(metaclass=MetaModel):
                     res['warning'].get('type') or "",
                 ))
 
-    def onchange(self, values: Dict, field_names: List[str], fields_spec: Dict):
+    def onchange(self, values: dict, field_names: list[str], fields_spec: dict):
         raise NotImplementedError("onchange() is implemented in module 'web'")
 
     def _get_placeholder_filename(self, field):

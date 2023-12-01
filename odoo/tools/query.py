@@ -49,19 +49,19 @@ def _generate_table_alias(src_table_alias, link):
     return make_identifier(f"{src_table_alias}__{link}")
 
 
-class Query(object):
+class Query:
     """ Simple implementation of a query object, managing tables with aliases,
     join clauses (with aliases, condition and parameters), where clauses (with
     parameters), order, limit and offset.
 
-    :param cr: database cursor (for lazy evaluation)
+    :param env: model environment (for lazy evaluation)
     :param alias: name or alias of the table
     :param table: a table expression (``str`` or ``SQL`` object), optional
     """
 
-    def __init__(self, cr, alias: str, table: (str | SQL | None) = None):
+    def __init__(self, env, alias: str, table: (str | SQL | None) = None):
         # database cursor
-        self._cr = cr
+        self._env = env
 
         # tables {alias: table(SQL|None)}
         self._tables = {alias: _sql_table(table)}
@@ -221,8 +221,7 @@ class Query(object):
         is memoized for future use, which avoids making the same query twice.
         """
         if self._ids is None:
-            self._cr.execute(self.select())
-            self._ids = tuple(row[0] for row in self._cr.fetchall())
+            self._ids = tuple(id_ for id_, in self._env.get_select_result(self.select()))
         return self._ids
 
     def set_result_ids(self, ids, ordered=True):
@@ -267,8 +266,7 @@ class Query(object):
                 sql = SQL("SELECT COUNT(*) FROM (%s) t", self.select(""))
             else:
                 sql = self.select('COUNT(*)')
-            self._cr.execute(sql)
-            return self._cr.fetchone()[0]
+            return self._env.get_select_result(sql)[0][0]
         return len(self.get_result_ids())
 
     def __iter__(self):
