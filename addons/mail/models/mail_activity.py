@@ -412,16 +412,14 @@ class MailActivity(models.Model):
             return super()._search(domain, offset, limit, order, access_rights_uid)
 
         # retrieve activities and their corresponding res_model, res_id
-        self.flush_model(['res_model', 'res_id'])
+        self.flush_model(['res_model', 'res_id', 'user_id'])
         query = super()._search(domain, offset, limit, order, access_rights_uid)
-        query_str, params = query.select(
+        rows = self.env.get_select_result(query.select(
             f'"{self._table}"."id"',
             f'"{self._table}"."res_model"',
             f'"{self._table}"."res_id"',
             f'"{self._table}"."user_id"',
-        )
-        self.env.cr.execute(query_str, params)
-        rows = self.env.cr.fetchall()
+        ))
 
         # group res_ids by model, and determine accessible records
         # Note: the user can read all activities assigned to him (see at the end of the method)
