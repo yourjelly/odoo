@@ -68,6 +68,11 @@ class TestTimesheetGlobalTimeOff(common.TransactionCase):
             },
         ])
 
+        # Create a 2nd company
+        self.test_company_2 = self.env['res.company'].create({
+            'name': 'My Test Company 2',
+        })
+
     def _get_timesheets_by_employee(self, leave_task):
         timesheets_by_read_dict = self.env['account.analytic.line']._read_group([('task_id', '=', leave_task.id)], ['employee_id'], ['__count'])
         return {
@@ -119,6 +124,15 @@ class TestTimesheetGlobalTimeOff(common.TransactionCase):
             'calendar_id': self.test_company.resource_calendar_id.id,
             'date_from': leave_start_datetime,
             'date_to': leave_end_datetime,
+        })
+
+        # Create a global time-off in another company which should not be
+        # taken into account when creating/unarchiving employee
+        self.env['resource.calendar.leaves'].with_company(self.test_company_2).create({
+            'name': 'Global leave in another company',
+            'calendar_id': False,
+            'date_from': datetime(2022, 2, 7, 0, 0, 0),
+            'date_to': datetime(2022, 2, 7, 23, 59, 59),
         })
 
         # 5 Timesheets should have been created for full_time_employee
