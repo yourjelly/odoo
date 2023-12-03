@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <record id="payment.payment_provider_2c2p" model="payment.provider">
+        <field name="code">2c2p</field>
+    </record>
+
+</odoo>

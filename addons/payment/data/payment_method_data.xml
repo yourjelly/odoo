@@ -2939,14 +2939,22 @@
         <field name="support_refund">partial</field>
         <field name="supported_country_ids"
                eval="[Command.set([
+                         ref('base.th'),
+                         ref('base.sg'),
+                         ref('base.my'),
                          ref('base.id'),
                          ref('base.ph'),
+                         ref('base.vn'),
                      ])]"
         />
         <field name="supported_currency_ids"
                eval="[Command.set([
+                         ref('base.THB'),
+                         ref('base.SGD'),
+                         ref('base.MYR'),
                          ref('base.IDR'),
-
+                         ref('base.PHP'),
+                         ref('base.VND'),
                      ])]"
         />
     </record>
@@ -3179,16 +3187,14 @@
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
-        <field name="supported_country_ids"
-               eval="[Command.set([
-                         ref('base.th'),
-                     ])]"
-        />
-        <field name="supported_currency_ids"
-               eval="[Command.set([
-                         ref('base.THB'),
-                     ])]"
-        />
+        <field name="supported_country_ids" eval="[Command.set([
+            ref('base.th'),
+            ref('base.mm'),
+        ])]" />
+        <field name="supported_currency_ids" eval="[Command.set([
+            ref('base.THB'),
+            ref('base.MMK'),
+        ])]"/>
     </record>
 
     <record id="payment_method_trustly" model="payment.method">
@@ -3926,6 +3932,621 @@
         <field name="sequence">1000</field>
         <field name="active">False</field>
         <field name="image" type="base64" file="payment/static/img/visa.png"/>
+    </record>
+
+    <record id="payment_web_pay" model="payment.method">
+        <field name="name">Web Payment</field>
+        <field name="code">web_pay</field>
+        <field name="image" type="base64" file="payment/static/img/web_pay.png"/>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+    </record>
+
+<!-- MPASS	Master Pass		Global -->
+    <record id="payment_method_masterpass" model="payment.method">
+        <field name="name">Master Pass</field>
+        <field name="code">MPASS</field>
+        <field name="image" type="base64" file="payment/static/img/masterpass.png"/>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+    </record>
+
+<!-- APPLEPAY	Apple Pay		Global -->
+    <record id="payment_method_applepay" model="payment.method">
+        <field name="name">Apple Pay</field>
+        <field name="code">APPLEPAY</field>
+        <field name="image" type="base64" file="payment/static/img/applepay.png"/>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+    </record>
+
+<!-- GOOGLEPAY	Google Pay		Global -->
+    <record id="payment_method_googlepay" model="payment.method">
+        <field name="name">Google Pay</field>
+        <field name="code">GOOGLEPAY</field>
+        <field name="image" type="base64" file="payment/static/img/googlepay.png"/>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+    </record>
+
+<!-- ALIPAY	Alipay		Global -->
+
+<!-- PAYPAL	PayPal Wallet		Global -->
+
+<!-- SHPPAY	ShopeePay Wallet		TH / SG / MY / ID / PH / VN -->
+
+<!-- GRAB	Grab	 	SG / MY / PH -->
+<!-- Tokenization SG -->
+
+<!-- LINE	Line Pay		TH -->
+
+<!-- TRUEMONEY	True Money	 	TH / MM -->
+<!-- Tokenization -->
+
+<!-- LAZADAPAY	LazadaPay		TH -->
+    <record id="payment_method_lazadapay" model="payment.method">
+        <field name="name">LazadaPay</field>
+        <field name="code">LAZADAPAY</field>
+        <field name="image" type="base64" file="payment/static/img/lazadapay.png"/>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+        <field name="supported_country_ids" eval="[Command.set([
+            ref('base.th'),
+        ])]"/>
+        <field name="supported_currency_ids" eval="[Command.set([
+            ref('base.THB'),
+        ])]"/>
+    </record>
+
+<!-- PAOTANG	PaotangPay		TH -->
+    <record id="payment_method_paotangpay" model="payment.method">
+        <field name="name">PaotangPay</field>
+        <field name="code">PAOTANG</field>
+        <field name="image" type="base64" file="payment/static/img/paotangpay.png"/>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+        <field name="supported_country_ids" eval="[Command.set([
+            ref('base.th'),
+        ])]"/>
+        <field name="supported_currency_ids" eval="[Command.set([
+            ref('base.THB'),
+        ])]"/>
+    </record>
+
+<!-- DASH	Singtel Dash		SG -->
+    <record id="payment_method_dash" model="payment.method">
+        <field name="name">Singtel Dash</field>
+        <field name="code">DASH</field>
+        <field name="image" type="base64" file="payment/static/img/dash.png"/>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+        <field name="supported_country_ids" eval="[Command.set([
+            ref('base.sg'),
+        ])]"/>
+        <field name="supported_currency_ids" eval="[Command.set([
+            ref('base.SGD'),
+        ])]"/>
+    </record>
+
+<!-- WECHAT	WeChat		SG / MY / TH -->
+<!-- TODO set country/currencies -->
+
+<!-- PAYANYONE	OCBC PayAnyOne		SG -->
+    <record id="payment_method_payanyone" model="payment.method">
+        <field name="name">OCBC PayAnyOne</field>
+        <field name="code">PAYANYONE</field>
+        <field name="image" type="base64" file="payment/static/img/payanyone.png"/>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+        <field name="supported_country_ids" eval="[Command.set([
+            ref('base.sg'),
+        ])]"/>
+        <field name="supported_currency_ids" eval="[Command.set([
+            ref('base.SGD'),
+        ])]"/>
+    </record>
+
+<!-- TNG	Touch N Go	 	MY -->
+
+<!-- BOOST	BOOST		MY -->
+
+<!-- AYAPAY	AYAPAY		MM -->
+    <record id="payment_method_ayapay" model="payment.method">
+        <field name="name">AYAPAY</field>
+        <field name="code">AYAPAY</field>
+        <field name="image" type="base64" file="payment/static/img/ayapay.png"/>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+        <field name="supported_country_ids" eval="[Command.set([
+            ref('base.mm'),
+        ])]"/>
+        <field name="supported_currency_ids" eval="[Command.set([
+            ref('base.MMK'),
+        ])]"/>
+    </record>
+
+<!-- KPY	KbzPay		MM -->
+    <record id="payment_method_kbzpay" model="payment.method">
+        <field name="name">KbzPay</field>
+        <field name="code">KPY</field>
+        <field name="image" type="base64" file="payment/static/img/kbzpay.png"/>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+        <field name="supported_country_ids" eval="[Command.set([
+            ref('base.mm'),
+        ])]"/>
+        <field name="supported_currency_ids" eval="[Command.set([
+            ref('base.MMK'),
+        ])]"/>
+    </record>
+
+<!-- CBY	CBPay		MM -->
+    <record id="payment_method_cbpay" model="payment.method">
+        <field name="name">CBPay</field>
+        <field name="code">CBY</field>
+        <field name="image" type="base64" file="payment/static/img/cbpay.png"/>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+        <field name="supported_country_ids" eval="[Command.set([
+            ref('base.mm'),
+        ])]"/>
+        <field name="supported_currency_ids" eval="[Command.set([
+            ref('base.MMK'),
+        ])]"/>
+    </record>
+
+<!-- WAVE	Wave Pay		MM -->
+    <record id="payment_method_wavepay" model="payment.method">
+        <field name="name">Wave Pay</field>
+        <field name="code">WAVE</field>
+        <field name="image" type="base64" file="payment/static/img/wavepay.png"/>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+        <field name="supported_country_ids" eval="[Command.set([
+            ref('base.mm'),
+        ])]"/>
+        <field name="supported_currency_ids" eval="[Command.set([
+            ref('base.MMK'),
+        ])]"/>
+    </record>
+
+<!-- OKDOLLAR	OK Dollar		MM -->
+    <record id="payment_method_okdollar" model="payment.method">
+        <field name="name">OK Dollar</field>
+        <field name="code">OKDOLLAR</field>
+        <field name="image" type="base64" file="payment/static/img/okdollar.png"/>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+        <field name="supported_country_ids" eval="[Command.set([
+            ref('base.mm'),
+        ])]"/>
+        <field name="supported_currency_ids" eval="[Command.set([
+            ref('base.MMK'),
+        ])]"/>
+    </record>
+
+<!-- MTPAY	MyTel Pay		MM -->
+    <record id="payment_method_mtpay" model="payment.method">
+        <field name="name">MyTel Pay</field>
+        <field name="code">MTPAY</field>
+        <field name="image" type="base64" file="payment/static/img/mtpay.png"/>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+        <field name="supported_country_ids" eval="[Command.set([
+            ref('base.mm'),
+        ])]"/>
+        <field name="supported_currency_ids" eval="[Command.set([
+            ref('base.MMK'),
+        ])]"/>
+    </record>
+
+<!-- MPS	M-PiteSan		MM -->
+    <record id="payment_method_mps" model="payment.method">
+        <field name="name">M-PiteSan</field>
+        <field name="code">MPS</field>
+        <field name="image" type="base64" file="payment/static/img/mps.png"/>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+        <field name="supported_country_ids" eval="[Command.set([
+            ref('base.mm'),
+        ])]"/>
+        <field name="supported_currency_ids" eval="[Command.set([
+            ref('base.MMK'),
+        ])]"/>
+    </record>
+
+<!-- PAYMAYA	PayMaya		PH -->
+
+<!-- GCASH	Gcash		PH -->
+
+<!-- OVO	OVO	 	ID -->
+
+<!-- LINKAJA	LinkAja		ID -->
+
+<!-- DANA	DANA		ID -->
+
+<!-- GOPAY	GoPay		ID -->
+
+<!-- JENIUSPAY	JeniusPay		ID -->
+
+<!-- BILLDESK	Billdesk		IN -->
+    <record id="payment_method_billdesk" model="payment.method">
+        <field name="name">Billdesk</field>
+        <field name="code">BILLDESK</field>
+        <field name="image" type="base64" file="payment/static/img/billdesk.png"/>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+        <field name="supported_country_ids" eval="[Command.set([
+            ref('base.in'),
+        ])]"/>
+        <field name="supported_currency_ids" eval="[Command.set([
+            ref('base.INR'),
+        ])]"/>
+    </record>
+<!-- CAABPB	ABPB Wallet		IN -->
+    <record id="payment_method_abpb" model="payment.method">
+        <field name="name">ABPB Wallet</field>
+        <field name="code">CAABPB</field>
+        <field name="image" type="base64" file="payment/static/img/abpb.png"/>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+        <field name="supported_country_ids" eval="[Command.set([
+            ref('base.in'),
+        ])]"/>
+        <field name="supported_currency_ids" eval="[Command.set([
+            ref('base.INR'),
+        ])]"/>
+    </record>
+
+<!-- CAFC	Free Charge		IN -->
+    <record id="payment_method_freecharge" model="payment.method">
+        <field name="name">Free Charge</field>
+        <field name="code">CAFC</field>
+        <field name="image" type="base64" file="payment/static/img/freecharge.png"/>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+        <field name="supported_country_ids" eval="[Command.set([
+            ref('base.in'),
+        ])]"/>
+        <field name="supported_currency_ids" eval="[Command.set([
+            ref('base.INR'),
+        ])]"/>
+    </record>
+
+<!-- CAIC	Icash Card		IN -->
+    <record id="payment_method_icash" model="payment.method">
+        <field name="name">Icash Card</field>
+        <field name="code">CAIC</field>
+        <field name="image" type="base64" file="payment/static/img/icash.png"/>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+        <field name="supported_country_ids" eval="[Command.set([
+            ref('base.in'),
+        ])]"/>
+        <field name="supported_currency_ids" eval="[Command.set([
+            ref('base.INR'),
+        ])]"/>
+    </record>
+
+<!-- CAICICI	ICICI Pockets		IN -->
+    <record id="payment_method_icici" model="payment.method">
+        <field name="name">ICICI Pockets</field>
+        <field name="code">CAICICI</field>
+        <field name="image" type="base64" file="payment/static/img/icici_pockets.png"/>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+        <field name="supported_country_ids" eval="[Command.set([
+            ref('base.in'),
+        ])]"/>
+        <field name="supported_currency_ids" eval="[Command.set([
+            ref('base.INR'),
+        ])]"/>
+    </record>
+
+<!-- CAICC	Itz Cash Card		IN -->
+    <record id="payment_method_itz_cash" model="payment.method">
+        <field name="name">Itz Cash Card</field>
+        <field name="code">CAICC</field>
+        <field name="image" type="base64" file="payment/static/img/itz_cash_card.png"/>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+        <field name="supported_country_ids" eval="[Command.set([
+            ref('base.in'),
+        ])]"/>
+        <field name="supported_currency_ids" eval="[Command.set([
+            ref('base.INR'),
+        ])]"/>
+    </record>
+
+<!-- CAJIO	JioMoney		IN -->
+    <record id="payment_method_jiomoney" model="payment.method">
+        <field name="name">JioMoney</field>
+        <field name="code">CAJIO</field>
+        <field name="image" type="base64" file="payment/static/img/jiomoney.png"/>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+        <field name="supported_country_ids" eval="[Command.set([
+            ref('base.in'),
+        ])]"/>
+        <field name="supported_currency_ids" eval="[Command.set([
+            ref('base.INR'),
+        ])]"/>
+    </record>
+
+<!-- CAMOM	Money On Mobile		IN -->
+    <record id="payment_method_money_on_mobile" model="payment.method">
+        <field name="name">Money On Mobile</field>
+        <field name="code">CAMOM</field>
+        <field name="image" type="base64" file="payment/static/img/money_on_mobile.png"/>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+        <field name="supported_country_ids" eval="[Command.set([
+            ref('base.in'),
+        ])]"/>
+        <field name="supported_currency_ids" eval="[Command.set([
+            ref('base.INR'),
+        ])]"/>
+    </record>
+
+<!-- CAMK	Mobikwik		IN -->
+    <record id="payment_method_mobikwik" model="payment.method">
+        <field name="name">Mobikwik</field>
+        <field name="code">CAMK</field>
+        <field name="image" type="base64" file="payment/static/img/mobikwik.png"/>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+        <field name="supported_country_ids" eval="[Command.set([
+            ref('base.in'),
+        ])]"/>
+        <field name="supported_currency_ids" eval="[Command.set([
+            ref('base.INR'),
+        ])]"/>
+    </record>
+
+<!-- CAOX	Oxigen		IN -->
+    <record id="payment_method_oxigen" model="payment.method">
+        <field name="name">Oxigen</field>
+        <field name="code">CAOX</field>
+        <field name="image" type="base64" file="payment/static/img/oxigen.png"/>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+        <field name="supported_country_ids" eval="[Command.set([
+            ref('base.in'),
+        ])]"/>
+        <field name="supported_currency_ids" eval="[Command.set([
+            ref('base.INR'),
+        ])]"/>
+    </record>
+
+<!-- CAPT	Paytm		IN -->
+
+<!-- CAPZ	PayZApp		IN -->
+    <record id="payment_method_payzapp" model="payment.method">
+        <field name="name">PayZApp</field>
+        <field name="code">CAPZ</field>
+        <field name="image" type="base64" file="payment/static/img/payzapp.png"/>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+        <field name="supported_country_ids" eval="[Command.set([
+            ref('base.in'),
+        ])]"/>
+        <field name="supported_currency_ids" eval="[Command.set([
+            ref('base.INR'),
+        ])]"/>
+    </record>
+
+<!-- CASBI	SBI Buddy		IN -->
+    <record id="payment_method_sbi_buddy" model="payment.method">
+        <field name="name">SBI Buddy</field>
+        <field name="code">CASBI</field>
+        <field name="image" type="base64" file="payment/static/img/sbi_buddy.png"/>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+        <field name="supported_country_ids" eval="[Command.set([
+            ref('base.in'),
+        ])]"/>
+        <field name="supported_currency_ids" eval="[Command.set([
+            ref('base.INR'),
+        ])]"/>
+    </record>
+
+<!-- CAYB	YES Bank		IN -->
+    <record id="payment_method_yes_bank" model="payment.method">
+        <field name="name">YES Bank</field>
+        <field name="code">CAYB</field>
+        <field name="image" type="base64" file="payment/static/img/yes_bank.png"/>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+        <field name="supported_country_ids" eval="[Command.set([
+            ref('base.in'),
+        ])]"/>
+        <field name="supported_currency_ids" eval="[Command.set([
+            ref('base.INR'),
+        ])]"/>
+    </record>
+
+<!-- ALIPAYHK	Alipay Hongkong		HK -->
+
+<!-- OCTPAY	Octopus		HK -->
+
+<!-- PAYME	PayMe		HK -->
+
+<!-- VTCPAY	VTC Pay		VN -->
+    <record id="payment_method_vtcpay" model="payment.method">
+        <field name="name">VTC Pay</field>
+        <field name="code">VTCPAY</field>
+        <field name="image" type="base64" file="payment/static/img/vtcpay.png"/>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+        <field name="supported_country_ids" eval="[Command.set([
+            ref('base.vn'),
+        ])]"/>
+        <field name="supported_currency_ids" eval="[Command.set([
+            ref('base.VND'),
+        ])]"/>
+    </record>
+
+<!-- MPAYVN	MPay		VN -->
+    <record id="payment_method_mpay" model="payment.method">
+        <field name="name">MPay</field>
+        <field name="code">MPAYVN</field>
+        <field name="image" type="base64" file="payment/static/img/mpay.png"/>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+        <field name="supported_country_ids" eval="[Command.set([
+            ref('base.vn'),
+        ])]"/>
+        <field name="supported_currency_ids" eval="[Command.set([
+            ref('base.VND'),
+        ])]"/>
+    </record>
+
+<!-- ONEPAYWALLET	OnePay		VN -->
+    <record id="payment_method_onepay" model="payment.method">
+        <field name="name">OnePay</field>
+        <field name="code">ONEPAYWALLET</field>
+        <field name="image" type="base64" file="payment/static/img/onepay.png"/>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+        <field name="supported_country_ids" eval="[Command.set([
+            ref('base.vn'),
+        ])]"/>
+        <field name="supported_currency_ids" eval="[Command.set([
+            ref('base.VND'),
+        ])]"/>
+    </record>
+
+<!-- MOMO	MoMo Wallet		VN -->
+
+<!-- VINID	VINID		VN -->
+    <record id="payment_method_vinid" model="payment.method">
+        <field name="name">VINID</field>
+        <field name="code">VINID</field>
+        <field name="image" type="base64" file="payment/static/img/vinid.png"/>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+        <field name="supported_country_ids" eval="[Command.set([
+            ref('base.vn'),
+        ])]"/>
+        <field name="supported_currency_ids" eval="[Command.set([
+            ref('base.VND'),
+        ])]"/>
+    </record>
+
+<!-- ZALOPAY	ZaloPay	 	VN -->
+
+<!-- VIETTELPAY	ViettelPay		VN -->
+    <record id="payment_method_viettelpay" model="payment.method">
+        <field name="name">ViettelPay</field>
+        <field name="code">VIETTELPAY</field>
+        <field name="image" type="base64" file="payment/static/img/viettelpay.png"/>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+        <field name="supported_country_ids" eval="[Command.set([
+            ref('base.vn'),
+        ])]"/>
+        <field name="supported_currency_ids" eval="[Command.set([
+            ref('base.VND'),
+        ])]"/>
+    </record>
+
+<!-- KAKAO	KakaoPay		KR -->
+
+<!-- WING	WingPay		KH -->
+    <record id="payment_method_wingpay" model="payment.method">
+        <field name="name">WingPay</field>
+        <field name="code">WING</field>
+        <field name="image" type="base64" file="payment/static/img/wingpay.png"/>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+        <field name="supported_country_ids" eval="[Command.set([
+            ref('base.kh'),
+        ])]"/>
+        <field name="supported_currency_ids" eval="[Command.set([
+            ref('base.KHR'),
+        ])]"/>
+    </record>
+
+<!-- JKOPAY	JKOPay		TW -->
+
+
+
+
+
+
+<!-- BUY NOW PAY LATER -->
+<!-- BUY NOW PAY LATER -->
+<!-- BUY NOW PAY LATER -->
+<!-- BUY NOW PAY LATER -->
+<!-- BUY NOW PAY LATER -->
+
+
+
+
+<!-- ATOME	Atome Payment	Global -->
+
+<!-- HOOLAH	Hoolah	Global -->
+
+<!-- GRABBNPL	Grab PayLater	Global -->
+    <record id="payment_method_grabpaylater" model="payment.method">
+        <field name="name">Grab PayLater</field>
+        <field name="code">GRABBNPL</field>
+        <field name="image" type="base64" file="payment/static/img/grabpaylater.png"/>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+    </record>
+
+<!-- BILLEASE	Billease	PH -->
+
+<!-- HUMM	Humm	AU -->
+
+<!-- FNPL	Fly Now Pay Later	UK -->
+    <record id="payment_method_flynowpaylater" model="payment.method">
+        <field name="name">Fly Now Pay Later</field>
+        <field name="code">FNPL</field>
+        <field name="image" type="base64" file="payment/static/img/flynowpaylater.png"/>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+        <field name="supported_country_ids" eval="[Command.set([
+            ref('base.uk'),
+        ])]"/>
+        <field name="supported_currency_ids" eval="[Command.set([
+            ref('base.GBP'),
+        ])]"/>
+    </record>
+
+<!-- TENDOPAY	TendoPay	PH -->
+
+<!-- MAXX	MAXX	PH -->
+    <record id="payment_method_maxx" model="payment.method">
+        <field name="name">MAXX</field>
+        <field name="code">MAXX</field>
+        <field name="image" type="base64" file="payment/static/img/maxx.png"/>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+        <field name="supported_country_ids" eval="[Command.set([
+            ref('base.ph'),
+        ])]"/>
+        <field name="supported_currency_ids" eval="[Command.set([
+            ref('base.PHP'),
+        ])]"/>
+    </record>
+
+<!-- HOMECREDIT	HomeCredit	PH VN -->
+    <record id="payment_method_homecredit" model="payment.method">
+        <field name="name">HomeCredit</field>
+        <field name="code">HOMECREDIT</field>
+        <field name="image" type="base64" file="payment/static/img/homecredit.png"/>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+        <field name="supported_currency_ids" eval="[Command.set([
+            ref('base.PHP'),
+            ref('base.VND'),
+        ])]"/>
+        <field name="supported_country_ids" eval="[Command.set([
+            ref('base.ph'),
+            ref('base.vn'),
+        ])]"/>
     </record>
 
 </odoo>

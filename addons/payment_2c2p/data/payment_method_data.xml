@@ -1,0 +1,302 @@
+
+<!-- QR Payment Methods -->
+<!-- QR Payment Methods -->
+<!-- QR Payment Methods -->
+<!-- QR Payment Methods -->
+<!-- QR Payment Methods -->
+<!-- QR Payment Methods -->
+
+
+
+
+<!-- ALQR	AliPay QR	Global -->
+    <record id="payment_method_alipay_qr" model="payment.method">
+        <field name="name">Alipay QR</field>
+        <field name="code">ALQR</field>
+        <field name="image" type="base64" file="payment/static/img/alipay_qr.png"/>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+    </record>
+
+<!-- WCQR	WeChat QR	Global -->
+    <record id="payment_method_wechat_qr" model="payment.method">
+        <field name="name">WeChat QR</field>
+        <field name="code">WCQR</field>
+        <field name="image" type="base64" file="payment/static/img/wechat_qr.png"/>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+    </record>
+
+<!-- VEMVQR	Visa QR	Global -->
+    <record id="payment_method_visa_qr" model="payment.method">
+        <field name="name">Visa QR</field>
+        <field name="code">VEMVQR</field>
+        <field name="image" type="base64" file="payment/static/img/visa_qr.png"/>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+    </record>
+
+<!-- MCEMVQR	Master Card QR	Global -->
+    <record id="payment_method_mastercard_qr" model="payment.method">
+        <field name="name">Master Card QR</field>
+        <field name="code">MCEMVQR</field>
+        <field name="image" type="base64" file="payment/static/img/matercard_qr.png"/>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+    </record>
+
+<!-- UPIEMVQR	UPI QR	Global -->
+    <record id="payment_method_upi_qr" model="payment.method">
+        <field name="name">UPI QR</field>
+        <field name="code">UPIEMVQR</field>
+        <field name="image" type="base64" file="payment/static/img/upi_qr.png"/>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+    </record>
+
+<!-- SHPQR	Shopeepay Wallet (Customer QR)	SG / MY / ID / VN -->
+    <record id="payment_method_shopeepay_qr" model="payment.method">
+        <field name="name">Shopeepay Wallet (Customer QR)</field>
+        <field name="code">SHPQR</field>
+        <field name="image" type="base64" file="payment/static/img/shopeepay_qr.png"/>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+        <field name="supported_country_ids" eval="[Command.set([
+            ref('base.sg'),
+            ref('base.my'),
+            ref('base.id'),
+            ref('base.vn'),
+        ])]"/>
+        <field name="supported_currency_ids" eval="[Command.set([
+            ref('base.SGD'),
+            ref('base.MYR'),
+            ref('base.IDR'),
+            ref('base.VND'),
+        ])]"/>
+    </record>
+
+<!-- GPQR	GrabPay QR	SG / MY / PH -->
+    <record id="payment_method_grabpay_qr" model="payment.method">
+        <field name="name">GrabPay QR</field>
+        <field name="code">GPQR</field>
+        <field name="image" type="base64" file="payment/static/img/grabpay_qr.png"/>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+        <field name="supported_country_ids" eval="[Command.set([
+            ref('base.sg'),
+            ref('base.my'),
+            ref('base.ph'),
+        ])]"/>
+        <field name="supported_currency_ids" eval="[Command.set([
+            ref('base.SGD'),
+            ref('base.MYR'),
+            ref('base.PHP'),
+        ])]"/>
+    </record>
+
+<!-- GIPQR	GIP QR	TH / MY -->
+    <record id="payment_method_gip_qr" model="payment.method">
+        <field name="name">GIP QR</field>
+        <field name="code">GIPQR</field>
+        <field name="image" type="base64" file="payment/static/img/gip_qr.png"/>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+        <field name="supported_country_ids" eval="[Command.set([
+            ref('base.th'),
+            ref('base.my'),
+        ])]"/>
+        <field name="supported_currency_ids" eval="[Command.set([
+            ref('base.THB'),
+            ref('base.MYR'),
+        ])]"/>
+    </record>
+
+<!-- DOLFINQR	Dolfin QR	TH -->
+    <record id="payment_method_dolfin_qr" model="payment.method">
+        <field name="name">Dolfin QR</field>
+        <field name="code">DOLFINQR</field>
+        <field name="image" type="base64" file="payment/static/img/dolfin_qr.png"/>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+        <field name="supported_country_ids" eval="[Command.set([
+            ref('base.th'),
+        ])]"/>
+        <field name="supported_currency_ids" eval="[Command.set([
+            ref('base.THB'),
+        ])]"/>
+    </record>
+<!-- LAZADAPAYQR	LazadaPay	TH -->
+    <record id="payment_method_lazadapay_qr" model="payment.method">
+        <field name="name">LazadaPay</field>
+        <field name="code">LAZADAPAYQR</field>
+        <field name="image" type="base64" file="payment/static/img/lazadapay_qr.png"/>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+        <field name="supported_country_ids" eval="[Command.set([
+            ref('base.th'),
+        ])]"/>
+        <field name="supported_currency_ids" eval="[Command.set([
+            ref('base.THB'),
+        ])]"/>
+    </record>
+<!-- PPQR	Prompt Pay QR	TH -->
+    <record id="payment_method_promptpay_qr" model="payment.method">
+        <field name="name">Prompt Pay QR</field>
+        <field name="code">PPQR</field>
+        <field name="image" type="base64" file="payment/static/img/promptpay_qr.png"/>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+        <field name="supported_country_ids" eval="[Command.set([
+            ref('base.th'),
+        ])]"/>
+        <field name="supported_currency_ids" eval="[Command.set([
+            ref('base.THB'),
+        ])]"/>
+    </record>
+<!-- GPTHQR	GrabPay TH QR	TH -->
+    <record id="payment_method_grabpay_th_qr" model="payment.method">
+        <field name="name">GrabPay TH QR</field>
+        <field name="code">GPTHQR</field>
+        <field name="image" type="base64" file="payment/static/img/grabpay_th_qr.png"/>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+        <field name="supported_country_ids" eval="[Command.set([
+            ref('base.th'),
+        ])]"/>
+        <field name="supported_currency_ids" eval="[Command.set([
+            ref('base.THB'),
+        ])]"/>
+    </record>
+<!-- SHPQR	AirPay QR (ShopeePay QR)	TH -->
+    <record id="payment_method_airpay_qr" model="payment.method">
+        <field name="name">AirPay QR (ShopeePay QR)</field>
+        <field name="code">SHPQR</field>
+        <field name="image" type="base64" file="payment/static/img/airpay_qr.png"/>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+        <field name="supported_country_ids" eval="[Command.set([
+            ref('base.th'),
+        ])]"/>
+        <field name="supported_currency_ids" eval="[Command.set([
+            ref('base.THB'),
+        ])]"/>
+    </record>
+
+<!-- PNQR	PayNow QR	SG -->
+    <record id="payment_method_paynow_qr" model="payment.method">
+        <field name="name">PayNow QR</field>
+        <field name="code">PNQR</field>
+        <field name="image" type="base64" file="payment/static/img/paynow_qr.png"/>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+        <field name="supported_country_ids" eval="[Command.set([
+            ref('base.sg'),
+        ])]"/>
+        <field name="supported_currency_ids" eval="[Command.set([
+            ref('base.SGD'),
+        ])]"/>
+    </record>
+
+<!-- CBPQR	CBPay QR	MM -->
+    <record id="payment_method_cbpay_qr" model="payment.method">
+        <field name="name">CBPay QR</field>
+        <field name="code">CBPQR</field>
+        <field name="image" type="base64" file="payment/static/img/cbpay_qr.png"/>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+        <field name="supported_country_ids" eval="[Command.set([
+            ref('base.mm'),
+        ])]"/>
+        <field name="supported_currency_ids" eval="[Command.set([
+            ref('base.MMK'),
+        ])]"/>
+    </record>
+
+<!-- KBZQR	KBZPay QR	MM -->
+    <record id="payment_method_kbzpay_qr" model="payment.method">
+        <field name="name">KBZPay QR</field>
+        <field name="code">KBZQR</field>
+        <field name="image" type="base64" file="payment/static/img/kbzpay_qr.png"/>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+        <field name="supported_country_ids" eval="[Command.set([
+            ref('base.mm'),
+        ])]"/>
+        <field name="supported_currency_ids" eval="[Command.set([
+            ref('base.MMK'),
+        ])]"/>
+    </record>
+
+<!-- GCHQR	Gcash QR	PH -->
+    <record id="payment_method_gcash_qr" model="payment.method">
+        <field name="name">Gcash QR</field>
+        <field name="code">GCHQR</field>
+        <field name="image" type="base64" file="payment/static/img/gcash_qr.png"/>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+        <field name="supported_country_ids" eval="[Command.set([
+            ref('base.ph'),
+        ])]"/>
+        <field name="supported_currency_ids" eval="[Command.set([
+            ref('base.PHP'),
+        ])]"/>
+    </record>
+
+<!-- NOBUQRIS	QRIS	ID -->
+    <record id="payment_method_qris" model="payment.method">
+        <field name="name">QRIS</field>
+        <field name="code">NOBUQRIS</field>
+        <field name="image" type="base64" file="payment/static/img/qris.png"/>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+        <field name="supported_country_ids" eval="[Command.set([
+            ref('base.id'),
+        ])]"/>
+        <field name="supported_currency_ids" eval="[Command.set([
+            ref('base.IDR'),
+        ])]"/>
+    </record>
+<!-- DUITNOW	DuitNow QR	MY -->
+    <record id="payment_method_duitnow_qr" model="payment.method">
+        <field name="name">DuitNow QR</field>
+        <field name="code">DUITNOW</field>
+        <field name="image" type="base64" file="payment/static/img/duitnow_qr.png"/>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+        <field name="supported_country_ids" eval="[Command.set([
+            ref('base.my'),
+        ])]"/>
+        <field name="supported_currency_ids" eval="[Command.set([
+            ref('base.MYR'),
+        ])]"/>
+    </record>
+
+<!-- KHQR	Bakong QR	KH -->
+    <record id="payment_method_bakong_qr" model="payment.method">
+        <field name="name">Bakong QR</field>
+        <field name="code">KHQR</field>
+        <field name="image" type="base64" file="payment/static/img/bakong_qr.png"/>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+        <field name="supported_country_ids" eval="[Command.set([
+            ref('base.kh'),
+        ])]"/>
+        <field name="supported_currency_ids" eval="[Command.set([
+            ref('base.KHR'),
+        ])]"/>
+    </record>
+
+<!-- HKFPSQR	FPS QR	HK -->
+    <record id="payment_method_fps_qr" model="payment.method">
+        <field name="name">FPS QR</field>
+        <field name="code">HKFPSQR</field>
+        <field name="image" type="base64" file="payment/static/img/fps_qr.png"/>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+        <field name="supported_country_ids" eval="[Command.set([
+            ref('base.hk'),
+        ])]"/>
+        <field name="supported_currency_ids" eval="[Command.set([
+            ref('base.HKD'),
+        ])]"/>
+    </record>

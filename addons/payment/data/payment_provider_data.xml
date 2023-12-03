@@ -429,4 +429,85 @@
                ])]"/>
     </record>
 
+    <record id="payment_provider_2c2p" model="payment.provider">
+        <field name="name">2C2P</field>
+        <field name="image_128"
+               type="base64"
+               file="payment_2c2p/static/description/icon.png"/>
+        <field name="module_id" ref="base.module_payment_2c2p"/>
+        <!--
+            See https://developer.2c2p.com/docs/reference-payment-channels for API method
+        -->
+        <field name="payment_method_ids" eval="[(6, 0, [
+            ref('payment.payment_method_card'),
+            ref('payment.payment_web_pay'),
+            ref('payment.payment_method_masterpass'),
+            ref('payment.payment_method_applepay'),
+            ref('payment.payment_method_googlepay'),
+            ref('payment.payment_method_alipay'),
+            ref('payment.payment_method_paypal'),
+            ref('payment.payment_method_shopeepay'),
+            ref('payment.payment_method_grabpay'),
+            ref('payment.payment_method_linepay'),
+            ref('payment.payment_method_truemoney'),
+            ref('payment.payment_method_lazadapay'),
+            ref('payment.payment_method_paotangpay'),
+            ref('payment.payment_method_dash'),
+            ref('payment.payment_method_wechat_pay'),
+            ref('payment.payment_method_payanyone'),
+            ref('payment.payment_method_touch_n_go'),
+            ref('payment.payment_method_boost'),
+            ref('payment.payment_method_ayapay'),
+            ref('payment.payment_method_kbzpay'),
+            ref('payment.payment_method_cbpay'),
+            ref('payment.payment_method_wavepay'),
+            ref('payment.payment_method_okdollar'),
+            ref('payment.payment_method_mtpay'),
+            ref('payment.payment_method_mps'),
+            ref('payment.payment_method_maya'),
+            ref('payment.payment_method_gcash'),
+            ref('payment.payment_method_ovo'),
+            ref('payment.payment_method_linkaja'),
+            ref('payment.payment_method_dana'),
+            ref('payment.payment_method_gopay'),
+            ref('payment.payment_method_jeniuspay'),
+            ref('payment.payment_method_billdesk'),
+            ref('payment.payment_method_abpb'),
+            ref('payment.payment_method_freecharge'),
+            ref('payment.payment_method_icash'),
+            ref('payment.payment_method_icici'),
+            ref('payment.payment_method_itz_cash'),
+            ref('payment.payment_method_jiomoney'),
+            ref('payment.payment_method_money_on_mobile'),
+            ref('payment.payment_method_mobikwik'),
+            ref('payment.payment_method_oxigen'),
+            ref('payment.payment_method_paytm'),
+            ref('payment.payment_method_payzapp'),
+            ref('payment.payment_method_sbi_buddy'),
+            ref('payment.payment_method_yes_bank'),
+            ref('payment.payment_method_alipay_hk'),
+            ref('payment.payment_method_octopus'),
+            ref('payment.payment_method_payme'),
+            ref('payment.payment_method_vtcpay'),
+            ref('payment.payment_method_mpay'),
+            ref('payment.payment_method_onepay'),
+            ref('payment.payment_method_momo'),
+            ref('payment.payment_method_vinid'),
+            ref('payment.payment_method_zalopay'),
+            ref('payment.payment_method_viettelpay'),
+            ref('payment.payment_method_kakaopay'),
+            ref('payment.payment_method_wingpay'),
+            ref('payment.payment_method_jkopay'),
+            ref('payment.payment_method_atome'),
+            ref('payment.payment_method_hoolah'),
+            ref('payment.payment_method_grabpaylater'),
+            ref('payment.payment_method_billease'),
+            ref('payment.payment_method_humm'),
+            ref('payment.payment_method_flynowpaylater'),
+            ref('payment.payment_method_tendopay'),
+            ref('payment.payment_method_maxx'),
+            ref('payment.payment_method_homecredit'),
+        ])]"/>
+    </record>
+
 </odoo>
