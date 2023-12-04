@@ -4,11 +4,11 @@ from odoo.osv import expression
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools import frozendict, groupby, split_every
 from odoo.tools.float_utils import float_round
+from odoo.tools.safe_eval import _BUILTINS, safe_eval
 from odoo.tools.misc import clean_context, formatLang
 from odoo.tools.py_to_js import convert, convert_to_ast, Options
 
 from collections import defaultdict
-from functools import partial
 from markupsafe import Markup
 
 import ast
@@ -81,6 +81,53 @@ class AccountTaxGroup(models.Model):
             ('tax_group_id.tax_payable_account_id', '=', False),
             ('tax_group_id.tax_receivable_account_id', '=', False),
         ], limit=1))
+
+
+class TaxComputer:
+    def __init__(self):
+        self.var_counter = 0
+        self.equations = []
+
+    def next_variable(self):
+        var_number = self.var_counter
+        self.var_counter += 1
+        return f"x{var_number}"
+
+    def new_equation(self, formula, standalone=False, variable=False):
+        if standalone:
+            variable = None
+            self.equations.append((variable, formula))
+        else:
+            if not variable:
+                variable = self.next_variable()
+            self.equations.append((variable, f"{variable} = {formula}"))
+        return variable
+
+    def factorize_tax_amount(self, variable, factor):
+        if factor == 1.0:
+            return variable
+        return self.new_factorized_tax_equation(f"{variable} * {factor}")
+
+    def eval_equations(self, values):
+        equations = [x[1] for x in self.equations]
+        expression = ';'.join(equations)
+
+        globals_dict = {
+            '__builtins__': {
+                k: v
+                for k, v in _BUILTINS.items()
+                if k in ('True', 'False', 'None', 'min', 'max')
+            },
+        }
+        locals_dict = dict(values)
+        try:
+            safe_eval(expression, globals_dict=globals_dict, locals_dict=locals_dict, mode="exec", nocopy=True)
+        except Exception: # noqa: BLE001
+            raise UserError(_(
+                "Invalid expression found somewhere in: \n%s",
+                '\n'.join(equations),
+            ))
+        return locals_dict
 
 
 class AccountTax(models.Model):
@@ -555,7 +602,7 @@ class AccountTax(models.Model):
             self.include_base_amount = True
 
     # -------------------------------------------------------------------------
-    # PREPARE TAXES COMPUTATION
+    # TAXES COMPUTATION
     # -------------------------------------------------------------------------
 
     @api.model
@@ -605,133 +652,152 @@ class AccountTax(models.Model):
         return batches
 
     @api.model
-    def _ascending_process_fixed_taxes_batch(self, batch, fixed_multiplicator=1):
+    def _ascending_process_fixed_taxes_batch(self, batch, tax_computer, fixed_multiplicator=1):
         if batch['amount_type'] == 'fixed':
             batch['computed'] = 'tax'
             for tax_values in batch['taxes']:
                 multiplicator = tax_values['tax'].amount * abs(fixed_multiplicator)
-                tax_values['tax_amount'] = f"ctx['quantity'] * {multiplicator}"
-                tax_values['tax_amount_factorized'] = f"{tax_values['tax_amount']} * {tax_values['factor']}"
+                tax_values['tax_amount'] = tax_computer.new_equation(
+                    f"{multiplicator} * quantity",
+                )
+                tax_values['tax_amount_factorized'] = tax_computer.factorize_tax_amount(tax_values['tax_amount'], tax_values['factor'])
 
     @api.model
-    def _descending_process_price_included_taxes_batch(self, batch):
+    def _descending_process_price_included_taxes_batch(self, batch, tax_computer):
         tax_values_list = batch['taxes']
         amount_type = batch['amount_type']
         price_include = batch['price_include']
-        extra_base = batch['extra_base']
+        extra_base_expr = batch['extra_base_expr']
 
         if price_include:
-            price_included = "(ctx['quantity'] * ctx['price_unit'])"
-            if extra_base:
-                price_included = f"({price_included} + {extra_base})"
             if amount_type == 'percent':
                 batch['computed'] = True
 
-                # Compute the tax amounts.
-                total_factor = 1 + sum(tax_values['tax'].amount * tax_values['factor'] for tax_values in tax_values_list) / 100.0
-                tax_amounts = []
-                for tax_values in tax_values_list:
-                    multiplicator = tax_values['tax'].amount / 100.0
-                    tax_values['tax_amount'] = f"{price_included} * {multiplicator} / {total_factor}"
-                    tax_values['tax_amount_factorized'] = f"{tax_values['tax_amount']} * {tax_values['factor']}"
-                    tax_amounts.append(tax_values['tax_amount_factorized'])
+                total_percent = sum(
+                    tax_values['tax'].amount * tax_values['factor']
+                    for tax_values in tax_values_list
+                ) / 100.0
+                price_included_base_expr = f"(price_unit * quantity){extra_base_expr}"
+                price_excluded_base_expr = f"({price_included_base_expr}) / (1 + {total_percent})"
 
-                # Compute the base amount.
-                base = f"{price_included} - {' - '.join(tax_amounts)}"
+                amounts_variable = []
                 for tax_values in tax_values_list:
-                    tax_values['base'] = tax_values['display_base'] = base
+                    tax_values['tax_amount'] = tax_computer.new_equation(
+                        f"({price_excluded_base_expr}) * {tax_values['tax'].amount / 100.0}"
+                    )
+                    tax_values['tax_amount_factorized'] = tax_computer.factorize_tax_amount(tax_values['tax_amount'], tax_values['factor'])
+                    amounts_variable.append(tax_values['tax_amount_factorized'])
+
+                base_variable = tax_computer.new_equation(
+                    f"({price_included_base_expr}) - {' - '.join(amounts_variable)}"
+                )
+                for tax_values in tax_values_list:
+                    tax_values['base'] = tax_values['display_base'] = base_variable
 
             elif amount_type == 'division':
                 batch['computed'] = True
+                price_included_base_expr = f"(price_unit * quantity){extra_base_expr}"
+                price_included_base_variable = tax_computer.new_equation(price_included_base_expr)
 
-                # Compute the tax amounts.
-                tax_amounts = []
+                amounts_variable = []
                 for tax_values in tax_values_list:
-                    multiplicator = tax_values['tax'].amount * tax_values['factor'] / 100.0
-                    tax_values['tax_amount'] = f"{price_included} * {multiplicator}"
-                    tax_values['tax_amount_factorized'] = f"{tax_values['tax_amount']} * {tax_values['factor']}"
-                    tax_amounts.append(tax_values['tax_amount_factorized'])
+                    tax = tax_values['tax']
+                    multiplicator = tax.amount * tax_values['factor'] / 100.0
+                    tax_values['tax_amount'] = tax_computer.new_equation(
+                        f"{price_included_base_variable} * {multiplicator}"
+                    )
+                    tax_values['tax_amount_factorized'] = tax_computer.factorize_tax_amount(tax_values['tax_amount'], tax_values['factor'])
+                    tax_values['display_base'] = price_included_base_variable
+                    amounts_variable.append(tax_values['tax_amount_factorized'])
 
-                # Compute the base amount.
-                base = f"{price_included} - {' - '.join(tax_amounts)}"
+                base_variable = tax_computer.new_equation(
+                    f"{price_included_base_variable} - {' - '.join(amounts_variable)}"
+                )
                 for tax_values in tax_values_list:
-                    tax_values['display_base'] = price_included
-                    tax_values['base'] = base
+                    tax_values['base'] = base_variable
 
             elif amount_type == 'fixed':
                 batch['computed'] = True
-
-                # Compute the base amount.
-                base = f"{price_included} - {' - '.join(tax_amounts)}"
+                amounts_variable = [tax_values['tax_amount_factorized'] for tax_values in batch['taxes']]
+                price_included_base_expr = f"(price_unit * quantity){extra_base_expr}"
+                base_variable = tax_computer.new_equation(
+                    f"({price_included_base_expr}) - {' - '.join(amounts_variable)}"
+                )
                 for tax_values in tax_values_list:
-                    tax_values['base'] = tax_values['display_base'] = base
+                    tax_values['base'] = tax_values['display_base'] = base_variable
 
     @api.model
-    def _ascending_process_taxes_batch(self, batch):
+    def _ascending_process_taxes_batch(self, batch, tax_computer):
         tax_values_list = batch['taxes']
         amount_type = tax_values_list[0]['tax'].amount_type
         price_include = batch['price_include']
-        extra_base = batch['extra_base']
+        extra_base_expr = batch['extra_base_expr']
 
         if not price_include:
-            price_excluded = "(ctx['quantity'] * ctx['price_unit'])"
-            if extra_base:
-                price_excluded = f"({price_excluded} + {extra_base})"
+
             if amount_type == 'percent':
                 batch['computed'] = True
+                price_excluded_base_variable = tax_computer.new_equation(
+                    f"(price_unit * quantity){extra_base_expr}"
+                )
                 for tax_values in tax_values_list:
                     multiplicator = tax_values['tax'].amount / 100.0
-                    tax_values['tax_amount'] = f"{price_excluded} * {multiplicator}"
-                    tax_values['tax_amount_factorized'] = f"{tax_values['tax_amount']} * {tax_values['factor']}"
-                    tax_values['base'] = tax_values['display_base'] = price_excluded
+                    tax_values['tax_amount'] = tax_computer.new_equation(
+                        f"{price_excluded_base_variable} * {multiplicator}"
+                    )
+                    tax_values['tax_amount_factorized'] = tax_computer.factorize_tax_amount(tax_values['tax_amount'], tax_values['factor'])
+                    tax_values['base'] = tax_values['display_base'] = price_excluded_base_variable
 
             elif amount_type == 'division':
                 batch['computed'] = True
+                price_excluded_base_variable = tax_computer.new_equation(
+                    f"(price_unit * quantity){extra_base_expr}"
+                )
                 for tax_values in tax_values_list:
                     # If the base is 48.0 with a 15% tax, the tax_amount is computed as 48.0 * 15 / 85.
                     multiplicator = tax_values['tax'].amount / (100 - tax_values['tax'].amount)
-                    tax_values['tax_amount'] = f"{price_excluded} * {multiplicator}"
-                    tax_values['tax_amount_factorized'] = f"{tax_values['tax_amount']} * {tax_values['factor']}"
-                    tax_values['base'] = tax_values['display_base'] = price_excluded
+                    tax_values['tax_amount'] = tax_computer.new_equation(
+                        f"{price_excluded_base_variable} * {multiplicator}"
+                    )
+                    tax_values['tax_amount_factorized'] = tax_computer.factorize_tax_amount(tax_values['tax_amount'], tax_values['factor'])
+                    tax_values['base'] = tax_values['display_base'] = price_excluded_base_variable
 
             elif amount_type == 'fixed':
                 batch['computed'] = True
+                price_excluded_base_variable = tax_computer.new_equation(
+                    f"(price_unit * quantity){extra_base_expr}"
+                )
                 for tax_values in tax_values_list:
-                    tax_values['base'] = tax_values['display_base'] = price_excluded
+                    tax_values['base'] = tax_values['display_base'] = price_excluded_base_variable
 
     @api.model
-    def _apply_round_per_line(self, currency, batches):
+    def _apply_round_per_line(self, tax_computer, currency, batches):
         for batch in batches:
             tax_values_list = batch['taxes']
 
-            total_tax_amount_before_node = computer.sum(*[
-                computer.get_variable(tax_values['tax_amount_factorized'])
-                for tax_values in tax_values_list
-            ])
-            total_excluded_before_var = computer.get_variable(tax_values_list[0]['base'])
-            total_included_before_var = total_excluded_before_var + total_tax_amount_before_node
+            tax_amounts_before = [tax_values['tax_amount_factorized'] for tax_values in batch['taxes']]
+            total_excluded_before = tax_values_list[0]['base']
+            total_included_before = f"{total_excluded_before} + {' + '.join(tax_amounts_before)}"
 
-            tax_amounts_nodes = []
             for tax_values in tax_values_list:
-                base_var = computer.get_variable(tax_values['base'])
-                base_var = computer.create_var(computer.round(base_var, currency.rounding))
-                tax_values['base'] = base_var.get_name()
-                display_base_var = computer.get_variable(tax_values['display_base'])
-                display_base_var = computer.create_var(computer.round(display_base_var, currency.rounding))
-                tax_values['display_base'] = display_base_var.get_name()
-                tax_amount_var = computer.get_variable(tax_values['tax_amount_factorized'])
-                tax_amount_var = computer.create_var(computer.round(tax_amount_var, currency.rounding))
-                tax_values['tax_amount_factorized'] = tax_amount_var.get_name()
-                tax_amounts_nodes.append(tax_amount_var)
+                tax_values['base'] = tax_computer.new_equation(
+                    f"round({tax_values['base']}, {currency.rounding})"
+                )
+                tax_values['display_base'] = tax_computer.new_equation(
+                    f"round({tax_values['display_base']}, {currency.rounding})"
+                )
+                tax_values['tax_amount_factorized'] = tax_computer.new_equation(
+                    f"round({tax_values['tax_amount_factorized']}, {currency.rounding})"
+                )
 
-            total_tax_amount_after_node = computer.sum(*tax_amounts_nodes)
-            total_excluded_after_var = computer.get_variable(tax_values_list[0]['base'])
-            total_included_after_node = total_excluded_after_var + total_tax_amount_after_node
-            last_tax_amount_node = tax_amounts_nodes[-1]
+            tax_amounts_after = [tax_values['tax_amount_factorized'] for tax_values in batch['taxes']]
+            total_excluded_after = tax_values_list[0]['base']
+            total_included_after = f"{total_excluded_after} + {' + '.join(tax_amounts_after)}"
+            last_tax_values = tax_values_list[-1]
 
-            delta_node = computer.round(total_included_before_var, currency.rounding) - total_included_after_node
-            tax_amount_var = computer.create_var(last_tax_amount_node + delta_node)
-            tax_values_list[-1]['tax_amount_factorized'] = tax_amount_var.get_name()
+            last_tax_values['tax_amount_factorized'] = tax_computer.new_equation(
+                f"{last_tax_values['tax_amount_factorized']} + round({total_included_before}, {currency.rounding}) - ({total_included_after})"
+            )
 
     def _prepare_taxes_computation(
         self,
@@ -742,6 +808,7 @@ class AccountTax(models.Model):
         include_caba_tags=False,
         rounding_method='round_per_line',
         currency=None,
+        tax_computer=None,
     ):
         if rounding_method == 'round_per_line':
             assert currency
@@ -772,69 +839,79 @@ class AccountTax(models.Model):
         descending_batches = self._prepare_taxes_batches(tax_values_list)
         ascending_batches = list(reversed(descending_batches))
 
+        # Prepare the computation.
+        tax_computer = tax_computer or TaxComputer()
+
         # First ascending computation for fixed tax.
         # In Belgium, we could have a price-excluded tax affecting the base of a price-included tax.
         # In that case, we need to compute the fix amount before the descending computation.
-        ascending_extra_base = None
+        ascending_extra_base_expr = ''
         for batch in ascending_batches:
-            batch['ascending_extra_base'] = ascending_extra_base
+            batch['ascending_extra_base_expr'] = ascending_extra_base_expr
 
-            self._ascending_process_fixed_taxes_batch(batch, fixed_multiplicator=fixed_multiplicator)
-
-            # Build the expression representing the extra base as a sum.
+            self._ascending_process_fixed_taxes_batch(
+                batch,
+                tax_computer,
+                fixed_multiplicator=fixed_multiplicator,
+            )
             if batch.get('computed') in (True, 'tax') and (batch['include_base_amount'] and not batch['price_include']):
-                tax_amounts = [f"({tax_values['tax_amount_factorized']})" for tax_values in tax_values_list]
-                if ascending_extra_base:
-                    ascending_extra_base += " + "
-                ascending_extra_base = f"{ascending_extra_base or ''}{' + '.join(tax_amounts)}"
+                # Build the expression representing the extra base as a sum.
+                ascending_extra_base_expr_amounts = [str(tax_values['tax_amount_factorized']) for tax_values in batch['taxes']]
+                if ascending_extra_base_expr:
+                    ascending_extra_base_expr_amounts.append(ascending_extra_base_expr)
+                ascending_extra_base_expr = ' + '.join(ascending_extra_base_expr_amounts)
 
         # First descending computation to compute price_included values.
-        descending_extra_base = None
+        descending_extra_base_expr = ''
         for batch in descending_batches:
             computed = batch.get('computed')
-            batch['descending_extra_base'] = descending_extra_base
+            batch['descending_extra_base_expr'] = descending_extra_base_expr
 
-            # Build the expression representing the extra base as a sum.
             if not computed or computed == 'tax':
-                batch['extra_base'] = f"{descending_extra_base or ''}{' + ' if descending_extra_base else ''}{batch['ascending_extra_base']}"
+                # Build the expression representing the extra base as a sum.
+                descending_extra_base_expr_amounts = []
+                if descending_extra_base_expr:
+                    descending_extra_base_expr_amounts.append(f'- {descending_extra_base_expr}')
+                if ascending_extra_base_expr := batch['ascending_extra_base_expr']:
+                    descending_extra_base_expr_amounts.append(f' + {ascending_extra_base_expr}')
+                batch['extra_base_expr'] = ''.join(descending_extra_base_expr_amounts)
 
                 # Compute price-included taxes.
-                self._descending_process_price_included_taxes_batch(batch)
+                self._descending_process_price_included_taxes_batch(batch, tax_computer)
 
             # Update the base expression for the following taxes.
             if batch.get('computed') is True:
-                tax_amounts = [f"({tax_values['tax_amount_factorized']})" for tax_values in tax_values_list]
-                if descending_extra_base:
-                    descending_extra_base += " - "
-                descending_extra_base = f"{descending_extra_base or ''}{' - '.join(tax_amounts)}"
+                descending_extra_base_expr_amounts = [str(tax_values['tax_amount_factorized']) for tax_values in batch['taxes']]
+                if descending_extra_base_expr:
+                    descending_extra_base_expr_amounts.append(descending_extra_base_expr)
+                descending_extra_base_expr = ' - '.join(descending_extra_base_expr_amounts)
 
         # Second ascending computation to compute the missing values for price-excluded taxes.
         # Build the final results.
-        extra_base = None
+        extra_base_expr = ''
         tax_values_list = []
         for i, batch in enumerate(ascending_batches):
             computed = batch.get('computed')
             if computed is not True:
                 # Build the expression representing the extra base as a sum.
-                extra_bases = []
-                if extra_base:
-                    extra_bases.append(extra_base)
-                if ascending_extra_base := batch['ascending_extra_base']:
-                    extra_bases.append(extra_base)
-                if descending_extra_base := batch['descending_extra_base']:
-                    extra_bases.append(extra_base)
-                if extra_bases:
-                    extra_base = " + ".join(extra_bases)
+                extra_base_expr_amounts = []
+                if extra_base_expr:
+                    extra_base_expr_amounts.append(extra_base_expr)
+                if ascending_extra_base_expr := batch['ascending_extra_base_expr']:
+                    extra_base_expr_amounts.append(f'+ {ascending_extra_base_expr}')
+                if descending_extra_base_expr := batch['descending_extra_base_expr']:
+                    extra_base_expr_amounts.append(f'- {descending_extra_base_expr}')
+                batch['extra_base_expr'] = ''.join(extra_base_expr_amounts)
 
                 # Compute price-excluded taxes.
-                self._ascending_process_taxes_batch(batch)
+                self._ascending_process_taxes_batch(batch, tax_computer)
 
                 # Update the base expression for the following taxes.
                 if not computed and batch['include_base_amount']:
-                    tax_amounts = [f"({tax_values['tax_amount_factorized']})" for tax_values in tax_values_list]
-                    if extra_base:
-                        extra_base += " - "
-                    extra_base = f"{extra_base or ''}{' - '.join(tax_amounts)}"
+                    extra_base_expr_amounts = [f"+ {tax_values['tax_amount_factorized']}" for tax_values in batch['taxes']]
+                    if extra_base_expr:
+                        extra_base_expr_amounts.append(extra_base_expr)
+                    extra_base_expr = ''.join(extra_base_expr_amounts)
 
             # Compute the subsequent taxes.
             subsequent_taxes = self.env['account.tax']
@@ -864,68 +941,67 @@ class AccountTax(models.Model):
                 tax_values_list.append(tax_values)
 
         # Round per line.
-        # if rounding_method == 'round_per_line':
-        #     self._apply_round_per_line(computer, currency, ascending_batches)
+        if rounding_method == 'round_per_line':
+            self._apply_round_per_line(tax_computer, currency, ascending_batches)
 
         # Compute total_included / total_excluded.
         if tax_values_list:
-            total_excluded = tax_values_list[0]['base']
-            tax_amounts = [f"({tax_values['tax_amount_factorized']})" for tax_values in tax_values_list]
-            total_included = f"{total_excluded} + {' + '.join(tax_amounts)}"
+            total_included = total_excluded = tax_values_list[0]['base']
+            amounts_variable = [tax_values['tax_amount_factorized'] for tax_values in tax_values_list]
+            total_included = tax_computer.new_equation(
+                f"{total_included} + {' + '.join(amounts_variable)}"
+            )
+        elif rounding_method == 'round_per_line':
+            total_included = total_excluded = tax_computer.new_equation(
+                f"round(quantity * price_unit, {currency.rounding})"
+            )
         else:
-            if rounding_method == 'round_per_line':
-                total_included = total_excluded = f"float_round(ctx['quantity'] * ctx['price_unit'], precision_rounding={currency.rounding})"
-            else:
-                total_included = total_excluded = "ctx['quantity'] * ctx['price_unit']"
-
-        # Convert to AST.
-        for tax_values in tax_values_list:
-            for key in ('base', 'display_base', 'tax_amount', 'tax_amount_factorized'):
-                tax_values[key] = ast.parse(f"lambda ctx: {tax_values[key]}")
+            total_included = total_excluded = tax_computer.new_equation(
+                "quantity * price_unit"
+            )
 
         return {
             'tax_values_list': tax_values_list,
             'total_excluded': total_excluded,
             'total_included': total_included,
+            'tax_computer': tax_computer,
         }
-
-    @api.model
-    def _prepare_py_to_js_options(self):
-        options = Options()
-        return options
 
     @api.model
     def _eval_taxes_computation(self, taxes_computation, price_unit, quantity, extra_computation_values=None):
+        tax_computer = taxes_computation['tax_computer']
         tax_values_list = taxes_computation['tax_values_list']
 
-        eval_context = {
+        # Evaluate the expressions.
+        local_results = tax_computer.eval_equations({
             **(extra_computation_values or {}),
             'price_unit': price_unit,
             'quantity': quantity,
-        }
+            'round': lambda v, pr: float_round(v, precision_rounding=pr),
+        })
 
         # Build the results.
         eval_tax_values_list = []
         for tax_values in tax_values_list:
-            is_applicable = tax_values['is_applicable'](eval_context) if 'is_applicable' in tax_values else True
             eval_tax_values = {
                 'tax_id': tax_values['tax_id'],
                 'group_id': tax_values['group_id'],
                 'tax_ids': tax_values['tax_ids'],
                 'tag_ids': tax_values['tag_ids'],
                 'price_include': tax_values['price_include'],
-                'tax_amount': tax_values['tax_amount'](eval_context),
-                'tax_amount_factorized': tax_values['tax_amount_factorized'](eval_context),
-                'base': tax_values['base'](eval_context),
-                'display_base': tax_values['display_base'](eval_context),
+                'skip': local_results[tax_values['skip']] if tax_values.get('skip') else False,
+                'tax_amount': local_results[tax_values['tax_amount']],
+                'tax_amount_factorized': local_results[tax_values['tax_amount_factorized']],
+                'base': local_results[tax_values['base']],
+                'display_base': local_results[tax_values['display_base']],
             }
-            if is_applicable:
+            if not eval_tax_values['skip']:
                 eval_tax_values_list.append(eval_tax_values)
 
         return {
             'tax_values_list': eval_tax_values_list,
-            'total_excluded': taxes_computation['total_excluded'](eval_context),
-            'total_included': taxes_computation['total_included'](eval_context),
+            'total_excluded': local_results[taxes_computation['total_excluded']],
+            'total_included': local_results[taxes_computation['total_included']],
         }
 
     # -------------------------------------------------------------------------
@@ -959,38 +1035,40 @@ class AccountTax(models.Model):
             rounding_method=rounding_method,
             currency=currency,
         )
-        computer = taxes_computation['computer']
-        price_unit_var = computer.get_variable(taxes_computation['total_excluded'])
+        price_unit_variable = taxes_computation['total_excluded']
 
         if mode == 'excluded_then_included':
-            computer.create_var(price_unit_var, var_name='price_unit')
+            taxes_computation['tax_computer'].new_equation(price_unit_variable, variable='price_unit')
             taxes_computation = flattened_taxes_after_fp._prepare_taxes_computation(
                 fixed_multiplicator=fixed_multiplicator,
                 handle_price_include=False,
                 rounding_method=rounding_method,
                 currency=currency,
-                computer=computer,
+                tax_computer=taxes_computation['tax_computer'],
             )
             price_included_tax_ids = set(flattened_taxes_after_fp.filtered('price_include').ids)
-            total_tax_amount_node = computer.sum(*[
-                computer.get_variable(tax_values['tax_amount_factorized'])
+            amounts_variable = [
+                tax_values['tax_amount_factorized']
                 for tax_values in taxes_computation['tax_values_list']
                 if tax_values['tax_id'] in price_included_tax_ids
-            ])
-            price_unit_var = computer.create_var(price_unit_var + total_tax_amount_node)
+            ]
+            if amounts_variable:
+                price_unit_variable = taxes_computation['tax_computer'].new_equation(
+                    f"{price_unit_variable} + {' + '.join(amounts_variable)}"
+                )
 
         return {
-            'price_unit': price_unit_var.get_name(),
+            'price_unit': price_unit_variable,
             'taxes': flattened_taxes_after_fp,
-            'computer': computer,
+            'tax_computer': taxes_computation['tax_computer'],
         }
 
     @api.model
     def _eval_price_unit_after_fiscal_position(self, taxes_computation, price_unit, extra_computation_values=None):
-        computer = taxes_computation['computer']
+        tax_computer = taxes_computation['tax_computer']
 
         # Evaluate the expressions.
-        local_results = computer.eval_python({
+        local_results = tax_computer.eval_equations({
             **(extra_computation_values or {}),
             'price_unit': price_unit,
             'quantity': 1.0,
