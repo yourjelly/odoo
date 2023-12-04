@@ -41,28 +41,55 @@ class ResourceCalendarLeaves(models.Model):
                 }
         """
         resource_calendars = resource_calendars or self._get_resource_calendars()
+        # to easily find the calendar with its id.
+        calendars_dict = {calendar.id: calendar for calendar in resource_calendars}
+
         leaves_read_group = self.env['resource.calendar.leaves']._read_group(
             [('id', 'in', self.ids)],
-            ['calendar_id'],
+            ['calendar_id', 'company_id'],
             ['id:recordset', 'resource_id:recordset', 'date_from:min', 'date_to:max'],
         )
+        global_leaves_read_group = []
         # dict of keys: calendar_id
         #   and values : { 'date_from': datetime, 'date_to': datetime, resources: self.env['resource.resource'] }
         cal_attendance_intervals_dict = {}
-        for calendar, leaves, resources, date_from_min, date_to_max in leaves_read_group:
+
+        # 1st pass: only consider calendar's specific leaves
+        for calendar, company, leaves, resources, date_from_min, date_to_max in leaves_read_group:
+            if not calendar:
+                global_leaves_read_group.append((calendar, company, leaves, resources, date_from_min, date_to_max))
+                continue
             calendar_data = {
                 'date_from': utc.localize(date_from_min),
                 'date_to': utc.localize(date_to_max),
                 'resources': resources,
                 'leaves': leaves,
             }
-            if not calendar:
-                for calendar_id in resource_calendars.ids:
+            cal_attendance_intervals_dict[calendar.id] = calendar_data
+
+        # 2nd pass: merge global leaves with calendar attendance intervals
+        for calendar, company, leaves, resources, date_from_min, date_to_max in global_leaves_read_group:
+            for calendar_id in resource_calendars.ids:
+                if calendars_dict[calendar_id].company_id != company:
+                    continue  # only consider global leaves of the same company as the calendar
+                calendar_data = cal_attendance_intervals_dict.get(calendar_id)
+                if calendar_data is None:
+                    calendar_data = {
+                        'date_from': utc.localize(date_from_min),
+                        'date_to': utc.localize(date_to_max),
+                        'resources': resources,
+                        'leaves': leaves,
+                    }
                     cal_attendance_intervals_dict[calendar_id] = calendar_data
-            else:
-                cal_attendance_intervals_dict[calendar.id] = calendar_data
-        # to easily find the calendar with its id.
-        calendars_dict = {calendar.id: calendar for calendar in resource_calendars}
+                else:
+                    date_from_min_utc = utc.localize(date_from_min)
+                    date_to_max_utc = utc.localize(date_to_max)
+                    calendar_data.update(
+                        date_from=min(date_from_min_utc, calendar_data['date_from']),
+                        date_to=max(date_to_max_utc, calendar_data['date_to']),
+                        resources=resources | calendar_data['resources'],
+                        leaves=leaves | calendar_data['leaves'],
+                    )
 
         # dict of keys: calendar_id
         #   and values: a dict of keys: leave.id
