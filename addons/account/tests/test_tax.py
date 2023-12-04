@@ -806,6 +806,17 @@ class TestTax(TestTaxCommon):
             48.0,
         )
 
+    def test_safe_eval(self):
+        tax1 = self.fixed_tax(1, include_base_amount=True)
+        tax2 = self.percent_tax(21, price_include=True)
+        taxes = tax1 + tax2
+
+        import time
+        t0 = time.time()
+        for i in range(10000):
+            taxes.compute_all(120.0)
+        print(time.time() - t0)
+
     def test_fixed_taxes_for_l10n_be(self):
         tax1 = self.fixed_tax(1)
         tax2 = self.percent_tax(21)
