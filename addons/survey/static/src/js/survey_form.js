@@ -51,6 +51,7 @@ publicWidget.registry.SurveyFormWidget = publicWidget.Widget.extend(SurveyPreloa
             self.readonly = self.options.readonly;
             self.selectedAnswers = self.options.selectedAnswers;
             self.imgZoomer = false;
+            self.triggeringQuestionForSection = [];
 
             // Add Survey cookie to retrieve the survey if you quit the page and restart the survey.
             if (!cookie.get('survey_' + self.options.surveyToken)) {
@@ -1068,7 +1069,6 @@ publicWidget.registry.SurveyFormWidget = publicWidget.Widget.extend(SurveyPreloa
                 const $label = $target.closest('label');
                 $label.toggleClass('o_survey_selected', !$label.hasClass('o_survey_selected'));
                 const answerId = $target.val();
-
                 if (this.options.questionsLayout !== 'page_per_question') {
                     $label.hasClass('o_survey_selected')
                         ? this.selectedAnswers.push(parseInt(answerId))
@@ -1099,8 +1099,22 @@ publicWidget.registry.SurveyFormWidget = publicWidget.Widget.extend(SurveyPreloa
             const sectionId = dependingQuestion.getAttribute('section-id');
             if(sectionId){
                 const dependingSection = document.querySelector(`.js_section_wrapper[id="${sectionId}"]`);
-                dependingSection.classList.toggle('d-none',hasNoSelectedTriggers);
+                const isQuestionIncluded = this.triggeringQuestionForSection.includes(questionId);
+
+                if(isQuestionIncluded){
+                    this.triggeringQuestionForSection = this.triggeringQuestionForSection.filter(qId => qId != questionId);
+                }
+                else{
+                    this.triggeringQuestionForSection.push(questionId);
+                }
+                
+                const anyQuestionSelected = questionIds.some(qId =>
+                        this.triggeringQuestionForSection.includes(qId)
+                );
+
+                dependingSection.classList.toggle('d-none',!anyQuestionSelected);
             }
+
             dependingQuestion.classList.toggle('d-none', hasNoSelectedTriggers);
             if (hasNoSelectedTriggers) {
                 // Clear / Un-select all the input from the given question
