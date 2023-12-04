@@ -6269,14 +6269,6 @@ class BaseModel(metaclass=MetaModel):
             for vals, ids in updates.items():
                 model.browse(ids)._write(vals)
 
-        # DLE P76: test_onchange_one2many_with_domain_on_related_field
-        # ```
-        # email.important = True
-        # self.assertIn(email, discussion.important_emails)
-        # ```
-        # When a search on a field coming from a related occurs (the domain
-        # on discussion.important_emails field), make sure the related field
-        # is flushed
         if fnames is None:
             fields = self._fields.values()
         else:
@@ -6285,8 +6277,6 @@ class BaseModel(metaclass=MetaModel):
         model_fields = defaultdict(list)
         for field in fields:
             model_fields[field.model_name].append(field)
-            if field.related_field:
-                model_fields[field.related_field.model_name].append(field.related_field)
 
         for model_name, fields_ in model_fields.items():
             dirty_fields = self.env.cache.get_dirty_fields()
@@ -6318,11 +6308,6 @@ class BaseModel(metaclass=MetaModel):
                             value = field._convert_from_cache_to_column(value)
                         id_vals[record.id][field.name] = value
                 process(model, id_vals)
-
-        # flush the inverse of one2many fields, too
-        for field in fields:
-            if field.type == 'one2many' and field.inverse_name:
-                self.env[field.comodel_name].flush_model([field.inverse_name])
 
     #
     # New records - represent records that do not exist in the database yet;
