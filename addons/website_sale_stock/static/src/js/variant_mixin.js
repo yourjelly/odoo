@@ -53,8 +53,14 @@ patch(VariantMixin, {
         const $addQtyInput = $parent.find('input[name="add_qty"]');
         let qty = $addQtyInput.val();
         let ctaWrapper = $parent[0].querySelector('#o_wsale_cta_wrapper');
+
+        if (!ctaWrapper) {
+            // we're not strictly on the product page, but in the optional product modal
+            // skip, should be supported in the future but isn't rn
+            return result;
+        }
+
         ctaWrapper.classList.replace('d-none', 'd-flex');
-        ctaWrapper.classList.remove('out_of_stock');
 
         if (combination.product_type === 'product' && !combination.allow_out_of_stock_order) {
             combination.free_qty -= parseInt(combination.cart_qty);
@@ -68,7 +74,6 @@ patch(VariantMixin, {
             }
             if (combination.free_qty < 1) {
                 ctaWrapper.classList.replace('d-flex', 'd-none');
-                ctaWrapper.classList.add('out_of_stock');
             }
         }
 

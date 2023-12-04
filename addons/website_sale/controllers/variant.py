@@ -26,6 +26,7 @@ class WebsiteSaleVariantController(Controller):
         for key in ('product_taxes', 'taxes', 'currency', 'date'):
             combination_info.pop(key)
 
+        # TODO VFE do not request carousel unless necessary
         if request.website.product_page_image_width != 'none' and not request.env.context.get('website_sale_no_images', False):
             combination_info['carousel'] = request.env['ir.ui.view']._render_template(
                 'website_sale.shop_product_images',
