@@ -68,10 +68,11 @@ class AccountMove(models.Model):
                     valuation_price_unit = line.product_id.uom_id._compute_price(valuation_price_unit, line.product_uom_id)
                 else:
                     # Valuation_price unit is always expressed in invoice currency, so that it can always be computed with the good rate
-                    price_unit = line.product_id.uom_id._compute_price(line.product_id.standard_price, line.product_uom_id)
+                    po_line = line.purchase_line_id
+                    price_unit = line.product_id.uom_id._compute_price(po_line.price_unit, po_line.product_uom)
                     price_unit = -price_unit if line.move_id.move_type == 'in_refund' else price_unit
                     valuation_date = valuation_stock_moves and max(valuation_stock_moves.mapped('date')) or move.date
-                    valuation_price_unit = line.company_currency_id._convert(
+                    valuation_price_unit = po_line.currency_id._convert(
                         price_unit, move.currency_id,
                         move.company_id, valuation_date, round=False
                     )

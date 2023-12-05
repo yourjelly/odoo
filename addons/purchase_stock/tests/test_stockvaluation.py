@@ -1047,15 +1047,27 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
 
         inv.action_post()
 
+        """
+        Justification:
+        Semble avoir été arbitrairement modifié par 9dc7835cf62302ce05db822dcc1db9e5b577338f sans raison apparente
+            Company USD
+            Auto AVCO
+            PO 1 @ 100 EUR
+            Bill 1 @ 100 EUR
+        Ca ne devrait rien générer d'autres que deux AML:
+        - une qui crédite l'account pyable
+        - une qui débite le stock input
+        """
+
         move_lines = inv.line_ids
-        self.assertEqual(len(move_lines), 4)
+        self.assertEqual(len(move_lines), 2)
 
         payable_line = move_lines.filtered(lambda l: l.account_id.account_type == 'liability_payable')
 
         self.assertEqual(payable_line.amount_currency, -100.0)
         self.assertAlmostEqual(payable_line.balance, -66.67)
 
-        stock_line = move_lines.filtered(lambda l: l.account_id == self.stock_input_account and l.balance > 0)
+        stock_line = move_lines.filtered(lambda l: l.account_id == self.stock_input_account)
         self.assertEqual(stock_line.amount_currency, 100.0)
         self.assertAlmostEqual(stock_line.balance, 66.67)
 
