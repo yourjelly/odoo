@@ -71,7 +71,7 @@ BarcodeScan.template = xml`
     <!-- <a role="button" class="btn btn-primary o_mobile_barcode" t-on-click="open"/> -->
 </div>
 `;
-await mount(MainComponentsContainer, target, { env });
+// await mount(MainComponentsContainer, target, { env });
 await mount(BarcodeScan, target, { env });
 
 })

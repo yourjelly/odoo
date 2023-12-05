@@ -16,6 +16,7 @@ export class BarcodeScanner extends Component {
     }
 
     async openMobileScanner() {
+        debugger;
         let error = null;
         let barcode = null;
         try {

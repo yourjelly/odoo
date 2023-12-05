@@ -8,7 +8,7 @@ import { loadJS } from "@web/core/assets";
 import { isVideoElementReady, buildZXingBarcodeDetector } from "./ZXingBarcodeDetector";
 import { CropOverlay } from "./crop_overlay";
 
-import { Component, onMounted, onWillStart, onWillUnmount, useRef, useState } from "@odoo/owl";
+import { Component, onMounted, onWillStart, onWillUnmount, useRef, useState, onRendered } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 
 export class BarcodeDialog extends Component {
@@ -16,6 +16,7 @@ export class BarcodeDialog extends Component {
      * @override
      */
     setup() {
+        debugger;
         this.videoPreviewRef = useRef("videoPreview");
         this.interval = null;
         this.stream = null;
@@ -41,12 +42,15 @@ export class BarcodeDialog extends Component {
             this.detector = new DetectorClass({ formats });
         });
 
+        onRendered(()=>{
+            debugger; 
+        })
         onMounted(async () => {
             const constraints = {
                 video: { facingMode: this.props.facingMode },
                 audio: false,
             };
-
+            debugger; 
             try {
                 this.stream = await browser.navigator.mediaDevices.getUserMedia(constraints);
             } catch (err) {
@@ -190,6 +194,7 @@ export function isBarcodeScannerSupported() {
  * @returns {Promise<string>} resolves when a {qr,bar}code has been detected
  */
 export async function scanBarcode(env, facingMode = "environment") {
+    debugger; 
     let res;
     let rej;
     const promise = new Promise((resolve, reject) => {

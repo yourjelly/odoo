@@ -43,6 +43,7 @@ export const dialogService = {
         };
 
         const add = (dialogClass, props, options = {}) => {
+            debugger;
             const id = nextId++;
             const close = () => remove();
             const subEnv = reactive({
