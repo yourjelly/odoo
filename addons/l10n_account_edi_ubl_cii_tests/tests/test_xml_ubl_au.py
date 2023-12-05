@@ -110,6 +110,7 @@ class TestUBLAU(TestUBLCommon):
             ''',
             expected_file='from_odoo/a_nz_out_invoice.xml',
         )
+        self.assertEqual(False, True)
         self.assertEqual(attachment.name[-8:], "a_nz.xml")
         self._assert_imported_invoice_from_etree(invoice, attachment)
 
