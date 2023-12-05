@@ -164,6 +164,29 @@ class TestEditableQuant(TransactionCase):
         self.assertEqual(valid_quant.quantity, 10)
         self.assertEqual(inventoried_quant.quantity, 20)
 
+    def test_create_quant_import(self):
+        """ Try to create the same quant twice in the same create, as if it was an import.
+            The import mechanism expect that 1 line = 1 record.
+        """
+        ImportQuants = self.env['stock.quant'].with_context(inventory_mode=True, import_file=True)
+        quants = ImportQuants.create([
+            {'product_id': self.product.id, 'location_id': self.room1.id, 'inventory_quantity': 2},
+            {'product_id': self.product.id, 'location_id': self.room1.id, 'inventory_quantity': 10},
+        ])
+        # We should have the same quant twice
+        self.assertEqual(len(quants), 2)
+        self.assertEqual(quants[0], quants[1])
+        # We don't know what the user is trying to do, so we take a safe path; the inventory quantity should be the last one
+        self.assertEqual(quants[0].inventory_quantity, 10)
+
+        quants.action_apply_inventory()
+
+        # Importing with a matching existing quant should work too
+        quant = ImportQuants.create({'product_id': self.product.id, 'location_id': self.room1.id, 'inventory_quantity': 2})
+        self.assertEqual(len(quant), 1)
+        self.assertEqual(quant.inventory_quantity, 2)
+
+
     def test_edit_quant_1(self):
         """ Increases manually quantity of a quant.
         """

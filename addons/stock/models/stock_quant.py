@@ -255,10 +255,7 @@ class StockQuant(models.Model):
                 lot_id = self.env['stock.lot'].browse(vals.get('lot_id'))
                 package_id = self.env['stock.quant.package'].browse(vals.get('package_id'))
                 owner_id = self.env['res.partner'].browse(vals.get('owner_id'))
-                quant = self.env['stock.quant']
-                if not self.env.context.get('import_file'):
-                    # Merge quants later, to make sure one line = one record during batch import
-                    quant = self._gather(product, location, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=True)
+                quant = self._gather(product, location, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=True)
                 if lot_id:
                     quant = quant.filtered(lambda q: q.lot_id)
                 if quant:
@@ -272,7 +269,13 @@ class StockQuant(models.Model):
                     quant.inventory_quantity = inventory_quantity
                     quant.user_id = vals.get('user_id', self.env.user.id)
                     quant.inventory_date = fields.Date.today()
-                quants |= quant
+
+                # The import mechanism requires that 1 line = 1 record, but `_gather` can return the same record twice in the same loop
+                # Therefore, use `Model.concat` instead of `Model.union` to keep the duplicate ids
+                if self.env.context.get('import_file'):
+                    quants += quant
+                else:
+                    quants |= quant
             else:
                 quant = super().create(vals)
                 quants |= quant
