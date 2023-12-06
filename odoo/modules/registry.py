@@ -378,6 +378,13 @@ class Registry(Mapping):
                         f"accessing {fnames1} may recompute and update {fnames2}. "
                         f"Use distinct compute methods for stored and non-stored fields."
                     )
+                if len({field.readonly for field in fields}) > 1:
+                    fnames = ", ".join(field.name for field in fields)
+                    warnings.warn(
+                        f"{model_name}: inconsistent 'readonly' for computed fields {fnames}. "
+                        f"Either set all fields to the same 'readonly' value, or "
+                        f"use distinct compute methods for readonly and non-readonly fields."
+                    )
         return computed
 
     def get_trigger_tree(self, fields: list, select=bool) -> "TriggerTree":
