@@ -25,6 +25,7 @@ class RazorpayController(http.Controller):
         save_session=False
     )
     def razorpay_return_from_checkout(self, reference, **data):
+        # breakpoint()
         """ Process the notification data sent by Razorpay after redirection from checkout.
 
         :param str reference: The transaction reference embedded in the return URL.
@@ -47,15 +48,17 @@ class RazorpayController(http.Controller):
         return request.redirect('/payment/status')
 
     @http.route(_webhook_url, type='http', methods=['POST'], auth='public', csrf=False)
-    def razorpay_webhook(self):
+    def razorpay_webhook(self, **data):
+        print("===========================================razorpay_webhook================================================")
         """ Process the notification data sent by Razorpay to the webhook.
 
         :return: An empty string to acknowledge the notification.
         :rtype: str
         """
         data = request.get_json_data()
+        print("data=========", data)
         _logger.info("Notification received from Razorpay with data:\n%s", pprint.pformat(data))
-
+        breakpoint()
         event_type = data['event']
         if event_type in HANDLED_WEBHOOK_EVENTS:
             entity_type = 'payment' if 'payment' in event_type else 'refund'
@@ -102,6 +105,8 @@ class RazorpayController(http.Controller):
         expected_signature = tx_sudo.provider_id._razorpay_calculate_signature(
             notification_data, is_redirect=is_redirect
         )
+        print("received_signature===", received_signature)
+        print("expected_signature===", expected_signature)
         if not hmac.compare_digest(received_signature, expected_signature):
             _logger.warning("Received notification with invalid signature.")
             raise Forbidden()

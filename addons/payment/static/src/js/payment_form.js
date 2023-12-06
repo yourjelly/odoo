@@ -135,6 +135,7 @@ publicWidget.registry.PaymentForm = publicWidget.Widget.extend({
         const paymentOptionId = this.paymentContext.paymentOptionId = this._getPaymentOptionId(
             checkedRadio
         );
+        debugger
         if (flow === 'token' && this.paymentContext['assignTokenRoute']) { // Assign token flow.
             await this._assignToken(paymentOptionId);
         } else { // Both tokens and payment methods must process a payment operation.
@@ -323,6 +324,7 @@ publicWidget.registry.PaymentForm = publicWidget.Widget.extend({
      * @return {void}
      */
     _setPaymentFlow(flow = 'redirect') {
+        debugger
         if (['redirect', 'direct', 'token'].includes(flow)) {
             this.paymentContext.flow = flow;
         } else {

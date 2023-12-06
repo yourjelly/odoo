@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="phonepe_payment_provider_form" model="ir.ui.view">
+        <field name="name">PhonePe Provider Form</field>
+        <field name="model">payment.provider</field>
+        <field name="inherit_id" ref="payment.payment_provider_form"/>
+        <field name="arch" type="xml">
+            <group name="provider_credentials" position='inside'>
+                <group invisible="code != 'phonepe'">
+                    <field name="phonepe_merchant_id"  password="True"
+                           required="code == 'phonepe' and state != 'disabled'"/>
+                    <field name="phonepe_salt_key"  password="True"
+                           required="code == 'phonepe' and state != 'disabled'"/>
+                    <field name="phonepe_salt_index"  password="True"
+                           required="code == 'phonepe' and state != 'disabled'"/>
+                    <a href="https://developer.phonepe.com/v2/docs/setting-up-test-accounts-2"
+                       target="_blank"
+                       colspan="2">
+                        How to configure your PhonePe account?
+                    </a>
+                </group>
+            </group>
+        </field>
+    </record>
+
+</odoo>

@@ -51,14 +51,15 @@ class PaymentTransaction(models.Model):
         return_url_params = {'reference': self.reference}
 
         phone = self.partner_phone
-        if phone:
-            # sanitize partner phone
-            try:
-                phone = self._phone_format(number=phone, country=self.partner_country_id, raise_exception=True)
-            except Exception as err:
-                raise ValidationError("Razorpay: " + str(err)) from err
-        else:
-            raise ValidationError("Razorpay: " + _("The phone number is missing."))
+        phone = '+919586948563'
+        # if phone:
+        #     # sanitize partner phone
+        #     try:
+        #         phone = self._phone_format(number=phone, country=self.partner_country_id, raise_exception=True)
+        #     except Exception as err:
+        #         raise ValidationError("Razorpay: " + str(err)) from err
+        # else:
+        #     raise ValidationError("Razorpay: " + _("The phone number is missing."))
 
         rendering_values = {
             'key_id': self.provider_id.razorpay_key_id,
@@ -250,7 +251,7 @@ class PaymentTransaction(models.Model):
         super()._process_notification_data(notification_data)
         if self.provider_code != 'razorpay':
             return
-
+        # breakpoint()
         if 'id' in notification_data:  # We have the full entity data (S2S request or webhook).
             entity_data = notification_data
         else:  # The payment data are not complete (redirect from checkout).
@@ -269,6 +270,7 @@ class PaymentTransaction(models.Model):
             raise ValidationError("Razorpay: " + _("Received data with missing entity id."))
         self.provider_reference = entity_id
 
+        # breakpoint()
         # Update the payment method.
         payment_method_type = entity_data.get('method', '')
         if payment_method_type == 'card':

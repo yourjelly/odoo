@@ -72,6 +72,7 @@ class PaymentProvider(models.Model):
         :rtype: dict
         :raise ValidationError: If an HTTP error occurs.
         """
+        print("====endpoint====",endpoint)
         self.ensure_one()
 
         url = url_join('https://api.razorpay.com/v1/', endpoint)
