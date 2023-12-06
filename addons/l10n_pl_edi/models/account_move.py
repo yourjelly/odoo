@@ -1,14 +1,20 @@
 # -*- coding:utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import base64
+import hashlib
+import json
 import logging
 import pytz
+import requests
 
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import padding
 from datetime import datetime
 from lxml import etree
 
 from odoo import api, fields, models, _
-from odoo.tools import cleanup_xml_node, float_is_zero, float_repr
+from odoo.tools import cleanup_xml_node, file_open, float_is_zero, float_repr
 
 DEFAULT_PL_EINVOICE_DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
 
@@ -102,3 +108,77 @@ class AccountMove(models.Model):
     def _l10n_pl_edi_ksef_get_filename(self):
         self.ensure_one()
         return f'{self.name.replace("/", "_")}_ksef.xml'
+
+    def _l10n_pl_edi_send(self, attachment_vals):
+        comp_vals = {}
+        for company in self.mapped('company_id'):
+            res = json.loads(requests.post('https://ksef-test.mf.gov.pl/api/online/Session/AuthorisationChallenge', json={
+                "contextIdentifier": {
+                    "type": "onip",
+                    "identifier": company.vat[2:]
+                }
+            }).text)
+            utc_time = datetime.strptime(res.get('timestamp'), "%Y-%m-%dT%H:%M:%S.%fZ")
+            epoch_time = (utc_time - datetime(1970, 1, 1)).total_seconds()
+
+            token_example = company.l10n_pl_edi_ksef_token
+
+            with file_open("l10n_pl_edi/data/publicKey.pem", "rb") as key_file:
+                public_key = serialization.load_pem_public_key(
+                    key_file.read(),
+                )
+
+            message_to_encrypt = token_example + '|' + str(int(epoch_time*1000))
+            encrypted_text = public_key.encrypt(bytes(message_to_encrypt, 'utf-8'), padding.PKCS1v15())
+            string = base64.b64encode(encrypted_text).decode()
+
+            template_values = {
+                'challenge': res.get('challenge'),
+                'nip': company.vat[2:],
+                'token': string
+            }
+            string_xml = self.env['ir.qweb']._render('l10n_pl_edi.init_session_token_request_template', template_values)
+            string_xml = str(string_xml)
+
+            res = json.loads(requests.post('https://ksef-test.mf.gov.pl/api/online/Session/InitToken', data=string_xml).text)
+            comp_vals[company] = res.get('sessionToken').get('token')
+
+        to_send = {}
+
+        for move in self:
+            attachment = attachment_vals[move]
+
+
+
+            sha256_digest = hashlib.sha256(attachment['raw']).digest()
+            sha_base64 = base64.b64encode(sha256_digest).decode()
+            input_len = len(attachment['raw'])
+            content_base64 = base64.b64encode(attachment['raw'])
+
+            res2 = json.loads(requests.put(
+                "https://ksef-test.mf.gov.pl/api/online/Invoice/Send",
+                json={
+
+                    "invoiceHash": {
+                        "hashSHA": {
+                            "algorithm": "SHA-256",
+                            "encoding": "Base64",
+                            "value": sha_base64
+                        },
+                        "fileSize": input_len,
+                    },
+                    "invoicePayload": {
+                        "type": "plain",
+                        "invoiceBody": content_base64.decode()
+                    }
+                },
+                headers={'SessionToken': comp_vals[move.company_id]},
+            ).text)
+
+            res_invoice = requests.get(
+                f"https://ksef-test.mf.gov.pl/api/online/Invoice/Status/{res2.get('elementReferenceNumber')}",
+                headers={'SessionToken': comp_vals[move.company_id]},
+                timeout=30,
+            )
+
+            print("hey")

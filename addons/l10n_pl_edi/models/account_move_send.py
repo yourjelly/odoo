@@ -84,3 +84,17 @@ class AccountMoveSend(models.TransientModel):
         if attachment_vals:
             self.env['ir.attachment'].with_user(SUPERUSER_ID).create(attachment_vals)
             invoice.invalidate_recordset(fnames=['l10n_pl_edi_ksef_xml_id', 'l10n_pl_edi_ksef_xml_file'])
+
+    @api.model
+    def _call_web_service_after_invoice_pdf_render(self, invoices_data):
+        # Overrides 'account'
+        moves = self.env['account.move']
+        attachments_vals = {}
+        for move, move_data in invoices_data.items():
+            if move_data.get('l10n_pl_edi_ksef_xml'):
+                moves |= move
+                if attachment := move.l10n_pl_edi_ksef_xml_id:
+                    attachments_vals[move] = {'name': attachment.name, 'raw': attachment.raw}
+                else:
+                    attachments_vals[move] = invoices_data[move]['l10n_pl_edi_ksef_attachment_values']
+        moves._l10n_pl_edi_send(attachments_vals)
