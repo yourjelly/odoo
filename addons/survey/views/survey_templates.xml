@@ -116,6 +116,7 @@
                 t-att-data-triggered-questions-by-answer="json.dumps(triggered_questions_by_answer)"
                 t-att-data-triggering-answers-by-question="json.dumps(triggering_answers_by_question)"
                 t-att-data-selected-answers="json.dumps(selected_answers)"
+                t-att-data-questions-by-section="json.dumps(questions_by_section)"
                 t-att-data-refresh-background="any(page.background_image for page in survey.page_ids)">
             <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
             <input type="hidden" name="token" t-att-value="answer.access_token" />

@@ -834,6 +834,14 @@ class Survey(models.Model):
                 triggered_questions_by_answer[triggering_answer_id] |= question
 
         return triggering_answers_by_question, triggered_questions_by_answer
+    
+    def _get_questions_by_section(self):
+        questions_by_section = defaultdict(lambda: self.env['survey.question']);
+
+        for question in self.question_ids:
+            if question.page_id:
+                questions_by_section[question.page_id] |= question
+        return questions_by_section
 
     # ------------------------------------------------------------
     # SESSIONS MANAGEMENT

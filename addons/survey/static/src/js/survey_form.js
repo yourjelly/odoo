@@ -52,6 +52,8 @@ publicWidget.registry.SurveyFormWidget = publicWidget.Widget.extend(SurveyPreloa
             self.selectedAnswers = self.options.selectedAnswers;
             self.imgZoomer = false;
             self.triggeringQuestionForSection = [];
+            self.triggeringSectionsForAnswers = [];
+            self.questionsBySection = self.options.questionsBySection; 
 
             // Add Survey cookie to retrieve the survey if you quit the page and restart the survey.
             if (!cookie.get('survey_' + self.options.surveyToken)) {
@@ -1097,22 +1099,29 @@ publicWidget.registry.SurveyFormWidget = publicWidget.Widget.extend(SurveyPreloa
             const hasNoSelectedTriggers = !this.options.triggeringAnswersByQuestion[questionId]
                 .some(answerId => this.selectedAnswers.includes(parseInt(answerId)));
             const sectionId = dependingQuestion.getAttribute('section-id');
-            if(sectionId){
+            
+            if (sectionId) {
                 const dependingSection = document.querySelector(`.js_section_wrapper[id="${sectionId}"]`);
+                const isAnyQuestionIncluded = this.questionsBySection[sectionId]
+                    .some(qId => this.triggeringQuestionForSection.includes(qId));
                 const isQuestionIncluded = this.triggeringQuestionForSection.includes(questionId);
-
-                if(isQuestionIncluded){
-                    this.triggeringQuestionForSection = this.triggeringQuestionForSection.filter(qId => qId != questionId);
-                }
-                else{
+                if(this.triggeringQuestionForSection.length == 0){
+                    dependingSection.classList.remove('d-none');
                     this.triggeringQuestionForSection.push(questionId);
                 }
-                
-                const anyQuestionSelected = questionIds.some(qId =>
-                        this.triggeringQuestionForSection.includes(qId)
-                );
+                if(isQuestionIncluded){
+                    this.triggeringQuestionForSection = this.triggeringQuestionForSection.filter(qId => qId != questionId);
+                    const isAnyQuestionIncluded = this.questionsBySection[sectionId]
+                        .some(qId => this.triggeringQuestionForSection.includes(qId));
 
-                dependingSection.classList.toggle('d-none',!anyQuestionSelected);
+                    if(!isAnyQuestionIncluded){
+                    dependingSection.classList.add('d-none');
+                    }
+                }
+                else{
+                    dependingSection.classList.remove('d-none');
+                    this.triggeringQuestionForSection.push(questionId);
+                }
             }
 
             dependingQuestion.classList.toggle('d-none', hasNoSelectedTriggers);
