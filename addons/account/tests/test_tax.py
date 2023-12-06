@@ -65,8 +65,8 @@ class TestTaxCommon(AccountTestInvoicingCommon):
 
     def _check_tax_results(self, taxes, expected_values, price_unit, **kwargs):
         results = taxes.compute_all(price_unit, **kwargs)
-        import pprint
-        print(pprint.pformat(results))
+        # import pprint
+        # print(pprint.pformat(results))
         self.assertAlmostEqual(results['total_included'], expected_values['total_included'])
         self.assertAlmostEqual(results['total_excluded'], expected_values['total_excluded'])
         self.assertEqual(len(results['taxes']), len(expected_values['taxes']))
@@ -274,6 +274,7 @@ class TestTax(TestTaxCommon):
                 )
 
     def test_random_case_1(self):
+        print(self.env['account.tax']._eval_js_taxes_computation())
         tax_percent_8_price_included = self.percent_tax(8.0, price_include=True)
         tax_percent_0_price_included = self.percent_tax(0.0, price_include=True)
 
@@ -805,17 +806,6 @@ class TestTax(TestTaxCommon):
             },
             48.0,
         )
-
-    def test_safe_eval(self):
-        tax1 = self.fixed_tax(1, include_base_amount=True)
-        tax2 = self.percent_tax(21, price_include=True)
-        taxes = tax1 + tax2
-
-        import time
-        t0 = time.time()
-        for i in range(10000):
-            taxes.compute_all(120.0)
-        print(time.time() - t0)
 
     def test_fixed_taxes_for_l10n_be(self):
         tax1 = self.fixed_tax(1)
