@@ -6,16 +6,14 @@
             <base t-att-href="origin"/>
             <meta http-equiv="cache-control" content="no-cache" />
             <meta http-equiv="pragma" content="no-cache" />
-            <link rel="stylesheet" type="text/css" href="/web/static/lib/bootstrap/dist/css/bootstrap.css"/>
-            <link rel="stylesheet" type="text/css" href="/web/static/src/libs/fontawesome/css/font-awesome.css"/>
-            <link rel="stylesheet" type="text/css" href="/point_of_sale/static/src/css/customer_facing_display.css"/>
+            <link rel="stylesheet" type="text/css" t-att-href="origin + '/web/static/lib/fontawesome/css/font-awesome.css'"/>
+            <link rel="stylesheet" type="text/css" t-att-href="origin + '/point_of_sale/static/src/css/customer_facing_display.css'"/>
         </div>
     </t>
 
     <t t-name="CustomerFacingDisplayOrder" owl="1">
         <!-- Header -->
         <t t-call="CustomerFacingDisplayHead"/>
-
         <div class="pos-customer_facing_display pos-palette_01">
             <!-- Orderlines -->
             <div class="pos-customer_products" name="Products list">
