@@ -150,7 +150,7 @@ class HolidaysRequest(models.Model):
     # HR data
 
     employee_id = fields.Many2one(
-        'hr.employee', compute='_compute_from_employee_ids', store=True, string='Employee', index=True, readonly=False, ondelete="restrict",
+        'hr.employee', compute='_compute_employee_id', store=True, string='Employee', index=True, readonly=False, ondelete="restrict",
         tracking=True, compute_sudo=False,
         domain=lambda self: self._get_employee_domain())
     employee_company_id = fields.Many2one(related='employee_id.company_id', string="Employee Company", store=True)
@@ -199,7 +199,7 @@ class HolidaysRequest(models.Model):
         'hr.employee', compute='_compute_from_holiday_type', store=True, string='Employees', readonly=True, groups="hr_holidays.group_hr_holidays_responsible",
         domain=lambda self: self._get_employee_domain(), context={'active_test': False})
     multi_employee = fields.Boolean(
-        compute='_compute_from_employee_ids', store=True, compute_sudo=False,
+        compute='_compute_multi_employee', store=True, compute_sudo=False,
         help='Holds whether this allocation concerns more than 1 employee')
     category_id = fields.Many2one(
         'hr.employee.category', compute='_compute_from_holiday_type', store=True, string='Employee Tag',
@@ -413,13 +413,17 @@ class HolidaysRequest(models.Model):
                 holiday.request_unit_hours = False
 
     @api.depends('employee_ids')
-    def _compute_from_employee_ids(self):
+    def _compute_employee_id(self):
         for holiday in self:
             if len(holiday.employee_ids) == 1:
-                holiday.employee_id = holiday.employee_ids[0]._origin
+                holiday.employee_id = holiday.employee_ids._origin
             else:
                 holiday.employee_id = False
-            holiday.multi_employee = (len(holiday.employee_ids) > 1)
+
+    @api.depends('employee_ids')
+    def _compute_multi_employee(self):
+        for holiday in self:
+            holiday.multi_employee = len(holiday.employee_ids) > 1
 
     def _get_employee_domain(self):
         domain = [
