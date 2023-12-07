@@ -62,7 +62,7 @@ class HolidaysAllocation(models.Model):
         domain=_domain_holiday_status_id,
         default=_default_holiday_status_id)
     employee_id = fields.Many2one(
-        'hr.employee', compute='_compute_from_employee_ids', store=True, string='Employee', index=True, readonly=False, ondelete="restrict", tracking=True)
+        'hr.employee', compute='_compute_employee_id', store=True, string='Employee', index=True, readonly=False, ondelete="restrict", tracking=True)
     employee_company_id = fields.Many2one(related='employee_id.company_id', readonly=True, store=True)
     active_employee = fields.Boolean('Active Employee', related='employee_id.active', readonly=True)
     manager_id = fields.Many2one('hr.employee', compute='_compute_manager_id', store=True, string='Manager')
@@ -106,7 +106,7 @@ class HolidaysAllocation(models.Model):
     employee_ids = fields.Many2many(
         'hr.employee', compute='_compute_from_holiday_type', store=True, string='Employees', readonly=False)
     multi_employee = fields.Boolean(
-        compute='_compute_from_employee_ids', store=True,
+        compute='_compute_multi_employee', store=True,
         help='Holds whether this allocation concerns more than 1 employee')
     mode_company_id = fields.Many2one(
         'res.company', compute='_compute_from_holiday_type', store=True, string='Company Mode', readonly=False)
@@ -250,13 +250,17 @@ class HolidaysAllocation(models.Model):
                 allocation.can_approve = True
 
     @api.depends('employee_ids')
-    def _compute_from_employee_ids(self):
+    def _compute_employee_id(self):
         for allocation in self:
             if len(allocation.employee_ids) == 1:
-                allocation.employee_id = allocation.employee_ids[0]._origin
+                allocation.employee_id = allocation.employee_ids._origin
             else:
                 allocation.employee_id = False
-            allocation.multi_employee = (len(allocation.employee_ids) > 1)
+
+    @api.depends('employee_ids')
+    def _compute_multi_employee(self):
+        for allocation in self:
+            allocation.multi_employee = len(allocation.employee_ids) > 1
 
     @api.depends('holiday_type')
     def _compute_from_holiday_type(self):
