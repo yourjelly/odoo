@@ -108,6 +108,21 @@ QUnit.test("do not close on click away", async (assert) => {
     assert.containsNone(fixture, ".o_popover #comp");
 });
 
+QUnit.test("close on scroll", async (assert) => {
+    assert.containsOnce(fixture, ".o_popover_container");
+
+    class Comp extends Component {}
+    Comp.template = xml`<div id="comp">in popover</div>`;
+    popovers.add(popoverTarget, Comp, {});
+    await nextTick();
+    assert.containsOnce(fixture, ".o_popover");
+    assert.containsOnce(fixture, ".o_popover #comp");
+    fixture.dispatchEvent(new Event("scroll"));
+    await nextTick();
+    assert.containsNone(fixture, ".o_popover");
+    assert.containsNone(fixture, ".o_popover #comp");
+});
+
 QUnit.test("close callback", async (assert) => {
     assert.expect(3);
 

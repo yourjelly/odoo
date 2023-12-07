@@ -10,6 +10,7 @@ class PopoverController extends Component {
 
         if (this.target.isConnected) {
             useExternalListener(window, "click", this.onClickAway, { capture: true });
+            useExternalListener(window, "scroll", () => this.props.close(), { capture: true });
             const targetObserver = new MutationObserver(this.onTargetMutate.bind(this));
             targetObserver.observe(this.target.parentElement, { childList: true });
             onWillDestroy(() => {
