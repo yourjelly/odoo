@@ -85,10 +85,10 @@ class MrpWorkorder(models.Model):
         'Real Duration', compute='_compute_duration', inverse='_set_duration',
         readonly=False, store=True, copy=False)
     duration_unit = fields.Float(
-        'Duration Per Unit', compute='_compute_duration',
+        'Duration Per Unit', compute='_compute_duration_unit_percent',
         group_operator="avg", readonly=True, store=True)
     duration_percent = fields.Integer(
-        'Duration Deviation (%)', compute='_compute_duration',
+        'Duration Deviation (%)', compute='_compute_duration_unit_percent',
         group_operator="avg", readonly=True, store=True)
     progress = fields.Float('Progress Done (%)', digits=(16, 2), compute='_compute_progress')
 
@@ -299,10 +299,14 @@ class MrpWorkorder(models.Model):
         for workorder in self:
             workorder.duration_expected = workorder._get_duration_expected()
 
-    @api.depends('time_ids.duration', 'qty_produced')
+    @api.depends('time_ids.duration')
     def _compute_duration(self):
         for order in self:
             order.duration = sum(order.time_ids.mapped('duration'))
+
+    @api.depends('duration', 'qty_produced')
+    def _compute_duration_unit_percent(self):
+        for order in self:
             order.duration_unit = round(order.duration / max(order.qty_produced, 1), 2)  # rounding 2 because it is a time
             if order.duration_expected:
                 order.duration_percent = max(-2147483648, min(2147483647, 100 * (order.duration_expected - order.duration) / order.duration_expected))
