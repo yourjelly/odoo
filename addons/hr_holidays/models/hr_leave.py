@@ -222,7 +222,7 @@ class HolidaysRequest(models.Model):
     supported_attachment_ids = fields.Many2many(
         'ir.attachment', string="Attach File", compute='_compute_supported_attachment_ids',
         inverse='_inverse_supported_attachment_ids')
-    supported_attachment_ids_count = fields.Integer(compute='_compute_supported_attachment_ids')
+    supported_attachment_ids_count = fields.Integer(compute='_compute_supported_attachment_ids_count')
     # UX fields
     all_employee_ids = fields.Many2many('hr.employee', compute='_compute_all_employees', compute_sudo=True)
     leave_type_request_unit = fields.Selection(related='holiday_status_id.request_unit', readonly=True)
@@ -665,11 +665,15 @@ class HolidaysRequest(models.Model):
     def _compute_supported_attachment_ids(self):
         for holiday in self:
             holiday.supported_attachment_ids = holiday.attachment_ids
-            holiday.supported_attachment_ids_count = len(holiday.attachment_ids.ids)
 
     def _inverse_supported_attachment_ids(self):
         for holiday in self:
             holiday.attachment_ids = holiday.supported_attachment_ids
+
+    @api.depends('leave_type_support_document', 'attachment_ids')
+    def _compute_supported_attachment_ids_count(self):
+        for holiday in self:
+            holiday.supported_attachment_ids_count = len(holiday.attachment_ids)
 
     @api.constrains('date_from', 'date_to', 'employee_id')
     def _check_date(self):
