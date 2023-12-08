@@ -30,8 +30,6 @@ def add_stripped_items_before(node, spec, extract):
 
     if len(spec) > 0:
         spec[-1].tail = (spec[-1].tail or "").rstrip() + before_text
-    else:
-        spec.text = (spec.text or "").rstrip() + before_text
 
     for child in spec:
         if child.get('position') == 'move':
@@ -261,3 +259,10 @@ def apply_inheritance_specs(source, specs_tree, inherit_branding=False, pre_loca
             )
 
     return source
+
+# arch1 = """<t t-name="web.A"><div>I was petrified</div></t>"""
+# arch2 = """<xpath expr="." position="replace"><t><t t-if="cond"><div>At first I was afraid</div></t><t t-else="">$0</t></t></xpath>"""
+
+# result = apply_inheritance_specs(etree.fromstring(arch1), etree.fromstring(arch2))
+
+# print(etree.tostring(result))
