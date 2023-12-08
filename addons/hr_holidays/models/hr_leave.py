@@ -196,7 +196,7 @@ class HolidaysRequest(models.Model):
         string='Allocation Mode', readonly=False, required=True, default='employee',
         help='By Employee: Allocation/Request for individual Employee, By Employee Tag: Allocation/Request for group of employees in category')
     employee_ids = fields.Many2many(
-        'hr.employee', compute='_compute_from_holiday_type', store=True, string='Employees', readonly=True, groups="hr_holidays.group_hr_holidays_responsible",
+        'hr.employee', compute='_compute_from_holiday_type', store=True, string='Employees', readonly=False, groups="hr_holidays.group_hr_holidays_responsible",
         domain=lambda self: self._get_employee_domain(), context={'active_test': False})
     multi_employee = fields.Boolean(
         compute='_compute_multi_employee', store=True, compute_sudo=False,
