@@ -16,7 +16,7 @@ class EventRegistration(models.Model):
             ('sold', 'Sold'),
             ('free', 'Free'),
         ], compute="_compute_registration_status", compute_sudo=True, store=True)
-    state = fields.Selection(default=None, compute="_compute_registration_status", store=True, readonly=False)
+    state = fields.Selection(default=None, compute="_compute_state", store=True, readonly=False)
     utm_campaign_id = fields.Many2one(compute='_compute_utm_campaign_id', readonly=False,
         store=True, ondelete="set null")
     utm_source_id = fields.Many2one(compute='_compute_utm_source_id', readonly=False,
@@ -26,18 +26,25 @@ class EventRegistration(models.Model):
 
     @api.depends('sale_order_id.state', 'sale_order_id.currency_id', 'sale_order_line_id.price_total')
     def _compute_registration_status(self):
+        for so_line, registrations in self.grouped('sale_order_line_id').items():
+            if not so_line or float_is_zero(so_line.price_total, precision_digits=so_line.currency_id.rounding):
+                registrations.sale_status = 'free'
+            else:
+                sold_registrations = registrations.filtered(lambda reg: reg.sale_order_id.state == 'sale')
+                sold_registrations.sale_status = 'sold'
+                (registrations - sold_registrations).sale_status = 'to_pay'
+
+    @api.depends('sale_order_id.state', 'sale_order_id.currency_id', 'sale_order_line_id.price_total')
+    def _compute_state(self):
         self.filtered(lambda reg: not reg.state).state = 'draft'
         for so_line, registrations in self.grouped('sale_order_line_id').items():
             cancelled_registrations = registrations.filtered(lambda reg: reg.sale_order_id.state == 'cancel')
             cancelled_registrations.state = 'cancel'
             if not so_line or float_is_zero(so_line.price_total, precision_digits=so_line.currency_id.rounding):
-                registrations.sale_status = 'free'
-                registrations.filtered(lambda reg: reg.state == 'draft').write({"state": "open"})
+                registrations.filtered(lambda reg: reg.state == 'draft').state = 'open'
             else:
                 sold_registrations = registrations.filtered(lambda reg: reg.sale_order_id.state == 'sale')
-                sold_registrations.sale_status = 'sold'
-                (registrations - sold_registrations).sale_status = 'to_pay'
-                sold_registrations.filtered(lambda reg: reg.state in {'draft', 'cancel'}).write({"state": "open"})
+                sold_registrations.filtered(lambda reg: reg.state in {'draft', 'cancel'}).state = 'open'
                 (registrations - sold_registrations - cancelled_registrations).state = 'draft'
 
     @api.depends('sale_order_id')
