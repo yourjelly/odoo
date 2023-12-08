@@ -1686,15 +1686,18 @@ class AccountMoveLine(models.Model):
                 line._copy_data_extend_business_fields(values)
         return data_list
 
-    def _field_to_sql(self, alias: str, fname: str, query: (Query | None) = None) -> SQL:
+    def _field_to_sql(self, alias: str, fname: str, query: (Query | None) = None, flush: bool = True) -> SQL:
         if fname != 'payment_date':
             return super()._field_to_sql(alias, fname, query)
         return SQL("""
             CASE
-                 WHEN discount_date >= %(today)s THEN discount_date
-                 ELSE date_maturity
-            END
-        """, today=fields.Date.context_today(self))
+                 WHEN %(discount_date)s >= %(today)s THEN %(discount_date)s
+                 ELSE %(date_maturity)s
+            END""",
+            today=fields.Date.context_today(self),
+            discount_date=super()._field_to_sql(alias, "discount_date", query, flush),
+            date_maturity=super()._field_to_sql(alias, "date_maturity", query, flush),
+        )
 
     def _order_field_to_sql(self, alias: str, field_name: str, direction: SQL, nulls: SQL, query: Query) -> SQL:
         if field_name != 'payment_date':

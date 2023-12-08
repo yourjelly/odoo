@@ -30,8 +30,11 @@ from odoo.exceptions import MissingError, AccessError
 from odoo.osv import expression
 from odoo.tools import is_html_empty, html_escape, html2plaintext, parse_contact_from_email
 from odoo.tools.misc import clean_context, split_every
+from odoo.tools.query import Query
+from odoo.tools.sql import SQL
 
 from requests import Session
+
 from ..web_push import push_to_end_point, DeviceUnreachableError
 
 MAX_DIRECT_PUSH = 5
@@ -391,27 +394,17 @@ class MailThread(models.AbstractModel):
 
         return super().get_empty_list_help(help_message)
 
-    def _flush_search(self, domain, fields=None, order=None, seen=None):
-        """ Override _flush_search in order to relax field groups security
-        check on `message_partner_ids`. Accept portal user to filter
-        threads by themselves as followers.
-        """
+    def _leaf_to_sql(self, alias: str, leaf: tuple, query: Query) -> SQL:
         if self.env.su or self.user_has_groups('base.group_user'):
-            return super()._flush_search(domain, fields, order, seen)
-
-        domain = list(domain)
-        for i, leaf in enumerate(domain):
-            if len(leaf) != 3 or leaf[0] != 'message_partner_ids':
-                continue
-            user_partner = self.env.user.partner_id
-            allow_partner_ids = set((user_partner | user_partner.commercial_partner_id).ids)
-            operand = leaf[2] if isinstance(leaf[2], (list, tuple)) else [leaf[2]]
-            if not allow_partner_ids.issuperset(operand):
-                raise AccessError("Portal users can only filter threads by themselves as followers.")
-            # Replace the leaf with dummy leaf
-            domain[i] = expression.TRUE_LEAF
-
-        return super()._flush_search(domain, fields, order, seen)
+            return super()._leaf_to_sql(alias, leaf, query)
+        if len(leaf) != 3 or leaf[0] != 'message_partner_ids':
+            return super()._leaf_to_sql(alias, leaf, query)
+        user_partner = self.env.user.partner_id
+        allow_partner_ids = set((user_partner | user_partner.commercial_partner_id).ids)
+        operand = leaf[2] if isinstance(leaf[2], (list, tuple)) else [leaf[2]]
+        if not allow_partner_ids.issuperset(operand):
+            raise AccessError("Portal users can only filter threads by themselves as followers.")
+        return super(MailThread, self.sudo())._leaf_to_sql(alias, leaf, query)
 
     # ------------------------------------------------------
     # MODELS / CRUD HELPERS

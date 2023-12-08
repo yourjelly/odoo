@@ -1901,9 +1901,7 @@ class BaseModel(metaclass=MetaModel):
         if offset:
             query_parts.append(SQL("OFFSET %s", offset))
 
-        self._flush_search(domain, fnames_to_flush)
-        if fnames_to_flush:
-            self._read_group_check_field_access_rights(fnames_to_flush)
+        # TODO: self._read_group_check_field_access_rights(fnames_to_flush)
 
         self.env.cr.execute(SQL("\n").join(query_parts))
         # row_values: [(a1, b1, c1), (a2, b2, c2), ...]
@@ -2755,7 +2753,7 @@ class BaseModel(metaclass=MetaModel):
 
         return rows_dict
 
-    def _field_to_sql(self, alias: str, fname: str, query: (Query | None) = None) -> SQL:
+    def _field_to_sql(self, alias: str, fname: str, query: (Query | None) = None, flush: bool = True) -> SQL:
         """ Return an :class:`SQL` object that represents the value of the given
         field from the given table alias, in the context of the given query.
         The query object is necessary for inherited fields, many2one fields and
@@ -2767,6 +2765,11 @@ class BaseModel(metaclass=MetaModel):
             fname, property_name = fname.split('.', 1)
 
         field = self._fields[fname]
+
+        self.check_field_access_rights('read', [fname])
+        if field.store and flush:
+            self.flush_model([fname])
+
         if field.inherited:
             # retrieve the parent model where field is inherited from
             parent_model = self.env[field.related_field.model_name]
@@ -2810,7 +2813,7 @@ class BaseModel(metaclass=MetaModel):
             query.add_join("LEFT JOIN", rel_alias, field.relation, condition)
             return SQL.identifier(rel_alias, field.column2)
 
-        elif field.translate and not self.env.context.get('prefetch_langs'):
+        if field.translate and not self.env.context.get('prefetch_langs'):
             sql_field = SQL.identifier(alias, fname)
             langs = field.get_translation_fallback_langs(self.env)
             sql_field_langs = [SQL("%s->>%s", sql_field, lang) for lang in langs]
@@ -2818,7 +2821,7 @@ class BaseModel(metaclass=MetaModel):
                 return sql_field_langs[0]
             return SQL("COALESCE(%s)", SQL(", ").join(sql_field_langs))
 
-        elif field.type == 'properties' and property_name:
+        if field.type == 'properties' and property_name:
             return self._field_properties_to_sql(alias, fname, property_name, query)
 
         return SQL.identifier(alias, fname)
@@ -3985,18 +3988,14 @@ class BaseModel(metaclass=MetaModel):
             assert field.store
             (column_fields if field.column_type else other_fields).add(field)
 
-        # necessary to retrieve the en_US value of fields without a translation
-        translated_field_names = [field.name for field in column_fields if field.translate]
-        if translated_field_names:
-            self.flush_model(translated_field_names)
-
         context = self.env.context
 
         if column_fields:
             # the query may involve several tables: we need fully-qualified names
             sql_terms = [SQL.identifier(self._table, 'id')]
             for field in column_fields:
-                sql = self._field_to_sql(self._table, field.name, query)
+                # fluch necessary to retrieve the en_US value of fields without a translation
+                sql = self._field_to_sql(self._table, field.name, query, flush=field.translate)
                 if field.type == 'binary' and (
                         context.get('bin_size') or context.get('bin_size_' + field.name)):
                     # PG 9.2 introduces conflicting pg_size_pretty(numeric) -> need ::cast
@@ -4235,7 +4234,6 @@ class BaseModel(metaclass=MetaModel):
             return self
 
         # determine ids in database that satisfy ir.rules
-        self._flush_search([])
         query.add_where(SQL("%s IN %s", SQL.identifier(self._table, 'id'), tuple(self.ids)))
         self._cr.execute(query.select())
         valid_ids = {row[0] for row in self._cr.fetchall()}
@@ -5348,6 +5346,7 @@ class BaseModel(metaclass=MetaModel):
         Note that ``order=None`` actually means no order, so if you expect some
         fallback order, you have to provide it yourself.
         """
+        warnings.warn("Since 18.0, _flush_search are deprecated")
         if seen is None:
             seen = set()
         elif self._name in seen:
@@ -5459,9 +5458,6 @@ class BaseModel(metaclass=MetaModel):
         if expression.is_false(self, domain):
             # optimization: no need to query, as no record satisfies the domain
             return self.browse()._as_query()
-
-        # the flush must be done before the _where_calc(), as the latter can do some selects
-        self._flush_search(domain, order=order)
 
         query = self._where_calc(domain)
         self._apply_ir_rules(query, 'read')
@@ -6367,7 +6363,6 @@ class BaseModel(metaclass=MetaModel):
 
         :param fnames: optional iterable of field names to flush
         """
-        self._recompute_model(fnames)
         self._flush(fnames)
 
     def flush_recordset(self, fnames=None):
@@ -6389,9 +6384,13 @@ class BaseModel(metaclass=MetaModel):
         else:
             fields = [self._fields[fname] for fname in fnames]
 
+        tocompute = self.env.all.tocompute
         dirty_fields = self.env.cache.get_dirty_fields()
-        if not any(field in dirty_fields for field in fields):
+        if not any(field in tocompute for field in fields) and not any(field in dirty_fields for field in fields):
             return
+
+        # recompute every fields to recompute in this model
+        self._recompute_model()
 
         # if any field is context-dependent, the values to flush should
         # be found with a context where the context keys are all None
