@@ -228,7 +228,7 @@ class Lead(models.Model):
     probability = fields.Float(
         'Probability', group_operator="avg", copy=False,
         compute='_compute_probabilities', readonly=False, store=True)
-    automated_probability = fields.Float('Automated Probability', compute='_compute_probabilities', readonly=True, store=True)
+    automated_probability = fields.Float('Automated Probability', compute='_compute_probabilities', readonly=False, store=True)
     is_automated_probability = fields.Boolean('Is automated probability?', compute="_compute_is_automated_probability")
     # Won/Lost
     lost_reason_id = fields.Many2one(
