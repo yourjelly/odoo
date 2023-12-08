@@ -3040,8 +3040,8 @@ class BaseModel(metaclass=MetaModel):
         if operator.endswith('like'):
             sql_left = SQL("%s::text", sql_field)
         if operator.endswith('ilike'):
-            sql_left = self.env.registry.unaccent_wrapper(sql_left)
-            sql_right = self.env.registry.unaccent_wrapper(sql_right)
+            sql_left = self.env.registry.unaccent(sql_left)
+            sql_right = self.env.registry.unaccent(sql_right)
 
         sql = SQL("(%s %s %s)", sql_left, sql_operator, sql_right)
 
