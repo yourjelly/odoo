@@ -614,7 +614,7 @@ actual arch.
         # 2/ sort by view id: the order the views were inserted in the
         #    database. e.g. base views are placed before stock ones.
 
-        self.env.cr.execute(query, [tuple(self.ids)] + where_params + where_params)
+        self.env.cr.execute(query)
         rows = self.env.cr.fetchall()
 
         views = self.browse(row[0] for row in rows)
