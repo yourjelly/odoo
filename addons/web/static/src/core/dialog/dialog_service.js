@@ -43,7 +43,6 @@ export const dialogService = {
         };
 
         const add = (dialogClass, props, options = {}) => {
-            debugger;
             const id = nextId++;
             const close = () => remove();
             const subEnv = reactive({
@@ -51,11 +50,11 @@ export const dialogService = {
                 close,
                 isActive: true,
             });
-
+            
             deactivate();
             stack.push(subEnv);
             document.body.classList.add("modal-open");
-
+            
             if (env.isSmall) {
                 const scrollOrigin = { top: window.scrollY, left: window.scrollX };
                 subEnv.scrollToOrigin = () => {
@@ -64,7 +63,7 @@ export const dialogService = {
                     }
                 };
             }
-
+            
             const remove = overlay.add(
                 DialogWrapper,
                 {
@@ -84,9 +83,10 @@ export const dialogService = {
                         options.onClose?.();
                     },
                 }
-            );
-
-            return remove;
+                );
+                
+                debugger;
+                return remove;
         };
 
         return { add };

@@ -39,27 +39,27 @@ QUnit.only("scan barcode fail or success", async function (assert) {
             },
         }
     });
-    // const facingMode = 'environment'
-    // patchWithCleanup(env.services.dialog, {
-    //     add(component) {
-    //         if (component === BarcodeDialog) {
-    //             debugger
-    //             facingMode
-    //             onResult: (result) => res(result)
-    //             onError: (error) => rej(error)
-    //         }
-    //     },
-    // });
+    const facingMode = 'environment'
+    patchWithCleanup(env.services.dialog, {
+        add(component) {
+            if (component === BarcodeDialog) {
+                debugger
+                facingMode
+                onResult: (result) => res(result)
+                onError: (error) => rej(error)
+            }
+        },
+    });
 
 class BarcodeScan extends Component {
     setup(){
         super.setup()
 
-        // onMounted(() => {
+    
+    }
+    onBarcodeScanned(ev){    // onMounted(() => {
         //     debugger;
         // })
-    }
-    onBarcodeScanned(ev){
     }
 }
 
