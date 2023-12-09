@@ -35,9 +35,9 @@ class ReturnPicking(models.TransientModel):
 
     picking_id = fields.Many2one('stock.picking')
     product_return_moves = fields.One2many('stock.return.picking.line', 'wizard_id', 'Moves', compute='_compute_moves_locations', readonly=False, store=True)
-    move_dest_exists = fields.Boolean('Chained Move Exists', compute='_compute_moves_locations', store=True)
-    original_location_id = fields.Many2one('stock.location', compute='_compute_moves_locations', store=True)
-    parent_location_id = fields.Many2one('stock.location', compute='_compute_moves_locations', store=True)
+    move_dest_exists = fields.Boolean('Chained Move Exists', compute='_compute_locations', store=True)
+    original_location_id = fields.Many2one('stock.location', compute='_compute_locations', store=True)
+    parent_location_id = fields.Many2one('stock.location', compute='_compute_locations', store=True)
     company_id = fields.Many2one(related='picking_id.company_id')
     location_id = fields.Many2one(
         'stock.location', 'Return Location', compute='_compute_moves_locations', readonly=False, store=True,
@@ -46,7 +46,6 @@ class ReturnPicking(models.TransientModel):
     @api.depends('picking_id')
     def _compute_moves_locations(self):
         for wizard in self:
-            move_dest_exists = False
             product_return_moves = [(5,)]
             if wizard.picking_id and wizard.picking_id.state != 'done':
                 raise UserError(_("You may only return Done pickings."))
@@ -55,12 +54,8 @@ class ReturnPicking(models.TransientModel):
             line_fields = [f for f in self.env['stock.return.picking.line']._fields.keys()]
             product_return_moves_data_tmpl = self.env['stock.return.picking.line'].default_get(line_fields)
             for move in wizard.picking_id.move_ids:
-                if move.state == 'cancel':
+                if move.state == 'cancel' or move.scrapped:
                     continue
-                if move.scrapped:
-                    continue
-                if move.move_dest_ids:
-                    move_dest_exists = True
                 product_return_moves_data = dict(product_return_moves_data_tmpl)
                 product_return_moves_data.update(wizard._prepare_stock_return_picking_line_vals_from_move(move))
                 product_return_moves.append((0, 0, product_return_moves_data))
@@ -68,13 +63,20 @@ class ReturnPicking(models.TransientModel):
                 raise UserError(_("No products to return (only lines in Done state and not fully returned yet can be returned)."))
             if wizard.picking_id:
                 wizard.product_return_moves = product_return_moves
-                wizard.move_dest_exists = move_dest_exists
-                wizard.parent_location_id = wizard.picking_id.picking_type_id.warehouse_id and wizard.picking_id.picking_type_id.warehouse_id.view_location_id.id or wizard.picking_id.location_id.location_id.id
-                wizard.original_location_id = wizard.picking_id.location_id.id
                 location_id = wizard.picking_id.location_id.id
                 if wizard.picking_id.picking_type_id.return_picking_type_id.default_location_dest_id.return_location:
                     location_id = wizard.picking_id.picking_type_id.return_picking_type_id.default_location_dest_id.id
                 wizard.location_id = wizard.picking_id.picking_type_id.default_location_return_id.id or location_id
+
+    @api.depends('picking_id')
+    def _compute_locations(self):
+        for wizard in self:
+            wizard.move_dest_exists = any(
+                move.state != 'cancel' and not move.scrapped and move.move_dest_ids
+                for move in wizard.picking_id.move_ids
+            )
+            wizard.original_location_id = wizard.picking_id.location_id.id
+            wizard.parent_location_id = wizard.picking_id.picking_type_id.warehouse_id and wizard.picking_id.picking_type_id.warehouse_id.view_location_id.id or wizard.picking_id.location_id.location_id.id
 
     @api.model
     def _prepare_stock_return_picking_line_vals_from_move(self, stock_move):
