@@ -901,10 +901,12 @@ Please change the quantity done or the rounding precision of your unit of measur
             loc_dest = self.env['stock.location'].browse(default_vals['location_dest_id'])
             product = self.env['product.product'].browse(default_vals['product_id'])
             loc_dest = loc_dest._get_putaway_strategy(product, lot['quantity'])
+            location_id = self.env['stock.location'].browse(default_vals['location_id'])
             vals_list.append({**default_vals,
                              **lot,
                              'location_dest_id': loc_dest.id,
                              'product_uom_id': product.uom_id.id,
+                             'location_id': location_id.id
                             })
         # format many2one values for webclient, id + display_name
         for values in vals_list:
