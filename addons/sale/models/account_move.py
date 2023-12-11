@@ -59,17 +59,22 @@ class AccountMove(models.Model):
         return super()._reverse_moves(default_values_list=default_values_list, cancel=cancel)
 
     def action_post(self):
-        #inherit of the function from account.move to validate a new tax and the priceunit of a downpayment
+        # inherit of the function from account.move to validate a new tax and the priceunit of a downpayment
         res = super(AccountMove, self).action_post()
-        down_payment_lines = self.line_ids.filtered('is_downpayment')
-        for line in down_payment_lines:
+        invoice_down_payment_lines = self.line_ids.filtered('is_downpayment')
+        invoice_down_payment_lines.filtered(lambda line: not line.sale_line_ids.display_type).sale_line_ids._compute_name()
 
-            if not line.sale_line_ids.display_type:
-                line.sale_line_ids._compute_name()
-
+        downpayment_lines = self.line_ids.sale_line_ids.filtered('is_downpayment')
+        other_so_lines = downpayment_lines.order_id.order_line - downpayment_lines
+        real_invoices = other_so_lines.invoice_lines.move_id
+        for dpl in downpayment_lines:
             try:
-                line.sale_line_ids.tax_id = line.tax_ids
-                line.sale_line_ids.price_unit = line.price_unit
+                dpl.price_unit = sum(
+                    l.price_unit if l.move_id.move_type == 'out_invoice' else -l.price_unit
+                    for l in dpl.invoice_lines
+                    if l.move_id.state == 'posted' and l.move_id not in real_invoices  # don't recompute with the final invoice
+                )
+                dpl.tax_id = dpl.invoice_lines.tax_ids
             except UserError:
                 # a UserError here means the SO was locked, which prevents changing the taxes
                 # just ignore the error - this is a nice to have feature and should not be blocking
