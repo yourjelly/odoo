@@ -108,7 +108,6 @@ class LivechatController(http.Controller):
                 chatbot_script = matching_rule.chatbot_script_id
                 rule.update({'chatbot': chatbot_script._format_for_frontend()})
         return {
-            'odoo_version': release.version,
             'available_for_me': (rule and rule.get('chatbot'))
                                 or operator_available and (not rule or rule['action'] != 'hide_button'),
             'rule': rule,
@@ -154,10 +153,15 @@ class LivechatController(http.Controller):
         if not persisted:
             operator_partner = request.env['res.partner'].sudo().browse(channel_vals['livechat_operator_id'])
             return {
+                'id': -1, # only one temporary thread at a time, id does not matter.
+                'is_minimized': True,
+                'isLoaded': True,
+                'model': 'discuss.channel',
                 'name': channel_vals['name'],
                 'chatbot_current_step_id': channel_vals['chatbot_current_step_id'],
                 'state': 'open',
                 'operator': operator_partner.mail_partner_format(fields={'id': True, 'user_livechat_username': True, 'write_date': True})[operator_partner],
+                'channel_type': 'livechat',
                 'chatbot_script_id': chatbot_script.id if chatbot_script else None
             }
         channel = request.env['discuss.channel'].with_context(mail_create_nosubscribe=False).sudo().create(channel_vals)
@@ -170,6 +174,7 @@ class LivechatController(http.Controller):
                 post_joined_message=False
             )
         channel = channel.with_context(guest=guest)  # a new guest was possibly created
+        channel.channel_member_ids.filtered(lambda m: m.guest_id).is_minimized = True
         if not chatbot_script or chatbot_script.operator_partner_id != channel.livechat_operator_id:
             channel._broadcast([channel.livechat_operator_id.id])
         channel_info = channel._channel_info()[0]

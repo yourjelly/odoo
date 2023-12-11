@@ -41,6 +41,7 @@ export class ChatBotService {
      * @param {{
      * "im_livechat.livechat": import("@im_livechat/embed/common/livechat_service").LivechatService,
      * "mail.message": import("@mail/core/common/message_service").MessageService,
+     * "mail.messaging": import("@mail/core/common/messaging_service").Messaging,
      * "mail.store": import("@mail/core/common/store_service").Store,
      * }} services
      */
@@ -50,31 +51,38 @@ export class ChatBotService {
         this.livechatService = services["im_livechat.livechat"];
         this.messageService = services["mail.message"];
         this.store = services["mail.store"];
-
         this.debouncedProcessUserAnswer = debounce(
             this._processUserAnswer.bind(this),
             MULTILINE_STEP_DEBOUNCE_DELAY
         );
-        if (this.livechatService.options.isTestChatbot) {
-            this.livechatService.rule.chatbot = {
-                ...this.livechatService.options.testChatbotData,
-                welcomeStepIndex: this.livechatService.options.testChatbotData.welcomeSteps.length,
-            };
-            this.currentStep = new ChatbotStep(
-                this.livechatService.options.testChatbotData.welcomeSteps.at(-1)
-            );
-            this.livechatService.updateSession(this.livechatService.options.testChatbotChannelData);
-        }
-        this.livechatService.initializedDeferred.then(() => {
-            this.chatbot = this.livechatService.rule?.chatbot
-                ? new Chatbot(this.livechatService.rule.chatbot)
-                : undefined;
-            this.shouldRestore = Boolean(
-                localStorage.getItem(
-                    `im_livechat.chatbot.state.uuid_${this.livechatService.sessionCookie?.uuid}`
-                )
-            );
+        services["mail.messaging"].isReady.then(async () => {
+            this.shouldRestore =
+                this.livechatService.options?.isTestChatbot ||
+                Boolean(
+                    localStorage.getItem(
+                        `im_livechat.chatbot.state.uuid_${this.livechatService.thread?.uuid}`
+                    )
+                );
+            if (this.shouldRestore) {
+                this.restore();
+            }
+            if (this.livechatService.thread?.isChatbotThread) {
+                await this.livechatService.thread.isLoadedDeferred;
+                this.start();
+            }
         });
+
+        this.livechatService.onStateChange(SESSION_STATE.CREATED, () => {
+            if (this.livechatService.thread.isChatbotThread) {
+                this.start();
+            }
+        });
+        this.livechatService.onStateChange(SESSION_STATE.PERSISTED, async () => {
+            if (this.livechatService.thread.isChatbotThread) {
+                await this.postWelcomeSteps();
+            }
+        });
+        this.livechatService.onStateChange(SESSION_STATE.NONE, () => this.stop());
         this.bus.addEventListener("MESSAGE_POST", ({ detail: message }) => {
             if (this.currentStep?.type === "free_input_multi") {
                 this.debouncedProcessUserAnswer(message);
@@ -88,6 +96,7 @@ export class ChatBotService {
      * Start the chatbot script.
      */
     async start() {
+        this.chatbot = this.chatbot ?? new Chatbot(this.livechatService.rule.chatbot);
         if (this.livechatService.options.isTestChatbot && !this.hasPostedWelcomeSteps) {
             await this.postWelcomeSteps();
             this.save();
@@ -281,13 +290,6 @@ export class ChatBotService {
         }
     }
 
-    /**
-     * @param {import("models").Thread} thread
-     */
-    isChatbotThread(thread) {
-        return thread?.operator.id === this.chatbot?.partnerId;
-    }
-
     // =============================================================================
     // STATE MANAGEMENT
     // =============================================================================
@@ -297,20 +299,22 @@ export class ChatBotService {
      * clear outdated storage.
      */
     async restore() {
-        const chatbotStorageKey = `im_livechat.chatbot.state.uuid_${this.livechatService.sessionCookie?.uuid}`;
+        const chatbotStorageKey = `im_livechat.chatbot.state.uuid_${this.livechatService.thread?.uuid}`;
         const { _chatbotCurrentStep, _chatbot } = JSON.parse(
             browser.localStorage.getItem(chatbotStorageKey) ?? "{}"
         );
-        this.currentStep = _chatbotCurrentStep ? new ChatbotStep(_chatbotCurrentStep) : undefined;
-        this.chatbot = _chatbot ? new Chatbot(_chatbot) : undefined;
+        this.currentStep = new ChatbotStep(
+            _chatbotCurrentStep ?? this.livechatService.rule.chatbot.welcomeSteps.at(-1)
+        );
+        this.chatbot = new Chatbot(_chatbot ?? this.livechatService.rule.chatbot);
     }
 
     /**
      * Clear outdated storage.
      */
     async clear() {
-        const chatbotStorageKey = this.livechatService.sessionCookie
-            ? `im_livechat.chatbot.state.uuid_${this.livechatService.sessionCookie.uuid}`
+        const chatbotStorageKey = this.livechatService.thread
+            ? `im_livechat.chatbot.state.uuid_${this.livechatService.thread.uuid}`
             : "";
         for (let i = 0; i < browser.localStorage.length; i++) {
             const key = browser.localStorage.key(i);
@@ -351,7 +355,7 @@ export class ChatBotService {
     }
 
     get active() {
-        return this.available && this.isChatbotThread(this.livechatService.thread);
+        return this.available && this.livechatService.thread?.isChatbotThread;
     }
 
     get available() {
@@ -374,6 +378,7 @@ export class ChatBotService {
             return true;
         }
         return (
+            this.livechatService.thread?.isLoaded &&
             !this.isTyping &&
             this.currentStep?.expectAnswer &&
             this.currentStep?.answers.length === 0
@@ -397,7 +402,7 @@ export class ChatBotService {
 }
 
 export const chatBotService = {
-    dependencies: ["im_livechat.livechat", "mail.message", "mail.store"],
+    dependencies: ["im_livechat.livechat", "mail.message", "mail.messaging", "mail.store"],
     start(env, services) {
         return new ChatBotService(env, services);
     },

@@ -2,6 +2,8 @@
 
 import { cleanTerm } from "@mail/utils/common/format";
 
+import { EventBus } from "@odoo/owl";
+
 import { _t } from "@web/core/l10n/translation";
 import { rpc } from "@web/core/network/rpc";
 import { registry } from "@web/core/registry";
@@ -20,6 +22,7 @@ export class Messaging {
         this.env = env;
         this.store = services["mail.store"];
         this.orm = services.orm;
+        this.bus = new EventBus();
         this.router = services.router;
         this.isReady = new Deferred();
         const user = services.user;
@@ -43,11 +46,15 @@ export class Messaging {
         };
     }
 
+    get initMessagingParams() {
+        return {};
+    }
+
     /**
      * Import data received from init_messaging
      */
     async initialize() {
-        await rpc("/mail/init_messaging", {}, { silent: true }).then(
+        await rpc("/mail/init_messaging", this.initMessagingParams, { silent: true }).then(
             this.initMessagingCallback.bind(this)
         );
     }
@@ -55,9 +62,10 @@ export class Messaging {
     initMessagingCallback(data) {
         this.store.update(data);
         this.store.discuss.isActive =
-            data.menu_id === this.router.current.hash?.menu_id ||
+            (data.menu_id && data.menu_id === this.router.current.hash?.menu_id) ||
             this.router.hash?.action === "mail.action_discuss";
         this.isReady.resolve(data);
+        this.bus.trigger("messaging_initialized", data);
         this.store.isMessagingReady = true;
     }
 

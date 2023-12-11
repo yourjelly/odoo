@@ -96,12 +96,16 @@ patch(MockServer.prototype, {
                 ["id", "=", channelVals.livechat_operator_id],
             ]);
             return {
+                id: -1,
+                is_minimized: true,
+                model: "discuss.channel",
                 name: channelVals["name"],
                 chatbot_current_step_id: channelVals.chatbot_current_step_id,
                 state: "open",
                 operator: this._mockResPartnerMailPartnerFormat([operatorPartner.id]).get(
                     operatorPartner.id
                 ),
+                channel_type: "livechat",
             };
         }
         const channelId = this.pyEnv["discuss.channel"].create(channelVals);
@@ -109,6 +113,11 @@ patch(MockServer.prototype, {
             channelId,
             this._mock__getGuestName()
         );
+        const [guestMemberId] = this.pyEnv["discuss.channel.member"].search([
+            ["channel_id", "=", channelId],
+            ["guest_id", "!=", false],
+        ]);
+        this.pyEnv["discuss.channel.member"].write([guestMemberId], { is_minimized: true });
         return this._mockDiscussChannelChannelInfo([channelId])[0];
     },
     _mock__getGuestName() {

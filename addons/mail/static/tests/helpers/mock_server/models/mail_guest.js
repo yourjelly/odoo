@@ -10,8 +10,13 @@ patch(MockServer.prototype, {
     },
     _mockMailGuest__initMessaging() {
         const guest = this._mockMailGuest__getGuestFromContext();
+        const channelIds = this.pyEnv["discuss.channel.member"]
+            .searchRead([["guest_id", "=", guest.id]])
+            .map((member) =>
+                Array.isArray(member.channel_id) ? member.channel_id[0] : member.channel_id
+            );
         return {
-            Thread: this._mockDiscussChannelChannelInfo(guest.channel_ids),
+            Thread: this._mockDiscussChannelChannelInfo(channelIds),
             self: { id: guest.id, name: guest.name, type: "guest" },
             current_user_id: false,
             settings: {},

@@ -241,3 +241,11 @@ class DiscussChannel(models.Model):
 
     def _types_allowing_seen_infos(self):
         return super()._types_allowing_seen_infos() + ["livechat"]
+
+    def _filter_for_init_messaging(self):
+        channels = super()._filter_for_init_messaging()
+        if self.env.context.get("is_for_livechat"):
+            # Only returns the latest live chat, every other channel is
+            # irrelevant in the live chat context.
+            return channels.filtered(lambda c: c.channel_type == 'livechat' and c.livechat_active)[-1:]
+        return channels
