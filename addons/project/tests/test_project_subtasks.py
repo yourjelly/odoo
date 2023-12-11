@@ -354,3 +354,24 @@ class TestProjectSubtasks(TestProjectCommon):
             self.assertEqual(parent_id, task.id, "The key should be the common ancestor")
             self.assertEqual(set(subtask_ids), set(all_subtasks.ids),
                              "All subtasks linked to the common ancestor should be returned by _get_subtask_ids_per_task_id method")
+
+    def test_action_convert_to_subtask(self):
+        project = self.env['project.project'].create({
+            'name': 'Project',
+        })
+        with Form(self.env['project.task']) as task_form:
+            task_form.name = 'Test Task A'
+            task_form.project_id = project
+        task_A = task_form.save()
+
+        with Form(self.env['project.task']) as task_form:
+            task_form.name = 'Test Task B'
+            task_form.project_id = project
+        task_B = task_form.save()
+
+        subtask = Form(task_B, view="project.project_task_convert_to_subtask_view_form")
+        subtask.parent_id = task_A
+        subtask.save()
+
+        self.assertTrue(task_A in task_B.parent_id, "Subtask must have parent task.")
+        self.assertTrue(task_B in task_A.child_ids, "Parent task must have child tasks.")
