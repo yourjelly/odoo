@@ -112,50 +112,46 @@ class AccountMove(models.Model):
     def _l10n_pl_edi_send(self, attachment_vals):
         comp_vals = {}
         for company in self.mapped('company_id'):
-            res = json.loads(requests.post('https://ksef-test.mf.gov.pl/api/online/Session/AuthorisationChallenge', json={
+            _vat_country, vat_number = company.partner_id._split_vat(company.vat)
+            challenge_request = json.loads(requests.post('https://ksef-test.mf.gov.pl/api/online/Session/AuthorisationChallenge', json={
                 "contextIdentifier": {
                     "type": "onip",
-                    "identifier": company.vat[2:]
+                    "identifier": vat_number,
                 }
             }).text)
-            utc_time = datetime.strptime(res.get('timestamp'), "%Y-%m-%dT%H:%M:%S.%fZ")
+            utc_time = datetime.strptime(challenge_request.get('timestamp'), "%Y-%m-%dT%H:%M:%S.%fZ")
             epoch_time = (utc_time - datetime(1970, 1, 1)).total_seconds()
 
-            token_example = company.l10n_pl_edi_ksef_token
+            token = company.l10n_pl_edi_ksef_token
 
             with file_open("l10n_pl_edi/data/publicKey.pem", "rb") as key_file:
                 public_key = serialization.load_pem_public_key(
                     key_file.read(),
                 )
 
-            message_to_encrypt = token_example + '|' + str(int(epoch_time*1000))
+            message_to_encrypt = token + '|' + str(int(epoch_time*1000))
             encrypted_text = public_key.encrypt(bytes(message_to_encrypt, 'utf-8'), padding.PKCS1v15())
             string = base64.b64encode(encrypted_text).decode()
 
             template_values = {
-                'challenge': res.get('challenge'),
-                'nip': company.vat[2:],
-                'token': string
+                'challenge': challenge_request.get('challenge'),
+                'nip': vat_number,
+                'token': string,
             }
             string_xml = self.env['ir.qweb']._render('l10n_pl_edi.init_session_token_request_template', template_values)
             string_xml = str(string_xml)
 
-            res = json.loads(requests.post('https://ksef-test.mf.gov.pl/api/online/Session/InitToken', data=string_xml).text)
-            comp_vals[company] = res.get('sessionToken').get('token')
-
-        to_send = {}
+            session_token_request = json.loads(requests.post('https://ksef-test.mf.gov.pl/api/online/Session/InitToken', data=string_xml).text)
+            comp_vals[company] = session_token_request.get('sessionToken').get('token')
 
         for move in self:
             attachment = attachment_vals[move]
-
-
-
             sha256_digest = hashlib.sha256(attachment['raw']).digest()
             sha_base64 = base64.b64encode(sha256_digest).decode()
             input_len = len(attachment['raw'])
             content_base64 = base64.b64encode(attachment['raw'])
 
-            res2 = json.loads(requests.put(
+            send_request = json.loads(requests.put(
                 "https://ksef-test.mf.gov.pl/api/online/Invoice/Send",
                 json={
 
@@ -176,7 +172,7 @@ class AccountMove(models.Model):
             ).text)
 
             res_invoice = requests.get(
-                f"https://ksef-test.mf.gov.pl/api/online/Invoice/Status/{res2.get('elementReferenceNumber')}",
+                f"https://ksef-test.mf.gov.pl/api/online/Invoice/Status/{send_request.get('elementReferenceNumber')}",
                 headers={'SessionToken': comp_vals[move.company_id]},
                 timeout=30,
             )
