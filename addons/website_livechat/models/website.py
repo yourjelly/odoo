@@ -38,6 +38,7 @@ class Website(models.Model):
         """
         visitor = self.env['website.visitor']._get_visitor_from_request()
         if visitor:
+            print(visitor)
             # get active chat_request linked to visitor
             chat_request_channel = self.env['discuss.channel'].sudo().search([
                 ('livechat_visitor_id', '=', visitor.id),
@@ -45,6 +46,7 @@ class Website(models.Model):
                 ('livechat_active', '=', True),
                 ('has_message', '=', True)
             ], order='create_date desc', limit=1)
+            print(chat_request_channel.livechat_active)
             if chat_request_channel:
                 if not visitor.partner_id:
                     current_guest = self.env['mail.guest']._get_guest_from_context()
