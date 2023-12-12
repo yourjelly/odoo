@@ -797,6 +797,13 @@ class MrpProduction(models.Model):
 
     def write(self, vals):
         if 'move_byproduct_ids' in vals and 'move_finished_ids' not in vals:
+            for byproduct in vals['move_byproduct_ids']:
+                    command, _id, field_values = byproduct
+                    if command == Command.UPDATE and field_values.get('product_id', False):
+                        move = self.move_byproduct_ids.filtered(lambda b: b.id == _id and b.state not in ['draft', 'done', 'cancel'])
+                        move.write({'state': 'draft', 'product_id': field_values.get('product_id')})
+                        move.move_line_ids.unlink()
+                        move._action_confirm()
             vals['move_finished_ids'] = vals.get('move_finished_ids', []) + vals['move_byproduct_ids']
             del vals['move_byproduct_ids']
         if 'bom_id' in vals and 'move_byproduct_ids' in vals and 'move_finished_ids' in vals:

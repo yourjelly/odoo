@@ -291,14 +291,6 @@ class StockMove(models.Model):
         return super().create(vals_list)
 
     def write(self, vals):
-        if 'product_id' in vals and self.product_id.id != vals.get('product_id'):
-            moves_data = self.copy_data()
-            for move_data in moves_data:
-                move_data.update({'product_id': vals.get('product_id')})
-            move = self.env['stock.move'].create(moves_data)
-            self.unlink()
-            move._action_confirm()
-            self = move
         if self.env.context.get('force_manual_consumption'):
             vals['manual_consumption'] = True
         if 'product_uom_qty' in vals and 'move_line_ids' in vals:
