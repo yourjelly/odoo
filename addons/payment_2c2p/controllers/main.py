@@ -48,7 +48,7 @@ class XenditController(http.Controller):
         if partner_sudo.email:
             payload['uiParams']['userInfo']['email'] = partner_sudo.email
         if payment_method_code:
-            payment_method_code = PAYMENT_METHODS_MAPPING.get(payment_method_code, payment_method_code)
+            payload['paymentChannel'] = [PAYMENT_METHODS_MAPPING.get(payment_method_code, payment_method_code)]
 
         checkout_url = provider_sudo._2c2p_make_request('paymentToken', payload=payload).get('webPaymentUrl')
         if not checkout_url:

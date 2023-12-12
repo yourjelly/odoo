@@ -42,8 +42,8 @@ API_URLS = {
     },
 }
 
+# See: https://developer.2c2p.com/docs/response-code-payment
 STATUS_MAPPING = {
-    'draft': (),
     'pending': ('1003', '0001', '2001'),
     'done': ('2000', '0000'),
     'cancel': ('0003', '4081'),
