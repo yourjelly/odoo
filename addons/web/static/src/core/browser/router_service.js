@@ -126,6 +126,7 @@ function makeRouter(env) {
         bus.trigger("ROUTE_CHANGE");
     });
 
+    let shouldReplace = false;
     /**
      * @param {string} mode
      * @returns {(hash: string, options: any) => any}
@@ -149,11 +150,12 @@ function makeRouter(env) {
             }
             // If the route changed: pushes or replaces browser state
             const url = browser.location.origin + routeToUrl(newRoute);
-            if (mode === "push") {
-                browser.history.pushState({}, "", url);
-            } else {
+            if (mode === "replace" || shouldReplace) {
                 browser.history.replaceState({}, "", url);
+            } else {
+                browser.history.pushState({}, "", url);
             }
+            shouldReplace = allPushArgs.some(([, options]) => options && options.shouldBeReplace);
             current = getRoute(browser.location);
         }
         return function pushOrReplaceState(hash, options) {
