@@ -33,6 +33,19 @@ class AccountMove(models.Model):
         string="Ksef File",
         copy=False,
     )
+    l10n_pl_edi_ksef_reference_number = fields.Char("KseF reference number")
+    l10n_pl_edi_ksef_session_token = fields.Char("KseF Session Token of the sent invoice")
+    l10n_pl_edi_ksef_state = fields.Selection(
+        selection=[
+            ('ready', 'Ready to send'),
+            ('processing', 'Pending Reception'),
+            ('done', 'Done'),
+            ('error', 'Error'),
+        ],
+        default='ready',
+        string='KseF status',
+        copy=False,
+    )
 
     def _check_mandatory_fields(self):
         errors = []
@@ -110,8 +123,9 @@ class AccountMove(models.Model):
         return f'{self.name.replace("/", "_")}_ksef.xml'
 
     def _l10n_pl_edi_send(self, attachment_vals):
+        moves_to_send = self.filtered(lambda m: m.l10n_pl_edi_ksef_state in ('ready', 'error'))
         comp_vals = {}
-        for company in self.mapped('company_id'):
+        for company in moves_to_send.mapped('company_id'):
             _vat_country, vat_number = company.partner_id._split_vat(company.vat)
             challenge_request = json.loads(requests.post('https://ksef-test.mf.gov.pl/api/online/Session/AuthorisationChallenge', json={
                 "contextIdentifier": {
@@ -121,6 +135,8 @@ class AccountMove(models.Model):
             }).text)
             utc_time = datetime.strptime(challenge_request.get('timestamp'), "%Y-%m-%dT%H:%M:%S.%fZ")
             epoch_time = (utc_time - datetime(1970, 1, 1)).total_seconds()
+
+            # example : 71FE65BD2451A1429BD9B9C15AA868D7418F46F2D5D61E00621FC932580FFA79 for 9999999999
 
             token = company.l10n_pl_edi_ksef_token
 
@@ -144,7 +160,7 @@ class AccountMove(models.Model):
             session_token_request = json.loads(requests.post('https://ksef-test.mf.gov.pl/api/online/Session/InitToken', data=string_xml).text)
             comp_vals[company] = session_token_request.get('sessionToken').get('token')
 
-        for move in self:
+        for move in moves_to_send:
             attachment = attachment_vals[move]
             sha256_digest = hashlib.sha256(attachment['raw']).digest()
             sha_base64 = base64.b64encode(sha256_digest).decode()
@@ -171,6 +187,10 @@ class AccountMove(models.Model):
                 headers={'SessionToken': comp_vals[move.company_id]},
             ).text)
 
+            move.l10n_pl_edi_ksef_reference_number = send_request.get('elementReferenceNumber')
+            move.l10n_pl_edi_ksef_session_token = comp_vals[move.company_id]
+            move.l10n_pl_edi_ksef_state = 'processing'
+
             res_invoice = requests.get(
                 f"https://ksef-test.mf.gov.pl/api/online/Invoice/Status/{send_request.get('elementReferenceNumber')}",
                 headers={'SessionToken': comp_vals[move.company_id]},
@@ -178,3 +198,39 @@ class AccountMove(models.Model):
             )
 
             print("hey")
+
+    # -------------------------------------------------------------------------
+    # CRONS
+    # -------------------------------------------------------------------------
+
+    def _cron_l10n_pl_edi_get_new_documents(self):
+        edi_users = self.search([('company_id.account_peppol_proxy_state', '=', 'active')])
+        self._l10n_pl_edi_get_new_documents()
+
+    def _cron_l10n_pl_edi_get_status(self):
+        self._l10n_pl_edi_get_status()
+
+    # -------------------------------------------------------------------------
+    # Fetch Actions
+    # -------------------------------------------------------------------------
+
+    @api.model
+    def _l10n_pl_edi_get_new_documents(self):
+        moves = self.env['account.move'].search([
+            ('l10n_pl_edi_ksef_state', '=', 'processing'),
+            ('company_id', 'in', self.env.companies.ids),
+        ])
+        for move in moves:
+            move_status_request = requests.get(
+                url=f"https://ksef-test.mf.gov.pl/api/online/Invoice/Status/{move.l10n_pl_edi_ksef_reference_number}",
+                headers={'SessionToken': move.l10n_pl_edi_ksef_session_token},
+                timeout=30,
+            )
+            if move_status_request.status_code == 200:
+                move.l10n_pl_edi_ksef_state = 'done'
+            else:
+                # todo print message error
+                move.l10n_pl_edi_ksef_state = 'error'
+
+    def _l10n_pl_edi_get_status(self):
+        print("hey")
