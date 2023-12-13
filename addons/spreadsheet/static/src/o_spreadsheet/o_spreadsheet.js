@@ -36219,6 +36219,7 @@
     class EvaluationPlugin extends UIPlugin {
         static getters = [
             "evaluateFormula",
+            "getCorrespondingFormulaCell",
             "getRangeFormattedValues",
             "getRangeValues",
             "getRangeFormats",
@@ -37292,7 +37293,9 @@
             let row = zone.bottom;
             if (col > 0) {
                 let leftPosition = { sheetId, col: col - 1, row };
-                while (this.getters.getEvaluatedCell(leftPosition).type !== CellValueType.empty ||
+                while (
+                // this.getters.getEvaluatedCell(leftPosition).type !== CellValueType.empty ||
+                this.getters.getCorrespondingFormulaCell(leftPosition) ||
                     this.getters.getCell(leftPosition)?.content) {
                     row += 1;
                     leftPosition = { sheetId, col: col - 1, row };
@@ -37302,7 +37305,9 @@
                 col = zone.right;
                 if (col <= this.getters.getNumberCols(sheetId)) {
                     let rightPosition = { sheetId, col: col + 1, row };
-                    while (this.getters.getEvaluatedCell(rightPosition).type !== CellValueType.empty ||
+                    while (
+                    // this.getters.getEvaluatedCell(rightPosition).type !== CellValueType.empty ||
+                    this.getters.getCorrespondingFormulaCell(rightPosition) ||
                         this.getters.getCell(rightPosition)?.content) {
                         row += 1;
                         rightPosition = { sheetId, col: col + 1, row };
@@ -50812,8 +50817,8 @@
 
 
     __info__.version = '16.4.16';
-    __info__.date = '2023-12-05T10:45:24.320Z';
-    __info__.hash = '1abbb92';
+    __info__.date = '2023-12-13T10:41:50.647Z';
+    __info__.hash = '6515349';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
