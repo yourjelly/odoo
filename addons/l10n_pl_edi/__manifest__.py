@@ -18,6 +18,7 @@ E-invoice implementation
         'data/invoice_pl_template.xml',
         'data/ksef_communication_template.xml',
         'views/res_config_settings_view.xml',
+        'views/account_journal_dashboard_views.xml',
         'wizard/account_move_send_views.xml',
         ],
     'demo': [

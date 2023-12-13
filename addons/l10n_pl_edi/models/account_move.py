@@ -215,7 +215,7 @@ class AccountMove(models.Model):
     # -------------------------------------------------------------------------
 
     @api.model
-    def _l10n_pl_edi_get_new_documents(self):
+    def _l10n_pl_edi_get_status(self):
         moves = self.env['account.move'].search([
             ('l10n_pl_edi_ksef_state', '=', 'processing'),
             ('company_id', 'in', self.env.companies.ids),
@@ -232,5 +232,55 @@ class AccountMove(models.Model):
                 # todo print message error
                 move.l10n_pl_edi_ksef_state = 'error'
 
-    def _l10n_pl_edi_get_status(self):
-        print("hey")
+    def _l10n_pl_edi_get_new_documents(self):
+        for company in self.env.companies:
+            _vat_country, vat_number = company.partner_id._split_vat(company.vat)
+            challenge_request = json.loads(requests.post('https://ksef-test.mf.gov.pl/api/online/Session/AuthorisationChallenge', json={
+                "contextIdentifier": {
+                    "type": "onip",
+                    "identifier": vat_number,
+                }
+            }).text)
+            utc_time = datetime.strptime(challenge_request.get('timestamp'), "%Y-%m-%dT%H:%M:%S.%fZ")
+            epoch_time = (utc_time - datetime(1970, 1, 1)).total_seconds()
+
+            # example : 71FE65BD2451A1429BD9B9C15AA868D7418F46F2D5D61E00621FC932580FFA79 for 9999999999
+
+            token = company.l10n_pl_edi_ksef_token
+
+            with file_open("l10n_pl_edi/data/publicKey.pem", "rb") as key_file:
+                public_key = serialization.load_pem_public_key(
+                    key_file.read(),
+                )
+
+            message_to_encrypt = token + '|' + str(int(epoch_time*1000))
+            encrypted_text = public_key.encrypt(bytes(message_to_encrypt, 'utf-8'), padding.PKCS1v15())
+            string = base64.b64encode(encrypted_text).decode()
+
+            template_values = {
+                'challenge': challenge_request.get('challenge'),
+                'nip': vat_number,
+                'token': string,
+            }
+            string_xml = self.env['ir.qweb']._render('l10n_pl_edi.init_session_token_request_template', template_values)
+            string_xml = str(string_xml)
+
+            session_token_request = json.loads(requests.post('https://ksef-test.mf.gov.pl/api/online/Session/InitToken', data=string_xml).text)
+            print("hey")
+
+            json.loads(requests.post(
+                "https://ksef-test.mf.gov.pl/api/online/Query/Invoice/Sync?PageSize=10&PageOffset=0",
+                json={
+                    "timestamp": datetime.strftime(pytz.utc.localize(fields.Datetime.now()), '%Y-%m-%dT%H:%M:%SZ'),
+                    "queryCriteria": {
+                        "type": "incremental",
+                        "subjectType": "subject2",
+                        "acquisitionTimestampThresholdFrom": "2022-01-01T00:00:01",
+                        "acquisitionTimestampThresholdTO": datetime.strftime(pytz.utc.localize(fields.Datetime.now()), '%Y-%m-%dT%H:%M:%S'),
+
+                    }
+                },
+                headers={'SessionToken': session_token_request.get('sessionToken').get('token')},
+            ).text)
+
+            print("heym")
