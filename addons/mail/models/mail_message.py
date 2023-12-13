@@ -119,7 +119,7 @@ class Message(models.Model):
         index=True, ondelete='set null')
     is_internal = fields.Boolean('Employee Only', help='Hide to public / portal users, independently from subtype configuration.')
     # origin
-    email_from = fields.Char('From', help="Email address of the sender. This field is set when no matching partner is found and replaces the author_id field in the chatter.")
+    email_from = fields.Char('From', help="Email address of the sender. This field is set when no matching partner is found and replaces the author_id field in the chatter.", groups="base.group_user")
     author_id = fields.Many2one(
         'res.partner', 'Author', index=True, ondelete='set null',
         help="Author of the message. If not set, email_from may hold an email address that did not match any partner.")
@@ -825,6 +825,9 @@ class Message(models.Model):
 
     def _message_format(self, fnames, format_reply=True):
         """Reads values from messages and formats them for the web client."""
+        if 'email_from' in fnames and not self.env.user.has_group('base.group_user'):
+            fnames.remove('email_from')
+
         self.check_access_rule('read')
         vals_list = self._read_format(fnames)
 
