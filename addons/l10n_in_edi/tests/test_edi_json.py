@@ -144,21 +144,21 @@ class TestEdiJson(AccountTestInvoicingCommon):
             "TranDtls": {"TaxSch": "GST", "SupTyp": "B2B", "RegRev": "N", "IgstOnIntra": "N"},
             "DocDtls": {"Typ": "INV", "No": "INV/2019/00001", "Dt": "01/01/2019"},
             "SellerDtls": {
-                "LglNm": "company_1_data",
                 "Addr1": "Block no. 401",
-                "Addr2": "Street 2",
                 "Loc": "City 1",
                 "Pin": 500001,
                 "Stcd": "36",
+                "Addr2": "Street 2",
+                "LglNm": "company_1_data",
                 "GSTIN": "36AABCT1332L011"},
             "BuyerDtls": {
-                "LglNm": "partner_a",
                 "Addr1": "Block no. 401",
-                "Addr2": "Street 2",
                 "Loc": "City 2",
                 "Pin": 500001,
                 "Stcd": "36",
+                "Addr2": "Street 2",
                 "POS": "36",
+                "LglNm": "partner_a",
                 "GSTIN": "36BBBFF5679L8ZR"},
             "ItemList": [
                 {
@@ -178,7 +178,7 @@ class TestEdiJson(AccountTestInvoicingCommon):
             ],
             "ValDtls": {
                 "AssVal": 1800.0, "CgstVal": 76.5, "SgstVal": 76.5, "IgstVal": 0.0, "CesVal": 46.59,
-                "StCesVal": 0.0, "RndOffAmt": 0.0, "TotInvVal": 1999.59
+                "StCesVal": 0.0, "Discount": 0.0, "RndOffAmt": 0.0, "TotInvVal": 1999.59
             }
         }
         self.assertDictEqual(json_value, expected, "Indian EDI send json value is not matched")
