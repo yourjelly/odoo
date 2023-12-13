@@ -686,3 +686,88 @@ class TestTimesheet(TestCommonTimesheet):
             },
         ])
         self.assertEqual(self.task1.progress, 1, 'The progress of allocated hours should be 1.')
+
+    def test_project_update_timesheet(self):
+        # Create a new project
+        project = self.env['project.project'].create({'name': 'Project', 'allocated_hours': 10})
+
+        # Create a tasks of project
+        task1 = self.env['project.task'].create({'name': 'task 1', 'project_id':project.id})
+        task2 = self.env['project.task'].create({'name': 'task 2', 'project_id':project.id})
+
+        # Add timesheet on task1
+        self.env['account.analytic.line'].create([
+            {
+                'name': 'Timesheet',
+                'project_id': project.id,
+                'task_id': task1.id,
+                'unit_amount': 2,
+                'employee_id': self.empl_employee.id,
+            }
+        ])
+
+        # Create a update of project
+        update = self.env['project.update'].create([
+            {
+                'name': 'test',
+                'status': 'on_track',
+                'project_id': project.id,
+            }
+        ])
+
+        self.assertEqual(update.allocated_time, project.allocated_hours)
+        self.assertEqual(update.timesheet_time, project.total_timesheet_time)
+        self.assertEqual(update.timesheet_percentage, 20)
+        self.assertEqual(project.remaining_hours, project.allocated_hours - project.total_timesheet_time)
+
+        project.allocated_hours = 12.0
+        # Add timesheet on task2
+        self.env['account.analytic.line'].create([
+            {
+                'name': 'Timesheet',
+                'project_id': project.id,
+                'task_id': task2.id,
+                'unit_amount': 3,
+                'employee_id': self.empl_employee.id,
+            }
+        ])
+
+        update1 = self.env['project.update'].create([
+            {
+                'name': 'test1',
+                'status': 'on_track',
+                'project_id': project.id,
+            }
+        ])
+
+        self.assertEqual(update1.allocated_time, project.allocated_hours)
+        self.assertEqual(update1.timesheet_time, project.total_timesheet_time)
+        self.assertEqual(update1.timesheet_percentage, 42)
+        self.assertEqual(project.remaining_hours, project.allocated_hours - project.total_timesheet_time)
+
+        self.env['account.analytic.line'].create([
+            {
+                'name': 'Timesheet',
+                'project_id': project.id,
+                'task_id': task2.id,
+                'unit_amount': 10,
+                'employee_id': self.empl_employee.id,
+            }
+        ])
+
+        update1 = self.env['project.update'].create([
+            {
+                'name': 'test1',
+                'status': 'on_track',
+                'project_id': project.id,
+            }
+        ])
+
+        self.assertEqual(update1.allocated_time, project.allocated_hours)
+        self.assertEqual(update1.timesheet_time, project.total_timesheet_time)
+        self.assertEqual(update1.timesheet_percentage, 125)
+        self.assertEqual(project.remaining_hours, project.allocated_hours - project.total_timesheet_time)
+        extra = round(100 * project.total_timesheet_time / project.allocated_hours)
+
+        if extra > 100:
+            self.assertEqual(round(100 * (project.total_timesheet_time - project.allocated_hours) / project.allocated_hours), 25)

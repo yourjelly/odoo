@@ -111,3 +111,43 @@ class TestProjectUpdate(TestProjectCommon):
             .execute()
         panel_data = self.project_pigs.get_panel_data()
         self.assertNotIn('milestones', panel_data, 'Since the "Milestones" feature is globally disabled, the "Milestones" section is not loaded.')
+
+    def test_project_update_values(self):
+        project = self.env['project.project'].create({'name': 'Project'})
+        task1 = self.env['project.task'].create({'name': 'task 1', 'project_id':project.id})
+        task2 = self.env['project.task'].create({'name': 'task 2', 'project_id':project.id})
+        with Form(self.env['project.update'].with_context({'default_project_id': project.id})) as update_form:
+            update_form.name = "Test"
+        update = update_form.save()
+
+        self.assertEqual(update.task_count, project.task_count, "Not equal count of task")
+
+        task1.state = '1_done'
+        with Form(self.env['project.update'].with_context({'default_project_id': project.id})) as update_form:
+            update_form.name = "Test1"
+        update1 = update_form.save()
+        self.assertEqual(update1.closed_task_count, project.closed_task_count, "Not equal closed task count")
+        self.assertEqual(update1.closed_task_percentage, 50, "Not equal percentage of task closed")
+
+        task2.state = '1_canceled'
+        with Form(self.env['project.update'].with_context({'default_project_id': project.id})) as update_form:
+            update_form.name = "Test2"
+        update2 = update_form.save()
+        self.assertEqual(update2.closed_task_count, project.closed_task_count, "Not equal closed task count")
+        self.assertEqual(update2.closed_task_percentage, 100, "Not equal percentage of task closed")
+
+        task3 = self.env['project.task'].create({'name': 'task 3', 'project_id':project.id})
+        with Form(self.env['project.update'].with_context({'default_project_id': project.id})) as update_form:
+            update_form.name = "Test3"
+        update3 = update_form.save()
+
+        self.assertEqual(update3.task_count, project.task_count, "Not equal count of task")
+        self.assertEqual(update3.closed_task_count, project.closed_task_count, "Not equal closed task count")
+        self.assertEqual(update3.closed_task_percentage, 67, "Not equal percentage of task closed")
+
+        task3.state = '1_done'
+        with Form(self.env['project.update'].with_context({'default_project_id': project.id})) as update_form:
+            update_form.name = "Test3"
+        update4 = update_form.save()
+        self.assertEqual(update4.closed_task_count, project.closed_task_count, "Not equal closed task count")
+        self.assertEqual(update4.closed_task_percentage, 100, "Not equal percentage of task closed")
