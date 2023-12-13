@@ -229,7 +229,7 @@ class PaymentMethod(models.Model):
             ])
 
         # Handle tokenization support requirements.
-        if force_tokenization:
+        if force_tokenization or self.provider_ids._is_tokenization_required(**kwargs):
             domain = expression.AND([domain, [('support_tokenization', '=', True)]])
 
         # Handle express checkout.
