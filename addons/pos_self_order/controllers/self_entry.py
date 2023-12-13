@@ -56,6 +56,7 @@ class PosSelfKiosk(http.Controller):
                             'table': table._get_self_order_data() if table else False,
                             'access_token': config_access_token,
                             **pos_config._get_self_ordering_data(),
+                            **pos_config.get_kitchen_printer(),
                         },
                         "base_url": request.env['pos.session'].get_base_url(),
                     }

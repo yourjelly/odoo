@@ -12,3 +12,10 @@ class PosConfig(models.Model):
         data["config"]["epson_printer_ip"] = self.epson_printer_ip
         data["config"]["other_devices"] = self.other_devices
         return data
+
+    def get_kitchen_printer(self):
+        res = super().get_kitchen_printer()
+        for printer in self.printer_ids:
+            if printer.epson_printer_ip:
+                res["kitchen_printers"][printer.id]["epson_printer_ip"] = printer.epson_printer_ip
+        return res

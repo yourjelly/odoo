@@ -16,9 +16,10 @@ import { registry } from "@web/core/registry";
 import { cookie } from "@web/core/browser/cookie";
 import { formatDateTime } from "@web/core/l10n/dates";
 import { printerService } from "@point_of_sale/app/printer/printer_service";
-import { qrCodeSrc } from "@point_of_sale/utils";
+import { qrCodeSrc, deduceUrl } from "@point_of_sale/utils";
 import { OrderReceipt } from "@point_of_sale/app/screens/receipt_screen/receipt/order_receipt";
-
+import { HWPrinter } from "@point_of_sale/app/printer/hw_printer";
+import { renderToElement } from "@web/core/utils/render";
 export class SelfOrder extends Reactive {
     constructor(...args) {
         super();
@@ -54,12 +55,22 @@ export class SelfOrder extends Reactive {
         this.ordering = false;
         this.orders = [];
         this.color = getColor(this.company.color);
+        this.kitchenPrinters = [];
 
         this.initData();
         if (this.config.self_ordering_mode === "kiosk") {
             this.initKioskData();
         } else {
             await this.initMobileData();
+        }
+    }
+    async confirmationPage(screen_mode, print) {
+        this.router.navigate("confirmation", {
+            orderAccessToken: this.currentOrder.access_token,
+            screenMode: screen_mode,
+        });
+        if (print) {
+            this.printChanges();
         }
     }
 
@@ -69,6 +80,8 @@ export class SelfOrder extends Reactive {
         const service = this.config.self_ordering_service_mode; // table, counter
         const paymentMethods = this.pos_payment_methods; // Stripe, Adyen, Online
         const order = this.currentOrder;
+        const printChanges =
+            !(device === "mobile" && service === "table") || this.config.self_ordering_takeaway;
 
         // Stand number page will recall this function after the stand number is set
         if (
@@ -85,10 +98,7 @@ export class SelfOrder extends Reactive {
         // this directive works for both mode each and meal
         if (order.amount_total === 0 && order.lines.length > 0) {
             await this.sendDraftOrderToServer();
-            this.router.navigate("confirmation", {
-                orderAccessToken: order.access_token,
-                screenMode: "order",
-            });
+            this.confirmationPage("order", printChanges);
             return;
         }
 
@@ -101,11 +111,7 @@ export class SelfOrder extends Reactive {
                 await this.sendDraftOrderToServer();
                 screenMode = payAfter === "meal" ? "order" : "pay";
             }
-
-            this.router.navigate("confirmation", {
-                orderAccessToken: order.access_token,
-                screenMode: screenMode,
-            });
+            this.confirmationPage(screenMode, printChanges);
         } else {
             // In meal mode, first time the customer validate his order, we send it to the server
             // and we redirect him to the confirmation page, the next time he validate his order
@@ -113,10 +119,7 @@ export class SelfOrder extends Reactive {
             // In each mode, we redirect the customer to the payment page directly
             if (payAfter === "meal" && !order.isSavedOnServer) {
                 await this.sendDraftOrderToServer();
-                this.router.navigate("confirmation", {
-                    orderAccessToken: order.access_token,
-                    screenMode: "order",
-                });
+                this.confirmationPage("order", printChanges);
             } else {
                 this.router.navigate("payment");
             }
@@ -205,6 +208,60 @@ export class SelfOrder extends Reactive {
         }
 
         this.updateCategoryList();
+
+        if (this.kitchen_printers) {
+            for (const printerConfig of Object.values(this.kitchen_printers)) {
+                const printer = this.create_printer(printerConfig);
+                if (printer) {
+                    printer.config = printerConfig;
+                    this.kitchenPrinters.push(printer);
+                }
+            }
+        }
+    }
+
+    create_printer(printer) {
+        const url = deduceUrl(printer.proxy_ip || "");
+        return new HWPrinter({ url });
+    }
+
+    _getPrintingCategoriesChanges(categories) {
+        return this.currentOrder.lines.filter((orderline) =>
+            categories.some((categId) =>
+                this.productByIds[orderline["product_id"]].pos_categ_ids
+                    .map((categ) => categ.id)
+                    .includes(categId)
+            )
+        );
+    }
+
+    async printChanges() {
+        const d = new Date();
+        let hours = "" + d.getHours();
+        hours = hours.length < 2 ? "0" + hours : hours;
+        let minutes = "" + d.getMinutes();
+        minutes = minutes.length < 2 ? "0" + minutes : minutes;
+        for (const printer of this.kitchenPrinters) {
+            const orderlines = this._getPrintingCategoriesChanges(
+                Object.values(printer.config.product_categories_ids)
+            );
+            if (orderlines) {
+                const printingChanges = {
+                    new: orderlines,
+                    tracker: this.currentOrder.table_stand_number,
+                    trackingNumber: this.currentOrder.trackingNumber || "unknown number",
+                    name: this.currentOrder.pos_reference || "unknown order",
+                    time: {
+                        hours,
+                        minutes,
+                    },
+                };
+                const receipt = renderToElement("pos_self_order.OrderChangeReceipt", {
+                    changes: printingChanges,
+                });
+                await printer.printReceipt(receipt);
+            }
+        }
     }
 
     initKioskData() {
