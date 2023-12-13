@@ -11,7 +11,7 @@ QUnit.module("Livechat history command");
 QUnit.test("Handle livechat history command", async (assert) => {
     const pyEnv = await startServer();
     await loadDefaultConfig();
-    const env = await start({
+    const { env } = await start({
         mockRPC(route, args) {
             if (route === "/im_livechat/history") {
                 assert.step("/im_livechat/history");

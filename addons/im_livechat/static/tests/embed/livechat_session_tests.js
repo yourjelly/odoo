@@ -36,7 +36,7 @@ QUnit.test("Session is reset after failing to persist the channel", async (asser
 QUnit.test("Thread state is saved on the session", async (assert) => {
     await startServer();
     await loadDefaultConfig();
-    const env = await start();
+    const { env } = await start();
     await click(".o-livechat-LivechatButton");
     await contains(".o-mail-Thread");
     assert.strictEqual(env.services["im_livechat.livechat"].sessionCookie.state, "open");
@@ -51,7 +51,7 @@ QUnit.test("Thread state is saved on the session", async (assert) => {
 QUnit.test("Seen message is saved on the session", async (assert) => {
     await startServer();
     await loadDefaultConfig();
-    const env = await start();
+    const { env } = await start();
     await click(".o-livechat-LivechatButton");
     assert.notOk(env.services["im_livechat.livechat"].sessionCookie.seen_message_id);
     await insertText(".o-mail-Composer-input", "Hello World!");

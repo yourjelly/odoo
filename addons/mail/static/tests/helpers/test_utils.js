@@ -65,7 +65,7 @@ function getOpenFormView(openView) {
  * Reset registries used by the messaging environment. Useful to create multiple
  * web clients.
  */
-function resetRegistries() {
+export function resetRegistries() {
     const categories = ["actions", "main_components", "services", "systray"];
     for (const name of categories) {
         clearRegistryWithCleanup(registry.category(name));

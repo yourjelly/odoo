@@ -90,6 +90,7 @@ function patchCookie() {
                 }
             }
         },
+        cookieJar,
     });
 }
 

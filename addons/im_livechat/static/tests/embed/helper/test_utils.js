@@ -25,11 +25,13 @@ import { createWebClient } from "@web/../tests/webclient/helpers";
  *
  * @returns {Promise<number>} the id of the livechat channel.
  */
-export async function loadDefaultConfig() {
+export async function loadDefaultConfig(livechatChannelId) {
     const pyEnv = await getPyEnv();
-    const livechatChannelId = pyEnv["im_livechat.channel"].create({
-        user_ids: [pyEnv.adminUserId],
-    });
+    if (!livechatChannelId) {
+        livechatChannelId = pyEnv["im_livechat.channel"].create({
+            user_ids: [pyEnv.adminUserId],
+        });
+    }
     patchWithCleanup(session, {
         livechatData: {
             isAvailable: true,
@@ -78,7 +80,7 @@ export async function start({ mockRPC } = {}) {
     });
     const pyEnv = await getPyEnv();
     pyEnv.logout();
-    const { env } = await createWebClient({
+    const webclient = await createWebClient({
         serverData: {
             models: pyEnv.getData(),
             views: pyEnv.getViews(),
@@ -86,5 +88,5 @@ export async function start({ mockRPC } = {}) {
         mockRPC,
     });
     await livechatButtonAvailableDeferred;
-    return env;
+    return webclient;
 }

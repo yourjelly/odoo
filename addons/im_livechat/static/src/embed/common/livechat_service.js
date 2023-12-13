@@ -136,7 +136,7 @@ export class LivechatService {
                 await this.rpc("/im_livechat/visitor_leave_session", { uuid: session.uuid });
             }
         } finally {
-            localStorage.removeItem(this.GUEST_TOKEN_STORAGE_KEY);
+            browser.localStorage.removeItem(this.GUEST_TOKEN_STORAGE_KEY);
             cookie.delete(this.SESSION_COOKIE);
             this.state = SESSION_STATE.NONE;
             this.sessionInitialized = false;
@@ -206,7 +206,7 @@ export class LivechatService {
             return;
         }
         if ("guest_token" in threadData) {
-            localStorage.setItem(this.GUEST_TOKEN_STORAGE_KEY, threadData.guest_token);
+            browser.localStorage.setItem(this.GUEST_TOKEN_STORAGE_KEY, threadData.guest_token);
             delete threadData.guest_token;
         }
         this.updateSession(threadData);
@@ -263,7 +263,7 @@ export class LivechatService {
      * @returns {string|undefined}
      */
     get guestToken() {
-        return localStorage.getItem(this.GUEST_TOKEN_STORAGE_KEY);
+        return browser.localStorage.getItem(this.GUEST_TOKEN_STORAGE_KEY);
     }
 
     /**

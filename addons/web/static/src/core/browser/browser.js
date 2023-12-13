@@ -106,5 +106,6 @@ export function makeRAMLocalStorage() {
         key() {
             return "";
         },
+        store,
     };
 }

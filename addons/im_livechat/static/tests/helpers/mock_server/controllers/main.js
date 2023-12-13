@@ -19,6 +19,7 @@ patch(MockServer.prototype, {
                 anonymous_name,
                 parseInt(previous_operator_id),
                 persisted,
+                args.chatbot_script_id,
                 context
             );
         }
@@ -57,6 +58,7 @@ patch(MockServer.prototype, {
      * @private
      * @param {integer} channel_id
      * @param {string} anonymous_name
+     * @param {integer} [chatbot_script_id]
      * @param {integer} [previous_operator_id]
      * @param {Object} [context={}]
      * @returns {Object}
@@ -66,6 +68,7 @@ patch(MockServer.prototype, {
         anonymous_name,
         previous_operator_id,
         persisted,
+        chatbot_script_id,
         context = {}
     ) {
         let country_id;
@@ -86,7 +89,7 @@ patch(MockServer.prototype, {
             anonymous_name,
             previous_operator_id,
             country_id,
-            persisted
+            chatbot_script_id
         );
         if (!channelVals) {
             return false;
@@ -100,6 +103,7 @@ patch(MockServer.prototype, {
             ]);
             return {
                 name: channelVals["name"],
+                chatbot_script_id: chatbot_script_id,
                 chatbot_current_step_id: channelVals.chatbot_current_step_id,
                 state: "open",
                 operator_pid: [operatorPartner.id, operator.name],
@@ -229,9 +233,19 @@ patch(MockServer.prototype, {
      * Simulates the `/im_livechat/init` route.
      */
     _mockRouteImLivechatInit(channelId) {
-        return {
-            available_for_me: true,
-            rule: {},
+        const [matchingRule] = this.pyEnv["im_livechat.channel.rule"].searchRead([
+            ["channel_id", "=", channelId],
+        ]);
+        const rule = {
+            action: matchingRule.action,
+            auto_popup_timer: matchingRule.auto_popup_timer,
+            regex_url: matchingRule.regex_url,
         };
+        if (matchingRule?.chatbot_script_id) {
+            rule["chatbot"] = this._mockChatbotScript__formatForFrontend(
+                matchingRule.chatbot_script_id[0]
+            );
+        }
+        return { available_for_me: true, odoo_version: "does_not_matter_in_tests", rule };
     },
 });

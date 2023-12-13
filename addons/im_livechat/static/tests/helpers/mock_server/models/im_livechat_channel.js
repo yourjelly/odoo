@@ -27,10 +27,22 @@ patch(MockServer.prototype, {
         id,
         anonymous_name,
         previous_operator_id,
-        country_id
+        country_id,
+        chatbot_script_id
     ) {
+        let operatorPartnerId;
+        let operatorName;
+        if (chatbot_script_id) {
+            const [chatbotScript] = this.pyEnv["chatbot.script"].searchRead([
+                ["id", "=", chatbot_script_id],
+            ]);
+            operatorPartnerId = chatbotScript.operator_partner_id[0];
+            operatorName = chatbotScript.title;
+        }
         const operator = this._mockImLivechatChannel_getOperator(id, previous_operator_id);
-        if (!operator) {
+        operatorPartnerId = operator?.partner_id || operatorPartnerId;
+        operatorName = operator ? operator.livechat_username || operator.name : operatorName;
+        if (!operatorPartnerId) {
             return false;
         }
         // partner to add to the discuss.channel
@@ -40,19 +52,19 @@ patch(MockServer.prototype, {
                 0,
                 {
                     is_pinned: false,
-                    partner_id: operator.partner_id,
+                    partner_id: operatorPartnerId,
                 },
             ],
         ];
         const membersName = [
             this.pyEnv.currentUser ? this.pyEnv.currentUser.display_name : anonymous_name,
-            operator.livechat_username ? operator.livechat_username : operator.name,
+            operatorName,
         ];
         return {
-            channel_partner_ids: [operator.partner_id],
+            channel_partner_ids: [operatorPartnerId],
             channel_member_ids: membersToAdd,
             livechat_active: true,
-            livechat_operator_id: operator.partner_id,
+            livechat_operator_id: operatorPartnerId,
             livechat_channel_id: id,
             anonymous_name: this.pyEnv.currentUser?._is_public() ? false : anonymous_name,
             country_id: country_id,
