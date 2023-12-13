@@ -939,8 +939,7 @@ export const formatSelection = (editor, formatName, {applyStyle, formatProps} = 
         // Remove the format on all inline ancestors until a block or an element
         // with a class (in case the formating comes from the class).
         while (parentNode && (!isBlock(parentNode) && !(parentNode.classList && parentNode.classList.length))) {
-            const isUselessZws = parentNode.tagName === 'SPAN' &&
-                parentNode.hasAttribute('oe-zws-empty-inline') &&
+            const isUselessZws = parentNode.hasAttribute('oe-zws-empty-inline') &&
                 parentNode.getAttributeNames().length === 1;
 
             if (isUselessZws) {
@@ -979,17 +978,28 @@ export const formatSelection = (editor, formatName, {applyStyle, formatProps} = 
     }
 
     if (zws) {
-        const siblings = [...zws.parentElement.childNodes];
-        if (
-            selectedTextNodes.includes(siblings[0]) &&
-            selectedTextNodes.includes(siblings[siblings.length - 1])
-        ) {
-            zws.parentElement.setAttribute('oe-zws-empty-inline', '');
+        if (isBlock(zws.parentElement)) {
+            const zwsParent = zws.parentElement;
+            const zwsIndex = Array.prototype.indexOf.call(zws.parentElement.childNodes, zws);
+            zws.remove();
+            setSelection(
+                zwsParent,
+                zwsIndex
+            );
+            fillEmpty(zwsParent);
         } else {
-            const span = document.createElement('span');
-            span.setAttribute('oe-zws-empty-inline', '');
-            zws.before(span);
-            span.append(zws);
+            const siblings = [...zws.parentElement.childNodes];
+            if (
+                selectedTextNodes.includes(siblings[0]) &&
+                selectedTextNodes.includes(siblings[siblings.length - 1])
+            ) {
+                zws.parentElement.setAttribute('oe-zws-empty-inline', '');
+            } else {
+                const span = document.createElement('span');
+                span.setAttribute('oe-zws-empty-inline', '');
+                zws.before(span);
+                span.append(zws);
+            }
         }
     }
 
@@ -1197,8 +1207,17 @@ export function isFontSize(node, props) {
  * @returns {boolean}
  */
 export function isSelectionFormat(editable, format) {
-    const selectedNodes = getTraversedNodes(editable)
-        .filter(n => n.nodeType === Node.TEXT_NODE && n.nodeValue.trim().length);
+    const document = editable.ownerDocument;
+    const selection = document.getSelection();
+    if (!selection.rangeCount) {
+        return false;
+    }
+    const selectedNodes = [
+        selection.anchorNode,
+        selection.focusNode,
+        ...getTraversedNodes(editable)
+            .filter(n => n.nodeType === Node.TEXT_NODE && n.nodeValue.trim().length)
+    ];
     const isFormatted = formatsSpecs[format].isFormatted;
     return selectedNodes.every(n => isFormatted(n, editable));
 }

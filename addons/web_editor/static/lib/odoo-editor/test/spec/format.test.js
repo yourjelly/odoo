@@ -777,6 +777,30 @@ describe('Format', () => {
         });
     });
 
+    describe('zws', () => {
+        it('should remove zws when toggling twice a format', () => {
+            return testEditor(BasicEditor, {
+                contentBefore: `<p>a[]b</p>`,
+                stepFunction: async editor => {
+                    await editor.execCommand('bold');
+                    await editor.execCommand('bold');
+                },
+                contentAfterEdit: `<p>a[]b</p>`,
+            });
+        });
+        it('should remove zws when toggling twice a format inside an empty paragraph', () => {
+            return testEditor(BasicEditor, {
+                contentBefore: `<p>[]<br></p>`,
+                stepFunction: async editor => {
+                    await editor.execCommand('bold');
+                    await editor.execCommand('bold');
+                },
+                contentAfterEdit: `<p placeholder="Type &quot;/&quot; for commands" class="oe-hint oe-command-temporary-hint">[]<br></p>`,
+            });
+        });
+    });
+
+
     it('should add style to a span parent of an inline', async () => {
         await testEditor(BasicEditor, {
             contentBefore: `<p>a<span style="background-color: black;">${strong(`[bc]`)}</span>d</p>`,
