@@ -76,7 +76,7 @@
 </template>
 <!-- Card layout -->
 <template id="dynamic_filter_template_blog_post_card" name="Card layout">
-    <div t-foreach="records" t-as="data" class="s_blog_posts_post pb32 w-100" data-number-of-elements="3">
+    <div t-foreach="records" t-as="data" class="s_blog_posts_post w-100" data-extra-classes="g-3" data-column-classes="col col-sm-6 col-lg-4 col-xxl-3">
         <t t-set="record" t-value="data['_record']"/>
         <div class="card">
             <a class="s_blog_posts_post_cover" t-att-href="data['call_to_action_url']">
