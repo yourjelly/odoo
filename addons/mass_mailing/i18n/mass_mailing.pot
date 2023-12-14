@@ -4519,14 +4519,7 @@ msgstr ""
 #. module: mass_mailing
 #: model:ir.model.fields,help:mass_mailing.field_mailing_list__is_public
 msgid ""
-"The mailing list can be accessible by recipients in the subscription "
-"management page to allows them to update their preferences."
-msgstr ""
-
-#. module: mass_mailing
-#: model:ir.model.fields,help:mass_mailing.field_mailing_list__is_public
-msgid ""
-"The mailing list can bes accessible by recipients in the subscription "
+"The mailing list cant bes accessible by recipients in the subscription "
 "management page to allow them to update their preferences."
 msgstr ""
 
