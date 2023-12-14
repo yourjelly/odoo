@@ -41,6 +41,7 @@ class PaymentTransaction(models.Model):
         self.ensure_one()
         encoded_payload = self._phonepe_encode_payload(payload)
         checksum = self._phonepe_prepare_checksum(encoded_payload)
+        base_url = self.get_base_url()
         headers = {
             'Content-Type': 'application/json',
             'X-Verify': checksum,
@@ -61,13 +62,13 @@ class PaymentTransaction(models.Model):
             return res
         converted_amount = payment_utils.to_minor_currency_units(self.amount, self.currency_id)
         base_url = self.get_base_url()
-        payment_redirect = "/payment/status"
+        payment_redirect_url = "/payment/status"
         payload = {
             'merchantId': self.provider_id.phonepe_merchant_id,
             'merchantTransactionId': self.reference,
             'merchantUserId': self.partner_email,
             'amount': converted_amount,
-            'redirectUrl': url_join(base_url, payment_redirect),
+            'redirectUrl': url_join(base_url, payment_redirect_url),
             'redirectMode': 'REDIRECT',
             'callbackUrl': url_join(base_url, PhonePeController._callback_url),
             'mobileNumber': self.partner_phone,
