@@ -27,9 +27,9 @@ class PhonePeController(http.Controller):
     #         tx_sudo._handle_notification_data('phonepe', data)
     #     return request.redirect('/payment/status')
     
-    @http.route(_callback_url, method=['POST', 'GET'], type='http', auth='public', csrf=False)
-    def phonepe_callback(self, **data):
-
+    @http.route(_callback_url, method=['POST'], type='http', auth='public', csrf=False)
+    def phonepe_callback(self):
+        data = request.get_json_data()
         _logger.info('PhonePe: Entering form_feedback with post data %s', pprint.pformat(data))
         if data.get('response'):
             response = data.get('response')
