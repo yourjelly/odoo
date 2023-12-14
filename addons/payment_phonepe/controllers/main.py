@@ -14,7 +14,7 @@ _logger = logging.getLogger(__name__)
 
 
 class PhonePeController(http.Controller):
-    # _return_url = '/payment/phonepe/return/'
+    _return_url = '/payment/phonepe/return/'
     _callback_url = '/payment/phonepe/callback/'
 
     # @http.route(_return_url, method=['POST'], type='http', auth='public', csrf=False)
@@ -25,10 +25,11 @@ class PhonePeController(http.Controller):
     #         print(tx_sudo)
     #         # self._verify_notification_signature(data, data.get('checksum'), tx_sudo)
     #         tx_sudo._handle_notification_data('phonepe', data)
-    #     return request.redirect('/payment/status')    
+    #     return request.redirect('/payment/status')
     
-    @http.route(_callback_url, method=['POST'], type='http', auth='public', csrf=False)
+    @http.route(_callback_url, method=['POST', 'GET'], type='http', auth='public', csrf=False)
     def phonepe_callback(self, **data):
+
         _logger.info('PhonePe: Entering form_feedback with post data %s', pprint.pformat(data))
         if data.get('response'):
             response = data.get('response')
@@ -38,7 +39,7 @@ class PhonePeController(http.Controller):
             header = request.httprequest.headers.get('X-VERIFY') or data.headers.get('X-VERIFY')
             self._verify_notification_signature(response, header, tx_sudo)
             tx_sudo._handle_notification_data('phonepe', decode_response)
-        return ''
+        return request.redirect('/payment/status')
 
     @staticmethod
     def _verify_notification_signature(notification_data, received_signature, tx_sudo, is_response=True):
