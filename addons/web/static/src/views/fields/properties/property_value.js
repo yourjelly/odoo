@@ -22,6 +22,8 @@ import { m2oTupleFromData } from "@web/views/fields/many2one/many2one_field";
 import { parseFloat, parseInteger } from "@web/views/fields/parsers";
 import { Many2XAutocomplete, useOpenMany2XRecord } from "@web/views/fields/relational_utils";
 import { PropertyTags } from "./property_tags";
+import { BooleanField } from "@web/views/fields/boolean/boolean_field";
+import { DateTimeField } from "@web/views/fields/datetime/datetime_field";
 
 /**
  * Represent one property value.
@@ -47,6 +49,8 @@ export class PropertyValue extends Component {
         TagsList,
         AutoComplete,
         PropertyTags,
+        BooleanField,
+        DateTimeField,
     };
 
     static props = {
@@ -64,12 +68,15 @@ export class PropertyValue extends Component {
         tags: { type: Array, optional: true },
         onChange: { type: Function, optional: true },
         onTagsChange: { type: Function, optional: true },
+        record: { type: Object, optional: true },
+        name: { type: String, optional: true },
     };
 
     setup() {
         this.orm = useService("orm");
         this.action = useService("action");
 
+        // debugger
         this.openMany2X = useOpenMany2XRecord({
             resModel: this.props.model,
             activeActions: {

@@ -144,6 +144,8 @@
                     </label>
                     <PropertyValue
                         id="getUniqueDomID('default')"
+                        record="props.record"
+                        name="`${props.name}.${props.propertyDefinition.name}`"
                         readonly="props.readonly"
                         canChangeDefinition="props.canChangeDefinition"
                         type="state.propertyDefinition.type"

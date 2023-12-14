@@ -6,14 +6,20 @@
         </t>
         <t t-else="">
             <t t-if="props.type === 'boolean'">
-                <CheckBox
+                <BooleanField
                     id="props.id"
-                    value="propertyValue"
-                    disabled="props.readonly"
-                    onChange.bind="onValueChange"
+                    record="props.record"
+                    name="props.name"
+                    readonly="props.readonly"
                 />
             </t>
             <t t-elif="['date', 'datetime'].includes(props.type)">
+                <DateTimeField
+                    id="props.id"
+                    record="props.record"
+                    name="props.name"
+                    readonly="props.readonly"
+                />
                 <DateTimeInput
                     id="props.id"
                     type="props.type"

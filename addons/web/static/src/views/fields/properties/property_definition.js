@@ -46,10 +46,14 @@ export class PropertyDefinition extends Component {
         onPropertyMove: { type: Function, optional: true },
         // prop needed by the popover service
         close: { type: Function, optional: true },
+
+        record: { type: Object, optional: true },
+        name: { type: String, optional: true },
     };
 
     setup() {
         this.orm = useService("orm");
+        // debugger
 
         this.propertyDefinitionRef = useRef("propertyDefinition");
         this.addDialog = useOwnedDialogs();

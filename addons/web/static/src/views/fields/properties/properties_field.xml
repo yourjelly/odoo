@@ -6,7 +6,7 @@
             t-att-columns="renderedColumnsCount">
             <t t-set="unfoldedSeparators" t-value="state.unfoldedSeparators"/>
             <t t-set="_groupedPropertiesList" t-value="groupedPropertiesList"/>
-            <t t-foreach="groupedPropertiesList" t-as="propertiesListGroup" t-key="propertiesListGroup_index">
+            <t t-foreach="_groupedPropertiesList" t-as="propertiesListGroup" t-key="propertiesListGroup_index">
                 <t t-set="foldable" t-value="propertiesListGroup.name and propertiesListGroup.title and propertiesListGroup.title.length"/>
                 <t t-set="isFolded" t-value="propertiesListGroup.name and !unfoldedSeparators.includes(propertiesListGroup.name)"/>
                 <div class="o_inner_group o_group col-lg-6 o_property_group"
@@ -59,6 +59,8 @@
                         <div class="o_property_field_value w-100">
                             <PropertyValue
                                 id="domId"
+                                name="`${props.name}.${propertyConfiguration.name}`"
+                                record="props.record"
                                 canChangeDefinition="state.canChangeDefinition"
                                 checkDefinitionWriteAccess.bind="checkDefinitionWriteAccess ? checkDefinitionWriteAccess : () => {}"
                                 comodel="propertyConfiguration.comodel || ''"

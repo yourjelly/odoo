@@ -217,6 +217,13 @@ export class PropertiesField extends Component {
      */
     get groupedPropertiesList() {
         const propertiesList = this.propertiesList;
+        // If we don t have any properties, we want to return an empty array ?
+        // Actually, we return a array with 2 element ?
+        // Like: {title: null, name: null, columnSeparator: true, elements: Array(0), invisibleLabel: true}
+        // Look strange or normal ?
+        // if (!propertiesList.length) {
+        //     return [];
+        // }
         // default invisible group
         const groupedProperties =
             propertiesList[0]?.type !== "separator"
@@ -251,6 +258,7 @@ export class PropertiesField extends Component {
             }
             const properties = propertiesList.filter((property) => property.type !== "separator");
             properties.forEach((property, index) => {
+                // it s not possible to calculate it easily ?
                 const columnIndex = Math.floor(
                     (index * this.renderedColumnsCount) / properties.length
                 );
@@ -853,6 +861,7 @@ export class PropertiesField extends Component {
      * @param {boolean} isNewlyCreated
      */
     _openPropertyDefinition(target, propertyName, isNewlyCreated = false) {
+        // debugger
         const propertiesList = this.propertiesList;
         const propertyIndex = propertiesList.findIndex(
             (property) => property.name === propertyName
@@ -882,6 +891,7 @@ export class PropertiesField extends Component {
             }
         };
 
+        // debugger
         this.popover.open(target, {
             readonly: this.props.readonly || !this.state.canChangeDefinition,
             canChangeDefinition: this.state.canChangeDefinition,
@@ -897,6 +907,8 @@ export class PropertiesField extends Component {
             isNewlyCreated: isNewlyCreated,
             propertyIndex: propertyIndex,
             propertiesSize: propertiesList.length,
+            record: this.props.record,
+            name: this.props.name,
         });
     }
 
