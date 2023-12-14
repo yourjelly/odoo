@@ -5824,7 +5824,7 @@ const ImageHandlerOption = SnippetOptionWidget.extend({
         await this._loadImageInfo();
         await this._rerenderXML();
         this._getImg().dataset.resizeWidth = this.optimizedWidth;
-        await this._applyOptions();
+        await this._applyOptions(false);
         await this.updateUI();
     },
     /**
