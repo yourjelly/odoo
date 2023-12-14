@@ -67,7 +67,7 @@ class PaymentTransaction(models.Model):
             'merchantTransactionId': self.reference,
             'merchantUserId': self.partner_email,
             'amount': converted_amount,
-            'redirectUrl': url_join(base_url, PhonePeController._callback_url),
+            'redirectUrl': url_join(base_url, payment_redirect),
             'redirectMode': 'REDIRECT',
             'callbackUrl': url_join(base_url, PhonePeController._callback_url),
             'mobileNumber': self.partner_phone,
