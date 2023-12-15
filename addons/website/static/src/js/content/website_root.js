@@ -50,10 +50,9 @@ export const WebsiteRoot = publicRootData.PublicRoot.extend({
      * @override
      */
     _getContext: function (context) {
-        var html = document.documentElement;
         return Object.assign({
-            'website_id': html.getAttribute('data-website-id') | 0,
-        }, this._super.apply(this, arguments));
+            'website_id': session.website_id | 0,
+        }, this._super(...arguments));
     },
     /**
      * @override

@@ -1,13 +1,13 @@
 /** @odoo-module **/
 
 import { rpc } from "@web/core/network/rpc";
+import { session } from "@web/session";
 import wUtils from "@website/js/utils";
 
 export const cartHandlerMixin = {
     getRedirectOption() {
-        const html = document.documentElement;
-        this.stayOnPageOption = html.dataset.add2cartRedirect === '1';
-        this.forceDialog = html.dataset.add2cartRedirect === '2';
+        this.stayOnPageOption = session.add2cart_redirect === '1';
+        this.forceDialog = session.add2cart_redirect === '2';
     },
     getCartHandlerOptions(ev) {
         this.isBuyNow = ev.currentTarget.classList.contains('o_we_buy_now');

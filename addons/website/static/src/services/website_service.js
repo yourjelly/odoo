@@ -3,6 +3,7 @@
 import { _t } from "@web/core/l10n/translation";
 import { registry } from '@web/core/registry';
 import { loadBundle } from "@web/core/assets";
+import { session } from "@web/session";
 
 import { FullscreenIndication } from '../components/fullscreen_indication/fullscreen_indication';
 import { WebsiteLoader } from '../components/website_loader/website_loader';
@@ -115,7 +116,7 @@ export const websiteService = {
                 const { dataset } = document.documentElement;
                 // XML files have no dataset on Firefox, and an empty one on
                 // Chrome.
-                const isWebsitePage = dataset && dataset.websiteId;
+                const isWebsitePage = document.defaultView.odoo.loader.modules.get('@web/session').session.website_id;
                 if (!isWebsitePage) {
                     currentMetadata = {};
                 } else {

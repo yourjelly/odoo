@@ -395,10 +395,10 @@ class Http(models.AbstractModel):
             'geoip_country_code': geoip_country_code,
             'geoip_phone_code': geoip_phone_code,
             'lang_url_code': request.lang._get_cached('url_code'),
+            'website_id': request.website.id,
         })
         if request.env.user.has_group('website.group_website_restricted_editor'):
             session_info.update({
-                'website_id': request.website.id,
                 'website_company_id': request.website._get_cached('company_id'),
             })
         session_info['bundle_params']['website_id'] = request.website.id
