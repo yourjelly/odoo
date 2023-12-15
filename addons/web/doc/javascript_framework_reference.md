@@ -38,11 +38,13 @@ Last updated:  Dec 14, 2023
   - [6.7. Routing](#67-routing)
   - [6.8. Error handling](#68-error-handling)
   - [6.9. Javascript libraries](#69-javascript-libraries)
-  - [6.10. Command palette](#610-command-palette)
-  - [6.11. Notifications](#611-notifications)
-  - [6.12. Dialogs and modals](#612-dialogs-and-modals)
-  - [6.13. Popover](#613-popover)
-  - [6.14. Overlays](#614-overlays)
+  - [6.10. Date handling](#610-date-handling)
+  - [6.11. Debug mode](#611-debug-mode)
+  - [6.12. Command palette](#612-command-palette)
+  - [6.13. Notifications](#613-notifications)
+  - [6.14. Dialogs and modals](#614-dialogs-and-modals)
+  - [6.15. Popover](#615-popover)
+  - [6.16. Overlays](#616-overlays)
 - [7. Web client](#7-web-client)
   - [7.1. The environment (env)](#71-the-environment-env)
   - [7.2. ir.action model](#72-iraction-model)
@@ -65,14 +67,12 @@ Last updated:  Dec 14, 2023
   - [15.1. Unit tests](#151-unit-tests)
   - [15.2. Tours](#152-tours)
 - [16. Miscellaneous](#16-miscellaneous)
-  - [16.1. Date handling](#161-date-handling)
-  - [16.2. Debug mode](#162-debug-mode)
-  - [16.3. Patching system](#163-patching-system)
-  - [16.4. pyjs](#164-pyjs)
-  - [16.5. Links and button](#165-links-and-button)
-  - [16.6. Special attributes (tooltip)](#166-special-attributes-tooltip)
-  - [16.7. Security](#167-security)
-  - [16.8. Macros](#168-macros)
+  - [16.1. Patching system](#161-patching-system)
+  - [16.2. pyjs](#162-pyjs)
+  - [16.3. Links and button](#163-links-and-button)
+  - [16.4. Special attributes (tooltip)](#164-special-attributes-tooltip)
+  - [16.5. Security](#165-security)
+  - [16.6. Macros](#166-macros)
 
 
 # 1. Introduction
@@ -125,12 +125,14 @@ explain how it works
 ## 6.8. Error handling
 ## 6.9. Javascript libraries
 
-## 6.10. Command palette
-## 6.11. Notifications
-## 6.12. Dialogs and modals
-## 6.13. Popover
-## 6.14. Overlays
+## 6.10. Date handling
+## 6.11. Debug mode
 
+## 6.12. Command palette
+## 6.13. Notifications
+## 6.14. Dialogs and modals
+## 6.15. Popover
+## 6.16. Overlays
 
 
 # 7. Web client
@@ -175,12 +177,10 @@ Function actions
 
 # 16. Miscellaneous
 
-## 16.1. Date handling
-## 16.2. Debug mode
-## 16.3. Patching system
-## 16.4. pyjs
-## 16.5. Links and button
-## 16.6. Special attributes (tooltip)
-## 16.7. Security
-## 16.8. Macros
+## 16.1. Patching system
+## 16.2. pyjs
+## 16.3. Links and button
+## 16.4. Special attributes (tooltip)
+## 16.5. Security
+## 16.6. Macros
 
