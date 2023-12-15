@@ -36,11 +36,13 @@ Last updated:  Dec 14, 2023
     - [6.6.4. Network errors](#664-network-errors)
     - [6.6.5. Downloading a file](#665-downloading-a-file)
   - [6.7. Routing](#67-routing)
-  - [6.8. Command palette](#68-command-palette)
-  - [6.9. Notifications](#69-notifications)
-  - [6.10. Dialogs and modals](#610-dialogs-and-modals)
-  - [6.11. Popover](#611-popover)
-  - [6.12. Overlays](#612-overlays)
+  - [6.8. Error handling](#68-error-handling)
+  - [6.9. Javascript libraries](#69-javascript-libraries)
+  - [6.10. Command palette](#610-command-palette)
+  - [6.11. Notifications](#611-notifications)
+  - [6.12. Dialogs and modals](#612-dialogs-and-modals)
+  - [6.13. Popover](#613-popover)
+  - [6.14. Overlays](#614-overlays)
 - [7. Web client](#7-web-client)
   - [7.1. The environment (env)](#71-the-environment-env)
   - [7.2. ir.action model](#72-iraction-model)
@@ -54,25 +56,23 @@ Last updated:  Dec 14, 2023
   - [8.1. ir.ui.view model](#81-iruiview-model)
 - [9. Fields](#9-fields)
 - [10. Services](#10-services)
-- [11. Error handling](#11-error-handling)
-- [12. Javascript libraries](#12-javascript-libraries)
-- [13. Registries](#13-registries)
-- [14. The Relational Model](#14-the-relational-model)
-  - [14.1. Record component](#141-record-component)
-- [15. Components](#15-components)
-- [16. Utility functions](#16-utility-functions)
-- [17. Test framework](#17-test-framework)
-  - [17.1. Unit tests](#171-unit-tests)
-  - [17.2. Tours](#172-tours)
-- [18. Miscellaneous](#18-miscellaneous)
-  - [18.1. Date handling](#181-date-handling)
-  - [18.2. Debug mode](#182-debug-mode)
-  - [18.3. Patching system](#183-patching-system)
-  - [18.4. pyjs](#184-pyjs)
-  - [18.5. Links and button](#185-links-and-button)
-  - [18.6. Special attributes (tooltip)](#186-special-attributes-tooltip)
-  - [18.7. Security](#187-security)
-  - [18.8. Macros](#188-macros)
+- [11. Registries](#11-registries)
+- [12. The Relational Model](#12-the-relational-model)
+  - [12.1. Record component](#121-record-component)
+- [13. Components](#13-components)
+- [14. Utility functions](#14-utility-functions)
+- [15. Test framework](#15-test-framework)
+  - [15.1. Unit tests](#151-unit-tests)
+  - [15.2. Tours](#152-tours)
+- [16. Miscellaneous](#16-miscellaneous)
+  - [16.1. Date handling](#161-date-handling)
+  - [16.2. Debug mode](#162-debug-mode)
+  - [16.3. Patching system](#163-patching-system)
+  - [16.4. pyjs](#164-pyjs)
+  - [16.5. Links and button](#165-links-and-button)
+  - [16.6. Special attributes (tooltip)](#166-special-attributes-tooltip)
+  - [16.7. Security](#167-security)
+  - [16.8. Macros](#168-macros)
 
 
 # 1. Introduction
@@ -122,12 +122,16 @@ explain how it works
 ### 6.6.5. Downloading a file
 
 ## 6.7. Routing
+## 6.8. Error handling
+## 6.9. Javascript libraries
 
-## 6.8. Command palette
-## 6.9. Notifications
-## 6.10. Dialogs and modals
-## 6.11. Popover
-## 6.12. Overlays
+## 6.10. Command palette
+## 6.11. Notifications
+## 6.12. Dialogs and modals
+## 6.13. Popover
+## 6.14. Overlays
+
+
 
 # 7. Web client
 
@@ -155,31 +159,28 @@ Function actions
 
 # 10. Services
 
-# 11. Error handling
 
-# 12. Javascript libraries
+# 11. Registries
 
-# 13. Registries
+# 12. The Relational Model
 
-# 14. The Relational Model
+## 12.1. Record component
 
-## 14.1. Record component
+# 13. Components
 
-# 15. Components
+# 14. Utility functions
+# 15. Test framework
+## 15.1. Unit tests
+## 15.2. Tours
 
-# 16. Utility functions
-# 17. Test framework
-## 17.1. Unit tests
-## 17.2. Tours
+# 16. Miscellaneous
 
-# 18. Miscellaneous
-
-## 18.1. Date handling
-## 18.2. Debug mode
-## 18.3. Patching system
-## 18.4. pyjs
-## 18.5. Links and button
-## 18.6. Special attributes (tooltip)
-## 18.7. Security
-## 18.8. Macros
+## 16.1. Date handling
+## 16.2. Debug mode
+## 16.3. Patching system
+## 16.4. pyjs
+## 16.5. Links and button
+## 16.6. Special attributes (tooltip)
+## 16.7. Security
+## 16.8. Macros
 
