@@ -9,7 +9,7 @@ Last updated:  Dec 14, 2023
 - [2. Controllers](#2-controllers)
   - [2.1. Defining a controller](#21-defining-a-controller)
   - [2.2. call\_kw](#22-call_kw)
-  - [2.3. web\_read](#23-web_read)
+  - [2.3. `/web/dataset/call_kw/web_read`](#23-webdatasetcall_kwweb_read)
   - [2.4. web\_readgroup](#24-web_readgroup)
 - [3. Managing Assets](#3-managing-assets)
   - [3.1. Bundles](#31-bundles)
@@ -80,7 +80,7 @@ Last updated:  Dec 14, 2023
 
 ## 2.1. Defining a controller
 ## 2.2. call_kw
-## 2.3. web_read
+## 2.3. `/web/dataset/call_kw/web_read`
 ## 2.4. web_readgroup
 
 # 3. Managing Assets
@@ -115,6 +115,9 @@ explain how it works
 
 ### 5.6.1. rpc function
 ### 5.6.2. orm system
+
+commands
+
 ### 5.6.3. http service
 ### 5.6.4. Network errors
 ### 5.6.5. Downloading a file
