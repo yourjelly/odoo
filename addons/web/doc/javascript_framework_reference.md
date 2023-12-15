@@ -36,18 +36,21 @@ Last updated:  Dec 14, 2023
   - [Downloading a file](#downloading-a-file)
 - [The environment (env)](#the-environment-env)
 - [Styling Odoo](#styling-odoo)
-- [UI Models](#ui-models)
-  - [ir.ui.view](#iruiview)
-  - [ir.action](#iraction)
-  - [ir.action.act\_window](#iractionact_window)
-  - [menu items](#menu-items)
+- [Web client](#web-client)
+  - [ir.ui.view model](#iruiview-model)
+  - [ir.action model](#iraction-model)
+  - [ir.action.act\_window model](#iractionact_window-model)
+  - [menu items model](#menu-items-model)
+  - [Actions](#actions)
+  - [Routing](#routing)
+    - [Client actions](#client-actions)
+    - [Window actions](#window-actions)
 - [Views](#views)
 - [Fields](#fields)
-- [Routing](#routing)
 - [Services](#services)
 - [Error handling](#error-handling)
 - [Javascript libraries](#javascript-libraries)
-- [Actions](#actions)
+- [Actions](#actions-1)
 - [Registries](#registries)
 - [The Relational Model](#the-relational-model)
   - [Record component](#record-component)
@@ -102,7 +105,9 @@ Last updated:  Dec 14, 2023
 ## authentication
 ## session_info
 
+
 # 5. Localization
+
 
 explain how it works
 
@@ -118,18 +123,27 @@ explain how it works
 
 # Styling Odoo
 
-# UI Models
+scss/css
+variables
 
-## ir.ui.view
-## ir.action
-## ir.action.act_window
-## menu items
+# Web client
+
+## ir.ui.view model
+## ir.action model
+## ir.action.act_window model
+## menu items model
+## Actions
+## Routing
+
+### Client actions
+Function actions
+
+### Window actions
 
 # Views
 
 # Fields
 
-# Routing
 
 
 # Services
