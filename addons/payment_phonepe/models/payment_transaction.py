@@ -6,7 +6,7 @@ import base64
 import json
 import hashlib
 
-from werkzeug.urls import url_join
+from werkzeug.urls import url_join, url_encode
 
 from odoo import _, models
 from odoo.exceptions import ValidationError
@@ -62,15 +62,16 @@ class PaymentTransaction(models.Model):
             return res
         converted_amount = payment_utils.to_minor_currency_units(self.amount, self.currency_id)
         base_url = self.get_base_url()
+        return_url_params = {'reference': self.reference}
         payment_redirect_url = "/payment/status"
         payload = {
             'merchantId': self.provider_id.phonepe_merchant_id,
             'merchantTransactionId': self.reference,
             'merchantUserId': self.partner_email,
             'amount': converted_amount,
-            'redirectUrl': url_join(base_url, payment_redirect_url),
+            'redirectUrl': url_join(base_url, f'{payment_redirect_url}?{url_encode(return_url_params)}'),
             'redirectMode': 'REDIRECT',
-            'callbackUrl': url_join(base_url, PhonePeController._callback_url),
+            'callbackUrl': f'{base_url}{PhonePeController._callback_url}',
             'mobileNumber': self.partner_phone,
             'paymentInstrument': {
                 'type': 'PAY_PAGE'
