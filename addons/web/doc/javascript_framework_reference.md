@@ -40,39 +40,38 @@ Last updated:  Dec 14, 2023
   - [6.9. Javascript libraries](#69-javascript-libraries)
   - [6.10. Date handling](#610-date-handling)
   - [6.11. Debug mode](#611-debug-mode)
-  - [6.12. Command palette](#612-command-palette)
-  - [6.13. Notifications](#613-notifications)
-  - [6.14. Dialogs and modals](#614-dialogs-and-modals)
-  - [6.15. Popover](#615-popover)
-  - [6.16. Overlays](#616-overlays)
-- [7. Web client](#7-web-client)
-  - [7.1. The environment (env)](#71-the-environment-env)
-  - [7.2. ir.action model](#72-iraction-model)
-  - [7.3. ir.action.act\_window model](#73-iractionact_window-model)
-  - [7.4. menu items model](#74-menu-items-model)
-  - [7.5. Actions](#75-actions)
-  - [7.6. Systray items](#76-systray-items)
-    - [7.6.1. Client actions](#761-client-actions)
-    - [7.6.2. Window actions](#762-window-actions)
-- [8. Views](#8-views)
-  - [8.1. ir.ui.view model](#81-iruiview-model)
-- [9. Fields](#9-fields)
-- [10. Services](#10-services)
-- [11. Registries](#11-registries)
+  - [6.12. Patching system](#612-patching-system)
+  - [6.13. pyjs](#613-pyjs)
+  - [6.14. Links and button](#614-links-and-button)
+  - [6.15. Special attributes (tooltip)](#615-special-attributes-tooltip)
+  - [6.16. Security](#616-security)
+  - [6.17. Macros](#617-macros)
+  - [6.18. Command palette](#618-command-palette)
+  - [6.19. Notifications](#619-notifications)
+  - [6.20. Dialogs and modals](#620-dialogs-and-modals)
+  - [6.21. Popover](#621-popover)
+  - [6.22. Overlays](#622-overlays)
+- [7. Services](#7-services)
+- [8. Registries](#8-registries)
+- [9. Components](#9-components)
+- [10. Utility functions](#10-utility-functions)
+- [11. Web client](#11-web-client)
+  - [11.1. The environment (env)](#111-the-environment-env)
+  - [11.2. ir.action model](#112-iraction-model)
+  - [11.3. ir.action.act\_window model](#113-iractionact_window-model)
+  - [11.4. menu items model](#114-menu-items-model)
+  - [11.5. Actions](#115-actions)
+  - [11.6. Systray items](#116-systray-items)
+    - [11.6.1. Client actions](#1161-client-actions)
+    - [11.6.2. Window actions](#1162-window-actions)
 - [12. The Relational Model](#12-the-relational-model)
   - [12.1. Record component](#121-record-component)
-- [13. Components](#13-components)
-- [14. Utility functions](#14-utility-functions)
+- [13. Views](#13-views)
+  - [13.1. ir.ui.view model](#131-iruiview-model)
+- [14. Fields](#14-fields)
 - [15. Test framework](#15-test-framework)
   - [15.1. Unit tests](#151-unit-tests)
   - [15.2. Tours](#152-tours)
-- [16. Miscellaneous](#16-miscellaneous)
-  - [16.1. Patching system](#161-patching-system)
-  - [16.2. pyjs](#162-pyjs)
-  - [16.3. Links and button](#163-links-and-button)
-  - [16.4. Special attributes (tooltip)](#164-special-attributes-tooltip)
-  - [16.5. Security](#165-security)
-  - [16.6. Macros](#166-macros)
 
 
 # 1. Introduction
@@ -128,59 +127,56 @@ explain how it works
 ## 6.10. Date handling
 ## 6.11. Debug mode
 
-## 6.12. Command palette
-## 6.13. Notifications
-## 6.14. Dialogs and modals
-## 6.15. Popover
-## 6.16. Overlays
+## 6.12. Patching system
+## 6.13. pyjs
+## 6.14. Links and button
+## 6.15. Special attributes (tooltip)
+## 6.16. Security
+## 6.17. Macros
 
 
-# 7. Web client
+## 6.18. Command palette
+## 6.19. Notifications
+## 6.20. Dialogs and modals
+## 6.21. Popover
+## 6.22. Overlays
 
-## 7.1. The environment (env)
+# 7. Services
 
-## 7.2. ir.action model
-## 7.3. ir.action.act_window model
-## 7.4. menu items model
-## 7.5. Actions
-## 7.6. Systray items
 
-### 7.6.1. Client actions
+# 8. Registries
+
+# 9. Components
+
+# 10. Utility functions
+
+# 11. Web client
+
+## 11.1. The environment (env)
+
+## 11.2. ir.action model
+## 11.3. ir.action.act_window model
+## 11.4. menu items model
+## 11.5. Actions
+## 11.6. Systray items
+
+### 11.6.1. Client actions
 Function actions
 
-### 7.6.2. Window actions
-
-
-# 8. Views
-
-## 8.1. ir.ui.view model
-
-# 9. Fields
-
-
-
-# 10. Services
-
-
-# 11. Registries
+### 11.6.2. Window actions
 
 # 12. The Relational Model
 
 ## 12.1. Record component
 
-# 13. Components
 
-# 14. Utility functions
+# 13. Views
+
+## 13.1. ir.ui.view model
+
+# 14. Fields
+
 # 15. Test framework
 ## 15.1. Unit tests
 ## 15.2. Tours
-
-# 16. Miscellaneous
-
-## 16.1. Patching system
-## 16.2. pyjs
-## 16.3. Links and button
-## 16.4. Special attributes (tooltip)
-## 16.5. Security
-## 16.6. Macros
 
