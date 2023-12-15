@@ -34,46 +34,47 @@ Last updated:  Dec 14, 2023
   - [7.3. http service](#73-http-service)
   - [7.4. Network errors](#74-network-errors)
   - [7.5. Downloading a file](#75-downloading-a-file)
-- [8. The environment (env)](#8-the-environment-env)
-- [9. Styling Odoo](#9-styling-odoo)
-- [10. Web client](#10-web-client)
-  - [10.1. ir.action model](#101-iraction-model)
-  - [10.2. ir.action.act\_window model](#102-iractionact_window-model)
-  - [10.3. menu items model](#103-menu-items-model)
-  - [10.4. Actions](#104-actions)
-    - [10.4.1. Client actions](#1041-client-actions)
-    - [10.4.2. Window actions](#1042-window-actions)
-  - [10.5. Routing](#105-routing)
-- [11. Views](#11-views)
-  - [11.1. ir.ui.view model](#111-iruiview-model)
-- [12. Fields](#12-fields)
-- [13. Services](#13-services)
-- [14. Error handling](#14-error-handling)
-- [15. Javascript libraries](#15-javascript-libraries)
-- [16. Actions](#16-actions)
-- [17. Registries](#17-registries)
-- [18. The Relational Model](#18-the-relational-model)
-  - [18.1. Record component](#181-record-component)
-- [19. Components](#19-components)
-- [20. Utility functions](#20-utility-functions)
-- [21. Test framework](#21-test-framework)
-  - [21.1. Unit tests](#211-unit-tests)
-  - [21.2. Tours](#212-tours)
-- [22. Miscellaneous](#22-miscellaneous)
-  - [22.1. Date handling](#221-date-handling)
-  - [22.2. Debug mode](#222-debug-mode)
-  - [22.3. Patching system](#223-patching-system)
-  - [22.4. pyjs](#224-pyjs)
-  - [22.5. Links and button](#225-links-and-button)
-  - [22.6. Special attributes (tooltip)](#226-special-attributes-tooltip)
-  - [22.7. Security](#227-security)
-  - [22.8. Systray items](#228-systray-items)
-  - [22.9. Command palette](#229-command-palette)
-  - [22.10. Notifications](#2210-notifications)
-  - [22.11. Dialogs and modals](#2211-dialogs-and-modals)
-  - [22.12. Popover](#2212-popover)
-  - [22.13. Overlays](#2213-overlays)
-  - [22.14. Macros](#2214-macros)
+- [8. Styling Odoo](#8-styling-odoo)
+- [Common UI Features](#common-ui-features)
+  - [21.8. Command palette](#218-command-palette)
+  - [21.9. Notifications](#219-notifications)
+  - [21.10. Dialogs and modals](#2110-dialogs-and-modals)
+  - [21.11. Popover](#2111-popover)
+  - [21.12. Overlays](#2112-overlays)
+- [9. Web client](#9-web-client)
+  - [9.1. The environment (env)](#91-the-environment-env)
+  - [9.2. ir.action model](#92-iraction-model)
+  - [9.3. ir.action.act\_window model](#93-iractionact_window-model)
+  - [9.4. menu items model](#94-menu-items-model)
+  - [9.5. Actions](#95-actions)
+  - [9.6. Systray items](#96-systray-items)
+    - [9.6.1. Client actions](#961-client-actions)
+    - [9.6.2. Window actions](#962-window-actions)
+  - [9.7. Routing](#97-routing)
+- [10. Views](#10-views)
+  - [10.1. ir.ui.view model](#101-iruiview-model)
+- [11. Fields](#11-fields)
+- [12. Services](#12-services)
+- [13. Error handling](#13-error-handling)
+- [14. Javascript libraries](#14-javascript-libraries)
+- [15. Actions](#15-actions)
+- [16. Registries](#16-registries)
+- [17. The Relational Model](#17-the-relational-model)
+  - [17.1. Record component](#171-record-component)
+- [18. Components](#18-components)
+- [19. Utility functions](#19-utility-functions)
+- [20. Test framework](#20-test-framework)
+  - [20.1. Unit tests](#201-unit-tests)
+  - [20.2. Tours](#202-tours)
+- [21. Miscellaneous](#21-miscellaneous)
+  - [21.1. Date handling](#211-date-handling)
+  - [21.2. Debug mode](#212-debug-mode)
+  - [21.3. Patching system](#213-patching-system)
+  - [21.4. pyjs](#214-pyjs)
+  - [21.5. Links and button](#215-links-and-button)
+  - [21.6. Special attributes (tooltip)](#216-special-attributes-tooltip)
+  - [21.7. Security](#217-security)
+  - [21.13. Macros](#2113-macros)
 
 
 # 1. Introduction
@@ -119,70 +120,74 @@ explain how it works
 ## 7.4. Network errors
 ## 7.5. Downloading a file
 
-# 8. The environment (env)
 
-# 9. Styling Odoo
+# 8. Styling Odoo
 
 scss/css
 variables
 
-# 10. Web client
+# Common UI Features
 
-## 10.1. ir.action model
-## 10.2. ir.action.act_window model
-## 10.3. menu items model
-## 10.4. Actions
+## 21.8. Command palette
+## 21.9. Notifications
+## 21.10. Dialogs and modals
+## 21.11. Popover
+## 21.12. Overlays
 
-### 10.4.1. Client actions
+# 9. Web client
+
+## 9.1. The environment (env)
+
+## 9.2. ir.action model
+## 9.3. ir.action.act_window model
+## 9.4. menu items model
+## 9.5. Actions
+## 9.6. Systray items
+
+### 9.6.1. Client actions
 Function actions
 
-### 10.4.2. Window actions
+### 9.6.2. Window actions
 
-## 10.5. Routing
+## 9.7. Routing
 
-# 11. Views
+# 10. Views
 
-## 11.1. ir.ui.view model
+## 10.1. ir.ui.view model
 
-# 12. Fields
+# 11. Fields
 
 
 
-# 13. Services
+# 12. Services
 
-# 14. Error handling
+# 13. Error handling
 
-# 15. Javascript libraries
+# 14. Javascript libraries
 
-# 16. Actions
+# 15. Actions
 
-# 17. Registries
+# 16. Registries
 
-# 18. The Relational Model
+# 17. The Relational Model
 
-## 18.1. Record component
+## 17.1. Record component
 
-# 19. Components
+# 18. Components
 
-# 20. Utility functions
-# 21. Test framework
-## 21.1. Unit tests
-## 21.2. Tours
+# 19. Utility functions
+# 20. Test framework
+## 20.1. Unit tests
+## 20.2. Tours
 
-# 22. Miscellaneous
+# 21. Miscellaneous
 
-## 22.1. Date handling
-## 22.2. Debug mode
-## 22.3. Patching system
-## 22.4. pyjs
-## 22.5. Links and button
-## 22.6. Special attributes (tooltip)
-## 22.7. Security
-## 22.8. Systray items
-## 22.9. Command palette
-## 22.10. Notifications
-## 22.11. Dialogs and modals
-## 22.12. Popover
-## 22.13. Overlays
-## 22.14. Macros
+## 21.1. Date handling
+## 21.2. Debug mode
+## 21.3. Patching system
+## 21.4. pyjs
+## 21.5. Links and button
+## 21.6. Special attributes (tooltip)
+## 21.7. Security
+## 21.13. Macros
 
