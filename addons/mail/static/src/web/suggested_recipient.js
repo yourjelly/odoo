@@ -44,6 +44,12 @@ export class SuggestedRecipient extends Component {
                     default_name: this.props.recipient.name,
                     default_lang: this.props.recipient.lang,
                     force_email: true,
+                    ...Object.fromEntries(
+                        Object.entries(this.props.recipient.customerInfo).map(([k, v]) => [
+                            "default_" + k,
+                            v,
+                        ])
+                    ),
                     ref: "compound_context",
                 },
                 onRecordSaved: () =>

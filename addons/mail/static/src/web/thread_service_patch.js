@@ -150,12 +150,14 @@ patch(ThreadService.prototype, "mail/web", {
         const recipients = [];
         for (const data of dataList) {
             const [partner_id, emailInfo, lang, reason, customerInfo] = data;
-            let [name, email] = emailInfo ? parseEmail(emailInfo) : [];
-            if ((!name || name === email) && customerInfo?.name) {
-                name = customerInfo.name;
+            let email = customerInfo?.email;
+            if (!email) {
+                [, email] = parseEmail(emailInfo);
             }
+            const name = customerInfo?.name || email;
             recipients.push({
                 id: nextId++,
+                fullName: emailInfo,
                 name,
                 email,
                 lang,
@@ -167,6 +169,7 @@ patch(ThreadService.prototype, "mail/web", {
                       })
                     : false,
                 checked: true,
+                customerInfo,
             });
         }
         thread.suggestedRecipients = recipients;

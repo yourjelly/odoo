@@ -894,6 +894,103 @@ export class ThreadService {
         return composer;
     }
 
+    _updatePersonas(partners) {
+        for (const partner_id in partners) {
+            const partnerData = partners[partner_id];
+            const persona = this.personaService.insert({ ...partnerData });
+            const email = partnerData["email"];
+            const recipient = this.thread.suggestedRecipients.find(
+                (recipient) => recipient.email === email
+            );
+            Object.assign(recipient, { persona });
+        }
+    }
+
+    async _createPartnersFromData(partnersData) {
+        if (!partnersData.length) {
+            return [];
+        }
+        const partnersIds = await this.env.services.orm.create("res.partner", partnersData);
+        if (!partnersIds) {
+            return [];
+        }
+        const partners = await this.env.services.orm.read(
+            "res.partner",
+            typeof partnersIds === "number" ? [partnersIds] : partnersIds,
+            ["email"]
+        );
+        return partners;
+    }
+
+    async _createPartnersFromEmail(partner_emails) {
+        if (!partner_emails.length) {
+            return [];
+        }
+        const partners = await this.rpc("/mail/partner/from_email", {
+            emails: partner_emails,
+        });
+        if (!partners) {
+            return [];
+        }
+        return partners;
+    }
+
+    async _createPartnersFromRecipients(partnersToCreate) {
+        const partnersEmail = [];
+        const partnersData = [];
+        partnersToCreate.forEach((partnerData) => {
+            partnerData.email &&
+            (partnerData.length == 1 || (partnerData.length == 2 && partnerData.name))
+                ? partnersEmail.push(
+                      partnerData.name
+                          ? `${partnerData.name} <${partnerData.email}>`
+                          : partnerData.email
+                  )
+                : partnersData.push(partnerData);
+        });
+        return [
+            ...(await this._createPartnersFromEmail(partnersEmail)),
+            ...(await this._createPartnersFromData(partnersData)),
+        ];
+    }
+
+    async _getPartnersData(thread, create = false) {
+        const partnersData = [];
+        const partnersToCreate = [];
+        for (const recipient of thread.suggestedRecipients) {
+            if (!recipient.checked) {
+                continue;
+            }
+            if (recipient.persona) {
+                partnersData.push({ id: recipient.persona.id });
+            } else {
+                const defaultValues = recipient.customerInfo || {};
+                const partner = {};
+                for (const key of [
+                    "company_name",
+                    "company_type",
+                    "email",
+                    "lang",
+                    "name",
+                    "phone",
+                    "type",
+                ]) {
+                    const value = recipient[key] || defaultValues[key];
+                    if (value) {
+                        partner[key] = value;
+                    }
+                }
+                create ? partnersToCreate.push(partner) : partnersData.push(partner);
+            }
+        }
+        if (create && partnersToCreate.length) {
+            const partners = await this._createPartnersFromRecipients(partnersToCreate);
+            this._updatePersonas(thread, partners);
+            partnersData.push(...partners);
+        }
+        return partnersData;
+    }
+
     /**
      * @param {Thread} thread
      * @param {string} body
@@ -904,16 +1001,14 @@ export class ThreadService {
         const validMentions = this.store.user
             ? this.messageService.getMentionsFromText(rawMentions, body)
             : undefined;
-        const partner_ids = validMentions?.partners.map((partner) => partner.id);
-        let recipientEmails = [];
+        const partner_ids = validMentions?.partners.map((partner) => partner.id) || [];
+        const partners = [];
         if (!isNote) {
-            const recipientIds = thread.suggestedRecipients
-                .filter((recipient) => recipient.persona && recipient.checked)
-                .map((recipient) => recipient.persona.id);
-            recipientEmails = thread.suggestedRecipients
-                .filter((recipient) => recipient.checked && !recipient.persona)
-                .map((recipient) => recipient.email);
-            partner_ids?.push(...recipientIds);
+            const partnersData = await this._getPartnersData(thread);
+            partner_ids.push(
+                ...partnersData.filter((partner) => partner.id).map((partner) => partner.id)
+            );
+            partners.push(...partnersData.filter((partner) => !partner.id));
         }
         const tmpId = this.messageService.getNextTemporaryId();
         let params = {
@@ -928,8 +1023,8 @@ export class ThreadService {
                 attachment_tokens: attachments.map((attachment) => attachment.accessToken),
                 message_type: "comment",
                 partner_ids,
+                partners,
                 subtype_xmlid: subtype,
-                partner_emails: recipientEmails,
             },
             thread_id: thread.id,
             thread_model: thread.model,

@@ -68,6 +68,19 @@ class ThreadController(http.Controller):
     def _get_allowed_message_post_params(self):
         return {"attachment_ids", "body", "message_type", "partner_ids", "subtype_xmlid", "parent_id"}
 
+    def _get_or_create_partners(self, partners_data):
+        emails = []
+        partners = []
+        for partner_data in partners_data:
+            if partner_data.get("email") and (len(partner_data) == 1 or len(partner_data) == 2 and partner_data.get("name")):
+                emails.append(partner_data["email"])
+            else:
+                partners.append(partner_data)
+
+        new_partners = [record for record in request.env["res.partner"].create(partners)]
+        new_partners += request.env["res.partner"]._find_or_create_from_emails(emails)
+        return new_partners
+
     @http.route("/mail/message/post", methods=["POST"], type="json", auth="public")
     def mail_message_post(self, thread_model, thread_id, post_data, context=None):
         guest = request.env["mail.guest"]._get_guest_from_request(request)
@@ -80,11 +93,8 @@ class ThreadController(http.Controller):
         if "body" in post_data:
             post_data["body"] = Markup(post_data["body"])  # contains HTML such as @mentions
         new_partners = []
-        if "partner_emails" in post_data:
-            new_partners = [
-                record.id
-                for record in request.env["res.partner"]._find_or_create_from_emails(post_data["partner_emails"])
-            ]
+        if post_data.get("partners"):
+            new_partners = [r.id for r in self._get_or_create_partners(post_data["partners"])]
         post_data["partner_ids"] = list(set((post_data.get("partner_ids", [])) + new_partners))
         message_data = thread.message_post(
             **{key: value for key, value in post_data.items() if key in self._get_allowed_message_post_params()}

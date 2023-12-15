@@ -393,37 +393,18 @@ export class Composer extends Component {
     }
 
     async onClickFullComposer(ev) {
+        // const self = this;
+        const partnerIds = [];
         if (this.props.type !== "note") {
-            // auto-create partners of checked suggested partners
-            const emailsWithoutPartners = this.thread.suggestedRecipients
-                .filter((recipient) => recipient.checked && !recipient.persona)
-                .map((recipient) => recipient.email);
-            if (emailsWithoutPartners.length !== 0) {
-                const partners = await this.rpc("/mail/partner/from_email", {
-                    emails: emailsWithoutPartners,
-                });
-                for (const index in partners) {
-                    const partnerData = partners[index];
-                    const persona = this.personaService.insert({ ...partnerData, type: "partner" });
-                    const email = emailsWithoutPartners[index];
-                    const recipient = this.thread.suggestedRecipients.find(
-                        (recipient) => recipient.email === email
-                    );
-                    Object.assign(recipient, { persona });
-                }
-            }
+            const partnersData = await this.threadService._getPartnersData(this.thread, true);
+            partnerIds.push(...partnersData.map((partner) => partner.id));
         }
         const attachmentIds = this.props.composer.attachments.map((attachment) => attachment.id);
         const context = {
             default_attachment_ids: attachmentIds,
             default_body: escapeAndCompactTextContent(this.props.composer.textInputContent),
             default_model: this.thread.model,
-            default_partner_ids:
-                this.props.type === "note"
-                    ? []
-                    : this.thread.suggestedRecipients
-                          .filter((recipient) => recipient.checked)
-                          .map((recipient) => recipient.persona.id),
+            default_partner_ids: partnerIds,
             default_res_ids: [this.thread.id],
             default_subtype_xmlid: this.props.type === "note" ? "mail.mt_note" : "mail.mt_comment",
             mail_post_autofollow: this.thread.hasWriteAccess,

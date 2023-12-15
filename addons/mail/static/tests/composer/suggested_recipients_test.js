@@ -12,9 +12,97 @@ const views = {
                 <field name="message_follower_ids"/>
             </div>
         </form>`,
+    "res.partner,false,form": `
+        <form string="Fake">
+            <sheet>
+                <field name="name"/>
+                <field name="email"/>
+                <field name="phone"/>
+            </sheet>
+        </form>`,
 };
 
 QUnit.module("suggested_recipients");
+
+QUnit.test("send message with recipient checked by default", async (assert) => {
+    const pyEnv = await startServer();
+    const fakeId = pyEnv["res.fake"].create({
+        email_cc: "john@test.be",
+    });
+    const { openFormView } = await start({
+        async mockRPC(route, args, performRPC) {
+            if (route === "/mail/thread/data") {
+                const res = await performRPC(route, args);
+                assert.strictEqual(res["suggestedRecipients"].length, 1);
+                assert.deepEqual(res["suggestedRecipients"][0][1], "john@test.be");
+                res["suggestedRecipients"][0].push({
+                    name: "test name",
+                    phone: "123456789",
+                    company_name: "test company name",
+                });
+                return res;
+            }
+            if (route === "/mail/message/post") {
+                assert.deepEqual(args.post_data.partners, [
+                    {
+                        name: "test name",
+                        email: "john@test.be",
+                        phone: "123456789",
+                        company_name: "test company name",
+                    },
+                ]);
+            }
+        },
+    });
+    await openFormView("res.fake", fakeId);
+    await click("button:contains(Send message)");
+    await insertText(".o-mail-Composer-input", "Dummy Message");
+    await click(".o-mail-Composer-send");
+});
+
+QUnit.test("send message before creating partner from recipient", async (assert) => {
+    const pyEnv = await startServer();
+    const fakeId = pyEnv["res.fake"].create({
+        email_cc: "john@test.be",
+    });
+    let partner = pyEnv["res.partner"].search([["email", "=", "john@test.be"]]);
+    assert.strictEqual(partner.length, 0);
+    const { openFormView } = await start({
+        serverData: { views },
+        async mockRPC(route, args, performRPC) {
+            if (route === "/mail/thread/data") {
+                const res = await performRPC(route, args);
+                assert.strictEqual(res["suggestedRecipients"].length, 1);
+                assert.deepEqual(res["suggestedRecipients"][0][1], "john@test.be");
+                res["suggestedRecipients"][0].push({
+                    name: "test name",
+                    phone: "123456789",
+                    company_name: "test company name",
+                });
+                return res;
+            }
+            if (route === "/mail/message/post") {
+                assert.deepEqual(args.post_data.partners, [
+                    {
+                        name: "test name",
+                        email: "john@test.be",
+                        phone: "123456789",
+                        company_name: "test company name",
+                    },
+                ]);
+            }
+        },
+    });
+    await openFormView("res.fake", fakeId);
+    await click("button:contains(Send message)");
+    await click(".o-mail-SuggestedRecipient input");
+    await click(".o-mail-SuggestedRecipient input");
+    await click(".o_dialog .o_form_button_save");
+    partner = pyEnv["res.partner"].search([["email", "=", "john@test.be"]]);
+    assert.strictEqual(partner.length, 1);
+    await insertText(".o-mail-Composer-input", "Dummy Message");
+    await click(".o-mail-Composer-send");
+});
 
 QUnit.test("with 3 or less suggested recipients: no 'show more' button", async (assert) => {
     const pyEnv = await startServer();
