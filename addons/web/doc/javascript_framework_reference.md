@@ -11,13 +11,7 @@ Last updated:  Dec 14, 2023
   - [call\_kw](#call_kw)
   - [web\_read](#web_read)
   - [web\_readgroup](#web_readgroup)
-- [Network Requests](#network-requests)
-  - [rpc function](#rpc-function)
-  - [orm system](#orm-system)
-  - [http service](#http-service)
-  - [Handling network errors](#handling-network-errors)
-  - [Downloading a file](#downloading-a-file)
-- [Managing Assets](#managing-assets)
+- [2. Managing Assets](#2-managing-assets)
   - [Bundles](#bundles)
   - [Static files](#static-files)
   - [css and scss files](#css-and-scss-files)
@@ -26,6 +20,20 @@ Last updated:  Dec 14, 2023
   - [ir.asset model](#irasset-model)
   - [Lazy loading a bundle](#lazy-loading-a-bundle)
   - [Module Loader](#module-loader)
+- [3. Owl framework](#3-owl-framework)
+  - [Owl templates](#owl-templates)
+- [4. User and Session](#4-user-and-session)
+  - [Session](#session)
+  - [User](#user)
+  - [authentication](#authentication)
+  - [session\_info](#session_info)
+- [5. Localization](#5-localization)
+- [Network Requests](#network-requests)
+  - [rpc function](#rpc-function)
+  - [orm system](#orm-system)
+  - [http service](#http-service)
+  - [Handling network errors](#handling-network-errors)
+  - [Downloading a file](#downloading-a-file)
 - [The environment (env)](#the-environment-env)
 - [Styling Odoo](#styling-odoo)
 - [UI Models](#ui-models)
@@ -33,14 +41,9 @@ Last updated:  Dec 14, 2023
   - [ir.action](#iraction)
   - [ir.action.act\_window](#iractionact_window)
   - [menu items](#menu-items)
-- [Owl framework](#owl-framework)
-  - [Owl templates](#owl-templates)
 - [Views](#views)
 - [Fields](#fields)
 - [Routing](#routing)
-- [Session](#session)
-  - [authentication](#authentication)
-  - [session\_info](#session_info)
 - [Services](#services)
 - [Error handling](#error-handling)
 - [Javascript libraries](#javascript-libraries)
@@ -49,7 +52,6 @@ Last updated:  Dec 14, 2023
 - [The Relational Model](#the-relational-model)
   - [Record component](#record-component)
 - [Components](#components)
-- [Localization](#localization)
 - [Utility functions](#utility-functions)
 - [Test framework](#test-framework)
   - [Unit tests](#unit-tests)
@@ -79,15 +81,7 @@ Last updated:  Dec 14, 2023
 ## web_read
 ## web_readgroup
 
-# Network Requests
-## rpc function
-
-## orm system
-## http service
-## Handling network errors
-## Downloading a file
-
-# Managing Assets
+# 2. Managing Assets
 ## Bundles
 ## Static files
 ## css and scss files
@@ -96,6 +90,29 @@ Last updated:  Dec 14, 2023
 ## ir.asset model
 ## Lazy loading a bundle
 ## Module Loader
+
+# 3. Owl framework
+
+## Owl templates
+
+# 4. User and Session
+
+## Session
+## User
+## authentication
+## session_info
+
+# 5. Localization
+
+explain how it works
+
+# Network Requests
+
+## rpc function
+## orm system
+## http service
+## Handling network errors
+## Downloading a file
 
 # The environment (env)
 
@@ -108,20 +125,12 @@ Last updated:  Dec 14, 2023
 ## ir.action.act_window
 ## menu items
 
-# Owl framework
-
-## Owl templates
-
 # Views
 
 # Fields
 
 # Routing
 
-# Session
-
-## authentication
-## session_info
 
 # Services
 
@@ -139,7 +148,6 @@ Last updated:  Dec 14, 2023
 
 # Components
 
-# Localization
 # Utility functions
 # Test framework
 ## Unit tests
