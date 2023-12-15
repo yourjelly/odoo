@@ -76,6 +76,20 @@ Last updated:  Dec 14, 2023
 
 
 # 1. Introduction
+
+Odoo is a suite of applications built on top of a framework.  This document is an attempt at a complete reference to the frontend part of Odoo: the Odoo javascript framework.
+
+Broadly speaking, the Odoo JS framework is a set of tools, technologies and techniques that can be used to build, extend and test the Odoo user interface. Among others, it includes:
+
+- a set of controllers (/web, /call_kw, …)
+- a bundling system
+- a javascript component framework (Owl)
+- a set of components, hooks, utility functions and more
+- various libraries
+- a testing framework
+
+It handles all of the usual basic needs: assets, authentication, routing, translations (and localization), code-splitting, testing. The framework is designed to be very flexible. This is actually the main reason why Odoo needed to develop so many basic technologies: it was necessary to provide as much customization power as possible.
+
 # 2. Controllers
 
 ## 2.1. Defining a controller
