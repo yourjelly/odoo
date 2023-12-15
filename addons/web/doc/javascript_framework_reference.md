@@ -22,58 +22,57 @@ Last updated:  Dec 14, 2023
   - [3.8. Module Loader](#38-module-loader)
 - [4. Owl framework](#4-owl-framework)
   - [4.1. Owl templates](#41-owl-templates)
-- [5. User and Session](#5-user-and-session)
-  - [5.1. Session](#51-session)
-  - [5.2. User](#52-user)
-  - [5.3. authentication](#53-authentication)
-  - [5.4. session\_info](#54-session_info)
-- [6. Localization](#6-localization)
-- [7. Network Requests](#7-network-requests)
-  - [7.1. rpc function](#71-rpc-function)
-  - [7.2. orm system](#72-orm-system)
-  - [7.3. http service](#73-http-service)
-  - [7.4. Network errors](#74-network-errors)
-  - [7.5. Downloading a file](#75-downloading-a-file)
-- [8. Styling Odoo](#8-styling-odoo)
-- [9. Common UI Features](#9-common-ui-features)
-  - [9.1. Command palette](#91-command-palette)
-  - [9.2. Notifications](#92-notifications)
-  - [9.3. Dialogs and modals](#93-dialogs-and-modals)
-  - [9.4. Popover](#94-popover)
-  - [9.5. Overlays](#95-overlays)
-- [10. Web client](#10-web-client)
-  - [10.1. The environment (env)](#101-the-environment-env)
-  - [10.2. ir.action model](#102-iraction-model)
-  - [10.3. ir.action.act\_window model](#103-iractionact_window-model)
-  - [10.4. menu items model](#104-menu-items-model)
-  - [10.5. Actions](#105-actions)
-  - [10.6. Systray items](#106-systray-items)
-    - [10.6.1. Client actions](#1061-client-actions)
-    - [10.6.2. Window actions](#1062-window-actions)
-  - [10.7. Routing](#107-routing)
-- [11. Views](#11-views)
-  - [11.1. ir.ui.view model](#111-iruiview-model)
-- [12. Fields](#12-fields)
-- [13. Services](#13-services)
-- [14. Error handling](#14-error-handling)
-- [15. Javascript libraries](#15-javascript-libraries)
-- [16. Registries](#16-registries)
-- [17. The Relational Model](#17-the-relational-model)
-  - [17.1. Record component](#171-record-component)
-- [18. Components](#18-components)
-- [19. Utility functions](#19-utility-functions)
-- [20. Test framework](#20-test-framework)
-  - [20.1. Unit tests](#201-unit-tests)
-  - [20.2. Tours](#202-tours)
-- [21. Miscellaneous](#21-miscellaneous)
-  - [21.1. Date handling](#211-date-handling)
-  - [21.2. Debug mode](#212-debug-mode)
-  - [21.3. Patching system](#213-patching-system)
-  - [21.4. pyjs](#214-pyjs)
-  - [21.5. Links and button](#215-links-and-button)
-  - [21.6. Special attributes (tooltip)](#216-special-attributes-tooltip)
-  - [21.7. Security](#217-security)
-  - [21.8. Macros](#218-macros)
+- [5. Styling Odoo](#5-styling-odoo)
+- [6. Core](#6-core)
+  - [6.1. Session](#61-session)
+  - [6.2. User](#62-user)
+  - [6.3. authentication](#63-authentication)
+  - [6.4. session\_info](#64-session_info)
+  - [6.5. Localization](#65-localization)
+  - [6.6. Network Requests](#66-network-requests)
+    - [6.6.1. rpc function](#661-rpc-function)
+    - [6.6.2. orm system](#662-orm-system)
+    - [6.6.3. http service](#663-http-service)
+    - [6.6.4. Network errors](#664-network-errors)
+    - [6.6.5. Downloading a file](#665-downloading-a-file)
+  - [6.7. Routing](#67-routing)
+  - [6.8. Command palette](#68-command-palette)
+  - [6.9. Notifications](#69-notifications)
+  - [6.10. Dialogs and modals](#610-dialogs-and-modals)
+  - [6.11. Popover](#611-popover)
+  - [6.12. Overlays](#612-overlays)
+- [7. Web client](#7-web-client)
+  - [7.1. The environment (env)](#71-the-environment-env)
+  - [7.2. ir.action model](#72-iraction-model)
+  - [7.3. ir.action.act\_window model](#73-iractionact_window-model)
+  - [7.4. menu items model](#74-menu-items-model)
+  - [7.5. Actions](#75-actions)
+  - [7.6. Systray items](#76-systray-items)
+    - [7.6.1. Client actions](#761-client-actions)
+    - [7.6.2. Window actions](#762-window-actions)
+- [8. Views](#8-views)
+  - [8.1. ir.ui.view model](#81-iruiview-model)
+- [9. Fields](#9-fields)
+- [10. Services](#10-services)
+- [11. Error handling](#11-error-handling)
+- [12. Javascript libraries](#12-javascript-libraries)
+- [13. Registries](#13-registries)
+- [14. The Relational Model](#14-the-relational-model)
+  - [14.1. Record component](#141-record-component)
+- [15. Components](#15-components)
+- [16. Utility functions](#16-utility-functions)
+- [17. Test framework](#17-test-framework)
+  - [17.1. Unit tests](#171-unit-tests)
+  - [17.2. Tours](#172-tours)
+- [18. Miscellaneous](#18-miscellaneous)
+  - [18.1. Date handling](#181-date-handling)
+  - [18.2. Debug mode](#182-debug-mode)
+  - [18.3. Patching system](#183-patching-system)
+  - [18.4. pyjs](#184-pyjs)
+  - [18.5. Links and button](#185-links-and-button)
+  - [18.6. Special attributes (tooltip)](#186-special-attributes-tooltip)
+  - [18.7. Security](#187-security)
+  - [18.8. Macros](#188-macros)
 
 
 # 1. Introduction
@@ -98,93 +97,89 @@ Last updated:  Dec 14, 2023
 
 ## 4.1. Owl templates
 
-# 5. User and Session
-
-## 5.1. Session
-## 5.2. User
-## 5.3. authentication
-## 5.4. session_info
-
-
-# 6. Localization
-
-
-explain how it works
-
-# 7. Network Requests
-
-## 7.1. rpc function
-## 7.2. orm system
-## 7.3. http service
-## 7.4. Network errors
-## 7.5. Downloading a file
-
-
-# 8. Styling Odoo
+# 5. Styling Odoo
 
 scss/css
 variables
 
-# 9. Common UI Features
+# 6. Core
 
-## 9.1. Command palette
-## 9.2. Notifications
-## 9.3. Dialogs and modals
-## 9.4. Popover
-## 9.5. Overlays
+## 6.1. Session
+## 6.2. User
+## 6.3. authentication
+## 6.4. session_info
+## 6.5. Localization
 
-# 10. Web client
+explain how it works
 
-## 10.1. The environment (env)
 
-## 10.2. ir.action model
-## 10.3. ir.action.act_window model
-## 10.4. menu items model
-## 10.5. Actions
-## 10.6. Systray items
+## 6.6. Network Requests
 
-### 10.6.1. Client actions
+### 6.6.1. rpc function
+### 6.6.2. orm system
+### 6.6.3. http service
+### 6.6.4. Network errors
+### 6.6.5. Downloading a file
+
+## 6.7. Routing
+
+## 6.8. Command palette
+## 6.9. Notifications
+## 6.10. Dialogs and modals
+## 6.11. Popover
+## 6.12. Overlays
+
+# 7. Web client
+
+## 7.1. The environment (env)
+
+## 7.2. ir.action model
+## 7.3. ir.action.act_window model
+## 7.4. menu items model
+## 7.5. Actions
+## 7.6. Systray items
+
+### 7.6.1. Client actions
 Function actions
 
-### 10.6.2. Window actions
-
-## 10.7. Routing
-
-# 11. Views
-
-## 11.1. ir.ui.view model
-
-# 12. Fields
+### 7.6.2. Window actions
 
 
+# 8. Views
 
-# 13. Services
+## 8.1. ir.ui.view model
 
-# 14. Error handling
+# 9. Fields
 
-# 15. Javascript libraries
 
-# 16. Registries
 
-# 17. The Relational Model
+# 10. Services
 
-## 17.1. Record component
+# 11. Error handling
 
-# 18. Components
+# 12. Javascript libraries
 
-# 19. Utility functions
-# 20. Test framework
-## 20.1. Unit tests
-## 20.2. Tours
+# 13. Registries
 
-# 21. Miscellaneous
+# 14. The Relational Model
 
-## 21.1. Date handling
-## 21.2. Debug mode
-## 21.3. Patching system
-## 21.4. pyjs
-## 21.5. Links and button
-## 21.6. Special attributes (tooltip)
-## 21.7. Security
-## 21.8. Macros
+## 14.1. Record component
+
+# 15. Components
+
+# 16. Utility functions
+# 17. Test framework
+## 17.1. Unit tests
+## 17.2. Tours
+
+# 18. Miscellaneous
+
+## 18.1. Date handling
+## 18.2. Debug mode
+## 18.3. Patching system
+## 18.4. pyjs
+## 18.5. Links and button
+## 18.6. Special attributes (tooltip)
+## 18.7. Security
+## 18.8. Macros
 
