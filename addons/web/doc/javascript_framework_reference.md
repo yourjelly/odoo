@@ -32,20 +32,20 @@ Last updated:  Dec 14, 2023
   - [7.1. rpc function](#71-rpc-function)
   - [7.2. orm system](#72-orm-system)
   - [7.3. http service](#73-http-service)
-  - [7.4. Handling network errors](#74-handling-network-errors)
+  - [7.4. Network errors](#74-network-errors)
   - [7.5. Downloading a file](#75-downloading-a-file)
 - [8. The environment (env)](#8-the-environment-env)
 - [9. Styling Odoo](#9-styling-odoo)
 - [10. Web client](#10-web-client)
-  - [10.1. ir.ui.view model](#101-iruiview-model)
-  - [10.2. ir.action model](#102-iraction-model)
-  - [10.3. ir.action.act\_window model](#103-iractionact_window-model)
-  - [10.4. menu items model](#104-menu-items-model)
-  - [10.5. Actions](#105-actions)
-  - [10.6. Routing](#106-routing)
-    - [10.6.1. Client actions](#1061-client-actions)
-    - [10.6.2. Window actions](#1062-window-actions)
+  - [10.1. ir.action model](#101-iraction-model)
+  - [10.2. ir.action.act\_window model](#102-iractionact_window-model)
+  - [10.3. menu items model](#103-menu-items-model)
+  - [10.4. Actions](#104-actions)
+    - [10.4.1. Client actions](#1041-client-actions)
+    - [10.4.2. Window actions](#1042-window-actions)
+  - [10.5. Routing](#105-routing)
 - [11. Views](#11-views)
+  - [11.1. ir.ui.view model](#111-iruiview-model)
 - [12. Fields](#12-fields)
 - [13. Services](#13-services)
 - [14. Error handling](#14-error-handling)
@@ -116,7 +116,7 @@ explain how it works
 ## 7.1. rpc function
 ## 7.2. orm system
 ## 7.3. http service
-## 7.4. Handling network errors
+## 7.4. Network errors
 ## 7.5. Downloading a file
 
 # 8. The environment (env)
@@ -128,19 +128,21 @@ variables
 
 # 10. Web client
 
-## 10.1. ir.ui.view model
-## 10.2. ir.action model
-## 10.3. ir.action.act_window model
-## 10.4. menu items model
-## 10.5. Actions
-## 10.6. Routing
+## 10.1. ir.action model
+## 10.2. ir.action.act_window model
+## 10.3. menu items model
+## 10.4. Actions
 
-### 10.6.1. Client actions
+### 10.4.1. Client actions
 Function actions
 
-### 10.6.2. Window actions
+### 10.4.2. Window actions
+
+## 10.5. Routing
 
 # 11. Views
+
+## 11.1. ir.ui.view model
 
 # 12. Fields
 
