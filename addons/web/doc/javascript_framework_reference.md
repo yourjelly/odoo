@@ -77,8 +77,7 @@ Last updated:  Dec 14, 2023
 
 # 1. Introduction
 
-Odoo is a suite of applications built on top of a framework.  This document is an attempt at a complete reference to the frontend part of Odoo: the Odoo javascript framework.
-
+Odoo is a suite of applications built on top of a framework.  
 Broadly speaking, the Odoo JS framework is a set of tools, technologies and techniques that can be used to build, extend and test the Odoo user interface. Among others, it includes:
 
 - a set of controllers (`/web`, `/web/dataset/call_kw/`, ...)
@@ -90,9 +89,47 @@ Broadly speaking, the Odoo JS framework is a set of tools, technologies and tech
 
 It handles all of the usual basic needs: assets, authentication, routing, translations (and localization), code-splitting, testing. The framework is designed to be very flexible. This is actually the main reason why Odoo needed to develop so many basic technologies: it was necessary to provide as much customization power as possible.
 
+This document is an attempt at a complete reference to the frontend part of Odoo: the javascript framework. 
+
+
 # 2. Controllers
 
 ## 2.1. Defining a controller
+
+Controllers need to provide extensibility, much like Model, but can’t use the same mechanism as the pre-requisites (a database with loaded modules) may not be available yet (e.g. no database created, or no database selected). Controllers thus provide their own extension mechanism, separate from that of models.
+
+Controllers are created by inheriting from `Controller`. Routes are defined through methods decorated with `route()`:
+
+```py
+class MyController(odoo.http.Controller):
+    @route('/some_url', auth='public')
+    def handler(self):
+        return stuff()
+```
+
+To override a controller, inherit from its class and override relevant methods, re-exposing them if necessary:
+
+```py
+class Extension(MyController):
+    @route()
+    def handler(self):
+        do_before()
+        return super(Extension, self).handler()
+```
+
+Decorating with `route()` is necessary to keep the method (and route) visible: if the method is redefined without decorating, it will be “unpublished”
+
+The decorators of all methods are combined, if the overriding method’s decorator has no argument, all previous ones will be kept, any provided argument will override previously defined ones e.g.:
+
+```py
+class Restrict(MyController):
+    @route(auth='user')
+    def handler(self):
+        return super(Restrict, self).handler()
+```
+
+will change `/some_url` from public authentication to user (requiring a log-in)
+
 ## 2.2. call_kw
 ## 2.3. `/web/dataset/call_kw/web_read`
 ## 2.4. web_readgroup
