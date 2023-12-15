@@ -14,11 +14,16 @@ _logger = logging.getLogger(__name__)
 
 
 class PhonePeController(http.Controller):
-    _callback_url = '/payment/phonepe/callback'
+    _callback_url = '/callback-url'
+    _return_url = '/redirect-url'
+
+    @http.route(_return_url, methods=['POST', 'GET'], type='http', auth='public', csrf=False)
+    def phonepe_return_url(self, **response):
+        _logger.info('PhonePe: Entering form_feedback with post data %s', pprint.pformat(response))
+        return request.redirect('/payment/status')
     
-    @http.route(_callback_url, method=['POST'], type='http', auth='public', csrf=False)
+    @http.route(_callback_url, methods=['POST'], type='http', auth='public', csrf=False)
     def phonepe_callback(self, **response):
-        print('\n\n\n------response-------------',response)
         data = request.get_json_data()
         _logger.info('PhonePe: Entering form_feedback with post data %s', pprint.pformat(data))
         if data.get('response'):
