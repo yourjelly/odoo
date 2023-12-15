@@ -5,7 +5,7 @@
             <t t-foreach="payload" t-as="param">
                 <input type="hidden" t-att-name="param" t-att-value="payload[param]" />
             </t>
-            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+            <!-- <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/> -->
             <!-- <input type="hidden" id="command" name="command" t-att-value="command"/>
             <input type="hidden" id="merchant_id" name="merchantId" t-att-value="merchant_id"/>
             <input type="hidden" id="merchantTransactionId" name="merchantTransactionId" t-att-value="merchantTransactionId"/>
