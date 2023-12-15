@@ -35,29 +35,28 @@ Last updated:  Dec 14, 2023
   - [7.4. Network errors](#74-network-errors)
   - [7.5. Downloading a file](#75-downloading-a-file)
 - [8. Styling Odoo](#8-styling-odoo)
-- [Common UI Features](#common-ui-features)
-  - [21.8. Command palette](#218-command-palette)
-  - [21.9. Notifications](#219-notifications)
-  - [21.10. Dialogs and modals](#2110-dialogs-and-modals)
-  - [21.11. Popover](#2111-popover)
-  - [21.12. Overlays](#2112-overlays)
-- [9. Web client](#9-web-client)
-  - [9.1. The environment (env)](#91-the-environment-env)
-  - [9.2. ir.action model](#92-iraction-model)
-  - [9.3. ir.action.act\_window model](#93-iractionact_window-model)
-  - [9.4. menu items model](#94-menu-items-model)
-  - [9.5. Actions](#95-actions)
-  - [9.6. Systray items](#96-systray-items)
-    - [9.6.1. Client actions](#961-client-actions)
-    - [9.6.2. Window actions](#962-window-actions)
-  - [9.7. Routing](#97-routing)
-- [10. Views](#10-views)
-  - [10.1. ir.ui.view model](#101-iruiview-model)
-- [11. Fields](#11-fields)
-- [12. Services](#12-services)
-- [13. Error handling](#13-error-handling)
-- [14. Javascript libraries](#14-javascript-libraries)
-- [15. Actions](#15-actions)
+- [9. Common UI Features](#9-common-ui-features)
+  - [9.1. Command palette](#91-command-palette)
+  - [9.2. Notifications](#92-notifications)
+  - [9.3. Dialogs and modals](#93-dialogs-and-modals)
+  - [9.4. Popover](#94-popover)
+  - [9.5. Overlays](#95-overlays)
+- [10. Web client](#10-web-client)
+  - [10.1. The environment (env)](#101-the-environment-env)
+  - [10.2. ir.action model](#102-iraction-model)
+  - [10.3. ir.action.act\_window model](#103-iractionact_window-model)
+  - [10.4. menu items model](#104-menu-items-model)
+  - [10.5. Actions](#105-actions)
+  - [10.6. Systray items](#106-systray-items)
+    - [10.6.1. Client actions](#1061-client-actions)
+    - [10.6.2. Window actions](#1062-window-actions)
+  - [10.7. Routing](#107-routing)
+- [11. Views](#11-views)
+  - [11.1. ir.ui.view model](#111-iruiview-model)
+- [12. Fields](#12-fields)
+- [13. Services](#13-services)
+- [14. Error handling](#14-error-handling)
+- [15. Javascript libraries](#15-javascript-libraries)
 - [16. Registries](#16-registries)
 - [17. The Relational Model](#17-the-relational-model)
   - [17.1. Record component](#171-record-component)
@@ -74,7 +73,7 @@ Last updated:  Dec 14, 2023
   - [21.5. Links and button](#215-links-and-button)
   - [21.6. Special attributes (tooltip)](#216-special-attributes-tooltip)
   - [21.7. Security](#217-security)
-  - [21.13. Macros](#2113-macros)
+  - [21.8. Macros](#218-macros)
 
 
 # 1. Introduction
@@ -126,46 +125,44 @@ explain how it works
 scss/css
 variables
 
-# Common UI Features
+# 9. Common UI Features
 
-## 21.8. Command palette
-## 21.9. Notifications
-## 21.10. Dialogs and modals
-## 21.11. Popover
-## 21.12. Overlays
+## 9.1. Command palette
+## 9.2. Notifications
+## 9.3. Dialogs and modals
+## 9.4. Popover
+## 9.5. Overlays
 
-# 9. Web client
+# 10. Web client
 
-## 9.1. The environment (env)
+## 10.1. The environment (env)
 
-## 9.2. ir.action model
-## 9.3. ir.action.act_window model
-## 9.4. menu items model
-## 9.5. Actions
-## 9.6. Systray items
+## 10.2. ir.action model
+## 10.3. ir.action.act_window model
+## 10.4. menu items model
+## 10.5. Actions
+## 10.6. Systray items
 
-### 9.6.1. Client actions
+### 10.6.1. Client actions
 Function actions
 
-### 9.6.2. Window actions
+### 10.6.2. Window actions
 
-## 9.7. Routing
+## 10.7. Routing
 
-# 10. Views
+# 11. Views
 
-## 10.1. ir.ui.view model
+## 11.1. ir.ui.view model
 
-# 11. Fields
+# 12. Fields
 
 
 
-# 12. Services
+# 13. Services
 
-# 13. Error handling
+# 14. Error handling
 
-# 14. Javascript libraries
-
-# 15. Actions
+# 15. Javascript libraries
 
 # 16. Registries
 
@@ -189,5 +186,5 @@ Function actions
 ## 21.5. Links and button
 ## 21.6. Special attributes (tooltip)
 ## 21.7. Security
-## 21.13. Macros
+## 21.8. Macros
 
