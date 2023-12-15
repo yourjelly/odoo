@@ -23,7 +23,7 @@ Last updated:  Dec 14, 2023
 - [4. Owl framework](#4-owl-framework)
   - [4.1. Owl templates](#41-owl-templates)
 - [5. Styling Odoo](#5-styling-odoo)
-- [6. Core](#6-core)
+- [6. Foundations](#6-foundations)
   - [6.1. Session](#61-session)
   - [6.2. User](#62-user)
   - [6.3. authentication](#63-authentication)
@@ -51,27 +51,28 @@ Last updated:  Dec 14, 2023
   - [6.20. Dialogs and modals](#620-dialogs-and-modals)
   - [6.21. Popover](#621-popover)
   - [6.22. Overlays](#622-overlays)
-- [7. Services](#7-services)
-- [8. Registries](#8-registries)
-- [9. Components](#9-components)
-- [10. Utility functions](#10-utility-functions)
-- [11. Web client](#11-web-client)
-  - [11.1. The environment (env)](#111-the-environment-env)
-  - [11.2. ir.action model](#112-iraction-model)
-  - [11.3. ir.action.act\_window model](#113-iractionact_window-model)
-  - [11.4. menu items model](#114-menu-items-model)
-  - [11.5. Actions](#115-actions)
-  - [11.6. Systray items](#116-systray-items)
-    - [11.6.1. Client actions](#1161-client-actions)
-    - [11.6.2. Window actions](#1162-window-actions)
-- [12. The Relational Model](#12-the-relational-model)
-  - [12.1. Record component](#121-record-component)
-- [13. Views](#13-views)
-  - [13.1. ir.ui.view model](#131-iruiview-model)
-- [14. Fields](#14-fields)
-- [15. Test framework](#15-test-framework)
-  - [15.1. Unit tests](#151-unit-tests)
-  - [15.2. Tours](#152-tours)
+- [7. Building Blocks](#7-building-blocks)
+  - [7.1. Services](#71-services)
+  - [7.2. Registries](#72-registries)
+  - [7.3. Components](#73-components)
+  - [7.4. Utility functions](#74-utility-functions)
+- [8. Web client](#8-web-client)
+  - [8.1. The environment (env)](#81-the-environment-env)
+  - [8.2. ir.action model](#82-iraction-model)
+  - [8.3. ir.action.act\_window model](#83-iractionact_window-model)
+  - [8.4. menu items model](#84-menu-items-model)
+  - [8.5. Actions](#85-actions)
+  - [8.6. Systray items](#86-systray-items)
+    - [8.6.1. Client actions](#861-client-actions)
+    - [8.6.2. Window actions](#862-window-actions)
+- [9. The Relational Model](#9-the-relational-model)
+  - [9.1. Record component](#91-record-component)
+- [10. Views](#10-views)
+  - [10.1. ir.ui.view model](#101-iruiview-model)
+- [11. Fields](#11-fields)
+- [12. Test framework](#12-test-framework)
+  - [12.1. Unit tests](#121-unit-tests)
+  - [12.2. Tours](#122-tours)
 
 
 # 1. Introduction
@@ -101,7 +102,7 @@ Last updated:  Dec 14, 2023
 scss/css
 variables
 
-# 6. Core
+# 6. Foundations
 
 ## 6.1. Session
 ## 6.2. User
@@ -141,42 +142,43 @@ explain how it works
 ## 6.21. Popover
 ## 6.22. Overlays
 
-# 7. Services
+# 7. Building Blocks
+## 7.1. Services
 
 
-# 8. Registries
+## 7.2. Registries
 
-# 9. Components
+## 7.3. Components
 
-# 10. Utility functions
+## 7.4. Utility functions
 
-# 11. Web client
+# 8. Web client
 
-## 11.1. The environment (env)
+## 8.1. The environment (env)
 
-## 11.2. ir.action model
-## 11.3. ir.action.act_window model
-## 11.4. menu items model
-## 11.5. Actions
-## 11.6. Systray items
+## 8.2. ir.action model
+## 8.3. ir.action.act_window model
+## 8.4. menu items model
+## 8.5. Actions
+## 8.6. Systray items
 
-### 11.6.1. Client actions
+### 8.6.1. Client actions
 Function actions
 
-### 11.6.2. Window actions
+### 8.6.2. Window actions
 
-# 12. The Relational Model
+# 9. The Relational Model
 
-## 12.1. Record component
+## 9.1. Record component
 
 
-# 13. Views
+# 10. Views
 
-## 13.1. ir.ui.view model
+## 10.1. ir.ui.view model
 
-# 14. Fields
+# 11. Fields
 
-# 15. Test framework
-## 15.1. Unit tests
-## 15.2. Tours
+# 12. Test framework
+## 12.1. Unit tests
+## 12.2. Tours
 
