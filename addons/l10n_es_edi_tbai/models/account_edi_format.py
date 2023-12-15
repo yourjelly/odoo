@@ -336,7 +336,7 @@ class AccountEdiFormat(models.Model):
             discount = (gross_price_subtotal - line.price_subtotal) * refund_sign
 
             if not any([t.l10n_es_type == 'sujeto_isp' for t in line.tax_ids]):
-                total = line.price_total * abs(line.balance / line.amount_currency if line.amount_currency != 0 else 1) * -refund_sign
+                total = line.price_total / invoice.currency_rate * -refund_sign
             else:
                 total = abs(line.balance) * -refund_sign * (-1 if line.price_total < 0 else 1)
             invoice_lines.append({
