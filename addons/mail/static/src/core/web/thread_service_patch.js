@@ -20,6 +20,7 @@ patch(ThreadService.prototype, {
         this.action = services.action;
         this.activityService = services["mail.activity"];
         this.chatWindowService = services["mail.chat_window"];
+        this.outOfFocusService = services["mail.out_of_focus"];
     },
     /**
      * @param {import("models").Thread} thread
@@ -258,8 +259,49 @@ patch(ThreadService.prototype, {
     getNeedactionChannels() {
         return this.getRecentChannels().filter((channel) => channel.importantCounter > 0);
     },
+    /**
+     * Handle the notification of a new message based on the notification setting of the user.
+     * Thread on mute:
+     * 1. No longer see the unread status: the bold text disappears and the channel name fades out.
+     * 2. Without sound + need action counter.
+
+     * Thread Notification Type:
+     * All messages:All messages sound + need action counter
+     * Mentions:Only mention sounds + need action counter
+     * Nothing: No sound + need action counter
+
+     * @param {Thread} thread
+     * @param {Message} message
+     */
+    notifyMessageToUser(thread, message) {
+        if (
+            thread.type === "channel" &&
+            message.recipients?.includes(this.store.self) &&
+            message.notIn(thread.needactionMessages)
+        ) {
+            thread.needactionMessages.add(message);
+            thread.message_needaction_counter++;
+        }
+        if (
+            thread.correspondent?.eq(this.store.odoobot) ||
+            thread.muteUntilDateTime ||
+            thread.custom_notifications === "no_notif" ||
+            (thread.custom_notifications === "mentions" &&
+                !message.recipients?.includes(this.store.self))
+        ) {
+            return;
+        }
+        this.store.ChatWindow.insert({ thread });
+        this.outOfFocusService.notify(message, thread);
+    },
 });
 
 patch(threadService, {
-    dependencies: [...threadService.dependencies, "action", "mail.activity", "mail.chat_window"],
+    dependencies: [
+        ...threadService.dependencies,
+        "action",
+        "mail.activity",
+        "mail.chat_window",
+        "mail.out_of_focus",
+    ],
 });
