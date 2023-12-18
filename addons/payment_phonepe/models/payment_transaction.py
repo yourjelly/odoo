@@ -6,8 +6,6 @@ import base64
 import json
 import hashlib
 
-from werkzeug.urls import url_join, url_encode
-
 from odoo import _, models
 from odoo.exceptions import ValidationError
 
@@ -41,7 +39,6 @@ class PaymentTransaction(models.Model):
         self.ensure_one()
         encoded_payload = self._phonepe_encode_payload(payload)
         checksum = self._phonepe_prepare_checksum(encoded_payload)
-        base_url = self.get_base_url()
         headers = {
             'Content-Type': 'application/json',
             'X-Verify': checksum,
@@ -62,15 +59,13 @@ class PaymentTransaction(models.Model):
             return res
         converted_amount = payment_utils.to_minor_currency_units(self.amount, self.currency_id)
         base_url = self.get_base_url()
-        return_url_params = {'reference': self.reference}
-        payment_redirect_url = "/payment/status"
         payload = {
             'merchantId': self.provider_id.phonepe_merchant_id,
             'merchantTransactionId': self.reference,
             'merchantUserId': self.partner_email,
             'amount': converted_amount,
             'redirectUrl': f'{base_url}{PhonePeController._return_url}',
-            'redirectMode': 'REDIRECT',
+            'redirectMode': 'POST',
             'callbackUrl': f'{base_url}{PhonePeController._callback_url}',
             'mobileNumber': self.partner_phone,
             'paymentInstrument': {
@@ -84,10 +79,7 @@ class PaymentTransaction(models.Model):
             self.reference, pprint.pformat(payload)
         )
         checkout_url = response.get('data', {}).get('instrumentResponse', {}).get('redirectInfo', {}).get('url')
-        # return { 'api_url': checkout_url } # main code
-
-        #TODO temp code
-        payload.update({ 'api_url': checkout_url })
+        payload.update({'api_url': checkout_url})
         return payload
 
     def _get_tx_from_notification_data(self, provider_code, notification_data):
@@ -107,32 +99,29 @@ class PaymentTransaction(models.Model):
         return tx
 
     def _process_notification_data(self, notification_data):
-            """ Override of payment to process the transaction based on PhonePe data.
-            Note: self.ensure_one()
-            :param dict notification_data: The notification data sent by the provider
-            :return: None
-            """
+        """ Override of payment to process the transaction based on PhonePe data.
+        Note: self.ensure_one()
+        :param dict notification_data: The notification data sent by the provider
+        :return: None
+        """
 
-            super()._process_notification_data(notification_data)
-            if self.provider_code != 'phonepe':
-                return
-            # Update the provider reference.
-            self.provider_reference = notification_data.get('transactionId')
+        super()._process_notification_data(notification_data)
+        if self.provider_code != 'phonepe':
+            return
+        # Update the provider reference.
+        self.provider_reference = notification_data.get('transactionId')
 
-            # Update the payment method
+        # Update the payment method
 
-            payment_option = notification_data.get('paymentInstrument', '').get('type', '')
-            payment_method = self.env['payment.method']._get_from_code(payment_option.lower())
-            self.payment_method_id = payment_method or self.payment_method_id
+        payment_option = notification_data.get('paymentInstrument', '').get('type', '')
+        payment_method = self.env['payment.method']._get_from_code(payment_option.lower())
+        self.payment_method_id = payment_method or self.payment_method_id
 
-            # Update the payment state.
-            order_status = notification_data.get('code')
-            # print(order_status)
-            if order_status == 'PAYMENT_SUCCESS':
-                # breakpoint()
-                # print("----------------done--------------")
-                self._set_done()
-            else:
-                self._set_error("The something went wrong") #[IMP] For PAYMENT_ERROR
-            #   TODO checkother response code
-                self._set_canceled()
+        # Update the payment state.
+        order_status = notification_data.get('code')
+        if order_status == 'PAYMENT_SUCCESS':
+            self._set_done()
+        else:
+            self._set_error("The something went wrong") #[IMP] For PAYMENT_ERROR
+        #   TODO checkother response code
+            self._set_canceled()

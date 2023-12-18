@@ -21,7 +21,7 @@ class PhonePeController(http.Controller):
     def phonepe_return_url(self, **response):
         _logger.info('PhonePe: Entering form_feedback with post data %s', pprint.pformat(response))
         return request.redirect('/payment/status')
-    
+
     @http.route(_callback_url, methods=['POST'], type='http', auth='public', csrf=False)
     def phonepe_callback(self, **response):
         data = request.get_json_data()
