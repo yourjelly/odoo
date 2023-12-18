@@ -1,7 +1,7 @@
 /** @odoo-module */
 /* global waitForWebfonts */
 
-import { PosCollection, Order } from "@point_of_sale/app/store/models";
+import { Order } from "@point_of_sale/app/store/models";
 import { Mutex } from "@web/core/utils/concurrency";
 import { PosDB } from "@point_of_sale/app/store/db";
 import { markRaw, reactive } from "@odoo/owl";
@@ -61,6 +61,9 @@ export function uniqueBy(array, agg) {
  *  buster in case the product image has been changed
  * @returns {string} the base64 representation of the product's image
  */
+// FIXME: this can make a lot of requests to the server in case of a lot of
+// products, we should probably load it when it's needed instead of loading it
+// for all products at once.
 const getProductImage = memoize(function getProductImage(productId, writeDate) {
     return new Promise(function (resolve, reject) {
         const img = new Image();
@@ -156,7 +159,7 @@ export class PosStore extends Reactive {
         // these dynamic attributes can be watched for change by other models or widgets
         Object.assign(this, {
             synch: { status: "connected", pending: 0 },
-            orders: new PosCollection(),
+            orders: [],
             selectedOrder: null,
             selectedPartner: null,
             selectedCategoryId: null,
@@ -596,7 +599,11 @@ export class PosStore extends Reactive {
      * @param order
      */
     removeOrder(order, removeFromServer = true) {
-        this.orders.remove(order);
+        const index = this.orders.findIndex((_item) => order.cid == _item.cid);
+        if (index < 0) {
+            return index;
+        }
+        this.orders.splice(index, 1);
         this.db.remove_unpaid_order(order);
         for (const line of order.get_orderlines()) {
             if (line.refunded_orderline_id) {
@@ -666,7 +673,7 @@ export class PosStore extends Reactive {
             this.selectedOrder.updateSavedQuantity();
         }
         const order = this.createReactiveOrder();
-        this.orders.add(order);
+        this.orders.push(order);
         this.selectedOrder = order;
         return order;
     }
@@ -734,7 +741,7 @@ export class PosStore extends Reactive {
 
         if (orders.length) {
             for (const order of orders) {
-                this.orders.add(order);
+                this.orders.push(order);
             }
         }
         this.loadingOrderState = false;
@@ -868,7 +875,7 @@ export class PosStore extends Reactive {
     _createOrder(json) {
         if (this._shouldCreateOrder(json)) {
             const order = this.createReactiveOrder(json);
-            this.orders.add(order);
+            this.orders.push(order);
         }
         return this._isSelectedOrder(json);
     }
@@ -1323,7 +1330,7 @@ export class PosStore extends Reactive {
 
             if (orders.length) {
                 report.unpaid = orders.length;
-                this.orders.add(orders);
+                this.orders.push(orders);
             }
 
             report.unpaid_skipped_sessions = Object.keys(skipped_sessions);
@@ -1359,7 +1366,7 @@ export class PosStore extends Reactive {
         });
 
         if (orders.length) {
-            this.orders.add(orders);
+            this.orders.push(orders);
         }
     }
 

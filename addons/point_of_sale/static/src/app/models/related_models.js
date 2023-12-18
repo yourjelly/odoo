@@ -478,10 +478,7 @@ export function createRelatedModels(modelDefs, modelClasses = {}, indexes = {}) 
             }
         }
 
-        const index = orderedRecords[model].indexOf(record);
-        if (index >= 0) {
-            orderedRecords[model].splice(index, 1);
-        }
+        orderedRecords[model] = orderedRecords[model].filter((rec) => rec.id !== record.id);
 
         delete records[model][id];
 

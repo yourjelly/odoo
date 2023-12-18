@@ -575,6 +575,7 @@ export class FloorScreen extends Component {
                 this.pos.isEditMode = false;
                 this.pos.floorPlanStyle = "default";
                 this.state.floorBackground = null;
+                this.state.selectedFloorId = null;
             }
             return;
         }

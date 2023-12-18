@@ -343,7 +343,7 @@ patch(Order.prototype, {
         this.codeActivatedProgramRules = [];
         this.codeActivatedCoupons = [];
         this.couponPointChanges = {};
-        this.orderlines.remove(this._get_reward_lines());
+        this.orderlines = this.orderlines.filter((line) => !line.is_reward_line);
         this._updateRewards();
     },
     _updateRewards() {
@@ -450,7 +450,7 @@ patch(Order.prototype, {
             ) {
                 otherRewards.push(claimedReward);
             }
-            this.orderlines.remove(line);
+            this._unlinkOrderline(line);
         }
         for (const claimedReward of productRewards.concat(otherRewards).concat(paymentRewards)) {
             // For existing coupons check that they are still claimed, they can exist in either `couponPointChanges` or `codeActivatedCoupons`
@@ -1031,7 +1031,7 @@ patch(Order.prototype, {
                     return _t("A better global discount is already applied.");
                 } else if (rewardId != rewardId.id) {
                     for (const line of globalDiscountLines) {
-                        this.orderlines.remove(line);
+                        this._unlinkOrderline(line);
                     }
                 }
             }
@@ -1049,7 +1049,7 @@ patch(Order.prototype, {
             return _t("The reward could not be applied.");
         }
         for (const rewardLine of rewardLines) {
-            this.orderlines.add(this._createLineFromVals(rewardLine));
+            this.orderlines.push(this._createLineFromVals(rewardLine));
         }
         return true;
     },

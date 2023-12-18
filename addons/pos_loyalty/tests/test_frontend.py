@@ -5,7 +5,6 @@ from odoo.addons.point_of_sale.tests.test_frontend import TestPointOfSaleHttpCom
 from odoo.tests import tagged
 from odoo import Command
 
-
 @tagged("post_install", "-at_install")
 class TestUi(TestPointOfSaleHttpCommon):
 
@@ -145,7 +144,7 @@ class TestUi(TestPointOfSaleHttpCommon):
             "PosLoyaltyTour1",
             login="pos_user",
         )
- 
+
         # check coupon usage
         self.assertEqual(self.coupon1.points, 0, 'The coupon should have consumed its points.')
         self.assertEqual(self.coupon2.points, 4.5, 'The coupon was used but never validated.')

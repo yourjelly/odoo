@@ -15,7 +15,7 @@
                     <button class="button button-floor btn p-3 rounded-0 flex-fill border-start shadow-none d-flex align-items-center justify-content-center" t-attf-class="{{ floor.id === state.selectedFloorId ? 'btn-primary border-start-0' : 'btn-light' }}" t-on-click="() => this.selectFloor(floor)">
                         <t t-esc="floor.name" />
                         <t t-set="changeCount" t-value="this.getFloorChangeCount(floor.id)"/>
-                        <span t-if="activeFloor.id !== floor.id and changeCount > 0" class="mx-1 badge bg-danger text-white rounded-pill py-1 px-2 fs-5" t-esc="changeCount"/>
+                        <span t-if="activeFloor?.id !== floor.id and changeCount > 0" class="mx-1 badge bg-danger text-white rounded-pill py-1 px-2 fs-5" t-esc="changeCount"/>
                     </button>
                 </t>
                 <button class="button button-add btn btn-secondary p-3 ms-auto rounded-0" t-ref="add-floor-ref" t-on-click="addFloor">

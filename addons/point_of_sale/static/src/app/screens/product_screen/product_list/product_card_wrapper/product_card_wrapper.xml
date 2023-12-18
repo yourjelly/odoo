@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="point_of_sale.ProductCardWrapper">
+        <ProductCard
+            class="pos.productViewMode"
+            name="product.display_name"
+            productId="product.id"
+            price="pos.getProductPriceFormatted(product)"
+            imageUrl="product.getImageUrl()"
+            onClick.bind="addProductToOrder"
+            productInfo="true"
+            onProductInfoClick.bind="onProductInfoClick"
+        />
+    </t>
+</templates>

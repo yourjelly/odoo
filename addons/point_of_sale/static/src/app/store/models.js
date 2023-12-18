@@ -24,35 +24,6 @@ import { ask } from "@point_of_sale/app/store/make_awaitable_dialog";
 
 const { DateTime } = luxon;
 
-/**
- * If optimization is needed, then we should implement this
- * using a Balanced Binary Tree to behave like an Object and an Array.
- * But behaving like Object (indexed by cid) might not be
- * needed. Let's see how it turns out.
- */
-export class PosCollection extends Array {
-    getByCID(cid) {
-        return this.find((item) => item.cid == cid);
-    }
-    add(item) {
-        this.push(item);
-    }
-    remove(item) {
-        const index = this.findIndex((_item) => item.cid == _item.cid);
-        if (index < 0) {
-            return index;
-        }
-        this.splice(index, 1);
-        return index;
-    }
-    reset() {
-        this.length = 0;
-    }
-    at(index) {
-        return this[index];
-    }
-}
-
 let nextId = 0;
 class PosModel {
     /**
@@ -188,7 +159,7 @@ export class Orderline extends PosModel {
                 { env: this.env },
                 { json: { ...packlotline, order_line: this } }
             );
-            this.pack_lot_lines.add(pack_lot_line);
+            this.pack_lot_lines.push(pack_lot_line);
         }
         this.tax_ids = this.compute_related_tax(
             json.tax_ids && json.tax_ids.length !== 0 ? json.tax_ids[0][2] : undefined
@@ -286,7 +257,7 @@ export class Orderline extends PosModel {
 
         // Remove those that needed to be removed.
         for (const lotLine of lotLinesToRemove) {
-            this.pack_lot_lines.remove(lotLine);
+            this.pack_lot_lines = this.pack_lot_lines.filter((pll) => pll.cid !== lotLine.cid);
         }
 
         // Create new pack lot lines.
@@ -294,7 +265,7 @@ export class Orderline extends PosModel {
         for (const newLotLine of newPackLotLines) {
             newPackLotLine = new Packlotline({ env: this.env }, { order_line: this });
             newPackLotLine.lot_name = newLotLine.lot_name;
-            this.pack_lot_lines.add(newPackLotLine);
+            this.pack_lot_lines.push(newPackLotLine);
         }
 
         // Set the quantity of the line based on number of pack lots.
@@ -304,7 +275,7 @@ export class Orderline extends PosModel {
     }
     set_product_lot(product) {
         this.has_product_lot = product.tracking !== "none";
-        this.pack_lot_lines = this.has_product_lot && new PosCollection();
+        this.pack_lot_lines = this.has_product_lot && [];
     }
     getNote() {
         return this.note;
@@ -1084,8 +1055,8 @@ export class Order extends PosModel {
         this.temporary = options.temporary || false;
         this.date_order = luxon.DateTime.now();
         this.to_invoice = false;
-        this.orderlines = new PosCollection();
-        this.paymentlines = new PosCollection();
+        this.orderlines = [];
+        this.paymentlines = [];
         this.pos_session_id = this.pos.session.id;
         this.cashier = this.pos.get_cashier();
         this.finalized = false; // if true, cannot be modified.
@@ -1244,7 +1215,7 @@ export class Order extends PosModel {
                 { env: this.env },
                 { pos: this.pos, order: this, json: paymentline }
             );
-            this.paymentlines.add(newpaymentline);
+            this.paymentlines.push(newpaymentline);
 
             if (i === paymentlines.length - 1) {
                 this.select_paymentline(newpaymentline);
@@ -1622,7 +1593,7 @@ export class Order extends PosModel {
             line.order._unlinkOrderline(line);
         }
         line.order = this;
-        this.orderlines.add(line);
+        this.orderlines.push(line);
         this.select_orderline(this.get_last_orderline());
     }
     get_orderline(id) {
@@ -1789,7 +1760,11 @@ export class Order extends PosModel {
      */
     _unlinkOrderline(line) {
         this.assert_editable();
-        this.orderlines.remove(line);
+        const index = this.orderlines.findIndex((_item) => line.cid == _item.cid);
+        if (index < 0) {
+            return index;
+        }
+        this.orderlines.splice(index, 1);
         line.order = null;
     }
 
@@ -2059,7 +2034,7 @@ export class Order extends PosModel {
                 { env: this.env },
                 { order: this, payment_method: payment_method, pos: this.pos }
             );
-            this.paymentlines.add(newPaymentline);
+            this.paymentlines.push(newPaymentline);
             this.select_paymentline(newPaymentline);
             if (this.pos.config.cash_rounding) {
                 this.selected_paymentline.set_amount(0);
@@ -2091,7 +2066,7 @@ export class Order extends PosModel {
         if (this.selected_paymentline === line) {
             this.select_paymentline(undefined);
         }
-        this.paymentlines.remove(line);
+        this.paymentlines = this.paymentlines.filter((l) => l.cid !== line.cid);
     }
     clean_empty_paymentlines() {
         var lines = this.paymentlines;

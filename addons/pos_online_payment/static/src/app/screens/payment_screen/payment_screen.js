@@ -226,7 +226,7 @@ patch(PaymentScreen.prototype, {
             });
             return;
         }
-        this.pos.orders.add(updatedOrder);
+        this.pos.orders.push(updatedOrder);
         const oldLocalOrder = this.currentOrder;
         this.pos.set_order(updatedOrder);
         this.pos.removeOrder(oldLocalOrder, false);
