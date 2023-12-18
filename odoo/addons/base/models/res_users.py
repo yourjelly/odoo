@@ -1440,6 +1440,25 @@ class GroupsObjectUnion(GroupsObject):
         """ Returns True if whatever users there are, none will be contained in this set of access groups. """
         return self is self._root._no_one or not self._intersections or all(item.is_empty() for item in self._intersections)
 
+    def invert_intersect(self, factor):
+        """ Performs the inverse operation of '&' (a sort of factorization) such that: self == result & factor. """
+        if factor == self:
+            return self.every_one()
+
+        rfactor = ~factor
+        if rfactor.is_empty() or rfactor.is_every_one():
+            return None
+        rself = ~self
+
+        intersections = [i for i in rself._intersections if i not in rfactor._intersections]
+
+        if len(rself._intersections) - len(intersections) != len(rfactor._intersections):
+            # not possible to invert the intersection
+            return None
+
+        rself_value = GroupsObjectUnion(*intersections, root=self._root)
+        return ~rself_value
+
     def _reduce_intersections(self, intersections):
         """ Reduces the complexity of the object by reducing the number of elements. """
         intersections_leafs = [set(intersection._leafs) for intersection in intersections if not intersection.is_empty()]

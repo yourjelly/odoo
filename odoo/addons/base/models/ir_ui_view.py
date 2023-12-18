@@ -1104,10 +1104,69 @@ actual arch.
 
             self._postprocess_attributes(node, name_manager, node_info)
 
+        self._add_missing_fields(name_manager, root)
         name_manager.update_available_fields()
+
         root.set('model_access_rights', model._name)
 
         return name_manager
+
+    def _add_missing_fields(self, name_manager, root):
+        missing_fields = name_manager.get_missing_fields()
+        for name, (missing_groups, reasons) in missing_fields.items():
+            if name not in name_manager.field_info:
+                continue
+            if missing_groups is False:
+                # This case can happen if the access rights are modified after the view has been validated.
+                field_groups = name_manager._get_field_groups(name)
+                error_msg = [_(
+                    "There is no combination of groups that can guarantee the visibility of the field %(name)r on model %(model)r.\n"
+                    "The field %(name)r (%(field_groups)s) is used by this following elements (and their groups):",
+                        name=name, model=name_manager.model._name,
+                        field_groups=_('Only super user has access') if field_groups.is_empty() else field_groups,
+                    )]
+
+                for item_groups, _use, node in reasons:
+                    clone = etree.Element(node.tag, node.attrib)
+                    clone.attrib.pop('__validate__', None)
+                    error_msg.append(
+                        _("   %(node)s    (%(groups)s)",
+                            node=etree.tostring(clone, encoding='unicode'),
+                            groups=(
+                                _('Free access') if item_groups.is_every_one() else
+                                _('Only super user has access') if item_groups.is_empty() else
+                                item_groups
+                            ),
+                        )
+                    )
+                self._log_view_warning('\n'.join(error_msg), root)
+
+            # If the available fields have different groups then to avoid it being missing for
+            # certain users, we virtually add a field with common groups.
+            name_manager.available_fields[name].setdefault('info', {})
+            name_manager.available_fields[name].setdefault('groups', []).append(missing_groups)
+            name_manager.available_names.add(name)
+
+            # If the field is not in the view without any group restriction,
+            # add the field node with all mandatory groups (or without group if
+            # the mandatory field does not have groups).
+            attrs = {
+                'name': name,
+                'invisible' if root.tag != 'tree' else 'column_invisible': 'True',
+                'readonly': 'True',
+                'data-used-by': '; '.join([f"{attr}='{expr}' ({node.tag},{node.get('name')})" for _groups, (attr, expr), node in reasons]),
+            }
+
+            if missing_groups is not False:
+                subset_groups = missing_groups.invert_intersect(name_manager.model_groups)
+                if subset_groups is None:
+                    subset_groups = missing_groups
+                if not subset_groups.is_every_one():
+                    attrs['groups_repr'] = str(subset_groups)
+
+            item = etree.Element('field', attrs)
+            item.tail = '\n'
+            root.append(item)
 
     def _postprocess_on_change(self, arch, model):
         """ Add attribute on_change="1" on fields that are dependencies of
@@ -2964,16 +3023,6 @@ class NameManager:
                             name=name,
                             field_groups=_('Only super user has access') if field_groups.is_empty() else field_groups,
                     )]
-            else:
-                field_groups = self._get_field_groups(name)
-                error_msg = [_("Field %(name)r is not present for combinations of the mandatory groups.\n"
-                         "There are therefore cases where a user does not have access to the mandatory field value even though it is used somewhere in the view. "
-                         "The mandatory groups take care of the groups in view, the description field groups and model read access.\n"
-                         "The field %(name)r (%(field_groups)s) is used by this following elements (and their groups):",
-                            name=name,
-                            field_groups=_('Only super user has access') if field_groups.is_no_one() else field_groups,
-                    )]
-
             if error_msg:
                 for item_groups, _use, node in reasons:
                     clone = etree.Element(node.tag, node.attrib)

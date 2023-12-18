@@ -399,6 +399,47 @@ class TestGroupsObject(common.BaseCase):
         group2 = (B1 | D) & (A1B1 | (A1B1 & D) | (A1B1 & D & E) | (A1B1 & E) | E)
         self.assertEqual(str(group2), 'A1B1')
 
+    def test_groups_11_invert_intersect(self):
+        A = self.Group.define('A')
+        A1 = self.Group.define('A1')
+        A11 = self.Group.define('A11')
+        A2 = self.Group.define('A2')
+        A21 = self.Group.define('A21')
+        A22 = self.Group.define('A22')
+        B = self.Group.define('B')
+        B1 = self.Group.define('B1')
+        B2 = self.Group.define('B2')
+        D = self.Group.define('D')
+
+        self.assertEqual(str((A1 & A2).invert_intersect(A2)), 'A1')
+        self.assertEqual(str((A1 & B1 | A1 & B2).invert_intersect(A1)), 'B1 | B2')
+        self.assertEqual(str((A1 & B1 | A1 & B2 | A1 & A2).invert_intersect(A1)), 'A2 | B1 | B2')
+        self.assertEqual(str((A1 & B1 | A2 & B1).invert_intersect(A1 | A2)), 'B1')
+        self.assertEqual(str((A1 & B1 | A1 & B2 | A2 & B1 | A2 & B2).invert_intersect(A1 | A2)), 'B1 | B2')
+        self.assertEqual(A.invert_intersect(A | B), None)
+        self.assertEqual(A.invert_intersect(A1 | A2), None)
+        self.assertEqual(A.invert_intersect(A | D), None)
+
+        tests = [
+            (A2, A1),
+            (B1 | B2, A1),
+            (A2 | B1 | B2, A1),
+            (B1, A1 | A2),
+            (B1 | B2, A1 | A2),
+            (B1 & B2, A1),
+            (A2 & B1 & B2, A1),
+            (B1 & B2, A1 | A2),
+            (A1, B1 & B2),
+            (A1 | A2, B1 & B2),
+            (A1, A2 | B1 & B2),
+            (A11 | A21, A22 | B1 & B2),
+            (A11 & A21, A22 | B1 & B2),
+            (A, A1 | B),
+            (A1 | B, A),
+        ]
+        for a, b in tests:
+            self.assertEqual(str((a & b).invert_intersect(b)), str(a), f'Should invert_intersect: {a & b}\nby: ({b})')
+
 
 @common.tagged('at_install', 'groups')
 class TestGroupsOdoo(common.TransactionCase):
