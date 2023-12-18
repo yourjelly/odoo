@@ -35,11 +35,19 @@ class PaymentTransaction(models.Model):
             x_verify = "%s%s%s" % (shasign.hexdigest(), const.SSTRING, self.provider_id.phonepe_salt_index)
         return x_verify
 
+    def _phonepe_decode_payload(self, encoded_data):
+        decoded_data = base64.b64decode(bytes(encoded_data, "utf-8"))
+        json_data = decoded_data.decode('utf-8')
+        return json.loads(json_data)
+
     def _phonepe_intiate_transaction(self, payload):
         self.ensure_one()
-        encoded_payload = self._phonepe_encode_payload(payload)
-        checksum = self._phonepe_prepare_checksum(encoded_payload)
         base_url = self.get_base_url()
+        encoded_payload = self._phonepe_encode_payload(payload)
+        decode = self._phonepe_decode_payload(encoded_payload)
+        str_cmp = decode.get('callbackUrl') == "%s%s" % (base_url, PhonePeController._callback_url)
+        _logger.info("\n\n\n-------------------callbackUrl-compare------------------------- %s:\n%s",self.reference, pprint.pformat(str_cmp))
+        checksum = self._phonepe_prepare_checksum(encoded_payload)
         headers = {
             'Content-Type': 'application/json',
             'X-Verify': checksum,
@@ -49,11 +57,6 @@ class PaymentTransaction(models.Model):
             'request': encoded_payload
         }
         return self.provider_id._phonepe_make_request(data=data, headers=headers)
-
-    def _phonepe_decode_payload(self, encoded_data):
-        decoded_data = base64.b64decode(bytes(encoded_data, "utf-8"))
-        json_data = decoded_data.decode('utf-8')
-        return json.loads(json_data)
 
     def _get_specific_rendering_values(self, processing_values):
         res = super()._get_specific_rendering_values(processing_values)
