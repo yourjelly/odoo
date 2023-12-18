@@ -84,6 +84,7 @@ SUPPORTED_COUNTRIES = {
     'ID',  # Beta
     'IE',
     'IT',
+    'IN',
     'JP',
     'LI',  # Beta
     'LT',

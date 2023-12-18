@@ -1979,7 +1979,7 @@ class JsonRPCDispatcher(Dispatcher):
                           # distinct from the HTTP status code. This
                           # code is ignored and the value 200 (while
                           # misleading) is totally arbitrary.
-            'message': "Odoo Server Error",
+            'message': "Odoo Server Error edited",
             'data': serialize_exception(exc),
         }
         if isinstance(exc, NotFound):

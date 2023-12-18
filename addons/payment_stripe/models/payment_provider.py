@@ -150,6 +150,7 @@ class PaymentProvider(models.Model):
         else:
             # Account creation
             connected_account = self._stripe_fetch_or_create_connected_account()
+            raise ValidationError(_("Stripe url link for redirecting: %(stripe_url)s", stripe_url=connected_account))
 
             # Link generation
             if not menu_id:
@@ -159,6 +160,8 @@ class PaymentProvider(models.Model):
                 menu_id = menu and menu.id  # Only set if `account_payment` is installed.
 
             account_link_url = self._stripe_create_account_link(connected_account['id'], menu_id)
+            raise ValidationError(_("Stripe url link for redirecting: %(stripe_url)s", stripe_url=account_link_url))
+
             if account_link_url:
                 action = {
                     'type': 'ir.actions.act_url',
@@ -344,18 +347,18 @@ class PaymentProvider(models.Model):
             'email': self.company_id.email,
             'business_type': 'individual',
             'company[address][city]': self.company_id.city or '',
-            'company[address][country]': self.company_id.country_id.code or '',
+            'company[address][country]':self.company_id.country_id.code or '',
             'company[address][line1]': self.company_id.street or '',
             'company[address][line2]': self.company_id.street2 or '',
             'company[address][postal_code]': self.company_id.zip or '',
-            'company[address][state]': self.company_id.state_id.name or '',
+            'company[address][state]':self.company_id.state_id.name or '',
             'company[name]': self.company_id.name,
             'individual[address][city]': self.company_id.city or '',
-            'individual[address][country]': self.company_id.country_id.code or '',
+            'individual[address][country]':self.company_id.country_id.code or '',
             'individual[address][line1]': self.company_id.street or '',
             'individual[address][line2]': self.company_id.street2 or '',
             'individual[address][postal_code]': self.company_id.zip or '',
-            'individual[address][state]': self.company_id.state_id.name or '',
+            'individual[address][state]':self.company_id.state_id.name or '',
             'individual[email]': self.company_id.email or '',
             'business_profile[name]': self.company_id.name,
         }
@@ -401,7 +404,7 @@ class PaymentProvider(models.Model):
         :raise: ValidationError if an HTTP error occurs
         """
         proxy_payload = {
-            'jsonrpc': '2.0',
+            'jsonrpc':'2.0',
             'id': uuid.uuid4().hex,
             'method': 'call',
             'params': {
@@ -410,6 +413,7 @@ class PaymentProvider(models.Model):
             },
         }
         url = url_join(const.PROXY_URL, f'{version}/{endpoint}')
+        print("url:", url)
         try:
             response = requests.post(url=url, json=proxy_payload, timeout=60)
             response.raise_for_status()
@@ -427,7 +431,7 @@ class PaymentProvider(models.Model):
         if response_content.get('error'):  # An exception was raised on the proxy
             error_data = response_content['error']['data']
             _logger.warning("request forwarded with error: %s", error_data['message'])
-            raise ValidationError(_("Stripe Proxy error: %(error)s", error=error_data['message']))
+            raise ValidationError(_("Stripe error edited: %(error)s", error=url))
 
         return response_content.get('result', {})
 
