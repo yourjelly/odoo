@@ -63,6 +63,7 @@ DefaultFooter.template = xml`
 export const commandService = {
     dependencies: ["dialog", "hotkey", "ui"],
     start(env, { dialog, hotkey: hotkeyService, ui }) {
+        debugger;
         /** @type {Map<CommandRegistration>} */
         const registeredCommands = new Map();
         let nextToken = 0;
