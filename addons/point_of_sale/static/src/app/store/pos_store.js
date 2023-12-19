@@ -145,6 +145,7 @@ export class PosStore extends Reactive {
                 // maps the order's backendId to it's selected orderline
                 selectedOrderlineIds: {},
                 highlightHeaderNote: false,
+                acceptDeliveryOrderLoading: false,
             },
         };
 
@@ -194,6 +195,152 @@ export class PosStore extends Reactive {
             this.show_category_images ? "yes" : "no",
         ]);
     }
+
+    async processServerData() {
+        // These fields should be unique for the pos_config
+        // and should not change during the session, so we can
+        // safely take the first element.this.models
+        this.session = this.data.models["pos.session"].getFirst();
+        this.config = this.data.models["pos.config"].getFirst();
+        this.company = this.data.models["res.company"].getFirst();
+        this.user = this.data.models["res.users"].getFirst();
+        this.currency = this.data.models["res.currency"].getFirst();
+        this.pickingType = this.data.models["stock.picking.type"].getFirst();
+
+        // Custom data
+        this.partner_commercial_fields = this.data.custom.partner_commercial_fields;
+        this.server_version = this.data.custom.server_version;
+        this.base_url = this.data.custom.base_url;
+        this.has_cash_move_perm = this.data.custom.has_cash_move_perm;
+        this.has_available_products = this.data.custom.has_available_products;
+        this.pos_special_products_ids = this.data.custom.pos_special_products_ids;
+        this.open_orders_json = this.data.custom.open_orders;
+        this.delivery_order_count = this.data.custom.delivery_order_count;
+        this.models = this.data.models;
+
+        // Add Payment Interface to Payment Method
+        for (const pm of this.models["pos.payment.method"].getAll()) {
+            const PaymentInterface = this.electronic_payment_interfaces[pm.use_payment_terminal];
+
+            if (PaymentInterface) {
+                pm.payment_terminal = new PaymentInterface(this, pm);
+            }
+        }
+
+        // Create printer with hardware proxy, this will override related model data
+        this.unwatched.printers = [];
+        for (const relPrinter of this.models["pos.printer"].getAll()) {
+            const printer = relPrinter.serialize();
+            const HWPrinter = this.create_printer(printer);
+
+            HWPrinter.config = printer;
+            this.unwatched.printers.push(HWPrinter);
+
+            for (const id of printer.product_categories_ids) {
+                this.printers_category_ids_set.add(id);
+            }
+        }
+        this.config.iface_printers = !!this.unwatched.printers.length;
+
+        // Monitor product pricelist
+        this.models["product.product"].addEventListener(
+            "create",
+            this.computeProductPricelistCache.bind(this)
+        );
+        this.models["product.pricelist.item"].addEventListener(
+            "create",
+            this.computeProductPricelistCache.bind(this)
+        );
+
+        this.computeProductPricelistCache();
+    }
+
+    computeProductPricelistCache(data) {
+        // This function is called via the addEventListener callback initiated in the
+        // processServerData function when new products or pricelists are loaded into the PoS.
+        // It caches the heavy pricelist calculation when there are many products and pricelists.
+        const date = DateTime.now();
+        let pricelistItems = this.models["product.pricelist.item"].getAll();
+        let products = this.models["product.product"].getAll();
+
+        if (data && data.length > 0) {
+            if (data[0].model.modelName === "product.product") {
+                products = data;
+            }
+
+            if (data[0].model.modelName === "product.pricelist.item") {
+                pricelistItems = data;
+            }
+        }
+
+        for (const product of products) {
+            const applicableRules = {};
+
+            for (const item of pricelistItems) {
+                if (!applicableRules[item.pricelist_id.id]) {
+                    applicableRules[item.pricelist_id.id] = [];
+                }
+
+                if (!product.isPricelistItemUsable(item, date)) {
+                    continue;
+                }
+
+                if (item.product_id && product.id === item.product_id.id) {
+                    applicableRules[item.pricelist_id.id].push(item);
+                } else if (
+                    item.raw.product_tmpl_id &&
+                    product.raw?.product_tmpl_id === item.raw.product_tmpl_id
+                ) {
+                    applicableRules[item.pricelist_id.id].push(item);
+                } else if (!item.raw.product_tmpl_id && !item.raw.product_id) {
+                    applicableRules[item.pricelist_id.id].push(item);
+                }
+            }
+
+            product.cachedPricelistRules = applicableRules;
+        }
+    }
+
+    async loadProductPricelist(pricelistIds) {
+        if (!pricelistIds || pricelistIds.length === 0) {
+            return [];
+        }
+
+        const data = await this.data.read("product.pricelist", pricelistIds);
+        const pricelistItemsIds = data.map((p) => p.raw.item_ids).flat();
+
+        if (pricelistItemsIds.length) {
+            await this.data.read("product.pricelist.item", pricelistItemsIds);
+        }
+
+        return data;
+    }
+
+    async loadProducts(productIds) {
+        if (!productIds || productIds.length === 0) {
+            return [];
+        }
+        const pIds = Array.from(new Set(productIds));
+        const product = await this.data.read("product.product", pIds);
+        await this._loadMissingPricelistItems(product);
+    }
+
+    async afterProcessServerData() {
+        await this.load_orders();
+        this.set_start_order();
+        Object.assign(this.toRefundLines, this.db.load("TO_REFUND_LINES") || {});
+        window.addEventListener("beforeunload", () =>
+            this.db.save("TO_REFUND_LINES", this.toRefundLines)
+        );
+        const { start_category, iface_start_categ_id } = this.config;
+        this.setSelectedCategory((start_category && iface_start_categ_id?.[0]) || 0);
+        // Push orders in background, do not await
+        this.push_orders();
+        // This method is to load the demo datas.
+        this.load_server_orders();
+        this.markReady();
+    }
+
     get productListViewMode() {
         const viewMode = this.productListView && this.ui.isSmall ? this.productListView : "grid";
         if (viewMode === "grid") {
@@ -846,9 +993,9 @@ export class PosStore extends Reactive {
             this.set_order(orderList[0]);
         }
     }
-    async _syncAllOrdersFromServer() {
+    async _syncAllOrdersFromServer(domain = []) {
         await this._removeOrdersFromServer();
-        const ordersJson = await this._getOrdersJson();
+        const ordersJson = await this._getOrdersJson(domain);
         let message = null;
         message = await this._addPricelists(ordersJson);
         let messageFp = null;
@@ -866,8 +1013,8 @@ export class PosStore extends Reactive {
         this.sortOrders();
         return message;
     }
-    async _getOrdersJson() {
-        return await this.orm.call("pos.order", "export_for_ui_shared_order", [], {
+    async _getOrdersJson(domain = []) {
+        return await this.data.call("pos.order", "export_for_ui_shared_order", [], {
             config_id: this.config.id,
         });
     }
@@ -2038,7 +2185,20 @@ export class PosStore extends Reactive {
             company: this.company,
             cashier: this.get_cashier()?.name,
             header: this.config.receipt_header,
+            delivery: this.getDeliveryData(order),
         };
+    }
+
+    getDeliveryData(order) {
+        return {
+            service_name: order.delivery_service_name,
+            note: order.delivery_note,
+            date_order: new Date(order.date_order).toLocaleString(),
+        };
+    }
+
+    shouldLoadOrders() {
+        return this.config.raw.trusted_config_ids.length > 0;
     }
 
     isChildPartner(partner) {

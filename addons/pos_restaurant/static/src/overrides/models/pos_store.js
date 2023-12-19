@@ -146,21 +146,12 @@ patch(PosStore.prototype, {
         this.ordersToUpdateSet.add(order);
         return order;
     },
-    async _getTableOrdersFromServer(tableIds) {
-        this.set_synch("connecting", 1);
-        try {
-            // FIXME POSREF timeout
-            const orders = await this.env.services.orm.silent.call(
-                "pos.order",
-                "export_for_ui_table_draft",
-                [tableIds]
-            );
-            this.set_synch("connected");
-            return orders;
-        } catch (error) {
-            this.set_synch("error");
-            throw error;
-        }
+    async _getTableOrdersFromServer(tableIds, domain = []) {
+        const orders = await this.data.call("pos.order", "export_for_ui_table_draft", [
+            tableIds,
+            domain,
+        ]);
+        return orders;
     },
     /**
      * Sync orders that got updated to the back end
@@ -186,17 +177,17 @@ patch(PosStore.prototype, {
         const tableOrders = this.getTableOrders(tableId);
         this._replaceOrders(tableOrders, ordersJsons);
     },
-    async _getOrdersJson() {
+    async _getOrdersJson(domain = []) {
         if (this.config.module_pos_restaurant) {
             const tableIds = [].concat(
                 ...this.floors.map((floor) => floor.tables.map((table) => table.id))
             );
             await this._syncTableOrdersToServer(); // to prevent losing the transferred orders
-            const ordersJsons = await this._getTableOrdersFromServer(tableIds); // get all orders
+            const ordersJsons = await this._getTableOrdersFromServer(tableIds, domain); // get all orders
             await this._loadMissingProducts(ordersJsons);
             return ordersJsons;
         } else {
-            return await super._getOrdersJson();
+            return await super._getOrdersJson(domain);
         }
     },
     _shouldRemoveOrder(order) {
@@ -340,5 +331,8 @@ patch(PosStore.prototype, {
             this.get_order().setBooked(true);
         }
         return super.addProductToCurrentOrder(...arguments);
+    },
+    shouldLoadOrders() {
+        return super.shouldLoadOrders() || this.config.module_pos_restaurant;
     },
 });

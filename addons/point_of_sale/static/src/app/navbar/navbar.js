@@ -59,7 +59,7 @@ export class Navbar extends Component {
         if (this.isTicketScreenShown) {
             this.pos.closeScreen();
         } else {
-            if (this._shouldLoadOrders()) {
+            if (this.pos.shouldLoadOrders()) {
                 try {
                     this.pos.setLoadingOrderState(true);
                     const message = await this.pos._syncAllOrdersFromServer();
@@ -74,10 +74,6 @@ export class Navbar extends Component {
                 this.pos.showScreen("TicketScreen");
             }
         }
-    }
-
-    _shouldLoadOrders() {
-        return this.pos.config.trusted_config_ids.length > 0;
     }
 
     get isTicketScreenShown() {

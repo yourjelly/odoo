@@ -102,6 +102,306 @@ class PosSession(models.Model):
 
     _sql_constraints = [('uniq_name', 'unique(name)', "The name of this POS Session must be unique!")]
 
+    # We need to pass config_id because sometime params are needed without opened session (eg: closed self order).
+    # If we don't have a session, we can't get the config_id from the session.
+    def _load_data_params(self, config_id):
+        params = {
+            'pos.config': {
+                'domain': [('id', '=', config_id.id)],
+                'fields': []
+            },
+            'pos.order': {
+                'fields': [],
+                'domain': [("id", "=", False)], # Temp fix to avoid loading orders
+            },
+            'pos.order.line': {
+                'domain': lambda data: [('order_id', 'in', [order['id'] for order in data['pos.order']])],
+                'fields': [
+                    'qty', 'attribute_value_ids', 'custom_attribute_value_ids', 'price_unit', 'skip_change', 'uuid', 'price_subtotal', 'price_subtotal_incl', 'order_id',
+                    'product_id', 'discount', 'tax_ids', 'pack_lot_ids', 'customer_note', 'refunded_qty', 'price_extra', 'full_product_name', 'refunded_orderline_id', 'combo_parent_id', 'combo_line_ids', 'combo_line_id'],
+            },
+            'pos.session': {
+                'domain': [('id', '=', self.id)],
+                'fields': [
+                    'id', 'name', 'user_id', 'config_id', 'start_at', 'stop_at', 'sequence_number', 'login_number',
+                    'payment_method_ids', 'state', 'update_stock_at_closing', 'cash_register_balance_start', 'access_token'
+                ],
+            },
+            'pos.payment.method': {
+                'domain': ['|', ('active', '=', False), ('active', '=', True)],
+                'fields': ['id', 'name', 'is_cash_count', 'use_payment_terminal', 'split_transactions', 'type', 'image', 'sequence', 'delivery_payment_method'],
+            },
+            'pos.printer': {
+                'domain': [('id', 'in', config_id.printer_ids.ids)],
+                'fields': ['id', 'name', 'proxy_ip', 'product_categories_ids', 'printer_type'],
+            },
+            'pos.category': {
+                'domain': [('id', 'in', config_id.iface_available_categ_ids.ids)] if config_id.limit_categories and config_id.iface_available_categ_ids else [],
+                'fields': ['id', 'name', 'parent_id', 'child_id', 'write_date', 'has_image', 'color']
+            },
+            'pos.bill': {
+                'domain': ['|', ('id', 'in', config_id.default_bill_ids.ids), ('pos_config_ids', '=', False)],
+                'fields': ['id', 'name', 'value']
+            },
+            'product.product': {
+                'domain': config_id._get_available_product_domain(),
+                'fields': [
+                    'id',
+                    'display_name', 'lst_price', 'standard_price', 'categ_id', 'pos_categ_ids', 'taxes_id', 'barcode',
+                    'default_code', 'to_weight', 'uom_id', 'description_sale', 'description', 'product_tmpl_id', 'tracking',
+                    'write_date', 'available_in_pos', 'attribute_line_ids', 'active', 'image_128', 'combo_ids',
+                ],
+                'order': 'sequence,default_code,name',
+                'context': {'display_default_code': False},
+            },
+            'product.attribute': {
+                'domain': [('create_variant', '=', 'no_variant')],
+                'fields': ['name', 'display_type', 'template_value_ids', 'attribute_line_ids'],
+            },
+            'product.template.attribute.line': {
+                'domain': [],
+                'fields': ['display_name', 'attribute_id', 'product_template_value_ids'],
+            },
+            'product.template.attribute.value': {
+                'domain': lambda data: [('attribute_id', 'in', [attr['id'] for attr in data['product.attribute']])],
+                'fields': ['attribute_id', 'attribute_line_id', 'product_attribute_value_id', 'price_extra', 'name', 'is_custom', 'html_color', 'image']
+            },
+            'pos.combo': {
+                'domain': lambda data: [('id', 'in', list(set().union(*[product.get('combo_ids') for product in data['product.product']])))],
+                'fields': ['id', 'name', 'combo_line_ids', 'base_price']
+            },
+            'pos.combo.line': {
+                'domain': lambda data: [('id', 'in', list(set().union(*[combo.get('combo_line_ids') for combo in data['pos.combo']])))],
+                'fields': ['id', 'product_id', 'combo_price', 'combo_id']
+            },
+            'product.packaging': {
+                'domain': lambda data: AND([[('barcode', 'not in', ['', False])], [('product_id', 'in', [x['id'] for x in data['product.product']])] if data else []]),
+                'fields': ['id', 'name', 'barcode', 'product_id', 'qty'],
+            },
+            'res.users': {
+                'domain': [('id', '=', self.env.user.id)],
+                'fields': ['id', 'name', 'groups_id', 'partner_id'],
+            },
+            'res.partner': {
+                'domain': [('id', 'in', config_id.get_limited_partners_loading())],
+                'fields': [
+                    'id',
+                    'name', 'street', 'city', 'state_id', 'country_id', 'vat', 'lang', 'phone', 'zip', 'mobile', 'email',
+                    'barcode', 'write_date', 'property_account_position_id', 'property_product_pricelist', 'parent_name'
+                ]
+            },
+            'res.company': {
+                'domain': [('id', '=', config_id.company_id.id)],
+                'fields': [
+                    'id',
+                    'currency_id', 'email', 'website', 'company_registry', 'vat', 'name', 'phone', 'partner_id',
+                    'country_id', 'state_id', 'tax_calculation_rounding_method', 'nomenclature_id', 'point_of_sale_use_ticket_qr_code',
+                    'point_of_sale_ticket_unique_code', 'street', 'city', 'zip',
+                ],
+            },
+            'decimal.precision': {
+                'domain': [],
+                'fields': ['id', 'name', 'digits'],
+            },
+            'uom.uom': {
+                'domain': [],
+                'fields': ['id', 'name', 'category_id', 'factor_inv', 'factor', 'is_pos_groupable', 'uom_type', 'rounding'],
+            },
+            'uom.category': {
+                'domain': lambda data: [('uom_ids', 'in', [uom['category_id'] for uom in data['uom.uom']])],
+                'fields': ['id', 'name', 'uom_ids'],
+            },
+            'res.country.state': {
+                'domain': [],
+                'fields': ['id', 'name', 'code', 'country_id'],
+            },
+            'res.country': {
+                'domain': [],
+                'fields': ['id', 'name', 'code'],
+            },
+            'res.lang': {
+                'domain': [],
+                'fields': ['id', 'name', 'code'],
+            },
+            'product.pricelist' : {
+                'domain': [('id', 'in', config_id.available_pricelist_ids.ids)] if config_id.use_pricelist else [('id', '=', config_id.pricelist_id.id)],
+                'fields': ['id', 'name', 'display_name', 'discount_policy', 'item_ids']
+            },
+            'product.pricelist.item' : {
+                'domain': self._prepare_pricelist_domain,
+                'fields': ['product_tmpl_id', 'product_id', 'pricelist_id', 'price_surcharge', 'price_discount', 'price_round',
+                    'price_min_margin', 'price_max_margin', 'company_id', 'currency_id', 'date_start', 'date_end', 'compute_price',
+                    'fixed_price', 'percent_price', 'base_pricelist_id', 'base', 'categ_id', 'min_quantity']
+            },
+            'product.category': {
+                'domain': [],
+                'fields': ['id', 'name', 'parent_id'],
+            },
+            'account.tax': {
+                'domain': [('company_id', '=', config_id.company_id.id)],
+                'fields': [],
+            },
+            'account.cash.rounding': {
+                'domain': [('id', '=', config_id.rounding_method.id)],
+                'fields': ['id', 'name', 'rounding', 'rounding_method'],
+            },
+            'account.fiscal.position': {
+                'domain': [('id', 'in', config_id.fiscal_position_ids.ids)],
+                'fields': [],
+            },
+            'stock.picking.type': {
+                'domain': [('id', '=', config_id.picking_type_id.id)],
+                'fields': ['id', 'use_create_lots', 'use_existing_lots'],
+            },
+            'res.currency': {
+                'domain': [('id', '=', config_id.currency_id.id)],
+                'fields': ['id', 'name', 'symbol', 'position', 'rounding', 'rate', 'decimal_places'],
+            },
+        }
+
+        return params
+
+    def load_data(self, models_to_load, only_data=False):
+        params = self._load_data_params(self.config_id)
+        response = {}
+        response['data'] = {}
+        response['relations'] = {}
+        response['custom'] = {}
+
+        if not only_data:
+
+            response['custom'] = {
+                'partner_commercial_fields': self.env['res.partner']._commercial_fields(),
+                'server_version': exp_version(),
+                'base_url': self.get_base_url(),
+                'has_cash_move_perm': self.user_has_groups('account.group_account_invoice'),
+                'has_available_products': self._pos_has_valid_product(),
+                'pos_special_products_ids': self.env['pos.config']._get_special_products().ids,
+                'open_orders': self.env['pos.order'].search([('session_id', '=', self.id), ('state', '=', 'draft')]).export_for_ui(),
+                'delivery_order_count': self.env['pos.config'].get_delivery_order_count(),
+            }
+
+            # Taxes.
+            taxes = self.env['account.tax'].search(params['account.tax']['domain'])
+            self._load_account_tax(response, taxes)
+
+            # Fiscal positions.
+            fiscal_positions = self.env['account.fiscal.position'].search(params['account.fiscal.position']['domain'])
+            self._load_account_fiscal_position(response, fiscal_positions)
+
+        if len(models_to_load) > 0:
+            fields_to_load = [(name, params[name]) for name in models_to_load]
+        else:
+            fields_to_load = [(name, data) for name, data in params.items()]
+
+        # Custom loading.
+        for key, value in fields_to_load:
+            if 'custom_loading' in value:
+                records = self.env[key].with_context(value.get('context', [])).search(value['domain'])
+                response['data'][key] = value['custom_loading'](records)
+                if records:
+                    value['fields'] = [
+                        field_name
+                        for field_name in response['data'][key][0].keys()
+                        if field_name in records._fields
+                    ]
+
+        response['fields'] = {name: data['fields'] for name, data in fields_to_load}
+
+        # Load data from search_read
+        if len(params) > 0:
+            for key, value in params.items():
+
+                if not key in models_to_load and len(models_to_load) > 0:
+                    continue
+
+                if key not in response['data']:
+                    if isinstance(value['domain'], list):
+                        response['data'][key] = self.env[key].with_context(value.get('context', [])).search_read(
+                            value['domain'],
+                            value['fields'],
+                            order=value.get('order', []),
+                            load=False)
+                    else:
+                        response['data'][key] = self.env[key].with_context(value.get('context', [])).search_read(
+                            value['domain'](response['data']),
+                            value['fields'],
+                            order=value.get('order', []),
+                            load=False)
+
+                if not only_data:
+                    model_fields = self.env[key].fields_get(allfields=value['fields'] or None)
+                    for name, params in model_fields.items():
+                        if not response['relations'].get(key):
+                            response['relations'][key] = {}
+
+                        if params.get("relation"):
+
+                            response['relations'][key][name] = {
+                                'name': name,
+                                'model': key,
+                                'relation': params['relation'],
+                                'type': params['type'],
+                            }
+                            if params['type'] == 'one2many' and params.get('relation_field'):
+                                response['relations'][key][name]['inverse_name'] = params['relation_field']
+                        else:
+                            response['relations'][key][name] = {
+                                'name': name,
+                                'type': params['type'],
+                            }
+
+        # pos_config adaptation
+        if len(models_to_load) == 0 or 'pos.config' in models_to_load:
+            config = response['data']['pos.config'][0]
+            response['data']['pos.config'][0]['use_proxy'] = config['is_posbox'] and (
+                config['iface_electronic_scale'] or
+                config['iface_print_via_proxy'] or
+                config['iface_scan_via_proxy'] or
+                config['iface_customer_facing_display_via_proxy']
+            )
+
+            if not self.config_id.use_pricelist:
+                response['data']['pos.config'][0]['pricelist_id'] = False
+
+        # res_users adaptation
+        if len(models_to_load) == 0 or 'res.users' in models_to_load:
+            response['data']['res.users'][0]['role'] = 'manager' if any(id == self.config_id.group_pos_manager_id.id for id in response['data']['res.users'][0]['groups_id']) else 'cashier'
+            del response['data']['res.users'][0]['groups_id']
+
+        # product_product adapation
+        if len(models_to_load) == 0 or 'product.product' in models_to_load:
+            self._process_pos_ui_product_product(response['data']['product.product'])
+
+        return response
+
+    def _load_account_fiscal_position(self, response, fiscal_positions):
+        results = {}
+        for fiscal_position in fiscal_positions:
+            data = results[fiscal_position.id] = {
+                'id': fiscal_position.id,
+                'name': fiscal_position.name,
+                'display_name': fiscal_position.display_name,
+                'tax_mapping_by_id': {},
+            }
+            for fiscal_position_tax in fiscal_position.tax_ids:
+                fiscal_position_tax_data = data['tax_mapping_by_id'].setdefault(fiscal_position_tax.tax_src_id.id, [])
+                fiscal_position_tax_data.append(fiscal_position_tax.tax_dest_id.id)
+        response['custom']['account.fiscal.position'] = results
+
+    def _load_account_tax(self, response, taxes):
+        response['custom']['account.tax'] = {values['id']: values for values in taxes._convert_to_dict_for_taxes_computation()}
+
+    def _prepare_pricelist_domain(self, data):
+        product_tmpl_ids = [p['product_tmpl_id'] for p in data['product.product']]
+        product_ids = [p['id'] for p in data['product.product']]
+
+        return [
+            ('pricelist_id', 'in', [p['id'] for p in data['product.pricelist']]),
+            '|', ('product_tmpl_id', '=', False), ('product_tmpl_id', 'in', product_tmpl_ids),
+            '|', ('product_id', '=', False), ('product_id', 'in', product_ids),
+        ]
+
     @api.depends('currency_id', 'company_id.currency_id')
     def _compute_is_in_company_currency(self):
         for session in self:
