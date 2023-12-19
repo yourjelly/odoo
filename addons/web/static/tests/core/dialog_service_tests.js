@@ -22,6 +22,7 @@ import {
     triggerHotkey,
 } from "../helpers/utils";
 import { Dialog } from "../../src/core/dialog/dialog";
+import { editSearchBar } from "./command_service_tests";
 
 import { Component, onMounted, xml } from "@odoo/owl";
 
@@ -258,9 +259,9 @@ QUnit.test("dialog component crashes", async (assert) => {
     assert.containsOnce(target, ".modal .o_dialog_error");
 });
 
-QUnit.test("close dialogs on command pallet", async function (assert) {
+QUnit.debug("close dialogs on command pallet", async function (assert) {
     assert.expect(8);
-
+    debugger;
     // create first dialog box
     class CustomDialog extends Component {}
     CustomDialog.components = { Dialog };
@@ -277,20 +278,75 @@ QUnit.test("close dialogs on command pallet", async function (assert) {
     assert.containsN(target, ".o_dialog_container .o_dialog", 2);
 
     // create command pallet
-    const commands = [
-        {
-            name: "Command1",
-            action: () => {
-                assert.step("C1");
-            },
-        },
-    ];
+    // const commands = [
+    //     {
+    //         name: "Command1",
+    //         action: () => {
+    //             assert.step("C1");
+    //         },
+    //     },
+    // ];
+    // const configByNamespace = {
+    //     "/": {
+    //         // debounceDelay: 100,
+    //     },
+    //     "?": {
+    //         // debounceDelay: 100,
+    //     },
+    //     "@": {
+    //         // debounceDelay: 200,
+    //     },
+    //     "#": {
+    //         // debounceDelay: 100,
+    //     },
+    // };
 
+    // const provide = [
+    //     {
+    //         provide: () => commands,
+    //     },
+    // ];
+    // const providers = [
+    //     { namespace: "/", provide },
+    //     { namespace: "?", provide },
+    //     { namespace: "@", provide },
+    //     { namespace: "#", provide },
+    // ];
+
+
+    const action = () => {assert.step("C1");};
     const providers = [
         {
-            provide: () => commands,
+            provide: () => [
+                {
+                    name: "Command1",
+                    action,
+                },
+                {
+                    name: "Command2",
+                    action,
+                },
+            ],
+        },
+        {
+            namespace: "/",
+            provide: () => [
+                {
+                    name: "Command3",
+                    action,
+                },
+                {
+                    name: "Command4",
+                    action,
+                },
+            ],
         },
     ];
+    // const config = {
+    //     providers,
+    // };
+
+
     const config = {
         providers,
     };
@@ -303,7 +359,13 @@ QUnit.test("close dialogs on command pallet", async function (assert) {
         [...target.querySelectorAll(".o_command")].map((el) => el.textContent),
         ["Command1"]
     );
-
+    await editSearchBar("/");
+    assert.containsN(target, ".o_command", 2);
+    assert.deepEqual(
+        [...target.querySelectorAll(".o_command")].map((el) => el.textContent),
+        ["Command3", "Command4"]
+    );
+    
     // click on enter key to execute command
     triggerHotkey("enter");
     await nextTick();

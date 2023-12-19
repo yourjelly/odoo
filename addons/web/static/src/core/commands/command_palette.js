@@ -268,10 +268,15 @@ export class CommandPalette extends Component {
     async executeCommand(command) {
         debugger
         const config = await command.action();
+        const closeAllDialogs = ['/','?'];
+        debugger
         if (config) {
             this.setCommandPaletteConfig(config);
-        } else {
+        } else if(closeAllDialogs.includes(this.state.namespace)){
             this.dialogService.closeAllDialogs();
+        }
+        else{
+            this.props.close();
         }
     }
 
