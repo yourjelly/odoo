@@ -17,6 +17,9 @@ Odoo Web tours.
         'views/tour_views.xml'
     ],
     'assets': {
+        'web.assets_tests': [
+            'web_tour/static/tests/tours/**/*',
+        ],
         'web.assets_common': [
             'web_tour/static/src/scss/**/*',
             'web_tour/static/src/js/running_tour_action_helper.js',
@@ -47,6 +50,7 @@ Odoo Web tours.
         ],
         'web.qunit_suite_tests': [
             'web_tour/static/tests/**/*',
+            ('remove', 'web_tour/static/tests/tours/**/*'),
         ],
     },
     'auto_install': True,
