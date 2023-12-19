@@ -83,16 +83,40 @@ class StockForecasted(models.AbstractModel):
         res['incoming_qty'] = sum(products.mapped('incoming_qty'))
         res['outgoing_qty'] = sum(products.mapped('outgoing_qty'))
 
-        domain = [
-            ('location_id', 'in', wh_location_ids),
-            ('location_id.usage', '=', 'internal'),
+        if self.env.context.get('warehouse'):
+            warehouse = self.env['stock.warehouse'].browse(self.env.context.get('warehouse'))
+        else:
+            warehouse = self.env['stock.warehouse'].search([['active', '=', True]])[0]
+
+        lot_stock_child_ids = [loc['id'] for loc in self.env['stock.location'].search_read(
+            [('id', 'child_of', warehouse.lot_stock_id.id)],
+            ['id'],
+        )]
+        wh_internal_location = list(set(wh_location_ids) - set(lot_stock_child_ids))
+
+        inventory_domain = [
+            ('state', '=', 'done'),
+            ('location_id.usage', '=', 'inventory'),
+            ('location_dest_id', 'in', wh_internal_location)
+        ]
+        non_link_move_domain = [
+            ('state', 'in', ('assigned', 'partially_available')),
+            ('move_id.move_orig_ids', '=', False),
+            ('move_id.move_dest_ids', '=', False),
+            '|',
+                ('location_id', 'in', wh_location_ids),
+                ('location_dest_id', 'in', wh_location_ids),
         ]
         if product_template_ids:
-            domain.append(('product_tmpl_id', 'in', product_template_ids))
+            inventory_domain.append(('product_id.product_tmpl_id', 'in', product_template_ids))
+            non_link_move_domain.append(('product_id.product_tmpl_id', 'in', product_template_ids))
         else:
-            domain.append(('product_id', 'in', product_ids))
-        total_quantity = self.env['stock.quant']._read_group(domain, aggregates=['quantity:sum'])[0][0] or 0
-        res['non_available'] = total_quantity - res['quantity_on_hand'] if total_quantity else 0.00
+            inventory_domain.append(('product_id', 'in', product_ids))
+            non_link_move_domain.append(('product_id', 'in', product_ids))
+        inventory_qty = self.env['stock.move.line']._read_group(inventory_domain, aggregates=['quantity:sum'])[0][0] or 0.00
+        non_link_move_qty = self.env['stock.move.line']._read_group(non_link_move_domain, aggregates=['quantity:sum'])[0][0] or 0.00
+        total_quantity = inventory_qty + non_link_move_qty
+        res['non_available'] = total_quantity  if total_quantity else 0.00
         in_domain, out_domain = self._move_draft_domain(product_template_ids, product_ids, wh_location_ids)
         [in_sum] = self.env['stock.move']._read_group(in_domain, aggregates=['product_qty:sum'])[0]
         [out_sum] = self.env['stock.move']._read_group(out_domain, aggregates=['product_qty:sum'])[0]

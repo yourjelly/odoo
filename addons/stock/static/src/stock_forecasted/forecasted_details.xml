@@ -68,7 +68,10 @@
                     <td t-out="line.receipt_date or ''"
                         t-attf-class="#{line.is_late and 'o_grid_warning'}"/>
                     <td t-if="props.docs.multiple_product" t-out="line.product.display_name"/>
-                    <td class="text-end"><t t-if="! line.replenishment_filled">- </t><t t-out="_formatFloat(line.quantity)"/></td>
+                    <td class="text-end"><t t-if="! line.replenishment_filled">- </t>
+                    <t t-if="line.in_transit and ! line.move_out"><t t-out="_formatFloat(line.quantity - this.props.docs.non_available)"/></t>
+                    <t t-else=""><t t-out="_formatFloat(line.quantity)"/></t>
+                    </td>
                     <td t-attf-class="#{! line.replenishment_filled and 'o_grid_warning'}" name="usedby_cell">
                         <button t-if="line.move_out and line.move_out.picking_id"
                             t-attf-class="o_priority o_priority_star me-1 fa fa-star#{line.move_out.picking_id.priority=='1' ? '' : '-o'}"
@@ -91,7 +94,7 @@
                 </tr>
                 <tr class="o_forecasted_row bg-200">
                     <td colspan="2">Non Available</td>
-                    <td t-out="_formatFloat(this.props.docs.non_available - total_in_transit)" class="text-end"/>
+                    <td t-out="_formatFloat(this.props.docs.non_available)" class="text-end"/>
                 </tr>
             </thead>
             <tbody t-if="props.docs.qty.in or props.docs.qty.out">
