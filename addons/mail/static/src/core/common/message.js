@@ -187,6 +187,37 @@ export class Message extends Component {
         );
     }
 
+    getEmojiInfo(str) {
+        const parser = new DOMParser();
+        const htmlDoc = parser.parseFromString(str, "text/html");
+        const strWithoutTags = htmlDoc.body.textContent || "";
+        const allEmojis = strWithoutTags.match(/\p{Emoji_Presentation}|\p{Emoji}\uFE0F/gu) ?? [];
+        const zwsCount = (strWithoutTags.match(/\u200d/gu) ?? []).length;
+        const emojiCount = allEmojis.length - zwsCount;
+        const withoutEmojis = strWithoutTags.replace(
+            /\p{Emoji_Presentation}|\p{Emoji}\uFE0F|\u200d/gu,
+            ""
+        );
+        return {
+            hasEmojis: emojiCount > 0,
+            hasOnlyEmoji: withoutEmojis.length === 0,
+            emojiCount,
+        };
+    }
+
+    get bodyStyle() {
+        const { hasOnlyEmoji } = this.getEmojiInfo(this.message.body);
+        if (hasOnlyEmoji && !this.state.isEditing) {
+            return `font-size: ${this.emojiFontSize}rem;`;
+        }
+        return "";
+    }
+
+    get emojiFontSize() {
+        const { emojiCount } = this.getEmojiInfo(this.message.body);
+        return 1 + 1 / emojiCount;
+    }
+
     get attClass() {
         return {
             [this.props.className]: true,
