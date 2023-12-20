@@ -40,19 +40,14 @@ class PaymentProvider(models.Model):
         api_url = const.API_URLS[environment]
         return api_url
 
-    def _phonepe_make_request(self, method='POST', data=None, headers=None, transactionId=False):
+    def _phonepe_make_request(self, method='POST', data=None, headers=None):
         """
         """
         self.ensure_one()
         url = "%s%s" % (self._phonepe_get_api_url(), const.END_POINT) if not transactionId else "%s/pg/v1/status/%s/%s" % (self._phonepe_get_api_url(), self.phonepe_merchant_id, transactionId)
-        # auth = (self.phonepe_merchant_id, self.phonepe_salt_key, self.phonepe_salt_index)
         try:
-            if data and not transactionId:
-                data = json.dumps(data)
-                response = requests.request(method, url=url, data=data, headers=headers, timeout=60)
-            else:
-                response = requests.request(method, url=url, headers=headers, timeout=60)
-            # print("\n\n\n----------------response----------",response.json())
+            data = json.dumps(data)
+            response = requests.request(method, url=url, data=data, headers=headers, timeout=60)
             response.raise_for_status()
             return response.json()
         except requests.exceptions.HTTPError:
