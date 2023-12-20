@@ -66,10 +66,10 @@
             </div>
         </div>
         <!-- Off canvas filters on mobile-->
-        <div id="o_wevent_talk_offcanvas" class="o_website_offcanvas offcanvas offcanvas-end d-lg-none p-0 overflow-visible">
+        <div id="o_wevent_talk_offcanvas" class="o_website_offcanvas offcanvas offcanvas-end d-lg-none p-0 overflow-visible bg-body">
             <div class="offcanvas-header">
                 <h5 class="offcanvas-title">Filters</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"/>
+                <button type="button" class="btn-close bg-white" data-bs-dismiss="offcanvas" aria-label="Close"/>
             </div>
             <div class="offcanvas-body p-0">
                 <div class="accordion accordion-flush">
@@ -85,24 +85,16 @@
                             </button>
                         </h2>
                         <div class="o_wevent_offcanvas_fav accordion-collapse collapse">
-                            <div class="accordion-body pt-0">
-                                <ul class="list-group list-group-flush">
+                            <div class="accordion-body bg-white pt-0">
+                                <ul class="list-unstyled" t-if="option_track_wishlist">
                                     <!-- Optional wishlist filter -->
-                                    <li t-if="option_track_wishlist" class="list-group-item">                         
-                                        <a t-att-href="'/event/%s/track?%s' % (
-                                                slug(event),
-                                                keep_query('*', search_wishlist='')
-                                            )"
-                                            class="d-flex align-items-center justify-content-between">
-                                            All Talks
-                                        </a>
-                                        <a t-att-href="'/event/%s/track?%s' % (
-                                                slug(event),
-                                                keep_query('*', search_wishlist='1')
-                                            )"
-                                            t-attf-class="d-flex align-items-center justify-content-between #{'active' if search_wishlist else ''}">
-                                            Favorites
-                                        </a>
+                                    <li t-attf-onclick="location.href = '/event/#{slug(event)}/track?#{keep_query('*', search_wishlist='')}'" class="form-check"> 
+                                        <input class="form-check-input" type="radio" t-attf-name="#{search_wishlist}" t-att-checked="bool(search_wishlist == '')"/>
+                                        <label class="form-check-label" t-attf-for="#{search_wishlist}"> All Talks</label>
+                                    </li>
+                                    <li t-attf-onclick="location.href = '/event/#{slug(event)}/track?#{keep_query('*', search_wishlist='1')}'" class="form-check" > 
+                                        <input class="form-check-input" type="radio" t-attf-name="#{search_wishlist}" t-att-checked="bool(search_wishlist)"/>
+                                        <label class="form-check-label" t-attf-for="#{search_wishlist}">Favorites</label>
                                     </li>
                                 </ul>
                             </div>
@@ -120,20 +112,14 @@
                             </button>
                         </h2>
                         <div t-attf-class="o_wevent_offcanvas_tag_#{tag_category.name} accordion-collapse collapse">
-                            <div class="accordion-body pt-0">
-                                <ul class="list-group list-group-flush">
-                                        <li t-if="tag_category.tag_ids and any(tag.color for tag in tag_category.tag_ids)" class="list-group-item">
-                                            <t t-foreach="tag_category.tag_ids" t-as="tag">
-                                                <a t-att-href="'/event/%s/track?%s' % (
-                                                        slug(event),
-                                                        keep_query('*', tags=str((search_tags - tag).ids if tag in search_tags else (tag | search_tags).ids))
-                                                    )"
-                                                    t-if="tag.color"
-                                                    t-attf-class="d-flex align-items-center justify-content-between #{'active' if tag in search_tags else ''}">
-                                                    <t t-out="tag.name"/>
-                                                </a>
-                                            </t>
+                            <div class="accordion-body bg-white pt-0">
+                                <ul class="list-unstyled">
+                                    <t t-foreach="tag_category.tag_ids" t-as="tag">
+                                        <li t-if="tag_category.tag_ids and any(tag.color for tag in tag_category.tag_ids)" t-attf-onclick="location.href = '/event/#{slug(event)}/track?#{keep_query('*', tags=str((search_tags - tag).ids if tag in search_tags else (tag | search_tags).ids))}'" class="form-check">
+                                            <input class="form-check-input" type="checkbox" t-attf-name="#{tag.name}}" t-att-checked="bool(tag in search_tags)"/>
+                                            <label class="form-check-label" t-attf-for="#{tag.name}" t-out="tag.name"/>
                                         </li>
+                                    </t>
                                 </ul>
                             </div>
                         </div>

@@ -78,10 +78,10 @@
                 </div>
             </div>
             <!-- Off canvas filters on mobile-->
-            <div id="o_wevent_index_offcanvas" class="o_website_offcanvas offcanvas offcanvas-end d-lg-none p-0 overflow-visible">
+            <div id="o_wevent_index_offcanvas" class="o_website_offcanvas offcanvas offcanvas-end d-lg-none p-0 overflow-visible bg-body">
                 <div class="offcanvas-header">
                     <h5 class="offcanvas-title">Filters</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"/>
+                    <button type="button" class="btn-close bg-white" data-bs-dismiss="offcanvas" aria-label="Close"/>
                 </div>
                 <div class="offcanvas-body p-0">
                     <div class="accordion accordion-flush">
@@ -97,17 +97,14 @@
                                     </button>
                                 </h2>
                                 <div t-attf-class="o_wevent_offcanvas_cat_#{category.name} accordion-collapse collapse">
-                                    <div class="accordion-body pt-0">
-                                        <ul class="list-group list-group-flush">
-                                            <li t-if="category.is_published and category.tag_ids and any(tag.color for tag in category.tag_ids)" class="list-group-item">
-                                                <t t-foreach="category.tag_ids" t-as="tag">
-                                                    <a t-if="tag.color"
-                                                        t-att-href="'/event?%s' % keep_query('*', tags=str((search_tags - tag).ids if tag in search_tags else (tag | search_tags).ids))"
-                                                        t-attf-class="dropdown-item d-flex align-items-center justify-content-between #{'active' if tag in search_tags else ''}">
-                                                        <t t-out="tag.name"/>
-                                                    </a>
-                                                </t>
-                                            </li>
+                                    <div class="accordion-body bg-white pt-0">
+                                        <ul class="list-unstyled">
+                                            <t t-foreach="category.tag_ids" t-as="tag">
+                                                <li t-if="category.is_published and category.tag_ids and any(tag.color for tag in category.tag_ids)"  t-attf-onclick="location.href = '/event?#{keep_query('*', tags=str((search_tags - tag).ids if tag in search_tags else (tag | search_tags).ids))}'" class="form-check">
+                                                    <input class="form-check-input" type="checkbox" t-attf-name="#{tag.name}}" t-att-checked="bool(tag in search_tags)"/>
+                                                    <label class="form-check-label" t-attf-for="#{tag.name}" t-out="tag.name"/>
+                                                </li>
+                                            </t>
                                         </ul>
                                     </div>
                                 </div>
@@ -124,18 +121,17 @@
                                 </button>
                             </h2>
                             <div class="o_wevent_offcanvas_date accordion-collapse collapse">
-                                <div class="accordion-body pt-0">
-                                    <ul class="list-group list-group-flush">
-                                        <li class="list-group-item">
-                                            <t t-foreach="dates" t-as="date">
-                                                <t t-if="date[3] or (date[0] in ('old','upcoming','all'))">
-                                                    <a t-att-href="keep('/event', date=date[0])" t-attf-class="dropdown-item d-flex align-items-center justify-content-between #{searches.get('date') == date[0] and 'active'}">
-                                                        <t t-out="date[1]"/>
-                                                        <span t-if="date[3]" t-out="date[3]" t-attf-class="badge rounded-pill #{searches.get('date') == date[0] and 'bg-light text-primary' or 'bg-primary'} ms-3"/>
-                                                    </a>
-                                                </t>
+                                <div class="accordion-body bg-white pt-0">
+                                    <ul class="list-unstyled">
+                                        <t t-foreach="dates" t-as="date">
+                                            <t t-if="date[3] or (date[0] in ('old','upcoming','all'))">
+                                                <li class="form-check" t-attf-onclick="location.href = '#{keep('/event', date=date[0])}'">
+                                                    <input class="form-check-input" type="radio" t-attf-name="#{date[1]}" t-att-checked="bool(searches.get('date') == date[0])"/>
+                                                    <label class="form-check-label" t-attf-for="#{date[1]}" t-out="date[1]"/>
+                                                    <span t-if="date[3]" t-out="date[3]" t-attf-class="badge rounded-pill #{searches.get('date') == date[0] and 'bg-light text-primary' or 'bg-primary'} ms-3"/>
+                                                </li>
                                             </t>
-                                        </li>
+                                        </t>
                                     </ul>
                                 </div>
                             </div>
