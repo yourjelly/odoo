@@ -44,7 +44,7 @@ class PaymentProvider(models.Model):
         """
         """
         self.ensure_one()
-        url = "%s%s" % (self._phonepe_get_api_url(), const.END_POINT) if not transactionId else "%s/pg/v1/status/%s/%s" % (self._phonepe_get_api_url(), self.phonepe_merchant_id, transactionId)
+        url = "%s%s" % (self._phonepe_get_api_url(), const.END_POINT)
         try:
             data = json.dumps(data)
             response = requests.request(method, url=url, data=data, headers=headers, timeout=60)
