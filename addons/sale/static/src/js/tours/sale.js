@@ -11,12 +11,12 @@ registry.category("web_tour.tours").add("sale_tour", {
     sequence: 20,
     steps: () => [stepUtils.showAppsMenuItem(), {
     trigger: ".o_app[data-menu-xmlid='sale.sale_menu_root']",
-    content: _t("Open Sales app to send your first quotation in a few clicks."),
+    content: _t("Let's create a beautiful quotation in a few clicks."),
     position: "right",
     edition: "community"
 }, {
     trigger: ".o_app[data-menu-xmlid='sale.sale_menu_root']",
-    content: _t("Open Sales app to send your first quotation in a few clicks."),
+    content: _t("Let's create a beautiful quotation in a few clicks."),
     position: "bottom",
     edition: "enterprise"
 }, {
