@@ -341,6 +341,20 @@ class CustomerPortal(payment_portal.PaymentPortal):
             document.ir_attachment_id,
         ).get_response(as_attachment=True)
 
+    @http.route('/sale/demodata', type='http', auth='public')
+    def portal_quote_sample_document(self):
+        record = request.env['sale.order'].sudo().browse(1)
+        pdf = request.env['ir.actions.report'].sudo()._render_qweb_pdf('sale.action_report_saleorder', [record.id])
+        headers = [
+            ('Content-Type', 'application/pdf'),
+            ('Content-Disposition', 'attachment; filename=sample_quotation.pdf')
+        ]
+
+        return request.make_response(
+            pdf,
+            headers=headers
+        )
+
 
 class PaymentPortal(payment_portal.PaymentPortal):
 
