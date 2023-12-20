@@ -39,9 +39,11 @@ class PaymentTransaction(models.Model):
         self.ensure_one()
         encoded_payload = self._phonepe_encode_payload(payload)
         checksum = self._phonepe_prepare_checksum(encoded_payload)
+        base_url = self.get_base_url()
         headers = {
             'Content-Type': 'application/json',
             'X-Verify': checksum,
+            'X-CALLBACK-URL': "%s%s" % (base_url, PhonePeController._callback_url),
         }
         data = {
             'request': encoded_payload
@@ -64,9 +66,9 @@ class PaymentTransaction(models.Model):
             'merchantTransactionId': self.reference,
             'merchantUserId': self.partner_email,
             'amount': converted_amount,
-            'redirectUrl': f'{base_url}{PhonePeController._return_url}',
+            'redirectUrl': "%s%s" % (base_url, PhonePeController._return_url),
             'redirectMode': 'POST',
-            'callbackUrl': f'{base_url}{PhonePeController._callback_url}',
+            'callbackUrl': "%s%s" % (base_url, PhonePeController._callback_url),
             'mobileNumber': self.partner_phone,
             'paymentInstrument': {
                 'type': 'PAY_PAGE'
@@ -86,7 +88,8 @@ class PaymentTransaction(models.Model):
         tx = super()._get_tx_from_notification_data(provider_code, notification_data)
         if provider_code != 'phonepe' or len(tx) == 1:
             return tx
-        reference = notification_data.get('transactionId')
+        reference = notification_data.get('data', {}).get('merchantTransactionId')
+
         if not reference:
             raise ValidationError(
                 "PHONEPE: " + _("Received data with missing reference (%s)", reference)
@@ -104,16 +107,14 @@ class PaymentTransaction(models.Model):
         :param dict notification_data: The notification data sent by the provider
         :return: None
         """
-
         super()._process_notification_data(notification_data)
         if self.provider_code != 'phonepe':
             return
         # Update the provider reference.
-        self.provider_reference = notification_data.get('transactionId')
+        self.provider_reference = notification_data.get('data', {}).get('merchantTransactionId')
 
         # Update the payment method
-
-        payment_option = notification_data.get('paymentInstrument', '').get('type', '')
+        payment_option = notification_data.get('data', {}).get('paymentInstrument', {}).get('type')
         payment_method = self.env['payment.method']._get_from_code(payment_option.lower())
         self.payment_method_id = payment_method or self.payment_method_id
 

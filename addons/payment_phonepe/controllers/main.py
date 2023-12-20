@@ -23,15 +23,15 @@ class PhonePeController(http.Controller):
         return request.redirect('/payment/status')
 
     @http.route(_callback_url, methods=['POST'], type='http', auth='public', csrf=False)
-    def phonepe_callback(self, **response):
+    def phonepe_callback(self):
         data = request.get_json_data()
         _logger.info('PhonePe: Entering form_feedback with post data %s', pprint.pformat(data))
         if data.get('response'):
             response = data.get('response')
             pt_sudo = request.env['payment.transaction'].sudo()
             decode_response = pt_sudo._phonepe_decode_payload(response)
-            tx_sudo = pt_sudo._get_tx_from_notification_data('phonepe', decode_response.get('data'))
-            header = request.httprequest.headers.get('X-VERIFY') or data.headers.get('X-VERIFY')
+            tx_sudo = pt_sudo._get_tx_from_notification_data('phonepe', decode_response)
+            header = request.httprequest.headers.get('X-VERIFY')
             self._verify_notification_signature(response, header, tx_sudo)
             tx_sudo._handle_notification_data('phonepe', decode_response)
         return ''
