@@ -614,9 +614,12 @@ class PosOrder(models.Model):
             if self.config_id.cash_rounding and (not self.config_id.only_round_cash_method or any(p.payment_method_id.is_cash_count for p in self.payment_ids))
             else False
         }
-        if self.refunded_order_ids.account_move:
-            vals['ref'] = _('Reversal of: %s', self.refunded_order_ids.account_move.name)
-            vals['reversed_entry_id'] = self.refunded_order_ids.account_move.id
+        if self.refunded_order_ids:
+            refunded_order_names = ', '.join(order.account_move.name for order in self.refunded_order_ids if order.account_move)
+            if refunded_order_names:
+                vals['ref'] = _('Reversal of: %s', refunded_order_names)
+                vals['reversed_entry_id'] = self.refunded_order_ids.account_move.ids
+
         if self.note:
             vals.update({'narration': self.note})
         return vals
