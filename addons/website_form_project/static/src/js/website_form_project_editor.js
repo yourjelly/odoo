@@ -48,4 +48,5 @@ FormEditorRegistry.add('create_task', {
         string: _t('Project'),
         createAction: 'project.open_view_project_all',
     }],
+    successPage: '/your-task-has-been-submitted',
 });
