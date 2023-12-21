@@ -287,22 +287,29 @@ class MassMailing(models.Model):
         import time
         start = time.time()
         print("start _compute_clicks_ratio")
+
         self.env.cr.execute("""
-            SELECT COUNT(DISTINCT(stats.id)) AS nb_mails, COUNT(DISTINCT(clicks.mailing_trace_id)) AS nb_clicks, stats.mass_mailing_id AS id
-            FROM mailing_trace AS stats
-            LEFT OUTER JOIN link_tracker_click AS clicks ON clicks.mailing_trace_id = stats.id
-            WHERE stats.mass_mailing_id IN %s
-            GROUP BY stats.mass_mailing_id
+            SELECT COUNT(DISTINCT(stats.id)) AS nb_mails,
+                   COUNT(DISTINCT(clicks.mailing_trace_id)) AS nb_clicks,
+                   stats.mass_mailing_id AS id
+              FROM mailing_trace AS stats
+         LEFT JOIN link_tracker_click AS clicks
+                ON clicks.mailing_trace_id = stats.id
+             WHERE stats.mass_mailing_id IN %s
+          GROUP BY stats.mass_mailing_id
         """, [tuple(self.ids) or (None,)])
         mass_mailing_data = self.env.cr.dictfetchall()
         mapped_data = dict([(m['id'], float_round(100 * m['nb_clicks'] / m['nb_mails'], precision_digits=2)) for m in mass_mailing_data])
         for mass_mailing in self:
             mass_mailing.clicks_ratio = mapped_data.get(mass_mailing.id, 0)
+
         print("end _compute_clicks_ratio", time.time() - start)
 
     def _compute_statistics(self):
         """ Compute statistics of the mass mailing """
         import time
+        from collections import defaultdict
+
         start = time.time()
         print("start _compute_statistics")
 
@@ -312,45 +319,41 @@ class MassMailing(models.Model):
             'opened_ratio', 'replied_ratio', 'bounced_ratio',
         ):
             self[key] = False
-        if not self.ids:
-            return
-        # ensure traces are sent to db
-        self.env['mailing.trace'].flush_model()
-        self.env['mailing.mailing'].flush_model()
-        self.env.cr.execute("""
-            SELECT
-                m.id as mailing_id,
-                COUNT(s.id) AS expected,
-                COUNT(s.sent_datetime) AS sent,
-                COUNT(s.trace_status) FILTER (WHERE s.trace_status = 'outgoing') AS scheduled,
-                COUNT(s.trace_status) FILTER (WHERE s.trace_status = 'cancel') AS canceled,
-                COUNT(s.trace_status) FILTER (WHERE s.trace_status = 'process') AS process,
-                COUNT(s.trace_status) FILTER (WHERE s.trace_status = 'pending') AS pending,
-                COUNT(s.trace_status) FILTER (WHERE s.trace_status in ('sent', 'open', 'reply')) AS delivered,
-                COUNT(s.trace_status) FILTER (WHERE s.trace_status in ('open', 'reply')) AS opened,
-                COUNT(s.links_click_datetime) AS clicked,
-                COUNT(s.trace_status) FILTER (WHERE s.trace_status = 'reply') AS replied,
-                COUNT(s.trace_status) FILTER (WHERE s.trace_status = 'bounce') AS bounced,
-                COUNT(s.trace_status) FILTER (WHERE s.trace_status = 'error') AS failed
-            FROM
-                mailing_trace s
-            RIGHT JOIN
-                mailing_mailing m
-                ON (m.id = s.mass_mailing_id)
-            WHERE
-                m.id IN %s
-            GROUP BY
-                m.id
-        """, (tuple(self.ids), ))
-        for row in self.env.cr.dictfetchall():
-            total = (row['expected'] - row['canceled']) or 1
-            row['received_ratio'] = float_round(100.0 * row['delivered'] / total, precision_digits=2)
-            row['opened_ratio'] = float_round(100.0 * row['opened'] / total, precision_digits=2)
-            row['replied_ratio'] = float_round(100.0 * row['replied'] / total, precision_digits=2)
-            row['bounced_ratio'] = float_round(100.0 * row['bounced'] / total, precision_digits=2)
-            self.browse(row.pop('mailing_id')).update(row)
 
-        print("end _compute_statistics", time.time() - start)
+        result = self.env["mailing.trace"].sudo()._read_group(
+            [("mass_mailing_id", "in", self.ids)],
+            ['mass_mailing_id', 'trace_status'],
+            ['__count', 'links_click_datetime:count', 'sent_datetime:count'])
+
+        result_per_mailing = defaultdict(lambda: defaultdict(int))
+        for line in result:
+            result_per_mailing[line[0]][line[1]] = line[2]
+            result_per_mailing[line[0]]['links_click_datetime'] += line[3]
+            result_per_mailing[line[0]]['sent_datetime'] += line[4]
+
+        for mailing in self:
+            line = result_per_mailing[mailing]
+            values = {
+                'scheduled': line['outgoing'],
+                'expected': sum(v for k, v in line.items() if k not in ('links_click_datetime', 'sent_datetime')),
+                'canceled': line['cancel'],
+                'pending': line['pending'],
+                'delivered': line['sent'] + line['open'] + line['reply'],
+                'opened': line['open'] + line['reply'],
+                'replied': line['reply'],
+                'bounced': line['bounce'],
+                'failed': line['error'],
+                'clicked': line['links_click_datetime'],
+                'sent': line['sent_datetime'],
+            }
+            total = (values['expected'] - values['canceled']) or 1
+            values['received_ratio'] = float_round(100.0 * values['delivered'] / total, precision_digits=2)
+            values['opened_ratio'] = float_round(100.0 * values['opened'] / total, precision_digits=2)
+            values['replied_ratio'] = float_round(100.0 * values['replied'] / total, precision_digits=2)
+            values['bounced_ratio'] = float_round(100.0 * values['bounced'] / total, precision_digits=2)
+            mailing.update(values)
+
+        print("compute done", time.time() - start)
 
     @api.depends('schedule_date', 'state')
     def _compute_next_departure(self):
