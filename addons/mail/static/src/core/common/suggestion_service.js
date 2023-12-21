@@ -3,6 +3,7 @@
 import { partnerCompareRegistry } from "@mail/core/common/partner_compare";
 import { cleanTerm } from "@mail/utils/common/format";
 
+import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
 
 export class SuggestionService {
@@ -12,7 +13,6 @@ export class SuggestionService {
      */
     constructor(env, services) {
         this.env = env;
-        this.orm = services.orm;
         this.store = services["mail.store"];
         this.personaService = services["mail.persona"];
     }
@@ -43,7 +43,7 @@ export class SuggestionService {
         if (thread?.model === "discuss.channel") {
             kwargs.channel_id = thread.id;
         }
-        const suggestedPartners = await this.orm.silent.call(
+        const suggestedPartners = await orm.silent.call(
             "res.partner",
             thread?.model === "discuss.channel"
                 ? "get_mention_suggestions_from_channel"
@@ -58,7 +58,7 @@ export class SuggestionService {
      * @param {string} term
      */
     async fetchThreads(term) {
-        const suggestedThreads = await this.orm.silent.call(
+        const suggestedThreads = await orm.silent.call(
             "discuss.channel",
             "get_mention_suggestions",
             [],
@@ -241,7 +241,7 @@ export class SuggestionService {
 }
 
 export const suggestionService = {
-    dependencies: ["orm", "mail.store", "mail.persona"],
+    dependencies: ["mail.store", "mail.persona"],
     /**
      * @param {import("@web/env").OdooEnv} env
      * @param {Partial<import("services").Services>} services

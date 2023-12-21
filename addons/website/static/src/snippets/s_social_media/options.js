@@ -4,6 +4,7 @@ import fonts from '@web_editor/js/wysiwyg/fonts';
 import weUtils from '@web_editor/js/common/utils';
 import options from '@web_editor/js/editor/snippets.options';
 import { _t } from "@web/core/l10n/translation";
+import { orm } from "@web/core/orm";
 import { ICON_SELECTOR } from "@web_editor/js/editor/odoo-editor/src/utils/utils";
 
 let dbSocialValues;
@@ -17,11 +18,6 @@ const getDbSocialValuesCache = () => {
 };
 
 options.registry.SocialMedia = options.Class.extend({
-    init() {
-        this._super(...arguments);
-        this.orm = this.bindService("orm");
-    },
-
     /**
      * @override
      */
@@ -64,7 +60,7 @@ options.registry.SocialMedia = options.Class.extend({
                 websiteId = ctx['website_id'];
             },
         });
-        await this.orm.write("website", [websiteId], dbSocialValues);
+        await orm.write("website", [websiteId], dbSocialValues);
     },
     /**
      * @override
@@ -261,7 +257,7 @@ options.registry.SocialMedia = options.Class.extend({
                 },
             });
             // Fetch URLs for db links.
-            dbSocialValuesProm = this.orm.read("website", [websiteId], [
+            dbSocialValuesProm = orm.read("website", [websiteId], [
                 "social_facebook",
                 "social_twitter",
                 "social_linkedin",

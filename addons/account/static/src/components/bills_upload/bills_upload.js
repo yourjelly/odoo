@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { _t } from "@web/core/l10n/translation";
+import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { listView } from "@web/views/list/list_view";
@@ -31,7 +32,6 @@ export class AccountFileUploader extends Component {
     };
 
     setup() {
-        this.orm = useService("orm");
         this.action = useService("action");
         this.notification = useService("notification");
         this.attachmentIdsToProcess = [];
@@ -48,14 +48,14 @@ export class AccountFileUploader extends Component {
             mimetype: file.type,
             datas: file.data,
         };
-        const [att_id] = await this.orm.create("ir.attachment", [att_data], {
+        const [att_id] = await orm.create("ir.attachment", [att_data], {
             context: { ...this.extraContext, ...this.env.searchModel.context },
         });
         this.attachmentIdsToProcess.push(att_id);
     }
 
     async onUploadComplete() {
-        const action = await this.orm.call("account.journal", "create_document_from_attachment", ["", this.attachmentIdsToProcess], {
+        const action = await orm.call("account.journal", "create_document_from_attachment", ["", this.attachmentIdsToProcess], {
             context: { ...this.extraContext, ...this.env.searchModel.context },
         });
         this.attachmentIdsToProcess = [];

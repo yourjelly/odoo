@@ -4,6 +4,7 @@ import { Order, Orderline } from "@point_of_sale/app/store/models";
 import { Mutex } from "@web/core/utils/concurrency";
 import { roundDecimals, roundPrecision } from "@web/core/utils/numbers";
 import { _t } from "@web/core/l10n/translation";
+import { orm } from "@web/core/orm";
 import { patch } from "@web/core/utils/patch";
 import { ask } from "@point_of_sale/app/store/make_awaitable_dialog";
 import { PartnerList } from "@point_of_sale/app/screens/partner_list/partner_list";
@@ -1514,7 +1515,7 @@ patch(Order.prototype, {
                 return _t("That coupon code has already been scanned and activated.");
             }
             const customerId = this.get_partner() ? this.get_partner().id : false;
-            const { successful, payload } = await this.env.services.orm.call(
+            const { successful, payload } = await orm.call(
                 "pos.config",
                 "use_coupon_code",
                 [

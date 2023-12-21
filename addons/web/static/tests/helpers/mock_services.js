@@ -5,7 +5,7 @@ import { routerService } from "@web/core/browser/router_service";
 import { effectService } from "@web/core/effects/effect_service";
 import { localization } from "@web/core/l10n/localization";
 import { ConnectionAbortedError, rpcBus, rpc } from "@web/core/network/rpc";
-import { ormService } from "@web/core/orm_service";
+import { ormService } from "@web/core/orm";
 import { overlayService } from "@web/core/overlay/overlay_service";
 import { uiService } from "@web/core/ui/ui_service";
 import { user } from "@web/core/user";

@@ -23,7 +23,6 @@ export class ImportAction extends Component {
 
     setup() {
         this.notification = useService("notification");
-        this.orm = useService("orm");
         this.router = useService("router");
 
         this.env.config.setDisplayName(this.props.action.name || _t("Import a File"));
@@ -32,7 +31,6 @@ export class ImportAction extends Component {
             env: this.env,
             resModel: this.resModel,
             context: this.props.action.params.context || {},
-            orm: this.orm,
         });
 
         this.state = useState({

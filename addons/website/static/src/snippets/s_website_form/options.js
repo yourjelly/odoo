@@ -7,6 +7,7 @@ import weUtils from "@web_editor/js/common/utils";
 import "@website/js/editor/snippets.options";
 import { unique } from "@web/core/utils/arrays";
 import { _t } from "@web/core/l10n/translation";
+import { orm } from "@web/core/orm";
 import { renderToElement } from "@web/core/utils/render";
 import { formatDate, formatDateTime } from "@web/core/l10n/dates";
 
@@ -73,11 +74,6 @@ const authorizedFieldsCache = {
 
 
 const FormEditor = options.Class.extend({
-    init() {
-        this._super(...arguments);
-        this.orm = this.bindService("orm");
-    },
-
     //----------------------------------------------------------------------
     // Private
     //----------------------------------------------------------------------
@@ -107,7 +103,7 @@ const FormEditor = options.Class.extend({
                 display_name: tag[1],
             }));
         } else if (field._property && field.comodel) {
-            field.records = await this.orm.searchRead(field.comodel, field.domain || [], ["display_name"]);
+            field.records = await orm.searchRead(field.comodel, field.domain || [], ["display_name"]);
         } else if (field.type === "selection") {
             // Set selection as records to avoid added complexity.
             field.records = field.selection.map(el => ({
@@ -115,7 +111,7 @@ const FormEditor = options.Class.extend({
                 display_name: el[1],
             }));
         } else if (field.relation && field.relation !== 'ir.attachment') {
-            field.records = await this.orm.searchRead(field.relation, field.domain || [], ["display_name"]);
+            field.records = await orm.searchRead(field.relation, field.domain || [], ["display_name"]);
         }
         return field.records;
     },
@@ -428,7 +424,7 @@ options.registry.WebsiteFormEditor = FormEditor.extend({
         }
 
         // Get list of website_form compatible models.
-        this.models = await this.orm.call("ir.model", "get_compatible_form_models");
+        this.models = await orm.call("ir.model", "get_compatible_form_models");
 
         const targetModelName = this.$target[0].dataset.model_name || 'mail.mail';
         this.activeForm = this.models.find(m => m.model === targetModelName);
@@ -479,7 +475,7 @@ options.registry.WebsiteFormEditor = FormEditor.extend({
             if (fields.length) {
                 // ideally we'd only do this if saving the form
                 // succeeds... but no idea how to do that
-                this.orm.call("ir.model.fields", "formbuilder_whitelist", [model, unique(fields)]);
+                orm.call("ir.model.fields", "formbuilder_whitelist", [model, unique(fields)]);
             }
         }
         if (this.$message.length) {
@@ -542,7 +538,7 @@ options.registry.WebsiteFormEditor = FormEditor.extend({
      */
     addActionField: function (previewMode, value, params) {
         // Remove old property fields.
-        authorizedFieldsCache.get(this.$target[0], this.orm).then((fields) => {
+        authorizedFieldsCache.get(this.$target[0], orm).then((fields) => {
             for (const [fieldName, field] of Object.entries(fields)) {
                 if (field._property) {
                     for (const inputEl of this.$target[0].querySelectorAll(`[name="${fieldName}"]`)) {
@@ -930,7 +926,7 @@ options.registry.WebsiteFieldEditor = FieldEditor.extend({
     willStart: async function () {
         const _super = this._super.bind(this);
         // Get the authorized existing fields for the form model
-        this.existingFields = await authorizedFieldsCache.get(this.formEl, this.orm).then((fields) => {
+        this.existingFields = await authorizedFieldsCache.get(this.formEl, orm).then((fields) => {
             this.fields = {};
             for (const [fieldName, field] of Object.entries(fields)) {
                 field.name = fieldName;

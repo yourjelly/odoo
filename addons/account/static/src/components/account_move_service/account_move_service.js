@@ -4,12 +4,13 @@ import { _t } from "@web/core/l10n/translation";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { escape } from "@web/core/utils/strings";
 import { markup } from "@odoo/owl";
+import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
 
 
 export const accountMove = {
-    dependencies: ["dialog", "orm"],
-    start(env, { dialog, orm }) {
+    dependencies: ["dialog"],
+    start(env, { dialog }) {
         return {
             async addDeletionDialog(component, moveIds) {
                 const isMoveEndOfChain = await orm.call('account.move', 'check_move_sequence_chain', [moveIds]);

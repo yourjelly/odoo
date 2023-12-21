@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { _t } from "@web/core/l10n/translation";
+import { orm } from "@web/core/orm";
 import { useService } from "@web/core/utils/hooks";
 import { formatFloatTime, formatMonetary } from "@web/views/fields/formatters";
 import { formatFloat } from "@web/core/utils/numbers";
@@ -33,7 +34,6 @@ export class BomOverviewLine extends Component {
 
     setup() {
         this.actionService = useService("action");
-        this.ormService = useService("orm");
         this.formatFloat = formatFloat;
         this.formatFloatTime = formatFloatTime;
         this.formatMonetary = (val) => formatMonetary(val, { currencyId: this.data.currency_id });
@@ -61,7 +61,7 @@ export class BomOverviewLine extends Component {
     }
 
     async goToForecast() {
-        const action = await this.ormService.call(
+        const action = await orm.call(
             this.data.link_model,
             this.forecastAction,
             [[this.data.link_id]],

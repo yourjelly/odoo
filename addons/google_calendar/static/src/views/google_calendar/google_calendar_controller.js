@@ -2,6 +2,7 @@
 
 import { _t } from "@web/core/l10n/translation";
 import { AttendeeCalendarController } from "@calendar/views/attendee_calendar/attendee_calendar_controller";
+import { orm } from "@web/core/orm";
 import { patch } from "@web/core/utils/patch";
 import { useService } from "@web/core/utils/hooks";
 import { ConfirmationDialog, AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
@@ -14,7 +15,7 @@ patch(AttendeeCalendarController.prototype, {
     },
 
     async onGoogleSyncCalendar() {
-        await this.orm.call(
+        await orm.call(
             "res.users",
             "restart_google_synchronization",
             [[this.user.userId]],
@@ -48,7 +49,7 @@ patch(AttendeeCalendarController.prototype, {
             body: _t("You are about to stop the synchronization of your calendar with Google. Are you sure you want to continue?"),
             confirmLabel: _t("Stop Synchronization"),
             confirm: async () => {
-                await this.orm.call(
+                await orm.call(
                     "res.users",
                     "stop_google_synchronization",
                     [[this.user.userId]],

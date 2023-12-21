@@ -4,6 +4,7 @@ import { EventBus, markup, whenReady, reactive } from "@odoo/owl";
 import { browser } from "@web/core/browser/browser";
 import { _t } from "@web/core/l10n/translation";
 import { MacroEngine } from "@web/core/macro";
+import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
 import { config as transitionConfig } from "@web/core/transition";
 import { session } from "@web/session";
@@ -56,8 +57,8 @@ import { callWithUnloadCheck } from "./tour_utils";
 
 export const tourService = {
     // localization dependency to make sure translations used by tours are loaded
-    dependencies: ["orm", "effect", "ui", "overlay", "localization"],
-    start: async (_env, { orm, effect, ui, overlay }) => {
+    dependencies: ["effect", "ui", "overlay", "localization"],
+    start: async (_env, { effect, ui, overlay }) => {
         await whenReady();
         const toursEnabled = "tour_disable" in session && !session.tour_disable;
         const consumedTours = new Set(session.web_tours);

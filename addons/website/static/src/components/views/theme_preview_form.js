@@ -3,6 +3,7 @@
 import { ControlPanel } from "@web/search/control_panel/control_panel";
 import { FormController } from "@web/views/form/form_controller";
 import { formView } from "@web/views/form/form_view";
+import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { ViewButton } from "@web/views/view_button/view_button";
@@ -15,7 +16,6 @@ import { useSubEnv, useEnv } from "@odoo/owl";
 */
 export function useLoaderOnClick() {
     const website = useService('website');
-    const orm = useService('orm');
     const action = useService('action');
     const env = useEnv();
     const previousOnClickViewButton = env.onClickViewButton;

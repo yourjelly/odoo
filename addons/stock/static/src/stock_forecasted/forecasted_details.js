@@ -1,6 +1,7 @@
 /** @odoo-module **/
+
+import { orm } from "@web/core/orm";
 import { formatFloat } from "@web/core/utils/numbers";
-import { useService } from "@web/core/utils/hooks";
 import { Component } from "@odoo/owl";
 
 export class ForecastedDetails extends Component {
@@ -8,8 +9,6 @@ export class ForecastedDetails extends Component {
     static props = { docs: Object, openView: Function, reloadReport: Function };
 
     setup() {
-        this.orm = useService("orm");
-
         this.onHandCondition =
             this.props.docs.lines.length &&
             !this.props.docs.lines.some((line) => line.document_in || line.replenishment_filled);
@@ -20,7 +19,7 @@ export class ForecastedDetails extends Component {
     }
 
     async _reserve(move_id){
-        await this.orm.call(
+        await orm.call(
             'stock.forecasted_product_product',
             'action_reserve_linked_picks',
             [move_id],
@@ -29,7 +28,7 @@ export class ForecastedDetails extends Component {
     }
 
     async _unreserve(move_id){
-        await this.orm.call(
+        await orm.call(
             'stock.forecasted_product_product',
             'action_unreserve_linked_picks',
             [move_id],
@@ -40,7 +39,7 @@ export class ForecastedDetails extends Component {
     async _onClickChangePriority(modelName, record) {
         const value = record.priority == "0" ? "1" : "0";
 
-        await this.orm.call(modelName, "write", [[record.id], { priority: value }]);
+        await orm.call(modelName, "write", [[record.id], { priority: value }]);
         this.props.reloadReport();
     }
 

@@ -14,6 +14,7 @@ import {
     formatDateTime,
 } from "@web/core/l10n/dates";
 import { _t } from "@web/core/l10n/translation";
+import { orm } from "@web/core/orm";
 import { TagsList } from "@web/core/tags_list/tags_list";
 import { useService } from "@web/core/utils/hooks";
 import { formatInteger, formatMany2one } from "@web/views/fields/formatters";
@@ -67,7 +68,6 @@ export class PropertyValue extends Component {
     };
 
     setup() {
-        this.orm = useService("orm");
         this.action = useService("action");
 
         this.openMany2X = useOpenMany2XRecord({
@@ -320,7 +320,7 @@ export class PropertyValue extends Component {
             this.onValueChange(false);
             return;
         }
-        const result = await this.orm.call(this.props.comodel, "name_create", [name], {
+        const result = await orm.call(this.props.comodel, "name_create", [name], {
             context: this.props.context,
         });
         this.onValueChange([{ id: result[0], name: result[1] }]);
@@ -337,7 +337,7 @@ export class PropertyValue extends Component {
      * @param {integer} recordId
      */
     async _openRecord(recordModel, recordId) {
-        const action = await this.orm.call(recordModel, "get_formview_action", [[recordId]], {
+        const action = await orm.call(recordModel, "get_formview_action", [[recordId]], {
             context: this.props.context,
         });
 
@@ -352,7 +352,7 @@ export class PropertyValue extends Component {
      * @returns {array} [record id, record name]
      */
     async _nameGet(recordId) {
-        const result = await this.orm.read(this.props.comodel, [recordId], ["display_name"], {
+        const result = await orm.read(this.props.comodel, [recordId], ["display_name"], {
             context: this.props.context,
         });
         return [result[0].id, result[0].display_name];

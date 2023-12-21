@@ -1,7 +1,7 @@
 /** @odoo-module */
 
 import { _t } from "@web/core/l10n/translation";
-import { x2ManyCommands } from "@web/core/orm_service";
+import { x2ManyCommands, orm } from "@web/core/orm";
 import { Dialog } from '@web/core/dialog/dialog';
 import { useService } from "@web/core/utils/hooks";
 import { registry } from "@web/core/registry";
@@ -29,7 +29,6 @@ export class GenerateDialog extends Component {
         this.nextSerialCount = useRef('nextSerialCount');
         this.keepLines = useRef('keepLines');
         this.lots = useRef('lots');
-        this.orm = useService("orm");
         onMounted(() => {
             if (this.props.type === 'serial') {
                 this.nextSerialCount.el.value = this.props.move.data.product_uom_qty || 2;
@@ -38,7 +37,7 @@ export class GenerateDialog extends Component {
     }
     async _onGenerate() {
         const count = parseInteger(this.nextSerialCount.el?.value || '0');
-        const move_line_vals = await this.orm.call("stock.move", "action_generate_lot_line_vals", [
+        const move_line_vals = await orm.call("stock.move", "action_generate_lot_line_vals", [
             {...this.props.move.context, default_product_id: this.props.move.data.product_id[0]},
             this.props.type,
             this.nextSerial.el?.value,

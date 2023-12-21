@@ -1,15 +1,11 @@
 /** @odoo-module **/
 
 import { _t } from "@web/core/l10n/translation";
+import { orm } from "@web/core/orm";
 import options from "@web_editor/js/editor/snippets.options";
 import wUtils from "@website/js/utils";
 
 options.registry.Group = options.Class.extend({
-    init() {
-        this._super(...arguments);
-        this.orm = this.bindService("orm");
-    },
-
     /**
      * @override
      */
@@ -62,7 +58,7 @@ options.registry.Group = options.Class.extend({
             return;
         }
 
-        const groupId = await this.orm.create("mail.group", [{ name: name }]);
+        const groupId = await orm.create("mail.group", [{ name: name }]);
 
         this.$target.attr("data-id", groupId);
         return this._rerenderXML();
@@ -90,6 +86,6 @@ options.registry.Group = options.Class.extend({
      * @return {Promise}
      */
     _getMailGroups() {
-        return this.orm.call("mail.group", "name_search", [""]);
+        return orm.call("mail.group", "name_search", [""]);
     },
 });

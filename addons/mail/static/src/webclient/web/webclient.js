@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { browser } from "@web/core/browser/browser";
-import { useService } from "@web/core/utils/hooks";
+import { orm } from "@web/core/orm";
 import { patch } from "@web/core/utils/patch";
 import { WebClient } from "@web/webclient/webclient";
 import { onWillDestroy } from "@odoo/owl";
@@ -14,7 +14,6 @@ patch(WebClient.prototype, {
      */
     setup() {
         super.setup();
-        this.orm = useService("orm");
         if (this._canSendNativeNotification) {
             this._subscribePush();
         }
@@ -75,7 +74,7 @@ patch(WebClient.prototype, {
             kwargs.vapid_public_key = this._arrayBufferToBase64(
                 subscription.options.applicationServerKey
             );
-            await this.orm.call(USER_DEVICES_MODEL, "register_devices", [], kwargs);
+            await orm.call(USER_DEVICES_MODEL, "register_devices", [], kwargs);
         } catch (e) {
             const invalidVapidErrorClass =
                 "odoo.addons.mail.models.partner_devices.InvalidVapidError";
@@ -109,7 +108,7 @@ patch(WebClient.prototype, {
         if (!subscription) {
             return;
         }
-        await this.orm.call(USER_DEVICES_MODEL, "unregister_devices", [], {
+        await orm.call(USER_DEVICES_MODEL, "unregister_devices", [], {
             endpoint: subscription.endpoint,
         });
         await subscription.unsubscribe();
@@ -137,7 +136,7 @@ patch(WebClient.prototype, {
      * @return {Uint8Array}
      */
     async _getApplicationServerKey() {
-        const vapid_public_key_base64 = await this.orm.call(
+        const vapid_public_key_base64 = await orm.call(
             USER_DEVICES_MODEL,
             "get_web_push_vapid_public_key"
         );

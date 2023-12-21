@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
+import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
-import { useService } from "@web/core/utils/hooks";
 import { evaluateExpr } from "@web/core/py_js/py";
 import { getNextTabableElement, getPreviousTabableElement } from "@web/core/utils/ui";
 import { usePosition } from "@web/core/position_hook";
@@ -47,8 +47,6 @@ export class AnalyticDistribution extends Component {
     }
 
     setup(){
-        this.orm = useService("orm");
-
         this.state = useState({
             showDropdown: false,
             formattedData: [],
@@ -353,7 +351,7 @@ export class AnalyticDistribution extends Component {
 
     async fetchAllPlans() {
         const argsPlan = this.fetchPlansArgs();
-        this.allPlans = await this.orm.call("account.analytic.plan", "get_relevant_plans", [], argsPlan);
+        this.allPlans = await orm.call("account.analytic.plan", "get_relevant_plans", [], argsPlan);
     }
 
     async fetchAnalyticAccounts(domain) {
@@ -363,7 +361,7 @@ export class AnalyticDistribution extends Component {
             context: [],
         }
         // batched call
-        const records = await this.props.record.model.orm.read("account.analytic.account", domain[0][2], args.fields, {});
+        const records = await orm.read("account.analytic.account", domain[0][2], args.fields, {});
         return Object.assign({}, ...records.map((r) => {
             const {id, ...rest} = r;
             return {[id]: rest};

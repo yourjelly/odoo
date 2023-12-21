@@ -1,5 +1,6 @@
 /** @odoo-module **/
 
+import { orm } from "@web/core/orm";
 import { _t } from "@web/core/l10n/translation";
 import { Component } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
@@ -61,7 +62,6 @@ export class MoOverviewLine extends Component {
 
     setup() {
         this.actionService = useService("action");
-        this.ormService = useService("orm");
         this.formatFloat = (val) => formatFloat(val, { digits: [false, this.data.uom_precision || undefined] });
         this.formatFloatTime = formatFloatTime;
         this.formatMonetary = (val) => formatMonetary(val, { currencyId: this.data.currency_id });
@@ -85,7 +85,7 @@ export class MoOverviewLine extends Component {
     }
 
     async openForecast() {
-        const action = await this.ormService.call(
+        const action = await orm.call(
             this.data.product_model,
             this.forecastAction,
             [[this.data.product_id]],

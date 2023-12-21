@@ -4,7 +4,7 @@ import { CalendarFilterPanel } from "@web/views/calendar/filter_panel/calendar_f
 import { TimeOffCardMobile } from "../../../dashboard/time_off_card";
 import { getFormattedDateSpan } from "@web/views/calendar/utils";
 
-import { useService } from "@web/core/utils/hooks";
+import { orm } from "@web/core/orm";
 import { serializeDate } from "@web/core/l10n/dates";
 import { useState, onWillStart, onWillUpdateProps } from "@odoo/owl";
 
@@ -21,7 +21,6 @@ export class TimeOffCalendarFilterPanel extends CalendarFilterPanel {
     setup() {
         super.setup();
 
-        this.orm = useService("orm");
         this.getFormattedDateSpan = getFormattedDateSpan;
         this.leaveState = useState({
             holidays: [],
@@ -40,7 +39,7 @@ export class TimeOffCalendarFilterPanel extends CalendarFilterPanel {
         const context = {
             employee_id: this.props.employee_id,
         };
-        const specialDays = await this.orm.call(
+        const specialDays = await orm.call(
             "hr.employee",
             "get_special_days_data",
             [
@@ -69,7 +68,7 @@ export class TimeOffCalendarFilterPanel extends CalendarFilterPanel {
         }
 
         const filterData = {};
-        const data = await this.orm.call("hr.leave.type", "get_allocation_data_request", []);
+        const data = await orm.call("hr.leave.type", "get_allocation_data_request", []);
 
         data.forEach((leave) => {
             filterData[leave[3]] = leave;

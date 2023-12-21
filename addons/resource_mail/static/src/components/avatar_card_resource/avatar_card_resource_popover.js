@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { onWillStart } from "@odoo/owl";
+import { orm } from "@web/core/orm";
 import { useService } from "@web/core/utils/hooks";
 import { useOpenChat } from "@mail/core/web/open_chat_hook";
 import { AvatarCardPopover } from "@mail/discuss/web/avatar_card/avatar_card_popover";
@@ -23,14 +24,13 @@ export class AvatarCardResourcePopover extends AvatarCardPopover {
     };
 
     setup() {
-        this.orm = useService("orm");
         this.actionService = useService("action");
         this.openChat = useOpenChat("res.users");
         onWillStart(this.onWillStart);
     }
 
     async onWillStart() {
-        [this.record] = await this.orm.read(this.props.recordModel, [this.props.id], this.fieldNames);
+        [this.record] = await orm.read(this.props.recordModel, [this.props.id], this.fieldNames);
         await Promise.all(this.loadAdditionalData());
     }
 

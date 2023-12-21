@@ -1,16 +1,16 @@
 /** @odoo-module */
 
+import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
 import { EventBus } from "@odoo/owl";
 
 class SaleOrderFetcher extends EventBus {
-    static serviceDependencies = ["orm", "pos"];
-    constructor({ orm, pos }) {
+    static serviceDependencies = ["pos"];
+    constructor({ pos }) {
         super();
         this.currentPage = 1;
         this.ordersToShow = [];
         this.totalCount = 0;
-        this.orm = orm;
         this.pos = pos;
     }
 
@@ -66,7 +66,7 @@ class SaleOrderFetcher extends EventBus {
         );
 
         this.pos.set_synch("connecting");
-        const saleOrders = await this.orm.searchRead(
+        const saleOrders = await orm.searchRead(
             "sale.order",
             domain,
             [

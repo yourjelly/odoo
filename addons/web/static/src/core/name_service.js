@@ -1,5 +1,6 @@
 /** @odoo-module **/
 
+import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
 import { unique, zip } from "@web/core/utils/arrays";
 import { Deferred } from "@web/core/utils/concurrency";
@@ -15,9 +16,8 @@ function isId(val) {
  */
 
 export const nameService = {
-    dependencies: ["orm"],
     async: ["loadDisplayNames"],
-    start(env, { orm }) {
+    start(env) {
         let cache = {};
         const batches = {};
 

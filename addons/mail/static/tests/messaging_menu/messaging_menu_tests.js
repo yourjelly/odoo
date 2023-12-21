@@ -1,5 +1,6 @@
 /* @odoo-module */
 
+import { orm } from "@web/core/orm";
 import { rpc } from "@web/core/network/rpc";
 
 import { startServer } from "@bus/../tests/helpers/mock_python_environment";
@@ -1073,7 +1074,7 @@ QUnit.test("messaging menu should show new needaction messages from chatter", as
         notification_type: "inbox",
         res_partner_id: pyEnv.currentPartnerId,
     });
-    const [formattedMessage] = await env.services.orm.call("mail.message", "message_format", [
+    const [formattedMessage] = await orm.call("mail.message", "message_format", [
         [messageId],
     ]);
     pyEnv["bus.bus"]._sendone(pyEnv.currentPartner, "mail.message/inbox", formattedMessage);

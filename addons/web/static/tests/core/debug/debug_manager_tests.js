@@ -5,7 +5,7 @@ import { DebugMenu } from "@web/core/debug/debug_menu";
 import { regenerateAssets } from "@web/core/debug/debug_menu_items";
 import { registry } from "@web/core/registry";
 import { useDebugCategory, useOwnDebugContext } from "@web/core/debug/debug_context";
-import { ormService } from "@web/core/orm_service";
+import { ormService } from "@web/core/orm";
 import { uiService } from "@web/core/ui/ui_service";
 import { useSetupView } from "@web/views/view_hook";
 import { ActionDialog } from "@web/webclient/actions/action_dialog";

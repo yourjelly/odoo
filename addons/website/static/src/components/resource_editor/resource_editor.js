@@ -8,6 +8,7 @@ import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { _t } from "@web/core/l10n/translation";
 import { rpc } from "@web/core/network/rpc";
 import { SelectMenu } from "@web/core/select_menu/select_menu";
+import { orm } from "@web/core/orm";
 import { user } from "@web/core/user";
 import { sortBy } from "@web/core/utils/arrays";
 import { KeepLast } from "@web/core/utils/concurrency";
@@ -43,7 +44,6 @@ export class ResourceEditor extends Component {
 
     setup() {
         this.website = useService("website");
-        this.orm = useService("orm");
         this.dialog = useService("dialog");
 
         this.keepLast = new KeepLast();
@@ -293,7 +293,7 @@ export class ResourceEditor extends Component {
             throw new Error(_t("Reseting views is not supported yet"));
         }
         const resource = this.state.currentResource;
-        await this.orm.call("web_editor.assets", "reset_asset", [resource.url, resource.bundle], {
+        await orm.call("web_editor.assets", "reset_asset", [resource.url, resource.bundle], {
             context: this.context,
         });
         await this.loadResources();
@@ -363,7 +363,7 @@ export class ResourceEditor extends Component {
             : this.state.resources.scss[url].bundle;
         const fileType = isJSFile ? "js" : "scss";
         const params = [url, bundle, arch, fileType];
-        await this.orm.call("web_editor.assets", "save_asset", params, { context: this.context });
+        await orm.call("web_editor.assets", "save_asset", params, { context: this.context });
         delete resource.dirty;
     }
 
@@ -376,7 +376,7 @@ export class ResourceEditor extends Component {
     async saveXML(resource) {
         const { id, arch } = resource;
         const context = { ...this.context, lang: false };
-        await this.orm.write("ir.ui.view", [id], { arch }, { context });
+        await orm.write("ir.ui.view", [id], { arch }, { context });
         delete resource.dirty;
     }
 

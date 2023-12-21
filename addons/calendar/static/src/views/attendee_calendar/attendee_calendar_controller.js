@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { _t } from "@web/core/l10n/translation";
+import { orm } from "@web/core/orm";
 import { CalendarController } from "@web/views/calendar/calendar_controller";
 import { user } from "@web/core/user";
 import { useService } from "@web/core/utils/hooks";
@@ -16,7 +17,6 @@ export class AttendeeCalendarController extends CalendarController {
     setup() {
         super.setup();
         this.actionService = useService("action");
-        this.orm = useService("orm");
         onWillStart(async () => {
             this.isSystemUser = await user.hasGroup("base.group_system");
         });
@@ -91,9 +91,9 @@ export class AttendeeCalendarController extends CalendarController {
             }
         } else {
             // Decline event
-            this.orm
-                .call("calendar.attendee", "do_decline", [record.calendarAttendeeId])
-                .then(this.model.load.bind(this.model));
+            orm.call("calendar.attendee", "do_decline", [record.calendarAttendeeId]).then(
+                this.model.load.bind(this.model)
+            );
         }
     }
 

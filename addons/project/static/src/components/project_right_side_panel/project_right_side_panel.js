@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { _t } from "@web/core/l10n/translation";
+import { orm } from "@web/core/orm";
 import { useService } from '@web/core/utils/hooks';
 import { formatFloat } from "@web/core/utils/numbers";
 import { ViewButton } from '@web/views/view_button/view_button';
@@ -26,7 +27,6 @@ export class ProjectRightSidePanel extends Component {
     };
 
     setup() {
-        this.orm = useService('orm');
         this.actionService = useService('action');
         this.dialog = useService('dialog');
         this.state = useState({
@@ -99,7 +99,7 @@ export class ProjectRightSidePanel extends Component {
         if (!this.projectId) { // If this is called from notif, multiples updates but no specific project
             return {};
         }
-        const data = await this.orm.call(
+        const data = await orm.call(
             'project.project',
             'get_panel_data',
             [[this.projectId]],
@@ -110,7 +110,7 @@ export class ProjectRightSidePanel extends Component {
     }
 
     async loadMilestones() {
-        const milestones = await this.orm.call(
+        const milestones = await orm.call(
             'project.project',
             'get_milestones',
             [[this.projectId]],

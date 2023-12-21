@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { _t } from "@web/core/l10n/translation";
+import { orm } from "@web/core/orm";
 import { debounce as debounceFn } from "@web/core/utils/timing";
 import publicWidget from "@web/legacy/js/public/public_widget";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
@@ -51,7 +52,6 @@ export class ReorderDialog extends Component {
     };
 
     setup() {
-        this.orm = useService("orm");
         this.dialogService = useService("dialog");
         this.formatCurrency = formatCurrency;
 

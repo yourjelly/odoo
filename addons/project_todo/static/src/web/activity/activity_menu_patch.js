@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { _t } from "@web/core/l10n/translation";
+import { orm } from "@web/core/orm";
 import { ActivityMenu } from "@mail/core/web/activity_menu";
 import { FormViewDialog } from "@web/views/view_dialogs/form_view_dialog";
 import { useCommand } from "@web/core/commands/command_hook";
@@ -14,7 +15,6 @@ registry.category("command_categories").add("to-do", {}, { sequence: 105 });
 patch(ActivityMenu.prototype, {
     setup() {
         super.setup(...arguments);
-        this.orm = useService("orm");
         this.dialogService = useService("dialog");
         useCommand(
             _t("Add a To-Do"),
@@ -31,7 +31,7 @@ patch(ActivityMenu.prototype, {
     },
 
     async createActivityTodo() {
-        const wizard = await this.orm.call("mail.activity.todo.create", "create", [{
+        const wizard = await orm.call("mail.activity.todo.create", "create", [{
             "user_id": this.userId,
         }]);
         this.dialogService.add(FormViewDialog, {
@@ -51,7 +51,7 @@ patch(ActivityMenu.prototype, {
     },
 
     async loadTodoViews() {
-        this.todoViews = await this.orm.call(
+        this.todoViews = await orm.call(
             "project.task",
             "get_todo_views_id",
             [],

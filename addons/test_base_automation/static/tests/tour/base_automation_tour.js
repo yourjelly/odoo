@@ -1,5 +1,5 @@
 /** @odoo-module */
-import { ORM } from "@web/core/orm_service";
+import { ORM } from "@web/core/orm";
 import { patch } from "@web/core/utils/patch";
 
 import { registry } from "@web/core/registry";

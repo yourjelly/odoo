@@ -5,12 +5,13 @@ import { Component, useState } from "@odoo/owl";
 import { Domain, InvalidDomainError } from "@web/core/domain";
 import { DomainSelector } from "@web/core/domain_selector/domain_selector";
 import { DomainSelectorDialog } from "@web/core/domain_selector_dialog/domain_selector_dialog";
+import { orm } from "@web/core/orm";
 import { EvaluationError } from "@web/core/py_js/py_builtin";
 import { rpc } from "@web/core/network/rpc";
 import { registry } from "@web/core/registry";
 import { SelectCreateDialog } from "@web/views/view_dialogs/select_create_dialog";
 import { standardFieldProps } from "../standard_field_props";
-import { useBus, useService, useOwnedDialogs } from "@web/core/utils/hooks";
+import { useBus, useOwnedDialogs } from "@web/core/utils/hooks";
 import {
     useGetDomainTreeDescription,
     useGetDefaultLeafDomain,
@@ -36,7 +37,6 @@ export class DomainField extends Component {
     };
 
     setup() {
-        this.orm = useService("orm");
         this.getDomainTreeDescription = useGetDomainTreeDescription();
         this.getDefaultLeafDomain = useGetDefaultLeafDomain();
         this.addDialog = useOwnedDialogs();
@@ -181,7 +181,7 @@ export class DomainField extends Component {
         let recordCount;
         const context = this.getContext(props);
         try {
-            recordCount = await this.orm.silent.searchCount(resModel, domain, { context });
+            recordCount = await orm.silent.searchCount(resModel, domain, { context });
         } catch (error) {
             if (error.data?.name === "builtins.KeyError" && error.data.message === resModel) {
                 // we don't want to support invalid models

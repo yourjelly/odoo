@@ -2,6 +2,7 @@
 
 import { _t } from "@web/core/l10n/translation";
 import { Dialog } from "@web/core/dialog/dialog";
+import { orm } from "@web/core/orm";
 import { evaluateBooleanExpr } from "@web/core/py_js/py";
 import { editModelDebug } from "@web/core/debug/debug_utils";
 import { formatDateTime, deserializeDateTime } from "@web/core/l10n/dates";
@@ -122,7 +123,6 @@ class GetMetadataDialog extends Component {
     static template = "web.DebugMenu.GetMetadataDialog";
     static components = { Dialog };
     setup() {
-        this.orm = useService("orm");
         this.dialogService = useService("dialog");
         this.title = _t("View Metadata");
         this.state = useState({});
@@ -143,16 +143,13 @@ class GetMetadataDialog extends Component {
     }
 
     async toggleNoupdate() {
-        await this.env.services.orm.call("ir.model.data", "toggle_noupdate", [
-            this.props.resModel,
-            this.state.id,
-        ]);
+        await orm.call("ir.model.data", "toggle_noupdate", [this.props.resModel, this.state.id]);
         await this.loadMetadata();
     }
 
     async loadMetadata() {
         const args = [[this.props.resId]];
-        const result = await this.orm.call(this.props.resModel, "get_metadata", args);
+        const result = await orm.call(this.props.resModel, "get_metadata", args);
         const metadata = result[0];
         this.state.id = metadata.id;
         this.state.xmlid = metadata.xmlid;
@@ -216,7 +213,7 @@ export function viewRawRecord({ component, env }) {
         type: "item",
         description,
         callback: async () => {
-            const records = await component.model.orm.read(resModel, [resId]);
+            const records = await orm.read(resModel, [resId]);
             env.services.dialog.add(RawRecordDialog, {
                 title: _t("Raw Record Data: %s(%s)", resModel, resId),
                 record: records[0],
@@ -242,7 +239,6 @@ class SetDefaultDialog extends Component {
     };
 
     setup() {
-        this.orm = useService("orm");
         this.title = _t("Set Defaults");
         this.state = {
             fieldToSet: "",
@@ -333,7 +329,7 @@ class SetDefaultDialog extends Component {
         const fieldToSet = this.defaultFields.find((field) => {
             return field.name === this.state.fieldToSet;
         }).value;
-        await this.orm.call("ir.default", "set", [
+        await orm.call("ir.default", "set", [
             this.props.record.resModel,
             this.state.fieldToSet,
             fieldToSet,

@@ -3,6 +3,7 @@
 import { _t } from "@web/core/l10n/translation";
 import { Component, onWillStart, useState } from "@odoo/owl";
 import { download } from "@web/core/network/download";
+import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { Layout } from "@web/search/layout";
@@ -36,7 +37,6 @@ export class TraceabilityReport extends Component {
 
     setup() {
         this.actionService = useService("action");
-        this.orm = useService("orm");
 
         onWillStart(this.onWillStart);
         useSetupAction({
@@ -70,7 +70,7 @@ export class TraceabilityReport extends Component {
 
     async onWillStart() {
         if (!this.state.lines.length) {
-            const mainLines = await this.orm.call("stock.traceability.report", "get_main_lines", [
+            const mainLines = await orm.call("stock.traceability.report", "get_main_lines", [
                 this.context,
             ]);
             this.state.lines = mainLines.map(processLine);
@@ -132,7 +132,7 @@ export class TraceabilityReport extends Component {
         line.isFolded = !line.isFolded;
         if (!line.lines.length) {
             line.lines = (
-                await this.orm.call("stock.traceability.report", "get_lines", [line.id], {
+                await orm.call("stock.traceability.report", "get_lines", [line.id], {
                     model_id: line.model_id,
                     model_name: line.model,
                     level: line.level + 30 || 1,

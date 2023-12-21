@@ -1,6 +1,6 @@
 /* @odoo-module */
 
-import { x2ManyCommands } from "@web/core/orm_service";
+import { x2ManyCommands } from "@web/core/orm";
 import { intersection } from "@web/core/utils/arrays";
 import { pick } from "@web/core/utils/objects";
 import { completeActiveFields } from "@web/model/relational_model/utils";

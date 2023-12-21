@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { session } from "@web/session";
+import { orm } from "@web/core/orm";
 import { user } from "@web/core/user";
 import { MediaDialog } from "@web_editor/components/media_dialog/media_dialog";
 import { VideoSelector } from "@web_editor/components/media_dialog/video_selector";
@@ -144,7 +145,6 @@ export class Wysiwyg extends Component {
     });
 
     setup() {
-        this.orm = useService('orm');
         this.getColorPickerTemplateService = useService('get_color_picker_template');
         this.notification = useService("notification");
         this.popover = useService("popover");
@@ -2283,7 +2283,7 @@ export class Wysiwyg extends Component {
                     [$(x).data('oe-translation-initial-sha')]: this._getEscapedElement($(x)).html()
                 })
             ));
-            return this.orm.call(
+            return orm.call(
                 $els.data('oe-model'),
                 'update_field_translations_sha',
                 [
@@ -2297,7 +2297,7 @@ export class Wysiwyg extends Component {
                 return Promise.resolve();
             }
 
-            return this.orm.call(
+            return orm.call(
                 'ir.ui.view',
                 'save',
                 [
@@ -2345,7 +2345,7 @@ export class Wysiwyg extends Component {
                 fontawesome: 'fa-pencil-square-o',
                 isDisabled: () => !this.odooEditor.isSelectionInBlockRoot(),
                 callback: async () => {
-                    const [user] = await this.orm.read(
+                    const [user] = await orm.read(
                         'res.users',
                         [user.userId],
                         ['signature'],
@@ -2676,7 +2676,7 @@ export class Wysiwyg extends Component {
         // ZeroWidthSpace may be present from OdooEditor edition process
         let escapedHtml = this._getEscapedElement($el).prop('outerHTML');
 
-        const result = this.orm.call('ir.ui.view', 'save', [
+        const result = orm.call('ir.ui.view', 'save', [
             viewID,
             escapedHtml,
             !$el.data('oe-expression') && $el.data('oe-xpath') || null
@@ -2978,7 +2978,7 @@ export class Wysiwyg extends Component {
         return clients.sort((a, b) => isClientFirst(a, b) ? -1 : 1);
     }
     async _getCurrentRecord() {
-        const [record] = await this.orm.read(
+        const [record] = await orm.read(
             this.options.collaborationChannel.collaborationModelName,
             [this.options.collaborationChannel.collaborationResId],
             [this.options.collaborationChannel.collaborationFieldName],
@@ -3367,7 +3367,7 @@ export class Wysiwyg extends Component {
             if (!attachment.public) {
                 let accessToken = attachment.access_token;
                 if (!accessToken) {
-                    [accessToken] = await this.orm.call(
+                    [accessToken] = await orm.call(
                         'ir.attachment',
                         'generate_access_token',
                         [attachment.id],

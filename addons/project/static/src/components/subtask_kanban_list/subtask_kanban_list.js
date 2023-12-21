@@ -2,6 +2,7 @@
 
 import { Component, useState } from "@odoo/owl";
 
+import { orm } from "@web/core/orm";
 import { useService } from "@web/core/utils/hooks";
 import { registry } from "@web/core/registry";
 
@@ -25,7 +26,6 @@ export class SubtaskKanbanList extends Component {
 
     setup() {
         this.actionService = useService("action");
-        this.orm = useService("orm");
         this.subtaskCreate = useState({
             open: false,
             name: "",
@@ -73,7 +73,7 @@ export class SubtaskKanbanList extends Component {
     }
 
     async _onSubtaskCreateNameChanged(name) {
-        await this.orm.create("project.task", [{ display_name: name, parent_id: this.props.record.resId, user_ids: this.props.record.data.user_ids.resIds }]);
+        await orm.create("project.task", [{ display_name: name, parent_id: this.props.record.resId, user_ids: this.props.record.data.user_ids.resIds }]);
         this.subtaskCreate.open = false;
         this.subtaskCreate.name = "";
         this.props.record.load();

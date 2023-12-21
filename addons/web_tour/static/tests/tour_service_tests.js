@@ -4,7 +4,7 @@ import { browser } from "@web/core/browser/browser";
 import { MacroEngine } from "@web/core/macro";
 import { registry } from "@web/core/registry";
 import { tourService } from "@web_tour/tour_service/tour_service";
-import { ormService } from "@web/core/orm_service";
+import { ormService } from "@web/core/orm";
 import { notificationService } from "@web/core/notifications/notification_service";
 import { effectService } from "@web/core/effects/effect_service";
 import { registerCleanup } from "@web/../tests/helpers/cleanup";

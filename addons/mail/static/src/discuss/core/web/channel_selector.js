@@ -7,6 +7,7 @@ import { Component, onMounted, useEffect, useRef, useState } from "@odoo/owl";
 
 import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
 import { _t } from "@web/core/l10n/translation";
+import { orm } from "@web/core/orm";
 import { TagsList } from "@web/core/tags_list/tags_list";
 import { useService } from "@web/core/utils/hooks";
 import { isEventHandled, markEventHandled } from "@web/core/utils/misc";
@@ -23,7 +24,6 @@ export class ChannelSelector extends Component {
         this.store = useState(useService("mail.store"));
         this.threadService = useState(useService("mail.thread"));
         this.suggestionService = useService("mail.suggestion");
-        this.orm = useService("orm");
         this.sequential = useSequential();
         this.state = useState({
             value: "",
@@ -76,7 +76,7 @@ export class ChannelSelector extends Component {
                 const fields = ["name"];
                 const results = await this.sequential(async () => {
                     this.state.navigableListProps.isLoading = true;
-                    const res = await this.orm.searchRead("discuss.channel", domain, fields, {
+                    const res = await orm.searchRead("discuss.channel", domain, fields, {
                         limit: 10,
                     });
                     this.state.navigableListProps.isLoading = false;
@@ -104,7 +104,7 @@ export class ChannelSelector extends Component {
             if (this.props.category.id === "chats") {
                 const results = await this.sequential(async () => {
                     this.state.navigableListProps.isLoading = true;
-                    const res = await this.orm.call("res.partner", "im_search", [
+                    const res = await orm.call("res.partner", "im_search", [
                         cleanedTerm,
                         10,
                         this.state.selectedPartners,
@@ -151,15 +151,13 @@ export class ChannelSelector extends Component {
     onSelect(option) {
         if (this.props.category.id === "channels") {
             if (option.channelId === "__create__") {
-                this.env.services.orm
-                    .call("discuss.channel", "channel_create", [
-                        option.label,
-                        this.store.internalUserGroupId,
-                    ])
-                    .then((data) => {
-                        const channel = this.discussCoreCommonService.createChannelThread(data);
-                        this.threadService.open(channel);
-                    });
+                orm.call("discuss.channel", "channel_create", [
+                    option.label,
+                    this.store.internalUserGroupId,
+                ]).then((data) => {
+                    const channel = this.discussCoreCommonService.createChannelThread(data);
+                    this.threadService.open(channel);
+                });
             } else {
                 this.threadService.joinChannel(option.channelId, option.label);
             }

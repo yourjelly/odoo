@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
+import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
-import { useService } from "@web/core/utils/hooks";
 import { parseFloatTime } from "@web/views/fields/parsers";
 import { useInputField } from "@web/views/fields/input_field_hook";
 import { useRecordObserver } from "@web/model/relational_model/utils";
@@ -88,7 +88,6 @@ class MrpTimerField extends Component {
     static props = standardFieldProps;
 
     setup() {
-        this.orm = useService("orm");
         useInputField({
             getValue: () => this.durationFormatted,
             refName: "numpadDecimal",
@@ -97,7 +96,7 @@ class MrpTimerField extends Component {
 
         useRecordObserver(async (record) => {
             if (!this.props.record.model.useSampleModel && record.data.state === "progress") {
-                this.duration = await this.orm.call(
+                this.duration = await orm.call(
                     "mrp.workorder",
                     "get_duration",
                     [this.props.record.resId]

@@ -6,7 +6,7 @@ import { click, dragAndDrop, getFixture, mount } from "../helpers/utils";
 import { makeDialogTestEnv } from "../helpers/mock_env";
 import { registry } from "@web/core/registry";
 import { notificationService } from "@web/core/notifications/notification_service";
-import { ormService } from "@web/core/orm_service";
+import { ormService } from "@web/core/orm";
 import { uiService } from "@web/core/ui/ui_service";
 import { MainComponentsContainer } from "@web/core/main_components_container";
 import { makeFakeLocalizationService } from "../helpers/mock_services";

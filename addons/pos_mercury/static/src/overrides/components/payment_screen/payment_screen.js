@@ -1,6 +1,7 @@
 /** @odoo-module */
 
 import { _t } from "@web/core/l10n/translation";
+import { orm } from "@web/core/orm";
 import { patch } from "@web/core/utils/patch";
 import { PaymentScreen } from "@point_of_sale/app/screens/payment_screen/payment_screen";
 import { useBarcodeReader } from "@point_of_sale/app/barcode/barcode_reader_hook";
@@ -253,7 +254,7 @@ patch(PaymentScreen.prototype, {
             });
         }
         // FIXME POSREF timeout
-        this.orm
+        orm
             .call("pos_mercury.mercury_transaction", "do_payment", [transaction])
             .then((data) => {
                 // if not receiving a response from Vantiv, we should retry
@@ -445,7 +446,7 @@ patch(PaymentScreen.prototype, {
             });
         }
         // FIXME POSREF timeout
-        this.orm
+        orm
             .call("pos_mercury.mercury_transaction", rpc_method, [request_data])
             .then(function (data) {
                 if (data === "timeout") {

@@ -5,6 +5,7 @@ import publicWidget from '@web/legacy/js/public/public_widget';
 import { browser } from '@web/core/browser/browser';
 import { ConfirmationDialog } from '@web/core/confirmation_dialog/confirmation_dialog';
 import { _t } from '@web/core/l10n/translation';
+import { orm } from "@web/core/orm";
 import { renderToMarkup } from '@web/core/utils/render';
 import { rpc, RPCError } from '@web/core/network/rpc';
 
@@ -18,14 +19,6 @@ publicWidget.registry.PaymentForm = publicWidget.Widget.extend({
     }),
 
     // #=== WIDGET LIFECYCLE ===#
-
-    /**
-     * @override
-     */
-    init() {
-        this._super(...arguments);
-        this.orm = this.bindService("orm");
-    },
 
     /**
      * @override
@@ -86,7 +79,7 @@ publicWidget.registry.PaymentForm = publicWidget.Widget.extend({
 
         const linkedRadio = document.getElementById(ev.currentTarget.dataset['linkedRadio']);
         const tokenId = this._getPaymentOptionId(linkedRadio);
-        this.orm.call(
+        orm.call(
             'payment.token',
             'get_linked_records_info',
             [tokenId],

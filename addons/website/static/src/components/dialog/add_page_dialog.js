@@ -381,7 +381,6 @@ export class AddPageDialog extends Component {
         this.switchLabel = _t("Add to menu");
         this.website = useService('website');
         this.dialogs = useService("dialog");
-        this.orm = useService('orm');
         this.http = useService('http');
         this.action = useService('action');
 

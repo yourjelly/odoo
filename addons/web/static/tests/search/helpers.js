@@ -15,7 +15,7 @@ import { dialogService } from "@web/core/dialog/dialog_service";
 import { fieldService } from "@web/core/field_service";
 import { hotkeyService } from "@web/core/hotkeys/hotkey_service";
 import { notificationService } from "@web/core/notifications/notification_service";
-import { ormService } from "@web/core/orm_service";
+import { ormService } from "@web/core/orm";
 import { popoverService } from "@web/core/popover/popover_service";
 import { registry } from "@web/core/registry";
 import { CustomFavoriteItem } from "@web/search/custom_favorite_item/custom_favorite_item";

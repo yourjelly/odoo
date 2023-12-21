@@ -29,10 +29,7 @@ export function waitForOnlinePayment(checksAmount = 10, delayBetweenChecks = 300
                     const currentOrder = odoo.__WOWL_DEBUG__.root.env.services.pos.get_order();
                     let opData;
                     if (currentOrder) {
-                        opData = await currentOrder.update_online_payments_data_with_server(
-                            odoo.__WOWL_DEBUG__.root.env.services.orm,
-                            false
-                        );
+                        opData = await currentOrder.update_online_payments_data_with_server(false);
                     }
                     const isMaxChecksReached = checkIndex >= checksAmount - 1;
                     const isOrderPaid = opData && opData.is_paid;

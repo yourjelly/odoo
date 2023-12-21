@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { _t } from "@web/core/l10n/translation";
+import { orm } from "@web/core/orm";
 import options from "@web_editor/js/editor/snippets.options";
 import "@website/js/editor/snippets.options";
 import { uniqueId } from "@web/core/utils/functions";
@@ -60,7 +61,6 @@ options.registry.CoverProperties.include({
 options.registry.BlogPostTagSelection = options.Class.extend({
     init() {
         this._super(...arguments);
-        this.orm = this.bindService("orm");
         this.notification = this.bindService("notification");
     },
 
@@ -72,7 +72,7 @@ options.registry.BlogPostTagSelection = options.Class.extend({
 
         this.blogPostID = parseInt(this.$target[0].dataset.blogId);
         this.isEditingTags = false;
-        const tags = await this.orm.searchRead(
+        const tags = await orm.searchRead(
             "blog.tag",
             [],
             ["id", "name", "display_name", "post_ids"]

@@ -2,6 +2,7 @@
 
 import { Dialog } from "@web/core/dialog/dialog";
 import { FileInput } from "@web/core/file_input/file_input";
+import { orm } from "@web/core/orm";
 import { useService } from "@web/core/utils/hooks";
 
 import { Component, useState, onWillStart } from "@odoo/owl";
@@ -13,7 +14,6 @@ export class KanbanCoverImageDialog extends Component {
     static components = { Dialog, FileInput };
     setup() {
         this.id = `o_cover_image_upload_${nextDialogId++}`;
-        this.orm = useService("orm");
         this.http = useService("http");
         const { record, fieldName } = this.props;
         const attachment = (record && record.data[fieldName]) || [];
@@ -22,7 +22,7 @@ export class KanbanCoverImageDialog extends Component {
             selectedAttachmentId: attachment[0],
         });
         onWillStart(async () => {
-            this.attachments = await this.orm.searchRead(
+            this.attachments = await orm.searchRead(
                 "ir.attachment",
                 [
                     ["res_model", "=", record.resModel],

@@ -8,6 +8,7 @@ import { usePos } from "@point_of_sale/app/store/pos_hook";
 
 import { CashMoveReceipt } from "@point_of_sale/app/navbar/cash_move_popup/cash_move_receipt/cash_move_receipt";
 import { Dialog } from "@web/core/dialog/dialog";
+import { orm } from "@web/core/orm";
 import { useAsyncLockedMethod } from "@point_of_sale/app/utils/hooks";
 import { Input } from "@point_of_sale/app/generic_components/inputs/input/input";
 
@@ -17,7 +18,6 @@ export class CashMovePopup extends Component {
     setup() {
         super.setup();
         this.notification = useService("pos_notification");
-        this.orm = useService("orm");
         this.pos = usePos();
         this.dialog = useService("dialog");
         this.hardwareProxy = useService("hardware_proxy");
@@ -43,7 +43,7 @@ export class CashMovePopup extends Component {
         const translatedType = _t(type);
         const extras = { formattedAmount, translatedType };
         const reason = this.state.reason.trim();
-        await this.orm.call("pos.session", "try_cash_in_out", [
+        await orm.call("pos.session", "try_cash_in_out", [
             [this.pos.pos_session.id],
             type,
             amount,

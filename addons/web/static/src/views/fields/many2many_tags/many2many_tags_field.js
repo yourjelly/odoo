@@ -4,6 +4,7 @@ import { _t } from "@web/core/l10n/translation";
 import { CheckBox } from "@web/core/checkbox/checkbox";
 import { ColorList } from "@web/core/colorlist/colorlist";
 import { Domain } from "@web/core/domain";
+import { orm } from "@web/core/orm";
 import { evaluateBooleanExpr } from "@web/core/py_js/py";
 import {
     Many2XAutocomplete,
@@ -60,7 +61,6 @@ export class Many2ManyTagsField extends Component {
     static SEARCH_MORE_LIMIT = 320;
 
     setup() {
-        this.orm = useService("orm");
         this.previousColorsMap = {};
         this.popover = usePopover(this.constructor.components.Popover);
         this.dialog = useService("dialog");
@@ -103,7 +103,7 @@ export class Many2ManyTagsField extends Component {
 
         if (this.props.canQuickCreate) {
             this.quickCreate = async (name) => {
-                const created = await this.orm.call(this.relation, "name_create", [name], {
+                const created = await orm.call(this.relation, "name_create", [name], {
                     context: this.props.context,
                 });
                 return saveRecord([created[0]]);

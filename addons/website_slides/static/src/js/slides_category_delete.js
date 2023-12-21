@@ -2,17 +2,13 @@
 
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import publicWidget from "@web/legacy/js/public/public_widget";
+import { orm } from "@web/core/orm";
 import { _t } from "@web/core/l10n/translation";
 
 publicWidget.registry.websiteSlidesCategoryDelete = publicWidget.Widget.extend({
     selector: ".o_wslides_js_category_delete",
     events: {
         click: "_onClickDeleteCateogry",
-    },
-
-    init() {
-        this._super(...arguments);
-        this.orm = this.bindService("orm");
     },
 
     //--------------------------------------------------------------------------
@@ -34,7 +30,7 @@ publicWidget.registry.websiteSlidesCategoryDelete = publicWidget.Widget.extend({
                  * Calls 'unlink' method on slides.slide to delete the category and
                  * reloads page after deletion to re-arrange the content on UI
                  */
-                await this.orm.unlink("slide.slide", [categoryId]);
+                await orm.unlink("slide.slide", [categoryId]);
                 window.location.reload();
             },
             cancel: () => {},

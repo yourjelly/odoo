@@ -5,7 +5,7 @@ import { getModelFieldSelectorValues } from "./model_field_selector_tests";
 import { fieldService } from "@web/core/field_service";
 import { hotkeyService } from "@web/core/hotkeys/hotkey_service";
 import { makeFakeLocalizationService } from "../helpers/mock_services";
-import { ormService } from "@web/core/orm_service";
+import { ormService } from "@web/core/orm";
 import { popoverService } from "@web/core/popover/popover_service";
 import { uiService } from "@web/core/ui/ui_service";
 import { nameService } from "@web/core/name_service";

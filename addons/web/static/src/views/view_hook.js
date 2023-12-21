@@ -2,6 +2,7 @@
 
 import { useDebugCategory } from "@web/core/debug/debug_context";
 import { useSetupAction } from "@web/webclient/actions/action_hook";
+import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { browser } from "@web/core/browser/browser";
@@ -57,7 +58,6 @@ export function useActionLinks({ resModel, reload }) {
     const component = useComponent();
     const keepLast = component.env.keepLast;
 
-    const orm = useService("orm");
     const { doAction } = useService("action");
 
     function checkAndCollapseBootstrap(target) {

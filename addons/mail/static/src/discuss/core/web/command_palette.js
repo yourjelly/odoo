@@ -5,6 +5,7 @@ import { cleanTerm } from "@mail/utils/common/format";
 import { Component } from "@odoo/owl";
 
 import { _t } from "@web/core/l10n/translation";
+import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
 import { url } from "@web/core/utils/urls";
 import { imageCacheKey } from "@web/views/fields/image/image_field";
@@ -143,7 +144,7 @@ commandProviderRegistry.add("discuss.channel", {
             ["channel_type", "=", "channel"],
             ["name", "ilike", cleanTerm(options.searchValue)],
         ];
-        const channelsData = await messaging.orm.searchRead(
+        const channelsData = await orm.searchRead(
             "discuss.channel",
             domain,
             ["channel_type", "name", "avatar_128"],

@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { _t } from "@web/core/l10n/translation";
+import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
 import { browser } from "@web/core/browser/browser";
 
@@ -34,7 +35,7 @@ function runJSTestsMobileItem({ env }) {
 
 export function openViewItem({ env }) {
     async function onSelected(records) {
-        const views = await env.services.orm.searchRead(
+        const views = await orm.searchRead(
             "ir.ui.view",
             [["id", "=", records[0]]],
             ["name", "model", "type"],

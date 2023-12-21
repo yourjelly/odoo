@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { _t } from "@web/core/l10n/translation";
+import { orm } from "@web/core/orm";
 import { Attachment, FileSelector, IMAGE_MIMETYPES } from './file_selector';
 
 export class DocumentAttachment extends Attachment {
@@ -58,7 +59,7 @@ export class DocumentSelector extends FileSelector {
     /**
      * Utility method used by the MediaDialog component.
      */
-    static async createElements(selectedMedia, { orm }) {
+    static async createElements(selectedMedia) {
         return Promise.all(selectedMedia.map(async attachment => {
             const linkEl = document.createElement('a');
             let href = `/web/content/${encodeURIComponent(attachment.id)}?unique=${encodeURIComponent(attachment.checksum)}&download=true`;

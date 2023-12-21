@@ -1,9 +1,11 @@
 /** @odoo-module **/
 
+import { orm } from "@web/core/orm";
+
 export class BarcodeParser {
     static barcodeNomenclatureFields = ["name", "rule_ids", "upc_ean_conv"];
     static barcodeRuleFields = ["name", "sequence", "type", "encoding", "pattern", "alias"];
-    static async fetchNomenclature(orm, id) {
+    static async fetchNomenclature(id) {
         const [nomenclature] = await orm.read(
             "barcode.nomenclature",
             [id],

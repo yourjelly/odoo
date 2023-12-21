@@ -1,5 +1,6 @@
 /** @odoo-module **/
 
+import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
 import { ProfilingItem } from "./profiling_item";
 import { session } from "@web/session";
@@ -10,8 +11,7 @@ import { EventBus, reactive } from "@odoo/owl";
 const systrayRegistry = registry.category("systray");
 
 const profilingService = {
-    dependencies: ["orm"],
-    start(env, { orm }) {
+    start(env) {
         // Only set up profiling when in debug mode
         if (!env.debug) {
             return;

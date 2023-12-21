@@ -1,15 +1,16 @@
 /** @odoo-module */
+
+import { orm } from "@web/core/orm";
 import { useService } from "@web/core/utils/hooks";
 import { Component, onWillStart } from "@odoo/owl";
 
 export class PurchaseDashBoard extends Component {
     static template = "purchase.PurchaseDashboard";
     setup() {
-        this.orm = useService("orm");
         this.action = useService("action");
 
         onWillStart(async () => {
-            this.purchaseData = await this.orm.call("purchase.order", "retrieve_dashboard");
+            this.purchaseData = await orm.call("purchase.order", "retrieve_dashboard");
         });
     }
 

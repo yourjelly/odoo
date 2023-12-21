@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import {_t} from "@web/core/l10n/translation";
+import { orm } from "@web/core/orm";
 import options from "@web_editor/js/editor/snippets.options";
 import SocialMediaOption from "@website/snippets/s_social_media/options";
 
@@ -10,7 +11,6 @@ options.registry.InstagramPage = options.Class.extend({
      */
     init() {
         this._super(...arguments);
-        this.orm = this.bindService("orm");
         this.notification = this.bindService("notification");
         this.instagramUrlStr = "instagram.com/";
     },
@@ -30,7 +30,7 @@ options.registry.InstagramPage = options.Class.extend({
                     websiteId = ctx["website_id"];
                 },
             });
-            const values = await this.orm.read("website", [websiteId], ["social_instagram"]);
+            const values = await orm.read("website", [websiteId], ["social_instagram"]);
             socialInstagram = values[0]["social_instagram"];
         }
         if (socialInstagram) {

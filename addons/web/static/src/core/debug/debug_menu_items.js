@@ -3,6 +3,7 @@
 import { _t } from "@web/core/l10n/translation";
 import { browser } from "@web/core/browser/browser";
 import { routeToUrl } from "@web/core/browser/router_service";
+import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
 import { user } from "@web/core/user";
 
@@ -33,7 +34,7 @@ export function regenerateAssets({ env }) {
         type: "item",
         description: _t("Regenerate Assets Bundles"),
         callback: async () => {
-            await env.services.orm.call("ir.attachment", "regenerate_assets_bundles");
+            await orm.call("ir.attachment", "regenerate_assets_bundles");
             browser.location.reload();
         },
         sequence: 430,

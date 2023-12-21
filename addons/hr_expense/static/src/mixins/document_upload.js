@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { _t } from "@web/core/l10n/translation";
+import { orm } from "@web/core/orm";
 import { useBus, useService } from '@web/core/utils/hooks';
 import { useRef, useEffect, useState } from "@odoo/owl";
 
@@ -58,7 +59,6 @@ export const ExpenseDocumentUpload = (T) => class ExpenseDocumentUpload extends 
         super.setup();
         this.actionService = useService('action');
         this.notification = useService('notification');
-        this.orm = useService('orm');
         this.http = useService('http');
         this.fileInput = useRef('fileInput');
         this.root = useRef("root");
@@ -98,7 +98,7 @@ export const ExpenseDocumentUpload = (T) => class ExpenseDocumentUpload extends 
             return;
         }
 
-        const action = await this.orm.call('hr.expense', 'create_expense_from_attachments', ["", attachmentIds]);
+        const action = await orm.call('hr.expense', 'create_expense_from_attachments', ["", attachmentIds]);
         this.actionService.doAction(action);
     }
 };

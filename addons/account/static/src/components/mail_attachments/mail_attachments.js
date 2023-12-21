@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { _t } from "@web/core/l10n/translation";
+import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { FileInput } from "@web/core/file_input/file_input";
@@ -11,7 +12,6 @@ export class MailAttachments extends Component {
     static components = { FileInput };
 
     setup() {
-        this.orm = useService("orm");
         this.action = useService("action");
         this.notification = useService("notification");
         this.attachmentIdsToUnlink = new Set();
@@ -79,7 +79,7 @@ export class MailAttachments extends Component {
             });
         }
         if(this.attachmentIdsToUnlink.size > 0){
-            await this.orm.unlink("ir.attachment", Array.from(this.attachmentIdsToUnlink));
+            await orm.unlink("ir.attachment", Array.from(this.attachmentIdsToUnlink));
         }
     }
 }

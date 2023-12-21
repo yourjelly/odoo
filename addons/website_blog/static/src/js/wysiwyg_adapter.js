@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { WysiwygAdapterComponent } from '@website/components/wysiwyg_adapter/wysiwyg_adapter';
+import { orm } from "@web/core/orm";
 import { patch } from "@web/core/utils/patch";
 
 patch(WysiwygAdapterComponent.prototype, {
@@ -44,13 +45,13 @@ patch(WysiwygAdapterComponent.prototype, {
     async _saveBlogTags() {
         for (const [key, tags] of Object.entries(this.blogTagsPerBlogPost)) {
             const proms = tags.filter(tag => typeof tag.id === 'string').map(tag => {
-                return this.orm.create("blog.tag", [{
+                return orm.create("blog.tag", [{
                         'name': tag.name,
                     }]);
             });
             const createdIDs = (await Promise.all(proms)).flat();
 
-            await this.orm.write("blog.post", [parseInt(key)], {
+            await orm.write("blog.post", [parseInt(key)], {
                 'tag_ids': [[6, 0, tags.filter(tag => typeof tag.id === 'number').map(tag => tag.id).concat(createdIDs)]],
             });
         }

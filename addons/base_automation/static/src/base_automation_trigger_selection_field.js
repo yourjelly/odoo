@@ -2,11 +2,11 @@
 
 import { useState } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
+import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
 import { useRecordObserver } from "@web/model/relational_model/utils";
 import { selectionField, SelectionField } from "@web/views/fields/selection/selection_field";
 import { TRIGGER_FILTERS } from "./utils";
-import { useService } from "@web/core/utils/hooks";
 
 const OPT_GROUPS = [
     {
@@ -76,7 +76,6 @@ export class TriggerSelectionField extends SelectionField {
         super.setup();
         this.groupedOptions = useState([]);
 
-        const orm = useService("orm");
         let lastRelatedModelId;
         let relatedModelFields;
         useRecordObserver(async (record) => {

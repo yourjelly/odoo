@@ -1,5 +1,6 @@
 /* @odoo-module */
 
+import { orm } from "@web/core/orm";
 import { rpc } from "@web/core/network/rpc";
 
 import { startServer } from "@bus/../tests/helpers/mock_python_environment";
@@ -925,7 +926,7 @@ QUnit.test(
             res_partner_id: pyEnv.currentPartnerId,
         });
         // simulate receiving a new needaction message
-        const [formattedMessage] = await env.services.orm.call("mail.message", "message_format", [
+        const [formattedMessage] = await orm.call("mail.message", "message_format", [
             [messageId],
         ]);
         pyEnv["bus.bus"]._sendone(pyEnv.currentPartner, "mail.message/inbox", formattedMessage);

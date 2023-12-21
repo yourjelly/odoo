@@ -8,8 +8,9 @@ import { Domain } from "@web/core/domain";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { ModelSelector } from "@web/core/model_selector/model_selector";
+import { orm } from "@web/core/orm";
 import { Many2XAutocomplete } from "@web/views/fields/relational_utils";
-import { useService, useOwnedDialogs } from "@web/core/utils/hooks";
+import { useOwnedDialogs } from "@web/core/utils/hooks";
 import { PropertyDefinitionSelection } from "./property_definition_selection";
 import { PropertyTags } from "./property_tags";
 import { SelectCreateDialog } from "@web/views/view_dialogs/select_create_dialog";
@@ -49,8 +50,6 @@ export class PropertyDefinition extends Component {
     };
 
     setup() {
-        this.orm = useService("orm");
-
         this.propertyDefinitionRef = useRef("propertyDefinition");
         this.addDialog = useOwnedDialogs();
 
@@ -364,7 +363,7 @@ export class PropertyDefinition extends Component {
             // retrieve the model id and the model description from it's name
             // "res.partner" => (5, "Contact")
             try {
-                const result = await this.orm.call("ir.model", "display_name_for", [[newModel]]);
+                const result = await orm.call("ir.model", "display_name_for", [[newModel]]);
                 if (!result || !result.length) {
                     return;
                 }
@@ -390,7 +389,7 @@ export class PropertyDefinition extends Component {
         if (this.state.resModel && this.state.resModel.length) {
             const domainList = new Domain(this.state.propertyDefinition.domain || "[]").toList();
 
-            const result = await this.orm.call(
+            const result = await orm.call(
                 this.state.propertyDefinition.comodel,
                 "search_count",
                 [domainList]

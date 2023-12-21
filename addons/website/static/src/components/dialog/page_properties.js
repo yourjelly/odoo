@@ -2,6 +2,7 @@
 
 import {CheckBox} from '@web/core/checkbox/checkbox';
 import { _t } from "@web/core/l10n/translation";
+import { orm } from "@web/core/orm";
 import {useService, useAutofocus} from "@web/core/utils/hooks";
 import {sprintf} from "@web/core/utils/strings";
 import {WebsiteDialog} from './dialog';
@@ -26,7 +27,6 @@ export class PageDependencies extends Component {
 
     setup() {
         super.setup();
-        this.orm = useService('orm');
 
         this.action = useRef('action');
         this.sprintf = sprintf;
@@ -44,7 +44,7 @@ export class PageDependencies extends Component {
     }
 
     async fetchDependencies() {
-        this.state.dependencies = await this.orm.call(
+        this.state.dependencies = await orm.call(
             'website',
             'search_url_dependencies',
             [this.props.resModel, this.props.resIds],
@@ -125,7 +125,6 @@ export class DuplicatePageDialog extends Component {
     };
 
     setup() {
-        this.orm = useService('orm');
         this.website = useService('website');
         useAutofocus();
 
@@ -136,7 +135,7 @@ export class DuplicatePageDialog extends Component {
 
     async duplicate() {
         if (this.state.name) {
-            const res = await this.orm.call(
+            const res = await orm.call(
                 'website.page',
                 'clone_page',
                 [this.props.pageId, this.state.name]
@@ -169,7 +168,6 @@ export class PagePropertiesDialog extends FormViewDialog {
     setup() {
         super.setup();
         this.dialog = useService('dialog');
-        this.orm = useService('orm');
         this.website = useService('website');
 
         this.viewProps.resId = this.resId;
@@ -195,7 +193,7 @@ export class PagePropertiesDialog extends FormViewDialog {
             resIds: pageIds,
             resModel: 'website.page',
             onDelete: async () => {
-                await this.orm.unlink("website.page", pageIds);
+                await orm.unlink("website.page", pageIds);
                 this.website.goToWebsite({path: '/'});
                 this.props.close();
                 this.props.onClose();

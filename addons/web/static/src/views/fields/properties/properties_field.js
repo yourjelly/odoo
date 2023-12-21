@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { _t } from "@web/core/l10n/translation";
+import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
 import { user } from "@web/core/user";
 import { standardFieldProps } from "../standard_field_props";
@@ -36,7 +37,6 @@ export class PropertiesField extends Component {
 
     setup() {
         this.notification = useService("notification");
-        this.orm = useService("orm");
         this.dialogService = useService("dialog");
         this.popover = usePopover(PropertyDefinition, {
             closeOnClickAway: this.checkPopoverClose,
@@ -642,7 +642,7 @@ export class PropertiesField extends Component {
         }
 
         try {
-            await this.orm.call(
+            await orm.call(
                 this.definitionRecordModel,
                 "check_access_rule",
                 [this.definitionRecordId],

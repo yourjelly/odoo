@@ -5,6 +5,7 @@ import { Component, useRef } from "@odoo/owl";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
+import { orm } from "@web/core/orm";
 import { usePopover } from "@web/core/popover/popover_hook";
 import { memoize } from "@web/core/utils/functions";
 import { useService } from "@web/core/utils/hooks";
@@ -38,7 +39,6 @@ export class KanbanHeader extends Component {
 
     setup() {
         this.dialog = useService("dialog");
-        this.orm = useService("orm");
         this.rootRef = useRef("root");
         this.popover = usePopover(KanbanHeaderTooltip);
         this.onTitleMouseEnter = useDebounced(this.onTitleMouseEnter, 400);
@@ -134,7 +134,7 @@ export class KanbanHeader extends Component {
         const { name, relation: resModel } = this.group.groupByField;
         const tooltipInfo = this.props.tooltipInfo[name];
         const fieldNames = Object.keys(tooltipInfo);
-        const [values] = await this.orm.silent.read(
+        const [values] = await orm.silent.read(
             resModel,
             [this.group.value],
             ["display_name", ...fieldNames]

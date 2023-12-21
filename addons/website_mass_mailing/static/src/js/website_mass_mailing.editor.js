@@ -2,15 +2,11 @@
 
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { _t } from "@web/core/l10n/translation";
+import { orm } from "@web/core/orm";
 import { renderToElement } from "@web/core/utils/render";
 import options from "@web_editor/js/editor/snippets.options";
 
 options.registry.mailing_list_subscribe = options.Class.extend({
-    init() {
-        this._super(...arguments);
-        this.orm = this.bindService("orm");
-    },
-
     /**
      * @override
      */
@@ -85,7 +81,7 @@ options.registry.mailing_list_subscribe = options.Class.extend({
      * @override
      */
     async _renderCustomXML(uiFragment) {
-        this.mailingLists = await this.orm.call(
+        this.mailingLists = await orm.call(
             "mailing.list",
             "name_search",
             ["", [["is_public", "=", true]]],

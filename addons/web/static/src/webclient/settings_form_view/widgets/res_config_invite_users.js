@@ -2,6 +2,7 @@
 
 import { registry } from "@web/core/registry";
 import { _t } from "@web/core/l10n/translation";
+import { orm } from "@web/core/orm";
 import { user } from "@web/core/user";
 import { unique } from "@web/core/utils/arrays";
 import { useService } from "@web/core/utils/hooks";
@@ -16,7 +17,6 @@ class ResConfigInviteUsers extends Component {
     };
 
     setup() {
-        this.orm = useService("orm");
         this.invite = useService("user_invite");
         this.action = useService("action");
         this.notification = useService("notification");
@@ -137,7 +137,7 @@ class ResConfigInviteUsers extends Component {
 
         try {
             if (emailsLeftToProcess) {
-                await this.orm.call("res.users", "web_create_users", [emailsLeftToProcess]);
+                await orm.call("res.users", "web_create_users", [emailsLeftToProcess]);
                 this.state.invite = await this.invite.fetchData(true);
             }
         } finally {

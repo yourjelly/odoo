@@ -2,6 +2,7 @@
 
 import { makeContext } from "@web/core/context";
 import { _t } from "@web/core/l10n/translation";
+import { orm } from "@web/core/orm";
 import { evaluateExpr, evaluateBooleanExpr } from "@web/core/py_js/py";
 import { visitXML } from "@web/core/utils/xml";
 import { DEFAULT_INTERVAL, DEFAULT_PERIOD } from "@web/search/utils/dates";
@@ -155,7 +156,7 @@ export class SearchArchParser {
                     }
                     preField.defaultAutocompleteValue.label = option[1];
                 } else if (fieldType === "many2one") {
-                    this.labels.push((orm) => {
+                    this.labels.push(() => {
                         return orm
                             .call(relation, "read", [value, ["display_name"]], { context })
                             .then((results) => {
