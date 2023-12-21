@@ -1,21 +1,22 @@
 <?xml version="1.0"?>
 <odoo><data>
     <record model="ir.ui.view" id="view_social_share_post_template_elementform">
-        <field name="name">social.share.post.template.element.form</field>
-        <field name="model">social.share.post.template.element</field>
+        <field name="name">social.share.image.render.element.form</field>
+        <field name="model">social.share.image.render.element</field>
         <field name="arch" type="xml">
             <form string="Share Campaign Template">
                 <sheet>
                     <group>
                         <group>
-                        <field name="name"/>
                         <field name="role"/>
                         <field name="type"/>
-                        <group invisible="type != 'field_txt'">
+                        <field name="value_type"/>
+                        <group invisible="type != 'text'">
                             <field name="model" invisible="1"/>
-                            <field name="text_val"
+                            <field name="text" invisible="value_type != 'static'"/>
+                            <field name="field_path"
                                 widget="DynamicModelFieldSelectorChar"
-                                required="model and type == 'field_txt'" readonly="not model" invisible="not model"
+                                required="1" readonly="not model" invisible="type != 'text' or value_type != 'field'"
                                 options="{'model': 'model', 'follow_relations': False}"/>
                             <field name="text_align"/>
                             <field name="text_align_vert"/>
@@ -23,20 +24,13 @@
                             <field name="text_font_size"/>
                             <field name="text_color"/>
                         </group>
-                        <group invisible="type != 'txt'">
-                            <field name="text_val"/>
-                            <field name="text_align"/>
-                            <field name="text_align_vert"/>
-                            <field name="text_font"/>
-                            <field name="text_font_size"/>
-                            <field name="text_color"/>
-                        </group>
-                        <group invisible="type != 'img'">
+                        <group invisible="type != 'image'">
                             <field name="image" widget="image" nolabel="1"/>
+                            <field name="shape"/>
                         </group>
-                        <group invisible="type != 'color'">
-                            <field name="image_crop"/>
-                            <field name="text_val"/>
+                        <group invisible="type != 'shape'">
+                            <field name="shape"/>
+                            <field name="color"/>
                         </group>
                         </group>
 
@@ -56,7 +50,7 @@
 
     <record model="ir.actions.act_window" id="action_social_share_post_template_element">
         <field name="name">Share Campaign Template element</field>
-        <field name="res_model">social.share.post.template.element</field>
+        <field name="res_model">social.share.image.render.element</field>
         <field name="view_mode">tree,form</field>
     </record>
 

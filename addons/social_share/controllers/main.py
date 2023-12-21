@@ -15,7 +15,6 @@ class EventSharePostController(Controller):
         if not share_campaign:
             return request.not_found()
         campaign = request.env['social.share.post'].sudo().browse(int(share_campaign)).exists()
-        template = campaign.share_template_id
 
         url = request.env['social.share.url']
         target = None
@@ -33,7 +32,7 @@ class EventSharePostController(Controller):
             })
             url.write({'shared': True, 'message': campaign.thanks_message})
 
-        image_bytes = template.with_user(campaign.user_id)._generate_image_bytes(target)
+        image_bytes = campaign.with_user(campaign.user_id)._generate_image_bytes(record=target)
         return request.make_response(image_bytes, [('Content-Type', ' image/png')])
 
     @route(['/social_share/post'], type='http', auth='public')

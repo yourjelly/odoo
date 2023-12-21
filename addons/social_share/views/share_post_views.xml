@@ -40,79 +40,30 @@
                         <page name="Post Image">
                             <group>
                             <group>
-                                <field name="header" invisible="1"/>
-                                <group colspan="2" invisible="not header" class="o_share_post_form_inline_template_element">
-                                    <span class="d-block" style="width: 7rem;">Header: </span>
-                                    <div class="o_share_post_form_inline_template_element_fields">
-                                        <field name="header_type" class="w-25 align-top px-2"/>
-                                        <field name="header_val" class="w-75 px-2" invisible="header_type != 'txt'"/>
-                                        <field name="header_val" class="w-75 px-2" widget="DynamicModelFieldSelectorChar" invisible="header_type != 'field_txt'"/>
-                                    </div>
-                                </group>
-                                <field name="subheader" invisible="1"/>
-                                <group colspan="2" invisible="not subheader" class="o_share_post_form_inline_template_element">
-                                    <span class="d-block" style="width: 7rem;">Sub-Header: </span>
-                                    <div class="o_share_post_form_inline_template_element_fields">
-                                        <field name="subheader_type" class="w-25 align-top px-2"/>
-                                        <field name="subheader_val" class="w-75 px-2" invisible="subheader_type != 'txt'"/>
-                                        <field name="subheader_val" class="w-75 px-2" widget="DynamicModelFieldSelectorChar" invisible="subheader_type != 'field_txt'"/>
-                                    </div>
-                                </group>
-                                <field name="section_1" invisible="1"/>
-                                <group colspan="2" invisible="not section_1" class="o_share_post_form_inline_template_element">
-                                    <span class="d-block" style="width: 7rem;">Section 1: </span>
-                                    <div class="o_share_post_form_inline_template_element_fields">
-                                        <field name="section_1_type" class="w-25 align-top px-2"/>
-                                        <field name="section_1_val" class="w-75 px-2" invisible="section_1_type != 'txt'"/>
-                                        <field name="section_1_val" class="w-75 px-2" widget="DynamicModelFieldSelectorChar" invisible="section_1_type != 'field_txt'"/>
-                                    </div>
-                                </group>
-                                <field name="subsection_1" invisible="1"/>
-                                <group colspan="2" invisible="not subsection_1" class="o_share_post_form_inline_template_element">
-                                    <span class="d-block" style="width: 7rem;">Sub-Section 1: </span>
-                                    <div class="o_share_post_form_inline_template_element_fields">
-                                        <field name="subsection_1_type" class="w-25 align-top px-2"/>
-                                        <field name="subsection_1_val" class="w-75 px-2" invisible="subsection_1_type != 'txt'"/>
-                                        <field name="subsection_1_val" class="w-75 px-2" widget="DynamicModelFieldSelectorChar" invisible="subsection_1_type != 'field_txt'"/>
-                                    </div>
-                                </group>
-                                <field name="subsection_2" invisible="1"/>
-                                <group colspan="2" invisible="not subsection_2" class="o_share_post_form_inline_template_element">
-                                    <span class="d-block" style="width: 7rem;">Sub-Section 2: </span>
-                                    <div class="o_share_post_form_inline_template_element_fields">
-                                        <field name="subsection_2_type" class="w-25 align-top px-2"/>
-                                        <field name="subsection_2_val" class="w-75 px-2" invisible="subsection_2_type != 'txt'"/>
-                                        <field name="subsection_2_val" class="w-75 px-2" widget="DynamicModelFieldSelectorChar" invisible="subsection_2_type != 'field_txt'"/>
-                                    </div>
-                                </group>
-                                <field name="button" invisible="1"/>
-                                <group colspan="2" invisible="not button">
-                                    <span class="d-block" style="width: 7rem;">Button Text: </span>
-                                    <div class="o_share_post_form_inline_template_element_fields">
-                                        <field name="button_val"/>
-                                    </div>
-                                </group>
-                                <field name="background" invisible="1"/>
-                                <group colspan="2" invisible="not background">
-                                    <span class="d-block" style="width: 7rem;">Background: </span>
-                                    <div class="o_share_post_form_inline_template_element_fields">
-                                        <field name="background_val" widget="image"/>
-                                    </div>
-                                </group>
-                                <field name="image_1" invisible="1"/>
-                                <group colspan="2" invisible="not image_1">
-                                    <span class="d-block" style="width: 7rem;">Image 1: </span>
-                                    <div class="o_share_post_form_inline_template_element_fields">
-                                        <field name="image_1_val" widget="image"/>
-                                    </div>
-                                </group>
-                                <field name="image_2" invisible="1"/>
-                                <group colspan="2" invisible="not image_2">
-                                    <span class="d-block" style="width: 7rem;">Image 2: </span>
-                                    <div class="o_share_post_form_inline_template_element_fields">
-                                        <field name="image_2_val" widget="image"/>
-                                    </div>
-                                </group>
+                            <field name="custom_element_ids" nolabel="1" colspan="2">
+                                <tree editable="true" create="false" delete="false">
+                                    <field name="role" readonly="true" force_save="true"/>
+                                    <field name="type" readonly="true" optional="hide" force_save="true"/>
+                                    <field name="value_type"/>
+                                    <field name="field_path" invisible="type != 'text' or value_type != 'field'" optional="show" force_save="true"/>
+                                    <field name="text" invisible="type != 'text' or value_type != 'static'" optional="show" force_save="true"/>
+                                    <field name="text_color" invisible="type != 'text'" optional="show" widget="color" force_save="true"/>
+                                    <field name="image" invisible="type != 'image' or value_type != 'static'" optional="show" widget="image" force_save="true"/>
+                                    <field name="shape" invisible="type != 'image' or type != 'shape'" optional="show" force_save="true"/>
+                                    <field name="color" invisible="type != 'image' or type != 'shape'" optional="show" widget="color" force_save="true"/>
+                                    <!--not relevant but needs to be on the view to pass values from onchange-->
+                                    <field name="sequence" column_invisible="true" force_save="true"/>
+                                    <field name="x_pos" column_invisible="true" force_save="true"/>
+                                    <field name="y_pos" column_invisible="true" force_save="true"/>
+                                    <field name="x_size" column_invisible="true" force_save="true"/>
+                                    <field name="y_size" column_invisible="true" force_save="true"/>
+                                    <field name="text_align" column_invisible="true" force_save="true"/>
+                                    <field name="text_align_vert" column_invisible="true" force_save="true"/>
+                                    <field name="text_font_size" column_invisible="true" force_save="true"/>
+                                    <field name="text_font" column_invisible="true" force_save="true"/>
+                                </tree>
+                            </field>
+
                             </group>
                             <group>
                                 <group>
@@ -120,7 +71,6 @@
                                 <field name="reference_share_template_id"/>
                                 <field name="share_template_variant_id" widget="radio" options="{'horizontal': True}"
                                        invisible="not reference_share_template_id"/>
-                                <field name="share_template_id"/>
                                 </group>
                                 <field name="image" widget="image" options="{'size': [700, 366]}" nolabel="1"/>
                             </group>
