@@ -1,7 +1,6 @@
 /** @odoo-module **/
 
 import { Component } from "@odoo/owl";
-import { orm } from "@web/core/orm";
 import { useService } from "@web/core/utils/hooks";
 import { useDebounced } from "@web/core/utils/timing";
 
@@ -15,6 +14,7 @@ export class CheckInOut extends Component {
 
     setup() {
         this.actionService = useService("action");
+        this.orm = useService("orm");
         this.notification = useService("notification");
 
         this.onClickSignInOut = useDebounced(this.signInOut, 200, { immediate: true });
@@ -23,20 +23,20 @@ export class CheckInOut extends Component {
     async signInOut() {
         navigator.geolocation.getCurrentPosition(
             ({coords: {latitude, longitude}}) => {
-                orm.call("hr.employee", "update_last_position", [
+                this.orm.call("hr.employee", "update_last_position", [
                     [this.props.employeeId],
                     latitude,
                     longitude
                 ])
             },
             err => {
-                orm.call("hr.employee", "update_last_position", [
+                this.orm.call("hr.employee", "update_last_position", [
                     [this.props.employeeId],
                     false,
                     false
                 ])
             })
-        const result = await orm.call("hr.employee", "attendance_manual", [
+        const result = await this.orm.call("hr.employee", "attendance_manual", [
             [this.props.employeeId],
             this.props.nextAction,
         ]);

@@ -21,6 +21,7 @@ export class MentionList extends Component {
             searchTerm: "",
             options: [],
         });
+        this.orm = useService("orm");
         this.store = useState(useService("mail.store"));
         this.suggestionService = useService("mail.suggestion");
         this.sequential = useSequential();

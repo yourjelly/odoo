@@ -11,7 +11,6 @@ import { Component, useState } from "@odoo/owl";
 
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { _t } from "@web/core/l10n/translation";
-import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { markEventHandled } from "@web/core/utils/misc";
@@ -38,6 +37,7 @@ export class DiscussSidebarCategories extends Component {
         });
         this.actionService = useService("action");
         this.dialogService = useService("dialog");
+        this.orm = useService("orm");
         onExternalClick("selector", () => {
             this.state.editing = false;
         });
@@ -144,7 +144,7 @@ export class DiscussSidebarCategories extends Component {
 
     async toggleCategory(category) {
         category.isOpen = !category.isOpen;
-        await orm.call(
+        await this.orm.call(
             "res.users.settings",
             "set_res_users_settings",
             [[this.store.settings.id]],

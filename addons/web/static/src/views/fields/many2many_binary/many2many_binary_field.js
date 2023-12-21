@@ -21,6 +21,7 @@ export class Many2ManyBinaryField extends Component {
     };
 
     setup() {
+        this.orm = useService("orm");
         this.notification = useService("notification");
         this.operations = useX2ManyCrud(() => this.props.record.data[this.props.name], true);
     }

@@ -1,7 +1,6 @@
 /** @odoo-module **/
 
 import { useState } from "@odoo/owl";
-import { orm } from "@web/core/orm";
 import { rpc } from "@web/core/network/rpc";
 import { useService } from "@web/core/utils/hooks";
 import { _t } from "@web/core/l10n/translation";
@@ -13,6 +12,7 @@ export function useKEProxy({onAllSent}) {
         error: false,
         message: "",
     });
+    const orm = useService("orm");
     const http = useService("http");
 
     /**

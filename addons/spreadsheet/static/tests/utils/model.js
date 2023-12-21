@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { ormService } from "@web/core/orm";
+import { ormService } from "@web/core/orm_service";
 import { registry } from "@web/core/registry";
 import { makeFakeLocalizationService } from "@web/../tests/helpers/mock_services";
 import { makeTestEnv } from "@web/../tests/helpers/mock_env";

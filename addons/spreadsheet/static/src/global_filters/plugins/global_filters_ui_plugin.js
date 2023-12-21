@@ -10,7 +10,6 @@
 import { _t } from "@web/core/l10n/translation";
 import { sprintf } from "@web/core/utils/strings";
 import { Domain } from "@web/core/domain";
-import { orm } from "@web/core/orm";
 import { user } from "@web/core/user";
 import { constructDateRange, getPeriodOptions, QUARTER_OPTIONS } from "@web/search/utils/dates";
 
@@ -48,6 +47,7 @@ const uuidGenerator = new UuidGenerator();
 export class GlobalFiltersUIPlugin extends spreadsheet.UIPlugin {
     constructor(config) {
         super(config);
+        this.orm = config.custom.env?.services.orm;
         /**
          * Cache record display names for relation filters.
          * For each filter, contains a promise resolving to
@@ -253,11 +253,11 @@ export class GlobalFiltersUIPlugin extends spreadsheet.UIPlugin {
                 return periodStr ? periodStr + "/" + year : year;
             }
             case "relation":
-                if (!value) { // FIXME AAB ?
+                if (!value || !this.orm) {
                     return "";
                 }
                 if (!this.recordsDisplayName[filter.id]) {
-                    orm
+                    this.orm
                         .call(filter.modelName, "read", [value, ["display_name"]])
                         .then((result) => {
                             const names = result.map(({ display_name }) => display_name);

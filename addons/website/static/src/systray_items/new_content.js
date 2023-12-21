@@ -2,7 +2,6 @@
 
 import { _t } from "@web/core/l10n/translation";
 import { rpc } from "@web/core/network/rpc";
-import { orm } from "@web/core/orm";
 import { registry } from '@web/core/registry';
 import { user } from "@web/core/user";
 import { useService } from '@web/core/utils/hooks';
@@ -63,6 +62,7 @@ export class NewContentModal extends Component {
     static components = { NewContentElement };
 
     setup() {
+        this.orm = useService('orm');
         this.dialogs = useService('dialog');
         this.website = useService('website');
         this.action = useService('action');
@@ -147,7 +147,7 @@ export class NewContentModal extends Component {
         if (this.canInstall) {
             const moduleNames = this.state.newContentElements.filter(({status}) => status === MODULE_STATUS.NOT_INSTALLED).map(({moduleName}) => moduleName);
             this.modulesInfo = {};
-            for (const record of await orm.searchRead(
+            for (const record of await this.orm.searchRead(
                 "ir.module.module",
                 [['name', 'in', moduleNames]],
                 ["id", "name", "shortdesc"],
@@ -183,7 +183,7 @@ export class NewContentModal extends Component {
     }
 
     async installModule(id, redirectUrl) {
-        await orm.silent.call(
+        await this.orm.silent.call(
             'ir.module.module',
             'button_immediate_install',
             [id],

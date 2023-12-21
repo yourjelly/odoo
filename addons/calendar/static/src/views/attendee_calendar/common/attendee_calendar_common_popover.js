@@ -2,7 +2,6 @@
 
 import { onWillStart } from "@odoo/owl";
 import { CalendarCommonPopover } from "@web/views/calendar/calendar_common/calendar_common_popover";
-import { orm } from "@web/core/orm";
 import { useService } from "@web/core/utils/hooks";
 import { useAskRecurrenceUpdatePolicy } from "@calendar/views/ask_recurrence_update_policy_hook";
 import { Dropdown } from "@web/core/dropdown/dropdown";
@@ -22,6 +21,7 @@ export class AttendeeCalendarCommonPopover extends CalendarCommonPopover {
     };
     setup() {
         super.setup();
+        this.orm = useService("orm");
         this.actionService = useService("action");
         this.askRecurrenceUpdatePolicy = useAskRecurrenceUpdatePolicy();
 
@@ -31,7 +31,7 @@ export class AttendeeCalendarCommonPopover extends CalendarCommonPopover {
     async onWillStart() {
         // Show status dropdown if user is in attendees list
         if (this.isEventEditable) {
-            const stateSelections = await orm.call(
+            const stateSelections = await this.env.services.orm.call(
                 this.props.model.resModel,
                 "get_state_selections"
             );
@@ -83,7 +83,7 @@ export class AttendeeCalendarCommonPopover extends CalendarCommonPopover {
     }
 
     async onClickOpenRecord() {
-        const action = await orm.call("calendar.event", "action_open_calendar_event", [
+        const action = await this.orm.call("calendar.event", "action_open_calendar_event", [
             this.props.record.id,
         ]);
         this.actionService.doAction(action);
@@ -126,7 +126,7 @@ export class AttendeeCalendarCommonPopover extends CalendarCommonPopover {
                 return this.props.close();
             }
         }
-        await orm.call(this.props.model.resModel, "change_attendee_status", [
+        await this.env.services.orm.call(this.props.model.resModel, "change_attendee_status", [
             [record.id],
             selectedStatus,
             recurrenceUpdate,

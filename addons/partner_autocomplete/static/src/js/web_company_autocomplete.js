@@ -4,7 +4,7 @@ import { registry } from "@web/core/registry";
 import { session } from "@web/session";
 
 export const companyAutocompleteService = {
-    dependencies: ["company"],
+    dependencies: ["orm", "company"],
 
     start(env, { orm, company }) {
         if (session.iap_company_enrich) {

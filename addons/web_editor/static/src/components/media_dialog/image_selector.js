@@ -1,7 +1,6 @@
 /** @odoo-module **/
 
 import { _t } from "@web/core/l10n/translation";
-import { orm } from "@web/core/orm";
 import { rpc } from "@web/core/network/rpc";
 import weUtils from '@web_editor/js/common/utils';
 import { Attachment, FileSelector, IMAGE_MIMETYPES, IMAGE_EXTENSIONS } from './file_selector';
@@ -282,7 +281,7 @@ export class ImageSelector extends FileSelector {
     /**
      * Utility method used by the MediaDialog component.
      */
-    static async createElements(selectedMedia) {
+    static async createElements(selectedMedia, { orm }) {
         // Create all media-library attachments.
         const toSave = Object.fromEntries(selectedMedia.filter(media => media.mediaType === 'libraryMedia').map(media => [
             media.id, {

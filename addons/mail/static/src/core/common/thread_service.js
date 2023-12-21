@@ -7,7 +7,6 @@ import { prettifyMessageContent } from "@mail/utils/common/format";
 import { browser } from "@web/core/browser/browser";
 import { _t } from "@web/core/l10n/translation";
 import { rpc } from "@web/core/network/rpc";
-import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
 import { user } from "@web/core/user";
 import { memoize } from "@web/core/utils/functions";
@@ -32,6 +31,7 @@ export class ThreadService {
     setup(env, services) {
         this.env = env;
         this.store = services["mail.store"];
+        this.orm = services.orm;
         this.notificationService = services.notification;
         this.router = services.router;
         this.ui = services.ui;
@@ -118,7 +118,7 @@ export class ThreadService {
     }
 
     async markAllMessagesAsRead(thread) {
-        await orm.silent.call("mail.message", "mark_all_as_read", [
+        await this.orm.silent.call("mail.message", "mark_all_as_read", [
             [
                 ["model", "=", thread.model],
                 ["res_id", "=", thread.id],
@@ -136,7 +136,7 @@ export class ThreadService {
      * @param {import("models").Thread} thread
      */
     async markAsFetched(thread) {
-        await orm.silent.call("discuss.channel", "channel_fetched", [[thread.id]]);
+        await this.orm.silent.call("discuss.channel", "channel_fetched", [[thread.id]]);
     }
 
     getFetchRoute(thread) {
@@ -312,7 +312,7 @@ export class ThreadService {
             }
         }
         if (ids.length) {
-            const previews = await orm.call("discuss.channel", "channel_fetch_preview", [ids]);
+            const previews = await this.orm.call("discuss.channel", "channel_fetch_preview", [ids]);
             Record.MAKE_UPDATE(() => {
                 for (const preview of previews) {
                     const thread = this.store.Thread.get({
@@ -389,7 +389,7 @@ export class ThreadService {
         if (thread.model !== "discuss.channel") {
             return;
         }
-        return orm.silent.call("discuss.channel", "channel_pin", [thread.id], {
+        return this.orm.silent.call("discuss.channel", "channel_pin", [thread.id], {
             pinned: false,
         });
     }
@@ -399,7 +399,7 @@ export class ThreadService {
             return;
         }
         thread.is_pinned = true;
-        return orm.silent.call("discuss.channel", "channel_pin", [thread.id], {
+        return this.orm.silent.call("discuss.channel", "channel_pin", [thread.id], {
             pinned: true,
         });
     }
@@ -434,7 +434,7 @@ export class ThreadService {
                 user = this.store.users[userId];
             }
             if (!user.partner_id) {
-                const [userData] = await orm.silent.read(
+                const [userData] = await this.orm.silent.read(
                     "res.users",
                     [user.id],
                     ["partner_id"],
@@ -458,7 +458,7 @@ export class ThreadService {
         if (partnerId) {
             const partner = this.store.Persona.insert({ id: partnerId, type: "partner" });
             if (!partner.user) {
-                const [userId] = await orm.silent.search(
+                const [userId] = await this.orm.silent.search(
                     "res.users",
                     [["partner_id", "=", partnerId]],
                     { context: { active_test: false } }
@@ -514,7 +514,7 @@ export class ThreadService {
 
     async joinChannel(id, name) {
         await this.env.services["mail.messaging"].isReady;
-        await orm.call("discuss.channel", "add_members", [[id]], {
+        await this.orm.call("discuss.channel", "add_members", [[id]], {
             partner_ids: [this.store.self.id],
         });
         const thread = this.store.Thread.insert({
@@ -529,7 +529,7 @@ export class ThreadService {
     }
 
     async joinChat(id) {
-        const data = await orm.call("discuss.channel", "channel_get", [], {
+        const data = await this.orm.call("discuss.channel", "channel_get", [], {
             partners_to: [id],
         });
         const thread = this.store.Thread.insert(data);
@@ -537,7 +537,7 @@ export class ThreadService {
     }
 
     executeCommand(thread, command, body = "") {
-        return orm.call("discuss.channel", command.methodName, [[thread.id]], {
+        return this.orm.call("discuss.channel", command.methodName, [[thread.id]], {
             body,
         });
     }
@@ -559,12 +559,12 @@ export class ThreadService {
         ) {
             if (thread.type === "channel" || thread.type === "group") {
                 thread.name = newName;
-                await orm.call("discuss.channel", "channel_rename", [[thread.id]], {
+                await this.orm.call("discuss.channel", "channel_rename", [[thread.id]], {
                     name: newName,
                 });
             } else if (thread.type === "chat") {
                 thread.custom_channel_name = newName;
-                await orm.call("discuss.channel", "channel_set_custom_name", [[thread.id]], {
+                await this.orm.call("discuss.channel", "channel_set_custom_name", [[thread.id]], {
                     name: newName,
                 });
             }
@@ -573,13 +573,13 @@ export class ThreadService {
 
     async notifyThreadDescriptionToServer(thread, description) {
         thread.description = description;
-        return orm.call("discuss.channel", "channel_change_description", [[thread.id]], {
+        return this.orm.call("discuss.channel", "channel_change_description", [[thread.id]], {
             description,
         });
     }
 
     async leaveChannel(channel) {
-        await orm.call("discuss.channel", "action_unfollow", [channel.id]);
+        await this.orm.call("discuss.channel", "action_unfollow", [channel.id]);
         channel.delete();
         this.setDiscussThread(
             this.store.discuss.channels.threads[0]
@@ -768,7 +768,7 @@ export class ThreadService {
      */
     async setMainAttachmentFromIndex(thread, index) {
         thread.mainAttachment = thread.attachmentsInWebClientView[index];
-        await orm.call("ir.attachment", "register_as_main_attachment", [
+        await this.orm.call("ir.attachment", "register_as_main_attachment", [
             thread.mainAttachment.id,
         ]);
     }
@@ -865,6 +865,7 @@ export class ThreadService {
 export const threadService = {
     dependencies: [
         "mail.store",
+        "orm",
         "notification",
         "router",
         "mail.message",

@@ -1,8 +1,7 @@
 /** @odoo-module **/
 
-import { orm } from "@web/core/orm";
-import { sprintf } from "@web/core/utils/strings";
 import { Deferred } from "@web/core/utils/concurrency";
+import { sprintf } from "@web/core/utils/strings";
 
 export const translationLoaded = Symbol("translationLoaded");
 export const translatedTerms = {
@@ -80,7 +79,7 @@ _t("%d years ago");
  * If any new language is installed, a full page refresh will happen,
  * so there is no need invalidate it.
  */
-export async function loadLanguages() {
+export async function loadLanguages(orm) {
     if (!loadLanguages.installedLanguages) {
         loadLanguages.installedLanguages = await orm.call("res.lang", "get_installed");
     }

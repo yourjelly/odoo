@@ -40,7 +40,6 @@ import {
     normalizeCSSColor,
  } from '@web/core/utils/colors';
 import { renderToElement } from "@web/core/utils/render";
-import { orm } from "@web/core/orm";
 import { rpc } from "@web/core/network/rpc";
 
 const preserveCursor = OdooEditorLib.preserveCursor;
@@ -2740,6 +2739,7 @@ const Many2oneUserValueWidget = SelectUserValueWidget.extend({
         options.nullText = $target[0].dataset.nullText ||
             JSON.parse($target[0].dataset.oeContactOptions || '{}')['null_text'];
 
+        this.orm = serviceCached(this.bindService("orm"));
 
         return this._super(...arguments);
     },
@@ -2849,7 +2849,7 @@ const Many2oneUserValueWidget = SelectUserValueWidget.extend({
     async setFilterInDomainIds(linkedRecordsIds) {
         const allowedIds = new Set();
         if (linkedRecordsIds) {
-            const parentRecordsData = await orm.searchRead(
+            const parentRecordsData = await this.orm.searchRead(
                 this.options.filterInModel,
                 [['id', 'in', linkedRecordsIds]],
                 [this.options.filterInField]
@@ -2873,7 +2873,7 @@ const Many2oneUserValueWidget = SelectUserValueWidget.extend({
      * @private
      */
     async _search(needle) {
-        const recTuples = await orm.call(this.options.model, "name_search", [], {
+        const recTuples = await this.orm.call(this.options.model, "name_search", [], {
             name: needle,
             args: (await this._getSearchDomain()).concat(
                 Object.values(this.options.domainComponents).filter(item => item !== null)
@@ -2881,7 +2881,7 @@ const Many2oneUserValueWidget = SelectUserValueWidget.extend({
             operator: "ilike",
             limit: this.options.limit + 1,
         });
-        const records = await orm.read(
+        const records = await this.orm.read(
             this.options.model,
             recTuples.map(([id, _name]) => id),
             this.options.fields
@@ -2973,7 +2973,7 @@ const Many2oneUserValueWidget = SelectUserValueWidget.extend({
      */
     async _getDisplayName(recordId) {
         if (!this.displayNameCache.hasOwnProperty(recordId)) {
-            this.displayNameCache[recordId] = (await orm.read(this.options.model, [recordId], ['display_name']))[0].display_name;
+            this.displayNameCache[recordId] = (await this.orm.read(this.options.model, [recordId], ['display_name']))[0].display_name;
         }
         return this.displayNameCache[recordId];
     },
@@ -3085,6 +3085,7 @@ const Many2manyUserValueWidget = UserValueWidget.extend({
             dataAttributes.filterInModel = options.model;
             dataAttributes.filterInField = options.m2oField;
         }
+        this.orm = this.bindService("orm");
         this.fields = this.bindService("field");
         return this._super(...arguments);
     },
@@ -3100,7 +3101,7 @@ const Many2manyUserValueWidget = UserValueWidget.extend({
             return;
         }
         const { model, recordId, m2oField } = this.options;
-        const [record] = await orm.read(model, [parseInt(recordId)], [m2oField]);
+        const [record] = await this.orm.read(model, [parseInt(recordId)], [m2oField]);
         const selectedRecordIds = record[m2oField];
         // TODO: handle no record
         const modelData = await this.fields.loadFields(model, { fieldNames: [m2oField] });
@@ -3108,7 +3109,7 @@ const Many2manyUserValueWidget = UserValueWidget.extend({
         this.m2oModel = modelData[m2oField].relation;
         this.m2oName = modelData[m2oField].field_description; // Use as string attr?
 
-        const selectedRecords = await orm.read(this.m2oModel, selectedRecordIds, ['display_name']);
+        const selectedRecords = await this.orm.read(this.m2oModel, selectedRecordIds, ['display_name']);
         // TODO: reconcile the fact that this widget sets its own initial value
         // instead of it coming through setValue(_computeWidgetState)
         this._value = JSON.stringify(selectedRecords);
@@ -8665,6 +8666,11 @@ registry.ContainerWidth = SnippetOptionWidget.extend({
  * @todo replace this mechanism with real backend m2o field ?
  */
 registry.many2one = SnippetOptionWidget.extend({
+    init() {
+        this._super(...arguments);
+        this.orm = this.bindService("orm");
+    },
+
     /**
      * @override
      */
@@ -8673,7 +8679,7 @@ registry.many2one = SnippetOptionWidget.extend({
         this.fields = ['name', 'display_name'];
         return Promise.all([
             this._super(...arguments),
-            orm.read(oeMany2oneModel, [parseInt(oeMany2oneId)], this.fields).then(([initialRecord]) => {
+            this.orm.read(oeMany2oneModel, [parseInt(oeMany2oneId)], this.fields).then(([initialRecord]) => {
                 this.initialRecord = initialRecord;
             }),
         ]);
@@ -8740,7 +8746,7 @@ registry.many2one = SnippetOptionWidget.extend({
         many2oneWidget.dataset.changeRecord = '';
 
         const model = this.$target[0].dataset.oeMany2oneModel;
-        const [{name: modelName}] = await orm.searchRead("ir.model", [['model', '=', model]], ['name']);
+        const [{name: modelName}] = await this.orm.searchRead("ir.model", [['model', '=', model]], ['name']);
         many2oneWidget.setAttribute('String', modelName);
         many2oneWidget.dataset.model = model;
         many2oneWidget.dataset.fields = JSON.stringify(this.fields);
@@ -8769,7 +8775,7 @@ registry.many2one = SnippetOptionWidget.extend({
             .attr('data-oe-many2one-id', contactId).data('oe-many2one-id', contactId)
             .map(async (i, node) => {
                 if (node.dataset.oeType === 'contact') {
-                    const html = await orm.call(
+                    const html = await this.orm.call(
                         "ir.qweb.field.contact",
                         "get_record_to_html",
                         [[contactId]],
@@ -9103,6 +9109,7 @@ registry.SelectTemplate = SnippetOptionWidget.extend({
         this._super(...arguments);
         this.containerSelector = '';
         this.selectTemplateWidgetName = '';
+        this.orm = this.bindService("orm");
     },
     /**
      * @constructor
@@ -9175,7 +9182,7 @@ registry.SelectTemplate = SnippetOptionWidget.extend({
      */
     async _getTemplate(xmlid) {
         if (!this._templates[xmlid]) {
-            this._templates[xmlid] = await orm.call(
+            this._templates[xmlid] = await this.orm.call(
                 "ir.ui.view",
                 "render_public_asset",
                 [`${xmlid}`, {}],

@@ -1,7 +1,6 @@
 /** @odoo-module **/
 
 import { AttendeeCalendarModel } from "@calendar/views/attendee_calendar/attendee_calendar_model";
-import { orm } from "@web/core/orm";
 import { serializeDateTime } from "@web/core/l10n/dates";
 import { getColor } from "@web/views/calendar/colors";
 import { patch } from "@web/core/utils/patch";
@@ -19,7 +18,7 @@ patch(AttendeeCalendarModel.prototype, {
                 .filter(filter => filter.type !== "all" && filter.value && filter.active)
                 .map(filter => filter.value)
         }
-        return orm.call('res.partner', "get_worklocation", [
+        return this.orm.call('res.partner', "get_worklocation", [
             attendeeIds,
             serializeDateTime(data.range.start),
             serializeDateTime(data.range.end),

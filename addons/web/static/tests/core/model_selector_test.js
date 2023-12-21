@@ -3,7 +3,7 @@
 import { browser } from "@web/core/browser/browser";
 import { hotkeyService } from "@web/core/hotkeys/hotkey_service";
 import { registry } from "@web/core/registry";
-import { ormService } from "@web/core/orm";
+import { ormService } from "@web/core/orm_service";
 import { ModelSelector } from "@web/core/model_selector/model_selector";
 import { makeTestEnv } from "@web/../tests/helpers/mock_env";
 import { click, editInput, getFixture, mount, patchWithCleanup } from "@web/../tests/helpers/utils";

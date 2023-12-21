@@ -6,7 +6,6 @@ import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { Component, useState } from "@odoo/owl";
 import { usePos } from "@point_of_sale/app/store/pos_hook";
 import { Dialog } from "@web/core/dialog/dialog";
-import { orm } from "@web/core/orm";
 import { useService } from "@web/core/utils/hooks";
 import { useAsyncLockedMethod } from "@point_of_sale/app/utils/hooks";
 
@@ -26,6 +25,7 @@ export class PartnerEditor extends Component {
 
     setup() {
         this.pos = usePos();
+        this.orm = useService("orm");
         this.dialog = useService("dialog");
         this.intFields = ["country_id", "state_id", "property_product_pricelist"];
         const partner = this.props.partner;
@@ -107,7 +107,7 @@ export class PartnerEditor extends Component {
             });
         }
         processedChanges.id = this.props.partner.id || false;
-        await orm.call("res.partner", "create_from_ui", [processedChanges]);
+        await this.orm.call("res.partner", "create_from_ui", [processedChanges]);
         await this.pos.load_new_partners();
         this.props.close();
     }

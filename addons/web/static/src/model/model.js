@@ -1,6 +1,5 @@
 /** @odoo-module **/
 
-import { orm } from "@web/core/orm";
 import { user } from "@web/core/user";
 import { useBus, useService } from "@web/core/utils/hooks";
 import { SEARCH_KEYS } from "@web/search/with_search/with_search";
@@ -16,13 +15,11 @@ import { EventBus, onWillStart, onWillUpdateProps, useComponent } from "@odoo/ow
 export class Model {
     /**
      * @param {Object} env
-     * @param {Object} params
      * @param {Object} services
-     * @param {ORM} [orm]
      */
     constructor(env, params, services) {
         this.env = env;
-        this.orm = orm; // make it overridable (sample orm)
+        this.orm = services.orm;
         this.bus = new EventBus();
         this.setup(params, services);
     }
@@ -93,6 +90,7 @@ export function useModel(ModelClass, params, options = {}) {
     for (const key of ModelClass.services) {
         services[key] = useService(key);
     }
+    services.orm = services.orm || useService("orm");
     const model = new ModelClass(component.env, params, services);
     onWillStart(async () => {
         await options.beforeFirstLoad?.();
@@ -121,6 +119,7 @@ export function useModelWithSampleData(ModelClass, params, options = {}) {
     for (const key of ModelClass.services) {
         services[key] = useService(key);
     }
+    services.orm = services.orm || useService("orm");
 
     const model = new ModelClass(component.env, params, services);
 
@@ -141,6 +140,7 @@ export function useModelWithSampleData(ModelClass, params, options = {}) {
             : component.props.useSampleModel
     );
     model.useSampleModel = useSampleModel;
+    const orm = model.orm;
     let sampleORM = localState.sampleORM;
     let started = false;
 

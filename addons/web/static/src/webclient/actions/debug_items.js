@@ -2,7 +2,6 @@
 
 import { _t } from "@web/core/l10n/translation";
 import { editModelDebug } from "@web/core/debug/debug_utils";
-import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
 
 const debugRegistry = registry.category("debug");
@@ -53,7 +52,7 @@ function viewFields({ action, env }) {
         description,
         callback: async () => {
             const modelId = (
-                await orm.search("ir.model", [["model", "=", action.res_model]], {
+                await env.services.orm.search("ir.model", [["model", "=", action.res_model]], {
                     limit: 1,
                 })
             )[0];
@@ -113,7 +112,7 @@ function viewAccessRights({ accessRights, action, env }) {
         description,
         callback: async () => {
             const modelId = (
-                await orm.search("ir.model", [["model", "=", action.res_model]], {
+                await env.services.orm.search("ir.model", [["model", "=", action.res_model]], {
                     limit: 1,
                 })
             )[0];
@@ -145,7 +144,7 @@ function viewRecordRules({ accessRights, action, env }) {
         description: _t("View Record Rules"),
         callback: async () => {
             const modelId = (
-                await orm.search("ir.model", [["model", "=", action.res_model]], {
+                await env.services.orm.search("ir.model", [["model", "=", action.res_model]], {
                     limit: 1,
                 })
             )[0];

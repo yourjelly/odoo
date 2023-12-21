@@ -6,7 +6,6 @@ import { Mutex } from "@web/core/utils/concurrency";
 import { PosDB } from "@point_of_sale/app/store/db";
 import { markRaw, reactive } from "@odoo/owl";
 import { roundPrecision as round_pr, floatIsZero } from "@web/core/utils/numbers";
-import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { deduceUrl } from "@point_of_sale/utils";
@@ -79,6 +78,7 @@ export class PosStore extends Reactive {
     mainScreen = { name: null, component: null };
 
     static serviceDependencies = [
+        "orm",
         "number_buffer",
         "barcode_reader",
         "hardware_proxy",
@@ -93,9 +93,10 @@ export class PosStore extends Reactive {
     // use setup instead of constructor because setup can be patched.
     async setup(
         env,
-        { popup, number_buffer, hardware_proxy, barcode_reader, ui, dialog, printer }
+        { popup, orm, number_buffer, hardware_proxy, barcode_reader, ui, dialog, printer }
     ) {
         this.env = env;
+        this.orm = orm;
         this.popup = popup;
         this.numberBuffer = number_buffer;
         this.barcodeReader = barcode_reader;
@@ -215,7 +216,7 @@ export class PosStore extends Reactive {
         return this.default_pricelist;
     }
     async load_product_uom_unit() {
-        const uom_id = await orm.call("ir.model.data", "check_object_reference", [
+        const uom_id = await this.orm.call("ir.model.data", "check_object_reference", [
             "uom",
             "product_uom_unit",
         ]);
@@ -241,7 +242,7 @@ export class PosStore extends Reactive {
     }
 
     async load_server_data() {
-        const loadedData = await orm.silent.call("pos.session", "load_pos_data", [
+        const loadedData = await this.orm.silent.call("pos.session", "load_pos_data", [
             [odoo.pos_session_id],
         ]);
         await this._processData(loadedData);
@@ -428,7 +429,7 @@ export class PosStore extends Reactive {
     async load_new_partners() {
         const search_params = { domain: this.prepare_new_partners_domain() };
         // FIXME POSREF TIMEOUT 3000
-        const partners = await orm.silent.call(
+        const partners = await this.orm.silent.call(
             "pos.session",
             "get_pos_ui_res_partner_by_params",
             [[odoo.pos_session_id], search_params]
@@ -674,7 +675,7 @@ export class PosStore extends Reactive {
         if (!missingProductIds.size) {
             return;
         }
-        const products = await orm.call(
+        const products = await this.orm.call(
             "pos.session",
             "get_pos_ui_product_product_by_params",
             [odoo.pos_session_id, { domain: [["id", "in", [...missingProductIds]]] }]
@@ -689,7 +690,7 @@ export class PosStore extends Reactive {
         const product_tmpl_ids = products.map((product) => product.product_tmpl_id[0]);
         const product_ids = products.map((product) => product.id);
 
-        const pricelistItems = await orm.call(
+        const pricelistItems = await this.orm.call(
             "pos.session",
             "get_pos_ui_product_pricelist_item_by_product",
             [odoo.pos_session_id, product_tmpl_ids, product_ids]
@@ -713,7 +714,7 @@ export class PosStore extends Reactive {
     async _loadPartners(partnerIds) {
         if (partnerIds.length > 0) {
             // FIXME POSREF TIMEOUT
-            const fetchedPartners = await orm.silent.call(
+            const fetchedPartners = await this.orm.silent.call(
                 "pos.session",
                 "get_pos_ui_res_partner_by_params",
                 [[odoo.pos_session_id], { domain: [["id", "in", partnerIds]] }]
@@ -745,7 +746,7 @@ export class PosStore extends Reactive {
 
         this.set_synch("connecting", removedOrdersIds.length);
         try {
-            const removeOrdersResponseData = await orm.silent.call(
+            const removeOrdersResponseData = await this.orm.silent.call(
                 "pos.order",
                 "remove_from_ui",
                 [removedOrdersIds]
@@ -840,7 +841,7 @@ export class PosStore extends Reactive {
         return message;
     }
     async _getOrdersJson() {
-        return await orm.call("pos.order", "export_for_ui_shared_order", [], {
+        return await this.orm.call("pos.order", "export_for_ui_shared_order", [], {
             config_id: this.config.id,
         });
     }
@@ -866,7 +867,7 @@ export class PosStore extends Reactive {
         return message;
     }
     async _getPricelistJson(pricelistsToGet) {
-        return await orm.call(
+        return await this.env.services.orm.call(
             "pos.session",
             "get_pos_ui_product_pricelists_by_ids",
             [[odoo.pos_session_id], pricelistsToGet]
@@ -920,7 +921,7 @@ export class PosStore extends Reactive {
         return message;
     }
     async _getFiscalPositionJson(fiscalPositionToGet) {
-        return await orm.call(
+        return await this.env.services.orm.call(
             "pos.session",
             "get_pos_ui_account_fiscal_positions_by_ids",
             [[odoo.pos_session_id], fiscalPositionToGet]
@@ -945,7 +946,7 @@ export class PosStore extends Reactive {
         const order = this.get_order();
         // check back-end method `get_product_info_pos` to see what it returns
         // We do this so it's easier to override the value returned and use it in the component template later
-        const productInfo = await orm.call("product.product", "get_product_info_pos", [
+        const productInfo = await this.orm.call("product.product", "get_product_info_pos", [
             [product.id],
             product.get_price(order.pricelist, quantity),
             quantity,
@@ -981,7 +982,7 @@ export class PosStore extends Reactive {
         };
     }
     async getClosePosInfo() {
-        return await orm.call("pos.session", "get_closing_control_data", [
+        return await this.orm.call("pos.session", "get_closing_control_data", [
             [this.pos_session.id],
         ]);
     }
@@ -1201,7 +1202,7 @@ export class PosStore extends Reactive {
         }
         // we try to send the order. silent prevents a spinner if it takes too long. (unless we are sending an invoice,
         // then we want to notify the user that we are waiting on something )
-        const orm = options.to_invoice ? orm : orm.silent;
+        const orm = options.to_invoice ? this.orm : this.orm.silent;
 
         try {
             // FIXME POSREF timeout
@@ -1661,9 +1662,9 @@ export class PosStore extends Reactive {
      */
     async _addProducts(ids, setAvailable = true) {
         if (setAvailable) {
-            await orm.write("product.product", ids, { available_in_pos: true });
+            await this.orm.write("product.product", ids, { available_in_pos: true });
         }
-        const product = await orm.call("pos.session", "get_pos_ui_product_product_by_params", [
+        const product = await this.orm.call("pos.session", "get_pos_ui_product_product_by_params", [
             odoo.pos_session_id,
             { domain: [["id", "in", ids]] },
         ]);
@@ -1681,7 +1682,7 @@ export class PosStore extends Reactive {
             this.ticket_screen_mobile_pane === "left" ? "right" : "left";
     }
     async logEmployeeMessage(action, message) {
-        await orm.call("pos.session", "log_partner_message", [
+        await this.orm.call("pos.session", "log_partner_message", [
             this.pos_session.id,
             this.user.partner_id.id,
             action,

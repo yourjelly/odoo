@@ -14,7 +14,7 @@ import { View, ViewNotFoundError } from "@web/views/view";
 import { ActionDialog } from "./action_dialog";
 import { CallbackRecorder } from "./action_hook";
 import { ReportAction } from "./reports/report_action";
-import { UPDATE_METHODS } from "@web/core/orm";
+import { UPDATE_METHODS } from "@web/core/orm_service";
 import { ControlPanel } from "@web/search/control_panel/control_panel";
 
 import {

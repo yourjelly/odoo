@@ -4,7 +4,6 @@ import { useService } from "@web/core/utils/hooks";
 import { Component, onWillStart, useState } from "@odoo/owl";
 import { Dialog } from "@web/core/dialog/dialog";
 import { CodeEditor } from "@web/core/code_editor/code_editor";
-import { orm } from "@web/core/orm";
 
 /**
  * A dialog that let the user edit the code that will be injected in the <head>
@@ -16,6 +15,7 @@ export class EditHeadBodyDialog extends Component {
     static components = { CodeEditor, Dialog };
 
     setup() {
+        this.orm = useService("orm");
         this.website = useService("website");
 
         this.state = useState({
@@ -24,7 +24,7 @@ export class EditHeadBodyDialog extends Component {
         });
 
         onWillStart(async () => {
-            const websites = await orm.read("website",
+            const websites = await this.orm.read("website",
                 [this.website.currentWebsite.id],
                 ["custom_code_head", "custom_code_footer"],
             );
@@ -35,7 +35,7 @@ export class EditHeadBodyDialog extends Component {
     }
 
     async onSave() {
-        await orm.write("website", [this.website.currentWebsite.id], {
+        await this.orm.write("website", [this.website.currentWebsite.id], {
             custom_code_head: this.state.head,
             custom_code_footer: this.state.body,
         });

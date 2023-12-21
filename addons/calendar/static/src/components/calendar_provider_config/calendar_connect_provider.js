@@ -1,10 +1,10 @@
 /** @odoo-module **/
 
 import { rpc } from "@web/core/network/rpc";
-import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
 import { user } from "@web/core/user";
 import { standardWidgetProps } from "@web/views/widgets/standard_widget_props";
+import { useService } from "@web/core/utils/hooks";
 import { Component } from "@odoo/owl";
 
 const providerData = {
@@ -24,6 +24,11 @@ export class CalendarConnectProvider extends Component {
     };
     static template = "calendar.CalendarConnectProvider";
 
+    setup() {
+        super.setup();
+        this.orm = useService("orm");
+    }
+
     /**
      * Activate the external sync for the first time, after installing the
      * relevant submodule if necessary.
@@ -36,7 +41,7 @@ export class CalendarConnectProvider extends Component {
         if (!(await this.props.record.save())) {
             return; // handled by view
         }
-        await orm.call(
+        await this.orm.call(
             this.props.record.resModel,
             "action_calendar_prepare_external_provider_sync",
             [this.props.record.resId]
@@ -44,7 +49,7 @@ export class CalendarConnectProvider extends Component {
         // See google/microsoft_calendar for the origin of this shortened version
         const { restart_sync_method, sync_route } =
             providerData[this.props.record.data.external_calendar_provider];
-        await orm.call("res.users", restart_sync_method, [[user.userId]]);
+        await this.orm.call("res.users", restart_sync_method, [[user.userId]]);
         const response = await rpc(sync_route, {
             model: "calendar.event",
             fromurl: window.location.href,

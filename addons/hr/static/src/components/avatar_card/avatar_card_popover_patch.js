@@ -1,6 +1,5 @@
 /* @odoo-module */
 
-import { orm } from "@web/core/orm";
 import { patch } from "@web/core/utils/patch";
 import { AvatarCardPopover } from "@mail/discuss/web/avatar_card/avatar_card_popover";
 import { useService } from "@web/core/utils/hooks";
@@ -29,7 +28,7 @@ export const patchAvatarCardPopover = {
     },
     async onClickViewEmployee(){
         const employeeId = this.user.employee_id[0];
-        const action = await orm.call('hr.employee', 'get_formview_action', [employeeId]);
+        const action = await this.orm.call('hr.employee', 'get_formview_action', [employeeId]);
         this.actionService.doAction(action); 
     }
 };

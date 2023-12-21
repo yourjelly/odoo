@@ -1,10 +1,9 @@
 /** @odoo-module */
 import { makeTestEnv } from "../helpers/mock_env";
 import { viewService } from "@web/views/view_service";
-import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
 import { makeMockServer } from "../helpers/mock_server";
-import { ormService } from "@web/core/orm";
+import { ormService } from "@web/core/orm_service";
 
 QUnit.module("View service", (hooks) => {
     let serverData;
@@ -137,10 +136,10 @@ QUnit.module("View service", (hooks) => {
         assert.verifySteps(["get_views"]);
         await loadView();
         assert.verifySteps([]); // cache works => no actual rpc
-        await orm.unlink("ir.ui.view", [3]);
+        await env.services.orm.unlink("ir.ui.view", [3]);
         await loadView();
         assert.verifySteps(["get_views"]); // cache was invalidated
-        await orm.unlink("take.five", [3]);
+        await env.services.orm.unlink("take.five", [3]);
         await loadView();
         assert.verifySteps([]); // cache was not invalidated
     });

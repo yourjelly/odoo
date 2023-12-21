@@ -1,7 +1,6 @@
 /** @odoo-module **/
 
 import { _t } from "@web/core/l10n/translation";
-import { orm } from "@web/core/orm";
 import { BarcodeScanner } from "@barcodes/components/barcode_scanner";
 import { Component, onWillStart } from "@odoo/owl";
 import { rpc } from "@web/core/network/rpc";
@@ -17,6 +16,7 @@ export class EventScanView extends Component {
         this.actionService = useService("action");
         this.dialog = useService("dialog");
         this.notification = useService("notification");
+        this.orm = useService("orm");
 
         const { default_event_id, active_model, active_id } = this.props.action.context;
         this.eventId = default_event_id || (active_model === "event.event" && active_id);
@@ -46,7 +46,7 @@ export class EventScanView extends Component {
      * information. Open a confirmation / choice Dialog to confirm attendee.
      */
     async onBarcodeScanned(barcode) {
-        const result = await orm.call("event.registration", "register_attendee", [], {
+        const result = await this.orm.call("event.registration", "register_attendee", [], {
             barcode: barcode,
             event_id: this.eventId,
         });

@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { ormService } from "@web/core/orm";
+import { ormService } from "@web/core/orm_service";
 import { registry } from "@web/core/registry";
 import { hotkeyService } from "@web/core/hotkeys/hotkey_service";
 import { BurgerUserMenu } from "@web/webclient/burger_menu/burger_user_menu/burger_user_menu";

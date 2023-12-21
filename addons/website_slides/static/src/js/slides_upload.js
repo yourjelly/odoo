@@ -7,7 +7,6 @@ import Dialog from '@web/legacy/js/core/dialog';
 import publicWidget from '@web/legacy/js/public/public_widget';
 import wUtils from '@website/js/utils';
 import { _t } from "@web/core/l10n/translation";
-import { orm } from "@web/core/orm";
 import { rpc } from "@web/core/network/rpc";
 
 var SlideUploadDialog = Dialog.extend({
@@ -67,6 +66,8 @@ var SlideUploadDialog = Dialog.extend({
 
         this.file = {};
         this.isValidUrl = true;
+
+        this.orm = this.bindService("orm");
     },
     willStart: function () {
         const slideCategoriesPromise = rpc('/slides/category/search_read', {
@@ -681,7 +682,7 @@ var SlideUploadDialog = Dialog.extend({
         $el.text(_t('Installing "%s".', this.modulesToInstallStatus.name));
         this.modulesToInstallStatus.installing = true;
         this._resetModalButton();
-        orm.call("ir.module.module", "button_immediate_install", [
+        this.orm.call("ir.module.module", "button_immediate_install", [
             [this.modulesToInstallStatus.id],
         ]).then(
             function () {

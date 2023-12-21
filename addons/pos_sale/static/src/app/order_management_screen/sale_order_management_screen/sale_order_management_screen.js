@@ -1,7 +1,6 @@
 /** @odoo-module **/
 
 import { _t } from "@web/core/l10n/translation";
-import { orm } from "@web/core/orm";
 import { sprintf } from "@web/core/utils/strings";
 import { parseFloat } from "@web/views/fields/parsers";
 import { floatIsZero } from "@web/core/utils/numbers";
@@ -36,6 +35,7 @@ export class SaleOrderManagementScreen extends Component {
     setup() {
         super.setup();
         this.pos = usePos();
+        this.orm = useService("orm");
         this.dialog = useService("dialog");
         this.root = useRef("root");
         this.numberBuffer = useService("number_buffer");
@@ -384,7 +384,7 @@ export class SaleOrderManagementScreen extends Component {
     }
 
     async _getSaleOrder(id) {
-        const [sale_order] = await orm.read(
+        const [sale_order] = await this.orm.read(
             "sale.order",
             [id],
             [
@@ -405,7 +405,7 @@ export class SaleOrderManagementScreen extends Component {
         sale_order.order_line = sale_lines;
 
         if (sale_order.picking_ids[0]) {
-            const [picking] = await orm.read(
+            const [picking] = await this.orm.read(
                 "stock.picking",
                 [sale_order.picking_ids[0]],
                 ["scheduled_date"]
@@ -417,7 +417,7 @@ export class SaleOrderManagementScreen extends Component {
     }
 
     async _getSOLines(ids) {
-        const so_lines = await orm.call("sale.order.line", "read_converted", [ids]);
+        const so_lines = await this.orm.call("sale.order.line", "read_converted", [ids]);
         return so_lines;
     }
 }

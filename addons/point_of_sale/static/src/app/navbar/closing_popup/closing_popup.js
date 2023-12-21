@@ -1,7 +1,6 @@
 /** @odoo-module */
 
 import { Dialog } from "@web/core/dialog/dialog";
-import { orm } from "@web/core/orm";
 import { SaleDetailsButton } from "@point_of_sale/app/navbar/sale_details_button/sale_details_button";
 import { ConfirmationDialog, AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { MoneyDetailsPopup } from "@point_of_sale/app/utils/money_details_popup/money_details_popup";
@@ -29,6 +28,7 @@ export class ClosePosPopup extends Component {
 
     setup() {
         this.pos = usePos();
+        this.orm = useService("orm");
         this.report = useService("report");
         this.hardwareProxy = useService("hardware_proxy");
         this.customerDisplay = useService("customer_display");
@@ -144,7 +144,7 @@ export class ClosePosPopup extends Component {
     async closeSession() {
         this.customerDisplay?.update({ closeUI: true });
         if (this.pos.config.cash_control) {
-            const response = await orm.call(
+            const response = await this.orm.call(
                 "pos.session",
                 "post_closing_cash_details",
                 [this.pos.pos_session.id],
@@ -161,7 +161,7 @@ export class ClosePosPopup extends Component {
         }
 
         try {
-            await orm.call("pos.session", "update_closing_control_state_session", [
+            await this.orm.call("pos.session", "update_closing_control_state_session", [
                 this.pos.pos_session.id,
                 this.state.notes,
             ]);
@@ -178,7 +178,7 @@ export class ClosePosPopup extends Component {
             const bankPaymentMethodDiffPairs = this.props.other_payment_methods
                 .filter((pm) => pm.type == "bank")
                 .map((pm) => [pm.id, this.getDifference(pm.id)]);
-            const response = await orm.call("pos.session", "close_session_from_ui", [
+            const response = await this.orm.call("pos.session", "close_session_from_ui", [
                 this.pos.pos_session.id,
                 bankPaymentMethodDiffPairs,
             ]);

@@ -1,7 +1,6 @@
 /** @odoo-module **/
 
 import { _t } from "@web/core/l10n/translation";
-import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { usePos } from "@point_of_sale/app/store/pos_hook";
@@ -15,6 +14,7 @@ export class TipScreen extends Component {
     setup() {
         this.pos = usePos();
         this.posReceiptContainer = useRef("pos-receipt-container");
+        this.orm = useService("orm");
         this.printer = useService("printer");
         this.state = this.currentOrder.uiState.TipScreen;
         this._totalAmount = this.currentOrder.get_total_with_tax();
@@ -59,7 +59,7 @@ export class TipScreen extends Component {
         }
 
         if (!amount) {
-            await orm.call("pos.order", "set_no_tip", [serverId]);
+            await this.orm.call("pos.order", "set_no_tip", [serverId]);
             this.goNextScreen();
             return;
         }
@@ -89,7 +89,7 @@ export class TipScreen extends Component {
 
         // set_tip calls add_product which sets the new line as the selected_orderline
         const tip_line = order.selected_orderline;
-        await orm.call("pos.order", "set_tip", [serverId, tip_line.export_as_JSON()]);
+        await this.orm.call("pos.order", "set_tip", [serverId, tip_line.export_as_JSON()]);
         this.goNextScreen();
     }
     goNextScreen() {

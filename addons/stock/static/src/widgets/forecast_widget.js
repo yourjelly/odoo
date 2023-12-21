@@ -2,7 +2,6 @@
 
 import { FloatField, floatField } from "@web/views/fields/float/float_field";
 import { formatDate } from "@web/core/l10n/dates";
-import { orm } from "@web/core/orm";
 import { formatFloat } from "@web/core/utils/numbers";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
@@ -12,6 +11,7 @@ export class ForecastWidgetField extends FloatField {
     setup() {
         const { data, fields, resId } = this.props.record;
         this.actionService = useService("action");
+        this.orm = useService("orm");
         this.resId = resId;
 
         this.reservedAvailability = formatFloat(data.quantity, {
@@ -46,7 +46,7 @@ export class ForecastWidgetField extends FloatField {
         if (!this.resId) {
             return;
         }
-        const action = await orm.call("stock.move", "action_product_forecast_report", [
+        const action = await this.orm.call("stock.move", "action_product_forecast_report", [
             this.resId,
         ]);
         this.actionService.doAction(action);

@@ -5,7 +5,6 @@ import { convertBrToLineBreak, prettifyMessageContent } from "@mail/utils/common
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { rpc } from "@web/core/network/rpc";
-import { orm } from "@web/core/orm";
 import { user } from "@web/core/user";
 
 const { DateTime } = luxon;
@@ -18,6 +17,7 @@ export class MessageService {
     constructor(env, services) {
         this.env = env;
         this.store = services["mail.store"];
+        this.orm = services.orm;
     }
 
     async edit(
@@ -107,11 +107,11 @@ export class MessageService {
     }
 
     async toggleStar(message) {
-        await orm.silent.call("mail.message", "toggle_message_starred", [[message.id]]);
+        await this.orm.silent.call("mail.message", "toggle_message_starred", [[message.id]]);
     }
 
     async setDone(message) {
-        await orm.silent.call("mail.message", "set_message_done", [[message.id]]);
+        await this.orm.silent.call("mail.message", "set_message_done", [[message.id]]);
     }
 
     async unfollow(message) {
@@ -130,7 +130,7 @@ export class MessageService {
         // apply the change immediately for faster feedback
         this.store.discuss.starred.counter = 0;
         this.store.discuss.starred.messages = [];
-        await orm.call("mail.message", "unstar_all");
+        await this.orm.call("mail.message", "unstar_all");
     }
 
     async react(message, content) {
@@ -171,7 +171,7 @@ export class MessageService {
 }
 
 export const messageService = {
-    dependencies: ["mail.store"],
+    dependencies: ["mail.store", "orm"],
     start(env, services) {
         return new MessageService(env, services);
     },

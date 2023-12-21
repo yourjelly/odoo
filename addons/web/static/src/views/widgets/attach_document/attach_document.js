@@ -1,7 +1,6 @@
 /** @odoo-module */
 
 import { FileInput } from "@web/core/file_input/file_input";
-import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { checkFileSize } from "@web/core/utils/files";
@@ -64,7 +63,7 @@ export class AttachDocumentWidget extends Component {
         const { action, record } = this.props;
         if (action) {
             const { resId, resModel } = record;
-            await orm.call(resModel, action, [resId], {
+            await this.env.services.orm.call(resModel, action, [resId], {
                 attachment_ids: files.map((file) => file.id),
             });
             await record.load();

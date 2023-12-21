@@ -1,7 +1,6 @@
 /** @odoo-module */
 
 import { _t } from "@web/core/l10n/translation";
-import { orm } from "@web/core/orm";
 import { PaymentInterface } from "@point_of_sale/app/payment/payment_interface";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 
@@ -76,7 +75,7 @@ export class PaymentPaytm extends PaymentInterface {
                 return false;
             }
             try {
-                const data = await orm.silent.call(
+                const data = await this.env.services.orm.silent.call(
                     'pos.payment.method',
                     'paytm_fetch_payment_status',
                     [[this.payment_method.id], transactionId, referenceId, timestamp],
@@ -120,7 +119,7 @@ export class PaymentPaytm extends PaymentInterface {
     */
     async makePaymentRequest(amount, transactionId, referenceId, timestamp) {
         try {
-            const data = await orm.silent.call(
+            const data = await this.env.services.orm.silent.call(
                 'pos.payment.method',
                 'paytm_make_payment_request',
                 [[this.payment_method.id], amount, transactionId, referenceId, timestamp],

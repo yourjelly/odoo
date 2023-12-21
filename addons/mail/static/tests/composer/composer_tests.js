@@ -7,8 +7,6 @@ import { Command } from "@mail/../tests/helpers/command";
 import { patchUiSize, SIZES } from "@mail/../tests/helpers/patch_ui_size";
 import { start } from "@mail/../tests/helpers/test_utils";
 
-import { orm } from "@web/core/orm";
-
 import {
     makeDeferred,
     nextTick,
@@ -470,9 +468,11 @@ QUnit.test("Can handle leave notification from unknown member", async () => {
             Command.create({ partner_id: partnerId }),
         ],
     });
-    const { openDiscuss } = await start();
+    const { env, openDiscuss } = await start();
     openDiscuss(channelId);
-    await pyEnv.withUser(userId, () => orm.call("discuss.channel", "action_unfollow", [channelId]));
+    await pyEnv.withUser(userId, () =>
+        env.services.orm.call("discuss.channel", "action_unfollow", [channelId])
+    );
     await click("button[title='Show Member List']");
     await contains(".o-discuss-ChannelMember", { text: "Mitchell Admin" });
     await contains(".o-discuss-ChannelMember", { count: 0, text: "Dobby" });

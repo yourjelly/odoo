@@ -1,6 +1,5 @@
 /** @odoo-module **/
 
-import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
 import { useBus, useService } from "@web/core/utils/hooks";
 import { ControlPanel } from "@web/search/control_panel/control_panel";
@@ -16,6 +15,7 @@ export class ReceptionReportMain extends Component {
 
     setup() {
         this.controlPanelDisplay = {};
+        this.ormService = useService("orm");
         this.actionService = useService("action");
         this.reportName = "stock.report_reception";
         const defaultDocIds = Object.entries(this.context).find(([k,v]) => k.startsWith("default_"));
@@ -36,7 +36,7 @@ export class ReceptionReportMain extends Component {
             this.contextDefaultDoc.ids,
             { context: this.context, report_type: "html" },
         ];
-        return orm.call(
+        return this.ormService.call(
             "report.stock.report_reception",
             "get_report_data",
             args,
@@ -60,7 +60,7 @@ export class ReceptionReportMain extends Component {
             }
         }
 
-        await orm.call(
+        await this.ormService.call(
             "report.stock.report_reception",
             "action_assign",
             [false, moveIds, quantities, inIds],

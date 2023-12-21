@@ -1,7 +1,7 @@
 /** @odoo-module */
 
+import { useService } from '@web/core/utils/hooks';
 import { getCurrency } from '@web/core/currency';
-import { orm } from "@web/core/orm";
 import { Component, onWillStart, useState } from "@odoo/owl";
 
 export class ExpenseDashboard extends Component {
@@ -9,13 +9,14 @@ export class ExpenseDashboard extends Component {
 
     setup() {
         super.setup();
+        this.orm = useService('orm');
 
         this.state = useState({
             expenses: {}
         });
 
         onWillStart(async () => {
-            const expense_states = await orm.call("hr.expense", 'get_expense_dashboard', []);
+            const expense_states = await this.orm.call("hr.expense", 'get_expense_dashboard', []);
             this.state.expenses = expense_states;
         });
     }

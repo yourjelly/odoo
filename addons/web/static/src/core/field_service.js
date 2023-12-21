@@ -2,9 +2,7 @@
 
 import { Cache } from "@web/core/utils/cache";
 import { Domain } from "@web/core/domain";
-import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
-
 
 /**
  * @typedef {Object} LoadFieldsOptions
@@ -13,8 +11,9 @@ import { registry } from "@web/core/registry";
  */
 
 export const fieldService = {
+    dependencies: ["orm"],
     async: ["loadFields", "loadPath", "loadPropertyDefinitions"],
-    start(env) {
+    start(env, { orm }) {
         const cache = new Cache(
             (resModel, options) => {
                 return orm

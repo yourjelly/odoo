@@ -2,10 +2,10 @@
 
 import { _t } from "@web/core/l10n/translation";
 import {PageControllerMixin, PageRendererMixin} from "./page_views_mixin";
-import { orm } from "@web/core/orm";
 import {registry} from '@web/core/registry';
 import {listView} from '@web/views/list/list_view';
 import {ConfirmationDialog} from "@web/core/confirmation_dialog/confirmation_dialog";
+import {useService} from "@web/core/utils/hooks";
 import {DeletePageDialog} from '@website/components/dialog/page_properties';
 import {CheckboxItem} from "@web/core/dropdown/checkbox_item";
 
@@ -22,6 +22,7 @@ export class PageListController extends PageControllerMixin(listView.Controller)
      */
     setup() {
         super.setup();
+        this.orm = useService('orm');
         if (this.props.resModel === "website.page") {
             this.archiveEnabled = false;
         }
@@ -79,7 +80,7 @@ export class PageListController extends PageControllerMixin(listView.Controller)
 
     async togglePublished(publish) {
         const resIds = this.model.root.selection.map(record => record.resId);
-        await orm.write(this.props.resModel, resIds, {is_published: publish});
+        await this.orm.write(this.props.resModel, resIds, {is_published: publish});
         this.actionService.switchView('list');
     }
 }

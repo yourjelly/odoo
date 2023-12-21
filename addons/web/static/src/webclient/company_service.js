@@ -4,7 +4,7 @@ import { browser } from "@web/core/browser/browser";
 import { rpcBus } from "@web/core/network/rpc";
 import { registry } from "@web/core/registry";
 import { session } from "@web/session";
-import { UPDATE_METHODS } from "@web/core/orm";
+import { UPDATE_METHODS } from "@web/core/orm_service";
 import { cookie } from "@web/core/browser/cookie";
 import { redirect } from "@web/core/utils/urls";
 import { routeToUrl } from "@web/core/browser/router_service";

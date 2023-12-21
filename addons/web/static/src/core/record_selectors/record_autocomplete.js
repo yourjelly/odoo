@@ -4,7 +4,6 @@ import { Component } from "@odoo/owl";
 import { AutoComplete } from "@web/core/autocomplete/autocomplete";
 import { _t } from "@web/core/l10n/translation";
 import { Domain } from "@web/core/domain";
-import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
 import { useOwnedDialogs, useService } from "@web/core/utils/hooks";
 
@@ -28,6 +27,7 @@ export class RecordAutocomplete extends Component {
     static template = "web.RecordAutocomplete";
 
     setup() {
+        this.orm = useService("orm");
         this.nameService = useService("name");
         this.addDialog = useOwnedDialogs();
         this.sources = [
@@ -122,7 +122,7 @@ export class RecordAutocomplete extends Component {
 
     search(name, limit) {
         const domain = this.getDomain();
-        return orm.call(this.props.resModel, "name_search", [], {
+        return this.orm.call(this.props.resModel, "name_search", [], {
             name,
             args: domain,
             limit,

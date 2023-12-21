@@ -6,7 +6,6 @@ import SurveySessionChart from "@survey/js/survey_session_chart";
 import SurveySessionTextAnswers from "@survey/js/survey_session_text_answers";
 import SurveySessionLeaderBoard from "@survey/js/survey_session_leaderboard";
 import { _t } from "@web/core/l10n/translation";
-import { orm } from "@web/core/orm";
 import { rpc } from "@web/core/network/rpc";
 import { browser } from "@web/core/browser/browser";
 
@@ -27,6 +26,11 @@ publicWidget.registry.SurveySessionManage = publicWidget.Widget.extend(SurveyPre
         'click .o_survey_session_navigation_next, .o_survey_session_start': '_onNext',
         'click .o_survey_session_navigation_previous': '_onBack',
         'click .o_survey_session_close': '_onEndSessionClick',
+    },
+
+    init() {
+        this._super(...arguments);
+        this.orm = this.bindService("orm");
     },
 
     /**
@@ -226,7 +230,7 @@ publicWidget.registry.SurveySessionManage = publicWidget.Widget.extend(SurveyPre
         var self = this;
         ev.preventDefault();
 
-        orm.call(
+        this.orm.call(
             "survey.survey",
             "action_end_session",
             [[this.surveyId]]
@@ -490,7 +494,7 @@ publicWidget.registry.SurveySessionManage = publicWidget.Widget.extend(SurveyPre
     _refreshAttendeesCount: function () {
         var self = this;
 
-        return orm.read(
+        return self.orm.read(
             "survey.survey",
             [[self.surveyId], ['session_answer_count']]
         ).then(function (result) {

@@ -1,7 +1,6 @@
 /** @odoo-module */
 
 import { rpc } from "@web/core/network/rpc";
-import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { usePopover } from "@web/core/popover/popover_hook";
@@ -14,6 +13,7 @@ class HrOrgChartPopover extends Component {
     async setup() {
         super.setup();
 
+        this.orm = useService('orm');
         this.actionService = useService("action");
         this._onEmployeeSubRedirect = onEmployeeSubRedirect();
     }
@@ -26,7 +26,7 @@ class HrOrgChartPopover extends Component {
      * @returns {Promise} action loaded
      */
     async _onEmployeeRedirect(employeeId) {
-        const action = await orm.call('hr.employee', 'get_formview_action', [employeeId]);
+        const action = await this.orm.call('hr.employee', 'get_formview_action', [employeeId]);
         this.actionService.doAction(action); 
     }
 }
@@ -36,6 +36,7 @@ export class HrOrgChart extends Component {
     async setup() {
         super.setup();
 
+        this.orm = useService('orm');
         this.actionService = useService("action");
         this.popover = usePopover(HrOrgChartPopover);
 
@@ -104,7 +105,7 @@ export class HrOrgChart extends Component {
      * @returns {Promise} action loaded
      */
     async _onEmployeeRedirect(employeeId) {
-        const action = await orm.call('hr.employee', 'get_formview_action', [employeeId]);
+        const action = await this.orm.call('hr.employee', 'get_formview_action', [employeeId]);
         this.actionService.doAction(action); 
     }
 

@@ -3,7 +3,6 @@
 import options from "@web_editor/js/editor/snippets.options";
 import s_dynamic_snippet_carousel_options from "@website/snippets/s_dynamic_snippet_carousel/options";
 
-import { orm } from "@web/core/orm";
 import wUtils from "@website/js/utils";
 
 const alternativeSnippetRemovedOptions = [
@@ -28,6 +27,8 @@ const dynamicSnippetProductsOptions = s_dynamic_snippet_carousel_options.extend(
         }
         this.productCategories = {};
         this.isAlternativeProductSnippet = this.$target.hasClass('o_wsale_alternative_products');
+
+        this.orm = this.bindService("orm");
     },
     //--------------------------------------------------------------------------
     // Private
@@ -49,7 +50,7 @@ const dynamicSnippetProductsOptions = s_dynamic_snippet_carousel_options.extend(
      * @returns {Promise}
      */
     _fetchProductCategories: function () {
-        return orm.searchRead("product.public.category", wUtils.websiteDomain(this), ["id", "name"]);
+        return this.orm.searchRead("product.public.category", wUtils.websiteDomain(this), ["id", "name"]);
     },
     /**
      *

@@ -1,7 +1,6 @@
 /** @odoo-module **/
 
 import { _t } from "@web/core/l10n/translation";
-import { orm } from "@web/core/orm";
 import { useService } from "@web/core/utils/hooks";
 import { user } from "@web/core/user";
 import { Dialog } from "@web/core/dialog/dialog";
@@ -31,6 +30,7 @@ export class PartnerList extends Component {
     setup() {
         this.pos = usePos();
         this.ui = useState(useService("ui"));
+        this.orm = useService("orm");
         this.notification = useService("pos_notification");
         this.dialog = useService("dialog");
 
@@ -127,7 +127,7 @@ export class PartnerList extends Component {
             ];
         }
         // FIXME POSREF timeout
-        const result = await orm.silent.call(
+        const result = await this.orm.silent.call(
             "pos.session",
             "get_pos_ui_res_partner_by_params",
             [[odoo.pos_session_id], { domain, limit: limit, offset: this.state.currentOffset }]

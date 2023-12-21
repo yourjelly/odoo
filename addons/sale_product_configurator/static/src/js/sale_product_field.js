@@ -2,7 +2,7 @@
 
 import { SaleOrderLineProductField } from '@sale/js/sale_product_field';
 import { serializeDateTime } from "@web/core/l10n/dates";
-import { x2ManyCommands, orm } from "@web/core/orm";
+import { x2ManyCommands } from "@web/core/orm_service";
 import { useService } from "@web/core/utils/hooks";
 import { patch } from "@web/core/utils/patch";
 import { ProductConfiguratorDialog } from "./product_configurator_dialog/product_configurator_dialog";
@@ -43,11 +43,12 @@ patch(SaleOrderLineProductField.prototype, {
         super.setup(...arguments);
 
         this.dialog = useService("dialog");
+        this.orm = useService("orm");
     },
 
     async _onProductTemplateUpdate() {
         super._onProductTemplateUpdate(...arguments);
-        const result = await orm.call(
+        const result = await this.orm.call(
             'product.template',
             'get_single_product_variant',
             [this.props.record.data.product_template_id[0]],
@@ -112,7 +113,7 @@ patch(SaleOrderLineProductField.prototype, {
                 this.props.record.data.product_custom_attribute_value_ids.records.map(
                     record => record.data
                 ) :
-                await orm.read(
+                await this.orm.read(
                     'product.attribute.custom.value',
                     this.props.record.data.product_custom_attribute_value_ids.currentIds,
                     ["custom_product_template_attribute_value_id", "custom_value"]

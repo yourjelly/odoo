@@ -1,7 +1,6 @@
 /* @odoo-module */
 
 import { _t } from "@web/core/l10n/translation";
-import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
 import { user } from "@web/core/user";
 import { useService } from "@web/core/utils/hooks";
@@ -73,7 +72,7 @@ patch(KanbanHeader.prototype, {
 
     async _openAutomations() {
         const domain = [["model", "=", this.props.list.resModel]];
-        const modelId = await orm.search("ir.model", domain, { limit: 1 });
+        const modelId = await this.orm.search("ir.model", domain, { limit: 1 });
         const context = {
             active_test: false,
             default_model_id: modelId[0],

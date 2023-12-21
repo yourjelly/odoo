@@ -5,14 +5,15 @@ import { effect } from "@web/core/utils/reactive";
 import { batched } from "@web/core/utils/timing";
 
 export class SelfOrderBus {
-    static serviceDependencies = ["self_order", "bus_service"];
+    static serviceDependencies = ["self_order", "orm", "bus_service"];
 
     constructor(...args) {
         this.setup(...args);
     }
 
-    setup(env, { self_order, bus_service }) {
+    setup(env, { self_order, orm, bus_service }) {
         this.selfOrder = self_order;
+        this.orm = orm;
         this.bus = bus_service;
 
         effect(

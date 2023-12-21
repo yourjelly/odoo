@@ -1,7 +1,6 @@
 /** @odoo-module **/
 
 import { _t } from "@web/core/l10n/translation";
-import { orm } from "@web/core/orm";
 import { useService, useAutofocus } from '@web/core/utils/hooks';
 import { useNestedSortable } from "@web/core/utils/nested_sortable";
 import wUtils from '@website/js/utils';
@@ -109,6 +108,7 @@ export class EditMenuDialog extends Component {
     };
 
     setup() {
+        this.orm = useService('orm');
         this.website = useService('website');
         this.dialogs = useService('dialog');
 
@@ -120,7 +120,7 @@ export class EditMenuDialog extends Component {
         this.state = useState({ rootMenu: {} });
 
         onWillStart(async () => {
-            const menu = await orm.call(
+            const menu = await this.orm.call(
                 'website.menu',
                 'get_tree',
                 [this.website.currentWebsite.id, this.props.rootID],
@@ -248,7 +248,7 @@ export class EditMenuDialog extends Component {
             }
         });
 
-        await orm.call('website.menu', 'save', [
+        await this.orm.call('website.menu', 'save', [
             this.website.currentWebsite.id,
             {
                 'data': data,

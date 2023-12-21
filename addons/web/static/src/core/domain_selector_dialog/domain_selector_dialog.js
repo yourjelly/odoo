@@ -39,6 +39,7 @@ export class DomainSelectorDialog extends Component {
 
     setup() {
         this.notification = useService("notification");
+        this.orm = useService("orm");
         this.state = useState({ domain: this.props.domain });
         this.confirmButtonRef = useRef("confirm");
     }

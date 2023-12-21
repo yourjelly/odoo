@@ -3,7 +3,6 @@
 import { _t } from "@web/core/l10n/translation";
 import { Component, markup, onRendered, onWillStart, useState } from "@odoo/owl";
 import { Layout } from "@web/search/layout";
-import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { useSetupAction } from "@web/webclient/actions/action_hook";
@@ -30,6 +29,7 @@ export class ProductPricelistReport extends Component {
 
     setup() {
         this.action = useService("action");
+        this.orm = useService("orm");
 
         this.MAX_QTY = 5;
         const pastState = this.props.state || {};
@@ -113,11 +113,11 @@ export class ProductPricelistReport extends Component {
     // orm calls
 
     getPricelists() {
-        return orm.searchRead("product.pricelist", [], ["id", "name"]);
+        return this.orm.searchRead("product.pricelist", [], ["id", "name"]);
     }
 
     async renderHtml() {
-        let html = await orm.call(
+        let html = await this.orm.call(
             "report.product.report_pricelist", "get_html", [], {data: this.reportParams}
         );
         this.state.html = markup(html);

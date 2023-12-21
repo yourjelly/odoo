@@ -2,7 +2,7 @@
 
 import { Dialog } from '@web/core/dialog/dialog';
 import { formatDateTime } from '@web/core/l10n/dates';
-import { orm } from "@web/core/orm";
+import { useService } from '@web/core/utils/hooks';
 import { memoize } from '@web/core/utils/functions';
 import { Component, onMounted, useState, markup } from '@odoo/owl';
 import { _t } from '@web/core/l10n/translation';
@@ -31,6 +31,8 @@ class HistoryDialog extends Component {
     setup() {
         this.size = 'xl';
         this.title = _t('History');
+        this.orm = useService('orm');
+
         onMounted(() => this.init());
     }
 
@@ -54,7 +56,7 @@ class HistoryDialog extends Component {
 
     getRevisionComparison = memoize(
         async function getRevisionComparison(revisionId) {
-            const comparison = await orm.call(
+            const comparison = await this.orm.call(
                 this.props.recordModel,
                 'html_field_history_get_comparison_at_revision',
                 [this.props.recordId, this.props.versionedFieldName, revisionId]
@@ -65,7 +67,7 @@ class HistoryDialog extends Component {
 
     getRevisionContent = memoize(
         async function getRevisionContent(revisionId) {
-            const content = await orm.call(
+            const content = await this.orm.call(
                 this.props.recordModel,
                 'html_field_history_get_content_at_revision',
                 [this.props.recordId, this.props.versionedFieldName, revisionId]

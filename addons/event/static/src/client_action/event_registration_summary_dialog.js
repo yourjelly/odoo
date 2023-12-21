@@ -3,7 +3,6 @@
 import { _t } from "@web/core/l10n/translation";
 import { Component } from "@odoo/owl";
 import { Dialog } from "@web/core/dialog/dialog";
-import { orm } from "@web/core/orm";
 import { useService } from "@web/core/utils/hooks";
 
 export class EventRegistrationSummaryDialog extends Component {
@@ -17,6 +16,7 @@ export class EventRegistrationSummaryDialog extends Component {
     setup() {
         this.actionService = useService("action");
         this.notification = useService("notification");
+        this.orm = useService("orm");
     }
 
     get registration() {
@@ -28,7 +28,7 @@ export class EventRegistrationSummaryDialog extends Component {
     }
 
     async onRegistrationConfirm() {
-        await orm.call("event.registration", "action_set_done", [this.registration.id]);
+        await this.orm.call("event.registration", "action_set_done", [this.registration.id]);
         this.notification.add(_t("Registration confirmed"));
         this.props.close();
     }

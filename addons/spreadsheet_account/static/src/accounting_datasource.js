@@ -11,7 +11,7 @@ import { ServerData } from "@spreadsheet/data_sources/server_data";
 
 export class AccountingDataSource {
     constructor(services) {
-        this.serverData = new ServerData({
+        this.serverData = new ServerData(services.orm, {
             whenDataIsFetched: () => services.notify(),
         });
     }

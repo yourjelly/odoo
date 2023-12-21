@@ -4,7 +4,6 @@ import { _t } from "@web/core/l10n/translation";
 
 import { Component, useState } from "@odoo/owl";
 
-import { orm } from "@web/core/orm";
 import { useService } from "@web/core/utils/hooks";
 import { useModel } from "@web/model/model";
 import { extractFieldsFromArchInfo } from "@web/model/relational_model/utils";
@@ -102,7 +101,7 @@ export class ActivityController extends Component {
                 resIds.push(parseInt(resId));
             }
         }
-        orm.call(this.props.resModel, "activity_send_mail", [resIds, templateID], {});
+        this.model.orm.call(this.props.resModel, "activity_send_mail", [resIds, templateID], {});
     }
 
     async openRecord(record, mode) {

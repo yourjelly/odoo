@@ -2,7 +2,7 @@
 
 import { rpcBus } from "@web/core/network/rpc";
 import { registry } from "@web/core/registry";
-import { UPDATE_METHODS, orm } from "@web/core/orm";
+import { UPDATE_METHODS } from "@web/core/orm_service";
 
 /**
  * @typedef {Object} IrFilter
@@ -41,8 +41,8 @@ import { UPDATE_METHODS, orm } from "@web/core/orm";
  */
 
 export const viewService = {
-    dependencies: [],
-    start(env) {
+    dependencies: ["orm"],
+    start(env, { orm }) {
         let cache = {};
 
         function clearCache() {

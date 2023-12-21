@@ -1,9 +1,8 @@
 /** @odoo-module */
 
 import { rpc } from "@web/core/network/rpc";
-import { orm } from "@web/core/orm";
 import { user } from "@web/core/user";
-import { useBus } from "@web/core/utils/hooks";
+import { useBus, useService } from "@web/core/utils/hooks";
 import { Many2XAutocomplete } from "@web/views/fields/relational_utils";
 import { Component, useState, onWillStart, markup, xml } from "@odoo/owl";
 
@@ -25,6 +24,7 @@ export class LunchOrderLine extends Component {
 
     setup() {
         super.setup();
+        this.orm = useService('orm');
         this.state = useState({ mobileOpen: false });
     }
 
@@ -46,7 +46,7 @@ export class LunchOrderLine extends Component {
     }
 
     async updateQuantity(increment) {
-        await orm.call('lunch.order', 'update_quantity', [
+        await this.orm.call('lunch.order', 'update_quantity', [
             this.props.line.id,
             increment
         ]);

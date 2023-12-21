@@ -18,7 +18,7 @@ import { hotkeyService } from "@web/core/hotkeys/hotkey_service";
 import { MainComponentsContainer } from "@web/core/main_components_container";
 import { makeFakeLocalizationService } from "../helpers/mock_services";
 import { makeTestEnv } from "../helpers/mock_env";
-import { ormService } from "@web/core/orm";
+import { ormService } from "@web/core/orm_service";
 import { popoverService } from "@web/core/popover/popover_service";
 import { registry } from "@web/core/registry";
 import { uiService } from "@web/core/ui/ui_service";

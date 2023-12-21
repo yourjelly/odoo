@@ -1,6 +1,5 @@
 /** @odoo-module **/
 
-import { orm } from "@web/core/orm";
 import { SearchModel } from "@web/search/search_model";
 
 export class StockReportSearchModel extends SearchModel {
@@ -20,7 +19,7 @@ export class StockReportSearchModel extends SearchModel {
     }
 
     async _loadWarehouses() {
-        this.warehouses = await orm.call(
+        this.warehouses = await this.orm.call(
             'stock.warehouse',
             'get_current_warehouses',
             [[]],

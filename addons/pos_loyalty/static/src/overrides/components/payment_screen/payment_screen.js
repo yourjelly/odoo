@@ -2,7 +2,6 @@
 
 import { _t } from "@web/core/l10n/translation";
 import { PaymentScreen } from "@point_of_sale/app/screens/payment_screen/payment_screen";
-import { orm } from "@web/core/orm";
 import { patch } from "@web/core/utils/patch";
 import { PosLoyaltyCard } from "@pos_loyalty/overrides/models/loyalty";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
@@ -36,7 +35,7 @@ patch(PaymentScreen.prototype, {
         // No need to do an rpc if no existing coupon is being used.
         if (Object.keys(pointChanges || {}).length > 0 || newCodes.length) {
             try {
-                const { successful, payload } = await orm.call(
+                const { successful, payload } = await this.orm.call(
                     "pos.order",
                     "validate_coupon_programs",
                     [[], pointChanges, newCodes]
@@ -122,7 +121,7 @@ patch(PaymentScreen.prototype, {
             })
         );
         if (Object.keys(couponData || []).length > 0) {
-            const payload = await orm.call("pos.order", "confirm_coupon_programs", [
+            const payload = await this.orm.call("pos.order", "confirm_coupon_programs", [
                 server_ids,
                 couponData,
             ]);

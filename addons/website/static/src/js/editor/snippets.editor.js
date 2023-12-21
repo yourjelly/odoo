@@ -2,7 +2,6 @@
 
 import { _t } from "@web/core/l10n/translation";
 import { Dialog } from "@web/core/dialog/dialog";
-import { orm } from "@web/core/orm";
 import { useChildRef } from "@web/core/utils/hooks";
 import weSnippetEditor from "@web_editor/js/editor/snippets.editor";
 import wSnippetOptions from "@website/js/editor/snippets.options";
@@ -235,7 +234,7 @@ const wSnippetMenu = weSnippetEditor.SnippetsMenu.extend({
                     $button.prop('disabled', true);
                     const res = await this._validateGMapAPIKey(valueAPIKey);
                     if (res.isValid) {
-                        await orm.write("website", [websiteId], {google_maps_api_key: valueAPIKey});
+                        await this.orm.write("website", [websiteId], {google_maps_api_key: valueAPIKey});
                         invalidated = true;
                         return true;
                     } else {

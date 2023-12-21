@@ -2,7 +2,6 @@
 
 import { _t } from "@web/core/l10n/translation";
 import { rpc } from "@web/core/network/rpc";
-import { orm } from "@web/core/orm";
 import { useService, useAutofocus } from '@web/core/utils/hooks';
 import { MediaDialog } from '@web_editor/components/media_dialog/media_dialog';
 import { WebsiteDialog } from './dialog';
@@ -379,6 +378,7 @@ export class OptimizeSEODialog extends Component {
     setup() {
         this.website = useService('website');
         this.dialogs = useService('dialog');
+        this.orm = useService('orm');
 
         this.title = _t("Optimize SEO");
         this.saveButton = _t("Save");
@@ -470,7 +470,7 @@ export class OptimizeSEODialog extends Component {
             }
         }
         data.website_meta_og_img = seoContext.metaImage;
-        await orm.write(this.object.model, [this.object.id], data, {
+        await this.orm.write(this.object.model, [this.object.id], data, {
             context: {
                 lang: this.website.currentWebsite.metadata.lang,
                 'website_id': this.website.currentWebsite.id,

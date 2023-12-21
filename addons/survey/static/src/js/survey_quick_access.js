@@ -1,7 +1,6 @@
 /** @odoo-module **/
 
 import publicWidget from "@web/legacy/js/public/public_widget";
-import { orm } from "@web/core/orm";
 import { rpc } from "@web/core/network/rpc";
 
 publicWidget.registry.SurveyQuickAccessWidget = publicWidget.Widget.extend({
@@ -15,6 +14,11 @@ publicWidget.registry.SurveyQuickAccessWidget = publicWidget.Widget.extend({
     //--------------------------------------------------------------------------
     // Widget
     //--------------------------------------------------------------------------
+
+    init() {
+        this._super(...arguments);
+        this.orm = this.bindService("orm");
+    },
     
     /**
     * @override
@@ -37,7 +41,7 @@ publicWidget.registry.SurveyQuickAccessWidget = publicWidget.Widget.extend({
     // -------------------------------------------------------------------------
 
     _onLaunchSessionClick: async function () {
-        const sessionResult = await orm.call(
+        const sessionResult = await this.orm.call(
             "survey.survey",
             "action_start_session",
             [[this.$(".o_survey_launch_session").data("surveyId")]]

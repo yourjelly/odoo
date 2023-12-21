@@ -2,7 +2,6 @@
 
 import { browser } from "@web/core/browser/browser";
 import { makeContext } from "@web/core/context";
-import { orm } from "@web/core/orm";
 import { session } from "@web/session";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
@@ -51,6 +50,7 @@ export class ActionMenus extends Component {
     };
 
     setup() {
+        this.orm = useService("orm");
         this.actionService = useService("action");
         onWillStart(async () => {
             this.actionItems = await this.getActionItems(this.props);
@@ -98,7 +98,7 @@ export class ActionMenus extends Component {
     async executeAction(action) {
         let activeIds = this.props.getActiveIds();
         if (this.props.isDomainSelected) {
-            activeIds = await orm.search(this.props.resModel, this.props.domain, {
+            activeIds = await this.orm.search(this.props.resModel, this.props.domain, {
                 limit: session.active_ids_limit,
                 context: this.props.context,
             });

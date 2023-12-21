@@ -1,7 +1,6 @@
 /** @odoo-module */
 
 import { RPCErrorDialog } from "@web/core/errors/error_dialogs";
-import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { user } from "@web/core/user";
@@ -15,6 +14,7 @@ export class BaseAutomationErrorDialog extends RPCErrorDialog {
         this.automationName = name;
         this.isUserAdmin = user.isAdmin;
         this.actionService = useService("action");
+        this.orm = useService("orm");
     }
 
     //--------------------------------------------------------------------------
@@ -30,7 +30,7 @@ export class BaseAutomationErrorDialog extends RPCErrorDialog {
      * @param {MouseEvent} ev
      */
     async disableAutomation(ev) {
-        await orm.write("base.automation", [this.automationId], { active: false });
+        await this.orm.write("base.automation", [this.automationId], { active: false });
         this.props.close();
     }
     /**

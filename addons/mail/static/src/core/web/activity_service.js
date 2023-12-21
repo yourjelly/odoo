@@ -1,7 +1,6 @@
 /* @odoo-module */
 
 import { _t } from "@web/core/l10n/translation";
-import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
 import { browser } from "@web/core/browser/browser";
 
@@ -21,6 +20,7 @@ export class ActivityService {
         }
         this.env = env;
         this.store = services["mail.store"];
+        this.orm = services.orm;
     }
 
     /**
@@ -28,7 +28,7 @@ export class ActivityService {
      * @param {number[]} attachmentIds
      */
     async markAsDone(activity, attachmentIds = []) {
-        await orm.call("mail.activity", "action_feedback", [[activity.id]], {
+        await this.orm.call("mail.activity", "action_feedback", [[activity.id]], {
             attachment_ids: attachmentIds,
             feedback: activity.feedback,
         });
@@ -39,7 +39,7 @@ export class ActivityService {
     }
 
     async markAsDoneAndScheduleNext(activity) {
-        const action = await orm.call(
+        const action = await this.env.services.orm.call(
             "mail.activity",
             "action_feedback_schedule_next",
             [[activity.id]],
@@ -134,7 +134,7 @@ export class ActivityService {
 }
 
 export const activityService = {
-    dependencies: ["mail.store"],
+    dependencies: ["mail.store", "orm"],
     /**
      * @param {import("@web/env").OdooEnv} env
      * @param {Partial<import("services").Services>} services

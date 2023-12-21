@@ -1,8 +1,8 @@
 /** @odoo-module **/
 
 import { _t } from "@web/core/l10n/translation";
-import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
+import { useService } from "@web/core/utils/hooks";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { useInputField } from "@web/views/fields/input_field_hook";
 
@@ -24,6 +24,7 @@ export class PasswordField extends Component {
             getValue: () => this.props.record.data[this.props.name] || "",
         });
 
+        const orm = useService("orm");
         onWillStart(async () => {
             const policy = await orm.call("res.users", "get_password_policy");
             this.state.required = new ConcretePolicy(policy);

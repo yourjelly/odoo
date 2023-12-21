@@ -1,7 +1,6 @@
 /** @odoo-module **/
 
 import { _t } from "@web/core/l10n/translation";
-import { orm } from "@web/core/orm";
 import { user } from "@web/core/user";
 import { useService } from '@web/core/utils/hooks';
 import { KanbanHeader } from "@web/views/kanban/kanban_header";
@@ -24,7 +23,7 @@ export class ProjectTaskKanbanHeader extends KanbanHeader {
 
     async deleteGroup() {
         if (this.group.groupByField.name === 'stage_id') {
-            const action = await orm.call(
+            const action = await this.group.model.orm.call(
                 this.group.groupByField.relation,
                 'unlink_wizard',
                 [this.group.value],

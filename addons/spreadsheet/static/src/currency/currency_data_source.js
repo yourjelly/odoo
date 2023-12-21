@@ -14,7 +14,7 @@ import { toServerDateString } from "../helpers/helpers";
  */
 export class CurrencyDataSource {
     constructor(services) {
-        this.serverData = new ServerData({
+        this.serverData = new ServerData(services.orm, {
             whenDataIsFetched: () => services.notify(),
         });
     }

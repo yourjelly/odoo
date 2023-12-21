@@ -42,9 +42,10 @@ export class MetadataRepository extends EventBus {
      */
     constructor(env) {
         super();
+        this.orm = env.services.orm.silent;
         this.nameService = env.services.name;
 
-        this.serverData = new ServerData({
+        this.serverData = new ServerData(this.orm, {
             whenDataIsFetched: () => this.trigger("labels-fetched"),
         });
 

@@ -1,7 +1,6 @@
 /** @odoo-module */
 
 import { _t } from "@web/core/l10n/translation";
-import { orm } from "@web/core/orm";
 import { PaymentInterface } from "@point_of_sale/app/payment/payment_interface";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { sprintf } from "@web/core/utils/strings";
@@ -47,7 +46,7 @@ export class PaymentAdyen extends PaymentInterface {
 
     _call_adyen(data, operation = false) {
         // FIXME POSREF TIMEOUT 10000
-        return orm.silent
+        return this.env.services.orm.silent
             .call("pos.payment.method", "proxy_adyen_request", [
                 [this.payment_method.id],
                 data,
@@ -218,7 +217,7 @@ export class PaymentAdyen extends PaymentInterface {
      * confirmation from Adyen is received via the webhook.
      */
     async handleAdyenStatusResponse() {
-        const notification = await orm.silent.call(
+        const notification = await this.env.services.orm.silent.call(
             "pos.payment.method",
             "get_latest_adyen_status",
             [[this.payment_method.id]]

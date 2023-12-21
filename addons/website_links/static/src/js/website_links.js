@@ -3,7 +3,6 @@
 import { _t } from "@web/core/l10n/translation";
 import publicWidget from "@web/legacy/js/public/public_widget";
 import { browser } from "@web/core/browser/browser";
-import { orm } from "@web/core/orm";
 import { rpc } from "@web/core/network/rpc";
 
 var SelectBox = publicWidget.Widget.extend({
@@ -21,6 +20,8 @@ var SelectBox = publicWidget.Widget.extend({
         this._super.apply(this, arguments);
         this.obj = obj;
         this.placeholder = placeholder;
+
+        this.orm = this.bindService("orm");
     },
     /**
      * @override
@@ -28,7 +29,7 @@ var SelectBox = publicWidget.Widget.extend({
     willStart: function () {
         var self = this;
         var defs = [this._super.apply(this, arguments)];
-        defs.push(orm.searchRead(this.obj, [], ["id", "name"]).then(function (result) {
+        defs.push(this.orm.searchRead(this.obj, [], ["id", "name"]).then(function (result) {
             self.objects = result.map((val) => {
                 return {id: val.id, text: val.name};
             });
@@ -79,7 +80,7 @@ var SelectBox = publicWidget.Widget.extend({
         if (this.obj === "utm.campaign"){
             args.is_auto_campaign = true;
         }
-        return orm.create(this.obj, [args]).then(function (record) {
+        return this.orm.create(this.obj, [args]).then(function (record) {
             self.$el.attr('value', record);
             self.objects.push({'id': record, 'text': name});
         });

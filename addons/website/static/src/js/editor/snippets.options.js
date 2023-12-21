@@ -3,7 +3,6 @@
 import { loadCSS } from "@web/core/assets";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { Dialog } from "@web/core/dialog/dialog";
-import { orm } from "@web/core/orm";
 import { rpc } from "@web/core/network/rpc";
 import { user } from "@web/core/user";
 import { useChildRef } from "@web/core/utils/hooks";
@@ -671,6 +670,8 @@ options.Class.include({
         // triggers a custom event, only that same jQuery instance will
         // trigger handlers set with `.on`.
         this.$bsTarget = this.ownerDocument.defaultView.$(this.$target[0]);
+
+        this.orm = this.bindService("orm");
     },
 
     //--------------------------------------------------------------------------
@@ -948,7 +949,7 @@ options.Class.include({
         Object.keys(values).forEach((key) => {
             values[key] = values[key] || defaultValue;
         });
-        return orm.call("web_editor.assets", "make_scss_customization", [url, values]);
+        return this.orm.call("web_editor.assets", "make_scss_customization", [url, values]);
     },
     /**
      * Refreshes all public widgets related to the given element.
@@ -1271,6 +1272,7 @@ options.registry.OptionsTab = options.Class.extend({
         this._super(...arguments);
         this.grayParams = {};
         this.grays = {};
+        this.orm = this.bindService("orm");
     },
 
     //--------------------------------------------------------------------------
@@ -1656,6 +1658,7 @@ options.registry.ThemeColors = options.registry.OptionsTab.extend({
 options.registry.menu_data = options.Class.extend({
     init() {
         this._super(...arguments);
+        this.orm = this.bindService("orm");
         this.notification = this.bindService("notification");
     },
 
@@ -1692,7 +1695,7 @@ options.registry.menu_data = options.Class.extend({
                             name,
                             url,
                         };
-                        return orm.call(
+                        return this.orm.call(
                             "website.menu",
                             "save",
                             [websiteId, {'data': [data]}]

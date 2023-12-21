@@ -1,6 +1,5 @@
 /** @odoo-module **/
 
-import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import {
@@ -24,6 +23,7 @@ export class SaleProgressBarField extends KanbanProgressBarField {
         super.setup();
 
         this.actionService = useService("action");
+        this.orm = useService("orm");
 
         useEffect(() => {
             this.state.isInvoicingTargetDefined = this.props.record.data[this.props.maxValueField];
@@ -35,7 +35,7 @@ export class SaleProgressBarField extends KanbanProgressBarField {
      */
     async defineInvoicingTarget() {
         const { resId, resModel } = this.props.record;
-        const action = await orm.call(resModel, "get_formview_action", [[resId]]);
+        const action = await this.orm.call(resModel, "get_formview_action", [[resId]]);
         this.actionService.doAction(action, { props: { mode: "edit" } });
     }
 }

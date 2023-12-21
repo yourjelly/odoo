@@ -1,7 +1,6 @@
 /** @odoo-module **/
 
 import { _t } from "@web/core/l10n/translation";
-import { orm } from "@web/core/orm";
 import { useService } from "@web/core/utils/hooks";
 import { registry } from "@web/core/registry";
 import { FormController } from "@web/views/form/form_controller";
@@ -13,6 +12,7 @@ export class ExpenseFormController extends FormController {
     setup() {
         super.setup();
         this.dialogService = useService("dialog");
+        this.orm = useService("orm");
     }
 
     /**
@@ -28,7 +28,7 @@ export class ExpenseFormController extends FormController {
                 this.dialogService.add(ConfirmationDialog, {
                     body: _t("An expense of same category, amount and date already exists."),
                     confirm: async () => {
-                        await orm.call("hr.expense", "action_approve_duplicates", [record.resId]);
+                        await this.orm.call("hr.expense", "action_approve_duplicates", [record.resId]);
                         resolve(true);
                     },
                 }, {

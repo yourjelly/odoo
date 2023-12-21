@@ -1,7 +1,6 @@
 /** @odoo-module **/
 
 import { _t } from "@web/core/l10n/translation";
-import { orm } from "@web/core/orm";
 import { rpc } from "@web/core/network/rpc";
 import { useService } from '@web/core/utils/hooks';
 import { ConfirmationDialog } from '@web/core/confirmation_dialog/confirmation_dialog';
@@ -144,6 +143,7 @@ export class FileSelector extends Component {
 
     setup() {
         this.notificationService = useService("notification");
+        this.orm = useService('orm');
         this.uploadService = useService('upload');
         this.keepLast = new KeepLast();
 
@@ -232,7 +232,7 @@ export class FileSelector extends Component {
         this.state.isFetchingAttachments = true;
         let attachments = [];
         try {
-            attachments = await orm.call(
+            attachments = await this.orm.call(
                 'ir.attachment',
                 'search_read',
                 [],

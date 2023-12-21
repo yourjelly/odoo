@@ -1,6 +1,5 @@
 /** @odoo-module **/
 
-import { orm } from "@web/core/orm";
 import options from '@web_editor/js/editor/snippets.options';
 
 options.registry.WebsiteEvent.include({
@@ -13,7 +12,7 @@ options.registry.WebsiteEvent.include({
      * @see this.selectClass for parameters
      */
     allowRoomCreation(previewMode, widgetValue, params) {
-        orm.write(this.modelName, [this.eventId], {
+        this.orm.write(this.modelName, [this.eventId], {
             meeting_room_allow_creation: widgetValue,
         }).then(() => this.trigger_up('request_save', {reload: true, optionSelector: this.data.selector}));
     },

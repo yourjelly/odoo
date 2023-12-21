@@ -3,7 +3,7 @@
 import { nextTick } from "@web/../tests/helpers/utils";
 import { makeTestEnv } from "@web/../tests/helpers/mock_env";
 import { registry } from "@web/core/registry";
-import { ormService } from "@web/core/orm";
+import { ormService } from "@web/core/orm_service";
 import { MetadataRepository } from "@spreadsheet/data_sources/metadata_repository";
 import { nameService } from "@web/core/name_service";
 

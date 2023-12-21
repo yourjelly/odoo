@@ -7,8 +7,6 @@ import { getFirstAccountFunction, getNumberOfAccountFormulas } from "./utils";
 import { parseAccountingDate } from "./accounting_functions";
 import { camelToSnakeObject } from "@spreadsheet/helpers/helpers";
 
-import { orm } from "@web/core/orm";
-
 const { cellMenuRegistry, featurePluginRegistry } = spreadsheet.registries;
 const { astToFormula } = spreadsheet;
 const { toString, toBoolean } = spreadsheet.helpers;
@@ -33,7 +31,7 @@ cellMenuRegistry.add("move_lines_see_records", {
         companyId = companyId || null;
         includeUnposted = toBoolean(includeUnposted);
 
-        const action = await orm.call(
+        const action = await env.services.orm.call(
             "account.account",
             "spreadsheet_move_line_action",
             [camelToSnakeObject({ dateRange, companyId, codes, includeUnposted })]

@@ -2,7 +2,6 @@
 
 import { Domain } from "@web/core/domain";
 import { serializeDate, serializeDateTime } from "@web/core/l10n/dates";
-import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
 import { KeepLast } from "@web/core/utils/concurrency";
 import { useAutofocus, useBus, useService } from "@web/core/utils/hooks";
@@ -56,6 +55,8 @@ export class SearchBar extends Component {
         // derived state
         this.items = useState([]);
         this.subItems = {};
+
+        this.orm = useService("orm");
 
         this.keepLast = new KeepLast();
 
@@ -293,7 +294,7 @@ export class SearchBar extends Component {
                 ? searchItem.propertyFieldDefinition.comodel
                 : field.relation;
 
-        const options = await orm.call(relation, "name_search", [], {
+        const options = await this.orm.call(relation, "name_search", [], {
             args: domain,
             context: { ...this.env.searchModel.globalContext, ...field.context },
             limit: 8,

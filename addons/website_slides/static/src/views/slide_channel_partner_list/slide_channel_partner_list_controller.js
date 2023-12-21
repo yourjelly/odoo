@@ -9,6 +9,7 @@ export default class SlideChannelPartnerListController extends ListController {
     setup() {
         super.setup();
         this.action = useService('action');
+        this.orm = useService('orm');
         this.channelId = this.props.context.default_channel_id || false;
     }
 
@@ -19,7 +20,7 @@ export default class SlideChannelPartnerListController extends ListController {
      * @private
      */
     async _openEnrollWizard() {
-        const action = await orm.call(
+        const action = await this.orm.call(
             'slide.channel',
             'action_channel_enroll',
             [this.channelId]

@@ -4,7 +4,6 @@ import { ExpenseDashboard } from '../components/expense_dashboard';
 import { ExpenseMobileQRCode } from '../mixins/qrcode';
 import { ExpenseDocumentUpload, ExpenseDocumentDropZone } from '../mixins/document_upload';
 
-import { orm } from "@web/core/orm";
 import { registry } from '@web/core/registry';
 import { useService } from '@web/core/utils/hooks';
 import { user } from "@web/core/user";
@@ -17,6 +16,7 @@ import { onWillStart } from "@odoo/owl";
 export class ExpenseListController extends ExpenseDocumentUpload(ListController) {
     setup() {
         super.setup();
+        this.orm = useService('orm');
         this.actionService = useService('action');
         this.isExpenseSheet = this.model.config.resModel === "hr.expense.sheet";
 
@@ -55,7 +55,7 @@ export class ExpenseListController extends ExpenseDocumentUpload(ListController)
         const records = this.model.root.selection;
         const recordIds = records.map((a) => a.resId);
         const model = this.model.config.resModel;
-        const res = await orm.call(model, action, [recordIds]);
+        const res = await this.orm.call(model, action, [recordIds]);
         if (res) {
             await this.actionService.doAction(res, {
                 additionalContext: {
@@ -72,7 +72,7 @@ export class ExpenseListController extends ExpenseDocumentUpload(ListController)
 
     async action_show_expenses_to_submit () {
         const records = this.model.root.selection;
-        const res = await orm.call(this.model.config.resModel, 'get_expenses_to_submit', [records.map((record) => record.resId)]);
+        const res = await this.orm.call(this.model.config.resModel, 'get_expenses_to_submit', [records.map((record) => record.resId)]);
         if (res) {
             await this.actionService.doAction(res, {});
         }

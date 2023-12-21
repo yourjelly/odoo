@@ -2,7 +2,6 @@
 
 import { _t } from "@web/core/l10n/translation";
 import { ThreadService } from "@mail/core/common/thread_service";
-import { orm } from "@web/core/orm";
 import { patch } from "@web/core/utils/patch";
 
 /** @type {import("@mail/core/common/thread_service").ThreadService} */
@@ -19,7 +18,7 @@ const threadServicePatch = {
         }
         if (!employee.user_id && !employee.hasCheckedUser) {
             employee.hasCheckedUser = true;
-            const [employeeData] = await orm.silent.read(
+            const [employeeData] = await this.orm.silent.read(
                 "hr.employee.public",
                 [employee.id],
                 ["user_id", "user_partner_id"],

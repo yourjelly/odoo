@@ -8,6 +8,7 @@ export class DataCleaningCommonListController extends ListController {
 
     setup() {
         super.setup();
+        this.orm = useService("orm");
         this.actionService = useService("action");
         this.notificationService = useService("notification");
     }

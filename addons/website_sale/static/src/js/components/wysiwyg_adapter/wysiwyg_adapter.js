@@ -1,7 +1,6 @@
 /** @odoo-module **/
 
 import { WysiwygAdapterComponent } from '@website/components/wysiwyg_adapter/wysiwyg_adapter';
-import { orm } from "@web/core/orm";
 import { patch } from "@web/core/utils/patch";
 import { markup } from "@odoo/owl";
 
@@ -14,7 +13,7 @@ patch(WysiwygAdapterComponent.prototype, {
 
         let ribbons = [];
         if (this._isProductListPage()) {
-            ribbons = await orm.searchRead(
+            ribbons = await this.orm.searchRead(
                 'product.ribbon',
                 [],
                 ['id', 'html', 'bg_color', 'text_color', 'html_class'],
@@ -66,7 +65,7 @@ patch(WysiwygAdapterComponent.prototype, {
         const proms = [];
         let createdRibbonIds;
         if (created.length > 0) {
-            proms.push(orm.create(
+            proms.push(this.orm.create(
                 'product.ribbon',
                 created.map(ribbon => {
                     ribbon = Object.assign({}, ribbon);
@@ -76,14 +75,14 @@ patch(WysiwygAdapterComponent.prototype, {
             ).then(ids => createdRibbonIds = ids));
         }
 
-        modified.forEach(ribbon => proms.push(orm.write(
+        modified.forEach(ribbon => proms.push(this.orm.write(
             'product.ribbon',
             [ribbon.id],
             ribbon,
         )));
 
         if (deletedIds.length > 0) {
-            proms.push(orm.unlink(
+            proms.push(this.orm.unlink(
                 'product.ribbon',
                 deletedIds,
             ));
@@ -113,7 +112,7 @@ patch(WysiwygAdapterComponent.prototype, {
             .map(([ribbonId, templateIds]) => {
                 const id = currentIds.includes(parseInt(ribbonId)) ? ribbonId : false;
                 return [id, templateIds];
-            }).map(([ribbonId, templateIds]) => orm.write(
+            }).map(([ribbonId, templateIds]) => this.orm.write(
                 'product.template',
                 templateIds,
                 {'website_ribbon_id': localToServer[ribbonId].id},

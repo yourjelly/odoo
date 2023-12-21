@@ -2,7 +2,6 @@
 
 import { registry } from "@web/core/registry";
 import { SignatureDialog } from "@web/core/signature/signature_dialog";
-import { orm } from "@web/core/orm";
 import { useService } from "@web/core/utils/hooks";
 import { standardWidgetProps } from "@web/views/widgets/standard_widget_props";
 
@@ -20,6 +19,7 @@ export class SignatureWidget extends Component {
 
     setup() {
         this.dialogService = useService("dialog");
+        this.orm = useService("orm");
     }
 
     onClickSignature() {
@@ -56,7 +56,7 @@ export class SignatureWidget extends Component {
         const file = signatureImage[1];
         const { model, resModel, resId } = this.props.record;
 
-        await orm.write(resModel, [resId], {
+        await this.env.services.orm.write(resModel, [resId], {
             [this.props.signatureField]: file,
         });
         await this.props.record.load();

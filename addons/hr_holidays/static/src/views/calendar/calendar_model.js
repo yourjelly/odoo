@@ -1,6 +1,5 @@
 /** @odoo-module */
 
-import { orm } from "@web/core/orm";
 import { CalendarModel } from '@web/views/calendar/calendar_model';
 import { deserializeDateTime, serializeDate, serializeDateTime } from "@web/core/l10n/dates";
 
@@ -54,7 +53,7 @@ export class TimeOffCalendarModel extends CalendarModel {
      * @override
      */
     fetchUnusualDays(data) {
-        return orm.call(this.meta.resModel, "get_unusual_days", [
+        return this.orm.call(this.meta.resModel, "get_unusual_days", [
             serializeDateTime(data.range.start),
             serializeDateTime(data.range.end),
         ],
@@ -66,7 +65,7 @@ export class TimeOffCalendarModel extends CalendarModel {
     }
 
     async fetchMandatoryDays(data) {
-        return orm.call("hr.employee", "get_mandatory_days", [
+        return this.orm.call("hr.employee", "get_mandatory_days", [
             this.employeeId,
             serializeDate(data.range.start, "datetime"),
             serializeDate(data.range.end, "datetime"),
@@ -87,6 +86,6 @@ export class TimeOffCalendarModel extends CalendarModel {
         if (!this.employeeId) {
             context['short_name'] = 1;
         }
-        return orm.searchRead(resModel, this.computeDomain(data), fieldNames, { context });
+        return this.orm.searchRead(resModel, this.computeDomain(data), fieldNames, { context });
     }
 }

@@ -4,7 +4,6 @@ import { Component, onWillStart, useState } from "@odoo/owl";
 
 import { Dialog } from "@web/core/dialog/dialog";
 import { _t } from "@web/core/l10n/translation";
-import { orm } from "@web/core/orm";
 import { rpc } from "@web/core/network/rpc";
 import { useService } from "@web/core/utils/hooks";
 
@@ -54,7 +53,7 @@ export class FollowerSubtypeDialog extends Component {
         if (selectedSubtypes.length === 0) {
             await this.env.services["mail.thread"].removeFollower(this.props.follower);
         } else {
-            await orm.call(
+            await this.env.services.orm.call(
                 this.props.follower.followedThread.model,
                 "message_subscribe",
                 [[this.props.follower.followedThread.id]],

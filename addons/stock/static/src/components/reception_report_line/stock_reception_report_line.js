@@ -1,6 +1,4 @@
 /** @odoo-module **/
-
-import { orm } from "@web/core/orm";
 import { useService } from "@web/core/utils/hooks";
 import { formatFloat } from "@web/core/utils/numbers";
 import { Component } from "@odoo/owl";
@@ -15,6 +13,7 @@ export class ReceptionReportLine extends Component {
     };
 
     setup() {
+        this.ormService = useService("orm");
         this.actionService = useService("action");
         this.formatFloat = (val) => formatFloat(val, { digits: [false, this.props.precision] });
     }
@@ -22,7 +21,7 @@ export class ReceptionReportLine extends Component {
     //---- Handlers ----
 
     async onClickForecast() {
-        const action = await orm.call(
+        const action = await this.ormService.call(
             "stock.move",
             "action_product_forecast_report",
             [[this.data.move_out_id]],
@@ -48,7 +47,7 @@ export class ReceptionReportLine extends Component {
     }
 
     async onClickAssign() {
-        await orm.call(
+        await this.ormService.call(
             "report.stock.report_reception",
             "action_assign",
             [false, [this.data.move_out_id], [this.data.quantity], [this.data.move_ins]],
@@ -57,7 +56,7 @@ export class ReceptionReportLine extends Component {
     }
 
     async onClickUnassign() {
-        const done = await orm.call(
+        const done = await this.ormService.call(
             "report.stock.report_reception",
             "action_unassign",
             [false, this.data.move_out_id, this.data.quantity, this.data.move_ins]

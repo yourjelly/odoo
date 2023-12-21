@@ -2,7 +2,6 @@
 
 import { _t } from "@web/core/l10n/translation";
 import { TicketScreen } from "@point_of_sale/app/screens/ticket_screen/ticket_screen";
-import { orm } from "@web/core/orm";
 import { useAutofocus } from "@web/core/utils/hooks";
 import { patch } from "@web/core/utils/patch";
 import { Component, useState } from "@odoo/owl";
@@ -94,7 +93,7 @@ patch(TicketScreen.prototype, {
                 order.set_tip(amount);
                 order.finalized = true;
                 const tip_line = order.selected_orderline;
-                await orm.call("pos.order", "set_tip", [serverId, tip_line.export_as_JSON()]);
+                await this.orm.call("pos.order", "set_tip", [serverId, tip_line.export_as_JSON()]);
             }
             if (order === this.pos.get_order()) {
                 this._selectNextOrder(order);
@@ -110,7 +109,7 @@ patch(TicketScreen.prototype, {
         }
     },
     async setNoTip(serverId) {
-        await orm.call("pos.order", "set_no_tip", [serverId]);
+        await this.orm.call("pos.order", "set_no_tip", [serverId]);
     },
     _getOrderStates() {
         const result = super._getOrderStates(...arguments);

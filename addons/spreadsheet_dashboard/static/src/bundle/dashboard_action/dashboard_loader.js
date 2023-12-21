@@ -4,8 +4,6 @@ import { DataSources } from "@spreadsheet/data_sources/data_sources";
 import { migrate } from "@spreadsheet/o_spreadsheet/migration";
 import { Model } from "@odoo/o-spreadsheet";
 
-import { orm } from "@web/core/orm";
-
 /**
  * @type {{
  *  NotLoaded: "NotLoaded",
@@ -41,16 +39,19 @@ export const Status = {
  *
  * @typedef {import("@web/env").OdooEnv} OdooEnv
  *
- * @typedef {import("@web/core/orm").ORM} ORM
+ * @typedef {import("@web/core/orm_service").ORM} ORM
  */
 
 export class DashboardLoader {
     /**
      * @param {OdooEnv} env
+     * @param {ORM} orm
      */
-    constructor(env) {
+    constructor(env, orm) {
         /** @private */
         this.env = env;
+        /** @private */
+        this.orm = orm;
         /** @private @type {Array<DashboardGroupData>} */
         this.groups = [];
         /** @private @type {Object<number, Dashboard>} */
@@ -127,7 +128,7 @@ export class DashboardLoader {
      * @returns {Promise<{id: number, name: string, dashboard_ids: number[]}[]>}
      */
     async _fetchGroups() {
-        const groups = await orm.webSearchRead(
+        const groups = await this.orm.webSearchRead(
             "spreadsheet.dashboard.group",
             [["dashboard_ids", "!=", false]],
             {
@@ -160,7 +161,7 @@ export class DashboardLoader {
         const dashboard = this._getDashboard(dashboardId);
         dashboard.status = Status.Loading;
         try {
-            const { snapshot, revisions } = await orm.call(
+            const { snapshot, revisions } = await this.orm.call(
                 "spreadsheet.dashboard",
                 "get_readonly_dashboard",
                 [dashboardId]
@@ -200,7 +201,7 @@ export class DashboardLoader {
         const model = new Model(
             migrate(snapshot),
             {
-                custom: { env: this.env, orm: orm, dataSources },
+                custom: { env: this.env, orm: this.orm, dataSources },
                 mode: "dashboard",
             },
             revisions

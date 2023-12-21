@@ -2,7 +2,6 @@
 
 import { isMobileOS } from "@web/core/browser/feature_detection";
 import { _t } from "@web/core/l10n/translation";
-import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { url } from "@web/core/utils/urls";
@@ -59,6 +58,7 @@ export class ImageField extends Component {
 
     setup() {
         this.notification = useService("notification");
+        this.orm = useService("orm");
         this.isMobile = isMobileOS();
         this.state = useState({
             isValid: true,
@@ -155,7 +155,7 @@ export class ImageField extends Component {
                     canvas.width,
                     canvas.height
                 );
-                const [resizedId] = await orm.call("ir.attachment", "create_unique", [
+                const [resizedId] = await this.orm.call("ir.attachment", "create_unique", [
                     [
                         {
                             name: info.name,
@@ -171,7 +171,7 @@ export class ImageField extends Component {
                     ],
                 ]);
                 referenceId = referenceId || resizedId; // Keep track of original.
-                await orm.call("ir.attachment", "create_unique", [
+                await this.orm.call("ir.attachment", "create_unique", [
                     [
                         {
                             name: info.name.replace(/\.webp$/, ".jpg"),

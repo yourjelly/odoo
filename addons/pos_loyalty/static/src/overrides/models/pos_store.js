@@ -1,6 +1,5 @@
 /** @odoo-module */
 
-import { orm } from "@web/core/orm";
 import { patch } from "@web/core/utils/patch";
 import { PosStore } from "@point_of_sale/app/store/pos_store";
 import { _t } from "@web/core/l10n/translation";
@@ -97,7 +96,7 @@ patch(PosStore.prototype, {
             if (trimmedCode && trimmedCode.startsWith("044")) {
                 // check if the code exist in the database
                 // if so, use its balance, otherwise, use the unit price of the gift card product
-                const fetchedGiftCard = await orm.searchRead(
+                const fetchedGiftCard = await this.orm.searchRead(
                     "loyalty.card",
                     [
                         ["code", "=", trimmedCode],
@@ -307,7 +306,7 @@ patch(PosStore.prototype, {
      * @param {int} limit Default to 1
      */
     async fetchCoupons(domain, limit = 1) {
-        const result = await orm.searchRead(
+        const result = await this.env.services.orm.searchRead(
             "loyalty.card",
             domain,
             ["id", "points", "code", "partner_id", "program_id"],

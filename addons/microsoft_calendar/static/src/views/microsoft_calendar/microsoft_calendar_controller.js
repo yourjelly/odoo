@@ -4,7 +4,6 @@ import { _t } from "@web/core/l10n/translation";
 import { AttendeeCalendarController } from "@calendar/views/attendee_calendar/attendee_calendar_controller";
 import { patch } from "@web/core/utils/patch";
 import { useService } from "@web/core/utils/hooks";
-import { orm } from "@web/core/orm";
 import { ConfirmationDialog, AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 
 patch(AttendeeCalendarController.prototype, {
@@ -15,7 +14,7 @@ patch(AttendeeCalendarController.prototype, {
     },
 
     async onMicrosoftSyncCalendar() {
-        await orm.call(
+        await this.orm.call(
             "res.users",
             "restart_microsoft_synchronization",
             [[this.user.userId]],
@@ -49,7 +48,7 @@ patch(AttendeeCalendarController.prototype, {
             body: _t("You are about to stop the synchronization of your calendar with Outlook. Are you sure you want to continue?"),
             confirmLabel: _t("Stop Synchronization"),
             confirm: async () => {
-                await orm.call(
+                await this.orm.call(
                     "res.users",
                     "stop_microsoft_synchronization",
                     [[this.user.userId]],

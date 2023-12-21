@@ -2,8 +2,8 @@
 
 import { threadActionsRegistry } from "@mail/core/common/thread_actions";
 import { _t } from "@web/core/l10n/translation";
-import { orm } from "@web/core/orm";
 import { useComponent } from "@odoo/owl";
+import { useService } from "@web/core/utils/hooks";
 
 threadActionsRegistry.add("open-hr-profile", {
     condition(component) {
@@ -25,6 +25,7 @@ threadActionsRegistry.add("open-hr-profile", {
     },
     async setup(action) {
         const component = useComponent();
+        const orm = useService("orm");
         let employeeId;
         if (!component.thread?.correspondent?.employeeId && component.thread?.correspondent) {
             const employees = await orm.silent.searchRead(

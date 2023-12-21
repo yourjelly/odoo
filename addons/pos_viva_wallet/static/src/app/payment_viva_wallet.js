@@ -1,7 +1,6 @@
 /** @odoo-module */
 
 import { _t } from "@web/core/l10n/translation";
-import { orm } from "@web/core/orm";
 import { PaymentInterface } from "@point_of_sale/app/payment/payment_interface";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { sprintf } from "@web/core/utils/strings";
@@ -31,7 +30,7 @@ export class PaymentVivaWallet extends PaymentInterface {
     }
 
     _call_viva_wallet(data, action) {
-        return orm.silent
+        return this.env.services.orm.silent
             .call("pos.payment.method",
                 action,
                 [[this.payment_method.id], data]
@@ -123,7 +122,7 @@ export class PaymentVivaWallet extends PaymentInterface {
      */
     async handleVivaWalletStatusResponse() {
         var line = this.pending_viva_wallet_line();
-        const notification = await orm.silent.call(
+        const notification = await this.env.services.orm.silent.call(
             "pos.payment.method",
             "get_latest_viva_wallet_status",
             [[this.payment_method.id]]

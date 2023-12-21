@@ -4,7 +4,7 @@ import { markRaw, markup, toRaw } from "@odoo/owl";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { serializeDate, serializeDateTime } from "@web/core/l10n/dates";
 import { _t } from "@web/core/l10n/translation";
-import { x2ManyCommands } from "@web/core/orm";
+import { x2ManyCommands } from "@web/core/orm_service";
 import { evaluateBooleanExpr } from "@web/core/py_js/py";
 import { escape } from "@web/core/utils/strings";
 import { DataPoint } from "./datapoint";

@@ -2,7 +2,6 @@
 
 import { Domain } from "@web/core/domain";
 import { _t } from "@web/core/l10n/translation";
-import { orm } from "@web/core/orm";
 import { KeepLast, Mutex } from "@web/core/utils/concurrency";
 import { pick } from "@web/core/utils/objects";
 import { Model } from "@web/model/model";
@@ -690,7 +689,7 @@ export class HierarchyModel extends Model {
      * @returns {Object[]} main data for hierarchy view
      */
     async _loadData(config) {
-        const result = await orm.call(
+        const result = await this.orm.call(
             this.resModel,
             "hierarchy_read",
             [config.domain, this.fieldsToFetch, this.parentFieldName, this.childFieldName],
@@ -761,7 +760,7 @@ export class HierarchyModel extends Model {
                 [["id", "!=", node.resId]],
             ])
         }
-        const result = await orm.searchRead(
+        const result = await this.orm.searchRead(
             this.resModel,
             domain.toList({}),
             this.fieldsToFetch,
@@ -797,7 +796,7 @@ export class HierarchyModel extends Model {
         if (excludeResIds) {
             childrenResIds = childrenResIds.filter((childResId) => !excludeResIds.includes(childResId));
         }
-        const data = await orm.read(
+        const data = await this.orm.read(
             this.resModel,
             childrenResIds,
             this.fieldsToFetch,
@@ -817,7 +816,7 @@ export class HierarchyModel extends Model {
     async _fetchDescendants(childrenData) {
         const resIds = childrenData.map((d) => d.id);
         if (resIds.length) {
-            const fetchChildren = await orm.readGroup(
+            const fetchChildren = await this.orm.readGroup(
                 this.resModel,
                 [[this.parentFieldName, "in", resIds]],
                 ['id:array_agg'],
@@ -884,7 +883,7 @@ export class HierarchyModel extends Model {
             }
             this.notify({ scrollTarget: "none" });
             await this.mutex.exec(async () => {
-                await orm.write(
+                await this.orm.write(
                     this.resModel,
                     [node.resId],
                     { [this.parentFieldName]: parentResId || parentNode?.resId || false },
@@ -897,7 +896,7 @@ export class HierarchyModel extends Model {
             domain = domain.toList({});
             const descendants = {};
             if (domain.length) {
-                const data = await orm.searchRead(
+                const data = await this.orm.searchRead(
                     this.resModel,
                     domain,
                     this.fieldsToFetch,

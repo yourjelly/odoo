@@ -2,9 +2,8 @@
 
 import { _t } from "@web/core/l10n/translation";
 import { AutoComplete } from "@web/core/autocomplete/autocomplete";
-import { orm } from "@web/core/orm";
 import { Transition } from "@web/core/transition";
-import { useOwnedDialogs } from "@web/core/utils/hooks";
+import { useOwnedDialogs, useService } from "@web/core/utils/hooks";
 import { SelectCreateDialog } from "@web/views/view_dialogs/select_create_dialog";
 import { getColor } from "../colors";
 import { Component, useState } from "@odoo/owl";
@@ -27,6 +26,7 @@ export class CalendarFilterPanel extends Component {
             fieldRev: 1,
         });
         this.addDialog = useOwnedDialogs();
+        this.orm = useService("orm");
     }
 
     getFilterColor(filter) {
@@ -60,7 +60,7 @@ export class CalendarFilterPanel extends Component {
         const domain = [
             ["id", "not in", section.filters.filter((f) => f.type !== "all").map((f) => f.value)],
         ];
-        const records = await orm.call(resModel, "name_search", [], {
+        const records = await this.orm.call(resModel, "name_search", [], {
             name: request,
             operator: "ilike",
             args: domain,
@@ -94,7 +94,7 @@ export class CalendarFilterPanel extends Component {
     async onSearchMore(section, resModel, domain, request) {
         const dynamicFilters = [];
         if (request.length) {
-            const nameGets = await orm.call(resModel, "name_search", [], {
+            const nameGets = await this.orm.call(resModel, "name_search", [], {
                 name: request,
                 args: domain,
                 operator: "ilike",

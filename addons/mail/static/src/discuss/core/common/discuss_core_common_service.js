@@ -3,7 +3,6 @@
 import { reactive } from "@odoo/owl";
 
 import { _t } from "@web/core/l10n/translation";
-import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
 
 export class DiscussCoreCommon {
@@ -15,6 +14,7 @@ export class DiscussCoreCommon {
         this.busService = services.bus_service;
         this.env = env;
         this.notificationService = services.notification;
+        this.orm = services.orm;
         this.presence = services.presence;
         this.messageService = services["mail.message"];
         this.messagingService = services["mail.messaging"];
@@ -171,7 +171,7 @@ export class DiscussCoreCommon {
     }
 
     async createGroupChat({ default_display_mode, partners_to }) {
-        const data = await orm.call("discuss.channel", "create_group", [], {
+        const data = await this.orm.call("discuss.channel", "create_group", [], {
             default_display_mode,
             partners_to,
         });
@@ -275,6 +275,7 @@ export const discussCoreCommon = {
         "mail.store",
         "mail.thread",
         "notification",
+        "orm",
         "presence",
     ],
     /**

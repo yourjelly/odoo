@@ -1,5 +1,6 @@
 /** @odoo-module **/
 
+import { registry } from "@web/core/registry";
 import { rpc } from "@web/core/network/rpc";
 import { user } from "@web/core/user";
 
@@ -299,4 +300,34 @@ export class ORM {
     }
 }
 
-export const orm = new ORM();
+/**
+ * Note:
+ *
+ * when we will need a way to configure a rpc (for example, to setup a "shadow"
+ * flag, or some way of not displaying errors), we can use the following api:
+ *
+ * this.orm = useService('orm');
+ *
+ * ...
+ *
+ * const result = await this.orm.withOption({shadow: true}).read('res.partner', [id]);
+ */
+export const ormService = {
+    async: [
+        "call",
+        "create",
+        "nameGet",
+        "read",
+        "readGroup",
+        "search",
+        "searchRead",
+        "unlink",
+        "webSearchRead",
+        "write",
+    ],
+    start() {
+        return new ORM();
+    },
+};
+
+registry.category("services").add("orm", ormService);

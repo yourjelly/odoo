@@ -31,6 +31,7 @@ export class PaymentScreen extends Component {
     setup() {
         this.pos = usePos();
         this.ui = useState(useService("ui"));
+        this.orm = useService("orm");
         this.dialog = useService("dialog");
         this.report = useService("report");
         this.notification = useService("pos_notification");

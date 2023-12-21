@@ -1,6 +1,5 @@
 /** @odoo-module  */
 
-import { orm } from "@web/core/orm";
 import { formatDate } from "@web/core/l10n/dates";
 import { useService } from '@web/core/utils/hooks';
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
@@ -19,6 +18,7 @@ export class ProjectMilestone extends Component {
     static template = "project.ProjectMilestone";
 
     setup() {
+        this.orm = useService('orm');
         this.dialog = useService("dialog");
         this.milestone = useState(this.props.milestone);
         this.state = useState({
@@ -60,7 +60,7 @@ export class ProjectMilestone extends Component {
         this.dialog.add(ConfirmationDialog, {
             body: _t("Are you sure you want to delete this record?"),
             confirm: async () => {
-                await orm.call('project.milestone', 'unlink', [this.milestone.id]);
+                await this.orm.call('project.milestone', 'unlink', [this.milestone.id]);
                 await this.props.load();
             },
             cancel: () => {},
@@ -88,7 +88,7 @@ export class ProjectMilestone extends Component {
     async toggleIsReached() {
         if (!this.write_mutex) {
             this.write_mutex = true;
-            this.milestone = await orm.call(
+            this.milestone = await this.orm.call(
                 this.resModel,
                 'toggle_is_reached',
                 [[this.milestone.id], !this.milestone.is_reached],

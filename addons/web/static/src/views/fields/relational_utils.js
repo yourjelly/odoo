@@ -152,7 +152,7 @@ export function useSpecialData(loadFn) {
     const record = component.props.record;
     const key = `${record.resModel}-${component.props.name}`;
     const { specialDataCaches } = record.model;
-    const orm = component.env.services.orm; // TODO AAB
+    const orm = component.env.services.orm;
     const ormWithCache = Object.create(orm);
     if (!specialDataCaches[key]) {
         specialDataCaches[key] = new Cache(
@@ -216,6 +216,8 @@ export class Many2XAutocomplete extends Component {
         dropdown: true,
     };
     setup() {
+        this.orm = useService("orm");
+
         this.autoCompleteContainer = useForwardRefToParent("autocomplete_container");
         const { activeActions, resModel, update, isToMany, fieldString } = this.props;
 
@@ -298,7 +300,7 @@ export class Many2XAutocomplete extends Component {
     }
 
     search(name) {
-        return orm.call(this.props.resModel, "name_search", [], {
+        return this.orm.call(this.props.resModel, "name_search", [], {
             name: name,
             operator: "ilike",
             args: this.props.getDomain(),
@@ -394,7 +396,7 @@ export class Many2XAutocomplete extends Component {
         const domain = getDomain();
         let dynamicFilters = [];
         if (request.length) {
-            const nameGets = await orm.call(resModel, "name_search", [], {
+            const nameGets = await this.orm.call(resModel, "name_search", [], {
                 name: request,
                 args: domain,
                 operator: "ilike",
@@ -451,6 +453,7 @@ export function useOpenMany2XRecord({
     onClose = (isNew) => {},
 }) {
     const addDialog = useOwnedDialogs();
+    const orm = useService("orm");
 
     return async function openDialog(
         { resId = false, forceModel = null, title, context },

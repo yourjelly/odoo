@@ -1,6 +1,5 @@
 /** @odoo-module **/
 
-import { orm } from "@web/core/orm";
 import { patch } from "@web/core/utils/patch";
 import { AvatarCardResourcePopover } from "@resource_mail/components/avatar_card_resource/avatar_card_resource_popover";
 
@@ -11,7 +10,7 @@ export const patchAvatarCardResourcePopover = {
         this.skills = false;
         if (this.record.employee_skill_ids?.length) {
             promises.push(
-                orm
+                this.orm
                     .read("hr.employee.skill", this.record.employee_skill_ids, ["display_name"])
                     .then((skills) => {
                         this.skills = skills;

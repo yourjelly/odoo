@@ -6,7 +6,6 @@ import { ActionPanel } from "@mail/discuss/core/common/action_panel";
 import { Component, onMounted, onWillStart, useRef, useState } from "@odoo/owl";
 
 import { _t } from "@web/core/l10n/translation";
-import { orm } from "@web/core/orm";
 import { useService } from "@web/core/utils/hooks";
 import { useSequential } from "@mail/utils/common/hooks";
 
@@ -18,6 +17,7 @@ export class ChannelInvitation extends Component {
 
     setup() {
         this.discussCoreCommonService = useState(useService("discuss.core.common"));
+        this.orm = useService("orm");
         this.store = useState(useService("mail.store"));
         this.notification = useService("notification");
         this.threadService = useState(useService("mail.thread"));
@@ -45,7 +45,7 @@ export class ChannelInvitation extends Component {
 
     async fetchPartnersToInvite() {
         const results = await this.sequential(() =>
-            orm.call("res.partner", "search_for_channel_invite", [
+            this.orm.call("res.partner", "search_for_channel_invite", [
                 this.searchStr,
                 this.props.thread.id,
             ])
@@ -99,7 +99,7 @@ export class ChannelInvitation extends Component {
                 ...this.state.selectedPartners.map((partner) => partner.id),
             ]);
         } else {
-            await orm.call("discuss.channel", "add_members", [[this.props.thread.id]], {
+            await this.orm.call("discuss.channel", "add_members", [[this.props.thread.id]], {
                 partner_ids: this.state.selectedPartners.map((partner) => partner.id),
             });
         }

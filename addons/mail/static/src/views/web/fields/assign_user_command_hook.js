@@ -5,8 +5,8 @@ import { useComponent } from "@odoo/owl";
 import { useCommand } from "@web/core/commands/command_hook";
 import { Domain } from "@web/core/domain";
 import { _t } from "@web/core/l10n/translation";
-import { orm } from "@web/core/orm";
 import { user } from "@web/core/user";
+import { useService } from "@web/core/utils/hooks";
 import { getFieldDomain } from "@web/model/relational_model/utils";
 
 /**
@@ -15,6 +15,7 @@ import { getFieldDomain } from "@web/model/relational_model/utils";
 
 export function useAssignUserCommand() {
     const component = useComponent();
+    const orm = useService("orm");
     const type = component.props.record.fields[component.props.name].type;
     if (component.relation !== "res.users") {
         return;

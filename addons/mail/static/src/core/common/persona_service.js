@@ -18,6 +18,7 @@ export class PersonaService {
      */
     setup(env, services) {
         this.env = env;
+        this.orm = services.orm;
         /** @type {import("@mail/core/common/store_service").Store} */
         this.store = services["mail.store"];
         this.sequential = useSequential();
@@ -62,7 +63,7 @@ export class PersonaService {
 }
 
 export const personaService = {
-    dependencies: ["mail.store"],
+    dependencies: ["orm", "mail.store"],
     /**
      * @param {import("@web/env").OdooEnv} env
      * @param {Partial<import("services").Services>} services

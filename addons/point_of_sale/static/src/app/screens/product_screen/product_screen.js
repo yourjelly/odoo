@@ -5,7 +5,6 @@ import { useService } from "@web/core/utils/hooks";
 import { useBarcodeReader } from "@point_of_sale/app/barcode/barcode_reader_hook";
 import { parseFloat } from "@web/views/fields/parsers";
 import { _t } from "@web/core/l10n/translation";
-import { orm } from "@web/core/orm";
 import { NumberPopup } from "@point_of_sale/app/utils/input_popups/number_popup";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { ConnectionAbortedError, ConnectionLostError } from "@web/core/network/rpc";
@@ -44,6 +43,7 @@ export class ProductScreen extends Component {
         super.setup();
         this.pos = usePos();
         this.ui = useState(useService("ui"));
+        this.orm = useService("orm");
         this.dialog = useService("dialog");
         this.notification = useService("pos_notification");
         this.numberBuffer = useService("number_buffer");
@@ -276,7 +276,7 @@ export class ProductScreen extends Component {
         let product = this.pos.db.get_product_by_barcode(code.base_code);
         if (!product) {
             // find the barcode in the backend
-            const { product_id = [], packaging = [] } = await orm.silent.call(
+            const { product_id = [], packaging = [] } = await this.orm.silent.call(
                 "pos.session",
                 "find_product_by_barcode",
                 [odoo.pos_session_id, code.base_code]
@@ -335,7 +335,7 @@ export class ProductScreen extends Component {
         let partner = this.pos.db.get_partner_by_barcode(code.code);
         if (!partner) {
             // find the partner in the backend by the barcode
-            const foundPartnerIds = await orm.search("res.partner", [
+            const foundPartnerIds = await this.orm.search("res.partner", [
                 ["barcode", "=", code.code],
             ]);
             if (foundPartnerIds.length) {
@@ -519,7 +519,7 @@ export class ProductScreen extends Component {
 
         try {
             const limit = 30;
-            const ProductIds = await orm.call(
+            const ProductIds = await this.orm.call(
                 "product.product",
                 "search",
                 [
@@ -559,7 +559,7 @@ export class ProductScreen extends Component {
     async loadDemoDataProducts() {
         try {
             this.state.loadingDemo = true;
-            const { models_data, successful } = await orm.call(
+            const { models_data, successful } = await this.orm.call(
                 "pos.session",
                 "load_product_frontend",
                 [this.pos.pos_session.id]

@@ -5,7 +5,6 @@ import {
     useX2ManyCrud,
     useOpenX2ManyRecord,
 } from "@web/views/fields/relational_utils";
-import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
 import { _t } from "@web/core/l10n/translation";
 import { CommonSkillsListRenderer } from "../../views/skills_list_renderer";
@@ -17,10 +16,11 @@ export class SkillsListRenderer extends CommonSkillsListRenderer {
     static template = "hr_skills.SkillsListRenderer";
     setup() {
         super.setup();
+        this.orm = useService('orm');
         this.actionService = useService("action");
 
         onWillStart(async () => {
-            const res = await orm.searchCount('hr.skill', []);
+            const res = await this.orm.searchCount('hr.skill', []);
             this.anySkills = res > 0;
         });
     }

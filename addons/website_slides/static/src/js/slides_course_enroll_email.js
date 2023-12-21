@@ -3,13 +3,16 @@
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { _t } from "@web/core/l10n/translation";
 import { escape } from "@web/core/utils/strings";
-import { orm } from "@web/core/orm";
 import publicWidget from "@web/legacy/js/public/public_widget";
 
 export const WebsiteSlidesEnroll = publicWidget.Widget.extend({
     selector: "#wrapwrap",
     events: {
         "click .o_wslides_js_channel_enroll": "_onSendRequestClick",
+    },
+    init() {
+        this._super(...arguments);
+        this.orm = this.bindService("orm");
     },
     async _onSendRequestClick(ev) {
         ev.preventDefault();
@@ -24,7 +27,7 @@ export const WebsiteSlidesEnroll = publicWidget.Widget.extend({
                 cancel: () => {}, // show cancel button
             })
         );
-        const { error, done } = await orm.call(
+        const { error, done } = await this.orm.call(
             "slide.channel",
             "action_request_access",
             [channelId],

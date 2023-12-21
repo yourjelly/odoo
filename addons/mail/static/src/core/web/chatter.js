@@ -28,7 +28,6 @@ import { browser } from "@web/core/browser/browser";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { _t } from "@web/core/l10n/translation";
 import { usePopover } from "@web/core/popover/popover_hook";
-import { orm } from "@web/core/orm";
 import { user } from "@web/core/user";
 import { useService } from "@web/core/utils/hooks";
 import { escape } from "@web/core/utils/strings";
@@ -95,6 +94,7 @@ export class Chatter extends Component {
         this.activityService = useState(useService("mail.activity"));
         this.threadService = useService("mail.thread");
         this.store = useState(useService("mail.store"));
+        this.orm = useService("orm");
         this.state = useState({
             composerType: false,
             isAttachmentBoxOpened: this.props.isAttachmentBoxVisibleInitially,
@@ -269,7 +269,7 @@ export class Chatter extends Component {
     }
 
     async _follow(thread) {
-        await orm.call(thread.model, "message_subscribe", [[thread.id]], {
+        await this.orm.call(thread.model, "message_subscribe", [[thread.id]], {
             partner_ids: [this.store.self.id],
         });
         this.onFollowerChanged(thread);

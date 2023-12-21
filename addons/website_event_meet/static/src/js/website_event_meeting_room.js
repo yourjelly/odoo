@@ -2,7 +2,6 @@
 
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import publicWidget from "@web/legacy/js/public/public_widget";
-import { orm } from "@web/core/orm";
 import { _t } from "@web/core/l10n/translation";
 
 publicWidget.registry.websiteEventMeetingRoom = publicWidget.Widget.extend({
@@ -11,6 +10,11 @@ publicWidget.registry.websiteEventMeetingRoom = publicWidget.Widget.extend({
         'click .o_wevent_meeting_room_delete': '_onDeleteClick',
         'click .o_wevent_meeting_room_duplicate': '_onDuplicateClick',
         'click .o_wevent_meeting_room_is_pinned': '_onPinClick',
+    },
+
+    init() {
+        this._super(...arguments);
+        this.orm = this.bindService("orm");
     },
 
     start: function () {
@@ -35,7 +39,7 @@ publicWidget.registry.websiteEventMeetingRoom = publicWidget.Widget.extend({
         this.call("dialog", "add", ConfirmationDialog, {
             body: _t("Are you sure you want to close this room?"),
             confirm: async () => {
-                await orm.write(
+                await this.orm.write(
                     "event.meeting.room",
                     [this.meetingRoomId],
                     { is_published: false },
@@ -59,7 +63,7 @@ publicWidget.registry.websiteEventMeetingRoom = publicWidget.Widget.extend({
         this.call("dialog", "add", ConfirmationDialog, {
             body: _t("Are you sure you want to duplicate this room?"),
             confirm: async () => {
-                await orm.call("event.meeting.room", "copy", [this.meetingRoomId], {
+                await this.orm.call("event.meeting.room", "copy", [this.meetingRoomId], {
                     context: this.context,
                 });
 
@@ -80,7 +84,7 @@ publicWidget.registry.websiteEventMeetingRoom = publicWidget.Widget.extend({
         const pinnedButtonClass = "o_wevent_meeting_room_pinned";
         const isPinned = event.currentTarget.classList.contains(pinnedButtonClass);
 
-        await orm.write(
+        await this.orm.write(
             "event.meeting.room",
             [this.meetingRoomId],
             { is_pinned: !isPinned },

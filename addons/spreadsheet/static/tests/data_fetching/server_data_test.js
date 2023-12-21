@@ -281,7 +281,6 @@ QUnit.module("spreadsheet server data", {}, () => {
     });
 
     QUnit.test("Call the correct callback after a batch result", async (assert) => {
-        // TODO patch orm
         const orm = {
             call: async (model, method, args) => {
                 if (args[0].includes(5)) {
@@ -290,7 +289,7 @@ QUnit.module("spreadsheet server data", {}, () => {
                 return args[0];
             },
         };
-        const batchEndpoint = new BatchEndpoint("partner", "get_something", {
+        const batchEndpoint = new BatchEndpoint(orm, "partner", "get_something", {
             whenDataIsFetched: () => {},
             successCallback: () => assert.step("success-callback"),
             failureCallback: () => assert.step("failure-callback"),

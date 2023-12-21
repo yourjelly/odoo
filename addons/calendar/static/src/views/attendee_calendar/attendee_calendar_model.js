@@ -2,7 +2,6 @@
 
 import { _t } from "@web/core/l10n/translation";
 import { rpc } from "@web/core/network/rpc";
-import { orm } from "@web/core/orm";
 import { user } from "@web/core/user";
 import { CalendarModel } from "@web/views/calendar/calendar_model";
 import { askRecurrenceUpdatePolicy } from "@calendar/views/ask_recurrence_update_policy_hook";
@@ -22,7 +21,7 @@ export class AttendeeCalendarModel extends CalendarModel {
         const res = await super.load(...arguments);
         const [credentialStatus, defaultDuration] = await Promise.all([
             rpc("/calendar/check_credentials"),
-            orm.call("calendar.event", "get_default_duration"),
+            this.orm.call("calendar.event", "get_default_duration"),
         ]);
         this.credentialStatus = credentialStatus;
         this.defaultDuration = defaultDuration;
@@ -93,7 +92,7 @@ export class AttendeeCalendarModel extends CalendarModel {
                 .filter((filter) => filter.type !== "all" && filter.value)
                 .map((filter) => filter.value);
         }
-        data.attendees = await orm.call("res.partner", "get_attendee_detail", [
+        data.attendees = await this.orm.call("res.partner", "get_attendee_detail", [
             attendeeIds,
             eventIds,
         ]);
@@ -188,9 +187,9 @@ export class AttendeeCalendarModel extends CalendarModel {
 
     async _archiveRecord(id, recurrenceUpdate) {
         if (!recurrenceUpdate && recurrenceUpdate !== "self_only") {
-            await orm.call(this.resModel, "action_archive", [[id]]);
+            await this.orm.call(this.resModel, "action_archive", [[id]]);
         } else {
-            await orm.call(this.resModel, "action_mass_archive", [[id], recurrenceUpdate]);
+            await this.orm.call(this.resModel, "action_mass_archive", [[id], recurrenceUpdate]);
         }
         await this.load();
     }

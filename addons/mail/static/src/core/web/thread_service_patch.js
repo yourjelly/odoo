@@ -5,7 +5,6 @@ import { parseEmail } from "@mail/utils/common/format";
 
 import { _t } from "@web/core/l10n/translation";
 import { rpc } from "@web/core/network/rpc";
-import { orm } from "@web/core/orm";
 import { patch } from "@web/core/utils/patch";
 import { Record } from "@mail/core/common/record";
 
@@ -152,7 +151,7 @@ patch(ThreadService.prototype, {
     },
     /** @param {import("models").Thread} thread */
     async loadMoreFollowers(thread) {
-        const followers = await orm.call(thread.model, "message_get_followers", [
+        const followers = await this.orm.call(thread.model, "message_get_followers", [
             [thread.id],
             thread.followers.at(-1).id,
         ]);
@@ -169,7 +168,7 @@ patch(ThreadService.prototype, {
         });
     },
     async loadMoreRecipients(thread) {
-        const recipients = await orm.call(
+        const recipients = await this.orm.call(
             thread.model,
             "message_get_followers",
             [[thread.id], thread.recipients.at(-1).id],
@@ -209,7 +208,7 @@ patch(ThreadService.prototype, {
      * @param {import("models").Follower} follower
      */
     async removeFollower(follower) {
-        await orm.call(follower.followedThread.model, "message_unsubscribe", [
+        await this.orm.call(follower.followedThread.model, "message_unsubscribe", [
             [follower.followedThread.id],
             [follower.partner.id],
         ]);

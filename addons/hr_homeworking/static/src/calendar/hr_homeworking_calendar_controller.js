@@ -1,7 +1,6 @@
 /** @odoo-module **/
 
 import { _t } from "@web/core/l10n/translation";
-import { orm } from "@web/core/orm";
 import { patch } from "@web/core/utils/patch";
 import { useService } from "@web/core/utils/hooks";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
@@ -54,7 +53,7 @@ patch(AttendeeCalendarController.prototype, {
                     confirm: () => {
                         const dayName = record.start.setLocale("en").weekdayLong.toLowerCase();
                         const locationField = `${dayName}_location_id`;
-                        orm.call('hr.employee', "write", [
+                        this.orm.call('hr.employee', "write", [
                             [record.rawRecord.employee_id],
                             {[locationField]: false}
                         ]);
@@ -68,7 +67,7 @@ patch(AttendeeCalendarController.prototype, {
                     title: _t("Confirmation"),
                     body: _t("Are you sure you want to delete this exception?"),
                     confirm: () => {
-                        orm.call('hr.employee.location', "unlink", [
+                        this.orm.call('hr.employee.location', "unlink", [
                             record.id,
                         ]);
                         this.model.load();

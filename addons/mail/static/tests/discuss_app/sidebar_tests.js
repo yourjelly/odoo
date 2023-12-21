@@ -1,6 +1,5 @@
 /* @odoo-module */
 
-import { orm } from "@web/core/orm";
 import { rpc } from "@web/core/network/rpc";
 
 import { startServer } from "@bus/../tests/helpers/mock_python_environment";
@@ -739,13 +738,13 @@ QUnit.test("channel - avatar: should have correct avatar", async () => {
 QUnit.test("channel - avatar: should update avatar url from bus", async (assert) => {
     const pyEnv = await startServer();
     const channelId = pyEnv["discuss.channel"].create({ avatarCacheKey: "101010", name: "test" });
-    const { openDiscuss } = await start();
+    const { env, openDiscuss } = await start();
     openDiscuss(channelId);
     await contains(
         `img[data-src='${getOrigin()}/discuss/channel/${channelId}/avatar_128?unique=101010']`,
         { count: 2 }
     );
-    await orm.call("discuss.channel", "write", [
+    await env.services.orm.call("discuss.channel", "write", [
         [channelId],
         { image_128: "This field does not matter" },
     ]);
@@ -765,16 +764,16 @@ QUnit.test("channel - states: close should update the value on the server", asyn
         is_discuss_sidebar_category_channel_open: true,
     });
     const currentUserId = pyEnv.currentUserId;
-    const { openDiscuss } = await start();
+    const { openDiscuss, env } = await start();
     openDiscuss();
-    const initalSettings = await orm.call(
+    const initalSettings = await env.services.orm.call(
         "res.users.settings",
         "_find_or_create_for_user",
         [[currentUserId]]
     );
     assert.ok(initalSettings.is_discuss_sidebar_category_channel_open);
     await click(".o-mail-DiscussSidebarCategory .btn", { text: "Channels" });
-    const newSettings = await orm.call(
+    const newSettings = await env.services.orm.call(
         "res.users.settings",
         "_find_or_create_for_user",
         [[currentUserId]]
@@ -790,9 +789,9 @@ QUnit.test("channel - states: open should update the value on the server", async
         is_discuss_sidebar_category_channel_open: false,
     });
     const currentUserId = pyEnv.currentUserId;
-    const { openDiscuss } = await start();
+    const { openDiscuss, env } = await start();
     openDiscuss();
-    const initalSettings = await orm.call(
+    const initalSettings = await env.services.orm.call(
         "res.users.settings",
         "_find_or_create_for_user",
         [[currentUserId]]
@@ -800,7 +799,7 @@ QUnit.test("channel - states: open should update the value on the server", async
     assert.notOk(initalSettings.is_discuss_sidebar_category_channel_open);
 
     await click(".o-mail-DiscussSidebarCategory .btn", { text: "Channels" });
-    const newSettings = await orm.call(
+    const newSettings = await env.services.orm.call(
         "res.users.settings",
         "_find_or_create_for_user",
         [[currentUserId]]
@@ -884,9 +883,9 @@ QUnit.test("chat - states: close should call update server data", async (assert)
         is_discuss_sidebar_category_chat_open: true,
     });
     const currentUserId = pyEnv.currentUserId;
-    const { openDiscuss } = await start();
+    const { openDiscuss, env } = await start();
     openDiscuss();
-    const initalSettings = await orm.call(
+    const initalSettings = await env.services.orm.call(
         "res.users.settings",
         "_find_or_create_for_user",
         [[currentUserId]]
@@ -894,7 +893,7 @@ QUnit.test("chat - states: close should call update server data", async (assert)
     assert.ok(initalSettings.is_discuss_sidebar_category_chat_open);
 
     await click(".o-mail-DiscussSidebarCategory-chat .btn", { text: "Direct messages" });
-    const newSettings = await orm.call(
+    const newSettings = await env.services.orm.call(
         "res.users.settings",
         "_find_or_create_for_user",
         [[currentUserId]]
@@ -909,10 +908,10 @@ QUnit.test("chat - states: open should call update server data", async (assert) 
         user_id: pyEnv.currentUserId,
         is_discuss_sidebar_category_chat_open: false,
     });
-    const { openDiscuss } = await start();
+    const { openDiscuss, env } = await start();
     openDiscuss();
     const currentUserId = pyEnv.currentUserId;
-    const initalSettings = await orm.call(
+    const initalSettings = await env.services.orm.call(
         "res.users.settings",
         "_find_or_create_for_user",
         [[currentUserId]]
@@ -920,7 +919,7 @@ QUnit.test("chat - states: open should call update server data", async (assert) 
     assert.notOk(initalSettings.is_discuss_sidebar_category_chat_open);
 
     await click(".o-mail-DiscussSidebarCategory-chat .btn", { text: "Direct messages" });
-    const newSettings = await orm.call(
+    const newSettings = await env.services.orm.call(
         "res.users.settings",
         "_find_or_create_for_user",
         [[currentUserId]]

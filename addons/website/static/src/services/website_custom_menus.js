@@ -1,7 +1,6 @@
 /** @odoo-module **/
 
 import { _t } from "@web/core/l10n/translation";
-import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
 import { EditMenuDialog } from '@website/components/dialog/edit_menu';
 import { OptimizeSEODialog } from '@website/components/dialog/seo';
@@ -104,7 +103,7 @@ registry.category('website_custom_menus').add('website.menu_page_properties', {
         && env.services.website.currentWebsite.metadata.mainObject.model === 'website.page',
     getProps: (services) => ({
         onRecordSaved: (record) => {
-            return orm.read('website.page', [record.resId], ['url']).then(res => {
+            return services.orm.read('website.page', [record.resId], ['url']).then(res => {
                 services.website.goToWebsite({websiteId: record.data.website_id[0], path: res[0]['url']});
             });
         },

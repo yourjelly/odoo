@@ -5,7 +5,6 @@ import { browser } from "@web/core/browser/browser";
 import { CheckBox } from "@web/core/checkbox/checkbox";
 import { Dialog } from "@web/core/dialog/dialog";
 import { rpc } from "@web/core/network/rpc";
-import { orm } from "@web/core/orm";
 import { unique } from "@web/core/utils/arrays";
 import { useService } from "@web/core/utils/hooks";
 import { fuzzyLookup } from "@web/core/utils/search";
@@ -93,6 +92,7 @@ export class ExportDataDialog extends Component {
     setup() {
         this.dialog = useService("dialog");
         this.notification = useService("notification");
+        this.orm = useService("orm");
         this.draggableRef = useRef("draggable");
         this.exportListRef = useRef("exportList");
         this.searchRef = useRef("search");
@@ -146,7 +146,7 @@ export class ExportDataDialog extends Component {
 
         onWillStart(async () => {
             this.availableFormats = await rpc("/web/export/formats");
-            this.templates = await orm.searchRead(
+            this.templates = await this.orm.searchRead(
                 "ir.exports",
                 [["resource", "=", this.props.root.resModel]],
                 [],
@@ -319,7 +319,7 @@ export class ExportDataDialog extends Component {
                 type: "danger",
             });
         }
-        const [id] = await orm.create(
+        const [id] = await this.orm.create(
             "ir.exports",
             [
                 {
@@ -370,7 +370,7 @@ export class ExportDataDialog extends Component {
             text: _t("Do you really want to delete this export template?"),
             delete: async () => {
                 const id = Number(this.state.templateId);
-                await orm.unlink("ir.exports", [id], { context: this.props.context });
+                await this.orm.unlink("ir.exports", [id], { context: this.props.context });
                 this.templates.splice(
                     this.templates.findIndex((i) => i.id === id),
                     1

@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
-import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
+import { useService } from "@web/core/utils/hooks";
 import { loadBundle } from "@web/core/assets";
 import { renderToString } from "@web/core/utils/render";
 import { useDebounced } from "@web/core/utils/timing";
@@ -31,6 +31,7 @@ export class ProfilingQwebView extends Component {
     setup() {
         super.setup();
 
+        this.orm = useService("orm");
         this.ace = useRef("ace");
         this.selector = useRef("selector");
 
@@ -80,7 +81,7 @@ export class ProfilingQwebView extends Component {
      */
     async _fetchViewData() {
         const viewIDs = Array.from(new Set(this.profile.data.map((line) => line.view_id)));
-        const viewObjects = await orm.call("ir.ui.view", "search_read", [], {
+        const viewObjects = await this.orm.call("ir.ui.view", "search_read", [], {
             fields: ["id", "display_name", "key"],
             domain: [["id", "in", viewIDs]],
         });

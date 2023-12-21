@@ -1,7 +1,6 @@
 /** @odoo-module **/
 
 import { _t } from "@web/core/l10n/translation";
-import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
 import { pick } from "@web/core/utils/objects";
 import { groupBy, sortBy } from "@web/core/utils/arrays";
@@ -77,9 +76,10 @@ const strftimeToHumanFormat = memoize(function strftimeToHumanFormat(value) {
  *
  */
 export class BaseImportModel {
-    constructor({ env, resModel, context }) {
+    constructor({ env, resModel, context, orm }) {
         this.id = 1;
         this.env = env;
+        this.orm = orm;
         this.handleInterruption = false;
 
         this.resModel = resModel;
@@ -208,10 +208,10 @@ export class BaseImportModel {
 
     async init() {
         [this.importTemplates, this.id] = await Promise.all([
-            orm.call(this.resModel, "get_import_templates", [], {
+            this.orm.call(this.resModel, "get_import_templates", [], {
                 context: this.context,
             }),
-            orm.call("base_import.import", "create", [{ res_model: this.resModel }]),
+            this.orm.call("base_import.import", "create", [{ res_model: this.resModel }]),
         ]);
     }
 
@@ -288,7 +288,7 @@ export class BaseImportModel {
         }
         this.importMessages = [];
 
-        const res = await orm.call("base_import.import", "parse_preview", [
+        const res = await this.orm.call("base_import.import", "parse_preview", [
             this.id,
             this.formattedImportOptions,
         ]);
@@ -381,7 +381,7 @@ export class BaseImportModel {
 
     async _callImport(dryrun, args) {
         try {
-            const res = await orm.silent.call("base_import.import", "execute_import", args, {
+            const res = await this.orm.silent.call("base_import.import", "execute_import", args, {
                 dryrun,
                 context: {
                     ...this.context,
@@ -765,6 +765,6 @@ export class BaseImportModel {
 /**
  * @returns {BaseImportModel}columns
  */
-export function useImportModel({ env, resModel, context }) {
-    return useState(new BaseImportModel({ env, resModel, context }));
+export function useImportModel({ env, resModel, context, orm }) {
+    return useState(new BaseImportModel({ env, resModel, context, orm }));
 }

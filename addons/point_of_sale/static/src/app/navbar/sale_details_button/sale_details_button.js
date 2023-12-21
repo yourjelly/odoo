@@ -1,6 +1,5 @@
 /** @odoo-module */
 
-import { orm } from "@web/core/orm";
 import { useService } from "@web/core/utils/hooks";
 import { renderToElement } from "@web/core/utils/render";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
@@ -13,6 +12,7 @@ export class SaleDetailsButton extends Component {
     setup() {
         super.setup(...arguments);
         this.pos = usePos();
+        this.orm = useService("orm");
         this.dialog = useService("dialog");
         this.hardwareProxy = useService("hardware_proxy");
     }
@@ -21,7 +21,7 @@ export class SaleDetailsButton extends Component {
         // IMPROVEMENT: Perhaps put this logic in a parent component
         // so that for unit testing, we can check if this simple
         // component correctly triggers an event.
-        const saleDetails = await orm.call(
+        const saleDetails = await this.orm.call(
             "report.point_of_sale.report_saledetails",
             "get_sale_details",
             [false, false, false, [this.pos.pos_session.id]]

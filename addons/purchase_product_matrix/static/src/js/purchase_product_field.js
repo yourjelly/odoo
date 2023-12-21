@@ -1,7 +1,6 @@
 /** @odoo-module **/
 
 import { _t } from "@web/core/l10n/translation";
-import { orm } from "@web/core/orm";
 import { registry } from '@web/core/registry';
 import { Many2OneField, many2OneField } from '@web/views/fields/many2one/many2one_field';
 import { ProductMatrixDialog } from "@product_matrix/js/product_matrix_dialog";
@@ -37,7 +36,7 @@ export class PurchaseOrderLineProductField extends Many2OneField {
     }
 
     async _onProductTemplateUpdate() {
-        const result = await orm.call(
+        const result = await this.orm.call(
             'product.template',
             'get_single_product_variant',
             [this.props.record.data.product_template_id[0]],

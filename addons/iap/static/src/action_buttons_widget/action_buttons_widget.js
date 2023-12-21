@@ -1,6 +1,5 @@
 /** @odoo-modules */
 
-import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { standardWidgetProps } from "@web/views/widgets/standard_widget_props";
@@ -15,6 +14,7 @@ class IAPActionButtonsWidget extends Component {
     };
 
     setup() {
+        this.orm = useService("orm");
         this.action = useService("action");
     }
 
@@ -23,7 +23,7 @@ class IAPActionButtonsWidget extends Component {
     }
 
     async onBuyLinkClicked() {
-        const url = await orm.silent.call("iap.account", "get_credits_url", [this.props.serviceName]);
+        const url = await this.orm.silent.call("iap.account", "get_credits_url", [this.props.serviceName]);
         this.action.doAction({
             type: "ir.actions.act_url",
             url: url,

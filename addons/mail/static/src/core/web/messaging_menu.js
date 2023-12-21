@@ -9,7 +9,6 @@ import { Component, useState } from "@odoo/owl";
 import { hasTouch } from "@web/core/browser/feature_detection";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { _t } from "@web/core/l10n/translation";
-import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 
@@ -205,7 +204,7 @@ export class MessagingMenu extends Component {
     }
 
     cancelNotifications(failure) {
-        return orm.call(failure.resModel, "notify_cancel_by_type", [], {
+        return this.env.services.orm.call(failure.resModel, "notify_cancel_by_type", [], {
             notification_type: failure.type,
         });
     }

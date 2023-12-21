@@ -1,6 +1,5 @@
 /** @odoo-module **/
 
-import { orm } from "@web/core/orm";
 import { useService } from "@web/core/utils/hooks";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
@@ -24,6 +23,7 @@ export class StockForecasted extends Component {
         ForecastedDetails,
     };
     setup() {
+        this.orm = useService("orm");
         this.action = useService("action");
 
         this.context = useState(this.props.action.context);
@@ -44,11 +44,11 @@ export class StockForecasted extends Component {
         const isTemplate = !this.resModel || this.resModel === 'product.template';
         this.reportModelName = `stock.forecasted_product_${isTemplate ? "template" : "product"}`;
         this.warehouses.splice(0, this.warehouses.length);
-        this.warehouses.push(...await orm.searchRead('stock.warehouse', [],['id', 'name', 'code']));
+        this.warehouses.push(...await this.orm.searchRead('stock.warehouse', [],['id', 'name', 'code']));
         if (!this.context.warehouse) {
             this.updateWarehouse(this.warehouses[0].id);
         }
-        const reportValues = await orm.call(this.reportModelName, "get_report_values", [], {
+        const reportValues = await this.orm.call(this.reportModelName, "get_report_values", [], {
             context: this.context,
             docids: [this.productId],
         });
@@ -60,7 +60,7 @@ export class StockForecasted extends Component {
         //Following is used as a fallback when the forecast is not called by an action but through browser's history
         if (!this.resModel) {
             if (this.props.action.res_model) {
-                const actionModel = await orm.read('ir.model', [Number(this.props.action.res_model)], ['model']);
+                const actionModel = await this.orm.read('ir.model', [Number(this.props.action.res_model)], ['model']);
                 if (actionModel[0]?.model) {
                     this.resModel = actionModel[0].model
                 }

@@ -1,7 +1,6 @@
 /** @odoo-module **/
 
 import { _t } from "@web/core/l10n/translation";
-import { orm } from "@web/core/orm";
 import { GraphModel } from "@web/views/graph/graph_model";
 import { sortBy } from "@web/core/utils/arrays";
 
@@ -24,7 +23,7 @@ export class BurndownChartModel extends GraphModel {
             !context.active_id || !context.default_project_id
                 ? []
                 : [["project_ids", "in", context.active_id]];
-        const data = await orm.webSearchRead("project.task.type", searchDomain, {
+        const data = await this.orm.webSearchRead("project.task.type", searchDomain, {
             specification: {
                 name: {},
                 sequence: {},

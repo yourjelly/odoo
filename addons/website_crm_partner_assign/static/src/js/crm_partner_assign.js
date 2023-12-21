@@ -3,7 +3,6 @@
 import { _t } from "@web/core/l10n/translation";
 import publicWidget from "@web/legacy/js/public/public_widget";
 import { parseDate, formatDate, serializeDate } from "@web/core/l10n/dates";
-import { orm } from "@web/core/orm";
 import { RPCError } from "@web/core/network/rpc";
 const { DateTime } = luxon;
 
@@ -19,6 +18,11 @@ publicWidget.registry.crmPartnerAssign = publicWidget.Widget.extend({
         'click .edit_opp_confirm': '_onEditOppConfirm',
         'change .edit_opp_form .next_activity': '_onChangeNextActivity',
         'change #new-opp-dialog .contact_name': '_onChangeContactName',
+    },
+
+    init() {
+        this._super(...arguments);
+        this.orm = this.bindService("orm");
     },
 
     //--------------------------------------------------------------------------
@@ -46,7 +50,7 @@ publicWidget.registry.crmPartnerAssign = publicWidget.Widget.extend({
      * @returns {Promise}
      */
     _confirmInterestedPartner: function () {
-        return orm.call("crm.lead", "partner_interested", [
+        return this.orm.call("crm.lead", "partner_interested", [
             [parseInt($('.interested_partner_assign_form .assign_lead_id').val())],
             $('.interested_partner_assign_form .comment_interested').val()
         ]).then(function () {
@@ -58,7 +62,7 @@ publicWidget.registry.crmPartnerAssign = publicWidget.Widget.extend({
      * @returns {Promise}
      */
     _confirmDesinterestedPartner: function () {
-        return orm.call("crm.lead", "partner_desinterested", [
+        return this.orm.call("crm.lead", "partner_desinterested", [
             [parseInt($('.desinterested_partner_assign_form .assign_lead_id').val())],
             $('.desinterested_partner_assign_form .comment_desinterested').val(),
             $('.desinterested_partner_assign_form .contacted_desinterested').prop('checked'),
@@ -73,7 +77,7 @@ publicWidget.registry.crmPartnerAssign = publicWidget.Widget.extend({
      * @returns {Promise}
      */
     _changeOppStage: function (leadID, stageID) {
-        return orm.write("crm.lead", [leadID], { stage_id: stageID }, {
+        return this.orm.write("crm.lead", [leadID], { stage_id: stageID }, {
             context: Object.assign({website_partner_assign: 1}),
         }).then(function () {
             window.location.reload();
@@ -84,7 +88,7 @@ publicWidget.registry.crmPartnerAssign = publicWidget.Widget.extend({
      * @returns {Promise}
      */
     _editContact: function () {
-        return orm.call("crm.lead", "update_contact_details_from_portal", [
+        return this.orm.call("crm.lead", "update_contact_details_from_portal", [
             [parseInt($('.edit_contact_form .opportunity_id').val())],
             {
                 partner_name: $('.edit_contact_form .partner_name').val(),
@@ -107,7 +111,7 @@ publicWidget.registry.crmPartnerAssign = publicWidget.Widget.extend({
      * @returns {Promise}
      */
     _createOpportunity: function () {
-        return orm.call("crm.lead", "create_opp_portal", [{
+        return this.orm.call("crm.lead", "create_opp_portal", [{
             contact_name: $('.new_opp_form .contact_name').val(),
             title: $('.new_opp_form .title').val(),
             description: $('.new_opp_form .description').val(),
@@ -126,7 +130,7 @@ publicWidget.registry.crmPartnerAssign = publicWidget.Widget.extend({
      * @returns {Promise}
      */
     _editOpportunity: function () {
-        return orm.call("crm.lead", "update_lead_portal", [
+        return this.orm.call("crm.lead", "update_lead_portal", [
             [parseInt($('.edit_opp_form .opportunity_id').val())],
             {
                 date_deadline: this._parse_date($('.edit_opp_form .date_deadline').val()),

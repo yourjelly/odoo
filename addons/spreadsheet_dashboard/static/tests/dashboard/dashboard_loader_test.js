@@ -1,6 +1,7 @@
 /** @odoo-module */
 
-import { orm } from "@web/core/orm";
+import { ormService } from "@web/core/orm_service";
+import { registry } from "@web/core/registry";
 import { makeTestEnv } from "@web/../tests/helpers/mock_env";
 import {
     DashboardLoader,
@@ -19,12 +20,13 @@ import { getCellValue } from "@spreadsheet/../tests/utils/getters";
  * @returns {Promise<DashboardLoader>}
  */
 async function createDashboardLoader(params = {}) {
+    registry.category("services").add("orm", ormService);
     const env = await makeTestEnv({
         serverData: params.serverData || getDashboardServerData(),
         mockRPC: params.mockRPC,
     });
-    return new DashboardLoader(env, async (dashboardId) => {
-        const [record] = await orm.read(
+    return new DashboardLoader(env, env.services.orm, async (dashboardId) => {
+        const [record] = await env.services.orm.read(
             "spreadsheet.dashboard",
             [dashboardId],
             ["spreadsheet_data"]

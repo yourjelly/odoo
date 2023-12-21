@@ -449,6 +449,7 @@ class AttachmentMediaDialog extends MediaDialog {
 options.registry.WebsiteSaleProductPage = options.Class.extend({
     init() {
         this._super(...arguments);
+        this.orm = this.bindService("orm");
         this.notification = this.bindService("notification");
     },
 
@@ -607,7 +608,7 @@ options.registry.WebsiteSaleProductPage = options.Class.extend({
             ctx.fillStyle = "rgb(255, 255, 255)";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             ctx.drawImage(imgEl, 0, 0, imgEl.width, imgEl.height, 0, 0, canvas.width, canvas.height);
-            const [resizedId] = await orm.call("ir.attachment", "create_unique", [[{
+            const [resizedId] = await this.orm.call("ir.attachment", "create_unique", [[{
                 name: webpName,
                 description: size === originalSize ? "" : `resize: ${size}`,
                 datas: canvas.toDataURL("image/webp", 0.75).split(",")[1],
@@ -622,7 +623,7 @@ options.registry.WebsiteSaleProductPage = options.Class.extend({
                 attachment.mimetype = "image/webp";
             }
             referenceId = referenceId || resizedId; // Keep track of original.
-            await orm.call("ir.attachment", "create_unique", [[{
+            await this.orm.call("ir.attachment", "create_unique", [[{
                 name: webpName.replace(/\.webp$/, ".jpg"),
                 description: "format: jpeg",
                 datas: canvas.toDataURL("image/jpeg", 0.75).split(",")[1],
@@ -761,6 +762,10 @@ options.registry.SnippetSave.include({
 });
 
 options.registry.ReplaceMedia.include({
+    init() {
+        this._super(...arguments);
+        this.orm = this.bindService("orm");
+    },
     /**
      * @override
      */
@@ -779,7 +784,7 @@ options.registry.ReplaceMedia.include({
         if (this.recordModel === "product.image") {
             // Unlink the "product.image" record as it is not the main product
             // image.
-            await orm.unlink("product.image", [this.recordId]);
+            await this.orm.unlink("product.image", [this.recordId]);
         }
         this.$target[0].remove();
         this.trigger_up("request_save", {reload: true, optionSelector: "#product_detail_main"});

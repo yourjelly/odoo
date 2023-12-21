@@ -1,12 +1,11 @@
 /** @odoo-module */
 
-import { orm } from "@web/core/orm";
 import { ListController } from '@web/views/list/list_controller';
 
 export class StockOrderpointListController extends ListController {
     async onClickOrder(force_to_max) {
         const resIds = await this.getSelectedResIds();
-        const action = await orm.call(this.props.resModel, 'action_replenish', [resIds], {
+        const action = await this.model.orm.call(this.props.resModel, 'action_replenish', [resIds], {
             context: this.props.context,
             force_to_max: force_to_max,
         });

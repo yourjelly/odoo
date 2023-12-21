@@ -1,6 +1,5 @@
 /** @odoo-module **/
 
-import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
 import { _t } from "@web/core/l10n/translation";
 import { useRecordObserver } from "@web/model/relational_model/utils";
@@ -32,6 +31,7 @@ export class MassMailingHtmlField extends HtmlField {
             onWysiwygReset: this._resetIframe.bind(this),
         });
         this.action = useService('action');
+        this.orm = useService('orm');
         this.dialog = useService('dialog');
 
         useRecordObserver((record) => {
@@ -212,7 +212,7 @@ export class MassMailingHtmlField extends HtmlField {
             : [];
 
         // Templates taken from old mailings
-        const result = await orm.call('mailing.mailing', 'action_fetch_favorites', args);
+        const result = await this.orm.call('mailing.mailing', 'action_fetch_favorites', args);
         if (status(this) === 'destroyed') return;
         const templatesParams = result.map(values => {
             return {
@@ -407,7 +407,7 @@ export class MassMailingHtmlField extends HtmlField {
             const $target = $(ev.currentTarget);
             const mailingId = $target.data('id');
 
-            const action = await orm.call('mailing.mailing', 'action_remove_favorite', [mailingId]);
+            const action = await this.orm.call('mailing.mailing', 'action_remove_favorite', [mailingId]);
             this.action.doAction(action);
 
             $target.parents('.o_mail_template_preview').remove();

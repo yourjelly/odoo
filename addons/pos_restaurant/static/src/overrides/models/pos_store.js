@@ -1,6 +1,5 @@
 /** @odoo-module */
 
-import { orm } from "@web/core/orm";
 import { patch } from "@web/core/utils/patch";
 import { PosStore } from "@point_of_sale/app/store/pos_store";
 import { PaymentScreen } from "@point_of_sale/app/screens/payment_screen/payment_screen";
@@ -149,7 +148,7 @@ patch(PosStore.prototype, {
         this.set_synch("connecting", 1);
         try {
             // FIXME POSREF timeout
-            const orders = await orm.silent.call(
+            const orders = await this.env.services.orm.silent.call(
                 "pos.order",
                 "export_for_ui_table_draft",
                 [tableIds]
@@ -313,7 +312,7 @@ patch(PosStore.prototype, {
         if (floors) {
             this.floors = floors;
             this.loadRestaurantFloor();
-            const result = await orm.call(
+            const result = await this.orm.call(
                 "pos.config",
                 "get_tables_order_count_and_printing_changes",
                 [this.config.id]

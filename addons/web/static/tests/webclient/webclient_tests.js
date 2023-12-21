@@ -2,7 +2,7 @@
 
 import { dialogService } from "@web/core/dialog/dialog_service";
 import { notificationService } from "@web/core/notifications/notification_service";
-import { ormService } from "@web/core/orm";
+import { ormService } from "@web/core/orm_service";
 import { popoverService } from "@web/core/popover/popover_service";
 import { registry } from "@web/core/registry";
 import { uiService } from "@web/core/ui/ui_service";

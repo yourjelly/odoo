@@ -1,6 +1,5 @@
 /** @odoo-module **/
 
-import { orm } from "@web/core/orm";
 import options from "@web_editor/js/editor/snippets.options";
 import dynamicSnippetOptions from "@website/snippets/s_dynamic_snippet/options";
 
@@ -38,7 +37,7 @@ const dynamicSnippetBlogPostsOptions = dynamicSnippetOptions.extend({
      * @returns {Promise}
      */
     _fetchBlogs: function () {
-        return orm.searchRead("blog.blog", wUtils.websiteDomain(this), ["id", "name"]);
+        return this.orm.searchRead("blog.blog", wUtils.websiteDomain(this), ["id", "name"]);
     },
     /**
      *

@@ -13,6 +13,7 @@ export class ImportDataColumnError extends Component {
 
     setup() {
         this.action = useService("action");
+        this.orm = useService("orm");
         this.state = useState({
             isExpanded: false,
             moreInfoContent: undefined,

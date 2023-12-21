@@ -16,6 +16,7 @@ import { KeepLast } from "@web/core/utils/concurrency";
  */
 export class LoadableDataSource {
     constructor(services) {
+        this._orm = services.orm;
         this._metadataRepository = services.metadataRepository;
         this._notify = services.notify;
 

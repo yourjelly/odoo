@@ -1,7 +1,6 @@
 /** @odoo-module */
 
 import { patch } from "@web/core/utils/patch";
-import { orm } from "@web/core/orm";
 import { PosStore } from "@point_of_sale/app/store/pos_store";
 
 patch(PosStore.prototype, {
@@ -73,7 +72,7 @@ patch(PosStore.prototype, {
             super.logEmployeeMessage(...arguments);
             return;
         }
-        await orm.call("pos.session", "log_partner_message", [
+        await this.orm.call("pos.session", "log_partner_message", [
             this.pos_session.id,
             this.cashier.work_contact_id,
             action,

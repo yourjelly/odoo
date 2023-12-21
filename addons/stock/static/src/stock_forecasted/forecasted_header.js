@@ -1,6 +1,4 @@
 /** @odoo-module **/
-
-import { orm } from "@web/core/orm";
 import { useService } from "@web/core/utils/hooks";
 import { formatFloat } from "@web/core/utils/numbers";
 import { Component } from "@odoo/owl";
@@ -10,6 +8,7 @@ export class ForecastedHeader extends Component {
     static props = { docs: Object, openView: Function };
 
     setup(){
+        this.orm = useService("orm");
         this.action = useService("action");
 
         this._formatFloat = (num) => formatFloat(num, { digits: this.props.docs.precision });
@@ -17,7 +16,7 @@ export class ForecastedHeader extends Component {
 
     async _onClickInventory(){
         const context = this._getActionContext();
-        const action = await orm.call('stock.quant', 'action_view_quants', [], { context });
+        const action = await this.orm.call('stock.quant', 'action_view_quants', [], { context });
         return this.action.doAction(action);
     }
 

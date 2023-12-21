@@ -1,6 +1,5 @@
 /** @odoo-module */
 
-import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 
@@ -17,6 +16,7 @@ export class DepartmentChart extends Component {
         super.setup();
 
         this.action = useService("action");
+        this.orm = useService("orm");
         this.state = useState({
             hierarchy: {},
         });
@@ -28,7 +28,7 @@ export class DepartmentChart extends Component {
     }
 
     async fetchHierarchy(departmentId) {
-        this.state.hierarchy = await orm.call("hr.department", "get_department_hierarchy", [
+        this.state.hierarchy = await this.orm.call("hr.department", "get_department_hierarchy", [
             departmentId,
         ]);
     }
