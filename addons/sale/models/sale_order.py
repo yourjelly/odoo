@@ -120,6 +120,7 @@ class SaleOrder(models.Model):
     validity_date = fields.Date(
         string="Expiration",
         compute='_compute_validity_date',
+        help="Validity of the offer, for information purpose.",
         store=True, readonly=False, copy=False, precompute=True)
     journal_id = fields.Many2one(
         'account.journal', string="Invoicing Journal",
@@ -1413,17 +1414,6 @@ class SaleOrder(models.Model):
         return moves
 
     # MAIL #
-
-    def _track_finalize(self):
-        """ Override of `mail` to prevent logging changes when the SO is in a draft state. """
-        if (len(self) == 1
-            # The method _track_finalize is sometimes called too early or too late and it
-            # might cause a desynchronization with the cache, thus this condition is needed.
-            and self.env.cache.contains(self, self._fields['state']) and self.state == 'draft'):
-            self.env.cr.precommit.data.pop(f'mail.tracking.{self._name}', {})
-            self.env.flush_all()
-            return
-        return super()._track_finalize()
 
     @api.returns('mail.message', lambda value: value.id)
     def message_post(self, **kwargs):
