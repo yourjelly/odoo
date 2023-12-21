@@ -122,14 +122,13 @@ export class BarcodeReader {
 }
 
 export const barcodeReaderService = {
-    dependencies: [...BarcodeReader.serviceDependencies, "dialog", "barcode", "orm"],
+    dependencies: [...BarcodeReader.serviceDependencies, "dialog", "barcode"],
     async start(env, deps) {
-        const { dialog, barcode, orm } = deps;
+        const { dialog, barcode } = deps;
         let barcodeReader = null;
 
         if (session.nomenclature_id) {
             const nomenclature = await BarcodeParser.fetchNomenclature(
-                orm,
                 session.nomenclature_id
             );
             const parser = new BarcodeParser({ nomenclature });
@@ -138,7 +137,6 @@ export const barcodeReaderService = {
 
         if (session.fallback_nomenclature_id && barcodeReader) {
             const fallbackNomenclature = await BarcodeParser.fetchNomenclature(
-                orm,
                 session.fallback_nomenclature_id
             );
             barcodeReader.fallbackParser = new BarcodeParser({

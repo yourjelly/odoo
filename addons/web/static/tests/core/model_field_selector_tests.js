@@ -6,7 +6,7 @@ import { fieldService } from "@web/core/field_service";
 import { hotkeyService } from "@web/core/hotkeys/hotkey_service";
 import { MainComponentsContainer } from "@web/core/main_components_container";
 import { ModelFieldSelector } from "@web/core/model_field_selector/model_field_selector";
-import { ormService } from "@web/core/orm_service";
+import { ormService } from "@web/core/orm";
 import { popoverService } from "@web/core/popover/popover_service";
 import { registry } from "@web/core/registry";
 import { uiService } from "@web/core/ui/ui_service";

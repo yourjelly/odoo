@@ -51,7 +51,6 @@ export class MediaDialog extends Component {
         this.title = _t("Select a media");
         this.modalRef = useChildRef();
 
-        this.orm = useService('orm');
         this.notificationService = useService('notification');
 
         this.tabs = [];
@@ -161,7 +160,7 @@ export class MediaDialog extends Component {
      * @returns {Array<HTMLElement>}
      */
     async renderMedia(selectedMedia) {
-        const elements = await TABS[this.state.activeTab].Component.createElements(selectedMedia, { orm: this.orm });
+        const elements = await TABS[this.state.activeTab].Component.createElements(selectedMedia);
         elements.forEach(element => {
             if (this.props.media) {
                 element.classList.add(...this.props.media.classList);

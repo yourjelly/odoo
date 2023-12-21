@@ -2,7 +2,7 @@
 
 import { Dialog } from "@web/core/dialog/dialog";
 import { user } from "@web/core/user";
-import { useService } from "@web/core/utils/hooks";
+import { orm } from "@web/core/orm";
 import { loadLanguages, _t } from "@web/core/l10n/translation";
 
 import { Component, onWillStart } from "@odoo/owl";
@@ -15,13 +15,12 @@ export class TranslationDialog extends Component {
         this.title = _t("Translate: %s", this.props.fieldName);
 
         this.user = user;
-        this.orm = useService("orm");
 
         this.terms = [];
         this.updatedTerms = {};
 
         onWillStart(async () => {
-            const languages = await loadLanguages(this.orm);
+            const languages = await loadLanguages();
             const [translations, context] = await this.loadTranslations(languages);
             let id = 1;
             translations.forEach((t) => (t.id = id++));
@@ -64,7 +63,7 @@ export class TranslationDialog extends Component {
      * Load the translation terms for the installed language, for the current model and res_id
      */
     async loadTranslations(languages) {
-        return this.orm.call(this.props.resModel, "get_field_translations", [
+        return orm.call(this.props.resModel, "get_field_translations", [
             [this.props.resId],
             this.props.fieldName,
         ]);
@@ -91,7 +90,7 @@ export class TranslationDialog extends Component {
             }
         });
 
-        await this.orm.call(this.props.resModel, "update_field_translations", [
+        await orm.call(this.props.resModel, "update_field_translations", [
             [this.props.resId],
             this.props.fieldName,
             translations,

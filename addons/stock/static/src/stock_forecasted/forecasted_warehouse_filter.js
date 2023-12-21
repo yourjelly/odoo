@@ -10,7 +10,6 @@ export class ForecastedWarehouseFilter extends Component {
     static props = { action: Object, setWarehouseInContext: Function, warehouses: Array };
 
     setup() {
-        this.orm = useService("orm");
         this.context = this.props.action.context;
         this.warehouses = this.props.warehouses;
         onWillStart(this.onWillStart)

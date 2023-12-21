@@ -4,6 +4,7 @@ import { cleanTerm } from "@mail/utils/common/format";
 
 import { _t } from "@web/core/l10n/translation";
 import { rpc } from "@web/core/network/rpc";
+import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
 import { user } from "@web/core/user";
 import { Deferred } from "@web/core/utils/concurrency";
@@ -20,7 +21,6 @@ export class Messaging {
     setup(env, services) {
         this.env = env;
         this.store = services["mail.store"];
-        this.orm = services.orm;
         this.router = services.router;
         this.isReady = new Deferred();
         this.store.Persona.insert({ id: user.partnerId, type: "partner", isAdmin: user.isAdmin });
@@ -91,7 +91,7 @@ export class Messaging {
             }
         }
         if (!partners.length) {
-            const partnersData = await this.orm.silent.call("res.partner", "im_search", [
+            const partnersData = await orm.silent.call("res.partner", "im_search", [
                 searchTerm,
                 limit,
             ]);
@@ -113,7 +113,6 @@ export class Messaging {
 export const messagingService = {
     dependencies: [
         "mail.store",
-        "orm",
         "router",
         "im_status",
         "mail.attachment", // FIXME: still necessary until insert is managed by this service

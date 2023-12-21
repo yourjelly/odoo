@@ -3,7 +3,7 @@
 import { disableTours } from "@web_tour/debug/debug_manager";
 
 import { hotkeyService } from "@web/core/hotkeys/hotkey_service";
-import { ormService } from "@web/core/orm_service";
+import { ormService } from "@web/core/orm";
 import { registry } from "@web/core/registry";
 import { uiService } from "@web/core/ui/ui_service";
 import { browser } from "@web/core/browser/browser";

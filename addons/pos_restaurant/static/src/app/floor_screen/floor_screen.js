@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { _t } from "@web/core/l10n/translation";
+import { orm } from "@web/core/orm";
 import { sprintf } from "@web/core/utils/strings";
 import { ConnectionLostError } from "@web/core/network/rpc";
 import { debounce } from "@web/core/utils/timing";
@@ -34,7 +35,6 @@ export class FloorScreen extends Component {
     setup() {
         this.pos = usePos();
         this.dialog = useService("dialog");
-        this.orm = useService("orm");
         const floor = this.pos.currentFloor;
         this.state = useState({
             selectedFloorId: floor ? floor.id : null,
@@ -280,9 +280,9 @@ export class FloorScreen extends Component {
         };
 
         if (table.id) {
-            await this.orm.write("restaurant.table", [table.id], tableCopy);
+            await orm.write("restaurant.table", [table.id], tableCopy);
         } else {
-            const tableId = await this.orm.create("restaurant.table", [tableCopy]);
+            const tableId = await orm.create("restaurant.table", [tableCopy]);
 
             table.id = tableId[0];
             this.pos.tables_by_id[tableId] = table;
@@ -380,7 +380,7 @@ export class FloorScreen extends Component {
             title: _t("New Floor"),
             placeholder: _t("Floor name"),
             getPayload: async (newName) => {
-                const floor = await this.orm.call("restaurant.floor", "create_from_ui", [
+                const floor = await orm.call("restaurant.floor", "create_from_ui", [
                     newName,
                     "#ACADAD",
                     this.pos.config.id,
@@ -407,7 +407,7 @@ export class FloorScreen extends Component {
             const floor = this.activeFloor;
             const tables = this.activeFloor.tables;
             const newFloorName = floor.name + " (copy)";
-            const newFloor = await this.orm.call("restaurant.floor", "create_from_ui", [
+            const newFloor = await orm.call("restaurant.floor", "create_from_ui", [
                 newFloorName,
                 floor.background_color,
                 this.pos.config.id,
@@ -453,7 +453,7 @@ export class FloorScreen extends Component {
                       getPayload: (newName) => {
                           if (newName !== this.activeFloor.name) {
                               this.activeFloor.name = newName;
-                              this.orm.call("restaurant.floor", "rename_floor", [
+                              orm.call("restaurant.floor", "rename_floor", [
                                   this.activeFloor.id,
                                   newName,
                               ]);
@@ -509,7 +509,7 @@ export class FloorScreen extends Component {
     async setFloorColor(color) {
         this.state.floorBackground = color;
         this.activeFloor.background_color = color;
-        await this.orm.write("restaurant.floor", [this.activeFloor.id], {
+        await orm.write("restaurant.floor", [this.activeFloor.id], {
             background_color: color,
         });
         this.state.isColorPicker = false;
@@ -530,7 +530,7 @@ export class FloorScreen extends Component {
                 return;
             }
             const originalSelectedFloorId = this.activeFloor.id;
-            await this.orm.call("restaurant.floor", "deactivate_floor", [
+            await orm.call("restaurant.floor", "deactivate_floor", [
                 originalSelectedFloorId,
                 this.pos.pos_session.id,
             ]);
@@ -566,7 +566,7 @@ export class FloorScreen extends Component {
             return;
         }
         const originalSelectedTableIds = [...this.state.selectedTableIds];
-        const response = await this.orm.call("restaurant.table", "are_orders_still_in_draft", [
+        const response = await orm.call("restaurant.table", "are_orders_still_in_draft", [
             originalSelectedTableIds,
         ]);
         if (!response) {
@@ -578,7 +578,7 @@ export class FloorScreen extends Component {
                     }
                 }
                 this.pos.tables_by_id[id].active = false;
-                this.orm.write("restaurant.table", [id], { active: false });
+                orm.write("restaurant.table", [id], { active: false });
                 this.activeFloor.tables = this.activeTables.filter((table) => table.id !== id);
                 delete this.pos.tables_by_id[id];
             }

@@ -1,5 +1,6 @@
 /** @odoo-module **/
 
+import { orm } from "@web/core/orm";
 import { registry } from '@web/core/registry';
 import { ListRenderer } from "@web/views/list/list_renderer";
 import { KanbanRenderer } from "@web/views/kanban/kanban_renderer";
@@ -11,7 +12,6 @@ import { useEffect, useRef } from "@odoo/owl";
 export function useSurveyLoadSampleHook(selector) {
     const rootRef = useRef("root");
     const actionService = useService("action");
-    const orm = useService('orm');
     let isLoadingSample = false;
     /**
      * Load and show the sample survey related to the clicked element,

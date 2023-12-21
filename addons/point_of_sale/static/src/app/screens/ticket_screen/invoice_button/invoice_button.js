@@ -1,5 +1,6 @@
 /** @odoo-module **/
 import { _t } from "@web/core/l10n/translation";
+import { orm } from "@web/core/orm";
 import { useService } from "@web/core/utils/hooks";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { usePos } from "@point_of_sale/app/store/pos_hook";
@@ -14,7 +15,6 @@ export class InvoiceButton extends Component {
         this.pos = usePos();
         this.invoiceButton = useRef("invoice-button");
         this.dialog = useService("dialog");
-        this.orm = useService("orm");
         this.report = useService("report");
     }
     get isAlreadyInvoiced() {
@@ -32,12 +32,9 @@ export class InvoiceButton extends Component {
     }
     async _downloadInvoice(orderId) {
         try {
-            const [orderWithInvoice] = await this.orm.read(
-                "pos.order",
-                [orderId],
-                ["account_move"],
-                { load: false }
-            );
+            const [orderWithInvoice] = await orm.read("pos.order", [orderId], ["account_move"], {
+                load: false,
+            });
             if (orderWithInvoice?.account_move) {
                 await this.report.doAction("account.account_invoices", [
                     orderWithInvoice.account_move,
@@ -86,7 +83,7 @@ export class InvoiceButton extends Component {
             if (!newPartner) {
                 return;
             }
-            await this.orm.write("pos.order", [orderId], { partner_id: newPartner.id });
+            await orm.write("pos.order", [orderId], { partner_id: newPartner.id });
         }
 
         const confirmed = await this.onWillInvoiceOrder(order);
@@ -96,7 +93,7 @@ export class InvoiceButton extends Component {
 
         // Part 2: Invoice the order.
         // FIXME POSREF timeout
-        await this.orm.silent.call("pos.order", "action_pos_order_invoice", [orderId]);
+        await orm.silent.call("pos.order", "action_pos_order_invoice", [orderId]);
 
         // Part 3: Download invoice.
         await this._downloadInvoice(orderId);

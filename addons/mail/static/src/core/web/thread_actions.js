@@ -4,6 +4,7 @@ import { threadActionsRegistry } from "@mail/core/common/thread_actions";
 import { useComponent, useState } from "@odoo/owl";
 
 import { _t } from "@web/core/l10n/translation";
+import { orm } from "@web/core/orm";
 import { useService } from "@web/core/utils/hooks";
 
 threadActionsRegistry
@@ -15,7 +16,7 @@ threadActionsRegistry
             return component.thread.isEmpty;
         },
         open(component) {
-            component.orm.silent.call("mail.message", "mark_all_as_read");
+            orm.silent.call("mail.message", "mark_all_as_read");
         },
         sequence: 1,
         text: _t("Mark all read"),

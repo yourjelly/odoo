@@ -8,6 +8,7 @@ import {
 } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { makeContext } from "@web/core/context";
 import { useDebugCategory } from "@web/core/debug/debug_context";
+import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
 import { SIZES } from "@web/core/ui/ui_service";
 import { user } from "@web/core/user";
@@ -145,7 +146,6 @@ export class FormController extends Component {
         this.evaluateBooleanExpr = evaluateBooleanExpr;
         this.dialogService = useService("dialog");
         this.router = useService("router");
-        this.orm = useService("orm");
         this.viewService = useService("view");
         this.ui = useService("ui");
         useBus(this.ui.bus, "resize", this.render);
@@ -330,7 +330,7 @@ export class FormController extends Component {
                 }
             }
             if (Object.keys(translationChanges).length) {
-                await this.orm.call(this.model.root.resModel, "web_override_translations", [
+                await orm.call(this.model.root.resModel, "web_override_translations", [
                     [this.model.root.resId],
                     translationChanges,
                 ]);

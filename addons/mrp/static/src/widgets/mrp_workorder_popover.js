@@ -1,5 +1,6 @@
 /** @odoo-module */
-import { useService } from "@web/core/utils/hooks";
+
+import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
 import {
     PopoverComponent,
@@ -20,12 +21,8 @@ import {
  */
 
 class WorkOrderPopover extends PopoverComponent {
-    setup(){
-        this.orm = useService("orm");
-    }
-
     async onReplanClick() {
-        await this.orm.call(
+        await orm.call(
             'mrp.workorder',
             'action_replan',
             [this.props.record.resId]

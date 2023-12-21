@@ -1,7 +1,7 @@
 /** @odoo-module */
 import { Dialog } from "@web/core/dialog/dialog";
+import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
-import { useService } from "@web/core/utils/hooks";
 import { _t } from "@web/core/l10n/translation";
 import { Component, onWillStart } from "@odoo/owl";
 
@@ -9,13 +9,12 @@ class InsufficientCreditDialog extends Component {
     static components = { Dialog };
     static template = "iap.InsufficientCreditDialog";
     setup() {
-        this.orm = useService("orm");
         onWillStart(this.onWillStart);
     }
 
     async onWillStart() {
         const { errorData } = this.props;
-        this.url = await this.orm.call("iap.account", "get_credits_url", [], {
+        this.url = await orm.call("iap.account", "get_credits_url", [], {
             base_url: errorData.base_url,
             service_name: errorData.service_name,
             credit: errorData.credit,

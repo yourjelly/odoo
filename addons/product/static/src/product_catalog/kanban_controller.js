@@ -2,6 +2,7 @@
 
 import { KanbanController } from "@web/views/kanban/kanban_controller";
 import { onWillStart } from "@odoo/owl";
+import { orm } from "@web/core/orm";
 import { useService } from "@web/core/utils/hooks";
 import { _t } from "@web/core/l10n/translation";
 
@@ -11,7 +12,6 @@ export class ProductCatalogKanbanController extends KanbanController {
     setup() {
         super.setup();
         this.action = useService("action");
-        this.orm = useService("orm");
         this.orderId = this.props.context.order_id;
         this.orderResModel = this.props.context.product_catalog_order_model;
 
@@ -25,7 +25,7 @@ export class ProductCatalogKanbanController extends KanbanController {
 
     async _defineButtonContent() {
         // Define the button's label depending of the order's state.
-        const orderStateInfo = await this.orm.searchRead(
+        const orderStateInfo = await orm.searchRead(
             this.orderResModel, [["id", "=", this.orderId]], ["state"]
         );
         const orderIsQuotation = ["draft", "sent"].includes(orderStateInfo[0].state);

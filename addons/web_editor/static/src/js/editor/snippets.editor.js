@@ -15,6 +15,7 @@ import { debounce, throttleForAnimation } from "@web/core/utils/timing";
 import { uniqueId } from "@web/core/utils/functions";
 import { sortBy, unique } from "@web/core/utils/arrays";
 import { browser } from "@web/core/browser/browser";
+import { orm } from "@web/core/orm";
 import { attachComponent } from "@web/legacy/utils";
 import { Toolbar } from "@web_editor/js/editor/toolbar";
 import {
@@ -1819,7 +1820,6 @@ var SnippetsMenu = Widget.extend({
         this._loadingEffectDisabled = false;
         this._onClick = this._onClick.bind(this);
 
-        this.orm = this.bindService("orm");
         this.notification = this.bindService("notification");
         this.dialog = this.bindService("dialog");
     },
@@ -2173,7 +2173,7 @@ var SnippetsMenu = Widget.extend({
             context.lang = this.options.context.user_lang;
             context.snippet_lang = this.options.context.lang;
         }
-        this._defLoadSnippets = this.orm.silent.call(
+        this._defLoadSnippets = orm.silent.call(
             "ir.ui.view",
             "render_public_asset",
             [this.options.snippets, {}],
@@ -3968,7 +3968,7 @@ var SnippetsMenu = Widget.extend({
             body: markup(`${escape(bodyText)}\n<a href="${linkUrl}" target="_blank">${escape(linkText)}</a>`),
             confirm: async () => {
                 try {
-                    await this.orm.call("ir.module.module", "button_immediate_install", [[moduleID]]);
+                    await orm.call("ir.module.module", "button_immediate_install", [[moduleID]]);
                     this.trigger_up('request_save', {
                         invalidateSnippetCache: true,
                         _toMutex: true,
@@ -4034,7 +4034,7 @@ var SnippetsMenu = Widget.extend({
         this.dialog.add(ConfirmationDialog, {
             body: message,
             confirm: async () => {
-                await this.orm.call("ir.ui.view", "delete_snippet", [], {
+                await orm.call("ir.ui.view", "delete_snippet", [], {
                     'view_id': snippetId,
                     'template_key': this.options.snippets,
                 });
@@ -4072,7 +4072,7 @@ var SnippetsMenu = Widget.extend({
             const name = $textInput.val();
             if (name !== snippetName) {
                 this._execWithLoadingEffect(async () => {
-                    await this.orm.call("ir.ui.view", "rename_snippet", [], {
+                    await orm.call("ir.ui.view", "rename_snippet", [], {
                         'name': name,
                         'view_id': parseInt(ev.target.dataset.snippetId),
                         'template_key': this.options.snippets,

@@ -2,6 +2,7 @@
 
 import { makeContext } from "@web/core/context";
 import { Domain } from "@web/core/domain";
+import { orm } from "@web/core/orm";
 import { evaluateExpr } from "@web/core/py_js/py";
 import { user } from "@web/core/user";
 import { sortBy, groupBy } from "@web/core/utils/arrays";
@@ -170,8 +171,7 @@ export class SearchModel extends EventBus {
      */
     setup(services) {
         // services
-        const { field: fieldService, name: nameService, orm, view } = services;
-        this.orm = orm;
+        const { field: fieldService, name: nameService, view } = services;
         this.fieldService = fieldService;
         this.viewService = view;
 
@@ -315,7 +315,7 @@ export class SearchModel extends EventBus {
 
         this.searchPanelInfo = { ...searchPanelInfo, loaded: false, shouldReload: false };
 
-        await Promise.all(labels.map((cb) => cb(this.orm)));
+        await Promise.all(labels.map((cb) => cb()));
 
         // prepare search items (populate this.searchItems)
         for (const preGroup of preSearchItems || []) {
@@ -589,7 +589,7 @@ export class SearchModel extends EventBus {
     }
 
     async _createIrFilters(irFilter) {
-        const serverSideId = await this.orm.call("ir.filters", "create_or_replace", [irFilter]);
+        const serverSideId = await orm.call("ir.filters", "create_or_replace", [irFilter]);
         this.env.bus.trigger("CLEAR-CACHES");
         return serverSideId;
     }
@@ -691,7 +691,7 @@ export class SearchModel extends EventBus {
 
     async _deleteIrFilters(searchItem) {
         const { serverSideId } = searchItem;
-        await this.orm.unlink("ir.filters", [serverSideId]);
+        await orm.unlink("ir.filters", [serverSideId]);
         this.env.bus.trigger("CLEAR-CACHES");
     }
 
@@ -1467,7 +1467,7 @@ export class SearchModel extends EventBus {
         const searchDomain = this.searchDomain;
         await Promise.all(
             categories.map(async (category) => {
-                const result = await this.orm.call(
+                const result = await orm.call(
                     this.resModel,
                     "search_panel_select_range",
                     [category.fieldName],
@@ -1502,7 +1502,7 @@ export class SearchModel extends EventBus {
         const searchDomain = this.searchDomain;
         await Promise.all(
             filters.map(async (filter) => {
-                const result = await this.orm.call(
+                const result = await orm.call(
                     this.resModel,
                     "search_panel_select_multi_range",
                     [filter.fieldName],

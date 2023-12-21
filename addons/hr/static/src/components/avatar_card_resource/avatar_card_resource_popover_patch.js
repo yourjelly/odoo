@@ -1,5 +1,6 @@
 /* @odoo-module */
 
+import { orm } from "@web/core/orm";
 import { patch } from "@web/core/utils/patch";
 import { AvatarCardResourcePopover } from "@resource_mail/components/avatar_card_resource/avatar_card_resource_popover";
 import { useService } from "@web/core/utils/hooks";
@@ -24,7 +25,7 @@ const patchAvatarCardResourcePopover = {
         if (!this.record.employee_id) {
             return;
         }
-        const action = await this.orm.call("hr.employee", "get_formview_action", [
+        const action = await orm.call("hr.employee", "get_formview_action", [
             this.record.employee_id[0],
         ]);
         this.actionService.doAction(action);

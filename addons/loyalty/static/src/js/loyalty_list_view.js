@@ -1,5 +1,6 @@
 /** @odoo-module **/
 
+import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
 import { listView } from "@web/views/list/list_view";
 import { ListRenderer } from "@web/views/list/list_renderer";
@@ -9,11 +10,10 @@ import { Component, onWillStart } from "@odoo/owl";
 export class LoyaltyActionHelper extends Component {
     static template = "loyalty.LoyaltyActionHelper";
     setup() {
-        this.orm = useService("orm");
         this.action = useService("action");
 
         onWillStart(async () => {
-            this.loyaltyTemplateData = await this.orm.call(
+            this.loyaltyTemplateData = await orm.call(
                 "loyalty.program",
                 "get_program_templates",
                 [],
@@ -25,7 +25,7 @@ export class LoyaltyActionHelper extends Component {
     }
 
     async onTemplateClick(templateId) {
-        const action = await this.orm.call(
+        const action = await orm.call(
             "loyalty.program",
             "create_from_template",
             [templateId],

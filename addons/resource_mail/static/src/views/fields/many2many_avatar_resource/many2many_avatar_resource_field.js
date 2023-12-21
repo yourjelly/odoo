@@ -1,5 +1,6 @@
 /** @odoo-module **/
 
+import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
 import { usePopover } from "@web/core/popover/popover_hook";
 import {
@@ -24,7 +25,7 @@ class AvatarResourceMany2XAutocomplete extends AvatarMany2XAutocomplete {
      * @override
      */
     search(request) {
-        return this.orm.call(
+        return orm.call(
             this.props.resModel,
             "search_read",
             [this.getDomain(request), ["id", "display_name", "resource_type"]],

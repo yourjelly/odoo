@@ -1,5 +1,6 @@
 /* @odoo-module */
 
+import { orm } from "@web/core/orm";
 import { rpc } from "@web/core/network/rpc";
 
 import { startServer } from "@bus/../tests/helpers/mock_python_environment";
@@ -111,20 +112,16 @@ QUnit.test("Close should update the value on the server", async (assert) => {
         is_discuss_sidebar_category_livechat_open: true,
     });
     const currentUserId = pyEnv.currentUserId;
-    const { env, openDiscuss } = await start();
+    const { openDiscuss } = await start();
     openDiscuss();
-    const initalSettings = await env.services.orm.call(
-        "res.users.settings",
-        "_find_or_create_for_user",
-        [[currentUserId]]
-    );
+    const initalSettings = await orm.call("res.users.settings", "_find_or_create_for_user", [
+        [currentUserId],
+    ]);
     assert.ok(initalSettings.is_discuss_sidebar_category_livechat_open);
     await click(".o-mail-DiscussSidebarCategory-livechat .btn");
-    const newSettings = await env.services.orm.call(
-        "res.users.settings",
-        "_find_or_create_for_user",
-        [[currentUserId]]
-    );
+    const newSettings = await orm.call("res.users.settings", "_find_or_create_for_user", [
+        [currentUserId],
+    ]);
     assert.notOk(newSettings.is_discuss_sidebar_category_livechat_open);
 });
 
@@ -147,18 +144,14 @@ QUnit.test("Open should update the value on the server", async (assert) => {
     const currentUserId = pyEnv.currentUserId;
     const { env, openDiscuss } = await start();
     openDiscuss();
-    const initalSettings = await env.services.orm.call(
-        "res.users.settings",
-        "_find_or_create_for_user",
-        [[currentUserId]]
-    );
+    const initalSettings = await orm.call("res.users.settings", "_find_or_create_for_user", [
+        [currentUserId],
+    ]);
     assert.notOk(initalSettings.is_discuss_sidebar_category_livechat_open);
     await click(".o-mail-DiscussSidebarCategory-livechat .btn");
-    const newSettings = await env.services.orm.call(
-        "res.users.settings",
-        "_find_or_create_for_user",
-        [[currentUserId]]
-    );
+    const newSettings = await orm.call("res.users.settings", "_find_or_create_for_user", [
+        [currentUserId],
+    ]);
     assert.ok(newSettings.is_discuss_sidebar_category_livechat_open);
 });
 

@@ -3,6 +3,7 @@
 import { HierarchyNavbar } from "./hierarchy_navbar";
 import { Layout } from "@web/search/layout";
 import { registry } from "@web/core/registry";
+import { orm } from "@web/core/orm";
 import { useService } from "@web/core/utils/hooks";
 import { Component, onWillStart, useEffect, useState } from "@odoo/owl";
 
@@ -11,7 +12,6 @@ export class ViewHierarchy extends Component {
     static template = "website.view_hierarchy";
     setup() {
         this.action = useService("action");
-        this.orm = useService("orm");
         this.router = useService("router");
         this.state = useState({ showInactive: false, searchedView: {}, viewTree: {} });
         this.websites = useState({ names: new Set(["All Websites"]), selected: "All Websites" });
@@ -22,7 +22,7 @@ export class ViewHierarchy extends Component {
             ({
                 sibling_views: this.siblingViews,
                 hierarchy: this.state.viewTree,
-            } = await this.orm.call("ir.ui.view", "get_view_hierarchy", [this.viewId], {}));
+            } = await orm.call("ir.ui.view", "get_view_hierarchy", [this.viewId], {}));
 
             this.setupWebsiteNames();
             this.setupHideGenericViewByWebsite();

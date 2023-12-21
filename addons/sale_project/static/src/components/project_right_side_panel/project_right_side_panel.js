@@ -1,5 +1,6 @@
 /** @odoo-module */
 
+import { orm } from "@web/core/orm";
 import { patch } from "@web/core/utils/patch";
 import { formatFloatTime } from "@web/views/fields/formatters";
 import { formatFloat } from "@web/core/utils/numbers";
@@ -10,7 +11,7 @@ patch(ProjectRightSidePanel.prototype, {
         const offset = this.state.data.sale_items.data.length;
         const totalRecords = this.state.data.sale_items.total;
         const limit = totalRecords - offset <= 5 ? totalRecords - offset : 5;
-        const saleOrderItems = await this.orm.call(
+        const saleOrderItems = await orm.call(
             'project.project',
             'get_sale_items_data',
             [this.projectId, undefined, offset, limit],

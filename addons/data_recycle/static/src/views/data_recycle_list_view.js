@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { DataCleaningCommonListController } from "@data_recycle/views/data_cleaning_common_list";
+import { orm } from "@web/core/orm";
 import { registry } from '@web/core/registry';
 import { listView } from '@web/views/list/list_view';
 
@@ -11,7 +12,7 @@ export class DataRecycleListController extends DataCleaningCommonListController 
     async onValidateClick() {
         const record_ids = await this.getSelectedResIds();
 
-        await this.orm.call('data_recycle.record', 'action_validate', [record_ids]);
+        await orm.call('data_recycle.record', 'action_validate', [record_ids]);
         await this.model.load();
     }
 };

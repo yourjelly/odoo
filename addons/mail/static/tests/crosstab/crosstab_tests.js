@@ -1,5 +1,6 @@
 /* @odoo-module */
 
+import { orm } from "@web/core/orm";
 import { rpc } from "@web/core/network/rpc";
 
 import { startServer } from "@bus/../tests/helpers/mock_python_environment";
@@ -105,7 +106,7 @@ QUnit.test("Channel subscription is renewed when channel is added from invite", 
     });
     openDiscuss();
     await contains(".o-mail-DiscussSidebarChannel");
-    env.services.orm.call("discuss.channel", "add_members", [[channelId]], {
+    orm.call("discuss.channel", "add_members", [[channelId]], {
         partner_ids: [pyEnv.currentPartnerId],
     });
     await contains(".o-mail-DiscussSidebarChannel", { count: 2 });

@@ -1,10 +1,10 @@
 /** @odoo-module **/
 
 import { serializeDate } from "@web/core/l10n/dates";
+import { orm } from "@web/core/orm";
 import { useService } from "@web/core/utils/hooks";
 
 export function useWorkEntry({ getEmployeeIds, getRange, onClose}) {
-    const orm = useService("orm");
     const action = useService("action");
 
     return {

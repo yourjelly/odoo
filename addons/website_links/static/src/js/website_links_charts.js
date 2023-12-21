@@ -126,11 +126,6 @@ publicWidget.registry.websiteLinksCharts = publicWidget.Widget.extend({
         'click .copy-to-clipboard': '_onCopyToClipboardClick',
     },
 
-    init() {
-        this._super(...arguments);
-        this.orm = this.bindService("orm");
-    },
-
     /**
      * @override
      */
@@ -224,13 +219,13 @@ publicWidget.registry.websiteLinksCharts = publicWidget.Widget.extend({
      * @private
      */
     _totalClicks: function () {
-        return this.orm.searchCount("link.tracker.click", [this.links_domain]);
+        return orm.searchCount("link.tracker.click", [this.links_domain]);
     },
     /**
      * @private
      */
     _clicksByDay: function () {
-        return this.orm.readGroup(
+        return orm.readGroup(
             "link.tracker.click",
             [this.links_domain],
             ["create_date"],
@@ -241,7 +236,7 @@ publicWidget.registry.websiteLinksCharts = publicWidget.Widget.extend({
      * @private
      */
     _clicksByCountry: function () {
-        return this.orm.readGroup(
+        return orm.readGroup(
             "link.tracker.click",
             [this.links_domain],
             ["country_id"],
@@ -256,7 +251,7 @@ publicWidget.registry.websiteLinksCharts = publicWidget.Widget.extend({
         const aWeekAgoDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
         // get the date in the format YYYY-MM-DD.
         const aWeekAgoString = aWeekAgoDate.toISOString().split("T")[0];
-        return this.orm.readGroup(
+        return orm.readGroup(
             "link.tracker.click",
             [this.links_domain, ["create_date", ">", aWeekAgoString]],
             ["country_id"],
@@ -271,7 +266,7 @@ publicWidget.registry.websiteLinksCharts = publicWidget.Widget.extend({
         const aMonthAgoDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
         // get the date in the format YYYY-MM-DD.
         const aMonthAgoString = aMonthAgoDate.toISOString().split("T")[0];
-        return this.orm.readGroup(
+        return orm.readGroup(
             "link.tracker.click",
             [this.links_domain, ["create_date", ">", aMonthAgoString]],
             ["country_id"],

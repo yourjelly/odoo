@@ -3,6 +3,7 @@
 import { _t } from "@web/core/l10n/translation";
 
 import { rpc } from "@web/core/network/rpc";
+import { orm } from "@web/core/orm";
 import { user } from "@web/core/user";
 import { useService, useBus } from "@web/core/utils/hooks";
 import { useHotkey } from '@web/core/hotkeys/hotkey_hook';
@@ -72,7 +73,6 @@ export class WysiwygAdapterComponent extends Wysiwyg {
         this.options = this.props.options || {};
 
         this.websiteService = useService('website');
-        this.orm = useService('orm');
         this.dialogs = useService('dialog');
         this.action = useService('action');
 
@@ -229,7 +229,7 @@ export class WysiwygAdapterComponent extends Wysiwyg {
         }
         const dirtyPageOptions = Object.entries(this.pageOptions).filter(([name, option]) => option.isDirty);
         await Promise.all(dirtyPageOptions.map(async ([name, option]) => {
-            await this.orm.write(mainObject.model, [mainObject.id], {[name]: option.value});
+            await orm.write(mainObject.model, [mainObject.id], {[name]: option.value});
         }));
         return this.saveContent(false);
     }
@@ -854,7 +854,7 @@ export class WysiwygAdapterComponent extends Wysiwyg {
             'text_align_class': el.dataset.textAlignClass,
         };
 
-        return this.orm.write(resModel, [resID], {'cover_properties': JSON.stringify(coverProps)});
+        return orm.write(resModel, [resID], {'cover_properties': JSON.stringify(coverProps)});
     }
     /**
      *
@@ -893,7 +893,7 @@ export class WysiwygAdapterComponent extends Wysiwyg {
             const classes = [...$el[0].classList].filter(megaMenuClass =>
                 ["dropdown-menu", "o_mega_menu", "show"].indexOf(megaMenuClass) < 0);
             promises.push(
-                this.orm.write('website.menu', [parseInt($el.data('oe-id'))], {
+                orm.write('website.menu', [parseInt($el.data('oe-id'))], {
                     'mega_menu_classes': classes.join(' '),
                 })
             );

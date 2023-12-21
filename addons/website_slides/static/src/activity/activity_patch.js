@@ -2,12 +2,13 @@
 
 import { Activity } from "@mail/core/web/activity";
 
+import { orm } from "@web/core/orm";
 import { patch } from "@web/core/utils/patch";
 
 /** @type {import("@mail/core/web/activity").Activity } */
 const ActivityPatch = {
     async onGrantAccess() {
-        await this.env.services.orm.call(
+        await orm.call(
             "slide.channel",
             "action_grant_access",
             [[this.props.data.res_id]],
@@ -17,7 +18,7 @@ const ActivityPatch = {
         this.props.reloadParentView();
     },
     async onRefuseAccess() {
-        await this.env.services.orm.call(
+        await orm.call(
             "slide.channel",
             "action_refuse_access",
             [[this.props.data.res_id]],

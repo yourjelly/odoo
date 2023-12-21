@@ -1,5 +1,6 @@
 /** @odoo-module **/
 
+import { orm } from "@web/core/orm";
 import { useService } from "@web/core/utils/hooks";
 import { pick } from "@web/core/utils/objects";
 import { RelationalModel } from "@web/model/relational_model/relational_model";
@@ -25,7 +26,6 @@ class _Record extends Component {
     static template = xml`<t t-slot="default" record="model.root"/>`;
     static props = ["slots", "info", "fields", "values?"];
     setup() {
-        this.orm = useService("orm");
         const resModel = this.props.info.resModel;
         const activeFields = this.getActiveFields();
         const modelParams = {
@@ -48,7 +48,6 @@ class _Record extends Component {
                 return [servName, useService(servName)];
             })
         );
-        modelServices.orm = this.orm;
         this.model = useState(new StandaloneRelationalModel(this.env, modelParams, modelServices));
 
         const prepareLoadWithValues = async (values) => {
@@ -68,7 +67,7 @@ class _Record extends Component {
                                 specification: fieldSpec,
                             };
                             proms.push(
-                                this.orm.webRead(resModel, resIds, kwargs).then((records) => {
+                                orm.webRead(resModel, resIds, kwargs).then((records) => {
                                     values[fieldName] = records;
                                 })
                             );
@@ -83,7 +82,7 @@ class _Record extends Component {
                             context: activeField.context || {},
                             specification: { display_name: {} },
                         };
-                        const records = await this.orm.webRead(resModel, [resId], kwargs);
+                        const records = await orm.webRead(resModel, [resId], kwargs);
                         return records[0].display_name;
                     };
                     if (typeof values[fieldName] === "number") {
@@ -172,7 +171,6 @@ export class Record extends Component {
         if (this.props.fields) {
             this.fields = this.props.fields;
         } else {
-            const orm = useService("orm");
             onWillStart(async () => {
                 this.fields = await orm.call(
                     this.props.resModel,

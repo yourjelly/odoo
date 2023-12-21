@@ -15,6 +15,7 @@ import {
     useSubEnv,
 } from "@odoo/owl";
 import { RPCError } from "@web/core/network/rpc";
+import { orm } from "@web/core/orm";
 import { extractFieldsFromArchInfo } from "@web/model/relational_model/utils";
 import { formView } from "../form/form_view";
 import { getDefaultConfig } from "../view";
@@ -68,7 +69,6 @@ class KanbanQuickCreateController extends Component {
                 return [servName, useService(servName)];
             })
         );
-        modelServices.orm = useService("orm");
         const config = {
             resModel: this.props.resModel,
             resId: false,
@@ -139,7 +139,7 @@ class KanbanQuickCreateController extends Component {
             const isValid = await this.model.root.checkValidity(); // needed to put the class o_field_invalid in the field
             if (isValid) {
                 try {
-                    [resId] = await this.model.orm.call(
+                    [resId] = await orm.call(
                         this.props.resModel,
                         "name_create",
                         [this.model.root.data.display_name],

@@ -2,6 +2,7 @@
 
 import { AutoComplete } from "@web/core/autocomplete/autocomplete";
 import { delay } from "@web/core/utils/concurrency";
+import { orm } from "@web/core/orm";
 import { getDataURLFromFile } from "@web/core/utils/urls";
 import weUtils from '@web_editor/js/common/utils';
 import { _t } from "@web/core/l10n/translation";
@@ -114,7 +115,6 @@ class DescriptionScreen extends Component {
     setup() {
         this.industrySelection = useRef('industrySelection');
         this.state = useStore();
-        this.orm = useService('orm');
 
         onMounted(() => this.onMounted());
     }
@@ -204,7 +204,7 @@ class DescriptionScreen extends Component {
             // If the industry name is not known by the server, send it to the
             // IAP server.
             if (selectedIndustry.id === -1) {
-                this.orm.call('website', 'configurator_missing_industry', [], {
+                orm.call('website', 'configurator_missing_industry', [], {
                     'unknown_industry': selectedIndustry.label,
                 });
             }
@@ -223,7 +223,6 @@ class PaletteSelectionScreen extends Component {
         this.state = useStore();
         this.logoInputRef = useRef('logoSelectionInput');
         this.notification = useService("notification");
-        this.orm = useService('orm');
 
         onMounted(() => {
             if (this.state.logo) {
@@ -266,7 +265,7 @@ class PaletteSelectionScreen extends Component {
             img = await svgToPNG(img);
         }
         img = img.split(',')[1];
-        const [color1, color2] = await this.orm.call('base.document.layout',
+        const [color1, color2] = await orm.call('base.document.layout',
             'extract_image_primary_secondary_colors',
             [img],
             {mitigate: 255},
@@ -300,7 +299,7 @@ class ApplyConfiguratorScreen extends Component {
 
         const attemptConfiguratorApply = async (data, retryCount = 0) => {
             try {
-                return await this.orm.silent.call('website',
+                return await orm.silent.call('website',
                     'configurator_apply', [], data
                 );
             } catch (error) {
@@ -361,7 +360,6 @@ export class FeaturesSelectionScreen extends ApplyConfiguratorScreen {
     setup() {
         super.setup();
 
-        this.orm = useService("orm");
         this.state = useStore();
     }
 
@@ -370,7 +368,7 @@ export class FeaturesSelectionScreen extends ApplyConfiguratorScreen {
         if (!industryId) {
             return this.props.navigate(ROUTES.descriptionScreen);
         }
-        const themes = await this.orm.call('website',
+        const themes = await orm.call('website',
             'configurator_recommended_themes',
             [],
             {
@@ -399,7 +397,6 @@ class ThemeSelectionScreen extends ApplyConfiguratorScreen {
         super.setup();
 
         this.uiService = useService('ui');
-        this.orm = useService('orm');
         this.state = useStore();
         this.themeSVGPreviews = [useRef('ThemePreview1'), useRef('ThemePreview2'), useRef('ThemePreview3')];
         const proms = [];
@@ -570,7 +567,6 @@ function useStore() {
 
 export class Configurator extends Component {
     setup() {
-        this.orm = useService('orm');
         this.action = useService('action');
         this.router = useService('router');
 
@@ -592,7 +588,7 @@ export class Configurator extends Component {
         useSubEnv({ store });
 
         onWillStart(async () => {
-            this.websiteId = (await this.orm.call('website', 'get_current_website')).match(/\d+/)[0];
+            this.websiteId = (await orm.call('website', 'get_current_website')).match(/\d+/)[0];
 
             await store.start(() => this.getInitialState());
             this.updateStorage(store);
@@ -635,7 +631,7 @@ export class Configurator extends Component {
 
     async getInitialState() {
         // Load values from python and iap
-        var results = await this.orm.call('website', 'configurator_init');
+        var results = await orm.call('website', 'configurator_init');
         const r = {
             industries: results.industries,
             logo: results.logo ? 'data:image/png;base64,' + results.logo : false,
@@ -667,7 +663,7 @@ export class Configurator extends Component {
         if (localState) {
             let themes = [];
             if (localState.selectedIndustry && localState.selectedPalette) {
-                themes = await this.orm.call('website', 'configurator_recommended_themes', [], {
+                themes = await orm.call('website', 'configurator_recommended_themes', [], {
                     'industry_id': localState.selectedIndustry.id,
                     'palette': localState.selectedPalette,
                 });
@@ -724,7 +720,7 @@ export class Configurator extends Component {
     }
 
     async skipConfigurator() {
-        await this.orm.call('website', 'configurator_skip');
+        await orm.call('website', 'configurator_skip');
         this.clearStorage();
         this.action.doAction('website.theme_install_kanban_action', {
             clearBreadcrumbs: true,

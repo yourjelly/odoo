@@ -1,5 +1,7 @@
 /* @odoo-module */
 
+import { orm } from "@web/core/orm";
+
 import { startServer } from "@bus/../tests/helpers/mock_python_environment";
 
 import { Command } from "@mail/../tests/helpers/command";
@@ -173,12 +175,10 @@ QUnit.test("Channel member count update after user left", async (assert) => {
             Command.create({ partner_id: partnerId }),
         ],
     });
-    const { env, openDiscuss } = await start();
+    const { openDiscuss } = await start();
     openDiscuss(channelId);
     await click("[title='Show Member List']");
     await contains(".o-discuss-ChannelMember", { count: 2 });
-    await pyEnv.withUser(userId, () =>
-        env.services.orm.call("discuss.channel", "action_unfollow", [channelId])
-    );
+    await pyEnv.withUser(userId, () => orm.call("discuss.channel", "action_unfollow", [channelId]));
     await contains(".o-discuss-ChannelMember", { count: 1 });
 });

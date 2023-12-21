@@ -2,6 +2,7 @@
 
 import { Component, useState } from "@odoo/owl";
 
+import { orm } from "@web/core/orm";
 import { useService } from "@web/core/utils/hooks";
 import { _t } from "@web/core/l10n/translation";
 
@@ -63,7 +64,7 @@ export class ActivityMailTemplate extends Component {
             model: this.props.activity.res_model,
             id: this.props.activity.res_id,
         });
-        await this.env.services.orm.call(this.props.activity.res_model, "activity_send_mail", [
+        await orm.call(this.props.activity.res_model, "activity_send_mail", [
             [this.props.activity.res_id],
             mailTemplate.id,
         ]);

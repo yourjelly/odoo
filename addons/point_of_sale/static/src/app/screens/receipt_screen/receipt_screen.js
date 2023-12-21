@@ -3,6 +3,7 @@
 import { _t } from "@web/core/l10n/translation";
 import { useErrorHandlers } from "@point_of_sale/app/utils/hooks";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
 import { OrderReceipt } from "@point_of_sale/app/screens/receipt_screen/receipt/order_receipt";
 import { useRef, useState, onWillStart, Component } from "@odoo/owl";
@@ -19,7 +20,6 @@ export class ReceiptScreen extends Component {
         this.printer = useState(useService("printer"));
         useErrorHandlers();
         this.ui = useState(useService("ui"));
-        this.orm = useService("orm");
         this.renderer = useService("renderer");
         this.dialog = useService("dialog");
         this.buttonMailReceipt = useRef("order-mail-receipt-button");
@@ -147,7 +147,7 @@ export class ReceiptScreen extends Component {
             });
             return Promise.reject();
         }
-        await this.orm.call("pos.order", methodName, [
+        await orm.call("pos.order", methodName, [
             [order_server_id],
             orderName,
             orderPartner,

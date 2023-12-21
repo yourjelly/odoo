@@ -1,5 +1,6 @@
 /** @odoo-module */
 
+import { orm } from "@web/core/orm";
 import { rpc } from "@web/core/network/rpc";
 import { registry } from "@web/core/registry";
 import { downloadFile } from "@web/core/network/download";
@@ -7,8 +8,8 @@ import { user } from "@web/core/user";
 import { downloadReport } from "@web/webclient/actions/reports/utils";
 
 export const reportService = {
-    dependencies: ["ui", "orm"],
-    start(env, { ui, orm }) {
+    dependencies: ["ui"],
+    start(env, { ui }) {
         const reportActionsCache = {};
         return {
             async doAction(reportXmlId, active_ids) {

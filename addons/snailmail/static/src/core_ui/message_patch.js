@@ -5,6 +5,7 @@ import { Message } from "@mail/core/common/message";
 import { SnailmailError } from "./snailmail_error";
 import { SnailmailNotificationPopover } from "./snailmail_notification_popover";
 
+import { orm } from "@web/core/orm";
 import { patch } from "@web/core/utils/patch";
 
 patch(Message.prototype, {
@@ -34,7 +35,7 @@ patch(Message.prototype, {
     },
 
     async openMissingFieldsLetterAction() {
-        const letterIds = await this.messageService.orm.searchRead(
+        const letterIds = await orm.searchRead(
             "snailmail.letter",
             [["message_id", "=", this.message.id]],
             ["id"]

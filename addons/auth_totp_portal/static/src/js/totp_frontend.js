@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { _t } from "@web/core/l10n/translation";
+import { orm } from "@web/core/orm";
 import { markup } from "@odoo/owl";
 import { InputConfirmationDialog } from "@portal/js/components/input_confirmation_dialog/input_confirmation_dialog";
 import { handleCheckIdentity } from "@portal/js/portal_security";
@@ -131,7 +132,6 @@ publicWidget.registry.TOTPButton = publicWidget.Widget.extend({
 
     init() {
         this._super(...arguments);
-        this.orm = this.bindService("orm");
         this.dialog = this.bindService("dialog");
     },
 
@@ -139,8 +139,7 @@ publicWidget.registry.TOTPButton = publicWidget.Widget.extend({
         e.preventDefault();
 
         const w = await handleCheckIdentity(
-            this.orm.call("res.users", "action_totp_enable_wizard", [session.user_id]),
-            this.orm,
+            orm.call("res.users", "action_totp_enable_wizard", [session.user_id]),
             this.dialog
         );
 
@@ -152,7 +151,7 @@ publicWidget.registry.TOTPButton = publicWidget.Widget.extend({
 
         const {res_model: model, res_id: wizard_id} = w;
 
-        const record = await this.orm.read(model, [wizard_id], []).then(ar => ar[0]);
+        const record = await orm.read(model, [wizard_id], []).then(ar => ar[0]);
 
         const doc = new DOMParser().parseFromString(
             document.getElementById('totp_wizard_view').textContent,
@@ -175,10 +174,9 @@ publicWidget.registry.TOTPButton = publicWidget.Widget.extend({
                 }
 
                 try {
-                    await this.orm.write(model, [record.id], { code: inputEl.value });
+                    await orm.write(model, [record.id], { code: inputEl.value });
                     await handleCheckIdentity(
-                        this.orm.call(model, "enable", [record.id]),
-                        this.orm,
+                        orm.call(model, "enable", [record.id]),
                         this.dialog
                     );
                 } catch (e) {
@@ -208,15 +206,13 @@ publicWidget.registry.DisableTOTPButton = publicWidget.Widget.extend({
 
     init() {
         this._super(...arguments);
-        this.orm = this.bindService("orm");
         this.dialog = this.bindService("dialog");
     },
 
     async _onClick(e) {
         e.preventDefault();
         await handleCheckIdentity(
-            this.orm.call("res.users", "action_totp_disable", [session.user_id]),
-            this.orm,
+            orm.call("res.users", "action_totp_disable", [session.user_id]),
             this.dialog
         )
         window.location = window.location;
@@ -231,8 +227,7 @@ publicWidget.registry.RevokeTrustedDeviceButton = publicWidget.Widget.extend({
     async _onClick(e){
         e.preventDefault();
         await handleCheckIdentity(
-            this.orm.call("auth_totp.device", "remove", [parseInt(this.el.id)]),
-            this.orm,
+            orm.call("auth_totp.device", "remove", [parseInt(this.el.id)]),
             this.dialog
         );
         window.location = window.location;
@@ -246,15 +241,13 @@ publicWidget.registry.RevokeAllTrustedDevicesButton = publicWidget.Widget.extend
 
     init() {
         this._super(...arguments);
-        this.orm = this.bindService("orm");
         this.dialog = this.bindService("dialog");
     },
 
     async _onClick(e){
         e.preventDefault();
         await handleCheckIdentity(
-            this.orm.call("res.users", "revoke_all_devices", [session.user_id]),
-            this.orm,
+            orm.call("res.users", "revoke_all_devices", [session.user_id]),
             this.dialog
         );
         window.location = window.location;

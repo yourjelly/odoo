@@ -1,16 +1,13 @@
 /** @odoo-module **/
 
+import { orm } from "@web/core/orm";
 import { FormController } from "@web/views/form/form_controller";
-import { useService } from "@web/core/utils/hooks";
 import { onWillStart } from "@odoo/owl";
 
 export class CalendarFormController extends FormController {
     setup() {
-        super.setup();
-        const ormService = useService("orm");
-
         onWillStart(async () => {
-            this.discussVideocallLocation = await ormService.call(
+            this.discussVideocallLocation = await orm.call(
                 "calendar.event",
                 "get_discuss_videocall_location"
             );

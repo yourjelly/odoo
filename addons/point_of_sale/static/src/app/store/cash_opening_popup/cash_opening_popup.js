@@ -1,5 +1,6 @@
 /** @odoo-module */
 
+import { orm } from "@web/core/orm";
 import { useService } from "@web/core/utils/hooks";
 import { usePos } from "@point_of_sale/app/store/pos_hook";
 import { MoneyDetailsPopup } from "@point_of_sale/app/utils/money_details_popup/money_details_popup";
@@ -25,12 +26,11 @@ export class CashOpeningPopup extends Component {
                 false
             ),
         });
-        this.orm = useService("orm");
         this.hardwareProxy = useService("hardware_proxy");
     }
     confirm() {
         this.pos.pos_session.state = "opened";
-        this.orm.call("pos.session", "set_cashbox_pos", [
+        orm.call("pos.session", "set_cashbox_pos", [
             this.pos.pos_session.id,
             parseFloat(this.state.openingCash),
             this.state.notes,

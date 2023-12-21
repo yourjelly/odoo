@@ -1,5 +1,6 @@
 /** @odoo-module */
 
+import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
 import { ControlPanel } from "@web/search/control_panel/control_panel";
 import { DashboardLoader, Status } from "./dashboard_loader";
@@ -30,14 +31,9 @@ export class SpreadsheetDashboardAction extends Component {
     setup() {
         this.Status = Status;
         this.controlPanelDisplay = {};
-        this.orm = useService("orm");
         this.router = useService("router");
-        // Use the non-protected orm service (`this.env.services.orm` instead of `useService("orm")`)
-        // because spreadsheets models are preserved across multiple components when navigating
-        // with the breadcrumb
-        // TODO write a test
         /** @type {DashboardLoader}*/
-        this.loader = useState(new DashboardLoader(this.env, this.env.services.orm));
+        this.loader = useState(new DashboardLoader(this.env));
         onWillStart(async () => {
             if (this.props.state && this.props.state.dashboardLoader) {
                 const { groups, dashboards } = this.props.state.dashboardLoader;
@@ -129,7 +125,7 @@ export class SpreadsheetDashboardAction extends Component {
     }
 
     async shareSpreadsheet(data, excelExport) {
-        const url = await this.orm.call("spreadsheet.dashboard.share", "action_get_share_url", [
+        const url = await orm.call("spreadsheet.dashboard.share", "action_get_share_url", [
             {
                 dashboard_id: this.activeDashboardId,
                 spreadsheet_data: JSON.stringify(data),

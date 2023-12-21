@@ -1,12 +1,13 @@
 /** @odoo-module **/
 
-import { registry } from "../registry";
-import { memoize } from "../utils/functions";
+import { orm } from "@web/core/orm";
+import { registry } from "@web/core/registry";
+import { memoize } from "@web/core/utils/functions";
 
 import { useEffect, useEnv, useSubEnv } from "@odoo/owl";
 const debugRegistry = registry.category("debug");
 
-const getAccessRights = memoize(async function getAccessRights(orm) {
+const getAccessRights = memoize(async function getAccessRights() {
     const rightsToCheck = {
         "ir.ui.view": "write",
         "ir.rule": "read",
@@ -25,7 +26,6 @@ const getAccessRights = memoize(async function getAccessRights(orm) {
 
 class DebugContext {
     constructor(env, defaultCategories) {
-        this.orm = env.services.orm;
         this.categories = new Map(defaultCategories.map((cat) => [cat, [{}]]));
     }
 
@@ -43,7 +43,7 @@ class DebugContext {
     }
 
     async getItems(env) {
-        const accessRights = await getAccessRights(this.orm);
+        const accessRights = await getAccessRights();
         return [...this.categories.entries()]
             .flatMap(([category, contexts]) => {
                 return debugRegistry

@@ -5,6 +5,7 @@ import { isMobileOS } from "@web/core/browser/feature_detection";
 import { makeContext } from "@web/core/context";
 import { Dialog } from "@web/core/dialog/dialog";
 import { _t } from "@web/core/l10n/translation";
+import { orm } from "@web/core/orm";
 import { evaluateBooleanExpr } from "@web/core/py_js/py";
 import { registry } from "@web/core/registry";
 import { useChildRef, useOwnedDialogs, useService } from "@web/core/utils/hooks";
@@ -94,7 +95,6 @@ export class Many2OneField extends Component {
     static SEARCH_MORE_LIMIT = 320;
 
     setup() {
-        this.orm = useService("orm");
         this.action = useService("action");
         this.dialog = useService("dialog");
         this.notification = useService("notification");
@@ -118,7 +118,7 @@ export class Many2OneField extends Component {
                 const resId = this.value[0];
                 const fields = ["display_name"];
                 // use unity read + relatedFields from Field Component
-                const records = await this.orm.read(this.relation, [resId], fields, {
+                const records = await orm.read(this.relation, [resId], fields, {
                     context: this.context,
                 });
                 await this.updateRecord(m2oTupleFromData(records[0]));
@@ -240,7 +240,7 @@ export class Many2OneField extends Component {
             [openActionContext || this.context, record.fields[name].context],
             record.evalContext
         );
-        const action = await this.orm.call(this.relation, "get_formview_action", [[this.resId]], {
+        const action = await orm.call(this.relation, "get_formview_action", [[this.resId]], {
             context,
         });
         await this.action.doAction(action);
@@ -293,7 +293,7 @@ export class Many2OneField extends Component {
         }
     }
     async search(barcode) {
-        const results = await this.orm.call(this.relation, "name_search", [], {
+        const results = await orm.call(this.relation, "name_search", [], {
             name: barcode,
             args: this.getDomain(),
             operator: "ilike",

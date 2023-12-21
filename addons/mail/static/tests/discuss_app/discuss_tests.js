@@ -1,5 +1,6 @@
 /* @odoo-module */
 
+import { orm } from "@web/core/orm";
 import { rpc } from "@web/core/network/rpc";
 
 import { startServer } from "@bus/../tests/helpers/mock_python_environment";
@@ -438,9 +439,7 @@ QUnit.test("receive new needaction messages", async () => {
         notification_type: "inbox",
         res_partner_id: pyEnv.currentPartnerId,
     });
-    const [message1] = await env.services.orm.call("mail.message", "message_format", [
-        [messageId_1],
-    ]);
+    const [message1] = await orm.call("mail.message", "message_format", [[messageId_1]]);
     pyEnv["bus.bus"]._sendone(pyEnv.currentPartner, "mail.message/inbox", message1);
     await contains("button", { text: "Inbox", contains: [".badge", { text: "1" }] });
     await contains(".o-mail-Message");
@@ -460,9 +459,7 @@ QUnit.test("receive new needaction messages", async () => {
         notification_type: "inbox",
         res_partner_id: pyEnv.currentPartnerId,
     });
-    const [message2] = await env.services.orm.call("mail.message", "message_format", [
-        [messageId_2],
-    ]);
+    const [message2] = await orm.call("mail.message", "message_format", [[messageId_2]]);
     pyEnv["bus.bus"]._sendone(pyEnv.currentPartner, "mail.message/inbox", message2);
     await contains("button", { text: "Inbox", contains: [".badge", { text: "2" }] });
     await contains(".o-mail-Message", { count: 2 });
@@ -1341,7 +1338,7 @@ QUnit.test("Channel is added to discuss after invitation", async () => {
     await contains(".o-mail-DiscussSidebarChannel", { count: 0, text: "General" });
 
     pyEnv.withUser(userId, () =>
-        env.services.orm.call("discuss.channel", "add_members", [[channelId]], {
+        orm.call("discuss.channel", "add_members", [[channelId]], {
             partner_ids: [pyEnv.adminPartnerId],
         })
     );

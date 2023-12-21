@@ -1,12 +1,14 @@
 
 /** @odoo-module **/
+
+import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
 
 let colorPickerTemplatePromise;
 export const getColorPickerTemplateService = {
-    dependencies: ["orm"],
+    dependencies: [],
     async: true,
-    start(env, { orm }) {
+    start() {
         return () => {
             colorPickerTemplatePromise ??= orm.call(
                 'ir.ui.view',

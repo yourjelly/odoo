@@ -2,6 +2,7 @@
 
 import { _t } from "@web/core/l10n/translation";
 import { Domain } from '@web/core/domain';
+import { orm } from "@web/core/orm";
 import { registry } from '@web/core/registry';
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { useService } from "@web/core/utils/hooks";
@@ -139,7 +140,7 @@ export class FieldMany2OneMailingFilter extends Many2OneField {
         // Prevent multiple clicks to avoid trying to deleting same record multiple times.
         ev.target.disabled = true;
 
-        await this.orm.unlink('mailing.filter', [filterId]);
+        await orm.unlink('mailing.filter', [filterId]);
         this.update(false);
         this.props.record.update({[this.props.domain_field]: mailingDomain});
     }
@@ -166,7 +167,7 @@ export class FieldMany2OneMailingFilter extends Many2OneField {
             ev.stopPropagation();
             filterInput.focus();
         } else {
-            const [newFilterId] = await this.env.model.orm.create("mailing.filter", [{
+            const [newFilterId] = await orm.create("mailing.filter", [{
                 name: filterName,
                 mailing_domain: this.props.record.data[this.props.domain_field],
                 mailing_model_id: this.props.record.data[this.props.model_field][0],

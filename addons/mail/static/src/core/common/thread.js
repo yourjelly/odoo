@@ -19,6 +19,7 @@ import {
 } from "@odoo/owl";
 
 import { _t } from "@web/core/l10n/translation";
+import { orm } from "@web/core/orm";
 import { Transition } from "@web/core/transition";
 import { useBus, useService } from "@web/core/utils/hooks";
 import { escape } from "@web/core/utils/strings";
@@ -73,7 +74,6 @@ export class Thread extends Component {
         });
         this.lastJumpPresent = this.props.jumpPresent;
         this.threadService = useState(useService("mail.thread"));
-        this.orm = useService("orm");
         /** @type {ReturnType<import('@mail/utils/common/hooks').useMessageHighlight>|null} */
         this.messageHighlight = this.env.messageHighlight
             ? useState(this.env.messageHighlight)
@@ -379,7 +379,7 @@ export class Thread extends Component {
     }
 
     async onClickPreferences() {
-        const actionDescription = await this.orm.call("res.users", "action_get");
+        const actionDescription = await orm.call("res.users", "action_get");
         actionDescription.res_id = this.store.self.user.id;
         this.env.services.action.doAction(actionDescription);
     }

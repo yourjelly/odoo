@@ -89,7 +89,7 @@ const DEFAULT_HOOKS = {
 };
 
 export class RelationalModel extends Model {
-    static services = ["action", "company", "dialog", "notification", "orm"];
+    static services = ["action", "company", "dialog", "notification"];
     static Record = Record;
     static Group = Group;
     static DynamicRecordList = DynamicRecordList;

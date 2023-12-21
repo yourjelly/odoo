@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { _t } from "@web/core/l10n/translation";
+import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
 import { usePopover } from "@web/core/popover/popover_hook";
 import { useService } from "@web/core/utils/hooks";
@@ -23,7 +24,6 @@ export class AccountPaymentField extends Component {
     setup() {
         const position = localization.direction === "rtl" ? "bottom" : "left";
         this.popover = usePopover(AccountPaymentPopOver, { position });
-        this.orm = useService("orm");
         this.action = useService("action");
     }
 
@@ -62,18 +62,18 @@ export class AccountPaymentField extends Component {
     }
 
     async assignOutstandingCredit(moveId, id) {
-        await this.orm.call(this.props.record.resModel, 'js_assign_outstanding_line', [moveId, id], {});
+        await orm.call(this.props.record.resModel, 'js_assign_outstanding_line', [moveId, id], {});
         await this.props.record.model.root.load();
     }
 
     async removeMoveReconcile(moveId, partialId) {
         this.popover.close();
-        await this.orm.call(this.props.record.resModel, 'js_remove_outstanding_partial', [moveId, partialId], {});
+        await orm.call(this.props.record.resModel, 'js_remove_outstanding_partial', [moveId, partialId], {});
         await this.props.record.model.root.load();
     }
 
     async openMove(moveId) {
-        const action = await this.orm.call(this.props.record.resModel, 'action_open_business_doc', [moveId], {});
+        const action = await orm.call(this.props.record.resModel, 'action_open_business_doc', [moveId], {});
         this.action.doAction(action);
     }
 }

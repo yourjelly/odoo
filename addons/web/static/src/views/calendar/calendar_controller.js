@@ -5,6 +5,7 @@ import {
     ConfirmationDialog,
 } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { _t } from "@web/core/l10n/translation";
+import { orm } from "@web/core/orm";
 import { useOwnedDialogs, useService } from "@web/core/utils/hooks";
 import { Layout } from "@web/search/layout";
 import { useModelWithSampleData } from "@web/model/model";
@@ -58,7 +59,6 @@ export class CalendarController extends Component {
 
     setup() {
         this.action = useService("action");
-        this.orm = useService("orm");
         this.displayDialog = useUniqueDialog();
 
         this.model = useModelWithSampleData(
@@ -308,7 +308,7 @@ export class CalendarController extends Component {
         } else {
             let formViewId = this.model.formViewId;
             if (shouldFetchFormViewId) {
-                formViewId = await this.orm.call(
+                formViewId = await orm.call(
                     this.model.resModel,
                     "get_formview_id",
                     [[record.id]],

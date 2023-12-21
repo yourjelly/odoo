@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { Component, EventBus, onWillStart, useSubEnv, useState } from "@odoo/owl";
+import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
 import { useBus, useService } from "@web/core/utils/hooks";
 import { Layout } from "@web/search/layout";
@@ -23,7 +24,6 @@ export class MoOverview extends Component {
 
     setup() {
         this.actionService = useService("action");
-        this.ormService = useService("orm");
         this.unfoldedIds = new Set();
         this.context = {};
 
@@ -42,7 +42,7 @@ export class MoOverview extends Component {
     }
 
     async getManufacturingData() {
-        const reportValues = await this.ormService.call(
+        const reportValues = await orm.call(
             "report.mrp.report_mo_overview",
             "get_report_values",
             [this.activeId],

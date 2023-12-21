@@ -7,6 +7,7 @@ import { cookie } from "@web/core/browser/cookie";;
 import { loadWysiwygFromTextarea } from "@web_editor/js/frontend/loadWysiwygFromTextarea";
 import publicWidget from "@web/legacy/js/public/public_widget";
 import { session } from "@web/session";
+import { orm } from "@web/core/orm";
 import { rpc } from "@web/core/network/rpc";
 import { escape } from "@web/core/utils/strings";
 import { _t } from "@web/core/l10n/translation";
@@ -36,7 +37,6 @@ publicWidget.registry.websiteForum = publicWidget.Widget.extend({
 
     init() {
         this._super(...arguments);
-        this.orm = this.bindService("orm");
         this.notification = this.bindService("notification");
     },
 
@@ -551,7 +551,7 @@ publicWidget.registry.websiteForum = publicWidget.Widget.extend({
     async _onFlagValidatorClick(ev) {
         ev.preventDefault();
         const currentTarget = ev.currentTarget;
-        await this.orm.call("forum.post", currentTarget.dataset.action, [
+        await orm.call("forum.post", currentTarget.dataset.action, [
             parseInt(currentTarget.dataset.postId),
         ]);
         this._findParent(currentTarget, '.o_wforum_flag_alert')?.classList.toggle('d-none');
@@ -596,11 +596,6 @@ publicWidget.registry.websiteForumSpam = publicWidget.Widget.extend({
         'input #spamSearch': '_onSpamSearchInput',
     },
 
-    init() {
-        this._super(...arguments);
-        this.orm = this.bindService("orm");
-    },
-
     /**
      * @override
      */
@@ -629,7 +624,7 @@ publicWidget.registry.websiteForumSpam = publicWidget.Widget.extend({
     _onSpamSearchInput: function (ev) {
         var self = this;
         var toSearch = $(ev.currentTarget).val();
-        return this.orm.searchRead(
+        return orm.searchRead(
             "forum.post",
             [['id', 'in', self.spamIDs],
                 '|',
@@ -654,7 +649,7 @@ publicWidget.registry.websiteForumSpam = publicWidget.Widget.extend({
         var key = this.$('.modal .tab-pane.active').data('key');
         var $inputs = this.$('.modal .tab-pane.active input.form-check-input:checked');
         var values = Array.from($inputs).map((o) => parseInt(o.value));
-        return this.orm.call("forum.post", "mark_as_offensive_batch", [
+        return orm.call("forum.post", "mark_as_offensive_batch", [
             this.spamIDs,
             key,
             values,

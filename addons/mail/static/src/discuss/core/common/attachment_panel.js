@@ -5,6 +5,7 @@ import { ActionPanel } from "@mail/discuss/core/common/action_panel";
 import { AttachmentList } from "@mail/core/common/attachment_list";
 
 import { Component, onWillStart, onWillUpdateProps } from "@odoo/owl";
+import { orm } from "@web/core/orm";
 import { useService } from "@web/core/utils/hooks";
 import { useSequential, useVisible } from "@mail/utils/common/hooks";
 
@@ -20,7 +21,6 @@ export class AttachmentPanel extends Component {
     setup() {
         this.sequential = useSequential();
         this.store = useService("mail.store");
-        this.ormService = useService("orm");
         this.threadService = useService("mail.thread");
         this.attachmentUploadService = useService("mail.attachment_upload");
         onWillStart(() => {
@@ -61,7 +61,7 @@ export class AttachmentPanel extends Component {
 
     toggleAllowPublicUpload() {
         this.sequential(() =>
-            this.ormService.write("discuss.channel", [this.props.thread.id], {
+            orm.write("discuss.channel", [this.props.thread.id], {
                 allow_public_upload: !this.props.thread.allow_public_upload,
             })
         );

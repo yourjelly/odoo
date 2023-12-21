@@ -2,6 +2,7 @@
 /* global StripeTerminal */
 
 import { _t } from "@web/core/l10n/translation";
+import { orm } from "@web/core/orm";
 import { PaymentInterface } from "@point_of_sale/app/payment/payment_interface";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 
@@ -19,7 +20,7 @@ export class PaymentStripe extends PaymentInterface {
     async stripeFetchConnectionToken() {
         // Do not cache or hardcode the ConnectionToken.
         try {
-            const data = await this.env.services.orm.silent.call(
+            const data = await orm.silent.call(
                 "pos.payment.method",
                 "stripe_connection_token",
                 []
@@ -204,7 +205,7 @@ export class PaymentStripe extends PaymentInterface {
 
     async capturePayment(paymentIntentId) {
         try {
-            const data = await this.env.services.orm.silent.call(
+            const data = await orm.silent.call(
                 "pos.payment.method",
                 "stripe_capture_payment",
                 [paymentIntentId]
@@ -222,7 +223,7 @@ export class PaymentStripe extends PaymentInterface {
 
     async fetchPaymentIntentClientSecret(payment_method, amount) {
         try {
-            const data = await this.env.services.orm.silent.call(
+            const data = await orm.silent.call(
                 "pos.payment.method",
                 "stripe_payment_intent",
                 [[payment_method.id], amount]

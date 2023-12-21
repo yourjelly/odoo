@@ -9,6 +9,7 @@ import { Thread } from "@mail/core/common/thread_model";
 import { reactive } from "@odoo/owl";
 
 import { _t } from "@web/core/l10n/translation";
+import { orm } from "@web/core/orm";
 import { rpc } from "@web/core/network/rpc";
 import { registry } from "@web/core/registry";
 import { patch } from "@web/core/utils/patch";
@@ -61,7 +62,6 @@ export class MessagePin {
         this.env = env;
         this.busService = services.bus_service;
         this.dialogService = services.dialog;
-        this.ormService = services.orm;
         this.store = services["mail.store"];
     }
 
@@ -143,7 +143,7 @@ export class MessagePin {
      * @param {boolean} pinned
      */
     setPin(message, pinned) {
-        this.ormService.call("discuss.channel", "set_message_pin", [message.originThread.id], {
+        orm.call("discuss.channel", "set_message_pin", [message.originThread.id], {
             message_id: message.id,
             pinned,
         });
@@ -171,7 +171,7 @@ export class MessagePin {
 }
 
 export const messagePinService = {
-    dependencies: ["bus_service", "dialog", "mail.store", "orm"],
+    dependencies: ["bus_service", "dialog", "mail.store"],
     /**
      * @param {import("@web/env").OdooEnv} env
      * @param {Partial<import("services").Services>} services

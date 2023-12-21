@@ -2,6 +2,7 @@
 /* global checkVATNumber */
 
 import { loadJS } from "@web/core/assets";
+import { orm } from "@web/core/orm";
 import { _t } from "@web/core/l10n/translation";
 import { KeepLast } from "@web/core/utils/concurrency";
 import { useService } from "@web/core/utils/hooks";
@@ -21,7 +22,6 @@ export function usePartnerAutocomplete() {
 
     const http = useService("http");
     const notification = useService("notification");
-    const orm = useService("orm");
 
     function sanitizeVAT(value) {
         return value ? value.replace(/[^A-Za-z0-9]/g, '') : '';

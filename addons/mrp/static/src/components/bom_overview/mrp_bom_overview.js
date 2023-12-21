@@ -1,5 +1,6 @@
 /** @odoo-module **/
 
+import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { BomOverviewControlPanel } from "../bom_overview_control_panel/mrp_bom_overview_control_panel";
@@ -13,7 +14,6 @@ export class BomOverviewComponent extends Component {
         BomOverviewTable,
     };
     setup() {
-        this.orm = useService("orm");
         this.actionService = useService("action");
 
         this.variants = [];
@@ -74,7 +74,7 @@ export class BomOverviewComponent extends Component {
             this.state.currentVariantId,
         ];
         const context = this.state.currentWarehouse ? { warehouse: this.state.currentWarehouse.id } : {};
-        const bomData = await this.orm.call(
+        const bomData = await orm.call(
             "report.mrp.report_bom_structure",
             "get_html",
             args,
@@ -86,7 +86,7 @@ export class BomOverviewComponent extends Component {
     }
 
     async getWarehouses() {
-        const warehouses = await this.orm.call(
+        const warehouses = await orm.call(
             "report.mrp.report_bom_structure",
             "get_warehouses",
         );

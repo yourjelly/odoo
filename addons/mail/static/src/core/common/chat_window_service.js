@@ -25,7 +25,6 @@ export class ChatWindowService {
     setup(env, services) {
         this.env = env;
         this.store = services["mail.store"];
-        this.orm = services.orm;
         this.ui = services.ui;
     }
 
@@ -160,7 +159,7 @@ export class ChatWindowService {
 }
 
 export const chatWindowService = {
-    dependencies: ["mail.store", "orm", "ui"],
+    dependencies: ["mail.store","ui"],
     /**
      * @param {import("@web/env").OdooEnv} env
      * @param {Partial<import("services").Services>} services

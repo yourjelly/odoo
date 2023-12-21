@@ -1,6 +1,7 @@
 /** @odoo-module */
 
 import { Order } from "@point_of_sale/app/store/models";
+import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { deserializeDateTime, formatDateTime } from "@web/core/l10n/dates";
@@ -49,7 +50,6 @@ export class TicketScreen extends Component {
     setup() {
         this.pos = usePos();
         this.ui = useState(useService("ui"));
-        this.orm = useService("orm");
         this.dialog = useService("dialog");
         this.numberBuffer = useService("number_buffer");
         this.numberBuffer.use({
@@ -726,7 +726,7 @@ export class TicketScreen extends Component {
         const offset =
             (this._state.syncedOrders.currentPage - 1) * this._state.syncedOrders.nPerPage;
         const config_id = this.pos.config.id;
-        const { ordersInfo, totalCount } = await this.orm.call(
+        const { ordersInfo, totalCount } = await orm.call(
             "pos.order",
             "search_paid_order_ids",
             [],
@@ -742,7 +742,7 @@ export class TicketScreen extends Component {
         });
         const idsToLoad = idsNotInCache.concat(idsNotUpToDate).map((info) => info[0]);
         if (idsToLoad.length > 0) {
-            const fetchedOrders = await this.orm.call("pos.order", "export_for_ui", [idsToLoad]);
+            const fetchedOrders = await orm.call("pos.order", "export_for_ui", [idsToLoad]);
             // Check for missing products and partners and load them in the PoS
             await this.pos._loadMissingProducts(fetchedOrders);
             await this.pos._loadMissingPartners(fetchedOrders);

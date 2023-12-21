@@ -4,6 +4,7 @@ import { Component, onWillStart, useState, useEffect } from "@odoo/owl";
 import { useOnBottomScrolled, useSequential } from "@mail/utils/common/hooks";
 
 import { rpc } from "@web/core/network/rpc";
+import { orm } from "@web/core/orm";
 import { user } from "@web/core/user";
 import { useService, useAutofocus } from "@web/core/utils/hooks";
 import { useDebounced } from "@web/core/utils/timing";
@@ -53,7 +54,6 @@ export class GifPicker extends Component {
     static props = ["PICKERS?", "className?", "close?", "onSelect", "state?"];
 
     setup() {
-        this.orm = useService("orm");
         this.store = useState(useService("mail.store"));
         this.sequential = useSequential();
         useAutofocus();
@@ -248,7 +248,7 @@ export class GifPicker extends Component {
     async onClickFavorite(gif) {
         if (!this.isFavorite(gif)) {
             this.state.favorites.gifs.push(gif);
-            await this.orm.silent.create("discuss.gif.favorite", [{ tenor_gif_id: gif.id }]);
+            await orm.silent.create("discuss.gif.favorite", [{ tenor_gif_id: gif.id }]);
         } else {
             const index = this.state.favorites.gifs.findIndex(({ id }) => id === gif.id);
             if (index >= 0) {

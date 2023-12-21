@@ -2,6 +2,7 @@
 
 import { _t } from "@web/core/l10n/translation";
 import { browser } from '@web/core/browser/browser';
+import { orm } from "@web/core/orm";
 import { registry } from '@web/core/registry';
 import { ResizablePanel } from '@web/core/resizable_panel/resizable_panel';
 import { useService, useBus } from '@web/core/utils/hooks';
@@ -46,7 +47,6 @@ export class WebsitePreview extends Component {
         this.title = useService('title');
         this.router = useService('router');
         this.action = useService('action');
-        this.orm = useService('orm');
 
         this.iframeFallbackUrl = '/website/iframefallback';
 
@@ -69,7 +69,7 @@ export class WebsitePreview extends Component {
 
         onWillStart(async () => {
             const [backendWebsiteRepr] = await Promise.all([
-                this.orm.call('website', 'get_current_website'),
+                orm.call('website', 'get_current_website'),
                 this.websiteService.fetchWebsites(),
                 this.websiteService.fetchUserGroups(),
             ]);

@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { AutoComplete } from "@web/core/autocomplete/autocomplete";
-import { useService } from "@web/core/utils/hooks";
+import { orm } from "@web/core/orm";
 import { fuzzyLookup } from "@web/core/utils/search";
 import { _t } from "@web/core/l10n/translation";
 
@@ -20,15 +20,11 @@ export class ModelSelector extends Component {
     };
 
     setup() {
-        this.orm = useService("orm");
-
         onWillStart(async () => {
             if (!this.props.models) {
                 this.models = await this._fetchAvailableModels();
             } else {
-                this.models = await this.orm.call("ir.model", "display_name_for", [
-                    this.props.models,
-                ]);
+                this.models = await orm.call("ir.model", "display_name_for", [this.props.models]);
             }
 
             this.models = this.models.map((record) => ({
@@ -95,7 +91,7 @@ export class ModelSelector extends Component {
      * selected for the relational properties.
      */
     async _fetchAvailableModels() {
-        const result = await this.orm.call("ir.model", "get_available_models");
+        const result = await orm.call("ir.model", "get_available_models");
         return result || [];
     }
 }

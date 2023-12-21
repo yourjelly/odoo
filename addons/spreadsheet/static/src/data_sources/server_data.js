@@ -1,6 +1,8 @@
 /** @odoo-module */
 import { LoadingDataError } from "../o_spreadsheet/errors";
 
+import { orm } from "@web/core/orm";
+
 /**
  * @param {T[]} array
  * @returns {T[]}
@@ -85,12 +87,10 @@ class ListRequestBatch {
 
 export class ServerData {
     /**
-     * @param {any} orm
      * @param {object} params
      * @param {function} params.whenDataIsFetched
      */
-    constructor(orm, { whenDataIsFetched }) {
-        this.orm = orm;
+    constructor({ whenDataIsFetched }) {
         this.dataFetchedCallback = whenDataIsFetched;
         /** @type {Record<string, unknown>}*/
         this.cache = {};
@@ -135,7 +135,7 @@ export class ServerData {
         if (!(request.key in this.cache)) {
             const error = new LoadingDataError();
             this.cache[request.key] = error;
-            this.orm
+            orm
                 .call(resModel, method, args)
                 .then((result) => (this.cache[request.key] = result))
                 .catch((error) => (this.cache[request.key] = error))
@@ -155,7 +155,7 @@ export class ServerData {
     async fetch(resModel, method, args) {
         const request = new Request(resModel, method, args);
         if (!(request.key in this.asyncCache)) {
-            this.asyncCache[request.key] = this.orm.call(resModel, method, args);
+            this.asyncCache[request.key] = orm.call(resModel, method, args);
         }
         return this.asyncCache[request.key];
     }
@@ -204,7 +204,7 @@ export class ServerData {
      * @param {string} method
      */
     _createBatchEndpoint(resModel, method) {
-        return new BatchEndpoint(this.orm, resModel, method, {
+        return new BatchEndpoint(resModel, method, {
             whenDataIsFetched: () => this.dataFetchedCallback(),
             successCallback: (request, result) => (this.cache[request.key] = result),
             failureCallback: (request, error) => (this.cache[request.key] = error),
@@ -217,7 +217,6 @@ export class ServerData {
  */
 export class BatchEndpoint {
     /**
-     * @param {object} orm
      * @param {string} resModel
      * @param {string} method
      * @param {object} callbacks
@@ -226,7 +225,6 @@ export class BatchEndpoint {
      * @param {function} callbacks.whenDataIsFetched
      */
     constructor(orm, resModel, method, { successCallback, failureCallback, whenDataIsFetched }) {
-        this.orm = orm;
         this.resModel = resModel;
         this.method = method;
         this.successCallback = successCallback;
@@ -273,7 +271,7 @@ export class BatchEndpoint {
                 const batch = this._pendingBatch;
                 const { resModel, method } = batch;
                 this._pendingBatch = new ListRequestBatch(resModel, method);
-                await this.orm
+                await orm
                     .call(resModel, method, batch.payload)
                     .then((result) => batch.splitResponse(result))
                     .catch(() => this._retryOneByOne(batch))
@@ -298,7 +296,7 @@ export class BatchEndpoint {
         const proms = [];
         for (const batch of singleRequestBatches) {
             const request = batch.requests[0];
-            const prom = this.orm
+            const prom = orm
                 .call(resModel, method, batch.payload)
                 .then((result) =>
                     mergedResults.set(request, batch.splitResponse(result).get(request))

@@ -11,6 +11,7 @@ import { Component, onMounted, onWillUnmount, useState } from "@odoo/owl";
 import { browser } from "@web/core/browser/browser";
 import { deserializeDateTime } from "@web/core/l10n/dates";
 import { _t } from "@web/core/l10n/translation";
+import { orm } from "@web/core/orm";
 import { usePopover } from "@web/core/popover/popover_hook";
 import { useService } from "@web/core/utils/hooks";
 import { FileUploader } from "@web/views/fields/file_handler";
@@ -112,7 +113,7 @@ export class Activity extends Component {
     async unlink() {
         const thread = this.thread;
         this.activityService.delete(this.props.data);
-        await this.env.services.orm.unlink("mail.activity", [this.props.data.id]);
+        await orm.unlink("mail.activity", [this.props.data.id]);
         this.props.onUpdate(thread);
     }
 

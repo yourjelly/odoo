@@ -4,12 +4,13 @@ import { Model, parse, helpers, iterateAstNodes } from "@odoo/o-spreadsheet";
 import { migrate } from "@spreadsheet/o_spreadsheet/migration";
 import { _t } from "@web/core/l10n/translation";
 import { loadBundle } from "@web/core/assets";
+import { orm } from "@web/core/orm";
 
 const { toCartesian, UuidGenerator, createEmptySheet } = helpers;
 const uuidGenerator = new UuidGenerator();
 
 export async function fetchSpreadsheetModel(env, resModel, resId) {
-    const { data, revisions } = await env.services.orm.call(resModel, "join_spreadsheet_session", [
+    const { data, revisions } = await orm.call(resModel, "join_spreadsheet_session", [
         resId,
     ]);
     return createSpreadsheetModel({ env, data, revisions });

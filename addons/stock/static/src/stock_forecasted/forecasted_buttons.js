@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { _t } from "@web/core/l10n/translation";
+import { orm } from "@web/core/orm";
 import { useService } from "@web/core/utils/hooks";
 import { Component } from "@odoo/owl";
 
@@ -14,7 +15,6 @@ export class ForecastedButtons extends Component {
 
     setup() {
         this.actionService = useService("action");
-        this.orm = useService("orm");
         this.context = this.props.action.context;
         this.productId = this.context.active_id;
         this.resModel = this.props.resModel || this.context.active_model || this.context.params?.active_model || 'product.template';
@@ -50,7 +50,7 @@ export class ForecastedButtons extends Component {
     }
 
     async _onClickUpdateQuantity() {
-        const action = await this.orm.call(this.resModel, "action_update_quantity_on_hand", [[this.productId]]);
+        const action = await orm.call(this.resModel, "action_update_quantity_on_hand", [[this.productId]]);
         if (action.res_model === "stock.quant") { // Quant view in inventory mode.
             action.views = [[false, "tree"]];
         }

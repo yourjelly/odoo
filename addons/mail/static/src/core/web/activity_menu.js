@@ -5,6 +5,7 @@ import { Component, useState } from "@odoo/owl";
 import { useDiscussSystray } from "@mail/utils/common/hooks";
 
 import { Dropdown } from "@web/core/dropdown/dropdown";
+import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { Domain } from "@web/core/domain";
@@ -26,7 +27,7 @@ export class ActivityMenu extends Component {
     }
 
     async fetchSystrayActivities() {
-        const groups = await this.env.services.orm.call("res.users", "systray_get_activities");
+        const groups = await orm.call("res.users", "systray_get_activities");
         let total = 0;
         for (const group of groups) {
             total += group.total_count || 0;

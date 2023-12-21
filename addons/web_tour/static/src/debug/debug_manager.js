@@ -2,6 +2,7 @@
 
 import { _t } from "@web/core/l10n/translation";
 import { browser } from "@web/core/browser/browser";
+import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
 import { user } from "@web/core/user";
 import ToursDialog from "@web_tour/debug/tour_dialog_component";
@@ -19,7 +20,7 @@ export function disableTours({ env }) {
         type: "item",
         description: _t("Disable Tours"),
         callback: async () => {
-            await env.services.orm.call("web_tour.tour", "consume", [activeTourNames]);
+            await orm.call("web_tour.tour", "consume", [activeTourNames]);
             for (const tourName of activeTourNames) {
                 tourState.clear(tourName);
             }

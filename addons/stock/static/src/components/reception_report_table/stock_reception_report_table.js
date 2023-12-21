@@ -1,5 +1,6 @@
 /** @odoo-module **/
 
+import { orm } from "@web/core/orm";
 import { useService } from "@web/core/utils/hooks";
 import { ReceptionReportLine } from "../reception_report_line/stock_reception_report_line";
 import { Component } from "@odoo/owl";
@@ -20,7 +21,6 @@ export class ReceptionReportTable extends Component {
 
     setup() {
         this.actionService = useService("action");
-        this.ormService = useService("orm");
     }
 
     //---- Handlers ----
@@ -36,7 +36,7 @@ export class ReceptionReportTable extends Component {
             inIds.push(line.move_ins);
         }
 
-        await this.ormService.call(
+        await orm.call(
             "report.stock.report_reception",
             "action_assign",
             [false, moveIds, quantities, inIds],

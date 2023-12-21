@@ -1,10 +1,12 @@
 /** @odoo-module */
+
+import { orm } from "@web/core/orm";
 import { patch } from "@web/core/utils/patch";
 import { Order, Payment } from "@point_of_sale/app/store/models";
 import { floatIsZero } from "@web/core/utils/numbers";
 
 patch(Order.prototype, {
-    async update_online_payments_data_with_server(orm, next_online_payment_amount) {
+    async update_online_payments_data_with_server(next_online_payment_amount) {
         if (!this.server_id) {
             return false;
         }

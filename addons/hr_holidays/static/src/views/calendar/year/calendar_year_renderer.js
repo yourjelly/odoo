@@ -1,9 +1,9 @@
 /** @odoo-module **/
 
 import { _t } from "@web/core/l10n/translation";
+import { orm } from "@web/core/orm";
 import { CalendarYearRenderer } from "@web/views/calendar/calendar_year/calendar_year_renderer";
 
-import { useService } from "@web/core/utils/hooks";
 import { useMandatoryDays } from "../../hooks";
 import { useCalendarPopover } from "@web/views/calendar/hooks";
 import { TimeOffCalendarYearPopover } from "./calendar_year_popover";
@@ -12,7 +12,6 @@ import { useEffect } from "@odoo/owl";
 export class TimeOffCalendarYearRenderer extends CalendarYearRenderer {
     setup() {
         super.setup();
-        this.orm = useService("orm");
         this.mandatoryDays = useMandatoryDays(this.props);
         this.mandatoryDaysList = [];
         this.mandatoryDayPopover = useCalendarPopover(TimeOffCalendarYearPopover);
@@ -58,7 +57,7 @@ export class TimeOffCalendarYearRenderer extends CalendarYearRenderer {
             this.popover.close();
             const date = luxon.DateTime.fromISO(info.dateStr);
             const target = info.dayEl;
-            const mandatory_days_data = await this.orm.call(
+            const mandatory_days_data = await orm.call(
                 "hr.employee",
                 "get_mandatory_days_data",
                 [date, date]

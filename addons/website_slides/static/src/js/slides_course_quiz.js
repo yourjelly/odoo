@@ -10,6 +10,7 @@
     import { rpc } from "@web/core/network/rpc";
     import { SlideQuizFinishDialog } from "@website_slides/js/public/components/slide_quiz_finish_dialog/slide_quiz_finish_dialog";
 
+    import { orm } from "@web/core/orm";
     import { _t } from "@web/core/l10n/translation";
 
     import { markup } from "@odoo/owl";
@@ -72,8 +73,6 @@
             this.userId = session.user_id;
             this.redirectURL = encodeURIComponent(document.URL);
             this.channel = channel_data;
-
-            this.orm = this.bindService("orm");
         },
 
         /**
@@ -671,7 +670,7 @@
          */
         _onConfirmClick: function () {
             var self = this;
-            this.orm.unlink("slide.question", [this.questionId]).then(function () {
+            orm.unlink("slide.question", [this.questionId]).then(function () {
                 self.trigger_up('delete_question', { questionId: self.questionId });
                 self.close();
             });

@@ -1,7 +1,7 @@
 /* @odoo-module */
 
+import { orm } from "@web/core/orm";
 import { registry } from "@web/core/registry";
-import { useService } from "@web/core/utils/hooks";
 import { useRecordObserver } from "@web/model/relational_model/utils";
 
 import { formatDate } from "@web/core/l10n/dates";
@@ -13,8 +13,6 @@ export class LeaveStatsComponent extends Component {
     static template = "hr_holidays.LeaveStatsComponent";
 
     setup() {
-        this.orm = useService("orm");
-
         this.state = useState({
             leaves: [],
             departmentLeaves: [],
@@ -83,7 +81,7 @@ export class LeaveStatsComponent extends Component {
         const dateFrom = date.startOf("month");
         const dateTo = date.endOf("month");
 
-        const departmentLeaves = await this.orm.searchRead(
+        const departmentLeaves = await orm.searchRead(
             "hr.leave",
             [
                 ["department_id", "=", department[0]],
@@ -112,7 +110,7 @@ export class LeaveStatsComponent extends Component {
 
         const dateFrom = date.startOf("year");
         const dateTo = date.endOf("year");
-        this.state.leaves = await this.orm.readGroup(
+        this.state.leaves = await orm.readGroup(
             "hr.leave",
             [
                 ["employee_id", "=", employee[0]],

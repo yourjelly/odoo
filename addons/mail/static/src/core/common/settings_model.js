@@ -1,6 +1,7 @@
 /* @odoo-module */
 
 import { browser } from "@web/core/browser/browser";
+import { orm } from "@web/core/orm";
 import { Record } from "./record";
 
 export class Settings extends Record {
@@ -208,18 +209,13 @@ export class Settings extends Record {
      */
     async _onSaveGlobalSettingsTimeout() {
         this.globalSettingsTimeout = undefined;
-        await this._store.env.services.orm.call(
-            "res.users.settings",
-            "set_res_users_settings",
-            [[this.id]],
-            {
-                new_settings: {
-                    push_to_talk_key: this.push_to_talk_key,
-                    use_push_to_talk: this.use_push_to_talk,
-                    voice_active_duration: this.voice_active_duration,
-                },
-            }
-        );
+        await orm.call("res.users.settings", "set_res_users_settings", [[this.id]], {
+            new_settings: {
+                push_to_talk_key: this.push_to_talk_key,
+                use_push_to_talk: this.use_push_to_talk,
+                voice_active_duration: this.voice_active_duration,
+            },
+        });
     }
     /**
      * @param {Object} param0
@@ -229,14 +225,9 @@ export class Settings extends Record {
      */
     async _onSaveVolumeSettingTimeout({ key, partnerId, guestId, volume }) {
         this.volumeSettingsTimeouts.delete(key);
-        await this._store.env.services.orm.call(
-            "res.users.settings",
-            "set_volume_setting",
-            [[this.id], partnerId, volume],
-            {
-                guest_id: guestId,
-            }
-        );
+        await orm.call("res.users.settings", "set_volume_setting", [[this.id], partnerId, volume], {
+            guest_id: guestId,
+        });
     }
     /**
      * @private

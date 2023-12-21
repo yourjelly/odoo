@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { FormController } from "@web/views/form/form_controller";
+import { orm } from "@web/core/orm";
 import { useService } from "@web/core/utils/hooks";
 
 /**
@@ -11,7 +12,6 @@ export default class OnboardingStepFormController extends FormController {
     setup() {
         super.setup();
         this.action = useService('action');
-        this.orm = useService('orm');
     }
     /**
      * If necessary, mark the step as done and reload the main view.
@@ -21,7 +21,7 @@ export default class OnboardingStepFormController extends FormController {
         const saved = await super.save(otherParams);
         if (saved) {
             const { reloadOnFirstValidation, reloadAlways } = this.stepConfig;
-            const validationResponse = await this.orm.call(
+            const validationResponse = await orm.call(
                 'onboarding.onboarding.step',
                 'action_validate_step',
                 [this.stepName],

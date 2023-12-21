@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { ConfirmationDialog } from '@web/core/confirmation_dialog/confirmation_dialog';
+import { orm } from "@web/core/orm";
 import { renderToMarkup } from "@web/core/utils/render";
 import publicWidget from '@web/legacy/js/public/public_widget';
 import { session } from "@web/session";
@@ -15,7 +16,6 @@ publicWidget.registry.NewAPIKeyButton = publicWidget.Widget.extend({
 
     init() {
         this._super(...arguments);
-        this.orm = this.bindService("orm");
         this.dialog = this.bindService("dialog");
     },
 
@@ -27,8 +27,7 @@ publicWidget.registry.NewAPIKeyButton = publicWidget.Widget.extend({
         // The result of the call is unused. But it's required to call a method with the decorator `@check_identity`
         // in order to use `handleCheckIdentity`.
         await handleCheckIdentity(
-            this.orm.call("res.users", "api_key_wizard", [session.user_id]),
-            this.orm,
+            orm.call("res.users", "api_key_wizard", [session.user_id]),
             this.dialog
         );
 
@@ -38,10 +37,9 @@ publicWidget.registry.NewAPIKeyButton = publicWidget.Widget.extend({
             confirmLabel: _t("Confirm"),
             confirm: async ({ inputEl }) => {
                 const description = inputEl.value;
-                const wizard_id = await this.orm.create("res.users.apikeys.description", [{ name: description }]);
+                const wizard_id = await orm.create("res.users.apikeys.description", [{ name: description }]);
                 const res = await handleCheckIdentity(
-                    this.orm.call("res.users.apikeys.description", "make_key", [wizard_id]),
-                    this.orm,
+                    orm.call("res.users.apikeys.description", "make_key", [wizard_id]),
                     this.dialog
                 );
 
@@ -67,15 +65,13 @@ publicWidget.registry.RemoveAPIKeyButton = publicWidget.Widget.extend({
 
     init() {
         this._super(...arguments);
-        this.orm = this.bindService("orm");
         this.dialog = this.bindService("dialog");
     },
 
     async _onClick(e){
         e.preventDefault();
         await handleCheckIdentity(
-            this.orm.call("res.users.apikeys", "remove", [parseInt(this.el.id)]),
-            this.orm,
+            orm.call("res.users.apikeys", "remove", [parseInt(this.el.id)]),
             this.dialog
         );
         window.location = window.location;
@@ -116,13 +112,8 @@ publicWidget.registry.RevokeSessionsButton = publicWidget.Widget.extend({
         click: '_onClick',
     },
 
-    init() {
-        this._super(...arguments);
-        this.orm = this.bindService("orm");
-    },
-
     async _onClick() {
-        const { res_id: checkId } = await this.orm.call("res.users", "api_key_wizard", [
+        const { res_id: checkId } = await orm.call("res.users", "api_key_wizard", [
             session.user_id,
         ]);
         this.call("dialog", "add", InputConfirmationDialog, {
@@ -135,9 +126,9 @@ publicWidget.registry.RevokeSessionsButton = publicWidget.Widget.extend({
                     return false;
                 }
 
-                await this.orm.write("res.users.identitycheck", [checkId], { password: inputEl.value });
+                await orm.write("res.users.identitycheck", [checkId], { password: inputEl.value });
                 try {
-                    await this.orm.call(
+                    await orm.call(
                         "res.users.identitycheck",
                         "revoke_all_devices",
                         [checkId]
@@ -175,7 +166,7 @@ publicWidget.registry.RevokeSessionsButton = publicWidget.Widget.extend({
  * @param {Function} dialogService dialog service
  * @returns {Promise} result of the original call
  */
-export async function handleCheckIdentity(wrapped, ormService, dialogService) {
+export async function handleCheckIdentity(wrapped, dialogService) {
     return wrapped.then((r) => {
         if (!(r.type === "ir.actions.act_window" && r.res_model === "res.users.identitycheck")) {
             return r;
@@ -192,9 +183,9 @@ export async function handleCheckIdentity(wrapped, ormService, dialogService) {
                         return false;
                     }
                     let result;
-                    await ormService.write("res.users.identitycheck", [checkId], { password: inputEl.value });
+                    await orm.write("res.users.identitycheck", [checkId], { password: inputEl.value });
                     try {
-                        result = await ormService.call("res.users.identitycheck", "run_check", [checkId]);
+                        result = await orm.call("res.users.identitycheck", "run_check", [checkId]);
                     } catch {
                         inputEl.classList.add("is-invalid");
                         inputEl.setCustomValidity(_t("Check failed"));
