@@ -46,10 +46,20 @@ class TestMailingStatistics(TestMassSMSCommon):
         # check mailing statistics
         self.assertEqual(mailing.clicked, 3)
         self.assertEqual(mailing.delivered, 4)
-        self.assertEqual(mailing.received_ratio, 40)
         self.assertEqual(mailing.opened, 3)
-        self.assertEqual(mailing.opened_ratio, 30)
         self.assertEqual(mailing.sent, 10)
+        self.assertEqual(mailing.scheduled, 0)  # TODO: not zero values here
+        self.assertEqual(mailing.canceled, 0)
+        self.assertEqual(mailing.process, 0)
+        self.assertEqual(mailing.pending, 6)
+        self.assertEqual(mailing.replied, 0)
+        self.assertEqual(mailing.bounced, 0)
+        self.assertEqual(mailing.failed, 0)
+
+        self.assertEqual(mailing.received_ratio, 40)
+        self.assertEqual(mailing.opened_ratio, 30)
+        self.assertEqual(mailing.replied_ratio, 0)
+        self.assertEqual(mailing.bounced_ratio, 0)
 
         with self.mock_mail_gateway(mail_unlink_sent=True):
             mailing._action_send_statistics()

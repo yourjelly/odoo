@@ -284,6 +284,9 @@ class MassMailing(models.Model):
             mass_mailing.total = total
 
     def _compute_clicks_ratio(self):
+        import time
+        start = time.time()
+        print("start _compute_clicks_ratio")
         self.env.cr.execute("""
             SELECT COUNT(DISTINCT(stats.id)) AS nb_mails, COUNT(DISTINCT(clicks.mailing_trace_id)) AS nb_clicks, stats.mass_mailing_id AS id
             FROM mailing_trace AS stats
@@ -295,9 +298,14 @@ class MassMailing(models.Model):
         mapped_data = dict([(m['id'], float_round(100 * m['nb_clicks'] / m['nb_mails'], precision_digits=2)) for m in mass_mailing_data])
         for mass_mailing in self:
             mass_mailing.clicks_ratio = mapped_data.get(mass_mailing.id, 0)
+        print("end _compute_clicks_ratio", time.time() - start)
 
     def _compute_statistics(self):
         """ Compute statistics of the mass mailing """
+        import time
+        start = time.time()
+        print("start _compute_statistics")
+
         for key in (
             'scheduled', 'expected', 'canceled', 'sent', 'pending', 'delivered', 'opened',
             'process', 'clicked', 'replied', 'bounced', 'failed', 'received_ratio',
@@ -341,6 +349,8 @@ class MassMailing(models.Model):
             row['replied_ratio'] = float_round(100.0 * row['replied'] / total, precision_digits=2)
             row['bounced_ratio'] = float_round(100.0 * row['bounced'] / total, precision_digits=2)
             self.browse(row.pop('mailing_id')).update(row)
+
+        print("end _compute_statistics", time.time() - start)
 
     @api.depends('schedule_date', 'state')
     def _compute_next_departure(self):

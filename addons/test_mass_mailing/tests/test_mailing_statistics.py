@@ -45,6 +45,7 @@ class TestMailingStatistics(TestMassMailCommon):
         self.gateway_mail_click(mailing, target_records[3], 'https://www.odoo.be')
 
         # check mailing statistics
+        self.assertEqual(mailing.expected, 10)
         self.assertEqual(mailing.clicked, 3)
         self.assertEqual(mailing.delivered, 10)
         self.assertEqual(mailing.opened, 4)
