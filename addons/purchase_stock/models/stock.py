@@ -240,6 +240,8 @@ class StockLot(models.Model):
 class ProcurementGroup(models.Model):
     _inherit = 'procurement.group'
 
+    purchase_order_ids = fields.One2many('purchase.order', 'group_id')
+
     @api.model
     def run(self, procurements, raise_user_error=True):
         wh_by_comp = dict()

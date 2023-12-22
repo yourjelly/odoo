@@ -28,8 +28,8 @@ class TestSalePurchaseStockFlow(TransactionCase):
 
     def test_cancel_so_with_draft_po(self):
         """
-        Sell a MTO+Buy product -> a PO is generated
-        Cancel the SO -> an activity should be added to the PO
+        Sell a MTO+Buy product -> a RFQ is generated
+        Cancel the SO -> The RFQ is cancelled
         """
         so_form = Form(self.env['sale.order'])
         so_form.partner_id = self.env.user.partner_id
@@ -42,8 +42,7 @@ class TestSalePurchaseStockFlow(TransactionCase):
 
         so._action_cancel()
 
-        self.assertTrue(po.activity_ids)
-        self.assertIn(so.name, po.activity_ids.note)
+        self.assertEqual(po.state, 'cancel')
 
     def test_qty_delivered_with_mto_and_done_quantity_change(self):
         """
@@ -83,3 +82,61 @@ class TestSalePurchaseStockFlow(TransactionCase):
 
         sm.move_line_ids.quantity = 10
         self.assertEqual(so.order_line.qty_delivered, 10)
+        # TODO : test MTSO with partially available stock
+
+    @freeze_time('2024-01-01')
+    def test_reordering_with_visibility_days(self):
+        """
+        If reordering rules' visibility is set bigger than
+        DAYS_FROM_TODAY_TO_ORDER (plus lead time). Then the
+        order should be included in the calculation of quantity to order.
+
+            ┌─ Today                     ┌── Scheduled Delivery
+            │ (2024-01-01)               │    (2024-02-01)
+            │                            │    aka commitment_date
+            │                            │
+            ▼                            ▼
+          ──────────────────────────────────────────►
+                                                    time
+            ◄────────────────────────────►
+                DAYS_FROM_TODAY_TO_ORDER
+
+                                    ◄────►
+                                    lead_time
+        """
+        N_ORDERED_QTY = 666
+        DAYS_FROM_TODAY_TO_ORDER = 30
+        MONTH_FROM_TODAY = (datetime.today() + timedelta(days=DAYS_FROM_TODAY_TO_ORDER)).strftime('%Y-%m-%d')
+
+        # Setup: Create a product with vendor
+        partner = self.env['res.partner'].create({'name': 'Azure Interior'})
+        seller = self.env['product.supplierinfo'].create({
+                'partner_id': partner.id,
+                'price': 1.0,
+        })
+        product = self.env['product.product'].create({
+            'name': 'Dummy Product',
+            'type': 'product',
+            'seller_ids': [seller.id],
+        })
+
+        # Setup: Create sale order scheduled in the future
+        so = self.env['sale.order'].create({
+            'partner_id': self.customer.id,
+            'commitment_date': MONTH_FROM_TODAY,
+            'order_line': [(0, 0, {
+                'name': product.name,
+                'product_id': product.id,
+                'price_unit': 1,
+                'product_uom_qty': N_ORDERED_QTY,
+            })],
+        })
+        so.action_confirm() # so.state: 'draft' -> 'sale'
+
+        # Create Reordering rule and trigger  recalculation
+        orderpoint_form = Form(self.env['stock.warehouse.orderpoint'])
+        orderpoint_form.product_id = product
+        orderpoint_form.visibility_days = DAYS_FROM_TODAY_TO_ORDER
+        orderpoint = orderpoint_form.save()
+
+        self.assertEqual(orderpoint.qty_to_order, N_ORDERED_QTY, f"Order from {DAYS_FROM_TODAY_TO_ORDER} days from today NOT included into the qty_to_order calculation, despite having visibility days set {DAYS_FROM_TODAY_TO_ORDER}!")
