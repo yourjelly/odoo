@@ -1394,10 +1394,10 @@ class QuantPackage(models.Model):
     package_type_id = fields.Many2one(
         'stock.package.type', 'Package Type', index=True)
     location_id = fields.Many2one(
-        'stock.location', 'Location', compute='_compute_package_info',
+        'stock.location', 'Location', compute='_compute_location_id',
         index=True, readonly=False, store=True)
     company_id = fields.Many2one(
-        'res.company', 'Company', compute='_compute_package_info',
+        'res.company', 'Company', compute='_compute_company_id',
         index=True, readonly=True, store=True)
     owner_id = fields.Many2one(
         'res.partner', 'Owner', compute='_compute_owner_id', search='_search_owner',
@@ -1411,15 +1411,18 @@ class QuantPackage(models.Model):
     valid_sscc = fields.Boolean('Package name is valid SSCC', compute='_compute_valid_sscc')
     pack_date = fields.Date('Pack Date', default=fields.Date.today)
 
-    @api.depends('quant_ids.location_id', 'quant_ids.company_id')
-    def _compute_package_info(self):
+    @api.depends('quant_ids.location_id')
+    def _compute_location_id(self):
         for package in self:
-            package.location_id = False
-            package.company_id = False
-            if package.quant_ids:
-                package.location_id = package.quant_ids[0].location_id
-                if all(q.company_id == package.quant_ids[0].company_id for q in package.quant_ids):
-                    package.company_id = package.quant_ids[0].company_id
+            # if package.quant_ids is empty, so is package.location_id
+            package.location_id = package.quant_ids[:1].location_id
+
+    @api.depends('quant_ids.company_id')
+    def _compute_company_id(self):
+        for package in self:
+            # take the company of the quants if they all have the same company
+            companies = package.quant_ids.company_id
+            package.company_id = companies if len(companies) == 1 else False
 
     @api.depends('quant_ids.owner_id')
     def _compute_owner_id(self):
