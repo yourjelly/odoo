@@ -3220,6 +3220,9 @@ class BaseModel(metaclass=MetaModel):
                 #  - reading inherited fields should not bypass access rights
                 #  - copy inherited fields iff their original field is copied
                 Field = type(field)
+                field_attrs = {}
+                if field.type == 'properties':
+                    field_attrs['definition'] = field.definition
                 self._add_field(name, Field(
                     inherited=True,
                     inherited_field=field,
@@ -3228,6 +3231,7 @@ class BaseModel(metaclass=MetaModel):
                     copy=field.copy,
                     readonly=field.readonly,
                     export_string_translation=field.export_string_translation,
+                    **field_attrs,
                 ))
 
     @api.model

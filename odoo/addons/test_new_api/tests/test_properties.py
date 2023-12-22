@@ -1651,6 +1651,19 @@ class PropertiesCase(TestPropertiesMixin):
             values = message.read(['attributes'])[0]['attributes'][0]
         self.assertEqual(values['value'], (tag.id, 'Test Tag'))
 
+    def test_properties_inherits(self):
+        email = self.env['test_new_api.emailmessage'].create({
+            'discussion': self.discussion_1.id,
+            'attributes': [{
+                'type': 'char',
+                'name': 'name',
+                'value': 'value',
+            }],
+        })
+
+        self.assertEqual(email.message.attributes, {'name': 'value'})
+        self.assertEqual(email.attributes, {'name': 'value'})
+
 
 class PropertiesSearchCase(TestPropertiesMixin):
     @classmethod
