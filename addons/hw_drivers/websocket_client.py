@@ -76,6 +76,6 @@ class WebsocketClient(Thread):
         self.ws = websocket.WebSocketApp(self.url,
             on_open=self.on_open, on_message=on_message,
             on_error=on_error)
-        while 1: # A loop is necessary because reconnection must occur in all cases, even if the server closes the connection properly
-            self.ws.run_forever()
-            time.sleep(10) # Wait 10 second between each reconnection attempts
+        # A loop is necessary because reconnection must occur in all cases, even if the server closes the connection properly
+        # Wait 10 second between each reconnection attempts
+        self.ws.run_forever(reconnect=10)
