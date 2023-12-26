@@ -3,7 +3,6 @@ from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 from odoo.tests import tagged
 from odoo.tests.common import Form, TransactionCase
 from odoo import fields, api, SUPERUSER_ID, Command
-from odoo.exceptions import ValidationError, UserError
 from odoo.tools import mute_logger
 
 from dateutil.relativedelta import relativedelta
@@ -18,14 +17,13 @@ class TestSequenceMixinCommon(AccountTestInvoicingCommon):
     @classmethod
     def setUpClass(cls, chart_template_ref=None):
         super().setUpClass(chart_template_ref=chart_template_ref)
-        cls.company_data['company'].write({'fiscalyear_last_day': "31", 'fiscalyear_last_month': "3"})
         cls.test_move = cls.create_move()
 
     @classmethod
-    def create_move(cls, date=None, journal=None, name=None, post=False):
+    def create_move(cls, date=None, journal=None, name=None, post=False, move_type='entry'):
         move = cls.env['account.move'].create({
-            'move_type': 'entry',
-            'date': date or '2016-01-01',
+            'move_type': move_type,
+            **({'date': date or '2016-01-01'} if move_type == 'entry' else {'invoice_date': date or '2016-01-01'}),
             'line_ids': [
                 (0, None, {
                     'name': 'line',
@@ -38,6 +36,8 @@ class TestSequenceMixinCommon(AccountTestInvoicingCommon):
             move.journal_id = journal
         if name:
             move.name = name
+        if move_type != 'entry':
+            move.partner_id = cls.partner_a
         if post:
             move.action_post()
         return move
@@ -45,6 +45,22 @@ class TestSequenceMixinCommon(AccountTestInvoicingCommon):
 
 @tagged('post_install', '-at_install')
 class TestSequenceMixin(TestSequenceMixinCommon):
+    def test_suggested_sequence_date_on_2_years_on_new_journal(self):
+        self.company_data['company'].write({'fiscalyear_last_day': "31", 'fiscalyear_last_month': "3"})
+        sale = self.env['account.journal'].create({
+            'name': 'Another Awesome Journal',
+            'code': 'AAJ',
+            'type': 'sale',
+        })
+        invoice = self.create_move(date='2023-03-01', journal=sale, post=False, move_type='out_invoice')
+        self.assertEqual(invoice.name, 'AAJ/2022-2023/00001', "The first sequence of the year should be suggested")
+        invoice.action_post()
+        self.assertEqual(invoice.name, 'AAJ/2022-2023/00001', "The assigned sequence at post should be the same")
+        invoice = self.create_move(date='2023-03-02', journal=sale, post=False, move_type='out_invoice')
+        self.assertEqual(invoice.name, '/', "The second sequence shouldn't be suggested even if the first one wasn't posted")
+        invoice = self.create_move(date='2023-04-01', journal=sale, post=False, move_type='out_invoice')
+        self.assertEqual(invoice.name, 'AAJ/2023-2024/00001', "The first sequence of the year should be suggested")
+
     def test_sequence_change_date(self):
         """Change the sequence when we change the date iff it has never been posted."""
         # Check setup
@@ -278,16 +294,18 @@ class TestSequenceMixin(TestSequenceMixinCommon):
 
     def test_journal_sequence_format(self):
         """Test different format of sequences and what it becomes on another period"""
+        self.company_data['company'].write({'fiscalyear_last_day': "31", 'fiscalyear_last_month': "3"})
         sequences = [
-            ('JRNL/2016/00001', 'JRNL/2016/00002', 'JRNL/2016/00003', 'JRNL/2017/00001'),
-            ('JRNL/2015-2016/00001', 'JRNL/2015-2016/00002', 'JRNL/2016-2017/00001', 'JRNL/2016-2017/00002'),
-            ('1234567', '1234568', '1234569', '1234570'),
-            ('20190910', '20190911', '20190912', '20190913'),
-            ('2016-0910', '2016-0911', '2016-0912', '2017-0001'),
-            ('201603-10', '201603-11', '201604-01', '201703-01'),
-            ('16-03-10', '16-03-11', '16-04-01', '17-03-01'),
-            ('2016-10', '2016-11', '2016-12', '2017-01'),
-            ('045-001-000002', '045-001-000003', '045-001-000004', '045-001-000005'),
+            # sequence_init,           sequence_next,           sequence_next_month,     sequence_next_year
+            ('JRNL/2016/00001',       'JRNL/2016/00002',       'JRNL/2016/00003',       'JRNL/2017/00001'),
+            ('JRNL/2015-2016/00001',  'JRNL/2015-2016/00002',  'JRNL/2016-2017/00001',  'JRNL/2016-2017/00002'),
+            ('1234567',               '1234568',               '1234569',               '1234570'),
+            ('20190910',              '20190911',              '20190912',              '20190913'),
+            ('2016-0910',             '2016-0911',             '2016-0912',             '2017-0001'),
+            ('201603-10',             '201603-11',             '201604-01',             '201703-01'),
+            ('16-03-10',              '16-03-11',              '16-04-01',              '17-03-01'),
+            ('2016-10',               '2016-11',               '2016-12',               '2017-01'),
+            ('045-001-000002',        '045-001-000003',        '045-001-000004',        '045-001-000005'),
             ('JRNL/2016/00001suffix', 'JRNL/2016/00002suffix', 'JRNL/2016/00003suffix', 'JRNL/2017/00001suffix'),
         ]
 
@@ -299,13 +317,14 @@ class TestSequenceMixin(TestSequenceMixinCommon):
         next_moves.action_post()
 
         for sequence_init, sequence_next, sequence_next_month, sequence_next_year in sequences:
-            init_move.name = sequence_init
-            next_moves.name = False
-            next_moves._compute_name()
-            self.assertEqual(
-                [next_move.name, next_move_month.name, next_move_year.name],
-                [sequence_next, sequence_next_month, sequence_next_year],
-            )
+            with self.subTest(sequence_init=sequence_init, sequence_next=sequence_next, sequence_next_month=sequence_next_month, sequence_next_year=sequence_next_year):
+                init_move.name = sequence_init
+                next_moves.name = False
+                next_moves._compute_name()
+                self.assertEqual(
+                    [next_move.name, next_move_month.name, next_move_year.name],
+                    [sequence_next, sequence_next_month, sequence_next_year],
+                )
 
     def test_journal_next_sequence(self):
         """Sequences behave correctly even when there is not enough padding."""
