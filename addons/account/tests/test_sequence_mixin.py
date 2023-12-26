@@ -3,7 +3,6 @@ from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 from odoo.tests import tagged
 from odoo.tests.common import Form, TransactionCase
 from odoo import fields, api, SUPERUSER_ID, Command
-from odoo.exceptions import ValidationError, UserError
 from odoo.tools import mute_logger
 
 from dateutil.relativedelta import relativedelta
@@ -18,14 +17,14 @@ class TestSequenceMixinCommon(AccountTestInvoicingCommon):
     @classmethod
     def setUpClass(cls, chart_template_ref=None):
         super().setUpClass(chart_template_ref=chart_template_ref)
-        cls.company_data['company'].write({'fiscalyear_last_day': "31", 'fiscalyear_last_month': "3"})
         cls.test_move = cls.create_move()
 
     @classmethod
-    def create_move(cls, date=None, journal=None, name=None, post=False):
+    def create_move(cls, date=None, journal=None, name=None, post=False, move_type='entry'):
+        date_key = 'date' if move_type == 'entry' else 'invoice_date'
         move = cls.env['account.move'].create({
-            'move_type': 'entry',
-            'date': date or '2016-01-01',
+            'move_type': move_type,
+            date_key: date or '2016-01-01',
             'line_ids': [
                 (0, None, {
                     'name': 'line',
@@ -38,6 +37,8 @@ class TestSequenceMixinCommon(AccountTestInvoicingCommon):
             move.journal_id = journal
         if name:
             move.name = name
+        if move_type != 'entry':
+            move.partner_id = cls.partner_a
         if post:
             move.action_post()
         return move
@@ -82,9 +83,6 @@ class TestSequenceMixin(TestSequenceMixinCommon):
         The sequence should only be recalculated if a value (year or month) utilized in the sequence is modified.
         """
         self.env.company.quick_edit_mode = "out_and_in_invoices"
-        self.env.company.fiscalyear_last_day = 30
-        self.env.company.fiscalyear_last_month = '12'
-
         bill = self.env['account.move'].create({
             'partner_id': 1,
             'move_type': 'in_invoice',
@@ -127,6 +125,55 @@ class TestSequenceMixin(TestSequenceMixinCommon):
             self.assertEqual(invoice_form.name, 'INV/2016/00001')
             invoice_form.date = '2017-01-01'
             self.assertEqual(invoice_form.name, 'INV/2017/00001')
+
+    def test_sequence_change_date_with_quick_edit_mode_fiscalyear_inbetween_2_years(self):
+        """ Same test but with a company having a fiscalyear period on 2 years """
+        self.env.company.fiscalyear_last_day = 15
+        self.env.company.fiscalyear_last_month = '12'
+        self.env.company.quick_edit_mode = "out_and_in_invoices"
+        bill = self.env['account.move'].create({
+            'partner_id': 1,
+            'move_type': 'in_invoice',
+            'date': '2016-01-01',
+            'line_ids': [
+                Command.create({
+                    'name': 'line',
+                    'account_id': self.company_data['default_account_revenue'].id,
+                }),
+            ]
+        })
+        self.assertEqual(bill.name, 'BILL/2015-2016/00001')
+        bill = bill.copy({'date': '2016-02-01'})
+
+        # The name period doesn't change and thus it shouldn't recompute the name nor suggest any
+        self.assertEqual(bill.name, False)
+        with Form(bill) as bill_form:
+            bill_form.date = '2016-02-02'
+            self.assertEqual(bill_form.name, False)
+            bill_form.date = '2017-01-01'
+            # The date is set on another fiscal period and thus it should update
+            self.assertEqual(bill_form.name, 'BILL/2016-2017/00001')
+
+        invoice = self.env['account.move'].create({
+            'partner_id': 1,
+            'move_type': 'out_invoice',
+            'date': '2016-01-01',
+            'line_ids': [
+                Command.create({
+                    'name': 'line',
+                    'account_id': self.company_data['default_account_revenue'].id,
+                }),
+            ]
+        })
+
+        self.assertEqual(invoice.name, 'INV/2015-2016/00001')
+        with Form(invoice) as invoice_form:
+            invoice_form.date = '2016-01-02'
+            self.assertEqual(invoice_form.name, 'INV/2015-2016/00001')
+            invoice_form.date = '2016-02-02'
+            self.assertEqual(invoice_form.name, 'INV/2015-2016/00001')
+            invoice_form.date = '2017-01-01'
+            self.assertEqual(invoice_form.name, 'INV/2016-2017/00001')
 
     def test_sequence_empty_editable_with_quick_edit_mode(self):
         """ Ensure the names of all but the first moves in a period are empty and editable in quick edit mode """
@@ -287,6 +334,7 @@ class TestSequenceMixin(TestSequenceMixinCommon):
 
     def test_journal_sequence_format(self):
         """Test different format of sequences and what it becomes on another period"""
+        self.company_data['company'].write({'fiscalyear_last_day': "31", 'fiscalyear_last_month': "3"})
         sequences = [
             ('JRNL/2016/00001', 'JRNL/2016/00002', 'JRNL/2016/00003', 'JRNL/2017/00001'),
             ('JRNL/2015-2016/00001', 'JRNL/2015-2016/00002', 'JRNL/2016-2017/00001', 'JRNL/2016-2017/00002'),
@@ -488,6 +536,7 @@ class TestSequenceMixin(TestSequenceMixinCommon):
 
     def test_sequence_get_more_specific(self):
         """There is the ability to change the format (i.e. from yearly to montlhy)."""
+        self.company_data['company'].write({'fiscalyear_last_day': "31", 'fiscalyear_last_month': "3"})
         # Start with a continuous sequence
         self.test_move.name = 'MISC/00001'
 
@@ -577,6 +626,21 @@ class TestSequenceMixin(TestSequenceMixinCommon):
         for move in payments.move_id:
             self.assertRecordValues(move.line_ids, [{'move_name': move.name}] * len(move.line_ids))
 
+    def test_suggested_sequence_date_on_2_years_on_new_journal(self):
+        self.company_data['company'].write({'fiscalyear_last_day': "31", 'fiscalyear_last_month': "3"})
+        sale = self.env['account.journal'].create({
+            'name': 'Another Awesome Journal',
+            'code': 'AAJ',
+            'type': 'sale',
+        })
+        invoice = self.create_move(date='2023-03-01', journal=sale, post=False, move_type='out_invoice')
+        self.assertEqual(invoice.name, 'AAJ/2022-2023/00001', "The first sequence of the year should be suggested")
+        invoice.action_post()
+        self.assertEqual(invoice.name, 'AAJ/2022-2023/00001', "The assigned sequence at post should be the same")
+        invoice = self.create_move(date='2023-03-02', journal=sale, post=False, move_type='out_invoice')
+        self.assertEqual(invoice.name, '/', "The second sequence shouldn't be suggested even if the first one wasn't posted")
+        invoice = self.create_move(date='2023-04-01', journal=sale, post=False, move_type='out_invoice')
+        self.assertEqual(invoice.name, 'AAJ/2023-2024/00001', "The first sequence of the year should be suggested")
 
 @tagged('post_install', '-at_install')
 class TestSequenceMixinDeletion(TestSequenceMixinCommon):

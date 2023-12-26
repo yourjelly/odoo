@@ -2568,7 +2568,10 @@ class AccountMove(models.Model):
         # EXTENDS account sequence.mixin
         self.ensure_one()
         is_payment = self.payment_id or self._context.get('is_payment')
-        if self.journal_id.type in ['sale', 'bank', 'cash']:
+        if (int(self.company_id.fiscalyear_last_month), self.company_id.fiscalyear_last_day) != (12, 31):
+            # Fiscal year isn't the civil year: suggest the sequence accordingly
+            starting_sequence = "%s/%04d-%04d/00000" % (self.journal_id.code, self.date.year, self.date.year + 1)
+        elif self.journal_id.type in ['sale', 'bank', 'cash']:
             starting_sequence = "%s/%04d/00000" % (self.journal_id.code, self.date.year)
         else:
             starting_sequence = "%s/%04d/%02d/0000" % (self.journal_id.code, self.date.year, self.date.month)
