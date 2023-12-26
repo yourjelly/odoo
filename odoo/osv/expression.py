@@ -1000,7 +1000,7 @@ class expression(object):
             if field.inherited:
                 parent_model = model.env[field.related_field.model_name]
                 parent_fname = model._inherits[parent_model._name]
-                parent_alias = self.query.left_join(
+                parent_alias = self.query.join(  # parent_fname is required
                     alias, parent_fname, parent_model._table, 'id', parent_fname,
                 )
                 push(leaf, parent_model, parent_alias)

@@ -862,7 +862,7 @@ class BaseModel(metaclass=MetaModel):
                 field = cls._fields.get(name)
                 if not field:
                     _logger.warning("method %s.%s: @constrains parameter %r is not a field name", cls._name, attr, name)
-                elif not (field.store or field.inverse or field.inherited):
+                elif not (field.store or field.inverse):
                     _logger.warning("method %s.%s: @constrains parameter %r is not writeable", cls._name, attr, name)
             methods.append(func)
 
@@ -2770,9 +2770,9 @@ class BaseModel(metaclass=MetaModel):
             # retrieve the parent model where field is inherited from
             parent_model = self.env[field.related_field.model_name]
             parent_fname = field.related.split('.')[0]
-            # LEFT JOIN parent_model._table AS parent_alias ON alias.parent_fname = parent_alias.id
+            # JOIN parent_model._table AS parent_alias ON alias.parent_fname = parent_alias.id
             parent_alias = query.make_alias(alias, parent_fname)
-            query.add_join('LEFT JOIN', parent_alias, parent_model._table, SQL(
+            query.add_join('JOIN', parent_alias, parent_model._table, SQL(
                 "%s = %s",
                 self._field_to_sql(alias, parent_fname, query),
                 SQL.identifier(parent_alias, 'id'),
@@ -3205,7 +3205,7 @@ class BaseModel(metaclass=MetaModel):
                     inherited=True,
                     inherited_field=field,
                     related=f"{parent_fname}.{name}",
-                    related_sudo=False,
+                    related_sudo=True,  # The search is done in sudo but not the read, but ir.rule from parent are already put in each read.
                     copy=field.copy,
                     readonly=field.readonly,
                     export_string_translation=field.export_string_translation,
@@ -4541,7 +4541,7 @@ class BaseModel(metaclass=MetaModel):
                     stored[key] = val
                 if field.inherited:
                     inherited[field.related_field.model_name][key] = val
-                elif field.inverse and field not in precomputed:
+                if field.inverse and field not in precomputed:
                     inversed[key] = val
                     determine_inverses[field.inverse].add(field)
                 # protect editable computed fields and precomputed fields
@@ -4551,23 +4551,18 @@ class BaseModel(metaclass=MetaModel):
 
             data_list.append(data)
 
-        # create or update parent records
+        # create parent records if needed / update will be done with the inverse method
         for model_name, parent_name in self._inherits.items():
-            parent_data_list = []
-            for data in data_list:
-                if not data['stored'].get(parent_name):
-                    parent_data_list.append(data)
-                elif data['inherited'][model_name]:
-                    parent = self.env[model_name].browse(data['stored'][parent_name])
-                    parent.write(data['inherited'][model_name])
-
-            if parent_data_list:
-                parents = self.env[model_name].create([
-                    data['inherited'][model_name]
-                    for data in parent_data_list
-                ])
-                for parent, data in zip(parents, parent_data_list):
-                    data['stored'][parent_name] = parent.id
+            parent_data_list = [
+                data for data in data_list
+                if not data['stored'].get(parent_name)
+            ]
+            parents = self.env[model_name].create([
+                data['inherited'][model_name]
+                for data in parent_data_list
+            ])
+            for parent, data in zip(parents, parent_data_list):
+                data['stored'][parent_name] = parent.id
 
         # create records with stored fields
         records = self._create(data_list)
@@ -4775,9 +4770,7 @@ class BaseModel(metaclass=MetaModel):
         common_set_vals = set(LOG_ACCESS_COLUMNS + ['id', 'parent_path'])
         for data, record in zip(data_list, records):
             data['record'] = record
-            # DLE P104: test_inherit.py, test_50_search_one2many
-            vals = dict({k: v for d in data['inherited'].values() for k, v in d.items()}, **data['stored'])
-            set_vals = common_set_vals.union(vals)
+            set_vals = common_set_vals.union(data['stored'])
             for field in self._fields.values():
                 if field.type in ('one2many', 'many2many'):
                     self.env.cache.set(record, field, ())
@@ -4788,9 +4781,11 @@ class BaseModel(metaclass=MetaModel):
                 # in other words, if `parent_id` is not set, no other message `child_ids` are impacted.
                 # + avoid the fetch of fields which are False. e.g. if a boolean field is not passed in vals and as no default set in the field attributes,
                 # then we know it can be set to False in the cache in the case of a create.
+                # Force the cache to None to avoid refecthing NULL values later
                 elif field.store and field.name not in set_vals and not field.compute:
                     self.env.cache.set(record, field, field.convert_to_cache(None, record))
-            for fname, value in vals.items():
+
+            for fname, value in data['stored'].items():
                 field = self._fields[fname]
                 if field.type in ('one2many', 'many2many'):
                     cachetoclear.append((record, field))
@@ -5161,7 +5156,7 @@ class BaseModel(metaclass=MetaModel):
             parent_model = self.env[field.related_field.model_name]
             parent_fname = field.related.split('.')[0]
             parent_alias = query.make_alias(alias, parent_fname)
-            query.add_join('LEFT JOIN', parent_alias, parent_model._table, SQL(
+            query.add_join('JOIN', parent_alias, parent_model._table, SQL(
                 "%s = %s",
                 self._field_to_sql(alias, parent_fname, query),
                 SQL.identifier(parent_alias, 'id'),

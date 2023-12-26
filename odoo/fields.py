@@ -1295,7 +1295,7 @@ class Field(MetaField('DummyField', (object,), {})):
                 self.write(new_records, value)
                 new_records.modified([self.name])
 
-            if self.inherited:
+            if self.inherited:  # Also for related ?
                 # special case: also assign parent records if they are new
                 parents = records[self.related.split('.')[0]]
                 parents.filtered(lambda r: not r.id)[self.name] = value
