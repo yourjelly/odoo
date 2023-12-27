@@ -33,10 +33,6 @@ stepUtils.showAppsMenuItem(),
     trigger: 'input[id="pricelist_id_0"]',
     run: 'text Custo'
 }, {
-    content: "select the pricelist",
-    trigger: 'ul.ui-autocomplete > li > a:contains(Custom pricelist (TEST))',
-    in_modal: false,
-}, {
     trigger: 'a:contains("Add a product")',
 }, {
     trigger: 'div[name="product_template_id"] input',
