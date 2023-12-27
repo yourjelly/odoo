@@ -2,11 +2,11 @@
 
 import { UPDATE_BUS_PRESENCE_DELAY } from "@bus/im_status_service";
 import { startServer } from "@bus/../tests/helpers/mock_python_environment";
+import { waitNotifications } from "@bus/../tests/helpers/websocket_event_deferred";
 
 import { Command } from "@mail/../tests/helpers/command";
 import { start } from "@mail/../tests/helpers/test_utils";
 
-import { nextTick } from "@web/../tests/helpers/utils";
 import { click, contains } from "@web/../tests/utils";
 
 QUnit.module("im status");
@@ -93,7 +93,7 @@ QUnit.test("Can handle im_status of unknown partner", async (assert) => {
     pyEnv["bus.bus"]._sendone(channel, "mail.record/insert", {
         Persona: { im_status: "online", id: partnerId, type: "partner" },
     });
-    await nextTick();
+    await waitNotifications([env, "mail.record/insert"]);
     const persona = env.services["mail.store"].Persona.get({ type: "partner", id: partnerId });
     assert.ok(persona);
     assert.ok(persona.im_status === "online");
