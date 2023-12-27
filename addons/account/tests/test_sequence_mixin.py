@@ -577,6 +577,53 @@ class TestSequenceMixin(TestSequenceMixinCommon):
             self.assertRecordValues(move.line_ids, [{'move_name': move.name}] * len(move.line_ids))
 
 
+    def test_journal_resequence_in_between_2_years_pattern(self):
+        """Resequence AAJ/2023-2024/00001 into AAJ/23-24/00001 then back to AAJ/2023-2024/00001"""
+        # Change the fiscal year to have a company that would be suggested the 2 years pattern
+        self.company_data['company'].write({'fiscalyear_last_day': "31", 'fiscalyear_last_month': "3"})
+        # Create 3 sale invoice in a new sale journal
+        sale = self.env['account.journal'].create({
+            'name': 'Another Awesome Journal',
+            'code': 'AAJ',
+            'type': 'sale',
+        })
+        invoices = (
+            self.create_move(date="2023-03-01", journal=sale, post=True, move_type='out_invoice')
+            + self.create_move(date="2023-03-02", journal=sale, post=True, move_type='out_invoice')
+            + self.create_move(date="2023-03-03", journal=sale, post=True, move_type='out_invoice')
+            + self.create_move(date="2023-04-01", journal=sale, post=True, move_type='out_invoice')
+            + self.create_move(date="2023-04-02", journal=sale, post=True, move_type='out_invoice')
+        )
+        self.assertRecordValues(invoices, (
+            {'name': 'AAJ/2022-2023/00001', 'state': 'posted'},
+            {'name': 'AAJ/2022-2023/00002', 'state': 'posted'},
+            {'name': 'AAJ/2022-2023/00003', 'state': 'posted'},
+            {'name': 'AAJ/2023-2024/00001', 'state': 'posted'},
+            {'name': 'AAJ/2023-2024/00002', 'state': 'posted'},
+        ))
+
+        # Call the resequence wizard and change the sequence to AAJ/22-23/00001
+        # By default the sequence order should be kept
+        resequence_wizard = Form(self.env['account.resequence.wizard'].with_context(active_ids=invoices.ids, active_model='account.move'))
+        resequence_wizard.first_name = "AAJ/22-23/00001"
+        new_values = json.loads(resequence_wizard.new_values)
+        # Ensure consistencies of sequence displayed in the UI
+        self.assertEqual(new_values[str(invoices[0].id)]['new_by_name'], 'AAJ/22-23/00001')
+        self.assertEqual(new_values[str(invoices[1].id)]['new_by_name'], 'AAJ/22-23/00002')
+        self.assertEqual(new_values[str(invoices[2].id)]['new_by_name'], 'AAJ/22-23/00003')
+        self.assertEqual(new_values[str(invoices[3].id)]['new_by_name'], 'AAJ/23-24/00001')
+        self.assertEqual(new_values[str(invoices[4].id)]['new_by_name'], 'AAJ/23-24/00002')
+        resequence_wizard.save().resequence()
+
+        # Ensure the resequencing gave the same result as what was expected
+        self.assertRecordValues(invoices, (
+            {'name': 'AAJ/22-23/00001', 'state': 'posted'},
+            {'name': 'AAJ/22-23/00002', 'state': 'posted'},
+            {'name': 'AAJ/22-23/00003', 'state': 'posted'},
+            {'name': 'AAJ/23-24/00001', 'state': 'posted'},
+            {'name': 'AAJ/23-24/00002', 'state': 'posted'},
+        ))
+
 @tagged('post_install', '-at_install')
 class TestSequenceMixinDeletion(TestSequenceMixinCommon):
     @classmethod
