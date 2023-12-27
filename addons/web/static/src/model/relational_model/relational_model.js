@@ -327,7 +327,7 @@ export class RelationalModel extends Model {
             countLimit: "countLimit" in config ? config.countLimit : this.initialCountLimit,
             offset: config.offset || 0,
         });
-        if (config.countLimit !== Number.MAX_SAFE_INTEGER) {
+        if (config.countLimit !== Number.MAX_SAFE_INTEGER && config.countLimit !== -1) {
             config.countLimit = Math.max(config.countLimit, config.offset + config.limit);
         }
         return this._loadUngroupedList({
@@ -349,6 +349,9 @@ export class RelationalModel extends Model {
             config.limit = config.openGroupsByDefault
                 ? this.constructor.DEFAULT_OPEN_GROUP_LIMIT
                 : this.constructor.DEFAULT_GROUP_LIMIT;
+        } else if (config.limit === Number.MAX_SAFE_INTEGER) {
+            // Don't send no sense limit to avoid modify SQL query executed
+            delete config.limit;
         }
         config.groups = config.groups || {};
         const firstGroupByName = config.groupBy[0].split(":")[0];
@@ -452,6 +455,7 @@ export class RelationalModel extends Model {
                 }
             }
             if (!groupConfig.isFolded && group.count > 0) {
+                groupConfig.list.countLimit = -1 // Avoid counting the number of records already count by _webReadGroup ...
                 const prom = this._loadData(groupConfig.list).then((response) => {
                     if (groupBy.length) {
                         group.groups = response ? response.groups : [];
@@ -548,14 +552,19 @@ export class RelationalModel extends Model {
      * @returns
      */
     async _loadUngroupedList(config) {
+        let countLimit = config.limit;
+        if (config.countLimit === Number.MAX_SAFE_INTEGER) {
+            countLimit = undefined;
+        } else if (config.countLimit !== -1){
+            countLimit = config.countLimit + 1;
+        }
         const kwargs = {
             specification: getFieldsSpec(config.activeFields, config.fields, config.context),
             offset: config.offset,
             order: orderByToString(config.orderBy),
             limit: config.limit,
             context: { bin_size: true, ...config.context },
-            count_limit:
-                config.countLimit !== Number.MAX_SAFE_INTEGER ? config.countLimit + 1 : undefined,
+            count_limit: countLimit,
         };
         return this.orm.webSearchRead(config.resModel, config.domain, kwargs);
     }

@@ -1248,6 +1248,7 @@ export class MockServer {
                 delete group.__range;
             }
             // compute count key to match dumb server logic...
+            // group_by_no_leaf still exist ?
             const groupByNoLeaf = kwargs.context ? "group_by_no_leaf" in kwargs.context : false;
             let countKey;
             if (kwargs.lazy && (groupBy.length >= 2 || !groupByNoLeaf)) {
