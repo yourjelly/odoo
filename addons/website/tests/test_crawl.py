@@ -51,6 +51,8 @@ class Crawler(HttpCaseWithUserDemo):
             })
 
     def crawl(self, url, seen=None, msg=''):
+
+        url = url.replace("&nofwd=1", "").replace("?nofwd=1", "")
         if seen is None:
             seen = set()
 
@@ -62,7 +64,9 @@ class Crawler(HttpCaseWithUserDemo):
             seen.add(url_slug)
 
         _logger.info("%s %s", msg, url)
-        r = self.url_open(url, allow_redirects=False)
+
+        fake_url = url + ('?' in url and '&' or '?') + "nofwd=1"
+        r = self.url_open(fake_url, allow_redirects=False)
         if r.status_code in (301, 302, 303):
             # check local redirect to avoid fetch externals pages
             new_url = r.headers.get('Location')

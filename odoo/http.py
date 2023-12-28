@@ -1267,6 +1267,12 @@ class Response(werkzeug.wrappers.Response):
     def render(self):
         """ Renders the Response's template, returns the result. """
         self.qcontext['request'] = request
+
+        if 'nofwd' in self.qcontext:
+            try:
+                _logger.warning("LEAK from %s", request.httprequest.environ['REQUEST_URI'])
+            except:
+                _logger.warning("LEAK from %...")
         return request.env["ir.ui.view"]._render_template(self.template, self.qcontext)
 
     def flatten(self):
