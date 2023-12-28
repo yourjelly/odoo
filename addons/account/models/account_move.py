@@ -2569,7 +2569,7 @@ class AccountMove(models.Model):
         self.ensure_one()
         is_payment = self.payment_id or self._context.get('is_payment')
         company = self.company_id
-        if int(company.fiscalyear_last_month) != 12:
+        if (int(company.fiscalyear_last_month), company.fiscalyear_last_day) != (12, 31):
             # Fiscal year isn't the civil year: suggest the sequence accordingly
             starting_sequence = "%s/%04d-%04d/00000" % (self.journal_id.code, self.date.year, self.date.year + 1)
         elif self.journal_id.type in ['sale', 'bank', 'cash']:
