@@ -8,7 +8,7 @@ class ProductTemplate(models.Model):
     _inherit = "product.template"
 
     l10n_hu_product_code_type = fields.Selection(
-        [
+        selection=[
             ("VTSZ", "VTSZ"),
             ("TESZOR", "TESZOR"),
             ("KN", "KN"),
@@ -16,9 +16,12 @@ class ProductTemplate(models.Model):
             ("KT", "KT"),
             ("CSK", "CSK"),
             ("EJ", "EJ"),
-            ("OWN", "OWN"),
             ("OTHER", "OTHER"),
         ],
-        string="Product Code Type",
+        string="(HU) Product Code Type",
+        help="If your product has a code in a standard nomenclature, you can indicate which nomenclature here.",
     )
-    l10n_hu_product_code = fields.Char("Product Code")
+    l10n_hu_product_code = fields.Char(
+        string="(HU) Product Code Value",
+        help="If your product has a code in a standard nomenclature, you can indicate its code here.",
+    )

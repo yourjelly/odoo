@@ -2,28 +2,28 @@
 <odoo>
 
     <record id="uom.product_uom_unit" model="uom.uom">
-        <field name="l10n_hu_measure_unit_code">PIECE</field>
+        <field name="l10n_hu_edi_code">PIECE</field>
     </record>
     <record id="uom.product_uom_kgm" model="uom.uom">
-        <field name="l10n_hu_measure_unit_code">KILOGRAM</field>
+        <field name="l10n_hu_edi_code">KILOGRAM</field>
     </record>
     <record id="uom.product_uom_day" model="uom.uom">
-        <field name="l10n_hu_measure_unit_code">DAY</field>
+        <field name="l10n_hu_edi_code">DAY</field>
     </record>
     <record id="uom.product_uom_hour" model="uom.uom">
-        <field name="l10n_hu_measure_unit_code">HOUR</field>
+        <field name="l10n_hu_edi_code">HOUR</field>
     </record>
     <record id="uom.product_uom_ton" model="uom.uom">
-        <field name="l10n_hu_measure_unit_code">TON</field>
+        <field name="l10n_hu_edi_code">TON</field>
     </record>
     <record id="uom.product_uom_meter" model="uom.uom">
-        <field name="l10n_hu_measure_unit_code">METER</field>
+        <field name="l10n_hu_edi_code">METER</field>
     </record>
     <record id="uom.product_uom_km" model="uom.uom">
-        <field name="l10n_hu_measure_unit_code">KILOMETER</field>
+        <field name="l10n_hu_edi_code">KILOMETER</field>
     </record>
     <record id="uom.product_uom_litre" model="uom.uom">
-        <field name="l10n_hu_measure_unit_code">LITRE</field>
+        <field name="l10n_hu_edi_code">LITRE</field>
     </record>
 
 </odoo>
