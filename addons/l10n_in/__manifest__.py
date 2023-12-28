@@ -47,8 +47,8 @@ Sheet, now only Vertical format has been permitted Which is Supported By Odoo.
         'report/audit_trail_report_views.xml',
     ],
     'demo': [
-        'demo/demo_company.xml',
         'demo/product_demo.xml',
+        'demo/demo_company.xml',
     ],
     'license': 'LGPL-3',
 }
