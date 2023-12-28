@@ -45,6 +45,15 @@ class TestSequenceMixinCommon(AccountTestInvoicingCommon):
 
 @tagged('post_install', '-at_install')
 class TestSequenceMixin(TestSequenceMixinCommon):
+    def assertNameAtDate(self, date, name):
+        test = self.create_move(date=date)
+        test.action_post()
+        self.assertEqual(test.name, name)
+        return test
+
+    def set_sequence(self, date, name):
+        return self.create_move(date=date, name=name)._post(soft=False)
+
     def test_sequence_change_date(self):
         """Change the sequence when we change the date iff it has never been posted."""
         # Check setup
@@ -281,6 +290,7 @@ class TestSequenceMixin(TestSequenceMixinCommon):
         sequences = [
             ('JRNL/2016/00001', 'JRNL/2016/00002', 'JRNL/2016/00003', 'JRNL/2017/00001'),
             ('JRNL/2015-2016/00001', 'JRNL/2015-2016/00002', 'JRNL/2016-2017/00001', 'JRNL/2016-2017/00002'),
+            ('JRNL/15-16/00001', 'JRNL/15-16/00002', 'JRNL/16-17/00001', 'JRNL/16-17/00002'),
             ('1234567', '1234568', '1234569', '1234570'),
             ('20190910', '20190911', '20190912', '20190913'),
             ('2016-0910', '2016-0911', '2016-0912', '2017-0001'),
@@ -478,30 +488,40 @@ class TestSequenceMixin(TestSequenceMixinCommon):
 
     def test_sequence_get_more_specific(self):
         """There is the ability to change the format (i.e. from yearly to montlhy)."""
-        def test_date(date, name):
-            test = self.create_move(date=date)
-            test.action_post()
-            self.assertEqual(test.name, name)
-
-        def set_sequence(date, name):
-            return self.create_move(date=date, name=name)._post()
-
         # Start with a continuous sequence
         self.test_move.name = 'MISC/00001'
 
         # Change the prefix to reset every year starting in 2017
-        new_year = set_sequence(self.test_move.date + relativedelta(years=1), 'MISC/2017/00001')
+        new_year = self.set_sequence(self.test_move.date + relativedelta(years=1), 'MISC/2017/00001')
 
         # Change the prefix to reset every month starting in February 2017
-        new_month = set_sequence(new_year.date + relativedelta(months=1), 'MISC/2017/02/00001')
+        new_month = self.set_sequence(new_year.date + relativedelta(months=1), 'MISC/2017/02/00001')
 
-        test_date(self.test_move.date, 'MISC/00002')  # Keep the old prefix in 2016
-        test_date(new_year.date, 'MISC/2017/00002')  # Keep the new prefix in 2017
-        test_date(new_month.date, 'MISC/2017/02/00002')  # Keep the new prefix in February 2017
+        self.assertNameAtDate(self.test_move.date, 'MISC/00002')  # Keep the old prefix in 2016
+        self.assertNameAtDate(new_year.date, 'MISC/2017/00002')  # Keep the new prefix in 2017
+        self.assertNameAtDate(new_month.date, 'MISC/2017/02/00002')  # Keep the new prefix in February 2017
+
+        # Go fiscal year in March
+        # This will break the prefix of 2017 set previously and we will use the fiscal year prefix as of now
+        start_fiscal = self.set_sequence(new_year.date + relativedelta(months=2), 'MISC/2016-2017/00001')
+
+        self.assertNameAtDate(self.test_move.date, 'MISC/00003')  # Keep the old prefix in 2016
+        self.assertNameAtDate(new_year.date, 'MISC/2016-2017/00002')  # Prefix in January 2017 changed!
+        self.assertNameAtDate(new_month.date, 'MISC/2017/02/00003')  # Keep the new prefix in February 2017
+        self.assertNameAtDate(start_fiscal.date, 'MISC/2016-2017/00003')  # Keep the new prefix in March 2017
 
         # Change the prefix to never reset (again) year starting in 2018 (Please don't do that)
-        reset_never = set_sequence(self.test_move.date + relativedelta(years=2), 'MISC/00100')
-        test_date(reset_never.date, 'MISC/00101')  # Keep the new prefix in 2018
+        reset_never = self.set_sequence(self.test_move.date + relativedelta(years=2), 'MISC/00100')
+        self.assertNameAtDate(reset_never.date, 'MISC/00101')  # Keep the new prefix in 2018
+
+    def test_fiscal_vs_monthly(self):
+        """Monthly sequence has priority over 2 digit financial year sequence but can be overridden."""
+        self.set_sequence('2101-02-01', 'MISC/01-02/00001')
+        move = self.assertNameAtDate('2101-03-01', 'MISC/01-03/00001')
+
+        move.journal_id.sequence_override_regex = move._sequence_yearly_financial_regex
+        move.name = 'MISC/00-01/00001'
+        self.assertNameAtDate('2101-03-01', 'MISC/00-01/00002')
 
     def test_resequence_clash(self):
         """Resequence doesn't clash when it uses a name set in the same batch

@@ -23,9 +23,9 @@ class SequenceMixin(models.AbstractModel):
     _sequence_field = "name"
     _sequence_date_field = "date"
     _sequence_index = False
+    _sequence_yearly_financial_regex = r'^(?P<prefix1>.*?)(?P<fyear_start>((?<=\D)|(?<=^))((19|20|21)\d{2}|(\d{2}(?=\D))))?(?P<prefix2>\D)?(?P<fyear_end>((?<=\D)|(?<=^))((19|20|21)\d{2}|(\d{2}(?=\D))))?(?P<prefix3>\D+?)?(?P<seq>\d*)(?P<suffix>\D*?)$'
     _sequence_monthly_regex = r'^(?P<prefix1>.*?)(?P<year>((?<=\D)|(?<=^))((19|20|21)\d{2}|(\d{2}(?=\D))))(?P<prefix2>\D*?)(?P<month>(0[1-9]|1[0-2]))(?P<prefix3>\D+?)(?P<seq>\d*)(?P<suffix>\D*?)$'
     _sequence_yearly_regex = r'^(?P<prefix1>.*?)(?P<year>((?<=\D)|(?<=^))((19|20|21)?\d{2}))(?P<prefix2>\D+?)(?P<seq>\d*)(?P<suffix>\D*?)$'
-    _sequence_yearly_financial_regex = r'^(?P<prefix1>.*?)(?P<fyear_start>((?<=\D)|(?<=^))((19|20|21)\d{2}))(?P<prefix2>\D)(?P<fyear_end>((?<=\D)|(?<=^))((19|20|21)\d{2}))(?P<prefix3>\D+?)(?P<seq>\d*)(?P<suffix>\D*?)$'
     _sequence_fixed_regex = r'^(?P<prefix1>.*?)(?P<seq>\d{0,9})(?P<suffix>\D*?)$'
 
     sequence_prefix = fields.Char(compute='_compute_split_sequence', store=True)
@@ -133,7 +133,7 @@ class SequenceMixin(models.AbstractModel):
             match = re.match(regex, name or '')
             if match:
                 groupdict = match.groupdict()
-                if all(req in groupdict for req in requirements):
+                if all(groupdict.get(req) is not None for req in requirements):
                     return ret_val
         raise ValidationError(_(
             'The sequence regex should at least contain the seq grouping keys. For instance:\n'
@@ -238,9 +238,9 @@ class SequenceMixin(models.AbstractModel):
             regex = self._sequence_monthly_regex
         format_values = re.match(regex, previous).groupdict()
         format_values['seq_length'] = len(format_values['seq'])
-        format_values['year_length'] = len(format_values.get('year', ''))
-        format_values['fyear_start_length'] = len(format_values.get('fyear_start', ''))
-        format_values['fyear_end_length'] = len(format_values.get('fyear_end', ''))
+        format_values['year_length'] = len(format_values.get('year') or '')
+        format_values['fyear_start_length'] = len(format_values.get('fyear_start') or '')
+        format_values['fyear_end_length'] = len(format_values.get('fyear_end') or '')
         if not format_values.get('seq') and 'prefix1' in format_values and 'suffix' in format_values:
             # if we don't have a seq, consider we only have a prefix and not a suffix
             format_values['prefix1'] = format_values['suffix']
@@ -254,7 +254,7 @@ class SequenceMixin(models.AbstractModel):
             "{month:02d}" if s == 'month' else
             "{year:0{year_length}d}" if s == 'year' else
             "{fyear_start:0{fyear_start_length}d}" if s == 'fyear_start' else
-            "{fyear_end:0{fyear_end_length}d}" if s == 'fyear_start' else
+            "{fyear_end:0{fyear_end_length}d}" if s == 'fyear_end' else
             "{%s}" % s
             for s in placeholders
         )
