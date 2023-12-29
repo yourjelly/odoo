@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo.exceptions import ValidationError
 import logging
 import requests
 from werkzeug.urls import url_encode
+
 from requests.exceptions import HTTPError, ConnectionError
 from odoo import api, models, fields, _
+from odoo.exceptions import ValidationError
 
 _logger = logging.getLogger(__name__)
 
