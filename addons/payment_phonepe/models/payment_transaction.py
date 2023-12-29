@@ -23,10 +23,11 @@ class PaymentTransaction(models.Model):
         json_str = json.dumps(payload, separators=(',', ':'))
         return base64.urlsafe_b64encode(bytes(json_str, "utf-8")).decode("utf-8")
 
-    def _phonepe_prepare_checksum(self, encoded_data, is_response=False):
+    def _phonepe_prepare_checksum(self, encoded_data, refund, is_response=False):
         self.ensure_one()
         if not is_response:
-            verification_str = "%s%s%s" % (encoded_data, const.END_POINT, self.provider_id.phonepe_salt_key)
+            additional_end_point = 'pay' if not refund else 'refund'
+            verification_str = "%s%s%s%s" % (encoded_data, const.END_POINT, Additional_end_point, self.provider_id.phonepe_salt_key)
             shasign = hashlib.sha256(verification_str.encode())
             x_verify = "%s%s%s" % (shasign.hexdigest(), const.SSTRING, self.provider_id.phonepe_salt_index)
         else:
@@ -40,14 +41,11 @@ class PaymentTransaction(models.Model):
         json_data = decoded_data.decode('utf-8')
         return json.loads(json_data)
 
-    def _phonepe_intiate_transaction(self, payload):
+    def _phonepe_intiate_transaction(self, payload, refund=False):
         self.ensure_one()
         base_url = self.get_base_url()
         encoded_payload = self._phonepe_encode_payload(payload)
-        decode = self._phonepe_decode_payload(encoded_payload)
-        str_cmp = decode.get('callbackUrl') == "%s%s" % (base_url, PhonePeController._callback_url)
-        _logger.info("\n\n\n-------------------callbackUrl-compare------------------------- %s:\n%s",self.reference, pprint.pformat(str_cmp))
-        checksum = self._phonepe_prepare_checksum(encoded_payload)
+        checksum = self._phonepe_prepare_checksum(encoded_payload, refund)
         headers = {
             'Content-Type': 'application/json',
             'X-Verify': checksum,
@@ -56,7 +54,7 @@ class PaymentTransaction(models.Model):
         data = {
             'request': encoded_payload
         }
-        return self.provider_id._phonepe_make_request(data=data, headers=headers)
+        return headers, data
 
     def _get_specific_rendering_values(self, processing_values):
         res = super()._get_specific_rendering_values(processing_values)
@@ -78,13 +76,50 @@ class PaymentTransaction(models.Model):
             },
         }
 
-        response = self._phonepe_intiate_transaction(payload)
+        headers, data  = self._phonepe_intiate_transaction(payload)
+        response = self.provider_id._phonepe_make_request(data=data, headers=headers)
         _logger.info(
             "Payload of '/orders' request for transaction with reference %s:\n%s",
             self.reference, pprint.pformat(payload)
         )
         checkout_url = response.get('data', {}).get('instrumentResponse', {}).get('redirectInfo', {}).get('url')
         return payload.update({'api_url': checkout_url})
+
+    def _send_refund_request(self, amount_to_refund=None):
+        """
+        """
+        refund_tx = super()._send_refund_request(amount_to_refund=amount_to_refund)
+        if self.provider_code != 'phonepe':
+            return refund_tx
+
+        # Make the refund request to phonepe.
+        converted_amount = payment_utils.to_minor_currency_units(
+            -refund_tx.amount, refund_tx.currency_id
+        )  # The amount is negative for refund transactions.
+        payload = {
+            "merchantId": self.provider_id.phonepe_merchant_id,
+            "merchantUserId": self.partner_email,
+            "originalTransactionId": self.provider_reference,
+            "merchantTransactionId": self.reference,
+            "amount": converted_amount,
+            "callbackUrl": "%s%s" % (base_url, PhonePeController._callback_url),
+        }
+
+        _logger.info(
+            "Payload of '/payments/<id>/refund' request for transaction with reference %s:\n%s",
+            self.reference, pprint.pformat(payload)
+        )
+
+        headers, data  = self._phonepe_intiate_transaction(payload, refund=True)
+        response_content = refund_tx.provider_id._phonepe_make_request(data=data, headers=headers, refund=True)
+        _logger.info(
+            "Response of '/payments/<id>/refund' request for transaction with reference %s:\n%s",
+            self.reference, pprint.pformat(response_content)
+        )
+        response_content.update(entity_type='refund')
+        refund_tx._handle_notification_data('phonepe', response_content)
+
+        return refund_tx
 
     def _get_tx_from_notification_data(self, provider_code, notification_data):
         tx = super()._get_tx_from_notification_data(provider_code, notification_data)

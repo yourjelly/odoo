@@ -12,6 +12,18 @@
                     <field name="phonepe_salt_index" required="code == 'phonepe' and state != 'disabled'"/>
                 </group>
             </group>
+            <field name="allow_tokenization" position="after">
+                <div invisible="code != 'razorpay' or not allow_tokenization" colspan="2">
+                    <a href="###"
+                       class="btn btn-link"
+                       role="button"
+                       target="new"
+                    >
+                        <i class="oi oi-fw o_button_icon oi-arrow-right"/>
+                        Enable recurring payments on Razorpay Paji Gone To Done This Task Soon
+                    </a>
+                </div>
+            </field>
         </field>
     </record>
 </odoo>

@@ -17,5 +17,5 @@ DEFAULT_PAYMENT_METHODS_CODES = [
     'upi',
 ]
 
-END_POINT = '/pg/v1/pay'
+END_POINT = '/pg/v1/'
 SSTRING = '###'
