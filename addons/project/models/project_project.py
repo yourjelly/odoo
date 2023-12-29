@@ -3,6 +3,7 @@
 
 import ast
 import json
+import werkzeug.exceptions
 from collections import defaultdict
 from datetime import timedelta
 
@@ -559,6 +560,46 @@ class Project(models.Model):
             values['alias_defaults'] = defaults = ast.literal_eval(self.alias_defaults or "{}")
             defaults['project_id'] = self.id
         return values
+
+    def get_project_permission_panel_data(self):
+        """
+        Returns a dictionary containing all values required to render the permission panel.
+        """
+        if not self:
+            return werkzeug.exceptions.Forbidden()
+        members_values = []
+
+        for collaborator in self.message_follower_ids.filtered(lambda follower: follower.partner_id.partner_share):
+            member_values = {
+                'id': collaborator.partner_id.id,
+                'partner_id': collaborator.partner_id.id,
+                'partner_name': collaborator.partner_id.name,
+                'partner_email': collaborator.partner_id.email,
+                'permission': 'edit' if collaborator.partner_id.id in self.collaborator_ids.mapped('partner_id.id') else 'read',
+                'partner_share': collaborator.partner_id.partner_share,
+            }
+
+            members_values.append(member_values)
+
+        user_is_admin = self.env.user._is_admin()
+
+        return {
+            'members_options': [('edit', 'Can edit'), ('read', 'Can read')],
+            'members': members_values,
+            'user_is_admin': user_is_admin,
+            'show_admin_tip': user_is_admin,
+        }
+
+    def remove_collaborator_follower(self, partner_id, project_id):
+        self.env['project.collaborator'].search([('project_id', '=', project_id), ('partner_id', '=', partner_id)], limit=1).unlink()
+        self.env['mail.followers'].search([('res_id', '=', project_id), ('partner_id', '=', partner_id), ('res_model', '=', 'project.project')], limit=1).unlink()
+
+    def set_portal_permission(self, permission, partner_id):
+        if permission == 'edit':
+            partner = self.env['res.partner'].browse(partner_id)
+            self._add_collaborators(partner)
+        else:
+            self.env['project.collaborator'].search([('project_id', '=', self.id), ('partner_id', '=', partner_id)], limit=1).unlink()
 
     @api.constrains('stage_id')
     def _ensure_stage_has_same_company(self):

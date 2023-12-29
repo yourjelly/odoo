@@ -15,7 +15,7 @@
                     When sharing a project in read-only mode, you are giving people access to the tasks in their portal.
                     These people will be able to view the tasks, but not edit them.
                 </p>
-                <field name="res_model" invisible="1"/>
+                <field name="res_model" invisible="0"/>
                 <field name="res_id" invisible="1"/>
                 <field name="display_access_mode" invisible="1" />
                 <group>
