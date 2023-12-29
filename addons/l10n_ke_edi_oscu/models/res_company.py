@@ -78,7 +78,26 @@ class ResCompany(models.Model):
         response = session.post(CUSTOMS_IMPORT_URL, json=content)
         print(response.json())
         for item in response.json()['data']['itemList']:
-            self.env['l10n_ke_edi.customs.import'].create({'name': item})
+            self.env['l10n_ke_edi.customs.import'].create({'name': item, 'company_id': self.id})
+
+
+    def action_l10n_ke_get_classification_codes(self):
+        session = self.l10n_ke_oscu_get_session()
+        content = {
+            'tin': self.vat,
+            'bhfId': self.l10n_ke_oscu_branch_code,
+            'cmcKey': self.l10n_ke_oscu_cmc_key,
+            'lastReqDt': '20180101000000',
+        }
+        response = session.post(URL + 'selectItemClsList)', json=content)
+        print(response.json())
+        i = 0
+        for item in response.json()['data']['itemClsList']:
+            unspsc_code = self.env['product.unspsc.code'].search([('code', '=', item['itemClsCd'])], limit=1)
+            if not unspsc_code:
+                i = i + 1
+        print("Result", i)
+
 
     def action_l10n_ke_create_branch_user(self):
         session = self.l10n_ke_oscu_get_session()

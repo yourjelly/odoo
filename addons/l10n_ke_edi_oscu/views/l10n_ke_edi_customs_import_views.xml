@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+    <record id="l10n_ke_edi_customs_import_view_tree" model="ir.ui.view">
+        <field name="name">l10n.ke.edi.customs.import.tree</field>
+        <field name="model">l10n_ke_edi.customs.import</field>
+        <field name="arch" type="xml">
+            <tree string="Customs imports">
+                <field name="name"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="product_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="l10n_ke_edi_customs_import_view_branch_form" model="ir.ui.view">
+        <field name="name">l10n_ke_edi.customs.import.form</field>
+        <field name="model">l10n_ke_edi.customs.import</field>
+        <field name="arch" type="xml">
+            <form string="Customs Import">
+                <sheet>
+                    <group string="Customs Import Details">
+                        <field name="name"/>
+                        <field name="company_id" groups="base.group_multi_company"/>
+                        <field name="product_id"/>
+                    </group>
+                    <group>
+                        <button name="action_send_match" string="Send To KRA" type="object"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_l10n_ke_edi_oscu_customs_import" model="ir.actions.act_window">
+        <field name="name">Customs Import</field>
+        <field name="res_model">l10n_ke_edi.customs.import</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            The Customs Import will be downloading automatically through the scheduled action.
+          </p>
+        </field>
+    </record>
+
+    <menuitem id="menu_action_l10n_ke_edi_customs_import" action="action_l10n_ke_edi_oscu_customs_import"
+          parent="account.menu_finance_payables" sequence="8" name="Customs Imports"/>
+    </data>
+</odoo>

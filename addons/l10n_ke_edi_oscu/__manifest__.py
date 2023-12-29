@@ -25,6 +25,7 @@
         'views/report_invoice.xml',
         'views/res_company_views.xml',
         'views/res_partner_views.xml',
+        'views/l10n_ke_edi_customs_import_views.xml',
         'security/ir.model.access.csv',
         'wizard/account_move_send_views.xml',
     ],
