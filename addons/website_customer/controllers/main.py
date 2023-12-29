@@ -62,43 +62,52 @@ class WebsiteCustomer(http.Controller):
             domain += [('website_tag_ids', 'in', tag_id)]
 
         # group by industry, based on customers found with the search(domain)
-        industries = Partner.sudo().read_group(domain, ["id", "industry_id"], groupby="industry_id", orderby="industry_id")
-        partners_count = Partner.sudo().search_count(domain)
+        industry_groups = Partner.sudo()._read_group(
+            domain, ['industry_id'], ['__count'], order='industry_id')
+        industries = [{
+            'industry_id_count': sum(count for _industry, count in industry_groups),
+            'industry_id': (0, _("All Industries")),
+        }]
+        industries += [{
+            'industry_id_count': count,
+            'industry_id': (industry.id, industry.display_name) if industry else False,
+        } for industry, count in industry_groups]
 
         if industry:
             domain.append(('industry_id', '=', industry.id))
-            if industry.id not in (x['industry_id'][0] for x in industries if x['industry_id']):
-                if industry.exists():
-                    industries.append({
-                        'industry_id_count': 0,
-                        'industry_id': (industry.id, industry.name)
-                    })
-
-        industries.sort(key=lambda d: (d.get('industry_id') or (0, ''))[1])
-
-        industries.insert(0, {
-            'industry_id_count': partners_count,
-            'industry_id': (0, _("All Industries"))
-        })
+            if (
+                not any(industry.id == industry.id for industry, _count in industry_groups)
+                and industry.exists()
+            ):
+                industries.append({
+                    'industry_id_count': 0,
+                    'industry_id': (industry.id, industry.name),
+                })
+                industries.sort(key=lambda d: (d.get('industry_id') or (0, ''))[1])
 
         # group by country, based on customers found with the search(domain)
-        countries = Partner.sudo().read_group(domain, ["id", "country_id"], groupby="country_id", orderby="country_id")
-        country_count = Partner.sudo().search_count(domain)
+        country_groups = Partner.sudo()._read_group(
+            domain, ['country_id'], ['__count'], order='country_id')
+        countries = [{
+            'country_id_count': sum(count for _country, count in country_groups),
+            'country_id': (0, _("All Industries")),
+        }]
+        countries += [{
+            'country_id_count': count,
+            'country_id': (country.id, country.display_name) if country else False,
+        } for country, count in country_groups]
 
         if country:
-            domain += [('country_id', '=', country.id)]
-            if country.id not in (x['country_id'][0] for x in countries if x['country_id']):
-                if country.exists():
-                    countries.append({
-                        'country_id_count': 0,
-                        'country_id': (country.id, country.name)
-                    })
-                    countries.sort(key=lambda d: (d['country_id'] or (0, ""))[1])
-
-        countries.insert(0, {
-            'country_id_count': country_count,
-            'country_id': (0, _("All Countries"))
-        })
+            domain.append(('country_id', '=', country.id))
+            if (
+                not any(country.id == country.id for country, _count in country_groups)
+                and country.exists()
+            ):
+                countries.append({
+                    'country_id_count': 0,
+                    'country_id': (country.id, country.name),
+                })
+                countries.sort(key=lambda d: (d.get('country_id') or (0, ''))[1])
 
         # search customers to display
         partner_count = Partner.sudo().search_count(domain)

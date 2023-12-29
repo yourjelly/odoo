@@ -12,6 +12,7 @@ from collections import OrderedDict
 from werkzeug.exceptions import InternalServerError
 
 import odoo
+from odoo.models import BaseModel
 import odoo.modules.registry
 from odoo import http
 from odoo.exceptions import UserError
@@ -138,10 +139,11 @@ class GroupsTreeNode:
         """
         Return the child identified by `key`.
         If it doesn't exists inserts a default node and returns it.
-        :param key: child key identifier (groupby value as returned by read_group,
-                    usually (id, display_name))
+        :param key: child key identifier (groupby value as returned by _read_group)
         :return: the child node
         """
+        if isinstance(key, BaseModel):  # When we groupby on a relational fields
+            key = key.display_name
         if key not in self.children:
             self.children[key] = GroupsTreeNode(self._model, self._export_field_names, self._groupby, self._groupby_type)
         return self.children[key]
@@ -149,13 +151,11 @@ class GroupsTreeNode:
     def insert_leaf(self, group):
         """
         Build a leaf from `group` and insert it in the tree.
-        :param group: dict as returned by `read_group(lazy=False)`
+        :param group: tuple as returned by `_read_group`
         """
-        leaf_path = [group.get(groupby_field) for groupby_field in self._groupby]
-        domain = group.pop('__domain')
-        count = group.pop('__count')
+        *leaf_path, count, record_ids = group
 
-        records = self._model.search(domain, offset=0, limit=False, order=False)
+        records = self._model.search([('id', 'in', record_ids)])  # To reorder
 
         # Follow the path from the top level group to the deepest
         # group which actually contains the records' data.
@@ -248,7 +248,6 @@ class GroupExportXlsxWriter(ExportXlsxWriter):
         self.fields = fields
 
     def write_group(self, row, column, group_name, group, group_depth=0):
-        group_name = group_name[1] if isinstance(group_name, tuple) and len(group_name) > 1 else group_name
         if group._groupby_type[group_depth] != 'boolean':
             group_name = group_name or _("Undefined")
         row, column = self._write_group_header(row, column, group_name, group, group_depth)
@@ -484,7 +483,7 @@ class ExportFormat(object):
         if not import_compat and groupby:
             groupby_type = [Model._fields[x.split(':')[0]].type for x in groupby]
             domain = [('id', 'in', ids)] if ids else domain
-            groups_data = Model.read_group(domain, ['__count'], groupby, lazy=False)
+            groups_data = Model._read_group(domain, groupby, ['__count', 'id:array_agg'])
 
             # read_group(lazy=False) returns a dict only for final groups (with actual data),
             # not for intermediary groups. The full group tree must be re-constructed.

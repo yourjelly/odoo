@@ -237,35 +237,38 @@ class WebsiteCrmPartnerAssign(WebsitePartnerPage):
                 country = country_obj.search([('code', '=', request.geoip.country_code)], limit=1)
         if country:
             grade_domain += [('country_id', '=', country.id)]
-        grades = partner_obj.sudo().read_group(
-            grade_domain, ["id", "grade_id"],
-            groupby="grade_id")
-        grades_partners = partner_obj.sudo().search_count(grade_domain)
-        # flag active grade
-        for grade_dict in grades:
-            grade_dict['active'] = grade and grade_dict['grade_id'][0] == grade.id
-        grades.insert(0, {
-            'grade_id_count': grades_partners,
+
+        grade_groups = partner_obj.sudo()._read_group(
+            grade_domain, ['grade_id'], ['__count'], order='grade_id')
+        grades = [{
+            'grade_id_count': sum(count for _grade, count in grade_groups),
             'grade_id': (0, _("All Categories")),
             'active': bool(grade is None),
-        })
+        }]
+        grades += [{
+            'grade_id_count': count,
+            'grade_id': (tmp_grade.id, tmp_grade.display_name),
+            'active': tmp_grade.id == grade.id,
+        } for tmp_grade, count in grade_groups]
 
         # group by country
         country_domain = list(base_partner_domain)
         if grade:
             country_domain += [('grade_id', '=', grade.id)]
-        countries = partner_obj.sudo().read_group(
-            country_domain, ["id", "country_id"],
-            groupby="country_id", orderby="country_id")
-        countries_partners = partner_obj.sudo().search_count(country_domain)
+
+        country_groups = partner_obj.sudo()._read_group(
+            country_domain, ['country_id'], ['__count'], order='country_id')
         # flag active country
-        for country_dict in countries:
-            country_dict['active'] = country and country_dict['country_id'] and country_dict['country_id'][0] == country.id
-        countries.insert(0, {
-            'country_id_count': countries_partners,
+        countries = [{
+            'country_id_count': sum(count for _country, count in country_groups),
             'country_id': (0, _("All Countries")),
             'active': bool(country is None),
-        })
+        }]
+        countries += [{
+            'country_id_count': count,
+            'country_id': (tmp_country.id, tmp_country.display_name) if tmp_country else False,
+            'active': tmp_country.id == country.id,
+        } for tmp_country, count in grade_groups]
 
         # current search
         if grade:

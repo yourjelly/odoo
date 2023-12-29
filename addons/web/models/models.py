@@ -286,18 +286,18 @@ class Base(models.AbstractModel):
         def adapt(value):
             if field_type == 'selection':
                 value = selection_labels.get(value, False)
-            if isinstance(value, tuple):
-                value = value[1]  # FIXME should use technical value (0)
+            if isinstance(value, BaseModel):
+                value = value.display_name  # FIXME should use technical value (id)
             return value
 
+        fname = progress_bar['field']
         result = {}
-        for group in self.read_group(domain, [progress_bar['field']], [group_by, progress_bar['field']], lazy=False):
-            group_by_value = str(adapt(group[group_by]))
-            field_value = group[progress_bar['field']]
+        for group_by_value, field_value, count in self._read_group(domain, [group_by, fname], ['__count']):
+            group_by_value = str(adapt(group_by_value))
             if group_by_value not in result:
                 result[group_by_value] = dict.fromkeys(progress_bar['colors'], 0)
             if field_value in result[group_by_value]:
-                result[group_by_value][field_value] += group['__count']
+                result[group_by_value][field_value] += count
         return result
 
     @api.model

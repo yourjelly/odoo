@@ -28,11 +28,8 @@ class MaintenanceEquipmentCategory(models.Model):
 
     @api.depends('equipment_ids')
     def _compute_fold(self):
-        # fix mutual dependency: 'fold' depends on 'equipment_count', which is
-        # computed with a read_group(), which retrieves 'fold'!
-        self.fold = False
         for category in self:
-            category.fold = False if category.equipment_count else True
+            category.fold = not category.equipment_count
 
     name = fields.Char('Category Name', required=True, translate=True)
     company_id = fields.Many2one('res.company', string='Company',

@@ -63,25 +63,29 @@ class WebsiteMembership(http.Controller):
         if post_name:
             country_domain += ['|', ('name', 'ilike', post_name), ('website_description', 'ilike', post_name)]
 
-        countries = Partner.sudo().read_group(country_domain + [("website_published", "=", True)], ["__count"], groupby="country_id")
-        countries_total = sum(country_dict['country_id_count'] for country_dict in countries)
+        country_groups = Partner.sudo()._read_group(country_domain + [('website_published', '=', True)], ['country_id'], ['__count'], order='country_id')
+        countries = [{
+            'country_id_count': sum(count for _country, count in country_groups),
+            'country_id': (0, _("All Countries")),
+        }]
+        countries += [{
+            'country_id_count': count,
+            'country_id': (group_country.id, group_country.name) if group_country else False,
+        } for group_country, count in country_groups]
 
         line_domain = list(base_line_domain)
         if country_id:
             line_domain.append(('partner.country_id', '=', country_id))
-            current_country = Country.browse(country_id).read(['id', 'name'])[0]
-            if not any(x['country_id'][0] == country_id for x in countries if x['country_id']):
+            if (
+                not any(country_id == group_country.id for group_country, _count in country_groups)
+            ):
+                country = Country.browse(country_id).fetch(['name'])
                 countries.append({
                     'country_id_count': 0,
-                    'country_id': (country_id, current_country["name"])
+                    'country_id': (country, country.name),
                 })
                 countries = [d for d in countries if d['country_id']]
                 countries.sort(key=lambda d: d['country_id'][1])
-
-        countries.insert(0, {
-            'country_id_count': countries_total,
-            'country_id': (0, _("All Countries"))
-        })
 
         # format domain for group_by and memberships
         memberships = Product.search([('membership', '=', True)], order="website_sequence")
