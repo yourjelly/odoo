@@ -2217,7 +2217,7 @@ https://fontawesome.com/license -->
                 <t t-set="description" t-value="menuItem.description(env)"/>
                 <div
                   t-if="description"
-                  class="o-menu-item-description ms-auto"
+                  class="o-menu-item-description ms-auto text-truncate"
                   t-esc="description"
                 />
                 <div
@@ -3976,6 +3976,6 @@ https://fontawesome.com/license -->
 </odoo>
 <!--
   __info__.version = '16.4.16';
-  __info__.date = '2023-12-05T10:45:25.834Z';
-  __info__.hash = '1abbb92';
+  __info__.date = '2023-12-29T10:23:27.044Z';
+  __info__.hash = '4c6714e';
 -->

@@ -5598,6 +5598,7 @@
         },
     };
 
+    const macRegex = /Mac/i;
     /**
      * Return true if the event was triggered from
      * a child element.
@@ -5637,7 +5638,15 @@
         return Array.from(document.querySelectorAll(".o-spreadsheet .o-menu"));
     }
     function isMacOS() {
-        return navigator.userAgent.toUpperCase().indexOf("MAC") >= 0;
+        return Boolean(macRegex.test(navigator.userAgent));
+    }
+    /**
+     * @param {KeyboardEvent | MouseEvent} ev
+     * @returns Returns true if the event was triggered with the "ctrl" modifier pressed.
+     * On Mac, this is the "meta" or "command" key.
+     */
+    function isCtrlKey(ev) {
+        return isMacOS() ? ev.metaKey : ev.ctrlKey;
     }
 
     /**
@@ -5993,6 +6002,7 @@
           background-color: ${BG_HOVER_COLOR};
         }
         .o-menu-item-description {
+          max-width: 40%;
           color: grey;
         }
         .o-menu-item-icon {
@@ -20491,10 +20501,10 @@
     function updateSelectionWithArrowKeys(ev, selection) {
         const direction = arrowMap[ev.key];
         if (ev.shiftKey) {
-            selection.resizeAnchorZone(direction, ev.ctrlKey ? "end" : 1);
+            selection.resizeAnchorZone(direction, isCtrlKey(ev) ? "end" : 1);
         }
         else {
-            selection.moveAnchorCell(direction, ev.ctrlKey ? "end" : 1);
+            selection.moveAnchorCell(direction, isCtrlKey(ev) ? "end" : 1);
         }
     }
 
@@ -25539,7 +25549,10 @@
                 return;
             }
             const [col, row] = this.getCartesianCoordinates(ev);
-            this.props.onCellClicked(col, row, { shiftKey: ev.shiftKey, ctrlKey: ev.ctrlKey });
+            this.props.onCellClicked(col, row, {
+                expandZone: ev.shiftKey,
+                addZone: isCtrlKey(ev),
+            });
         }
         onDoubleClick(ev) {
             const [col, row] = this.getCartesianCoordinates(ev);
@@ -25767,7 +25780,7 @@
                 this._increaseSelection(index);
             }
             else {
-                this._selectElement(index, ev.ctrlKey);
+                this._selectElement(index, isCtrlKey(ev));
             }
             this.lastSelectedElementIndex = index;
             const mouseMoveSelect = (col, row) => {
@@ -25780,7 +25793,7 @@
             const mouseUpSelect = () => {
                 this.state.isSelecting = false;
                 this.lastSelectedElementIndex = null;
-                this.env.model.dispatch(ev.ctrlKey ? "PREPARE_SELECTION_INPUT_EXPANSION" : "STOP_SELECTION_INPUT");
+                this.env.model.dispatch(isCtrlKey(ev) ? "PREPARE_SELECTION_INPUT_EXPANSION" : "STOP_SELECTION_INPUT");
                 this._computeGrabDisplay(ev);
             };
             dragAndDropBeyondTheViewport(this.env, mouseMoveSelect, mouseUpSelect);
@@ -25932,8 +25945,8 @@
                 this.env.raiseError(MergeErrorMessage);
             }
         }
-        _selectElement(index, ctrlKey) {
-            this.env.model.selection.selectColumn(index, ctrlKey ? "newAnchor" : "overrideSelection");
+        _selectElement(index, addDistinctHeader) {
+            this.env.model.selection.selectColumn(index, addDistinctHeader ? "newAnchor" : "overrideSelection");
         }
         _increaseSelection(index) {
             this.env.model.selection.selectColumn(index, "updateAnchor");
@@ -26106,8 +26119,8 @@
                 this.env.raiseError(MergeErrorMessage);
             }
         }
-        _selectElement(index, ctrlKey) {
-            this.env.model.selection.selectRow(index, ctrlKey ? "newAnchor" : "overrideSelection");
+        _selectElement(index, addDistinctHeader) {
+            this.env.model.selection.selectRow(index, addDistinctHeader ? "newAnchor" : "overrideSelection");
         }
         _increaseSelection(index) {
             this.env.model.selection.selectRow(index, "updateAnchor");
@@ -26913,8 +26926,8 @@
         // ---------------------------------------------------------------------------
         // Zone selection with mouse
         // ---------------------------------------------------------------------------
-        onCellClicked(col, row, { ctrlKey, shiftKey }) {
-            if (ctrlKey) {
+        onCellClicked(col, row, { addZone, expandZone }) {
+            if (addZone) {
                 this.env.model.dispatch("PREPARE_SELECTION_INPUT_EXPANSION");
             }
             if (this.env.model.getters.hasOpenedPopover()) {
@@ -26923,10 +26936,10 @@
             if (this.env.model.getters.getEditionMode() === "editing") {
                 this.env.model.dispatch("STOP_EDITION");
             }
-            if (shiftKey) {
+            if (expandZone) {
                 this.env.model.selection.setAnchorCorner(col, row);
             }
-            else if (ctrlKey) {
+            else if (addZone) {
                 this.env.model.selection.addCellToSelection(col, row);
             }
             else {
@@ -26988,9 +27001,7 @@
                 return;
             }
             let keyDownString = "";
-            if (ev.ctrlKey)
-                keyDownString += "CTRL+";
-            if (ev.metaKey)
+            if (isCtrlKey(ev))
                 keyDownString += "CTRL+";
             if (ev.altKey)
                 keyDownString += "ALT+";
@@ -47050,7 +47061,7 @@
         }
         onKeydown(ev) {
             let keyDownString = "";
-            if (ev.ctrlKey || ev.metaKey) {
+            if (isCtrlKey(ev)) {
                 keyDownString += "CTRL+";
             }
             keyDownString += ev.key.toUpperCase();
@@ -50812,8 +50823,8 @@
 
 
     __info__.version = '16.4.16';
-    __info__.date = '2023-12-05T10:45:24.320Z';
-    __info__.hash = '1abbb92';
+    __info__.date = '2023-12-29T10:23:24.198Z';
+    __info__.hash = '4c6714e';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
