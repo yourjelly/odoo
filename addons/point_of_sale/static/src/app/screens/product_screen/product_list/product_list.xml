@@ -4,7 +4,16 @@
         <div t-ref="products" class="overflow-y-auto flex-grow-1">
             <div t-if="productsToDisplay.length != 0 and pos.posHasValidProduct()" t-attf-class="product-list {{this.pos.productListViewMode}} p-1">
                 <t  t-foreach="productsToDisplay" t-as="product" t-key="product.id">
-                    <ProductCardWrapper product="product" />
+                    <ProductCard
+                        class="pos.productViewMode"
+                        name="product.display_name"
+                        productId="product.id"
+                        price="pos.getProductPriceFormatted(product)"
+                        imageUrl="product.getImageUrl()"
+                        onClick.bind="() => this.addProductToOrder(product)"
+                        productInfo="true"
+                        onProductInfoClick.bind="() => this.onProductInfoClick(product)"
+                    />
                 </t>
             </div>
             <div t-else="" class="flex-grow-1 text-center mt-5">

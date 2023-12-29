@@ -6,12 +6,12 @@ import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { _t } from "@web/core/l10n/translation";
 import { usePos } from "@point_of_sale/app/store/pos_hook";
 import { useService } from "@web/core/utils/hooks";
-import { ProductCardWrapper } from "./product_card_wrapper/product_card_wrapper";
+import { ProductCard } from "@point_of_sale/app/generic_components/product_card/product_card";
 
 export class ProductList extends Component {
     static template = "point_of_sale.ProductList";
     static components = {
-        ProductCardWrapper,
+        ProductCard,
     };
 
     setup() {
@@ -23,6 +23,15 @@ export class ProductList extends Component {
             previousSearchWord: "",
             currentOffset: 0,
         });
+    }
+
+    addProductToOrder(product) {
+        this.pos.addProductToCurrentOrder(product);
+    }
+
+    async onProductInfoClick(product) {
+        const info = await this.pos.getProductInfo(product, 1);
+        this.dialog.add(ProductInfoPopup, { info: info, product: product });
     }
 
     get searchWord() {
