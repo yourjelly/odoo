@@ -50,7 +50,6 @@ class L10nKeOSCUNotice(models.Model):
                 existing_notice_numbers = self.search([
                     ('number', 'in', [notice['noticeNo'] for notice in notice_list]),
                 ]).mapped("number")
-                import pudb; pudb.set_trace()
                 new_notices = self.create([{
                     'number':     notice['noticeNo'],
                     'title':      notice['title'],

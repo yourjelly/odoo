@@ -196,6 +196,8 @@ class ProductProduct(models.Model):
             response = session.post(SAVE_ITEM_URL, json=content)
             if response.ok:
                 product.l10n_ke_item_code = content['itemCd']
+                self.env.cr.commit()
+                raise UserError("Saved!")
 
     def _l10n_ke_oscu_save_stock_master_content(self):
         """ When initializing a stock quantity for an item, these are the required fields """

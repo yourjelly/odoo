@@ -90,7 +90,7 @@ class ResCompany(models.Model):
             'lastReqDt': '20180101000000',
         }
         response = session.post(URL + 'selectItemClsList)', json=content)
-        print(response.json())
+        import pdb; pdb.set_trace()
         i = 0
         for item in response.json()['data']['itemClsList']:
             unspsc_code = self.env['product.unspsc.code'].search([('code', '=', item['itemClsCd'])], limit=1)

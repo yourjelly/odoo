@@ -16,8 +16,6 @@
                                 <div class="cell"/>
                                 <button name="action_l10n_ke_oscu_initialize" string="Initialize OSCU" type="object"/> <!-- invisible="l10n_ke_oscu_cmc_key"/> -->
                                 <div class="cell"/>
-                                <button name="action_l10n_ke_oscu_get_notices" string="Get OSCU Notices" type="object"/> <!-- invisible="l10n_ke_oscu_cmc_key"/> -->
-                                <div class="cell"/>
                                 <button name="action_l10n_ke_get_customs_imports" string="Import Customs Stuff" type="object"/>
                                 <div class="cell"/>
                                 <button name="action_l10n_ke_create_branch_user" string="Create Branch User" type="object"/>
