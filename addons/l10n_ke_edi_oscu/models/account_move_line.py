@@ -49,5 +49,7 @@ class AccountMoveLine(models.Model):
                 line_dict[line.id].update({'bcd': product.barcode})
             missing_fields = check_required_fields('TrnsSalesSaveWrItem', line_dict[line.id])
             if missing_fields:
+                print(line_dict[line.id])
+                import pdb; pdb.set_trace()
                 raise ValidationError(_("Required field %s missing from invoice content.", missing_fields))
         return line_dict

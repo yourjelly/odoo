@@ -154,6 +154,8 @@ class AccountMove(models.Model):
             })
             missing_fields = check_required_fields('TrnsSalesSaveWrReq', content)
         if missing_fields:
+            print(content)
+            import pdb; pdb;set_trace()
             raise ValidationError(_("Required field %s missing from invoice content.", missing_fields))
         return content
 
@@ -164,7 +166,9 @@ class AccountMove(models.Model):
             content = self._l10n_ke_oscu_move_content()
             content.update({'invcNo': sequence.number_next})            # KRA Invoice Number
             session = company.l10n_ke_oscu_get_session()
+            print(session.headers)
             url_to_use = SALE_URL if move.move_type in ('out_invoice', 'out_refund') else PURCHASE_URL
+            print(content)
             response = session.post(url_to_use, json=content)
             # if not response.ok:
             #     raise somekindofError()

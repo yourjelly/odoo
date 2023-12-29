@@ -8,6 +8,7 @@ from odoo.exceptions import ValidationError
 URL = "https://etims-api-sbx.kra.go.ke/etims-api/"
 DEVICE_INIT_URL = URL + "selectInitOsdcInfo"
 NOTICE_SEARCH_URL = URL + "selectNoticeList"
+CUSTOMS_IMPORT_URL = URL + "selectImportItemList"
 
 
 class ResCompany(models.Model):
@@ -38,11 +39,9 @@ class ResCompany(models.Model):
             }
             response = session.post(DEVICE_INIT_URL, json=content)
             response_content = response.json()
-            print(f"\n\n response_content:\n{response_content}\n\n")
-            if not response.json()['resultCd'] != '000':
-                raise ValidationError('Request Error Code: %s, Message: %s', response_content['resultCd'], response_content['resultMsg'])
             if response_content['resultCd'] == '000':
                 info = response_content['data']['info']
+                print(info)
                 company.l10n_ke_oscu_cmc_key = info['cmcKey']
                 # Create OSCU sequences on the company
                 sequence_name_and_code = [
@@ -63,8 +62,60 @@ class ResCompany(models.Model):
                 # Activate crons
                 self.env.ref("l10n_ke_edi_oscu.fetch_kra_codes_cron").active = True
 
+    def action_l10n_ke_get_customs_imports(self):
+        session = self.l10n_ke_oscu_get_session()
+        content = {
+            'tin': self.vat,
+            'bhfId': self.l10n_ke_oscu_branch_code,
+            'cmcKey': self.l10n_ke_oscu_cmc_key,
+            'lastReqDt': '20180101000000',
+        }
+        response = session.post(CUSTOMS_IMPORT_URL, json=content)
+        print(response.json())
+        for item in response.json()['data']['itemList']:
+            self.env['l10n_ke_edi.customs.import'].create({'name': item})
+
+    def action_l10n_ke_create_branch_user(self):
+        session = self.l10n_ke_oscu_get_session()
+        user = self.env.user
+        content = {
+            'tin': self.vat,
+            'bhfId': self.l10n_ke_oscu_branch_code,
+            'cmcKey': self.l10n_ke_oscu_cmc_key,
+            'lastReqDt': '20180101000000',
+            'userId': user.id,
+            'userNm': user.login,
+            'pwd': '1234',
+            'useYn': "Y",
+            "regrId": "Test",
+            "regrNm": "Test", "modrId": "Test", "modrNm": "Test"
+        }
+        response = session.post(URL + 'saveBhfUser', json=content)
+        import pdb; pdb.set_trace()
+
+
+    def action_l10n_ke_create_branches(self):
+        session = self.l10n_ke_oscu_get_session()
+        content = {
+         'tin': self.vat,
+         'bhfId': self.l10n_ke_oscu_branch_code,
+         'cmcKey': self.l10n_ke_oscu_cmc_key or self.parent_id.l10n_ke_oscu_cmc_key,
+         'lastReqDt': '20180101000000',
+        }
+        response = session.post(URL + 'selectBhfList', json=content)
+        data = response.json()['data']
+        for bhf in data['bhfList']:
+            if bhf['bhfId'] != self.l10n_ke_oscu_branch_code:
+                company = self.search([('id', 'child_of', self.id), ('l10n_ke_oscu_branch_code', '=', bhf['bhfId'])], limit=1)
+                if not company:
+                    self.create({
+                        'parent_id': self.id,
+                        'name': bhf['bhfNm'],
+                        'l10n_ke_oscu_branch_code': bhf['bhfId'],
+                    })
+
     def action_l10n_ke_oscu_get_notices(self):
-        """ Retrieve the notices TODO explaination """
+        """ Retrieve the notices TODO explanation """
 
         last_request_date = self.env['ir.config_parameter'].get_param('l10n_ke_oscu.last_notice_request_date', '20180101000000')
         content = {
@@ -89,6 +140,7 @@ class ResCompany(models.Model):
         session.headers.update({
             'tin': self.vat,
             'bhfid': self.l10n_ke_oscu_branch_code,
-            'cmcKey': self.l10n_ke_oscu_cmc_key,
+            'cmcKey': self.l10n_ke_oscu_cmc_key or self.parent_id.l10n_ke_oscu_cmc_key,
         })
         return session
+

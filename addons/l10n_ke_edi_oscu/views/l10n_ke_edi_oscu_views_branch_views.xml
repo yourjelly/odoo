@@ -45,4 +45,52 @@
     </record>
 
         <!-- <menuitem id="menu_action_l10n_ke_edi_oscu_branch" action="action_l10n_ke_edi_oscu_branch" sequence="8" groups="base.group_no_one"/> -->
+
+
+        <record id="l10n_ke_edi_oscu_view_branch_tree" model="ir.ui.view">
+        <field name="name">l10n.ke.edi.customs.import.tree</field>
+        <field name="model">l10n_ke_edi_oscu.branch</field>
+        <field name="arch" type="xml">
+            <tree string="Customs imports">
+                <field name="name"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="code"/>
+                <field name="serial_number"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="l10n_ke_edi_oscu_view_branch_form" model="ir.ui.view">
+        <field name="name">l10n.ke.edi.oscu.branch.form</field>
+        <field name="model">l10n_ke_edi_oscu.branch</field>
+        <field name="arch" type="xml">
+            <form string="OSCU Branch">
+                <sheet>
+                    <group string="Branch Details">
+                        <field name="name"/>
+                        <field name="company_id" groups="base.group_multi_company"/>
+                        <field name="code"/>
+                        <field name="serial_number"/>
+                        <field name="cmc_key"/>
+                        <field name="warehouse_ids" widget="many2many_tags"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_l10n_ke_edi_oscu_branch" model="ir.actions.act_window">
+        <field name="name">OSCU Branches</field>
+        <field name="res_model">l10n_ke_edi_oscu.branch</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="l10n_ke_edi_oscu_view_branch_tree"/>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            Create a new OSCU Branch
+          </p>
+        </field>
+    </record>
+
+
+
 </odoo>
