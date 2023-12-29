@@ -25,6 +25,7 @@ export const busService = {
     start(env, { multi_tab: multiTab, "bus.parameters": params }) {
         const bus = new EventBus();
         const notificationBus = new EventBus();
+        const originalSubscribeFnToEnrichedFn = {};
         let worker;
         let isActive = false;
         let isInitialized = false;
@@ -161,7 +162,12 @@ export const busService = {
         browser.addEventListener("offline", () => send("stop"));
 
         return {
-            addEventListener: bus.addEventListener.bind(bus),
+            addEventListener(ename) {
+                if (ename === "notifications") {
+                    throw new Error("Unsupported event name: notifications");
+                }
+                bus.addEventListener(...arguments);
+            },
             addChannel: async (channel) => {
                 if (!worker) {
                     startWorker();
@@ -215,9 +221,22 @@ export const busService = {
              * @param {function} callback
              */
             subscribe(notificationType, callback) {
-                notificationBus.addEventListener(notificationType, ({ detail }) =>
-                    callback(detail)
+                const enrichedFn = ({ detail }) => callback(JSON.parse(JSON.stringify(detail)));
+                originalSubscribeFnToEnrichedFn[callback] = enrichedFn;
+                notificationBus.addEventListener(notificationType, enrichedFn);
+            },
+            /**
+             * Unsubscribe from a single notification type.
+             *
+             * @param {string} notificationType
+             * @param {function} callback
+             */
+            unsubscribe(notificationType, callback) {
+                notificationBus.removeEventListener(
+                    notificationType,
+                    originalSubscribeFnToEnrichedFn[callback]
                 );
+                delete originalSubscribeFnToEnrichedFn[callback];
             },
         };
     },

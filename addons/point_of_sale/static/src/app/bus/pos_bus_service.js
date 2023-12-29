@@ -12,16 +12,11 @@ export class PosBus {
     setup(env, { pos, orm, bus_service }) {
         this.pos = pos;
         this.orm = orm;
-
-        bus_service.addChannel(`pos_session-${pos.pos_session.id}-${pos.pos_session.access_token}`);
-        bus_service.addEventListener("notification", ({ detail }) => {
-            for (const message of detail) {
-                this.dispatch(message);
-            }
-        });
+        this.busService = bus_service;
+        this.busService.addChannel(
+            `pos_session-${pos.pos_session.id}-${pos.pos_session.access_token}`
+        );
     }
-
-    dispatch(message) {}
 }
 
 export const posBusService = {

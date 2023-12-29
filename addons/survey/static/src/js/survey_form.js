@@ -293,52 +293,38 @@ publicWidget.registry.SurveyFormWidget = publicWidget.Widget.extend(SurveyPreloa
      *
      * @private
      * @param {CustomEvent} ev
-     * @param {Array[]} [ev.detail] notifications structured as specified by the bus feature
+     * @param {Object} [ev.detail] notification structured as specified by the bus feature
      */
-    _onNotification: function ({ detail: notifications }) {
-        var nextPageEvent = false;
-        if (notifications && notifications.length !== 0) {
-            notifications.forEach(function (notification) {
-                if (notification.type === 'next_question' ||
-                    notification.type === 'end_session') {
-                    nextPageEvent = notification;
-                }
-            });
-        }
-
+    _onNotification: function (nextPageEvent) {
         if (this.options.isStartScreen && nextPageEvent.type === 'end_session') {
             // can happen when triggering the same survey session multiple times
             // we received an "old" end_session event that needs to be ignored
             return;
         }
 
-        if (nextPageEvent) {
-            if (nextPageEvent.type === 'next_question') {
-                var serverDelayMS =
-                   (DateTime.now().toSeconds() - nextPageEvent.payload.question_start) * 1000;
-                if (serverDelayMS < 0) {
-                    serverDelayMS = 0;
-                } else if (serverDelayMS > 1000) {
-                    serverDelayMS = 1000;
-                }
-                this.fadeInOutDelay = (1000 - serverDelayMS) / 2;
-            } else {
-                this.fadeInOutDelay = 400;
+        if (nextPageEvent.type === 'next_question') {
+            var serverDelayMS =
+               (DateTime.now().toSeconds() - nextPageEvent.payload.question_start) * 1000;
+            if (serverDelayMS < 0) {
+                serverDelayMS = 0;
+            } else if (serverDelayMS > 1000) {
+                serverDelayMS = 1000;
             }
-
-            this.$('.o_survey_main_title:visible').fadeOut(400);
-
-            this.preventEnterSubmit = false;
-            this.readonly = false;
-            this._nextScreen(
-                rpc(
-                    `/survey/next_question/${this.options.surveyToken}/${this.options.answerToken}`
-                ), {
-                    initTimer: true,
-                    isFinish: nextPageEvent.type === 'end_session'
-                }
-            );
+            this.fadeInOutDelay = (1000 - serverDelayMS) / 2;
+        } else {
+            this.fadeInOutDelay = 400;
         }
+        this.$('.o_survey_main_title:visible').fadeOut(400);
+        this.preventEnterSubmit = false;
+        this.readonly = false;
+        this._nextScreen(
+            rpc(
+                `/survey/next_question/${this.options.surveyToken}/${this.options.answerToken}`
+            ), {
+                initTimer: true,
+                isFinish: nextPageEvent.type === 'end_session'
+            }
+        );
     },
 
     // SUBMIT
@@ -892,7 +878,8 @@ publicWidget.registry.SurveyFormWidget = publicWidget.Widget.extend(SurveyPreloa
                 }, 2000);
             }
 
-            this.call('bus_service', 'addEventListener', 'notification', this._onNotification.bind(this));
+            this.call('bus_service', 'subscribe', 'next_question', this._onNotification.bind(this));
+            this.call('bus_service', 'subscribe', 'end_session', this._onNotification.bind(this));
         }
     },
 

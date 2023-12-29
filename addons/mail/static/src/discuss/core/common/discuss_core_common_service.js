@@ -78,21 +78,8 @@ export class DiscussCoreCommon {
                 thread.messages.splice(0, thread.messages.length);
                 thread.delete();
             });
-            this.busService.addEventListener("notification", ({ detail: notifications }) => {
-                // Do not handle new message notification if the channel was just left. This issue
-                // occurs because the "discuss.channel/leave" and the "discuss.channel/new_message"
-                // notifications come from the bus as a batch.
-                const channelsLeft = new Set(
-                    notifications
-                        .filter(({ type }) => type === "discuss.channel/leave")
-                        .map(({ payload }) => payload.id)
-                );
-                for (const notif of notifications.filter(
-                    ({ payload, type }) =>
-                        type === "discuss.channel/new_message" && !channelsLeft.has(payload.id)
-                )) {
-                    this._handleNotificationNewMessage(notif);
-                }
+            this.busService.subscribe("discuss.channel/new_message", (payload) => {
+                this._handleNotificationNewMessage(payload);
             });
             this.busService.subscribe("discuss.channel/transient_message", (payload) => {
                 const { body, originThread } = payload;
