@@ -20,14 +20,20 @@
                                     <i t-attf-class="fa {{printer.state.isPrinting ? 'fa-fw fa-spin fa-circle-o-notch' : 'fa-print'}} me-1" />Print Receipt
                                 </button>
                             </div>
-                            <form t-on-submit.prevent="onSendEmail" class="send-email d-flex">
-                                <div class="input-email input-group">
-                                    <input type="email" class="form-control py-3 bg-view" t-attf-placeholder="Email: {{currentOrder.getEmailItems().join(', ')}}" t-model="orderUiState.inputEmail" />
-                                    <button class="send btn px-5" t-att-class="isValidEmail() ? 'highlight btn btn-primary' : 'btn-secondary disabled'" type="submit">
+                            <form class="send-form d-flex">
+                                <div class="input-group">
+                                    <input
+                                        type="text"
+                                        class="form-control py-3 bg-view"
+                                        t-attf-placeholder="Enter Customer Contact Info.('Email' or 'Number')"
+                                        t-att-value="this.orderUiState.inputEmail"
+                                        t-on-input="onInputChange"
+                                    />
+                                    <button class="send-email btn px-5" t-att-class="isValidEmail() ? 'highlight btn btn-primary' : 'btn-secondary disabled'" t-on-click="function(){onClickSend('email');}" type="button">
                                         <i class="fa fa-paper-plane" aria-hidden="true" t-ref="order-mail-receipt-button" />
                                     </button>
                                 </div>
-                            </form>
+                            </form>         
                             <div class="notice mt-2">
                                 <div t-if="orderUiState.emailSuccessful !== null" t-attf-class="{{ orderUiState.emailSuccessful ? 'successful text-success' : 'failed text-danger' }}">
                                     <t t-esc="orderUiState.emailNotice"></t>

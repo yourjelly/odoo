@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="pos_sms.ReceiptScreen" t-inherit="point_of_sale.ReceiptScreen" t-inherit-mode="extension">
+        <xpath expr="//button[hasclass('send-email')]" position="after">
+            <button t-if="this.pos.config.module_pos_sms" class="send btn px-5" type="button" t-att-class="!smsState.smsButtonDisabled and is_valid_mobile ? 'highlight btn btn-primary' : 'btn-secondary disabled'" t-on-click="function(){onClickSend('sms');}">
+                <i class="fa" t-att-class="smsState.isSending ? 'fa-fw fa-spin fa-circle-o-notch' : 'fa-mobile'" aria-hidden="true" />
+            </button>
+        </xpath>
+        <xpath expr="//div[hasclass('notice')]" position="after">
+            <div t-if="this.pos.config.module_pos_sms" class="sms-notice">
+                <div t-if="smsState.smsSuccessful !== null" t-att-class="smsState.smsSuccessful ? 'successful' : 'failed'">
+                    <t t-esc="smsState.smsNotice"/>
+                </div>
+            </div>
+        </xpath>
+    </t>
+</templates>

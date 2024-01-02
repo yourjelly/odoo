@@ -28,8 +28,7 @@ export class ReceiptScreen extends Component {
         this.currentOrder = this.pos.get_order();
         const partner = this.currentOrder.get_partner();
         this.orderUiState = this.currentOrder.uiState.ReceiptScreen;
-        this.orderUiState.inputEmail =
-            this.orderUiState.inputEmail || (partner && partner.email) || "";
+        this.orderUiState.inputEmail = this.orderUiState.inputEmail || (partner?.email || partner?.mobile || '');
 
         onWillStart(async () => {
             // When the order is paid, if there is still a part of the order
@@ -78,6 +77,14 @@ export class ReceiptScreen extends Component {
     isValidEmail() {
         // A basic check of whether the `inputEmail` is an email or not.
         return /^.+@.+$/.test(this.orderUiState.inputEmail);
+    }
+    async onClickSend(type) {
+        if (type === 'email') {
+            this.onSendEmail();
+        }
+    }
+    onInputChange(ev) {
+        this.orderUiState.inputEmail = ev.target.value;
     }
     get orderAmountPlusTip() {
         const order = this.currentOrder;
