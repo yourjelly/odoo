@@ -218,8 +218,8 @@ if __name__ == '__main__':
         'incremental': True,
         'disable_existing_loggers': False,
         'loggers': {
-            'odoo.modules.loading': {'level': 'CRITICAL'},
-            'odoo.sql_db': {'level': 'CRITICAL'},
+            #'odoo.modules.loading': {'level': 'CRITICAL'},
+            #'odoo.sql_db': {'level': 'CRITICAL'},
             'odoo.models.unlink': {'level': 'WARNING'},
             'odoo.addons.base.models.ir_model': {'level': "WARNING"},
         }
