@@ -80,6 +80,10 @@
                                 <strong>Customer Code:</strong>
                                 <p class="m-0" t-field="o.partner_id.ref"/>
                             </div>
+                            <!-- <div class="col-auto col-3 mw-100 mb-2" t-if="o.invoice_payment_term_id" name="payment_terms">
+                                <strong>Payment Terms:</strong>
+                                <p class="m-0" t-field="o.invoice_date_due"/>
+                            </div>                             -->
                             <div class="col-auto col-3 mw-100 mb-2" t-if="o.ref" name="reference">
                                 <strong>Reference:</strong>
                                 <p class="m-0" t-field="o.ref"/>

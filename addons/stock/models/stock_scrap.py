@@ -88,6 +88,23 @@ class StockScrap(models.Model):
                         self.location_id = move_line.location_id if move_line.state != 'done' else move_line.location_dest_id
                         break
 
+    @api.onchange('location_id','product_id')
+    def _onchange_location_product(self):
+        domain = []
+        if self.location_id and self.product_id:
+            quants = self.env['stock.quant'].search([
+                ('location_id', 'child_of', self.location_id.id),
+                # ('location_id', '=', self.location_id.id), To show lots of only exact selected location
+                ('product_id', '=', self.product_id.id),
+                ('quantity', '>', 0.0)
+            ])
+            lot_ids = quants.mapped('lot_id')
+            domain = [('id', 'in', lot_ids.ids)]
+        return {
+            'domain': {
+                'lot_id': domain
+            }
+        }
     @api.onchange('company_id')
     def _onchange_company_id(self):
         if self.company_id:

@@ -92,6 +92,24 @@ class StockMoveLine(models.Model):
                 else:
                     line.product_uom_id = line.product_id.uom_id.id
 
+    @api.onchange('location_id','product_id')
+    def _onchange_location_product(self):
+        domain = []
+        if self.location_id and self.product_id:
+            quants = self.env['stock.quant'].search([
+                ('location_id', 'child_of', self.location_id.id),
+                # ('location_id', '=', self.location_id.id), To show lots of only exact selected location
+                ('product_id', '=', self.product_id.id),
+                ('quantity', '>', 0.0)
+            ])
+            lot_ids = quants.mapped('lot_id')
+            domain = [('id', 'in', lot_ids.ids)]
+        return {
+            'domain': {
+                'lot_id': domain
+            }
+        }
+
     @api.depends('picking_id.picking_type_id', 'product_id.tracking')
     def _compute_lots_visible(self):
         for line in self:

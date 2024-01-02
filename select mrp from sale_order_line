@@ -1,0 +1,75 @@
+                                                Table "public.sale_order_line"
+          Column           |            Type             | Collation | Nullable |                   Default                   
+---------------------------+-----------------------------+-----------+----------+---------------------------------------------
+ id                        | integer                     |           | not null | nextval('sale_order_line_id_seq'::regclass)
+ order_id                  | integer                     |           | not null | 
+ sequence                  | integer                     |           |          | 
+ company_id                | integer                     |           |          | 
+ currency_id               | integer                     |           |          | 
+ order_partner_id          | integer                     |           |          | 
+ salesman_id               | integer                     |           |          | 
+ product_id                | integer                     |           |          | 
+ product_uom               | integer                     |           |          | 
+ product_packaging_id      | integer                     |           |          | 
+ create_uid                | integer                     |           |          | 
+ write_uid                 | integer                     |           |          | 
+ state                     | character varying           |           |          | 
+ display_type              | character varying           |           |          | 
+ qty_delivered_method      | character varying           |           |          | 
+ invoice_status            | character varying           |           |          | 
+ analytic_distribution     | jsonb                       |           |          | 
+ name                      | text                        |           | not null | 
+ product_uom_qty           | numeric                     |           | not null | 
+ price_unit                | numeric                     |           | not null | 
+ discount                  | numeric                     |           |          | 
+ discount_2                | numeric                     |           |          | 
+ discount_3                | numeric                     |           |          | 
+ discount_4                | numeric                     |           |          | 
+ price_reduce              | numeric                     |           |          | 
+ price_subtotal            | numeric                     |           |          | 
+ price_total               | numeric                     |           |          | 
+ price_reduce_taxexcl      | numeric                     |           |          | 
+ price_reduce_taxinc       | numeric                     |           |          | 
+ qty_delivered             | numeric                     |           |          | 
+ qty_invoiced              | numeric                     |           |          | 
+ qty_to_invoice            | numeric                     |           |          | 
+ untaxed_amount_invoiced   | numeric                     |           |          | 
+ untaxed_amount_to_invoice | numeric                     |           |          | 
+ is_downpayment            | boolean                     |           |          | 
+ is_expense                | boolean                     |           |          | 
+ create_date               | timestamp without time zone |           |          | 
+ write_date                | timestamp without time zone |           |          | 
+ price_tax                 | double precision            |           |          | 
+ product_packaging_qty     | double precision            |           |          | 
+ customer_lead             | double precision            |           | not null | 
+ mrp                       | double precision            |           |          | 
+Indexes:
+    "sale_order_line_pkey" PRIMARY KEY, btree (id)
+    "sale_order_line_analytic_distribution_gin_index" gin (analytic_distribution)
+    "sale_order_line_company_id_index" btree (company_id)
+    "sale_order_line_order_id_index" btree (order_id)
+    "sale_order_line_order_partner_id_index" btree (order_partner_id)
+    "sale_order_line_product_id_index" btree (product_id) WHERE product_id IS NOT NULL
+Check constraints:
+    "sale_order_line_accountable_required_fields" CHECK (display_type IS NOT NULL OR product_id IS NOT NULL AND product_uom IS NOT NULL)
+    "sale_order_line_non_accountable_null_fields" CHECK (display_type IS NULL OR product_id IS NULL AND price_unit = 0::numeric AND product_uom_qty = 0::numeric AND product_uom IS NULL AND customer_lead = 0::double precision)
+Foreign-key constraints:
+    "sale_order_line_company_id_fkey" FOREIGN KEY (company_id) REFERENCES res_company(id) ON DELETE SET NULL
+    "sale_order_line_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    "sale_order_line_currency_id_fkey" FOREIGN KEY (currency_id) REFERENCES res_currency(id) ON DELETE SET NULL
+    "sale_order_line_order_id_fkey" FOREIGN KEY (order_id) REFERENCES sale_order(id) ON DELETE CASCADE
+    "sale_order_line_order_partner_id_fkey" FOREIGN KEY (order_partner_id) REFERENCES res_partner(id) ON DELETE SET NULL
+    "sale_order_line_product_id_fkey" FOREIGN KEY (product_id) REFERENCES product_product(id) ON DELETE RESTRICT
+    "sale_order_line_product_packaging_id_fkey" FOREIGN KEY (product_packaging_id) REFERENCES product_packaging(id) ON DELETE SET NULL
+    "sale_order_line_product_uom_fkey" FOREIGN KEY (product_uom) REFERENCES uom_uom(id) ON DELETE RESTRICT
+    "sale_order_line_salesman_id_fkey" FOREIGN KEY (salesman_id) REFERENCES res_users(id) ON DELETE SET NULL
+    "sale_order_line_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+Referenced by:
+    TABLE "account_analytic_line" CONSTRAINT "account_analytic_line_so_line_fkey" FOREIGN KEY (so_line) REFERENCES sale_order_line(id) ON DELETE SET NULL
+    TABLE "account_tax_sale_order_line_rel" CONSTRAINT "account_tax_sale_order_line_rel_sale_order_line_id_fkey" FOREIGN KEY (sale_order_line_id) REFERENCES sale_order_line(id) ON DELETE CASCADE
+    TABLE "product_attribute_custom_value" CONSTRAINT "product_attribute_custom_value_sale_order_line_id_fkey" FOREIGN KEY (sale_order_line_id) REFERENCES sale_order_line(id) ON DELETE CASCADE
+    TABLE "product_template_attribute_value_sale_order_line_rel" CONSTRAINT "product_template_attribute_value_sale_o_sale_order_line_id_fkey" FOREIGN KEY (sale_order_line_id) REFERENCES sale_order_line(id) ON DELETE CASCADE
+    TABLE "purchase_order_line" CONSTRAINT "purchase_order_line_sale_line_id_fkey" FOREIGN KEY (sale_line_id) REFERENCES sale_order_line(id) ON DELETE SET NULL
+    TABLE "sale_order_line_invoice_rel" CONSTRAINT "sale_order_line_invoice_rel_order_line_id_fkey" FOREIGN KEY (order_line_id) REFERENCES sale_order_line(id) ON DELETE CASCADE
+    TABLE "sale_order_option" CONSTRAINT "sale_order_option_line_id_fkey" FOREIGN KEY (line_id) REFERENCES sale_order_line(id) ON DELETE SET NULL
+
