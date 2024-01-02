@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="mrp_bom_view_form_inherit_l10n_ke" model="ir.ui.view">
+        <field name="name">mrp.bom.view.form.inherit.l10n_ke</field>
+        <field name="model">mrp.bom</field>
+        <field name="inherit_id" ref="mrp.mrp_bom_form_view"/>
+        <field name="arch" type="xml">
+            <field name="ready_to_produce" position="after">
+                <button name="action_l10n_ke_send_bom"
+                type="object"
+                string="Send to KRA"/>
+            </field>
+        </field>
+    </record>
+</odoo>

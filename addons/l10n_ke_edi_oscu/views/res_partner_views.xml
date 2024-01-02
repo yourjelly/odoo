@@ -13,6 +13,9 @@
                             string="Save on OSCU"
                             type="object"
                             invisible="l10n_ke_oscu_synchronized"/>
+                    <button name="action_l10n_ke_oscu_fetch_bhf_customer"
+                            string="Fetch Data from OSCU"
+                            type="object"/>
                 </group>
             </group>
         </field>

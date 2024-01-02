@@ -107,9 +107,9 @@ class AccountMove(models.Model):
             'taxRtC':           0,
             'taxRtD':           0,
             'taxRtE':           8,
-            'totTaxblAmt':      tax_details['base_amount'],
-            'totTaxAmt':        tax_details['tax_amount'],
-            'totAmt':           self.amount_total,
+            'totTaxblAmt':      round(tax_details['base_amount'], 2),
+            'totTaxAmt':        round(tax_details['tax_amount'], 2),
+            'totAmt':           round(self.amount_total, 2),
             'totItemCnt':       len(line_items),                         # Total Item count
             'regrId':           self.user_id.id or self.env.user.id,     # TODO Registration ID
             'regrNm':           self.user_id.name or self.env.user.name, # TODO Registration Name
@@ -165,6 +165,7 @@ class AccountMove(models.Model):
             content.update({'invcNo': sequence.number_next})            # KRA Invoice Number
             session = company.l10n_ke_oscu_get_session()
             url_to_use = SALE_URL if move.move_type in ('out_invoice', 'out_refund') else PURCHASE_URL
+            print("content:", content)
             response = session.post(url_to_use, json=content)
             # if not response.ok:
             #     raise somekindofError()
@@ -180,6 +181,8 @@ class AccountMove(models.Model):
                     'l10n_ke_oscu_branch_code': company.l10n_ke_oscu_branch_code,
                 })
                 sequence.next_by_id()
+            else:
+                raise UserError(response.content)
 
     def cron_l10n_ke_oscu_fetch_purchases(self):
         """ Retrieve vendor bills from the KRA """

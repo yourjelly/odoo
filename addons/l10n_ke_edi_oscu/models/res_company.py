@@ -4,7 +4,7 @@ import logging
 import requests
 
 from odoo import api, fields, models
-from odoo.exceptions import ValidationError
+from odoo.exceptions import ValidationError, UserError
 
 URL = "https://etims-api-sbx.kra.go.ke/etims-api/"
 DEVICE_INIT_URL = URL + "selectInitOsdcInfo"
@@ -26,6 +26,11 @@ class ResCompany(models.Model):
     l10n_ke_oscu_seq_stock_io_id = fields.Many2one('ir.sequence', help='Sequence used when reporting stock IO to the KRA using eTIMS.')
 
     l10n_ke_oscu_last_fetch_purchase_date = fields.Char(default='20180101000000')
+
+    l10n_ke_insurance_code = fields.Char("Insurance Code")
+    l10n_ke_insurance_name = fields.Char("Insurance Name")
+    l10n_ke_insurance_rate = fields.Float("")
+
 
     def action_l10n_ke_oscu_initialize(self):
         """ Initializing the device is necessary in order to receive the cmc key
@@ -75,13 +80,13 @@ class ResCompany(models.Model):
             'cmcKey': self.l10n_ke_oscu_cmc_key,
             'lastReqDt': '20180101000000',
         }
+        print(content)
         response = session.post(CUSTOMS_IMPORT_URL, json=content)
         print(response.json())
         for item in response.json()['data']['itemList']:
             self.env['l10n_ke_edi.customs.import'].create({'name': item, 'company_id': self.id})
 
-
-    def action_l10n_ke_get_classification_codes(self):
+    def action_l10n_ke_get_item_codes(self):
         session = self.l10n_ke_oscu_get_session()
         content = {
             'tin': self.vat,
@@ -89,15 +94,21 @@ class ResCompany(models.Model):
             'cmcKey': self.l10n_ke_oscu_cmc_key,
             'lastReqDt': '20180101000000',
         }
-        response = session.post(URL + 'selectItemClsList)', json=content)
-        import pdb; pdb.set_trace()
-        i = 0
-        for item in response.json()['data']['itemClsList']:
-            unspsc_code = self.env['product.unspsc.code'].search([('code', '=', item['itemClsCd'])], limit=1)
-            if not unspsc_code:
-                i = i + 1
-        print("Result", i)
+        #cls_url = URL + something
+        response = session.post(URL + 'selectItemList', json=content)
+        raise UserError(response.content)
 
+    def action_l10n_ke_get_stock_moves(self):
+        session = self.l10n_ke_oscu_get_session()
+        content = {
+            'tin': self.vat,
+            'bhfId': self.l10n_ke_oscu_branch_code,
+            'cmcKey': self.l10n_ke_oscu_cmc_key,
+            'lastReqDt': '20180101000000',
+        }
+        #cls_url = URL + something
+        response = session.post(URL + 'selectStockMoveList', json=content)
+        raise UserError(response.content)
 
     def action_l10n_ke_create_branch_user(self):
         session = self.l10n_ke_oscu_get_session()
@@ -115,7 +126,26 @@ class ResCompany(models.Model):
             "regrNm": "Test", "modrId": "Test", "modrNm": "Test"
         }
         response = session.post(URL + 'saveBhfUser', json=content)
-        import pdb; pdb.set_trace()
+        print(response)
+
+    def action_l10n_ke_send_insurance(self):
+        session = self.l10n_ke_oscu_get_session()
+        user = self.env.user
+        content = {
+            'tin': self.vat,
+            'bhfId': self.l10n_ke_oscu_branch_code,
+            'cmcKey': self.l10n_ke_oscu_cmc_key,
+            'isrccCd': self.l10n_ke_insurance_code,
+            'isrccNm': self.l10n_ke_insurance_name,
+            'isrcRt': self.l10n_ke_insurance_rate,
+            'useYn': 'Y',
+            "regrId": "Test",
+            "regrNm": "Test",
+            "modrId": "Test",
+            "modrNm": "Test",
+        }
+        response = session.post(URL + 'saveBhfInsurance', json=content)
+        print(response.content)
 
 
     def action_l10n_ke_create_branches(self):

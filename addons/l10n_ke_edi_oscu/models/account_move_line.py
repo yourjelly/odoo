@@ -35,15 +35,15 @@ class AccountMoveLine(models.Model):
                 'pkgUnitCd': product.l10n_ke_packaging_unit_id.code,       # Packaging code, describes the type of package used
                 'pkg': product.l10n_ke_packaging_quantity * line.quantity, # Number of packages used
                 'qtyUnitCd': product.l10n_ke_quantity_unit_id.code,        # The UOMs as defined by the KRA, defined seperately from the UOMs on the line
-                'qty': line.quantity,
-                'prc': line.price_unit,
-                'splyAmt': line.quantity * line.price_unit,
-                'dcRt': line.discount,
-                'dcAmt': line.quantity * line.price_unit * (line.discount/100), # TODO, this and above, the more complex implementation details,
+                'qty': round(line.quantity, 2),
+                'prc': round(line.price_unit, 2),
+                'splyAmt': round(line.quantity * line.price_unit, 2),
+                'dcRt': round(line.discount, 2),
+                'dcAmt': round(line.quantity * line.price_unit * (line.discount/100), 2), # TODO, this and above, the more complex implementation details,
                 'taxTyCd': line.tax_ids.l10n_ke_tax_type.code,
-                'taxblAmt': per_record[line]['base_amount'],
-                'taxAmt': per_record[line]['tax_amount'],
-                'totAmt': per_record[line]['base_amount'] + per_record[line]['tax_amount'],
+                'taxblAmt': round(per_record[line]['base_amount'], 2),
+                'taxAmt': round(per_record[line]['tax_amount'], 2),
+                'totAmt': round(per_record[line]['base_amount'] + per_record[line]['tax_amount'], 2),
             }
             if line.product_id.barcode:
                 line_dict[line.id].update({'bcd': product.barcode})

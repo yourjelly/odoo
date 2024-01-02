@@ -13,16 +13,23 @@
                                 <field name="l10n_ke_oscu_branch_code"/>
                                 <field name="l10n_ke_oscu_serial_number"/>
                                 <field name="l10n_ke_oscu_cmc_key"/>
+                                <field name="l10n_ke_insurance_code"/>
+                                <field name="l10n_ke_insurance_name"/>
+                                <field name="l10n_ke_insurance_rate"/>
                                 <div class="cell"/>
                                 <button name="action_l10n_ke_oscu_initialize" string="Initialize OSCU" type="object"/> <!-- invisible="l10n_ke_oscu_cmc_key"/> -->
                                 <div class="cell"/>
                                 <button name="action_l10n_ke_get_customs_imports" string="Import Customs Stuff" type="object"/>
                                 <div class="cell"/>
-                                <button name="action_l10n_ke_create_branch_user" string="Create Branch User" type="object"/>
+                                <button name="action_l10n_ke_create_branch_user" string="Send Branch User" type="object"/>
                                 <div class="cell"/>
                                 <button name="action_l10n_ke_create_branches" string="Create Branches" type="object"/>
                                 <div class="cell"/>
-                                <button name="action_l10n_ke_get_classification_codes" string="Check Classification Codes" type="object"/>
+                                <button name="action_l10n_ke_get_item_codes" string="Get Item Codes" type="object"/>
+                                <div class="cell"/>
+                                <button name="action_l10n_ke_get_stock_moves" string="Get Stock Moves List" type="object"/>
+                                <div class="cell"/>
+                                <button name="action_l10n_ke_send_insurance" string="Send Insurance" type="object"/>
                             </group>
                         </group>
                     </page>

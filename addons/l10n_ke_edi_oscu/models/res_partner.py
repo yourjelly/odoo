@@ -2,7 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import fields, models
-
+from odoo.exceptions import UserError
 
 URL = "https://etims-api-sbx.kra.go.ke/etims-api/"
 SAVE_PARTNER_URL = URL + "saveBhfCustomer"
@@ -42,9 +42,8 @@ class ResPartner(models.Model):
                 raise ValidationError('Request Error Code: %s, Message: %s', response_content['resultCd'], response_content['resultMsg'])
             partner.l10n_ke_oscu_synchronized = True
 
-    def action_l10n_ke_oscu_fetch_bhf_customer(self, tin):
-
+    def action_l10n_ke_oscu_fetch_bhf_customer(self):
         company = self.company_id or self.env.company
         session = company.l10n_ke_oscu_get_session()
-        response = session.post(FETCH_PARTNER_URL, json={'custmTin': tin})
-        return response
+        response = session.post(FETCH_PARTNER_URL, json={'custmTin': self.vat})
+        raise UserError(response.content)

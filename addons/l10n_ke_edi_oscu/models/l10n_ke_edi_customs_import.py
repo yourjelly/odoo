@@ -25,13 +25,14 @@ class L10nKeEdiCustomsImport(models.Model):
             'taskCd': data['taskCd'],
             'dclDe': data['dclDe'],
             "itemSeq": data['itemSeq'],
-            "hsCd": data['hsCd'],
-            "itemClsCd": self.product_id.unspsc_code_id.code,
+            "hsCd": data['hsCd'] + '00',
+            "itemClsCd": "30101500", #self.product_id.unspsc_code_id.code,
             "itemCd": self.product_id.l10n_ke_item_code,
-            "imptItemSttsCd": 1, #What is this
-            "modrId": self.env.user.id,
-            "modrNm": self.env.user.name,
+            "imptItemSttsCd": "1", #What is this
+            "remark": "",
+            "modrNm": "Test",
+            "modrId": "Test",
         }
-        response = session.post(URL + 'updateImportItem', json=content)
         print(content)
+        response = session.post(URL + 'updateImportItem', json=content)
         print(response.json())

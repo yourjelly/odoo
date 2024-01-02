@@ -37,6 +37,7 @@ CODE_TYPES = [
 
 class L10nKeOSCUCode(models.Model):
     _name = 'l10n_ke_edi_oscu.code'
+
     code_type = fields.Selection(selection=CODE_TYPES)
     code = fields.Char()
     name = fields.Char()
