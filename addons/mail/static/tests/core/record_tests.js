@@ -1,6 +1,7 @@
 /* @odoo-module */
 
-import { BaseStore, Record, makeStore, modelRegistry } from "@mail/core/common/record";
+import { modelRegistry } from "@mail/core/common/model/misc";
+import { Store, Record, makeStore } from "@mail/core/common/model/export";
 
 import { registry } from "@web/core/registry";
 import { clearRegistryWithCleanup, makeTestEnv } from "@web/../tests/helpers/mock_env";
@@ -14,7 +15,7 @@ QUnit.module("record", {
         serviceRegistry.add("store", { start: (env) => makeStore(env) });
         clearRegistryWithCleanup(modelRegistry);
         Record.register();
-        ({ Store: class extends BaseStore {} }).Store.register();
+        Store.register();
         start = async () => {
             const env = await makeTestEnv();
             return env.services.store;
@@ -577,8 +578,8 @@ QUnit.test("lazy sort should re-sort while they are observed", async (assert) =>
     message.sequence = 10;
     assert.equal(
         `${toRaw(thread)
-            ._raw._fields.get("messages")
-            .value.data.map((localId) => toRaw(thread)._raw._store.get(localId).id)}`,
+            ._0._fields.get("messages")
+            .value.data.map((localId) => toRaw(thread)._0._store.get(localId).id)}`,
         "2,1",
         "observed one last time when it changes"
     );
@@ -586,8 +587,8 @@ QUnit.test("lazy sort should re-sort while they are observed", async (assert) =>
     message.sequence = 1;
     assert.equal(
         `${toRaw(thread)
-            ._raw._fields.get("messages")
-            .value.data.map((localId) => toRaw(thread)._raw._store.get(localId).id)}`,
+            ._0._fields.get("messages")
+            .value.data.map((localId) => toRaw(thread)._0._store.get(localId).id)}`,
         "2,1",
         "no longer observed"
     );
@@ -604,14 +605,14 @@ QUnit.test("store updates can be observed", async (assert) => {
     function onUpdate() {
         assert.step(`abc:${reactiveStore.abc}`);
     }
-    const rawStore = toRaw(store)._raw;
+    const _0store = toRaw(store)._0;
     const reactiveStore = reactive(store, onUpdate);
     onUpdate();
     assert.verifySteps(["abc:undefined"]);
     store.abc = 1;
     assert.verifySteps(["abc:1"], "observable from makeStore");
-    rawStore._store.abc = 2;
+    _0store._store.abc = 2;
     assert.verifySteps(["abc:2"], "observable from record._store");
-    rawStore.Model.store.abc = 3;
+    _0store.Model.store.abc = 3;
     assert.verifySteps(["abc:3"], "observable from Model.store");
 });

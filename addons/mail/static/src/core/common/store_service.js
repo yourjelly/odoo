@@ -1,11 +1,9 @@
 /* @odoo-module */
 
-import { BaseStore, makeStore, Record } from "@mail/core/common/record";
+import { Store as BaseStore, makeStore, Record } from "@mail/core/common/record";
 
-import { rpc } from "@web/core/network/rpc";
 import { registry } from "@web/core/registry";
 import { user } from "@web/core/user";
-import { Deferred } from "@web/core/utils/concurrency";
 import { debounce } from "@web/core/utils/timing";
 import { session } from "@web/session";
 
@@ -203,58 +201,6 @@ export class Store extends BaseStore {
     isMessagingReady = false;
     settings = Record.one("Settings");
     openInviteThread = Record.one("Thread");
-
-    fetchDeferred = new Deferred();
-    fetchParams = {};
-    fetchReadonly = true;
-    fetchSilent = true;
-
-    async fetchData(params, { readonly = true, silent = true } = {}) {
-        Object.assign(this.fetchParams, params);
-        this.fetchReadonly = this.fetchReadonly && readonly;
-        this.fetchSilent = this.fetchSilent && silent;
-        const fetchDeferred = this.fetchDeferred;
-        this._fetchDataDebounced();
-        return fetchDeferred;
-    }
-
-    async _fetchDataDebounced() {
-        const fetchDeferred = this.fetchDeferred;
-        this.fetchParams.context = {
-            ...user.context,
-            ...this.fetchParams.context,
-        };
-        rpc(this.fetchReadonly ? "/mail/data" : "/mail/action", this.fetchParams, {
-            silent: this.fetchSilent,
-        }).then(
-            (data) => {
-                const recordsByModel = this.insert(data, { html: true });
-                fetchDeferred.resolve(recordsByModel);
-            },
-            (error) => fetchDeferred.reject(error)
-        );
-        this.fetchDeferred = new Deferred();
-        this.fetchParams = {};
-        this.fetchReadonly = true;
-        this.fetchSilent = true;
-    }
-
-    /**
-     * @template T
-     * @param {T} dataByModelName
-     * @param {Object} [options={}]
-     * @returns {{ [K in keyof T]: T[K] extends Array ? import("models").Models[K][] : import("models").Models[K] }}
-     */
-    insert(dataByModelName, options = {}) {
-        const store = this;
-        return Record.MAKE_UPDATE(function storeInsert() {
-            const res = {};
-            for (const [modelName, data] of Object.entries(dataByModelName)) {
-                res[modelName] = store[modelName].insert(data, options);
-            }
-            return res;
-        });
-    }
 
     async startMeeting() {
         const thread = await this.env.services["discuss.core.common"].createGroupChat({
