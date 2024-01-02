@@ -3082,7 +3082,7 @@ class AccountMove(models.Model):
         invoices = self
         current_invoice = self
         passed_file_data_list = []
-        for file_data in list(filter(lambda d: d.get('attachment'), file_data_list)):
+        for file_data in file_data_list:
 
             # The invoice has already been decoded by an embedded file.
             if attachments_by_invoice.get(file_data['attachment']):

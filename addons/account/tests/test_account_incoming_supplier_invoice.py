@@ -77,6 +77,7 @@ class TestAccountIncomingSupplierInvoice(AccountTestInvoicingCommon):
 
     def _assert_extend_with_attachments(self, expected_values, new=False):
         attachments = self.env['ir.attachment'].browse([x.id for x in expected_values])
+        nb_moves_before = self.env['account.move'].search_count([('company_id', '=', self.env.company.id)])
         results = self.env['account.move']\
             .with_context(default_move_type='out_invoice', default_journal_id=self.company_data['default_journal_sale'].id)\
             ._extend_with_attachments(attachments, new=new)
@@ -91,6 +92,9 @@ class TestAccountIncomingSupplierInvoice(AccountTestInvoicingCommon):
             current_values[attachment.name] = invoice_number
 
         self.assertEqual(current_values, {k.name: v for k, v in expected_values.items()})
+
+        nb_moves_after = self.env['account.move'].search_count([('company_id', '=', self.env.company.id)])
+        self.assertEqual(nb_moves_before + invoice_number, nb_moves_after)
 
     def test_supplier_invoice_mailed_from_supplier(self):
         message_parsed = {
@@ -194,5 +198,7 @@ class TestAccountIncomingSupplierInvoice(AccountTestInvoicingCommon):
         with self.with_success_decoder(omit={pdf1.name}):
             self._assert_extend_with_attachments({pdf1: 1, pdf2: 2}, new=True)
         with self.with_success_decoder(), self.with_simulated_embedded_xml(pdf1):
+            self._assert_extend_with_attachments({pdf1: 1}, new=False)
+            self._assert_extend_with_attachments({pdf1: 1}, new=True)
             self._assert_extend_with_attachments({pdf1: 1, pdf2: 1}, new=False)
             self._assert_extend_with_attachments({pdf1: 1, pdf2: 2}, new=True)

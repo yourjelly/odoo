@@ -46,7 +46,6 @@ class IrAttachment(models.Model):
                 'attachment': self,
                 'filename': filename,
                 'content': content,
-                'attachment': self,
                 'xml_tree': xml_tree,
                 'sort_weight': 10,
                 'type': 'xml',
