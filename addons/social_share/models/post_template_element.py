@@ -18,6 +18,28 @@ render_class_from_type = {
     },
 }
 
+text_option_fields= (
+    'text_align',
+    'text_align_vert',
+    'text_font_size',
+    'text_font',
+    'text_color',
+)
+
+reset_dict_from_type = {
+    'image': {
+        'static': {field: False for field in ('field_path', 'text', 'color', *text_option_fields)}
+    },
+    'shape': {
+        'static': {field: False for field in ('field_path', 'text', 'image', *text_option_fields)}
+    },
+    'text': {
+        'static': {field: False for field in ('field_path', 'color', 'image', 'shape')},
+        'field': {field: False for field in ('text', 'color', 'image', 'shape')}
+    },
+}
+
+
 class ImageRenderElement(models.Model):
     _name = 'social.share.image.render.element'
     _description = 'Social Share Template Layer'
@@ -83,30 +105,14 @@ class ImageRenderElement(models.Model):
             if not element._get_renderer_class():
                 raise exceptions.ValidationError(_('%(dynamic_type)s %(output_type)s cannot be rendered', dynamic_type=self.value_type, output_type=self.type))
 
-    @api.onchange('type')
+    @api.onchange('type', 'value_type')
     def _onchange_type(self):
         for element in self:
-            if element._origin.type == 'text':
-                element.write({'text': False} | {field: False for field in element._get_text_option_fields()})
+            if reset_dict_from_type.get(element.type, {}).get(element.value_type):
+                element.write(reset_dict_from_type[element.type][element.value_type])
 
     def _get_renderer(self, record=None):
         return self._get_renderer_class()(self, record=record)
 
     def _get_renderer_class(self):
         return render_class_from_type.get(self.type, {}).get(self.value_type)
-
-    def _get_text_option_fields(self):
-        return {
-            'text_align',
-            'text_align_vert',
-            'text_font_size',
-            'text_font',
-            'text_color',
-        }
-
-    def _get_position(self):
-        return (self.x_pos, self.y_pos)
-    def _get_size(self):
-        return (self.x_size, self.y_size)
-    def _get_bounds(self):
-        return ((self.x_pos, self.y_pos), (self.x_pos + self.x_size, self.y_pos + self.y_size))

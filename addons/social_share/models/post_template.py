@@ -55,11 +55,13 @@ class PostTemplate(models.Model):
         for post in self:
             post.image = base64.encodebytes(post._generate_image_bytes())
 
-    def _generate_image_bytes(self, record=None, replacement_layers=None):
+    def _generate_image_bytes(self, record=None, replacement_values=None):
         canvas_image = Image.new('RGBA', TEMPLATE_DIMENSIONS, color=(0, 0, 0))
         for layer in self.layers:
-            if replacement_layers and layer.role and replacement_layers.get(layer.role):
-                layer = replacement_layers[layer.role]
+            if replacement_values and layer.role and replacement_values.get(layer.role):
+                layer = replacement_values[layer.role]
+                sdkf;lssf
+                # build the renderer with replaced values
             record = record or (self.env[self.model_id.model] if self.model_id else None)
             layer_image = layer._get_renderer(record=record).render_image()
             canvas_image.paste(layer_image, layer._get_position(), layer_image)

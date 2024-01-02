@@ -69,13 +69,13 @@ class TextRenderer(Renderer):
 class UserTextRenderer(TextRenderer):
 
     def get_text(self):
-        return self.text
+        return self.text or ''
 
 
 class FieldTextRenderer(TextRenderer):
 
     def _get_proxy_fields(self):
-        return super()._get_proxy_fields + ['_record']
+        return super()._get_proxy_fields() + ['_record']
 
     def __init__(self, template_element, record=False):
         self._record = record

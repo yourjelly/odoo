@@ -11,6 +11,8 @@ SUPPORTED_ROLES = (
     'button', 'image-1', 'image-2'
 )
 
+VALUE_TYPES = [('static', 'Text'), ('field', 'Field')]
+
 class Post(models.Model):
     """
     This is used to send customized share links to event participants
@@ -18,9 +20,6 @@ class Post(models.Model):
     """
     _name = 'social.share.post'
     _description = 'Social Share Campaign'
-
-    def _get_text_types_selection(self):
-        lambda self: self.env['social.share.image.render.element']._get_text_types()
 
     name = fields.Char(required=True)
     active = fields.Boolean(default=True)
@@ -43,32 +42,24 @@ class Post(models.Model):
     thanks_redirection = fields.Char(string='Redirection URL')
     user_id = fields.Many2one('res.users', string='Responsible', default=lambda self: self.env.user)
 
-    custom_element_ids = fields.One2many(
-        'social.share.image.render.element',
-        inverse_name='post_id',
-        compute='_compute_custom_element_ids',
-        readonly=False,
-        store=True,
-    )
+    header_type = fields.Selection(selection=VALUE_TYPES)
+    subheader_type = fields.Selection(selection=VALUE_TYPES)
+    section_1_type = fields.Selection(selection=VALUE_TYPES)
+    subsection_1_type = fields.Selection(selection=VALUE_TYPES)
+    subsection_2_type = fields.Selection(selection=VALUE_TYPES)
+
+    header_val = fields.Text()
+    subheader_val = fields.Text()
+    section_1_val = fields.Text()
+    subsection_1_val = fields.Text()
+    subsection_2_val = fields.Text()
+
+    background_val = fields.Image()
+    button_val = fields.Text()
+    image_1_val = fields.Image()
+    image_2_val = fields.Image()
 
     image = fields.Image(compute='_compute_image')
-
-    @api.depends('share_template_variant_id')
-    def _compute_custom_element_ids(self):
-        for post in self:
-            # identify changes
-            template_custom_layers = post.share_template_variant_id.layers.filtered(lambda layer: layer.role in SUPPORTED_ROLES)
-            current_custom_layers = post.custom_element_ids
-            template_layer_roles = set(template_custom_layers.mapped('role'))
-            current_layer_roles = set(current_custom_layers.mapped('role'))
-            new_layer_ids = template_custom_layers.filtered(lambda layer: layer.role not in current_layer_roles)
-            removed_layer_ids = current_custom_layers.filtered(lambda layer: layer.role not in template_layer_roles)
-
-            # copy individually to copy translations too
-            commands = [Command.unlink(id) for id in removed_layer_ids.ids]
-            commands += [Command.create(layer.copy_data({'template_id': False})[0]) for layer in new_layer_ids]
-
-            post.write({'custom_element_ids': commands})
 
     @api.depends('custom_element_ids.image')
     def _compute_image(self):
@@ -93,8 +84,63 @@ class Post(models.Model):
     def _generate_image_bytes(self, record=None):
         return self.share_template_variant_id._generate_image_bytes(
             record=record,
-            replacement_layers=self.custom_element_ids.grouped('role')
+            replacement_values=self._get_replacement_values()
         )
+
+    def _get_replacement_values(self):
+        return {
+            'background': {
+                'type': 'image',
+                'value_type': 'static',
+                'image': self.background_val,
+            },
+            'header': {
+                'type': 'text',
+                'value_type': self.header_type,
+                'field_path': self.header_val,
+                'text': self.header_val,
+            },
+            'subheader': {
+                'type': 'text',
+                'value_type': self.subheader_type,
+                'field_path': self.subheader_val,
+                'text': self.subheader_val,
+            },
+            'section-1': {
+                'type': 'text',
+                'value_type': self.section_1_type,
+                'field_path': self.section_1_val,
+                'text': self.section_1_val,
+            },
+            'subsection-1': {
+                'type': 'text',
+                'value_type': self.subsection_1_type,
+                'field_path': self.subsection_1_val,
+                'text': self.subsection_1_val,
+            },
+            'subsection-2': {
+                'type': 'text',
+                'value_type': self.subsection_2_type,
+                'field_path': self.subsection_2_val,
+                'text': self.subsection_2_val,
+            },
+            'button': {
+                'type': 'text',
+                'value_type': 'static',
+                'text': self.button_val,
+            },
+            'image-1': {
+                'type': 'image',
+                'value_type': 'static',
+                'image': self.image_1_val,
+            },
+            'image-2': {
+                'type': 'image',
+                'value_type': 'static',
+                'image': self.image_2_val,
+            },
+        }
+
 
     def _inverse_custom_elements(self):
         pass

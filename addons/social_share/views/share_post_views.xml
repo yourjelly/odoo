@@ -40,12 +40,17 @@
                         <page name="Post Image">
                             <group>
                             <group>
-                            <field name="custom_element_ids" nolabel="1" colspan="2">
+                            <!--hack to force onchange to pass values without having to commit changes to db-->
+                            <field name="custom_element_ids" nolabel="1" colspan="2" invisible="1" force_save="1">
                                 <tree editable="true" create="false" delete="false">
                                     <field name="role" readonly="true" force_save="true"/>
                                     <field name="type" readonly="true" optional="hide" force_save="true"/>
                                     <field name="value_type"/>
-                                    <field name="field_path" invisible="type != 'text' or value_type != 'field'" optional="show" force_save="true"/>
+                                    <field name="field_path"
+                                    widget="DynamicModelFieldSelectorChar"
+                                    required="true" readonly="not model"
+                                    invisible="type != 'text' or value_type != 'field'"
+                                    options="{'model': 'model', 'follow_relations': False}"/>
                                     <field name="text" invisible="type != 'text' or value_type != 'static'" optional="show" force_save="true"/>
                                     <field name="text_color" invisible="type != 'text'" optional="show" widget="color" force_save="true"/>
                                     <field name="image" invisible="type != 'image' or value_type != 'static'" optional="show" widget="image" force_save="true"/>
@@ -61,6 +66,7 @@
                                     <field name="text_align_vert" column_invisible="true" force_save="true"/>
                                     <field name="text_font_size" column_invisible="true" force_save="true"/>
                                     <field name="text_font" column_invisible="true" force_save="true"/>
+                                    <field name="model" column_invisible="true"/>
                                 </tree>
                             </field>
 

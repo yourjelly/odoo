@@ -1,21 +1,22 @@
 
 class Renderer:
+    def __init__(self, *args, pos=(0, 0), size=(0, 0), **kwargs):
+        self.pos = pos
+        self.size = size
+        super().__init__()
+
     @staticmethod
-    def _get_proxy_fields():
-        return ['_template_element']
+    def from_template_element(element, replaced_values=None):
+        vals = {
+            'pos': (element.x_pos, element.y_pos),
+            'size': (element.x_size, element.y_size),
+        }
+        vals.update(replaced_values)
+        return Renderer(**vals)
 
-    def __init__(self, template_element, *args, **kwargs):
-        self._template_element = template_element
 
-    def __getattr__(self, attr):
-        if attr in self._get_proxy_fields():
-            return super().__getattr__(attr)
-        return getattr(self._template_element, attr)
-
-    def __setattr__(self, key, val):
-        if key in self._get_proxy_fields():
-            return super().__setattr__(key, val)
-        setattr(self._template_element, key, val)
+    def _get_bounds(self):
+        return (self.pos, tuple(pos + size for pos, size in zip(self.pos, self.size)))
 
     def render_image(self):
         return b''
