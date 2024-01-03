@@ -23,8 +23,15 @@ registry.category("web_tour.tours").add('shop_mail', {
     },
     {
         content: "click send by email",
-        trigger: '.btn[name="action_quotation_send"]',
+        trigger: '.btn[name="action_send_email"]',
         extra_trigger: '.o_statusbar_status .o_arrow_button_current:contains("Sales Order")',
+    },
+    {
+        trigger: ".modal-footer button[name='document_layout_save']",
+        extra_trigger: ".modal-footer button[name='document_layout_save']",
+        content: "let's continue",
+        position: "bottom",
+        skip_trigger: ".modal-footer button[name='action_send_mail']",
     },
     {
         content: "Open recipients dropdown",

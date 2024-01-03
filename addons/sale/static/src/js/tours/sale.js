@@ -75,10 +75,18 @@ registry.category("web_tour.tours").add("sale_tour", {
     },
     ...stepUtils.statusbarButtonsSteps("Send by Email", markup(_t("<b>Send the quote</b> to yourself and check what the customer will receive.")), ".o_statusbar_buttons button[name='action_quotation_send']"),
     {
+        trigger: ".modal-footer button[name='document_layout_save']",
+        extra_trigger: ".modal-footer button[name='document_layout_save']",
+        content: _t("let's continue"),
+        position: "bottom",
+        skip_trigger: ".modal-footer button[name='action_send_mail']",
+    },
+    {
         trigger: ".modal-footer button[name='action_send_mail']",
         extra_trigger: ".modal-footer button[name='action_send_mail']",
-        content: _t("Let's send the quote."),
+        content: _t("Go ahead and send the quotation."),
         position: "bottom",
+        run: "click",
     },
     {
         trigger: "body:not(.modal-open)",

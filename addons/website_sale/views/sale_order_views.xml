@@ -59,7 +59,7 @@
                     invisible="not is_abandoned_cart or cart_recovery_email_sent"/>
             </button>
             <button name="action_send_email" id="send_by_email" position="after">
-                <button name="action_send_email" id="send_by_email_bis" string="Send by Email" type="object"
+                <button name="action_quotation_send" id="send_by_email_bis" string="Send by Email" type="object"
                     invisible="not is_abandoned_cart or cart_recovery_email_sent or state != 'draft'"/>
             </button>
         </field>
