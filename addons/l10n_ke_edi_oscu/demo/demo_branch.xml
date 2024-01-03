@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="demo_seq_invoice" model="ir.sequence">
+        <field name="name">OSCU Branch 00: Customer Invoice Number</field>
+        <field name="code">l10n.ke.oscu.invoice.number.branch.00</field>
+        <field name="implementation">no_gap</field>
+        <field name="company_id" ref="l10n_ke.demo_company_ke"/>
+    </record>
+    <record id="demo_seq_bill" model="ir.sequence">
+        <field name="name">OSCU Branch 00: Vendor Bill Number</field>
+        <field name="code">l10n.ke.oscu.bill.number.branch.00</field>
+        <field name="implementation">no_gap</field>
+        <field name="company_id" ref="l10n_ke.demo_company_ke"/>
+    </record>
+    <record id="demo_seq_stock" model="ir.sequence">
+        <field name="name"> OSCU Branch 00: Stock IO Number aa</field>
+        <field name="code">l10n.ke.oscu.stock.io.number.branch.00</field>
+        <field name="implementation">no_gap</field>
+        <field name="company_id" ref="l10n_ke.demo_company_ke"/>
+    </record>
+    <record id="l10n_ke.partner_demo_company_ke" model="res.partner">
+        <field name="vat">P052112956W</field>
+    </record>
+    <record id="l10n_ke.demo_company_ke" model="res.company">
+        <field name="l10n_ke_oscu_branch_code">00</field>
+        <field name="l10n_ke_oscu_seq_stock_io_id" ref="demo_seq_stock"/>
+        <field name="l10n_ke_oscu_seq_invoice_id" ref="demo_seq_invoice"/>
+        <field name="l10n_ke_oscu_seq_vendor_bill_id" ref="demo_seq_bill"/>
+    </record>
+</odoo>

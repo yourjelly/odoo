@@ -12,7 +12,7 @@
                             <group>
                                 <field name="l10n_ke_oscu_branch_code"/>
                                 <field name="l10n_ke_oscu_serial_number"/>
-                                <field name="l10n_ke_oscu_cmc_key"/>
+                                <field name="l10n_ke_oscu_cmc_key" password="True"/>
                                 <field name="l10n_ke_insurance_code"/>
                                 <field name="l10n_ke_insurance_name"/>
                                 <field name="l10n_ke_insurance_rate"/>
