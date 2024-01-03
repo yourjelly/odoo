@@ -66,23 +66,23 @@
                                 <t t-elif="o.move_type == 'out_refund'"><strong>Credit Note Date:</strong></t>
                                 <t t-elif="o.move_type == 'out_receipt'"><strong>Receipt Date:</strong></t>
                                 <t t-else=""><strong>Date:</strong></t>
-                                <p class="m-0" t-field="o.invoice_date"/>
+                                <p class="m-0" t-field="o.invoice_date" style="word-wrap: break-word;"/>
                             </div>
                             <div class="col-auto col-3 mw-100 mb-2" t-if="o.invoice_date_due and o.move_type == 'out_invoice' and o.state == 'posted'" name="due_date">
                                 <strong>Due Date:</strong>
-                                <p class="m-0" t-field="o.invoice_date_due"/>
+                                <p class="m-0" t-field="o.invoice_date_due" style="word-wrap: break-word;"/>
                             </div>
                             <div class="col-auto col-3 mw-100 mb-2" t-if="o.invoice_origin" name="origin">
                                 <strong>Source:</strong>
-                                <p class="m-0" t-field="o.invoice_origin"/>
+                                <p class="m-0" t-field="o.invoice_origin" style="word-wrap: break-word;"/>
                             </div>
                             <div class="col-auto col-3 mw-100 mb-2" t-if="o.partner_id.ref" name="customer_code">
                                 <strong>Customer Code:</strong>
-                                <p class="m-0" t-field="o.partner_id.ref"/>
+                                <p class="m-0" t-field="o.partner_id.ref" style="word-wrap: break-word;"/>
                             </div>
                             <div class="col-auto col-3 mw-100 mb-2" t-if="o.ref" name="reference">
                                 <strong>Reference:</strong>
-                                <p class="m-0" t-field="o.ref"/>
+                                <p class="m-0" t-field="o.ref" style="word-wrap: break-word;"/>
                             </div>
                         </div>
 
@@ -283,7 +283,7 @@
                     <span t-esc="tax_totals['formatted_rounding_amount']"/>
                 </td>
             </t>
-            
+
             <!--Total amount with all taxes-->
             <tr class="border-black o_total">
                 <td><strong>Total</strong></td>
