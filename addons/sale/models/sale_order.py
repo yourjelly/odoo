@@ -852,6 +852,15 @@ class SaleOrder(models.Model):
             'context': ctx,
         }
 
+    def action_send_email(self):
+        self.ensure_one()
+        report_action = self.action_quotation_send()
+
+        if self.env.is_admin() and not self.env.company.external_report_layout_id and not self.env.context.get('discard_logo_check'):
+            return self.env['ir.actions.report']._action_configure_external_report_layout(report_action)
+
+        return report_action
+
     def _find_mail_template(self):
         """ Get the appropriate mail template for the current sales order based on its state.
 
