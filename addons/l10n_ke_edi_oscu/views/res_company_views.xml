@@ -30,6 +30,9 @@
                                 <button name="action_l10n_ke_get_stock_moves" string="Get Stock Moves List" type="object"/>
                                 <div class="cell"/>
                                 <button name="action_l10n_ke_send_insurance" string="Send Insurance" type="object"/>
+                                <field name="l10n_ke_oscu_seq_invoice_id"/>
+                                <field name="l10n_ke_oscu_seq_vendor_bill_id"/>
+                                <field name="l10n_ke_oscu_seq_stock_io_id"/>
                             </group>
                         </group>
                     </page>

@@ -28,7 +28,7 @@ class L10nKeEdiCustomsImport(models.Model):
             "hsCd": data['hsCd'] + '00',
             "itemClsCd": "30101500", #self.product_id.unspsc_code_id.code,
             "itemCd": self.product_id.l10n_ke_item_code,
-            "imptItemSttsCd": "1", #What is this
+            "imptItemSttsCd": data['imptItemsttsCd'], #What is this
             "remark": "",
             "modrNm": "Test",
             "modrId": "Test",
@@ -36,3 +36,15 @@ class L10nKeEdiCustomsImport(models.Model):
         print(content)
         response = session.post(URL + 'updateImportItem', json=content)
         print(response.json())
+
+    def action_create_product(self):
+        data = json.loads(self.name.replace("\'", "\"")) #TODO: avoid this hack anyways (maybe by putting normal fields instead)
+        create_vals = {
+            'name':                       data['itemNm'],
+            'l10n_ke_packaging_quantity': data['pkg'],
+            'l10n_ke_packaging_unit_id':  self.env['l10n_ke_edi_oscu.code'].search([('code_type', '=', '17'), ('code', '=', data['pkgUnitCd'])], limit=1).id,
+            'l10n_ke_quantity_unit_id':   self.env['l10n_ke_edi_oscu.code'].search([('code_type', '=', '10'), ('code', '=', data['qtyUnitCd'])], limit=1).id,
+            'standard_price':             data['invcFcurExcrt'],
+            'l10n_ke_origin_country_id': self.env['res.country'].search([('code', '=', data['orgnNatCd'])], limit=1).id,
+        }
+        self.product_id = self.env['product.product'].create(create_vals)

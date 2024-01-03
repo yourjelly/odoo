@@ -45,32 +45,18 @@ class ResCompany(models.Model):
                 'bhfId':     branch_code,                        # Branch ID
                 'dvcSrlNo':  company.l10n_ke_oscu_serial_number, # Device serial number
             }
+            print(content)
             response = session.post(DEVICE_INIT_URL, json=content)
+            print(response.content)
             response_content = response.json()
             print(f"\n\n response_content:\n{response_content}\n\n")
             if response.json()['resultCd'] != '000':
-                raise ValidationError('Request Error Code: %s, Message: %s', response_content['resultCd'], response_content['resultMsg'])
+                raise ValidationError('Request Error Code: %s, Message: %s' % (response_content['resultCd'], response_content['resultMsg']))
             if response_content['resultCd'] == '000':
                 info = response_content['data']['info']
                 company.l10n_ke_oscu_cmc_key = info['cmcKey']
                 # Create OSCU sequences on the company
-                sequence_name_and_code = [
-                    (f'OSCU Branch {branch_code}: Customer Invoice Number', f'l10n.ke.oscu.invoice.{branch_code}'),
-                    (f'OSCU Branch {branch_code}: Vendor Bill Number', f'l10n.ke.oscu.bill.{branch_code}'),
-                    (f'OSCU Branch {branch_code}: Stock IO Number', f'l10n.ke.oscu.stock.io.{branch_code}'),
-                ]
-                (
-                    company.l10n_ke_oscu_seq_invoice_id,
-                    company.l10n_ke_oscu_seq_vendor_bill_id,
-                    company.l10n_ke_oscu_seq_stock_io_id,
-                ) = self.env['ir.sequence'].create([{
-                        'name': name,
-                        'code': code,
-                        'implementation': 'no_gap',
-                        'company_id': company.id,
-                } for name, code in sequence_name_and_code])
-                # Activate crons
-                self.env.ref("l10n_ke_edi_oscu.fetch_kra_codes_cron").active = True
+
 
     def action_l10n_ke_get_customs_imports(self):
         session = self.l10n_ke_oscu_get_session()
@@ -92,11 +78,12 @@ class ResCompany(models.Model):
             'tin': self.vat,
             'bhfId': self.l10n_ke_oscu_branch_code,
             'cmcKey': self.l10n_ke_oscu_cmc_key,
-            'lastReqDt': '20180101000000',
+            'lastReqDt': '20180301000000',
         }
         #cls_url = URL + something
+        print(content)
         response = session.post(URL + 'selectItemList', json=content)
-        raise UserError(response.content)
+        print(response.content)
 
     def action_l10n_ke_get_stock_moves(self):
         session = self.l10n_ke_oscu_get_session()
@@ -104,7 +91,7 @@ class ResCompany(models.Model):
             'tin': self.vat,
             'bhfId': self.l10n_ke_oscu_branch_code,
             'cmcKey': self.l10n_ke_oscu_cmc_key,
-            'lastReqDt': '20180101000000',
+            'lastReqDt': '20180301000000',
         }
         #cls_url = URL + something
         response = session.post(URL + 'selectStockMoveList', json=content)
@@ -126,7 +113,7 @@ class ResCompany(models.Model):
             "regrNm": "Test", "modrId": "Test", "modrNm": "Test"
         }
         response = session.post(URL + 'saveBhfUser', json=content)
-        print(response)
+        print(response.content)
 
     def action_l10n_ke_send_insurance(self):
         session = self.l10n_ke_oscu_get_session()
@@ -144,6 +131,7 @@ class ResCompany(models.Model):
             "modrId": "Test",
             "modrNm": "Test",
         }
+        print(content)
         response = session.post(URL + 'saveBhfInsurance', json=content)
         print(response.content)
 
@@ -157,6 +145,7 @@ class ResCompany(models.Model):
          'lastReqDt': '20180101000000',
         }
         response = session.post(URL + 'selectBhfList', json=content)
+        print(response.content)
         data = response.json()['data']
         for bhf in data['bhfList']:
             if bhf['bhfId'] != self.l10n_ke_oscu_branch_code:

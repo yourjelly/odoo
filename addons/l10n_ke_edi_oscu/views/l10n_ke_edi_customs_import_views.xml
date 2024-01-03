@@ -26,6 +26,7 @@
                     </group>
                     <group>
                         <button name="action_send_match" string="Send To KRA" type="object"/>
+                        <button name="action_create_product" string="Create and Assign product" type="object"/>
                     </group>
                 </sheet>
             </form>

@@ -116,6 +116,7 @@ class StockMove(models.Model):
             })
             session = self.company_id.l10n_ke_oscu_get_session()
             response = session.post(SAVE_STOCK_IO_URL, json=content)
+            print(response.content)
             if response.json()['resultCd'] == '000':
                 move.l10n_ke_oscu_sar_number = content['sarNo']
                 sequence.next_by_id()

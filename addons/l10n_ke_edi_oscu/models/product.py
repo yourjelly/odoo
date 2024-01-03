@@ -279,7 +279,6 @@ class ProductProduct(models.Model):
             ('code', '=', product_dict['pkgUnitCd']), ('code_type', '=', '17'),
         ], limit=1)
         unspsc_code = self.env['product.unspsc.code'].search([('code', '=', product_dict['itemClsCd'])], limit=1)
-        import pdb; pdb.set_trace()
         price_ksh = product_dict['dftPrc'] if 'dftPrc' in product_dict else product_dict.get('prc', 0) # TODO currency conversion
         taxes = self.env['account.tax'].search([('l10n_ke_tax_type.code', '=', product_dict['taxTyCd'])], order="sequence")
         taxes_to_use = self.env['account.tax']
@@ -356,6 +355,8 @@ class ProductCode(models.Model):
 
     _inherit = 'product.unspsc.code'
 
+    l10n_ke_special = fields.Boolean()
+
     def _cron_l10n_ke_oscu_get_codes_from_device(self):
         """ Automatically fetch and create UNSPSC codes from the OSCU if they don't already exist """
         company = self.env['res.company'].search([
@@ -384,6 +385,7 @@ class ProductCode(models.Model):
                     'name': code_dict['itemClsNm'],
                     'code': code_dict['itemClsCd'],
                     'applies_to': 'product',
+                    'l10n_ke_special': True,
                 } for code_dict in cls_list if code_dict['itemClsCd'] not in existing_codes])
 
                 _logger.info("%i UNSPSC codes fetched from the OSCU, %i UNSPSC codes created", len(cls_list), len(new_codes))
