@@ -103,7 +103,7 @@ class ProductProduct(models.Model):
         help="Used by the OSCU to determine the type of the product",
     )
     l10n_ke_is_insurance_applicable = fields.Boolean(string='Insurance Applicable')
-    l10n_ke_item_code = fields.Char(compute='_compute_l10n_ke_item_code')
+    l10n_ke_item_code = fields.Char(compute='_compute_l10n_ke_item_code', store=True)
 
     @api.depends('taxes_id.l10n_ke_tax_type')
     def _compute_l10n_ke_tax_type_code(self):
@@ -148,7 +148,7 @@ class ProductProduct(models.Model):
             item_code_prefix = ''.join(code_fields)
             product.l10n_ke_item_code = item_code_prefix + \
                 ('0'*20)[:-len(item_code_prefix)-len(str(product.id))] + \
-                str(self.id)
+                str(product.id)
 
     def _l10n_ke_oscu_save_item_content(self):
         """ When saving an item to the OSCU, these are the required fields. """
@@ -181,6 +181,7 @@ class ProductProduct(models.Model):
         last_request_date = self.env['ir.config_parameter'].get_param('l10n_ke_edi_oscu.last_fetch_items_request_date', '20180101000000')
         response = session.post(FETCH_ITEM_URL, json={'lastReqDt': last_request_date})
         response_content = response.json()
+        print(response_content)
 
         if response_content['resultCd'] == '001':
             _logger.info("No new items fetched from the OSCU.")
@@ -194,6 +195,7 @@ class ProductProduct(models.Model):
         for product in self:
             content = product._l10n_ke_oscu_save_item_content()
             response = session.post(SAVE_ITEM_URL, json=content)
+            print(response.content)
             if response.ok:
                 product.l10n_ke_item_code = content['itemCd']
                 self.env.cr.commit()
@@ -277,6 +279,7 @@ class ProductProduct(models.Model):
             ('code', '=', product_dict['pkgUnitCd']), ('code_type', '=', '17'),
         ], limit=1)
         unspsc_code = self.env['product.unspsc.code'].search([('code', '=', product_dict['itemClsCd'])], limit=1)
+        import pdb; pdb.set_trace()
         price_ksh = product_dict['dftPrc'] if 'dftPrc' in product_dict else product_dict.get('prc', 0) # TODO currency conversion
         taxes = self.env['account.tax'].search([('l10n_ke_tax_type.code', '=', product_dict['taxTyCd'])], order="sequence")
         taxes_to_use = self.env['account.tax']
@@ -366,6 +369,7 @@ class ProductCode(models.Model):
         # The API will return all codes added since this date
         last_request_date = self.env['ir.config_parameter'].get_param('l10n_ke_oscu.last_unspsc_code_request_date', '20180101000000')
         response = session.post(FETCH_UNSPSC_URL, json={'lastReqDt': last_request_date})
+        print(response.content)
         if (response_content := response.ok and response.json()):
             if response_content['resultCd'] == '001':
                 _logger.info("No new UNSPSC codes fetched from the OSCU.")
@@ -380,7 +384,7 @@ class ProductCode(models.Model):
                     'name': code_dict['itemClsNm'],
                     'code': code_dict['itemClsCd'],
                     'applies_to': 'product',
-                } for code_dict in cls_list if not code_dict['itemClsCd'] not in existing_codes])
+                } for code_dict in cls_list if code_dict['itemClsCd'] not in existing_codes])
 
                 _logger.info("%i UNSPSC codes fetched from the OSCU, %i UNSPSC codes created", len(cls_list), len(new_codes))
                 self.env['ir.config_parameter'].sudo().set_param('l10n_ke_oscu.last_unspsc_code_request_date', fields.Datetime.now().strftime('%Y%m%d%H%M%S'))

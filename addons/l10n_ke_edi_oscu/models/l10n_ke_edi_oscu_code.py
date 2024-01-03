@@ -59,6 +59,7 @@ class L10nKeOSCUCode(models.Model):
             '04': [('tax_rate', float)],
         }
         code_types_in_use = [num for num, _desc in self._fields['code_type'].selection]
+        print(json_content)
         for code_data in json_content['clsList']:
             code_type = code_data['cdCls']
             if code_type not in code_types_in_use:
@@ -122,6 +123,7 @@ class L10nKeOSCUCode(models.Model):
         # The API will return all codes added since this date
         last_request_date = self.env['ir.config_parameter'].get_param('l10n_ke_oscu.last_code_request_date', '20180101000000')
         response = session.post(CODE_SEARCH_URL, json={'lastReqDt': last_request_date})
+        print(response.content)
         if (response_content := response.ok and response.json()):
             if response_content['resultCd'] == '001':
                 _logger.info("No new KRA standard codes fetched from the OSCU.")

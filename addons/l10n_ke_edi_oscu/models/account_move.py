@@ -167,19 +167,21 @@ class AccountMove(models.Model):
             url_to_use = SALE_URL if move.move_type in ('out_invoice', 'out_refund') else PURCHASE_URL
             print("content:", content)
             response = session.post(url_to_use, json=content)
+            print(response.content)
             # if not response.ok:
             #     raise somekindofError()
             if response.json()['resultCd'] == '000':
                 response_data = response.json()['data']
-                move.update({
-                    'l10n_ke_oscu_receipt_number': response_data['curRcptNo'],
-                    'l10n_ke_oscu_invoice_number': content['invcNo'],
-                    'l10n_ke_oscu_signature': response_data['rcptSign'],
-                    'l10n_ke_oscu_datetime': datetime.strptime(response_data['sdcDateTime'], '%Y%m%d%H%M%S'),
-                    'l10n_ke_oscu_internal_data': response_data['intrlData'],
-                    'l10n_ke_oscu_serial_number': company.l10n_ke_oscu_serial_number,
-                    'l10n_ke_oscu_branch_code': company.l10n_ke_oscu_branch_code,
-                })
+                if move.is_sale_document():
+                    move.update({
+                        'l10n_ke_oscu_receipt_number': response_data['curRcptNo'],
+                        'l10n_ke_oscu_invoice_number': content['invcNo'],
+                        'l10n_ke_oscu_signature': response_data['rcptSign'],
+                        'l10n_ke_oscu_datetime': datetime.strptime(response_data['sdcDateTime'], '%Y%m%d%H%M%S'),
+                        'l10n_ke_oscu_internal_data': response_data['intrlData'],
+                        'l10n_ke_oscu_serial_number': company.l10n_ke_oscu_serial_number,
+                        'l10n_ke_oscu_branch_code': company.l10n_ke_oscu_branch_code,
+                    })
                 sequence.next_by_id()
             else:
                 raise UserError(response.content)
@@ -194,7 +196,8 @@ class AccountMove(models.Model):
         moves = self
         for company in companies:
             session = company.l10n_ke_oscu_get_session()
-            response = session.post(FETCH_URL, json={'lastReqDt': company.l10n_ke_oscu_last_fetch_purchase_date})
+            response = session.post(FETCH_URL, json={'lastReqDt': company.l10n_ke_oscu_last_fetch_purchase_date or '20180101000000'})
+            print(response.content)
             response_content = response.json()
             if response_content['resultCd'] == '001':
                 _logger.warning('There are no new vendor bills on the OSCU for %s.', company.name)

@@ -41,6 +41,7 @@ class L10nKeOSCUNotice(models.Model):
         # The API will return all codes added since this date
         last_request_date = self.env['ir.config_parameter'].get_param('l10n_ke_oscu.last_notice_request_date', '20180101000000')
         response = session.post(NOTICE_SEARCH_URL, json={'lastReqDt': last_request_date})
+        print(response.content)
         if (response_content := response.ok and response.json()):
             if response_content['resultCd'] == '001':
                 _logger.info("No new KRA notices fetched from the OSCU.")
