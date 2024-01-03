@@ -12,7 +12,7 @@ patch(ControlButtons.prototype, {
     _getEWalletRewards(order) {
         const claimableRewards = order.getClaimableRewards();
         return claimableRewards.filter((reward_line) => {
-            const coupon = this.pos.couponCache[reward_line.coupon_id];
+            const coupon = this.pos.models["loyalty.card"].get(reward_line.coupon_id);
             return (
                 coupon &&
                 reward_line.reward.program_id.program_type == "ewallet" &&
@@ -52,11 +52,14 @@ patch(ControlButtons.prototype, {
                 });
             }
             if (selectedProgram) {
-                this.pos.addProductFromUi(selectedProgram.trigger_product_ids[0], {
-                    price: -orderTotal,
-                    merge: false,
-                    eWalletGiftCardProgram: selectedProgram,
-                });
+                this.pos.addLineToCurrentOrder(
+                    {
+                        product_id: selectedProgram.trigger_product_ids[0],
+                        e_wallet_program_id: selectedProgram,
+                        price_unit: -orderTotal,
+                    },
+                    {}
+                );
             }
         } else if (eWalletRewards.length >= 1) {
             let eWalletReward = null;
@@ -142,7 +145,7 @@ patch(ControlButtons.prototype, {
      */
     async _applyReward(reward, coupon_id, potentialQty) {
         const order = this.pos.get_order();
-        order.disabledRewards.delete(reward.id);
+        order.uiState.disabledRewards.delete(reward.id);
 
         const args = {};
         if (reward.reward_type === "product" && reward.multi_product) {
@@ -164,7 +167,12 @@ patch(ControlButtons.prototype, {
             (reward.reward_type == "product" && reward.program_id.applies_on !== "both") ||
             (reward.program_id.applies_on == "both" && potentialQty)
         ) {
-            this.pos.addProductToCurrentOrder(args["product"] || reward.reward_product_ids[0]);
+            await this.pos.addLineToCurrentOrder(
+                {
+                    product_id: args["product"] || reward.reward_product_ids[0],
+                },
+                {}
+            );
             return true;
         } else {
             const result = order._applyReward(reward, coupon_id, args);

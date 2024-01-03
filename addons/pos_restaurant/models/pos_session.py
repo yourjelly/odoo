@@ -13,6 +13,7 @@ class PosSession(models.Model):
         params = super()._load_data_params(config_id)
 
         if self.config_id.module_pos_restaurant:
+            params['pos.order.line']['fields'].append('note')
             params.update({
                 'restaurant.floor': {
                     'domain': [('pos_config_ids', '=', self.config_id.id)],
@@ -27,6 +28,8 @@ class PosSession(models.Model):
                 }
             })
             params['account.fiscal.position']['domain'] = OR([params['account.fiscal.position']['domain'], [('id', '=', self.config_id.takeaway_fp_id.id)]])
+
+        params['pos.order.line']['fields'] += ['note']
 
         return params
 
