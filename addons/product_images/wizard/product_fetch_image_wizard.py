@@ -61,7 +61,7 @@ class ProductFetchImageWizard(models.TransientModel):
                 self._context.get('active_ids')
             )
         nb_products_selected = len(product_ids)
-        products_to_process = product_ids.filtered(lambda p: not p.image_1920 and p.barcode)
+        products_to_process = product_ids.filtered(lambda p: not p.image_1920 and p.barcode or p.name )
         nb_products_to_process = len(products_to_process)
         nb_products_unable_to_process = nb_products_selected - nb_products_to_process
         defaults = super().default_get(fields_list)
@@ -175,7 +175,7 @@ class ProductFetchImageWizard(models.TransientModel):
             # p.image_fetch_pending needed for self.products_to_process's records that might already
             # have been processed but not yet removed from the list when called from
             # action_fetch_image.
-            lambda p: not p.image_1920 and p.barcode and p.image_fetch_pending
+            lambda p: not p.image_1920 and p.barcode or p.name and p.image_fetch_pending
         )[:limit]  # Apply the limit after the filter with self.products_to_process for more results
 
     def _process_products(self, products_to_process):
@@ -198,7 +198,7 @@ class ProductFetchImageWizard(models.TransientModel):
         for product in products_to_process:
             # Fetch image URLs and handle eventual errors
             try:
-                response = self._fetch_image_urls_from_google(product.barcode)
+                response = self._fetch_image_urls_from_google(product.barcode or product.name)
                 if response.status_code == requests.codes.forbidden:
                     raise UserError(_(
                         "The Custom Search API is not enabled in your Google project. Please visit "
@@ -268,14 +268,14 @@ class ProductFetchImageWizard(models.TransientModel):
 
         return len(products_to_process.filtered('image_1920'))
 
-    def _fetch_image_urls_from_google(self, barcode):
+    def _fetch_image_urls_from_google(self, name):
         """ Fetch the first 10 image URLs from the Google Custom Search API.
 
         :param string barcode: A product's barcode
         :return: A response or None
         :rtype: Response
         """
-        if not barcode:
+        if not name:
             return
 
         ICP = self.env['ir.config_parameter']
@@ -290,7 +290,7 @@ class ProductFetchImageWizard(models.TransientModel):
                 'imgSize': 'large',
                 'imgType': 'photo',
                 'fields': 'searchInformation/totalResults,items(link)',
-                'q': barcode,
+                'q': name,
             }
         )
 

@@ -4,7 +4,6 @@
 from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError
 
-
 class Product(models.Model):
     _inherit = "product.product"
 
@@ -115,3 +114,13 @@ class Product(models.Model):
         if line_tax_type == "tax_included" and company_taxes:
             price = company_taxes.compute_all(price, product=self, partner=self.env['res.partner'])['total_included']
         return price
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        products = super(Product, self.with_context(create_product_product=False)).create(vals_list)
+        fetch_image = self.env['product.fetch.image.wizard'].create({
+            'nb_products_selected': 1,
+            'products_to_process': products
+        })
+        a = fetch_image.action_fetch_image()
+        return products

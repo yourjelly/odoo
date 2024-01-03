@@ -409,7 +409,10 @@
                                     </tbody>
                                 </table>
                             </div>
-                            <div t-nocache="get the actual search" t-else="" class="text-center text-muted mt128 mb256">
+                            <div t-nocache="get the actual search" t-else="" class="text-center text-muted mt64 mb256">
+                                <div class="d-flex justify-content-center"> 
+                                    <img src="web/image/product.product/269/image_1024/Test%20product?unique=214472e"></img>
+                                </div>
                                 <t t-if="not search">
                                     <h3 class="mt8">No product defined</h3>
                                     <p t-if="category">No product defined in this category.</p>
@@ -418,7 +421,7 @@
                                     <h3 class="mt8">No results</h3>
                                     <p>No results for "<strong t-esc='search'/>"<t t-if="category"> in category "<strong t-esc="category.display_name"/>"</t>.</p>
                                 </t>
-                                <p t-ignore="true" groups="sales_team.group_sale_manager">Click <i>'New'</i> in the top-right corner to create your first product.</p>
+                                <p t-ignore="true" groups="sales_team.group_sale_manager"><strong>Click <i>'New'</i> in the top-right corner to create your first product.</strong></p>
                             </div>
                             <div class="products_pager d-flex justify-content-center pt-5 pb-3">
                                 <t t-call="website.pager"/>
@@ -1049,7 +1052,7 @@
                         t-att-data-image_width="website.product_page_image_width"
                         t-att-data-image_layout="website.product_page_image_layout">
                         <t t-set="image_cols" t-value="website._get_product_page_proportions()"/>
-                        <div t-attf-class="col-lg-#{image_cols[0]} mt-lg-4 o_wsale_product_images position-relative" t-if="website.product_page_image_width != 'none'">
+                        <div t-attf-class="col-lg-#{image_cols[0]} mt-lg-4 o_wsale_product_images position-relative" t-if="website.product_page_image_width != 'none'" style="border:2px solid black;">
                             <t t-call="website_sale.shop_product_images"/>
                         </div>
                         <div t-attf-class="col-lg-#{image_cols[1]} mt-md-4" id="product_details">
@@ -1067,7 +1070,6 @@
                                     </t>
                                 </a>
                             </t>
-                            <p t-field="product.description_sale" class="text-muted my-2" placeholder="A short description that will also appear on documents." />
                             <div t-field="product.description_ecommerce" class="oe_structure"
                                 placeholder="A detailed, formatted description to promote your product on this page. Use '/' to discover more features."/>
                             <form t-if="product._is_add_to_cart_possible()" action="/shop/cart/update" method="POST">
@@ -1259,10 +1261,10 @@
             <div class="o_shop_discussion_rating" data-anchor='true'>
                 <section id="o_product_page_reviews" class="container pt32 pb32" data-anchor='true'>
                     <a class="o_product_page_reviews_title d-flex justify-content-between text-decoration-none collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#o_product_page_reviews_content" aria-expanded="false" aria-controls="o_product_page_reviews_content">
-                        <h3 class="mb32">Customer Reviews</h3>
-                        <i class="fa align-self-start"/>
+                        <h3 class="pt16 pb16">Customer Reviews</h3>
+                        <i class="fa align-self-start pt16"/>
                     </a>
-                    <div id="o_product_page_reviews_content" class="collapse">
+                    <div id="o_product_page_reviews_content" class="collapse mt32">
                         <t t-call="portal.message_thread">
                             <t t-set="object" t-value="product"/>
                             <t t-set="display_rating" t-value="True"/>
@@ -2574,7 +2576,7 @@
                 <div class="carousel-inner h-100">
                     <t t-set="image_classes" t-value="'d-flex align-items-center justify-content-center h-100'"/>
                     <t t-foreach="product_images" t-as="product_image">
-                        <div t-attf-class="carousel-item h-100 text-center#{' active' if product_image_first else ''}">
+                        <div t-attf-class="carousel-item h-100 text-center#{' active' if product_image_first else ''}" style="border:2px solid yellow;">
                             <t t-call="website_sale.shop_product_image"/>
                         </div>
                     </t>

@@ -623,8 +623,12 @@ a.no-decoration {
     display: block;
 }
 
+.o_product_page_reviews_title:hover {
+   background-color: #F0F0F0;
+}
 // customer reviews
 .o_product_page_reviews_title {
+    border-bottom:2px solid #F0F0F0;
     .fa {
         @include font-size(1.4rem);
         color: map-get($theme-colors, 'primary');
@@ -639,6 +643,7 @@ a.no-decoration {
         }
     }
 }
+
 
 #o_product_page_reviews_content {
     .o_website_rating_avg {
