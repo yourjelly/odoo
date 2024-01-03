@@ -269,6 +269,7 @@
                                             'cssReadonly': 'mass_mailing.iframe_css_assets_edit'
                                     }" readonly="state in ('sending', 'done')"/>
                                     <field name="is_body_empty" invisible="1"/>
+                                    <field name="body_html" invisible="1"/>
                                     <div class="o_view_nocontent oe_read_only" invisible="not is_body_empty or state in ('sending', 'done')">
                                         <div class="o_nocontent_help">
                                             <p class="o_view_nocontent_smiling_face">
@@ -461,7 +462,6 @@
                 </xpath>
                 <xpath expr="//notebook/page[@name='mail_body']" position="after">
                     <!-- test_01_mass_mailing_editor_tour -->
-                    <field name="body_html" invisible="1"/>
                     <page string="Mail Debug" name="mail_debug" groups="base.group_no_one">
                         <div class="position-relative">
                             <div class="mt-n2">
