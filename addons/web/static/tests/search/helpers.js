@@ -253,6 +253,7 @@ export async function editFavoriteName(el, name) {
     );
     input.value = name;
     await triggerEvent(input, null, "input");
+    await triggerEvent(input, null, "change");
 }
 
 export async function saveFavorite(el) {

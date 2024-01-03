@@ -542,6 +542,7 @@ odoo.define('web.favorite_menu_tests', function (require) {
                 model: 'partner',
                 res_id: 1,
                 View: FormView,
+                debug:1,
                 env: {
                     dataManager: {
                         create_filter(filter) {
@@ -576,7 +577,7 @@ odoo.define('web.favorite_menu_tests', function (require) {
             const filterNameInput = document.querySelector('.o_add_favorite input[type="text"]');
             assert.isVisible(filterNameInput, "should display an input field for the filter name");
 
-            await testUtils.fields.editInput(filterNameInput, 'Awesome Test Customer Filter');
+            await cpHelpers.editFavoriteName(document, 'Awesome Test Customer Filter')
             await testUtils.dom.click(document.querySelector('.o_add_favorite button.btn-primary'));
 
             form.destroy();
