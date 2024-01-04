@@ -224,9 +224,9 @@ export class Dropdown extends Component {
             return;
         }
 
-        // event.stopPropagation();
+        event.stopPropagation();
         if (this.state.isOpen && !this.hasParent) {
-            // this.state.close();
+            this.state.close();
         } else {
             this.state.open();
         }

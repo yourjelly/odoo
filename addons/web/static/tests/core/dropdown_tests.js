@@ -12,7 +12,7 @@ import { overlayService } from "@web/core/overlay/overlay_service";
 import { registry } from "@web/core/registry";
 import { uiService } from "@web/core/ui/ui_service";
 import { registerCleanup } from "@web/../tests/helpers/cleanup";
-import { /**clearRegistryWithCleanup,**/ makeTestEnv } from "../helpers/mock_env";
+import { makeTestEnv } from "../helpers/mock_env";
 import { makeFakeLocalizationService } from "../helpers/mock_services";
 import { mountInFixture } from "../helpers/mountInFixture";
 import {
@@ -1663,11 +1663,11 @@ QUnit.module("Components", ({ beforeEach }) => {
         assert.containsN(target, ".dropdown-menu", 2);
         await click(target, ".outside-dialog");
         assert.containsOnce(target, ".modal-dialog");
-        assert.containsN(target, ".dropdown-menu", 1);
+        assert.containsOnce(target, ".dropdown-menu");
 
-        await click(target, ".dialog-item");
+        await click(target, ".modal-dialog .btn-primary");
         assert.containsNone(target, ".modal-dialog");
-        assert.containsN(target, ".dropdown-menu", 1);
+        assert.containsOnce(target, ".dropdown-menu");
         await click(target, ".outside-parent");
         assert.containsNone(target, ".dropdown-menu");
     });

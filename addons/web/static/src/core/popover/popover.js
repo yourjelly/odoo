@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { Component, useEffect, onWillDestroy, useRef, onMounted } from "@odoo/owl";
+import { Component, onWillDestroy, useRef, onMounted } from "@odoo/owl";
 import { useForwardRefToParent } from "../utils/hooks";
 import { usePosition } from "@web/core/position/position_hook";
 import { addClassesToElement, mergeClasses } from "../utils/className";
@@ -86,7 +86,7 @@ export class Popover extends Component {
 
     static animationTime = 200;
     setup() {
-        this.menuRef = useRef("ref");
+        this.rootRef = useRef("ref");
         this.arrow = useRef("popoverArrow");
 
         if (this.props.setActiveElement) {
@@ -100,27 +100,9 @@ export class Popover extends Component {
             position: this.props.position,
         });
 
-        if (this.props.holdOnHover) {
-            const lock = () => this.position.lock();
-            const unlock = () => this.position.unlock();
-
-            useEffect(
-                () => {
-                    this.menuRef.el.addEventListener("pointerenter", lock);
-                    this.menuRef.el.addEventListener("pointerleave", unlock);
-
-                    return () => {
-                        this.menuRef.el.removeEventListener("pointerenter", lock);
-                        this.menuRef.el.removeEventListener("pointerleave", unlock);
-                    };
-                },
-                () => [this.menuRef.el]
-            );
-        }
-
         onMounted(() => {
             const id = uniqueId("popover-");
-            this.menuRef.el.setAttribute("data-popover-id", id);
+            this.rootRef.el.setAttribute("data-popover-id", id);
             this.props.target.setAttribute("data-popover-for", id);
         });
 

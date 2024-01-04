@@ -2,7 +2,7 @@
 
 import { useEffect, useEnv, EventBus, useChildSubEnv, onWillDestroy } from "@odoo/owl";
 import { localization } from "@web/core/l10n/localization";
-import { useBus } from "@web/core/utils/hooks";
+import { useBus, useService } from "@web/core/utils/hooks";
 
 export const ClosingMode = {
     None: "none",
@@ -49,7 +49,9 @@ class DropdownNestingState {
 
     shouldIgnoreChanges(other) {
         return (
-            other === this || [...this.children].some((child) => child.shouldIgnoreChanges(other))
+            other === this ||
+            other.activeEl !== this.activeEl ||
+            [...this.children].some((child) => child.shouldIgnoreChanges(other))
         );
     }
 
@@ -60,7 +62,7 @@ class DropdownNestingState {
         }
 
         if (other.isOpen && this.isOpen) {
-            // this.close();
+            this.close();
         }
     }
 }
@@ -76,6 +78,17 @@ export function useDropdownNesting(state) {
         parent: env[DROPDOWN],
         close: () => state.close(),
     });
+
+    // Set up UI active element related behavior ---------------------------
+    const uiService = useService("ui");
+    useEffect(
+        () => {
+            Promise.resolve().then(() => {
+                current.activeEl = uiService.activeElement;
+            });
+        },
+        () => []
+    );
 
     useChildSubEnv({ [DROPDOWN]: current });
     useBus(BUS, "state-changed", ({ detail: other }) => current.handleChange(other));

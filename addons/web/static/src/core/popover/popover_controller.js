@@ -84,7 +84,7 @@ export class PopoverController extends Component {
             !this.isInside(target) &&
             !this.isInOverlay(target)
         ) {
-            // this.props.close();
+            this.props.close();
         }
     }
 
