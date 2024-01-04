@@ -2544,6 +2544,12 @@ export class OdooEditor extends EventTarget {
             link.append(span);
         } else if (side === 'after') {
             link.after(span);
+            const selection = this.document.getSelection();
+            if (selection.rangeCount > 0) {
+                const range = selection.getRangeAt(0);
+                selection.removeAllRanges();
+                setSelection(range.startContainer, range.startOffset, range.endContainer, range.endOffset);
+            }
         }
         this.observerActive('_insertLinkZws');
         return span;
