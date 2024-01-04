@@ -7,7 +7,6 @@ import {
     ATTR_SYM,
     MANY_SYM,
     ONE_SYM,
-    OR_SYM,
     modelRegistry,
     _0,
     isCommand,
@@ -15,74 +14,70 @@ import {
     isOne,
     isRecord,
     isRelation,
+    VERSION,
 } from "./misc";
-
-/**
- * @typedef {Object} FieldDefinition
- * @property {boolean} [ATTR_SYM] true when this is an attribute, i.e. a non-relational field.
- * @property {boolean} [MANY_SYM] true when this is a many relation.
- * @property {boolean} [ONE_SYM] true when this is a one relation.
- * @property {any} [default] the default value of this attribute.
- * @property {boolean} [html] whether the attribute is an html field. Useful to automatically markup
- *   when the insert is trusted.
- * @property {string} [targetModel] model name of records contained in this relational field.
- * @property {() => any} [compute] if set the field is computed based on provided function.
- *   The `this` of function is the record, and the function is recalled whenever any field
- *   in models used by this compute function is changed. The return value is the new value of
- *   the field. On relational field, passing a (list of) record(s) or data work as expected.
- * @property {boolean} [eager=false] when field is computed, determines whether the computation
- *   of this field is eager or lazy. By default, fields are computed lazily, which means that
- *   they are computed when dependencies change AND when this field is being used. In eager mode,
- *   the field is immediately (re-)computed when dependencies changes, which matches the built-in
- *   behaviour of OWL reactive.
- * @property {string} [inverse] name of inverse relational field in targetModel.
- * @property {(r: Record) => void} [onAdd] hook that is called when relation is updated
- *   with a record being added. Callback param is record being added into relation.
- * @property {(r: Record) => void} [onDelete] hook that is called when relation is updated
- *   with a record being deleted. Callback param is record being deleted from relation.
- * @property {() => void} [onUpdate] hook that is called when field is updated.
- * @property {(r1: Record, r2: Record) => number} [sort] if defined, this many relational field is
- *   automatically sorted by this function.
- */
-/**
- * @typedef {Object} RecordField
- * @property {string} name the name of the field in the model definition
- * @property {boolean} [ATTR_SYM] true when this is an attribute, i.e. a non-relational field.
- * @property {boolean} [MANY_SYM] true when this is a many relation.
- * @property {boolean} [ONE_SYM] true when this is a one relation.
- * @property {any} [default] the default value of this attribute.
- * @property {() => void} [compute] for computed field, invoking this function (re-)computes the field.
- * @property {boolean} [computing] for computed field, determines whether the field is computing its value.
- * @property {() => void} [requestCompute] on computed field, calling this function makes a request to compute
- *   the field. This doesn't necessarily mean the field is immediately re-computed: during an update cycle, this
- *   is put in the compute FC_QUEUE and will be invoked at end.
- * @property {boolean} [computeOnNeed] on lazy-computed field, determines whether the field should be (re-)computed
- *   when it's needed (i.e. accessed). Eager computed fields are immediately re-computed at end of update cycle,
- *   whereas lazy computed fields wait extra for them being needed.
- * @property {boolean} [computeInNeed] on lazy computed-fields, determines whether this field is needed (i.e. accessed).
- * @property {() => void} [sort] for sorted field, invoking this function (re-)sorts the field.
- * @property {boolean} [sorting] for sorted field, determines whether the field is sorting its value.
- * @property {() => void} [requestSort] on sorted field, calling this function makes a request to sort
- *   the field. This doesn't necessarily mean the field is immediately re-sorted: during an update cycle, this
- *   is put in the sort FS_QUEUE and will be invoked at end.
- * @property {boolean} [sortOnNeed] on lazy-sorted field, determines whether the field should be (re-)sorted
- *   when it's needed (i.e. accessed). Eager sorted fields are immediately re-sorted at end of update cycle,
- *   whereas lazy sorted fields wait extra for them being needed.
- * @property {boolean} [sortInNeed] on lazy sorted-fields, determines whether this field is needed (i.e. accessed).
- * @property {() => void} [onUpdate] function that contains functions to be called when the value of field
- *   has changed, e.g. sort and onUpdate.
- * @property {RecordList<Record>} [value] value of the field. Either its raw value if it's an attribute,
- *   or a RecordList if it's a relational field.
- */
+import { DeprecatedRecord } from "./deprecated_record";
+import { FieldDefinition } from "./field_definition";
+import { RecordField } from "./record_field";
 
 export class Record {
+    /**
+     * Expression to define how records on the model are identified.
+     * Supported value:
+     * - string with single field name
+     * - non-nested AND/OR expressions with field names. see AND|OR functions
+     * - list with the above values except OR expression (each items are disjunctive, i.e. joined with OR)
+     *
+     * @type {string|AND|OR|Array<string|AND>}
+     */
     static id;
-    /** @type {Object<string, Record>} */
+    /**
+     * Normalized version of static id.
+     * Should not be defined by business code, as this is deduced from provided static id.
+     * It contains a list whose item are lists of string.
+     * 1st-level depth of listing is a "OR" between items, and 2nd-level depth of
+     * listing is an "AND" between items.
+     * This _id is simpler to navigate than static id which is a sort of Domain-Specific-Language.
+     * To avoid parsing it again and again, static _id is preferred for internal code.
+     *
+     * @type {Array<string[]>}
+     */
+    static _id;
+    /**
+     * List of fields that contribute to object ids.
+     * Should not be defined by business code, as this is deduced from provided static id.
+     * Useful to track when their value change on a record, to adapt object id that maps to
+     * this record... and maybe need to reconcile with another existing record that has the
+     * same identity!
+     *
+     * @type {string[]}
+     */
+    static objectIdFields = [];
+    /**
+     * in VERSION 0: key is legacy localId, e.g. "Persona, partner AND 3"
+     * in VERSION 1: key is the local objectId, basically ModelName{number}(SELF_ID)[VERSION], e.g. "Persona{200}(123456789)[1]"
+     *
+     * @type {Object<string, Record>}
+     */
     static records;
     /** @type {import("models").Store} */
     static store;
     /** @type {import("models").Store} */
     static store0;
+    static NEXT_LOCAL_ID = 1;
+    /**
+     * A UUID/GUI of the current record manager. Useful to determine whether a local id comes from itself of others.
+     * Self local ids have easy access and do not change local identity (small exception with reconciliation, but
+     * the local ids persist until the record is fully deleted)
+     */
+    static SELF_ID = 0; //`${new Date().getTime()}:::${Math.random()}`;
+    /**
+     * Whether there's only at most 1 record of this model.
+     * Useful to simply insert on such record without having to define a dummy id and making sure it's the same value passed.
+     * `undefined` values are not elligible as non-local object id, and non-singleton models will refuse to insert a record
+     * without at least one non-local object id.
+     */
+    static singleton = false;
     /** @param {() => any} fn */
     static MAKE_UPDATE(fn) {
         return this.store0.MAKE_UPDATE(fn);
@@ -115,59 +110,173 @@ export class Record {
         return isRecord(record);
     }
     static get(data) {
-        const Model = toRaw(this);
-        return this.records[Model.localId(data)];
+        const this0 = _0(this);
+        return this.records[this0.dataToLocalId(data)];
+    }
+    /** Find the local id from data on current model (if exists) */
+    static dataToLocalId(data) {
+        const this0 = _0(this);
+        if (VERSION.CURRENT === 0) {
+            return this.localId(data);
+        }
+        let localId;
+        if (this0.singleton) {
+            return Object.keys(this0.records)[0];
+        }
+        if (typeof data !== "object" || data === null) {
+            // special shorthand when record has a single single-id primitive.
+            // Note that this is not working on object field due to ambiguity
+            // on whether it targets this single-id or data are on self object.
+            const singleIds = this0._id.filter((item) => item.length === 1).map((item) => item[0]);
+            if (singleIds.length !== 1) {
+                throw new Error(`
+                    Model "${this0.name}" has more than one single-id.
+                    Shorthand to get/insert records with non-object is only supported with a single single-id.
+                    Found singleIds: ${singleIds.map((item) => item[0]).join(",")}
+                `);
+            }
+            return this.dataToLocalId({ [singleIds[0]]: data });
+        }
+        for (let i = 0; i < this0._id.length && !localId; i++) {
+            const expr = this0._id[i];
+            if (expr.some((item) => !(item in data))) {
+                continue;
+            }
+            this._retrieveObjectIdsFromExpr(expr, data, {
+                earlyStop: () => localId,
+                onObjectId: (objectId) => {
+                    localId = this0.store0.objectIdToLocalId.get(objectId);
+                },
+            });
+        }
+        return localId;
+    }
+    /**
+     * Compute object ids of the record, without updating them.
+     * Useful to compare with old object ids and determine strategy to
+     * update them and/or reconcile records if needed.
+     *
+     * @param {Record} record
+     */
+    static recordToObjectIds(record) {
+        const this0 = _0(this);
+        const objectIds = [...record.localIds];
+        for (let i = 0; i < this0._id.length; i++) {
+            const expr = this0._id[i];
+            if (expr.some((item) => record[item] === undefined)) {
+                continue;
+            }
+            this._retrieveObjectIdsFromExpr(expr, record, {
+                onObjectId: (objectId) => {
+                    objectIds.push(objectId);
+                },
+            });
+        }
+        return objectIds;
+    }
+    /**
+     * @param {string[]} expr part of an AND expression in model ids. See static _id
+     * @param {Object|Record} data
+     * @param {Object} [param2={}]
+     * @param {() => boolean} [param2.earlyStop] if provided, truthy value means the retrieve
+     *   process should stop. Useful when using this function requires to only find a
+     *   single match.
+     * @param {(string) => void} [param2.onObjectId] if provided, called whenever an object id
+     *   has been retrieved by this function. Param is the currently retrieved object id.
+     */
+    static _retrieveObjectIdsFromExpr(expr, data, { earlyStop, onObjectId } = {}) {
+        const this0 = _0(this);
+        // Try each combination of potential objectId, using all localIds of relations
+        const fields = expr.map((item) => ({
+            name: item,
+            relation: isRelation(this0._fields.get(item)),
+        }));
+        const fieldToIndex = Object.fromEntries(
+            fields.filter((f) => f.relation).map((f, index) => [f.name, index])
+        );
+        const fcounts = fields.map((field) => (field.relation ? 0 : -1));
+        const iteration = { value: 0 };
+        const MAX_ITER = 1000;
+
+        const loop = function (index, ...fcounts2) {
+            /** @param {string} name */
+            const getRelatedRecord = function (name) {
+                if (isRecord(data[name])) {
+                    return data[name];
+                } else if (isCommand(data[name])) {
+                    const param2 = data[name]?.[0]?.at(-1);
+                    if (!param2) {
+                        return;
+                    } else if (isRecord(param2)) {
+                        return param2;
+                    }
+                    const { targetModel } = this0._fields.get(name);
+                    return this0.store0[targetModel].get(param2);
+                } else if ([null, false, undefined].includes(data[name])) {
+                    return undefined;
+                } else {
+                    const { targetModel } = this0._fields.get(name);
+                    return this0.store0[targetModel].get(data[name]);
+                }
+            };
+            if (index >= fields.length) {
+                let ok = true;
+                const fieldVals = expr
+                    .map((item) => {
+                        if (isRelation(this0._fields.get(item))) {
+                            const i = fcounts2[fieldToIndex[item]];
+                            const relatedRecord = getRelatedRecord(item);
+                            if (!relatedRecord) {
+                                ok = false;
+                                return;
+                            }
+                            return `${item}: (${relatedRecord.localIds[i]})`;
+                        } else {
+                            return `${item}: ${data[item]}`;
+                        }
+                    })
+                    .join(", ");
+                if (!ok) {
+                    return;
+                }
+                const objectId = `${this0.name}{${fieldVals}}(${Record.SELF_ID})[${VERSION.CURRENT}]`;
+                onObjectId?.(objectId);
+                iteration.value++;
+                return;
+            }
+            const fieldName = fields[index].name;
+            if (!fields[index].relation) {
+                return loop(index + 1, ...fcounts2);
+            }
+            const relatedRecord = getRelatedRecord(fieldName);
+            if (!relatedRecord) {
+                return; // not a candidate
+            }
+            for (
+                let i = 0;
+                i < relatedRecord.localIds.length && !earlyStop?.() && iteration.value < MAX_ITER;
+                i++
+            ) {
+                loop(index + 1, ...fcounts2);
+            }
+        };
+        loop(0, ...fcounts);
+        if (iteration.value === MAX_ITER) {
+            throw new Error("Too many reconciled records with residual data");
+        }
     }
     static register() {
         modelRegistry.add(this.name, this);
     }
+    /** @deprecated */
     static localId(data) {
-        const Model = toRaw(this);
-        let idStr;
-        if (typeof data === "object" && data !== null) {
-            idStr = Model._localId(Model.id, data);
-        } else {
-            idStr = data; // non-object data => single id
-        }
-        return `${Model.name},${idStr}`;
+        return DeprecatedRecord.localId.call(this, ...arguments);
     }
     static _localId(expr, data, { brackets = false } = {}) {
-        const Model = toRaw(this);
-        if (!Array.isArray(expr)) {
-            const definition = Model._fields.get(expr);
-            if (definition) {
-                if (isMany(definition)) {
-                    throw new Error("Using a Record.many() as id is not (yet) supported");
-                }
-                if (!isRelation(definition)) {
-                    return data[expr];
-                }
-                if (isCommand(data[expr])) {
-                    // Note: only one() is supported
-                    const [cmd, data2] = data[expr].at(-1);
-                    if (cmd === "DELETE") {
-                        return undefined;
-                    } else {
-                        return `(${data2?.localId})`;
-                    }
-                }
-                // relational field (note: optional when OR)
-                return `(${data[expr]?.localId})`;
-            }
-            return data[expr];
-        }
-        const vals = [];
-        for (let i = 1; i < expr.length; i++) {
-            vals.push(Model._localId(expr[i], data, { brackets: true }));
-        }
-        let res = vals.join(expr[0] === OR_SYM ? " OR " : " AND ");
-        if (brackets) {
-            res = `(${res})`;
-        }
-        return res;
+        return DeprecatedRecord._localId.call(this, ...arguments);
     }
     static _retrieveIdFromData(data) {
-        const Model = toRaw(this);
+        const this0 = _0(this);
         const res = {};
         function _deepRetrieve(expr2) {
             if (typeof expr2 === "string") {
@@ -196,18 +305,18 @@ export class Record {
                 }
             }
         }
-        if (Model.id === undefined) {
+        if (this0.id === undefined) {
             return res;
         }
-        if (typeof Model.id === "string") {
+        if (typeof this0.id === "string") {
             if (typeof data !== "object" || data === null) {
-                return { [Model.id]: data }; // non-object data => single id
+                return { [this0.id]: data }; // non-object data => single id
             }
-            if (isCommand(data[Model.id])) {
+            if (isCommand(data[this0.id])) {
                 // Note: only one() is supported
-                const [cmd, data2] = data[Model.id].at(-1);
+                const [cmd, data2] = data[this0.id].at(-1);
                 return Object.assign(res, {
-                    [Model.id]:
+                    [this0.id]:
                         cmd === "DELETE"
                             ? undefined
                             : cmd === "DELETE.noinv"
@@ -217,9 +326,9 @@ export class Record {
                             : data2,
                 });
             }
-            return { [Model.id]: data[Model.id] };
+            return { [this0.id]: data[this0.id] };
         }
-        for (const expr of Model.id) {
+        for (const expr of this0.id) {
             if (typeof expr === "symbol") {
                 continue;
             }
@@ -244,41 +353,99 @@ export class Record {
      * @returns {Record}
      */
     static new(data) {
-        const Model = toRaw(this);
-        return Model.store0.MAKE_UPDATE(function R_new() {
-            const rec1 = new Model.Class();
+        const this0 = _0(this);
+        const store0 = this0.store0;
+        return store0.MAKE_UPDATE(function R_new() {
+            const rec1 = new this0.Class();
             const rec0 = _0(rec1);
-            const ids = Model._retrieveIdFromData(data);
-            for (const name in ids) {
-                if (
-                    ids[name] &&
-                    !isRecord(ids[name]) &&
-                    !isCommand(ids[name]) &&
-                    isRelation(Model._fields.get(name))
-                ) {
-                    // preinsert that record in relational field,
-                    // as it is required to make current local id
-                    ids[name] = Model.store0[Model._fields.get(name).targetModel].preinsert(
-                        ids[name]
-                    );
-                }
-            }
-            Object.assign(rec0, { localId: Model.localId(ids) });
-            Object.assign(rec1, { ...ids });
-            Model.records[rec0.localId] = rec1;
-            if (rec0.Model.name === "Store") {
-                Object.assign(rec0, {
-                    env: Model.store0.env,
-                    recordByLocalId: Model.store0.recordByLocalId,
+            let localId;
+            if (VERSION.CURRENT === 0) {
+                localId = DeprecatedRecord.new_1.call(this, rec1, data);
+            } else {
+                localId = `${this0.name}{${this0.NEXT_LOCAL_ID++}}(${Record.SELF_ID})[${
+                    VERSION.CURRENT
+                }]`;
+                Object.assign(rec1, {
+                    localIds: [localId],
+                    objectIds: [localId],
                 });
             }
-            Model.store0.recordByLocalId.set(rec0.localId, rec1);
+            this0.records[rec0.localId] = rec1;
+            if (rec0.Model.name === "Store") {
+                Object.assign(rec0, {
+                    env: store0.env,
+                    objectIdToLocalId: store0.objectIdToLocalId,
+                    localIdToRecord: store0.localIdToRecord,
+                });
+            }
+            store0.localIdToRecord.set(rec0.localId, rec1);
+            store0.objectIdToLocalId.set(rec0.localId, rec0.localId);
             for (const field of rec0._fields.values()) {
                 field.requestCompute?.();
                 field.requestSort?.();
             }
             return rec1;
         });
+    }
+    /** @param {Record} rec1 */
+    static onRecomputeObjectIds(rec1) {
+        const this0 = _0(this);
+        const rec0 = _0(rec1);
+        const store0 = this0.store0;
+        // 1. compute object ids
+        const objectIds = this0.recordToObjectIds(rec1);
+        const oldObjectIds = rec0.objectIds.filter((objectId) => !objectIds.includes(objectId));
+        const newObjectIds = objectIds.filter((objectId) => !rec0.objectIds.includes(objectId));
+        // 2. old object ids => remove the mapping
+        for (const oldOid of oldObjectIds) {
+            rec0.objectIds = rec0.objectIds.filter((oid) => oid !== oldOid);
+            store0.objectIdToLocalId.delete(oldOid);
+        }
+        // 3. new object ids
+        for (const newOid of newObjectIds) {
+            if (store0.objectIdToLocalId.get(newOid)) {
+                // Detected other record matching same identity => reconcile
+                const otherRec = _0(
+                    _0(store0.localIdToRecord).get(store0.objectIdToLocalId.get(newOid))
+                );
+                if (!rec0._reconciling && !otherRec._reconciling) {
+                    this0.reconcile(rec0, otherRec);
+                }
+            }
+            rec0.objectIds.push(newOid);
+            store0.objectIdToLocalId.set(newOid, rec0.localId);
+        }
+    }
+    /**
+     * @param {Record} a record that triggered same identity detection
+     * @param {Record} b record that has been detected as having same identity
+     */
+    static reconcile(a, b) {
+        a._reconciling = true;
+        b._reconciling = true;
+        const this0 = _0(this);
+        const store0 = this0.store0;
+        for (const localId of a.localIds) {
+            store0.localIdToRecord.set(localId, b._1);
+            b.localIds.push(localId);
+        }
+        for (const objectId of a.objectIds) {
+            store0.objectIdToLocalId.set(objectId, b.localId);
+        }
+        a.localIds = b.localIds;
+        a.objectIds = b.objectIds;
+        a._redirectedRecord = b._2;
+        RecordField.reconcile(a, b);
+        RecordUses.reconcile(a, b);
+        // TODO combine _updatingAttrs
+        a._updatingAttrs = b._updatingAttrs;
+        // TODO combine _updatingFieldsThroughProxy
+        a._updatingFieldsThroughProxy = b._updatingFieldsThroughProxy;
+        a._0 = b._0;
+        a._1 = b._1;
+        a._2 = b._2;
+        a._reconciling = false;
+        b._reconciling = false;
     }
     /**
      * @template {keyof import("models").Models} M
@@ -287,7 +454,7 @@ export class Record {
      * @param {Function} [param1.compute] if set, the value of this relational field is declarative and
      *   is computed automatically. All reactive accesses recalls that function. The context of
      *   the function is the record. Returned value is new value assigned to this field.
-     * * @property {boolean} [eager=false] when field is computed, determines whether the computation
+     * @param {boolean} [param1.eager=false] when field is computed, determines whether the computation
      *   of this field is eager or lazy. By default, fields are computed lazily, which means that
      *   they are computed when dependencies change AND when this field is being used. In eager mode,
      *   the field is immediately (re-)computed when dependencies changes, which matches the built-in
@@ -301,8 +468,8 @@ export class Record {
      *   This is called at least once at record creation.
      * @returns {import("models").Models[M]}
      */
-    static one(targetModel, { compute, eager = false, inverse, onAdd, onDelete, onUpdate } = {}) {
-        return [ONE_SYM, { targetModel, compute, eager, inverse, onAdd, onDelete, onUpdate }];
+    static one(targetModel, param1) {
+        return new FieldDefinition({ ...param1, targetModel, [ONE_SYM]: true });
     }
     /**
      * @template {keyof import("models").Models} M
@@ -311,7 +478,7 @@ export class Record {
      * @param {Function} [param1.compute] if set, the value of this relational field is declarative and
      *   is computed automatically. All reactive accesses recalls that function. The context of
      *   the function is the record. Returned value is new value assigned to this field.
-     * @property {boolean} [eager=false] when field is computed, determines whether the computation
+     * @param {boolean} [param1.eager=false] when field is computed, determines whether the computation
      *   of this field is eager or lazy. By default, fields are computed lazily, which means that
      *   they are computed when dependencies change AND when this field is being used. In eager mode,
      *   the field is immediately (re-)computed when dependencies changes, which matches the built-in
@@ -323,18 +490,12 @@ export class Record {
      *   from the relation.
      * @param {() => void} [param1.onUpdate] function that is called when the field value is updated.
      *   This is called at least once at record creation.
-     * @property {(r1: import("models").Models[M], r2: import("models").Models[M]) => number} [sort] if defined, this field
+     * @param {(r1: import("models").Models[M], r2: import("models").Models[M]) => number} [param1.sort] if defined, this field
      *   is automatically sorted by this function.
      * @returns {import("models").Models[M][]}
      */
-    static many(
-        targetModel,
-        { compute, eager = false, inverse, onAdd, onDelete, onUpdate, sort } = {}
-    ) {
-        return [
-            MANY_SYM,
-            { targetModel, compute, eager, inverse, onAdd, onDelete, onUpdate, sort },
-        ];
+    static many(targetModel, param1) {
+        return new FieldDefinition({ ...param1, targetModel, [MANY_SYM]: true });
     }
     /**
      * @template T
@@ -343,7 +504,7 @@ export class Record {
      * @param {Function} [param1.compute] if set, the value of this attr field is declarative and
      *   is computed automatically. All reactive accesses recalls that function. The context of
      *   the function is the record. Returned value is new value assigned to this field.
-     * @property {boolean} [eager=false] when field is computed, determines whether the computation
+     * @param {boolean} [param1.eager=false] when field is computed, determines whether the computation
      *   of this field is eager or lazy. By default, fields are computed lazily, which means that
      *   they are computed when dependencies change AND when this field is being used. In eager mode,
      *   the field is immediately (re-)computed when dependencies changes, which matches the built-in
@@ -352,18 +513,18 @@ export class Record {
      *   Useful to automatically markup when the insert is trusted.
      * @param {() => void} [param1.onUpdate] function that is called when the field value is updated.
      *   This is called at least once at record creation.
-     * @property {(Object, Object) => number} [sort] if defined, this field is automatically sorted
+     * @param {(Object, Object) => number} [param1.sort] if defined, this field is automatically sorted
      *   by this function.
      * @returns {T}
      */
-    static attr(def, { compute, eager = false, html, onUpdate, sort } = {}) {
-        return [ATTR_SYM, { compute: compute, default: def, eager, html, onUpdate, sort }];
+    static attr(def, param1) {
+        return new FieldDefinition({ ...param1, [ATTR_SYM]: true, default: def });
     }
     /** @returns {Record|Record[]} */
     static insert(data, options = {}) {
-        const Model3 = this;
-        const Model = toRaw(Model3);
-        const store0 = Model.store0;
+        const this3 = this;
+        const this0 = _0(this3);
+        const store0 = this0.store0;
         return store0.MAKE_UPDATE(function R_insert() {
             const isMulti = Array.isArray(data);
             if (!isMulti) {
@@ -372,7 +533,7 @@ export class Record {
             const oldTrusted = store0.trusted;
             store0.trusted = options.html ?? store0.trusted;
             const res = data.map(function R_insert_map(d) {
-                return Model._insert.call(Model3, d, options);
+                return this0._insert.call(this3, d, options);
             });
             store0.trusted = oldTrusted;
             if (!isMulti) {
@@ -383,9 +544,9 @@ export class Record {
     }
     /** @returns {Record} */
     static _insert(data) {
-        const Model3 = this;
-        const Model = toRaw(Model3);
-        const record3 = Model.preinsert.call(Model3, data);
+        const this3 = this;
+        const this0 = _0(this3);
+        const record3 = this0.preinsert.call(this3, data);
         const record = _0(record3);
         record.update.call(record._2, data);
         return record3;
@@ -395,23 +556,42 @@ export class Record {
      * @returns {Record}
      */
     static preinsert(data) {
-        const Model3 = this;
-        const Model = toRaw(Model3);
-        return Model.get.call(Model3, data) ?? Model.new(data);
+        const this3 = this;
+        const this0 = _0(this3);
+        return this0.get.call(this3, data) ?? this0.new(data);
     }
+    // Internal props on instance. Important to not have them being registered as fields!
+    static INSTANCE_INTERNALS = {
+        _reconciling: true,
+        _customAssignThroughProxy: true,
+        _redirectedRecord: true,
+        _fields: true,
+        _updatingFieldsThroughProxy: true,
+        _updatingAttrs: true,
+        __uses__: true,
+        Model: true,
+        localIds: true,
+        objectIds: true,
+        _0: true,
+        _1: true,
+        _2: true,
+        // store-specific
+        localIdToRecord: true,
+        objectIdToLocalId: true,
+        Models: true,
+    };
 
-    /**
-     * Raw relational values of the record, each of which contains object id(s)
-     * rather than the record(s). This allows data in store and models being normalized,
-     * which eases handling relations notably in when a record gets deleted.
-     *
-     * @type {Map<string, RecordField>}
-     */
+    _reconciling = false;
+    /** @type {() => void>} */
+    _customAssignThroughProxy;
+    /** @type {boolean} */
+    _redirectedRecord;
+    /** @type {Map<string, import("./record_field").RecordField>}*/
     _fields = new Map();
     /** @type {Set<string>} */
-    _proxyUsed;
+    _updatingFieldsThroughProxy;
     /** @type {Set<string>} */
-    _updateFields;
+    _updatingAttrs;
     __uses__ = markRaw(new RecordUses());
     get _store() {
         return _0(this).Model.store0._2;
@@ -434,8 +614,46 @@ export class Record {
      * @type {typeof Record}
      */
     Model;
-    /** @type {string} */
-    localId;
+    /**
+     * The referenced local id of the record.
+     *
+     * In VERSION 0: legacy format:
+     *    ModelName,OrderedExpressionEvaluationOfIdValues
+     *    e.g. "Persona,partner AND 3"
+     * In VERSION 1: local object id:
+     *    ModelName{number}(SELF_ID)[VERSION]
+     *    e.g. "Persona{20}(123456789)[1]"
+     *
+     * @type {string}
+     */
+    get localId() {
+        return this.localIds[0];
+    }
+    /**
+     * List of all local ids related to this record.
+     * Most of time records only have a single local id.
+     * Multiple local ids happen when 2 or more records happen
+     * to share same identity and they have being reconciled.
+     * Eventually record will keep a single local id, but to
+     * smooth transition a record can have temporarily many local
+     * ids.
+     *
+     * @type {string[]}
+     */
+    localIds = [];
+    get objectId() {
+        return this.localId;
+    }
+    /**
+     * List of object ids of the record.
+     * Object ids include local ids, and also all currently known way
+     * to identify this record. An object id is a stringified version
+     * of data that identify the record. A non-local object id matches
+     * an AND expression in static id.
+     *
+     * @type {string[]}
+     */
+    objectIds = [];
     /** @type {this} */
     _0; // previously "_raw"
     /** @type {this} */
@@ -450,13 +668,30 @@ export class Record {
     setup() {}
 
     update(data) {
+        if (data === undefined) {
+            return;
+        }
         const this0 = _0(this);
         return this0._store0.MAKE_UPDATE(function R_update() {
             if (typeof data === "object" && data !== null) {
                 this0._store0.updateFields(this0, data);
             } else {
                 // update on single-id data
-                this0._store0.updateFields(this0, { [this0.Model.id]: data });
+                if (Record.VERSION === 0) {
+                    this0._store0.updateFields(this0, { [this0.Model.id]: data });
+                } else {
+                    const singleIds = this0.Model._id
+                        .filter((item) => item.length === 1)
+                        .map((item) => item[0]);
+                    if (singleIds.length !== 1) {
+                        throw new Error(`
+                            Model "${this0.name}" has more than one single-id.
+                            Shorthand to get/insert records with non-object is only supported with a single single-id.
+                            Found singleIds: ${singleIds.map((item) => item[0]).join(",")}
+                        `);
+                    }
+                    this0._store0.updateFields(this0, { [singleIds[0]]: data });
+                }
             }
         });
     }
@@ -470,7 +705,19 @@ export class Record {
 
     /** @param {Record} record */
     eq(record) {
-        return _0(this) === _0(record);
+        const this0 = _0(this);
+        const record0 = _0(record);
+        if (!record?.localId) {
+            return;
+        }
+        for (const thisLocalId of this0.localIds || []) {
+            for (const recordLocalId of record0.localIds || []) {
+                if (thisLocalId === recordLocalId) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /** @param {Record} record */
@@ -511,15 +758,9 @@ export class Record {
                 data[name] = this[name]; // attr()
             }
         }
-        delete data._fields;
-        delete data._2;
-        delete data._1;
-        delete data._proxyUsed;
-        delete data._0;
-        delete data.Model;
-        delete data._updateFields;
-        delete data.__uses__;
-        delete data.Model;
+        for (const key of Object.keys(this0.Model.INSTANCE_INTERNALS)) {
+            delete data[key];
+        }
         return data;
     }
     toIdData() {

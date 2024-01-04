@@ -1,7 +1,6 @@
 /* @odoo-module */
 
 import { Chatbot } from "@im_livechat/embed/common/chatbot/chatbot_model";
-import { ChatbotStep } from "@im_livechat/embed/common/chatbot/chatbot_step_model";
 import { SESSION_STATE } from "@im_livechat/embed/common/livechat_service";
 
 import { EventBus, markup, reactive } from "@odoo/owl";
@@ -22,7 +21,7 @@ const MULTILINE_STEP_DEBOUNCE_DELAY = 10000;
 export class ChatBotService {
     /** @type {import("@im_livechat/embed/common/chatbot/chatbot_model").Chatbot} */
     chatbot;
-    /** @type {import("@im_livechat/embed/common/chatbot/chatbot_step_model").ChatbotStep} */
+    /** @type {import("models").ChatbotStep} */
     currentStep;
     /** @type {number} */
     nextStepTimeout;
@@ -198,7 +197,7 @@ export class ChatBotService {
      * Get the next step to process as well as the message posted by the
      * step if any.
      *
-     * @returns {Promise<{ step: ChatbotStep?, stepMessage: object?}>}
+     * @returns {Promise<{ step: import("models").ChatbotStep?, stepMessage: object?}>}
      */
     async _getNextStep() {
         if (this.currentStep?.expectAnswer) {
@@ -207,7 +206,7 @@ export class ChatBotService {
         if (!this.chatbot.welcomeCompleted) {
             const welcomeStep = this.chatbot.nextWelcomeStep;
             return {
-                step: new ChatbotStep(welcomeStep),
+                step: this.store.ChatbotStep.insert(welcomeStep),
                 stepMessage: {
                     chatbotStep: welcomeStep,
                     id: this.messageService.getNextTemporaryId(),
@@ -223,7 +222,7 @@ export class ChatBotService {
         });
         const { chatbot_posted_message, chatbot_step } = nextStepData ?? {};
         return {
-            step: chatbot_step ? new ChatbotStep(chatbot_step) : null,
+            step: chatbot_step ? this.store.ChatbotStep.insert(chatbot_step) : null,
             stepMessage: chatbot_posted_message,
         };
     }
@@ -288,7 +287,9 @@ export class ChatBotService {
      */
     async _restore() {
         const { _chatbotCurrentStep, _chatbot } = this.savedState;
-        this.currentStep = _chatbotCurrentStep ? new ChatbotStep(_chatbotCurrentStep) : undefined;
+        this.currentStep = _chatbotCurrentStep
+            ? this.store.ChatbotStep.insert(_chatbotCurrentStep)
+            : undefined;
         this.chatbot = _chatbot ? new Chatbot(_chatbot) : undefined;
         if (this.livechatService.state !== SESSION_STATE.PERSISTED) {
             // We need to repost the welcome steps as they were not saved.
@@ -323,7 +324,7 @@ export class ChatBotService {
             `im_livechat.chatbot.state.uuid_${this.livechatService.thread.uuid}`,
             JSON.stringify({
                 _chatbot: this.chatbot,
-                _chatbotCurrentStep: this.currentStep,
+                _chatbotCurrentStep: this.currentStep.toData(),
             })
         );
     }

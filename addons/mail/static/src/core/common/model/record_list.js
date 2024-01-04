@@ -1,33 +1,97 @@
 /* @odoo-module */
 
-import { reactive, toRaw } from "@odoo/owl";
-import { _0, isOne, isRecord } from "./misc";
+import { reactive } from "@odoo/owl";
+import { ATTR_SYM, MANY_SYM, ONE_SYM, _0, isOne, isRecord } from "./misc";
 
-/** * @template {Record} R */
+/** * @template {import("./record").Record} R */
 export class RecordList extends Array {
-    /** @type {Record} */
-    owner;
-    /** @type {string} */
-    name;
+    /**
+     * Combine both record lists, i.e. resulting data in both lists is current record list in owner.
+     *
+     * @param {RecordList} a
+     * @param {RecordList} b
+     */
+    static reconcile(a, b) {
+        const store = a.store;
+        const field = b.field;
+        const reclist = field.value;
+        a.field = field;
+        b.field = field;
+        const a2 = a._2;
+        const b2 = b._2;
+        a._0 = reclist._0;
+        a._1 = reclist._1;
+        a._2 = reclist._2;
+        b._0 = reclist._0;
+        b._1 = reclist._1;
+        b._2 = reclist._2;
+        const { inverse } = field.definition;
+        if (inverse) {
+            const removedRecs = [];
+            for (const localId of [...a.state.data, ...b.state.data]) {
+                let otherRec = _0(_0(store.localIdToRecord).get(localId));
+                for (let i = 0; otherRec && i < otherRec.localIds.length; i++) {
+                    const localId = otherRec.localIds[i];
+                    if (reclist.state.data.some((d) => d === localId)) {
+                        otherRec = false;
+                    }
+                }
+                if (otherRec && !removedRecs.some((rec) => rec.eq(otherRec))) {
+                    removedRecs.push(otherRec);
+                }
+            }
+            for (const removedRec of removedRecs) {
+                const otherField = removedRec._fields.get(inverse);
+                const otherReclist = otherField.value;
+                const owner = field.owner;
+                for (const localId of owner.localIds) {
+                    otherReclist.state.data = otherReclist.state.data.filter((d) => d !== localId);
+                    store.ADD_QUEUE(otherField, "onDelete", owner);
+                    store.ADD_QUEUE(field, "onDelete", removedRec);
+                }
+            }
+        }
+        a2.state = reclist.state;
+        b2.state = reclist.state;
+    }
     /** @type {import("models").Store} */
     store;
-    /** @type {string[]} */
-    data = [];
+    // in an object so it can be easily reconciled
+    state = {
+        /** @type {string[]} */
+        data: [],
+    };
     /** @type {this} */
     _0; // previously "_raw"
     /** @type {this} */
     _1; // previously "_proxyInternal"
     /** @type {this} */
     _2; // previously "_proxy"
-    /** @type {RecordField} */
+    /** @type {import("./record_field").RecordField} */
     field;
-
+    get name() {
+        return this.field.name;
+    }
+    get [ATTR_SYM]() {
+        return this.field[ATTR_SYM];
+    }
+    get [MANY_SYM]() {
+        return this.field[MANY_SYM];
+    }
+    get [ONE_SYM]() {
+        return this.field[ONE_SYM];
+    }
+    get owner() {
+        return this.field.owner;
+    }
     get definition() {
         return this.owner.Model._fields.get(this.name);
     }
 
-    constructor() {
+    /** @param {Object} vals */
+    constructor(vals) {
         super();
+        Object.assign(this, vals);
         const this0 = this;
         this0._0 = this0;
         const this1 = new Proxy(this0, {
@@ -48,7 +112,7 @@ export class RecordList extends Array {
                     }
                 }
                 if (name === "length") {
-                    return this3.data.length;
+                    return this3.state.data.length;
                 }
                 if (this0.field?.sort && !this0.field.eager) {
                     this0.field.sortInNeed = true;
@@ -59,7 +123,7 @@ export class RecordList extends Array {
                 if (typeof name !== "symbol" && !window.isNaN(parseInt(name))) {
                     // support for "array[index]" syntax
                     const index = parseInt(name);
-                    return this3.store.recordByLocalId.get(this3.data[index]);
+                    return this3.store.localIdToRecord.get(this3.state.data[index]);
                 }
                 // Attempt an unimplemented array method call
                 const array = [...this0._1[Symbol.iterator].call(this3)];
@@ -72,8 +136,8 @@ export class RecordList extends Array {
                         // support for "array[index] = r3" syntax
                         const index = parseInt(name);
                         this0._insert(val, function RL_set_insert(newRecord) {
-                            const oldRecord = toRaw(this0.store.recordByLocalId).get(
-                                this0.data[index]
+                            const oldRecord = _0(this0.store.localIdToRecord).get(
+                                this0.state.data[index]
                             );
                             if (oldRecord && oldRecord.notEq(newRecord)) {
                                 oldRecord.__uses__.delete(this0);
@@ -83,7 +147,7 @@ export class RecordList extends Array {
                             if (inverse) {
                                 oldRecord._fields.get(inverse).value.delete(this0);
                             }
-                            this3.data[index] = newRecord?.localId;
+                            this3.state.data[index] = newRecord?.localId;
                             if (newRecord) {
                                 newRecord.__uses__.add(this0);
                                 this0.store.ADD_QUEUE(this0.field, "onAdd", newRecord);
@@ -95,11 +159,11 @@ export class RecordList extends Array {
                         });
                     } else if (name === "length") {
                         const newLength = parseInt(val);
-                        if (newLength !== this0.data.length) {
-                            if (newLength < this0.data.length) {
+                        if (newLength !== this0.state.data.length) {
+                            if (newLength < this0.state.data.length) {
                                 this0.splice.call(this3, newLength, this0.length - newLength);
                             }
-                            this3.data.length = newLength;
+                            this3.state.data.length = newLength;
                         }
                     } else {
                         return Reflect.set(this0, name, val, this3);
@@ -155,8 +219,7 @@ export class RecordList extends Array {
         fn?.(newRecord0);
         if (!isRecord(val)) {
             // was preinserted, fully insert now
-            const { targetModel } = this.definition;
-            this.store[targetModel].insert(val);
+            newRecord3.update(val);
         }
         return newRecord0;
     }
@@ -179,7 +242,7 @@ export class RecordList extends Array {
                     record.__uses__.add(this0);
                 })
             );
-            this0._2.data = records2.map((record2) => _0(record2).localId);
+            this0._2.state.data = records2.map((record2) => _0(record2).localId);
         });
     }
     /** @param {R[]} records */
@@ -189,7 +252,7 @@ export class RecordList extends Array {
         return this0.store.MAKE_UPDATE(function RL_push() {
             for (const val of records) {
                 const record = this0._insert(val, function RL_push_insert(record) {
-                    this0._2.data.push(record.localId);
+                    this0._2.state.data.push(record.localId);
                     record.__uses__.add(this0);
                 });
                 this0.store.ADD_QUEUE(this0.field, "onAdd", record);
@@ -198,7 +261,7 @@ export class RecordList extends Array {
                     record._fields.get(inverse).value.add(this0.owner);
                 }
             }
-            return this3.data.length;
+            return this3.state.data.length;
         });
     }
     /** @returns {R} */
@@ -219,7 +282,7 @@ export class RecordList extends Array {
         const this0 = _0(this);
         const this3 = this0._downgradeProxy(this);
         return this0.store.MAKE_UPDATE(function RL_shift() {
-            const record3 = this3.store.recordByLocalId.get(this3.data.shift());
+            const record3 = this3.store.localIdToRecord.get(this3.state.data.shift());
             if (!record3) {
                 return;
             }
@@ -240,7 +303,7 @@ export class RecordList extends Array {
         return this0.store.MAKE_UPDATE(function RL_unshift() {
             for (let i = records.length - 1; i >= 0; i--) {
                 const record = this0._insert(records[i], (record) => {
-                    this0._2.data.unshift(record.localId);
+                    this0._2.state.data.unshift(record.localId);
                     record.__uses__.add(this0);
                 });
                 this0.store.ADD_QUEUE(this0.field, "onAdd", record);
@@ -249,14 +312,21 @@ export class RecordList extends Array {
                     record._fields.get(inverse).value.add(this0.owner);
                 }
             }
-            return this3.data.length;
+            return this3.state.data.length;
         });
     }
     /** @param {R} record3 */
     indexOf(record3) {
         const this0 = _0(this);
         const this3 = this0._downgradeProxy(this);
-        return this3.data.indexOf(_0(record3)?.localId);
+        let index = -1;
+        for (const localId of _0(record3)?.localIds || []) {
+            index = this3.state.data.indexOf(localId);
+            if (index !== -1) {
+                break;
+            }
+        }
+        return index;
     }
     /**
      * @param {number} [start]
@@ -268,13 +338,13 @@ export class RecordList extends Array {
         const this3 = this0._downgradeProxy(this);
         return this0.store.MAKE_UPDATE(function RL_splice() {
             const oldRecords3 = this0._1.slice.call(this3, start, start + deleteCount);
-            const list = this3.data.slice(); // splice on copy of list so that reactive observers not triggered while splicing
+            const list = this3.state.data.slice(); // splice on copy of list so that reactive observers not triggered while splicing
             list.splice(
                 start,
                 deleteCount,
                 ...newRecords3.map((newRecord3) => _0(newRecord3).localId)
             );
-            this0._2.data = list;
+            this0._2.state.data = list;
             for (const oldRecord3 of oldRecords3) {
                 const oldRecord0 = _0(oldRecord3);
                 oldRecord0.__uses__.delete(this0);
@@ -308,8 +378,8 @@ export class RecordList extends Array {
     concat(...collections) {
         const this0 = _0(this);
         const this3 = this0._downgradeProxy(this);
-        return this3.data
-            .map((localId) => this3.store.recordByLocalId.get(localId))
+        return this3.state.data
+            .map((localId) => this3.store.localIdToRecord.get(localId))
             .concat(...collections.map((c) => [...c]));
     }
     /** @param {...R}  */
@@ -318,11 +388,11 @@ export class RecordList extends Array {
         return this0.store.MAKE_UPDATE(function RL_add() {
             if (isOne(this0)) {
                 const last = records.at(-1);
-                if (isRecord(last) && this0.data.includes(_0(last).localId)) {
+                if (isRecord(last) && this0.state.data.includes(_0(last).localId)) {
                     return;
                 }
                 this0._insert(last, function RL_add_insertOne(record) {
-                    if (record.localId !== this0.data[0]) {
+                    if (record.localId !== this0.state.data[0]) {
                         this0.pop.call(this0._2);
                         this0.push.call(this0._2, record);
                     }
@@ -330,11 +400,11 @@ export class RecordList extends Array {
                 return;
             }
             for (const val of records) {
-                if (isRecord(val) && this0.data.includes(val.localId)) {
+                if (isRecord(val) && this0.state.data.includes(val.localId)) {
                     continue;
                 }
                 this0._insert(val, function RL_add_insertMany(record) {
-                    if (this0.data.indexOf(record.localId) === -1) {
+                    if (this0.state.data.indexOf(record.localId) === -1) {
                         this0.push.call(this0._2, record);
                     }
                 });
@@ -358,11 +428,11 @@ export class RecordList extends Array {
             const record = recordList._insert(
                 last,
                 function RL_addNoInv_insertOne(record) {
-                    if (record.localId !== recordList.data[0]) {
+                    if (record.localId !== recordList.state.data[0]) {
                         const old = recordList._2.at(-1);
-                        recordList._2.data.pop();
+                        recordList._2.state.data.pop();
                         old?.__uses__.delete(recordList);
-                        recordList._2.data.push(record.localId);
+                        recordList._2.state.data.push(record.localId);
                         record.__uses__.add(recordList);
                     }
                 },
@@ -378,7 +448,7 @@ export class RecordList extends Array {
             const record = recordList._insert(
                 val,
                 function RL_addNoInv_insertMany(record) {
-                    if (recordList.data.indexOf(record.localId) === -1) {
+                    if (recordList.state.data.indexOf(record.localId) === -1) {
                         recordList.push.call(recordList._2, record);
                         record.__uses__.add(recordList);
                     }
@@ -396,7 +466,7 @@ export class RecordList extends Array {
                 this0._insert(
                     val,
                     function RL_delete_insert(record) {
-                        const index = this0.data.indexOf(record.localId);
+                        const index = this0.state.data.indexOf(record.localId);
                         if (index !== -1) {
                             this0.splice.call(this0._2, index, 1);
                         }
@@ -419,7 +489,7 @@ export class RecordList extends Array {
             const record = recordList._insert(
                 val,
                 function RL_deleteNoInv_insert(record) {
-                    const index = recordList.data.indexOf(record.localId);
+                    const index = recordList.state.data.indexOf(record.localId);
                     if (index !== -1) {
                         recordList.splice.call(recordList._2, index, 1);
                         record.__uses__.delete(recordList);
@@ -433,7 +503,7 @@ export class RecordList extends Array {
     clear() {
         const this0 = _0(this);
         return this0.store.MAKE_UPDATE(function RL_clear() {
-            while (this0.data.length > 0) {
+            while (this0.state.data.length > 0) {
                 this0.pop.call(this0._2);
             }
         });
@@ -442,8 +512,8 @@ export class RecordList extends Array {
     *[Symbol.iterator]() {
         const this0 = _0(this);
         const this3 = this0._downgradeProxy(this);
-        for (const localId of this3.data) {
-            yield this3.store.recordByLocalId.get(localId);
+        for (const localId of this3.state.data) {
+            yield this3.store.localIdToRecord.get(localId);
         }
     }
 }

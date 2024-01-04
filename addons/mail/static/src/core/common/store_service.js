@@ -23,6 +23,8 @@ export class Store extends BaseStore {
     CannedResponse;
     /** @type {typeof import("@mail/core/common/channel_member_model").ChannelMember} */
     ChannelMember;
+    /** @type {typeof import("@im_livechat/embed/common/chatbot/chatbot_step_model").ChatbotStep} */
+    ChatbotStep;
     /** @type {typeof import("@mail/core/common/chat_window_model").ChatWindow} */
     ChatWindow;
     /** @type {typeof import("@mail/core/common/composer_model").Composer} */

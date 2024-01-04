@@ -2,9 +2,18 @@
 
 import { markup, reactive, toRaw } from "@odoo/owl";
 import { Record } from "./record";
-import { Markup, STORE_SYM, _0, isAttr, isCommand, isMany, isRecord } from "./misc";
+import { ATTR_SYM, Markup, STORE_SYM, _0, isAttr, isCommand, isMany, isRecord } from "./misc";
+import { FieldDefinition } from "./field_definition";
+import { RecordField } from "./record_field";
 
 export class Store extends Record {
+    /** @type {Object<string, typeof Record>} */
+    Models;
+    static singleton = true;
+    /** @type {Map<string, string>} */
+    objectIdToLocalId;
+    /** @type {Map<string, Record>} */
+    localIdToRecord;
     [STORE_SYM] = true;
     /**
      * Determines whether the inserts are considered trusted or not.
@@ -12,15 +21,15 @@ export class Store extends Record {
      */
     trusted = false;
     UPDATE = 0;
-    /** @type {RecordField[]} */
+    /** @type {import("./record_field").RecordField[]} */
     FC_QUEUE = []; // field-computes
-    /** @type {RecordField[]} */
+    /** @type {import("./record_field").RecordField[]} */
     FS_QUEUE = []; // field-sorts
-    /** @type {Array<{field: RecordField, records: Record[]}>} */
+    /** @type {Array<{field: import("./record_field").RecordField, records: Record[]}>} */
     FA_QUEUE = []; // field-onadds
-    /** @type {Array<{field: RecordField, records: Record[]}>} */
+    /** @type {Array<{field: import("./record_field").RecordField, records: Record[]}>} */
     FD_QUEUE = []; // field-ondeletes
-    /** @type {RecordField[]} */
+    /** @type {import("./record_field").RecordField[]} */
     FU_QUEUE = []; // field-onupdates
     /** @type {Function[]} */
     RO_QUEUE = []; // record-onchanges
@@ -92,7 +101,7 @@ export class Store extends Record {
                     }
                     for (const [localId, names] of record.__uses__.data.entries()) {
                         for (const [name2, count] of names.entries()) {
-                            const usingRecord2 = toRaw(this0.recordByLocalId).get(localId);
+                            const usingRecord2 = _0(this0.localIdToRecord).get(localId);
                             if (!usingRecord2) {
                                 // record already deleted, clean inverses
                                 record.__uses__.data.delete(localId);
@@ -108,8 +117,13 @@ export class Store extends Record {
                             }
                         }
                     }
-                    delete record.Model.records[record.localId];
-                    this0.recordByLocalId.delete(record.localId);
+                    for (const objectId of record.objectIds) {
+                        this0.objectIdToLocalId.delete(objectId);
+                    }
+                    for (const localId of record.localIds) {
+                        delete record.Model.records[localId];
+                        this0.localIdToRecord.delete(localId);
+                    }
                 }
             }
             this0.UPDATE--;
@@ -117,7 +131,7 @@ export class Store extends Record {
         return res;
     }
     /**
-     * @param {RecordField|Record} fieldOrRecord
+     * @param {import("./record_field").RecordField|Record} fieldOrRecord
      * @param {"compute"|"sort"|"onAdd"|"onDelete"|"onUpdate"} type
      * @param {Record} [record] when field with onAdd/onDelete, the record being added or deleted
      */
@@ -132,7 +146,7 @@ export class Store extends Record {
                 }
             }
         } else {
-            /** @type {RecordField} */
+            /** @type {import("./record_field").RecordField} */
             const field = fieldOrRecord;
             const field0 = _0(field);
             if (type === "compute") {
@@ -190,12 +204,31 @@ export class Store extends Record {
      */
     updateFields(record, vals) {
         for (const [fieldName, value] of Object.entries(vals)) {
-            if (record?.[STORE_SYM] && record.storeReady && fieldName in record.Models) {
-                // "store[Model] =" is considered a Model.insert()
-                record[fieldName].insert(value);
+            if (record?.[STORE_SYM] && fieldName in record.Models) {
+                if (record.storeReady) {
+                    // "store[Model] =" is considered a Model.insert()
+                    record[fieldName].insert(value);
+                } else {
+                    record[fieldName] = value;
+                }
+            } else if (record.Model.INSTANCE_INTERNALS[fieldName]) {
+                record[fieldName] = value;
             } else {
-                const definition = record.Model._fields.get(fieldName);
-                if (!definition || isAttr(definition)) {
+                let definition = record.Model._fields.get(fieldName);
+                if (!definition) {
+                    // dynamically add attr field definition on the fly
+                    definition = new FieldDefinition({
+                        [ATTR_SYM]: true,
+                        name: fieldName,
+                        Model: record.Model,
+                    });
+                    record.Model._fields.set(fieldName, definition);
+                }
+                if (!record._fields.get(fieldName)) {
+                    const field = new RecordField({ definition, owner: record });
+                    record._fields.set(fieldName, field);
+                }
+                if (isAttr(definition)) {
                     this.updateAttr(record, fieldName, value);
                 } else {
                     this.updateRelation(record, fieldName, value);
@@ -211,23 +244,34 @@ export class Store extends Record {
     updateAttr(record, fieldName, value) {
         const definition = record.Model._fields.get(fieldName);
         // ensure each field write goes through the proxy exactly once to trigger reactives
-        const targetRecord = record._proxyUsed.has(fieldName) ? record : record._2;
+        const record2 = record._updatingFieldsThroughProxy.has(fieldName) ? record : record._2;
+        const field = record._fields.get(fieldName);
         if (
             definition?.html &&
             this.trusted &&
             typeof value === "string" &&
             !(value instanceof Markup)
         ) {
-            if (record[fieldName]?.toString() !== value) {
-                record._updateFields.add(fieldName);
-                targetRecord[fieldName] = markup(value);
-                record._updateFields.delete(fieldName);
+            if (field.value?.toString() !== value || record[fieldName]?.toString() !== value) {
+                field.ts = field.definition.NEXT_TS++;
+                record._updatingAttrs.add(fieldName);
+                if (record2 === record) {
+                    record2._fields.get(fieldName).value = markup(value);
+                } else {
+                    record2[fieldName] = markup(value);
+                }
+                record._updatingAttrs.delete(fieldName);
             }
         } else {
-            if (record[fieldName] !== value) {
-                record._updateFields.add(fieldName);
-                targetRecord[fieldName] = value;
-                record._updateFields.delete(fieldName);
+            if (field.value !== value || record[fieldName] !== value) {
+                field.ts = field.definition.NEXT_TS++;
+                record._updatingAttrs.add(fieldName);
+                if (record2 === record) {
+                    record2._fields.get(fieldName).value = value;
+                } else {
+                    record2[fieldName] = value;
+                }
+                record._updatingAttrs.delete(fieldName);
             }
         }
     }
@@ -310,14 +354,14 @@ export class Store extends Record {
     sortRecordList(reclist3, func) {
         const reclist0 = _0(reclist3);
         // sort on copy of list so that reactive observers not triggered while sorting
-        const records3 = reclist3.data.map((localId) =>
-            reclist3.store.recordByLocalId.get(localId)
+        const records3 = reclist3.state.data.map((localId) =>
+            reclist3.store.localIdToRecord.get(localId)
         );
         records3.sort(func);
         const data = records3.map((record3) => _0(record3).localId);
-        const hasChanged = reclist0.data.some((localId, i) => localId !== data[i]);
+        const hasChanged = reclist0.state.data.some((localId, i) => localId !== data[i]);
         if (hasChanged) {
-            reclist3.data = data;
+            reclist3.state.data = data;
         }
     }
     /**
@@ -362,11 +406,11 @@ export class Store extends Record {
     }
     storeReady = false;
     /**
-     * @param {string} localId
+     * @param {string} objectId
      * @returns {Record}
      */
-    get(localId) {
-        return this.recordByLocalId.get(localId);
+    get(objectId) {
+        return this.localIdToRecord.get(this.objectIdToLocalId.get(objectId));
     }
     /**
      * @template T

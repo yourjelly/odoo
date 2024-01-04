@@ -7,7 +7,7 @@ import { assignDefined } from "@mail/utils/common/misc";
  * @property {string} chatbot_name
  * @property {number} chatbot_operator_partner_id
  * @property {number} chatbot_script_id
- * @property {import("@im_livechat/embed/common/chatbot/chatbot_step_model").IChatbotStep[]} chatbot_welcome_steps
+ * @property {import("models").ChatbotStep[]} chatbot_welcome_steps
  * @property {number} [welcome_step_index]
  */
 
@@ -20,7 +20,7 @@ export class Chatbot {
     welcomeStepIndex = 0;
     /** @type {number} */
     scriptId;
-    /** @type {import("@im_livechat/embed/common/chatbot/chatbot_step_model").IChatbotStep[]} */
+    /** @type {import("models").ChatbotStep[]} */
     welcomeSteps = [];
 
     /**

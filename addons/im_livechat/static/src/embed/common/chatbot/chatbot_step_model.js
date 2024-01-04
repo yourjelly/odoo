@@ -1,6 +1,6 @@
 /* @odoo-module */
 
-import { assignDefined } from "@mail/utils/common/misc";
+import { Record } from "@mail/core/common/record";
 
 /**
  * @typedef StepAnswer
@@ -13,20 +13,8 @@ import { assignDefined } from "@mail/utils/common/misc";
  * @typedef { "free_input_multi"|"free_input_single"|"question_email"|"question_phone"|"question_selection"|"text"|"forward_operator"} StepType
  */
 
-/**
- * @typedef IChatbotStep
- * @property {number} id
- * @property {boolean} isLast
- * @property {string} message
- * @property {StepType} type
- * @property {StepAnswer[]} [answers]
- * @property {boolean} [operatorFound]
- * @property {boolean} [isEmailValid]
- * @property {number} [selectedAnswerId]
- * @property {boolean} [hasAnswer]
- */
-
-export class ChatbotStep {
+export class ChatbotStep extends Record {
+    static id = "id";
     /** @type {number} */
     id;
     /** @type {StepAnswer[]} */
@@ -39,21 +27,11 @@ export class ChatbotStep {
     isEmailValid = false;
     operatorFound = false;
     isLast = false;
+    /** @type {number} */
+    selectedAnswerId;
 
-    /**
-     * @param {IChatbotStep} data
-     */
-    constructor(data) {
-        assignDefined(this, data, [
-            "answers",
-            "id",
-            "isLast",
-            "message",
-            "operatorFound",
-            "hasAnswer",
-            "type",
-            "isEmailValid",
-        ]);
+    update(data) {
+        super.update(data);
         this.hasAnswer = data.hasAnswer ?? Boolean(data.selectedAnswerId);
     }
 
@@ -75,3 +53,5 @@ export class ChatbotStep {
         );
     }
 }
+
+ChatbotStep.register();

@@ -2,33 +2,41 @@
 
 import { reactive } from "@odoo/owl";
 import {
-    IS_FIELD_DEFINITION_SYM,
-    IS_RECORD_FIELD_SYM,
-    IS_RECORD_SYM,
+    RECORD_SYM,
     STORE_SYM,
     modelRegistry,
     _0,
     isField,
     isMany,
     isRelation,
+    AND_SYM,
+    OR_SYM,
+    ATTR_SYM,
 } from "./misc";
 import { Store } from "./store";
-import { onChange } from "@mail/utils/common/misc";
+import { assignDefined, onChange } from "@mail/utils/common/misc";
 import { RecordList } from "./record_list";
 import { Record } from "./record";
+import { RecordField } from "./record_field";
+import { FieldDefinition } from "./field_definition";
 
 export function makeStore(env) {
-    const recordByLocalId = reactive(new Map());
+    const localIdToRecord = reactive(new Map());
+    const objectIdToLocalId = new Map();
     const dummyStore = new Store();
-    dummyStore.recordByLocalId = recordByLocalId;
+    dummyStore.localIdToRecord = localIdToRecord;
+    dummyStore.objectIdToLocalId = objectIdToLocalId;
     dummyStore.env = env;
-    const _ = { store: dummyStore };
+    let store = dummyStore;
     Record.store0 = dummyStore;
     const Models = {};
+    dummyStore.Models = Models;
+    const OgClasses = {};
     for (const [name, _OgClass] of modelRegistry.getEntries()) {
         /** @type {typeof Record} */
         const OgClass = _OgClass;
-        if (_.store[name]) {
+        OgClasses[name] = OgClass;
+        if (store[name]) {
             throw new Error(`There must be no duplicated Model Names (duplicate found: ${name})`);
         }
         // classes cannot be made reactive because they are functions and they are not supported.
@@ -39,44 +47,45 @@ export function makeStore(env) {
         // Produce another class with changed prototype, so that there are automatic get/set on relational fields
         const Class = {
             [OgClass.name]: class extends OgClass {
-                [IS_RECORD_SYM] = true;
+                [RECORD_SYM] = true;
                 constructor() {
                     super();
                     const this0 = this;
-                    this0._proxyUsed = new Set();
-                    this0._updateFields = new Set();
+                    this0._updatingFieldsThroughProxy = new Set();
+                    this0._updatingAttrs = new Set();
                     this0._0 = this0;
                     this0.Model = Model;
                     const this1 = new Proxy(this0, {
                         get(this0, name, this3) {
                             this3 = this0._downgradeProxy(this3);
                             const field = this0._fields.get(name);
-                            if (field) {
-                                if (field.compute && !field.eager) {
-                                    field.computeInNeed = true;
-                                    if (field.computeOnNeed) {
-                                        field.compute();
-                                    }
-                                }
-                                if (field.sort && !field.eager) {
-                                    field.sortInNeed = true;
-                                    if (field.sortOnNeed) {
-                                        field.sort();
-                                    }
-                                }
-                                if (isRelation(field)) {
-                                    const reclist = field.value;
-                                    const reclist3 = this3._fields.get(name).value._2;
-                                    if (isMany(reclist)) {
-                                        return reclist3;
-                                    }
-                                    return reclist3[0];
+                            if (!field) {
+                                return Reflect.get(this0, name, this3);
+                            }
+                            if (field.compute && !field.eager) {
+                                field.computeInNeed = true;
+                                if (field.computeOnNeed) {
+                                    field.compute();
                                 }
                             }
-                            return Reflect.get(this0, name, this3);
+                            if (field.sort && !field.eager) {
+                                field.sortInNeed = true;
+                                if (field.sortOnNeed) {
+                                    field.sort();
+                                }
+                            }
+                            if (isRelation(field)) {
+                                const reclist = field.value;
+                                const reclist3 = this3._fields.get(name).value._1;
+                                if (isMany(reclist)) {
+                                    return reclist3;
+                                }
+                                return reclist3[0];
+                            }
+                            return this3._fields.get(name).value;
                         },
                         deleteProperty(this0, name) {
-                            return _.store.MAKE_UPDATE(function R_deleteProperty() {
+                            return store.MAKE_UPDATE(function R_deleteProperty() {
                                 const field = this0._fields.get(name);
                                 if (field && isRelation(field)) {
                                     const reclist = field.value;
@@ -91,15 +100,21 @@ export function makeStore(env) {
                          * when updating multiple fields at the same time.
                          */
                         set(this0, name, val) {
-                            // ensure each field write goes through the updateFields method exactly once
-                            if (this0._updateFields.has(name)) {
-                                this0[name] = val;
+                            if (this0._customAssignThroughProxy) {
+                                const fn = this0._customAssignThroughProxy.bind(this0);
+                                this0._customAssignThroughProxy = undefined;
+                                fn();
                                 return true;
                             }
-                            return _.store.MAKE_UPDATE(function R_set() {
-                                this0._proxyUsed.add(name);
-                                _.store.updateFields(this0, { [name]: val });
-                                this0._proxyUsed.delete(name);
+                            // ensure each field write goes through the updateFields method exactly once
+                            if (this0._updatingAttrs.has(name)) {
+                                this0._fields.get(name).value = val;
+                                return true;
+                            }
+                            return store.MAKE_UPDATE(function R_set() {
+                                this0._updatingFieldsThroughProxy.add(name);
+                                store.updateFields(this0, { [name]: val });
+                                this0._updatingFieldsThroughProxy.delete(name);
                                 return true;
                             });
                         },
@@ -108,35 +123,32 @@ export function makeStore(env) {
                     const this2 = reactive(this1);
                     this0._2 = this2;
                     if (this0?.[STORE_SYM]) {
-                        _.store = this0;
+                        assignDefined(this0, dummyStore, [
+                            "Models",
+                            "localIdToRecord",
+                            "objectIdToRecord",
+                            "trusted",
+                            "FC_QUEUE",
+                            "FS_QUEUE",
+                            "FA_QUEUE",
+                            "FD_QUEUE",
+                            "FU_QUEUE",
+                            "RO_QUEUE",
+                            "RD_QUEUE",
+                        ]);
+                        Record.store0 = this0;
+                        store = this0;
                     }
                     for (const [name, definition] of Model._fields) {
-                        const SYM = this0[name]?.[0];
-                        const field = {
-                            [IS_RECORD_FIELD_SYM]: true,
-                            [SYM]: true,
-                            eager: definition.eager,
-                            name,
-                        };
+                        const field = new RecordField({ definition, owner: this0 });
                         this0._fields.set(name, field);
-                        if (isRelation(SYM)) {
-                            // Relational fields contain symbols for detection in original class.
-                            // This constructor is called on genuine records:
-                            // - 'one' fields => undefined
-                            // - 'many' fields => RecordList
-                            // record[name]?.[0] is ONE_SYM or MANY_SYM
-                            const reclist0 = new RecordList();
-                            Object.assign(reclist0, {
-                                [SYM]: true,
-                                field,
-                                name,
-                                owner: this0,
-                                _0: reclist0,
-                            });
-                            reclist0.store = _.store;
+                        if (isRelation(field)) {
+                            const reclist0 = new RecordList({ field, store });
+                            reclist0._0 = reclist0;
                             field.value = reclist0;
+                            field.registerOnChangeRecomputeObjectId();
                         } else {
-                            this0[name] = definition.default;
+                            this2[name] = definition.default;
                         }
                         if (definition.compute) {
                             if (!definition.eager) {
@@ -162,14 +174,16 @@ export function makeStore(env) {
                                 compute: () => {
                                     field.computing = true;
                                     field.computeOnNeed = false;
-                                    _.store.updateFields(this0, {
-                                        [name]: definition.compute.call(proxy2),
+                                    store.MAKE_UPDATE(() => {
+                                        store.updateFields(this0, {
+                                            [name]: definition.compute.call(proxy2),
+                                        });
                                     });
                                     field.computing = false;
                                 },
                                 requestCompute: ({ force = false } = {}) => {
-                                    if (_.store.UPDATE !== 0 && !force) {
-                                        _.store.ADD_QUEUE(field, "compute");
+                                    if (store.UPDATE !== 0 && !force) {
+                                        store.ADD_QUEUE(field, "compute");
                                     } else {
                                         if (field.eager || field.computeInNeed) {
                                             field.compute();
@@ -204,15 +218,17 @@ export function makeStore(env) {
                                 sort: () => {
                                     field.sortOnNeed = false;
                                     field.sorting = true;
-                                    _.store.sortRecordList(
-                                        proxy2._fields.get(name).value._2,
-                                        definition.sort.bind(proxy2)
-                                    );
+                                    store.MAKE_UPDATE(() => {
+                                        store.sortRecordList(
+                                            proxy2._fields.get(name).value._2,
+                                            definition.sort.bind(proxy2)
+                                        );
+                                    });
                                     field.sorting = false;
                                 },
                                 requestSort: ({ force } = {}) => {
-                                    if (_.store.UPDATE !== 0 && !force) {
-                                        _.store.ADD_QUEUE(field, "sort");
+                                    if (store.UPDATE !== 0 && !force) {
+                                        store.ADD_QUEUE(field, "sort");
                                     } else {
                                         if (field.eager || field.sortInNeed) {
                                             field.sort();
@@ -228,18 +244,20 @@ export function makeStore(env) {
                             let observe;
                             Object.assign(field, {
                                 onUpdate: () => {
-                                    /**
-                                     * Forward internal proxy for performance as onUpdate does not
-                                     * need reactive (observe is called separately).
-                                     */
-                                    definition.onUpdate.call(this0._1);
-                                    observe?.();
+                                    store.MAKE_UPDATE(() => {
+                                        /**
+                                         * Forward internal proxy for performance as onUpdate does not
+                                         * need reactive (observe is called separately).
+                                         */
+                                        definition.onUpdate.call(this0._1);
+                                        observe?.();
+                                    });
                                 },
                             });
-                            _.store._onChange(this2, name, (obs) => {
+                            store._onChange(this2, name, (obs) => {
                                 observe = obs;
-                                if (_.store.UPDATE !== 0) {
-                                    _.store.ADD_QUEUE(field, "onUpdate");
+                                if (store.UPDATE !== 0) {
+                                    store.ADD_QUEUE(field, "onUpdate");
                                 } else {
                                     field.onUpdate();
                                 }
@@ -250,22 +268,83 @@ export function makeStore(env) {
                 }
             },
         }[OgClass.name];
+        // Produce _id and objectIdFields
+        // For more structured object id mapping and re-shape on change of object id.
+        // Useful for support of multi-identification on records
+        if (Model.id === undefined) {
+            Model._id = [];
+            Model.objectIdFields = {};
+        } else if (typeof Model.id === "string") {
+            Model._id = [[Model.id]];
+            Model.objectIdFields = { [Model.id]: true };
+        } else if (Model.id[0] === AND_SYM) {
+            const fields = Model.id.slice(1);
+            Model._id = [[...fields]];
+            Model.objectIdFields = Object.fromEntries(fields.map((i) => [i, true]));
+        } else if (Model.id[0] === OR_SYM) {
+            const fields = Model.id.slice(1);
+            Model._id = [...fields.map((i) => [i])];
+            Model.objectIdFields = Object.fromEntries(fields.map((i) => [i, true]));
+        } else {
+            const _id = [];
+            const objectIdFields = {};
+            // this is an array of string and AND expressions
+            for (const item of Model.id) {
+                if (typeof item === "string") {
+                    _id.push([item]);
+                    if (!objectIdFields[item]) {
+                        objectIdFields[item] = true;
+                    }
+                } else if (item[0] === AND_SYM) {
+                    const fields = item.slice(1);
+                    _id.push([...fields]);
+                    for (const f of fields) {
+                        if (!objectIdFields[f]) {
+                            objectIdFields[f] = true;
+                        }
+                    }
+                } else {
+                    _id.push([...item]);
+                    for (const f of item) {
+                        if (!objectIdFields[f]) {
+                            objectIdFields[f] = true;
+                        }
+                    }
+                }
+            }
+            Object.assign(Model, { _id, objectIdFields });
+        }
         Object.assign(Model, {
             Class,
+            NEXT_LOCAL_ID: 1,
             env,
             records: reactive({}),
             _fields: new Map(),
         });
         Models[name] = Model;
-        _.store[name] = Model;
+        store[name] = Model;
+    }
+    for (const Model of Object.values(Models)) {
         // Detect fields with a dummy record and setup getter/setters on them
-        const obj = new OgClass();
+        const obj = new OgClasses[Model.name]();
         for (const [name, val] of Object.entries(obj)) {
-            const SYM = val?.[0];
-            if (!isField(SYM)) {
+            if (obj?.[STORE_SYM] && name in Models) {
                 continue;
             }
-            Model._fields.set(name, { [IS_FIELD_DEFINITION_SYM]: true, [SYM]: true, ...val[1] });
+            if (Model.INSTANCE_INTERNALS[name]) {
+                continue;
+            }
+            /** @type {FieldDefinition} */
+            let definition;
+            if (!isField(val)) {
+                // dynamically add attr field definition on the fly
+                definition = new FieldDefinition({ [ATTR_SYM]: true, default: val });
+            } else {
+                definition = val;
+            }
+            definition.Model = Model;
+            definition.name = name;
+            Model._fields.set(name, definition);
         }
     }
     // Sync inverse fields
@@ -298,17 +377,17 @@ export function makeStore(env) {
         }
     }
     /**
-     * store/_0store are assigned on models at next step, but they are
+     * store/store0 are assigned on models at next step, but they are
      * required on Store model to make the initial store insert.
      */
-    Object.assign(_.store.Store, { store: _.store, _0store: _.store });
+    Object.assign(store.Store, { store, store0: store });
     // Make true store (as a model)
-    _.store = _0(_.store.Store.insert());
+    store = _0(store.Store.insert());
     for (const Model of Object.values(Models)) {
-        Model.store0 = _.store;
-        Model.store = _.store._2;
-        _.store._2[Model.name] = Model;
+        Model.store0 = store;
+        Model.store = store._2;
+        store._2[Model.name] = Model;
     }
-    Object.assign(_.store, { Models, storeReady: true });
-    return _.store._2;
+    Object.assign(store, { storeReady: true });
+    return store._2;
 }

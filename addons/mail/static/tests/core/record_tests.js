@@ -1,7 +1,7 @@
 /* @odoo-module */
 
-import { modelRegistry } from "@mail/core/common/model/misc";
-import { Store, Record, makeStore } from "@mail/core/common/model/export";
+import { AND, modelRegistry } from "@mail/core/common/model/misc";
+import { Store, OR, Record, makeStore } from "@mail/core/common/model/export";
 
 import { registry } from "@web/core/registry";
 import { clearRegistryWithCleanup, makeTestEnv } from "@web/../tests/helpers/mock_env";
@@ -579,7 +579,7 @@ QUnit.test("lazy sort should re-sort while they are observed", async (assert) =>
     assert.equal(
         `${toRaw(thread)
             ._0._fields.get("messages")
-            .value.data.map((localId) => toRaw(thread)._0._store.get(localId).id)}`,
+            .value.state.data.map((localId) => toRaw(thread)._0._store.get(localId).id)}`,
         "2,1",
         "observed one last time when it changes"
     );
@@ -588,7 +588,7 @@ QUnit.test("lazy sort should re-sort while they are observed", async (assert) =>
     assert.equal(
         `${toRaw(thread)
             ._0._fields.get("messages")
-            .value.data.map((localId) => toRaw(thread)._0._store.get(localId).id)}`,
+            .value.state.data.map((localId) => toRaw(thread)._0._store.get(localId).id)}`,
         "2,1",
         "no longer observed"
     );
@@ -605,14 +605,310 @@ QUnit.test("store updates can be observed", async (assert) => {
     function onUpdate() {
         assert.step(`abc:${reactiveStore.abc}`);
     }
-    const _0store = toRaw(store)._0;
+    const store0 = toRaw(store)._0;
     const reactiveStore = reactive(store, onUpdate);
     onUpdate();
     assert.verifySteps(["abc:undefined"]);
     store.abc = 1;
     assert.verifySteps(["abc:1"], "observable from makeStore");
-    _0store._store.abc = 2;
+    store0._store.abc = 2;
     assert.verifySteps(["abc:2"], "observable from record._store");
-    _0store.Model.store.abc = 3;
+    store0.Model.store.abc = 3;
     assert.verifySteps(["abc:3"], "observable from Model.store");
+});
+
+QUnit.test("Record can have many ids (1)", async (assert) => {
+    (class User extends Record {
+        static id = OR("name", "employeeId", "userId");
+        name;
+    }).register();
+    const store = await start();
+    const john = store.User.insert({ name: "John", employeeId: 10, userId: 200 });
+    const john1 = store.User.get({ name: "John" });
+    const john2 = store.User.get({ employeeId: 10 });
+    const john3 = store.User.get({ userId: 200 });
+    assert.ok(john.eq(john1));
+    assert.ok(john.eq(john2));
+    assert.ok(john.eq(john3));
+});
+
+QUnit.test("Record can have many ids (2)", async (assert) => {
+    (class User extends Record {
+        static id = ["name", ["id", "type"]];
+        name;
+        id;
+        type;
+    }).register();
+    const store = await start();
+    const john = store.User.insert({ name: "John", id: 100, type: "partner" });
+    const john1 = store.User.get({ name: "John" });
+    const john2 = store.User.get({ id: 100, type: "partner" });
+    assert.ok(john.eq(john1));
+    assert.ok(john.eq(john2));
+});
+
+QUnit.test("Record can have many ids (3)", async (assert) => {
+    (class User extends Record {
+        static id = ["name", "managerOfTeam"];
+        managerOfTeam = Record.one("Team");
+        name;
+        id;
+        type;
+    }).register();
+    (class Team extends Record {
+        static id = ["name"];
+        name;
+        manager = Record.one("User", { inverse: "managerOfTeam" });
+    }).register();
+    const store = await start();
+    const john = store.User.insert({ name: "John" });
+    const rd = store.Team.insert("R&D");
+    rd.manager = john;
+    const john1 = store.User.get({ name: "John" });
+    const john2 = store.User.get({ managerOfTeam: rd });
+    assert.ok(john.eq(john1));
+    assert.ok(john.eq(john2));
+});
+
+QUnit.test("Record can have many ids (4)", async (assert) => {
+    (class User extends Record {
+        static id = ["name", "managerOfTeam"];
+        managerOfTeam = Record.one("Team");
+        name;
+        id;
+    }).register();
+    (class Team extends Record {
+        static id = ["name"];
+        name;
+        manager = Record.one("User", { inverse: "managerOfTeam" });
+    }).register();
+    const store = await start();
+    const john = store.User.insert({ name: "John", managerOfTeam: { name: "R&D" } });
+    const john1 = store.User.get({ name: "John" });
+    const john2 = store.User.get({ managerOfTeam: { name: "R&D" } });
+    assert.ok(john.eq(john1));
+    assert.ok(john.eq(john2));
+});
+
+QUnit.test("Record can have many ids (5)", async (assert) => {
+    (class User extends Record {
+        static id = ["name", "managerOfTeam"];
+        managerOfTeam = Record.one("Team");
+        name;
+        id;
+    }).register();
+    (class Team extends Record {
+        static id = ["name"];
+        name;
+        manager = Record.one("User", { inverse: "managerOfTeam" });
+    }).register();
+    const store = await start();
+    const rd = store.Team.insert({ name: "R&D", manager: { name: "John" } });
+    const john1 = store.User.get({ name: "John" });
+    const john2 = store.User.get({ managerOfTeam: { name: "R&D" } });
+    assert.ok(rd.manager.eq(john1));
+    assert.ok(rd.manager.eq(john2));
+});
+
+QUnit.test("record reconcile (1) - base", async (assert) => {
+    (class Person extends Record {
+        static id = ["name", "ceoOfCorporation"];
+        corpAsCEO = Record.one("Corporation");
+        name;
+        id;
+        surname;
+    }).register();
+    (class Corporation extends Record {
+        static id = ["name"];
+        name;
+        ceo = Record.one("Person", { inverse: "corpAsCEO" });
+    }).register();
+    const store = await start();
+    const abk = store.Corporation.insert({ name: "ABK" });
+    const bobby = store.Person.insert({ name: "Bobby" });
+    abk.ceo = { surname: "Cocktick" };
+    abk.ceo.name = "Bobby";
+    assert.ok(abk.ceo.eq(bobby));
+    assert.strictEqual(bobby.surname, "Cocktick");
+});
+
+QUnit.test("record reconcile (2) - base observed", async (assert) => {
+    (class Person extends Record {
+        static id = ["name", "ceoOfCorporation"];
+        corpAsCEO = Record.one("Corporation");
+        name;
+        id;
+        surname;
+    }).register();
+    (class Corporation extends Record {
+        static id = ["name"];
+        name;
+        ceo = Record.one("Person", { inverse: "corpAsCEO" });
+    }).register();
+    const store = await start();
+    const abk = store.Corporation.insert({ name: "ABK" });
+    const bobby = store.Person.insert({ name: "Bobby" });
+    function onUpdate() {
+        assert.step(`${reactiveBobby.name}:${reactiveBobby.surname}`);
+    }
+    const reactiveBobby = reactive(bobby, onUpdate);
+    onUpdate();
+    assert.verifySteps(["Bobby:undefined"]);
+    abk.ceo = { surname: "Cocktick" };
+    assert.verifySteps([]);
+    abk.ceo.name = "Bobby";
+    assert.ok(abk.ceo.eq(bobby));
+    assert.strictEqual(bobby.surname, "Cocktick");
+    assert.verifySteps(["Bobby:Cocktick"]);
+});
+
+QUnit.test("record reconcile (3) - relation", async (assert) => {
+    (class Thread extends Record {
+        static id = [AND("model", "id"), "channelId"];
+        name;
+        messages = Record.many("Message");
+        model;
+        id;
+        channelId;
+    }).register();
+    (class Message extends Record {
+        static id = ["id"];
+        id;
+        content;
+    }).register();
+    const store = await start();
+    const t1 = store.Thread.insert({ model: "channel", id: 1, name: "MyConversation" });
+    t1.messages = [
+        { id: 1, content: "1" },
+        { id: 2, content: "2" },
+    ];
+    const t2 = store.Thread.insert({ channelId: 1, name: "MyConversationUpdated" });
+    t2.messages = [
+        { id: 3, content: "3" },
+        { id: 4, content: "4" },
+    ];
+    assert.ok(t1.notEq(t2));
+    const msgs1 = t1.messages;
+    const msgs2 = t2.messages;
+    t1.channelId = 1;
+    assert.ok(t1.eq(t2));
+    // most recently updated fields are chosen by default
+    assert.strictEqual(t1.name, "MyConversationUpdated");
+    assert.strictEqual(t2.name, "MyConversationUpdated");
+    assert.strictEqual(t1.messages.length, 2);
+    assert.strictEqual(t1.messages[0].id, 3);
+    assert.strictEqual(t1.messages[1].id, 4);
+    assert.strictEqual(t2.messages.length, 2);
+    assert.strictEqual(t2.messages[0].id, 3);
+    assert.strictEqual(t2.messages[1].id, 4);
+    assert.strictEqual(msgs1.length, 2);
+    assert.strictEqual(msgs1[0].id, 3);
+    assert.strictEqual(msgs1[1].id, 4);
+    assert.strictEqual(msgs2.length, 2);
+    assert.strictEqual(msgs2[0].id, 3);
+    assert.strictEqual(msgs2[1].id, 4);
+});
+
+QUnit.test("record reconcile (4) - relation observed", async (assert) => {
+    (class Thread extends Record {
+        static id = [AND("model", "id"), "channelId"];
+        name;
+        messages = Record.many("Message");
+        model;
+        id;
+        channelId;
+    }).register();
+    (class Message extends Record {
+        static id = ["id"];
+        id;
+        content;
+    }).register();
+    const store = await start();
+    const t1 = store.Thread.insert({ model: "channel", id: 1 });
+    t1.messages = [
+        { id: 1, content: "1" },
+        { id: 2, content: "2" },
+    ];
+    const t2 = store.Thread.insert({ channelId: 1 });
+    t2.messages = [
+        { id: 3, content: "3" },
+        { id: 4, content: "4" },
+    ];
+    function onUpdate1() {
+        assert.step(`1:${reactiveT1.messages.map((msg) => msg.id).join(",")}`);
+    }
+    function onUpdate2() {
+        assert.step(`2:${reactiveT2.messages.map((msg) => msg.id).join(",")}`);
+    }
+    const reactiveT1 = reactive(t1, onUpdate1);
+    const reactiveT2 = reactive(t2, onUpdate2);
+    onUpdate1();
+    onUpdate2();
+    assert.verifySteps(["1:1,2", "2:3,4"]);
+    t1.channelId = 1;
+    assert.verifySteps(["1:3,4"]);
+});
+
+QUnit.test("record reconcile (5) - inverse relation + observed", async (assert) => {
+    // roughly same test as (4) but with inverse field
+    (class Thread extends Record {
+        static id = [AND("model", "id"), "channelId"];
+        name;
+        messages = Record.many("Message");
+        model;
+        id;
+        channelId;
+    }).register();
+    (class Message extends Record {
+        static id = ["id"];
+        id;
+        content;
+        originThread = Record.one("Thread", { inverse: "messages" });
+    }).register();
+    const store = await start();
+    const t1 = store.Thread.insert({ model: "channel", id: 1, name: "MyConversation" });
+    t1.messages = [
+        { id: 1, content: "1" },
+        { id: 2, content: "2" },
+    ];
+    const t2 = store.Thread.insert({ channelId: 1, name: "MyConversationUpdated" });
+    t2.messages = [
+        { id: 3, content: "3" },
+        { id: 4, content: "4" },
+    ];
+    assert.ok(t1.notEq(t2));
+    const m1 = t1.messages[0];
+    const m2 = t1.messages[1];
+    const m3 = t2.messages[0];
+    const m4 = t2.messages[1];
+    const msgs1 = t1.messages;
+    const msgs2 = t2.messages;
+    function onUpdate() {
+        assert.step(`m1.originThread: ${reactiveM1.originThread?.id}`);
+    }
+    const reactiveM1 = reactive(m1, onUpdate);
+    onUpdate();
+    assert.verifySteps(["m1.originThread: 1"]);
+    t1.channelId = 1;
+    assert.ok(t1.eq(t2));
+    // most recently updated fields are chosen by default
+    assert.strictEqual(t1.name, "MyConversationUpdated");
+    assert.strictEqual(t2.name, "MyConversationUpdated");
+    assert.strictEqual(t1.messages.length, 2);
+    assert.strictEqual(t1.messages[0].id, 3);
+    assert.strictEqual(t1.messages[1].id, 4);
+    assert.strictEqual(t2.messages.length, 2);
+    assert.strictEqual(t2.messages[0].id, 3);
+    assert.strictEqual(t2.messages[1].id, 4);
+    assert.strictEqual(msgs1.length, 2);
+    assert.strictEqual(msgs1[0].id, 3);
+    assert.strictEqual(msgs1[1].id, 4);
+    assert.strictEqual(msgs2.length, 2);
+    assert.strictEqual(msgs2[0].id, 3);
+    assert.strictEqual(msgs2[1].id, 4);
+    assert.notOk(m1.originThread);
+    assert.notOk(m2.originThread);
+    assert.ok(m3.originThread.eq(t1));
+    assert.ok(m4.originThread.eq(t1));
+    assert.verifySteps(["m1.originThread: undefined"]);
 });
