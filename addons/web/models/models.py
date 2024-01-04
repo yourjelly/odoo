@@ -259,6 +259,7 @@ class Base(models.AbstractModel):
 
         :returns: array of groups
         """
+        # TODO: the new read_group and deprecate read_group in order to remove it in next versions
         groups = self.read_group(domain, fields, groupby, offset=offset, limit=limit,
                                  orderby=orderby, lazy=lazy)
         return groups
