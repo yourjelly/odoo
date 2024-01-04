@@ -987,6 +987,11 @@ class RecordList extends Array {
  *   or a RecordList if it's a relational field.
  */
 
+/**
+ * @template {ThisConstructor<typeof Record>} T
+ * @typedef {T} ThisConstructor
+ */
+
 export class Record {
     /** @param {FieldDefinition} */
     static isAttr(definition) {
@@ -1501,7 +1506,13 @@ export class Record {
     static attr(def, { compute, eager = false, html, onUpdate } = {}) {
         return [ATTR_SYM, { compute: compute, default: def, eager, html, onUpdate }];
     }
-    /** @returns {Record|Record[]} */
+    /**
+     * @template {ThisConstructor<typeof Record>} T
+     * @template DataType
+     * @this {T}
+     * @param {DataType} data
+     * @returns {DataType extends Array<any> ? ThisConstructor<T["prototype"]>[] : ThisConstructor<T["prototype"]>}
+     */
     static insert(data, options = {}) {
         const SubClass = this;
         return Record.MAKE_UPDATE(function RecordInsert() {

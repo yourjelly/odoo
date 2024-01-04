@@ -36,10 +36,7 @@ export class Thread extends Record {
         // Transform "Thread,<model> AND <id>" to "<model>_<id>""
         return localId.split(",").slice(1).join("_").replace(" AND ", "_");
     }
-    /** @returns {import("models").Thread|import("models").Thread[]} */
-    static insert(data) {
-        return super.insert(...arguments);
-    }
+
     static new(data) {
         const thread = super.new(data);
         Record.onChange(thread, ["state"], () => {
