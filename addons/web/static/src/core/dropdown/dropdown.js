@@ -156,6 +156,10 @@ export class Dropdown extends Component {
             focusInitialElementOnDisabled: () => !this.group.isInGroup,
             ...this.nesting.navigationOptions,
             ...this.props.options.navigation,
+            hotkeys: {
+                ...this.nesting.navigationOptions.hotkeys,
+                ...(this.props.options.navigation?.hotkeys ?? {}),
+            },
         });
 
         this.DIRECTION_CLASS = {
@@ -220,9 +224,9 @@ export class Dropdown extends Component {
             return;
         }
 
-        event.stopPropagation();
+        // event.stopPropagation();
         if (this.state.isOpen && !this.hasParent) {
-            this.state.close();
+            // this.state.close();
         } else {
             this.state.open();
         }
@@ -321,6 +325,7 @@ export class Dropdown extends Component {
             popoverRole: "menu",
             arrow: false,
             animation: true,
+            setActiveElement: false,
             position: this.position,
             ref: this.menuRef,
             closeOnEscape: false, // Handled via navigation and prevents closing root of nested dropdown

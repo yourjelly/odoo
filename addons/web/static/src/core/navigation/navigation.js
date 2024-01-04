@@ -6,16 +6,7 @@ import { scrollTo } from "@web/core/utils/scrolling";
 
 /**
  * @typedef {Object} NavigationOptions
- * @property {keyHandlerCallback} onArrowUp
- * @property {keyHandlerCallback} onArrowDown
- * @property {keyHandlerCallback} onArrowLeft
- * @property {keyHandlerCallback} onArrowRight
- * @property {keyHandlerCallback} onHome
- * @property {keyHandlerCallback} onEnd
- * @property {keyHandlerCallback} onTab
- * @property {keyHandlerCallback} onShiftTab
- * @property {keyHandlerCallback} onEnter
- * @property {Function} onEscape
+ * @property {NavigationHotkeys} hotkeys
  * @property {Function} onOpen
  * @property {Function} onMouseEnter
  * @property {Boolean} [virtualFocus=false] - If true, items are only visually
@@ -23,6 +14,24 @@ import { scrollTo } from "@web/core/utils/scrolling";
  * @property {string} [itemsSelector=":scope .o-navigable"] - The selector used to get the list
  * of navigable elements.
  * @property {Function} focusInitialElementOnDisabled
+ * @property {Boolean} [shouldFocusChildInput=false] - If true, elements like inputs or buttons
+ * inside of the items are focused instead of the items themselves.
+ */
+
+/**
+ * @typedef {{
+ *  home: keyHandlerCallback|undefined,
+ *  end: keyHandlerCallback|undefined,
+ *  tab: keyHandlerCallback|undefined,
+ *  "shift+tab": keyHandlerCallback|undefined,
+ *  arrowup: keyHandlerCallback|undefined,
+ *  arrowdown: keyHandlerCallback|undefined,
+ *  enter: keyHandlerCallback|undefined,
+ *  arrowleft: keyHandlerCallback|undefined,
+ *  arrowright: keyHandlerCallback|undefined,
+ *  escape: keyHandlerCallback|undefined,
+ *  space: keyHandlerCallback|undefined,
+ * }} NavigationHotkeys
  */
 
 /**
@@ -55,16 +64,16 @@ class NavigationItem {
         } else {
             this.target = el;
         }
-    }
 
-    addListeners() {
-        this.target.addEventListener("focus", this.focus);
-        this.target.addEventListener("mouseenter", this.onMouseEnter);
-    }
+        const focus = (ev) => this.focus(ev);
+        const onMouseEnter = (ev) => this.onMouseEnter(ev);
 
-    removeListeners() {
-        this.target.removeEventListener("focus", this.focus);
-        this.target.removeEventListener("mouseenter", this.onMouseEnter);
+        this.target.addEventListener("focus", focus);
+        this.target.addEventListener("mouseenter", onMouseEnter);
+        this.removeListeners = () => {
+            this.target.removeEventListener("focus", focus);
+            this.target.removeEventListener("mouseenter", onMouseEnter);
+        };
     }
 
     select() {
@@ -72,9 +81,9 @@ class NavigationItem {
         this.target.click();
     }
 
-    focus(event) {
+    focus(event = undefined) {
         scrollTo(this.target);
-        this.setActiveItem(this.index, this.target);
+        this.setActiveItem(this.index, this);
         this.target.classList.add(ACTIVE_ELEMENT_CLASS);
 
         if (!event && !this.options.virtualFocus) {
@@ -88,9 +97,7 @@ class NavigationItem {
 
     onMouseEnter() {
         this.focus();
-        if (this.options.onMouseEnter) {
-            this.options.onMouseEnter(this);
-        }
+        this.options.onMouseEnter?.(this);
     }
 }
 
@@ -104,7 +111,7 @@ class Navigator {
         this.containerRef = containerRef;
 
         const focusAt = (increment) => {
-            const isFocused = [...this.activeItems].some((el) => el.isConnected);
+            const isFocused = this.activeItem?.el.isConnected;
             const index = this.currentActiveIndex + increment;
             if (isFocused && index >= 0) {
                 return this.items[index % this.items.length]?.focus();
@@ -120,50 +127,36 @@ class Navigator {
             virtualFocus: false,
             itemsSelector: ":scope .o-navigable",
             focusInitialElementOnDisabled: () => true,
-
-            onHome: (index, items) => items[0]?.focus(),
-            onEnd: (index, items) => items.at(-1)?.focus(),
-            onTab: () => focusAt(+1),
-            onShiftTab: () => focusAt(-1),
-            onArrowDown: () => focusAt(+1),
-            onArrowUp: () => focusAt(-1),
-            onArrowLeft: () => {},
-            onArrowRight: () => {},
-            onEnter: (index, items) => items[index]?.select(),
-
             ...options,
+
+            hotkeys: {
+                home: (index, items) => items[0]?.focus(),
+                end: (index, items) => items.at(-1)?.focus(),
+                tab: () => focusAt(+1),
+                "shift+tab": () => focusAt(-1),
+                arrowdown: () => focusAt(+1),
+                arrowup: () => focusAt(-1),
+                enter: (index, items) => items[index]?.select(),
+                ...(options?.hotkeys || {}),
+            },
         };
 
         /**@type {Array<NavigationItem>} */
         this.items = [];
-        /**@type {Set<HTMLElement>} */
-        this.activeItems = new Set();
+
+        /**@type {NavigationItem|undefined}*/
+        this.activeItem = undefined;
         this.currentActiveIndex = -1;
+
         this.initialFocusElement = undefined;
         this.debouncedUpdate = debounce(() => this.update(), 100);
 
         this.hotkeyRemoves = [];
         this.hotkeyService = hotkeyService;
-        this.BYPASSED_HOTKEYS = ["arrowup", "arrowdown", "enter"];
-        this.hotkeyCallbacks = {
-            home: () => this.options.onHome(this.currentActiveIndex, this.items),
-            end: () => this.options.onEnd(this.currentActiveIndex, this.items),
-            tab: () => this.options.onTab(this.currentActiveIndex, this.items),
-            "shift+tab": () => this.options.onShiftTab(this.currentActiveIndex, this.items),
-            arrowdown: () => this.options.onArrowDown(this.currentActiveIndex, this.items),
-            arrowup: () => this.options.onArrowUp(this.currentActiveIndex, this.items),
-            arrowleft: () => this.options.onArrowLeft(this.currentActiveIndex, this.items),
-            arrowright: () => this.options.onArrowRight(this.currentActiveIndex, this.items),
-            escape: () => this.options.onEscape(this.currentActiveIndex, this.items),
-            enter: () => this.options.onEnter(this.currentActiveIndex, this.items),
-        };
-    }
 
-    selectElement(index, overrideOption) {
-        if (overrideOption) {
-            overrideOption(this.currentActiveIndex, this.items);
-        } else if (index !== undefined && index >= 0 && index < this.items.length) {
-            this.items[index].focus();
+        this.bypassedHotkeys = ["arrowup", "arrowdown", "enter", "tab", "shift+tab"];
+        if (options.hotkeys.space) {
+            this.bypassedHotkeys.push("space");
         }
     }
 
@@ -172,14 +165,20 @@ class Navigator {
             return;
         }
 
-        this.enabled = true;
+        for (const [hotkey, callback] of Object.entries(this.options.hotkeys)) {
+            if (!callback) {
+                continue;
+            }
 
-        for (const [hotkey, callback] of Object.entries(this.hotkeyCallbacks)) {
             this.hotkeyRemoves.push(
-                this.hotkeyService.add(hotkey, callback, {
-                    allowRepeat: true,
-                    bypassEditableProtection: this.BYPASSED_HOTKEYS.includes(hotkey),
-                })
+                this.hotkeyService.add(
+                    hotkey,
+                    () => callback(this.currentActiveIndex, this.items),
+                    {
+                        allowRepeat: true,
+                        bypassEditableProtection: this.bypassedHotkeys.includes(hotkey),
+                    }
+                )
             );
         }
 
@@ -188,9 +187,6 @@ class Navigator {
             childList: true,
             subtree: true,
         });
-
-        this.resizeObserver = new ResizeObserver(() => this.debouncedUpdate());
-        this.resizeObserver.observe(this.containerRef.el);
 
         this.initialFocusElement = document.activeElement;
         this.currentActiveIndex = -1;
@@ -201,6 +197,8 @@ class Navigator {
         } else if (this.items.length > 0) {
             this.items[0]?.focus();
         }
+
+        this.enabled = true;
     }
 
     disable() {
@@ -208,16 +206,9 @@ class Navigator {
             return;
         }
 
-        this.enabled = false;
-
         if (this.targetObserver) {
             this.targetObserver.disconnect();
             this.targetObserver = undefined;
-        }
-
-        if (this.resizeObserver) {
-            this.resizeObserver.disconnect();
-            this.resizeObserver = undefined;
         }
 
         this.clearItems();
@@ -229,6 +220,8 @@ class Navigator {
         if (this.options.focusInitialElementOnDisabled()) {
             focusElement(this.initialFocusElement);
         }
+
+        this.enabled = false;
     }
 
     update() {
@@ -248,12 +241,11 @@ class Navigator {
         });
     }
 
-    setActiveItem(index, target) {
-        this.activeItems.forEach((el) => {
-            el.classList.remove(ACTIVE_ELEMENT_CLASS);
-        });
-        this.activeItems.clear();
-        this.activeItems.add(target);
+    setActiveItem(index, item) {
+        if (this.activeItem) {
+            this.activeItem.el.classList.remove(ACTIVE_ELEMENT_CLASS);
+        }
+        this.activeItem = item;
         this.currentActiveIndex = index;
     }
 

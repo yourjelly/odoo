@@ -33,7 +33,9 @@ export class DropdownPopover extends Component {
         this.__owl__.childEnv = this.props.env;
         this.props.renderRef.render = () => this.render();
 
-        onWillStart(() => this.props.beforeOpen?.());
+        onWillStart(async () => {
+            await this.props.beforeOpen?.();
+        });
 
         onMounted(() => {
             this.props.onOpened?.();

@@ -58,6 +58,7 @@ export const popoverService = {
                         onPositioned: options.onPositioned,
                         fixedPosition: options.fixedPosition,
                         holdOnHover: options.holdOnHover,
+                        setActiveElement: options.setActiveElement ?? true,
                     },
                 },
                 { onRemove: options.onClose }

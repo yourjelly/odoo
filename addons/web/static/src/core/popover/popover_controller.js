@@ -45,7 +45,7 @@ export class PopoverController extends Component {
         if (this.props.target.isConnected) {
             this.popoverRef = this.props.ref || useChildRef();
 
-            useExternalListener(window, "pointerdown", this.onClickAway, { capture: true });
+            useExternalListener(window, "pointerdown", this.onClickAway, true);
             if (this.props.closeOnEscape) {
                 useHotkey("escape", () => this.props.close());
             }
@@ -61,6 +61,14 @@ export class PopoverController extends Component {
         }
     }
 
+    isInOverlay(el) {
+        const currentOverlay = this.popoverRef.el.closest(".o-overlay-container > *");
+        const targetOverlay = el.closest(".o-overlay-container > *");
+
+        const overlays = [...this.popoverRef.el.parentElement.childNodes];
+        return overlays.indexOf(targetOverlay) > overlays.indexOf(currentOverlay);
+    }
+
     isInside(target) {
         if (this.props.target.contains(target) || this.popoverRef.el.contains(target)) {
             return true;
@@ -70,8 +78,13 @@ export class PopoverController extends Component {
 
     onClickAway(ev) {
         const target = ev.composedPath()[0];
-        if (this.props.closeOnClickAway(target) && !this.isInside(target)) {
-            this.props.close();
+        console.log(target, this.isInOverlay(target));
+        if (
+            this.props.closeOnClickAway(target) &&
+            !this.isInside(target) &&
+            !this.isInOverlay(target)
+        ) {
+            // this.props.close();
         }
     }
 

@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { App, Component, xml } from "@odoo/owl";
-import { templates } from "@web/core/assets";
+import { templates } from "@web/core/templates";
 import { MainComponentsContainer } from "@web/core/main_components_container";
 import { registry } from "@web/core/registry";
 import { makeTestEnv } from "./mock_env";
@@ -39,7 +39,6 @@ function getApp(env, props) {
         appConfig.translateFn = env._t;
     }
     const app = new App(TestComponent, appConfig);
-
     registerCleanup(() => app.destroy());
     return app;
 }

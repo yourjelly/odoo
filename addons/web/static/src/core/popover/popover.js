@@ -15,6 +15,7 @@ export class Popover extends Component {
         fixedPosition: false,
         arrow: true,
         animation: true,
+        setActiveElement: false,
     };
     static props = {
         ref: {
@@ -23,7 +24,6 @@ export class Popover extends Component {
         },
         class: {
             optional: true,
-            type: String,
         },
         role: {
             optional: true,
@@ -60,6 +60,10 @@ export class Popover extends Component {
             type: Boolean,
             optional: true,
         },
+        setActiveElement: {
+            type: Boolean,
+            optional: true,
+        },
         target: {
             validate: (target) => {
                 // target may be inside an iframe, so get the Element constructor
@@ -85,7 +89,10 @@ export class Popover extends Component {
         this.menuRef = useRef("ref");
         this.arrow = useRef("popoverArrow");
 
-        useActiveElement("ref");
+        if (this.props.setActiveElement) {
+            useActiveElement("ref");
+        }
+
         useForwardRefToParent("ref");
         this.shouldAnimate = this.props.animation;
         this.position = usePosition("ref", () => this.props.target, {

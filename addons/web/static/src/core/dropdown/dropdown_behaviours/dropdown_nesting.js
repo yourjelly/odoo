@@ -60,7 +60,7 @@ class DropdownNestingState {
         }
 
         if (other.isOpen && this.isOpen) {
-            this.close();
+            // this.close();
         }
     }
 }
@@ -95,34 +95,37 @@ export function useDropdownNesting(state) {
         get hasParent() {
             return Boolean(current.parent);
         },
+        /**@type {import("@web/core/navigation/navigation").NavigationOptions} */
         navigationOptions: {
             onOpen: (items) => {
                 if (current.parent) {
                     items[0]?.focus();
                 }
             },
-            onEscape: () => current.close(),
-            onArrowLeft: (index, items) => {
-                if (
-                    localization.direction === "rtl" &&
-                    items[index]?.target.classList.contains("o-dropdown")
-                ) {
-                    items[index]?.select();
-                } else if (current.parent) {
-                    current.close();
-                }
-            },
-            onArrowRight: (index, items) => {
-                if (localization.direction === "rtl" && current.parent) {
-                    current.close();
-                } else if (items[index]?.target.classList.contains("o-dropdown")) {
-                    items[index]?.select();
-                }
-            },
             onMouseEnter: (item) => {
                 if (item.target.classList.contains("o-dropdown")) {
                     item.select();
                 }
+            },
+            hotkeys: {
+                escape: () => current.close(),
+                arrowleft: (index, items) => {
+                    if (
+                        localization.direction === "rtl" &&
+                        items[index]?.target.classList.contains("o-dropdown")
+                    ) {
+                        items[index]?.select();
+                    } else if (current.parent) {
+                        current.close();
+                    }
+                },
+                arrowright: (index, items) => {
+                    if (localization.direction === "rtl" && current.parent) {
+                        current.close();
+                    } else if (items[index]?.target.classList.contains("o-dropdown")) {
+                        items[index]?.select();
+                    }
+                },
             },
         },
     };
