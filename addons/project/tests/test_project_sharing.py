@@ -63,6 +63,38 @@ class TestProjectSharingCommon(TestProjectCommon):
 @tagged('project_sharing')
 class TestProjectSharing(TestProjectSharingCommon):
 
+    def test_blocked_by_project_sharing_string_portal(self):
+        # Create a new project and task not shared with the portal user
+        project1 = self.env['project.project'].with_context({'mail_create_nolog': True}).create({
+            'name': 'Project 1',
+        })
+        task = self.env['project.task'].with_context({'mail_create_nolog': True}).create({
+            'name': 'UserTask',
+            'project_id': project1.id,
+        })
+
+        # Attempt to read the task as the portal user
+        with self.assertRaises(AccessError, msg="Should not accept the portal user to access to a task he doesn't have access to."):
+            task.with_user(self.user_portal).read(['name'])
+
+        # Share the project with edit access for the portal user
+        project_share_wizard = self.env['project.share.wizard'].create({
+            'res_model': 'project.project',
+            'res_id': project1.id,
+            'access_mode': 'edit',
+        })
+        project_share_wizard.write({'partner_ids': [Command.link(self.user_portal.partner_id.id)]})
+        project_share_wizard.action_send_mail()
+
+        # Attempt to read the task as the portal user after sharing the project
+        task_read = task.with_user(self.user_portal).read(['name'])
+        self.assertEqual(task_read, [{'name': 'UserTask'}], 'The portal user should now have access to the task.')
+
+        # Check if the 'blocked by project sharing' string is displayed when accessing the task in the portal user's context
+        with self.get_project_sharing_form_view(task, self.user_portal) as form:
+            blocked_by_string = form.view['fields']['name']['string']
+            self.assertEqual(blocked_by_string, 'Blocked by Project Sharing', 'The correct string should be displayed for blocked tasks.')
+
     def test_project_share_wizard(self):
         """ Test Project Share Wizard
 
