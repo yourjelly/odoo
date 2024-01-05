@@ -19,6 +19,15 @@ def _get_font_name_to_path_map():
 
 
 class TextRenderer(Renderer):
+    text_color: tuple[int, int, int]
+    text_font_name: str
+    text_font_size: int
+
+    def __init__(self, *args, text_color:str='ffffff', text_font_name=None, text_font_size=16, **kwargs):
+        self.text_color = get_rgb_from_hex(text_color)
+        self.text_font_name = text_font_name
+        self.text_font_size = text_font_size
+        super().__init__(self, *args, text_color=text_color, text_font_name=text_font_name, text_font_size=text_font_size, **kwargs)
 
     @staticmethod
     def _get_font_name_to_path_map():
@@ -39,8 +48,8 @@ class TextRenderer(Renderer):
         self.ensure_one()
         font_map = self._get_font_name_to_path_map()
         font = None
-        if self.text_font and font_map.get(self.text_font):
-            font = self._get_raw_font(font_map[self.text_font])
+        if self.text_font_name and font_map.get(self.text_font_name):
+            font = self._get_raw_font(font_map[self.text_font_name])
         if font:
             return ImageFont.truetype(font, self.text_font_size)
         return ImageFont.load_default()
@@ -56,38 +65,41 @@ class TextRenderer(Renderer):
         max_y = text_lines[-1][0][1][1]
         min_y = text_lines[0][0][0][1]
         max_x = max(text_line[0][1][0] for text_line in text_lines)
-        if self.y_size and (max_y > self.y_size or min_y < 0):
-            raise UserError(_('The text "%(text)s" cannot fit in the requested height %(height)d', text=text, height=self.y_size))
+        if self.size[1] and (max_y > self.size[1] or min_y < 0):
+            raise UserError(_('The text "%(text)s" cannot fit in the requested height %(height)d', text=text, height=self.size[1]))
         base_image = Image.new('RGBA', (math.ceil(max_x), math.ceil(max_y)), color=(0, 0, 0, 0))
         editor = ImageDraw.ImageDraw(base_image)
         for (pos, dummy), line in text_lines:
-            editor.text(
-                pos, line, font=font,
-                fill=get_rgb_from_hex(self.text_color if self.text_color else 'ffffff'))
+            editor.text(pos, line, font=font, fill=self.text_color)
         return base_image
 
 class UserTextRenderer(TextRenderer):
+    text: str
+
+    def __init__(self, *args, text='', **kwargs):
+        self.text = text
+        super().__init__(self, *args, text=text, **kwargs)
 
     def get_text(self):
         return self.text or ''
 
 
 class FieldTextRenderer(TextRenderer):
+    field_path: str
+    record: models.BaseModel
 
-    def _get_proxy_fields(self):
-        return super()._get_proxy_fields() + ['_record']
-
-    def __init__(self, template_element, record=False):
-        self._record = record
-        self._template_element = template_element
+    def __init__(self, *args, field_path='', record=None, **kwargs):
+        self.field_path = field_path
+        self.record = record
+        super().__init__(self, *args, field_path=field_path, record=record, **kwargs)
 
     def get_text(self):
         field = self.field_path
-        if self._record:
-            return self._record[field]
-        elif isinstance(self._record, models.Model):
+        if self.record:
+            return self.record[field]
+        elif isinstance(self.record, models.Model):
             field_name = self.env['ir.model.fields'].sudo().search([
-                ('model_id', '=', self._record.name), ('name', '=', field)
+                ('model_id', '=', self.record.name), ('name', '=', field)
             ], limit=1).name
             return f'[{field_name}]'
         return f'[{field}]'

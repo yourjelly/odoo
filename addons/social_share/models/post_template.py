@@ -62,8 +62,10 @@ class PostTemplate(models.Model):
                 layer = replacement_values[layer.role]
                 sdkf;lssf
                 # build the renderer with replaced values
+            else:
+                renderer = layer._get_renderer_class
             record = record or (self.env[self.model_id.model] if self.model_id else None)
-            layer_image = layer._get_renderer(record=record).render_image()
+            layer_image = .render_image()
             canvas_image.paste(layer_image, layer._get_position(), layer_image)
 
         canvas_image_bytes = BytesIO()
