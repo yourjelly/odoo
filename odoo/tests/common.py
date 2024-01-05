@@ -79,6 +79,11 @@ except ImportError:
     # chrome headless tests will be skipped
     websocket = None
 
+
+if not odoo.tools.config['test_enable']:
+    raise AssertionError("Don't import tests if config didn't enable testing")
+
+
 _logger = logging.getLogger(__name__)
 
 
