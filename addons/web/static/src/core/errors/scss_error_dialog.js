@@ -20,11 +20,15 @@ const scssErrorDisplayService = {
         for (const { cssRules } of assets) {
             const lastRule = cssRules?.[cssRules?.length - 1];
             if (lastRule?.selectorText === "css_error_message") {
-                dialog.add(ScssErrorDialog, {
-                    message: lastRule.style.content
-                        .replaceAll("\\a", "\n")
-                        .replaceAll("\\*", "*")
-                        .replaceAll(`\\"`, `"`),
+                new Promise((resolve) => {
+                    env.bus.addEventListener("WEB_CLIENT_READY", resolve);
+                }).then(() => {
+                    dialog.add(ScssErrorDialog, {
+                        message: lastRule.style.content
+                            .replaceAll("\\a", "\n")
+                            .replaceAll("\\*", "*")
+                            .replaceAll(`\\"`, `"`),
+                    });
                 });
             }
         }
