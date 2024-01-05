@@ -232,11 +232,12 @@ export function makeFakeNotificationService(mock) {
     };
 }
 
-export function makeFakeDialogService(addDialog) {
+export function makeFakeDialogService(addDialog, closeAllDialog) {
     return {
         start() {
             return {
                 add: addDialog || (() => () => {}),
+                closeAll: closeAllDialog || (() => () => {}),
             };
         },
     };
