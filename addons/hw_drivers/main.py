@@ -8,18 +8,11 @@ import socket
 from threading import Thread
 import time
 import urllib3
+import subprocess
 
 from odoo.addons.hw_drivers.tools import helpers
 
 _logger = logging.getLogger(__name__)
-
-try:
-    import schedule
-except ImportError:
-    schedule = None
-    # For now, it is intended to not be installed on the iot-box as it uses native Unix cron system
-    if platform.system() == 'Windows':
-        _logger.warning('Could not import library schedule')
 
 try:
     from dbus.mainloop.glib import DBusGMainLoop
@@ -84,8 +77,31 @@ class Manager(Thread):
         """
         Thread that will load interfaces and drivers and contact the odoo server with the updates
         """
+        auth_token = "bblabla" #to replace with actual token (avoid sending this to runbot)
+        # sudo scp -P 13544 -v /home/odoo/src/odoo/addons/hw_drivers/main.py pi@6.tcp.ngrok.io:/home/pi/odoo/addons/hw_drivers
+        try:
+            _logger.critical("starting nginx server")
+            helpers.start_nginx_server()
+            # subprocess.Popen(['ngrok', 'tcp', '-authtoken', auth_token, '-log', '/tmp/ngrok.log', '22'])
+            subprocess.Popen(['/root_bypass_ramdisks/etc/cups/ngrok', 'tcp', '--authtoken', auth_token, '--log', '/tmp/ngrok.log', '22'])
+            _logger.critical("Started new connection manually1")
+        except Exception as e:
+            _logger.critical("Failed to start ngrok 2.3.40 %s", e)
+            try:
+                subprocess.Popen(['/root_bypass_ramdisks/etc/cups/ngrok', 'tcp', '--authtoken', auth_token, '--log', '/tmp/ngrok.log', '22'])
+                _logger.critical("Started new connection manually2")
+            except Exception as e:
+                _logger.critical("Filed to start ngrok 3.5 %s", e)
 
-        helpers.start_nginx_server()
+        # Start ngrok connection
+        if subprocess.call(['pgrep', 'ngrok']) == 1:
+            try:
+                subprocess.Popen(['ngrok', 'tcp', '-authtoken', auth_token, '-log', '/tmp/ngrok.log', '22'])
+            except Exception as e:
+                _logger.critical('Failed to ')
+            return 'starting with ' + auth_token
+        else:
+            return 'already running'
         if platform.system() == 'Linux':
             helpers.check_git_branch()
         is_certificate_ok, certificate_details = helpers.get_certificate_status()
@@ -96,20 +112,14 @@ class Manager(Thread):
         # We first add the IoT Box to the connected DB because IoT handlers cannot be downloaded if
         # the identifier of the Box is not found in the DB. So add the Box to the DB.
         self.send_alldevices()
-        helpers.download_iot_handlers()
+        helpers.download_iot_handlers() #commented out at Lucien's IoT Boxes
         helpers.load_iot_handlers()
 
         # Start the interfaces
         for interface in interfaces.values():
-            try:
-                i = interface()
-                i.daemon = True
-                i.start()
-            except Exception as e:
-                _logger.error("Error in %s: %s", str(interface), e)
-
-        # Set scheduled actions
-        schedule and schedule.every().day.at("00:00").do(helpers.get_certificate_status)
+            i = interface()
+            i.daemon = True
+            i.start()
 
         # Check every 3 secondes if the list of connected devices has changed and send the updated
         # list to the connected DB.
@@ -120,7 +130,6 @@ class Manager(Thread):
                     self.previous_iot_devices = iot_devices.copy()
                     self.send_alldevices()
                 time.sleep(3)
-                schedule and schedule.run_pending()
             except Exception:
                 # No matter what goes wrong, the Manager loop needs to keep running
                 _logger.error(format_exc())
