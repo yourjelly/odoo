@@ -14,6 +14,7 @@ Reference:
 # Odoo Developer Documentation TOC
 
 
+```
 
 Tutorials
     Getting Started
@@ -196,6 +197,7 @@ Reference
         Styling guidelines
         Tooling
 
+```
 
 # Detail of some pages:
 
