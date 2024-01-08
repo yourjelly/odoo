@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from io import BytesIO
+from collections import OrderedDict
 import base64
+from io import BytesIO
 from PIL import Image
 
 from odoo import _, api, Command, fields, models
@@ -55,18 +56,55 @@ class PostTemplate(models.Model):
         for post in self:
             post.image = base64.encodebytes(post._generate_image_bytes())
 
-    def _generate_image_bytes(self, record=None, replacement_values=None):
-        canvas_image = Image.new('RGBA', TEMPLATE_DIMENSIONS, color=(0, 0, 0))
+    def _generate_image_bytes(self, record=None, replacement_renderers=None):
+        # build a list for each subgraph in order of dependency as:
+        # [[parent, child, sub_child], [child, sub_child], [sub_child]]
+        # this is inefficient but only a few simple dependency graphs are expected
+        renderer_from_layer = OrderedDict()
+        def get_acyclic_dependencies(layer, encountered_layers=[]):
+            if not layer.required_element_ids:
+                return [[layer]]
+            return [
+                child_dependency + [layer]
+                for child_layer in layer.required_element_ids
+                for child_dependency in get_acyclic_dependencies(child_layer, encountered_layers + [layer])
+                if child_layer not in encountered_layers
+            ]
+        acyclic_dependencies = [dependency_graph for layer in self.layers for dependency_graph in get_acyclic_dependencies(layer)]
+        not_rendered_set = set()
+
+        # prepare renderers
+        image_from_layer = OrderedDict()
         for layer in self.layers:
-            if replacement_values and layer.role and replacement_values.get(layer.role):
-                layer = replacement_values[layer.role]
-                sdkf;lssf
-                # build the renderer with replaced values
+            if replacement_renderers and layer.role and replacement_renderers.get(layer.role):
+                renderer = replacement_renderers[layer.role]
             else:
-                renderer = layer._get_renderer_class
-            record = record or (self.env[self.model_id.model] if self.model_id else None)
-            layer_image = .render_image()
-            canvas_image.paste(layer_image, layer._get_position(), layer_image)
+                renderer_class, renderer_values = layer._get_renderer_values()[0]
+                renderer = renderer_class(**renderer_values)
+            record = record if record is not None else (self.env[self.model_id.model] if self.model_id else None)
+            renderer_from_layer[layer] = renderer
+
+        # determine hidden layers
+        for layer, renderer in renderer_from_layer.items():
+            hide_children = False
+            if layer in not_rendered_set:
+                hide_children = True
+            layer_image = renderer.render_image(record=record)
+            if layer_image is None:
+                hide_children = True
+            if hide_children:
+                for graph_id, dependency_graph in enumerate(acyclic_dependencies):
+                    if dependency_graph[0] == layer:
+                        for graph_element in dependency_graph:
+                            not_rendered_set.add(graph_element)
+                        acyclic_dependencies.pop(graph_id)
+            image_from_layer[layer] = (renderer.pos, layer_image)
+
+        # assemble image
+        canvas_image = Image.new('RGBA', TEMPLATE_DIMENSIONS, color=(0, 0, 0))
+        for layer, (pos, image) in image_from_layer.items():
+            if layer not in not_rendered_set:
+                canvas_image.paste(image, pos, image)
 
         canvas_image_bytes = BytesIO()
         canvas_image.convert('RGB').save(canvas_image_bytes, "PNG")

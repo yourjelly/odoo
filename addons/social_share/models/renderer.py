@@ -1,4 +1,6 @@
 from abc import ABC, abstractmethod
+from PIL import Image
+
 
 class Renderer(ABC):
     pos: tuple[int, int]
@@ -13,5 +15,5 @@ class Renderer(ABC):
         return (self.pos, tuple(pos + size for pos, size in zip(self.pos, self.size)))
 
     @abstractmethod
-    def render_image(self):
-        return b''
+    def render_image(self, *args, **kwargs) -> Image.Image | None:
+        return None

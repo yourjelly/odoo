@@ -19,15 +19,36 @@ def _get_font_name_to_path_map():
 
 
 class TextRenderer(Renderer):
+    text_align_horizontal: str
+    text_align_vertical: str
     text_color: tuple[int, int, int]
     text_font_name: str
     text_font_size: int
 
-    def __init__(self, *args, text_color:str='ffffff', text_font_name=None, text_font_size=16, **kwargs):
-        self.text_color = get_rgb_from_hex(text_color)
+    def __init__(
+            self,
+            *args,
+            text_align_horizontal='center',
+            text_align_vertical='center',
+            text_color:str='ffffff',
+            text_font_name=None,
+            text_font_size=16,
+            **kwargs):
+        self.text_align_horizontal = text_align_horizontal
+        self.text_align_vertical = text_align_vertical
+        self.text_color = get_rgb_from_hex(text_color or 'ffffff')
         self.text_font_name = text_font_name
         self.text_font_size = text_font_size
-        super().__init__(self, *args, text_color=text_color, text_font_name=text_font_name, text_font_size=text_font_size, **kwargs)
+        super().__init__(
+            self,
+            *args,
+            text_align_horizontal=text_align_horizontal,
+            text_align_vertical=text_align_vertical,
+            text_color=text_color,
+            text_font_name=text_font_name,
+            text_font_size=text_font_size,
+            **kwargs
+        )
 
     @staticmethod
     def _get_font_name_to_path_map():
@@ -45,7 +66,6 @@ class TextRenderer(Renderer):
             return None
 
     def _get_font(self):
-        self.ensure_one()
         font_map = self._get_font_name_to_path_map()
         font = None
         if self.text_font_name and font_map.get(self.text_font_name):
@@ -57,10 +77,12 @@ class TextRenderer(Renderer):
     def get_text(self):
         return ''
 
-    def render_image(self):
-        text = self.get_text()
+    def render_image(self, *args, record=None, **kwargs):
+        text = self.get_text(record=record)
+        if not text:
+            return None
         font = self._get_font()
-        text_lines = align_text(text, font, ((0, 0), self._get_size()), self.text_align or 'left')
+        text_lines = align_text(text, font, ((0, 0), self.size), self.text_align_horizontal or 'left')
         # if biggest y and smallest Ys don't fit in the size
         max_y = text_lines[-1][0][1][1]
         min_y = text_lines[0][0][0][1]
@@ -80,24 +102,25 @@ class UserTextRenderer(TextRenderer):
         self.text = text
         super().__init__(self, *args, text=text, **kwargs)
 
-    def get_text(self):
+    def get_text(self, *args, **kwargs):
         return self.text or ''
 
 
 class FieldTextRenderer(TextRenderer):
     field_path: str
-    record: models.BaseModel
+    model: models.Model
 
-    def __init__(self, *args, field_path='', record=None, **kwargs):
+    def __init__(self, *args, field_path='', model=None, **kwargs):
         self.field_path = field_path
-        self.record = record
-        super().__init__(self, *args, field_path=field_path, record=record, **kwargs)
+        self.model = model
+        super().__init__(self, *args, field_path=field_path, model=model, **kwargs)
 
-    def get_text(self):
+    def get_text(self, record=None):
         field = self.field_path
-        if self.record:
-            return self.record[field]
-        elif isinstance(self.record, models.Model):
+        record = record if record is not None else self.model
+        if record:
+            return record[field] if record[field] else None
+        elif isinstance(record, models.Model):
             field_name = self.env['ir.model.fields'].sudo().search([
                 ('model_id', '=', self.record.name), ('name', '=', field)
             ], limit=1).name

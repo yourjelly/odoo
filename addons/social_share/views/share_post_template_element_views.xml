@@ -8,6 +8,8 @@
                 <sheet>
                     <group>
                         <group>
+                        <field name="required_element_ids"/>
+                        <field name="sub_element_ids"/>
                         <field name="role"/>
                         <field name="type"/>
                         <field name="value_type"/>

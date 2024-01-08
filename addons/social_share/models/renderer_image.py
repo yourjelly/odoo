@@ -16,7 +16,7 @@ class ImageShapeRenderer(ShapeRenderer):
     image: str
 
     def __init__(self, *args, image='', **kwargs):
-        self.image = image
+        self.image = image or ''
         super().__init__(self, *args, image=image, **kwargs)
 
     def get_image(self):
@@ -30,7 +30,9 @@ class ImageShapeRenderer(ShapeRenderer):
         #        return None
         return None
 
-    def render_image(self):
+    def render_image(self, *args, **kwargs):
+        if not self.image:
+            return None
         image = Image.open(BytesIO(base64.b64decode(self.image))).convert('RGBA')
         image = fit_to_mask(image, self.shape, xy=self.size)
         if any(self.size) and image.size != self.size:
@@ -41,8 +43,10 @@ class ColorShapeRenderer(ShapeRenderer):
     color: tuple[int, int, int]
 
     def __init__(self, *args, color:str='000000', **kwargs):
-        self.color = get_rgb_from_hex(color)
+        self.color = get_rgb_from_hex(color or '000000')
         super().__init__(self, *args, color=color, **kwargs)
 
-    def render_image(self):
+    def render_image(self, *args, **kwargs):
+        if not self.shape:
+            return None
         return get_shape(self.shape or 'rect', self.color, 4, self.size)

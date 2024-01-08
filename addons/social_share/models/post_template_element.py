@@ -91,7 +91,11 @@ class ImageRenderElement(models.Model):
     # text field
     field_path = fields.Char()
 
-    _sql_constraints = [('role_uniq', "unique(template_id, post_id, role)", "Each template and post should only have one element for each role.")]
+    # if any required element has no value to render, this element won't be rendered
+    required_element_ids = fields.Many2many('social.share.image.render.element', relation="social_share_element_requirements", column1='social_share_element_required', column2='social_share_sub_element')
+    sub_element_ids = fields.Many2many('social.share.image.render.element', relation="social_share_element_requirements", column1='social_share_sub_element', column2='social_share_element_required')
+
+    _sql_constraints = [('role_uniq', "unique(template_id, role)", "Each template and post should only have one element for each role.")]
 
     @api.constrains('type', 'value_type')
     def _check_type_combination(self):
@@ -105,7 +109,7 @@ class ImageRenderElement(models.Model):
             if reset_dict_from_type.get(element.type, {}).get(element.value_type):
                 element.write(reset_dict_from_type[element.type][element.value_type])
 
-    def _get_renderer(self, record=None):
+    def _get_renderer(self):
         return self._get_renderer_class()
 
     def _get_renderer_values(self):
@@ -115,7 +119,7 @@ class ImageRenderElement(models.Model):
                 'pos': (element.x_pos, element.y_pos),
                 'size': (element.x_size, element.y_size),
             }
-            renderer_class = self._get_renderer_class()
+            renderer_class = element._get_renderer_class()
             if renderer_class == ImageShapeRenderer:
                 create_dict.update({
                     'shape': element.shape,
@@ -128,19 +132,25 @@ class ImageRenderElement(models.Model):
                 })
             elif renderer_class == UserTextRenderer:
                 create_dict.update({
-                    'text': self.text,
-                    'text_color': self.text_color,
-                    'text_font_name': self.text_font,
-                    'text_font_size': self.text_font_size,
+                    'text': element.text,
+                    'text_align_horizontal': element.text_align,
+                    'text_align_vertical': element.text_align_vert,
+                    'text_color': element.text_color,
+                    'text_font_name': element.text_font,
+                    'text_font_size': element.text_font_size,
                 })
             elif renderer_class == FieldTextRenderer:
                 create_dict.update({
-                    'field_path': self.field_path,
-                    'text_color': self.text_color,
-                    'text_font_name': self.text_font,
-                    'text_font_size': self.text_font_size,
+                    'field_path': element.field_path,
+                    'model': element.model,
+                    'text_align_horizontal': element.text_align,
+                    'text_align_vertical': element.text_align_vert,
+                    'text_color': element.text_color,
+                    'text_font_name': element.text_font,
+                    'text_font_size': element.text_font_size,
                 })
-            create_values += (renderer_class, create_dict)
+            create_values += [(renderer_class, create_dict)]
+        return create_values
 
     def _get_renderer_class(self):
         return render_class_from_type.get(self.type, {}).get(self.value_type)

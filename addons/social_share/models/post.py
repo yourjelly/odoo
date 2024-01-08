@@ -4,6 +4,8 @@
 import base64
 
 from odoo import _, api, Command, fields, models
+from .renderer_text import FieldTextRenderer, UserTextRenderer
+from .renderer_image import ColorShapeRenderer, ImageShapeRenderer
 
 SUPPORTED_ROLES = (
     'background', 'header', 'subheader',
@@ -42,11 +44,11 @@ class Post(models.Model):
     thanks_redirection = fields.Char(string='Redirection URL')
     user_id = fields.Many2one('res.users', string='Responsible', default=lambda self: self.env.user)
 
-    header_type = fields.Selection(selection=VALUE_TYPES)
-    subheader_type = fields.Selection(selection=VALUE_TYPES)
-    section_1_type = fields.Selection(selection=VALUE_TYPES)
-    subsection_1_type = fields.Selection(selection=VALUE_TYPES)
-    subsection_2_type = fields.Selection(selection=VALUE_TYPES)
+    header_type = fields.Selection(selection=VALUE_TYPES, default='static', required=True)
+    subheader_type = fields.Selection(selection=VALUE_TYPES, default='static', required=True)
+    section_1_type = fields.Selection(selection=VALUE_TYPES, default='static', required=True)
+    subsection_1_type = fields.Selection(selection=VALUE_TYPES, default='static', required=True)
+    subsection_2_type = fields.Selection(selection=VALUE_TYPES, default='static', required=True)
 
     header_val = fields.Text()
     subheader_val = fields.Text()
@@ -61,7 +63,27 @@ class Post(models.Model):
 
     image = fields.Image(compute='_compute_image')
 
-    @api.depends('custom_element_ids.image')
+    @api.model
+    def _get_image_dependency_fields(self):
+        return (
+            'share_template_variant_id.layers',
+            'header_type',
+            'subheader_type',
+            'section_1_type',
+            'subsection_1_type',
+            'subsection_2_type',
+            'header_val',
+            'subheader_val',
+            'section_1_val',
+            'subsection_1_val',
+            'subsection_2_val',
+            'background_val',
+            'button_val',
+            'image_1_val',
+            'image_2_val',
+        )
+
+    @api.depends(lambda self: self._get_image_dependency_fields())
     def _compute_image(self):
         for post in self:
             post.image = base64.encodebytes(post._generate_image_bytes())
@@ -84,61 +106,59 @@ class Post(models.Model):
     def _generate_image_bytes(self, record=None):
         return self.share_template_variant_id._generate_image_bytes(
             record=record,
-            replacement_values=self._get_replacement_values()
+            replacement_renderers=self._get_replacement_renderers()
         )
 
-    def _get_replacement_values(self):
-        return {
-            'background': {
-                'type': 'image',
-                'value_type': 'static',
-                'image': self.background_val,
-            },
-            'header': {
-                'type': 'text',
-                'value_type': self.header_type,
+    def _get_replacement_renderers(self):
+        """Combine the original values of the template with the custom values of the post.
+
+        Get a mapping from layer role to an instance of a renderer.
+        """
+        layers = self.share_template_variant_id.layers.filtered('role')
+        layer_values = {
+            layer.role: render_values
+            for layer, (_, render_values)
+            in zip(layers, layers._get_renderer_values())
+        }
+        model = self.env[self.model] if self.model else None
+        post_values = {
+            role: (renderer, values) for role, (renderer, values, has_value)
+            in {
+            'background': (ImageShapeRenderer, {'image': self.background_val}, self.background_val),
+            'button': (UserTextRenderer, {'text': self.button_val}, self.button_val),
+            'image-1': (ImageShapeRenderer, {'image': self.image_1_val}, self.image_1_val),
+            'image-2': (ImageShapeRenderer, {'image': self.image_2_val}, self.image_2_val),
+            'header': (FieldTextRenderer if self.header_type == 'field' else UserTextRenderer, {
                 'field_path': self.header_val,
+                'model': model,
                 'text': self.header_val,
-            },
-            'subheader': {
-                'type': 'text',
-                'value_type': self.subheader_type,
+            }, self.header_val),
+            'subheader': (FieldTextRenderer if self.subheader_type == 'field' else UserTextRenderer, {
                 'field_path': self.subheader_val,
+                'model': model,
                 'text': self.subheader_val,
-            },
-            'section-1': {
-                'type': 'text',
-                'value_type': self.section_1_type,
+            }, self.subheader_val),
+            'section-1': (FieldTextRenderer if self.section_1_type == 'field' else UserTextRenderer, {
                 'field_path': self.section_1_val,
+                'model': model,
                 'text': self.section_1_val,
-            },
-            'subsection-1': {
-                'type': 'text',
-                'value_type': self.subsection_1_type,
+            }, self.section_1_val),
+            'subsection-1': (FieldTextRenderer if self.subsection_1_type == 'field' else UserTextRenderer,{
                 'field_path': self.subsection_1_val,
+                'model': model,
                 'text': self.subsection_1_val,
-            },
-            'subsection-2': {
-                'type': 'text',
-                'value_type': self.subsection_2_type,
+            }, self.subsection_1_val),
+            'subsection-2': (FieldTextRenderer if self.subsection_2_type == 'field' else UserTextRenderer, {
                 'field_path': self.subsection_2_val,
+                'model': model,
                 'text': self.subsection_2_val,
-            },
-            'button': {
-                'type': 'text',
-                'value_type': 'static',
-                'text': self.button_val,
-            },
-            'image-1': {
-                'type': 'image',
-                'value_type': 'static',
-                'image': self.image_1_val,
-            },
-            'image-2': {
-                'type': 'image',
-                'value_type': 'static',
-                'image': self.image_2_val,
-            },
+            }, self.subsection_2_val),
+            }.items()
+            if has_value
+        }
+        return {
+            role: post_values[role][0](**(layer_values[role] | post_values[role][1]))
+            for role in layer_values.keys() & post_values.keys()
         }
 
 
