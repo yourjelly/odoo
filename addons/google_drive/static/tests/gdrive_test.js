@@ -23,7 +23,7 @@ odoo.define('google_drive.gdrive_integration', function (require) {
         QUnit.module('Google Drive ActionMenus');
 
         QUnit.test('rendering of the google drive attachments in action menus', async function (assert) {
-            assert.expect(3);
+            assert.expect(5);
 
             const form = await testUtils.createView({
                 actionMenusRegistry: true,
@@ -60,8 +60,11 @@ odoo.define('google_drive.gdrive_integration', function (require) {
                     hasActionMenus: true,
                 },
             });
-            await testUtils.controlPanel.toggleActionMenu(form);
 
+            assert.containsNone(form, ".o_cp_action_menus .dropdown-menu");
+            await testUtils.controlPanel.toggleActionMenu(form);
+            
+            assert.containsOnce(form, ".o_cp_action_menus .dropdown-menu");
             assert.containsOnce(form, '.oe_share_gdoc_item',
                 "The button to the google action should be present");
 
