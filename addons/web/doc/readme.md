@@ -56,38 +56,117 @@ How-to guides
     Connect to Odoo using json-rpc
     Write a reporting model using SQL views
     Make an accounting localization
+    Connect IOT Box with a device
 
 Reference
         
-    Python Framework
-        Core concepts
+    
+    Architecture Overview
+
+    Modules
         Structure of a module
         Module Manifest
-        ORM
         Data files
-        Action models
-        Testing
-        Translations
+            Structure
+            Core operations
+            Shortcuts
+            CSV data files
+        Translations (localization?)
+            PO files
+            Exporting and importing
+            Translating python code
+            Translating js code
+        QWeb
 
-    Javascript framework
+
+    Python Framework
+        Overview
         Core concepts
+            Multi-company 
+
+        ORM
+        Actions
+            ir.action
+            ir.action.act_window
+            automated actions (ir.cron)
+        Security
+        Performance
+        Web controllers
+            Defining a controller
+            call_kw
+            web_read
+            web_readgroup
+            ...
+        Mixins and useful classes
+    
+    Javascript framework
+        Overview
+        Core concepts
+            session, user and context
+            localization
+            date handling
+            debug mode
+            Network requests
+                rpc
+                orm
+                http service
+                downloading a file
+            Routing
+            The environment (env)
+            
+
+        Libraries
+            How to add a JS library
+            Recommanded libraries
+            luxon
+            chartjs
+            fullcalendar
+            o_spreadsheet
+
         Managing Assets
+            Bundles
+            Static files
+            css/scss files
+            xml files
+            js files
+            ir.asset model
+            Lazy loading
+            Module Loader
         Owl Framework
         Registries
         Components
         Hooks
         Services
-        Utils
+        Utility functions
+
+        Dialog and modals
+        Overlays
+        Popover and notifications
+        Command palette
+
         Web Client
+            Actions
+
+        Error Handling
         Relational Model
-        Testing
+            Record component
+        Patching Code
 
     Views and Fields
+        Overview
         View models
-        Views
+          ir.ui.view
+        Views (js)
         Fields
 
+    Testing
+        Overview
+        Python unit tests
+        Javascript unit tests
+        Tours
+
     Reporting
+        Overview
         QWeb reports
         Report actions
         ir.actions.report model
@@ -112,19 +191,22 @@ Reference
     Payment
 
 
-Information
-    Architecture Overview
-    The anatomy of a Odoo module
-    A short introduction to the JS framework
-    Coding Guidelines
-    Styling guidelines
-    Tooling
+    Miscellaneous
+        Coding Guidelines
+        Styling guidelines
+        Tooling
 
 
 # Detail of some pages:
 
 Python Framework/Core concepts
     Multi-company 
+
+JS Framework/Core features
+    session
+    localization
+    date handling
+    debug mode
 
 
 # Concrete changes
