@@ -67,9 +67,9 @@ odoo.define('google_drive.gdrive_integration', function (require) {
             assert.containsOnce(form, ".o_cp_action_menus .dropdown-menu");
             assert.containsOnce(form, '.oe_share_gdoc_item',
             "The button to the google action should be present");
-            if (!document.querySelector(".oe_share_gdoc_item")) {
-                console.error(form.$(".o_cp_action_menus").innerHTML);
-            }
+            // if (!document.querySelector(".oe_share_gdoc_item")) {
+                console.log(form.$(".o_cp_action_menus")[0].innerHTML);
+            // }
             
             await testUtils.controlPanel.toggleMenuItem(form, "Cyberdyne Systems");
 
