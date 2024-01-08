@@ -144,7 +144,11 @@ export function addLegacyMockEnvironment(env, legacyParams = {}) {
     // clear the ActionMenus registry to prevent external code from doing unknown rpcs
     const actionMenusRegistry = ActionMenus.registry;
     ActionMenus.registry = new Registry();
-    registerCleanup(() => (ActionMenus.registry = actionMenusRegistry));
+    console.log("XXXX helpers: new Registry", Object.keys(actionMenusRegistry.entries()));
+    registerCleanup(() => {
+        console.log("XXXX helpers: restoring", Object.keys(actionMenusRegistry.entries()));
+        ActionMenus.registry = actionMenusRegistry;
+    });
 
     let localSession;
     if (legacyParams && legacyParams.getTZOffset) {

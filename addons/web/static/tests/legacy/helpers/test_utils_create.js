@@ -351,6 +351,7 @@ odoo.define('web.test_utils_create', function (require) {
         let actionMenusRegistry = ActionMenus.registry;
         if (params.actionMenusRegistry !== true) {
             ActionMenus.registry = new Registry();
+            console.log("XXXX test_utils_create: new Registry", Object.keys(actionMenusRegistry.entries()));
         }
 
         const viewController = await view.getController(widget);
@@ -365,6 +366,7 @@ odoo.define('web.test_utils_create', function (require) {
             webClient.remove();
             if (params.actionMenusRegistry !== true) {
                 ActionMenus.registry = actionMenusRegistry;
+                console.log("XXXX test_utils_create: restoring", Object.keys(actionMenusRegistry.entries()));
             }
         };
 

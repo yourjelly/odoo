@@ -37,8 +37,10 @@ odoo.define('web.action_menus_tests', function (require) {
             // Patch the registry of the action menus
             this.actionMenusRegistry = ActionMenus.registry;
             ActionMenus.registry = new Registry();
+            console.log("XXXX action_menus_tests: new Registry", Object.keys(this.actionMenusRegistry.entries()));
         },
         afterEach() {
+            console.log("XXXX action_menus_tests: restoring", Object.keys(this.actionMenusRegistry.entries()));
             ActionMenus.registry = this.actionMenusRegistry;
         },
     }, function () {
