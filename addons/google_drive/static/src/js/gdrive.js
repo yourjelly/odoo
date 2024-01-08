@@ -22,6 +22,7 @@ odoo.define('google_drive.ActionMenus', function (require) {
     async function googleDrivePropsGetter(props, env, rpc) {
         const [activeId] = props.activeIds;
         const { context } = props;
+        console.log("GoogleDrivepropsGetter", env.view.type, activeId);
         if (env.view.type !== "form" || !activeId) {
             return false;
         }
@@ -31,6 +32,7 @@ odoo.define('google_drive.ActionMenus', function (require) {
             method: 'get_google_drive_config',
             model: 'google.drive.config',
         });
+        console.log("GoogleDrivepropsGetter items", items.length);
         return Boolean(items.length) && { activeId, context, items };
     }
 
