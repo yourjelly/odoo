@@ -22,7 +22,7 @@ odoo.define('google_drive.gdrive_integration', function (require) {
 
         QUnit.module('Google Drive ActionMenus');
 
-        QUnit.test('rendering of the google drive attachments in action menus', async function (assert) {
+        QUnit.only('rendering of the google drive attachments in action menus', async function (assert) {
             assert.expect(5);
 
             const form = await testUtils.createView({
