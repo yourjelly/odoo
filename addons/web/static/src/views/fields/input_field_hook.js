@@ -113,12 +113,13 @@ export function useInputField(params) {
      * If it is not such a case, we update the field with the new value.
      */
     useEffect(() => {
+        const value = params.getValue();
         if (
             inputRef.el &&
             !isDirty &&
             !component.props.record.isFieldInvalid(component.props.name)
         ) {
-            inputRef.el.value = params.getValue();
+            inputRef.el.value = value;
             lastSetValue = inputRef.el.value;
         }
     });
