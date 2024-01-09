@@ -2488,7 +2488,6 @@ https://fontawesome.com/license -->
               <SelectionInput
                 ranges="state.currentCF.ranges"
                 class="'o-range'"
-                isInvalid="isRangeValid"
                 onSelectionChanged="(ranges) => this.onRangesChanged(ranges)"
                 required="true"
               />
@@ -3257,6 +3256,6 @@ https://fontawesome.com/license -->
 </odoo>
 <!--
   __info__.version = '16.0.27';
-  __info__.date = '2024-01-04T12:42:46.770Z';
-  __info__.hash = '54006f6';
+  __info__.date = '2024-01-09T12:26:11.175Z';
+  __info__.hash = '324afd0';
 -->
