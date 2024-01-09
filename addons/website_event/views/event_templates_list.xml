@@ -92,20 +92,23 @@
                                         type="button"
                                         data-bs-toggle="collapse"
                                         t-att-data-bs-target="'.o_wevent_offcanvas_cat_%s' % category.name"
-                                        aria-expanded="false">
-                                        <t t-out="category.name"/>
+                                        aria-expanded="false"
+                                        t-attf-aria-controls="o_wevent_offcanvas_cat_#{category.name}">
+                                        <b t-out="category.name"/>
                                     </button>
                                 </h2>
-                                <div t-attf-class="o_wevent_offcanvas_cat_#{category.name} accordion-collapse collapse">
+                                <div t-attf-id="o_wevent_offcanvas_cat_#{category.name}" t-attf-class="o_wevent_offcanvas_cat_#{category.name} accordion-collapse collapse" aria-labelledby="offcanvas_category">
                                     <div class="accordion-body bg-white pt-0">
-                                        <ul class="list-unstyled">
+                                        <div class="list-group">
                                             <t t-foreach="category.tag_ids" t-as="tag">
-                                                <li t-if="category.is_published and category.tag_ids and any(tag.color for tag in category.tag_ids)"  t-attf-onclick="location.href = '/event?#{keep_query('*', tags=str((search_tags - tag).ids if tag in search_tags else (tag | search_tags).ids))}'" class="form-check">
+                                            <div class="list-group-item border-0 ps-0 pb-0">
+                                                <div role="button" t-if="category.is_published and category.tag_ids and any(tag.color for tag in category.tag_ids)"  t-attf-onclick="location.href = '/event?#{keep_query('*', tags=str((search_tags - tag).ids if tag in search_tags else (tag | search_tags).ids))}'" class="form-check mb-1">
                                                     <input class="form-check-input" type="checkbox" t-attf-name="#{tag.name}}" t-att-checked="bool(tag in search_tags)"/>
                                                     <label class="form-check-label" t-attf-for="#{tag.name}" t-out="tag.name"/>
-                                                </li>
+                                                </div>
+                                            </div>
                                             </t>
-                                        </ul>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -116,23 +119,24 @@
                                     type="button"
                                     data-bs-toggle="collapse"
                                     data-bs-target=".o_wevent_offcanvas_date"
-                                    aria-expanded="false">
-                                    Date
+                                    aria-expanded="false"
+                                    aria-controls="o_wevent_offcanvas_date">
+                                    <b>Date</b>
                                 </button>
                             </h2>
-                            <div class="o_wevent_offcanvas_date accordion-collapse collapse">
+                            <div id="o_wevent_offcanvas_date" class="o_wevent_offcanvas_date accordion-collapse collapse" aria-labelledby="offcanvas_date">
                                 <div class="accordion-body bg-white pt-0">
-                                    <ul class="list-unstyled">
+                                    <div class="list-group">
                                         <t t-foreach="dates" t-as="date">
-                                            <t t-if="date[3] or (date[0] in ('old','upcoming','all'))">
-                                                <li class="form-check" t-attf-onclick="location.href = '#{keep('/event', date=date[0])}'">
+                                            <div class="list-group-item border-0 ps-0 pb-0" t-if="date[3] or (date[0] in ('old','upcoming','all'))">
+                                                <div role="button" class="form-check mb-1" t-attf-onclick="location.href = '#{keep('/event', date=date[0])}'">
                                                     <input class="form-check-input" type="radio" t-attf-name="#{date[1]}" t-att-checked="bool(searches.get('date') == date[0])"/>
                                                     <label class="form-check-label" t-attf-for="#{date[1]}" t-out="date[1]"/>
-                                                    <span t-if="date[3]" t-out="date[3]" t-attf-class="badge rounded-pill #{searches.get('date') == date[0] and 'bg-light text-primary' or 'bg-primary'} ms-3"/>
-                                                </li>
-                                            </t>
+                                                    <span t-if="date[3]" t-out="date[3]" class="badge rounded-pill text-bg-primary ms-3"/>
+                                                </div>
+                                            </div>
                                         </t>
-                                    </ul>
+                                    </div>
                                 </div>
                             </div>
                         </div>
