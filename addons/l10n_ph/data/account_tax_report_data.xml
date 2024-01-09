@@ -322,16 +322,27 @@
                                 <field name="engine">tax_tags</field>
                                 <field name="formula">42SB</field>
                             </record>
+                            <!-- 42 capital -->
+                            <record id="domestic_purchase_formula_capital_base" model="account.report.expression">
+                                <field name="label">_capital_base</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">CAPA</field>
+                            </record>
+                            <record id="domestic_purchase_formula_capital_balance" model="account.report.expression">
+                                <field name="label">_capital_balance</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">CAPB</field>
+                            </record>
                             <!-- Aggregate -->
                             <record id="domestic_purchase_base" model="account.report.expression">
                                 <field name="label">tax_base</field>
                                 <field name="engine">aggregation</field>
-                                <field name="formula">42._vat_base + 42._service_base</field>
+                                <field name="formula">42._vat_base + 42._service_base + 42._capital_base</field>
                             </record>
                             <record id="domestic_purchase_balance" model="account.report.expression">
                                 <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
-                                <field name="formula">42._vat_balance + 42._service_balance</field>
+                                <field name="formula">42._vat_balance + 42._service_balance + 42._capital_balance</field>
                             </record>
                         </field>
                     </record>
