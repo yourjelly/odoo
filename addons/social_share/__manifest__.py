@@ -13,6 +13,7 @@
         'views/share_post_views.xml',
         'views/share_post_template_views.xml',
         'views/share_post_template_element_views.xml',
+        'views/social_share_field_allow.xml',
         'views/social_share_menus.xml',
         'wizards/share_url.xml'
     ],

@@ -18,7 +18,7 @@ render_class_from_type = {
     },
 }
 
-text_option_fields= (
+text_option_fields = (
     'text_align',
     'text_align_vert',
     'text_font_size',
@@ -110,47 +110,43 @@ class ImageRenderElement(models.Model):
                 element.write(reset_dict_from_type[element.type][element.value_type])
 
     def _get_renderer(self):
-        return self._get_renderer_class()
+        renderer_class = self._get_renderer_class()
+        renderer_values = self._get_renderer_constructor_values(renderer_class)
+        return renderer_class(**renderer_values)
 
-    def _get_renderer_values(self):
-        create_values = []
-        for element in self:
-            create_dict = {
-                'pos': (element.x_pos, element.y_pos),
-                'size': (element.x_size, element.y_size),
+    def _get_renderer_constructor_values(self, renderer_class):
+        """Return a dict containing kwargs to construct a renderer object."""
+        common_dict = {
+            'pos': (self.x_pos, self.y_pos),
+            'size': (self.x_size, self.y_size),
+        }
+        if renderer_class == ImageShapeRenderer:
+            return common_dict | {
+                'shape': self.shape,
+                'image': self.image,
             }
-            renderer_class = element._get_renderer_class()
-            if renderer_class == ImageShapeRenderer:
-                create_dict.update({
-                    'shape': element.shape,
-                    'image': element.image,
-                })
-            elif renderer_class == ColorShapeRenderer:
-                create_dict.update({
-                    'shape': element.shape,
-                    'color': element.color
-                })
-            elif renderer_class == UserTextRenderer:
-                create_dict.update({
-                    'text': element.text,
-                    'text_align_horizontal': element.text_align,
-                    'text_align_vertical': element.text_align_vert,
-                    'text_color': element.text_color,
-                    'text_font_name': element.text_font,
-                    'text_font_size': element.text_font_size,
-                })
-            elif renderer_class == FieldTextRenderer:
-                create_dict.update({
-                    'field_path': element.field_path,
-                    'model': element.model,
-                    'text_align_horizontal': element.text_align,
-                    'text_align_vertical': element.text_align_vert,
-                    'text_color': element.text_color,
-                    'text_font_name': element.text_font,
-                    'text_font_size': element.text_font_size,
-                })
-            create_values += [(renderer_class, create_dict)]
-        return create_values
+        if renderer_class == ColorShapeRenderer:
+            return common_dict | {
+                'shape': self.shape,
+                'color': self.color
+            }
+        text_common_dict = {
+            'text_align_horizontal': self.text_align,
+            'text_align_vertical': self.text_align_vert,
+            'text_color': self.text_color,
+            'text_font_name': self.text_font,
+            'text_font_size': self.text_font_size,
+        }
+        if renderer_class == UserTextRenderer:
+            return common_dict | text_common_dict | {
+                'text': self.text,
+            }
+        if renderer_class == FieldTextRenderer:
+            return common_dict | text_common_dict | {
+                'field_path': self.field_path,
+                'model': self.model,
+            }
+        return dict()
 
     def _get_renderer_class(self):
         return render_class_from_type.get(self.type, {}).get(self.value_type)

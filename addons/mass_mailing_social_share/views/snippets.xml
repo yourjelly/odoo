@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<template id="email_designer_snippets" inherit_id="mass_mailing.email_designer_snippets">
+    <xpath expr="//t[@id='default_snippets']" position="inside">
+        <div id="email_designer_default_social_share" class="o_panel">
+            <div class="o_panel_header">Social Share Campaign</div>
+            <div class="o_panel_body" id="email_designer_footer_elements">
+                <t t-snippet="mass_mailing_social_share.s_mail_social_share" string="Social Share" t-thumbnail="/mass_mailing/static/src/img/snippets_thumbs/block_footer_social.png"/>
+            </div>
+        </div>
+    </xpath>
+</template>
+
+
+</odoo>

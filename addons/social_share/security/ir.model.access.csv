@@ -20,3 +20,4 @@ access_social_share_url_manager,social.share.url.manager,model_social_share_url,
 access_social_share_field_allow,social.share.field.allow,model_social_share_field_allow,,0,0,0,0
 access_social_share_field_allow_user,social.share.field.allow.user,model_social_share_field_allow,social_share.group_social_share_user,1,0,0,0
 access_social_share_field_allow_manager,social.share.field.allow.manager,model_social_share_field_allow,social_share.group_social_share_manager,1,0,0,0
+access_social_share_field_allow_system,social.share.field.allow.system,model_social_share_field_allow,base.group_system,1,1,1,1

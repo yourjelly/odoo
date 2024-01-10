@@ -8,4 +8,5 @@ class SocialShareFieldAllow(models.Model):
     _name = 'social.share.field.allow'
     _description = 'Field allowed in social share templates'
 
-    field_id = fields.Many2one('ir.model.fields')
+    model_id = fields.Many2one(related='field_id.model_id', store=True)
+    field_id = fields.Many2one('ir.model.fields', ondelete='cascade', required=True)

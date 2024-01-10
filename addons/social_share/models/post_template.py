@@ -79,8 +79,7 @@ class PostTemplate(models.Model):
             if replacement_renderers and layer.role and replacement_renderers.get(layer.role):
                 renderer = replacement_renderers[layer.role]
             else:
-                renderer_class, renderer_values = layer._get_renderer_values()[0]
-                renderer = renderer_class(**renderer_values)
+                renderer = layer._get_renderer()
             record = record if record is not None else (self.env[self.model_id.model] if self.model_id else None)
             renderer_from_layer[layer] = renderer
 

@@ -121,8 +121,8 @@ class FieldTextRenderer(TextRenderer):
         if record:
             return record[field] if record[field] else None
         elif isinstance(record, models.Model):
-            field_name = self.env['ir.model.fields'].sudo().search([
-                ('model_id', '=', self.record.name), ('name', '=', field)
+            field_name = record.env['ir.model.fields'].sudo().search([
+                ('model_id', '=', record._name), ('name', '=', field)
             ], limit=1).name
             return f'[{field_name}]'
         return f'[{field}]'

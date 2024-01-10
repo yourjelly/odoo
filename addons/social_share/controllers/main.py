@@ -1,7 +1,3 @@
-
-# -*- coding: utf-8 -*-
-# Part of Odoo. See LICENSE file for full copyright and licensing details.
-
 from odoo import _
 from odoo.http import Controller, request, route
 from odoo.addons.portal.controllers.web import Home
@@ -26,6 +22,7 @@ class EventSharePostController(Controller):
 
         crawler = self._get_crawler_name(request)
         if crawler:
+            print("CRAWLER")
             request.env['bus.bus']._sendone(f'social_share_link_target-{url.target_id}', 'social_share/share_link_target', {
                 'target_id': url.target_id,
                 'message': 'KIND-OF-SECRET COUPON CODE'

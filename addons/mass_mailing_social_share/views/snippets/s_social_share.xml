@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="s_mail_social_share_options" inherit_id="mass_mailing.snippet_options">
+        <xpath expr="." position="inside">
+            <div data-js="SocialShare" data-selector=".s_mail_social_share">
+                <we-many2one string="Share Campaign"
+                data-model="social.share.post"
+                data-set-social-share-post=""
+                data-name="social_share_post_picker_opt"
+                data-no-preview="false"
+                data-domain='["|", ["model", "=", false], ["model", "!=", false]]'
+                />
+            </div>
+        </xpath>
+    </template>
+
+
+<template id="s_mail_social_share" name="Social Share">
+    <div class="s_mail_social_share">
+        <div class="container">
+            <div class="row">
+                <p>placeholder</p>
+            </div>
+        </div>
+    </div>
+</template>
+
+</odoo>
