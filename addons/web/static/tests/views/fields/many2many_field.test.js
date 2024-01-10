@@ -5,15 +5,14 @@ import { animationFrame } from "@odoo/hoot-mock";
 import {
     Command,
     MockServer,
-    clickKanbanCard,
     clickModalButton,
     clickSave,
     clickViewButton,
     contains,
     defineModels,
+    fieldInput,
     fields,
-    kanban,
-    modal,
+    kanbanCard,
     models,
     mountView,
     onRpc,
@@ -271,17 +270,18 @@ test.tags("desktop")("many2many kanban: edition", async () => {
     expect(`.o_field_many2many .o-kanban-button-new:visible`).toHaveText("Add");
 
     // edit existing subrecord
-    await contains(kanban.record({ text: "gold" })).click();
 
-    await contains(modal.form.field("name", { target: "input" })).edit("new name");
-    await contains(modal.button({ text: "Save" })).click();
+    await kanbanCard({ text: "gold" }).click();
+
+    await fieldInput("name").edit("new name");
+    await clickModalButton({ text: "Save" });
     await animationFrame(); // todo: ????
 
     expect(".o_kanban_record:first:visible").toHaveText("new name");
 
     // add subrecords
     // -> single select
-    await contains(`.btn:visible:contains(Add)`).click();
+    await clickViewButton({ text: "Add" });
 
     expect(".modal .o_list_view tbody .o_list_record_selector").toHaveCount(3);
 
@@ -309,14 +309,14 @@ test.tags("desktop")("many2many kanban: edition", async () => {
 
     expect(".modal .o_form_view .o_form_editable").toBeVisible();
 
-    await contains(".modal .o_form_view input").edit("A new type");
+    await fieldInput("name").edit("A new type");
     await clickModalButton({ text: "Save & Close" });
 
     expect(".o_kanban_record:visible").toHaveCount(6);
     expect(".o_kanban_record:contains(A new type)").toBeVisible();
 
     // delete subrecords
-    await clickKanbanCard({ text: "silver" });
+    await kanbanCard({ text: "silver" }).click();
 
     expect(".modal .modal-footer .o_btn_remove").toHaveCount(1);
     await clickModalButton({ text: "Remove" });
@@ -325,7 +325,7 @@ test.tags("desktop")("many2many kanban: edition", async () => {
     expect(".o_kanban_record:visible").toHaveCount(5);
     expect(".o_kanban_record:contains(silver)").toHaveCount(0);
 
-    await contains(".o_kanban_record:contains(blue) .delete_icon").click();
+    await kanbanCard({ text: "blue", target: ".delete_icon" }).click();
 
     expect(".o_kanban_record:visible").toHaveCount(4);
     expect(".o_kanban_record:contains(blue)").toHaveCount(0);

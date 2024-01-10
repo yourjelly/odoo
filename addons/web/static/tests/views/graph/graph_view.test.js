@@ -3415,7 +3415,7 @@ test("empty graph view without sample data after filter", async () => {
     expect(".o_view_nocontent").toHaveCount(1);
 });
 
-test("reload chart with switchView button keep internal state", async () => {
+test.tags("desktop")("reload chart with switchView button keep internal state", async () => {
     Foo._views.list = /* xml */ `<list />`;
 
     await mountWithCleanup(WebClient);
