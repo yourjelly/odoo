@@ -72,21 +72,19 @@
     active="True">
     <xpath expr="//div[hasclass('o_wesponsor_topbar_filters')]" position="inside">
         <div class="dropdown flex-grow-1">
-            <a href="#" role="button" class="btn btn-light dropdown-toggle w-100" data-bs-toggle="dropdown">
+            <a href="#" role="button" class="btn btn-light dropdown-toggle w-100" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 By Country
             </a>
             <div class="dropdown-menu">
-                <a class="dropdown-item o_dropdown_reset_tags">
+                <a role="button" class="dropdown-item o_dropdown_reset_tags">
                     All Countries
                 </a>
-                <t t-foreach="sponsor_countries" t-as="sponsor_country">
-                    <label t-attf-class="dropdown-item {{ 'active' if sponsor_country.id in search_countries.ids else '' }}">
-                        <input class="d-none" type="checkbox" name="sponsor_country" multiple="multiple"
-                            t-att-value="sponsor_country.id"
-                            t-att-checked="'checked' if sponsor_country.id in search_countries.ids else None"/>
-                        <t t-out="sponsor_country.name"/>
-                    </label>
-                </t>
+                <label t-foreach="sponsor_countries" t-as="sponsor_country" t-attf-class="dropdown-item {{ 'active' if sponsor_country.id in search_countries.ids else '' }}">
+                    <input class="d-none" type="checkbox" name="sponsor_country" multiple="multiple"
+                        t-att-value="sponsor_country.id"
+                        t-att-checked="'checked' if sponsor_country.id in search_countries.ids else None"/>
+                    <t t-out="sponsor_country.name"/>
+                </label>
             </div>
         </div>
     </xpath>
@@ -99,32 +97,30 @@
                     data-bs-target=".o_wevent_offcanvas_country"
                     aria-expanded="false"
                     aria-controls="o_wevent_offcanvas_country">
-                    By Country
+                    <b>By Country</b>
                 </button>
             </h2>
-            <div class="o_wevent_offcanvas_country accordion-collapse collapse">
+            <div class="o_wevent_offcanvas_country accordion-collapse collapse" aria-labelledby="offcanvas_country">
                 <div class="accordion-body bg-white pt-0">
-                    <ul class="list-unstyled">
-                        <li class="form-check" t-attf-onclick="location.href = '/event/#{slug(event)}/exhibitors?#{keep_query('*', search_countries='')}'">
-                        <input class="form-check-input" t-attf-name="#{search_countries}" type="checkbox"  t-att-checked="bool(search_countries.ids == '')"/>
-                            <a t-att-href="'/event/%s/exhibitors?%s' % (
+                    <div class="list-group">
+                        <div class="list-group-item border-0 ps-0 pb-0">
+                            <a role="button" t-att-href="'/event/%s/exhibitors?%s' % (
                                         slug(event),
                                         keep_query('*', search_countries='')
-                                    )" class="text-reset">
+                                    )" class="text-reset mb-1">
                                 All Countries
                             </a>
-                        </li>
+                        </div>
                         <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                        <t t-foreach="sponsor_countries" t-as="sponsor_country">
-                        <t t-out="search_countries.ids"></t>
-                            <label class="form-check">
+                        <div t-foreach="sponsor_countries" t-as="sponsor_country" class="list-group-item border-0 ps-0 pb-0">
+                            <label class="form-check mb-1">
                                 <input class="form-check-input" type="checkbox" name="sponsor_country" multiple="multiple"
                                     t-att-value="sponsor_country.id"
                                     t-att-checked="'checked' if sponsor_country.id in search_countries.ids else None"/>
                                 <t t-out="sponsor_country.name"/>
                             </label>
-                        </t>
-                    </ul>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -138,21 +134,19 @@
     active="True">
     <xpath expr="//div[hasclass('o_wesponsor_topbar_filters')]" position="inside">
         <div class="dropdown flex-grow-1">
-            <a href="#" role="button" class="btn btn-light dropdown-toggle w-100" data-bs-toggle="dropdown">
+            <a href="#" role="button" class="btn btn-light dropdown-toggle w-100" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 By Level
             </a>
             <div class="dropdown-menu">
-                <a class="dropdown-item o_dropdown_reset_tags">
+                <a role="button" class="dropdown-item o_dropdown_reset_tags text-reset">
                     All Levels
                 </a>
-                <t t-foreach="sponsor_types" t-as="sponsor_type">
-                    <label t-attf-class="dropdown-item {{ 'active' if sponsor_type.id in search_sponsorships.ids else '' }}">
-                        <input class="d-none" type="checkbox" name="sponsor_type" multiple="multiple"
-                            t-att-value="sponsor_type.id"
-                            t-att-checked="'checked' if sponsor_type.id in search_sponsorships.ids else None"/>
-                        <t t-out="sponsor_type.name"/>
-                    </label>
-                </t>
+                <label t-foreach="sponsor_types" t-as="sponsor_type" t-attf-class="dropdown-item {{ 'active' if sponsor_type.id in search_sponsorships.ids else '' }}">
+                    <input class="d-none" type="checkbox" name="sponsor_type" multiple="multiple"
+                        t-att-value="sponsor_type.id"
+                        t-att-checked="'checked' if sponsor_type.id in search_sponsorships.ids else None"/>
+                    <t t-out="sponsor_type.name"/>
+                </label>
             </div>
         </div>
     </xpath>
@@ -165,27 +159,27 @@
                     data-bs-target=".o_wevent_offcanvas_level"
                     aria-expanded="false"
                     aria-controls="o_wevent_offcanvas_level">
-                    By Level
+                    <b>By Level</b>
                 </button>
             </h2>
-            <div class="o_wevent_offcanvas_level accordion-collapse collapse">
+            <div class="o_wevent_offcanvas_level accordion-collapse collapse" aria-labelledby="offcanvas_level">
                 <div class="accordion-body bg-white pt-0">
-                    <ul class="list-unstyled">
-                        <li>
-                            <a class="o_dropdown_reset_tags cursor-pointer">
+                    <div class="list-group">
+                        <div class="list-group-item border-0 ps-0 pb-0">
+                            <a role="button" class="o_dropdown_reset_tags text-reset mb-1">
                                 All Levels
                             </a>
-                        </li>
+                        </div>
                         <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                        <t t-foreach="sponsor_types" t-as="sponsor_type">
-                            <label class="form-check">
+                        <div t-foreach="sponsor_types" t-as="sponsor_type" class="list-group-item border-0 ps-0 pb-0">
+                            <label class="form-check mb-1">
                                 <input class="form-check-input" type="checkbox" name="sponsor_type" multiple="multiple"
                                     t-att-value="sponsor_type.id"
                                     t-att-checked="'checked' if sponsor_type.id in search_sponsorships.ids else None"/>
                                 <t t-out="sponsor_type.name"/>
                             </label>
-                        </t>
-                    </ul>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
