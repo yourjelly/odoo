@@ -54,13 +54,13 @@ import {
 //
 export function useSelectCreate({ resModel, activeActions, onSelected, onCreateEdit, onUnselect }) {
     const addDialog = useOwnedDialogs();
-
-    function selectCreate({ domain, context, filters, title }) {
+    const globalResModel = resModel;
+    function selectCreate({ domain, context, filters, title, resModel }) {
         addDialog(SelectCreateDialog, {
             title: title || _t("Select records"),
             noCreate: !activeActions.create,
             multiSelect: "link" in activeActions ? activeActions.link : false, // LPE Fixme
-            resModel,
+            resModel: resModel || globalResModel,
             context,
             domain,
             onSelected,
@@ -392,7 +392,6 @@ export class Many2XAutocomplete extends Component {
 
     async onSearchMore(request) {
         const { resModel, getDomain, context, fieldString } = this.props;
-
         const domain = getDomain();
         let dynamicFilters = [];
         if (request.length) {
@@ -414,6 +413,7 @@ export class Many2XAutocomplete extends Component {
 
         const title = _t("Search: %s", fieldString);
         this.selectCreate({
+            resModel,
             domain,
             context,
             filters: dynamicFilters,
