@@ -1496,6 +1496,8 @@ class Picking(models.Model):
                 float_compare(ml.quantity, 0.0, precision_rounding=ml.product_uom_id.rounding) > 0 and
                 not ml.result_package_id
         )
+        if self.env.context.get('sml_ids'):
+            quantity_move_line_ids = quantity_move_line_ids.filtered(lambda ml: ml.id in self.env.context['sml_ids'])
         move_line_ids = quantity_move_line_ids.filtered(lambda ml: ml.picked)
         if not move_line_ids:
             move_line_ids = quantity_move_line_ids
