@@ -1,10 +1,8 @@
 /** @odoo-module alias=@odoo/hoot default=false */
 
-import { mount, whenReady } from "@odoo/owl";
 import { TestRunner } from "./core/runner";
-import { patchWindow } from "./mock/window";
-import { HootMain } from "./ui/hoot_main";
 import { hootLog } from "./hoot_utils";
+import { setupHootUI } from "./ui/setup_hoot_ui";
 
 /**
  * @typedef {{ runner: TestRunner }} Environment
@@ -14,7 +12,7 @@ import { hootLog } from "./hoot_utils";
 // Global
 //-----------------------------------------------------------------------------
 
-const { console, document } = globalThis;
+const { console } = globalThis;
 
 //-----------------------------------------------------------------------------
 // Internal
@@ -116,14 +114,4 @@ export const __debug__ = runner;
 // Main
 //-----------------------------------------------------------------------------
 
-// - Patch window before any other code is executed
-patchWindow();
-
-// - Mount the main UI component
-whenReady(() =>
-    mount(HootMain, document.body, {
-        dev: true, // TODO: remove when lib is stable
-        env: { runner },
-        name: "HOOT",
-    })
-);
+setupHootUI(runner);

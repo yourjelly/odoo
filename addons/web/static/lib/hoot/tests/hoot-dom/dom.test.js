@@ -218,14 +218,14 @@ describe(parseUrl(import.meta.url), () => {
     });
 
     test("isFocusable", async () => {
-        await mount(FULL_HTML_TEMPLATE);
+        mount(FULL_HTML_TEMPLATE);
 
         expect(isFocusable("input:first")).toBe(true);
         expect(isFocusable("li:first")).toBe(false);
     });
 
     test("isVisible", async () => {
-        await mount(FULL_HTML_TEMPLATE);
+        mount(FULL_HTML_TEMPLATE);
 
         expect(isVisible(document)).toBe(true);
         expect(isVisible(document.body)).toBe(true);
@@ -257,7 +257,7 @@ describe(parseUrl(import.meta.url), () => {
         });
 
         test("custom pseudo-classes", async () => {
-            await mount(FULL_HTML_TEMPLATE);
+            mount(FULL_HTML_TEMPLATE);
 
             await new Promise((resolve) => $$("iframe")[0].addEventListener("load", resolve));
 
@@ -314,7 +314,7 @@ describe(parseUrl(import.meta.url), () => {
             expectSelector(`p:contains(/\\bvelit,/)`).toMatch("p");
 
             // Whatever, at this point I'm just copying failing selectors and creating
-            // contexts accordingly as I'm fixing them.
+            // fake contexts accordingly as I'm fixing them.
 
             mount(/* xml */ `
                 <div class="o_we_customize_panel">
@@ -376,13 +376,25 @@ describe(parseUrl(import.meta.url), () => {
             expectSelector(
                 `.o_menu_sections .dropdown-item:contains('Products'), nav.o_burger_menu_content li[data-menu-xmlid='sale.menu_product_template_action']`
             ).toMatch(".dropdown-item,li");
+
+            mount(/* xml */ `
+                <span>
+                    <div>Matrix (PAV11, PAV22, PAV31)</div>
+                    <div>PA4: PAV41</div>
+                </span>
+            `)
+            expectSelector(`span:contains("Matrix (PAV11, PAV22, PAV31)\nPA4: PAV41")`).toMatch("span");
         });
 
         test("invalid selectors", async () => {
             mount(FULL_HTML_TEMPLATE);
 
-            expect(() => queryAll`[colspan=1]`).toThrow();
-            expect(() => queryAll`[href=/]`).toThrow();
+            expect(() => queryAll`[colspan=1]`).toThrow(); // missing quotes
+            expect(() => queryAll`[href=/]`).toThrow(); // missing quotes
+            expect(
+                () =>
+                    queryAll`#o_wblog_posts_loop:has(span:has(i.fa-calendar-o):has(a[href="/blog?search=a"])):has(span:has(i.fa-search):has(a[href^="/blog?date_begin"]))`
+            ).toThrow(); // nested :has statements
         });
 
         test("queryAllContents", async () => {
@@ -401,7 +413,7 @@ describe(parseUrl(import.meta.url), () => {
             expect(() => queryOne(".title", { exact: 2 })).toThrow();
         });
 
-        test.skip("performance against jQuery", async () => {
+        test.skip.tags("manual")("performance against jQuery", async () => {
             const jQuery = globalThis.$;
 
             const time = (fn) => {

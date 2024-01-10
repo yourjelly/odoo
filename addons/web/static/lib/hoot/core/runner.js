@@ -7,7 +7,7 @@ import {
     defineRootNode,
     getActiveElement,
     isEmpty,
-    watchChildren,
+    waitUntil,
     watchKeys,
 } from "@web/../lib/hoot-dom/helpers/dom";
 import {
@@ -684,7 +684,6 @@ export class TestRunner {
         this.afterEach(runAllTimers, resetTime, cleanupObservers, clearFixture, resetEventActions);
         if (!this.config.nowatcher) {
             this.beforeEach(
-                watchChildren(() => this.#fixture),
                 watchListeners(document),
                 watchListeners(document.documentElement),
                 watchListeners(document.body),

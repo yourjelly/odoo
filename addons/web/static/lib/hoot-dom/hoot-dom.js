@@ -31,7 +31,6 @@ export {
     registerPseudoClass,
     waitFor,
     waitUntil,
-    watchChildren,
     watchKeys,
 } from "./helpers/dom";
 export {

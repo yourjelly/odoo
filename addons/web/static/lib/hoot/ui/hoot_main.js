@@ -11,6 +11,16 @@ import { HootSearch } from "./hoot_search";
  * @typedef {{}} HootMainProps
  */
 
+//-----------------------------------------------------------------------------
+// Global
+//-----------------------------------------------------------------------------
+
+const { window } = globalThis;
+
+//-----------------------------------------------------------------------------
+// Exports
+//-----------------------------------------------------------------------------
+
 /** @extends Component<HootMainProps, import("../hoot").Environment> */
 export class HootMain extends Component {
     static components = {
@@ -54,9 +64,7 @@ export class HootMain extends Component {
         useSubEnv({ runner });
 
         if (!runner.config.headless) {
-            useExternalListener(window, "keydown", (ev) => this.onWindowKeyDown(ev), {
-                capture: true,
-            });
+            useExternalListener(window, "keydown", this.onWindowKeyDown, { capture: true });
         }
     }
 

@@ -27,16 +27,17 @@ import { mount, parseUrl } from "../local_helpers";
 const monitorEvents = (target) => {
     const element = queryOne(target);
     for (const prop in element) {
-        if (prop.startsWith("on")) {
-            after(
-                on(element, prop.slice(2), (ev) => {
-                    expect.step([ev.currentTarget.tagName.toLowerCase(), ev.type].join("."));
-                    if (ev.type === "submit") {
-                        ev.preventDefault();
-                    }
-                })
-            );
+        const type = prop.match(/^on(\w+)/)?.[1];
+        if (!type) {
+            continue;
         }
+        const off = on(element, type, (ev) => {
+            expect.step([ev.currentTarget.tagName.toLowerCase(), ev.type].join("."));
+            if (ev.type === "submit") {
+                ev.preventDefault();
+            }
+        });
+        after(off);
     }
 };
 

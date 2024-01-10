@@ -110,6 +110,13 @@ const filterNodes = (...nodesToFilter) => {
 };
 
 /**
+ * @param {string} string
+ */
+const getStringContent = (string) => {
+    return string.match(R_QUOTE_CONTENT)?.[2] || string;
+};
+
+/**
  * @param {Node} node
  * @returns {ReturnType<typeof getNodeValue> & ReturnType<typeof getNodeText>}
  */
@@ -123,18 +130,6 @@ const getNodeContent = (node) => {
             return [...node.selectedOptions].map(getNodeContent).join(",");
     }
     return getNodeText(node);
-};
-
-/**
- * @param {string} string
- */
-const hasUnclosedScope = (string) => {
-    for (const [start, end] of SCOPE_DELIMITERS) {
-        if ((string.match(start) || []).length > (string.match(end) || []).length) {
-            return true;
-        }
-    }
-    return false;
 };
 
 /**
@@ -395,7 +390,7 @@ const parseSelector = (selector) => {
             if (parens[0] === parens[1]) {
                 const [pseudo, content] = currentPseudo;
                 const makeFilter = customPseudoClasses.get(pseudo);
-                currentPart.push(makeFilter(trimQuotes(content)));
+                currentPart.push(makeFilter(getStringContent(content)));
                 currentPseudo = null;
             } else if (registerChar) {
                 currentPseudo[1] += selector[i];
@@ -509,20 +504,11 @@ const queryWithCustomSelector = (nodes, selector) => {
 const selectorError = (pseudoClass, message) =>
     new HootDomError(`invalid selector \`:${pseudoClass}\`: ${message}`);
 
-/**
- * @param {string} string
- */
-const trimQuotes = (string) => string.match(R_QUOTE_CONTENT)?.[2] || string;
-
 // Regexes
 const R_CHAR = /[\w-]/;
-const R_QUOTE_CONTENT = /^\s*(['"])?(.*?)\1?\s*$/;
+const R_QUOTE_CONTENT = /^\s*(['"])?([^]*?)\1\s*$/;
 const R_ROOT_ELEMENT = /^(HTML|BODY|#document)$/;
 const R_WHITESPACE = /\s/;
-const SCOPE_DELIMITERS = [
-    [/\[/g, /]/g],
-    [/\(/g, /\)/g],
-];
 
 // Following selector is based on this spec:
 // https://html.spec.whatwg.org/multipage/interaction.html#dom-tabindex
@@ -606,7 +592,7 @@ customPseudoClasses
         } else {
             const lowerContent = content.toLowerCase();
             return function containsString(node) {
-                return String(getNodeContent(node)).toLowerCase().includes(lowerContent);
+                return getStringContent(getNodeContent(node)).toLowerCase().includes(lowerContent);
             };
         }
     })
@@ -1549,41 +1535,6 @@ export function waitUntil(predicate, options) {
             disconnect();
             throw reason;
         });
-}
-
-/**
- * Returns a function checking that the given target does not contain any child
- * node.
- *
- * @param {Document | Element | (() => Document | Element)} target
- * @returns {(cleanup: boolean) => void}
- * @example
- *  afterEach(watchChildren(document.body));
- */
-export function watchChildren(target) {
-    /**
-     * @param {boolean} [cleanup=false]
-     */
-    return function checkChildren(cleanup = false) {
-        if (typeof target === "function") {
-            target = target();
-        }
-        if (!isInDOM(target)) {
-            return;
-        }
-        const remainingElements = target?.childNodes.length;
-        if (remainingElements) {
-            if (cleanup) {
-                target.innerHTML = "";
-            } else {
-                console.warn(
-                    `${target.constructor.name} contains`,
-                    remainingElements,
-                    `undesired elements`
-                );
-            }
-        }
-    };
 }
 
 /**
