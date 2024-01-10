@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { queryOne, waitFor } from "@odoo/hoot-dom";
+import { waitFor } from "@odoo/hoot-dom";
 import { Component, useSubEnv, xml } from "@odoo/owl";
 import { Dialog } from "@web/core/dialog/dialog";
 import { MainComponentsContainer } from "@web/core/main_components_container";
@@ -63,70 +63,6 @@ const buildSelector = (base, params) => {
         selector += ` ${params.target}`;
     }
     return selector;
-};
-
-/**
- * @param {string} [scope=""]
- */
-const makeFormViewAccessors = (scope = "") => {
-    return {
-        /**
-         * @param {SelectorOptions} [params]
-         */
-        button: (params) =>
-            queryOne(buildSelector(`${scope} .o_form_view .o_control_panel .btn:visible`, params)),
-        /**
-         * @param {string} name
-         * @param {SelectorOptions} [params]
-         */
-        field: (name, params) =>
-            queryOne(
-                buildSelector(`${scope} .o_form_view .o_field_widget[name='${name}']`, params)
-            ),
-    };
-};
-
-/**
- * @param {string} [scope=""]
- */
-const makeKanbanViewAccessors = (scope = "") => {
-    return {
-        /**
-         * @param {SelectorOptions} [params]
-         */
-        button: (params) =>
-            queryOne(
-                buildSelector(
-                    `${scope} .o_kanban_view .o_control_panel .btn:enabled:visible`,
-                    params
-                )
-            ),
-        /**
-         * @param {SelectorOptions} [params]
-         */
-        record: (params) =>
-            queryOne(buildSelector(`${scope} .o_kanban_view .o_kanban_record:visible`, params)),
-    };
-};
-
-/**
- * @param {string} [scope=""]
- */
-const makeListViewAccessors = (scope = "") => {
-    return {
-        /**
-         * @param {SelectorOptions} [params]
-         */
-        button: (params) =>
-            queryOne(
-                buildSelector(`${scope} .o_list_view .o_control_panel .btn:enabled:visible`, params)
-            ),
-        /**
-         * @param {SelectorOptions} [params]
-         */
-        record: (params) =>
-            queryOne(buildSelector(`${scope} .o_list_view .o_data_row:visible`, params)),
-    };
 };
 
 /**
@@ -194,42 +130,57 @@ class ViewDialog extends Component {
  * @param {SelectorOptions} [options]
  */
 export async function clickButton(options) {
-    await contains(buildSelector(`.btn:enabled:visible`, options)).click();
+    await contains(buildSelector(`.btn:enabled`, options)).click();
 }
 
 /**
  * @param {SelectorOptions} [options]
  */
 export async function clickCancel(options) {
-    await contains(buildSelector(`.o_form_button_cancel:enabled:visible`, options)).click();
+    await contains(buildSelector(`.o_form_button_cancel:enabled`, options)).click();
 }
 
 /**
  * @param {SelectorOptions} [options]
  */
 export async function clickKanbanCard(options) {
-    await contains(buildSelector(`.o_kanban_record:visible`, options)).click();
+    await contains(buildSelector(`.o_kanban_record`, options)).click();
 }
 
 /**
  * @param {SelectorOptions} [options]
  */
 export async function clickModalButton(options) {
-    await contains(buildSelector(`.modal .btn:enabled:visible`, options)).click();
+    await contains(buildSelector(`.modal .btn:enabled`, options)).click();
 }
 
 /**
  * @param {SelectorOptions} [options]
  */
 export async function clickSave(options) {
-    await contains(buildSelector(`.o_form_button_save:enabled:visible`, options)).click();
+    await contains(buildSelector(`.o_form_button_save:enabled`, options)).click();
 }
 
 /**
  * @param {SelectorOptions} [options]
  */
 export async function clickViewButton(options) {
-    await contains(buildSelector(`.o_view_controller .btn:enabled:visible`, options)).click();
+    await contains(buildSelector(`.o_view_controller .btn:enabled`, options)).click();
+}
+
+/**
+ * @param {string} name
+ * @param {SelectorOptions} options
+ */
+export function fieldInput(name, options) {
+    return contains(buildSelector(`.o_field_widget[name='${name}'] input`, options));
+}
+
+/**
+ * @param {SelectorOptions} options
+ */
+export function kanbanCard(options) {
+    return contains(buildSelector(`.o_kanban_record`, options));
 }
 
 /**
@@ -261,17 +212,3 @@ export async function mountView(params) {
         props: parseViewProps(params),
     });
 }
-
-export const form = makeFormViewAccessors();
-export const kanban = makeKanbanViewAccessors();
-export const list = makeListViewAccessors();
-
-export const modal = {
-    /**
-     * @param {SelectorOptions} [params]
-     */
-    button: (params) => queryOne(buildSelector(`.modal-footer .btn:enabled:visible`, params)),
-    form: makeFormViewAccessors(".modal"),
-    kanban: makeKanbanViewAccessors(".modal"),
-    list: makeListViewAccessors(".modal"),
-};

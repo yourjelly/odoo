@@ -98,11 +98,15 @@ const interact = async (target, ...interactions) => {
  * @param {QueryOptions} [options]
  */
 export function contains(target, options) {
+    if (target?.raw) {
+        return contains(String.raw(...arguments));
+    }
     /**
      * @template T
      * @param  {...T} actions
      */
-    const run = (...actions) => waitFor(target, options).then((node) => interact(node, ...actions));
+    const run = (...actions) =>
+        waitFor(target, { visible: true, ...options }).then((node) => interact(node, ...actions));
     return {
         /**
          * @param {PointerOptions} [options]

@@ -64,6 +64,30 @@ const {
 // Internal
 //-----------------------------------------------------------------------------
 
+/**
+ * @param {unknown} number
+ */
+const ordinal = (number) => {
+    const strNumber = String(number);
+    if (strNumber.at(-2) === "1") {
+        return `${strNumber}th`;
+    }
+    switch (strNumber.at(-1)) {
+        case "1": {
+            return `${strNumber}st`;
+        }
+        case "2": {
+            return `${strNumber}nd`;
+        }
+        case "3": {
+            return `${strNumber}rd`;
+        }
+        default: {
+            return `${strNumber}th`;
+        }
+    }
+};
+
 const OBJECT_REGEX = /^\[object \w+\]$/;
 const TIME_UNITS = {
     h: 60_000 * 60,

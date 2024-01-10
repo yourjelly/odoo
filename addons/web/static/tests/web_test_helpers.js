@@ -84,10 +84,8 @@ export {
     clickModalButton,
     clickSave,
     clickViewButton,
-    form,
-    kanban,
-    list,
-    modal,
+    fieldInput,
+    kanbanCard,
     mountView,
     mountViewInDialog,
 } from "./_framework/view_test_helpers";
