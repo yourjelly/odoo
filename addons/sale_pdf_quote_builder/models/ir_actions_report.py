@@ -28,6 +28,7 @@ class IrActionsReport(models.Model):
                 has_header = bool(header_record.sale_header)
                 has_footer = bool(footer_record.sale_footer)
                 included_product_docs = self.env['product.document']
+                add_header_footer = self.env['base.document.layout'].search([('company_id', '=', order.company_id.id)], limit=1).add_header_footer
                 doc_line_id_mapping = {}
                 for line in order.order_line:
                     product_product_docs = line.product_id.product_document_ids
@@ -44,7 +45,7 @@ class IrActionsReport(models.Model):
 
                 IrBinary = self.env['ir.binary']
                 writer = PdfFileWriter()
-                if has_header:
+                if has_header and add_header_footer == 'yes':
                     header_stream = IrBinary._record_to_stream(header_record, 'sale_header').read()
                     self._add_pages_to_writer(writer, header_stream)
                 if included_product_docs:
@@ -53,7 +54,7 @@ class IrActionsReport(models.Model):
                         self._add_pages_to_writer(writer, doc_stream, doc_line_id_mapping[doc.id])
                         self._prefix_sol_form_fields(writer, doc_line_id_mapping[doc.id])
                 self._add_pages_to_writer(writer, (initial_stream).getvalue())
-                if has_footer:
+                if has_footer and add_header_footer == 'yes':
                     footer_stream = IrBinary._record_to_stream(footer_record, 'sale_footer').read()
                     self._add_pages_to_writer(writer, footer_stream)
 

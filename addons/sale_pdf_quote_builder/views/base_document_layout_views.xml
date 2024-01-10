@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_base_document_layout_inherit" model="ir.ui.view">
+            <field name="name">view.base.document.layout</field>
+            <field name="model">base.document.layout</field>
+            <field name="inherit_id" ref="web.view_base_document_layout"/>
+            <field name="arch" type="xml">
+                <data>
+                    <xpath expr="//field[@name='paperformat_id']" position="after">
+                            <field name="add_header_footer" string="Add header footer" widget="radio" default="yes"/>
+                    </xpath>
+                </data>
+            </field>
+        </record>
+    </data>
+</odoo>
