@@ -1,5 +1,34 @@
 (function (exports) {
     'use strict';
+    const weakmaps = new Set();
+    class WeakMap extends window.WeakMap {
+        constructor() {
+            super(...arguments);
+            this.keyRefs = [];
+            weakmaps.add(new WeakRef(this));
+        }
+        set(key, value) {
+            this.keyRefs.push(new WeakRef(key));
+            return super.set(key, value);
+        }
+        clear() {
+            for (const ref of this.keyRefs) {
+                const key = ref.deref();
+                if (key) {
+                    this.delete(key);
+                }
+            }
+            this.keyRefs = [];
+        }
+    }
+    window.clearOwlWeakMaps = () => weakmaps.forEach(ref => {
+        const wm = ref.deref();
+        if (wm) {
+            wm.clear();
+        } else {
+            weakmaps.delete(ref);
+        }
+    });
 
     function filterOutModifiersFromData(dataList) {
         dataList = dataList.slice();
