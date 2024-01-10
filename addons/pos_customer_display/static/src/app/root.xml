@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="pos_customer_display.CustomerDisplay">
+        <t t-set="bgImgSrc" t-value="session.customer_display_bg_img ? 'url(/web/image/pos.config/' + pos.config.id + '/customer_display_bg_img)' : 'none'" />
+        <t t-set="bgColor" t-value="'#343A40'" />
+        <div class="d-flex h-100">
+            <div class="d-flex flex-column flex-grow-1">
+                <div class="d-flex justify-content-center" t-att-style="session.has_bg_img ? `background-image: url(/web/image/pos.config/${session.config_id}/customer_display_bg_img);` : `background-color: ${bgColor};`">
+                    <img t-attf-src="/logo?company={{session.company_id}}" />
+                </div>
+                <div t-if="!order.finalized and order.lines?.length" class="m-2 p-3 rounded-3" t-attf-style="background-color: {{bgColor}};">
+                    <h3 class="text-white">Your Order</h3>
+                </div>
+                <OrderWidget t-if="!order.finalized" lines="order.lines" t-slot-scope="scope" style="'background-color: #f6f6f6;'">
+                    <Orderline line="scope.line" class="'bg-white mx-3 my-1 rounded-3' + (scope.line.isSelected ? ' selected' : '')"/>
+                </OrderWidget>
+                <CenteredIcon t-else="" icon="'fa-smile-o fa-4x'" text="'Thank you'"/>
+                <div class="text-white p-2 px-5 d-flex flex-column justify-content-center" t-attf-style="background-color: {{bgColor}};">
+                    <div class="row">
+                        <h4 class="col text-start text-white">Total</h4>
+                        <div class="col text-end" t-esc="order.amount"/>
+                    </div>
+                    <div t-foreach="order.paymentLines or []" t-as="line" t-key="line_index" class="row">
+                        <div class="col text-start" t-esc="line.name" />
+                        <div class="col text-end" t-esc="line.amount"/>
+                    </div>
+                    <div class="row" t-if="order.change">
+                        <div class="col text-start">Change</div>
+                        <div class="col text-end" t-esc="order.change"/>
+                    </div>
+                    <div class="d-flex align-items-center ms-auto">Powered by<OdooLogo style="'width: 4rem;'" monochrome="true" /></div>
+                </div>
+            </div>
+        </div>
+        <MainComponentsContainer />
+    </t>
+</templates>

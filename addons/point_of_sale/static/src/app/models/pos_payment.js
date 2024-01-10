@@ -1,7 +1,7 @@
 /** @odoo-module */
 import { registry } from "@web/core/registry";
 import { Base } from "./related_models";
-import { formatFloat, roundDecimals } from "@web/core/utils/numbers";
+import { roundDecimals } from "@web/core/utils/numbers";
 import { uuidv4 } from "@point_of_sale/utils";
 
 const { DateTime } = luxon;
@@ -31,12 +31,6 @@ export class PosPayment extends Base {
 
     get_amount() {
         return this.amount || 0;
-    }
-
-    get_amount_str() {
-        return formatFloat(this.amount, {
-            digits: [69, this.pos_order_id.currency.decimal_places],
-        });
     }
 
     get_payment_status() {

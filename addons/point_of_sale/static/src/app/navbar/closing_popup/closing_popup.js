@@ -34,7 +34,6 @@ export class ClosePosPopup extends Component {
         this.pos = usePos();
         this.report = useService("report");
         this.hardwareProxy = useService("hardware_proxy");
-        this.customerDisplay = useService("customer_display");
         this.dialog = useService("dialog");
         this.state = useState(this.getInitialState());
         this.confirm = useAsyncLockedMethod(this.confirm);
@@ -147,7 +146,6 @@ export class ClosePosPopup extends Component {
         return true;
     }
     async closeSession() {
-        this.customerDisplay?.update({ closeUI: true });
         // If there are orders in the db left unsynced, we try to sync.
         const syncSuccess = await this.pos.push_orders_with_closing_popup();
         if (!syncSuccess) {

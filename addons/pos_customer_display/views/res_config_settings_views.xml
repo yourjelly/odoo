@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<odoo>
+    <record id="res_config_settings_view_form_menu" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.pos_customer_display.view</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="point_of_sale.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <setting id="customer_display" position="attributes">
+                <attribute name="invisible">pos_customer_display_type == 'none'</attribute>
+            </setting>
+            <setting id="customer_display">
+                <div>
+                    <field name="pos_customer_display_type"/>
+                    <div class="mt-1" invisible="pos_customer_display_type == 'none'">
+                        <label for="pos_customer_display_bg_img" />
+                        <field name="pos_customer_display_bg_img_name" invisible ="1"/>
+                        <field name="pos_customer_display_bg_img" class="w-100" filename="pos_customer_display_bg_img_name"/>
+                    </div>
+                </div>
+            </setting>
+        </field>
+    </record>
+</odoo>

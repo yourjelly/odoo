@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="pos_customer_display.Navbar" t-inherit="point_of_sale.Navbar" t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('pos-rightheader')]/div[hasclass('status-buttons')]/SyncNotification" position="before">
+            <button t-if="pos.config.customer_display_type !== 'none'" t-on-click="openCustomerDisplay" class="btn btn-light rounded-0 px-3">
+                <i class="fa fa-fw fa-desktop text-success me-1" role="img" aria-label="Customer Screen" title="Customer Screen" />Customer Screen</button>
+        </xpath>
+    </t>
+</templates>

@@ -20,7 +20,6 @@
                     <CashierName />
                     <SaleDetailsButton t-if="hardwareProxy.printer" isHeaderButton="true"/>
                     <ProxyStatus t-if="pos.config.use_proxy" />
-                    <CustomerFacingDisplayButton t-if="customerFacingDisplayButtonIsShown" />
                     <SyncNotification />
                 </div>
                 <div t-if="isBurgerMenuClosed()" class="navbar-button menu-button btn btn-light rounded-0 d-flex align-items-center px-3 cursor-pointer" t-on-click="openMenu">
@@ -42,7 +41,6 @@
                                         Cash In/Out
                                     </a>
                                 </li>
-                                <CustomerFacingDisplayButton t-if="CustomerFacingDisplayButtonIsShown"/>
                                 <li t-if="showToggleProductView" class="menu-item navbar-button" t-on-click="toggleProductView">
                                     <a class="dropdown-item py-2">
                                         Switch Product View

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="pos_customer_display_menu_item" model="ir.ui.view">
+        <field name="name">pos.config.kanban.view.inherit.customer_display</field>
+        <field name="model">pos.config</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_config_kanban" />
+        <field name="arch" type="xml">
+            <xpath
+                expr="//div[hasclass('dropdown-pos-config')]/div/div[hasclass('o_kanban_manage_view')]"
+                position="inside">
+                <field name="customer_display_type" invisible="1" />
+                <field name="access_token" invisible="1" />
+                <div role="menuitem" invisible="customer_display_type != 'remote'">
+                    <a t-attf-href="/pos-customer-display/#{record.access_token.value}" target="_blank" style="white-space: nowrap;">Customer Display</a>
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>
