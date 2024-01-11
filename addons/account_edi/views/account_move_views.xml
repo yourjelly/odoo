@@ -15,7 +15,13 @@
             <field name="inherit_id" ref="account.view_out_invoice_tree" />
             <field name="arch" type="xml">
                 <field name="state" position="before">
-                    <field name="edi_state" optional="hide"/>
+                    <field name="edi_state" optional="hide"
+                    widget="badge"
+                    decoration-warning="(edi_state == 'to_send' or edi_state == 'to_cancel')"
+                    decoration-muted="edi_state == 'cancelled'"
+                    decoration-danger="edi_state == 'failed'"
+                    decoration-success="edi_state == 'sent' "
+                    />
                     <field name="edi_blocking_level" optional="hide"/>
                     <field name="edi_error_message" optional="hide"/>
                 </field>
@@ -85,12 +91,12 @@
                 <xpath expr="//header" position="after">
                     <field name="edi_blocking_level" invisible="1" />
                     <field name="edi_error_count" invisible="1" />
-                    <div class="alert alert-info" role="alert" style="margin-bottom:0px;"
+                    <div class="alert alert-info d-flex justify-content-between align-items-center" role="alert" style="margin-bottom:0px;"
                         invisible="edi_web_services_to_process in ['', False] or state == 'draft'">
                          <div>The invoice will soon be sent to
-                             <field name="edi_web_services_to_process" class="w-auto"/> -
-                             <button name="button_process_edi_web_services" type="object" class="oe_link ps-0 text-decoration-underline" string="Process now"/>
+                             <field name="edi_web_services_to_process" class="w-auto"/>
                          </div>
+                         <button name="button_process_edi_web_services" type="object" class="oe_link ps-0 text-decoration-underline" string="Process now"/>
                     </div>
                     <div class="alert alert-danger" role="alert" style="margin-bottom:0px;"
                         invisible="edi_error_count == 0 or edi_blocking_level != 'error'">

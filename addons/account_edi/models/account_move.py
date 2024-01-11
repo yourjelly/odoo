@@ -16,7 +16,7 @@ class AccountMove(models.Model):
         comodel_name='account.edi.document',
         inverse_name='move_id')
     edi_state = fields.Selection(
-        selection=[('to_send', 'To Send'), ('sent', 'Sent'), ('to_cancel', 'To Cancel'), ('cancelled', 'Cancelled')],
+        selection=[('to_send', 'To Send'), ('sent', 'Sent'), ('to_cancel', 'To Cancel'), ('cancelled', 'Cancelled'), ('failed', 'Failed')],
         string="Electronic invoicing",
         store=True,
         compute='_compute_edi_state',
@@ -45,6 +45,8 @@ class AccountMove(models.Model):
                 move.edi_state = 'sent'
             elif all_states == {'cancelled'}:
                 move.edi_state = 'cancelled'
+            elif all_states == {'failed'}:
+                move.edi_state = {'failed'}
             elif 'to_send' in all_states:
                 move.edi_state = 'to_send'
             elif 'to_cancel' in all_states:
