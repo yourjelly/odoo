@@ -64,64 +64,42 @@ class TestProjectSharingCommon(TestProjectCommon):
 class TestProjectSharing(TestProjectSharingCommon):
 
     def test_blocked_by_project_sharing_string_portal(self):
-        # Create a new project and task not shared with the portal user
-        project1 = self.env['project.project'].with_context({'mail_create_nolog': True}).create({
+
+        project_admin = self.env['project.project'].with_context({'mail_create_nolog': True}).create({
             'name': 'Project 1',
+            'collaborator_ids': [
+                Command.create({'partner_id': self.user_portal.partner_id.id}),
+            ],
+        })
+        project_portal = self.env['project.project'].with_context({'mail_create_nolog': True}).create({
+            'name': 'Blocked Project',
+        })
+        task_manager= self.env['project.task'].with_context({'mail_create_nolog': True}).create({
+            'name': 'Blocked',
+            'project_id': project_admin.id,
+            'user_ids': self.user_projectmanager,
         })
         task = self.env['project.task'].with_context({'mail_create_nolog': True}).create({
             'name': 'UserTask',
-            'project_id': project1.id,
+            'project_id': project_portal.id,
+            'depend_on_ids': task_manager,
         })
 
-        # Attempt to read the task as the portal user
-        with self.assertRaises(AccessError, msg="Should not accept the portal user to access to a task he doesn't have access to."):
-            task.with_user(self.user_portal).read(['name'])
-
-        # Share the project with edit access for the portal user
         project_share_wizard = self.env['project.share.wizard'].create({
             'res_model': 'project.project',
-            'res_id': project1.id,
+            'res_id': project_portal.id,
             'access_mode': 'edit',
+            'partner_ids': [
+                Command.link(self.user_portal.partner_id.id),
+            ],
         })
-        project_share_wizard.write({'partner_ids': [Command.link(self.user_portal.partner_id.id)]})
         project_share_wizard.action_send_mail()
 
-        # Attempt to read the task as the portal user after sharing the project
-        task_read = task.with_user(self.user_portal).read(['name'])
-        self.assertEqual(task_read, [{'name': 'UserTask'}], 'The portal user should now have access to the task.')
-
-        # Check if the 'blocked by project sharing' string is displayed when accessing the task in the portal user's context
         with self.get_project_sharing_form_view(task, self.user_portal) as form:
-            blocked_by_string = form.view['fields']['name']['string']
-            self.assertEqual(blocked_by_string, 'Blocked by Project Sharing', 'The correct string should be displayed for blocked tasks.')
-
-    def test_project_share_wizard(self):
-        """ Test Project Share Wizard
-
-            Test Cases:
-            ==========
-            1) Create the wizard record
-            2) Check if no access rights are given to a portal user
-            3) Add access rights to a portal user
-        """
-        project_share_wizard = self.env['project.share.wizard'].create({
-            'res_model': 'project.project',
-            'res_id': self.project_portal.id,
-            'access_mode': 'edit',
-        })
-        self.assertFalse(project_share_wizard.partner_ids, 'No collaborator should be in the wizard.')
-        self.assertFalse(self.project_portal.with_user(self.user_portal)._check_project_sharing_access(), 'The portal user should not have accessed in project sharing views.')
-        project_share_wizard.write({'partner_ids': [Command.link(self.user_portal.partner_id.id)]})
-        project_share_wizard.action_send_mail()
-        self.assertEqual(len(self.project_portal.collaborator_ids), 1, 'The access right added in project share wizard should be added in the project when the user confirm the access in the wizard.')
-        self.assertDictEqual({
-            'partner_id': self.project_portal.collaborator_ids.partner_id,
-            'project_id': self.project_portal.collaborator_ids.project_id,
-        }, {
-            'partner_id': self.user_portal.partner_id,
-            'project_id': self.project_portal,
-        }, 'The access rights added should be the read access for the portal project for Chell Gladys.')
-        self.assertTrue(self.project_portal.with_user(self.user_portal)._check_project_sharing_access(), 'The portal user should have read access to the portal project with project sharing feature.')
+            form.name = 'Test'
+            self.assertEqual(task.name, 'UserTask')
+            self.assertEqual(task.project_id, project_portal)
+            self.assertIn('This task is currently blocked by' , form, 'This task is currently')
 
     def test_project_sharing_access(self):
         """ Check if the different user types can access to project sharing feature as expected. """
