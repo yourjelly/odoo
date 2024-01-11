@@ -215,8 +215,8 @@ class AccountEdiFormat(models.Model):
         report_lines_xmlids = invoice.line_ids.tax_tag_ids.tax_report_line_ids.mapped(lambda x: x.get_external_id().get(x.id, ''))
         return any([x == "l10n_it.tax_report_line_vj3" for x in report_lines_xmlids])
 
-    def _l10n_it_document_type_mapping(self):
-        return {
+    def _l10n_it_document_type_mapping(self, outgoing_import=False):
+        mapping = {
             'TD01': dict(move_types=['out_invoice'], import_type='in_invoice', downpayment=False),
             'TD02': dict(move_types=['out_invoice'], import_type='in_invoice', downpayment=True),
             'TD04': dict(move_types=['out_refund'], import_type='in_refund'),
@@ -227,6 +227,10 @@ class AccountEdiFormat(models.Model):
             'TD18': dict(move_types=['in_invoice', 'in_refund'], import_type='in_invoice', self_invoice=True, services_or_goods="consu", partner_in_eu=True),
             'TD19': dict(move_types=['in_invoice', 'in_refund'], import_type='in_invoice', self_invoice=True, services_or_goods="consu", goods_in_italy=True),
         }
+        if outgoing_import:
+            for dictionary in mapping.values():
+                dictionary['import_type'] = 'out_' + dictionary['import_type'][3:]
+        return mapping
 
     def _l10n_it_get_document_type(self, invoice):
         is_simplified = self._l10n_it_edi_is_simplified(invoice)
@@ -431,9 +435,10 @@ class AccountEdiFormat(models.Model):
             # For unsupported document types, just assume in_invoice, and log that the type is unsupported
             elements = tree.xpath('//DatiGeneraliDocumento/TipoDocumento')
             document_type = elements[0].text if elements else ''
-            move_type = self._l10n_it_document_type_mapping().get(document_type, {}).get('import_type', False)
+            outgoing = company == self.env.company
+            move_type = self._l10n_it_document_type_mapping(outgoing_import=outgoing).get(document_type, {}).get('import_type', False)
             if not move_type:
-                move_type = "in_invoice"
+                move_type = "out_invoice" if outgoing else "in_invoice"
                 _logger.info('Document type not managed: %s. Invoice type is set by default.', document_type)
 
             simplified = self._l10n_it_is_simplified_document_type(document_type)

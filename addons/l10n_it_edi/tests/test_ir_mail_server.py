@@ -112,6 +112,19 @@ class PecMailServerTests(AccountEdiTestCommon):
         """ Test a sample e-invoice file from https://www.fatturapa.gov.it/export/documenti/fatturapa/v1.2/IT01234567890_FPR01.xml """
         invoices = self._create_invoice(self.invoice_content, self.invoice_filename2)
         self.assertTrue(bool(invoices))
+        self.assertRecordValues(invoices, [{
+            'move_type': 'in_invoice',
+        }])
+
+    def test_receive_out_invoice(self):
+        """ Test a sample e-invoice file from https://www.fatturapa.gov.it/export/documenti/fatturapa/v1.2/IT01234567890_FPR01.xml """
+        # When the company has the same codice fiscale as the company issuing the invoice we assume it is an outgoing invoice
+        self.env.company.l10n_it_codice_fiscale = '01234560157'
+        invoices = self._create_invoice(self.invoice_content, self.invoice_filename2)
+        self.assertTrue(bool(invoices))
+        self.assertRecordValues(invoices, [{
+            'move_type': 'out_invoice',
+        }])
 
     def test_receive_signed_vendor_bill(self):
         """ Test a signed (P7M) sample e-invoice file from https://www.fatturapa.gov.it/export/documenti/fatturapa/v1.2/IT01234567890_FPR01.xml """
