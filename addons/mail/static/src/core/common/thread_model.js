@@ -306,10 +306,6 @@ export class Thread extends Record {
         return ["chat", "channel", "group"];
     }
 
-    get isSelfCall() {
-        return this.memberCount === 1 && this.channel_type === 'chat';
-    }
-
     get allowCalls() {
         return (
             this.typesAllowingCalls.includes(this.type) &&

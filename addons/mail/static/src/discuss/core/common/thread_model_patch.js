@@ -76,4 +76,7 @@ patch(Thread.prototype, {
     incrementUnreadCounter() {
         this.message_unread_counter++;
     },
+    get isOnlySelf() {
+        return this.memberCount === 1 && this.channel_type === 'chat';
+    },
 });
