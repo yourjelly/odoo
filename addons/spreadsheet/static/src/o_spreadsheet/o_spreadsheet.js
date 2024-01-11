@@ -56821,5 +56821,5 @@
     __info__.hash = "56dbdc91d";
 
 
-})(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
+})(this.o_spreadsheet = this.o_spreadsheet || {}, odoo.loader.modules.get("@odoo/owl"));
 //# sourceMappingURL=o_spreadsheet.js.map

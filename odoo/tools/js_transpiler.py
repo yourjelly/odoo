@@ -665,7 +665,7 @@ ODOO_MODULE_RE = re.compile(r"""
     \s*                                       # some starting space
     \/(\*|\/).*\s*                            # // or /*
     @odoo-module                              # @odoo-module
-    (\s+alias=(?P<alias>[\w.]+))?             # alias=web.AbstractAction (optional)
+    (\s+alias=(?P<alias>[\w.@/]+))?             # alias=web.AbstractAction (optional)
     (\s+default=(?P<default>False|false|0))?  # default=False or false or 0 (optional)
 """, re.VERBOSE)
 
