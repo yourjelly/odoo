@@ -114,7 +114,7 @@ test.tags("desktop")("toggling through multiple ways", async () => {
 
     expect(`.o-checkbox input`).toBeChecked();
 
-    await contains(".o-checkbox > .form-check-label").uncheck();
+    await contains(".o-checkbox > .form-check-label", { visible: false }).uncheck();
 
     expect(`.o-checkbox input`).not.toBeChecked();
 
