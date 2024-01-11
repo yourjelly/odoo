@@ -11,6 +11,7 @@ class AccountAnalyticLine(models.Model):
         'product.product',
         string='Product',
         check_company=True,
+        compute='_compute_product_id', store=True, readonly=False
     )
     general_account_id = fields.Many2one(
         'account.account',
@@ -18,7 +19,7 @@ class AccountAnalyticLine(models.Model):
         ondelete='restrict',
         domain="[('deprecated', '=', False)]",
         check_company=True,
-        compute='_compute_general_account_id', store=True, readonly=False
+        compute='_compute_general_account_id', store=True, readonly=False, precompute=True,
     )
     journal_id = fields.Many2one(
         'account.journal',
@@ -28,41 +29,75 @@ class AccountAnalyticLine(models.Model):
         related='move_line_id.journal_id',
         store=True,
     )
-    partner_id = fields.Many2one(
-        readonly=False,
-        compute="_compute_partner_id",
-        store=True,
-    )
-    move_line_id = fields.Many2one(
-        'account.move.line',
+    source_document_model = fields.Selection(selection_add=[('account.move.line', 'Journal Item')], ondelete={'account.move.line': 'cascade'})
+    move_line_id = fields.Many2oneReferenceField(
         string='Journal Item',
-        ondelete='cascade',
-        index=True,
-        check_company=True,
+        comodel_name='account.move.line',
+        reference_field='source_document_id',
     )
     code = fields.Char(size=8)
-    ref = fields.Char(string='Ref.')
-    category = fields.Selection(selection_add=[('invoice', 'Customer Invoice'), ('vendor_bill', 'Vendor Bill')])
+    ref = fields.Char(string='Ref.', related='move_line_id.ref')
+    category = fields.Selection(
+        selection_add=[
+            ('invoice', 'Customer Invoice'),
+            ('vendor_bill', 'Vendor Bill'),
+        ],
+    )
+
+    @api.depends('move_line_id.product_id')
+    def _compute_product_id(self):
+        for line in self.filtered('move_line_id'):
+            line.product_id = line.move_line_id.product_id
 
     @api.depends('move_line_id')
+    def _compute_category(self):
+        super()._compute_category()
+        for line in self.filtered(('move_line_id')):
+            move = line.move_line_id.move_id
+            line.category = (
+                'invoice' if move.is_sale_document() else
+                'vendor_bill' if move.is_purchase_document() else
+                'other'
+            )
+
+    @api.depends('move_line_id.account_id')
     def _compute_general_account_id(self):
-        for line in self:
+        for line in self.filtered('move_line_id'):
             line.general_account_id = line.move_line_id.account_id
 
-    @api.constrains('move_line_id', 'general_account_id')
+    @api.depends('move_line_id.balance', 'percentage')
+    def _compute_amount(self):
+        super()._compute_amount()
+        for line in self.filtered(('move_line_id')):
+            line.amount = -line.move_line_id.balance * line.percentage
+
+    @api.depends('move_line_id.name')
+    def _compute_name(self):
+        super()._compute_name()
+        for line in self.filtered(('move_line_id')):
+            line.name = line.move_line_id.name
+
+    @api.depends('move_line_id.date')
+    def _compute_date(self):
+        super()._compute_date()
+        for line in self.filtered(('move_line_id')):
+            line.date = line.move_line_id.date
+
+    @api.depends('move_line_id.partner_id')
+    def _compute_partner_id(self):
+        super()._compute_partner_id()
+        for line in self.filtered(('move_line_id')):
+            line.partner_id = line.move_line_id.partner_id
+
+    @api.constrains('source_document_id', 'general_account_id')
     def _check_general_account_id(self):
         for line in self:
             if line.move_line_id and line.general_account_id != line.move_line_id.account_id:
                 raise ValidationError(_('The journal item is not linked to the correct financial account'))
 
-    @api.depends('move_line_id')
-    def _compute_partner_id(self):
-        for line in self:
-            line.partner_id = line.move_line_id.partner_id or line.partner_id
-
     @api.onchange('product_id', 'product_uom_id', 'unit_amount', 'currency_id')
     def on_change_unit_amount(self):
-        if not self.product_id:
+        if not self.product_id or self.move_line_id:
             return {}
 
         prod_accounts = self.product_id.product_tmpl_id.with_company(self.company_id)._get_product_accounts()

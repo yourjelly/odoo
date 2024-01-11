@@ -6,16 +6,41 @@
         <field name="arch" type="xml">
             <tree string="Analytic Items" multi_edit="1">
                 <field name="company_id" column_invisible="True"/>
+                <field name="source_document_model" column_invisible="1"/>
                 <field name="product_uom_category_id" column_invisible="True"/>
                 <field name="date" optional="show"/>
-                <field name="name"/>
+                <field name="source_document_id" readonly="1" optional="show"/>
+                <field name="name" readonly="source_document_model"/>
                 <field name="account_id"/>
                 <field name="currency_id" column_invisible="True"/>
                 <field name="unit_amount" sum="Quantity" optional="hide"/>
                 <field name="product_uom_id" optional="hide"/>
                 <field name="partner_id" optional="hide"/>
                 <field name="company_id" groups="base.group_multi_company" optional="show"/>
+                <field name="percentage" widget="percentage" optional="hide" invisible="not source_document_model or source_document_model == 'analytic.budget'"/>
                 <field name="amount" sum="Total" optional="show"/>
+                <field name="state"/>
+                <field name="line_type"/>
+                <field name="achieved_amount" invisible="line_type != 'budget'" optional="show"/>
+                <field name="theoritical_amount" invisible="line_type != 'budget'" optional="show"/>
+                <field name="achievement" invisible="line_type != 'budget'" optional="show" widget="percentage"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_account_analytic_line_widget_tree" model="ir.ui.view">
+        <field name="name">account.analytic.line.tree</field>
+        <field name="model">account.analytic.line</field>
+        <field name="arch" type="xml">
+            <tree string="Analytic Items" multi_edit="1">
+                <field name="company_id" column_invisible="True"/>
+                <field name="source_document_model" column_invisible="1"/>
+                <field name="source_document_id" column_invisible="1"/>
+                <field name="product_uom_category_id" column_invisible="True"/>
+                <field name="account_id"/>
+                <field name="currency_id" column_invisible="True"/>
+                <field name="percentage" widget="percentage" invisible="not source_document_model or source_document_model == 'analytic.budget'"/>
+                <field name="amount" sum="Total"/>
             </tree>
         </field>
     </record>
@@ -30,6 +55,7 @@
                 <separator/>
                 <filter name="month" string="Date" date="date"/>
                 <group string="Group By..." expand="0" name="groupby">
+                    <filter name="line_type" string="Budget" context="{'group_by': 'line_type'}"/>
                     <separator/>
                     <filter string="Date" name="group_date" context="{'group_by': 'date'}"/>
                 </group>
@@ -73,13 +99,16 @@
             <field name="company_id" invisible="1"/>
             <sheet>
                 <group>
+                    <field name="source_document_model" invisible="1"/>
+                    <field name="source_document_id" invisible="1"/>
                     <group name="analytic_item" string="Analytic Item">
-                        <field name="name"/>
+                        <field name="name" readonly="source_document_model"/>
                         <field name="account_id"/>
                         <field name="date"/>
                         <field name="company_id" groups="base.group_multi_company"/>
                     </group>
                     <group name="amount" string="Amount">
+                        <field name="percentage" widget="percentage" invisible="not source_document_model or source_document_model == 'analytic.budget'"/>
                         <field name="amount"/>
                         <field name="unit_amount"/>
                         <field name="product_uom_category_id" invisible="1"/>
@@ -159,6 +188,7 @@
         <field name="res_model">account.analytic.line</field>
         <field name="view_mode">tree,kanban,form,graph,pivot</field>
         <field name="view_id" ref="view_account_analytic_line_tree"/>
+        <field name="domain">[('line_type', '!=', '9_configuration')]</field>
         <field name="search_view_id" ref="analytic.view_account_analytic_line_filter"/>
         <field name="help" type="html">
             <p class="o_view_nocontent_empty_folder">

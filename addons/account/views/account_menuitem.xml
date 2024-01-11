@@ -73,6 +73,7 @@
                 <menuitem id="menu_analytic__distribution_model" name="Analytic Distribution Models" action="analytic.action_analytic_distribution_model" groups="analytic.group_analytic_accounting" sequence="1"/>
                 <menuitem id="account_analytic_def_account" action="analytic.action_account_analytic_account_form" groups="analytic.group_analytic_accounting" sequence="1"/>
                 <menuitem id="account_analytic_plan_menu" name="Analytic Plans" action="analytic.account_analytic_plan_action" groups="analytic.group_analytic_accounting" sequence="2"/>
+                <menuitem id="analytic_budget_menu" name="Analytic Budget" action="analytic.action_analytic_budget" groups="analytic.group_analytic_accounting" sequence="3"/>
             </menuitem>
         </menuitem>
     </menuitem>

@@ -24,6 +24,7 @@ class AccountMoveLine(models.Model):
     _order = "date desc, move_name desc, id"
     _check_company_auto = True
     _rec_names_search = ['name', 'move_id', 'product_id']
+    _analytic_relation = 'move_line_id'
 
     # ==============================================================================================
     #                                          JOURNAL ENTRY
@@ -301,6 +302,7 @@ class AccountMoveLine(models.Model):
         compute='_compute_display_type', store=True, readonly=False, precompute=True,
         required=True,
     )
+    analytic_line_ids = fields.One2many(compute='_compute_analytic_line_ids', store=True, readonly=False)
     product_id = fields.Many2one(
         comodel_name='product.product',
         string='Product',
@@ -369,15 +371,6 @@ class AccountMoveLine(models.Model):
     discount_allocation_key = fields.Binary(compute='_compute_discount_allocation_key', exportable=False)
     discount_allocation_needed = fields.Binary(compute='_compute_discount_allocation_needed', exportable=False)
     discount_allocation_dirty = fields.Boolean(compute='_compute_discount_allocation_needed')
-
-    # === Analytic fields === #
-    analytic_line_ids = fields.One2many(
-        comodel_name='account.analytic.line', inverse_name='move_line_id',
-        string='Analytic lines',
-    )
-    analytic_distribution = fields.Json(
-        inverse="_inverse_analytic_distribution",
-    ) # add the inverse function used to trigger the creation/update of the analytic lines accordingly (field originally defined in the analytic mixin)
 
     # === Early Pay fields === #
     discount_date = fields.Date(
@@ -900,7 +893,7 @@ class AccountMoveLine(models.Model):
 
         return tax_ids
 
-    @api.depends('tax_ids', 'currency_id', 'partner_id', 'account_id', 'group_tax_id', 'analytic_distribution')
+    @api.depends('tax_ids', 'currency_id', 'partner_id', 'account_id', 'group_tax_id')
     def _compute_tax_key(self):
         for line in self:
             if line.tax_repartition_line_id:
@@ -919,7 +912,7 @@ class AccountMoveLine(models.Model):
             else:
                 line.tax_key = frozendict({'id': line.id})
 
-    @api.depends('tax_ids', 'currency_id', 'partner_id', 'analytic_distribution', 'balance', 'partner_id', 'move_id.partner_id', 'price_unit', 'quantity')
+    @api.depends('tax_ids', 'currency_id', 'partner_id', 'balance', 'partner_id', 'move_id.partner_id', 'price_unit', 'quantity')
     def _compute_all_tax(self):
         for line in self:
             sign = line.move_id.direction_sign
@@ -1038,7 +1031,7 @@ class AccountMoveLine(models.Model):
             else:
                 line.epd_key = False
 
-    @api.depends('move_id.needed_terms', 'account_id', 'analytic_distribution', 'tax_ids', 'tax_tag_ids', 'company_id')
+    @api.depends('move_id.needed_terms', 'account_id', 'tax_ids', 'tax_tag_ids', 'company_id')
     def _compute_epd_needed(self):
         for line in self:
             line.epd_dirty = True
@@ -1123,7 +1116,7 @@ class AccountMoveLine(models.Model):
                 line.term_key = False
 
     @api.depends('account_id', 'partner_id', 'product_id')
-    def _compute_analytic_distribution(self):
+    def _compute_analytic_line_ids(self):
         cache = {}
         for line in self:
             if line.display_type == 'product' or not line.move_id.is_invoice(include_receipts=True):
@@ -1137,7 +1130,9 @@ class AccountMoveLine(models.Model):
                 })
                 if arguments not in cache:
                     cache[arguments] = self.env['account.analytic.distribution.model']._get_distribution(arguments)
-                line.analytic_distribution = cache[arguments] or line.analytic_distribution
+                distribution = cache[arguments]
+                if distribution:
+                    line.analytic_line_ids = line._distribution_to_commands(distribution)
 
     @api.depends('discount_date', 'date_maturity')
     def _compute_payment_date(self):
@@ -1215,17 +1210,8 @@ class AccountMoveLine(models.Model):
                 line.debit = 0
             line.balance = line.debit - line.credit
 
-    def _inverse_analytic_distribution(self):
-        """ Unlink and recreate analytic_lines when modifying the distribution."""
-        lines_to_modify = self.env['account.move.line'].browse([
-            line.id for line in self if line.parent_state == "posted"
-        ])
-        lines_to_modify.analytic_line_ids.unlink()
-        lines_to_modify._create_analytic_lines()
-
     @api.onchange('account_id')
     def _inverse_account_id(self):
-        self._inverse_analytic_distribution()
         self._conditional_add_to_compute('tax_ids', lambda line: (
             line.account_id.tax_ids
             and not line.product_id.taxes_id.filtered(lambda tax: tax.company_id == line.company_id)
@@ -2962,78 +2948,6 @@ class AccountMoveLine(models.Model):
                         _logger.info("%s has reconciled lines, changing the config", account.display_name)
                         account.reconcile = True
                     lines.with_context(no_exchange_difference=True, no_cash_basis=True).reconcile()
-
-    # -------------------------------------------------------------------------
-    # ANALYTIC
-    # -------------------------------------------------------------------------
-
-    def _validate_analytic_distribution(self):
-        for line in self.filtered(lambda line: line.display_type == 'product'):
-            line._validate_distribution(**{
-                        'product': line.product_id.id,
-                        'account': line.account_id.id,
-                        'business_domain': line.move_id.move_type in ['out_invoice', 'out_refund', 'out_receipt'] and 'invoice'
-                                           or line.move_id.move_type in ['in_invoice', 'in_refund', 'in_receipt'] and 'bill'
-                                           or 'general',
-                        'company_id': line.company_id.id,
-            })
-
-    def _create_analytic_lines(self):
-        """ Create analytic items upon validation of an account.move.line having an analytic distribution.
-        """
-        self._validate_analytic_distribution()
-        analytic_line_vals = []
-        for line in self:
-            analytic_line_vals.extend(line._prepare_analytic_lines())
-
-        self.env['account.analytic.line'].create(analytic_line_vals)
-
-    def _prepare_analytic_lines(self):
-        self.ensure_one()
-        analytic_line_vals = []
-        if self.analytic_distribution:
-            # distribution_on_each_plan corresponds to the proportion that is distributed to each plan to be able to
-            # give the real amount when we achieve a 100% distribution
-            distribution_on_each_plan = {}
-            for account_ids, distribution in self.analytic_distribution.items():
-                line_values = self._prepare_analytic_distribution_line(float(distribution), account_ids, distribution_on_each_plan)
-                if not self.currency_id.is_zero(line_values.get('amount')):
-                    analytic_line_vals.append(line_values)
-        return analytic_line_vals
-
-    def _prepare_analytic_distribution_line(self, distribution, account_ids, distribution_on_each_plan):
-        """ Prepare the values used to create() an account.analytic.line upon validation of an account.move.line having
-            analytic tags with analytic distribution.
-        """
-        self.ensure_one()
-        account_field_values = {}
-        decimal_precision = self.env['decimal.precision'].precision_get('Percentage Analytic')
-        amount = 0
-        for account in self.env['account.analytic.account'].browse(map(int, account_ids.split(","))).exists():
-            distribution_plan = distribution_on_each_plan.get(account.root_plan_id, 0) + distribution
-            if float_compare(distribution_plan, 100, precision_digits=decimal_precision) == 0:
-                amount = -self.balance * (100 - distribution_on_each_plan.get(account.root_plan_id, 0)) / 100.0
-            else:
-                amount = -self.balance * distribution / 100.0
-            distribution_on_each_plan[account.root_plan_id] = distribution_plan
-            account_field_values[account.plan_id._column_name()] = account.id
-        default_name = self.name or (self.ref or '/' + ' -- ' + (self.partner_id and self.partner_id.name or '/'))
-        return {
-            'name': default_name,
-            'date': self.date,
-            **account_field_values,
-            'partner_id': self.partner_id.id,
-            'unit_amount': self.quantity,
-            'product_id': self.product_id and self.product_id.id or False,
-            'product_uom_id': self.product_uom_id and self.product_uom_id.id or False,
-            'amount': amount,
-            'general_account_id': self.account_id.id,
-            'ref': self.ref,
-            'move_line_id': self.id,
-            'user_id': self.move_id.invoice_user_id.id or self._uid,
-            'company_id': self.company_id.id or self.env.company.id,
-            'category': 'invoice' if self.move_id.is_sale_document() else 'vendor_bill' if self.move_id.is_purchase_document() else 'other',
-        }
 
     # -------------------------------------------------------------------------
     # MISC

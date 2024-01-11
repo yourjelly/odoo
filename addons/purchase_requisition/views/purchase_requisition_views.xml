@@ -160,10 +160,7 @@
                                 <field name="product_uom_category_id" column_invisible="True"/>
                                 <field name="product_uom_id" string="UoM" groups="uom.group_uom" optional="show" required="product_id"/>
                                 <field name="schedule_date" optional="hide"/>
-                                <field name="analytic_distribution" widget="analytic_distribution"
-                                       optional="hide"
-                                       groups="analytic.group_analytic_accounting"
-                                       options="{'product_field': 'product_id', 'business_domain': 'purchase_order'}"/>
+                                <field name="analytic_line_ids" groups="analytic.group_analytic_accounting" optional="hide"/>
                                 <field name="price_unit"/>
                             </tree>
                             <form string="Products">
@@ -175,9 +172,7 @@
                                     <field name="product_uom_category_id" invisible="1"/>
                                     <field name="product_uom_id" groups="uom.group_uom"/>
                                     <field name="schedule_date"/>
-                                    <field name="analytic_distribution" widget="analytic_distribution"
-                                           groups="analytic.group_analytic_accounting"
-                                           options="{'product_field': 'product_id', 'business_domain': 'purchase_order'}"/>
+                                    <field name="analytic_line_ids" groups="analytic.group_analytic_accounting" optional="hide"/>
                                     <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}"/>
                                 </group>
                             </form>

@@ -60,11 +60,7 @@
                     <field name="activity_ids" widget="list_activity" optional="show"/>
                     <field name="accounting_date" optional="hide" groups="account.group_account_invoice,account.group_account_readonly"
                            readonly="not is_editable"/>
-                    <field name="analytic_distribution" widget="analytic_distribution"
-                           optional="show"
-                           groups="analytic.group_analytic_accounting"
-                           readonly="not is_editable"
-                           options="{'product_field': 'product_id', 'business_domain': 'expense'}"/>
+                    <field name="analytic_line_ids" groups="analytic.group_analytic_accounting"/>
                     <field name="account_id" optional="hide" groups="account.group_account_readonly"
                            readonly="not is_editable"/>
                     <field name="company_id" optional="show" groups="base.group_multi_company" readonly="True"/>
@@ -240,10 +236,7 @@
                                    domain="[('account_type', 'not in', ('asset_receivable','liability_payable','asset_cash','liability_credit_card')), ('company_id', '=', company_id)]"
                                    groups="account.group_account_readonly" readonly="not is_editable"
                                    context="{'default_company_id': company_id}"/>
-                            <field name="analytic_distribution" widget="analytic_distribution"
-                                groups="analytic.group_analytic_accounting"
-                                options="{'product_field': 'product_id', 'account_field': 'account_id', 'business_domain': 'expense'}"
-                                readonly="not is_editable"/>
+                            <field name="analytic_line_ids" groups="analytic.group_analytic_accounting" readonly="not is_editable"/>
                             <field name="company_id" groups="base.group_multi_company" readonly="state != 'draft'"/>
                         </group>
                     </group>
@@ -901,10 +894,7 @@
                                     <button name="action_get_attachment_view" type="object" icon="fa-paperclip"
                                             aria-label="View Attachments" title="View Attachments" class="float-end pe-0"
                                             readonly="True" invisible="nb_attachment == 0"/>
-                                    <field name="analytic_distribution" widget="analytic_distribution"
-                                           groups="analytic.group_analytic_accounting"
-                                           optional="show"
-                                           options="{'product_field': 'product_id', 'account_field': 'account_id', 'business_domain': 'expense'}"/>
+                                    <field name="analytic_line_ids" groups="analytic.group_analytic_accounting" optional="show"/>
                                     <field name="account_id" optional="hide" groups="account.group_account_readonly"/>
                                     <field name="price_unit" optional="hide" widget="monetary" options="{'currency_field': 'company_currency_id', 'field_digits': True}"/>
                                     <field name="currency_id" optional="hide" readonly="True" groups="base.group_multi_currency"/>

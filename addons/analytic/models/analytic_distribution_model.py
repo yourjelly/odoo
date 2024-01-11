@@ -36,22 +36,6 @@ class AccountAnalyticDistributionModel(models.Model):
         help="Select a company for which the analytic distribution will be used (e.g. create new customer invoice or Sales order if we select this company, it will automatically take this as an analytic account)",
     )
 
-    @api.constrains('company_id')
-    def _check_company_accounts(self):
-        query = """
-            SELECT model.id
-              FROM account_analytic_distribution_model model
-              JOIN account_analytic_account account
-                ON model.analytic_distribution ? CAST(account.id AS VARCHAR)
-             WHERE account.company_id IS NOT NULL 
-               AND (model.company_id IS NULL 
-                OR model.company_id != account.company_id)
-        """
-        self.flush_model(['company_id', 'analytic_distribution'])
-        self.env.cr.execute(query)
-        if self.env.cr.dictfetchone():
-            raise UserError(_('You defined a distribution with analytic account(s) belonging to a specific company but a model shared between companies or with a different company'))
-
     @api.model
     def _get_distribution(self, vals):
         """ Returns the distribution model that has the most fields that corresponds to the vals given

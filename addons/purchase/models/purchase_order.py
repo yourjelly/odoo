@@ -256,6 +256,10 @@ class PurchaseOrder(models.Model):
                 order.sudo().write(partner_vals)  # Because the purchase user doesn't have write on `res.partner`
         return orders
 
+    def unlink(self):
+        self.order_line.unlink()
+        return super().unlink()
+
     @api.ondelete(at_uninstall=False)
     def _unlink_if_cancelled(self):
         for order in self:
@@ -1069,3 +1073,10 @@ class PurchaseOrder(models.Model):
         """
         self.ensure_one()
         return self.state == 'cancel'
+
+    def _get_view(self, view_id=None, view_type='form', **options):
+        arch, view = super()._get_view(view_id, view_type, **options)
+        line_nodes = arch.findall('.//field[@name="analytic_line_ids"]')
+        for line_node in line_nodes:
+            self.env['account.analytic.line']._patch_view(line_node, False, source_model=self.order_line)
+        return arch, view

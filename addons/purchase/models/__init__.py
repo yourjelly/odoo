@@ -3,6 +3,7 @@
 
 from . import account_invoice
 from . import account_tax
+from . import analytic_line
 from . import analytic_account
 from . import analytic_applicability
 from . import purchase_order

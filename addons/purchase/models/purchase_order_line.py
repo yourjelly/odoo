@@ -41,6 +41,7 @@ class PurchaseOrderLine(models.Model):
     price_unit_discounted = fields.Float('Unit Price (Discounted)', compute='_compute_price_unit_discounted')
 
     price_subtotal = fields.Monetary(compute='_compute_amount', string='Subtotal', store=True)
+    price_subtotal_to_invoice = fields.Monetary(compute='_compute_price_subtotal_to_invoice')
     price_total = fields.Monetary(compute='_compute_amount', string='Total', store=True)
     price_tax = fields.Float(compute='_compute_amount', string='Tax', store=True)
 
@@ -99,6 +100,11 @@ class PurchaseOrderLine(models.Model):
                 'price_tax': amount_tax,
                 'price_total': amount_untaxed + amount_tax,
             })
+
+    @api.depends('price_subtotal', 'qty_invoiced', 'product_qty')
+    def _compute_price_subtotal_to_invoice(self):
+        for line in self:
+            line.price_subtotal_to_invoice = line.price_subtotal * (line.product_qty - line.qty_invoiced) / line.product_qty
 
     def _convert_to_tax_base_line_dict(self):
         """ Convert the current record to a dictionary in order to use the generic taxes computation method
@@ -256,8 +262,9 @@ class PurchaseOrderLine(models.Model):
 
     @api.depends('product_id', 'order_id.partner_id')
     def _compute_analytic_distribution(self):
+        super()._compute_analytic_distribution()
         for line in self:
-            if not line.display_type:
+            if not line.display_type and not line.analytic_distribution:
                 distribution = self.env['account.analytic.distribution.model']._get_distribution({
                     "product_id": line.product_id.id,
                     "product_categ_id": line.product_id.categ_id.id,

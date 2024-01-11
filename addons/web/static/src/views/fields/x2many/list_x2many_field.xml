@@ -2,7 +2,28 @@
 <templates xml:space="preserve">
 
     <t t-name="web.ListX2ManyField">
-       <t t-esc="formattedValue"/>
+        <div
+            class="o_field_tags d-inline-flex flex-wrap gap-1"
+            style="min-height: 20px;"
+            t-att-class="{'o_tags_input o_input': !props.readonly}"
+            t-on-focus="mainElementFocus"
+            tabindex="1"
+            t-ref="widgetRef">
+            <TagsList tags="tags"/>
+        </div>
+        <div class="analytic_distribution_popup dropdown-menu o-dropdown--menu show rounded py-0 w-50" t-if="state.popupOpen" t-ref="analyticDropdown">
+            <div class="popover-header sticky-top">
+                <div class="d-flex">
+                    <div class="h5 mt-2 me-auto">Analytic</div>
+                </div>
+            </div>
+            <div class="popover-body p-2">
+                <ListRenderer t-if="props.viewMode === 'list'" t-props="rendererProps" />
+            </div>
+            <div class="popover-body p-2">
+                <TagsList tags="planSummary"/>
+            </div>
+        </div>
     </t>
 
 </templates>

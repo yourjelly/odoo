@@ -3243,14 +3243,49 @@ class Many2oneReference(Integer):
     _description_model_field = property(attrgetter('model_field'))
 
     def convert_to_cache(self, value, record, validate=True):
-        # cache format: id or None
         if isinstance(value, BaseModel):
             value = value._ids[0] if value._ids else None
-        return super().convert_to_cache(value, record, validate)
+        if isinstance(value, dict):
+            value = value.get('id')
+        return value
+
+    def convert_to_write(self, value, record):
+        if type(value) in IdType:
+            return value
+        if not value:
+            return False
+        raise ValueError("Wrong value for %s: %r" % (self, value))
+
+    def _update(self, records, value):
+        cache = records.env.cache
+        for record in records:
+            cache.set(record, self, self.convert_to_cache(value, record, validate=False))
+
+    def write(self, records, value):
+        # discard recomputation of self on records
+        records.env.remove_to_compute(self, records)
+
+        # discard the records that are not modified
+        cache = records.env.cache
+        cache_value = self.convert_to_cache(value, records)
+        records = cache.get_records_different_from(records, self, cache_value)
+        if not records:
+            return
+
+        # remove records from the cache of one2many fields of old corecords
+        self._remove_inverses(records, cache_value)
+
+        # update the cache of self
+        dirty = self.store and any(records._ids)
+        cache.update(records, self, itertools.repeat(cache_value), dirty=dirty)
+
+        # update the cache of one2many fields of new corecord
+        print(records, cache_value)
+        self._update_inverses(records, cache_value)
 
     def _update_inverses(self, records, value):
         """ Add `records` to the cached values of the inverse fields of `self`. """
-        if not value:
+        if value is None:
             return
         cache = records.env.cache
         model_ids = self._record_ids_per_res_model(records)
@@ -3259,7 +3294,7 @@ class Many2oneReference(Integer):
             records = records.browse(model_ids[invf.model_name])
             if not records:
                 continue
-            corecord = records.env[invf.model_name].browse(value)
+            corecord = records.env[invf.model_name].browse([value])
             records = records.filtered_domain(invf.get_domain_list(corecord))
             if not records:
                 continue
@@ -3270,6 +3305,9 @@ class Many2oneReference(Integer):
             if ids0 is not None or not corecord.id:
                 ids1 = tuple(unique((ids0 or ()) + records._ids))
                 cache.set(corecord, invf, ids1)
+
+    def _remove_inverses(self, records, value):
+        pass
 
     def _record_ids_per_res_model(self, records):
         model_ids = defaultdict(set)
@@ -3283,6 +3321,45 @@ class Many2oneReference(Integer):
                     continue
             model_ids[model].add(record.id)
         return model_ids
+
+class Many2oneReferenceField(Many2one):
+    reference_field = None
+    store = False
+
+    def setup_nonrelated(self, model):
+        from . import api
+        super().setup_nonrelated(model)
+        comodel_name = self.comodel_name
+        fname = self.name
+        reference_field = model._fields[self.reference_field]
+        reference_model_fname = reference_field.model_field
+        reference_id_fname = reference_field.name
+
+        self._depends = (reference_model_fname, reference_id_fname)
+        def _compute_field_id(self):
+            for line in self:
+                line[fname] = (
+                    line[reference_model_fname] == comodel_name
+                    and self.env[comodel_name].browse(line[reference_id_fname])
+                )
+
+        @api.onchange(fname)
+        def _inverse_field_id(self):
+            for line in self:
+                if line[fname]:
+                    line[reference_model_fname] = comodel_name
+                    line[reference_id_fname] = line[fname]._origin.id
+                elif line[reference_model_fname] == comodel_name:
+                    line[reference_model_fname] = False
+                    line[reference_id_fname] = False
+        setattr(type(model), f"_inverse_{fname}", api.onchange(fname)(_inverse_field_id))
+
+        def _search_field_id(self, operator, value):
+            return [(reference_model_fname, '=', comodel_name), (reference_id_fname, operator, value)]
+
+        self.compute = _compute_field_id
+        self.inverse = _inverse_field_id
+        self.search = _search_field_id
 
 
 class Json(Field):
@@ -4480,7 +4557,7 @@ class One2many(_RelationalMulti):
         lines = comodel.search_fetch(domain, field_names)
 
         # group lines by inverse field (without prefetching other fields)
-        get_id = (lambda rec: rec.id) if inverse_field.type == 'many2one' else int
+        get_id = (lambda rec: int(rec) or rec.id)
         group = defaultdict(list)
         for line in lines:
             # line[inverse] may be a record or an integer
@@ -4632,6 +4709,7 @@ class One2many(_RelationalMulti):
                         for record in recs:
                             line = comodel.new(command[2], ref=command[1])
                             line[inverse] = record
+                            record[self.name] += line
                     elif command[0] == Command.UPDATE:
                         browse([command[1]]).update(command[2])
                     elif command[0] == Command.DELETE:

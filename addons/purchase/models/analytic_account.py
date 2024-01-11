@@ -11,6 +11,7 @@ class AccountAnalyticAccount(models.Model):
 
     @api.depends('line_ids')
     def _compute_purchase_order_count(self):
+        #TODO
         for account in self:
             account.purchase_order_count = self.env['purchase.order'].search_count([
                 ('order_line.invoice_lines.analytic_line_ids.account_id', '=', account.id)

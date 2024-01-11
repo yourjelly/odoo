@@ -20,6 +20,7 @@ that have no counterpart in the general financial accounts.
         'views/analytic_line_views.xml',
         'views/analytic_account_views.xml',
         'views/analytic_plan_views.xml',
+        'views/analytic_budget.xml',
         'views/analytic_distribution_model_views.xml',
         'data/analytic_data.xml'
     ],
@@ -27,9 +28,6 @@ that have no counterpart in the general financial accounts.
         'data/analytic_account_demo.xml'
     ],
     'assets': {
-        'web.assets_backend': [
-            'analytic/static/src/components/**/*',
-        ],
         'web.qunit_suite_tests': [
             'analytic/static/tests/*.js',
         ],

@@ -4097,9 +4097,6 @@ class AccountMove(models.Model):
             if lock_dates:
                 move.date = move._get_accounting_date(move.invoice_date or move.date, affects_tax_report)
 
-        # Create the analytic lines in batch is faster as it leads to less cache invalidation.
-        to_post.line_ids._create_analytic_lines()
-
         # Trigger copying for recurring invoices
         to_post.filtered(lambda m: m.auto_post not in ('no', 'at_date'))._copy_recurring_entries()
 
@@ -4374,8 +4371,6 @@ class AccountMove(models.Model):
                 raise UserError(_('You cannot reset to draft a tax cash basis journal entry.'))
             if move.restrict_mode_hash_table and move.state == 'posted':
                 raise UserError(_('You cannot modify a posted entry of this journal because it is in strict mode.'))
-            # We remove all the analytics entries for this journal
-            move.mapped('line_ids.analytic_line_ids').unlink()
 
         self.mapped('line_ids').remove_move_reconcile()
         self.write({'state': 'draft', 'is_move_sent': False})
@@ -5107,3 +5102,10 @@ class AccountMove(models.Model):
         :return: an array of ir.model.fields for which the user should provide values.
         """
         return []
+
+    def _get_view(self, view_id=None, view_type='form', **options):
+        arch, view = super()._get_view(view_id, view_type, **options)
+        line_nodes = arch.findall('.//field[@name="analytic_line_ids"]')
+        for line_node in line_nodes:
+            self.env['account.analytic.line']._patch_view(line_node, False, source_model=self.line_ids)
+        return arch, view
