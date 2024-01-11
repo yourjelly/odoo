@@ -118,18 +118,6 @@ export const CONFIG_SCHEMA = {
         parse: parseBoolean(true),
     },
     /**
-     * Do not execute monitoring functions after tests, checking:
-     * - elements left in the DOM
-     * - mutation observers still running
-     * - listeners left on global objects
-     * - keys left on global objects
-     * @default false
-     */
-    nowatcher: {
-        default: false,
-        parse: parseBoolean(true),
-    },
-    /**
      * Determines the seed from which random numbers will be generated. If truthy,
      * tests and suites will be shuffled within their parent suite.
      *
@@ -179,6 +167,23 @@ export const CONFIG_SCHEMA = {
     timeout: {
         default: 5_000,
         parse: parseNumber(5_000),
+    },
+    /**
+     * Monitors keys added on global objects if truthy. The value is a comma-separated
+     * list of white-listed keys. If left empty, no monitoring will be performed.
+     * @default ""
+     */
+    watchkeys: {
+        default: "",
+        parse: parseString(""),
+    },
+    /**
+     * Monitors remaining event listeners left on global objects after each test.
+     * @default ""
+     */
+    watchlisteners: {
+        default: false,
+        parse: parseBoolean(true),
     },
 };
 

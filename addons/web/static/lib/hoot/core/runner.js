@@ -7,7 +7,6 @@ import {
     defineRootNode,
     getActiveElement,
     isEmpty,
-    waitUntil,
     watchKeys,
 } from "@web/../lib/hoot-dom/helpers/dom";
 import {
@@ -30,8 +29,9 @@ import {
     normalize,
 } from "../hoot_utils";
 import { MockMath, internalRandom } from "../mock/math";
+import { cleanupNavigator } from "../mock/navigator";
 import { enableNetworkLogs } from "../mock/network";
-import { resetTime, runAllTimers, setFrameRate } from "../mock/time";
+import { cleanupTime, setFrameRate } from "../mock/time";
 import { DEFAULT_CONFIG, FILTER_KEYS } from "./config";
 import { makeExpectFunction } from "./expect";
 import { Suite, suiteError } from "./suite";
@@ -548,6 +548,8 @@ export class TestRunner {
      */
     getFixture() {
         if (!this.#fixture) {
+            resetEventActions();
+
             this.#fixture = document.createElement("div");
             this.#fixture.className = "hoot-fixture";
             if (this.debug) {
@@ -668,7 +670,7 @@ export class TestRunner {
         }
 
         // Fixture
-        const clearFixture = () => {
+        const cleanupFixture = () => {
             if (this.#fixture) {
                 this.#fixture.remove();
                 this.#fixture = null;
@@ -681,14 +683,18 @@ export class TestRunner {
             on(window, "unhandledrejection", (ev) => this.#onError(ev)),
             this.#useFixture()
         );
-        this.afterEach(runAllTimers, resetTime, cleanupObservers, clearFixture, resetEventActions);
-        if (!this.config.nowatcher) {
+        this.afterEach(cleanupTime, cleanupObservers, cleanupFixture, cleanupNavigator);
+        if (this.config.watchkeys) {
+            const keys = this.config.watchkeys?.split(/\s*,\s*/g) || [];
+            this.beforeEach(watchKeys(window, keys), watchKeys(document, keys));
+        }
+        if (this.config.watchlisteners) {
             this.beforeEach(
                 watchListeners(document),
                 watchListeners(document.documentElement),
+                watchListeners(document.head),
                 watchListeners(document.body),
-                watchListeners(window),
-                watchKeys(window, ["Chart"])
+                watchListeners(window)
             );
         }
 

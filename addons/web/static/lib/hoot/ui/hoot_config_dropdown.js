@@ -173,13 +173,23 @@ export class HootConfigDropdown extends Component {
                     </label>
                     <label
                         class="hoot-checkbox hoot-dropdown-line p-1"
-                        title="Disables the checks after tests such as remaining DOM elements, listeners, etc."
+                        title="Checks keys on global objects after each test"
                     >
                         <input
                             type="checkbox"
-                            t-model="config.nowatcher"
+                            t-model="config.watchkeys"
                         />
-                        <span>No watcher</span>
+                        <span>Watch global keys</span>
+                    </label>
+                    <label
+                        class="hoot-checkbox hoot-dropdown-line p-1"
+                        title="Checks event listeners on global objects after each test"
+                    >
+                        <input
+                            type="checkbox"
+                            t-model="config.watchlisteners"
+                        />
+                        <span>Watch global listeners</span>
                     </label>
                     <button
                         type="button"

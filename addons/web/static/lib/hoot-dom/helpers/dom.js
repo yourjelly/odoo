@@ -1513,7 +1513,7 @@ export function waitUntil(predicate, options) {
             return resolve(result);
         }
 
-        const timeout = Math.floor(options?.timeout || 5_000);
+        const timeout = Math.floor(options?.timeout ?? 1_000);
         const message = options?.message || `'waitUntil' timed out after %timeout% milliseconds`;
         const timeoutId = setTimeout(
             () => reject(new HootDomError(message.replace("%timeout%", String(timeout)))),

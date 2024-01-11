@@ -65,7 +65,7 @@ export async function mountWithCleanup(ComponentClass, options) {
         env: options?.env || getMockEnv() || (await makeMockEnv()),
         props: options?.props || {},
         templates,
-        test: true,
+        // test: true,
         translateFn: _t,
     };
     const target = options?.target || getFixture();

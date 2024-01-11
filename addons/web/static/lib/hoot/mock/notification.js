@@ -1,6 +1,7 @@
 /** @odoo-module */
 
 import { makePublicListeners } from "../hoot_utils";
+import { PERMISSIONS } from "./navigator";
 
 //-----------------------------------------------------------------------------
 // Global
@@ -33,17 +34,21 @@ export function flushNotifications() {
 
 export class MockNotification extends EventTarget {
     /** @type {NotificationPermission} */
-    static permission = "denied";
+    static get permission() {
+        return PERMISSIONS.notifications;
+    }
 
     /** @type {NotificationPermission} */
-    permission = this.constructor.permission;
+    get permission() {
+        this.constructor.permission;
+    }
 
     /**
      * @param {string} title
      * @param {NotificationOptions} [options]
      */
     constructor(title, options) {
-        super();
+        super(...arguments);
 
         makePublicListeners(this, ["click", "close", "error", "show"]);
 

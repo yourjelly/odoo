@@ -220,6 +220,13 @@ export function cancelAllTimers() {
     }
 }
 
+export function cleanupTime() {
+    runAllTimers();
+
+    dateTimeStamp = Date.now();
+    timeOffset = 0;
+}
+
 /**
  * Returns a promise resolved after a given amount of milliseconds (default to 0).
  *
@@ -371,11 +378,6 @@ export function mockTimeZone(tz) {
     return function restoreTimeZone() {
         timeZone = DEFAULT_TIMEZONE;
     };
-}
-
-export function resetTime() {
-    dateTimeStamp = Date.now();
-    timeOffset = 0;
 }
 
 /**

@@ -578,7 +578,6 @@ export function lookup(pattern, items, mapFn = normalize) {
     }
 }
 
-const warnSet = new WeakSet();
 export function makeCallbacks() {
     /**
      * @template P
@@ -624,11 +623,6 @@ export function makeCallbacks() {
         const fns = callbackRegistry[type];
         if (!fns?.length) {
             return;
-        }
-
-        if (fns.length > 100 && !warnSet.has(fns)) {
-            warnSet.add(fns);
-            console.warn(`large amount of callbacks for event "${type}":`, fns);
         }
 
         let afterCallback = () => {};

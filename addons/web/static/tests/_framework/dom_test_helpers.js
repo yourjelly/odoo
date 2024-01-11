@@ -44,7 +44,7 @@ import { ensureArray } from "@web/core/utils/arrays";
 
 /**
  * @template Async
- * @typedef {import("@odoo/hoot-dom").QueryOptions<Async>} QueryOptions
+ * @typedef {import("@odoo/hoot-dom").QueryOptions} QueryOptions
  */
 
 //-----------------------------------------------------------------------------

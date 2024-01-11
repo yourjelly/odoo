@@ -5,6 +5,7 @@
  */
 
 export { setRandomSeed } from "./mock/math";
+export { mockPermission } from "./mock/navigator";
 export { mockFetch, mockWebSocket, mockWorker } from "./mock/network";
 export { flushNotifications } from "./mock/notification";
 export {
