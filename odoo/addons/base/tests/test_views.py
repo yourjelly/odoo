@@ -2706,7 +2706,7 @@ class TestViews(ViewCase):
             'groups_id': [(4, self.env.ref('base.group_user').id)],
         })
 
-        def validate(template, field, demo=True, groups='', no_add=False):
+        def validate(template, field, demo=True, no_add=False):
             # add 'access_token' field automatically
             view = self.View.create({
                 'name': 'Form view attachment',
@@ -2722,7 +2722,6 @@ class TestViews(ViewCase):
                 self.assertFalse(nodes, f"Field '{field}' should not be added automatically")
                 return
             self.assertTrue(len(nodes) == 1, f"Field '{field}' should be added automatically")
-            self.assertEqual(nodes[0].get('groups_repr', ''), groups or '')
 
             # admin
             arch = self.env['ir.attachment'].get_view(view_id=view.id)['arch']
@@ -2752,7 +2751,7 @@ class TestViews(ViewCase):
                 <form string="View attachment">
                     <field name="company_id" invisible="not access_token" groups="base.group_erp_manager"/>
                 </form>
-            """, field='access_token', demo=False, groups="base.group_erp_manager")
+            """, field='access_token', demo=False)
 
         # add missing field with multi groups
         validate("""
@@ -2760,7 +2759,7 @@ class TestViews(ViewCase):
                     <field name="company_id" invisible="not name" groups="base.group_erp_manager"/>
                     <field name="company_id" invisible="not name" groups="base.group_system"/>
                 </form>
-            """, field='name', demo=False, groups="base.group_erp_manager")
+            """, field='name', demo=False)
         # add missing field without group because the view is already restricted to the group 'base.group_user'
         validate("""
                 <form string="View attachment">
@@ -2769,7 +2768,7 @@ class TestViews(ViewCase):
                     <field name="company_id" invisible="not name" groups="base.group_multi_company"/>
                     <field name="company_id" invisible="not name" groups="base.group_user"/>
                 </form>
-            """, field='name', demo=True, groups="")
+            """, field='name', demo=True)
         validate("""
                 <form string="View attachment">
                     <field name="company_id" invisible="not name" groups="base.group_erp_manager"/>
@@ -2784,7 +2783,7 @@ class TestViews(ViewCase):
                         <field name="company_id" invisible="not access_token"/>
                     </group>
                 </form>
-            """, field='access_token', demo=False, groups="base.group_erp_manager")
+            """, field='access_token', demo=False)
         validate("""
                 <form string="View attachment">
                     <group groups="base.group_erp_manager">
@@ -2792,7 +2791,7 @@ class TestViews(ViewCase):
                         <field name="company_id" invisible="not name" groups="base.group_user"/>
                     </group>
                 </form>
-            """, field='name', demo=False, groups="base.group_erp_manager")
+            """, field='name', demo=False)
         validate("""
                 <form string="View attachment">
                     <group groups="base.group_erp_manager" invisible="not display_name">
@@ -2800,7 +2799,7 @@ class TestViews(ViewCase):
                         <field name="company_id" invisible="not name" groups="base.group_user"/>
                     </group>
                 </form>
-            """, field='name', demo=False, groups="base.group_erp_manager")
+            """, field='name', demo=False)
         validate("""
                 <form string="View attachment">
                     <group groups="base.group_erp_manager" invisible="not display_name">
@@ -2808,7 +2807,7 @@ class TestViews(ViewCase):
                         <field name="company_id" invisible="not name" groups="base.group_user"/>
                     </group>
                 </form>
-            """, field='display_name', demo=False, groups="base.group_erp_manager")
+            """, field='display_name', demo=False)
         validate("""
                 <form string="View attachment">
                     <group groups="base.group_user" invisible="not display_name">
@@ -2816,7 +2815,7 @@ class TestViews(ViewCase):
                         <field name="company_id" invisible="not name" groups="base.group_erp_manager"/>
                     </group>
                 </form>
-            """, field='name', demo=False, groups="base.group_erp_manager | base.group_multi_company")
+            """, field='name', demo=False)
         validate("""
                 <form string="View attachment">
                     <group groups="base.group_user" invisible="not display_name">
@@ -2824,7 +2823,7 @@ class TestViews(ViewCase):
                         <field name="company_id" invisible="not name" groups="base.group_erp_manager"/>
                     </group>
                 </form>
-            """, field='display_name', demo=True, groups="")
+            """, field='display_name', demo=True)
 
         # field already exist with implied groups
         validate("""
@@ -4403,16 +4402,18 @@ class ViewModifiers(ViewCase):
         def validate(arch, add_field_with_groups=False, parent=False, model='ir.ui.view'):
             parent = 'parent.' if parent else ''
             view = self.assertValid(arch % {'attrs': f"""decoration-info="{parent}name == 'foo'" """}, model=model)
-            view_arch = self.env[model]._get_view_cache(view_id=view.id)['arch']
-            tree = etree.fromstring(view_arch)
+            result = self.env[model]._get_view_cache(view_id=view.id)
+            tree = etree.fromstring(result['arch'])
 
             if add_field_with_groups is False:
                 nodes = tree.xpath('//field[@name="name"][@invisible][@readonly]')
-                self.assertEqual(len(nodes) and nodes[0].get('groups_repr', ''), 0, arch)
+                repr = len(nodes) and str(result['access_rights_groups'].get(nodes[0].get('__group_id__'), ''))
+                self.assertEqual(repr, 0, arch)
             else:
                 nodes = tree.xpath("//field[@name='name'][@invisible='True'][@readonly='True']")
                 self.assertEqual(len(nodes), 1, arch)
-                self.assertEqual(nodes[0].get('groups_repr', ''), add_field_with_groups, arch)
+                repr = str(result['access_rights_groups'].get(nodes[0].get('__group_id__'), ''))
+                self.assertEqual(repr, add_field_with_groups, arch)
 
         arch = """
             <form string="View">

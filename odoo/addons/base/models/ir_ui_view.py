@@ -958,7 +958,7 @@ actual arch.
         self and self.ensure_one()      # self is at most one view
 
         name_manager = self._postprocess_view(node, model or self.model, **options)
-
+        access_rights_groups_from_key = name_manager.access_rights_groups_from_key
         arch = etree.tostring(node, encoding="unicode").replace('\t', '')
 
         models = {}
@@ -966,9 +966,10 @@ actual arch.
         for name_manager in name_managers:
             models.setdefault(name_manager.model._name, set()).update(name_manager.available_fields)
             name_managers.extend(name_manager.children)
-        return arch, models
 
-    def _postprocess_access_rights(self, tree):
+        return arch, models, access_rights_groups_from_key
+
+    def _postprocess_access_rights(self, tree, access_rights_groups):
         """
         Apply group restrictions: elements with a 'groups' attribute should
         be removed from the view to people who are not members.
@@ -981,11 +982,12 @@ actual arch.
 
         # check the read/visibility access
         cache_has_read_access = {}
-        for node in tree.xpath('//*[@groups_repr]'):
-            groups_repr = node.attrib.pop('groups_repr')
-            if groups_repr not in cache_has_read_access:
-                cache_has_read_access[groups_repr] = self.env.user in Group.define_from_repr(groups_repr)
-            if not cache_has_read_access[groups_repr]:
+        for node in tree.xpath('//*[@__group_id__]'):
+            group_key = node.attrib.pop('__group_id__')
+            groups = access_rights_groups[group_key]
+            if group_key not in cache_has_read_access:
+                cache_has_read_access[group_key] = self.env.user in groups
+            if not cache_has_read_access[group_key]:
                 node.getparent().remove(node)
             elif node.tag == 't' and not node.attrib:
                 # Move content of <t groups=""> blocks
@@ -1100,7 +1102,10 @@ actual arch.
                 stack.append((child, node_info['view_groups'], node_info['editable']))
 
             if 'groups' in node.attrib or root_info['model_groups'] != node_info['model_groups']:
-                node.set('groups_repr', str(node_info['model_groups'] & node_info['view_groups']))
+                groups = node_info['model_groups'] & node_info['view_groups']
+                key = str(groups._key)
+                name_manager.access_rights_groups_from_key[key] = groups
+                node.set('__group_id__', key)
 
             self._postprocess_attributes(node, name_manager, node_info)
 
@@ -1162,7 +1167,9 @@ actual arch.
                 if subset_groups is None:
                     subset_groups = missing_groups
                 if not subset_groups.is_every_one():
-                    attrs['groups_repr'] = str(subset_groups)
+                    key = str(subset_groups._key)
+                    name_manager.access_rights_groups_from_key[key] = subset_groups
+                    attrs['__group_id__'] = key
 
             item = etree.Element('field', attrs)
             item.tail = '\n'
@@ -1284,11 +1291,12 @@ actual arch.
             for child in node:
                 if child.tag in ('form', 'tree', 'graph', 'kanban', 'calendar'):
                     node_info['children'] = []
-                    self._postprocess_view(
+                    sub_manager = self._postprocess_view(
                         child, field.comodel_name, editable=node_info['editable'],
                         model_groups=node_info['model_groups'], view_groups=node_info['view_groups'],
                         parent_name_manager=name_manager,
                     )
+                    name_manager.access_rights_groups_from_key.update(sub_manager.access_rights_groups_from_key)
 
             if node_info['editable'] and field.type in ('many2one', 'many2many'):
                 node.set('model_access_rights', field.comodel_name)
@@ -1309,10 +1317,11 @@ actual arch.
             return
         # post-process the node as a nested view, and associate it to the field
         node_info['children'] = []
-        self._postprocess_view(node, field.comodel_name, editable=False,
+        sub_manager = self._postprocess_view(node, field.comodel_name, editable=False,
             model_groups=node_info['model_groups'], view_groups=node_info['view_groups'],
             parent_name_manager=name_manager,
         )
+        name_manager.access_rights_groups_from_key.update(sub_manager.access_rights_groups_from_key)
         name_manager.has_field(node, name, node_info['model_groups'], node_info['view_groups'])
 
     def _postprocess_tag_label(self, node, name_manager, node_info):
@@ -1325,11 +1334,12 @@ actual arch.
     def _postprocess_tag_search(self, node, name_manager, node_info):
         searchpanel = [child for child in node if child.tag == 'searchpanel']
         if searchpanel:
-            self._postprocess_view(
+            sub_manager = self._postprocess_view(
                 searchpanel[0], name_manager.model._name, editable=False,
                 model_groups=node_info['model_groups'], view_groups=node_info['view_groups'],
                 parent_name_manager=name_manager,
             )
+            name_manager.access_rights_groups_from_key.update(sub_manager.access_rights_groups_from_key)
             node_info['children'] = [child for child in node if child.tag != 'searchpanel']
 
     def _postprocess_tag_tree(self, node, name_manager, node_info):
@@ -2679,10 +2689,11 @@ class Model(models.AbstractModel):
         arch, view = self._get_view(view_id, view_type, **options)
 
         # Apply post processing, groups and modifiers etc...
-        arch, models = view.postprocess_and_fields(arch, model=self._name, **options)
+        arch, models, access_rights_groups = view.postprocess_and_fields(arch, model=self._name, **options)
         models = self._get_view_fields(view_type or view.type, models)
         result = {
             'arch': arch,
+            'access_rights_groups': access_rights_groups,
             # TODO: only `web_studio` seems to require this. I guess this is acceptable to keep it.
             'id': view.id,
             # TODO: only `web_studio` seems to require this. But this one on the other hand should be eliminated:
@@ -2723,7 +2734,7 @@ class Model(models.AbstractModel):
         result = dict(self._get_view_cache(view_id, view_type, **options))
 
         node = etree.fromstring(result['arch'])
-        node = self.env['ir.ui.view']._postprocess_access_rights(node)
+        node = self.env['ir.ui.view']._postprocess_access_rights(node, result['access_rights_groups'])
         result['arch'] = etree.tostring(node, encoding="unicode").replace('\t', '')
 
         return result
@@ -2876,6 +2887,8 @@ class NameManager:
 
         self.Group = self.model.env['res.groups']._define_group()
         self.model_groups = model_groups if model_groups is not None else ~self.Group
+
+        self.access_rights_groups_from_key = {}
 
     @lazy_property
     def field_info(self):

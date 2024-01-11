@@ -458,6 +458,37 @@ class TestGroupsOdoo(common.TransactionCase):
         })
         cls.Group = cls.env['res.groups']._define_group()
 
+    def group_define_from_repr(self, group_repr):
+        """ Return the group object from the string (given by the repr of the group object).
+
+        :param group_repr: str
+            Use | (union) and & (intersection) separator like the python object.
+                intersection it's apply before union.
+                Can use an invertion with ~.
+        """
+        if not group_repr:
+            return self.Group.every_one()
+        res = None
+        for union in group_repr.split('|'):
+            union = union.strip()
+            intersection = None
+            if union.startswith('(') and union.endswith(')'):
+                union = union[1:-1]
+            for xmlid in union.split('&'):
+                xmlid = xmlid.strip()
+                leaf = ~self.Group.define(xmlid[1:]) if xmlid.startswith('~') else self.Group.define(xmlid)
+                if intersection is None:
+                    intersection = leaf
+                else:
+                    intersection &= leaf
+            if intersection is None:
+                return self.Group.every_one()
+            elif res is None:
+                res = intersection
+            else:
+                res |= intersection
+        return self.Group.no_one() if res is None else res
+
     def test_groups_1_base(self):
         define = self.Group.define
 
@@ -542,7 +573,7 @@ class TestGroupsOdoo(common.TransactionCase):
         self.assertEqual(define('base.group_system,!base.group_portal,!base.group_public') <= define('base.group_system,!base.group_public'), True)
 
     def test_groups_3_from_ref(self):
-        define = self.Group.define_from_repr
+        define = self.group_define_from_repr
 
         self.assertEqual(str(define('base.group_user & base.group_portal | base.group_user & ~base.group_system') & define('base.group_public')), '~*')
         self.assertEqual(str(define('base.group_user & base.group_portal | base.group_user & ~base.group_system') & define('~base.group_user')), '~*')
@@ -624,8 +655,7 @@ class TestGroupsOdoo(common.TransactionCase):
         ]
         for user_groups, groups, result in tests:
             user.groups_id = [(6, 0, [self.env.ref(xmlid).id for xmlid in user_groups.split(',')])]
-            group = self.Group.define_from_repr(groups)
-            self.assertEqual(user in group, result, f'User ({user_groups!r}) should {"" if result else "not "}have access to groups: ({groups!r})')
+            self.assertEqual(user in self.group_define_from_repr(groups), result, f'User ({user_groups!r}) should {"" if result else "not "}have access to groups: ({groups!r})')
 
     def test_groups_5_distinct(self):
         user = self.env['res.users'].create({

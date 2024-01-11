@@ -441,7 +441,7 @@ class Users(models.Model):
 
     @api.depends('groups_id')
     def _compute_share(self):
-        user_group_id = self.env['res.groups']._get_group_id('base.group_user')
+        user_group_id = self.env['ir.model.data']._xmlid_to_res_id('base.group_user', raise_if_not_found=False)
         internal_users = self.filtered_domain([('groups_id', 'in', [user_group_id])])
         internal_users.share = False
         (self - internal_users).share = True
@@ -1006,7 +1006,7 @@ class Users(models.Model):
         # group xml id does not exist and therefore the data may be inconsistent.
         # This change must be made at the same time as the __manifest__ and xml changes because
         # several modules use groups before those are created.
-        group_id = self.env['res.groups']._get_group_id(group_ext_id)
+        group_id = self.env['ir.model.data']._xmlid_to_res_id(group_ext_id, raise_if_not_found=False)
 
         # use singleton's id if called on a non-empty recordset, otherwise context uid
         return group_id in (self or self.env.user)._user_groups()
@@ -1018,11 +1018,11 @@ class Users(models.Model):
         from the session) then the group id of 'base.group_no_one' will be added."""
 
         group_ids = self.__user_groups()
-        if self.env['res.groups']._get_group_id('base.group_user') in group_ids:
+        if self.env['ir.model.data']._xmlid_to_res_id('base.group_user', raise_if_not_found=False) in group_ids:
             if debug_mode is None:
                 debug_mode = bool(request and request.session.debug)
             if debug_mode:
-                group_ids += (self.env['res.groups']._get_group_id('base.group_no_one'),)
+                group_ids += (self.env['ir.model.data']._xmlid_to_res_id('base.group_no_one', raise_if_not_found=False),)
 
         return group_ids
 
@@ -1031,7 +1031,7 @@ class Users(models.Model):
         """Returns the list of user group ids. (without the group id of 'base.group_no_one')"""
 
         self.ensure_one()
-        group_no_one_id = self.env['res.groups']._get_group_id('base.group_no_one')
+        group_no_one_id = self.env['ir.model.data']._xmlid_to_res_id('base.group_no_one', raise_if_not_found=False)
         return tuple(id_ for id_ in self.groups_id._ids if id_ != group_no_one_id)
 
     def _action_show(self):
@@ -1386,38 +1386,6 @@ class GroupsObjectUnion(GroupsObject):
             leaf_id = -len(self._root._all_leafs)
             self._root._all_leafs[leaf_id] = self._root._all_leafs[group_ext_id] = GroupsObjectLeaf(leaf_id, ref=group_ext_id)
         return self._root._all_leafs[group_ext_id]
-
-    def define_from_repr(self, group_repr):
-        """ Return the group object from the string (given by the repr of the group object).
-
-        :param group_repr: str
-            Use | (union) and & (intersection) separator like the python object.
-                intersection it's apply before union.
-                Can use an invertion with ~.
-        """
-        if not group_repr:
-            return self.every_one()
-
-        res = None
-        for union in group_repr.split('|'):
-            union = union.strip()
-            intersection = None
-            if union.startswith('(') and union.endswith(')'):
-                union = union[1:-1]
-            for xmlid in union.split('&'):
-                xmlid = xmlid.strip()
-                leaf = ~self.define(xmlid[1:]) if xmlid.startswith('~') else self.define(xmlid)
-                if intersection is None:
-                    intersection = leaf
-                else:
-                    intersection &= leaf
-            if intersection is None:
-                return self.every_one()
-            elif res is None:
-                res = intersection
-            else:
-                res |= intersection
-        return self.no_one() if res is None else res
 
     def define_from_ids(self, ids):
         """ Return the group object from the res.groups ids. """
@@ -1845,10 +1813,6 @@ class GroupsImplied(models.Model):
         return GroupsObjectUnion(data=data)
 
     @api.model
-    def _get_group_id(self, group_ext_id):
-        return self.__get_group().get_id(group_ext_id)
-
-    @api.model
     def _define_group(self, group_ext_ids=None):
         """ Return the group object from a string or an list of
         res.groups ids.
@@ -1862,20 +1826,11 @@ class GroupsImplied(models.Model):
                 result is an union between positive group who intersect
                 every negative group.
                 e.g. ``base.group_user,!base.group_system``
-
-        :param str group_ext_ids: from the group object repr:
-            Use | (union) and & (intersection) separator like the python
-                object.
-                Intersection it's apply before union.
-                Can use an invertion with ~.
-                e.g. ``base.group_user & ~base.group_system``
         """
         if not group_ext_ids:
             return self.__get_group()
         if isinstance(group_ext_ids, (list, tuple)):
             return self.__get_group().define_from_ids(group_ext_ids)
-        if '|' in group_ext_ids or '&' in group_ext_ids or '~' in group_ext_ids:
-            return self.__get_group().define_from_repr(group_ext_ids)
         return self.__get_group().define(group_ext_ids)
 
 
@@ -1988,8 +1943,8 @@ class GroupsView(models.Model):
             xml = E.field(name="groups_id", position="after")
 
         else:
-            group_no_one_id = self._get_group_id('base.group_no_one')
-            group_employee_id = self._get_group_id('base.group_user')
+            group_no_one_id = self.env['ir.model.data']._xmlid_to_res_id('base.group_no_one', raise_if_not_found=False)
+            group_employee_id = self.env['ir.model.data']._xmlid_to_res_id('base.group_user', raise_if_not_found=False)
             xml0, xml1, xml2, xml3, xml4 = [], [], [], [], []
             xml_by_category = {}
             xml1.append(E.separator(string='User Type', colspan="2", groups='base.group_no_one'))
