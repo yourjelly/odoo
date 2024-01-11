@@ -5,20 +5,21 @@ import base64
 
 from odoo import _, api, exceptions, fields, models
 from .renderer_text import FieldTextRenderer, UserTextRenderer
-from .renderer_image import ImageShapeRenderer
+from .renderer_image import ImageFieldShapeRenderer, ImageStaticShapeRenderer
 
-VALUE_TYPES = [('static', 'Text'), ('field', 'Field')]
+TEXT_VALUE_TYPES = [('static', 'Text'), ('field', 'Field')]
+IMAGE_VALUE_TYPES = [('static', 'Text'), ('field', 'Field')]
 
 # roles that are linked to post fields and what type of values they should be
 SUPPORTED_ROLES = {
     'background': {'type': ['image', 'shape'], 'value_type': ['static']},
-    'header': {'type': ['text'], 'value_type': [t[0] for t in VALUE_TYPES]},
-    'subheader': {'type': ['text'], 'value_type': [t[0] for t in VALUE_TYPES]},
-    'section-1': {'type': ['text'], 'value_type': [t[0] for t in VALUE_TYPES]},
-    'subsection-1': {'type': ['text'], 'value_type': [t[0] for t in VALUE_TYPES]},
-    'subsection-2': {'type': ['text'], 'value_type': [t[0] for t in VALUE_TYPES]},
+    'header': {'type': ['text'], 'value_type': [t[0] for t in TEXT_VALUE_TYPES]},
+    'subheader': {'type': ['text'], 'value_type': [t[0] for t in TEXT_VALUE_TYPES]},
+    'section-1': {'type': ['text'], 'value_type': [t[0] for t in TEXT_VALUE_TYPES]},
+    'subsection-1': {'type': ['text'], 'value_type': [t[0] for t in TEXT_VALUE_TYPES]},
+    'subsection-2': {'type': ['text'], 'value_type': [t[0] for t in TEXT_VALUE_TYPES]},
     'button': {'type': ['text'], 'value_type': ['static']},
-    'image-1': {'type': ['image', 'shape'], 'value_type': ['static']},
+    'image-1': {'type': ['image', 'shape'], 'value_type': IMAGE_VALUE_TYPES},
     'image-2': {'type': ['image', 'shape'], 'value_type': ['static']},
 }
 
@@ -52,21 +53,23 @@ class Post(models.Model):
     thanks_redirection = fields.Char(string='Redirection URL')
     user_id = fields.Many2one('res.users', string='Responsible', default=lambda self: self.env.user)
 
-    header_type = fields.Selection(selection=VALUE_TYPES, default='static', required=True)
-    subheader_type = fields.Selection(selection=VALUE_TYPES, default='static', required=True)
-    section_1_type = fields.Selection(selection=VALUE_TYPES, default='static', required=True)
-    subsection_1_type = fields.Selection(selection=VALUE_TYPES, default='static', required=True)
-    subsection_2_type = fields.Selection(selection=VALUE_TYPES, default='static', required=True)
+    header_type = fields.Selection(selection=TEXT_VALUE_TYPES, default='static', required=True)
+    subheader_type = fields.Selection(selection=TEXT_VALUE_TYPES, default='static', required=True)
+    section_1_type = fields.Selection(selection=TEXT_VALUE_TYPES, default='static', required=True)
+    subsection_1_type = fields.Selection(selection=TEXT_VALUE_TYPES, default='static', required=True)
+    subsection_2_type = fields.Selection(selection=TEXT_VALUE_TYPES, default='static', required=True)
+    image_1_type = fields.Selection(selection=IMAGE_VALUE_TYPES, default='static', required=True)
 
     header_val = fields.Text()
     subheader_val = fields.Text()
     section_1_val = fields.Text()
     subsection_1_val = fields.Text()
     subsection_2_val = fields.Text()
+    image_1_val = fields.Image()
+    image_1_field_path = fields.Char()
 
     background_val = fields.Image()
     button_val = fields.Text()
-    image_1_val = fields.Image()
     image_2_val = fields.Image()
 
     image = fields.Image(compute='_compute_image')
@@ -107,6 +110,11 @@ class Post(models.Model):
                     layer_value = related_layer[layer_value_field]
                     setattr(self, f'{fixed_field}_val', layer_value)
 
+    @api.onchange('model_id')
+    def _onchange_model(self):
+        # reset field values
+        pass
+
     @api.model
     def _get_image_dependency_fields(self):
         return (
@@ -130,7 +138,8 @@ class Post(models.Model):
     @api.depends(lambda self: self._get_image_dependency_fields())
     def _compute_image(self):
         for post in self:
-            post.image = base64.encodebytes(post._generate_image_bytes())
+            kwargs = {'record': self.env[post.model]} if post.model else {}
+            post.image = base64.encodebytes(post._generate_image_bytes(**kwargs))
 
     def action_open_url_share(self):
         """Open url dialog."""
@@ -163,10 +172,13 @@ class Post(models.Model):
         post_values = {
             role: (renderer, values) for role, (renderer, values, has_value)
             in {
-                'background': (ImageShapeRenderer, {'image': self.background_val}, self.background_val),
+                'background': (ImageStaticShapeRenderer, {'image': self.background_val}, self.background_val),
                 'button': (UserTextRenderer, {'text': self.button_val}, self.button_val),
-                'image-1': (ImageShapeRenderer, {'image': self.image_1_val}, self.image_1_val),
-                'image-2': (ImageShapeRenderer, {'image': self.image_2_val}, self.image_2_val),
+                'image-1': (ImageFieldShapeRenderer if self.image_1_type == 'field' else ImageStaticShapeRenderer, {
+                    'image': self.image_1_val,
+                    'field_path': self.image_1_field_path
+                }, self.image_1_val),
+                'image-2': (ImageStaticShapeRenderer, {'image': self.image_2_val}, self.image_2_val),
                 'header': (FieldTextRenderer if self.header_type == 'field' else UserTextRenderer, {
                     'field_path': self.header_val,
                     'model': model,
@@ -193,7 +205,6 @@ class Post(models.Model):
                     'text': self.subsection_2_val,
                 }, self.subsection_2_val),
             }.items()
-            if has_value
         }
         return {
             role: post_values[role][0](**(

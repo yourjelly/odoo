@@ -57,33 +57,35 @@ class PostTemplate(models.Model):
             post.image = base64.encodebytes(post._generate_image_bytes())
 
     def _generate_image_bytes(self, record=None, replacement_renderers=None):
-        # build a list for each subgraph in order of dependency as:
-        # [[parent, child, sub_child], [child, sub_child], [sub_child]]
+        # build a list for subgraphs in order of dependency as:
+        # [[parent, child, sub_child], ...]
         # this is inefficient but only a few simple dependency graphs are expected
         renderer_from_layer = OrderedDict()
         def get_acyclic_dependencies(layer, encountered_layers=[]):
-            if not layer.required_element_ids:
-                return [[layer]]
             return [
                 child_dependency + [layer]
                 for child_layer in layer.required_element_ids
                 for child_dependency in get_acyclic_dependencies(child_layer, encountered_layers + [layer])
                 if child_layer not in encountered_layers
-            ]
+            ] + [[layer]]
         acyclic_dependencies = [dependency_graph for layer in self.layers for dependency_graph in get_acyclic_dependencies(layer)]
-        not_rendered_set = set()
+        # append smaller subgraphs
+        for graph in acyclic_dependencies:
+            for start_index in range(1, len(graph)):
+                acyclic_dependencies.append(graph[start_index:])
 
         # prepare renderers
         image_from_layer = OrderedDict()
+        record = record if record is not None else (self.env[self.model_id.model] if self.model_id else None)
         for layer in self.layers:
             if replacement_renderers and layer.role and replacement_renderers.get(layer.role):
                 renderer = replacement_renderers[layer.role]
             else:
                 renderer = layer._get_renderer()
-            record = record if record is not None else (self.env[self.model_id.model] if self.model_id else None)
             renderer_from_layer[layer] = renderer
 
         # determine hidden layers
+        not_rendered_set = set()
         for layer, renderer in renderer_from_layer.items():
             hide_children = False
             if layer in not_rendered_set:
@@ -92,11 +94,14 @@ class PostTemplate(models.Model):
             if layer_image is None:
                 hide_children = True
             if hide_children:
+                pop_ids = []
                 for graph_id, dependency_graph in enumerate(acyclic_dependencies):
                     if dependency_graph[0] == layer:
                         for graph_element in dependency_graph:
                             not_rendered_set.add(graph_element)
-                        acyclic_dependencies.pop(graph_id)
+                            pop_ids.append(graph_id)
+                for index_nb, index in enumerate(pop_ids):
+                    acyclic_dependencies.pop(index - index_nb)
             image_from_layer[layer] = (renderer.pos, layer_image)
 
         # assemble image

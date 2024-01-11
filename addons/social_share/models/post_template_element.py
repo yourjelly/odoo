@@ -3,14 +3,15 @@
 
 from odoo import _, api, exceptions, fields, models
 from .renderer_text import FieldTextRenderer, TextRenderer, UserTextRenderer
-from .renderer_image import ColorShapeRenderer, ImageShapeRenderer
+from .renderer_image import ColorShapeRenderer, ImageFieldShapeRenderer, ImageStaticShapeRenderer
 
 render_class_from_type = {
     'image': {
-        'static': ImageShapeRenderer
+        'static': ImageStaticShapeRenderer,
+        'field': ImageFieldShapeRenderer,
     },
     'shape': {
-        'static': ColorShapeRenderer
+        'static': ColorShapeRenderer,
     },
     'text': {
         'static': UserTextRenderer,
@@ -28,10 +29,11 @@ text_option_fields = (
 
 reset_dict_from_type = {
     'image': {
-        'static': {field: False for field in ('field_path', 'text', 'color', *text_option_fields)}
+        'static': {field: False for field in ('field_path', 'text', 'color', *text_option_fields)},
+        'field': {field: False for field in ('image', 'text', 'color', *text_option_fields)},
     },
     'shape': {
-        'static': {field: False for field in ('field_path', 'text', 'image', *text_option_fields)}
+        'static': {field: False for field in ('field_path', 'text', 'image', *text_option_fields)},
     },
     'text': {
         'static': {field: False for field in ('field_path', 'color', 'image', 'shape')},
@@ -120,10 +122,15 @@ class ImageRenderElement(models.Model):
             'pos': (self.x_pos, self.y_pos),
             'size': (self.x_size, self.y_size),
         }
-        if renderer_class == ImageShapeRenderer:
+        if renderer_class == ImageStaticShapeRenderer:
             return common_dict | {
                 'shape': self.shape,
                 'image': self.image,
+            }
+        if renderer_class == ImageFieldShapeRenderer:
+            return common_dict | {
+                'shape': self.shape,
+                'field_path': self.field_path,
             }
         if renderer_class == ColorShapeRenderer:
             return common_dict | {

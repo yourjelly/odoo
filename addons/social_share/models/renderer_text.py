@@ -10,7 +10,7 @@ from odoo.exceptions import UserError
 from odoo.modules.module import get_module_path
 from odoo.tools.misc import file_path
 from ..utils.image_render_utils import align_text, get_rgb_from_hex
-from .renderer import Renderer
+from .renderer import FieldRenderer, Renderer
 
 @lru_cache()
 def _get_font_name_to_path_map():
@@ -30,7 +30,7 @@ class TextRenderer(Renderer):
             *args,
             text_align_horizontal='center',
             text_align_vertical='center',
-            text_color:str='ffffff',
+            text_color: str ='ffffff',
             text_font_name=None,
             text_font_size=16,
             **kwargs):
@@ -106,23 +106,6 @@ class UserTextRenderer(TextRenderer):
         return self.text or ''
 
 
-class FieldTextRenderer(TextRenderer):
-    field_path: str
-    model: models.Model
-
-    def __init__(self, *args, field_path='', model=None, **kwargs):
-        self.field_path = field_path
-        self.model = model
-        super().__init__(self, *args, field_path=field_path, model=model, **kwargs)
-
+class FieldTextRenderer(TextRenderer, FieldRenderer):
     def get_text(self, record=None):
-        field = self.field_path
-        record = record if record is not None else self.model
-        if record:
-            return record[field] if record[field] else None
-        elif isinstance(record, models.Model):
-            field_name = record.env['ir.model.fields'].sudo().search([
-                ('model_id', '=', record._name), ('name', '=', field)
-            ], limit=1).name
-            return f'[{field_name}]'
-        return f'[{field}]'
+        self.get_field_value(record=record) or f'[{self.get_field_name(record=record)}]'

@@ -22,7 +22,6 @@ class EventSharePostController(Controller):
 
         crawler = self._get_crawler_name(request)
         if crawler:
-            print("CRAWLER")
             request.env['bus.bus']._sendone(f'social_share_link_target-{url.target_id}', 'social_share/share_link_target', {
                 'target_id': url.target_id,
                 'message': 'KIND-OF-SECRET COUPON CODE'
