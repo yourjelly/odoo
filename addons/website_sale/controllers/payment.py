@@ -31,6 +31,7 @@ class PaymentPortal(payment_portal.PaymentPortal):
         :raise: ValidationError if the invoice id or the access token is invalid
         """
         # Check the order id and the access token
+        print("shop_payment_transaction---------------call-------")
         try:
             order_sudo = self._document_check_access('sale.order', order_id, access_token)
         except MissingError:
@@ -58,6 +59,7 @@ class PaymentPortal(payment_portal.PaymentPortal):
         tx_sudo = self._create_transaction(
             custom_create_values={'sale_order_ids': [Command.set([order_id])]}, **kwargs,
         )
+        print("tx_sudo----------------",tx_sudo)
 
         # Store the new transaction into the transaction list and if there's an old one, we remove
         # it until the day the ecommerce supports multiple orders at the same time.

@@ -40,6 +40,7 @@ class WebsiteSaleDelivery(WebsiteSale):
         if rate.get('success'):
             res['status'] = True
             res['new_amount_delivery'] = Monetary.value_to_html(rate['price'], {'display_currency': order.currency_id})
+            res['courier_name'] = rate.get('courier_name')
             res['is_free_delivery'] = not bool(rate['price'])
             res['error_message'] = rate['warning_message']
         else:

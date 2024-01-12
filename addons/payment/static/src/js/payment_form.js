@@ -122,6 +122,7 @@ publicWidget.registry.PaymentForm = publicWidget.Widget.extend({
      * @return {void}
      */
     async _submitForm(ev) {
+        console.log("_submitForm-----------------------",ev)
         ev.stopPropagation();
         ev.preventDefault();
 
@@ -135,15 +136,18 @@ publicWidget.registry.PaymentForm = publicWidget.Widget.extend({
         const paymentOptionId = this.paymentContext.paymentOptionId = this._getPaymentOptionId(
             checkedRadio
         );
+        console.log("paymentOptionId----------------------------",paymentOptionId, flow, this.paymentContext)
         if (flow === 'token' && this.paymentContext['assignTokenRoute']) { // Assign token flow.
             await this._assignToken(paymentOptionId);
         } else { // Both tokens and payment methods must process a payment operation.
             const providerCode = this.paymentContext.providerCode = this._getProviderCode(
                 checkedRadio
             );
+            console.log("providerCode----------------",providerCode)
             const pmCode = this.paymentContext.paymentMethodCode = this._getPaymentMethodCode(
                 checkedRadio
             );
+            console.log("pmCode--------------------",pmCode)
             this.paymentContext.providerId = this._getProviderId(checkedRadio);
             if (this._getPaymentOptionType(checkedRadio) === 'token') {
                 this.paymentContext.tokenId = paymentOptionId;
@@ -151,6 +155,7 @@ publicWidget.registry.PaymentForm = publicWidget.Widget.extend({
                 this.paymentContext.paymentMethodId = paymentOptionId;
             }
             const inlineForm = this._getInlineForm(checkedRadio);
+            console.log("inlineForm---------------------",inlineForm)
             this.paymentContext.tokenizationRequested = inlineForm?.querySelector(
                 '[name="o_payment_tokenize_checkbox"]'
             )?.checked ?? this.paymentContext['mode'] === 'validation';
@@ -373,6 +378,9 @@ publicWidget.registry.PaymentForm = publicWidget.Widget.extend({
      */
     async _initiatePaymentFlow(providerCode, paymentOptionId, paymentMethodCode, flow) {
         // Create a transaction and retrieve its processing values.
+        console.log("_initiatePaymentFlow--------------------",providerCode, paymentOptionId, paymentMethodCode, flow)
+        console.log("this.paymentContext['transactionRoute']-----------------",this.paymentContext['transactionRoute'])
+        console.log("this._prepareTransactionRouteParams()-----------------",this._prepareTransactionRouteParams())
         rpc(
             this.paymentContext['transactionRoute'],
             this._prepareTransactionRouteParams(),
@@ -443,6 +451,7 @@ publicWidget.registry.PaymentForm = publicWidget.Widget.extend({
      * @return {void}
      */
     _processRedirectFlow(providerCode, paymentOptionId, paymentMethodCode, processingValues) {
+        console.log("this._prepareTransactionRouteParams()--------------------",providerCode)
         // Create and configure the form element with the content rendered by the server.
         const div = document.createElement('div');
         div.innerHTML = processingValues['redirect_form_html'];
