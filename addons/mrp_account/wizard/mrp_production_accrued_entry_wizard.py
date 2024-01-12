@@ -19,8 +19,20 @@ class MrpProductionAccruedEntryWizard(models.TransientModel):
         orders = self.env['mrp.production'].browse(self.env.context['active_ids'])
         return orders and orders[0].company_id.id
 
+    def _get_completion_amount(self):
+        orders = self.env['mrp.production'].browse(self.env.context.get('active_ids'))
+        if not orders:
+            return 0
+        return orders and orders._compute_current_operation_cost() + orders._compute_current_product_cost()
+
+    def _get_completion_percentage(self):
+        orders = self.env['mrp.production'].browse(self.env.context.get('active_ids'))
+        if not orders:
+            return 0
+        return orders and (orders._compute_current_operation_cost() + orders._compute_current_product_cost()) * 100 / (orders._compute_expected_operation_cost() + orders._compute_expected_product_cost())
+
     company_id = fields.Many2one('res.company', default=_get_default_company, required=True)
-    currency_id = fields.Many2one(related='company_id.currency_id')
+    currency_id = fields.Many2one(related='company_id.currency_id', string='Company Currency', readonly=True, help='Utility field to express amount currency')
     account_id = fields.Many2one(
         'account.account',
         'Production Expense',
@@ -44,8 +56,10 @@ class MrpProductionAccruedEntryWizard(models.TransientModel):
     )
     preview_data = fields.Text(compute='_compute_preview_data')
     amount = fields.Monetary(string='Amount', help="Specify an arbitrary value that will be accrued on a \
-        default account for the entire order, regardless of the products on the different lines.")
+        default account for the entire order, regardless of the products on the different lines.", currency_field='currency_id')
     should_display_amount = fields.Boolean(compute='_compute_should_display_amount')
+    completion_amount = fields.Monetary("Total amount", default=_get_completion_amount, currency_field='currency_id')
+    completion_percentage = fields.Float(default=_get_completion_percentage)
 
     @api.depends('company_id')
     def _compute_journal_id(self):
@@ -77,12 +91,16 @@ class MrpProductionAccruedEntryWizard(models.TransientModel):
             else:
                 record.reversal_date = record.reversal_date
 
+    @api.model
+    def default_get(self, fields_list):
+        return super().default_get(fields_list)
+
     def _get_move_vals(self):
         self.ensure_one()
         productions = self.env['mrp.production'].browse(self.env.context['active_ids'])
         if len(productions.company_id) != 1:
             raise UserError(_('Entries can only be created for a single company at a time.'))
-        
+
         move_lines = []
         total_balance = 0.0
         for mo in productions:
@@ -106,6 +124,21 @@ class MrpProductionAccruedEntryWizard(models.TransientModel):
         if self.reversal_date <= self.date:
             raise UserError(_('Reversal date must be posterior to date.'))
 
+        productions = self.env['mrp.production'].browse(self.env.context['active_ids'])
+        if len(productions.company_id) != 1:
+            raise UserError(_('Entries can only be created for a single company at a time.'))
+
+        # is there a better way to implement this?
+        # i.e. create a specific fuction on the production to create all the related entries.
+        # could be split between creating the entries from the moves (aka a function in stock_account)
+        # and a function directly in mrp_account to handle the workorders
+        analytic_move_to_recompute = set()
+        for move_line in productions.move_raw_ids:
+            analytic_move_to_recompute.add(move_line.id)
+        if analytic_move_to_recompute:
+            self.env['stock.move'].browse(analytic_move_to_recompute)._account_analytic_entry_move()
+
+        self.create_analytic_entries(productions)
         move, reverse_move = self.create_and_reverse_move()
         return {
             'name': _('Accrual Moves'),
@@ -114,3 +147,6 @@ class MrpProductionAccruedEntryWizard(models.TransientModel):
             'view_mode': 'tree,form',
             'domain': [('id', 'in', (move.id, reverse_move.id))],
         }
+
+    def create_analytic_entries(self, productions):
+        productions.workorder_ids._create_or_update_analytic_entry(bypass=True)

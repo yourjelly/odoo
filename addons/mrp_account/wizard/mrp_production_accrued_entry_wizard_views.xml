@@ -15,6 +15,12 @@
                         <field name="account_id"/>
                         <field name="amount" invisible="not should_display_amount"/>
                         <field name="should_display_amount" invisible="1"/>
+                        <label for="completion_percentage"/>
+                        <div class="o_row">
+                            <field name="completion_percentage"/> %
+                        </div>
+                        <field name="completion_amount" widget='monetary'/>
+                        <field name="currency_id" invisible="True"/>
                     </group>
                     <group>
                         <field name="date"/>

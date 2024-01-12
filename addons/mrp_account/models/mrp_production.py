@@ -131,3 +131,22 @@ class MrpProduction(models.Model):
             'currency_id': self.company_id.currency_id.id,
             'amount_currency': costs,
         }
+
+    def _compute_expected_operation_cost(self):
+        return sum([wo._compute_expected_operation_cost() for wo in self.workorder_ids])
+
+    def _compute_current_operation_cost(self):
+        return sum([wo._compute_current_operation_cost() for wo in self.workorder_ids])
+
+    def _compute_expected_product_cost(self):
+        cost = 0
+        for move in self.move_raw_ids:
+            cost += move.product_uom_qty * move.product_id.standard_price
+        return cost
+
+    def _compute_current_product_cost(self):
+        cost = 0
+        for move in self.move_raw_ids:
+            wip_qty = move.product_uom._compute_quantity(move.quantity_done, move.product_id.uom_id)
+            cost += wip_qty * move.product_id.standard_price
+        return cost

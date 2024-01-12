@@ -32,10 +32,11 @@ class StockMoveLine(models.Model):
 
     def write(self, vals):
         analytic_move_to_recompute = set()
-        if 'qty_done' in vals or 'move_id' in vals:
-            for move_line in self:
-                move_id = vals.get('move_id', move_line.move_id.id)
-                analytic_move_to_recompute.add(move_id)
+        for sml in self:
+            if sml._is_analytic_move_to_recompute() and ('qty_done' in vals or 'move_id' in vals):
+                for move_line in sml:
+                    move_id = vals.get('move_id', move_line.move_id.id)
+                    analytic_move_to_recompute.add(move_id)
         if 'qty_done' in vals:
             for move_line in self:
                 if move_line.state != 'done':
@@ -52,6 +53,10 @@ class StockMoveLine(models.Model):
         if analytic_move_to_recompute:
             self.env['stock.move'].browse(analytic_move_to_recompute)._account_analytic_entry_move()
         return res
+
+    # Hook for mrp_production
+    def _is_analytic_move_to_recompute(self):
+        return True
 
     # -------------------------------------------------------------------------
     # SVL creation helpers
