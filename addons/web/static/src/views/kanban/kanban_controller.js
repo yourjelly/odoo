@@ -161,6 +161,9 @@ export class KanbanController extends Component {
             },
         });
         usePager(() => {
+            if (!this.model.started) {
+                return;
+            }
             const root = this.model.root;
             const { count, hasLimitedCount, isGrouped, limit, offset } = root;
             if (!isGrouped) {
@@ -273,6 +276,9 @@ export class KanbanController extends Component {
     }
 
     get canCreate() {
+        if (!this.model.started) {
+            return true;
+        }
         const { create, createGroup } = this.props.archInfo.activeActions;
         const list = this.model.root;
         if (!create) {

@@ -101,14 +101,14 @@ export class ListController extends Component {
             this.isExportEnable = await user.hasGroup("base.group_allow_export");
         });
 
-        onMounted(() => {
-            const { rendererScrollPositions } = this.props.state || {};
-            if (rendererScrollPositions) {
-                const renderer = this.rootRef.el.querySelector(".o_list_renderer");
-                renderer.scrollLeft = rendererScrollPositions.left;
-                renderer.scrollTop = rendererScrollPositions.top;
-            }
-        });
+        // onMounted(() => {
+        //     const { rendererScrollPositions } = this.props.state || {};
+        //     if (rendererScrollPositions) {
+        //         const renderer = this.rootRef.el.querySelector(".o_list_renderer");
+        //         renderer.scrollLeft = rendererScrollPositions.left;
+        //         renderer.scrollTop = rendererScrollPositions.top;
+        //     }
+        // });
 
         this.archiveEnabled =
             "active" in this.props.fields
@@ -141,8 +141,8 @@ export class ListController extends Component {
                 return {
                     modelState: this.model.exportState(),
                     rendererScrollPositions: {
-                        left: renderer.scrollLeft,
-                        top: renderer.scrollTop,
+                        left: renderer ? renderer.scrollLeft : 0,
+                        top: renderer ? renderer.scrollTop : 0,
                     },
                 };
             },
@@ -152,6 +152,9 @@ export class ListController extends Component {
         });
 
         usePager(() => {
+            if (!this.model.started) {
+                return;
+            }
             const { count, hasLimitedCount, isGrouped, limit, offset } = this.model.root;
             return {
                 offset: offset,
@@ -175,12 +178,12 @@ export class ListController extends Component {
 
         useEffect(
             () => {
-                if (this.props.onSelectionChanged) {
+                if (this.model.started && this.props.onSelectionChanged) {
                     const resIds = this.model.root.selection.map((record) => record.resId);
                     this.props.onSelectionChanged(resIds);
                 }
             },
-            () => [this.model.root.selection.length]
+            () => [this.model.started ? this.model.root.selection.length : 0]
         );
         this.searchBarToggler = useSearchBarToggler();
         this.firstLoad = true;
@@ -427,7 +430,7 @@ export class ListController extends Component {
     }
 
     get nbSelected() {
-        return this.model.root.selection.length;
+        return this.model.started ? this.model.root.selection.length : 0;
     }
 
     get isPageSelected() {

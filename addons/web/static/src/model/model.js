@@ -142,7 +142,7 @@ export function useModelWithSampleData(ModelClass, params, options = {}) {
     model.useSampleModel = useSampleModel;
     const orm = model.orm;
     let sampleORM = localState.sampleORM;
-    let started = false;
+    model.started = false;
 
     async function load(props) {
         const searchParams = getSearchParams(props);
@@ -158,19 +158,28 @@ export function useModelWithSampleData(ModelClass, params, options = {}) {
             useSampleModel = false;
             model.useSampleModel = useSampleModel;
         }
-        if (started) {
+        if (model.started) {
             model.notify();
         }
     }
     onWillStart(async () => {
+        // TODO: handle error case
+        let prom;
         if (options.onWillStart) {
-            await options.onWillStart();
+            prom = options.onWillStart();
         }
-        await load(component.props);
-        if (options.onWillStartAfterLoad) {
-            await options.onWillStartAfterLoad();
-        }
-        started = true;
+        Promise.resolve(prom).then(() => {
+            load(component.props).then(() => {
+                let prom;
+                if (options.onWillStartAfterLoad) {
+                    prom = options.onWillStartAfterLoad();
+                }
+                Promise.resolve(prom).then(() => {
+                    model.started = true;
+                    component.render(true);
+                });
+            });
+        });
     });
     onWillUpdateProps((nextProps) => {
         useSampleModel = false;

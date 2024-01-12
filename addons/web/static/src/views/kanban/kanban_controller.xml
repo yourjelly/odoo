@@ -38,7 +38,7 @@
                 <t t-set-slot="control-panel-navigation-additional">
                     <t t-component="searchBarToggler.component" t-props="searchBarToggler.props"/>
                 </t>
-                <t t-component="props.Renderer"
+                <t t-if="model.started" t-component="props.Renderer"
                     list="model.root"
                     archInfo="props.archInfo"
                     Compiler="props.Compiler"

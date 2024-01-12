@@ -5,7 +5,7 @@
         <div t-att-class="className" t-ref="root">
             <Layout className="model.useSampleModel ? 'o_view_sample_data' : ''" display="display">
                 <t t-set-slot="control-panel-create-button">
-                    <t t-if="!model.root.editedRecord and activeActions.create and !env.inDialog">
+                    <t t-if="(!model.started or !model.root.editedRecord) and activeActions.create and !env.inDialog">
                         <button type="button" class="btn btn-primary o_list_button_add" data-hotkey="c" t-on-click="onClickCreate" data-bounce-button="">
                             New
                         </button>
@@ -39,7 +39,7 @@
                 </t>
 
                 <t t-set-slot="control-panel-additional-actions">
-                    <CogMenu t-if="!nbSelected"/>
+                    <CogMenu t-if="model.started and !nbSelected"/>
                 </t>
                 <t t-set-slot="control-panel-selection-actions">
                     <div t-if="nbSelected" class="d-flex gap-1">
@@ -69,7 +69,7 @@
                         </t>
                     </div>
                 </t>
-                <t t-component="props.Renderer"
+                <t t-if="model.started" t-component="props.Renderer"
                     list="model.root"
                     activeActions="activeActions"
                     archInfo="archInfo"
@@ -87,7 +87,7 @@
     </t>
 
     <t t-name="web.ListView.Buttons">
-        <div t-if="props.showButtons" class="o_list_buttons d-flex gap-1 d-empty-none align-items-baseline" role="toolbar" aria-label="Main actions">
+        <div t-if="model.started and props.showButtons" class="o_list_buttons d-flex gap-1 d-empty-none align-items-baseline" role="toolbar" aria-label="Main actions">
             <t t-if="model.root.editedRecord">
                 <button type="button" class="btn btn-primary o_list_button_save" data-hotkey="s" t-on-click.stop="onClickSave">
                     Save
