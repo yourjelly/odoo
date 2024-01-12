@@ -1,11 +1,11 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import random
 from datetime import datetime
+
 from dateutil.relativedelta import relativedelta
 
-from odoo import api, fields, models, _
+from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 from odoo.http import request
 from odoo.osv import expression
@@ -436,7 +436,7 @@ class SaleOrder(models.Model):
         it again. """
         if self.env.context.get('website_sale_send_recovery_email'):
             self.cart_recovery_email_sent = True
-        return super(SaleOrder, self)._message_post_after_hook(message, msg_vals)
+        return super()._message_post_after_hook(message, msg_vals)
 
     def _notify_get_recipients_groups(self, message, model_description, msg_vals=None):
         """ In case of cart recovery email, update link to redirect directly
@@ -612,18 +612,11 @@ class SaleOrder(models.Model):
         return bool(carrier)
 
     def _get_delivery_methods(self):
-        def _is_carrier_available(carrier):
-            # Drop carriers where price computation fails (no price rule available/matching
-            # request)
-            res = carrier.rate_shipment(self)
-            return res.get('success')
         # searching on website_published will also search for available website (_search method on
         # computed field)
         return self.env['delivery.carrier'].sudo().search([
             ('website_published', '=', True),
-        ]).available_carriers(
-            self.partner_shipping_id
-        ).filtered(_is_carrier_available)
+        ]).filtered(lambda carrier: carrier._is_available_for_order(self))
 
     def _get_website_sale_extra_values(self):
         """ Hook to provide additional rendering values for the cart template.

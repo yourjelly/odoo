@@ -1,9 +1,10 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-import psycopg2
 import re
 
-from odoo import _, api, fields, models, registry, Command, SUPERUSER_ID
+import psycopg2
+
+from odoo import SUPERUSER_ID, Command, _, api, fields, models, registry
 from odoo.exceptions import UserError
 from odoo.tools.safe_eval import safe_eval
 
@@ -127,6 +128,17 @@ class DeliveryCarrier(models.Model):
                     Buy Odoo Enterprise now to get more providers.
                 </p>'''),
         }
+
+    def _is_available_for_order(self, order):
+        self.ensure_one()
+        order.ensure_one()
+        if not self._match_address(order.partner_shipping_id):
+            return False
+
+        if self.delivery_type == 'base_on_rule':
+            return self.rate_shipment(order).get('success')
+
+        return True
 
     def available_carriers(self, partner):
         return self.filtered(lambda c: c._match_address(partner))
