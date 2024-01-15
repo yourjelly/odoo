@@ -3,7 +3,7 @@
 import { expect } from "@odoo/hoot";
 import { Component, onMounted, useRef, xml } from "@odoo/owl";
 import { mountWithCleanup } from "@web/../tests/web_test_helpers";
-import { useWysiwyg } from "../src/editor/wysiwyg";
+import { usePhoenix } from "../src/editor/wysiwyg";
 
 export function getContent(node) {
     const sel = window.getSelection();
@@ -124,7 +124,7 @@ class TestEditor extends Component {
                 setContent(this.ref.el, this.props.content);
             });
         }
-        this.editor = useWysiwyg("target", this.props.config);
+        this.editor = usePhoenix("target", this.props.config);
     }
 }
 

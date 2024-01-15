@@ -29,7 +29,7 @@ export function wysiwyg(el, env, config) {
 
 }
 
-export function useWysiwyg(refName, config = {}) {
+export function usePhoenix(refName, config = {}) {
     const Plugins = [
         HistoryPlugin,
         HintPlugin,
