@@ -89,6 +89,10 @@ class ThemePreviewFormControlPanel extends ControlPanel {
     onDesktopClick() {
         this.env.bus.trigger('THEME_PREVIEW:SWITCH_MODE', {mode: 'desktop'});
     }
+
+    back() {
+        this.env.config.historyBack();
+    }
 }
 
 const ThemePreviewFormView = {
