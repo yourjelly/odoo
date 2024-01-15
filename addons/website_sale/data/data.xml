@@ -25,7 +25,7 @@
 
         <record id="website_sale.sale_ribbon" model="product.ribbon">
             <field name="html">Sale</field>
-            <field name="html_class">text-bg-success o_ribbon_left</field>
+            <field name="html_class">o_ribbon_left</field>
         </record>
 
         <record id="website_sale.sold_out_ribbon" model="product.ribbon">
