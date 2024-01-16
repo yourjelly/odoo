@@ -163,16 +163,6 @@ export class HootConfigDropdown extends Component {
                     </t>
                     <label
                         class="hoot-checkbox hoot-dropdown-line p-1"
-                        title="Mmmh?"
-                    >
-                        <input
-                            type="checkbox"
-                            t-model="config.fun"
-                        />
-                        <span>Fun</span>
-                    </label>
-                    <label
-                        class="hoot-checkbox hoot-dropdown-line p-1"
                         title="Re-run current tests without catching any errors"
                     >
                         <input
@@ -180,6 +170,16 @@ export class HootConfigDropdown extends Component {
                             t-model="config.notrycatch"
                         />
                         <span>No try/catch</span>
+                    </label>
+                    <label
+                        class="hoot-checkbox hoot-dropdown-line p-1"
+                        title='Activates "incentives" to help you stay motivated'
+                    >
+                        <input
+                            type="checkbox"
+                            t-model="config.fun"
+                        />
+                        <span>Enable incentives</span>
                     </label>
                     <label
                         class="hoot-checkbox hoot-dropdown-line p-1"
@@ -201,6 +201,7 @@ export class HootConfigDropdown extends Component {
                         />
                         <span>Watch global listeners</span>
                     </label>
+
                     <button
                         type="button"
                         class="hoot-dropdown-line p-1"
@@ -210,6 +211,7 @@ export class HootConfigDropdown extends Component {
                         <i t-attf-class="fa fa-{{ color.scheme === 'light' ? 'moon' : 'sun' }}-o" />
                         Color scheme
                     </button>
+
                     <button class="hoot-btn hoot-btn-primary mt-1 p-1">
                         Apply and refresh
                     </button>

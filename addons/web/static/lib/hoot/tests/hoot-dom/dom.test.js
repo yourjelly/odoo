@@ -785,7 +785,7 @@ describe.tags("ui")(parseUrl(import.meta.url), () => {
             expect(() => queryOne(".title", { exact: 2 })).toThrow();
         });
 
-        test.tags("manual")("performance against jQuery", () => {
+        test.skip("performance against jQuery", () => {
             const jQuery = globalThis.$;
 
             const time = (fn) => {

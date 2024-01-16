@@ -159,7 +159,7 @@ export class HootReporting extends Component {
                   }
                 : {
                       test: test,
-                      duration: test.lastResults.duration,
+                      duration: test.lastResults?.duration,
                       id: `test#${test.id}`,
                   };
 
