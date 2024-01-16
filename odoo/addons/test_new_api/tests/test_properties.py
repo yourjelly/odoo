@@ -2209,7 +2209,7 @@ class PropertiesGroupByCase(TestPropertiesMixin):
             group_by='attributes.myinteger',
             progress_bar={'field': 'size', 'colors': [0]},
         )
-        self.assertEqual(result, {'1337': {0: 2}, '5': {0: 1}, 'False': {0: 1}})
+        self.assertEqual(result, {1337: {0: 2}, 5: {0: 1}, False: {0: 1}})
 
     def _properties_field_read_group_date_prepare(self, date_type='date'):
         # Format in database: 2023-03-29 09:30:16

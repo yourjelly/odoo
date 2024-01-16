@@ -53,7 +53,7 @@ class ProgressBarState {
                     [group.groupByField.name]: group.serverValue,
                 });
             }
-            let groupValue = group.displayName || group.value;
+            let groupValue = group.value;
             if (groupValue === true) {
                 groupValue = "True";
             } else if (groupValue === false) {
@@ -267,7 +267,7 @@ class ProgressBarState {
             for (const group of this.model.root.groups) {
                 if (!group.isFolded) {
                     const groupInfo = this.getGroupInfo(group);
-                    let groupValue = group.displayName || group.value;
+                    let groupValue =  group.value;
                     if (groupValue === true) {
                         groupValue = "True";
                     } else if (groupValue === false) {
