@@ -56,32 +56,16 @@ export function isCommand(data) {
     return ["ADD", "DELETE", "ADD.noinv", "DELETE.noinv"].includes(data?.[0]?.[0]);
 }
 
-/** @param {FIELD_SYM} SYM */
-export function isField(val) {
-    if (val?.[RECORD_FIELD_SYM] || val?.[FIELD_DEFINITION_SYM]) {
-        return true;
-    }
-    return [MANY_SYM, ONE_SYM, ATTR_SYM].includes(val);
-}
-
-export function isMany(list) {
-    return Boolean(list?.[MANY_SYM]);
-}
-
-export function isOne(list) {
-    return Boolean(list?.[ONE_SYM]);
-}
-
 export function isRecord(record) {
     return Boolean(record?.[RECORD_SYM]);
 }
 
-/** @param {FIELD_SYM|RecordList} val */
-export function isRelation(val) {
-    if ([MANY_SYM, ONE_SYM].includes(val)) {
-        return true;
-    }
-    return isOne(val) || isMany(val);
+/**
+ * @param {typeof import("./record").Record} Model
+ * @param {string} fieldName
+ */
+export function isRelation(Model, fieldName) {
+    return Model.fieldsMany.get(fieldName) || Model.fieldsOne.get(fieldName);
 }
 
 // /** @param {string} objectId */

@@ -1,6 +1,6 @@
 /* @odoo-module */
 
-import { markRaw, toRaw } from "@odoo/owl";
+import { markRaw, reactive } from "@odoo/owl";
 import { RecordList } from "./record_list";
 import { RecordUses } from "./record_uses";
 import {
@@ -10,15 +10,13 @@ import {
     modelRegistry,
     _0,
     isCommand,
-    isMany,
-    isOne,
     isRecord,
     isRelation,
     VERSION,
+    FIELD_DEFINITION_SYM,
 } from "./misc";
 import { DeprecatedRecord } from "./deprecated_record";
-import { FieldDefinition } from "./field_definition";
-import { RecordField } from "./record_field";
+import { onChange } from "@mail/utils/common/misc";
 
 export class Record {
     /**
@@ -90,22 +88,130 @@ export class Record {
                 cb();
             };
             if (store0.UPDATE !== 0) {
-                if (!store0.RO_QUEUE.some((f) => toRaw(f) === fn)) {
-                    store0.RO_QUEUE.push(fn);
+                if (!store0.RO_QUEUE.has(fn)) {
+                    store0.RO_QUEUE.set(fn, true);
                 }
             } else {
                 fn();
             }
         });
     }
-    /**
-     * Contains field definitions of the model:
-     * - key : field name
-     * - value: Value contains definition of field
-     *
-     * @type {Map<string, FieldDefinition>}
-     */
-    static _fields;
+    /** @type {Map<string, boolean>} */
+    static fields;
+    /** @type {Map<string, any>} */
+    static fieldsDefault;
+    /** @type {Map<string, boolean>} */
+    static fieldsAttr;
+    /** @type {Map<string, boolean>} */
+    static fieldsOne;
+    /** @type {Map<string, boolean>} */
+    static fieldsMany;
+    /** @type {Map<string, boolean>} */
+    static fieldsHtml;
+    /** @type {Map<string, string>} */
+    static fieldsTargetModel;
+    /** @type {Map<string, () => any>} */
+    static fieldsCompute;
+    /** @type {Map<string, boolean>} */
+    static fieldsEager;
+    /** @type {Map<string, string>} */
+    static fieldsInverse;
+    /** @type {Map<string, () => void>} */
+    static fieldsOnAdd;
+    /** @type {Map<string, () => void>} */
+    static fieldsOnDelete;
+    /** @type {Map<string, () => void>} */
+    static fieldsOnUpdate;
+    /** @type {Map<string, () => number>} */
+    static fieldsSort;
+    /** @type {Map<string, number>} */
+    static fieldsNextTs;
+    static makeFieldMaps() {
+        return {
+            fields: markRaw(new Map()),
+            fieldsAttr: markRaw(new Map()),
+            fieldsOne: markRaw(new Map()),
+            fieldsMany: markRaw(new Map()),
+            fieldsHtml: markRaw(new Map()),
+            fieldsDefault: markRaw(new Map()),
+            fieldsTargetModel: markRaw(new Map()),
+            fieldsCompute: markRaw(new Map()),
+            fieldsEager: markRaw(new Map()),
+            fieldsInverse: markRaw(new Map()),
+            fieldsOnAdd: markRaw(new Map()),
+            fieldsOnDelete: markRaw(new Map()),
+            fieldsOnUpdate: markRaw(new Map()),
+            fieldsSort: markRaw(new Map()),
+            fieldsNextTs: markRaw(new Map()),
+        };
+    }
+    static prepareField(fieldName, data) {
+        this.fields.set(fieldName, true);
+        if (data[ATTR_SYM]) {
+            this.fieldsAttr.set(fieldName, data[ATTR_SYM]);
+        }
+        if (data[ONE_SYM]) {
+            this.fieldsOne.set(fieldName, data[ONE_SYM]);
+        }
+        if (data[MANY_SYM]) {
+            this.fieldsMany.set(fieldName, data[MANY_SYM]);
+        }
+        for (const key in data) {
+            const value = data[key];
+            switch (key) {
+                case "html": {
+                    if (!value) {
+                        break;
+                    }
+                    this.fieldsHtml.set(fieldName, value);
+                    break;
+                }
+                case "default": {
+                    if (value === undefined) {
+                        break;
+                    }
+                    this.fieldsDefault.set(fieldName, value);
+                    break;
+                }
+                case "targetModel": {
+                    this.fieldsTargetModel.set(fieldName, value);
+                    break;
+                }
+                case "compute": {
+                    this.fieldsCompute.set(fieldName, value);
+                    break;
+                }
+                case "eager": {
+                    if (!value) {
+                        break;
+                    }
+                    this.fieldsEager.set(fieldName, value);
+                    break;
+                }
+                case "sort": {
+                    this.fieldsSort.set(fieldName, value);
+                    break;
+                }
+                case "inverse": {
+                    this.fieldsInverse.set(fieldName, value);
+                    break;
+                }
+                case "onAdd": {
+                    this.fieldsOnAdd.set(fieldName, value);
+                    break;
+                }
+                case "onDelete": {
+                    this.fieldsOnDelete.set(fieldName, value);
+                    break;
+                }
+                case "onUpdate": {
+                    this.fieldsOnUpdate.set(fieldName, value);
+                    break;
+                }
+            }
+        }
+        this.fieldsNextTs.set(fieldName, 0);
+    }
     static isRecord(record) {
         return isRecord(record);
     }
@@ -189,7 +295,7 @@ export class Record {
         // Try each combination of potential objectId, using all localIds of relations
         const fields = expr.map((item) => ({
             name: item,
-            relation: isRelation(this0._fields.get(item)),
+            relation: isRelation(this0, item),
         }));
         const fieldToIndex = Object.fromEntries(
             fields.filter((f) => f.relation).map((f, index) => [f.name, index])
@@ -210,12 +316,12 @@ export class Record {
                     } else if (isRecord(param2)) {
                         return param2;
                     }
-                    const { targetModel } = this0._fields.get(name);
+                    const targetModel = this0.fieldsTargetModel.get(name);
                     return this0.store0[targetModel].get(param2);
                 } else if ([null, false, undefined].includes(data[name])) {
                     return undefined;
                 } else {
-                    const { targetModel } = this0._fields.get(name);
+                    const targetModel = this0.fieldsTargetModel.get(name);
                     return this0.store0[targetModel].get(data[name]);
                 }
             };
@@ -223,7 +329,7 @@ export class Record {
                 let ok = true;
                 const fieldVals = expr
                     .map((item) => {
-                        if (isRelation(this0._fields.get(item))) {
+                        if (isRelation(this0, item)) {
                             const i = fcounts2[fieldToIndex[item]];
                             const relatedRecord = getRelatedRecord(item);
                             if (!relatedRecord) {
@@ -380,9 +486,9 @@ export class Record {
             }
             store0.localIdToRecord.set(rec0.localId, rec1);
             store0.objectIdToLocalId.set(rec0.localId, rec0.localId);
-            for (const field of rec0._fields.values()) {
-                field.requestCompute?.();
-                field.requestSort?.();
+            for (const fieldName of rec0.Model.fields.keys()) {
+                rec0.requestComputeField(fieldName);
+                rec0.requestSortField(fieldName);
             }
             return rec1;
         });
@@ -435,8 +541,122 @@ export class Record {
         a.localIds = b.localIds;
         a.objectIds = b.objectIds;
         a._redirectedRecord = b._2;
-        RecordField.reconcile(a, b);
-        RecordUses.reconcile(a, b);
+        // Most recent values have precedence over old conflicting ones
+        for (const fieldName of this0.fields.keys()) {
+            const aTs = a.fieldsTs.get(fieldName);
+            const bTs = b.fieldsTs.get(fieldName);
+            let resVal;
+            if (aTs && !bTs) {
+                resVal = a._fields.get(fieldName);
+                b._customAssignThroughProxy = () => {
+                    b._fields.set(fieldName, resVal);
+                };
+            } else if (!aTs && bTs) {
+                // use b
+                resVal = b._fields.get(fieldName);
+                a._customAssignThroughProxy = () => {
+                    a._fields.set(fieldName, resVal);
+                };
+            } else if (!aTs && !bTs) {
+                // none have been converted to record field... nothing to do!
+            } else if (aTs > bTs) {
+                // use a
+                resVal = a._fields.get(fieldName);
+                b._customAssignThroughProxy = () => {
+                    b._fields.set(fieldName, resVal);
+                };
+            } else {
+                // use b
+                resVal = b._fields.get(fieldName);
+                a._customAssignThroughProxy = () => {
+                    a._fields.set(fieldName, resVal);
+                };
+            }
+            /** @type {RecordList} */
+            let a2Reclist;
+            /** @type {RecordList} */
+            let b2Reclist;
+            if (isRelation(this0, fieldName)) {
+                /** @type {RecordList} */
+                const aReclist = a._fields.get(fieldName);
+                /** @type {RecordList} */
+                const bReclist = b._fields.get(fieldName);
+                a2Reclist = aReclist._2;
+                b2Reclist = bReclist._2;
+                /** @type {RecordList} */
+                const reclist = resVal;
+                aReclist._0 = reclist._0;
+                aReclist._1 = reclist._1;
+                aReclist._2 = reclist._2;
+                aReclist._0 = reclist._0;
+                aReclist._1 = reclist._1;
+                aReclist._2 = reclist._2;
+                const inverse = this0.fieldsInverse.get(fieldName);
+                if (inverse) {
+                    const removedRecs = [];
+                    for (const localId of [...aReclist.state.data, ...bReclist.state.data]) {
+                        let otherRec = _0(_0(store0.localIdToRecord).get(localId));
+                        for (let i = 0; otherRec && i < otherRec.localIds.length; i++) {
+                            const localId = otherRec.localIds[i];
+                            if (reclist.state.data.some((d) => d === localId)) {
+                                otherRec = false;
+                            }
+                        }
+                        if (otherRec && !removedRecs.some((rec) => rec.eq(otherRec))) {
+                            removedRecs.push(otherRec);
+                        }
+                    }
+                    for (const removedRec of removedRecs) {
+                        const otherReclist = removedRec._fields.get(inverse);
+                        const owner = reclist.owner;
+                        for (const localId of owner.localIds) {
+                            otherReclist.state.data = otherReclist.state.data.filter(
+                                (d) => d !== localId
+                            );
+                            store0.ADD_QUEUE(
+                                "onDelete",
+                                otherReclist.owner,
+                                otherReclist.name,
+                                owner
+                            );
+                            store0.ADD_QUEUE("onDelete", reclist.owner, reclist.name, removedRec);
+                        }
+                    }
+                }
+            }
+            if (a._customAssignThroughProxy) {
+                a._2[fieldName] = resVal;
+            }
+            if (b._customAssignThroughProxy) {
+                b._2[fieldName] = resVal;
+            }
+            if (a2Reclist) {
+                a2Reclist.state = resVal.state;
+            }
+            if (b2Reclist) {
+                b2Reclist.state = resVal.state;
+            }
+        }
+        // TODO combine the uses
+        // the tracked uses are for efficient deletion of self,
+        // so it's fine if we overestimate it a bit
+        const data = a.__uses__.data;
+        for (const [localId, bFields] of b.__uses__.data.entries()) {
+            const aFields = data.get(localId);
+            if (!aFields) {
+                data.set(localId, bFields);
+            } else {
+                for (const [name, bCount] of bFields.entries()) {
+                    const aCount = aFields.get(name);
+                    if (aCount === undefined) {
+                        aFields.set(name, bCount);
+                    } else {
+                        aFields.set(name, aCount + bCount);
+                    }
+                }
+            }
+        }
+        b.__uses__.data = data;
         // TODO combine _updatingAttrs
         a._updatingAttrs = b._updatingAttrs;
         // TODO combine _updatingFieldsThroughProxy
@@ -469,7 +689,7 @@ export class Record {
      * @returns {import("models").Models[M]}
      */
     static one(targetModel, param1) {
-        return new FieldDefinition({ ...param1, targetModel, [ONE_SYM]: true });
+        return { ...param1, targetModel, [FIELD_DEFINITION_SYM]: true, [ONE_SYM]: true };
     }
     /**
      * @template {keyof import("models").Models} M
@@ -495,7 +715,7 @@ export class Record {
      * @returns {import("models").Models[M][]}
      */
     static many(targetModel, param1) {
-        return new FieldDefinition({ ...param1, targetModel, [MANY_SYM]: true });
+        return { ...param1, targetModel, [FIELD_DEFINITION_SYM]: true, [MANY_SYM]: true };
     }
     /**
      * @template T
@@ -518,7 +738,7 @@ export class Record {
      * @returns {T}
      */
     static attr(def, param1) {
-        return new FieldDefinition({ ...param1, [ATTR_SYM]: true, default: def });
+        return { ...param1, [FIELD_DEFINITION_SYM]: true, [ATTR_SYM]: true, default: def };
     }
     /** @returns {Record|Record[]} */
     static insert(data, options = {}) {
@@ -561,32 +781,102 @@ export class Record {
         return this0.get.call(this3, data) ?? this0.new(data);
     }
     // Internal props on instance. Important to not have them being registered as fields!
-    static INSTANCE_INTERNALS = {
-        _reconciling: true,
-        _customAssignThroughProxy: true,
-        _redirectedRecord: true,
-        _fields: true,
-        _updatingFieldsThroughProxy: true,
-        _updatingAttrs: true,
-        __uses__: true,
-        Model: true,
-        localIds: true,
-        objectIds: true,
-        _0: true,
-        _1: true,
-        _2: true,
-        // store-specific
-        localIdToRecord: true,
-        objectIdToLocalId: true,
-        Models: true,
-    };
+    static get INSTANCE_INTERNALS() {
+        return {
+            fieldsComputing: true,
+            fieldsSortOnNeed: true,
+            fieldsSortInNeed: true,
+            fieldsSorting: true,
+            fieldsComputeInNeed: true,
+            fieldsComputeOnNeed: true,
+            fieldsOnUpdateObserves: true,
+            fieldsSortProxy2: true,
+            fieldsComputeProxy2: true,
+            fieldsTs: true,
+            _reconciling: true,
+            _customAssignThroughProxy: true,
+            _redirectedRecord: true,
+            _fields: true,
+            _updatingFieldsThroughProxy: true,
+            _updatingAttrs: true,
+            __uses__: true,
+            Model: true,
+            localIds: true,
+            objectIds: true,
+            _0: true,
+            _1: true,
+            _2: true,
+            // store-specific
+            localIdToRecord: true,
+            objectIdToLocalId: true,
+            Models: true,
+            trusted: true,
+            UPDATE: true,
+            FC_QUEUE: true,
+            FS_QUEUE: true,
+            FA_QUEUE: true,
+            FD_QUEUE: true,
+            FU_QUEUE: true,
+            RO_QUEUE: true,
+            RD_QUEUE: true,
+        };
+    }
+    // Note: state of fields in Maps rather than object is intentional for improved performance.
+    /**
+     * For computed field, determines whether the field is computing its value.
+     *
+     * @type {Map<string, boolean>}
+     */
+    fieldsComputing = markRaw(new Map());
+    /**
+     * On lazy-sorted field, determines whether the field should be (re-)sorted
+     * when it's needed (i.e. accessed). Eager sorted fields are immediately re-sorted at end of update cycle,
+     * whereas lazy sorted fields wait extra for them being needed.
+     *
+     * @type {Map<string, boolean>}
+     */
+    fieldsSortOnNeed = markRaw(new Map());
+    /**
+     * On lazy sorted-fields, determines whether this field is needed (i.e. accessed).
+     *
+     * @type {Map<string, boolean>}
+     */
+    fieldsSortInNeed = markRaw(new Map());
+    /**
+     * For sorted field, determines whether the field is sorting its value.
+     *
+     * @type {Map<string, boolean>}
+     */
+    fieldsSorting = markRaw(new Map());
+    /**
+     * On lazy computed-fields, determines whether this field is needed (i.e. accessed).
+     *
+     * @type {Map<string, boolean>}
+     */
+    fieldsComputeInNeed = markRaw(new Map());
+    /**
+     * on lazy-computed field, determines whether the field should be (re-)computed
+     * when it's needed (i.e. accessed). Eager computed fields are immediately re-computed at end of update cycle,
+     * whereas lazy computed fields wait extra for them being needed.
+     *
+     * @type {Map<string, boolean>}
+     */
+    fieldsComputeOnNeed = markRaw(new Map());
+    /** @type {Map<string, () => void>} */
+    fieldsOnUpdateObserves = markRaw(new Map());
+    /** @type {Map<string, this>} */
+    fieldsSortProxy2 = markRaw(new Map());
+    /** @type {Map<string, this>} */
+    fieldsComputeProxy2 = markRaw(new Map());
+    /** @type {Map<string, number>} */
+    fieldsTs = markRaw(new Map());
 
     _reconciling = false;
     /** @type {() => void>} */
     _customAssignThroughProxy;
     /** @type {boolean} */
     _redirectedRecord;
-    /** @type {Map<string, import("./record_field").RecordField>}*/
+    /** @type {Map<string, import("./record_list").RecordList|any>}*/
     _fields = new Map();
     /** @type {Set<string>} */
     _updatingFieldsThroughProxy;
@@ -699,7 +989,7 @@ export class Record {
     delete() {
         const this0 = _0(this);
         return this0._store0.MAKE_UPDATE(function R_delete() {
-            this0._store0.ADD_QUEUE(this0, "delete");
+            this0._store0.ADD_QUEUE("delete", this0);
         });
     }
 
@@ -745,13 +1035,13 @@ export class Record {
     toData() {
         const this0 = _0(this);
         const data = { ...this };
-        for (const [name, { value }] of this0._fields) {
-            if (isMany(value)) {
+        for (const [name, value] of this0._fields) {
+            if (this0.Model.fieldsMany.get(name)) {
                 data[name] = value.map((record2) => {
                     const record = _0(record2);
                     return record.toIdData.call(record._1);
                 });
-            } else if (isOne(value)) {
+            } else if (this0.Model.fieldsOne.get(name)) {
                 const record = _0(value[0]);
                 data[name] = record?.toIdData.call(record._1);
             } else {
@@ -780,6 +1070,225 @@ export class Record {
      */
     _downgradeProxy(this3) {
         return this._2 === this3 ? this._1 : this3;
+    }
+
+    /**
+     * For computed field, invoking this function (re-)computes the field.
+     *
+     * @type {string} fieldName
+     */
+    computeField(fieldName) {
+        const compute = this.Model.fieldsCompute.get(fieldName);
+        if (!compute) {
+            return;
+        }
+        this.fieldsComputing.set(fieldName, true);
+        this.fieldsComputeOnNeed.delete(fieldName, true);
+        const proxy2 = this.fieldsComputeProxy2.get(fieldName);
+        this._store0.MAKE_UPDATE(() => {
+            this._store0.updateFields(this, { [fieldName]: compute.call(proxy2) });
+        });
+        this.fieldsComputing.delete(fieldName);
+    }
+
+    /**
+     * For sorted field, invoking this function (re-)sorts the field.
+     *
+     * @type {string} fieldName
+     */
+    sortField(fieldName) {
+        const sort = this.Model.fieldsSort.get(fieldName);
+        if (!sort) {
+            return;
+        }
+        this.fieldsSortOnNeed.delete(fieldName);
+        this.fieldsSorting.set(fieldName, true);
+        const proxy2 = this.fieldsSortProxy2.get(fieldName);
+        this._store0.MAKE_UPDATE(() => {
+            if (this.Model.fieldsAttr.get(fieldName)) {
+                proxy2[fieldName].sort(sort);
+            } else {
+                this._store0.sortRecordList(proxy2._fields.get(fieldName)._2, sort.bind(proxy2));
+            }
+        });
+        this.fieldsSorting.delete(fieldName);
+    }
+
+    /**
+     * on computed field, calling this function makes a request to compute
+     * the field. This doesn't necessarily mean the field is immediately re-computed: during an update cycle, this
+     * is put in the compute FC_QUEUE and will be invoked at end.
+     *
+     * @param {string} fieldName
+     * @param {Object} [param1={}]
+     * @param {boolean} [param1.force=false]
+     */
+    requestComputeField(fieldName, { force = false } = {}) {
+        const Model = this.Model;
+        if (!Model.fieldsCompute.get(fieldName)) {
+            return;
+        }
+        if (this._store0.UPDATE !== 0 && !force) {
+            this._store0.ADD_QUEUE("compute", this, fieldName);
+        } else {
+            if (Model.fieldsEager.get(fieldName) || this.fieldsComputeInNeed.get(fieldName)) {
+                this.computeField(fieldName);
+            } else {
+                this.fieldsComputeOnNeed.set(fieldName, true);
+            }
+        }
+    }
+
+    /**
+     * on sorted field, calling this function makes a request to sort
+     * the field. This doesn't necessarily mean the field is immediately re-sorted: during an update cycle, this
+     * is put in the sort FS_QUEUE and will be invoked at end.
+     *
+     * @param {string} fieldName
+     * @param {Object} [param1={}]
+     * @param {boolean} [param1.force=false]
+     */
+    requestSortField(fieldName, { force } = {}) {
+        const Model = this.Model;
+        if (!Model.fieldsSort.get(fieldName)) {
+            return;
+        }
+        if (this._store0.UPDATE !== 0 && !force) {
+            this._store0.ADD_QUEUE("sort", this, fieldName);
+        } else {
+            if (Model.fieldsEager.get(fieldName) || this.fieldsSortInNeed.get(fieldName)) {
+                this.sortField(fieldName);
+            } else {
+                this.fieldsSortOnNeed.set(fieldName, true);
+            }
+        }
+    }
+
+    prepareFieldOnRecomputeObjectIds(fieldName) {
+        const this0 = this;
+        const this2 = this0._2;
+        const Model = this0.Model;
+        if (Model.fieldsAttr.get(fieldName)) {
+            onChange(this2, fieldName, function RF_onChangeRecomputeObjectIds_attr() {
+                Model.onRecomputeObjectIds(this0._1);
+            });
+        } else {
+            onChange(
+                this2._fields.get(fieldName).state,
+                "data",
+                function RF_onChangeRecomputeObjectIds_rel_data() {
+                    Model.onRecomputeObjectIds(this0._1);
+                }
+            );
+            onChange(
+                this2._fields.get(fieldName).state.data,
+                "length",
+                function RF_onChangeRecomputeObjectIds_rel_data_length() {
+                    Model.onRecomputeObjectIds(this0._1);
+                }
+            );
+        }
+    }
+
+    prepareField(fieldName) {
+        const this0 = _0(this);
+        const this2 = this0._2;
+        const Model = this0.Model;
+        if (isRelation(Model, fieldName)) {
+            const reclist0 = new RecordList({
+                owner: this0,
+                name: fieldName,
+                store: this0._store0,
+            });
+            reclist0._0 = reclist0;
+            this0._fields.set(fieldName, reclist0);
+        }
+        if (this0.Model.objectIdFields[fieldName]) {
+            this0.prepareFieldOnRecomputeObjectIds(fieldName);
+        }
+        if (Model.fieldsAttr.get(fieldName)) {
+            const defaultVal = Model.fieldsDefault.get(fieldName);
+            if (defaultVal !== undefined) {
+                this2._fields.set(fieldName, defaultVal);
+            }
+        }
+        const nextTs = Model.fieldsNextTs.get(fieldName);
+        this.fieldsTs.set(fieldName, nextTs);
+        Model.fieldsNextTs.set(fieldName, nextTs + 1);
+        if (Model.fieldsCompute.get(fieldName)) {
+            if (!Model.fieldsEager.get(fieldName)) {
+                onChange(this2, fieldName, () => {
+                    if (this0.fieldsComputing.get(fieldName)) {
+                        /**
+                         * Use a reactive to reset the computeInNeed flag when there is
+                         * a change. This assumes when other reactive are still
+                         * observing the value, its own callback will reset the flag to
+                         * true through the proxy getters.
+                         */
+                        this0.fieldsComputeInNeed.delete(fieldName);
+                    }
+                });
+                // reset flags triggered by registering onChange
+                this0.fieldsComputeInNeed.delete(fieldName);
+                this0.fieldsSortInNeed.delete(fieldName);
+            }
+            const proxy2 = reactive(this2, function RF_computeObserver() {
+                this0.requestComputeField(fieldName);
+            });
+            this0.fieldsComputeProxy2.set(fieldName, proxy2);
+        }
+        if (Model.fieldsSort.get(fieldName)) {
+            if (!Model.fieldsEager.get(fieldName)) {
+                onChange(this2, fieldName, () => {
+                    if (this0.fieldsSorting.get(fieldName)) {
+                        /**
+                         * Use a reactive to reset the inNeed flag when there is a
+                         * change. This assumes if another reactive is still observing
+                         * the value, its own callback will reset the flag to true
+                         * through the proxy getters.
+                         */
+                        this0.fieldsSortInNeed.delete(fieldName);
+                    }
+                });
+                // reset flags triggered by registering onChange
+                this0.fieldsComputeInNeed.delete(fieldName);
+                this0.fieldsSortInNeed.delete(fieldName);
+            }
+            const proxy2 = reactive(this2, function RF_sortObserver() {
+                this0.requestSortField(fieldName);
+            });
+            this0.fieldsSortProxy2.set(fieldName, proxy2);
+        }
+        if (Model.fieldsOnUpdate.get(fieldName)) {
+            this0._store0._onChange(this2, fieldName, (obs) => {
+                this0.fieldsOnUpdateObserves.set(fieldName, obs);
+                if (this0._store0.UPDATE !== 0) {
+                    this0._store0.ADD_QUEUE("onUpdate", this0, fieldName);
+                } else {
+                    this0.onUpdateField(fieldName);
+                }
+            });
+        }
+    }
+
+    /**
+     * Function that contains functions to be called when the value of field has changed, e.g. sort and onUpdate.
+     *
+     * @param {string} fieldName
+     */
+    onUpdateField(fieldName) {
+        const onUpdate = this.Model.fieldsOnUpdate.get(fieldName);
+        if (!onUpdate) {
+            return;
+        }
+        this._store0.MAKE_UPDATE(() => {
+            /**
+             * Forward internal proxy for performance as onUpdate does not
+             * need reactive (observe is called separately).
+             */
+            onUpdate.call(this._1);
+            this.fieldsOnUpdateObserves.get(fieldName)?.();
+        });
     }
 }
 

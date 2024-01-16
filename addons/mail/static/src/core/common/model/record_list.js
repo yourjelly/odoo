@@ -1,59 +1,10 @@
 /* @odoo-module */
 
 import { reactive } from "@odoo/owl";
-import { ATTR_SYM, MANY_SYM, ONE_SYM, _0, isOne, isRecord } from "./misc";
+import { _0, isRecord } from "./misc";
 
 /** * @template {import("./record").Record} R */
 export class RecordList extends Array {
-    /**
-     * Combine both record lists, i.e. resulting data in both lists is current record list in owner.
-     *
-     * @param {RecordList} a
-     * @param {RecordList} b
-     */
-    static reconcile(a, b) {
-        const store = a.store;
-        const field = b.field;
-        const reclist = field.value;
-        a.field = field;
-        b.field = field;
-        const a2 = a._2;
-        const b2 = b._2;
-        a._0 = reclist._0;
-        a._1 = reclist._1;
-        a._2 = reclist._2;
-        b._0 = reclist._0;
-        b._1 = reclist._1;
-        b._2 = reclist._2;
-        const { inverse } = field.definition;
-        if (inverse) {
-            const removedRecs = [];
-            for (const localId of [...a.state.data, ...b.state.data]) {
-                let otherRec = _0(_0(store.localIdToRecord).get(localId));
-                for (let i = 0; otherRec && i < otherRec.localIds.length; i++) {
-                    const localId = otherRec.localIds[i];
-                    if (reclist.state.data.some((d) => d === localId)) {
-                        otherRec = false;
-                    }
-                }
-                if (otherRec && !removedRecs.some((rec) => rec.eq(otherRec))) {
-                    removedRecs.push(otherRec);
-                }
-            }
-            for (const removedRec of removedRecs) {
-                const otherField = removedRec._fields.get(inverse);
-                const otherReclist = otherField.value;
-                const owner = field.owner;
-                for (const localId of owner.localIds) {
-                    otherReclist.state.data = otherReclist.state.data.filter((d) => d !== localId);
-                    store.ADD_QUEUE(otherField, "onDelete", owner);
-                    store.ADD_QUEUE(field, "onDelete", removedRec);
-                }
-            }
-        }
-        a2.state = reclist.state;
-        b2.state = reclist.state;
-    }
     /** @type {import("models").Store} */
     store;
     // in an object so it can be easily reconciled
@@ -67,26 +18,10 @@ export class RecordList extends Array {
     _1; // previously "_proxyInternal"
     /** @type {this} */
     _2; // previously "_proxy"
-    /** @type {import("./record_field").RecordField} */
-    field;
-    get name() {
-        return this.field.name;
-    }
-    get [ATTR_SYM]() {
-        return this.field[ATTR_SYM];
-    }
-    get [MANY_SYM]() {
-        return this.field[MANY_SYM];
-    }
-    get [ONE_SYM]() {
-        return this.field[ONE_SYM];
-    }
-    get owner() {
-        return this.field.owner;
-    }
-    get definition() {
-        return this.owner.Model._fields.get(this.name);
-    }
+    /** @type {string} */
+    name;
+    /** @type {import("./record").Record} */
+    owner;
 
     /** @param {Object} vals */
     constructor(vals) {
@@ -94,6 +29,7 @@ export class RecordList extends Array {
         Object.assign(this, vals);
         const this0 = this;
         this0._0 = this0;
+        const Model = this.owner.Model;
         const this1 = new Proxy(this0, {
             /** @param {RecordList<R>} this3 */
             get(this0, name, this3) {
@@ -105,19 +41,19 @@ export class RecordList extends Array {
                 ) {
                     return Reflect.get(this0, name, this3);
                 }
-                if (this0.field?.compute && !this0.field.eager) {
-                    this0.field.computeInNeed = true;
-                    if (this0.field.computeOnNeed) {
-                        this0.field.compute();
+                if (Model.fieldsCompute.get(this0.name) && !Model.fieldsEager.get(this0.name)) {
+                    this0.owner.fieldsComputeInNeed.set(this0.name, true);
+                    if (this0.owner.fieldsComputeOnNeed.get(this0.name)) {
+                        this0.owner.computeField(this0.name);
                     }
                 }
                 if (name === "length") {
                     return this3.state.data.length;
                 }
-                if (this0.field?.sort && !this0.field.eager) {
-                    this0.field.sortInNeed = true;
-                    if (this0.field.sortOnNeed) {
-                        this0.field.sort();
+                if (Model.fieldsSort.get(this0.name) && !Model.fieldsEager.get(this0.name)) {
+                    this0.owner.fieldsSortInNeed.set(this0.name, true);
+                    if (this0.owner.fieldsSortOnNeed.get(this0.name)) {
+                        this0.owner.sortField(this0.name);
                     }
                 }
                 if (typeof name !== "symbol" && !window.isNaN(parseInt(name))) {
@@ -142,18 +78,17 @@ export class RecordList extends Array {
                             if (oldRecord && oldRecord.notEq(newRecord)) {
                                 oldRecord.__uses__.delete(this0);
                             }
-                            this0.store.ADD_QUEUE(this0.field, "onDelete", oldRecord);
-                            const { inverse } = this0.definition;
+                            this0.store.ADD_QUEUE("onDelete", this0.owner, this0.name, oldRecord);
+                            const inverse = Model.fieldsInverse.get(this0.name);
                             if (inverse) {
-                                oldRecord._fields.get(inverse).value.delete(this0);
+                                oldRecord._fields.get(inverse).delete(this0);
                             }
                             this3.state.data[index] = newRecord?.localId;
                             if (newRecord) {
                                 newRecord.__uses__.add(this0);
-                                this0.store.ADD_QUEUE(this0.field, "onAdd", newRecord);
-                                const { inverse } = this0.definition;
+                                this0.store.ADD_QUEUE("onAdd", this0.owner, this0.name, newRecord);
                                 if (inverse) {
-                                    newRecord._fields.get(inverse).value.add(this0);
+                                    newRecord._fields.get(inverse).add(this0);
                                 }
                             }
                         });
@@ -202,7 +137,8 @@ export class RecordList extends Array {
      *   comes from deletion, we want to "DELETE".
      */
     _insert(val, fn, { inv = true, mode = "ADD" } = {}) {
-        const { inverse } = this.definition;
+        const Model = this.owner.Model;
+        const inverse = Model.fieldsInverse.get(this.name);
         if (inverse && inv) {
             // special command to call _addNoinv/_deleteNoInv, to prevent infinite loop
             val[inverse] = [[mode === "ADD" ? "ADD.noinv" : "DELETE.noinv", this.owner]];
@@ -210,7 +146,7 @@ export class RecordList extends Array {
         /** @type {R} */
         let newRecord3;
         if (!isRecord(val)) {
-            const { targetModel } = this.definition;
+            const targetModel = Model.fieldsTargetModel.get(this.name);
             newRecord3 = this.store[targetModel].preinsert(val);
         } else {
             newRecord3 = val;
@@ -249,16 +185,17 @@ export class RecordList extends Array {
     push(...records) {
         const this0 = _0(this);
         const this3 = this0._downgradeProxy(this);
+        const Model = this0.owner.Model;
         return this0.store.MAKE_UPDATE(function RL_push() {
             for (const val of records) {
                 const record = this0._insert(val, function RL_push_insert(record) {
                     this0._2.state.data.push(record.localId);
                     record.__uses__.add(this0);
                 });
-                this0.store.ADD_QUEUE(this0.field, "onAdd", record);
-                const { inverse } = this0.definition;
+                this0.store.ADD_QUEUE("onAdd", this0.owner, this0.name, record);
+                const inverse = Model.fieldsInverse.get(this0.name);
                 if (inverse) {
-                    record._fields.get(inverse).value.add(this0.owner);
+                    record._fields.get(inverse).add(this0.owner);
                 }
             }
             return this3.state.data.length;
@@ -281,6 +218,7 @@ export class RecordList extends Array {
     shift() {
         const this0 = _0(this);
         const this3 = this0._downgradeProxy(this);
+        const Model = this0.owner.Model;
         return this0.store.MAKE_UPDATE(function RL_shift() {
             const record3 = this3.store.localIdToRecord.get(this3.state.data.shift());
             if (!record3) {
@@ -288,10 +226,10 @@ export class RecordList extends Array {
             }
             const record0 = _0(record3);
             record0.__uses__.delete(this0);
-            this0.store.ADD_QUEUE(this0.field, "onDelete", record0);
-            const { inverse } = this0.definition;
+            this0.store.ADD_QUEUE("onDelete", this0.owner, this0.name, record0);
+            const inverse = Model.fieldsInverse.get(this0.name);
             if (inverse) {
-                record0._fields.get(inverse).value.delete(this0.owner);
+                record0._fields.get(inverse).delete(this0.owner);
             }
             return record3;
         });
@@ -300,16 +238,17 @@ export class RecordList extends Array {
     unshift(...records) {
         const this0 = _0(this);
         const this3 = this0._downgradeProxy(this);
+        const Model = this0.owner.Model;
         return this0.store.MAKE_UPDATE(function RL_unshift() {
             for (let i = records.length - 1; i >= 0; i--) {
                 const record = this0._insert(records[i], (record) => {
                     this0._2.state.data.unshift(record.localId);
                     record.__uses__.add(this0);
                 });
-                this0.store.ADD_QUEUE(this0.field, "onAdd", record);
-                const { inverse } = this0.definition;
+                this0.store.ADD_QUEUE("onAdd", this0.owner, this0.name, record);
+                const inverse = Model.fieldsInverse.get(this0.name);
                 if (inverse) {
-                    record._fields.get(inverse).value.add(this0.owner);
+                    record._fields.get(inverse).add(this0.owner);
                 }
             }
             return this3.state.data.length;
@@ -336,6 +275,8 @@ export class RecordList extends Array {
     splice(start, deleteCount, ...newRecords3) {
         const this0 = _0(this);
         const this3 = this0._downgradeProxy(this);
+        const Model = this0.owner.Model;
+        const inverse = Model.fieldsInverse.get(this0.name);
         return this0.store.MAKE_UPDATE(function RL_splice() {
             const oldRecords3 = this0._1.slice.call(this3, start, start + deleteCount);
             const list = this3.state.data.slice(); // splice on copy of list so that reactive observers not triggered while splicing
@@ -348,19 +289,17 @@ export class RecordList extends Array {
             for (const oldRecord3 of oldRecords3) {
                 const oldRecord0 = _0(oldRecord3);
                 oldRecord0.__uses__.delete(this0);
-                this0.store.ADD_QUEUE(this0.field, "onDelete", oldRecord0);
-                const { inverse } = this0.definition;
+                this0.store.ADD_QUEUE("onDelete", this0.owner, this0.name, oldRecord0);
                 if (inverse) {
-                    oldRecord0._fields.get(inverse).value.delete(this0.owner);
+                    oldRecord0._fields.get(inverse).delete(this0.owner);
                 }
             }
             for (const newRecord3 of newRecords3) {
                 const newRecord = _0(newRecord3);
                 newRecord.__uses__.add(this0);
-                this0.store.ADD_QUEUE(this0.field, "onAdd", newRecord);
-                const { inverse } = this0.definition;
+                this0.store.ADD_QUEUE("onAdd", this0.owner, this0.name, newRecord);
                 if (inverse) {
-                    newRecord._fields.get(inverse).value.add(this0.owner);
+                    newRecord._fields.get(inverse).add(this0.owner);
                 }
             }
         });
@@ -385,8 +324,9 @@ export class RecordList extends Array {
     /** @param {...R}  */
     add(...records) {
         const this0 = _0(this);
+        const Model = this0.owner.Model;
         return this0.store.MAKE_UPDATE(function RL_add() {
-            if (isOne(this0)) {
+            if (Model.fieldsOne.get(this0.name)) {
                 const last = records.at(-1);
                 if (isRecord(last) && this0.state.data.includes(_0(last).localId)) {
                     return;
@@ -419,43 +359,44 @@ export class RecordList extends Array {
      * @param {...R}
      */
     _addNoinv(...records) {
-        const recordList = this;
-        if (isOne(recordList)) {
+        const this0 = this;
+        const Model = this0.owner.Model;
+        if (Model.fieldsOne.get(this0.name)) {
             const last = records.at(-1);
-            if (isRecord(last) && last.in(recordList)) {
+            if (isRecord(last) && last.in(this0)) {
                 return;
             }
-            const record = recordList._insert(
+            const record = this0._insert(
                 last,
                 function RL_addNoInv_insertOne(record) {
-                    if (record.localId !== recordList.state.data[0]) {
-                        const old = recordList._2.at(-1);
-                        recordList._2.state.data.pop();
-                        old?.__uses__.delete(recordList);
-                        recordList._2.state.data.push(record.localId);
-                        record.__uses__.add(recordList);
+                    if (record.localId !== this0.state.data[0]) {
+                        const old = this0._2.at(-1);
+                        this0._2.state.data.pop();
+                        old?.__uses__.delete(this0);
+                        this0._2.state.data.push(record.localId);
+                        record.__uses__.add(this0);
                     }
                 },
                 { inv: false }
             );
-            this.store.ADD_QUEUE(recordList.field, "onAdd", record);
+            this.store.ADD_QUEUE("onAdd", this0.owner, this0.name, record);
             return;
         }
         for (const val of records) {
-            if (isRecord(val) && val.in(recordList)) {
+            if (isRecord(val) && val.in(this0)) {
                 continue;
             }
-            const record = recordList._insert(
+            const record = this0._insert(
                 val,
                 function RL_addNoInv_insertMany(record) {
-                    if (recordList.state.data.indexOf(record.localId) === -1) {
-                        recordList.push.call(recordList._2, record);
-                        record.__uses__.add(recordList);
+                    if (this0.state.data.indexOf(record.localId) === -1) {
+                        this0.push.call(this0._2, record);
+                        record.__uses__.add(this0);
                     }
                 },
                 { inv: false }
             );
-            this.store.ADD_QUEUE(recordList.field, "onAdd", record);
+            this.store.ADD_QUEUE("onAdd", this0.owner, this0.name, record);
         }
     }
     /** @param {...R}  */
@@ -484,20 +425,20 @@ export class RecordList extends Array {
      * @param {...R}
      */
     _deleteNoinv(...records) {
-        const recordList = this;
+        const this0 = this;
         for (const val of records) {
-            const record = recordList._insert(
+            const record = this0._insert(
                 val,
                 function RL_deleteNoInv_insert(record) {
-                    const index = recordList.state.data.indexOf(record.localId);
+                    const index = this0.state.data.indexOf(record.localId);
                     if (index !== -1) {
-                        recordList.splice.call(recordList._2, index, 1);
-                        record.__uses__.delete(recordList);
+                        this0.splice.call(this0._2, index, 1);
+                        record.__uses__.delete(this0);
                     }
                 },
                 { inv: false }
             );
-            this.store.ADD_QUEUE(recordList.field, "onDelete", record);
+            this.store.ADD_QUEUE("onDelete", this0.owner, this0.name, record);
         }
     }
     clear() {

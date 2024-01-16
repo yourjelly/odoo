@@ -6,19 +6,15 @@ import {
     STORE_SYM,
     modelRegistry,
     _0,
-    isField,
-    isMany,
     isRelation,
     AND_SYM,
     OR_SYM,
     ATTR_SYM,
+    FIELD_DEFINITION_SYM,
 } from "./misc";
 import { Store } from "./store";
-import { assignDefined, onChange } from "@mail/utils/common/misc";
-import { RecordList } from "./record_list";
+import { assignDefined } from "@mail/utils/common/misc";
 import { Record } from "./record";
-import { RecordField } from "./record_field";
-import { FieldDefinition } from "./field_definition";
 
 export function makeStore(env) {
     const localIdToRecord = reactive(new Map());
@@ -29,6 +25,7 @@ export function makeStore(env) {
     dummyStore.env = env;
     let store = dummyStore;
     Record.store0 = dummyStore;
+    /** @type {Object<string, typeof Record>} */
     const Models = {};
     dummyStore.Models = Models;
     const OgClasses = {};
@@ -58,37 +55,34 @@ export function makeStore(env) {
                     const this1 = new Proxy(this0, {
                         get(this0, name, this3) {
                             this3 = this0._downgradeProxy(this3);
-                            const field = this0._fields.get(name);
-                            if (!field) {
+                            if (!Model.fields.has(name)) {
                                 return Reflect.get(this0, name, this3);
                             }
-                            if (field.compute && !field.eager) {
-                                field.computeInNeed = true;
-                                if (field.computeOnNeed) {
-                                    field.compute();
+                            if (Model.fieldsCompute.get(name) && !Model.fieldsEager.get(name)) {
+                                this0.fieldsComputeInNeed.set(name, true);
+                                if (this0.fieldsComputeOnNeed.get(name)) {
+                                    this0.computeField(name);
                                 }
                             }
-                            if (field.sort && !field.eager) {
-                                field.sortInNeed = true;
-                                if (field.sortOnNeed) {
-                                    field.sort();
+                            if (Model.fieldsSort.get(name) && !Model.fieldsEager.get(name)) {
+                                this0.fieldsSortInNeed.set(name, true);
+                                if (this0.fieldsSortOnNeed.get(name)) {
+                                    this0.sortField(name);
                                 }
                             }
-                            if (isRelation(field)) {
-                                const reclist = field.value;
-                                const reclist3 = this3._fields.get(name).value._1;
-                                if (isMany(reclist)) {
+                            if (isRelation(Model, name)) {
+                                const reclist3 = this3._fields.get(name)._1;
+                                if (Model.fieldsMany.get(name)) {
                                     return reclist3;
                                 }
                                 return reclist3[0];
                             }
-                            return this3._fields.get(name).value;
+                            return this3._fields.get(name);
                         },
                         deleteProperty(this0, name) {
                             return store.MAKE_UPDATE(function R_deleteProperty() {
-                                const field = this0._fields.get(name);
-                                if (field && isRelation(field)) {
-                                    const reclist = field.value;
+                                if (isRelation(Model, name)) {
+                                    const reclist = this0._fields.get(name);
                                     reclist.clear();
                                     return true;
                                 }
@@ -108,7 +102,7 @@ export function makeStore(env) {
                             }
                             // ensure each field write goes through the updateFields method exactly once
                             if (this0._updatingAttrs.has(name)) {
-                                this0._fields.get(name).value = val;
+                                this0._fields.set(name, val);
                                 return true;
                             }
                             return store.MAKE_UPDATE(function R_set() {
@@ -139,130 +133,8 @@ export function makeStore(env) {
                         Record.store0 = this0;
                         store = this0;
                     }
-                    for (const [name, definition] of Model._fields) {
-                        const field = new RecordField({ definition, owner: this0 });
-                        this0._fields.set(name, field);
-                        if (isRelation(field)) {
-                            const reclist0 = new RecordList({ field, store });
-                            reclist0._0 = reclist0;
-                            field.value = reclist0;
-                            field.registerOnChangeRecomputeObjectId();
-                        } else {
-                            this2[name] = definition.default;
-                        }
-                        if (definition.compute) {
-                            if (!definition.eager) {
-                                onChange(this2, name, () => {
-                                    if (field.computing) {
-                                        /**
-                                         * Use a reactive to reset the computeInNeed flag when there is
-                                         * a change. This assumes when other reactive are still
-                                         * observing the value, its own callback will reset the flag to
-                                         * true through the proxy getters.
-                                         */
-                                        field.computeInNeed = false;
-                                    }
-                                });
-                                // reset flags triggered by registering onChange
-                                field.computeInNeed = false;
-                                field.sortInNeed = false;
-                            }
-                            const proxy2 = reactive(this2, function RF_computeObserver() {
-                                field.requestCompute();
-                            });
-                            Object.assign(field, {
-                                compute: () => {
-                                    field.computing = true;
-                                    field.computeOnNeed = false;
-                                    store.MAKE_UPDATE(() => {
-                                        store.updateFields(this0, {
-                                            [name]: definition.compute.call(proxy2),
-                                        });
-                                    });
-                                    field.computing = false;
-                                },
-                                requestCompute: ({ force = false } = {}) => {
-                                    if (store.UPDATE !== 0 && !force) {
-                                        store.ADD_QUEUE(field, "compute");
-                                    } else {
-                                        if (field.eager || field.computeInNeed) {
-                                            field.compute();
-                                        } else {
-                                            field.computeOnNeed = true;
-                                        }
-                                    }
-                                },
-                            });
-                        }
-                        if (definition.sort) {
-                            if (!definition.eager) {
-                                onChange(this2, name, () => {
-                                    if (field.sorting) {
-                                        /**
-                                         * Use a reactive to reset the inNeed flag when there is a
-                                         * change. This assumes if another reactive is still observing
-                                         * the value, its own callback will reset the flag to true
-                                         * through the proxy getters.
-                                         */
-                                        field.sortInNeed = false;
-                                    }
-                                });
-                                // reset flags triggered by registering onChange
-                                field.computeInNeed = false;
-                                field.sortInNeed = false;
-                            }
-                            const proxy2 = reactive(this2, function RF_sortObserver() {
-                                field.requestSort();
-                            });
-                            Object.assign(field, {
-                                sort: () => {
-                                    field.sortOnNeed = false;
-                                    field.sorting = true;
-                                    store.MAKE_UPDATE(() => {
-                                        store.sortRecordList(
-                                            proxy2._fields.get(name).value._2,
-                                            definition.sort.bind(proxy2)
-                                        );
-                                    });
-                                    field.sorting = false;
-                                },
-                                requestSort: ({ force } = {}) => {
-                                    if (store.UPDATE !== 0 && !force) {
-                                        store.ADD_QUEUE(field, "sort");
-                                    } else {
-                                        if (field.eager || field.sortInNeed) {
-                                            field.sort();
-                                        } else {
-                                            field.sortOnNeed = true;
-                                        }
-                                    }
-                                },
-                            });
-                        }
-                        if (definition.onUpdate) {
-                            /** @type {Function} */
-                            let observe;
-                            Object.assign(field, {
-                                onUpdate: () => {
-                                    store.MAKE_UPDATE(() => {
-                                        /**
-                                         * Forward internal proxy for performance as onUpdate does not
-                                         * need reactive (observe is called separately).
-                                         */
-                                        definition.onUpdate.call(this0._1);
-                                        observe?.();
-                                    });
-                                },
-                            });
-                            store._onChange(this2, name, (obs) => {
-                                observe = obs;
-                                if (store.UPDATE !== 0) {
-                                    store.ADD_QUEUE(field, "onUpdate");
-                                } else {
-                                    field.onUpdate();
-                                }
-                            });
-                        }
+                    for (const fieldName of Model.fields.keys()) {
+                        this0.prepareField(fieldName);
                     }
                     return this2;
                 }
@@ -319,7 +191,7 @@ export function makeStore(env) {
             NEXT_LOCAL_ID: 1,
             env,
             records: reactive({}),
-            _fields: new Map(),
+            ...Record.makeFieldMaps(),
         });
         Models[name] = Model;
         store[name] = Model;
@@ -334,45 +206,43 @@ export function makeStore(env) {
             if (Model.INSTANCE_INTERNALS[name]) {
                 continue;
             }
-            /** @type {FieldDefinition} */
-            let definition;
-            if (!isField(val)) {
-                // dynamically add attr field definition on the fly
-                definition = new FieldDefinition({ [ATTR_SYM]: true, default: val });
+            if (val?.[FIELD_DEFINITION_SYM]) {
+                Model.prepareField(name, val);
             } else {
-                definition = val;
+                Model.prepareField(name, { [ATTR_SYM]: true, default: val });
             }
-            definition.Model = Model;
-            definition.name = name;
-            Model._fields.set(name, definition);
         }
     }
     // Sync inverse fields
     for (const Model of Object.values(Models)) {
-        for (const [name, definition] of Model._fields) {
-            if (!isRelation(definition)) {
+        for (const fieldName of Model.fields.keys()) {
+            if (!isRelation(Model, fieldName)) {
                 continue;
             }
-            const { targetModel, inverse } = definition;
+            const targetModel = Model.fieldsTargetModel.get(fieldName);
+            const inverse = Model.fieldsInverse.get(fieldName);
             if (targetModel && !Models[targetModel]) {
                 throw new Error(`No target model ${targetModel} exists`);
             }
             if (inverse) {
-                const rel2 = Models[targetModel]._fields.get(inverse);
-                if (rel2.targetModel && rel2.targetModel !== Model.name) {
+                const OtherModel = Models[targetModel];
+                const rel2TargetModel = OtherModel.fieldsTargetModel.get(inverse);
+                const rel2Inverse = OtherModel.fieldsInverse.get(inverse);
+                if (rel2TargetModel && rel2TargetModel !== Model.name) {
                     throw new Error(
-                        `Fields ${Models[targetModel].name}.${inverse} has wrong targetModel. Expected: "${Model.name}" Actual: "${rel2.targetModel}"`
+                        `Fields ${Models[targetModel].name}.${inverse} has wrong targetModel. Expected: "${Model.name}" Actual: "${rel2TargetModel}"`
                     );
                 }
-                if (rel2.inverse && rel2.inverse !== name) {
+                if (rel2Inverse && rel2Inverse !== fieldName) {
                     throw new Error(
-                        `Fields ${Models[targetModel].name}.${inverse} has wrong inverse. Expected: "${name}" Actual: "${rel2.inverse}"`
+                        `Fields ${Models[targetModel].name}.${inverse} has wrong inverse. Expected: "${fieldName}" Actual: "${rel2Inverse}"`
                     );
                 }
-                Object.assign(rel2, { targetModel: Model.name, inverse: name });
-                // // FIXME: lazy fields are not working properly with inverse.
-                definition.eager = true;
-                rel2.eager = true;
+                OtherModel.fieldsTargetModel.set(inverse, Model.name);
+                OtherModel.fieldsInverse.set(inverse, fieldName);
+                // FIXME: lazy fields are not working properly with inverse.
+                Model.fieldsEager.set(fieldName, true);
+                OtherModel.fieldsEager.set(inverse, true);
             }
         }
     }

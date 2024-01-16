@@ -579,7 +579,7 @@ QUnit.test("lazy sort should re-sort while they are observed", async (assert) =>
     assert.equal(
         `${toRaw(thread)
             ._0._fields.get("messages")
-            .value.state.data.map((localId) => toRaw(thread)._0._store.get(localId).id)}`,
+            .state.data.map((localId) => toRaw(thread)._0._store.get(localId).id)}`,
         "2,1",
         "observed one last time when it changes"
     );
@@ -588,7 +588,7 @@ QUnit.test("lazy sort should re-sort while they are observed", async (assert) =>
     assert.equal(
         `${toRaw(thread)
             ._0._fields.get("messages")
-            .value.state.data.map((localId) => toRaw(thread)._0._store.get(localId).id)}`,
+            .state.data.map((localId) => toRaw(thread)._0._store.get(localId).id)}`,
         "2,1",
         "no longer observed"
     );

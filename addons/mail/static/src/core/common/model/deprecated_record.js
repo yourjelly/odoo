@@ -1,6 +1,6 @@
 /* @odoo-module */
 
-import { OR_SYM, _0, isCommand, isMany, isRecord, isRelation } from "./misc";
+import { OR_SYM, _0, isCommand, isRecord, isRelation } from "./misc";
 
 /** @deprecated */
 export class DeprecatedRecord {
@@ -19,9 +19,6 @@ export class DeprecatedRecord {
         if (!Array.isArray(expr)) {
             const definition = this0._fields.get(expr);
             if (definition) {
-                if (isMany(definition)) {
-                    throw new Error("Using a Record.many() as id is not (yet) supported");
-                }
                 if (!isRelation(definition)) {
                     return data[expr];
                 }
