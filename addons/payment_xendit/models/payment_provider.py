@@ -1,5 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import json
 import logging
 import pprint
 
@@ -9,6 +10,7 @@ from odoo import _, fields, models
 from odoo.exceptions import ValidationError
 
 from odoo.addons.payment_xendit import const
+from werkzeug.urls import url_join
 
 
 _logger = logging.getLogger(__name__)
@@ -26,6 +28,19 @@ class PaymentProvider(models.Model):
     xendit_webhook_token = fields.Char(
         string="Xendit Webhook Token", groups='base.group_system', required_if_provider='xendit'
     )
+    xendit_public_key = fields.Char(
+        string="Xendit Public Key",
+        groups='base.group_system',
+        required_if_provider='xendit'
+    )
+
+    # === COMPUTE METHODS === #
+    def _compute_feature_support_fields(self):
+        """ Override of `payment` to enable additional features. """
+        super()._compute_feature_support_fields()
+        self.filtered(lambda p: p.code == 'xendit').update({
+            'support_tokenization': True,
+        })
 
     # === BUSINESS METHODS ===#
 
@@ -45,7 +60,7 @@ class PaymentProvider(models.Model):
             return default_codes
         return const.DEFAULT_PAYMENT_METHOD_CODES
 
-    def _xendit_make_request(self, payload=None):
+    def _xendit_make_request(self, endpoint, payload=None):
         """ Make a request to Xendit API and return the JSON-formatted content of the response.
 
         Note: self.ensure_one()
@@ -58,7 +73,8 @@ class PaymentProvider(models.Model):
         self.ensure_one()
 
         auth = (self.xendit_secret_key, '')
-        url = "https://api.xendit.co/v2/invoices"
+        url = url_join('https://api.xendit.co/', endpoint)
+
         try:
             response = requests.post(url, json=payload, auth=auth, timeout=10)
             response.raise_for_status()
@@ -77,3 +93,37 @@ class PaymentProvider(models.Model):
                 )
             )
         return response.json()
+
+    def _xendit_get_inline_form_values(self):
+        """ Return a serialized JSON of the required values to render the inline form.
+
+        Note: `self.ensure_one()`
+
+        :return: The JSON serial of the required values to render the inline form.
+        :rtype: str
+        """
+        self.ensure_one()
+
+        inline_form_values = {
+            "public_key": self.xendit_public_key,
+        }
+        return json.dumps(inline_form_values)
+
+    def _get_redirect_form_view(self, is_validation=False):
+        """ Override of `payment` to avoid rendering the form view for validation operations.
+
+        Unlike other compatible payment methods in Xendit, `Card` is implemented using a direct
+        flow. To avoid rendering a useless template, and also to avoid computing wrong values, this
+        method returns `False` for Xendit's validation operations (Card is and will always be the
+        sole tokenizable payment method for Xendit).
+
+        Note: `self.ensure_one()`
+
+        :param bool is_validation: Whether the operation is a validation.
+        :return: The view of the redirect form template or False.
+        :rtype: record of `ir.ui.view` | False
+        """
+        self.ensure_one()
+        if self.code == 'xendit' and is_validation:
+            return False
+        return super()._get_redirect_form_view(is_validation)
