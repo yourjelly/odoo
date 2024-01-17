@@ -60,6 +60,12 @@ msgstr "Clotûre de Compte"
 
 #. module: l10n_fr_pos_cert
 #. odoo-python
+#: code:addons/l10n_fr_pos_cert/models/res_company.py:0
+msgid "Accounting is not unalterable for the company %s. This mechanism is designed for companies where accounting is unalterable."
+msgstr ""
+
+#. module: l10n_fr_pos_cert
+#. odoo-python
 #: code:addons/l10n_fr_pos_cert/models/pos.py:0
 msgid "An error occurred when computing the inalterability. Impossible to get the unique previous posted point of sale order."
 msgstr "Une erreur s'est produite lors de la vérification de l'inaltérabilité. Impossible de récupérer la dernière commande de caisse unique et comptabilisée."

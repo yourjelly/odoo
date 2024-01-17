@@ -3,15 +3,16 @@
 # 	* hr_gamification
 #
 # Translators:
-# Martin Trigaux, 2022
+# Wil Odoo, 2023
+# Thi Huong Nguyen, 2023
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0beta\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-23 08:02+0000\n"
-"PO-Revision-Date: 2022-09-22 05:46+0000\n"
-"Last-Translator: Martin Trigaux, 2022\n"
+"POT-Creation-Date: 2024-01-17 10:10+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Thi Huong Nguyen, 2023\n"
 "Language-Team: Vietnamese (https://app.transifex.com/odoo/teams/41243/vi/)\n"
 "Language: vi\n"
 "MIME-Version: 1.0\n"
@@ -88,7 +89,7 @@ msgstr "Tạo mới thử thách"
 #. module: hr_gamification
 #: model_terms:ir.actions.act_window,help:hr_gamification.goals_menu_groupby_action2
 msgid "Create a new goal"
-msgstr "Tạo mới mục tiêu"
+msgstr "Tạo mục tiêu mới"
 
 #. module: hr_gamification
 #: model_terms:ir.ui.view,arch_db:hr_gamification.view_badge_wizard_reward
@@ -200,6 +201,7 @@ msgid "Reward Employee with"
 msgstr "Tặng thưởng Nhân viên bằng"
 
 #. module: hr_gamification
+#. odoo-python
 #: code:addons/hr_gamification/models/gamification.py:0
 msgid "The selected employee does not correspond to the selected user."
 msgstr "Nhân viên được chọn không tương ứng với người dùng được chọn."
@@ -216,11 +218,13 @@ msgid "What are you thankful for?"
 msgstr "Bạn cảm ơn vì điều gì?"
 
 #. module: hr_gamification
+#. odoo-python
 #: code:addons/hr_gamification/wizard/gamification_badge_user_wizard.py:0
 msgid "You can not send a badge to yourself."
 msgstr "Bạn không thể gửi một huy hiệu đến chính bạn."
 
 #. module: hr_gamification
+#. odoo-python
 #: code:addons/hr_gamification/wizard/gamification_badge_user_wizard.py:0
 msgid "You can send badges only to employees linked to a user."
 msgstr "Bạn chỉ có thể trao huy chương cho các nhân viên mà có gắn với tài khoản người dùng."

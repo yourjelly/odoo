@@ -3,17 +3,15 @@
 # 	* utm
 #
 # Translators:
-# Martin Trigaux, 2022
-# Erwin van der Ploeg <erwin@odooexperts.nl>, 2022
-# Jolien De Paepe, 2023
+# Wil Odoo, 2023
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0beta\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-16 13:50+0000\n"
-"PO-Revision-Date: 2022-09-22 05:55+0000\n"
-"Last-Translator: Jolien De Paepe, 2023\n"
+"POT-Creation-Date: 2024-01-17 10:11+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Wil Odoo, 2023\n"
 "Language-Team: Dutch (https://app.transifex.com/odoo/teams/41243/nl/)\n"
 "Language: nl\n"
 "MIME-Version: 1.0\n"
@@ -53,7 +51,7 @@ msgstr "Goedgekeurd"
 #. module: utm
 #: model_terms:ir.ui.view,arch_db:utm.utm_campaign_view_kanban
 msgid "Archive"
-msgstr ""
+msgstr "Archiveren"
 
 #. module: utm
 #: model_terms:ir.ui.view,arch_db:utm.utm_campaign_view_form
@@ -104,7 +102,7 @@ msgstr "Campagnefase"
 #: model:ir.actions.act_window,name:utm.action_view_utm_tag
 #: model_terms:ir.ui.view,arch_db:utm.utm_tag_view_tree
 msgid "Campaign Tags"
-msgstr "Campagnelabels"
+msgstr "Campagne labels"
 
 #. module: utm
 #: model:ir.actions.act_window,name:utm.utm_campaign_action
@@ -121,7 +119,7 @@ msgstr "Campagnes worden gebruikt om je marketinginspanningen te centraliseren e
 #. module: utm
 #: model_terms:ir.ui.view,arch_db:utm.view_utm_campaign_view_search
 msgid "Campaigns that are assigned to me"
-msgstr ""
+msgstr "Campagnes die aan mij toegewezen zijn"
 
 #. module: utm
 #: model:utm.campaign,title:utm.utm_campaign_christmas_special
@@ -265,7 +263,7 @@ msgstr "Verzamel data, stel een lijst met ontvangers op en schrijf inhoud op bas
 #. module: utm
 #: model_terms:ir.ui.view,arch_db:utm.view_utm_campaign_view_search
 msgid "Group By"
-msgstr "Groepeer op"
+msgstr "Groeperen op"
 
 #. module: utm
 #: model:ir.model,name:utm.model_ir_http
@@ -314,7 +312,7 @@ msgstr "Later"
 #. module: utm
 #: model:ir.ui.menu,name:utm.menu_link_tracker_root
 msgid "Link Tracker"
-msgstr "Opvolging links"
+msgstr "Link Tracker"
 
 #. module: utm
 #. odoo-javascript
@@ -348,7 +346,7 @@ msgstr "Mediums"
 #. module: utm
 #: model_terms:ir.ui.view,arch_db:utm.view_utm_campaign_view_search
 msgid "My Campaigns"
-msgstr ""
+msgstr "Mijn campagnes"
 
 #. module: utm
 #: model:ir.model.fields,field_description:utm.field_utm_source_mixin__name
@@ -401,7 +399,7 @@ msgstr "Verantwoordelijke"
 #. module: utm
 #: model_terms:ir.ui.view,arch_db:utm.utm_campaign_view_kanban
 msgid "Restore"
-msgstr ""
+msgstr "Terugzetten"
 
 #. module: utm
 #. odoo-javascript
@@ -495,7 +493,7 @@ msgstr "Fases"
 #. module: utm
 #: model_terms:ir.actions.act_window,help:utm.action_view_utm_stage
 msgid "Stages allow you to organize your workflow  (e.g. plan, design, in progress, done, …)."
-msgstr ""
+msgstr "Fases die je toelaten je workflow te organiseren (bijv. planning, design, in behandeling, gereed,...)."
 
 #. module: utm
 #: model:ir.model.fields,help:utm.field_utm_tag__color
@@ -505,7 +503,7 @@ msgstr "Labelkleur. Geen kleur betekent geen weergave in kanban om interne label
 #. module: utm
 #: model:ir.model.constraint,message:utm.constraint_utm_tag_name_uniq
 msgid "Tag name already exists!"
-msgstr ""
+msgstr "Labelnaam bestaat al!"
 
 #. module: utm
 #: model:ir.model.fields,field_description:utm.field_utm_campaign__tag_ids
@@ -563,7 +561,7 @@ msgstr "Om goedgekeurd te worden"
 #. odoo-javascript
 #: code:addons/utm/static/src/js/utm_campaign_kanban_examples.js:0
 msgid "Track incoming events (e.g. Christmas, Black Friday, ...) and publish timely content."
-msgstr ""
+msgstr "Volg inkomende evenementen (bijv. Kerstmis, Black Friday, ...) en publiceer actuele inhoud."
 
 #. module: utm
 #: model:ir.model,name:utm.model_utm_campaign
@@ -631,17 +629,17 @@ msgstr "Gebruik dit voor 'mijn campagnes'."
 #. module: utm
 #: model_terms:ir.ui.view,arch_db:utm.utm_stage_view_form
 msgid "e.g. \"Brainstorming\""
-msgstr ""
+msgstr "bijv. \"Brainstorming\""
 
 #. module: utm
 #: model_terms:ir.ui.view,arch_db:utm.utm_source_view_tree
 msgid "e.g. \"Christmas Mailing\""
-msgstr ""
+msgstr "bijv. \"Mailinglijst Kerstmis\""
 
 #. module: utm
 #: model_terms:ir.ui.view,arch_db:utm.utm_medium_view_tree
 msgid "e.g. \"Email\""
-msgstr ""
+msgstr "bijv. \"E-mail\""
 
 #. module: utm
 #: model_terms:ir.ui.view,arch_db:utm.utm_campaign_view_form

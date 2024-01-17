@@ -3,16 +3,15 @@
 # 	* base_iban
 #
 # Translators:
-# Martin Trigaux, 2022
-# Jolien De Paepe, 2022
+# Wil Odoo, 2023
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0beta\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:55+0000\n"
-"PO-Revision-Date: 2022-09-22 05:45+0000\n"
-"Last-Translator: Jolien De Paepe, 2022\n"
+"POT-Creation-Date: 2024-01-17 10:10+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Wil Odoo, 2023\n"
 "Language-Team: Dutch (https://app.transifex.com/odoo/teams/41243/nl/)\n"
 "Language: nl\n"
 "MIME-Version: 1.0\n"
@@ -35,8 +34,7 @@ msgstr "Bankrekeningen"
 #. odoo-python
 #: code:addons/base_iban/models/res_partner_bank.py:0
 msgid "Cannot compute the BBAN because the account number is not an IBAN."
-msgstr ""
-"BBAN kan niet berekend worden omdat het rekeningnummer geen IBAN-nummer is."
+msgstr "BBAN kan niet berekend worden omdat het rekeningnummer geen IBAN-nummer is."
 
 #. module: base_iban
 #. odoo-python
@@ -48,15 +46,11 @@ msgstr "IBAN"
 #. odoo-python
 #: code:addons/base_iban/models/res_partner_bank.py:0
 msgid ""
-"The IBAN does not seem to be correct. You should have entered something like "
-"this %s\n"
-"Where B = National bank code, S = Branch code, C = Account No, k = Check "
-"digit"
+"The IBAN does not seem to be correct. You should have entered something like this %s\n"
+"Where B = National bank code, S = Branch code, C = Account No, k = Check digit"
 msgstr ""
-"Het IBAN-nummer lijkt onjuist te zijn. Het nummer zou er ongeveer als volgt "
-"moeten uitzien %s\n"
-"waarbij B = nationale bankcode, S = branchcode, C = rekeningnummer, k = "
-"controlecijfer"
+"Het IBAN-nummer lijkt onjuist te zijn. Het nummer zou er ongeveer als volgt moeten uitzien %s\n"
+"waarbij B = nationale bankcode, S = branchcode, C = rekeningnummer, k = controlecijfer"
 
 #. module: base_iban
 #. odoo-python

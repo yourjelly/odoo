@@ -3,16 +3,15 @@
 # 	* im_livechat_mail_bot
 #
 # Translators:
-# Martin Trigaux, 2022
-# Erwin van der Ploeg <erwin@odooexperts.nl>, 2022
+# Wil Odoo, 2023
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 15.5alpha1\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-16 13:49+0000\n"
-"PO-Revision-Date: 2022-09-22 05:53+0000\n"
-"Last-Translator: Erwin van der Ploeg <erwin@odooexperts.nl>, 2022\n"
+"POT-Creation-Date: 2024-01-17 10:10+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Wil Odoo, 2023\n"
 "Language-Team: Dutch (https://app.transifex.com/odoo/teams/41243/nl/)\n"
 "Language: nl\n"
 "MIME-Version: 1.0\n"
@@ -35,7 +34,7 @@ msgstr "Mailbot"
 #. odoo-python
 #: code:addons/im_livechat_mail_bot/models/mail_bot.py:0
 msgid "Not sure what you are doing. Please, type %s and wait for the propositions. Select one of them and press enter."
-msgstr ""
+msgstr "Ik weet niet zeker wat je doet. Typ %s en wacht op de voorstellen. Selecteer er één en druk op Enter."
 
 #. module: im_livechat_mail_bot
 #: model:ir.model.fields,field_description:im_livechat_mail_bot.field_res_users__odoobot_state
@@ -45,13 +44,13 @@ msgstr "OdooBot status"
 #. module: im_livechat_mail_bot
 #: model:ir.model.fields.selection,name:im_livechat_mail_bot.selection__res_users__odoobot_state__onboarding_canned
 msgid "Onboarding canned"
-msgstr "Onboarding standaard antwoorden"
+msgstr "Onboarding standaardantwoorden"
 
 #. module: im_livechat_mail_bot
 #. odoo-python
 #: code:addons/im_livechat_mail_bot/models/mail_bot.py:0
 msgid "That's me! 🎉<br/>Try typing %s to use canned responses."
-msgstr ""
+msgstr "Dat ben ik! 🎉<br/>Probeer %s te typen om standaardantwoorden te gebruiken."
 
 #. module: im_livechat_mail_bot
 #: model:ir.model,name:im_livechat_mail_bot.model_res_users

@@ -3,16 +3,15 @@
 # 	* partner_autocomplete
 #
 # Translators:
-# Malaz Abuidris <msea@odoo.com>, 2022
-# Martin Trigaux, 2022
+# Wil Odoo, 2023
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0beta\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-16 13:49+0000\n"
-"PO-Revision-Date: 2022-09-22 05:53+0000\n"
-"Last-Translator: Martin Trigaux, 2022\n"
+"POT-Creation-Date: 2024-01-17 10:10+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Wil Odoo, 2023\n"
 "Language-Team: Arabic (https://app.transifex.com/odoo/teams/41243/ar/)\n"
 "Language: ar\n"
 "MIME-Version: 1.0\n"
@@ -35,7 +34,7 @@ msgstr "شراء رصيد أكثر"
 #. module: partner_autocomplete
 #: model:ir.model,name:partner_autocomplete.model_res_company
 msgid "Companies"
-msgstr "الشركات "
+msgstr "الشركات"
 
 #. module: partner_autocomplete
 #. odoo-python
@@ -146,7 +145,7 @@ msgstr "مزامنة إكمال الشريك تلقائيًا"
 #. module: partner_autocomplete
 #: model:ir.actions.server,name:partner_autocomplete.ir_cron_partner_autocomplete_ir_actions_server
 msgid "Partner Autocomplete: Sync with remote DB"
-msgstr ""
+msgstr "إكمال الشريك تلقائياً: المزامنة مع قاعدة بيانات بعيدة "
 
 #. module: partner_autocomplete
 #. odoo-python

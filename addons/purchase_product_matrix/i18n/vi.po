@@ -3,16 +3,15 @@
 # 	* purchase_product_matrix
 #
 # Translators:
-# Martin Trigaux, 2022
-# Thi Huong Nguyen, 2023
+# Wil Odoo, 2023
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0beta\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:55+0000\n"
-"PO-Revision-Date: 2022-09-22 05:54+0000\n"
-"Last-Translator: Thi Huong Nguyen, 2023\n"
+"POT-Creation-Date: 2024-01-17 10:10+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Wil Odoo, 2023\n"
 "Language-Team: Vietnamese (https://app.transifex.com/odoo/teams/41243/vi/)\n"
 "Language: vi\n"
 "MIME-Version: 1.0\n"
@@ -48,12 +47,8 @@ msgstr "Cập nhật lưới"
 
 #. module: purchase_product_matrix
 #: model:ir.model.fields,help:purchase_product_matrix.field_purchase_order__report_grids
-msgid ""
-"If set, the matrix of configurable products will be shown on the report of "
-"this order."
-msgstr ""
-"Nếu cài đặt, ma trận các sản phẩm có thể cấu hình sẽ được hiển thị trên báo "
-"cáo của đơn hàng này."
+msgid "If set, the matrix of configurable products will be shown on the report of this order."
+msgstr "Nếu cài đặt, ma trận các sản phẩm có thể cấu hình sẽ được hiển thị trên báo cáo của đơn hàng này."
 
 #. module: purchase_product_matrix
 #: model:ir.model.fields,field_description:purchase_product_matrix.field_purchase_order_line__is_configurable_product
@@ -88,7 +83,7 @@ msgstr "Đơn mua hàng"
 #. module: purchase_product_matrix
 #: model:ir.model,name:purchase_product_matrix.model_purchase_order_line
 msgid "Purchase Order Line"
-msgstr "Mục đơn mua hàng"
+msgstr "Dòng đơn mua hàng"
 
 #. module: purchase_product_matrix
 #: model:ir.model.fields,help:purchase_product_matrix.field_purchase_order__grid_product_tmpl_id
@@ -114,9 +109,5 @@ msgstr "Liệu trường lưới có chứa ma trận mới để áp dụng hay
 #. module: purchase_product_matrix
 #. odoo-python
 #: code:addons/purchase_product_matrix/models/purchase.py:0
-msgid ""
-"You cannot change the quantity of a product present in multiple purchase "
-"lines."
-msgstr ""
-"Bạn không thể thay đổi số lượng của một sản phẩm hiển thị trong nhiều mục "
-"bán hàng. "
+msgid "You cannot change the quantity of a product present in multiple purchase lines."
+msgstr "Bạn không thể thay đổi số lượng của một sản phẩm hiển thị trong nhiều dòng bán hàng. "

@@ -3,16 +3,15 @@
 # 	* website_sale_stock
 #
 # Translators:
-# Martin Trigaux, 2022
-# Thi Huong Nguyen, 2023
+# Wil Odoo, 2023
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 15.5alpha1\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:56+0000\n"
-"PO-Revision-Date: 2022-09-22 05:57+0000\n"
-"Last-Translator: Thi Huong Nguyen, 2023\n"
+"POT-Creation-Date: 2024-01-17 10:11+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Wil Odoo, 2023\n"
 "Language-Team: Vietnamese (https://app.transifex.com/odoo/teams/41243/vi/)\n"
 "Language: vi\n"
 "MIME-Version: 1.0\n"
@@ -55,12 +54,8 @@ msgstr "Kính gửi quý khách, "
 
 #. module: website_sale_stock
 #: model_terms:ir.ui.view,arch_db:website_sale_stock.res_config_settings_view_form
-msgid ""
-"Default availability mode set on newly created storable products. This can "
-"be changed at the product level."
-msgstr ""
-"Chế độ tình trạng còn hàng mặc định được thiết lập cho các sản phẩm lưu kho "
-"mới tạo; có thể thay đổi ở cấp sản phẩm."
+msgid "Default availability mode set on newly created storable products. This can be changed at the product level."
+msgstr "Chế độ tình trạng còn hàng mặc định được thiết lập cho các sản phẩm lưu kho mới tạo; có thể thay đổi ở cấp sản phẩm."
 
 #. module: website_sale_stock
 #: model_terms:ir.ui.view,arch_db:website_sale_stock.res_config_settings_view_form
@@ -154,7 +149,7 @@ msgstr "Đơn bán hàng"
 #. module: website_sale_stock
 #: model:ir.model,name:website_sale_stock.model_sale_order_line
 msgid "Sales Order Line"
-msgstr "Mục đơn bán hàng"
+msgstr "Dòng đơn bán hàng"
 
 #. module: website_sale_stock
 #: model_terms:ir.ui.view,arch_db:website_sale_stock.product_template_form_view_inherit_website_sale_stock
@@ -179,12 +174,8 @@ msgstr "Hiển thị số lượng hiện có"
 #. module: website_sale_stock
 #. odoo-python
 #: code:addons/website_sale_stock/models/sale_order.py:0
-msgid ""
-"Some products became unavailable and your cart has been updated. We're sorry "
-"for the inconvenience."
-msgstr ""
-"Một số sản phẩm không còn hàng và giỏ hàng của bạn đã được cập nhật. Chúng "
-"tôi rất tiếc về điều này."
+msgid "Some products became unavailable and your cart has been updated. We're sorry for the inconvenience."
+msgstr "Một số sản phẩm không còn hàng và giỏ hàng của bạn đã được cập nhật. Chúng tôi rất tiếc về điều này."
 
 #. module: website_sale_stock
 #: model_terms:ir.ui.view,arch_db:website_sale_stock.availability_email_body
@@ -241,8 +232,7 @@ msgstr "Trang web"
 #. module: website_sale_stock
 #: model:ir.model.fields,help:website_sale_stock.field_stock_picking__website_id
 msgid "Website where this order has been placed, for eCommerce orders."
-msgstr ""
-"Trang web mà đơn hàng này được đặt, đối với đơn hàng Thương mại điện tử."
+msgstr "Trang web mà đơn hàng này được đặt, đối với đơn hàng Thương mại điện tử."
 
 #. module: website_sale_stock
 #. odoo-javascript
@@ -260,7 +250,7 @@ msgstr "Bạn vừa thêm tất cả sản phẩm còn hàng vào giỏ hàng. "
 #. odoo-javascript
 #: code:addons/website_sale_stock/static/src/js/website_sale_reorder.js:0
 msgid "You already have %s Units in your cart."
-msgstr "Bạn đã có %s đơn vị trong giỏ hàng."
+msgstr "Bạn đã có %s sản phẩm trong giỏ hàng."
 
 #. module: website_sale_stock
 #. odoo-python

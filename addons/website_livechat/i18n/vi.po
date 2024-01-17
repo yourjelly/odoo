@@ -3,16 +3,15 @@
 # 	* website_livechat
 #
 # Translators:
-# Martin Trigaux, 2022
-# Thi Huong Nguyen, 2023
+# Wil Odoo, 2023
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 15.5alpha1\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:56+0000\n"
-"PO-Revision-Date: 2022-09-22 05:56+0000\n"
-"Last-Translator: Thi Huong Nguyen, 2023\n"
+"POT-Creation-Date: 2024-01-17 10:11+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Wil Odoo, 2023\n"
 "Language-Team: Vietnamese (https://app.transifex.com/odoo/teams/41243/vi/)\n"
 "Language: vi\n"
 "MIME-Version: 1.0\n"
@@ -46,7 +45,7 @@ msgstr "<span>Kênh Livechat</span>"
 #. module: website_livechat
 #: model_terms:ir.ui.view,arch_db:website_livechat.website_visitor_view_search
 msgid "Available"
-msgstr "Khả dụng"
+msgstr "Có hàng"
 
 #. module: website_livechat
 #. odoo-javascript
@@ -99,7 +98,7 @@ msgstr "Chat"
 #. module: website_livechat
 #: model:ir.model,name:website_livechat.model_res_config_settings
 msgid "Config Settings"
-msgstr "Cấu hình"
+msgstr "Cài đặt cấu hình"
 
 #. module: website_livechat
 #: model:ir.model.fields,help:website_livechat.field_im_livechat_channel__website_description
@@ -119,7 +118,7 @@ msgstr "Tuyệt vời"
 #. module: website_livechat
 #: model:ir.model,name:website_livechat.model_ir_http
 msgid "HTTP Routing"
-msgstr "HTTP Routing"
+msgstr "Định tuyến HTTP"
 
 #. module: website_livechat
 #: model_terms:ir.ui.view,arch_db:website_livechat.channel_page
@@ -167,7 +166,7 @@ msgstr "Kênh hỗ trợ livechat"
 #. module: website_livechat
 #: model_terms:ir.ui.view,arch_db:website_livechat.channel_page
 msgid "Neutral face"
-msgstr "Mặt trung tính"
+msgstr "Mặt không biểu cảm"
 
 #. module: website_livechat
 #: model:ir.actions.act_window,name:website_livechat.im_livechat_channel_action_add
@@ -178,8 +177,7 @@ msgstr "Kênh mới"
 #. odoo-python
 #: code:addons/website_livechat/models/website_visitor.py:0
 msgid "No Livechat Channel allows you to send a chat request for website %s."
-msgstr ""
-"Không có kênh Livechat nào cho phép bạn gửi yêu cầu chat cho website %s. "
+msgstr "Không có kênh Livechat nào cho phép bạn gửi yêu cầu chat cho website %s. "
 
 #. module: website_livechat
 #: model_terms:ir.ui.view,arch_db:website_livechat.channel_page
@@ -204,12 +202,8 @@ msgstr "Tên người vận hành"
 #. module: website_livechat
 #. odoo-python
 #: code:addons/website_livechat/models/website_visitor.py:0
-msgid ""
-"Recipients are not available. Please refresh the page to get latest visitors "
-"status."
-msgstr ""
-"Người nhận không khả dụng. Hãy làm mới trang và xem trạng thái khách truy "
-"cập mới nhất. "
+msgid "Recipients are not available. Please refresh the page to get latest visitors status."
+msgstr "Người nhận không khả dụng. Hãy làm mới trang và xem trạng thái khách truy cập mới nhất. "
 
 #. module: website_livechat
 #: model_terms:ir.ui.view,arch_db:website_livechat.channel_page
@@ -280,7 +274,7 @@ msgstr "Hiện tại không có đánh giá cho kênh này. "
 #. module: website_livechat
 #: model:ir.model.fields,field_description:website_livechat.field_im_livechat_channel__website_published
 msgid "Visible on current website"
-msgstr "Hiển thị ở website hiện tại"
+msgstr "Hiển thị trên trang web hiện tại"
 
 #. module: website_livechat
 #: model:ir.model.fields,field_description:website_livechat.field_discuss_channel__livechat_visitor_id
@@ -295,8 +289,8 @@ msgid "Visitor #%d"
 msgstr ""
 
 #. module: website_livechat
-#. odoo-python
 #. odoo-javascript
+#. odoo-python
 #: code:addons/website_livechat/controllers/main.py:0
 #: code:addons/website_livechat/static/src/web/persona_model_patch.js:0
 msgid "Visitor #%s"
@@ -343,14 +337,14 @@ msgstr "Kênh live chat website"
 #. module: website_livechat
 #: model:ir.model.fields,field_description:website_livechat.field_im_livechat_channel__website_url
 msgid "Website URL"
-msgstr "Địa chỉ website"
+msgstr "URL trang web"
 
 #. module: website_livechat
 #. odoo-python
 #: code:addons/website_livechat/tests/test_livechat_basic_flow.py:0
 #: model:ir.model,name:website_livechat.model_website_visitor
 msgid "Website Visitor"
-msgstr "Khách truy cập website"
+msgstr "Khách truy cập trang web"
 
 #. module: website_livechat
 #: model:ir.model.fields,field_description:website_livechat.field_im_livechat_channel__website_description

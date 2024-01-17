@@ -3,16 +3,15 @@
 # 	* website_twitter
 #
 # Translators:
-# JH CHOI <hwangtog@gmail.com>, 2022
-# Martin Trigaux, 2023
+# Wil Odoo, 2023
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 15.5alpha1\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-16 13:50+0000\n"
-"PO-Revision-Date: 2022-09-22 05:57+0000\n"
-"Last-Translator: Martin Trigaux, 2023\n"
+"POT-Creation-Date: 2024-01-17 10:11+0000\n"
+"PO-Revision-Date: 2023-10-26 23:10+0000\n"
+"Last-Translator: Wil Odoo, 2023\n"
 "Language-Team: Korean (https://app.transifex.com/odoo/teams/41243/ko/)\n"
 "Language: ko\n"
 "MIME-Version: 1.0\n"
@@ -23,12 +22,12 @@ msgstr ""
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
 msgid ", <strong>create a project</strong> with the following information:"
-msgstr ""
+msgstr ", <strong>프로젝트 생성</strong>에 다음 정보를 추가합니다: "
 
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
 msgid ", click on <strong>Elevated</strong> then on <strong>Apply</strong> and finally complete the form."
-msgstr ""
+msgstr ", <strong>승급</strong>을 클릭한 후 <strong>적용</strong> 버튼을 누르고 마지막으로 양식을 작성합니다."
 
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
@@ -36,11 +35,13 @@ msgid ""
 "<i class=\"oi oi-arrow-right\"/>\n"
 "                            Show me how to obtain the Twitter API key and Twitter API secret"
 msgstr ""
+"<i class=\"oi oi-arrow-right\"/>\n"
+"                            트위터 API 키 및 트위터 API 시크릿을 얻는 방법 확인"
 
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
 msgid "<strong>App Name: </strong> choose a unique name"
-msgstr ""
+msgstr "<strong>앱 네임: </strong> 고유한 이름을 선택해주세요"
 
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
@@ -55,7 +56,7 @@ msgstr "<strong>이름 : </strong> Odoo Twitter 통합"
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
 msgid "<strong>Use Case: </strong> Embedding Tweets in a website"
-msgstr ""
+msgstr "<strong>활용 사례: </strong> 웹사이트에 트윗 퍼가기"
 
 #. module: website_twitter
 #: model:ir.model.fields,field_description:website_twitter.field_res_config_settings__twitter_api_key
@@ -78,12 +79,12 @@ msgstr "인증 자격 증명이 없거나 잘못되었습니다. 화면명 트�
 #. module: website_twitter
 #: model:ir.model,name:website_twitter.model_res_config_settings
 msgid "Config Settings"
-msgstr "설정 구성"
+msgstr "환경 설정"
 
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
 msgid "Copy/Paste the API Key and API Key Secret values into the above fields"
-msgstr ""
+msgstr "위의 필드에 API 키 및 API 보안 키 값을 복사/붙여넣기하세요"
 
 #. module: website_twitter
 #: model:ir.model.fields,field_description:website_twitter.field_website_twitter_tweet__create_uid
@@ -109,7 +110,7 @@ msgstr "즐겨찾기에서"
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
 msgid "Get Elevated access by going to"
-msgstr ""
+msgstr "다음으로 이동하여 승격된 권한을 얻으십시오."
 
 #. module: website_twitter
 #: model:ir.model.fields,field_description:website_twitter.field_website__twitter_screen_name
@@ -136,7 +137,7 @@ msgstr "ID"
 #. odoo-python
 #: code:addons/website_twitter/models/res_config_settings.py:0
 msgid "Internet connection refused: We failed to reach a twitter server."
-msgstr ""
+msgstr "인터넷 연결이 거부되었습니다: 트위터 서버에 연결하지 못했습니다."
 
 #. module: website_twitter
 #: model:ir.model.fields,field_description:website_twitter.field_website_twitter_tweet__write_uid
@@ -151,7 +152,7 @@ msgstr "최근 갱신 일자"
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
 msgid "Log in or create an account on"
-msgstr ""
+msgstr "로그인 또는 계정 만들기"
 
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
@@ -161,7 +162,7 @@ msgstr "On the"
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
 msgid "Once connected, and if not already done, complete the Twitter portal access process on"
-msgstr ""
+msgstr "아직 완료하지 않은 경우, 연결 후 트위터 포털 액세스에서 프로세스를 완료합니다."
 
 #. module: website_twitter
 #. odoo-python
@@ -281,12 +282,12 @@ msgstr "트위터 구성"
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
 msgid "Twitter Portal"
-msgstr ""
+msgstr "트위터 포털"
 
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
 msgid "Twitter Roller"
-msgstr ""
+msgstr "트위터 롤러"
 
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.website_twitter_snippet
@@ -297,7 +298,7 @@ msgstr "트위터 스크롤러"
 #. odoo-python
 #: code:addons/website_twitter/models/res_config_settings.py:0
 msgid "Twitter authorization error! Please double-check your Twitter API Key and Secret!"
-msgstr ""
+msgstr "트위터 인증 오류가 발생했습니다! 트위터 API 키와 비밀번호를 다시 확인해주세요!"
 
 #. module: website_twitter
 #. odoo-python
@@ -352,14 +353,14 @@ msgstr "웹사이트 트위터"
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
 msgid "https://developer.twitter.com/"
-msgstr ""
+msgstr "https://developer.twitter.com/"
 
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
 msgid "https://developer.twitter.com/en/portal/products"
-msgstr ""
+msgstr "https://developer.twitter.com/en/portal/products"
 
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
 msgid "https://developer.twitter.com/portal/"
-msgstr ""
+msgstr "https://developer.twitter.com/portal/"

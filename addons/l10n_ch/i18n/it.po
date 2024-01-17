@@ -4,12 +4,13 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.1alpha1+e\n"
+"Project-Id-Version: Odoo Server 17.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-12-12 12:23+0000\n"
-"PO-Revision-Date: 2023-12-12 12:23+0000\n"
+"POT-Creation-Date: 2023-12-12 12:18+0000\n"
+"PO-Revision-Date: 2023-12-11 08:49+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
@@ -33,36 +34,18 @@ msgstr ""
 
 #. module: l10n_ch
 #: model:account.report.line,name:l10n_ch.account_tax_report_line_chtax_200
-msgid ""
-"200 - Total amount of agreed or collected consideration incl. from supplies "
-"opted for taxation, transfer of supplies acc. to the notification procedure "
-"and supplies provided abroad (worldwide turnover)"
-msgstr ""
-"200 - Totale delle controprestazioni convenute o ricevute, incluse quelle "
-"inerenti a prestazioni optate, a trasferimenti mediante procedura di "
-"notifica e a prestazioni all’estero"
+msgid "200 - Total amount of agreed or collected consideration incl. from supplies opted for taxation, transfer of supplies acc. to the notification procedure and supplies provided abroad (worldwide turnover)"
+msgstr "200 - Totale delle controprestazioni convenute o ricevute, incluse quelle inerenti a prestazioni optate, a trasferimenti mediante procedura di notifica e a prestazioni all’estero"
 
 #. module: l10n_ch
 #: model:account.report.line,name:l10n_ch.account_tax_report_line_chtax_205
-msgid ""
-"205 - Consideration reported in Ref. 200 from supplies exempt from the tax "
-"without credit (art. 21) where the option for their taxation according to "
-"art. 22 has been exercised"
-msgstr ""
-"205 - Controprestazioni contenute nella cifra 200 conseguite con prestazioni"
-" escluse dall’imposta (art. 21) per la cui imposizione si è optato in virtù "
-"dell’art. 22"
+msgid "205 - Consideration reported in Ref. 200 from supplies exempt from the tax without credit (art. 21) where the option for their taxation according to art. 22 has been exercised"
+msgstr "205 - Controprestazioni contenute nella cifra 200 conseguite con prestazioni escluse dall’imposta (art. 21) per la cui imposizione si è optato in virtù dell’art. 22"
 
 #. module: l10n_ch
 #: model:account.report.line,name:l10n_ch.account_tax_report_line_chtax_220_289
-msgid ""
-"220 - Supplies exempt from the tax (e.g. export, art. 23) and supplies "
-"provided to institutional and individual beneficiaries that are exempt from "
-"liability for tax (art. 107 para. 1 lit. a)"
-msgstr ""
-"220 - Prestazioni esenti dall’imposta (p. es. esportazioni; art. 23), "
-"prestazioni esenti a beneficiari istituzionali e persone beneficiarie (art. "
-"107 cpv. 1 lett. a)"
+msgid "220 - Supplies exempt from the tax (e.g. export, art. 23) and supplies provided to institutional and individual beneficiaries that are exempt from liability for tax (art. 107 para. 1 lit. a)"
+msgstr "220 - Prestazioni esenti dall’imposta (p. es. esportazioni; art. 23), prestazioni esenti a beneficiari istituzionali e persone beneficiarie (art. 107 cpv. 1 lett. a)"
 
 #. module: l10n_ch
 #: model:account.report.line,name:l10n_ch.account_tax_report_line_chtax_221
@@ -71,20 +54,13 @@ msgstr "221 - Prestazioni all’estero"
 
 #. module: l10n_ch
 #: model:account.report.line,name:l10n_ch.account_tax_report_line_chtax_225
-msgid ""
-"225 - Transfer of supplies according to the notification procedure (art. 38,"
-" please submit Form 764)"
+msgid "225 - Transfer of supplies according to the notification procedure (art. 38, please submit Form 764)"
 msgstr "225 - Trasferimenti mediante procedura di notifica (art. 38)"
 
 #. module: l10n_ch
 #: model:account.report.line,name:l10n_ch.account_tax_report_line_chtax_230
-msgid ""
-"230 - Supplies provided on Swiss territory exempt from the tax without "
-"credit (art. 21) and where the option for their taxation according to art. "
-"22 has not been exercised"
-msgstr ""
-"230 - Prestazioni escluse dall’imposta (art. 21) effettuate in territorio "
-"svizzero per la cui imposizione non si è optato in virtù dell’art. 22"
+msgid "230 - Supplies provided on Swiss territory exempt from the tax without credit (art. 21) and where the option for their taxation according to art. 22 has not been exercised"
+msgstr "230 - Prestazioni escluse dall’imposta (art. 21) effettuate in territorio svizzero per la cui imposizione non si è optato in virtù dell’art. 22"
 
 #. module: l10n_ch
 #: model:account.report.line,name:l10n_ch.account_tax_report_line_chtax_235
@@ -93,12 +69,8 @@ msgstr "235 - Diminuzioni della controprestazione quali sconti, ribassi, ecc."
 
 #. module: l10n_ch
 #: model:account.report.line,name:l10n_ch.account_tax_report_line_chtax_280
-msgid ""
-"280 - Miscellaneous (e.g. land value, purchase prices in case of margin "
-"taxation)"
-msgstr ""
-"280 - Diversi (ad.es. valore del terreno, prezzo d’acquisto in caso "
-"d’imposizione dei margini)"
+msgid "280 - Miscellaneous (e.g. land value, purchase prices in case of margin taxation)"
+msgstr "280 - Diversi (ad.es. valore del terreno, prezzo d’acquisto in caso d’imposizione dei margini)"
 
 #. module: l10n_ch
 #: model:account.report.line,name:l10n_ch.account_tax_report_line_chtax_289
@@ -108,9 +80,7 @@ msgstr "289 - Deduzioni (Totale cifre 220-280)"
 #. module: l10n_ch
 #: model:account.report.line,name:l10n_ch.account_tax_report_line_chtax_299
 msgid "299 - Taxable turnover (Ref. 200 minus Ref. 289)"
-msgstr ""
-"299 - Cifra d’affari imponibile complessiva (cifra 200, dedotta la cifra "
-"289)"
+msgstr "299 - Cifra d’affari imponibile complessiva (cifra 200, dedotta la cifra 289)"
 
 #. module: l10n_ch
 #: model:account.report.line,name:l10n_ch.account_tax_report_line_chtax_302a
@@ -130,8 +100,7 @@ msgstr "303a - Aliquota normale (8,1%): Prestazioni CHF fino dal 01.01.2024"
 #. module: l10n_ch
 #: model:account.report.line,name:l10n_ch.account_tax_report_line_chtax_303b
 msgid "303b - Standard rate (8,1%): Tax amount CHF / cent. from 01.01.2024"
-msgstr ""
-"303b - Aliquota normale (8,1%): Imposta CHF / cts. fino dal 01.01.2024"
+msgstr "303b - Aliquota normale (8,1%): Imposta CHF / cts. fino dal 01.01.2024"
 
 #. module: l10n_ch
 #: model:account.report.line,name:l10n_ch.account_tax_report_line_chtax_312a
@@ -151,37 +120,27 @@ msgstr "313a - Aliquota ridotta (2,6%): Prestazioni CHF fino dal 01.01.2024"
 #. module: l10n_ch
 #: model:account.report.line,name:l10n_ch.account_tax_report_line_chtax_313b
 msgid "313b - Reduced rate (2,6%): Tax amount CHF / cent. from 01.01.2024"
-msgstr ""
-"313b - Aliquota ridotta (2,6%): Imposta CHF / cts. fino dal 01.01.2024"
+msgstr "313b - Aliquota ridotta (2,6%): Imposta CHF / cts. fino dal 01.01.2024"
 
 #. module: l10n_ch
 #: model:account.report.line,name:l10n_ch.account_tax_report_line_chtax_342a
 msgid "342a - Accommodation rate (3,7%): Supplies CHF to 31.12.2023"
-msgstr ""
-"342a - Aliquota speciale per l’alloggio (3,7%): Prestazioni CHF fino al "
-"31.12.2023"
+msgstr "342a - Aliquota speciale per l’alloggio (3,7%): Prestazioni CHF fino al 31.12.2023"
 
 #. module: l10n_ch
 #: model:account.report.line,name:l10n_ch.account_tax_report_line_chtax_342b
 msgid "342b - Accommodation rate (3,7%): Tax amount CHF / cent. to 31.12.2023"
-msgstr ""
-"342b - Aliquota speciale per l’alloggio (3,7%): Imposta CHF / cts. fino al "
-"31.12.2023"
+msgstr "342b - Aliquota speciale per l’alloggio (3,7%): Imposta CHF / cts. fino al 31.12.2023"
 
 #. module: l10n_ch
 #: model:account.report.line,name:l10n_ch.account_tax_report_line_chtax_343a
 msgid "343a - Accommodation rate (3,8%): Supplies CHF from 01.01.2024"
-msgstr ""
-"343a - Aliquota speciale per l’alloggio (3,8%): Prestazioni CHF fino dal "
-"01.01.2024"
+msgstr "343a - Aliquota speciale per l’alloggio (3,8%): Prestazioni CHF fino dal 01.01.2024"
 
 #. module: l10n_ch
 #: model:account.report.line,name:l10n_ch.account_tax_report_line_chtax_343b
-msgid ""
-"343b - Accommodation rate (3,8%): Tax amount CHF / cent. from 01.01.2024"
-msgstr ""
-"343b - Aliquota speciale per l’alloggio (3,8%): Imposta CHF / cts. fino dal "
-"01.01.2024"
+msgid "343b - Accommodation rate (3,8%): Tax amount CHF / cent. from 01.01.2024"
+msgstr "343b - Aliquota speciale per l’alloggio (3,8%): Imposta CHF / cts. fino dal 01.01.2024"
 
 #. module: l10n_ch
 #: model:account.report.line,name:l10n_ch.account_tax_report_line_chtax_382a
@@ -211,8 +170,7 @@ msgstr "399 - Totale dell’imposta dovuta"
 #. module: l10n_ch
 #: model:account.report.line,name:l10n_ch.account_tax_report_line_chtax_400
 msgid "400 - Input tax on cost of materials and supplies of services"
-msgstr ""
-"400 - Imposta precedente su costi del materiale e prestazioni di servizi"
+msgstr "400 - Imposta precedente su costi del materiale e prestazioni di servizi"
 
 #. module: l10n_ch
 #: model:account.report.line,name:l10n_ch.account_tax_report_line_chtax_405
@@ -226,22 +184,13 @@ msgstr "410 - Sgravio fiscale successivo (art. 32)"
 
 #. module: l10n_ch
 #: model:account.report.line,name:l10n_ch.account_tax_report_line_chtax_415
-msgid ""
-"415 - Correction of the input tax deduction: mixed use (art. 30), own use "
-"(art. 31)"
-msgstr ""
-"415 - Correzioni dell’imposta precedente: doppia utilizzazione (art. 30), "
-"consumo proprio (art. 31)"
+msgid "415 - Correction of the input tax deduction: mixed use (art. 30), own use (art. 31)"
+msgstr "415 - Correzioni dell’imposta precedente: doppia utilizzazione (art. 30), consumo proprio (art. 31)"
 
 #. module: l10n_ch
 #: model:account.report.line,name:l10n_ch.account_tax_report_line_chtax_420
-msgid ""
-"420 - Reduction of the input tax deduction: Flow of funds, which are not "
-"deemed to be consideration, such as subsidies, tourist charges (art. 33 "
-"para. 2)"
-msgstr ""
-"420 - Riduzioni della deduzione dell’imposta precedente: non "
-"controprestazioni come sussidi, tasse turistiche (art. 33 cpv. 2)"
+msgid "420 - Reduction of the input tax deduction: Flow of funds, which are not deemed to be consideration, such as subsidies, tourist charges (art. 33 para. 2)"
+msgstr "420 - Riduzioni della deduzione dell’imposta precedente: non controprestazioni come sussidi, tasse turistiche (art. 33 cpv. 2)"
 
 #. module: l10n_ch
 #: model:account.report.line,name:l10n_ch.account_tax_report_line_chtax_479
@@ -260,18 +209,12 @@ msgstr "510 - Credito del contribuente "
 
 #. module: l10n_ch
 #: model:account.report.line,name:l10n_ch.account_tax_report_line_chtax_900
-msgid ""
-"900 - Subsidies, tourist funds collected by tourist offices, contributions "
-"from cantonal water, sewage or waste funds (art. 18 para. 2 lit. a to c)"
-msgstr ""
-"900 - Sussidi, tasse turistiche incassate da uffici turistici, contributi "
-"per lo smaltimento dei rifiuti e le aziende fornitrici d’acqua (lett. a-c)"
+msgid "900 - Subsidies, tourist funds collected by tourist offices, contributions from cantonal water, sewage or waste funds (art. 18 para. 2 lit. a to c)"
+msgstr "900 - Sussidi, tasse turistiche incassate da uffici turistici, contributi per lo smaltimento dei rifiuti e le aziende fornitrici d’acqua (lett. a-c)"
 
 #. module: l10n_ch
 #: model:account.report.line,name:l10n_ch.account_tax_report_line_chtax_910
-msgid ""
-"910 - Donations, dividends, payments of damages etc. (art. 18 para. 2 lit. d"
-" to l)"
+msgid "910 - Donations, dividends, payments of damages etc. (art. 18 para. 2 lit. d to l)"
 msgstr "910 - Doni, dividendi, risarcimenti dei danni ecc. (lett. d-l)"
 
 #. module: l10n_ch
@@ -508,9 +451,7 @@ msgstr "Pagamenti"
 #. module: l10n_ch
 #. odoo-python
 #: code:addons/l10n_ch/models/account_payment.py:0
-msgid ""
-"Please fill in a correct QRR reference in the payment reference. The banks "
-"will refuse your payment file otherwise."
+msgid "Please fill in a correct QRR reference in the payment reference. The banks will refuse your payment file otherwise."
 msgstr ""
 
 #. module: l10n_ch
@@ -521,10 +462,7 @@ msgstr ""
 #. module: l10n_ch
 #: model:ir.model.fields,help:l10n_ch.field_account_setup_bank_manual_config__l10n_ch_qr_iban
 #: model:ir.model.fields,help:l10n_ch.field_res_partner_bank__l10n_ch_qr_iban
-msgid ""
-"Put the QR-IBAN here for your own bank accounts.  That way, you can still "
-"use the main IBAN in the Account Number while you will see the QR-IBAN for "
-"the barcode.  "
+msgid "Put the QR-IBAN here for your own bank accounts.  That way, you can still use the main IBAN in the Account Number while you will see the QR-IBAN for the barcode.  "
 msgstr ""
 
 #. module: l10n_ch
@@ -649,17 +587,13 @@ msgstr ""
 #. module: l10n_ch
 #. odoo-python
 #: code:addons/l10n_ch/models/res_bank.py:0
-msgid ""
-"The partner must have a complete postal address (street, zip, city and "
-"country)."
+msgid "The partner must have a complete postal address (street, zip, city and country)."
 msgstr ""
 
 #. module: l10n_ch
 #. odoo-python
 #: code:addons/l10n_ch/models/res_bank.py:0
-msgid ""
-"The partner set on the bank account meant to receive the payment (%s) must "
-"have a complete postal address (street, zip, city and country)."
+msgid "The partner set on the bank account meant to receive the payment (%s) must have a complete postal address (street, zip, city and country)."
 msgstr ""
 
 #. module: l10n_ch
@@ -674,16 +608,10 @@ msgstr ""
 #. module: l10n_ch
 #. odoo-python
 #: code:addons/l10n_ch/models/res_bank.py:0
-msgid ""
-"When using a QR-IBAN as the destination account of a QR-code, the payment "
-"reference must be a QR-reference."
+msgid "When using a QR-IBAN as the destination account of a QR-code, the payment reference must be a QR-reference."
 msgstr ""
 
 #. module: l10n_ch
 #: model:ir.model.fields,help:l10n_ch.field_account_journal__invoice_reference_model
-msgid ""
-"You can choose different models for each type of reference. The default one "
-"is the Odoo reference."
-msgstr ""
-"È possibile scegliere modelli diversi per ciascun tipo di riferimento. Il "
-"predefinito è il riferimento Odoo."
+msgid "You can choose different models for each type of reference. The default one is the Odoo reference."
+msgstr "È possibile scegliere modelli diversi per ciascun tipo di riferimento. Il predefinito è il riferimento Odoo."

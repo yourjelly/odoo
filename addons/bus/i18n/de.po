@@ -3,16 +3,15 @@
 # 	* bus
 #
 # Translators:
-# Martin Trigaux, 2022
-# Larissa Manderfeld, 2023
+# Wil Odoo, 2023
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0beta\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-16 13:49+0000\n"
-"PO-Revision-Date: 2022-09-22 05:45+0000\n"
-"Last-Translator: Larissa Manderfeld, 2023\n"
+"POT-Creation-Date: 2024-01-17 10:10+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Wil Odoo, 2023\n"
 "Language-Team: German (https://app.transifex.com/odoo/teams/41243/de/)\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
@@ -67,12 +66,12 @@ msgstr "ID"
 #: model:ir.model.fields,field_description:bus.field_res_partner__im_status
 #: model:ir.model.fields,field_description:bus.field_res_users__im_status
 msgid "IM Status"
-msgstr "Sofortnachrichten-Status"
+msgstr "Status der Sofortnachricht"
 
 #. module: bus
 #: model:ir.model.fields,field_description:bus.field_bus_presence__last_poll
 msgid "Last Poll"
-msgstr "Letzte Abstimmung"
+msgstr "Letzte Befragung"
 
 #. module: bus
 #: model:ir.model.fields,field_description:bus.field_bus_presence__last_presence
@@ -97,7 +96,7 @@ msgstr "Nachricht"
 #. module: bus
 #: model:ir.model,name:bus.model_ir_model
 msgid "Models"
-msgstr "Datenmodelle"
+msgstr "Modelle"
 
 #. module: bus
 #: model:ir.model.fields.selection,name:bus.selection__bus_presence__status__offline
@@ -129,7 +128,7 @@ msgstr "Benutzer"
 #. module: bus
 #: model:ir.model,name:bus.model_bus_presence
 msgid "User Presence"
-msgstr "Benutzer Anwesenheit"
+msgstr "Benutzer-Anwesenheit"
 
 #. module: bus
 #: model:ir.model.fields,field_description:bus.field_bus_presence__user_id
@@ -140,9 +139,9 @@ msgstr "Benutzer"
 #. odoo-python
 #: code:addons/bus/controllers/home.py:0
 msgid "Your password is the default (admin)! If this system is exposed to untrusted users it is important to change it immediately for security reasons. I will keep nagging you about it!"
-msgstr ""
+msgstr "Ihr Passwort ist das Standardpasswort (admin)! Wenn dieses System für nicht vertrauenswürdige Benutzer zugänglich ist, müssen Sie es aus Sicherheitsgründen sofort ändern. Ich werde Sie immer wieder darauf hinweisen!"
 
 #. module: bus
 #: model:ir.model,name:bus.model_ir_websocket
 msgid "websocket message handling"
-msgstr "websocket message handling"
+msgstr "Websocket-Nachrichtbearbeitung"

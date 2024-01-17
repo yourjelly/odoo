@@ -3,16 +3,15 @@
 # 	* mail_bot
 #
 # Translators:
-# Martin Trigaux, 2022
-# Jolien De Paepe, 2023
+# Wil Odoo, 2023
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 15.5alpha1\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-16 13:49+0000\n"
-"PO-Revision-Date: 2022-09-22 05:53+0000\n"
-"Last-Translator: Jolien De Paepe, 2023\n"
+"POT-Creation-Date: 2024-01-17 10:10+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Wil Odoo, 2023\n"
 "Language-Team: French (https://app.transifex.com/odoo/teams/41243/fr/)\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
@@ -56,7 +55,7 @@ msgstr "Routage HTTP"
 #. odoo-python
 #: code:addons/mail_bot/models/res_users.py:0
 msgid "Hello,"
-msgstr ""
+msgstr "Bonjour,"
 
 #. module: mail_bot
 #. odoo-python
@@ -113,7 +112,7 @@ msgstr "Je ne sais pas ce que vous faites. S'il vous plaît, tapez <span class=\
 #. odoo-python
 #: code:addons/mail_bot/models/res_users.py:0
 msgid "Odoo's chat helps employees collaborate efficiently. I'm here to help you discover its features."
-msgstr ""
+msgstr "Le chat d'Odoo aide les employés à collaborer efficacement. Je suis là pour vous aider à découvrir ses fonctionnalités."
 
 #. module: mail_bot
 #: model:ir.model.fields,field_description:mail_bot.field_res_users__odoobot_state
@@ -179,7 +178,7 @@ msgstr "Pour commencer, essayez de m'envoyer un émoji :)"
 #. odoo-python
 #: code:addons/mail_bot/models/res_users.py:0
 msgid "Try to send me an emoji"
-msgstr ""
+msgstr "Essayez de m'envoyer un émoji"
 
 #. module: mail_bot
 #. odoo-python

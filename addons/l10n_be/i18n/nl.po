@@ -11,7 +11,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.3alpha1+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-04-14 12:18+0000\n"
+"POT-Creation-Date: 2023-08-28 10:46+0000\n"
 "PO-Revision-Date: 2023-04-14 14:20+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -211,18 +211,6 @@ msgstr "Saldo"
 #. module: l10n_be
 #. odoo-python
 #: code:addons/l10n_be/models/template_be.py:0
-msgid "Bank Fees (21% VAT)"
-msgstr "Bankkosten (21% BTW)"
-
-#. module: l10n_be
-#. odoo-python
-#: code:addons/l10n_be/models/template_be.py:0
-msgid "Bank Fees (No VAT)"
-msgstr "Bankkosten (Geen BTW)"
-
-#. module: l10n_be
-#. odoo-python
-#: code:addons/l10n_be/models/template_be.py:0
 msgid "Base"
 msgstr "Basis"
 
@@ -249,18 +237,6 @@ msgid "Contact"
 msgstr "Contact"
 
 #. module: l10n_be
-#. odoo-python
-#: code:addons/l10n_be/models/template_be.py:0
-msgid "Discount"
-msgstr "Korting"
-
-#. module: l10n_be
-#. odoo-python
-#: code:addons/l10n_be/models/template_be.py:0
-msgid "Discount Granted"
-msgstr "Korting verleend"
-
-#. module: l10n_be
 #: model:account.report.line,name:l10n_be.tax_report_title_operations_sortie
 msgid "II Outgoing"
 msgstr "II Uitgaand"
@@ -274,12 +250,6 @@ msgstr "III Inkomend"
 #: model:account.report.line,name:l10n_be.tax_report_title_taxes_dues
 msgid "IV Due"
 msgstr "IV Verschuldigd"
-
-#. module: l10n_be
-#. odoo-python
-#: code:addons/l10n_be/models/template_be.py:0
-msgid "Internal Transfers"
-msgstr "Interne overboekingen"
 
 #. module: l10n_be
 #: model:ir.model,name:l10n_be.model_account_journal
@@ -318,9 +288,5 @@ msgstr "VI Saldo"
 
 #. module: l10n_be
 #: model:ir.model.fields,help:l10n_be.field_account_journal__invoice_reference_model
-msgid ""
-"You can choose different models for each type of reference. The default one "
-"is the Odoo reference."
-msgstr ""
-"Je kan verschillende modellen kiezen voor elk type referentie. De standaard "
-"is de Odoo-referentie."
+msgid "You can choose different models for each type of reference. The default one is the Odoo reference."
+msgstr "Je kan verschillende modellen kiezen voor elk type referentie. De standaard is de Odoo-referentie."

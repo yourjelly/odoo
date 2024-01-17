@@ -56,10 +56,8 @@ msgstr "06 Penyerahan Lainnya (Turis Asing)"
 #. module: l10n_id_efaktur
 #: model:ir.model.fields.selection,name:l10n_id_efaktur.selection__account_move__l10n_id_kode_transaksi__07
 #: model:ir.model.fields.selection,name:l10n_id_efaktur.selection__res_partner__l10n_id_kode_transaksi__07
-msgid ""
-"07 Penyerahan yang PPN-nya Tidak Dipungut (Kawasan Ekonomi Khusus/ Batam)"
-msgstr ""
-"07 Penyerahan yang PPN-nya Tidak Dipungut (Kawasan Ekonomi Khusus/ Batam)"
+msgid "07 Penyerahan yang PPN-nya Tidak Dipungut (Kawasan Ekonomi Khusus/ Batam)"
+msgstr "07 Penyerahan yang PPN-nya Tidak Dipungut (Kawasan Ekonomi Khusus/ Batam)"
 
 #. module: l10n_id_efaktur
 #: model:ir.model.fields.selection,name:l10n_id_efaktur.selection__account_move__l10n_id_kode_transaksi__08
@@ -75,15 +73,8 @@ msgstr "09 Penyerahan Aktiva ( Pasal 16D UU PPN )"
 
 #. module: l10n_id_efaktur
 #: model_terms:ir.ui.view,arch_db:l10n_id_efaktur.res_config_settings_view_form
-msgid ""
-"<span class=\"fa fa-lg fa-building-o\" title=\"Values set here are company-"
-"specific.\" aria-label=\"Values set here are company-specific.\" "
-"groups=\"base.group_multi_company\" role=\"img\"/>"
-msgstr ""
-"<span class=\"fa fa-lg fa-building-o\" title=\"Nilai yang ditentukan di "
-"sini spesifik pada perusahaan.\" aria-label=\"Nilai yang ditentukan di sini "
-"spesifik pada perusahaan.\" groups=\"base.group_multi_company\" "
-"role=\"img\"/>"
+msgid "<span class=\"fa fa-lg fa-building-o\" title=\"Values set here are company-specific.\" aria-label=\"Values set here are company-specific.\" groups=\"base.group_multi_company\" role=\"img\"/>"
+msgstr "<span class=\"fa fa-lg fa-building-o\" title=\"Nilai yang ditentukan di sini spesifik pada perusahaan.\" aria-label=\"Nilai yang ditentukan di sini spesifik pada perusahaan.\" groups=\"base.group_multi_company\" role=\"img\"/>"
 
 #. module: l10n_id_efaktur
 #: code:addons/l10n_id_efaktur/models/account_move.py:0
@@ -117,12 +108,8 @@ msgstr "CSV Dibuat"
 #. module: l10n_id_efaktur
 #: code:addons/l10n_id_efaktur/models/account_move.py:0
 #, python-format
-msgid ""
-"Cannot mix VAT subject and Non-VAT subject items in the same invoice with "
-"this kode transaksi."
-msgstr ""
-"Tidak dapat menggabungkan subjek PPN dan subjek Bukan PPN dalam faktur yang "
-"sama dengan kode transaksi ini."
+msgid "Cannot mix VAT subject and Non-VAT subject items in the same invoice with this kode transaksi."
+msgstr "Tidak dapat menggabungkan subjek PPN dan subjek Bukan PPN dalam faktur yang sama dengan kode transaksi ini."
 
 #. module: l10n_id_efaktur
 #: model:ir.model.fields,field_description:l10n_id_efaktur.field_l10n_id_efaktur_efaktur_range__company_id
@@ -224,23 +211,17 @@ msgstr "ID PKP"
 #: model_terms:ir.actions.act_window,help:l10n_id_efaktur.efaktur_invoice_action
 msgid ""
 "In order to be able to export customer invoices as e-Faktur\n"
-"                    for the Indonesian government, you need to put here the "
-"ranges\n"
+"                    for the Indonesian government, you need to put here the ranges\n"
 "                    of numbers you were assigned by the government.\n"
-"                    When you validate an invoice, a number will be assigned "
-"based on these ranges.\n"
-"                    Afterwards, you can filter the invoices still to export "
-"in the\n"
+"                    When you validate an invoice, a number will be assigned based on these ranges.\n"
+"                    Afterwards, you can filter the invoices still to export in the\n"
 "                    invoices list and click on Action &gt; Download e-Faktur"
 msgstr ""
 "Agar dapat mengekspor faktur pelanggan sebagai e-Faktur\n"
-"                    untuk pemerintah Indonesia, Anda harus menaruh di sini "
-"rentang\n"
+"                    untuk pemerintah Indonesia, Anda harus menaruh di sini rentang\n"
 "                    nomor yang diberikan ke Anda oleh pemerintah.\n"
-"                    Saat Anda memvalidasi faktur, nomor akan diberikan ke "
-"Anda berdasarkan rentang-rentang ini.\n"
-"                    Setelahnya, Anda dapat memfilter faktur yang masih akan "
-"diekspor di\n"
+"                    Saat Anda memvalidasi faktur, nomor akan diberikan ke Anda berdasarkan rentang-rentang ini.\n"
+"                    Setelahnya, Anda dapat memfilter faktur yang masih akan diekspor di\n"
 "                    daftar faktur dan klik pada Action &gt; Unduh e-Faktur"
 
 #. module: l10n_id_efaktur
@@ -284,12 +265,8 @@ msgstr "L10N Id Membutuhkan Kode Transaksi"
 #. module: l10n_id_efaktur
 #: code:addons/l10n_id_efaktur/models/efaktur.py:0
 #, python-format
-msgid ""
-"Last 8 digits of End Number should be greater than the last 8 digit of "
-"Start Number"
-msgstr ""
-"8 angka terakhir dari Nomor Akhir harus lebih besar dari 8 angka terakhir "
-"dari Nomor Awal"
+msgid "Last 8 digits of End Number should be greater than the last 8 digit of Start Number"
+msgstr "8 angka terakhir dari Nomor Akhir harus lebih besar dari 8 angka terakhir dari Nomor Awal"
 
 #. module: l10n_id_efaktur
 #: model:ir.model.fields,field_description:l10n_id_efaktur.field_l10n_id_efaktur_efaktur_range____last_update
@@ -332,8 +309,7 @@ msgstr "Ganti Faktur"
 #. module: l10n_id_efaktur
 #: code:addons/l10n_id_efaktur/models/account_move.py:0
 #, python-format
-msgid ""
-"Replacement invoice only for invoices on which the e-Faktur is generated. "
+msgid "Replacement invoice only for invoices on which the e-Faktur is generated. "
 msgstr "Faktur pengganti hanya untuk faktur yang dibuat oleh e-Faktur. "
 
 #. module: l10n_id_efaktur
@@ -389,12 +365,8 @@ msgstr "Angka ketiga dari nomor pajak harus 0 atau 1"
 #. module: l10n_id_efaktur
 #: code:addons/l10n_id_efaktur/models/account_move.py:0
 #, python-format
-msgid ""
-"There is no Efaktur number available.  Please configure the range you get "
-"from the government in the e-Faktur menu. "
-msgstr ""
-"Tidak ada nomor Efaktur yang tersedia. Silakan konfigurasi rentang yang "
-"Anda dapat dari pemerintah di menu e-Faktur. "
+msgid "There is no Efaktur number available.  Please configure the range you get from the government in the e-Faktur menu. "
+msgstr "Tidak ada nomor Efaktur yang tersedia. Silakan konfigurasi rentang yang Anda dapat dari pemerintah di menu e-Faktur. "
 
 #. module: l10n_id_efaktur
 #: code:addons/l10n_id_efaktur/models/efaktur.py:0
@@ -415,11 +387,8 @@ msgstr "Total Tersedia"
 #. module: l10n_id_efaktur
 #: code:addons/l10n_id_efaktur/models/account_move.py:0
 #, python-format
-msgid ""
-"You can only change the number manually for a Vendor Bills and Credit Notes"
-msgstr ""
-"Anda hanya dapat mengubah nomor secara manual untuk Tagihan Vendor dan Nota "
-"Kredit"
+msgid "You can only change the number manually for a Vendor Bills and Credit Notes"
+msgstr "Anda hanya dapat mengubah nomor secara manual untuk Tagihan Vendor dan Nota Kredit"
 
 #. module: l10n_id_efaktur
 #: code:addons/l10n_id_efaktur/models/account_move.py:0

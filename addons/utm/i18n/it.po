@@ -3,16 +3,16 @@
 # 	* utm
 #
 # Translators:
-# Martin Trigaux, 2022
-# Sergio Zanchetta <primes2h@gmail.com>, 2022
+# Wil Odoo, 2023
+# Marianna Ciofani, 2024
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0beta\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-16 13:50+0000\n"
-"PO-Revision-Date: 2022-09-22 05:55+0000\n"
-"Last-Translator: Sergio Zanchetta <primes2h@gmail.com>, 2022\n"
+"POT-Creation-Date: 2024-01-17 10:11+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Marianna Ciofani, 2024\n"
 "Language-Team: Italian (https://app.transifex.com/odoo/teams/41243/it/)\n"
 "Language: it\n"
 "MIME-Version: 1.0\n"
@@ -24,7 +24,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/utm/models/utm_source.py:0
 msgid "%(content)s (%(model_description)s created on %(create_date)s)"
-msgstr ""
+msgstr "%(content)s (%(model_description)s creato il %(create_date)s)"
 
 #. module: utm
 #: model:ir.model.fields,field_description:utm.field_utm_campaign__active
@@ -52,7 +52,7 @@ msgstr "Approvata"
 #. module: utm
 #: model_terms:ir.ui.view,arch_db:utm.utm_campaign_view_kanban
 msgid "Archive"
-msgstr ""
+msgstr "Archivia"
 
 #. module: utm
 #: model_terms:ir.ui.view,arch_db:utm.utm_campaign_view_form
@@ -85,7 +85,7 @@ msgstr "Campagna"
 #. module: utm
 #: model:ir.model.fields,field_description:utm.field_utm_campaign__name
 msgid "Campaign Identifier"
-msgstr ""
+msgstr "Identificatore campagna"
 
 #. module: utm
 #: model:ir.model.fields,field_description:utm.field_utm_campaign__title
@@ -120,7 +120,7 @@ msgstr "Le campagne vengono usate per centralizzare le iniziative di marketing e
 #. module: utm
 #: model_terms:ir.ui.view,arch_db:utm.view_utm_campaign_view_search
 msgid "Campaigns that are assigned to me"
-msgstr ""
+msgstr "Campagne assegnate a me"
 
 #. module: utm
 #: model:utm.campaign,title:utm.utm_campaign_christmas_special
@@ -347,7 +347,7 @@ msgstr "Mezzi"
 #. module: utm
 #: model_terms:ir.ui.view,arch_db:utm.view_utm_campaign_view_search
 msgid "My Campaigns"
-msgstr ""
+msgstr "Le mie campagne"
 
 #. module: utm
 #: model:ir.model.fields,field_description:utm.field_utm_source_mixin__name
@@ -400,7 +400,7 @@ msgstr "Responsabile"
 #. module: utm
 #: model_terms:ir.ui.view,arch_db:utm.utm_campaign_view_kanban
 msgid "Restore"
-msgstr ""
+msgstr "Ripristina"
 
 #. module: utm
 #. odoo-javascript
@@ -476,7 +476,7 @@ msgstr "Nome sorgente"
 #: model:ir.actions.act_window,name:utm.utm_source_action
 #: model:ir.ui.menu,name:utm.menu_utm_source
 msgid "Sources"
-msgstr "Sorgenti"
+msgstr "Origini"
 
 #. module: utm
 #: model:ir.model.fields,field_description:utm.field_utm_campaign__stage_id
@@ -494,7 +494,7 @@ msgstr "Fasi"
 #. module: utm
 #: model_terms:ir.actions.act_window,help:utm.action_view_utm_stage
 msgid "Stages allow you to organize your workflow  (e.g. plan, design, in progress, done, …)."
-msgstr ""
+msgstr "Le fasi consentono di organizzare il flusso di lavoro (ad es.: pianificazione, progettazione, in elaborazione, completato...)."
 
 #. module: utm
 #: model:ir.model.fields,help:utm.field_utm_tag__color
@@ -504,7 +504,7 @@ msgstr "Colore etichetta. Nessun colore significa non visualizzarla nel kanban, 
 #. module: utm
 #: model:ir.model.constraint,message:utm.constraint_utm_tag_name_uniq
 msgid "Tag name already exists!"
-msgstr ""
+msgstr "Nome etichetta già esistente."
 
 #. module: utm
 #: model:ir.model.fields,field_description:utm.field_utm_campaign__tag_ids
@@ -516,14 +516,14 @@ msgstr "Etichette"
 #. odoo-python
 #: code:addons/utm/models/utm_medium.py:0
 msgid "The UTM medium '%s' cannot be deleted as it is used in some main functional flows, such as the recruitment and the mass mailing."
-msgstr ""
+msgstr "Il mezzo UTM \"%s\" non può essere eliminato in quanto viene utilizzato in alcuni flussi funzionali principali come l'assunzione e l'invio di e-mail di massa."
 
 #. module: utm
 #: model:ir.model.constraint,message:utm.constraint_utm_campaign_unique_name
 #: model:ir.model.constraint,message:utm.constraint_utm_medium_unique_name
 #: model:ir.model.constraint,message:utm.constraint_utm_source_unique_name
 msgid "The name must be unique"
-msgstr ""
+msgstr "Il nome deve essere unico"
 
 #. module: utm
 #. odoo-javascript
@@ -562,7 +562,7 @@ msgstr "Da approvare"
 #. odoo-javascript
 #: code:addons/utm/static/src/js/utm_campaign_kanban_examples.js:0
 msgid "Track incoming events (e.g. Christmas, Black Friday, ...) and publish timely content."
-msgstr ""
+msgstr "Traccia gli eventi in arrivo (ad es. Natale, Black Friday...) e pubblica tempestivamente i contenuti."
 
 #. module: utm
 #: model:ir.model,name:utm.model_utm_campaign
@@ -584,7 +584,7 @@ msgstr "Mezzo UTM"
 #. module: utm
 #: model_terms:ir.actions.act_window,help:utm.utm_medium_action
 msgid "UTM Mediums track the mean that was used to attract traffic (e.g. \"Website\", \"Twitter\", ...)."
-msgstr ""
+msgstr "I mezzi UTM monitorano il mezzo utilizzato per attrarre traffico (ad es. \"Sito web\", \"Twitter\"...)."
 
 #. module: utm
 #: model:ir.model,name:utm.model_utm_mixin
@@ -599,12 +599,12 @@ msgstr "Sorgente UTM"
 #. module: utm
 #: model:ir.model,name:utm.model_utm_source_mixin
 msgid "UTM Source Mixin"
-msgstr ""
+msgstr "Mixin origine UTM"
 
 #. module: utm
 #: model_terms:ir.actions.act_window,help:utm.utm_source_action
 msgid "UTM Sources track where traffic comes from  (e.g. \"May Newsletter\", \"\", ...)."
-msgstr ""
+msgstr "Le fonti UTM tengono traccia della provenienza del pubblico (ad es. \"Newsletter di maggio\"...) "
 
 #. module: utm
 #: model:ir.actions.act_window,name:utm.action_view_utm_stage
@@ -630,17 +630,17 @@ msgstr "Usa per le campagne"
 #. module: utm
 #: model_terms:ir.ui.view,arch_db:utm.utm_stage_view_form
 msgid "e.g. \"Brainstorming\""
-msgstr ""
+msgstr "ad es. \"Brainstorming\""
 
 #. module: utm
 #: model_terms:ir.ui.view,arch_db:utm.utm_source_view_tree
 msgid "e.g. \"Christmas Mailing\""
-msgstr ""
+msgstr "ad es. \"E-mail di Natale\""
 
 #. module: utm
 #: model_terms:ir.ui.view,arch_db:utm.utm_medium_view_tree
 msgid "e.g. \"Email\""
-msgstr ""
+msgstr "ad es. \"E-mail\""
 
 #. module: utm
 #: model_terms:ir.ui.view,arch_db:utm.utm_campaign_view_form

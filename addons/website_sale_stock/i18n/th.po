@@ -3,18 +3,16 @@
 # 	* website_sale_stock
 #
 # Translators:
-# Khwunchai Jaengsawang <khwunchai.j@ku.th>, 2022
-# monchai7 <montchye@gmail.com>, 2022
-# Martin Trigaux, 2022
-# Wichanon Jamwutthipreecha, 2022
+# Wil Odoo, 2023
+# Rasareeyar Lappiam, 2024
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 15.5alpha1\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:56+0000\n"
-"PO-Revision-Date: 2022-09-22 05:57+0000\n"
-"Last-Translator: Wichanon Jamwutthipreecha, 2022\n"
+"POT-Creation-Date: 2024-01-17 10:11+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Rasareeyar Lappiam, 2024\n"
 "Language-Team: Thai (https://app.transifex.com/odoo/teams/41243/th/)\n"
 "Language: th\n"
 "MIME-Version: 1.0\n"
@@ -57,12 +55,8 @@ msgstr "เรียนลูกค้า,"
 
 #. module: website_sale_stock
 #: model_terms:ir.ui.view,arch_db:website_sale_stock.res_config_settings_view_form
-msgid ""
-"Default availability mode set on newly created storable products. This can "
-"be changed at the product level."
-msgstr ""
-"ตั้งค่าโหมดความพร้อมใช้งานเริ่มต้นในสินค้าที่สามารถจัดเก็บได้ที่สร้างขึ้นใหม่ "
-"ซึ่งสามารถเปลี่ยนแปลงได้ที่ระดับสินค้า"
+msgid "Default availability mode set on newly created storable products. This can be changed at the product level."
+msgstr "ตั้งค่าโหมดความพร้อมใช้งานเริ่มต้นในสินค้าที่สามารถจัดเก็บได้ที่สร้างขึ้นใหม่ ซึ่งสามารถเปลี่ยนแปลงได้ที่ระดับสินค้า"
 
 #. module: website_sale_stock
 #: model_terms:ir.ui.view,arch_db:website_sale_stock.res_config_settings_view_form
@@ -156,7 +150,7 @@ msgstr "คำสั่งขาย"
 #. module: website_sale_stock
 #: model:ir.model,name:website_sale_stock.model_sale_order_line
 msgid "Sales Order Line"
-msgstr "ไลน์คำสั่งขาย"
+msgstr "รายการคำสั่งขาย"
 
 #. module: website_sale_stock
 #: model_terms:ir.ui.view,arch_db:website_sale_stock.product_template_form_view_inherit_website_sale_stock
@@ -181,9 +175,7 @@ msgstr "แสดงจำนวนที่มีอยู่"
 #. module: website_sale_stock
 #. odoo-python
 #: code:addons/website_sale_stock/models/sale_order.py:0
-msgid ""
-"Some products became unavailable and your cart has been updated. We're sorry "
-"for the inconvenience."
+msgid "Some products became unavailable and your cart has been updated. We're sorry for the inconvenience."
 msgstr "สินค้าบางรายการไม่มีอยู่และรถเข็นของคุณได้รับการอัปเดตแล้ว ขออภัยในความไม่สะดวก"
 
 #. module: website_sale_stock

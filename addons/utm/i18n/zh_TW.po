@@ -3,17 +3,15 @@
 # 	* utm
 #
 # Translators:
-# 敬雲 林 <chingyun@yuanchih-consult.com>, 2022
-# Martin Trigaux, 2022
-# Tony Ng, 2023
+# Wil Odoo, 2023
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0beta\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-16 13:50+0000\n"
-"PO-Revision-Date: 2022-09-22 05:55+0000\n"
-"Last-Translator: Tony Ng, 2023\n"
+"POT-Creation-Date: 2024-01-17 10:11+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Wil Odoo, 2023\n"
 "Language-Team: Chinese (Taiwan) (https://app.transifex.com/odoo/teams/41243/zh_TW/)\n"
 "Language: zh_TW\n"
 "MIME-Version: 1.0\n"
@@ -48,12 +46,12 @@ msgstr "審批基礎流程"
 #. odoo-javascript
 #: code:addons/utm/static/src/js/utm_campaign_kanban_examples.js:0
 msgid "Approved"
-msgstr "已批准"
+msgstr "已審批"
 
 #. module: utm
 #: model_terms:ir.ui.view,arch_db:utm.utm_campaign_view_kanban
 msgid "Archive"
-msgstr ""
+msgstr "封存"
 
 #. module: utm
 #: model_terms:ir.ui.view,arch_db:utm.utm_campaign_view_form
@@ -81,7 +79,7 @@ msgstr "自動生成的活動"
 #. module: utm
 #: model:ir.model.fields,field_description:utm.field_utm_mixin__campaign_id
 msgid "Campaign"
-msgstr "行銷"
+msgstr "行銷活動"
 
 #. module: utm
 #: model:ir.model.fields,field_description:utm.field_utm_campaign__name
@@ -173,7 +171,7 @@ msgstr "在您的行銷活動中建立作業流程"
 #: model:ir.model.fields,field_description:utm.field_utm_stage__create_uid
 #: model:ir.model.fields,field_description:utm.field_utm_tag__create_uid
 msgid "Created by"
-msgstr "創立者"
+msgstr "建立人員"
 
 #. module: utm
 #: model:ir.model.fields,field_description:utm.field_utm_campaign__create_date
@@ -265,7 +263,7 @@ msgstr "收集資料、建立收件人列表並根據您的營銷目標編寫內
 #. module: utm
 #: model_terms:ir.ui.view,arch_db:utm.view_utm_campaign_view_search
 msgid "Group By"
-msgstr "分組方式"
+msgstr "分組依據"
 
 #. module: utm
 #: model:ir.model,name:utm.model_ir_http
@@ -279,13 +277,13 @@ msgstr "HTTP 路由"
 #: model:ir.model.fields,field_description:utm.field_utm_stage__id
 #: model:ir.model.fields,field_description:utm.field_utm_tag__id
 msgid "ID"
-msgstr "ID"
+msgstr "識別號"
 
 #. module: utm
 #. odoo-javascript
 #: code:addons/utm/static/src/js/utm_campaign_kanban_examples.js:0
 msgid "Ideas"
-msgstr "創意"
+msgstr "想法"
 
 #. module: utm
 #: model:ir.model.fields,field_description:utm.field_utm_campaign__write_uid
@@ -401,7 +399,7 @@ msgstr "負責人"
 #. module: utm
 #: model_terms:ir.ui.view,arch_db:utm.utm_campaign_view_kanban
 msgid "Restore"
-msgstr ""
+msgstr "還原"
 
 #. module: utm
 #. odoo-javascript
@@ -423,12 +421,12 @@ msgstr "銷售"
 #. module: utm
 #: model:utm.stage,name:utm.campaign_stage_1
 msgid "Schedule"
-msgstr "安排"
+msgstr "預約"
 
 #. module: utm
 #: model_terms:ir.ui.view,arch_db:utm.utm_medium_view_search
 msgid "Search UTM Medium"
-msgstr "搜索 UTM 媒體"
+msgstr "搜尋 UTM 媒介"
 
 #. module: utm
 #. odoo-javascript
@@ -441,12 +439,12 @@ msgstr "發送"
 #: code:addons/utm/static/src/js/utm_campaign_kanban_examples.js:0
 #: model:utm.stage,name:utm.campaign_stage_3
 msgid "Sent"
-msgstr "已發送"
+msgstr "發送"
 
 #. module: utm
 #: model:ir.model.fields,field_description:utm.field_utm_stage__sequence
 msgid "Sequence"
-msgstr "序號"
+msgstr "序列號"
 
 #. module: utm
 #. odoo-javascript
@@ -505,7 +503,7 @@ msgstr "標籤顏色。沒有顏色意味著看板中沒有顯示以區分內部
 #. module: utm
 #: model:ir.model.constraint,message:utm.constraint_utm_tag_name_uniq
 msgid "Tag name already exists!"
-msgstr ""
+msgstr "標籤名稱已存在!"
 
 #. module: utm
 #: model:ir.model.fields,field_description:utm.field_utm_campaign__tag_ids
@@ -580,7 +578,7 @@ msgstr "UTM 活動"
 #. module: utm
 #: model:ir.model,name:utm.model_utm_medium
 msgid "UTM Medium"
-msgstr "UTM媒體"
+msgstr "UTM 媒介"
 
 #. module: utm
 #: model_terms:ir.actions.act_window,help:utm.utm_medium_action
@@ -590,7 +588,7 @@ msgstr "UTM 媒體跟踪用於吸引流量的平均值（例如“網站”、�
 #. module: utm
 #: model:ir.model,name:utm.model_utm_mixin
 msgid "UTM Mixin"
-msgstr "UTM Mixin"
+msgstr "UTM混入程式"
 
 #. module: utm
 #: model:ir.model,name:utm.model_utm_source

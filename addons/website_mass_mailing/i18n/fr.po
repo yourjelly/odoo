@@ -3,17 +3,15 @@
 # 	* website_mass_mailing
 #
 # Translators:
-# Martin Trigaux, 2022
-# Cécile Collart <cco@odoo.com>, 2022
-# Jolien De Paepe, 2023
+# Wil Odoo, 2023
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 15.5alpha1\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-16 13:50+0000\n"
-"PO-Revision-Date: 2022-09-22 05:56+0000\n"
-"Last-Translator: Jolien De Paepe, 2023\n"
+"POT-Creation-Date: 2024-01-17 10:11+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Wil Odoo, 2023\n"
 "Language-Team: French (https://app.transifex.com/odoo/teams/41243/fr/)\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
@@ -47,6 +45,8 @@ msgid ""
 "<span class=\"fa fa-check-circle\"/>\n"
 "                                Thank you for subscribing!"
 msgstr ""
+"<span class=\"fa fa-check-circle\"/>\n"
+"                                Merci de vous être abonné !"
 
 #. module: website_mass_mailing
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.s_newsletter_block_form_template
@@ -125,8 +125,8 @@ msgstr "Contact"
 #. module: website_mass_mailing
 #. odoo-javascript
 #: code:addons/website_mass_mailing/static/src/js/website_mass_mailing.editor.js:0
-msgid "Display Thanks Button"
-msgstr "Afficher le bouton de remerciement"
+msgid "Display Thanks Message"
+msgstr ""
 
 #. module: website_mass_mailing
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.newsletter_subscribe_options
@@ -181,7 +181,7 @@ msgstr "Afficher la politique reCaptcha"
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.s_newsletter_block_form_template
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.s_newsletter_subscribe_form
 msgid "Subscribe"
-msgstr "S'abonner"
+msgstr "S'inscrire"
 
 #. module: website_mass_mailing
 #. odoo-javascript
@@ -193,7 +193,7 @@ msgstr "S'abonner à"
 #. odoo-javascript
 #: code:addons/website_mass_mailing/static/src/js/website_mass_mailing.js:0
 msgid "Success"
-msgstr "Succès"
+msgstr "Réussite"
 
 #. module: website_mass_mailing
 #. odoo-python

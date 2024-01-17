@@ -3,15 +3,15 @@
 # 	* im_livechat_mail_bot
 #
 # Translators:
-# Martin Trigaux, 2022
+# Wil Odoo, 2023
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 15.5alpha1\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-16 13:49+0000\n"
-"PO-Revision-Date: 2022-09-22 05:53+0000\n"
-"Last-Translator: Martin Trigaux, 2022\n"
+"POT-Creation-Date: 2024-01-17 10:10+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Wil Odoo, 2023\n"
 "Language-Team: Italian (https://app.transifex.com/odoo/teams/41243/it/)\n"
 "Language: it\n"
 "MIME-Version: 1.0\n"
@@ -34,7 +34,7 @@ msgstr "Email Bot"
 #. odoo-python
 #: code:addons/im_livechat_mail_bot/models/mail_bot.py:0
 msgid "Not sure what you are doing. Please, type %s and wait for the propositions. Select one of them and press enter."
-msgstr ""
+msgstr "Non mi è chiaro cosa tu stia facendo. Digita %s e attendi ciò che ti viene proposto. Effettua una seleziona e premi invio."
 
 #. module: im_livechat_mail_bot
 #: model:ir.model.fields,field_description:im_livechat_mail_bot.field_res_users__odoobot_state
@@ -50,7 +50,7 @@ msgstr "Messaggio predefinito di benvenuto"
 #. odoo-python
 #: code:addons/im_livechat_mail_bot/models/mail_bot.py:0
 msgid "That's me! 🎉<br/>Try typing %s to use canned responses."
-msgstr ""
+msgstr "Sono io! 🎉<br/>Prova a digitare %s per utilizzare le risposte predefinite."
 
 #. module: im_livechat_mail_bot
 #: model:ir.model,name:im_livechat_mail_bot.model_res_users

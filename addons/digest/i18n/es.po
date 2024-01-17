@@ -3,18 +3,16 @@
 # 	* digest
 #
 # Translators:
-# Martin Trigaux, 2022
-# Patricia Gutiérrez Capetillo <pagc@odoo.com>, 2022
-# Leonardo J. Caballero G. <leonardocaballero@gmail.com>, 2022
-# Pedro M. Baeza <pedro.baeza@tecnativa.com>, 2023
+# Wil Odoo, 2023
+# Larissa Manderfeld, 2024
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 15.5alpha1\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-16 13:49+0000\n"
-"PO-Revision-Date: 2022-09-22 05:45+0000\n"
-"Last-Translator: Pedro M. Baeza <pedro.baeza@tecnativa.com>, 2023\n"
+"POT-Creation-Date: 2024-01-17 10:10+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Larissa Manderfeld, 2024\n"
 "Language-Team: Spanish (https://app.transifex.com/odoo/teams/41243/es/)\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
@@ -25,7 +23,7 @@ msgstr ""
 #. module: digest
 #: model_terms:ir.ui.view,arch_db:digest.digest_digest_view_form
 msgid "<i class=\"oi oi-arrow-right\"/> Check our Documentation"
-msgstr ""
+msgstr "<i class=\"oi oi-arrow-right\"/> Revisar nuestra documentación"
 
 #. module: digest
 #: model_terms:ir.ui.view,arch_db:digest.digest_mail_main
@@ -198,7 +196,7 @@ msgstr "Agrupar por"
 #. module: digest
 #: model_terms:digest.tip,tip_description:digest.digest_tip_digest_1
 msgid "Have a question about a document? Click on the responsible user's picture to start a conversation. If his avatar has a green dot, he is online."
-msgstr "¿Tienes una pregunta sobre el documento? Haz clic en la fotografía del usuario responsable para iniciar una conversación. Si el avatar tiene un punto verde, está en línea."
+msgstr "¿Tienes una pregunta sobre el documento? Haga clic en la fotografía del usuario responsable para iniciar una conversación. Si el avatar tiene un punto verde, está en línea."
 
 #. module: digest
 #: model:ir.model.fields,field_description:digest.field_digest_digest__id
@@ -324,7 +322,7 @@ msgstr "Con tecnología "
 #. odoo-python
 #: code:addons/digest/models/digest.py:0
 msgid "Prefer a broader overview?"
-msgstr ""
+msgstr "¿Prefiere una vista más amplia?"
 
 #. module: digest
 #: model_terms:digest.tip,tip_description:digest.digest_tip_digest_0
@@ -392,7 +390,7 @@ msgstr "Consejo: Una calculadora en Odoo"
 #. module: digest
 #: model_terms:digest.tip,tip_description:digest.digest_tip_digest_1
 msgid "Tip: Click on an avatar to chat with a user"
-msgstr "Consejo: Haz clic en un avatar para chatear con un usuario"
+msgstr "Consejo: Haga clic en un avatar para chatear con un usuario"
 
 #. module: digest
 #: model_terms:digest.tip,tip_description:digest.digest_tip_digest_3
@@ -417,7 +415,7 @@ msgstr "Consejo: Una calculadora en Odoo"
 #. module: digest
 #: model:digest.tip,name:digest.digest_tip_digest_1
 msgid "Tip: Click on an avatar to chat with a user"
-msgstr "Consejo: Haz clic en un avatar para chatear con el usuario"
+msgstr "Consejo: Haga clic en un avatar para chatear con el usuario"
 
 #. module: digest
 #: model:digest.tip,name:digest.digest_tip_digest_3

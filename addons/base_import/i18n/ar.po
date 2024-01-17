@@ -3,16 +3,15 @@
 # 	* base_import
 #
 # Translators:
-# Martin Trigaux, 2022
-# Malaz Abuidris <msea@odoo.com>, 2023
+# Wil Odoo, 2023
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 15.5alpha1\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-16 13:49+0000\n"
-"PO-Revision-Date: 2022-09-22 05:45+0000\n"
-"Last-Translator: Malaz Abuidris <msea@odoo.com>, 2023\n"
+"POT-Creation-Date: 2024-01-17 10:10+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Wil Odoo, 2023\n"
 "Language-Team: Arabic (https://app.transifex.com/odoo/teams/41243/ar/)\n"
 "Language: ar\n"
 "MIME-Version: 1.0\n"
@@ -24,19 +23,19 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_model.js:0
 msgid "%s at multiple rows"
-msgstr ""
+msgstr "%s في عدة صفوف "
 
 #. module: base_import
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_action/import_action.js:0
 msgid "%s records successfully imported"
-msgstr ""
+msgstr "%s سجلات تم استيرادها بنجاح "
 
 #. module: base_import
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_model.js:0
 msgid "A single column was found in the file, this often means the file separator is incorrect."
-msgstr ""
+msgstr "تم العثور على عمود وحيد في الملف. عادة ما يعني ذلك أن فاصل الملف غير صحيح. "
 
 #. module: base_import
 #. odoo-javascript
@@ -65,7 +64,7 @@ msgstr "حدث خطأ غير معروف أثناء الاستيراد (قد يك
 #. module: base_import
 #: model:ir.model,name:base_import.model_base
 msgid "Base"
-msgstr "أساس"
+msgstr "قاعدة "
 
 #. module: base_import
 #: model:ir.model,name:base_import.model_base_import_import
@@ -81,7 +80,7 @@ msgstr "تعيين الاستيراد الأساسي "
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_data_progress/import_data_progress.xml:0
 msgid "Batch"
-msgstr ""
+msgstr "الدفعة "
 
 #. module: base_import
 #. odoo-javascript
@@ -99,13 +98,13 @@ msgstr "حد الدفعة "
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_action/import_action.xml:0
 msgid "Cancel"
-msgstr "إلغاء "
+msgstr "إلغاء"
 
 #. module: base_import
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_model.js:0
 msgid "Click 'Resume' to proceed with the import, resuming at line %s."
-msgstr ""
+msgstr "اضغط على 'استمرار' لاستئناف عملية الاستيراد من السطر %s. "
 
 #. module: base_import
 #. odoo-python
@@ -182,7 +181,7 @@ msgstr "تنسيق التاريخ والوقت:"
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_model.js:0
 msgid "Decimals Separator:"
-msgstr ""
+msgstr "فاصل الخانات العشرية: "
 
 #. module: base_import
 #: model:ir.model.fields,field_description:base_import.field_base_import_import__display_name
@@ -219,7 +218,19 @@ msgstr "خطأ في تفسير البيانات [%s:L%d]: %s"
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_model.js:0
 msgid "Error at row %s: \"%s\""
-msgstr ""
+msgstr "خطأ في الصف %s: \"%s\" "
+
+#. module: base_import
+#. odoo-python
+#: code:addons/base_import/models/base_import.py:0
+msgid "Error while importing records: Text Delimiter should be a single character."
+msgstr "حدث خطأ أثناء استيراد السجلات: يجب أن يكون محدد النص خانة واحدة. "
+
+#. module: base_import
+#. odoo-python
+#: code:addons/base_import/models/base_import.py:0
+msgid "Error while importing records: all rows should be of the same size, but the title row has %d entries while the first row has %d. You may need to change the separator character."
+msgstr "حدث خطأ أثناء استيراد التقارير: يجب أن يكون لكافة الصفوف نفس الحجم، ولكن لدى صف العنوان %d قيد بينما الصف الأول به %d. "
 
 #. module: base_import
 #. odoo-javascript
@@ -378,19 +389,13 @@ msgstr "لا يوجد في الملف المستورد أي محتوى أو قد
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_data_content/import_data_content.xml:0
 msgid "Import preview failed due to: \""
-msgstr ""
+msgstr "فشلت عملية معاينة الاستيراد للأسباب التالية: \""
 
 #. module: base_import
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_records/import_records.xml:0
 msgid "Import records"
 msgstr "استيراد السجلات "
-
-#. module: base_import
-#. odoo-javascript
-#: code:addons/base_import/static/src/import_model.js:0
-msgid "Import timed out. Please retry. If you still encounter this issue, the file may be too big for the system's configuration, try to split it (import less records per file)."
-msgstr "انتهت مهلة الاستيراد. الرجاء المحاولة مرة أخرى. إذا استمرت المشكلة، قد يكون الملف أكبر من إعدادات نظامنا، حاول تجزءته (عن طريق استيراد سجلات أقل لكل ملف). "
 
 #. module: base_import
 #. odoo-javascript
@@ -438,12 +443,12 @@ msgstr "جاري تحميل الملف..."
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_block_ui.xml:0
 msgid "Loading..."
-msgstr ""
+msgstr "جار التحميل..."
 
 #. module: base_import
 #: model:ir.model.fields,field_description:base_import.field_base_import_import__res_model
 msgid "Model"
-msgstr "الكائن"
+msgstr "النموذج "
 
 #. module: base_import
 #. odoo-javascript
@@ -467,7 +472,7 @@ msgstr "بلا فاصل"
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_data_column_error/import_data_column_error.xml:0
 msgid "No matching records found for the following name"
-msgstr ""
+msgstr "لم يتم العثور على سجلات مطابقة للاسم التالي "
 
 #. module: base_import
 #. odoo-javascript
@@ -491,7 +496,7 @@ msgstr "معاينة"
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_data_sidepanel/import_data_sidepanel.xml:0
 msgid "Reimport"
-msgstr ""
+msgstr "إعادة الاستيراد "
 
 #. module: base_import
 #. odoo-javascript
@@ -514,7 +519,7 @@ msgstr "المتابعة "
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_data_content/import_data_content.js:0
 msgid "Search a field..."
-msgstr ""
+msgstr "البحث عن حقل... "
 
 #. module: base_import
 #. odoo-javascript
@@ -544,7 +549,7 @@ msgstr "الفاصل:"
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_data_options/import_data_options.js:0
 msgid "Set to: %s"
-msgstr ""
+msgstr "التعيين كـ: %s "
 
 #. module: base_import
 #. odoo-javascript
@@ -658,7 +663,7 @@ msgstr "فاصل الآلاف:"
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_model.js:0
 msgid "To import multiple values, separate them by a comma."
-msgstr ""
+msgstr "حتى تتمكن من استيراد عدة قيم، قم بفصلها بفواصل. "
 
 #. module: base_import
 #. odoo-javascript
@@ -706,13 +711,13 @@ msgstr "قم بتحميل ملف بصيغة Excel أو CSV لاستيراده "
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_model.js:0
 msgid "Use HH for hours in a 24h system, use II in conjonction with 'p' for a 12h system. You can use a custom format in addition to the suggestions provided. Leave empty to let Odoo guess the format (recommended)"
-msgstr ""
+msgstr "استخدم HH للتعبير عن الساعات بنظام الـ 24 ساعة، واستخدم II مع 'p' لاستخدام نظام 12 ساعة. يمكنك استخدام تنسيق مخصص بالإضافة إلى المقترحات التي تم تقديمها. اتركه فارغاً للسماح لأودو بتخمين التنسيق (يوصى به) "
 
 #. module: base_import
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_model.js:0
 msgid "Use YYYY to represent the year, MM for the month and DD for the day. Include separators such as a dot, forward slash or dash. You can use a custom format in addition to the suggestions provided. Leave empty to let Odoo guess the format (recommended)"
-msgstr ""
+msgstr "استخدم YYYY للتعبير عن السنة، وMM للتعبير عن الشهر، وDD للتعبير عن اليوم. استخدم أيضاً الفواصل كالنقطة، الشرطة المائلة أو الشركة. يمكنك استخدام تنسيق مخصص إضافة إلى الاقتراحات المقدمة. اتركه فارغاً للسماح لأودو بتخمين التنسيق (يوصى به) "
 
 #. module: base_import
 #. odoo-javascript
@@ -777,7 +782,7 @@ msgstr "دقائق "
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_data_column_error/import_data_column_error.xml:0
 msgid "more"
-msgstr ""
+msgstr "المزيد "
 
 #. module: base_import
 #. odoo-javascript
@@ -789,7 +794,7 @@ msgstr "من "
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_data_progress/import_data_progress.xml:0
 msgid "seconds"
-msgstr ""
+msgstr "ثواني"
 
 #. module: base_import
 #. odoo-python

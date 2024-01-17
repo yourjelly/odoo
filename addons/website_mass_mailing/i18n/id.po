@@ -3,16 +3,15 @@
 # 	* website_mass_mailing
 #
 # Translators:
-# Martin Trigaux, 2022
-# Abe Manyo, 2023
+# Wil Odoo, 2023
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 15.5alpha1\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-16 13:50+0000\n"
-"PO-Revision-Date: 2022-09-22 05:56+0000\n"
-"Last-Translator: Abe Manyo, 2023\n"
+"POT-Creation-Date: 2024-01-17 10:11+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Wil Odoo, 2023\n"
 "Language-Team: Indonesian (https://app.transifex.com/odoo/teams/41243/id/)\n"
 "Language: id\n"
 "MIME-Version: 1.0\n"
@@ -46,6 +45,8 @@ msgid ""
 "<span class=\"fa fa-check-circle\"/>\n"
 "                                Thank you for subscribing!"
 msgstr ""
+"<span class=\"fa fa-check-circle\"/>\n"
+"                                Terima kasih sudah berlangganan!"
 
 #. module: website_mass_mailing
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.s_newsletter_block_form_template
@@ -124,8 +125,8 @@ msgstr "Kontak"
 #. module: website_mass_mailing
 #. odoo-javascript
 #: code:addons/website_mass_mailing/static/src/js/website_mass_mailing.editor.js:0
-msgid "Display Thanks Button"
-msgstr "Tombol Tampilkan Terima Kasih"
+msgid "Display Thanks Message"
+msgstr ""
 
 #. module: website_mass_mailing
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.newsletter_subscribe_options
@@ -136,7 +137,7 @@ msgstr "Langganan Email"
 #. odoo-javascript
 #: code:addons/website_mass_mailing/static/src/js/website_mass_mailing.js:0
 msgid "Error"
-msgstr "Error"
+msgstr "Error!"
 
 #. module: website_mass_mailing
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.newsletter_subscribe_options
@@ -147,18 +148,18 @@ msgstr "Formulir Langganan"
 #. odoo-python
 #: code:addons/website_mass_mailing/controllers/website_form.py:0
 msgid "Mailing List(s) not found!"
-msgstr ""
+msgstr "Mailing List tidak ditemukan!"
 
 #. module: website_mass_mailing
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.newsletter_subscribe_options_common
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.snippets
 msgid "Newsletter"
-msgstr "Buletin"
+msgstr "Surat kabar"
 
 #. module: website_mass_mailing
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.snippets
 msgid "Newsletter Block"
-msgstr ""
+msgstr "Newsletter Block"
 
 #. module: website_mass_mailing
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.snippets
@@ -203,7 +204,7 @@ msgstr "Kegiatan mencurigakan dideteksi oleh Google reCaptcha."
 #. module: website_mass_mailing
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.newsletter_subscribe_options
 msgid "Template"
-msgstr "Templat"
+msgstr "Template"
 
 #. module: website_mass_mailing
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.s_newsletter_subscribe_form

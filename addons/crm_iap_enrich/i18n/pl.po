@@ -3,17 +3,15 @@
 # 	* crm_iap_enrich
 #
 # Translators:
-# Piotr Strębski <strebski@gmail.com>, 2022
-# Maksym <ms@myodoo.pl>, 2023
-# Tadeusz Karpiński <tadeuszkarpinski@gmail.com>, 2023
+# Wil Odoo, 2023
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server saas~15.2\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-02-11 14:34+0000\n"
-"PO-Revision-Date: 2022-09-22 05:45+0000\n"
-"Last-Translator: Tadeusz Karpiński <tadeuszkarpinski@gmail.com>, 2023\n"
+"POT-Creation-Date: 2024-01-17 10:10+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Wil Odoo, 2023\n"
 "Language-Team: Polish (https://app.transifex.com/odoo/teams/41243/pl/)\n"
 "Language: pl\n"
 "MIME-Version: 1.0\n"
@@ -37,9 +35,13 @@ msgid "Allow manual enrich"
 msgstr "Pozwól na ręczne wzbogacenie"
 
 #. module: crm_iap_enrich
+#. odoo-python
+#: code:addons/crm_iap_enrich/models/crm_lead.py:0
+msgid "An error occurred during lead enrichment"
+msgstr ""
+
+#. module: crm_iap_enrich
 #: model:ir.actions.server,name:crm_iap_enrich.ir_cron_lead_enrichment_ir_actions_server
-#: model:ir.cron,cron_name:crm_iap_enrich.ir_cron_lead_enrichment
-#: model:ir.cron,name:crm_iap_enrich.ir_cron_lead_enrichment
 msgid "CRM: enrich leads (IAP)"
 msgstr "CRM: wzbogacanie leadów (IAP)"
 
@@ -76,6 +78,7 @@ msgid "Lead Enrichment (based on email address)"
 msgstr "Wzbogacanie potencjalnych klientów (na podstawie adresu e-mail)"
 
 #. module: crm_iap_enrich
+#. odoo-python
 #: code:addons/crm_iap_enrich/models/crm_lead.py:0
 msgid "Lead enriched based on email address"
 msgstr "Szansa wzbogacona w oparciu o adres e-mail"
@@ -86,16 +89,13 @@ msgid "Lead/Opportunity"
 msgstr "Sygnał/Szansa"
 
 #. module: crm_iap_enrich
+#. odoo-python
 #: code:addons/crm_iap_enrich/models/crm_lead.py:0
 msgid "Not enough credits for Lead Enrichment"
 msgstr "Niewystarczająca liczba punktów dla wzbogacenia leadów"
 
 #. module: crm_iap_enrich
-#: code:addons/crm_iap_enrich/models/crm_lead.py:0
-msgid "Sent batch %s enrich requests: failed with exception %s"
-msgstr "Wysłana partia %s żądań wzbogacenia: nie powiodła się i zwróciła wyjątek %s"
-
-#. module: crm_iap_enrich
+#. odoo-python
 #: code:addons/crm_iap_enrich/models/crm_lead.py:0
 msgid "The leads/opportunities have successfully been enriched"
 msgstr "Leady/szanse zostały z powodzeniem wzbogacone"

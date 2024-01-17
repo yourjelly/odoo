@@ -13,7 +13,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.3alpha1+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-04-14 12:18+0000\n"
+"POT-Creation-Date: 2023-08-28 10:46+0000\n"
 "PO-Revision-Date: 2023-04-14 14:20+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -72,14 +72,12 @@ msgstr "46T - Ventes ABC"
 #. module: l10n_be
 #: model:account.report.line,name:l10n_be.tax_report_line_47
 msgid "47 - Other exempted operations and operations carried out abroad"
-msgstr ""
-"47 - Autres opérations exemptées et autres opérations effectuées à l'étranger"
+msgstr "47 - Autres opérations exemptées et autres opérations effectuées à l'étranger"
 
 #. module: l10n_be
 #: model:account.report.line,name:l10n_be.tax_report_title_operations_sortie_48
 msgid "48 - Credit notes for operations in grids [44] and [46]"
-msgstr ""
-"48 - Notes de crédit relatif aux opérations inscrites en grilles [44] et [46]"
+msgstr "48 - Notes de crédit relatif aux opérations inscrites en grilles [44] et [46]"
 
 #. module: l10n_be
 #: model:account.report.line,name:l10n_be.tax_report_line_48s44
@@ -113,12 +111,8 @@ msgstr "55 - TVA relative aux opérations déclarées en grilles [86] et [88]"
 
 #. module: l10n_be
 #: model:account.report.line,name:l10n_be.tax_report_line_56
-msgid ""
-"56 - VAT on operations in grid [87], with the exception of imports with "
-"reverse charge"
-msgstr ""
-"56 - TVA relative aux opérations déclarées en grille [87], à l'exception des "
-"importations avec report de perception"
+msgid "56 - VAT on operations in grid [87], with the exception of imports with reverse charge"
+msgstr "56 - TVA relative aux opérations déclarées en grille [87], à l'exception des importations avec report de perception"
 
 #. module: l10n_be
 #: model:account.report.line,name:l10n_be.tax_report_line_57
@@ -219,18 +213,6 @@ msgstr "Solde"
 #. module: l10n_be
 #. odoo-python
 #: code:addons/l10n_be/models/template_be.py:0
-msgid "Bank Fees (21% VAT)"
-msgstr "Frais bancaires (21% TVA)"
-
-#. module: l10n_be
-#. odoo-python
-#: code:addons/l10n_be/models/template_be.py:0
-msgid "Bank Fees (No VAT)"
-msgstr "Frais bancaires (Hors TVA)"
-
-#. module: l10n_be
-#. odoo-python
-#: code:addons/l10n_be/models/template_be.py:0
 msgid "Base"
 msgstr "Base"
 
@@ -257,18 +239,6 @@ msgid "Contact"
 msgstr "Contact"
 
 #. module: l10n_be
-#. odoo-python
-#: code:addons/l10n_be/models/template_be.py:0
-msgid "Discount"
-msgstr "Escompte"
-
-#. module: l10n_be
-#. odoo-python
-#: code:addons/l10n_be/models/template_be.py:0
-msgid "Discount Granted"
-msgstr "Escompte accordé"
-
-#. module: l10n_be
 #: model:account.report.line,name:l10n_be.tax_report_title_operations_sortie
 msgid "II Outgoing"
 msgstr "II A la sortie"
@@ -282,12 +252,6 @@ msgstr "III A l'entrée"
 #: model:account.report.line,name:l10n_be.tax_report_title_taxes_dues
 msgid "IV Due"
 msgstr "IV Dues"
-
-#. module: l10n_be
-#. odoo-python
-#: code:addons/l10n_be/models/template_be.py:0
-msgid "Internal Transfers"
-msgstr "Virements internes"
 
 #. module: l10n_be
 #: model:ir.model,name:l10n_be.model_account_journal

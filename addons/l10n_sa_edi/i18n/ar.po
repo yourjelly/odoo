@@ -139,7 +139,8 @@ msgid "Add Debit Note wizard"
 msgstr "إضافة مُعالج إشعار المدين "
 
 #. module: l10n_sa_edi
-#: model:ir.model.fields,help:l10n_sa_edi.field_res_company__l10n_sa_additional_identification_number model:ir.model.fields,help:l10n_sa_edi.field_res_partner__l10n_sa_additional_identification_number
+#: model:ir.model.fields,help:l10n_sa_edi.field_res_company__l10n_sa_additional_identification_number
+#: model:ir.model.fields,help:l10n_sa_edi.field_res_partner__l10n_sa_additional_identification_number
 #: model:ir.model.fields,help:l10n_sa_edi.field_res_users__l10n_sa_additional_identification_number
 msgid "Additional Identification Number for Seller/Buyer"
 msgstr "رقم التعريف الإضافي للبائع/المشتري"
@@ -160,7 +161,8 @@ msgid "Additional Identification Scheme is required for the Seller, and must be 
 msgstr "خطة التعريف الإضافي مطلوب للبائع، ويج أن يكون إما CRN، MOM، MLS، SAG، أو OTH"
 
 #. module: l10n_sa_edi
-#: model:ir.model.fields,help:l10n_sa_edi.field_res_company__l10n_sa_additional_identification_scheme model:ir.model.fields,help:l10n_sa_edi.field_res_partner__l10n_sa_additional_identification_scheme
+#: model:ir.model.fields,help:l10n_sa_edi.field_res_company__l10n_sa_additional_identification_scheme
+#: model:ir.model.fields,help:l10n_sa_edi.field_res_partner__l10n_sa_additional_identification_scheme
 #: model:ir.model.fields,help:l10n_sa_edi.field_res_users__l10n_sa_additional_identification_scheme
 msgid "Additional Identification scheme for Seller/Buyer"
 msgstr "خطة التعريف الإضافي للبائع/المشتري"
@@ -171,8 +173,10 @@ msgid "Are you sure you wish to re-onboard the Journal?"
 msgstr "هل أنت متأكد من أنك ترغب في إعادة تجهيز دفتر اليومية؟"
 
 #. module: l10n_sa_edi
-#: model:ir.model.fields,field_description:l10n_sa_edi.field_res_partner__l10n_sa_edi_building_number model:ir.model.fields,field_description:l10n_sa_edi.field_res_users__l10n_sa_edi_building_number
-#: model_terms:ir.ui.view,arch_db:l10n_sa_edi.sa_partner_address_form model_terms:ir.ui.view,arch_db:l10n_sa_edi.view_company_form
+#: model:ir.model.fields,field_description:l10n_sa_edi.field_res_partner__l10n_sa_edi_building_number
+#: model:ir.model.fields,field_description:l10n_sa_edi.field_res_users__l10n_sa_edi_building_number
+#: model_terms:ir.ui.view,arch_db:l10n_sa_edi.sa_partner_address_form
+#: model_terms:ir.ui.view,arch_db:l10n_sa_edi.view_company_form
 msgid "Building Number"
 msgstr "رقم المبنى"
 
@@ -306,7 +310,8 @@ msgid "Customer"
 msgstr "العميل"
 
 #. module: l10n_sa_edi
-#: model:ir.model.fields,help:l10n_sa_edi.field_account_tax__l10n_sa_is_retention model:ir.model.fields,help:l10n_sa_edi.field_account_tax_template__l10n_sa_is_retention
+#: model:ir.model.fields,help:l10n_sa_edi.field_account_tax__l10n_sa_is_retention
+#: model:ir.model.fields,help:l10n_sa_edi.field_account_tax_template__l10n_sa_is_retention
 msgid "Determines whether or not a tax counts as a Withholding Tax"
 msgstr "يحدد ما إذا كانت الضريبة تُحسب كضريبة احتجاز أم لا"
 
@@ -316,7 +321,8 @@ msgid "Display Name"
 msgstr "اسم العرض"
 
 #. module: l10n_sa_edi
-#: model:ir.model.fields,field_description:l10n_sa_edi.field_account_bank_statement_line__l10n_sa_uuid model:ir.model.fields,field_description:l10n_sa_edi.field_account_move__l10n_sa_uuid
+#: model:ir.model.fields,field_description:l10n_sa_edi.field_account_bank_statement_line__l10n_sa_uuid
+#: model:ir.model.fields,field_description:l10n_sa_edi.field_account_move__l10n_sa_uuid
 #: model:ir.model.fields,field_description:l10n_sa_edi.field_account_payment__l10n_sa_uuid
 msgid "Document UUID (SA)"
 msgstr "UUID الخاص بالمستند (المملكة العربية السعودية)"
@@ -332,7 +338,8 @@ msgid "Errors:"
 msgstr "الأخطاء:"
 
 #. module: l10n_sa_edi
-#: model:ir.model.fields,field_description:l10n_sa_edi.field_account_tax__l10n_sa_exemption_reason_code model:ir.model.fields,field_description:l10n_sa_edi.field_account_tax_template__l10n_sa_exemption_reason_code
+#: model:ir.model.fields,field_description:l10n_sa_edi.field_account_tax__l10n_sa_exemption_reason_code
+#: model:ir.model.fields,field_description:l10n_sa_edi.field_account_tax_template__l10n_sa_exemption_reason_code
 msgid "Exemption Reason Code"
 msgstr "كود سبب الإعفاء"
 
@@ -404,7 +411,8 @@ msgstr ""
 " %s "
 
 #. module: l10n_sa_edi
-#: model:ir.model.fields,help:l10n_sa_edi.field_account_bank_statement_line__l10n_sa_chain_index model:ir.model.fields,help:l10n_sa_edi.field_account_move__l10n_sa_chain_index
+#: model:ir.model.fields,help:l10n_sa_edi.field_account_bank_statement_line__l10n_sa_chain_index
+#: model:ir.model.fields,help:l10n_sa_edi.field_account_move__l10n_sa_chain_index
 #: model:ir.model.fields,help:l10n_sa_edi.field_account_payment__l10n_sa_chain_index
 msgid "Invoice index in chain, set if and only if an in-chain XML was submitted and did not error"
 msgstr "مؤشر الفاتورة في السلسلة. يتم إعداده فقط إذا تم إرسال ملف XML في سلسلة ولم يحدث أي خطأ"
@@ -430,7 +438,8 @@ msgid "Iqama Number"
 msgstr "رقم إقامة "
 
 #. module: l10n_sa_edi
-#: model:ir.model.fields,field_description:l10n_sa_edi.field_account_tax__l10n_sa_is_retention model:ir.model.fields,field_description:l10n_sa_edi.field_account_tax_template__l10n_sa_is_retention
+#: model:ir.model.fields,field_description:l10n_sa_edi.field_account_tax__l10n_sa_is_retention
+#: model:ir.model.fields,field_description:l10n_sa_edi.field_account_tax_template__l10n_sa_is_retention
 msgid "Is Retention"
 msgstr "احتفاظ"
 
@@ -440,7 +449,8 @@ msgid "JSON response from ZATCA could not be decoded"
 msgstr "تعذر فك تشفير رد JSON من زاتكا"
 
 #. module: l10n_sa_edi
-#: model:ir.model,name:l10n_sa_edi.model_account_journal model:ir.model.fields,field_description:l10n_sa_edi.field_l10n_sa_edi_otp_wizard__journal_id
+#: model:ir.model,name:l10n_sa_edi.model_account_journal
+#: model:ir.model.fields,field_description:l10n_sa_edi.field_l10n_sa_edi_otp_wizard__journal_id
 msgid "Journal"
 msgstr "دفتر اليومية"
 
@@ -460,7 +470,8 @@ msgid "Journal could not be onboarded. Please make sure the Company VAT/Identifi
 msgstr "تعذر تجهيز دفتر اليومية. يرجى التأكد من أن رقمي ضريبة القيمة المضافة/رقم التعريف صحيحين."
 
 #. module: l10n_sa_edi
-#: model:ir.model.fields,field_description:l10n_sa_edi.field_res_company__l10n_sa_api_mode model:ir.model.fields,field_description:l10n_sa_edi.field_res_config_settings__l10n_sa_api_mode
+#: model:ir.model.fields,field_description:l10n_sa_edi.field_res_company__l10n_sa_api_mode
+#: model:ir.model.fields,field_description:l10n_sa_edi.field_res_config_settings__l10n_sa_api_mode
 msgid "L10N Sa Api Mode"
 msgstr "L10N Sa Api Mode"
 
@@ -626,8 +637,10 @@ msgid "Please, set the OTP you received from ZATCA in the input below then valid
 msgstr "يرجى إعداد كلمة السر لمرة واحدة التي قمت باستلامها من زاتكا في المدخل أدناه، ثم قم بالتصديق."
 
 #. module: l10n_sa_edi
-#: model:ir.model.fields,field_description:l10n_sa_edi.field_res_partner__l10n_sa_edi_plot_identification model:ir.model.fields,field_description:l10n_sa_edi.field_res_users__l10n_sa_edi_plot_identification
-#: model_terms:ir.ui.view,arch_db:l10n_sa_edi.sa_partner_address_form model_terms:ir.ui.view,arch_db:l10n_sa_edi.view_company_form
+#: model:ir.model.fields,field_description:l10n_sa_edi.field_res_partner__l10n_sa_edi_plot_identification
+#: model:ir.model.fields,field_description:l10n_sa_edi.field_res_users__l10n_sa_edi_plot_identification
+#: model_terms:ir.ui.view,arch_db:l10n_sa_edi.sa_partner_address_form
+#: model_terms:ir.ui.view,arch_db:l10n_sa_edi.view_company_form
 msgid "Plot Identification"
 msgstr "معرّف قطعة الأرض"
 
@@ -749,7 +762,8 @@ msgid "Specifies if the Compliance Checks have been completed successfully"
 msgstr "يحدد ما إذا كان قد تم إكمال فحوصات الامتثال بنجاح أم لا"
 
 #. module: l10n_sa_edi
-#: model:ir.model.fields,help:l10n_sa_edi.field_res_company__l10n_sa_api_mode model:ir.model.fields,help:l10n_sa_edi.field_res_config_settings__l10n_sa_api_mode
+#: model:ir.model.fields,help:l10n_sa_edi.field_res_company__l10n_sa_api_mode
+#: model:ir.model.fields,help:l10n_sa_edi.field_res_config_settings__l10n_sa_api_mode
 msgid "Specifies which API the system should use"
 msgstr "يحدد نظام الواجهة البرمجية الذي يجب استخدامه"
 
@@ -779,7 +793,8 @@ msgid "Tax"
 msgstr "الضريبة"
 
 #. module: l10n_sa_edi
-#: model:ir.model.fields,help:l10n_sa_edi.field_account_tax__l10n_sa_exemption_reason_code model:ir.model.fields,help:l10n_sa_edi.field_account_tax_template__l10n_sa_exemption_reason_code
+#: model:ir.model.fields,help:l10n_sa_edi.field_account_tax__l10n_sa_exemption_reason_code
+#: model:ir.model.fields,help:l10n_sa_edi.field_account_tax_template__l10n_sa_exemption_reason_code
 msgid "Tax Exemption Reason Code (ZATCA)"
 msgstr "كود سبب الإعفاء (زاتكا)"
 
@@ -839,13 +854,15 @@ msgid "UBL 2.1 (ZATCA)"
 msgstr "UBL 2.1 (زاتكا)"
 
 #. module: l10n_sa_edi
-#: model:ir.model.fields,help:l10n_sa_edi.field_account_bank_statement_line__l10n_sa_uuid model:ir.model.fields,help:l10n_sa_edi.field_account_move__l10n_sa_uuid
+#: model:ir.model.fields,help:l10n_sa_edi.field_account_bank_statement_line__l10n_sa_uuid
+#: model:ir.model.fields,help:l10n_sa_edi.field_account_move__l10n_sa_uuid
 #: model:ir.model.fields,help:l10n_sa_edi.field_account_payment__l10n_sa_uuid
 msgid "Universally unique identifier of the Invoice"
 msgstr "المعرف الفريد عالمياً للفاتورة"
 
 #. module: l10n_sa_edi
-#: model:ir.model.fields,field_description:l10n_sa_edi.field_account_bank_statement_line__l10n_sa_invoice_signature model:ir.model.fields,field_description:l10n_sa_edi.field_account_move__l10n_sa_invoice_signature
+#: model:ir.model.fields,field_description:l10n_sa_edi.field_account_bank_statement_line__l10n_sa_invoice_signature
+#: model:ir.model.fields,field_description:l10n_sa_edi.field_account_move__l10n_sa_invoice_signature
 #: model:ir.model.fields,field_description:l10n_sa_edi.field_account_payment__l10n_sa_invoice_signature
 msgid "Unsigned XML Signature"
 msgstr "توقيع XML غير مسند"
@@ -964,6 +981,12 @@ msgstr ""
 "                                بمجرد أن تقوم بتحديد الواجهة البرمجية الصحيحة، يمكنك بدء عملية التجهيز عن طريق الذهاب إلى دفاتر اليومية وتحديد الخيارات تحت علامة تبويب زاتكا."
 
 #. module: l10n_sa_edi
+#. odoo-python
+#: code:addons/l10n_sa_edi/models/res_company.py:0
+msgid "You cannot change the ZATCA Submission Mode once it has been set to Production"
+msgstr ""
+
+#. module: l10n_sa_edi
 #: code:addons/l10n_sa_edi/wizard/l10n_sa_edi_otp_wizard.py:0
 msgid "You need to provide an OTP to be able to request a CCSID"
 msgstr "عليك تقديم كلمة مرور لمرة واحدة قبل طلب CCSID "
@@ -999,7 +1022,8 @@ msgid "ZATCA account.move chain sequence"
 msgstr "تسلسل سلسلة account.move لزاتكا"
 
 #. module: l10n_sa_edi
-#: model:ir.model.fields,field_description:l10n_sa_edi.field_account_bank_statement_line__l10n_sa_chain_index model:ir.model.fields,field_description:l10n_sa_edi.field_account_move__l10n_sa_chain_index
+#: model:ir.model.fields,field_description:l10n_sa_edi.field_account_bank_statement_line__l10n_sa_chain_index
+#: model:ir.model.fields,field_description:l10n_sa_edi.field_account_move__l10n_sa_chain_index
 #: model:ir.model.fields,field_description:l10n_sa_edi.field_account_payment__l10n_sa_chain_index
 msgid "ZATCA chain index"
 msgstr "مؤشر سلسلة زاتكا"
@@ -1025,7 +1049,8 @@ msgid "not(//ancestor-or-self::ext:UBLExtensions)"
 msgstr "not(//ancestor-or-self::ext:UBLExtensions)"
 
 #. module: l10n_sa_edi
-#: model_terms:ir.ui.view,arch_db:l10n_sa_edi.export_sa_zatca_ubl_extensions model_terms:ir.ui.view,arch_db:l10n_sa_edi.ubl_21_InvoiceType_zatca
+#: model_terms:ir.ui.view,arch_db:l10n_sa_edi.export_sa_zatca_ubl_extensions
+#: model_terms:ir.ui.view,arch_db:l10n_sa_edi.ubl_21_InvoiceType_zatca
 msgid "urn:oasis:names:specification:ubl:dsig:enveloped:xades"
 msgstr "urn:oasis:names:specification:ubl:dsig:enveloped:xades"
 
@@ -1035,7 +1060,8 @@ msgid "urn:oasis:names:specification:ubl:signature:1"
 msgstr "urn:oasis:names:specification:ubl:signature:1"
 
 #. module: l10n_sa_edi
-#: model_terms:ir.ui.view,arch_db:l10n_sa_edi.export_sa_zatca_ubl_extensions model_terms:ir.ui.view,arch_db:l10n_sa_edi.ubl_21_InvoiceType_zatca
+#: model_terms:ir.ui.view,arch_db:l10n_sa_edi.export_sa_zatca_ubl_extensions
+#: model_terms:ir.ui.view,arch_db:l10n_sa_edi.ubl_21_InvoiceType_zatca
 msgid "urn:oasis:names:specification:ubl:signature:Invoice"
 msgstr "urn:oasis:names:specification:ubl:signature:Invoice"
 

@@ -3,16 +3,16 @@
 # 	* project_timesheet_holidays
 #
 # Translators:
-# Sergio Zanchetta <primes2h@gmail.com>, 2022
-# Martin Trigaux, 2022
+# Wil Odoo, 2023
+# Marianna Ciofani, 2023
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0+e\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-16 13:49+0000\n"
-"PO-Revision-Date: 2022-09-22 05:54+0000\n"
-"Last-Translator: Martin Trigaux, 2022\n"
+"POT-Creation-Date: 2024-01-17 10:10+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Marianna Ciofani, 2023\n"
 "Language-Team: Italian (https://app.transifex.com/odoo/teams/41243/it/)\n"
 "Language: it\n"
 "MIME-Version: 1.0\n"
@@ -54,13 +54,13 @@ msgstr "Dipendente"
 
 #. module: project_timesheet_holidays
 #: model:ir.model.fields,field_description:project_timesheet_holidays.field_hr_leave_type__timesheet_generate
-msgid "Generate Timesheet"
-msgstr "Generare foglio ore"
+msgid "Generate Timesheets"
+msgstr "Genera fogli ore"
 
 #. module: project_timesheet_holidays
 #: model_terms:ir.ui.view,arch_db:project_timesheet_holidays.hr_holiday_status_view_form_inherit
 msgid "Generate timesheets when validating time off requests of this type"
-msgstr ""
+msgstr "Genera fogli ore quando convalidi le richieste di ferie di questo tipo"
 
 #. module: project_timesheet_holidays
 #: model:ir.model.fields,field_description:project_timesheet_holidays.field_account_analytic_line__global_leave_id
@@ -86,7 +86,7 @@ msgstr "Progetto interno"
 #. module: project_timesheet_holidays
 #: model:ir.model.fields,field_description:project_timesheet_holidays.field_project_task__is_timeoff_task
 msgid "Is Time off Task"
-msgstr ""
+msgstr "È un'attività ferie"
 
 #. module: project_timesheet_holidays
 #. odoo-python
@@ -116,12 +116,12 @@ msgstr "Lavoro"
 #. module: project_timesheet_holidays
 #: model:ir.model.fields,help:project_timesheet_holidays.field_res_config_settings__internal_project_id
 msgid "The default project used when automatically generating timesheets via time off requests. You can specify another project on each time off type individually."
-msgstr ""
+msgstr "Progetto predefinito utilizzato quando vengono creati automaticamente fogli ore attraverso le richieste di ferie. Puoi specificare un altro progetto singolarmente su ogni tipo di ferie."
 
 #. module: project_timesheet_holidays
 #: model:ir.model.fields,help:project_timesheet_holidays.field_res_config_settings__leave_timesheet_task_id
 msgid "The default task used when automatically generating timesheets via time off requests. You can specify another task on each time off type individually."
-msgstr ""
+msgstr "Attività predefinita utilizzata quando vengono creati automaticamente fogli ore attraverso le richieste di ferie. Puoi specificare un'altra attività singolarmente su ogni tipo di ferie."
 
 #. module: project_timesheet_holidays
 #. odoo-python
@@ -135,13 +135,13 @@ msgstr "Ferie"
 #. odoo-python
 #: code:addons/project_timesheet_holidays/models/hr_holidays.py:0
 #: code:addons/project_timesheet_holidays/models/resource_calendar_leaves.py:0
-msgid "Time Off (%s/%s)"
-msgstr "Ferie (%s/%s)"
+msgid "Time Off (%(index)s/%(total)s)"
+msgstr ""
 
 #. module: project_timesheet_holidays
 #: model:ir.model.fields,field_description:project_timesheet_holidays.field_account_analytic_line__holiday_id
 msgid "Time Off Request"
-msgstr ""
+msgstr "Richiesta ferie"
 
 #. module: project_timesheet_holidays
 #: model:ir.model.fields,field_description:project_timesheet_holidays.field_res_company__leave_timesheet_task_id
@@ -157,39 +157,33 @@ msgstr "Tipologia ferie"
 #. module: project_timesheet_holidays
 #: model:ir.model.fields,field_description:project_timesheet_holidays.field_project_task__leave_types_count
 msgid "Time Off Types Count"
-msgstr ""
+msgstr "Numero tipi di ferie"
 
 #. module: project_timesheet_holidays
 #: model_terms:ir.ui.view,arch_db:project_timesheet_holidays.hr_holiday_status_view_form_inherit
 msgid "Timesheets"
-msgstr ""
+msgstr "Fogli ore"
 
 #. module: project_timesheet_holidays
 #. odoo-python
 #: code:addons/project_timesheet_holidays/models/account_analytic.py:0
 msgid "View Time Off"
-msgstr ""
+msgstr "Mostra ferie"
 
 #. module: project_timesheet_holidays
 #. odoo-python
 #: code:addons/project_timesheet_holidays/models/account_analytic.py:0
 msgid "You cannot create timesheets for a task that is linked to a time off type. Please use the Time Off application to request new time off instead."
-msgstr ""
-
-#. module: project_timesheet_holidays
-#. odoo-python
-#: code:addons/project_timesheet_holidays/models/account_analytic.py:0
-msgid "You cannot delete timesheets linked to time off. Please, cancel the time off instead."
-msgstr ""
+msgstr "Non è possibile creare fogli ore per un'attività collegata ad un tipo di ferie. Per favore, utilizza l'applicazione Ferie per effettuare una nuova richiesta."
 
 #. module: project_timesheet_holidays
 #. odoo-python
 #: code:addons/project_timesheet_holidays/models/account_analytic.py:0
 msgid "You cannot delete timesheets that are linked to time off requests. Please cancel your time off request from the Time Off application instead."
-msgstr ""
+msgstr "Non è possibile eliminare i fogli ore legati alle richieste di ferie. Per favore, elimina la richiesta di ferie dall'applicazione stessa."
 
 #. module: project_timesheet_holidays
 #. odoo-python
 #: code:addons/project_timesheet_holidays/models/account_analytic.py:0
 msgid "You cannot modify timesheets that are linked to time off requests. Please use the Time Off application to modify your time off requests instead."
-msgstr ""
+msgstr "Non è possibile modificare i fogli ore legati alle richieste di ferie. Utilizza l'applicazione Ferie per modificare le tue richieste."

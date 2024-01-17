@@ -4,12 +4,13 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.1alpha1+e\n"
+"Project-Id-Version: Odoo Server 17.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-12-12 12:23+0000\n"
-"PO-Revision-Date: 2023-12-12 12:23+0000\n"
+"POT-Creation-Date: 2023-12-12 12:18+0000\n"
+"PO-Revision-Date: 2023-12-11 08:49+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
@@ -33,34 +34,18 @@ msgstr "'QR-Rechnung-%s' % object.name"
 
 #. module: l10n_ch
 #: model:account.report.line,name:l10n_ch.account_tax_report_line_chtax_200
-msgid ""
-"200 - Total amount of agreed or collected consideration incl. from supplies "
-"opted for taxation, transfer of supplies acc. to the notification procedure "
-"and supplies provided abroad (worldwide turnover)"
-msgstr ""
-"200 - Total der vereinbarten bzw. vereinnahmten Entgelte, inkl. optierte "
-"Leistungen im Ausland"
+msgid "200 - Total amount of agreed or collected consideration incl. from supplies opted for taxation, transfer of supplies acc. to the notification procedure and supplies provided abroad (worldwide turnover)"
+msgstr "200 - Total der vereinbarten bzw. vereinnahmten Entgelte, inkl. optierte Leistungen im Ausland"
 
 #. module: l10n_ch
 #: model:account.report.line,name:l10n_ch.account_tax_report_line_chtax_205
-msgid ""
-"205 - Consideration reported in Ref. 200 from supplies exempt from the tax "
-"without credit (art. 21) where the option for their taxation according to "
-"art. 22 has been exercised"
-msgstr ""
-"205 - In Ziffer 200 enthaltene Entgelte aus von der Steuer ausgenommenen "
-"Leistungen (Art. 21), für welche nach Art. 22 optiert wird"
+msgid "205 - Consideration reported in Ref. 200 from supplies exempt from the tax without credit (art. 21) where the option for their taxation according to art. 22 has been exercised"
+msgstr "205 - In Ziffer 200 enthaltene Entgelte aus von der Steuer ausgenommenen Leistungen (Art. 21), für welche nach Art. 22 optiert wird"
 
 #. module: l10n_ch
 #: model:account.report.line,name:l10n_ch.account_tax_report_line_chtax_220_289
-msgid ""
-"220 - Supplies exempt from the tax (e.g. export, art. 23) and supplies "
-"provided to institutional and individual beneficiaries that are exempt from "
-"liability for tax (art. 107 para. 1 lit. a)"
-msgstr ""
-"220 - Von der Steuer befreite Leistungen (u.a. Exporte, Art. 23), von der "
-"Steuer befreite Leistungen an begünstigte Einrichtungen und Personen (Art. "
-"107 Abs. 1 Bst. a)"
+msgid "220 - Supplies exempt from the tax (e.g. export, art. 23) and supplies provided to institutional and individual beneficiaries that are exempt from liability for tax (art. 107 para. 1 lit. a)"
+msgstr "220 - Von der Steuer befreite Leistungen (u.a. Exporte, Art. 23), von der Steuer befreite Leistungen an begünstigte Einrichtungen und Personen (Art. 107 Abs. 1 Bst. a)"
 
 #. module: l10n_ch
 #: model:account.report.line,name:l10n_ch.account_tax_report_line_chtax_221
@@ -69,20 +54,13 @@ msgstr "221 - Leistungen im Ausland"
 
 #. module: l10n_ch
 #: model:account.report.line,name:l10n_ch.account_tax_report_line_chtax_225
-msgid ""
-"225 - Transfer of supplies according to the notification procedure (art. 38,"
-" please submit Form 764)"
+msgid "225 - Transfer of supplies according to the notification procedure (art. 38, please submit Form 764)"
 msgstr "225 - Übertragung im Meldeverfahren (Art. 38)"
 
 #. module: l10n_ch
 #: model:account.report.line,name:l10n_ch.account_tax_report_line_chtax_230
-msgid ""
-"230 - Supplies provided on Swiss territory exempt from the tax without "
-"credit (art. 21) and where the option for their taxation according to art. "
-"22 has not been exercised"
-msgstr ""
-"230 - Von der Steuer ausgenommene Inlandleistungen (Art. 21), für die nicht "
-"nach Art. 22 optiert wird"
+msgid "230 - Supplies provided on Swiss territory exempt from the tax without credit (art. 21) and where the option for their taxation according to art. 22 has not been exercised"
+msgstr "230 - Von der Steuer ausgenommene Inlandleistungen (Art. 21), für die nicht nach Art. 22 optiert wird"
 
 #. module: l10n_ch
 #: model:account.report.line,name:l10n_ch.account_tax_report_line_chtax_235
@@ -91,11 +69,8 @@ msgstr "235 - Entgeltsminderungen wie Skonti, Rabatte usw."
 
 #. module: l10n_ch
 #: model:account.report.line,name:l10n_ch.account_tax_report_line_chtax_280
-msgid ""
-"280 - Miscellaneous (e.g. land value, purchase prices in case of margin "
-"taxation)"
-msgstr ""
-"280 - Diverses (z.B. Wert des Bodens, Ankaufspreise Margenbesteuerung)"
+msgid "280 - Miscellaneous (e.g. land value, purchase prices in case of margin taxation)"
+msgstr "280 - Diverses (z.B. Wert des Bodens, Ankaufspreise Margenbesteuerung)"
 
 #. module: l10n_ch
 #: model:account.report.line,name:l10n_ch.account_tax_report_line_chtax_289
@@ -164,8 +139,7 @@ msgstr "343a - Beherbergungssatz (3.8%): Leistungen CHF ab 01.01.2024"
 
 #. module: l10n_ch
 #: model:account.report.line,name:l10n_ch.account_tax_report_line_chtax_343b
-msgid ""
-"343b - Accommodation rate (3,8%): Tax amount CHF / cent. from 01.01.2024"
+msgid "343b - Accommodation rate (3,8%): Tax amount CHF / cent. from 01.01.2024"
 msgstr "343b - Beherbergungssatz (3.8%): Steuer CHF / Rp. ab 01.01.2024"
 
 #. module: l10n_ch
@@ -210,22 +184,13 @@ msgstr "410 - Einlageentsteuerung (Art. 32)"
 
 #. module: l10n_ch
 #: model:account.report.line,name:l10n_ch.account_tax_report_line_chtax_415
-msgid ""
-"415 - Correction of the input tax deduction: mixed use (art. 30), own use "
-"(art. 31)"
-msgstr ""
-"415 - Vorsteuerkorrekturen: gemischte Verwendung (Art. 30), Eigenverbrauch "
-"(Art. 31)"
+msgid "415 - Correction of the input tax deduction: mixed use (art. 30), own use (art. 31)"
+msgstr "415 - Vorsteuerkorrekturen: gemischte Verwendung (Art. 30), Eigenverbrauch (Art. 31)"
 
 #. module: l10n_ch
 #: model:account.report.line,name:l10n_ch.account_tax_report_line_chtax_420
-msgid ""
-"420 - Reduction of the input tax deduction: Flow of funds, which are not "
-"deemed to be consideration, such as subsidies, tourist charges (art. 33 "
-"para. 2)"
-msgstr ""
-"420 - Vorsteuerkürzungen: Nicht-Entgelte wie Subventionen, Tourismusabgaben "
-"(Art. 33 Abs. 2)"
+msgid "420 - Reduction of the input tax deduction: Flow of funds, which are not deemed to be consideration, such as subsidies, tourist charges (art. 33 para. 2)"
+msgstr "420 - Vorsteuerkürzungen: Nicht-Entgelte wie Subventionen, Tourismusabgaben (Art. 33 Abs. 2)"
 
 #. module: l10n_ch
 #: model:account.report.line,name:l10n_ch.account_tax_report_line_chtax_479
@@ -244,18 +209,12 @@ msgstr "510 - Guthaben der steuerpflichtigen Person"
 
 #. module: l10n_ch
 #: model:account.report.line,name:l10n_ch.account_tax_report_line_chtax_900
-msgid ""
-"900 - Subsidies, tourist funds collected by tourist offices, contributions "
-"from cantonal water, sewage or waste funds (art. 18 para. 2 lit. a to c)"
-msgstr ""
-"900 - Subventionen, durch Kurvereine eingenommene Tourismusabgaben, "
-"Entsorgungs- und Wasserwerkbeiträge (Bst. a-c)"
+msgid "900 - Subsidies, tourist funds collected by tourist offices, contributions from cantonal water, sewage or waste funds (art. 18 para. 2 lit. a to c)"
+msgstr "900 - Subventionen, durch Kurvereine eingenommene Tourismusabgaben, Entsorgungs- und Wasserwerkbeiträge (Bst. a-c)"
 
 #. module: l10n_ch
 #: model:account.report.line,name:l10n_ch.account_tax_report_line_chtax_910
-msgid ""
-"910 - Donations, dividends, payments of damages etc. (art. 18 para. 2 lit. d"
-" to l)"
+msgid "910 - Donations, dividends, payments of damages etc. (art. 18 para. 2 lit. d to l)"
 msgstr "910 - Spenden, Dividenden, Schadenersatz usw."
 
 #. module: l10n_ch
@@ -342,7 +301,7 @@ msgstr "Bankkonten"
 #. module: l10n_ch
 #: model:ir.model,name:l10n_ch.model_account_setup_bank_manual_config
 msgid "Bank setup manual config"
-msgstr "Bank-Konfiguration Bedienungsanleitung"
+msgstr "Manuelle Konfiguration der Bankeinstellung"
 
 #. module: l10n_ch
 #: model_terms:ir.ui.view,arch_db:l10n_ch.l10n_ch_qr_invoice_wizard_form
@@ -420,7 +379,7 @@ msgstr ""
 #. module: l10n_ch
 #: model:ir.model,name:l10n_ch.model_account_move
 msgid "Journal Entry"
-msgstr "Buchungssatz"
+msgstr "Journalbuchung"
 
 #. module: l10n_ch
 #: model:ir.model.fields,field_description:l10n_ch.field_account_setup_bank_manual_config__l10n_ch_display_qr_bank_options
@@ -492,9 +451,7 @@ msgstr "Zahlungen"
 #. module: l10n_ch
 #. odoo-python
 #: code:addons/l10n_ch/models/account_payment.py:0
-msgid ""
-"Please fill in a correct QRR reference in the payment reference. The banks "
-"will refuse your payment file otherwise."
+msgid "Please fill in a correct QRR reference in the payment reference. The banks will refuse your payment file otherwise."
 msgstr ""
 
 #. module: l10n_ch
@@ -505,14 +462,8 @@ msgstr ""
 #. module: l10n_ch
 #: model:ir.model.fields,help:l10n_ch.field_account_setup_bank_manual_config__l10n_ch_qr_iban
 #: model:ir.model.fields,help:l10n_ch.field_res_partner_bank__l10n_ch_qr_iban
-msgid ""
-"Put the QR-IBAN here for your own bank accounts.  That way, you can still "
-"use the main IBAN in the Account Number while you will see the QR-IBAN for "
-"the barcode.  "
-msgstr ""
-"Tragen Sie hier die QR-IBAN für Ihre eigenen Bankkonten ein. Auf diese Weise"
-" können Sie weiterhin die Haupt-IBAN in der Kontonummer verwenden, während "
-"Sie die QR-IBAN für den Barcode sehen werden. "
+msgid "Put the QR-IBAN here for your own bank accounts.  That way, you can still use the main IBAN in the Account Number while you will see the QR-IBAN for the barcode.  "
+msgstr "Tragen Sie hier die QR-IBAN für Ihre eigenen Bankkonten ein. Auf diese Weise können Sie weiterhin die Haupt-IBAN in der Kontonummer verwenden, während Sie die QR-IBAN für den Barcode sehen werden. "
 
 #. module: l10n_ch
 #: model_terms:ir.ui.view,arch_db:l10n_ch.l10n_ch_qr_invoice_wizard_form
@@ -560,7 +511,7 @@ msgstr ""
 #. module: l10n_ch
 #: model:ir.model,name:l10n_ch.model_ir_actions_report
 msgid "Report Action"
-msgstr ""
+msgstr "Berichtsaktion"
 
 #. module: l10n_ch
 #. odoo-python
@@ -636,23 +587,14 @@ msgstr ""
 #. module: l10n_ch
 #. odoo-python
 #: code:addons/l10n_ch/models/res_bank.py:0
-msgid ""
-"The partner must have a complete postal address (street, zip, city and "
-"country)."
-msgstr ""
-"Der Partner muss eine vollständige Postanschrift haben (Straße, "
-"Postleitzahl, Ort und Land)."
+msgid "The partner must have a complete postal address (street, zip, city and country)."
+msgstr "Der Partner muss eine vollständige Postanschrift haben (Straße, Postleitzahl, Ort und Land)."
 
 #. module: l10n_ch
 #. odoo-python
 #: code:addons/l10n_ch/models/res_bank.py:0
-msgid ""
-"The partner set on the bank account meant to receive the payment (%s) must "
-"have a complete postal address (street, zip, city and country)."
-msgstr ""
-"Der Partner des Bankkontos, auf das die Zahlung überwiesen werden soll (%s),"
-" muss eine vollständige Postanschrift haben (Straße, Postleitzahl, Ort und "
-"Land)."
+msgid "The partner set on the bank account meant to receive the payment (%s) must have a complete postal address (street, zip, city and country)."
+msgstr "Der Partner des Bankkontos, auf das die Zahlung überwiesen werden soll (%s), muss eine vollständige Postanschrift haben (Straße, Postleitzahl, Ort und Land)."
 
 #. module: l10n_ch
 #: model_terms:ir.ui.view,arch_db:l10n_ch.l10n_ch_qr_invoice_wizard_form
@@ -666,18 +608,10 @@ msgstr ""
 #. module: l10n_ch
 #. odoo-python
 #: code:addons/l10n_ch/models/res_bank.py:0
-msgid ""
-"When using a QR-IBAN as the destination account of a QR-code, the payment "
-"reference must be a QR-reference."
-msgstr ""
-"Wenn eine QR-IBAN als Zielkonto eines QR-Codes verwendet wird, muss die "
-"Zahlungsreferenz eine QR-Referenz sein."
+msgid "When using a QR-IBAN as the destination account of a QR-code, the payment reference must be a QR-reference."
+msgstr "Wenn eine QR-IBAN als Zielkonto eines QR-Codes verwendet wird, muss die Zahlungsreferenz eine QR-Referenz sein."
 
 #. module: l10n_ch
 #: model:ir.model.fields,help:l10n_ch.field_account_journal__invoice_reference_model
-msgid ""
-"You can choose different models for each type of reference. The default one "
-"is the Odoo reference."
-msgstr ""
-"Sie können für jede Art von Referenz verschiedene Modelle auswählen. Die "
-"Standardeinstellung ist die Odoo-Referenz."
+msgid "You can choose different models for each type of reference. The default one is the Odoo reference."
+msgstr "Sie können für jede Art von Referenz verschiedene Modelle auswählen. Die Standardeinstellung ist die Odoo-Referenz."

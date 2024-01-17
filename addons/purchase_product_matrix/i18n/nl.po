@@ -3,17 +3,15 @@
 # 	* purchase_product_matrix
 #
 # Translators:
-# Martin Trigaux, 2022
-# Jolien De Paepe, 2023
-# Erwin van der Ploeg <erwin@odooexperts.nl>, 2023
+# Wil Odoo, 2023
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0beta\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:55+0000\n"
-"PO-Revision-Date: 2022-09-22 05:54+0000\n"
-"Last-Translator: Erwin van der Ploeg <erwin@odooexperts.nl>, 2023\n"
+"POT-Creation-Date: 2024-01-17 10:10+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Wil Odoo, 2023\n"
 "Language-Team: Dutch (https://app.transifex.com/odoo/teams/41243/nl/)\n"
 "Language: nl\n"
 "MIME-Version: 1.0\n"
@@ -30,7 +28,7 @@ msgstr "Kenmerkwaardes"
 #. odoo-javascript
 #: code:addons/purchase_product_matrix/static/src/js/purchase_product_field.js:0
 msgid "Edit Configuration"
-msgstr "Configuratie wijzigen"
+msgstr "Wijzig configuratie"
 
 #. module: purchase_product_matrix
 #: model:ir.model.fields,field_description:purchase_product_matrix.field_purchase_order__grid
@@ -49,12 +47,8 @@ msgstr "Matrix update"
 
 #. module: purchase_product_matrix
 #: model:ir.model.fields,help:purchase_product_matrix.field_purchase_order__report_grids
-msgid ""
-"If set, the matrix of configurable products will be shown on the report of "
-"this order."
-msgstr ""
-"Indien ingesteld, wordt de matrix van configureerbare producten getoond in "
-"het rapport van deze order."
+msgid "If set, the matrix of configurable products will be shown on the report of this order."
+msgstr "Indien ingesteld, wordt de matrix van configureerbare producten getoond in het rapport van deze order."
 
 #. module: purchase_product_matrix
 #: model:ir.model.fields,field_description:purchase_product_matrix.field_purchase_order_line__is_configurable_product
@@ -115,9 +109,5 @@ msgstr "Of de matrixweergave een nieuwe matrix bevat om toe te voegen of niet."
 #. module: purchase_product_matrix
 #. odoo-python
 #: code:addons/purchase_product_matrix/models/purchase.py:0
-msgid ""
-"You cannot change the quantity of a product present in multiple purchase "
-"lines."
-msgstr ""
-"Je kunt de hoeveelheid van een product aanwezig in meerdere "
-"inkooporderregels niet wijzigen."
+msgid "You cannot change the quantity of a product present in multiple purchase lines."
+msgstr "Je kunt de hoeveelheid van een product aanwezig in meerdere inkooporderregels niet wijzigen."

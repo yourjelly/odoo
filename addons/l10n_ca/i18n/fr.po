@@ -6,10 +6,11 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.4alpha1+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-07-17 07:24+0000\n"
+"POT-Creation-Date: 2023-07-17 07:19+0000\n"
 "PO-Revision-Date: 2023-07-17 07:24+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
@@ -57,13 +58,8 @@ msgstr "104 - 204 - Redressements de taxe"
 
 #. module: l10n_ca
 #: model:account.report.line,name:l10n_ca.l10n_ca_tr_gsthst_104
-msgid ""
-"104 - Adjustments to be added to the net tax for the reporting period (for "
-"example, the GST/HST obtained from the recovery of a bad debt)."
-msgstr ""
-"104 - Redressements à ajouter à la taxe nette pour la pour la période de "
-"déclaration (par exemple, la TPS/TVH obtenue suite au recouvrement d'une "
-"créance irrécouvrable"
+msgid "104 - Adjustments to be added to the net tax for the reporting period (for example, the GST/HST obtained from the recovery of a bad debt)."
+msgstr "104 - Redressements à ajouter à la taxe nette pour la pour la période de déclaration (par exemple, la TPS/TVH obtenue suite au recouvrement d'une créance irrécouvrable"
 
 #. module: l10n_ca
 #: model:account.report.line,name:l10n_ca.l10n_ca_tr_qst_105_205
@@ -82,14 +78,8 @@ msgstr "106 - 206 - CTI/RTI"
 
 #. module: l10n_ca
 #: model:account.report.line,name:l10n_ca.l10n_ca_tr_gsthst_106
-msgid ""
-"106 - GST/HST you paid or that is payable by you on qualifying expenses "
-"(input tax credits – ITCs) for the current period and any eligible unclaimed"
-" ITCs from a previous period"
-msgstr ""
-"106 - TPS/TVH payée ou payable sur les dépenses admissibles (crédits de "
-"taxes sur les intrants  CTIs) pour la période courante et les CTI "
-"admissibles non demandés lors d'une période précédente"
+msgid "106 - GST/HST you paid or that is payable by you on qualifying expenses (input tax credits – ITCs) for the current period and any eligible unclaimed ITCs from a previous period"
+msgstr "106 - TPS/TVH payée ou payable sur les dépenses admissibles (crédits de taxes sur les intrants  CTIs) pour la période courante et les CTI admissibles non demandés lors d'une période précédente"
 
 #. module: l10n_ca
 #: model:account.report.line,name:l10n_ca.l10n_ca_tr_qst_107_207
@@ -98,19 +88,13 @@ msgstr "107 - 207 - Redressements de CTI/RTI et autres redressements"
 
 #. module: l10n_ca
 #: model:account.report.line,name:l10n_ca.l10n_ca_tr_gsthst_107
-msgid ""
-"107 - Adjustments to be deducted when determining the net tax for the "
-"reporting period (for example, the GST/HST included in a bad debt)"
-msgstr ""
-"107 - Redressements à déduire de la taxe nette pour la période de "
-"déclaration (par exemple, la TPS/TVH comprise dans une créance "
-"irrécouvrable)"
+msgid "107 - Adjustments to be deducted when determining the net tax for the reporting period (for example, the GST/HST included in a bad debt)"
+msgstr "107 - Redressements à déduire de la taxe nette pour la période de déclaration (par exemple, la TPS/TVH comprise dans une créance irrécouvrable)"
 
 #. module: l10n_ca
 #: model:account.report.line,name:l10n_ca.l10n_ca_tr_qst_108_208
 msgid "108 - 208 - ITCs/ITRs and adjustments"
-msgstr ""
-"108 - 208 - Total des redressements de CTI/RTI et autres redressements "
+msgstr "108 - 208 - Total des redressements de CTI/RTI et autres redressements "
 
 #. module: l10n_ca
 #: model:account.report.line,name:l10n_ca.l10n_ca_tr_gsthst_108
@@ -140,9 +124,7 @@ msgstr "110 - Acomptes provisionnels annuels et autres montants"
 #. module: l10n_ca
 #: model:account.report.line,name:l10n_ca.l10n_ca_tr_qst_111_211
 msgid "111 - 211 - Tax public service bodies' rebate"
-msgstr ""
-"111 - 211 - Remboursements de taxe à l'intention des Organismes de Service "
-"Public"
+msgstr "111 - 211 - Remboursements de taxe à l'intention des Organismes de Service Public"
 
 #. module: l10n_ca
 #: model:account.report.line,name:l10n_ca.l10n_ca_tr_gsthst_111
@@ -176,12 +158,8 @@ msgstr "113C - Solde"
 
 #. module: l10n_ca
 #: model:account.report.line,name:l10n_ca.l10n_ca_tr_qst_114_214
-msgid ""
-"114 - 214 - Tax payable on taxable immovables or taxable carbon emission "
-"allowances"
-msgstr ""
-"114 -214 - Taxe à payer à l'égard d'un immeuble taxable ou d'unités "
-"d'émission taxables"
+msgid "114 - 214 - Tax payable on taxable immovables or taxable carbon emission allowances"
+msgstr "114 -214 - Taxe à payer à l'égard d'un immeuble taxable ou d'unités d'émission taxables"
 
 #. module: l10n_ca
 #: model:account.report.line,name:l10n_ca.l10n_ca_tr_gsthst_114
@@ -235,12 +213,8 @@ msgstr "2 - Taxe payée sur les achats pour la revente"
 
 #. module: l10n_ca
 #: model:account.report.line,name:l10n_ca.l10n_ca_tr_gsthst_205
-msgid ""
-"205 - GST/HST due on purchases of real property or purchases of emission "
-"allowances"
-msgstr ""
-"205 - TPS/TVH due sur les achats d'immeubles ou sur les achats d'unité "
-"d'émission"
+msgid "205 - GST/HST due on purchases of real property or purchases of emission allowances"
+msgstr "205 - TPS/TVH due sur les achats d'immeubles ou sur les achats d'unité d'émission"
 
 #. module: l10n_ca
 #: model:account.report.line,name:l10n_ca.l10n_ca_tr_pst_mb_3
@@ -545,12 +519,8 @@ msgstr "D - TVP nette due sur les ventes et les locations"
 
 #. module: l10n_ca
 #: model:account.report.line,name:l10n_ca.l10n_ca_tr_pst_bc_e
-msgid ""
-"E - Purchase and Lease Price of Taxable Goods, Software and Services from "
-"which no PST was paid"
-msgstr ""
-"E - Prix d'achat et de location de biens, logiciels et services taxables "
-"pour lesquels aucune TVP n'a été payée."
+msgid "E - Purchase and Lease Price of Taxable Goods, Software and Services from which no PST was paid"
+msgstr "E - Prix d'achat et de location de biens, logiciels et services taxables pour lesquels aucune TVP n'a été payée."
 
 #. module: l10n_ca
 #: model:account.report.line,name:l10n_ca.l10n_ca_tr_pst_bc_f

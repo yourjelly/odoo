@@ -3,16 +3,15 @@
 # 	* uom
 #
 # Translators:
-# Martin Trigaux, 2022
-# Sergio Zanchetta <primes2h@gmail.com>, 2022
+# Wil Odoo, 2023
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0beta\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-23 08:03+0000\n"
-"PO-Revision-Date: 2022-09-22 05:55+0000\n"
-"Last-Translator: Sergio Zanchetta <primes2h@gmail.com>, 2022\n"
+"POT-Creation-Date: 2024-01-17 10:11+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Wil Odoo, 2023\n"
 "Language-Team: Italian (https://app.transifex.com/odoo/teams/41243/it/)\n"
 "Language: it\n"
 "MIME-Version: 1.0\n"
@@ -148,12 +147,6 @@ msgid "ID"
 msgstr "ID"
 
 #. module: uom
-#: model:ir.model.fields,field_description:uom.field_uom_category____last_update
-#: model:ir.model.fields,field_description:uom.field_uom_uom____last_update
-msgid "Last Modified on"
-msgstr "Ultima modifica il"
-
-#. module: uom
 #: model:ir.model.fields,field_description:uom.field_uom_category__write_uid
 #: model:ir.model.fields,field_description:uom.field_uom_uom__write_uid
 msgid "Last Updated by"
@@ -222,6 +215,7 @@ msgid "Smaller than the reference Unit of Measure"
 msgstr "Minore dell'unità di misura di riferimento"
 
 #. module: uom
+#. odoo-python
 #: code:addons/uom/models/uom_uom.py:0
 msgid ""
 "Some critical fields have been modified on %s.\n"
@@ -232,6 +226,13 @@ msgid ""
 "\n"
 "Therefore, changing core units of measure in a running database is not recommended."
 msgstr ""
+"Alcuni campi critici sono stati modificati su %s.\n"
+"Nota che i dati esistenti NON saranno aggiornati da questa modifica.\n"
+"\n"
+"Dato che le unità di misura hanno un impatto sul sistema, questo potrebbe creare seri problemi.\n"
+"Ad es. modificare l'arrotondamento potrebbe disturbare l'equilibrio del magazzino.\n"
+"\n"
+"Pertanto, non è consigliabile cambiare le unità di misura principali in un database in esecuzione."
 
 #. module: uom
 #: model:uom.category,name:uom.uom_categ_surface
@@ -249,6 +250,7 @@ msgid "The conversion ratio for a unit of measure cannot be 0!"
 msgstr "Il rapporto di conversione per una unità di misura non può essere 0."
 
 #. module: uom
+#. odoo-python
 #: code:addons/uom/models/uom_uom.py:0
 msgid ""
 "The following units of measure are used by the system and cannot be deleted: %s\n"
@@ -268,9 +270,16 @@ msgid "The rounding precision must be strictly positive."
 msgstr "La precisione di arrotondamento deve essere strettamente positiva."
 
 #. module: uom
+#. odoo-python
 #: code:addons/uom/models/uom_uom.py:0
 msgid "The unit of measure %s defined on the order line doesn't belong to the same category as the unit of measure %s defined on the product. Please correct the unit of measure defined on the order line or on the product, they should belong to the same category."
 msgstr "L'unità di misura %s indicata nella riga d'ordine non appartiene alla stessa categoria dell'unità di misura %s definita nel prodotto. Correggere la riga d'ordine o il prodotto, le loro unità di misura devono appartenere alla stessa categoria."
+
+#. module: uom
+#. odoo-python
+#: code:addons/uom/models/uom_uom.py:0
+msgid "The value of ratio could not be Zero"
+msgstr "Il valore del rapporto non può essere zero"
 
 #. module: uom
 #: model:ir.model.fields,field_description:uom.field_uom_uom__uom_type
@@ -335,16 +344,19 @@ msgstr ""
 "            ore, giorni."
 
 #. module: uom
+#. odoo-python
 #: code:addons/uom/models/uom_uom.py:0
 msgid "UoM category %s must have at least one reference unit of measure."
-msgstr ""
+msgstr "La categoria dell'UDM %s deve avere almeno un'unità di misura di riferimento."
 
 #. module: uom
+#. odoo-python
 #: code:addons/uom/models/uom_uom.py:0
 msgid "UoM category %s should have a reference unit of measure."
 msgstr "La categoria unità di misura %s deve avere un'unità di misura di riferimento."
 
 #. module: uom
+#. odoo-python
 #: code:addons/uom/models/uom_uom.py:0
 msgid "UoM category %s should only have one reference unit of measure."
 msgstr "La categoria UdM %s deve avere una sola unità di misura di riferimento."
@@ -360,6 +372,7 @@ msgid "Volume"
 msgstr "Volume"
 
 #. module: uom
+#. odoo-python
 #: code:addons/uom/models/uom_uom.py:0
 msgid "Warning for %s"
 msgstr "Avviso per %s"
@@ -471,4 +484,4 @@ msgstr "qt (Stati Uniti)"
 #. module: uom
 #: model:uom.uom,name:uom.product_uom_yard
 msgid "yd"
-msgstr ""
+msgstr "iarda"

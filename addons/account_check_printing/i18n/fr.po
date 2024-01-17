@@ -3,16 +3,16 @@
 # 	* account_check_printing
 #
 # Translators:
-# Martin Trigaux, 2022
-# Jolien De Paepe, 2023
+# Wil Odoo, 2023
+# Jolien De Paepe, 2024
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0+e\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-16 13:48+0000\n"
-"PO-Revision-Date: 2022-09-22 05:44+0000\n"
-"Last-Translator: Jolien De Paepe, 2023\n"
+"POT-Creation-Date: 2024-01-17 10:10+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Jolien De Paepe, 2024\n"
 "Language-Team: French (https://app.transifex.com/odoo/teams/41243/fr/)\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
@@ -24,7 +24,12 @@ msgstr ""
 #. odoo-python
 #: code:addons/account_check_printing/models/account_journal.py:0
 msgid ": Check Number Sequence"
-msgstr ""
+msgstr ": Séquence des numéros de chèques"
+
+#. module: account_check_printing
+#: model_terms:ir.ui.view,arch_db:account_check_printing.account_journal_dashboard_kanban_view_inherited
+msgid "<span>&amp;nbsp;</span>"
+msgstr "<span>&amp;nbsp;</span>"
 
 #. module: account_check_printing
 #: model:ir.model.fields,help:account_check_printing.field_res_company__account_check_printing_margin_left
@@ -104,7 +109,7 @@ msgstr "Cochez pour imprimer"
 #. module: account_check_printing
 #: model:account.payment.method,name:account_check_printing.account_payment_method_check
 msgid "Checks"
-msgstr "Chèques"
+msgstr "Contrôles"
 
 #. module: account_check_printing
 #: model:ir.model.fields,help:account_check_printing.field_account_journal__check_sequence_id
@@ -183,12 +188,12 @@ msgstr "Pièce comptable"
 #. module: account_check_printing
 #: model:ir.model.fields,field_description:account_check_printing.field_print_prenumbered_checks__write_uid
 msgid "Last Updated by"
-msgstr "Dernière mise à jour par"
+msgstr "Mis à jour par"
 
 #. module: account_check_printing
 #: model:ir.model.fields,field_description:account_check_printing.field_print_prenumbered_checks__write_date
 msgid "Last Updated on"
-msgstr "Dernière mise à jour le"
+msgstr "Mis à jour le"
 
 #. module: account_check_printing
 #: model:ir.model.fields,field_description:account_check_printing.field_account_journal__check_manual_sequencing
@@ -247,7 +252,7 @@ msgstr "Mode de paiement"
 #. module: account_check_printing
 #: model:ir.model,name:account_check_printing.model_account_payment_method
 msgid "Payment Methods"
-msgstr "Modes de paiement"
+msgstr "Modes de paiements"
 
 #. module: account_check_printing
 #: model:ir.model,name:account_check_printing.model_account_payment
@@ -324,7 +329,7 @@ msgid ""
 "Select the format corresponding to the check paper you will be printing your checks on.\n"
 "In order to disable the printing feature, select 'None'."
 msgstr ""
-"Choisissez le format de vos chèques.\n"
+"Choisir le format de vos chèques.\n"
 "Pour désactiver la fonctionnalité d'impression, sélectionnez 'Aucun'."
 
 #. module: account_check_printing
@@ -386,7 +391,7 @@ msgstr "Cette option vous permet d'imprimer l'étiquette de date sur le chèque,
 #. module: account_check_printing
 #: model_terms:ir.ui.view,arch_db:account_check_printing.print_pre_numbered_checks_view
 msgid "This will allow to save on payments the number of the corresponding check."
-msgstr "Ceci permettra de sauvegarder sur les paiements le numéro du chèque correspondant. "
+msgstr "Ceci permettra d'enregistrer sur les paiements le numéro du chèque correspondant. "
 
 #. module: account_check_printing
 #: model_terms:ir.ui.view,arch_db:account_check_printing.view_account_payment_form_inherited
@@ -396,7 +401,7 @@ msgstr "Décochez ceux qui ont été envoyés"
 #. module: account_check_printing
 #: model_terms:ir.ui.view,arch_db:account_check_printing.view_account_payment_form_inherited
 msgid "Void Check"
-msgstr "Chèque nul"
+msgstr "Annuler le chèque"
 
 #. module: account_check_printing
 #. odoo-python

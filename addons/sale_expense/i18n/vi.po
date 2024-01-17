@@ -3,16 +3,15 @@
 # 	* sale_expense
 #
 # Translators:
-# Martin Trigaux, 2022
-# Thi Huong Nguyen, 2023
+# Wil Odoo, 2024
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0beta\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-23 08:03+0000\n"
-"PO-Revision-Date: 2022-09-22 05:54+0000\n"
-"Last-Translator: Thi Huong Nguyen, 2023\n"
+"POT-Creation-Date: 2024-01-17 10:11+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Wil Odoo, 2024\n"
 "Language-Team: Vietnamese (https://app.transifex.com/odoo/teams/41243/vi/)\n"
 "Language: vi\n"
 "MIME-Version: 1.0\n"
@@ -23,7 +22,7 @@ msgstr ""
 #. module: sale_expense
 #: model:ir.model.fields,field_description:sale_expense.field_sale_order__expense_count
 msgid "# of Expenses"
-msgstr "Số lượng các loại chi phí"
+msgstr "# chi phí"
 
 #. module: sale_expense
 #: model:ir.model.fields,field_description:sale_expense.field_hr_expense__can_be_reinvoiced
@@ -35,7 +34,7 @@ msgstr "Có thể xuất lại hóa đơn"
 #: model:ir.model.fields,field_description:sale_expense.field_hr_expense__sale_order_id
 #: model:ir.model.fields,field_description:sale_expense.field_hr_expense_split__sale_order_id
 msgid "Customer to Reinvoice"
-msgstr "Khách hàng để xuất lại hóa đơn"
+msgstr "Khách hàng cần xuất lại hóa đơn"
 
 #. module: sale_expense
 #: model:ir.model,name:sale_expense.model_hr_expense
@@ -56,7 +55,7 @@ msgstr "Báo cáo chi phí"
 #. module: sale_expense
 #: model:ir.model,name:sale_expense.model_hr_expense_split
 msgid "Expense Split"
-msgstr "Tách chi phí"
+msgstr "Chia sẻ chi phí"
 
 #. module: sale_expense
 #: model:ir.actions.act_window,name:sale_expense.hr_expense_action_from_sale_order
@@ -66,19 +65,22 @@ msgid "Expenses"
 msgstr "Chi phí"
 
 #. module: sale_expense
+#. odoo-python
 #: code:addons/sale_expense/models/product_template.py:0
 msgid "Expenses of this category may not be added to a Sales Order."
-msgstr "Chi phí của danh mục này có thể không được thêm vào Đơn đặt hàng."
+msgstr "Chi phí của danh mục này có thể không được thêm vào đơn bán hàng."
 
 #. module: sale_expense
+#. odoo-python
 #: code:addons/sale_expense/models/product_template.py:0
 msgid "Expenses will be added to the Sales Order at their actual cost when posted."
-msgstr "Chi phí sẽ được thêm vào Đơn bán hàng theo chi phí thực tế khi ghi sổ."
+msgstr "Chi phí sẽ được thêm vào đơn bán hàng theo chi phí thực tế khi ghi sổ."
 
 #. module: sale_expense
+#. odoo-python
 #: code:addons/sale_expense/models/product_template.py:0
 msgid "Expenses will be added to the Sales Order at their sales price (product price, pricelist, etc.) when posted."
-msgstr "Chi phí sẽ được thêm vào Đơn bán hàng theo giá bán (giá sản phẩm, bảng giá,...) khi ghi sổ."
+msgstr "Chi phí sẽ được thêm vào đơn bán hàng theo giá bán (giá sản phẩm, bảng giá,...) khi ghi sổ."
 
 #. module: sale_expense
 #: model:ir.model.fields,help:sale_expense.field_hr_expense__sale_order_id
@@ -91,6 +93,11 @@ msgid "Invoicing"
 msgstr "Xuất hóa đơn"
 
 #. module: sale_expense
+#: model:ir.model,name:sale_expense.model_account_move
+msgid "Journal Entry"
+msgstr "Bút toán"
+
+#. module: sale_expense
 #: model:ir.model,name:sale_expense.model_account_move_line
 msgid "Journal Item"
 msgstr "Hạng mục bút toán"
@@ -101,6 +108,7 @@ msgid "Product"
 msgstr "Sản phẩm"
 
 #. module: sale_expense
+#. odoo-python
 #: code:addons/sale_expense/models/hr_expense_sheet.py:0
 msgid "Reinvoiced Sales Orders"
 msgstr "Xuất lại hoá đơn đơn bán hàng"

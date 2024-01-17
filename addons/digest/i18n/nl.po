@@ -3,17 +3,15 @@
 # 	* digest
 #
 # Translators:
-# Martin Trigaux, 2022
-# Jolien De Paepe, 2022
-# Erwin van der Ploeg <erwin@odooexperts.nl>, 2022
+# Wil Odoo, 2023
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 15.5alpha1\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-16 13:49+0000\n"
-"PO-Revision-Date: 2022-09-22 05:45+0000\n"
-"Last-Translator: Erwin van der Ploeg <erwin@odooexperts.nl>, 2022\n"
+"POT-Creation-Date: 2024-01-17 10:10+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Wil Odoo, 2023\n"
 "Language-Team: Dutch (https://app.transifex.com/odoo/teams/41243/nl/)\n"
 "Language: nl\n"
 "MIME-Version: 1.0\n"
@@ -24,7 +22,7 @@ msgstr ""
 #. module: digest
 #: model_terms:ir.ui.view,arch_db:digest.digest_digest_view_form
 msgid "<i class=\"oi oi-arrow-right\"/> Check our Documentation"
-msgstr ""
+msgstr "<i class=\"oi oi-arrow-right\"/> Bekijk onze documentatie"
 
 #. module: digest
 #: model_terms:ir.ui.view,arch_db:digest.digest_mail_main
@@ -55,7 +53,7 @@ msgstr "Geactiveerd"
 #. module: digest
 #: model_terms:ir.ui.view,arch_db:digest.res_config_settings_view_form
 msgid "Add new users as recipient of a periodic email with key metrics"
-msgstr "Voeg nieuwe gebruikers toe als ontvanger van een periodieke e-mail met belangrijke statistieken"
+msgstr "Voeg nieuwe gebruikers toe als ontvanger van een periodieke e-mail met belangrijke metrics"
 
 #. module: digest
 #: model:ir.model.fields,field_description:digest.field_digest_tip__group_id
@@ -71,7 +69,7 @@ msgstr "Beschikbare velden"
 #. odoo-python
 #: code:addons/digest/models/digest.py:0
 msgid "Choose the metrics you care about"
-msgstr "Kies je favoriete statistieken."
+msgstr "Kies je favoriete metrics."
 
 #. module: digest
 #: model:ir.model.fields,field_description:digest.field_digest_digest__company_id
@@ -86,7 +84,7 @@ msgstr "Configuratie instellingen"
 #. module: digest
 #: model_terms:ir.ui.view,arch_db:digest.res_config_settings_view_form
 msgid "Configure Digest Emails"
-msgstr "Samenvatting e-mails instellen"
+msgstr "Samenvattingsmails instellen"
 
 #. module: digest
 #. odoo-python
@@ -146,7 +144,7 @@ msgstr "Samenvatting"
 #: model:ir.model.fields,field_description:digest.field_res_config_settings__digest_id
 #: model_terms:ir.ui.view,arch_db:digest.res_config_settings_view_form
 msgid "Digest Email"
-msgstr "Samenvatting e-mail"
+msgstr "Samenvattingsmail"
 
 #. module: digest
 #: model:ir.actions.act_window,name:digest.digest_digest_action
@@ -154,19 +152,19 @@ msgstr "Samenvatting e-mail"
 #: model:ir.model.fields,field_description:digest.field_res_config_settings__digest_emails
 #: model:ir.ui.menu,name:digest.digest_menu
 msgid "Digest Emails"
-msgstr "Samenvatting e-mails"
+msgstr "Samenvattingsmails"
 
 #. module: digest
 #: model_terms:ir.ui.view,arch_db:digest.portal_digest_unsubscribed
 msgid "Digest Subscriptions"
-msgstr "Inschrijving e-mail"
+msgstr "Samenvatting Abonnementen"
 
 #. module: digest
 #: model:ir.actions.act_window,name:digest.digest_tip_action
 #: model:ir.model,name:digest.model_digest_tip
 #: model:ir.ui.menu,name:digest.digest_tip_menu
 msgid "Digest Tips"
-msgstr "Samenvatting tips"
+msgstr "Samenvattingstips"
 
 #. module: digest
 #: model_terms:ir.ui.view,arch_db:digest.digest_digest_view_form
@@ -192,7 +190,7 @@ msgstr "Algemeen"
 #. module: digest
 #: model_terms:ir.ui.view,arch_db:digest.digest_digest_view_search
 msgid "Group by"
-msgstr "Groepeer op"
+msgstr "Groeperen op"
 
 #. module: digest
 #: model_terms:digest.tip,tip_description:digest.digest_tip_digest_1
@@ -323,7 +321,7 @@ msgstr "Aangeboden door"
 #. odoo-python
 #: code:addons/digest/models/digest.py:0
 msgid "Prefer a broader overview?"
-msgstr ""
+msgstr "Liever een ruimer overzicht?"
 
 #. module: digest
 #: model_terms:digest.tip,tip_description:digest.digest_tip_digest_0
@@ -355,7 +353,7 @@ msgstr "Nu verzenden"
 #. module: digest
 #: model_terms:ir.ui.view,arch_db:digest.digest_mail_main
 msgid "Sent by"
-msgstr "Verstuurd door"
+msgstr "Verzonden door"
 
 #. module: digest
 #: model:ir.model.fields,field_description:digest.field_digest_tip__sequence
@@ -446,7 +444,7 @@ msgstr "Typ \"@\" om iemand in een bericht op de hoogte te stellen, of \"#\" om 
 #. module: digest
 #: model:ir.model.fields,help:digest.field_digest_tip__sequence
 msgid "Used to display digest tip in email template base on order"
-msgstr "Wordt gebruikt om de samenvatting-tip in e-mailsjabloon basis op order weer te geven"
+msgstr "Wordt gebruikt om de samenvattingstip in e-mailsjabloon basis op order weer te geven"
 
 #. module: digest
 #: model:ir.model,name:digest.model_res_users
@@ -497,12 +495,12 @@ msgstr ""
 #. module: digest
 #: model_terms:ir.ui.view,arch_db:digest.portal_digest_unsubscribed
 msgid "You have been successfully unsubscribed from:<br/>"
-msgstr "Je bent succesvol uitgeschreven van:<br/>"
+msgstr "Je bent succesvol afgemeld van:<br/>"
 
 #. module: digest
 #: model:digest.digest,name:digest.digest_digest_default
 msgid "Your Odoo Periodic Digest"
-msgstr "Jouw periodieke Odoo samenvatting."
+msgstr "Je periodieke Odoo samenvatting"
 
 #. module: digest
 #: model_terms:ir.ui.view,arch_db:digest.digest_digest_view_form

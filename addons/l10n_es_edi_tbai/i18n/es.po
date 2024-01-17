@@ -33,11 +33,8 @@ msgstr "240"
 
 #. module: l10n_es_edi_tbai
 #: model_terms:ir.ui.view,arch_db:l10n_es_edi_tbai.res_config_settings_view_form
-msgid ""
-"<span class=\"o_form_label\">Registro de Libros connection SII/TicketBAI</"
-"span>"
-msgstr ""
-"<span class=\"o_form_label\">Conexión Registro de Libros SII/TicketBAI</span>"
+msgid "<span class=\"o_form_label\">Registro de Libros connection SII/TicketBAI</span>"
+msgstr "<span class=\"o_form_label\">Conexión Registro de Libros SII/TicketBAI</span>"
 
 #. module: l10n_es_edi_tbai
 #: model:ir.model,name:l10n_es_edi_tbai.model_account_move_reversal
@@ -54,12 +51,8 @@ msgstr "Archivo adjunto"
 #: model:ir.model.fields,help:l10n_es_edi_tbai.field_account_move__l10n_es_tbai_refund_reason
 #: model:ir.model.fields,help:l10n_es_edi_tbai.field_account_move_reversal__l10n_es_tbai_refund_reason
 #: model:ir.model.fields,help:l10n_es_edi_tbai.field_account_payment__l10n_es_tbai_refund_reason
-msgid ""
-"BOE-A-1992-28740. Ley 37/1992, de 28 de diciembre, del Impuesto sobre el "
-"Valor Añadido. Artículo 80. Modificación de la base imponible."
-msgstr ""
-"BOE-A-1992-28740. Ley 37/1992, de 28 de diciembre, del Impuesto sobre el "
-"Valor Añadido. Artículo 80. Modificación de la base imponible."
+msgid "BOE-A-1992-28740. Ley 37/1992, de 28 de diciembre, del Impuesto sobre el Valor Añadido. Artículo 80. Modificación de la base imponible."
+msgstr "BOE-A-1992-28740. Ley 37/1992, de 28 de diciembre, del Impuesto sobre el Valor Añadido. Artículo 80. Modificación de la base imponible."
 
 #. module: l10n_es_edi_tbai
 #: model:ir.model.fields,field_description:l10n_es_edi_tbai.field_account_bank_statement_line__l10n_es_tbai_cancel_xml
@@ -72,12 +65,8 @@ msgstr "XML de cancelación"
 #: model:ir.model.fields,help:l10n_es_edi_tbai.field_account_bank_statement_line__l10n_es_tbai_cancel_xml
 #: model:ir.model.fields,help:l10n_es_edi_tbai.field_account_move__l10n_es_tbai_cancel_xml
 #: model:ir.model.fields,help:l10n_es_edi_tbai.field_account_payment__l10n_es_tbai_cancel_xml
-msgid ""
-"Cancellation XML sent to TicketBAI. Kept if accepted or no response "
-"(timeout), cleared otherwise."
-msgstr ""
-"El XML de cancelación se envió a TicketBAI. Se mantiene si se acepta o no se "
-"obtiene respuesta (timeout), de lo contrario, se borra."
+msgid "Cancellation XML sent to TicketBAI. Kept if accepted or no response (timeout), cleared otherwise."
+msgstr "El XML de cancelación se envió a TicketBAI. Se mantiene si se acepta o no se obtiene respuesta (timeout), de lo contrario, se borra."
 
 #. module: l10n_es_edi_tbai
 #: model:ir.model,name:l10n_es_edi_tbai.model_res_company
@@ -126,12 +115,8 @@ msgstr "Código de motivo de reembolso de la factura (TicketBai)"
 #: model:ir.model.fields,help:l10n_es_edi_tbai.field_account_bank_statement_line__l10n_es_tbai_chain_index
 #: model:ir.model.fields,help:l10n_es_edi_tbai.field_account_move__l10n_es_tbai_chain_index
 #: model:ir.model.fields,help:l10n_es_edi_tbai.field_account_payment__l10n_es_tbai_chain_index
-msgid ""
-"Invoice index in chain, set if and only if an in-chain XML was submitted and "
-"did not error"
-msgstr ""
-"Índice de facturas en cadena que se establece si y solo si se envió un XML y "
-"no dio error."
+msgid "Invoice index in chain, set if and only if an in-chain XML was submitted and did not error"
+msgstr "Índice de facturas en cadena que se establece si y solo si se envió un XML y no dio error."
 
 #. module: l10n_es_edi_tbai
 #: model:ir.model.fields,field_description:l10n_es_edi_tbai.field_account_move_reversal__l10n_es_tbai_is_required
@@ -246,16 +231,13 @@ msgstr "RL"
 #. odoo-python
 #: code:addons/l10n_es_edi_tbai/models/account_edi_format.py:0
 msgid "Refund reason cannot be R5 for non-simplified invoices (TicketBAI)"
-msgstr ""
-"El motivo de reembolso no puede ser R5 para facturas no simplificadas "
-"(TicketBai)"
+msgstr "El motivo de reembolso no puede ser R5 para facturas no simplificadas (TicketBai)"
 
 #. module: l10n_es_edi_tbai
 #. odoo-python
 #: code:addons/l10n_es_edi_tbai/models/account_edi_format.py:0
 msgid "Refund reason must be R5 for simplified invoices (TicketBAI)"
-msgstr ""
-"El motivo de reembolso debe ser R5 para facturas simplificadas (TicketBai)"
+msgstr "El motivo de reembolso debe ser R5 para facturas simplificadas (TicketBai)"
 
 #. module: l10n_es_edi_tbai
 #. odoo-python
@@ -291,12 +273,8 @@ msgstr "XML de envío"
 #: model:ir.model.fields,help:l10n_es_edi_tbai.field_account_bank_statement_line__l10n_es_tbai_post_xml
 #: model:ir.model.fields,help:l10n_es_edi_tbai.field_account_move__l10n_es_tbai_post_xml
 #: model:ir.model.fields,help:l10n_es_edi_tbai.field_account_payment__l10n_es_tbai_post_xml
-msgid ""
-"Submission XML sent to TicketBAI. Kept if accepted or no response (timeout), "
-"cleared otherwise."
-msgstr ""
-"Se envió el XML de envío a TicketBai. Se mantiene si se acepta o no se "
-"obtiene respuesta (timeout), de lo contrario, se borra."
+msgid "Submission XML sent to TicketBAI. Kept if accepted or no response (timeout), cleared otherwise."
+msgstr "Se envió el XML de envío a TicketBai. Se mantiene si se acepta o no se obtiene respuesta (timeout), de lo contrario, se borra."
 
 #. module: l10n_es_edi_tbai
 #: model_terms:ir.ui.view,arch_db:l10n_es_edi_tbai.template_invoice_bundle
@@ -371,14 +349,10 @@ msgstr "Secuencia en cadena TicketBai account.move"
 #. odoo-python
 #: code:addons/l10n_es_edi_tbai/models/account_move.py:0
 msgid "You cannot delete a move that has a TicketBAI chain id."
-msgstr ""
-"No puede eliminar un movimiento que tiene un ID en cadena de TicketBai."
+msgstr "No puede eliminar un movimiento que tiene un ID en cadena de TicketBai."
 
 #. module: l10n_es_edi_tbai
 #. odoo-python
 #: code:addons/l10n_es_edi_tbai/models/account_move.py:0
-msgid ""
-"You cannot reset to draft an entry that has been posted to TicketBAI's chain"
-msgstr ""
-"No puede regresar a borrador un asiento que se publicó en la cadena de "
-"TicketBai."
+msgid "You cannot reset to draft an entry that has been posted to TicketBAI's chain"
+msgstr "No puede regresar a borrador un asiento que se publicó en la cadena de TicketBai."
