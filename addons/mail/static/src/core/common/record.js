@@ -3,6 +3,7 @@
 import { onChange } from "@mail/utils/common/misc";
 import { markRaw, markup, reactive, toRaw } from "@odoo/owl";
 import { registry } from "@web/core/registry";
+import { Thread } from "./thread_model";
 
 export const modelRegistry = registry.category("discuss.model");
 
@@ -1677,3 +1678,6 @@ export class BaseStore extends Record {
         return this.recordByLocalId.get(localId);
     }
 }
+const thread = Thread.insert({});
+const threads = Thread.insert([{}, {}]);
+console.warn(thread, threads);
