@@ -5,7 +5,7 @@ import logging
 import requests
 from werkzeug.urls import url_encode
 
-from requests.exceptions import HTTPError, ConnectionError
+from requests.exceptions import HTTPError
 from odoo import api, models, fields, _
 from odoo.exceptions import ValidationError
 
