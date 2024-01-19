@@ -104,12 +104,16 @@
         justify-items: center;
         padding: map-get($spacers, 3);
 
-        @include media-breakpoint-up(md) {
+        @include media-breakpoint-up(sm) {
             grid-template-columns: repeat(2, 1fr);
         }
 
-        @include media-breakpoint-up(xxl) {
+        @include media-breakpoint-up(md) {
             grid-template-columns: repeat(3, 1fr);
+        }
+
+        @include media-breakpoint-up(xxl) {
+            grid-template-columns: repeat(4, 1fr);
         }
 
         .o_kanban_record {
