@@ -13,25 +13,16 @@ export class PartnerMany2XAutocomplete extends Many2XAutocomplete {
         this.partner_autocomplete = usePartnerAutocomplete();
     }
 
-    validateSearchTerm(request) {
-        return request && request.length > 2;
-    }
-
     get sources() {
         return super.sources.concat(
             {
                 options: async (request) => {
-                    if (this.validateSearchTerm(request)) {
-                        const suggestions = await this.partner_autocomplete.autocomplete(request);
-                        suggestions.forEach((suggestion) => {
-                            suggestion.classList = "partner_autocomplete_dropdown_many2one";
-                            suggestion.isFromPartnerAutocomplete = true;
-                        });
-                        return suggestions;
-                    }
-                    else {
-                        return [];
-                    }
+                    const suggestions = await this.partner_autocomplete.autocomplete(request);
+                    suggestions.forEach((suggestion) => {
+                        suggestion.classList = "partner_autocomplete_dropdown_many2one";
+                        suggestion.isFromPartnerAutocomplete = true;
+                    });
+                    return suggestions;
                 },
                 optionTemplate: "partner_autocomplete.Many2oneDropdownOption",
                 placeholder: _t('Searching Autocomplete...'),
