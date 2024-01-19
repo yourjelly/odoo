@@ -715,6 +715,8 @@ class ProductTemplate(models.Model):
         string="Category Routes", related='categ_id.total_route_ids', related_sudo=False)
     show_on_hand_qty_status_button = fields.Boolean(compute='_compute_show_qty_status_button')
     show_forecasted_qty_status_button = fields.Boolean(compute='_compute_show_qty_status_button')
+    create_onhand_qty_from_import = fields.Float('Create Available Quantity', digits='Quantity', store=True)
+    create_lot_from_import = fields.Text('Create Lot id/SN', store=True)
 
     @api.depends('type')
     def compute_is_storable(self):
