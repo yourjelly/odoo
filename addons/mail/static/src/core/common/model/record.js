@@ -219,6 +219,11 @@ export class Record {
         const this0 = _0(this);
         return this.records[this0.dataToLocalId(data)];
     }
+    static get singleIds() {
+        return this._id
+            .filter((item) => Object.keys(item).length === 1)
+            .map((item) => Object.keys(item)[0]);
+    }
     /** Find the local id from data on current model (if exists) */
     static dataToLocalId(data) {
         const this0 = _0(this);
@@ -233,7 +238,7 @@ export class Record {
             // special shorthand when record has a single single-id primitive.
             // Note that this is not working on object field due to ambiguity
             // on whether it targets this single-id or data are on self object.
-            const singleIds = this0._id.filter((item) => item.length === 1).map((item) => item[0]);
+            const singleIds = this0.singleIds;
             if (singleIds.length !== 1) {
                 throw new Error(`
                     Model "${this0.name}" has more than one single-id.
@@ -244,8 +249,13 @@ export class Record {
             return this.dataToLocalId({ [singleIds[0]]: data });
         }
         for (let i = 0; i < this0._id.length && !localId; i++) {
+            /** @type {Object<string, false | () => boolean>} */
             const expr = this0._id[i];
-            if (expr.some((item) => !(item in data))) {
+            if (
+                Object.entries(expr).some(
+                    ([fieldName, eligible]) => !(fieldName in data && (!eligible || eligible(data)))
+                )
+            ) {
                 continue;
             }
             this._retrieveObjectIdsFromExpr(expr, data, {
@@ -268,11 +278,17 @@ export class Record {
         const this0 = _0(this);
         const objectIds = [...record.localIds];
         for (let i = 0; i < this0._id.length; i++) {
+            /** @type {Object<string, false | () => boolean>} */
             const expr = this0._id[i];
-            if (expr.some((item) => record[item] === undefined)) {
+            if (
+                Object.entries(expr).some(
+                    ([fieldName, eligible]) =>
+                        record[fieldName] === undefined && (!eligible || eligible(record._1))
+                )
+            ) {
                 continue;
             }
-            this._retrieveObjectIdsFromExpr(expr, record, {
+            this._retrieveObjectIdsFromExpr(expr, record._1, {
                 onObjectId: (objectId) => {
                     objectIds.push(objectId);
                 },
@@ -281,7 +297,7 @@ export class Record {
         return objectIds;
     }
     /**
-     * @param {string[]} expr part of an AND expression in model ids. See static _id
+     * @param {Object<string, false | () => boolean>} expr part of an AND expression in model ids. See static _id
      * @param {Object|Record} data
      * @param {Object} [param2={}]
      * @param {() => boolean} [param2.earlyStop] if provided, truthy value means the retrieve
@@ -293,9 +309,9 @@ export class Record {
     static _retrieveObjectIdsFromExpr(expr, data, { earlyStop, onObjectId } = {}) {
         const this0 = _0(this);
         // Try each combination of potential objectId, using all localIds of relations
-        const fields = expr.map((item) => ({
-            name: item,
-            relation: isRelation(this0, item),
+        const fields = Object.entries(expr).map(([fieldName, eligibility]) => ({
+            name: fieldName,
+            relation: isRelation(this0, fieldName),
         }));
         const fieldToIndex = Object.fromEntries(
             fields.filter((f) => f.relation).map((f, index) => [f.name, index])
@@ -327,18 +343,22 @@ export class Record {
             };
             if (index >= fields.length) {
                 let ok = true;
-                const fieldVals = expr
-                    .map((item) => {
-                        if (isRelation(this0, item)) {
-                            const i = fcounts2[fieldToIndex[item]];
-                            const relatedRecord = getRelatedRecord(item);
+                const fieldVals = Object.entries(expr)
+                    .map(([fieldName, eligible]) => {
+                        if (typeof eligible === "function" && !eligible(data)) {
+                            ok = false;
+                            return;
+                        }
+                        if (isRelation(this0, fieldName)) {
+                            const i = fcounts2[fieldToIndex[fieldName]];
+                            const relatedRecord = getRelatedRecord(fieldName);
                             if (!relatedRecord) {
                                 ok = false;
                                 return;
                             }
-                            return `${item}: (${relatedRecord.localIds[i]})`;
+                            return `${fieldName}: (${relatedRecord.localIds[i]})`;
                         } else {
-                            return `${item}: ${data[item]}`;
+                            return `${fieldName}: ${data[fieldName]}`;
                         }
                     })
                     .join(", ");
@@ -970,9 +990,7 @@ export class Record {
                 if (Record.VERSION === 0) {
                     this0._store0.updateFields(this0, { [this0.Model.id]: data });
                 } else {
-                    const singleIds = this0.Model._id
-                        .filter((item) => item.length === 1)
-                        .map((item) => item[0]);
+                    const singleIds = this0.Model.singleIds;
                     if (singleIds.length !== 1) {
                         throw new Error(`
                             Model "${this0.name}" has more than one single-id.

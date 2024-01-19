@@ -1,6 +1,6 @@
 /* @odoo-module */
 
-import { AND, Record } from "@mail/core/common/record";
+import { Record } from "@mail/core/common/record";
 import { DEFAULT_AVATAR } from "@mail/core/common/persona_service";
 import { imageUrl } from "@web/core/utils/urls";
 
@@ -15,7 +15,7 @@ import { imageUrl } from "@web/core/utils/urls";
  */
 
 export class Persona extends Record {
-    static id = AND("type", "id");
+    static id = [["type!", "id!"], ["userId!"]];
     /** @type {Object.<number, import("models").Persona>} */
     static records = {};
     /** @returns {import("models").Persona} */
@@ -25,6 +25,16 @@ export class Persona extends Record {
     /** @returns {import("models").Persona|import("models").Persona[]} */
     static insert(data) {
         return super.insert(...arguments);
+    }
+    set partnerId(newPartnerId) {
+        this.id = newPartnerId;
+        this.type = "partner";
+    }
+    get partnerId() {
+        if (!this.type === "partner") {
+            return undefined;
+        }
+        return this.id;
     }
 
     channelMembers = Record.many("ChannelMember");

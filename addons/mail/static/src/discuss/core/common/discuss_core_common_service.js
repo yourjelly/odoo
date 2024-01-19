@@ -188,8 +188,6 @@ export class DiscussCoreCommon {
         if (!channel) {
             return;
         }
-        this.store.Message.get(messageData.temporary_id)?.delete();
-        messageData.temporary_id = null;
         const message = this.store.Message.insert(messageData, { html: true });
         if (message.notIn(channel.messages)) {
             if (!channel.loadNewer) {

@@ -25,21 +25,21 @@ export class MailCoreCommon {
                 if (messageData) {
                     this.store.Message.insert(messageData);
                 }
-                const attachment = this.store.Attachment.get(attachmentId);
+                const attachment = this.store.Attachment.get({ id: attachmentId });
                 if (attachment) {
-                    this.attachmentService.remove(attachment);
+                    attachment.delete();
                 }
             });
             this.busService.subscribe("mail.link.preview/delete", (payload) => {
                 const { id, message_id } = payload;
-                const message = this.store.Message.get(message_id);
+                const message = this.store.Message.get({ id: message_id });
                 if (message) {
                     message.linkPreviews.delete({ id });
                 }
             });
             this.busService.subscribe("mail.message/delete", (payload) => {
                 for (const messageId of payload.message_ids) {
-                    const message = this.store.Message.get(messageId);
+                    const message = this.store.Message.get({ id: messageId });
                     if (!message) {
                         continue;
                     }

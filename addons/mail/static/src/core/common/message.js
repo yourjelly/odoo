@@ -379,10 +379,6 @@ export class Message extends Component {
         this.props.messageToReplyTo.toggle(this.props.thread, this.props.message);
     }
 
-    async onClickAttachmentUnlink(attachment) {
-        await this.attachmentService.delete(attachment);
-    }
-
     onClickMarkAsUnread() {
         const previousMessageId =
             this.message.originThread.getPreviousMessage(this.message)?.id ?? false;
@@ -412,7 +408,8 @@ export class Message extends Component {
             ev.preventDefault();
             const partnerId = Number(ev.target.dataset.oeId);
             if (user.partnerId !== partnerId) {
-                this.threadService.openChat({ partnerId });
+                const persona = this.store.Persona.insert({ partnerId });
+                this.threadService.openChat(persona);
             }
             return;
         }

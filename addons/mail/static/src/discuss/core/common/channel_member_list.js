@@ -46,7 +46,7 @@ export class ChannelMemberList extends Component {
         if (!this.canOpenChatWith(member)) {
             return;
         }
-        this.threadService.openChat({ partnerId: member.persona.id });
+        this.threadService.openChat(member.persona);
     }
 
     get title() {

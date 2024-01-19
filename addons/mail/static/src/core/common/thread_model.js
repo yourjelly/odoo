@@ -1,7 +1,7 @@
 /* @odoo-module */
 
 import { DEFAULT_AVATAR } from "@mail/core/common/persona_service";
-import { AND, Record } from "@mail/core/common/record";
+import { Record } from "@mail/core/common/record";
 
 import { deserializeDateTime } from "@web/core/l10n/dates";
 import { _t } from "@web/core/l10n/translation";
@@ -18,7 +18,7 @@ import { Deferred } from "@web/core/utils/concurrency";
  */
 
 export class Thread extends Record {
-    static id = AND("model", "id");
+    static id = [["model", "id"]];
     /** @type {Object.<string, import("models").Thread>} */
     static records = {};
     /** @returns {import("models").Thread} */
@@ -61,7 +61,21 @@ export class Thread extends Record {
          * @param {import("models").Attachment} a1
          * @param {import("models").Attachment} a2
          */
-        sort: (a1, a2) => (a1.id < a2.id ? 1 : -1),
+        sort: (a1, a2) => {
+            if (a1.uploadId && a2.uploadId) {
+                return a1.uploadId < a2.uploadId ? 1 : -1;
+            }
+            if (a1.id && a2.id) {
+                return a1.id < a2.id ? 1 : -1;
+            }
+            if (a1.uploadId && !a2.uploadId) {
+                return 1;
+            }
+            if (!a1.uploadId && a2.uploadId) {
+                return -1;
+            }
+            return 0;
+        },
     });
     activeRtcSession = Record.one("RtcSession");
     get canLeave() {
@@ -279,11 +293,9 @@ export class Thread extends Record {
 
     get attachmentsInWebClientView() {
         const attachments = this.attachments.filter(
-            (attachment) => (attachment.isPdf || attachment.isImage) && !attachment.uploading
+            (attachment) => (attachment.isPdf || attachment.isImage) && !attachment.uploadId
         );
-        attachments.sort((a1, a2) => {
-            return a2.id - a1.id;
-        });
+        attachments.sort((a1, a2) => a2.id - a1.id);
         return attachments;
     }
 
@@ -527,7 +539,7 @@ export class Thread extends Record {
         if (previousMessages.length === 0) {
             return false;
         }
-        return this._store.Message.get(Math.max(...previousMessages.map((m) => m.id)));
+        return this._store.Message.get({ id: Math.max(...previousMessages.map((m) => m.id)) });
     }
 }
 

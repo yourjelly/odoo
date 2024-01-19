@@ -21,7 +21,6 @@ export const ATTR_SYM = Symbol("attr");
 export const MANY_SYM = Symbol("many");
 export const ONE_SYM = Symbol("one");
 export const OR_SYM = Symbol("or");
-export const AND_SYM = Symbol("and");
 export const RECORD_SYM = Symbol("Record");
 export const FIELD_DEFINITION_SYM = Symbol("FieldDefinition");
 export const RECORD_FIELD_SYM = Symbol("RecordField");
@@ -40,9 +39,6 @@ export function _0(obj) {
     return raw._0 ?? raw;
 }
 
-export function AND(...args) {
-    return [AND_SYM, ...args];
-}
 export function OR(...args) {
     return [OR_SYM, ...args];
 }

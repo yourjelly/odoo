@@ -7,8 +7,6 @@ import {
     modelRegistry,
     _0,
     isRelation,
-    AND_SYM,
-    OR_SYM,
     ATTR_SYM,
     FIELD_DEFINITION_SYM,
 } from "./misc";
@@ -143,48 +141,26 @@ export function makeStore(env) {
         // Produce _id and objectIdFields
         // For more structured object id mapping and re-shape on change of object id.
         // Useful for support of multi-identification on records
-        if (Model.id === undefined) {
-            Model._id = [];
-            Model.objectIdFields = {};
-        } else if (typeof Model.id === "string") {
-            Model._id = [[Model.id]];
-            Model.objectIdFields = { [Model.id]: true };
-        } else if (Model.id[0] === AND_SYM) {
-            const fields = Model.id.slice(1);
-            Model._id = [[...fields]];
-            Model.objectIdFields = Object.fromEntries(fields.map((i) => [i, true]));
-        } else if (Model.id[0] === OR_SYM) {
-            const fields = Model.id.slice(1);
-            Model._id = [...fields.map((i) => [i])];
-            Model.objectIdFields = Object.fromEntries(fields.map((i) => [i, true]));
-        } else {
-            const _id = [];
-            const objectIdFields = {};
-            // this is an array of string and AND expressions
-            for (const item of Model.id) {
-                if (typeof item === "string") {
-                    _id.push([item]);
-                    if (!objectIdFields[item]) {
-                        objectIdFields[item] = true;
+        Model._id = [];
+        Model.objectIdFields = {};
+        if (Model.id) {
+            for (const andExpr of Model.id) {
+                const data = {};
+                for (const item of andExpr) {
+                    /** @type {string} */
+                    let fieldName = item;
+                    if (fieldName.endsWith("!")) {
+                        fieldName = fieldName.substring(0, fieldName.length - 1);
+                        data[fieldName] = (record) => !!record[fieldName];
+                    } else {
+                        data[fieldName] = 0; // falsy so it's easier to distinguish it from function
                     }
-                } else if (item[0] === AND_SYM) {
-                    const fields = item.slice(1);
-                    _id.push([...fields]);
-                    for (const f of fields) {
-                        if (!objectIdFields[f]) {
-                            objectIdFields[f] = true;
-                        }
-                    }
-                } else {
-                    _id.push([...item]);
-                    for (const f of item) {
-                        if (!objectIdFields[f]) {
-                            objectIdFields[f] = true;
-                        }
+                    if (!Model.objectIdFields[fieldName]) {
+                        Model.objectIdFields[fieldName] = true;
                     }
                 }
+                Model._id.push(data);
             }
-            Object.assign(Model, { _id, objectIdFields });
         }
         Object.assign(Model, {
             Class,

@@ -1,7 +1,7 @@
 /* @odoo-module */
 
-import { AND, modelRegistry } from "@mail/core/common/model/misc";
-import { Store, OR, Record, makeStore } from "@mail/core/common/model/export";
+import { modelRegistry } from "@mail/core/common/model/misc";
+import { Store, Record, makeStore } from "@mail/core/common/model/export";
 
 import { registry } from "@web/core/registry";
 import { clearRegistryWithCleanup, makeTestEnv } from "@web/../tests/helpers/mock_env";
@@ -25,7 +25,7 @@ QUnit.module("record", {
 
 QUnit.test("Insert by passing only single-id value (non-relational)", async (assert) => {
     (class Persona extends Record {
-        static id = "name";
+        static id = [["name"]];
         name;
     }).register();
     const store = await start();
@@ -35,12 +35,12 @@ QUnit.test("Insert by passing only single-id value (non-relational)", async (ass
 
 QUnit.test("Can pass object as data for relational field with inverse as id", async (assert) => {
     (class Thread extends Record {
-        static id = "name";
+        static id = [["name"]];
         name;
         composer = Record.one("Composer", { inverse: "thread" });
     }).register();
     (class Composer extends Record {
-        static id = "thread";
+        static id = [["thread"]];
         thread = Record.one("Thread");
     }).register();
     const store = await start();
@@ -52,23 +52,23 @@ QUnit.test("Can pass object as data for relational field with inverse as id", as
 
 QUnit.test("Assign & Delete on fields with inverses", async (assert) => {
     (class Thread extends Record {
-        static id = "name";
+        static id = [["name"]];
         name;
         composer = Record.one("Composer", { inverse: "thread" });
         members = Record.many("Member", { inverse: "thread" });
         messages = Record.many("Message", { inverse: "threads" });
     }).register();
     (class Composer extends Record {
-        static id = "thread";
+        static id = [["thread"]];
         thread = Record.one("Thread");
     }).register();
     (class Member extends Record {
-        static id = "name";
+        static id = [["name"]];
         name;
         thread = Record.one("Thread");
     }).register();
     (class Message extends Record {
-        static id = "content";
+        static id = [["content"]];
         content;
         threads = Record.many("Thread");
     }).register();
@@ -116,7 +116,7 @@ QUnit.test("Assign & Delete on fields with inverses", async (assert) => {
 QUnit.test("onAdd/onDelete hooks on relational with inverse", async (assert) => {
     let logs = [];
     (class Thread extends Record {
-        static id = "name";
+        static id = [["name"]];
         name;
         members = Record.many("Member", {
             inverse: "thread",
@@ -125,7 +125,7 @@ QUnit.test("onAdd/onDelete hooks on relational with inverse", async (assert) => 
         });
     }).register();
     (class Member extends Record {
-        static id = "name";
+        static id = [["name"]];
         name;
         thread = Record.one("Thread");
     }).register();
@@ -151,7 +151,7 @@ QUnit.test("onAdd/onDelete hooks on relational with inverse", async (assert) => 
 
 QUnit.test("Computed fields", async (assert) => {
     (class Thread extends Record {
-        static id = "name";
+        static id = [["name"]];
         name;
         type = Record.attr("", {
             compute() {
@@ -174,7 +174,7 @@ QUnit.test("Computed fields", async (assert) => {
         members = Record.many("Persona");
     }).register();
     (class Persona extends Record {
-        static id = "name";
+        static id = [["name"]];
         name;
     }).register();
     const store = await start();
@@ -193,7 +193,7 @@ QUnit.test("Computed fields", async (assert) => {
 
 QUnit.test("Computed fields: lazy (default) vs. eager", async (assert) => {
     (class Thread extends Record {
-        static id = "name";
+        static id = [["name"]];
         name;
         computeType() {
             if (this.members.length === 0) {
@@ -222,7 +222,7 @@ QUnit.test("Computed fields: lazy (default) vs. eager", async (assert) => {
         members = Record.many("Persona");
     }).register();
     (class Persona extends Record {
-        static id = "name";
+        static id = [["name"]];
         name;
     }).register();
     const store = await start();
@@ -250,7 +250,7 @@ QUnit.test("Computed fields: lazy (default) vs. eager", async (assert) => {
 
 QUnit.test("Trusted insert on html field with { html: true }", async (assert) => {
     (class Message extends Record {
-        static id = "body";
+        static id = [["body"]];
         body = Record.attr("", { html: true });
     }).register();
     const store = await start();
@@ -263,7 +263,7 @@ QUnit.test("Trusted insert on html field with { html: true }", async (assert) =>
 
 QUnit.test("(Un)trusted insertion is applied even with same field value", async (assert) => {
     (class Message extends Record {
-        static id = "id";
+        static id = [["id"]];
         id;
         body = Record.attr("", { html: true });
     }).register();
@@ -279,11 +279,11 @@ QUnit.test("(Un)trusted insertion is applied even with same field value", async 
 
 QUnit.test("Unshift preserves order", async (assert) => {
     (class Message extends Record {
-        static id = "id";
+        static id = [["id"]];
         id;
     }).register();
     (class Thread extends Record {
-        static id = "name";
+        static id = [["name"]];
         name;
         messages = Record.many("Message");
     }).register();
@@ -308,7 +308,7 @@ QUnit.test("Unshift preserves order", async (assert) => {
 
 QUnit.test("onAdd hook should see fully inserted data", async (assert) => {
     (class Thread extends Record {
-        static id = "name";
+        static id = [["name"]];
         name;
         members = Record.many("Member", {
             inverse: "thread",
@@ -317,7 +317,7 @@ QUnit.test("onAdd hook should see fully inserted data", async (assert) => {
         });
     }).register();
     (class Member extends Record {
-        static id = "name";
+        static id = [["name"]];
         name;
         type;
         isAdmin = Record.attr(false, {
@@ -335,12 +335,12 @@ QUnit.test("onAdd hook should see fully inserted data", async (assert) => {
 
 QUnit.test("Can insert with relation as id, using relation as data object", async (assert) => {
     (class User extends Record {
-        static id = "name";
+        static id = [["name"]];
         name;
         settings = Record.one("Settings");
     }).register();
     (class Settings extends Record {
-        static id = "user";
+        static id = [["user"]];
         pushNotif;
         user = Record.one("User", { inverse: "settings" });
     }).register();
@@ -357,7 +357,7 @@ QUnit.test("Can insert with relation as id, using relation as data object", asyn
 
 QUnit.test("Set on attr should invoke onChange", async (assert) => {
     (class Message extends Record {
-        static id = "id";
+        static id = [["id"]];
         id;
         body;
     }).register();
@@ -372,12 +372,12 @@ QUnit.test("Set on attr should invoke onChange", async (assert) => {
 
 QUnit.test("record list sort should be manually observable", async (assert) => {
     (class Thread extends Record {
-        static id = "id";
+        static id = [["id"]];
         id;
         messages = Record.many("Message", { inverse: "thread" });
     }).register();
     (class Message extends Record {
-        static id = "id";
+        static id = [["id"]];
         id;
         body;
         author;
@@ -418,7 +418,7 @@ QUnit.test("record list sort should be manually observable", async (assert) => {
 
 QUnit.test("relation field sort should be automatically observed", async (assert) => {
     (class Thread extends Record {
-        static id = "id";
+        static id = [["id"]];
         id;
         messages = Record.many("Message", {
             inverse: "thread",
@@ -426,7 +426,7 @@ QUnit.test("relation field sort should be automatically observed", async (assert
         });
     }).register();
     (class Message extends Record {
-        static id = "id";
+        static id = [["id"]];
         id;
         body;
         author;
@@ -453,7 +453,7 @@ QUnit.test("relation field sort should be automatically observed", async (assert
 
 QUnit.test("reading of lazy compute relation field should recompute", async (assert) => {
     (class Thread extends Record {
-        static id = "id";
+        static id = [["id"]];
         id;
         messages = Record.many("Message", {
             inverse: "thread",
@@ -466,7 +466,7 @@ QUnit.test("reading of lazy compute relation field should recompute", async (ass
         });
     }).register();
     (class Message extends Record {
-        static id = "id";
+        static id = [["id"]];
         id;
         thread = Record.one("Thread", { inverse: "messages" });
     }).register();
@@ -486,7 +486,7 @@ QUnit.test("reading of lazy compute relation field should recompute", async (ass
 
 QUnit.test("lazy compute should re-compute while they are observed", async (assert) => {
     (class Channel extends Record {
-        static id = "id";
+        static id = [["id"]];
         id;
         count = 0;
         multiplicity = Record.attr(undefined, {
@@ -541,14 +541,14 @@ QUnit.test("lazy compute should re-compute while they are observed", async (asse
 
 QUnit.test("lazy sort should re-sort while they are observed", async (assert) => {
     (class Thread extends Record {
-        static id = "id";
+        static id = [["id"]];
         id;
         messages = Record.many("Message", {
             sort: (m1, m2) => m1.sequence - m2.sequence,
         });
     }).register();
     (class Message extends Record {
-        static id = "id";
+        static id = [["id"]];
         id;
         sequence;
     }).register();
@@ -619,7 +619,7 @@ QUnit.test("store updates can be observed", async (assert) => {
 
 QUnit.test("Record can have many ids (1)", async (assert) => {
     (class User extends Record {
-        static id = OR("name", "employeeId", "userId");
+        static id = [["name"], ["employeeId"], ["userId"]];
         name;
     }).register();
     const store = await start();
@@ -634,7 +634,7 @@ QUnit.test("Record can have many ids (1)", async (assert) => {
 
 QUnit.test("Record can have many ids (2)", async (assert) => {
     (class User extends Record {
-        static id = ["name", ["id", "type"]];
+        static id = [["name"], ["id", "type"]];
         name;
         id;
         type;
@@ -649,14 +649,14 @@ QUnit.test("Record can have many ids (2)", async (assert) => {
 
 QUnit.test("Record can have many ids (3)", async (assert) => {
     (class User extends Record {
-        static id = ["name", "managerOfTeam"];
+        static id = [["name"], ["managerOfTeam"]];
         managerOfTeam = Record.one("Team");
         name;
         id;
         type;
     }).register();
     (class Team extends Record {
-        static id = ["name"];
+        static id = [["name"]];
         name;
         manager = Record.one("User", { inverse: "managerOfTeam" });
     }).register();
@@ -672,13 +672,13 @@ QUnit.test("Record can have many ids (3)", async (assert) => {
 
 QUnit.test("Record can have many ids (4)", async (assert) => {
     (class User extends Record {
-        static id = ["name", "managerOfTeam"];
+        static id = [["name"], ["managerOfTeam"]];
         managerOfTeam = Record.one("Team");
         name;
         id;
     }).register();
     (class Team extends Record {
-        static id = ["name"];
+        static id = [["name"]];
         name;
         manager = Record.one("User", { inverse: "managerOfTeam" });
     }).register();
@@ -692,13 +692,13 @@ QUnit.test("Record can have many ids (4)", async (assert) => {
 
 QUnit.test("Record can have many ids (5)", async (assert) => {
     (class User extends Record {
-        static id = ["name", "managerOfTeam"];
+        static id = [["name"], ["managerOfTeam"]];
         managerOfTeam = Record.one("Team");
         name;
         id;
     }).register();
     (class Team extends Record {
-        static id = ["name"];
+        static id = [["name"]];
         name;
         manager = Record.one("User", { inverse: "managerOfTeam" });
     }).register();
@@ -712,14 +712,14 @@ QUnit.test("Record can have many ids (5)", async (assert) => {
 
 QUnit.test("record reconcile (1) - base", async (assert) => {
     (class Person extends Record {
-        static id = ["name", "ceoOfCorporation"];
+        static id = [["name"], ["ceoOfCorporation"]];
         corpAsCEO = Record.one("Corporation");
         name;
         id;
         surname;
     }).register();
     (class Corporation extends Record {
-        static id = ["name"];
+        static id = [["name"]];
         name;
         ceo = Record.one("Person", { inverse: "corpAsCEO" });
     }).register();
@@ -734,14 +734,14 @@ QUnit.test("record reconcile (1) - base", async (assert) => {
 
 QUnit.test("record reconcile (2) - base observed", async (assert) => {
     (class Person extends Record {
-        static id = ["name", "ceoOfCorporation"];
+        static id = [["name"], ["ceoOfCorporation"]];
         corpAsCEO = Record.one("Corporation");
         name;
         id;
         surname;
     }).register();
     (class Corporation extends Record {
-        static id = ["name"];
+        static id = [["name"]];
         name;
         ceo = Record.one("Person", { inverse: "corpAsCEO" });
     }).register();
@@ -764,7 +764,7 @@ QUnit.test("record reconcile (2) - base observed", async (assert) => {
 
 QUnit.test("record reconcile (3) - relation", async (assert) => {
     (class Thread extends Record {
-        static id = [AND("model", "id"), "channelId"];
+        static id = [["model", "id"], ["channelId"]];
         name;
         messages = Record.many("Message");
         model;
@@ -772,7 +772,7 @@ QUnit.test("record reconcile (3) - relation", async (assert) => {
         channelId;
     }).register();
     (class Message extends Record {
-        static id = ["id"];
+        static id = [["id"]];
         id;
         content;
     }).register();
@@ -811,7 +811,7 @@ QUnit.test("record reconcile (3) - relation", async (assert) => {
 
 QUnit.test("record reconcile (4) - relation observed", async (assert) => {
     (class Thread extends Record {
-        static id = [AND("model", "id"), "channelId"];
+        static id = [["model", "id"], ["channelId"]];
         name;
         messages = Record.many("Message");
         model;
@@ -819,7 +819,7 @@ QUnit.test("record reconcile (4) - relation observed", async (assert) => {
         channelId;
     }).register();
     (class Message extends Record {
-        static id = ["id"];
+        static id = [["id"]];
         id;
         content;
     }).register();
@@ -852,7 +852,7 @@ QUnit.test("record reconcile (4) - relation observed", async (assert) => {
 QUnit.test("record reconcile (5) - inverse relation + observed", async (assert) => {
     // roughly same test as (4) but with inverse field
     (class Thread extends Record {
-        static id = [AND("model", "id"), "channelId"];
+        static id = [["model", "id"], ["channelId"]];
         name;
         messages = Record.many("Message");
         model;
@@ -860,7 +860,7 @@ QUnit.test("record reconcile (5) - inverse relation + observed", async (assert) 
         channelId;
     }).register();
     (class Message extends Record {
-        static id = ["id"];
+        static id = [["id"]];
         id;
         content;
         originThread = Record.one("Thread", { inverse: "messages" });

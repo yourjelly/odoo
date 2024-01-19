@@ -93,7 +93,7 @@ export class MessagePin {
      * @returns {string|null}
      */
     getPinnedAt(messageId) {
-        const pinnedAt = this.store.Message.get(messageId)?.pinnedAt;
+        const pinnedAt = this.store.Message.get({ id: messageId })?.pinnedAt;
         return pinnedAt ? luxon.DateTime.fromISO(new Date(pinnedAt).toISOString()) : null;
     }
 

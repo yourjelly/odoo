@@ -47,7 +47,8 @@ export class DiscussCoreWeb {
                 { user: username }
             );
             this.notificationService.add(notification, { type: "info" });
-            const chat = await this.threadService.getChat({ partnerId });
+            const persona = this.store.Persona.insert({ partnerId });
+            const chat = await this.threadService.getChat(persona);
             if (chat && !this.ui.isSmall) {
                 this.store.ChatWindow.insert({ thread: chat });
             }
