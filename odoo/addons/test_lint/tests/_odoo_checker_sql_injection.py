@@ -27,7 +27,7 @@ DFTL_CURSOR_EXPR = [
 ]
 # <attribute> or <name>.<attribute> or <call>.<attribute>
 ATTRIBUTE_WHITELIST = [
-    '_table', 'name', 'lang', 'id', 'get_lang.code'
+    '_table', 'name', 'lang', 'id', 'get_lang.code', 'where_clause', 'from_clause'
 ]
 
 FUNCTION_WHITELIST = [
