@@ -24375,6 +24375,9 @@
                 const token = tokens.filter((token) => token.value.includes(currentSelectedText) &&
                     token.start <= currentSelection.start &&
                     token.end >= currentSelection.end)[0];
+                if (!token) {
+                    return;
+                }
                 if (token.type === "REFERENCE") {
                     this.env.model.dispatch("CHANGE_COMPOSER_CURSOR_SELECTION", {
                         start: token.start,
@@ -51597,8 +51600,8 @@
 
 
     __info__.version = '16.4.19';
-    __info__.date = '2024-01-17T10:56:15.632Z';
-    __info__.hash = 'fe01e7b';
+    __info__.date = '2024-01-19T08:47:05.062Z';
+    __info__.hash = 'b024c19';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
