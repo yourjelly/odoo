@@ -550,6 +550,27 @@ class AccountTax(models.Model):
         total_excluded = currency.round(recompute_base(base, incl_fixed_amount, incl_percent_amount, incl_division_amount))
 
         # 4) Iterate the taxes in the sequence order to compute missing tax amounts.
+        def _compute_tax_line_amounts(tax_amount, tax_repartition_lines, sum_repartition_factor, prec):
+            factorized_tax_amount = round(tax_amount * sum_repartition_factor, precision_rounding=prec)
+
+            # Compute the tax line amounts by multiplying each factor with the tax amount.
+            # Then, spread the tax rounding to ensure the consistency of each line independently with the factorized
+            # amount. E.g:
+            #
+            # Suppose a tax having 4 x 50% repartition line applied on a tax amount of 0.03 with 2 decimal places.
+            # The factorized_tax_amount will be 0.06 (200% x 0.03). However, each line taken independently will compute
+            # 50% * 0.03 = 0.01 with rounding. It means there is 0.06 - 0.04 = 0.02 as total_rounding_error to dispatch
+            # in lines as 2 x 0.01.
+            repartition_line_amounts = [round(tax_amount * line.factor, precision_rounding=prec) for line in tax_repartition_lines]
+            total_rounding_error = round(factorized_tax_amount - sum(repartition_line_amounts), precision_rounding=prec)
+            nber_rounding_steps = int(abs(total_rounding_error / currency.rounding))
+            rounding_error = round(nber_rounding_steps and total_rounding_error / nber_rounding_steps or 0.0, precision_rounding=prec)
+
+            for i in range(nber_rounding_steps):
+                repartition_line_amounts[i] += rounding_error
+
+            return factorized_tax_amount, repartition_line_amounts
+
         # Start the computation of accumulated amounts at the total_excluded value.
         base = total_included = total_void = total_excluded
 
@@ -587,7 +608,7 @@ class AccountTax(models.Model):
 
             # Round the tax_amount multiplied by the computed repartition lines factor.
             tax_amount = round(tax_amount, precision_rounding=prec)
-            factorized_tax_amount = round(tax_amount * sum_repartition_factor, precision_rounding=prec)
+            factorized_tax_amount, repartition_line_amounts = _compute_tax_line_amounts(tax_amount, tax_repartition_lines, sum_repartition_factor, prec)
 
             if price_include and total_included_checkpoints.get(i) is None:
                 cumulated_tax_included_amount += factorized_tax_amount
@@ -607,24 +628,7 @@ class AccountTax(models.Model):
 
                 subsequent_tags = taxes_for_subsequent_tags.get_tax_tags(is_refund, 'base')
 
-            # Compute the tax line amounts by multiplying each factor with the tax amount.
-            # Then, spread the tax rounding to ensure the consistency of each line independently with the factorized
-            # amount. E.g:
-            #
-            # Suppose a tax having 4 x 50% repartition line applied on a tax amount of 0.03 with 2 decimal places.
-            # The factorized_tax_amount will be 0.06 (200% x 0.03). However, each line taken independently will compute
-            # 50% * 0.03 = 0.01 with rounding. It means there is 0.06 - 0.04 = 0.02 as total_rounding_error to dispatch
-            # in lines as 2 x 0.01.
-            repartition_line_amounts = [round(tax_amount * line.factor, precision_rounding=prec) for line in tax_repartition_lines]
-            total_rounding_error = round(factorized_tax_amount - sum(repartition_line_amounts), precision_rounding=prec)
-            nber_rounding_steps = int(abs(total_rounding_error / currency.rounding))
-            rounding_error = round(nber_rounding_steps and total_rounding_error / nber_rounding_steps or 0.0, precision_rounding=prec)
-
             for repartition_line, line_amount in zip(tax_repartition_lines, repartition_line_amounts):
-
-                if nber_rounding_steps:
-                    line_amount += rounding_error
-                    nber_rounding_steps -= 1
 
                 if not include_caba_tags and tax.tax_exigibility == 'on_payment':
                     repartition_line_tags = self.env['account.account.tag']
