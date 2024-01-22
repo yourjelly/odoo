@@ -85,6 +85,12 @@ class StockMoveLine(models.Model):
                 move_line._log_message(production, move_line, 'mrp.track_production_move_template', vals)
         return super(StockMoveLine, self).write(vals)
 
+    def _get_aggregated_properties(self, move=False):
+        aggregated_properties = super()._get_aggregated_properties(move)
+        for move_line_key, move_line in aggregated_properties.items():
+            move_line['bom'] = move_line['move'].bom_line_id.bom_id or False
+        return aggregated_properties
+
     def _get_aggregated_product_quantities(self, **kwargs):
         """Returns dictionary of products and corresponding values of interest grouped by optional kit_name
 
@@ -100,12 +106,12 @@ class StockMoveLine(models.Model):
 
         to_be_removed = []
         for aggregated_move_line in aggregated_move_lines:
-            bom = aggregated_move_lines[aggregated_move_line]['bom_id']
+            bom = aggregated_move_lines[aggregated_move_line].get('bom', None)
             is_phantom = bom.type == 'phantom' if bom else False
             description = aggregated_move_lines[aggregated_move_line]['description']
 
             if kit_name:
-                if not is_phantom or bom.display_name not in kit_name:
+                if not is_phantom or bom.display_name != kit_name:
                     to_be_removed.append(aggregated_move_line)
                 elif description == kit_name:
                     aggregated_move_lines[aggregated_move_line]['description'] = ""

@@ -749,6 +749,47 @@ class StockMoveLine(models.Model):
             self.env['stock.move.line'].browse(to_unlink_candidate_ids).unlink()
             move_to_recompute_state._recompute_state()
 
+    def _get_aggregated_properties(self, move=False):
+        aggregated_move_lines = {}
+        if move:
+            uom = move.product_uom
+            name = move.product_id.display_name
+            description = move.description_picking
+            if description == name or description == move.product_id.name:
+                description = False
+            product = move.product_id
+            line_key = f'{product.id}_{product.display_name}_{description or ""}_{uom.id}'
+            aggregated_move_lines[line_key] = {
+                'name': name,
+                'description': description,
+                'product_uom': uom,
+                'move': move,
+                'move_line': None,
+                'product': move.product_id,
+            }
+        else:
+            for move_line in self:
+                move = move_line.move_id
+                uom = move_line.product_uom_id
+                name = move.product_id.display_name
+                description = move.description_picking
+                if description == name or description == move.product_id.name:
+                    description = False
+                product = move.product_id
+                line_key = f'{product.id}_{product.display_name}_{description or ""}_{uom.id}'
+                if line_key not in aggregated_move_lines:
+                    aggregated_move_lines[line_key] = {
+                        'name': name,
+                        'description': description,
+                        'product_uom': uom,
+                        'move': move,
+                        'move_line': move_line,
+                        'product': move.product_id,
+                        'qty_ordered': False,
+                        'qty_done': False,
+                    }
+        return aggregated_move_lines
+
     def _get_aggregated_product_quantities(self, **kwargs):
         """ Returns a dictionary of products (key = id+name+description+uom) and corresponding values of interest.
 
@@ -759,20 +800,6 @@ class StockMoveLine(models.Model):
 
         returns: dictionary {product_id+name+description+uom: {product, name, description, qty_done, product_uom}, ...}
         """
-        aggregated_move_lines = {}
-
-        def get_aggregated_properties(move_line=False, move=False):
-            move = move or move_line.move_id
-            uom = move.product_uom or move_line.product_uom_id
-            name = move.product_id.display_name
-            description = move.description_picking
-            if description == name or description == move.product_id.name:
-                description = False
-            product = move.product_id
-            line_key = f'{product.id}_{product.display_name}_{description or ""}_{uom.id}'
-            bom = move.bom_line_id.bom_id if getattr(move, 'bom_line_id', None) else False
-            return (line_key, name, description, uom, bom)
-
         # Loops to get backorders, backorders' backorders, and so and so...
         backorders = self.env['stock.picking']
         pickings = self.picking_id
@@ -780,37 +807,28 @@ class StockMoveLine(models.Model):
             backorders |= pickings.backorder_ids
             pickings = pickings.backorder_ids
 
-        for move_line in self:
-            if kwargs.get('except_package') and move_line.result_package_id:
-                continue
-            line_key, name, description, uom, bom = get_aggregated_properties(move_line=move_line)
+        aggregated_move_lines = self._get_aggregated_properties()
 
-            qty_done = move_line.product_uom_id._compute_quantity(move_line.qty_done, uom)
-            if line_key not in aggregated_move_lines:
-                qty_ordered = None
-                if backorders and not kwargs.get('strict'):
-                    qty_ordered = move_line.move_id.product_uom_qty
-                    # Filters on the aggregation key (product, description and uom) to add the
-                    # quantities delayed to backorders to retrieve the original ordered qty.
-                    following_move_lines = backorders.move_line_ids.filtered(
-                        lambda ml: get_aggregated_properties(move=ml.move_id)[0] == line_key
-                    )
-                    qty_ordered += sum(following_move_lines.move_id.mapped('product_uom_qty'))
-                    # Remove the done quantities of the other move lines of the stock move
-                    previous_move_lines = move_line.move_id.move_line_ids.filtered(
-                        lambda ml: get_aggregated_properties(move=ml.move_id)[0] == line_key and ml.id != move_line.id
-                    )
-                    qty_ordered -= sum(map(lambda m: m.product_uom_id._compute_quantity(m.qty_done, uom), previous_move_lines))
-                aggregated_move_lines[line_key] = {'name': name,
-                                                   'description': description,
-                                                   'qty_done': qty_done,
-                                                   'qty_ordered': qty_ordered or qty_done,
-                                                   'bom_id': bom,
-                                                   'product_uom': uom,
-                                                   'product': move_line.product_id}
-            else:
-                aggregated_move_lines[line_key]['qty_ordered'] += qty_done
-                aggregated_move_lines[line_key]['qty_done'] += qty_done
+        for move_line_key, move_line in aggregated_move_lines.items():
+            if kwargs.get('except_package') and move_line['move_line'].result_package_id:
+                continue
+            qty_done = move_line['product_uom']._compute_quantity(move_line['move_line'].qty_done, move_line['product_uom'])
+            qty_ordered = None
+            if backorders and not kwargs.get('strict'):
+                qty_ordered = move_line['move'].product_uom_qty
+                # Filters on the aggregation key (product, description and uom) to add the
+                # quantities delayed to backorders to retrieve the original ordered qty.
+                following_move_lines = backorders.move_line_ids.filtered(
+                    lambda ml: self._get_aggregated_properties(move=ml.move_id) == move_line_key
+                )
+                qty_ordered += sum(following_move_lines.move_id.mapped('product_uom_qty'))
+                # Remove the done quantities of the other move lines of the stock move
+                previous_move_lines = move_line['move'].move_line_ids.filtered(
+                    lambda ml: self._get_aggregated_properties(move=ml.move_id) == move_line_key and ml.id != move_line['move_line'].id
+                )
+                qty_ordered -= sum(map(lambda m: m.product_uom_id._compute_quantity(m.qty_done, move_line['product_uom']), previous_move_lines))
+            move_line['qty_ordered'] = qty_ordered or qty_done
+            move_line['qty_done'] = qty_done
 
         # Does the same for empty move line to retrieve the ordered qty. for partially done moves
         # (as they are splitted when the transfer is done and empty moves don't have move lines).
@@ -821,21 +839,16 @@ class StockMoveLine(models.Model):
             if not (empty_move.state == "cancel" and empty_move.product_uom_qty
                     and float_is_zero(empty_move.quantity_done, precision_rounding=empty_move.product_uom.rounding)):
                 continue
-            line_key, name, description, uom, bom = get_aggregated_properties(move=empty_move)
+            aggregated_empty_moves = self._get_aggregated_properties(move=empty_move)
 
-            if line_key not in aggregated_move_lines:
-                qty_ordered = empty_move.product_uom_qty
-                aggregated_move_lines[line_key] = {
-                    'name': name,
-                    'description': description,
-                    'qty_done': False,
-                    'qty_ordered': qty_ordered,
-                    'bom_id': bom,
-                    'product_uom': uom,
-                    'product': empty_move.product_id,
-                }
-            else:
-                aggregated_move_lines[line_key]['qty_ordered'] += empty_move.product_uom_qty
+            for aggregated_empty_move_key, aggregated_empty_move in aggregated_empty_moves.items():
+                if aggregated_empty_move_key not in aggregated_move_lines:
+                    qty_ordered = empty_move.product_uom_qty
+                    aggregated_move_lines[aggregated_empty_move_key] = aggregated_empty_move
+                    aggregated_move_lines[aggregated_empty_move_key]['qty_ordered'] = qty_ordered
+                    aggregated_move_lines[aggregated_empty_move_key]['qty_done'] = False
+                else:
+                    aggregated_move_lines[aggregated_empty_move_key]['qty_ordered'] += empty_move.product_uom_qty
 
         return aggregated_move_lines
 
