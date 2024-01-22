@@ -9,13 +9,12 @@ import { Component, useState } from "@odoo/owl";
  * @property {function} onSuggestedRecipientAdded
  * @property {import("models").Thread} thread
  * @property {string} className
- * @property {string} styleString
  * @extends {Component<Props, Env>}
  */
 export class SuggestedRecipientsList extends Component {
     static template = "mail.SuggestedRecipientsList";
     static components = { SuggestedRecipient };
-    static props = ["thread", "className", "styleString", "onSuggestedRecipientAdded"];
+    static props = ["thread", "className", "onSuggestedRecipientAdded"];
 
     setup() {
         this.state = useState({
