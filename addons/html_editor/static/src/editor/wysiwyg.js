@@ -11,12 +11,14 @@ import { PowerboxPlugin } from "./powerbox/powerbox_plugin";
 import { ToolbarPlugin } from "./toolbar/toolbar_plugin";
 import { TablePlugin } from "./table/table_plugin";
 import { ListPlugin } from "./list/list_plugin";
+import { DeletePlugin } from "./core/delete_plugin";
 
 export function wysiwyg(el, env, config) {
     const Plugins = [
         HistoryPlugin,
         HintPlugin,
         DomPlugin,
+        DeletePlugin,
         FormatPlugin,
         OverlayPlugin,
         ToolbarPlugin,
@@ -35,6 +37,7 @@ export function useWysiwyg(refName, config = {}) {
         HistoryPlugin,
         HintPlugin,
         DomPlugin,
+        DeletePlugin,
         FormatPlugin,
         OverlayPlugin,
         ToolbarPlugin,

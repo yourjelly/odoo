@@ -63,7 +63,7 @@ export class Editor {
                     str = JSON.stringify(payload);
                 }
                 console.log(`[${P.name}] ${command} (payload=${str})`);
-                this.dispatch(command, payload);
+                return this.dispatch(command, payload);
             };
             const plugin = new P(
                 this.document,
@@ -90,9 +90,11 @@ export class Editor {
         if (!this.editable) {
             throw new Error("Cannot dispatch command while not attached to an element");
         }
+        const results = [];
         for (const p of this.plugins) {
-            p.handleCommand(command, payload);
+            results.push(p.handleCommand(command, payload));
         }
+        return results;
     }
 
     destroy() {

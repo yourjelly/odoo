@@ -1714,7 +1714,7 @@ describe("Selection not collapsed", () => {
         }
     );
 
-    test.todo("should delete a heading (triple click backspace)", async () => {
+    test("should delete a heading (triple click backspace)", async () => {
         await testEditor({
             contentBefore: "<h1>[abc</h1><p>]def</p>",
             stepFunction: deleteBackward,
@@ -1728,27 +1728,24 @@ describe("Selection not collapsed", () => {
         });
     });
 
-    test.todo(
-        "should delete last character of paragraph, ignoring the selected paragraph break",
-        async () => {
-            await testEditor({
-                contentBefore: "<p>ab[c</p><p>]def</p>",
-                // This type of selection (typically done with a triple
-                // click) is "corrected" before remove so triple clicking
-                // doesn't remove a paragraph break.
-                stepFunction: deleteBackward,
-                contentAfter: "<p>ab[]</p><p>def</p>",
-            });
-            await testEditor({
-                contentBefore: "<p>ab[c</p><p>]<br></p><p>def</p>",
-                // This type of selection (typically done with a triple
-                // click) is "corrected" before remove so triple clicking
-                // doesn't remove a paragraph break.
-                stepFunction: deleteBackward,
-                contentAfter: "<p>ab[]</p><p><br></p><p>def</p>",
-            });
-        }
-    );
+    test("should delete last character of paragraph, ignoring the selected paragraph break", async () => {
+        await testEditor({
+            contentBefore: "<p>ab[c</p><p>]def</p>",
+            // This type of selection (typically done with a triple
+            // click) is "corrected" before remove so triple clicking
+            // doesn't remove a paragraph break.
+            stepFunction: deleteBackward,
+            contentAfter: "<p>ab[]</p><p>def</p>",
+        });
+        await testEditor({
+            contentBefore: "<p>ab[c</p><p>]<br></p><p>def</p>",
+            // This type of selection (typically done with a triple
+            // click) is "corrected" before remove so triple clicking
+            // doesn't remove a paragraph break.
+            stepFunction: deleteBackward,
+            contentAfter: "<p>ab[]</p><p><br></p><p>def</p>",
+        });
+    });
 
     test.todo(
         "should delete first character of paragraph, as well as selected paragraph break",
@@ -1761,35 +1758,32 @@ describe("Selection not collapsed", () => {
         }
     );
 
-    test.todo(
-        "should delete last character of paragraph, ignoring the selected paragraph break leading to an unbreakable",
-        async () => {
-            await testEditor({
-                contentBefore: '<p>ab[c</p><p t="unbreak">]def</p>',
-                // This type of selection (typically done with a triple
-                // click) is "corrected" before remove so triple clicking
-                // doesn't remove a paragraph break.
-                stepFunction: deleteBackward,
-                contentAfter: '<p>ab[]</p><p t="unbreak">def</p>',
-            });
-            await testEditor({
-                contentBefore: '<p>ab[c</p><p t="unbreak">]<br></p><p>def</p>',
-                // This type of selection (typically done with a triple
-                // click) is "corrected" before remove so triple clicking
-                // doesn't remove a paragraph break.
-                stepFunction: deleteBackward,
-                contentAfter: '<p>ab[]</p><p t="unbreak"><br></p><p>def</p>',
-            });
-            await testEditor({
-                contentBefore: '<p>ab[c</p><p>]<br></p><p t="unbreak">def</p>',
-                // This type of selection (typically done with a triple
-                // click) is "corrected" before remove so triple clicking
-                // doesn't remove a paragraph break.
-                stepFunction: deleteBackward,
-                contentAfter: '<p>ab[]</p><p><br></p><p t="unbreak">def</p>',
-            });
-        }
-    );
+    test("should delete last character of paragraph, ignoring the selected paragraph break leading to an unbreakable", async () => {
+        await testEditor({
+            contentBefore: '<p>ab[c</p><p t="unbreak">]def</p>',
+            // This type of selection (typically done with a triple
+            // click) is "corrected" before remove so triple clicking
+            // doesn't remove a paragraph break.
+            stepFunction: deleteBackward,
+            contentAfter: '<p>ab[]</p><p t="unbreak">def</p>',
+        });
+        await testEditor({
+            contentBefore: '<p>ab[c</p><p t="unbreak">]<br></p><p>def</p>',
+            // This type of selection (typically done with a triple
+            // click) is "corrected" before remove so triple clicking
+            // doesn't remove a paragraph break.
+            stepFunction: deleteBackward,
+            contentAfter: '<p>ab[]</p><p t="unbreak"><br></p><p>def</p>',
+        });
+        await testEditor({
+            contentBefore: '<p>ab[c</p><p>]<br></p><p t="unbreak">def</p>',
+            // This type of selection (typically done with a triple
+            // click) is "corrected" before remove so triple clicking
+            // doesn't remove a paragraph break.
+            stepFunction: deleteBackward,
+            contentAfter: '<p>ab[]</p><p><br></p><p t="unbreak">def</p>',
+        });
+    });
 
     test.todo(
         "should delete first character of unbreakable, ignoring selected paragraph break",

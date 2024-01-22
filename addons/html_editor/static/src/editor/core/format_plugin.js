@@ -4,6 +4,7 @@ import { Plugin } from "../plugin";
 import { closestElement } from "../utils/dom_traversal";
 import { formatSelection } from "../utils/formatting";
 import { getTraversedNodes } from "../utils/selection";
+import { handleShortcuts } from "../utils/shortcuts";
 
 const shortcuts = {
     FORMAT_BOLD: (e) => e.key === "b" && (e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey,
@@ -16,7 +17,9 @@ const shortcuts = {
 export class FormatPlugin extends Plugin {
     static name = "format";
     setup() {
-        this.addDomListener(this.editable, "keydown", this.handleShortcut.bind(this));
+        this.addDomListener(this.editable, "keydown", (e) =>
+            handleShortcuts(this.dispatch, shortcuts, e)
+        );
     }
     handleCommand(command, size) {
         switch (command) {
@@ -53,14 +56,6 @@ export class FormatPlugin extends Plugin {
         for (const node of getTraversedNodes(this.editable)) {
             // The only possible background image on text is the gradient.
             closestElement(node).style.backgroundImage = "";
-        }
-    }
-    handleShortcut(e) {
-        for (const [command, shortcut] of Object.entries(shortcuts)) {
-            if (shortcut(e)) {
-                e.preventDefault();
-                this.dispatch(command);
-            }
         }
     }
 }

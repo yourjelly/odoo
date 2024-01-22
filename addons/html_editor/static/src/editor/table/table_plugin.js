@@ -2,7 +2,8 @@
 
 import { Plugin } from "../plugin";
 import { isBlock } from "../utils/blocks";
-import { splitElement, splitTextNode } from "../utils/dom";
+import { splitElement, splitTextNode } from "../utils/dom_split";
+import { isRow } from "../utils/dom_info";
 import { closestElement } from "../utils/dom_traversal";
 import { parseHTML } from "../utils/html";
 import { DIRECTIONS, rightPos, startPos } from "../utils/position";
@@ -47,6 +48,9 @@ export class TablePlugin extends Plugin {
                 break;
             case "DELETE_TABLE":
                 this.deleteTable(payload);
+                break;
+            case "DELETE_BACKWARD:BEFORE":
+                this.deleteBackwardBefore(payload);
                 break;
         }
     }
@@ -230,5 +234,11 @@ export class TablePlugin extends Plugin {
         table.before(p);
         table.remove();
         setSelection(p, 0);
+    }
+    deleteBackwardBefore({ anchorNode, anchorOffset }) {
+        // If the cursor is at the beginning of a row, prevent deletion.
+        if (isRow(anchorNode) && !anchorOffset) {
+            return { stop: true };
+        }
     }
 }
