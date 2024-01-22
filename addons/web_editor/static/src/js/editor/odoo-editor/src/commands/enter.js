@@ -58,6 +58,7 @@ HTMLElement.prototype.oEnter = function (offset, firstSplit = true) {
 
     // Propagate the split until reaching a block element (or continue to the
     // closest list item element if there is one).
+    // @specific to li
     if (!isBlock(this) || (this.nodeName !== 'LI' && this.closest('LI'))) {
         if (this.parentElement) {
             this.parentElement.oEnter(childNodeIndex(this) + 1, !didSplit);
@@ -98,6 +99,7 @@ HTMLElement.prototype.oEnter = function (offset, firstSplit = true) {
  * Cursor end of line: <h1>title[]</h1> + ENTER <=> <h1>title</h1><p>[]<br/></p>
  * Cursor in the line: <h1>tit[]le</h1> + ENTER <=> <h1>tit</h1><h1>[]le</h1>
  */
+// Could be in its own plugin?
 HTMLHeadingElement.prototype.oEnter = function () {
     const newEl = HTMLElement.prototype.oEnter.call(this, ...arguments);
     if (!descendants(newEl).some(isVisibleTextNode)) {
@@ -113,6 +115,7 @@ HTMLQuoteElement.prototype.oEnter = HTMLHeadingElement.prototype.oEnter;
 /**
  * Specific behavior for list items: deletion and unindentation when empty.
  */
+// @specific to li
 HTMLLIElement.prototype.oEnter = function () {
     // If not empty list item, regular block split
     if (this.textContent) {
@@ -124,9 +127,42 @@ HTMLLIElement.prototype.oEnter = function () {
     }
     this.oShiftTab();
 };
+
+function process(target, forceElement) {
+    // const response = dispatchEvent('willProcessTarget', target)
+    switch (forceElement || target.tagName){
+        case 'htmlelement':
+            // ...
+            return target.parentElement;
+        case 'li':
+            process(target, 'htmlelement');
+            dipsatch('liEnter', target)
+            break;
+    }
+    // const response2 = dispatchEvent('didProcessTarget', target)
+}
+
+function enter(target) {
+
+    const response = dispatchEvent('willProcessTarget', target)
+    if (response.stop) {
+        return response.stop;
+    }
+    const parent = process(target);
+    const response2 = dispatchEvent('hasProcessTarget', target)
+    if (response2.stop) {
+        return response2.stop;
+    }
+    if (parent) {
+        enter(parent);
+    }
+
+}
+
 /**
  * Specific behavior for pre: insert newline (\n) in text or insert p at end.
  */
+// @specific to pre
 HTMLPreElement.prototype.oEnter = function (offset) {
     if (offset < this.childNodes.length) {
         const lineBreak = document.createElement('br');
