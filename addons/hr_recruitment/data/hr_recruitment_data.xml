@@ -39,7 +39,7 @@
     <record model="hr.recruitment.stage" id="stage_job0">
         <field name="name">New</field>
         <field name="sequence">0</field>
-        <field name="template_id" ref="email_template_data_applicant_congratulations"/> 
+        <!-- <field name="template_id" ref="email_template_data_applicant_congratulations"/>  -->
     </record>
     <record model="hr.recruitment.stage" id="stage_job1">
         <field name="name">Initial Qualification</field>
