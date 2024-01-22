@@ -2823,10 +2823,11 @@ export class OdooEditor extends EventTarget {
             resetTableSize.classList.remove('d-none');
         }
 
-        let left;
+        let left = 0;
         let top;
+        debugger;
         if (isRow && isRtl) {
-            left = tableRect.right - tableUiContainerRect.x;
+            left = tableRect.right - tableUiContainerRect.x - wrappedUi.clientWidth;
         } else if (isRow && !isRtl) {
             left = elementRect.left - tableUiContainerRect.left - (isRow ? wrappedUi.clientWidth : 0);
         } else {
