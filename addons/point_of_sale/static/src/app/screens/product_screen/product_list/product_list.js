@@ -55,33 +55,61 @@ export class ProductsWidget extends Component {
         );
     }
 
-    /**
-     * @returns {import("@point_of_sale/app/generic_components/category_selector/category_selector").Category[]}
-     */
-    getCategories() {
+    getAncestorsAndCurrent() {
         return [
             ...this.pos.db.get_category_ancestors_ids(this.pos.selectedCategoryId),
             this.pos.selectedCategoryId,
-            ...this.pos.db.get_category_childs_ids(this.pos.selectedCategoryId),
-        ]
+        ].filter((elem) => elem != 0);
+    }
+
+    getChildCategories(categoryId) {
+        return this.getCategoriesInfo(
+            [...this.pos.db.get_category_childs_ids(categoryId)],
+            categoryId
+        );
+    }
+
+    getCategoriesPath(selectedCategoryId = this.pos.selectedCategoryId) {
+        return this.getCategoriesInfo(
+            [...this.pos.db.get_category_ancestors_ids(selectedCategoryId), selectedCategoryId],
+            selectedCategoryId
+        );
+    }
+
+    /**
+     * @returns {import("@point_of_sale/app/generic_components/category_selector/category_selector").Category[]}
+     */
+    getCategories(selectedCategoryId = this.pos.selectedCategoryId) {
+        return [
+            ...this.getCategoriesPath(selectedCategoryId),
+            ...this.getChildCategories(selectedCategoryId),
+        ].filter((elem) => elem.id != 0);
+    }
+
+    getCategoriesInfo(categories, selectedCategoryId) {
+        return categories
             .map((id) => this.pos.db.category_by_id[id])
             .map((category) => {
                 const isRootCategory = category.id === this.pos.db.root_category_id;
                 const showSeparator =
                     !isRootCategory &&
                     [
-                        ...this.pos.db.get_category_ancestors_ids(this.pos.selectedCategoryId),
-                        this.pos.selectedCategoryId,
+                        ...this.pos.db.get_category_ancestors_ids(selectedCategoryId),
+                        selectedCategoryId,
                     ].includes(category.id);
+                const isSelected =
+                    !isRootCategory &&
+                    this.getAncestorsAndCurrent().includes(category.id) &&
+                    !this.ui.isSmall;
                 return {
                     id: category.id,
                     name: !isRootCategory ? category.name : "",
                     icon: isRootCategory ? "fa-home fa-2x" : "",
-                    separator: "fa-caret-right",
-                    showSeparator,
+                    separator: showSeparator ? "fa-caret-right" : "",
                     imageUrl:
                         category?.has_image &&
                         `/web/image?model=pos.category&field=image_128&id=${category.id}&unique=${category.write_date}`,
+                    isSelected,
                 };
             });
     }

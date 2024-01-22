@@ -1,20 +1,18 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <templates id="template" xml:space="preserve">
     <t t-name="point_of_sale.CategorySelector">
-        <div t-attf-class="{{props.class}} d-flex overflow-auto w-100 flex-grow-1">
-            <div class="d-flex p-1 bg-view">
-                <div t-foreach="props.categories" t-as="category" t-key="category.id"
-                    class="d-flex align-items-center">
-                    <i t-if="category_index != 0" t-attf-class="px-2 fa {{category.separator}}"
-                        t-att-style="`opacity: ${category.showSeparator ? 1 : 0};`"
-                        aria-hidden="true" />
+        <div t-attf-class="{{props.class}}">
+            <div class="category-list d-grid gap-1 p-1 overflow-x-scroll">
+                <t t-foreach="props.categories" t-as="category" t-key="category.id">
+                    <i t-if="category.separator" t-attf-class="px-2 fa {{category.separator}}"
+                        aria-hidden="true"/>
                     <button
-                        class="category-button btn btn-light d-flex flex-column align-items-center justify-content-center category-item p-1 h-100"
-                        style="max-width: 100px;"
+                        class="category-button position-relative btn btn-light d-flex flex-column align-items-center p-0 m-0 text-start cursor-pointer transition-base"
+                        t-att-style="`background-color: ${category.isSelected ? '#E7E9ED' : '' };`"
                         t-on-click="() => props.onClick(category.id)">
                         <t t-if="props.showImage">
                             <img t-if="category.imageUrl"
-                                class="rounded h-75"
+                                class="rounded w-75"
                                 t-att-src="category.imageUrl"
                                 alt="Category" />
                         </t>
@@ -23,7 +21,7 @@
                             aria-hidden="true" />
                         <span t-if="category.name" class="w-100 text-center fs-5 inline-block text-truncate" t-esc="category.name" style="min-height: 1.2rem" />
                     </button>
-                </div>
+                </t>
             </div>
         </div>
     </t>
