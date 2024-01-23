@@ -161,12 +161,12 @@ class Base(models.AbstractModel):
             if field_type == 'selection':
                 value = selection_labels.get(value, False)
             if isinstance(value, tuple):
-                value = value[1]  # FIXME should use technical value (0)
+                value = value[1] if field_type in ['date', 'datetime'] else value[0]  # FIXME should use technical value (0)
             return value
 
         result = {}
         for group in self._read_progress_bar(domain, group_by, progress_bar):
-            group_by_value = str(adapt(group[group_by]))
+            group_by_value = adapt(group[group_by])
             field_value = group[progress_bar['field']]
             if group_by_value not in result:
                 result[group_by_value] = dict.fromkeys(progress_bar['colors'], 0)
