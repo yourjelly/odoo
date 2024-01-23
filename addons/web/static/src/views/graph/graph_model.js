@@ -211,7 +211,11 @@ export class GraphModel extends Model {
             const x = dataPt.labels.slice(0, mode === "pie" ? undefined : 1);
             const trueLabel = x.length ? x.join(SEP) : this.env._t("Total");
             if (dateClasses) {
-                x[0] = dateClasses.classLabel(dataPt.originIndex, x[0]);
+                if (groupBy[0].interval === 'month') {
+                    x[0] = new Date(`1 ${trueLabel}`).getMonth();
+                } else {
+                    x[0] = dateClasses.classLabel(dataPt.originIndex, x[0]);
+                }
             }
             const key = JSON.stringify(x);
             if (labelMap[key] === undefined) {
