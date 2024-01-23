@@ -162,6 +162,8 @@ export class RecordList extends Array {
     /** @param {R[]|any[]} data */
     assign(data) {
         const this0 = _0(this);
+        const Model = this0.owner.Model;
+        const inverse = Model.fieldsInverse.get(this0.name);
         return this0.store.MAKE_UPDATE(function RL_assign() {
             /** @type {Record[]|Set<Record>|RecordList<Record|any[]>} */
             const collection = isRecord(data) ? [data] : data;
@@ -170,14 +172,30 @@ export class RecordList extends Array {
             const vals = [...collection];
             /** @type {R[]} */
             const oldRecords2 = this0._1.slice.call(this0._2);
-            for (const oldRecord2 of oldRecords2) {
-                _0(oldRecord2).__uses__.delete(this0);
-            }
             const records2 = vals.map((val) =>
                 this0._insert(val, function RL_assign_insert(record) {
-                    record.__uses__.add(this0);
+                    const wasIn = record.localIds.some(
+                        (localId) => this0.state.data.indexOf(localId) !== -1
+                    );
+                    if (!wasIn) {
+                        record.__uses__.add(this0);
+                        this0.store.ADD_QUEUE("onAdd", this0.owner, this0.name, record);
+                        if (inverse) {
+                            record._fields.get(inverse).add(this0.owner);
+                        }
+                    }
                 })
             );
+            for (const oldRecord2 of oldRecords2) {
+                const oldRecord = _0(oldRecord2);
+                if (!oldRecord.in(records2)) {
+                    oldRecord.__uses__.delete(this0);
+                    this0.store.ADD_QUEUE("onDelete", this0.owner, this0.name, oldRecord);
+                    if (inverse) {
+                        oldRecord._fields.get(inverse).delete(this0.owner);
+                    }
+                }
+            }
             this0._2.state.data = records2.map((record2) => _0(record2).localId);
         });
     }
