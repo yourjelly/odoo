@@ -2,7 +2,7 @@
 
 // ! WARNING: this module cannot depend on modules defined in "@web" !
 
-import { after, globals, start } from "@odoo/hoot";
+import { after, before, describe, globals, start } from "@odoo/hoot";
 import { watchKeys } from "@odoo/hoot-dom";
 import { Deferred } from "@odoo/hoot-mock";
 import { CONFIG_SUFFIX, TEST_SUFFIX } from "./mock_module_loader";
@@ -219,8 +219,11 @@ const runTests = async () => {
 
 const DEFAULT_MOCKS = {
     // Fixed modules
+    "@web/core/template_inheritance": makeFixedFactory("@web/core/template_inheritance"),
     "@web/core/templates": makeFixedFactory("@web/core/templates"),
-    "web.assets_web.bundle.xml": makeFixedFactory("web.assets_web.bundle.xml"),
+    "web.assets_unit_tests_setup.bundle.xml": makeFixedFactory(
+        "web.assets_unit_tests_setup.bundle.xml"
+    ),
     // Other mocks
     "@web/session": mockSessionFactory(),
 };
@@ -277,7 +280,7 @@ export async function defineModuleSet(entryPoints, params) {
 
     checkKeys(true);
 
-    return { moduleNames, subLoader };
+    return { addons, moduleNames, subLoader };
 }
 
 /**
@@ -294,20 +297,31 @@ export async function describeSuite(entryPoints, params) {
         return getBaseName(name);
     });
 
-    const { subLoader } = await defineModuleSet(entryPoints, params);
-    const { describe } = subLoader.modules.get("@odoo/hoot");
+    const { addons, subLoader } = await defineModuleSet(entryPoints, params);
+
+    /**
+     * @param {string} url
+     */
+    const filterTemplateUrl = (url) => addons.has(url.split("/")[1]);
+
     for (const moduleName of entryModuleNames) {
         const testModuleName = moduleName + TEST_SUFFIX;
         subLoader.factories.set(testModuleName, loader.factories.get(testModuleName));
 
         // Run test factory
         describe(getSuitePath(moduleName), () => {
+            const { setUrlFilters } = subLoader.modules.get("@web/core/templates");
+
+            before(() => setUrlFilters([filterTemplateUrl]));
+
             const { loader, define } = odoo;
             odoo.loader = subLoader;
             odoo.define = subLoader.define.bind(subLoader);
             after(() => {
                 odoo.loader = loader;
                 odoo.define = define;
+
+                setUrlFilters([]);
             });
 
             subLoader.startModule(testModuleName);

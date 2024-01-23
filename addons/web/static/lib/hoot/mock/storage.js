@@ -26,7 +26,7 @@ export class MockStorage {
 
     /** @type {typeof Storage.prototype.getItem} */
     getItem(key) {
-        return this.items.get(key);
+        return this.items.get(key) ?? null;
     }
 
     /** @type {typeof Storage.prototype.key} */

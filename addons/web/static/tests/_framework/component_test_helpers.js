@@ -4,7 +4,7 @@ import { mountOnFixture } from "@odoo/hoot";
 import { App, Component, xml } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { MainComponentsContainer } from "@web/core/main_components_container";
-import { templates } from "@web/core/templates";
+import { getTemplate } from "@web/core/templates";
 import { getMockEnv, makeMockEnv } from "./env_test_helpers";
 
 //-----------------------------------------------------------------------------
@@ -42,16 +42,16 @@ export function findComponent(parent, predicate) {
  * @param {C | string} ComponentClass
  * @param {{
  *  env?: E;
+ *  getTemplate?: Document;
  *  noMainContainer?: boolean;
  *  props?: P;
- *  templates?: Document;
  * }} [options]
  */
 export async function mountWithCleanup(ComponentClass, options) {
     const config = {
         env: options?.env || getMockEnv() || (await makeMockEnv()),
+        getTemplate,
         props: options?.props || {},
-        templates,
         translateFn: _t,
     };
 
