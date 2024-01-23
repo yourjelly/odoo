@@ -58,6 +58,10 @@ export const tourService = {
     // localization dependency to make sure translations used by tours are loaded
     dependencies: ["orm", "effect", "ui", "overlay", "localization"],
     start: async (_env, { orm, effect, ui, overlay }) => {
+        // Make tour accessible only to admin users
+        if (!_env.services.user.isAdmin) {
+            return;
+        }
         await whenReady();
         const toursEnabled = "tour_disable" in session && !session.tour_disable;
         const consumedTours = new Set(session.web_tours);
