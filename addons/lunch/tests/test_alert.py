@@ -58,3 +58,11 @@ class TestAlarm(TestsCommon):
 
         self.alert_ny.notification_time -= 1
         self.assertEqual(cron_ny.nextcall, old_nextcall + timedelta(days=1, hours=1))
+
+    def another_bad_match(self):
+        x = 'foo'
+        match x:
+            case 'foo':
+                pass
+            case _:
+                pass

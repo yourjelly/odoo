@@ -117,3 +117,11 @@ class TestsCommon(common.TransactionCase):
                 'tz': 'Asia/Tokyo',
                 'message': "",
             }).with_context(tz='Asia/Tokyo')
+
+    def test_match(self):
+        x = 'foo'
+        match x:
+            case 'foo':
+                pass
+            case _:
+                pass
