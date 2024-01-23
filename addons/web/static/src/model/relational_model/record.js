@@ -534,6 +534,8 @@ export class Record extends DataPoint {
             return value && value.length ? value : false;
         } else if (fieldType === "many2one") {
             return value ? value[0] : false;
+        } else if (fieldType === "many2one_reference") {
+            return value ? value.resId : 0;
         } else if (fieldType === "reference") {
             return value && value.resModel && value.resId
                 ? `${value.resModel},${value.resId}`
@@ -765,11 +767,16 @@ export class Record extends DataPoint {
     async _preprocessReferenceChanges(changes) {
         const proms = [];
         for (const [fieldName, value] of Object.entries(changes)) {
-            if (this.fields[fieldName].type !== "reference") {
+            if (!["reference", "many2one_reference"].includes(this.fields[fieldName].type)) {
                 continue;
             }
             if (!value) {
                 changes[fieldName] = false;
+                continue;
+            }
+            if (typeof value === "number") {
+                // Many2OneReferenceInteger field only manipulates the id
+                changes[fieldName] = { resId: value };
                 continue;
             }
             const id = value.resId;

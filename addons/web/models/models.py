@@ -211,11 +211,10 @@ class Base(models.AbstractModel):
 
                     if 'fields' in field_spec:
                         record_values[field_name] = reference_read[0]
-                        if field.type == 'reference':
-                            record_values[field_name]['id'] = {
-                                'id': co_record.id,
-                                'model': co_record._name
-                            }
+                        record_values[field_name]['id'] = {
+                            'id': co_record.id,
+                            'model': co_record._name
+                        }
 
         return values_list
 
