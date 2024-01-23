@@ -57,8 +57,8 @@ class ReportMoOverview(models.AbstractModel):
         doc['show_uom'] = self.env.user.user_has_groups('uom.group_uom')
         if doc['show_uom']:
             footer_colspan += 1
-        doc['data_mo_unit_cost'] = doc['summary'].get('mo_cost', 0) / doc['summary'].get('quantity', 1)
-        doc['data_real_unit_cost'] = doc['summary'].get('real_cost', 0) / doc['summary'].get('quantity', 1)
+        doc['data_mo_unit_cost'] = doc['summary'].get('mo_cost', 0) / doc['summary'].get('quantity', 1) if doc['summary'].get('mo_cost', 0) != 0 else 0
+        doc['data_real_unit_cost'] = doc['summary'].get('real_cost', 0) / doc['summary'].get('quantity', 1) if doc['summary'].get('real_cost', 0) != 0 else 0
         doc['unfolded_ids'] = set(json.loads(data.get('unfoldedIds', '[]')))
         doc['footer_colspan'] = footer_colspan
         doc['get_color'] = get_color
@@ -93,8 +93,8 @@ class ReportMoOverview(models.AbstractModel):
 
     def _get_report_extra_lines(self, summary, components, operations, production_done=False):
         currency = summary.get('currency', self.env.company.currency_id)
-        unit_mo_cost = currency.round(summary.get('mo_cost', 0) / summary.get('quantity', 1))
-        unit_real_cost = currency.round(summary.get('real_cost', 0) / summary.get('quantity', 1))
+        unit_mo_cost = currency.round(summary.get('mo_cost', 0) / summary.get('quantity', 1)) if (summary.get('quantity', 1) != 0) else 0
+        unit_real_cost = currency.round(summary.get('real_cost', 0) / summary.get('quantity', 1)) if (summary.get('quantity', 1) != 0) else 0
         extras = {
             'unit_mo_cost': unit_mo_cost,
             'unit_mo_cost_decorator': self._get_comparison_decorator(unit_real_cost, unit_mo_cost, currency.rounding),
@@ -189,7 +189,8 @@ class ReportMoOverview(models.AbstractModel):
         }
 
     def _get_unit_cost(self, move):
-        return move.product_id.uom_id._compute_price(move.product_id.standard_price, move.product_uom)
+        if move:
+            return move.product_id.uom_id._compute_price(move.product_id.standard_price, move.product_uom)
 
     def _format_state(self, record, components=False):
         """ For MOs, provide a custom state based on the demand vs quantities available for components.
@@ -230,7 +231,7 @@ class ReportMoOverview(models.AbstractModel):
         return _("Ready")
 
     def _get_uom_precision(self, uom_rounding):
-        return max(0, int(-(log10(uom_rounding))))
+        return max(0, int(-(log10(uom_rounding)) if uom_rounding != 0 else 0))
 
     def _get_comparison_decorator(self, expected, current, rounding):
         compare = float_compare(current, expected, precision_rounding=rounding)
