@@ -1049,6 +1049,111 @@ class StockQuant(TransactionCase):
         self.assertEqual(destruction_move_line.location_dest_id.id, creation_move_line.location_id.id)
         self.assertEqual(dummy_quant.quantity, 0)
 
+    def test_quant_gs1_barcode(self):
+        """ Checks quant's methods to generate barcode works as expected and don't generate barcode
+        longer than the given limit and use the given separator.
+        """
+        # Initial config.
+        self.env['ir.config_parameter'].set_param('stock.barcode_max_size', 400)
+        self.env['ir.config_parameter'].set_param('stock.barcode_separator', ';')
+        # Creates some products with a valid EAN-13 and LN/SN for tracked ones.
+        product_ean13 = self.env['product.product'].create({
+            'name': 'Product Test EAN13',
+            'type': 'product',
+            'barcode': '0100011101014',
+        })
+        product_serial_ean13 = self.env['product.product'].create({
+            'name': 'Product Test EAN13 - Tracked by SN',
+            'type': 'product',
+            'barcode': '0200022202028',
+            'tracking': 'serial',
+        })
+        product_lot_ean13 = self.env['product.product'].create({
+            'name': 'Product Test EAN13 - Tracked by Lots',
+            'type': 'product',
+            'barcode': '0300033303032',
+            'tracking': 'lot',
+        })
+
+        serial_numbers = self.env['stock.lot'].create([{
+            'product_id': product_serial_ean13.id,
+            'name': f'tsn-00{i}',
+        } for i in range(8)])
+
+        lot_numbers = self.env['stock.lot'].create([{
+            'product_id': product_lot_ean13.id,
+            'name': f'lot-00{i}',
+        } for i in range(2)])
+
+        # Adds some quants for those products.
+        common_serial_vals = {
+            'product_id': product_serial_ean13.id,
+            'location_id': self.stock_location.id,
+            'inventory_quantity': 1,
+        }
+        serial_vals = [{
+            **common_serial_vals,
+            'lot_id': serial_numbers[i].id,
+        } for i in range(8)]
+
+        quants = self.env['stock.quant'].create(serial_vals + [{
+            'product_id': product_ean13.id,
+            'location_id': self.stock_location.id,
+            'inventory_quantity': 123,
+        }, {
+            'product_id': product_lot_ean13.id,
+            'location_id': self.stock_location.id,
+            'inventory_quantity': 15,
+            'lot_id': lot_numbers[0].id,
+        }, {
+            'product_id': product_lot_ean13.id,
+            'location_id': self.stock_location.id,
+            'inventory_quantity': 25,
+            'lot_id': lot_numbers[1].id,
+        }])
+        quants.action_apply_inventory()
+
+        quants_product_ean13 = quants.filtered(lambda q: q.product_id == product_ean13)
+        quants_product_serial_ean13 = quants.filtered(lambda q: q.product_id == product_serial_ean13)
+        quants_product_lot_ean13 = quants.filtered(lambda q: q.product_id == product_lot_ean13)
+
+        # First, checks individual barcodes.
+        self.assertEqual(quants_product_ean13._get_gs1_barcode(), '01001000111010143000000123')
+        self.assertEqual(quants_product_serial_ean13[3]._get_gs1_barcode(), '010020002220202821tsn-003')
+        self.assertEqual(quants_product_lot_ean13[1]._get_gs1_barcode(), '0100300033303032300000002510lot-001')
+
+        # Then, checks the composite barcode.
+        composite_barcodes = quants.sorted(lambda q: q.product_id.id).get_composite_barcodes()
+        self.assertEqual(len(composite_barcodes), 1)
+        self.assertEqual(
+            composite_barcodes[0],
+            "01001000111010143000000123;010020002220202821tsn-000;010020002220202821tsn-001;"
+            "010020002220202821tsn-002;010020002220202821tsn-003;010020002220202821tsn-004;"
+            "010020002220202821tsn-005;010020002220202821tsn-006;010020002220202821tsn-007;"
+            "0100300033303032300000001510lot-000;0100300033303032300000002510lot-001;"
+        )
+
+        # Use another separator and set a lower composite barcode's max length.
+        self.env['ir.config_parameter'].set_param('stock.barcode_separator', '|')
+        self.env['ir.config_parameter'].set_param('stock.barcode_max_size', 160)
+        composite_barcodes = quants.sorted(lambda q: q.product_id.id).get_composite_barcodes()
+        # Check we have now two composite barcodes (306 char but limit at 160).
+        self.assertEqual(len(composite_barcodes), 2)
+        for composite_barcode in composite_barcodes:
+            self.assertTrue(
+                len(composite_barcode) <= 160,
+                "Every composite barcode should be shorter than the barcode max size limit")
+        self.assertEqual(
+            composite_barcodes[0],
+            "01001000111010143000000123|010020002220202821tsn-000|010020002220202821tsn-001|"
+            "010020002220202821tsn-002|010020002220202821tsn-003|010020002220202821tsn-004|"
+        )
+        self.assertEqual(
+            composite_barcodes[1],
+            "010020002220202821tsn-005|010020002220202821tsn-006|010020002220202821tsn-007|"
+            "0100300033303032300000001510lot-000|0100300033303032300000002510lot-001|"
+        )
+
 class StockQuantRemovalStrategy(TransactionCase):
     def setUp(self):
         super().setUp()

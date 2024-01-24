@@ -1306,6 +1306,78 @@ class StockQuant(models.Model):
             })
         return action
 
+    def _get_gs1_barcode(self, gs1_quantity_rules_ai_by_uom=False):
+        """ Generate a GS1 barcode for the quant's properties (product, quantity and LN/SN.)
+
+        :param gs1_quantity_rules_ai_by_uom: contains the products' GS1 AI paired with the UoM id
+        :type gs1_quantity_rules_ai_by_uom: dict
+        :return: str
+        """
+        self.ensure_one
+        gs1_quantity_rules_ai_by_uom = gs1_quantity_rules_ai_by_uom or {}
+        barcode = ''
+        # Product part.
+        if self.product_id.valid_ean:
+            barcode = self.product_id.barcode
+            barcode = '01' + '0' * (14 - len(barcode)) + barcode
+        # Quantity part.
+        if self.tracking != 'serial' or self.quantity > 1:
+            quantity_ai = gs1_quantity_rules_ai_by_uom.get(self.product_uom_id.id)
+            if quantity_ai:
+                qty_str = str(int(self.quantity / self.product_uom_id.rounding))
+                barcode += quantity_ai + '0' * (6 - len(qty_str)) + qty_str
+            else:
+                # GS1 have no decimal indicator for unit uom => round for now.
+                qty_str = str(int(round(self.quantity)))
+                barcode += '30' + '0' * (8 - len(qty_str)) + qty_str
+        # Tracking part (must be GS1 barcode's last part since we don't know SN/LN length.)
+        if self.lot_id:
+            if len(self.lot_id.name) > 20:
+                # Can not generate a valid GS1 barcode since the lot/serial number max length is
+                # exceeded and since this information is primordial if the LN/SN is present.
+                return ''
+            tracking_ai = '21' if self.tracking == 'serial' else '10'
+            barcode += tracking_ai + self.lot_id.name
+        return barcode
+
+    def get_composite_barcodes(self):
+        barcode_max_size = int(self.env['ir.config_parameter'].sudo().get_param('stock.barcode_max_size', 400))
+        barcode_separator = self.env['ir.config_parameter'].sudo().get_param('stock.barcode_separator')
+        if not barcode_separator:
+            return []  # A barcode separator is needed to grouped barcodes.
+
+        barcodes, composite_barcodes = [], []
+        composite_barcode = ""
+        # Searches all GS1 rules linked to an UoM other than Unit and retrieves their AI.
+        uom_unit_id = self.env.ref('uom.product_uom_unit').id
+        rules = self.env['barcode.rule'].search([
+            ('associated_uom_id', '!=', False),
+            ('associated_uom_id.id', '!=', uom_unit_id),
+            ('is_gs1_nomenclature', '=', True)]
+        )
+        gs1_quantity_rules_ai_by_uom = {}
+        for rule in rules:
+            decimal = str(len(f'{rule.associated_uom_id.rounding:.10f}'.rstrip('0').split('.')[1]))
+            rule_ai = rule.pattern[1:4] + decimal
+            gs1_quantity_rules_ai_by_uom[rule.associated_uom_id.id] = rule_ai
+
+        for quant in self:
+            if quant.product_id.valid_ean:
+                quant_gs1_barcode = quant._get_gs1_barcode(gs1_quantity_rules_ai_by_uom)
+                if quant_gs1_barcode:
+                    barcodes.append(quant_gs1_barcode)
+            elif quant.tracking == 'serial':
+                barcodes.append(quant.lot_id.name)
+        # Groups barcodes in the given length limit to form the composite barcode.
+        for barcode in barcodes:
+            if len(composite_barcode + barcode) > barcode_max_size:
+                composite_barcodes.append(composite_barcode)
+                composite_barcode = ""
+            composite_barcode += barcode + barcode_separator
+        if composite_barcode:
+            composite_barcodes.append(composite_barcode)
+        return composite_barcodes
+
     @api.model
     def _check_serial_number(self, product_id, lot_id, company_id, source_location_id=None, ref_doc_location_id=None):
         """ Checks for duplicate serial numbers (SN) when assigning a SN (i.e. no source_location_id)
