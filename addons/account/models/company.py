@@ -353,7 +353,7 @@ class ResCompany(models.Model):
     def _get_user_fiscal_lock_date(self):
         """Get the fiscal lock date for this company depending on the user"""
         lock_date = max(self.period_lock_date or date.min, self.fiscalyear_lock_date or date.min)
-        if self.user_has_groups('account.group_account_manager'):
+        if self.env.user._has_group('account.group_account_manager'):
             lock_date = self.fiscalyear_lock_date or date.min
         if self.parent_id:
             # We need to use sudo, since we might not have access to a parent company.
@@ -547,7 +547,7 @@ class ResCompany(models.Model):
         """Checks that all posted moves have still the same data as when they were posted
         and raises an error with the result.
         """
-        if not self.env.user.has_group('account.group_account_user'):
+        if not self.env.user._has_group('account.group_account_user'):
             raise UserError(_('Please contact your accountant to print the Hash integrity result.'))
 
         def build_move_info(move):

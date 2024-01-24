@@ -342,13 +342,13 @@ class Digest(models.Model):
                 _("We have noticed you did not connect these last few days. We have automatically switched your preference to %(new_perioridicy_str)s Digests.",
                   new_perioridicy_str=new_perioridicy_str)
             )
-        elif self.periodicity == 'daily' and user.has_group('base.group_erp_manager'):
+        elif self.periodicity == 'daily' and user._has_group('base.group_erp_manager'):
             preferences.append(Markup('<p>%s<br /><a href="%s" target="_blank" style="color:#875A7B; font-weight: bold;">%s</a></p>') % (
                 _('Prefer a broader overview?'),
                 f'/digest/{self.id:d}/set_periodicity?periodicity=weekly',
                 _('Switch to weekly Digests')
             ))
-        if user.has_group('base.group_erp_manager'):
+        if user._has_group('base.group_erp_manager'):
             preferences.append(Markup('<p>%s<br /><a href="%s" target="_blank" style="color:#875A7B; font-weight: bold;">%s</a></p>') % (
                 _('Want to customize this email?'),
                 f'/web#view_type=form&model={self._name}&id={self.id:d}',

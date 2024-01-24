@@ -114,7 +114,7 @@ QUnit.module('Google Calendar', {
                     assert.step(route);
                 } else if (route === '/web/dataset/call_kw/res.partner/get_attendee_detail') {
                     return Promise.resolve([]);
-                } else if (route === '/web/dataset/call_kw/res.users/has_group') {
+                } else if (route === '/web/dataset/call_kw/res.users/current_user_has_group') {
                     return Promise.resolve(true);
                 } else if (route === '/calendar/check_credentials') {
                     return Promise.resolve({

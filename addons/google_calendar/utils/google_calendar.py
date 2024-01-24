@@ -136,4 +136,4 @@ class GoogleCalendarService():
         )
 
     def _can_authorize_google(self, user):
-        return user.has_group('base.group_erp_manager')
+        return user._has_group('base.group_erp_manager')

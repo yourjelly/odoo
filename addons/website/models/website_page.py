@@ -205,7 +205,7 @@ class Page(models.Model):
         # Read access on website.page requires sudo.
         requires_sudo = True
         domain = [website.website_domain()]
-        if not self.env.user.has_group('website.group_website_designer'):
+        if not self.env.user._has_group('website.group_website_designer'):
             # Rule must be reinforced because of sudo.
             domain.append([('website_published', '=', True)])
 

@@ -30,7 +30,7 @@ class AccountAnalyticLine(models.Model):
     def _unlink_except_linked_leave(self):
         if any(line.holiday_id for line in self):
             error_message = _('You cannot delete timesheets that are linked to time off requests. Please cancel your time off request from the Time Off application instead.')
-            if not self.env.user.has_group('hr_holidays.group_hr_holidays_user') and self.env.user not in self.holiday_id.sudo().user_id:
+            if not self.env.user._has_group('hr_holidays.group_hr_holidays_user') and self.env.user not in self.holiday_id.sudo().user_id:
                 raise UserError(error_message)
             action = self._get_redirect_action()
             raise RedirectWarning(error_message, action, _('View Time Off'))

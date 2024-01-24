@@ -282,7 +282,7 @@ class PosSession(models.Model):
                 'partner_commercial_fields': self.env['res.partner']._commercial_fields(),
                 'server_version': exp_version(),
                 'base_url': self.get_base_url(),
-                'has_cash_move_perm': self.user_has_groups('account.group_account_invoice'),
+                'has_cash_move_perm': self.env.user._has_group('account.group_account_invoice'),
                 'has_available_products': self._pos_has_valid_product(),
                 'pos_special_products_ids': self.env['pos.config']._get_special_products().ids,
                 'open_orders': self.env['pos.order'].search([('session_id', '=', self.id), ('state', '=', 'draft')]).export_for_ui()
@@ -491,7 +491,7 @@ class PosSession(models.Model):
                 'update_stock_at_closing': update_stock_at_closing,
             })
 
-        if self.user_has_groups('point_of_sale.group_pos_user'):
+        if self.env.user._has_group('point_of_sale.group_pos_user'):
             sessions = super(PosSession, self.sudo()).create(vals_list)
         else:
             sessions = super().create(vals_list)
@@ -577,7 +577,7 @@ class PosSession(models.Model):
         bank_payment_method_diffs = bank_payment_method_diffs or {}
         self.ensure_one()
         data = {}
-        sudo = self.user_has_groups('point_of_sale.group_pos_user')
+        sudo = self.env.user._has_group('point_of_sale.group_pos_user')
         if self.order_ids.filtered(lambda o: o.state != 'cancel') or self.sudo().statement_line_ids:
             self.cash_real_transaction = sum(self.sudo().statement_line_ids.mapped('amount'))
             if self.state == 'closed':
@@ -670,7 +670,7 @@ class PosSession(models.Model):
         wizard = self.env['pos.close.session.wizard'].create({
             'amount_to_balance': amount_to_balance,
             'account_id': default_account.id,
-            'account_readonly': not self.env.user.has_group('account.group_account_readonly'),
+            'account_readonly': not self.env.user._has_group('account.group_account_readonly'),
             'message': _("There is a difference between the amounts to post and the amounts of the orders, it is probably caused by taxes or accounting configurations changes.")
         })
         return {
@@ -827,7 +827,7 @@ class PosSession(models.Model):
                 return {'successful': False, 'message': message, 'redirect': False}
 
     def get_closing_control_data(self):
-        if not self.env.user.has_group('point_of_sale.group_pos_user'):
+        if not self.env.user._has_group('point_of_sale.group_pos_user'):
             raise AccessError(_("You don't have the access rights to get the point of sale closing control data."))
         self.ensure_one()
         orders = self._get_closed_orders()
@@ -875,7 +875,7 @@ class PosSession(models.Model):
                 'id': pm.id,
                 'type': pm.type,
             } for pm in other_payment_method_ids],
-            'is_manager': self.user_has_groups("point_of_sale.group_pos_manager"),
+            'is_manager': self.env.user._has_group("point_of_sale.group_pos_manager"),
             'amount_authorized_diff': self.config_id.amount_authorized_diff if self.config_id.set_maximum_difference else None
         }
 

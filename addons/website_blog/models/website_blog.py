@@ -338,7 +338,7 @@ class BlogPost(models.Model):
                 domain.append([('tag_ids', 'in', active_tag_ids)])
         if date_begin and date_end:
             domain.append([("post_date", ">=", date_begin), ("post_date", "<=", date_end)])
-        if self.env.user.has_group('website.group_website_designer'):
+        if self.env.user._has_group('website.group_website_designer'):
             if state == "published":
                 domain.append([("website_published", "=", True), ("post_date", "<=", fields.Datetime.now())])
             elif state == "unpublished":

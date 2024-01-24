@@ -131,7 +131,7 @@
     <div t-attf-class="d-flex d-lg-block flex-wrap justify-content-between align-items-center {{event.event_registrations_open and 'pb-3 border-bottom' or ''}}">
         <div class="d-flex flex-wrap justify-content-between align-items-center w-100 mb-3">
             <h4 class="mb-0">Tickets</h4>
-            <t t-call="website_event.registration_configure_tickets_button" t-if="request.env.user.has_group('event.group_event_manager')">
+            <t t-call="website_event.registration_configure_tickets_button" t-if="request.env.user._has_group('event.group_event_manager')">
                 <t t-set="linkClasses" t-translation="off">ms-2</t>
             </t>
         </div>
@@ -148,7 +148,7 @@
                         <span t-out="event.date_tz"/>
                     </em>
                     <t t-call="website_event.registration_configure_tickets_button"
-                        t-if="request.env.user.has_group('event.group_event_manager')">
+                        t-if="request.env.user._has_group('event.group_event_manager')">
                             <t t-set="linkClasses" t-translation="off">alert-link my-3</t>
                     </t>
                 </div>

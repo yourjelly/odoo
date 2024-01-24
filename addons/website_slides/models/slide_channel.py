@@ -612,7 +612,7 @@ class Channel(models.Model):
             elif record.upload_group_ids:
                 record.can_upload = bool(record.upload_group_ids & self.env.user.groups_id)
             else:
-                record.can_upload = self.env.user.has_group('website_slides.group_website_slides_manager')
+                record.can_upload = self.env.user._has_group('website_slides.group_website_slides_manager')
 
     @api.depends('channel_type', 'user_id', 'can_upload')
     @api.depends_context('uid')
@@ -627,7 +627,7 @@ class Channel(models.Model):
             elif record.user_id == self.env.user:
                 record.can_publish = True
             else:
-                record.can_publish = self.env.user.has_group('website_slides.group_website_slides_manager')
+                record.can_publish = self.env.user._has_group('website_slides.group_website_slides_manager')
 
     @api.model
     def _get_can_publish_error_message(self):
@@ -1052,7 +1052,7 @@ class Channel(models.Model):
                 base_url=record.get_base_url(),
             )
             email_values = {'email_to': emails}
-            if self.env.user.has_group('base.group_portal'):
+            if self.env.user._has_group('base.group_portal'):
                 template = template.sudo()
                 email_values['email_from'] = self.env.company.catchall_formatted or self.env.company.email_formatted
 
@@ -1077,7 +1077,7 @@ class Channel(models.Model):
     def action_request_access(self):
         """ Request access to the channel. Returns a dict with keys being either 'error'
         (specific error raised) or 'done' (request done or not). """
-        if self.env.user.has_group('base.group_public'):
+        if self.env.user._has_group('base.group_public'):
             return {'error': _('You have to sign in before')}
         if not self.is_published:
             return {'error': _('Course not published yet')}

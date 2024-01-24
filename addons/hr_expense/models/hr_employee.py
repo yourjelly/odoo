@@ -32,7 +32,7 @@ class Employee(models.Model):
         for employee in self:
             previous_manager = employee._origin.parent_id.user_id
             manager = employee.parent_id.user_id
-            if manager and manager.has_group('hr_expense.group_hr_expense_user') \
+            if manager and manager._has_group('hr_expense.group_hr_expense_user') \
                     and (employee.expense_manager_id == previous_manager or not employee.expense_manager_id):
                 employee.expense_manager_id = manager
             elif not employee.expense_manager_id:
@@ -46,9 +46,9 @@ class Employee(models.Model):
         assert value
 
         res = [('id', '=', 0)]  # Nothing accepted by domain, by default
-        if self.user_has_groups('hr_expense.group_hr_expense_user') or self.user_has_groups('account.group_account_user'):
+        if self.env.user._has_group('hr_expense.group_hr_expense_user') or self.env.user._has_group('account.group_account_user'):
             res = ['|', ('company_id', '=', False), ('company_id', 'child_of', self.env.company.root_id.id)]  # Then, domain accepts everything
-        elif self.user_has_groups('hr_expense.group_hr_expense_team_approver') and self.env.user.employee_ids:
+        elif self.env.user._has_group('hr_expense.group_hr_expense_team_approver') and self.env.user.employee_ids:
             user = self.env.user
             employee = self.env.user.employee_id
             res = [

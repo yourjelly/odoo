@@ -23,7 +23,7 @@ class ResConfigSettings(models.TransientModel):
     group_mrp_workorder_dependencies = fields.Boolean("Work Order Dependencies", implied_group="mrp.group_mrp_workorder_dependencies")
 
     def set_values(self):
-        routing_before = self.env.user.has_group('mrp.group_mrp_routings')
+        routing_before = self.env.user._has_group('mrp.group_mrp_routings')
         super().set_values()
         if routing_before and not self.group_mrp_routings:
             self.env['mrp.routing.workcenter'].search([]).active = False

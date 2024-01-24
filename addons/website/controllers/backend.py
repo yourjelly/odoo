@@ -12,8 +12,8 @@ class WebsiteBackend(http.Controller):
     @http.route('/website/fetch_dashboard_data', type="json", auth='user')
     def fetch_dashboard_data(self, website_id):
         Website = request.env['website']
-        has_group_system = request.env.user.has_group('base.group_system')
-        has_group_designer = request.env.user.has_group('website.group_website_designer')
+        has_group_system = request.env.user._has_group('base.group_system')
+        has_group_designer = request.env.user._has_group('website.group_website_designer')
         dashboard_data = {
             'groups': {
                 'system': has_group_system,
@@ -23,7 +23,7 @@ class WebsiteBackend(http.Controller):
         }
 
         current_website = website_id and Website.browse(website_id) or Website.get_current_website()
-        multi_website = request.env.user.has_group('website.group_multi_website')
+        multi_website = request.env.user._has_group('website.group_multi_website')
         websites = multi_website and request.env['website'].search([]) or current_website
         dashboard_data['websites'] = websites.read(['id', 'name'])
         for website in dashboard_data['websites']:
@@ -47,7 +47,7 @@ class WebsiteBackend(http.Controller):
         a way to do it with the framework rather than having a dedicated
         controller route. (maybe by using a template or a JS util)
         """
-        if not request.env.user.has_group('website.group_website_restricted_editor'):
+        if not request.env.user._has_group('website.group_website_restricted_editor'):
             raise werkzeug.exceptions.Forbidden()
 
         return {

@@ -163,7 +163,7 @@ class HrEmployeeBase(models.AbstractModel):
                 employee.leave_manager_id = False
 
     def _compute_show_leaves(self):
-        show_leaves = self.env['res.users'].has_group('hr_holidays.group_hr_holidays_user')
+        show_leaves = self.env.user._has_group('hr_holidays.group_hr_holidays_user')
         for employee in self:
             if show_leaves or employee.user_id == self.env.user:
                 employee.show_leaves = True
@@ -217,7 +217,7 @@ class HrEmployeeBase(models.AbstractModel):
                 leave_manager = self.env['res.users'].browse(values['leave_manager_id'])
                 old_managers -= leave_manager
                 approver_group = self.env.ref('hr_holidays.group_hr_holidays_responsible', raise_if_not_found=False)
-                if approver_group and not leave_manager.has_group('hr_holidays.group_hr_holidays_responsible'):
+                if approver_group and not leave_manager._has_group('hr_holidays.group_hr_holidays_responsible'):
                     leave_manager.sudo().write({'groups_id': [(4, approver_group.id)]})
 
         res = super(HrEmployeeBase, self).write(values)
@@ -286,7 +286,7 @@ class HrEmployee(models.Model):
         }
 
     def _is_leave_user(self):
-        return self == self.env.user.employee_id and self.user_has_groups('hr_holidays.group_hr_holidays_user')
+        return self == self.env.user.employee_id and self.env.user._has_group('hr_holidays.group_hr_holidays_user')
 
     def get_mandatory_days(self, start_date, end_date):
         all_days = {}

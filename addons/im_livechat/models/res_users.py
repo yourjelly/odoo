@@ -42,4 +42,4 @@ class Users(models.Model):
 
     def _compute_has_access_livechat(self):
         for user in self:
-            user.has_access_livechat = user.has_group('im_livechat.im_livechat_group_user')
+            user.has_access_livechat = user._has_group('im_livechat.im_livechat_group_user')

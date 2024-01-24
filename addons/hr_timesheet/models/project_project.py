@@ -220,7 +220,7 @@ class Project(models.Model):
 
     def _get_stat_buttons(self):
         buttons = super(Project, self)._get_stat_buttons()
-        if not self.allow_timesheets or not self.env.user.has_group("hr_timesheet.group_hr_timesheet_user"):
+        if not self.allow_timesheets or not self.env.user._has_group("hr_timesheet.group_hr_timesheet_user"):
             return buttons
 
         encode_uom = self.env.company.timesheet_encode_uom_id

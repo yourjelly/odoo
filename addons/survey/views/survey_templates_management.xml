@@ -28,7 +28,7 @@
                 <div class="container">
                     <div class="jumbotron mt32">
                         <h1><span t-field="survey.title"/> survey is empty</h1>
-                        <p t-if="env.user.has_group('survey.group_survey_user')">
+                        <p t-if="env.user._has_group('survey.group_survey_user')">
                             Please make sure you have at least one question in your survey. You also need at least one section if you chose the "Page per section" layout.<br />
                             <a t-att-href="'/web#view_type=form&amp;model=survey.survey&amp;id=%s&amp;action=survey.action_survey_form' % survey.id"
                                 class="btn btn-secondary"
@@ -150,7 +150,7 @@
                             </div>
                             <div class="text-center mt32 p-2">
                                 <button groups="survey.group_survey_user" type="button" t-attf-class="o_survey_launch_session btn btn-primary {{'d-none' if error != 'survey_session_not_launched' else ''}}" t-att-data-survey-id="survey_id">Launch Session</button>
-                                <button type="submit" t-attf-class="btn btn-primary {{'d-none' if error == 'survey_session_not_launched' and request.env.user.has_group('survey.group_survey_user') else ''}}">Join Session</button>
+                                <button type="submit" t-attf-class="btn btn-primary {{'d-none' if error == 'survey_session_not_launched' and request.env.user._has_group('survey.group_survey_user') else ''}}">Join Session</button>
                             </div>
                         </div>
                     </div>

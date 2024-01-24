@@ -45,14 +45,14 @@ export function _makeUser(session) {
     delete session.user_settings;
     delete session.partner_write_date;
 
-    // Generate caches for has_group and check_access_rights calls
+    // Generate caches for current_user_has_group and check_access_rights calls
     const getGroupCacheValue = (group, context) => {
         if (!userId) {
             return Promise.resolve(false);
         }
-        return rpc("/web/dataset/call_kw/res.users/has_group", {
+        return rpc("/web/dataset/call_kw/res.users/current_user_has_group", {
             model: "res.users",
-            method: "has_group",
+            method: "current_user_has_group",
             args: [group],
             kwargs: { context },
         });

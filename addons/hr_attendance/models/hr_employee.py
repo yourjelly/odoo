@@ -68,7 +68,7 @@ class HrEmployee(models.Model):
             if values['attendance_manager_id']:
                 officer = self.env['res.users'].browse(values['attendance_manager_id'])
                 officers_group = self.env.ref('hr_attendance.group_hr_attendance_officer', raise_if_not_found=False)
-                if officers_group and not officer.has_group('hr_attendance.group_hr_attendance_officer'):
+                if officers_group and not officer._has_group('hr_attendance.group_hr_attendance_officer'):
                     officer.sudo().write({'groups_id': [(4, officers_group.id)]})
 
         res = super(HrEmployee, self).write(values)

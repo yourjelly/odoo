@@ -33,6 +33,7 @@ from collections import defaultdict, deque
 from concurrent.futures import Future, CancelledError, wait
 from typing import Callable
 
+
 try:
     from concurrent.futures import InvalidStateError
 except ImportError:
@@ -41,7 +42,7 @@ from contextlib import contextmanager, ExitStack
 from datetime import datetime
 from functools import lru_cache
 from itertools import zip_longest as izip_longest
-from unittest.mock import patch, _patch
+from unittest.mock import patch, _patch, Mock
 from xmlrpc import client as xmlrpclib
 
 import requests
@@ -51,6 +52,7 @@ from requests import PreparedRequest, Session
 
 import odoo
 from odoo import api
+from odoo.tools import DotDict
 from odoo.models import BaseModel
 from odoo.exceptions import AccessError
 from odoo.modules.registry import Registry
@@ -402,20 +404,29 @@ class BaseCase(case.TestCase, metaclass=MetaCase):
 
     @contextmanager
     def debug_mode(self):
-        """ Enable the effects of group 'base.group_no_one'; mainly useful with :class:`Form`. """
-        origin_user_has_groups = BaseModel.user_has_groups
-
-        def user_has_groups(self, groups):
-            group_set = set(groups.split(','))
-            if '!base.group_no_one' in group_set:
-                return False
-            elif 'base.group_no_one' in group_set:
-                group_set.remove('base.group_no_one')
-                return not group_set or origin_user_has_groups(self, ','.join(group_set))
-            return origin_user_has_groups(self, groups)
-
-        with patch('odoo.models.BaseModel.user_has_groups', user_has_groups):
-            yield
+        request = Mock(
+            # request
+            httprequest=Mock(
+                host='localhost',
+            ),
+            db=self.env.cr.dbname,
+            env=self.env,
+            session=DotDict(
+                odoo.http.get_default_session(),
+                debug='1',
+            ),
+        )
+        try:
+            odoo.http._request_stack.push(request)
+            self.env.flush_all()
+            self.env.invalidate_all()
+            yield request
+        finally:
+            self.env.flush_all()
+            self.env.invalidate_all()
+            r = odoo.http._request_stack.pop()
+            if r != request:
+                raise ValueError('Wrong request stack cleanup.')
 
     @contextmanager
     def _assertRaises(self, exception, *, msg=None):

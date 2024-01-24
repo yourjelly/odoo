@@ -12,7 +12,7 @@ class Digest(models.Model):
     kpi_project_task_opened_value = fields.Integer(compute='_compute_project_task_opened_value')
 
     def _compute_project_task_opened_value(self):
-        if not self.env.user.has_group('project.group_project_user'):
+        if not self.env.user._has_group('project.group_project_user'):
             raise AccessError(_("Do not have access, skip this data for user's digest email"))
 
         self._calculate_company_based_kpi(

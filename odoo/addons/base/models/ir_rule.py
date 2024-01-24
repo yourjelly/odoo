@@ -7,6 +7,7 @@ from odoo.exceptions import AccessError, ValidationError
 from odoo.osv import expression
 from odoo.tools import config
 from odoo.tools.safe_eval import safe_eval, time
+from odoo.http import request
 
 _logger = logging.getLogger(__name__)
 class IrRule(models.Model):
@@ -218,7 +219,7 @@ class IrRule(models.Model):
 
         resolution_info = _("If you really, really need access, perhaps you can win over your friendly administrator with a batch of freshly baked cookies.")
 
-        if not self.user_has_groups('base.group_no_one') or not self.env.user.has_group('base.group_user'):
+        if not (self.env.user._has_group('base.group_no_one') and request and request.session.debug) or not self.env.user._has_group('base.group_user'):
             records.invalidate_recordset()
             return AccessError(f"{operation_error}\n{failing_model}\n\n{resolution_info}")
 

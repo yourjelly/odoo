@@ -55,7 +55,7 @@ class PosPaymentMethod(models.Model):
 
     def _bearer_token(self, session):
         self.ensure_one()
-        if not self.env.user.has_group('point_of_sale.group_pos_user'):
+        if not self.env.user._has_group('point_of_sale.group_pos_user'):
             raise AccessError(_("Do not have access to fetch token from Viva Wallet"))
 
         data = {'grant_type': 'client_credentials'}
@@ -133,14 +133,14 @@ class PosPaymentMethod(models.Model):
             self.env['bus.bus']._sendone(pos_session_sudo._get_bus_channel_name(), 'VIVA_WALLET_LATEST_RESPONSE', pos_session_sudo.config_id.id)
 
     def viva_wallet_send_payment_request(self, data):
-        if not self.env.user.has_group('point_of_sale.group_pos_user'):
+        if not self.env.user._has_group('point_of_sale.group_pos_user'):
             raise AccessError(_("Only 'group_pos_user' are allowed to fetch token from Viva Wallet"))
 
         endpoint = "transactions:sale"
         return self._call_viva_wallet(endpoint, 'post', data)
 
     def viva_wallet_send_payment_cancel(self, data):
-        if not self.env.user.has_group('point_of_sale.group_pos_user'):
+        if not self.env.user._has_group('point_of_sale.group_pos_user'):
             raise AccessError(_("Only 'group_pos_user' are allowed to fetch token from Viva Wallet"))
 
         session_id = data.get('sessionId')
@@ -175,7 +175,7 @@ class PosPaymentMethod(models.Model):
         return records
 
     def get_latest_viva_wallet_status(self):
-        if not self.env.user.has_group('point_of_sale.group_pos_user'):
+        if not self.env.user._has_group('point_of_sale.group_pos_user'):
             raise AccessError(_("Only 'group_pos_user' are allowed to get latest transaction status"))
 
         self.ensure_one()

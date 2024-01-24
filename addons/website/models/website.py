@@ -202,7 +202,7 @@ class Website(models.Model):
         for website in websites:
             website._bootstrap_homepage()
 
-        if not self.env.user.has_group('website.group_multi_website') and self.search_count([]) > 1:
+        if not self.env.user._has_group('website.group_multi_website') and self.search_count([]) > 1:
             all_user_groups = 'base.group_portal,base.group_user,base.group_public'
             groups = self.env['res.groups'].concat(*(self.env.ref(it) for it in all_user_groups.split(',')))
             groups.write({'implied_ids': [(4, self.env.ref('website.group_multi_website').id)]})
@@ -1367,7 +1367,7 @@ class Website(models.Model):
             yield record
 
     def get_website_page_ids(self):
-        if not self.env.user.has_group('website.group_website_restricted_editor'):
+        if not self.env.user._has_group('website.group_website_restricted_editor'):
             # Note that `website.pages` have `0,0,0,0` ACL rights by default for
             # everyone except for the website designer which receive `1,0,0,0`.
             # So the "Website/Site/Content/Pages" menu to reach the page manager
@@ -1434,7 +1434,7 @@ class Website(models.Model):
 
     @api.model
     def action_dashboard_redirect(self):
-        if self.env.user.has_group('base.group_system') or self.env.user.has_group('website.group_website_designer'):
+        if self.env.user._has_group('base.group_system') or self.env.user._has_group('website.group_website_designer'):
             return self.env["ir.actions.actions"]._for_xml_id("website.backend_dashboard")
         return self.env["ir.actions.actions"]._for_xml_id("website.action_website")
 
@@ -1820,7 +1820,7 @@ class Website(models.Model):
             filter_is_published = (
                 'is_published' in model._fields
                 and model._fields['is_published'].base_field.model_name == model_name
-                and not self.env.user.has_group('base.group_user')
+                and not self.env.user._has_group('base.group_user')
             )
             if filter_is_published:
                 query.add_where('is_published')

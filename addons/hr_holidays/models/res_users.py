@@ -62,7 +62,7 @@ class User(models.Model):
         # and remove the access rights to those who don't
         # need them anymore
         approver_group = 'hr_holidays.group_hr_holidays_responsible'
-        if not any(u.has_group(approver_group) for u in self):
+        if not any(u._has_group(approver_group) for u in self):
             return
 
         res = self.env['hr.employee']._read_group(

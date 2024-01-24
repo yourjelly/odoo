@@ -91,7 +91,7 @@ class PortalMailGroup(http.Controller):
                 'is_member': bool(members_data.get(group.id, False)),
             } for group in mail_groups],
             'email': email_normalized,
-            'is_mail_group_manager': request.env.user.has_group('mail_group.group_mail_group_manager'),
+            'is_mail_group_manager': request.env.user._has_group('mail_group.group_mail_group_manager'),
         })
 
     # ------------------------------------------------------------

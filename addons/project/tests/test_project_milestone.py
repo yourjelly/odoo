@@ -24,12 +24,12 @@ class TestProjectMilestone(TestProjectCommon):
         self.env['res.config.settings'] \
             .create({'group_project_milestone': False}) \
             .execute()
-        self.assertFalse(self.env.user.has_group('project.group_project_milestone'), 'The "Milestones" feature should not be globally enabled by default.')
+        self.assertFalse(self.env.user._has_group('project.group_project_milestone'), 'The "Milestones" feature should not be globally enabled by default.')
         self.assertFalse(self.project_pigs.allow_milestones, 'The "Milestones" feature should not be enabled by default.')
         self.env['res.config.settings'] \
             .create({'group_project_milestone': True}) \
             .execute()
-        self.assertTrue(self.env.user.has_group('project.group_project_milestone'), 'The "Milestones" feature should globally be enabled.')
+        self.assertTrue(self.env.user._has_group('project.group_project_milestone'), 'The "Milestones" feature should globally be enabled.')
         self.assertTrue(self.project_pigs.allow_milestones, 'The "Milestones" feature should be enabled by default on the project when the feature is enabled.')
         project = self.env['project.project'].create({'name': 'Test allow_milestones on New Project'})
         self.assertTrue(project.allow_milestones, 'The "Milestones" feature should be enabled by default when the feature is enabled globally.')

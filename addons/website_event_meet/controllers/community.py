@@ -17,7 +17,7 @@ class WebsiteEventMeetController(EventCommunityController):
 
     def _get_event_rooms_base_domain(self, event):
         search_domain_base = [('event_id', '=', event.id)]
-        if not request.env.user.has_group('event.group_event_registration_desk'):
+        if not request.env.user._has_group('event.group_event_registration_desk'):
             search_domain_base = expression.AND([search_domain_base, [('is_published', '=', True)]])
         return search_domain_base
 
@@ -51,7 +51,7 @@ class WebsiteEventMeetController(EventCommunityController):
         meeting_rooms = request.env['event.meeting.room'].sudo().search(search_domain)
         meeting_rooms = meeting_rooms.sorted(self._sort_event_rooms, reverse=True)
 
-        is_event_user = request.env.user.has_group("event.group_event_registration_desk")
+        is_event_user = request.env.user._has_group("event.group_event_registration_desk")
         if not is_event_user:
             meeting_rooms = meeting_rooms.filtered(lambda m: not m.room_is_full)
 
@@ -74,7 +74,7 @@ class WebsiteEventMeetController(EventCommunityController):
     @http.route("/event/<model('event.event'):event>/meeting_room_create",
                 type="http", auth="public", methods=["POST"], website=True)
     def create_meeting_room(self, event, **post):
-        if not event or (not event.is_published and not request.env.user.user_has_groups('base.group_user')) or not event.meeting_room_allow_creation:
+        if not event or (not event.is_published and not request.env.user._has_group('base.group_user')) or not event.meeting_room_allow_creation:
             raise Forbidden()
 
         name = post.get("name")
@@ -140,7 +140,7 @@ class WebsiteEventMeetController(EventCommunityController):
             ('event_id', '=', event.id), ('id', '!=', meeting_room.id), ('is_published', '=', True),
         ], limit=6)
 
-        if not request.env.user.has_group("event.group_event_manager"):
+        if not request.env.user._has_group("event.group_event_manager"):
             # only the event manager can see meeting rooms which are full
             meeting_rooms_other = meeting_rooms_other.filtered(lambda m: not m.room_is_full)
 
@@ -155,5 +155,5 @@ class WebsiteEventMeetController(EventCommunityController):
             'meeting_rooms_other': meeting_rooms_other,
             # options
             'option_widescreen': True,
-            'is_event_user': request.env.user.has_group('event.group_event_registration_desk'),
+            'is_event_user': request.env.user._has_group('event.group_event_registration_desk'),
         }

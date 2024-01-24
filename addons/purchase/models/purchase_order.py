@@ -310,7 +310,7 @@ class PurchaseOrder(models.Model):
 
     @api.onchange('partner_id')
     def onchange_partner_id_warning(self):
-        if not self.partner_id or not self.env.user.has_group('purchase.group_warning_purchase'):
+        if not self.partner_id or not self.env.user._has_group('purchase.group_warning_purchase'):
             return
 
         partner = self.partner_id
@@ -747,7 +747,7 @@ class PurchaseOrder(models.Model):
         return result
 
     def _send_reminder_mail(self, send_single=False):
-        if not self.user_has_groups('purchase.group_send_reminder'):
+        if not self.env.user._has_group('purchase.group_send_reminder'):
             return
 
         template = self.env.ref('purchase.email_template_edi_purchase_reminder', raise_if_not_found=False)
@@ -767,7 +767,7 @@ class PurchaseOrder(models.Model):
 
     def send_reminder_preview(self):
         self.ensure_one()
-        if not self.user_has_groups('purchase.group_send_reminder'):
+        if not self.env.user._has_group('purchase.group_send_reminder'):
             return
 
         template = self.env.ref('purchase.email_template_edi_purchase_reminder', raise_if_not_found=False)
@@ -840,7 +840,7 @@ class PurchaseOrder(models.Model):
     def _get_action_add_from_catalog_extra_context(self):
         return {
             **super()._get_action_add_from_catalog_extra_context(),
-            'display_uom': self.env.user.has_group('uom.group_uom'),
+            'display_uom': self.env.user._has_group('uom.group_uom'),
             'precision': self.env['decimal.precision'].precision_get('Product Unit of Measure'),
             'product_catalog_currency_id': self.currency_id.id,
             'product_catalog_digits': self.order_line._fields['price_unit'].get_digits(self.env),
@@ -944,7 +944,7 @@ class PurchaseOrder(models.Model):
                 and self.amount_total < self.env.company.currency_id._convert(
                     self.company_id.po_double_validation_amount, self.currency_id, self.company_id,
                     self.date_order or fields.Date.today()))
-            or self.user_has_groups('purchase.group_purchase_manager'))
+            or self.env.user._has_group('purchase.group_purchase_manager'))
 
     def _confirm_reception_mail(self):
         for order in self:

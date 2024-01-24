@@ -33,7 +33,7 @@ class WebsiteBlog(http.Controller):
 
     def nav_list(self, blog=None):
         dom = blog and [('blog_id', '=', blog.id)] or []
-        if not request.env.user.has_group('website.group_website_designer'):
+        if not request.env.user._has_group('website.group_website_designer'):
             dom += [('post_date', '<=', fields.Datetime.now())]
         groups = request.env['blog.post']._read_group(
             dom, groupby=['post_date:month'])
@@ -93,7 +93,7 @@ class WebsiteBlog(http.Controller):
                     return request.redirect(new_url, 301)
             domain += [('tag_ids', 'in', active_tags.ids)]
 
-        if request.env.user.has_group('website.group_website_designer'):
+        if request.env.user._has_group('website.group_website_designer'):
             count_domain = domain + [("website_published", "=", True), ("post_date", "<=", fields.Datetime.now())]
             published_count = BlogPost.search_count(count_domain)
             unpublished_count = BlogPost.search_count(domain) - published_count
@@ -269,7 +269,7 @@ class WebsiteBlog(http.Controller):
 
         # Find next Post
         blog_post_domain = [('blog_id', '=', blog.id)]
-        if not request.env.user.has_group('website.group_website_designer'):
+        if not request.env.user._has_group('website.group_website_designer'):
             blog_post_domain += [('post_date', '<=', fields.Datetime.now())]
 
         all_post = BlogPost.search(blog_post_domain)

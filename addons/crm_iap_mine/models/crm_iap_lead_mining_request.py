@@ -25,7 +25,7 @@ class CRMLeadMiningRequest(models.Model):
     _description = 'CRM Lead Mining Request'
 
     def _default_lead_type(self):
-        if self.env.user.has_group('crm.group_use_lead'):
+        if self.env.user._has_group('crm.group_use_lead'):
             return 'lead'
         else:
             return 'opportunity'

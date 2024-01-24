@@ -25,6 +25,7 @@ from odoo import api, fields, models
 from odoo.tools.translate import _
 from odoo.tools.mimetypes import guess_mimetype
 from odoo.tools import config, DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT, pycompat
+from odoo.http import request
 
 FIELDS_RECURSION_LIMIT = 3
 ERROR_PREVIEW_BYTES = 200
@@ -305,7 +306,7 @@ class Import(models.TransientModel):
                 field_value['comodel_name'] = field['relation']
             elif field['type'] == 'one2many':
                 field_value['fields'] = self.get_fields_tree(field['relation'], depth=depth-1)
-                if self.user_has_groups('base.group_no_one'):
+                if self.env.user._has_group('base.group_no_one') and request and request.session.debug:
                     field_value['fields'].append({'id': '.id', 'name': '.id', 'string': _("Database ID"), 'required': False, 'fields': [], 'type': 'id'})
                 field_value['comodel_name'] = field['relation']
 
@@ -1003,7 +1004,7 @@ class Import(models.TransientModel):
                 'preview': column_example,
                 'options': options,
                 'advanced_mode': advanced_mode,
-                'debug': self.user_has_groups('base.group_no_one'),
+                'debug': self.env.user._has_group('base.group_no_one') and bool(request and request.session.debug),
                 'batch': batch,
                 'file_length': file_length
             }

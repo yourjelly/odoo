@@ -26,7 +26,7 @@ class PosConfig(models.Model):
     def _self_order_default_user(self):
         user_ids = self.env["res.users"].search(['|', ('company_id', '=', self.env.company.id), ('company_id', '=', False)])
         for user_id in user_ids:
-            if user_id.has_group("point_of_sale.group_pos_user") or user_id.has_group("point_of_sale.group_pos_manager"):
+            if user_id._has_group("point_of_sale.group_pos_user") or user_id._has_group("point_of_sale.group_pos_manager"):
                 return user_id
 
     status = fields.Selection(
@@ -166,7 +166,7 @@ class PosConfig(models.Model):
     @api.constrains('self_ordering_default_user_id')
     def _check_default_user(self):
         for record in self:
-            if record.self_ordering_mode == 'mobile' and not record.self_ordering_default_user_id.has_group("point_of_sale.group_pos_user") and not record.self_ordering_default_user_id.has_group("point_of_sale.group_pos_manager"):
+            if record.self_ordering_mode == 'mobile' and not record.self_ordering_default_user_id._has_group("point_of_sale.group_pos_user") and not record.self_ordering_default_user_id._has_group("point_of_sale.group_pos_manager"):
                 raise UserError(_("The Self-Order default user must be a POS user"))
 
     def _get_qr_code_data(self):

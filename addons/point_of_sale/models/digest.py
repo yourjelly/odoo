@@ -12,7 +12,7 @@ class Digest(models.Model):
     kpi_pos_total_value = fields.Monetary(compute='_compute_kpi_pos_total_value')
 
     def _compute_kpi_pos_total_value(self):
-        if not self.env.user.has_group('point_of_sale.group_pos_user'):
+        if not self.env.user._has_group('point_of_sale.group_pos_user'):
             raise AccessError(_("Do not have access, skip this data for user's digest email"))
 
         self._calculate_company_based_kpi(

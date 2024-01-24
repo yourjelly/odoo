@@ -113,7 +113,7 @@ class Users extends models.Model {
 
     name = fields.Char();
 
-    has_group() {
+    current_user_has_group() {
         return true;
     }
 

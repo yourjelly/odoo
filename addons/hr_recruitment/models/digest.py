@@ -12,7 +12,7 @@ class Digest(models.Model):
     kpi_hr_recruitment_new_colleagues_value = fields.Integer(compute='_compute_kpi_hr_recruitment_new_colleagues_value')
 
     def _compute_kpi_hr_recruitment_new_colleagues_value(self):
-        if not self.env.user.has_group('hr_recruitment.group_hr_recruitment_user'):
+        if not self.env.user._has_group('hr_recruitment.group_hr_recruitment_user'):
             raise AccessError(_("Do not have access, skip this data for user's digest email"))
 
         self._calculate_company_based_kpi(

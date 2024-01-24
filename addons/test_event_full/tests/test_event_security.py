@@ -150,26 +150,26 @@ class TestEventSecurity(TestEventFullCommon):
         """
         # Event Manager
         self.assertTrue(
-            self.user_eventmanager.has_group('event.group_event_user'),
+            self.user_eventmanager._has_group('event.group_event_user'),
             'The event manager group must imply the event user group')
         self.assertTrue(
-            self.user_eventmanager.has_group('event.group_event_registration_desk'),
+            self.user_eventmanager._has_group('event.group_event_registration_desk'),
             'The event manager group must imply the registration user group')
 
         # Event User
         self.assertTrue(
-            self.user_eventuser.has_group('event.group_event_registration_desk'),
+            self.user_eventuser._has_group('event.group_event_registration_desk'),
             'The event user group must imply the event user group')
         self.assertFalse(
-            self.user_eventuser.has_group('event.group_event_manager'),
+            self.user_eventuser._has_group('event.group_event_manager'),
             'The event user group must not imply the event user group')
 
         # Registration User
         self.assertFalse(
-            self.user_eventregistrationdesk.has_group('event.group_event_manager'),
+            self.user_eventregistrationdesk._has_group('event.group_event_manager'),
             'The event registration group must not imply the event user manager')
         self.assertFalse(
-            self.user_eventregistrationdesk.has_group('event.group_event_user'),
+            self.user_eventregistrationdesk._has_group('event.group_event_user'),
             'The event registration group must not imply the event user group')
 
     def test_multi_companies(self):

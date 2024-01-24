@@ -178,7 +178,7 @@ class PortalChatter(http.Controller):
 
     @http.route('/mail/chatter_init', type='json', auth='public', website=True)
     def portal_chatter_init(self, res_model, res_id, domain=False, limit=False, **kwargs):
-        is_user_public = request.env.user.has_group('base.group_public')
+        is_user_public = request.env.user._has_group('base.group_public')
         message_data = self.portal_message_fetch(res_model, res_id, domain=domain, limit=limit, **kwargs)
         display_composer = False
         if kwargs.get('allow_composer'):
@@ -189,7 +189,7 @@ class PortalChatter(http.Controller):
                 'message_count': message_data['message_count'],
                 'is_user_public': is_user_public,
                 'is_user_employee': request.env.user._is_internal(),
-                'is_user_publisher': request.env.user.has_group('website.group_website_restricted_editor'),
+                'is_user_publisher': request.env.user._has_group('website.group_website_restricted_editor'),
                 'display_composer': display_composer,
                 'partner_id': request.env.user.partner_id.id
             }
@@ -217,7 +217,7 @@ class PortalChatter(http.Controller):
             if not access_as_sudo:  # if token is not correct, raise Forbidden
                 raise Forbidden()
             # Non-employee see only messages with not internal subtype (aka, no internal logs)
-            if not request.env['res.users'].has_group('base.group_user'):
+            if not request.env.user._has_group('base.group_user'):
                 domain = expression.AND([Message._get_search_domain_share(), domain])
             Message = request.env['mail.message'].sudo()
         return {

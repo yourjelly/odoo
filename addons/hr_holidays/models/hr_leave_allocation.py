@@ -26,14 +26,14 @@ class HolidaysAllocation(models.Model):
     _mail_post_access = 'read'
 
     def _default_holiday_status_id(self):
-        if self.user_has_groups('hr_holidays.group_hr_holidays_user'):
+        if self.env.user._has_group('hr_holidays.group_hr_holidays_user'):
             domain = [('has_valid_allocation', '=', True), ('requires_allocation', '=', 'yes')]
         else:
             domain = [('has_valid_allocation', '=', True), ('requires_allocation', '=', 'yes'), ('employee_requests', '=', 'yes')]
         return self.env['hr.leave.type'].search(domain, limit=1)
 
     def _domain_holiday_status_id(self):
-        if self.user_has_groups('hr_holidays.group_hr_holidays_user'):
+        if self.env.user._has_group('hr_holidays.group_hr_holidays_user'):
             return [('requires_allocation', '=', 'yes')]
         return [('employee_requests', '=', 'yes')]
 
@@ -151,7 +151,7 @@ class HolidaysAllocation(models.Model):
     @api.depends_context('uid')
     @api.depends('allocation_type')
     def _compute_is_officer(self):
-        self.is_officer = self.env.user.has_group("hr_holidays.group_hr_holidays_user")
+        self.is_officer = self.env.user._has_group("hr_holidays.group_hr_holidays_user")
 
     # Useless depends, so that name is computed on new, before saving the record
     @api.depends_context('uid')
@@ -160,7 +160,7 @@ class HolidaysAllocation(models.Model):
         self.check_access_rights('read')
         self.check_access_rule('read')
 
-        is_officer = self.env.user.has_group('hr_holidays.group_hr_holidays_user')
+        is_officer = self.env.user._has_group('hr_holidays.group_hr_holidays_user')
 
         for allocation in self:
             if is_officer or allocation.employee_id.user_id == self.env.user or allocation.employee_id.leave_manager_id == self.env.user:
@@ -179,13 +179,13 @@ class HolidaysAllocation(models.Model):
                 allocation.name = '*****'
 
     def _inverse_description(self):
-        is_officer = self.env.user.has_group('hr_holidays.group_hr_holidays_user')
+        is_officer = self.env.user._has_group('hr_holidays.group_hr_holidays_user')
         for allocation in self:
             if is_officer or allocation.employee_id.user_id == self.env.user or allocation.employee_id.leave_manager_id == self.env.user:
                 allocation.sudo().private_name = allocation.name
 
     def _search_description(self, operator, value):
-        is_officer = self.env.user.has_group('hr_holidays.group_hr_holidays_user')
+        is_officer = self.env.user._has_group('hr_holidays.group_hr_holidays_user')
         domain = [('private_name', operator, value)]
 
         if not is_officer:
@@ -766,8 +766,8 @@ class HolidaysAllocation(models.Model):
         current_employee = self.env.user.employee_id
         if not current_employee:
             return
-        is_officer = self.env.user.has_group('hr_holidays.group_hr_holidays_user')
-        is_manager = self.env.user.has_group('hr_holidays.group_hr_holidays_manager')
+        is_officer = self.env.user._has_group('hr_holidays.group_hr_holidays_user')
+        is_manager = self.env.user._has_group('hr_holidays.group_hr_holidays_manager')
         for allocation in self:
             val_type = allocation.holiday_status_id.sudo().allocation_validation_type
             if state == 'confirm':

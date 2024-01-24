@@ -520,7 +520,7 @@ class Survey(models.Model):
         self.ensure_one()
         if test_entry:
             # the current user must have the access rights to survey
-            if not user.has_group('survey.group_survey_user'):
+            if not user._has_group('survey.group_survey_user'):
                 raise exceptions.UserError(_('Creating test token is not allowed for you.'))
         else:
             if not self.active:
@@ -845,14 +845,14 @@ class Survey(models.Model):
 
         We flush after writing to make sure it's updated before bus takes over. """
 
-        if self.env.user.has_group('survey.group_survey_user'):
+        if self.env.user._has_group('survey.group_survey_user'):
             self.sudo().write({'session_state': 'in_progress'})
             self.sudo().flush_recordset(['session_state'])
 
     def _get_session_next_question(self, go_back):
         self.ensure_one()
 
-        if not self.question_ids or not self.env.user.has_group('survey.group_survey_user'):
+        if not self.question_ids or not self.env.user._has_group('survey.group_survey_user'):
             return
 
         most_voted_answers = self._get_session_most_voted_answers()
@@ -1078,7 +1078,7 @@ class Survey(models.Model):
         The write is sudo'ed because a survey user can start a session even if it's
         not their own survey. """
 
-        if not self.env.user.has_group('survey.group_survey_user'):
+        if not self.env.user._has_group('survey.group_survey_user'):
             raise AccessError(_('Only survey users can manage sessions.'))
 
         self.ensure_one()
@@ -1104,7 +1104,7 @@ class Survey(models.Model):
         """ The write is sudo'ed because a survey user can end a session even if it's
         not their own survey. """
 
-        if not self.env.user.has_group('survey.group_survey_user'):
+        if not self.env.user._has_group('survey.group_survey_user'):
             raise AccessError(_('Only survey users can manage sessions.'))
 
         self.sudo().write({'session_state': False})

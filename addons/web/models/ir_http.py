@@ -86,7 +86,7 @@ class Http(models.AbstractModel):
         mods = odoo.conf.server_wide_modules or []
         if request.db:
             mods = list(request.registry._init_modules) + mods
-        is_internal_user = user.has_group('base.group_user')
+        is_internal_user = user._has_group('base.group_user')
         session_info = {
             "uid": session_uid,
             "is_system": user._is_system() if session_uid else False,
@@ -161,7 +161,7 @@ class Http(models.AbstractModel):
                     },
                 },
                 "show_effect": True,
-                "display_switch_company_menu": user.has_group('base.group_multi_company') and len(user.company_ids) > 1,
+                "display_switch_company_menu": user._has_group('base.group_multi_company') and len(user.company_ids) > 1,
             })
         return session_info
 

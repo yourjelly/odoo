@@ -890,7 +890,7 @@ class Module(models.Model):
                 'base.module_category_website_theme',
                 'base.module_category_theme',
             ]
-            if not self.user_has_groups('base.group_no_one'):
+            if not (self.env.user._has_group('base.group_no_one') and request and request.session.debug):
                 excluded_xmlids.append('base.module_category_hidden')
 
             excluded_category_ids = []

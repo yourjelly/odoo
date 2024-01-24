@@ -569,7 +569,7 @@ QUnit.module("Views", ({ beforeEach }) => {
                 </calendar>
             `,
             mockRPC(route) {
-                if (route.endsWith("/has_group")) {
+                if (route.endsWith("/current_user_has_group")) {
                     return true;
                 }
             },

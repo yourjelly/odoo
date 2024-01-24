@@ -451,7 +451,7 @@ class TestSaleOrder(SaleCommon):
         self.sale_order.create_uid.groups_id += self.env.ref('sale.group_auto_done_setting')
         self.sale_order.with_user(public_user.id).sudo().action_confirm()
 
-        self.assertFalse(public_user.has_group('sale.group_auto_done_setting'))
+        self.assertFalse(public_user._has_group('sale.group_auto_done_setting'))
         self.assertTrue(self.sale_order.locked)
 
     def test_draft_quotation_followers(self):

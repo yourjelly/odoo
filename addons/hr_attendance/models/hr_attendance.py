@@ -397,7 +397,7 @@ class HrAttendance(models.Model):
     def write(self, vals):
         if vals.get('employee_id') and \
             vals['employee_id'] not in self.env.user.employee_ids.ids and \
-            not self.env.user.has_group('hr_attendance.group_hr_attendance_officer'):
+            not self.env.user._has_group('hr_attendance.group_hr_attendance_officer'):
             raise AccessError(_("Do not have access, user cannot edit the attendances that are not his own."))
         attendances_dates = self._get_attendances_dates()
         result = super(HrAttendance, self).write(vals)

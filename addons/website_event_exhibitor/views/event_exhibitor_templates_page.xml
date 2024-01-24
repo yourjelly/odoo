@@ -147,7 +147,7 @@
         <!-- Website description -->
         <div t-if="not is_html_empty(sponsor.website_description)" t-field="sponsor.website_description"
              class="my-2 oe_no_empty"/>
-        <t t-elif="env.user.has_group('event.group_event_user')">
+        <t t-elif="env.user._has_group('event.group_event_user')">
             <div t-field="sponsor.website_description" class="my-2 mx-3"
                  placeholder="e.g. &quot;Openwood specializes in home decoration...&quot;"/>
             <div class="alert alert-info mx-3 mt-3 o_wesponsor_exhibitor_main_empty_website_descr_warning">

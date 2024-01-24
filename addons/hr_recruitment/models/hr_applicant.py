@@ -344,7 +344,7 @@ class Applicant(models.Model):
                 applicant.date_closed = False
 
     def _check_interviewer_access(self):
-        if self.user_has_groups('hr_recruitment.group_hr_recruitment_interviewer') and not self.user_has_groups('hr_recruitment.group_hr_recruitment_user'):
+        if self.env.user._has_group('hr_recruitment.group_hr_recruitment_interviewer') and not self.env.user._has_group('hr_recruitment.group_hr_recruitment_user'):
             raise AccessError(_('You are not allowed to perform this action.'))
 
     @api.model_create_multi
@@ -427,8 +427,8 @@ class Applicant(models.Model):
 
     @api.model
     def get_view(self, view_id=None, view_type='form', **options):
-        if view_type == 'form' and self.user_has_groups('hr_recruitment.group_hr_recruitment_interviewer')\
-            and not self.user_has_groups('hr_recruitment.group_hr_recruitment_user'):
+        if view_type == 'form' and self.env.user._has_group('hr_recruitment.group_hr_recruitment_interviewer')\
+            and not self.env.user._has_group('hr_recruitment.group_hr_recruitment_user'):
             view_id = self.env.ref('hr_recruitment.hr_applicant_view_form_interviewer').id
         return super().get_view(view_id, view_type, **options)
 
@@ -458,7 +458,7 @@ class Applicant(models.Model):
             })
 
         partners = self.partner_id | self.department_id.manager_id.user_id.partner_id
-        if self.user_has_groups('hr_recruitment.group_hr_recruitment_interviewer') and not self.user_has_groups('hr_recruitment.group_hr_recruitment_user'):
+        if self.env.user._has_group('hr_recruitment.group_hr_recruitment_interviewer') and not self.env.user._has_group('hr_recruitment.group_hr_recruitment_user'):
             partners |= self.env.user.partner_id
         else:
             partners |= self.user_id.partner_id

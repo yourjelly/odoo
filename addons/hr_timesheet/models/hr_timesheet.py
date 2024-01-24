@@ -36,14 +36,14 @@ class AccountAnalyticLine(models.Model):
 
     def _domain_project_id(self):
         domain = [('allow_timesheets', '=', True)]
-        if not self.user_has_groups('hr_timesheet.group_timesheet_manager'):
+        if not self.env.user._has_group('hr_timesheet.group_timesheet_manager'):
             return expression.AND([domain,
                 ['|', ('privacy_visibility', '!=', 'followers'), ('message_partner_ids', 'in', [self.env.user.partner_id.id])]
             ])
         return domain
 
     def _domain_employee_id(self):
-        if not self.user_has_groups('hr_timesheet.group_hr_timesheet_approver'):
+        if not self.env.user._has_group('hr_timesheet.group_hr_timesheet_approver'):
             return [('user_id', '=', self.env.user.id)]
         return []
 
@@ -129,7 +129,7 @@ class AccountAnalyticLine(models.Model):
 
     def _check_can_write(self, values):
         # If it's a basic user then check if the timesheet is his own.
-        if not (self.user_has_groups('hr_timesheet.group_hr_timesheet_approver') or self.env.su) and any(self.env.user.id != analytic_line.user_id.id for analytic_line in self):
+        if not (self.env.user._has_group('hr_timesheet.group_hr_timesheet_approver') or self.env.su) and any(self.env.user.id != analytic_line.user_id.id for analytic_line in self):
             raise AccessError(_("You cannot access timesheets that are not yours."))
 
     def _check_can_create(self):
@@ -300,7 +300,7 @@ class AccountAnalyticLine(models.Model):
         return doc
 
     def _timesheet_get_portal_domain(self):
-        if self.env.user.has_group('hr_timesheet.group_hr_timesheet_user'):
+        if self.env.user._has_group('hr_timesheet.group_hr_timesheet_user'):
             # Then, he is internal user, and we take the domain for this current user
             return self.env['ir.rule']._compute_domain(self._name)
         return [

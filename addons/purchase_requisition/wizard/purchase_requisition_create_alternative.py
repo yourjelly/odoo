@@ -33,7 +33,7 @@ class PurchaseRequisitionCreateAlternative(models.TransientModel):
         self.creation_blocked = False
         self.purchase_warn_msg = ''
         # follows partner warning logic from PurchaseOrder
-        if not self.env.user.has_group('purchase.group_warning_purchase'):
+        if not self.env.user._has_group('purchase.group_warning_purchase'):
             return
         partner = self.partner_id
         # If partner has no warning, check its company
@@ -53,7 +53,7 @@ class PurchaseRequisitionCreateAlternative(models.TransientModel):
                         self.purchase_warn_msg += _("This is a blocking warning!\n")
 
     def action_create_alternative(self):
-        if self.env.user.has_group('purchase.group_warning_purchase') and self.creation_blocked:
+        if self.env.user._has_group('purchase.group_warning_purchase') and self.creation_blocked:
             raise UserError(
                 _('The vendor you have selected or at least one of the products you are copying from the original '
                   'order has a blocking warning on it and cannot be selected to create an alternative.')

@@ -12,7 +12,7 @@ class Digest(models.Model):
     kpi_account_total_revenue_value = fields.Monetary(compute='_compute_kpi_account_total_revenue_value')
 
     def _compute_kpi_account_total_revenue_value(self):
-        if not self.env.user.has_group('account.group_account_invoice'):
+        if not self.env.user._has_group('account.group_account_invoice'):
             raise AccessError(_("Do not have access, skip this data for user's digest email"))
 
         start, end, companies = self._get_kpi_compute_parameters()

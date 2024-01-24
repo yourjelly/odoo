@@ -551,7 +551,7 @@ class ProductTemplate(models.Model):
         # we need to add the base _name_search to the results
         tmpl_without_variant_ids = []
         # Useless if variants is not set up as no tmpl_without_variant_ids could exist.
-        if self.env.user.has_group('product.group_product_variant') and (not limit or len(searched_ids) < limit):
+        if self.env.user._has_group('product.group_product_variant') and (not limit or len(searched_ids) < limit):
             # The ORM has to be bypassed because it would require a NOT IN which is inefficient.
             self.env['product.product'].flush_model(['product_tmpl_id', 'active'])
             tmpl_without_variant_ids = self.env['product.template']._search([], order='id')

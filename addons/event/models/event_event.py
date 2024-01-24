@@ -622,7 +622,7 @@ class EventEvent(models.Model):
     def _get_mail_message_access(self, res_ids, operation, model_name=None):
         if (
             operation == 'create'
-            and self.env.user.has_group('event.group_event_registration_desk')
+            and self.env.user._has_group('event.group_event_registration_desk')
             and (not model_name or model_name == 'event.event')
         ):
             # allow the registration desk users to post messages on Event

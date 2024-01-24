@@ -406,7 +406,7 @@ class View(models.Model):
 
         visibility = self._get_cached_visibility()
 
-        if visibility and not request.env.user.has_group('website.group_website_designer'):
+        if visibility and not request.env.user._has_group('website.group_website_designer'):
             if (visibility == 'connected' and request.website.is_public_user()):
                 error = werkzeug.exceptions.Forbidden()
             elif visibility == 'password' and \

@@ -722,7 +722,7 @@ class TestFields(TransactionCaseWithUserDemo):
         """ test access rights on inverse fields """
         foo = self.env['test_new_api.category'].create({'name': 'Foo'})
         user = self.env['res.users'].create({'name': 'Foo', 'login': 'foo'})
-        self.assertFalse(user.has_group('base.group_system'))
+        self.assertFalse(user._has_group('base.group_system'))
         # add group on non-stored inverse field
         self.patch(type(foo).display_name, 'groups', 'base.group_system')
         with self.assertRaises(AccessError):
@@ -1535,7 +1535,7 @@ class TestFields(TransactionCaseWithUserDemo):
         self.assertEqual(record.with_user(user2).foo, 'default')
 
         # add group on company-dependent field
-        self.assertFalse(user0.has_group('base.group_system'))
+        self.assertFalse(user0._has_group('base.group_system'))
         self.patch(type(record).foo, 'groups', 'base.group_system')
         with self.assertRaises(AccessError):
             record.with_user(user0).foo = 'forbidden'
@@ -1572,7 +1572,7 @@ class TestFields(TransactionCaseWithUserDemo):
 
         # a low priviledge user should be able to search on company_dependent fields
         company_record.env.user.groups_id -= self.env.ref('base.group_system')
-        self.assertFalse(company_record.env.user.has_group('base.group_system'))
+        self.assertFalse(company_record.env.user._has_group('base.group_system'))
         company_records = self.env['test_new_api.company'].search([('foo', '=', 'DEF')])
         self.assertEqual(len(company_records), 1)
 

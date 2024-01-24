@@ -53,7 +53,7 @@ class PosPaymentMethod(models.Model):
 
     @api.model
     def stripe_connection_token(self):
-        if not self.env.user.has_group('point_of_sale.group_pos_user'):
+        if not self.env.user._has_group('point_of_sale.group_pos_user'):
             raise AccessError(_("Do not have access to fetch token from Stripe"))
 
         endpoint = 'https://api.stripe.com/v1/terminal/connection_tokens'
@@ -71,7 +71,7 @@ class PosPaymentMethod(models.Model):
         return round(amount/currency.rounding)
 
     def stripe_payment_intent(self, amount):
-        if not self.env.user.has_group('point_of_sale.group_pos_user'):
+        if not self.env.user._has_group('point_of_sale.group_pos_user'):
             raise AccessError(_("Do not have access to fetch token from Stripe"))
 
         # For Terminal payments, the 'payment_method_types' parameter must include
@@ -111,7 +111,7 @@ class PosPaymentMethod(models.Model):
                        amount is captured. Specifying a larger amount allows
                        overcapturing to support tips.
         """
-        if not self.env.user.has_group('point_of_sale.group_pos_user'):
+        if not self.env.user._has_group('point_of_sale.group_pos_user'):
             raise AccessError(_("Do not have access to fetch token from Stripe"))
 
         endpoint = ('payment_intents/%s/capture') % (werkzeug.urls.url_quote(paymentIntentId))

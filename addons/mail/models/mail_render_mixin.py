@@ -241,7 +241,7 @@ class MailRenderMixin(models.AbstractModel):
         return False
 
     def _check_access_right_dynamic_template(self):
-        if not self.env.su and not self.env.user.has_group('mail.group_mail_template_editor') and self._is_dynamic():
+        if not self.env.su and not self.env.user._has_group('mail.group_mail_template_editor') and self._is_dynamic():
             group = self.env.ref('mail.group_mail_template_editor')
             raise AccessError(
                 _('Only users belonging to the "%(group_name)s" group can modify dynamic templates.',
@@ -304,7 +304,7 @@ class MailRenderMixin(models.AbstractModel):
         if add_context:
             variables.update(**add_context)
 
-        is_restricted = not self._unrestricted_rendering and not self.env.is_admin() and not self.env.user.has_group('mail.group_mail_template_editor')
+        is_restricted = not self._unrestricted_rendering and not self.env.is_admin() and not self.env.user._has_group('mail.group_mail_template_editor')
 
         for record in self.env[model].browse(res_ids):
             variables['object'] = record
@@ -416,7 +416,7 @@ class MailRenderMixin(models.AbstractModel):
         is_dynamic = len(template_instructions) > 1 or template_instructions[0][1]
 
         if (not self._unrestricted_rendering and is_dynamic and not self.env.is_admin() and
-           not self.env.user.has_group('mail.group_mail_template_editor')):
+           not self.env.user._has_group('mail.group_mail_template_editor')):
             group = self.env.ref('mail.group_mail_template_editor')
             raise AccessError(
                 _('Only users belonging to the "%(group_name)s" group can modify dynamic templates.',

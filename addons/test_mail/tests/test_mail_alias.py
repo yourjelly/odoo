@@ -827,7 +827,7 @@ class TestMailAliasMixin(TestMailAliasCommon):
     @users('employee')
     def test_copy_content(self):
         self.assertFalse(
-            self.env.user.has_group('base.group_system'),
+            self.env.user._has_group('base.group_system'),
             'Test user should not have Administrator access')
 
         record = self.env['mail.test.container'].create({

@@ -28,7 +28,7 @@ class MailPluginController(mail_plugin.MailPluginController):
 
         partner_leads = request.env['crm.lead'].search(
             [('partner_id', '=', partner.id)], offset=offset, limit=limit)
-        recurring_revenues = request.env.user.has_group('crm.group_use_recurring_revenues')
+        recurring_revenues = request.env.user._has_group('crm.group_use_recurring_revenues')
 
         leads = []
         for lead in partner_leads:

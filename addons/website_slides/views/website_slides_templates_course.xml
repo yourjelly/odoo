@@ -859,7 +859,7 @@
         <div class="card-body d-flex flex-column px-3">
             <a t-if="can_access" class="card-title h5 o_wslides_desc_truncate_2" t-attf-href="/slides/slide/#{slug(slide)}#{query_string}" t-esc="slide.name"/>
             <span t-else="" class="card-title h5 o_wslides_desc_truncate_2 text-muted" t-esc="slide.name"/>
-            <div class="text-muted o_wslides_desc_truncate_2 mb-2" t-if="slide.is_preview or (not slide.is_published and user.has_group('website_slides.group_website_slides_officer'))">
+            <div class="text-muted o_wslides_desc_truncate_2 mb-2" t-if="slide.is_preview or (not slide.is_published and user._has_group('website_slides.group_website_slides_officer'))">
                 <span t-if="slide.is_preview" class="badge text-bg-info">Preview</span>
                 <span t-if="not slide.is_published and channel.can_publish" class="badge text-bg-danger">Unpublished</span>
             </div>

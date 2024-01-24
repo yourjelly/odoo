@@ -24,7 +24,7 @@ class MicrosoftOutlookController(http.Controller):
         We will fetch the refresh token and the access token thanks to this authorization
         code and save those values on the given mail server.
         """
-        if not request.env.user.has_group('base.group_system'):
+        if not request.env.user._has_group('base.group_system'):
             _logger.error('Microsoft Outlook: Non system user try to link an Outlook account.')
             raise Forbidden()
 

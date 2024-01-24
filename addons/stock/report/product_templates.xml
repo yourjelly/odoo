@@ -48,7 +48,7 @@
 ^A0N,44,33^FD<t t-out="lot.product_id.display_name"/>^FS
 ^FO100,100
 ^A0N,44,33^FDLN/SN: <t t-out="lot.name"/>^FS
-                    <t t-if="env.user.has_group('stock.group_stock_lot_print_gs1')">
+                    <t t-if="env.user._has_group('stock.group_stock_lot_print_gs1')">
                         <t t-if="lot.product_id.valid_ean" t-set="final_barcode" t-value="'01' + '0' * (14 - len(lot.product_id.barcode)) + lot.product_id.barcode"/>
                         <!-- TODO: must keep lot/sn as last value in barcode because we cannot pad '0's without changing lot/sn name until we can scan in FNC1. -->
                         <t t-if="lot.product_id.tracking == 'lot'" name="datamatrix_lot" t-set="final_barcode" t-value="(final_barcode or '') + '10' + lot.name"/>

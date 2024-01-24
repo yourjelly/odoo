@@ -9,7 +9,7 @@ from odoo.http import request
 class BaseSetup(http.Controller):
     @http.route('/base_setup/data', type='json', auth='user')
     def base_setup_data(self, **kw):
-        if not request.env.user.has_group('base.group_erp_manager'):
+        if not request.env.user._has_group('base.group_erp_manager'):
             raise AccessError(_("Access Denied"))
 
         cr = request.cr

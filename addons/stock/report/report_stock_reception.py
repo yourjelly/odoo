@@ -18,7 +18,7 @@ class ReceptionReport(models.AbstractModel):
         report_values['sources_info'] = self._format_html_sources_info(report_values.get('sources_to_lines', {}))
         report_values['sources_to_lines'] = self._format_html_sources_to_lines(report_values.get('sources_to_lines', {}))
         report_values['sources_to_formatted_scheduled_date'] = self._format_html_sources_to_date(report_values.get('sources_to_formatted_scheduled_date', {}))
-        report_values['show_uom'] = self.env.user.has_group('uom.group_uom')
+        report_values['show_uom'] = self.env.user._has_group('uom.group_uom')
         return report_values
 
     @api.model

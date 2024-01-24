@@ -21,5 +21,5 @@ QUnit.test("successive calls to hasGroup", async (assert) => {
     const hasGroupXAgain = await user.hasGroup("x");
     assert.strictEqual(hasGroupXAgain, true);
 
-    assert.verifySteps(["res.users/has_group/x", "res.users/has_group/y"]);
+    assert.verifySteps(["res.users/current_user_has_group/x", "res.users/current_user_has_group/y"]);
 });

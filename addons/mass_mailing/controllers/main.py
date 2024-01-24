@@ -36,7 +36,7 @@ class MassMailController(http.Controller):
         if not hash_token:
             if request.env.user._is_public():
                 raise BadRequest()
-            if mailing_id and not request.env.user.has_group('mass_mailing.group_mass_mailing_user'):
+            if mailing_id and not request.env.user._has_group('mass_mailing.group_mass_mailing_user'):
                 raise BadRequest()
         if hash_token and (not mailing_id or not email or not document_id):
             raise BadRequest()
@@ -362,13 +362,13 @@ class MassMailController(http.Controller):
         if not token or not user_id:
             raise BadRequest()
         user = request.env['res.users'].sudo().browse(int(user_id)).exists()
-        if not user or not user.has_group('mass_mailing.group_mass_mailing_user') or \
+        if not user or not user._has_group('mass_mailing.group_mass_mailing_user') or \
            not consteq(token, request.env['mailing.mailing']._generate_mailing_report_token(user.id)):
             raise Unauthorized()
 
         request.env['ir.config_parameter'].sudo().set_param('mass_mailing.mass_mailing_reports', False)
         render_vals = {}
-        if user.has_group('base.group_system'):
+        if user._has_group('base.group_system'):
             render_vals = {'menu_id': request.env.ref('mass_mailing.menu_mass_mailing_global_settings').id}
         return request.render('mass_mailing.mailing_report_deactivated', render_vals)
 

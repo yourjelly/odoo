@@ -152,7 +152,7 @@ class User(models.Model):
         self.is_system = self.env.user._is_system()
 
     def _compute_can_edit(self):
-        can_edit = self.env['ir.config_parameter'].sudo().get_param('hr.hr_employee_self_edit') or self.env.user.has_group('hr.group_hr_user')
+        can_edit = self.env['ir.config_parameter'].sudo().get_param('hr.hr_employee_self_edit') or self.env.user._has_group('hr.group_hr_user')
         for user in self:
             user.can_edit = can_edit
 
@@ -238,7 +238,7 @@ class User(models.Model):
             for field_name, field in self._fields.items()
             if field.related_field and field.related_field.model_name == 'hr.employee' and field_name in vals
         }
-        can_edit_self = self.env['ir.config_parameter'].sudo().get_param('hr.hr_employee_self_edit') or self.env.user.has_group('hr.group_hr_user')
+        can_edit_self = self.env['ir.config_parameter'].sudo().get_param('hr.hr_employee_self_edit') or self.env.user._has_group('hr.group_hr_user')
         if hr_fields and not can_edit_self:
             # Raise meaningful error message
             raise AccessError(_("You are only allowed to update your preferences. Please contact a HR officer to update other information."))
@@ -317,7 +317,7 @@ class User(models.Model):
     def action_open_employees(self):
         self.ensure_one()
         employees = self.employee_ids
-        model = 'hr.employee' if self.user_has_groups('hr.group_hr_user') else 'hr.employee.public'
+        model = 'hr.employee' if self.env.user._has_group('hr.group_hr_user') else 'hr.employee.public'
         if len(employees) > 1:
             return {
                 'name': _('Related Employees'),

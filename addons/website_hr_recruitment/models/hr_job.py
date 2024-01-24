@@ -108,7 +108,7 @@ class Job(models.Model):
         elif is_untyped:
             domain.append([('contract_type_id', '=', None)])
 
-        if requires_sudo and not self.env.user.has_group('hr_recruitment.group_hr_recruitment_user'):
+        if requires_sudo and not self.env.user._has_group('hr_recruitment.group_hr_recruitment_user'):
             # Rule must be reinforced because of sudo.
             domain.append([('website_published', '=', True)])
 

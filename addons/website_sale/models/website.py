@@ -533,7 +533,7 @@ class Website(models.Model):
 
     @api.model
     def action_dashboard_redirect(self):
-        if self.env.user.has_group('sales_team.group_sale_salesman'):
+        if self.env.user._has_group('sales_team.group_sale_salesman'):
             return self.env['ir.actions.actions']._for_xml_id('website.backend_dashboard')
         return super().action_dashboard_redirect()
 

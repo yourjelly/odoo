@@ -439,7 +439,7 @@ class IrAttachment(models.Model):
             # XDO note: this should be done in check(write), constraints for access rights?
             # XDO note: if read on sudo, read twice, one for constraints, one for _inverse_datas as user
             if attachment.type == 'binary' and attachment.url:
-                has_group = self.env.user.has_group
+                has_group = self.env.user._has_group
                 if not any(has_group(g) for g in attachment.get_serving_groups()):
                     raise ValidationError(_("Sorry, you are not allowed to write on this document"))
 
@@ -465,9 +465,8 @@ class IrAttachment(models.Model):
                         raise AccessError(_("Sorry, you are not allowed to access this document."))
                     if res_field:
                         field = self.env[res_model]._fields[res_field]
-                        if field.groups:
-                            if not self.env.user.user_has_groups(field.groups):
-                                raise AccessError(_("Sorry, you are not allowed to access this document."))
+                        if not field.has_groups_access(self.env):
+                            raise AccessError(_("Sorry, you are not allowed to access this document."))
                 if not (res_model and res_id):
                     continue
                 model_ids[res_model].add(res_id)
@@ -706,7 +705,7 @@ class IrAttachment(models.Model):
         if record_sudo.with_context(prefetch_fields=False).public:
             return record_sudo
 
-        if self.env.user.has_group('base.group_portal'):
+        if self.env.user._has_group('base.group_portal'):
             # Check the read access on the record linked to the attachment
             # eg: Allow to download an attachment on a task from /my/tasks/task_id
             self.check('read')

@@ -1182,7 +1182,7 @@ class MassMailing(models.Model):
                 'display_mobile_banner': True,
                 ** mailing._prepare_statistics_email_values(),
             }
-            if mail_user.has_group('mass_mailing.group_mass_mailing_user'):
+            if mail_user._has_group('mass_mailing.group_mass_mailing_user'):
                 rendering_data['mailing_report_token'] = self._generate_mailing_report_token(mail_user.id)
                 rendering_data['user_id'] = mail_user.id
 

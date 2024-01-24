@@ -56,7 +56,7 @@ class TestACL(TransactionCaseWithUserDemo):
             #     </group>
             form_view = currency.get_view(False, 'form')
         view_arch = etree.fromstring(form_view.get('arch'))
-        has_group_system = self.user_demo.has_group(GROUP_SYSTEM)
+        has_group_system = self.user_demo._has_group(GROUP_SYSTEM)
         self.assertFalse(has_group_system, "`demo` user should not belong to the restricted group before the test")
         self.assertIn('decimal_places', original_fields, "'decimal_places' field must be properly visible before the test")
         self.assertNotEqual(view_arch.xpath("//field[@name='decimal_places'][@nolabel='1']"), [],
@@ -78,7 +78,7 @@ class TestACL(TransactionCaseWithUserDemo):
 
         # Make demo user a member of the restricted group and check that the field is back
         self.erp_system_group.users += self.user_demo
-        has_group_system = self.user_demo.has_group(GROUP_SYSTEM)
+        has_group_system = self.user_demo._has_group(GROUP_SYSTEM)
         fields = currency.fields_get([])
         with self.debug_mode():
             form_view = currency.get_view(False, 'form')
@@ -96,7 +96,7 @@ class TestACL(TransactionCaseWithUserDemo):
         partner = self.env['res.partner'].browse(1).with_user(self.user_demo)
 
         # Verify the test environment first
-        has_group_system = self.user_demo.has_group(GROUP_SYSTEM)
+        has_group_system = self.user_demo._has_group(GROUP_SYSTEM)
         self.assertFalse(has_group_system, "`demo` user should not belong to the restricted group")
         self.assertTrue(partner.read(['bank_ids']))
         self.assertTrue(partner.write({'bank_ids': []}))
@@ -115,7 +115,7 @@ class TestACL(TransactionCaseWithUserDemo):
 
         # Add the restricted group, and check that it works again
         self.erp_system_group.users += self.user_demo
-        has_group_system = self.user_demo.has_group(GROUP_SYSTEM)
+        has_group_system = self.user_demo._has_group(GROUP_SYSTEM)
         self.assertTrue(has_group_system, "`demo` user should now belong to the restricted group")
         self.assertTrue(partner.read(['bank_ids']))
         self.assertTrue(partner.write({'bank_ids': []}))

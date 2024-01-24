@@ -208,4 +208,4 @@ class MicrosoftCalendarService():
         return self.microsoft_service._get_authorize_uri(from_url, service='calendar', scope=self._get_calendar_scope())
 
     def _can_authorize_microsoft(self, user):
-        return user.has_group('base.group_erp_manager')
+        return user._has_group('base.group_erp_manager')

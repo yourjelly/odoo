@@ -16,7 +16,7 @@ class ResUsers(models.Model):
     @api.depends_context('uid')
     @api.depends('total_overtime')
     def _compute_request_overtime(self):
-        is_holiday_user = self.env.user.has_group('hr_holidays.group_hr_holidays_user')
+        is_holiday_user = self.env.user._has_group('hr_holidays.group_hr_holidays_user')
         time_off_types = self.env['hr.leave.type'].search_count([
             ('requires_allocation', '=', 'yes'),
             ('employee_requests', '=', 'yes'),

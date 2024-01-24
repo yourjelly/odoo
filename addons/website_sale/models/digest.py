@@ -11,7 +11,7 @@ class Digest(models.Model):
     kpi_website_sale_total_value = fields.Monetary(compute='_compute_kpi_website_sale_total_value')
 
     def _compute_kpi_website_sale_total_value(self):
-        if not self.env.user.has_group('sales_team.group_sale_salesman_all_leads'):
+        if not self.env.user._has_group('sales_team.group_sale_salesman_all_leads'):
             raise AccessError(_("Do not have access, skip this data for user's digest email"))
 
         self._calculate_company_based_kpi(

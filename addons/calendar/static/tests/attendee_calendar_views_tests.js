@@ -232,7 +232,7 @@ QUnit.module("CalendarView", ({ beforeEach }) => {
                           </calendar>
             `,
             mockRPC(route, args) {
-                if (route === "/web/dataset/call_kw/res.users/has_group") {
+                if (route === "/web/dataset/call_kw/res.users/current_user_has_group") {
                     return Promise.resolve(true);
                 } else if (route === "/web/dataset/call_kw/res.partner/get_attendee_detail") {
                     return Promise.resolve([]);
@@ -280,7 +280,7 @@ QUnit.module("CalendarView", ({ beforeEach }) => {
                           </calendar>
             `,
             mockRPC(route, args) {
-                if (route === "/web/dataset/call_kw/res.users/has_group") {
+                if (route === "/web/dataset/call_kw/res.users/current_user_has_group") {
                     return Promise.resolve(true);
                 } else if (route === "/web/dataset/call_kw/res.partner/get_attendee_detail") {
                     return Promise.resolve([]);

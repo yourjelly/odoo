@@ -979,7 +979,7 @@ actual arch.
 
         for node in tree.xpath('//*[@groups]'):
             attrib_groups = node.attrib.pop('groups')
-            if attrib_groups and not self.user_has_groups(attrib_groups):
+            if attrib_groups and not self._has_view_groups(attrib_groups):
                 node.getparent().remove(node)
             elif node.tag == 't' and (not node.attrib or node.get('postprocess_added')):
                 # Move content of <t groups=""> blocks
@@ -1025,6 +1025,33 @@ actual arch.
                                 node.set(action, 'False')
 
         return tree
+
+    def _has_view_groups(self, groups):
+        """Use to check groups access from ``groups`` or ``t-groups`` attributes.
+        Return true if the user is member of at least one of the groups in
+        ``groups``, and is not a member of any of the groups in ``groups``
+        preceded by ``!``. Typically used to resolve ``groups`` attribute in
+        view and model definitions.
+        :param str groups: comma-separated list of fully-qualified group
+            external IDs, e.g., ``base.group_user,base.group_system``,
+            optionally preceded by ``!``
+        :return: True if the current user is a member of one of the given groups
+            not preceded by ``!`` and is not member of any of the groups
+            preceded by ``!``
+        """
+        has_access = None
+        for group_ext_id in groups.split(','):
+            group_ext_id = group_ext_id.strip()
+            positive, group_ext_id = (False, group_ext_id[1:]) if group_ext_id[0] == '!' else (True, group_ext_id)
+            has_group = self.env.user._has_group(group_ext_id)
+            if has_group and group_ext_id == 'base.group_no_one':
+                # check: the group_no_one is effective in debug mode only
+                has_group = bool(request and request.session.debug)
+            if positive:
+                has_access = has_access or has_group
+            elif has_group:
+                return False
+        return has_access or has_access is None
 
     def _postprocess_view(self, node, model_name, editable=True, parent_name_manager=None, **options):
         """ Process the given architecture, modifying it in-place to add and

@@ -895,6 +895,16 @@ class Field(MetaField('DummyField', (object,), {})):
         """ Return whether the field can be editable in a view. """
         return not self.readonly
 
+    def has_groups_access(self, env):
+        """ Return whether the field is accessible from the given environment. """
+        if not self.groups:
+            return True
+        if env.is_superuser():
+            return True
+        if self.groups == '.':
+            return False
+        return any(env.user._has_group(group) for group in self.groups.split(','))
+
     ############################################################################
     #
     # Conversion of values
@@ -2035,7 +2045,7 @@ class Html(_String):
         }
 
         if self.sanitize_overridable:
-            if record.user_has_groups('base.group_sanitize_override'):
+            if record.env.user._has_group('base.group_sanitize_override'):
                 return value
 
             original_value = record[self.name]

@@ -16,7 +16,6 @@ class MailTracking(models.Model):
         'ir.model.fields', required=False, readonly=True,
         index=True, ondelete='set null')
     field_info = fields.Json('Removed field information')
-    field_groups = fields.Char(compute='_compute_field_groups')
 
     old_value_integer = fields.Integer('Old Value Integer', readonly=True)
     old_value_float = fields.Float('Old Value Float', readonly=True)
@@ -35,12 +34,12 @@ class MailTracking(models.Model):
 
     mail_message_id = fields.Many2one('mail.message', 'Message ID', required=True, index=True, ondelete='cascade')
 
-    @api.depends('mail_message_id', 'field_id')
-    def _compute_field_groups(self):
-        for tracking in self:
-            model = self.env[tracking.mail_message_id.model]
-            field = model._fields.get(tracking.field_id.name)
-            tracking.field_groups = field.groups if field else 'base.group_system'
+    def _has_tracking_field_access(self, env):
+        self.ensure_one()
+        field = self.env[self.mail_message_id.model]._fields.get(self.field_id.name)
+        if field:
+            return field.has_groups_access(env)
+        return env.is_system()
 
     @api.model
     def _create_tracking_values(self, initial_value, new_value, col_name, col_info, record):

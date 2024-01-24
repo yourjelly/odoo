@@ -65,7 +65,7 @@ class GoogleGmailMixin(models.AbstractModel):
         """
         self.ensure_one()
 
-        if not self.env.user.has_group('base.group_system'):
+        if not self.env.user._has_group('base.group_system'):
             raise AccessError(_('Only the administrator can link a Gmail mail server.'))
 
         if not self.google_gmail_uri:

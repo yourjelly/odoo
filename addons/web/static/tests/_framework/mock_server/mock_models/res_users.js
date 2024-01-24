@@ -23,7 +23,7 @@ export class ResUsers extends ServerModel {
         },
     ];
 
-    has_group() {
+    current_user_has_group() {
         return true;
     }
 }

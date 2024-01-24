@@ -183,7 +183,7 @@ class Team(models.Model):
             if not self.use_leads and not self.use_opportunities:
                 values['alias_name'] = False
             values['alias_defaults'] = defaults = literal_eval(self.alias_defaults or "{}")
-            has_group_use_lead = self.env.user.has_group('crm.group_use_lead')
+            has_group_use_lead = self.env.user._has_group('crm.group_use_lead')
             defaults['type'] = 'lead' if has_group_use_lead and self.use_leads else 'opportunity'
             defaults['team_id'] = self.id
         return values
@@ -294,7 +294,7 @@ class Team(models.Model):
           process. For more details about data see ``CrmTeam._allocate_leads()``
           and ``CrmTeamMember._assign_and_convert_leads``;
         """
-        if not self.env.user.has_group('sales_team.group_sale_manager') and not self.env.user.has_group('base.group_system'):
+        if not self.env.user._has_group('sales_team.group_sale_manager') and not self.env.user._has_group('base.group_system'):
             raise exceptions.UserError(_('Lead/Opportunities automatic assignment is limited to managers or administrators'))
 
         _logger.info('### START Lead Assignment (%d teams, %d sales persons, %.2f work_days)', len(self), len(self.crm_team_member_ids), work_days)
@@ -607,7 +607,7 @@ class Team(models.Model):
             user_team_id = self.search([], limit=1).id
             action['help'] = "<p class='o_view_nocontent_smiling_face'>%s</p><p>" % _("Create an Opportunity")
             if user_team_id:
-                if self.user_has_groups('sales_team.group_sale_manager'):
+                if self.env.user._has_group('sales_team.group_sale_manager'):
                     action['help'] += "<p>%s</p>" % _("""As you are a member of no Sales Team, you are showed the Pipeline of the <b>first team by default.</b>
                                         To work with the CRM, you should <a name="%d" type="action" tabindex="-1">join a team.</a>""",
                                         self.env.ref('sales_team.crm_team_action_config').id)

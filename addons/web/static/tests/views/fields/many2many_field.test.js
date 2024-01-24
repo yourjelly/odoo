@@ -162,7 +162,7 @@ class Users extends models.Model {
     name = fields.Char();
     partner_ids = fields.One2many({ relation: "res.partner", relation_field: "user_id" });
 
-    has_group() {
+    current_user_has_group() {
         return true;
     }
 

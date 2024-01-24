@@ -144,7 +144,7 @@
 
             <!-- Description -->
             <div t-if="not is_html_empty(track.description)" t-field="track.description" class="my-2 mx-3 oe_no_empty"/>
-            <t t-elif="env.user.has_group('event.group_event_user')">
+            <t t-elif="env.user._has_group('event.group_event_user')">
                 <div t-field="track.description" class="my-2 mx-3"
                      placeholder="e.g. &quot;This talk will be about...&quot;"/>
                 <div class="alert alert-info mx-3 mt-3 o_wesession_track_main_empty_descr_warning">

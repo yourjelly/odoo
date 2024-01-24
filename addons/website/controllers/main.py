@@ -129,8 +129,8 @@ class Website(Home):
         session, AFTER landing on that website domain (if set) as this will be a
         different session.
         """
-        if not (request.env.user.has_group('website.group_multi_website')
-           and request.env.user.has_group('website.group_website_restricted_editor')):
+        if not (request.env.user._has_group('website.group_multi_website')
+           and request.env.user._has_group('website.group_website_restricted_editor')):
             # The user might not be logged in on the forced website, so he won't
             # have rights. We just redirect to the path as the user is already
             # on the domain (basically a no-op as it won't change domain or
@@ -324,7 +324,7 @@ class Website(Home):
 
     @http.route(['/website/configurator', '/website/configurator/<int:step>'], type='http', auth="user", website=True, multilang=False)
     def website_configurator(self, step=1, **kwargs):
-        if not request.env.user.has_group('website.group_website_designer'):
+        if not request.env.user._has_group('website.group_website_designer'):
             raise werkzeug.exceptions.NotFound()
         if request.website.configurator_done:
             return request.redirect('/')
@@ -753,7 +753,7 @@ class Website(Home):
 
     @http.route(['/website/get_seo_data'], type='json', auth="user", website=True)
     def get_seo_data(self, res_id, res_model):
-        if not request.env.user.has_group('website.group_website_restricted_editor'):
+        if not request.env.user._has_group('website.group_website_restricted_editor'):
             raise werkzeug.exceptions.Forbidden()
 
         fields = ['website_meta_title', 'website_meta_description', 'website_meta_keywords', 'website_meta_og_img']

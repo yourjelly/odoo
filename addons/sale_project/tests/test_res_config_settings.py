@@ -39,10 +39,10 @@ class TestResConfigSettings(TestSaleProjectCommon):
         })
 
     def test_disable_and_enable_project_milestone_feature(self):
-        self.assertTrue(self.env.user.has_group('project.group_project_milestone'), 'The Project Milestones feature should be enabled.')
+        self.assertTrue(self.env.user._has_group('project.group_project_milestone'), 'The Project Milestones feature should be enabled.')
 
         self.set_project_milestone_feature(False)
-        self.assertFalse(self.env.user.has_group('project.group_project_milestone'), 'The Project Milestones feature should be disabled.')
+        self.assertFalse(self.env.user._has_group('project.group_project_milestone'), 'The Project Milestones feature should be disabled.')
         product_milestones = self.product_milestone + self.product_milestone2
         self.assertEqual(
             product_milestones.mapped('service_policy'),

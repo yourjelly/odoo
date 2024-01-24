@@ -101,7 +101,7 @@ class Employee(models.AbstractModel):
         }
 
     def _action_set_manual_presence(self, state):
-        if not self.env.user.has_group('hr.group_hr_manager'):
+        if not self.env.user._has_group('hr.group_hr_manager'):
             raise UserError(_("You don't have the right to do this. Please contact an Administrator."))
         self.write({'manually_set_present': state})
 
@@ -132,7 +132,7 @@ class Employee(models.AbstractModel):
 
     def action_send_sms(self):
         self.ensure_one()
-        if not self.env.user.has_group('hr.group_hr_manager'):
+        if not self.env.user._has_group('hr.group_hr_manager'):
             raise UserError(_("You don't have the right to do this. Please contact an Administrator."))
         if not self.mobile_phone:
             raise UserError(_("There is no professional mobile for this employee."))
@@ -159,7 +159,7 @@ Do not hesitate to contact your manager or the human resource department.""")
 
     def action_send_mail(self):
         self.ensure_one()
-        if not self.env.user.has_group('hr.group_hr_manager'):
+        if not self.env.user._has_group('hr.group_hr_manager'):
             raise UserError(_("You don't have the right to do this. Please contact an Administrator."))
         if not self.work_email:
             raise UserError(_("There is no professional email address for this employee."))
