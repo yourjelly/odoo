@@ -58,7 +58,7 @@ QUnit.test(
     }
 );
 
-QUnit.test(
+QUnit.debug(
     'chat window: post message on channel with "CTRL-Enter" keyboard shortcut for small screen size',
     async () => {
         const pyEnv = await startServer();

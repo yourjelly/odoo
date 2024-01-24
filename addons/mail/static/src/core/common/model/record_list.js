@@ -81,14 +81,14 @@ export class RecordList extends Array {
                             this0.store.ADD_QUEUE("onDelete", this0.owner, this0.name, oldRecord);
                             const inverse = Model.fieldsInverse.get(this0.name);
                             if (inverse) {
-                                oldRecord._fields.get(inverse).delete(this0);
+                                oldRecord[inverse].delete(this0);
                             }
                             this3.state.data[index] = newRecord?.localId;
                             if (newRecord) {
                                 newRecord.__uses__.add(this0);
                                 this0.store.ADD_QUEUE("onAdd", this0.owner, this0.name, newRecord);
                                 if (inverse) {
-                                    newRecord._fields.get(inverse).add(this0);
+                                    newRecord[inverse].add(this0);
                                 }
                             }
                         });
@@ -141,7 +141,11 @@ export class RecordList extends Array {
         const inverse = Model.fieldsInverse.get(this.name);
         if (inverse && inv) {
             // special command to call _addNoinv/_deleteNoInv, to prevent infinite loop
-            val[inverse] = [[mode === "ADD" ? "ADD.noinv" : "DELETE.noinv", this.owner]];
+            if (isRecord(val) && val._0 === val) {
+                val._1[inverse] = [[mode === "ADD" ? "ADD.noinv" : "DELETE.noinv", this.owner]];
+            } else {
+                val[inverse] = [[mode === "ADD" ? "ADD.noinv" : "DELETE.noinv", this.owner]];
+            }
         }
         /** @type {R} */
         let newRecord3;
@@ -181,7 +185,7 @@ export class RecordList extends Array {
                         record.__uses__.add(this0);
                         this0.store.ADD_QUEUE("onAdd", this0.owner, this0.name, record);
                         if (inverse) {
-                            record._fields.get(inverse).add(this0.owner);
+                            record[inverse].add(this0.owner);
                         }
                     }
                 })
@@ -192,7 +196,7 @@ export class RecordList extends Array {
                     oldRecord.__uses__.delete(this0);
                     this0.store.ADD_QUEUE("onDelete", this0.owner, this0.name, oldRecord);
                     if (inverse) {
-                        oldRecord._fields.get(inverse).delete(this0.owner);
+                        oldRecord[inverse].delete(this0.owner);
                     }
                 }
             }
@@ -213,7 +217,7 @@ export class RecordList extends Array {
                 this0.store.ADD_QUEUE("onAdd", this0.owner, this0.name, record);
                 const inverse = Model.fieldsInverse.get(this0.name);
                 if (inverse) {
-                    record._fields.get(inverse).add(this0.owner);
+                    record[inverse].add(this0.owner);
                 }
             }
             return this3.state.data.length;
@@ -247,7 +251,7 @@ export class RecordList extends Array {
             this0.store.ADD_QUEUE("onDelete", this0.owner, this0.name, record0);
             const inverse = Model.fieldsInverse.get(this0.name);
             if (inverse) {
-                record0._fields.get(inverse).delete(this0.owner);
+                record0[inverse].delete(this0.owner);
             }
             return record3;
         });
@@ -266,7 +270,7 @@ export class RecordList extends Array {
                 this0.store.ADD_QUEUE("onAdd", this0.owner, this0.name, record);
                 const inverse = Model.fieldsInverse.get(this0.name);
                 if (inverse) {
-                    record._fields.get(inverse).add(this0.owner);
+                    record[inverse].add(this0.owner);
                 }
             }
             return this3.state.data.length;
@@ -309,7 +313,7 @@ export class RecordList extends Array {
                 oldRecord0.__uses__.delete(this0);
                 this0.store.ADD_QUEUE("onDelete", this0.owner, this0.name, oldRecord0);
                 if (inverse) {
-                    oldRecord0._fields.get(inverse).delete(this0.owner);
+                    oldRecord0[inverse]?.delete(this0.owner);
                 }
             }
             for (const newRecord3 of newRecords3) {
@@ -317,7 +321,7 @@ export class RecordList extends Array {
                 newRecord.__uses__.add(this0);
                 this0.store.ADD_QUEUE("onAdd", this0.owner, this0.name, newRecord);
                 if (inverse) {
-                    newRecord._fields.get(inverse).add(this0.owner);
+                    newRecord[inverse].add(this0.owner);
                 }
             }
         });
@@ -408,7 +412,7 @@ export class RecordList extends Array {
                 val,
                 function RL_addNoInv_insertMany(record) {
                     if (this0.state.data.indexOf(record.localId) === -1) {
-                        this0.push.call(this0._2, record);
+                        this0._2.state.data.push(record.localId);
                         record.__uses__.add(this0);
                     }
                 },
@@ -450,11 +454,12 @@ export class RecordList extends Array {
                 function RL_deleteNoInv_insert(record) {
                     const index = this0.state.data.indexOf(record.localId);
                     if (index !== -1) {
-                        this0.splice.call(this0._2, index, 1);
-                        record.__uses__.delete(this0);
+                        const old = this0._2.at(-1);
+                        this0._2.state.data.splice(index, 1);
+                        old.__uses__.delete(this0);
                     }
                 },
-                { inv: false }
+                { inv: false, mode: "DELETE" }
             );
             this.store.ADD_QUEUE("onDelete", this0.owner, this0.name, record);
         }

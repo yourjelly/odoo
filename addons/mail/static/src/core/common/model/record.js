@@ -567,29 +567,29 @@ export class Record {
             const bTs = b.fieldsTs.get(fieldName);
             let resVal;
             if (aTs && !bTs) {
-                resVal = a._fields.get(fieldName);
+                resVal = a[fieldName];
                 b._customAssignThroughProxy = () => {
-                    b._fields.set(fieldName, resVal);
+                    b[fieldName] = resVal;
                 };
             } else if (!aTs && bTs) {
                 // use b
-                resVal = b._fields.get(fieldName);
+                resVal = b[fieldName];
                 a._customAssignThroughProxy = () => {
-                    a._fields.set(fieldName, resVal);
+                    a[fieldName] = resVal;
                 };
             } else if (!aTs && !bTs) {
                 // none have been converted to record field... nothing to do!
             } else if (aTs > bTs) {
                 // use a
-                resVal = a._fields.get(fieldName);
+                resVal = a[fieldName];
                 b._customAssignThroughProxy = () => {
-                    b._fields.set(fieldName, resVal);
+                    b[fieldName] = resVal;
                 };
             } else {
                 // use b
-                resVal = b._fields.get(fieldName);
+                resVal = b[fieldName];
                 a._customAssignThroughProxy = () => {
-                    a._fields.set(fieldName, resVal);
+                    a[fieldName] = resVal;
                 };
             }
             /** @type {RecordList} */
@@ -598,9 +598,9 @@ export class Record {
             let b2Reclist;
             if (isRelation(this0, fieldName)) {
                 /** @type {RecordList} */
-                const aReclist = a._fields.get(fieldName);
+                const aReclist = a[fieldName];
                 /** @type {RecordList} */
-                const bReclist = b._fields.get(fieldName);
+                const bReclist = b[fieldName];
                 a2Reclist = aReclist._2;
                 b2Reclist = bReclist._2;
                 /** @type {RecordList} */
@@ -627,7 +627,7 @@ export class Record {
                         }
                     }
                     for (const removedRec of removedRecs) {
-                        const otherReclist = removedRec._fields.get(inverse);
+                        const otherReclist = removedRec[inverse];
                         const owner = reclist.owner;
                         for (const localId of owner.localIds) {
                             otherReclist.state.data = otherReclist.state.data.filter(
@@ -816,7 +816,6 @@ export class Record {
             _reconciling: true,
             _customAssignThroughProxy: true,
             _redirectedRecord: true,
-            _fields: true,
             _updatingFieldsThroughProxy: true,
             _updatingAttrs: true,
             __uses__: true,
@@ -897,7 +896,7 @@ export class Record {
     /** @type {boolean} */
     _redirectedRecord;
     /** @type {Map<string, import("./record_list").RecordList|any>}*/
-    _fields = new Map();
+    fields = new Map();
     /** @type {Set<string>} */
     _updatingFieldsThroughProxy;
     /** @type {Set<string>} */
@@ -1053,7 +1052,10 @@ export class Record {
     toData() {
         const this0 = _0(this);
         const data = { ...this };
-        for (const [name, value] of this0._fields) {
+        for (const [name, value] of Object.entries(this0)) {
+            if (!this.Model.fields.has(name)) {
+                continue;
+            }
             if (this0.Model.fieldsMany.get(name)) {
                 data[name] = value.map((record2) => {
                     const record = _0(record2);
@@ -1126,7 +1128,7 @@ export class Record {
             if (this.Model.fieldsAttr.get(fieldName)) {
                 proxy2[fieldName].sort(sort);
             } else {
-                this._store0.sortRecordList(proxy2._fields.get(fieldName)._2, sort.bind(proxy2));
+                this._store0.sortRecordList(proxy2[fieldName]._2, sort.bind(proxy2));
             }
         });
         this.fieldsSorting.delete(fieldName);
@@ -1186,22 +1188,24 @@ export class Record {
         const this0 = this;
         const this2 = this0._2;
         const Model = this0.Model;
-        if (Model.fieldsAttr.get(fieldName)) {
-            onChange(this2, fieldName, function RF_onChangeRecomputeObjectIds_attr() {
+        onChange(this2, fieldName, function RF_onChangeRecomputeObjectIds_attr() {
+            Model.onRecomputeObjectIds(this0._1);
+        });
+        if (isRelation(Model, fieldName)) {
+            let reclistProxy;
+            if (Model.fieldsOne.get(fieldName)) {
+                reclistProxy = reactive(this0[fieldName]);
+            }
+            if (Model.fieldsMany.get(fieldName)) {
+                reclistProxy = this2[fieldName];
+            }
+            onChange(reclistProxy.state, "data", function RF_onChangeRecomputeObjectIds_rel_data() {
                 Model.onRecomputeObjectIds(this0._1);
             });
-        } else {
             onChange(
-                this2._fields.get(fieldName).state,
-                "data",
-                function RF_onChangeRecomputeObjectIds_rel_data() {
-                    Model.onRecomputeObjectIds(this0._1);
-                }
-            );
-            onChange(
-                this2._fields.get(fieldName).state.data,
+                reclistProxy.state.data,
                 "length",
-                function RF_onChangeRecomputeObjectIds_rel_data_length() {
+                function RF_onChangeRecomputeObjectIds_rel_length() {
                     Model.onRecomputeObjectIds(this0._1);
                 }
             );
@@ -1219,7 +1223,7 @@ export class Record {
                 store: this0._store0,
             });
             reclist0._0 = reclist0;
-            this0._fields.set(fieldName, reclist0);
+            this0[fieldName] = reclist0;
         }
         if (this0.Model.objectIdFields[fieldName]) {
             this0.prepareFieldOnRecomputeObjectIds(fieldName);
@@ -1227,7 +1231,7 @@ export class Record {
         if (Model.fieldsAttr.get(fieldName)) {
             const defaultVal = Model.fieldsDefault.get(fieldName);
             if (defaultVal !== undefined) {
-                this2._fields.set(fieldName, defaultVal);
+                this2[fieldName] = defaultVal;
             }
         }
         const nextTs = Model.fieldsNextTs.get(fieldName);

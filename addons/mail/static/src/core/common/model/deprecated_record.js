@@ -17,7 +17,7 @@ export class DeprecatedRecord {
     static _localId(expr, data, { brackets = false } = {}) {
         const this0 = _0(this);
         if (!Array.isArray(expr)) {
-            const definition = this0._fields.get(expr);
+            const definition = this0.fields.get(expr);
             if (definition) {
                 if (!isRelation(definition)) {
                     return data[expr];
@@ -55,11 +55,11 @@ export class DeprecatedRecord {
                 ids[name] &&
                 !isRecord(ids[name]) &&
                 !isCommand(ids[name]) &&
-                isRelation(this0._fields.get(name))
+                isRelation(this0.fields.get(name))
             ) {
                 // preinsert that record in relational field,
                 // as it is required to make current local id
-                ids[name] = this0.store0[this0._fields.get(name).targetModel].preinsert(ids[name]);
+                ids[name] = this0.store0[this0.fields.get(name).targetModel].preinsert(ids[name]);
             }
         }
         Object.assign(rec0, { localId: this0.localId(ids) });

@@ -577,18 +577,18 @@ QUnit.test("lazy sort should re-sort while they are observed", async (assert) =>
     observe = false;
     message.sequence = 10;
     assert.equal(
-        `${toRaw(thread)
-            ._0._fields.get("messages")
-            .state.data.map((localId) => toRaw(thread)._0._store.get(localId).id)}`,
+        `${toRaw(thread)._0.messages.state.data.map(
+            (localId) => toRaw(thread)._0._store.get(localId).id
+        )}`,
         "2,1",
         "observed one last time when it changes"
     );
     assert.verifySteps([]);
     message.sequence = 1;
     assert.equal(
-        `${toRaw(thread)
-            ._0._fields.get("messages")
-            .state.data.map((localId) => toRaw(thread)._0._store.get(localId).id)}`,
+        `${toRaw(thread)._0.messages.state.data.map(
+            (localId) => toRaw(thread)._0._store.get(localId).id
+        )}`,
         "2,1",
         "no longer observed"
     );

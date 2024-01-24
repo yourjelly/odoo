@@ -68,19 +68,20 @@ export function makeStore(env) {
                                     this0.sortField(name);
                                 }
                             }
+                            const val = Reflect.get(this0, name, this3);
                             if (isRelation(Model, name)) {
-                                const reclist3 = this3._fields.get(name)._1;
+                                const reclist3 = val._1;
                                 if (Model.fieldsMany.get(name)) {
                                     return reclist3;
                                 }
                                 return reclist3[0];
                             }
-                            return this3._fields.get(name);
+                            return val;
                         },
                         deleteProperty(this0, name) {
                             return store.MAKE_UPDATE(function R_deleteProperty() {
                                 if (isRelation(Model, name)) {
-                                    const reclist = this0._fields.get(name);
+                                    const reclist = this0[name];
                                     reclist.clear();
                                     return true;
                                 }
@@ -100,7 +101,7 @@ export function makeStore(env) {
                             }
                             // ensure each field write goes through the updateFields method exactly once
                             if (this0._updatingAttrs.has(name)) {
-                                this0._fields.set(name, val);
+                                this0[name] = val;
                                 return true;
                             }
                             return store.MAKE_UPDATE(function R_set() {

@@ -124,9 +124,6 @@ export class Store extends Record {
                     const record = RD_QUEUE.keys().next().value;
                     RD_QUEUE.delete(record);
                     // effectively delete the record
-                    for (const name of record._fields.keys()) {
-                        record[name] = undefined;
-                    }
                     for (const [localId, names] of record.__uses__.data.entries()) {
                         for (const [name2, count] of names.entries()) {
                             const usingRecord2 = _0(this0.localIdToRecord).get(localId);
@@ -289,25 +286,24 @@ export class Store extends Record {
         const Model = record.Model;
         // ensure each field write goes through the proxy exactly once to trigger reactives
         const record2 = record._updatingFieldsThroughProxy.has(fieldName) ? record : record._2;
-        let shouldChange = record._fields.get(fieldName) !== value;
+        let shouldChange = record[fieldName] !== value;
         let newValue = value;
         if (Model.fieldsHtml.has(fieldName) && this.trusted) {
             shouldChange =
-                record._fields.get(fieldName)?.toString() !== value?.toString() ||
-                !(record._fields.get(fieldName) instanceof Markup);
+                record[fieldName]?.toString() !== value?.toString() ||
+                !(record[fieldName] instanceof Markup);
             newValue = typeof value === "string" ? markup(value) : value;
         }
         if (shouldChange) {
+            if (fieldName === "is_pinned") {
+                debugger;
+            }
             const nextTs = Model.fieldsNextTs.get(fieldName);
             record.fieldsTs.set(fieldName, nextTs);
             Model.fieldsNextTs.set(fieldName, nextTs + 1);
             record._updatingFieldsThroughProxy.add(fieldName);
             record._updatingAttrs.add(fieldName);
-            if (record2 === record) {
-                record2._fields.set(fieldName, newValue);
-            } else {
-                record2[fieldName] = newValue;
-            }
+            record2[fieldName] = newValue;
             record._updatingAttrs.delete(fieldName);
             record._updatingFieldsThroughProxy.delete(fieldName);
         }
@@ -319,7 +315,7 @@ export class Store extends Record {
      */
     updateRelation(record, fieldName, value) {
         /** @type {RecordList<Record>} */
-        const recordList = record._fields.get(fieldName);
+        const recordList = record[fieldName];
         if (record.Model.fieldsMany.get(fieldName)) {
             this.updateRelationMany(recordList, value);
         } else {
