@@ -34,19 +34,17 @@ class IrHttp(models.AbstractModel):
         guest = self.env["mail.guest"]._get_guest_from_context()
         if request.session.uid:
             res["self"] = {
-                "id": user.partner_id.id,
+                "partnerId": user.partner_id.id,
                 "isAdmin": user._is_admin(),
                 "isInternalUser": not user.share,
                 "name": user.partner_id.name,
                 "notification_preference": user.notification_type,
-                "type": "partner",
                 "userId": user.id,
                 "write_date": fields.Datetime.to_string(user.write_date),
             }
         elif guest:
             res["self"] = {
-                "id": guest.id,
+                "guestId": guest.id,
                 "name": guest.name,
-                "type": "guest",
                 "write_date": fields.Datetime.to_string(guest.write_date),
             }

@@ -110,12 +110,12 @@ export class RtcSession extends Record {
 
     get partnerId() {
         const persona = this.channelMember?.persona;
-        return persona.type === "partner" ? persona.id : undefined;
+        return persona.partnerId;
     }
 
     get guestId() {
         const persona = this.channelMember?.persona;
-        return persona.type === "guest" ? persona.id : undefined;
+        return persona.guestId;
     }
 
     /**

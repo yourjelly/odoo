@@ -28,7 +28,7 @@ QUnit.test("persisted session", async () => {
     });
     cookie.set(
         "im_livechat.saved_state",
-        JSON.stringify({ threadData: { id: channelId, model: "discuss.channel" }, persisted: true })
+        JSON.stringify({ threadData: { channelId: channelId }, persisted: true })
     );
     start();
     await contains(".o-mail-ChatWindow");

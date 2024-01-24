@@ -100,8 +100,7 @@ patch(MockServer.prototype, {
                     self: this.pyEnv.getSelfData(),
                 },
                 Thread: {
-                    id: -1,
-                    model: "discuss.channel",
+                    channelId: -1,
                     isLoaded: true,
                     isNewlyCreated: true,
                     name: channelVals["name"],

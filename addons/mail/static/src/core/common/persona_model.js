@@ -15,7 +15,7 @@ import { imageUrl } from "@web/core/utils/urls";
  */
 
 export class Persona extends Record {
-    static id = [["type!", "id!"], ["userId!"]];
+    static id = [["type!", "id!"], ["userId!"], ["partnerId!"], ["guestId!"]];
     /** @type {Object.<number, import("models").Persona>} */
     static records = {};
     /** @returns {import("models").Persona} */
@@ -27,11 +27,27 @@ export class Persona extends Record {
         return super.insert(...arguments);
     }
     set partnerId(newPartnerId) {
+        if (!newPartnerId) {
+            return;
+        }
         this.id = newPartnerId;
         this.type = "partner";
     }
     get partnerId() {
-        if (!this.type === "partner") {
+        if (this.type !== "partner") {
+            return undefined;
+        }
+        return this.id;
+    }
+    set guestId(newGuestId) {
+        if (!newGuestId) {
+            return;
+        }
+        this.id = newGuestId;
+        this.type = "guest";
+    }
+    get guestId() {
+        if (this.type !== "guest") {
             return undefined;
         }
         return this.id;
@@ -82,10 +98,10 @@ export class Persona extends Record {
     }
 
     get avatarUrl() {
-        if (this.type === "partner") {
+        if (this.partnerId) {
             return imageUrl("res.partner", this.id, "avatar_128", { unique: this.write_date });
         }
-        if (this.type === "guest") {
+        if (this.guestId) {
             return imageUrl("mail.guest", this.id, "avatar_128", { unique: this.write_date });
         }
         if (this.userId) {

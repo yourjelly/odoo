@@ -18,7 +18,7 @@ import { Deferred } from "@web/core/utils/concurrency";
  */
 
 export class Thread extends Record {
-    static id = [["model", "id"]];
+    static id = [["model", "id"], ["channelId!"]];
     /** @type {Object.<string, import("models").Thread>} */
     static records = {};
     /** @returns {import("models").Thread} */
@@ -44,6 +44,19 @@ export class Thread extends Record {
     static async getOrFetch(data) {
         return this.get(data);
     }
+    set channelId(newChannelId) {
+        if (!newChannelId) {
+            return;
+        }
+        this.id = newChannelId;
+        this.model = "discuss.channel";
+    }
+    get channelId() {
+        if (this.model !== "discuss.channel") {
+            return undefined;
+        }
+        return this.id;
+    }
 
     /** @type {number} */
     id;
@@ -57,26 +70,29 @@ export class Thread extends Record {
     /** @type {boolean} */
     areAttachmentsLoaded = false;
     attachments = Record.many("Attachment", {
-        /**
-         * @param {import("models").Attachment} a1
-         * @param {import("models").Attachment} a2
-         */
-        sort: (a1, a2) => {
-            if (a1.uploadId && a2.uploadId) {
-                return a1.uploadId < a2.uploadId ? 1 : -1;
-            }
-            if (a1.id && a2.id) {
-                return a1.id < a2.id ? 1 : -1;
-            }
-            if (a1.uploadId && !a2.uploadId) {
-                return 1;
-            }
-            if (!a1.uploadId && a2.uploadId) {
-                return -1;
-            }
-            return 0;
+        sort(...args) {
+            return this.attachmentsSort(...args);
         },
     });
+    /**
+     * @param {import("models").Attachment} a1
+     * @param {import("models").Attachment} a2
+     */
+    attachmentsSort(a1, a2) {
+        if (a1.uploadId && a2.uploadId) {
+            return a1.uploadId < a2.uploadId ? 1 : -1;
+        }
+        if (a1.id && a2.id) {
+            return a1.id < a2.id ? 1 : -1;
+        }
+        if (a1.uploadId && !a2.uploadId) {
+            return 1;
+        }
+        if (!a1.uploadId && a2.uploadId) {
+            return -1;
+        }
+        return 0;
+    }
     activeRtcSession = Record.one("RtcSession");
     get canLeave() {
         return (
@@ -228,7 +244,7 @@ export class Thread extends Record {
     type = Record.attr("", {
         /** @this {import("models").Thread} */
         compute() {
-            if (this.model === "discuss.channel") {
+            if (this.channelId) {
                 return this.channel_type;
             }
             if (this.model === "mail.box") {
@@ -295,7 +311,7 @@ export class Thread extends Record {
         const attachments = this.attachments.filter(
             (attachment) => (attachment.isPdf || attachment.isImage) && !attachment.uploadId
         );
-        attachments.sort((a1, a2) => a2.id - a1.id);
+        attachments.sort(this.attachmentsSort);
         return attachments;
     }
 
@@ -319,7 +335,7 @@ export class Thread extends Record {
     }
 
     get hasAttachmentPanel() {
-        return this.model === "discuss.channel";
+        return !!this.channelId;
     }
 
     get isChatChannel() {

@@ -154,8 +154,7 @@ class LivechatController(http.Controller):
         if not persisted:
             operator_partner = request.env['res.partner'].sudo().browse(channel_vals['livechat_operator_id'])
             channel_info = {
-                'id': -1, # only one temporary thread at a time, id does not matter.
-                'model': 'discuss.channel',
+                'channelId': -1, # only one temporary thread at a time, id does not matter.
                 'name': channel_vals['name'],
                 'chatbot_current_step_id': channel_vals['chatbot_current_step_id'],
                 'state': 'open',

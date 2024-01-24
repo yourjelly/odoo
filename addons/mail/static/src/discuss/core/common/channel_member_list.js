@@ -36,7 +36,7 @@ export class ChannelMemberList extends Component {
         if (member.persona?.eq(this.store.self)) {
             return false;
         }
-        if (member.persona.type === "guest") {
+        if (member.persona.guestId) {
             return false;
         }
         return true;

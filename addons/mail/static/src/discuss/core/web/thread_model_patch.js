@@ -8,8 +8,8 @@ import { patch } from "@web/core/utils/patch";
 patch(Thread, {
     async getOrFetch(data) {
         let thread = super.get(data);
-        if (!thread?.channel_type && data.model === "discuss.channel" && data.id) {
-            const channelData = await rpc("/discuss/channel/info", { channel_id: data.id });
+        if (!thread?.channel_type && data.channelId) {
+            const channelData = await rpc("/discuss/channel/info", { channel_id: data.channelId });
             if (channelData) {
                 thread = this.store.Thread.insert(channelData);
             }
@@ -25,7 +25,7 @@ patch(Thread.prototype, {
     },
     incrementUnreadCounter() {
         super.incrementUnreadCounter();
-        if (this.model === "discuss.channel") {
+        if (this.channelId) {
             // initChannelsUnreadCounter becomes unreliable
             this._store.fetchChannels();
         }

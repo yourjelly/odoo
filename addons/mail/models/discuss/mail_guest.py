@@ -108,9 +108,8 @@ class MailGuest(models.Model):
             raise UserError(_("Guest's name is too long."))
         self.name = name
         guest_data = {
-            'id': self.id,
+            'guestId': self.id,
             'name': self.name,
-            'type': "guest"
         }
         bus_notifs = [(channel, 'mail.record/insert', {'Persona': guest_data}) for channel in self.channel_ids]
         bus_notifs.append((self, 'mail.record/insert', {'Persona': guest_data}))
@@ -141,9 +140,8 @@ class MailGuest(models.Model):
                 # sudo: bus.bus: reading non-sensitive last id
                 "initBusId": self.env["bus.bus"].sudo()._bus_last_id(),
                 "odoobot": {
-                    "id": odoobot.id,
+                    "partnerId": odoobot.id,
                     "name": odoobot.name,
-                    "type": "partner",
                 },
             },
             "Thread": self.env["discuss.channel"]._get_init_channels()._channel_info(),

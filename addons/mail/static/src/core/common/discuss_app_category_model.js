@@ -29,6 +29,16 @@ export class DiscussAppCategory extends Record {
         }
     }
 
+    get counter() {
+        return this.threads.reduce((acc, channel) => {
+            if (this.id === "channels") {
+                return channel.message_needaction_counter > 0 ? acc + 1 : acc;
+            } else {
+                return channel.message_unread_counter > 0 ? acc + 1 : acc;
+            }
+        }, 0);
+    }
+
     get isVisible() {
         return (
             !this.hideWhenEmpty ||

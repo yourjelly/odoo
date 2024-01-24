@@ -30,7 +30,7 @@ QUnit.test("new message from operator displays unread counter", async () => {
     });
     cookie.set(
         "im_livechat.saved_state",
-        JSON.stringify({ threadData: { id: channelId, model: "discuss.channel" }, persisted: true })
+        JSON.stringify({ threadData: { channelId }, persisted: true })
     );
     await start({
         async mockRPC(route, args, originalRpc) {
@@ -76,7 +76,7 @@ QUnit.test("focus on unread livechat marks it as read", async () => {
     });
     cookie.set(
         "im_livechat.saved_state",
-        JSON.stringify({ threadData: { id: channelId, model: "discuss.channel" }, persisted: true })
+        JSON.stringify({ threadData: { channelId }, persisted: true })
     );
     await start({
         async mockRPC(route, args, originalRpc) {

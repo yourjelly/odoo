@@ -4,7 +4,7 @@ import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { Deferred } from "@web/core/utils/concurrency";
 
-let nextId = -1;
+let nextUploadId = 1;
 
 export class AttachmentUploadService {
     constructor(env, services) {
@@ -96,7 +96,7 @@ export class AttachmentUploadService {
     }
 
     async uploadFile(hooker, file, options) {
-        const uploadId = nextId--;
+        const uploadId = nextUploadId++;
         const attachment = this.store.Attachment.insert({ uploadId });
         attachment.uploadHooker = hooker;
         await this.fileUploadService

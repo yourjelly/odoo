@@ -232,7 +232,7 @@ export class ChannelSelector extends Component {
     get tagsList() {
         const res = [];
         for (const partnerId of this.state.selectedPartners) {
-            const partner = this.store.Persona.get({ type: "partner", id: partnerId });
+            const partner = this.store.Persona.get({ partnerId });
             res.push({
                 id: partner.id,
                 text: partner.name,

@@ -80,7 +80,7 @@ export class Messaging {
         const searchTerm = cleanTerm(searchStr);
         for (const localId in this.store.Persona.records) {
             const persona = this.store.Persona.records[localId];
-            if (persona.type !== "partner") {
+            if (!persona.partnerId) {
                 continue;
             }
             const partner = persona;

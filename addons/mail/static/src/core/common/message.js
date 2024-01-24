@@ -226,7 +226,8 @@ export class Message extends Component {
         if (
             this.message.message_type &&
             this.message.message_type.includes("email") &&
-            !["partner", "guest"].includes(this.message.author?.type)
+            !this.message.author.partnerId &&
+            !this.message.author.guestId
         ) {
             return url("/mail/static/src/img/email_icon.png");
         }
@@ -290,9 +291,7 @@ export class Message extends Component {
 
     get canToggleStar() {
         return Boolean(
-            !this.message.is_transient &&
-                this.message.originThread &&
-                this.store.self.type === "partner"
+            !this.message.is_transient && this.message.originThread && this.store.self.partnerId
         );
     }
 

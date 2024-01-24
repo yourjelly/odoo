@@ -187,7 +187,7 @@ export class LivechatService {
         cookie.set(
             SAVED_STATE_COOKIE,
             JSON.stringify({
-                threadData: persisted ? { id: threadData.id, model: threadData.model } : threadData,
+                threadData: persisted ? { channelId: threadData.channelId } : threadData,
                 persisted,
                 livechatUserId: this.savedState?.livechatUserId ?? session.user_id,
             }),
