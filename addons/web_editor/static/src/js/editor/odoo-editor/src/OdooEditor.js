@@ -3354,6 +3354,7 @@ export class OdooEditor extends EventTarget {
         // between DOMRects on the same or different line.
         const rangeSpansMultipleLines =
             rangeRects.length > 1 && rangeRects.at(-1).bottom - rangeRects[0].bottom > BASELINE_MARGIN;
+        const isColorPickerOpen = !!this.toolbar.querySelector('.colorpicker-menu.show');
 
         // Get left position.
         let left = isSelForward || rangeSpansMultipleLines ?
@@ -3364,8 +3365,14 @@ export class OdooEditor extends EventTarget {
         // Ensure the toolbar doesn't overflow the editor on the right.
         left = Math.min(window.innerWidth - OFFSET - toolbarWidth, left);
         // Offset left to compensate for parent context position (eg. Iframe).
-        const adjustedLeft = left + parentContextRect.left;
-        this.toolbar.style.left = scrollX + adjustedLeft + 'px';
+        left += scrollX + parentContextRect.left;
+        const currentLeftValue = parseFloat(this.toolbar.style.left);
+        // Avoid updating the horizontal position if change is small while
+        // colorpicker is opened, to avoid flickering.
+        if (isColorPickerOpen && Math.abs(left - currentLeftValue) < 10) {
+            left = currentLeftValue;
+        }
+        this.toolbar.style.left = left + 'px';
 
         // Get top position.
         let top = correctedSelectionRect.top - toolbarHeight - OFFSET;
