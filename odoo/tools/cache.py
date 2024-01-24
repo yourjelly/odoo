@@ -56,19 +56,13 @@ class ormcache(object):
         self.cache_name = kwargs.get('cache', 'default')
 
     def __call__(self, method):
-        self.method = method
-        self.determine_key()
-        lookup = decorator(self.lookup, method)
-        lookup.cache = self
+        self.determine_key(method)
+        cache = CacheContainer(method, self.key, self.cache_name)
+        lookup = decorator(cache.lookup, method)
+        lookup.cache = cache
         return lookup
 
-    def add_value(self, *args, cache_value=None, **kwargs):
-        model = args[0]
-        d, key0, _ = self.lru(model)
-        key = key0 + self.key(*args, **kwargs)
-        d[key] = cache_value
-
-    def determine_key(self):
+    def determine_key(self, method):
         """ Determine the function that computes a cache key from arguments. """
         if self.skiparg is None:
             # build a string that represents function code and evaluate it
@@ -77,7 +71,7 @@ class ormcache(object):
                 # and defaults because they are redundant (defaults are present
                 # in the wrapper function itself)
                 str(params.replace(annotation=Parameter.empty, default=Parameter.empty))
-                for params in signature(self.method).parameters.values()
+                for params in signature(method).parameters.values()
             )
             if self.args:
                 code = "lambda %s: (%s,)" % (args, ", ".join(self.args))
@@ -88,25 +82,41 @@ class ormcache(object):
             # backward-compatible function that uses self.skiparg
             self.key = lambda *args, **kwargs: args[self.skiparg:]
 
-    def lru(self, model):
-        counter = STAT[(model.pool.db_name, model._name, self.method)]
-        return model.pool._Registry__caches[self.cache_name], (model._name, self.method), counter
+class CacheContainer():
+    def __init__(self, method, key, cache_name):
+        self.method = method
+        self.key = key
+        self.cache_name = cache_name
+
+    def add_value(self, *args, cache_value=None, **kwargs):
+        model = args[0]
+        cache = model.pool._Registry__caches[self.cache_name]
+        base_key = (model._name, self.method)
+        key = base_key + self.key(*args, **kwargs)
+        cache[key] = cache_value
+
+    def get_counter(self, model):
+        return STAT[(model.pool.db_name, model._name, self.method)]
 
     def lookup(self, method, *args, **kwargs):
-        d, key0, counter = self.lru(args[0])
-        key = key0 + self.key(*args, **kwargs)
+        assert method == self.method  # useless parameter since we have the ref but this is how it
+        model = args[0]
+        cache = model.pool._Registry__caches[self.cache_name]
+        base_key = (model._name, method)
+        counter = self.get_counter(model)
+        key = base_key + self.key(*args, **kwargs)
         try:
-            r = d[key]
+            cached_value = cache[key]
             counter.hit += 1
-            return r
+            return cached_value
         except KeyError:
             counter.miss += 1
-            value = d[key] = self.method(*args, **kwargs)
+            value = cache[key] = method(*args, **kwargs)
             return value
         except TypeError:
             _logger.warning("cache lookup error on %r", key, exc_info=True)
             counter.err += 1
-            return self.method(*args, **kwargs)
+            return method(*args, **kwargs)
 
     def clear(self, model, *args):
         """ Clear the registry cache """
@@ -124,11 +134,11 @@ class ormcache_context(ormcache):
         super(ormcache_context, self).__init__(*args, **kwargs)
         self.keys = kwargs['keys']
 
-    def determine_key(self):
+    def determine_key(self, method):
         """ Determine the function that computes a cache key from arguments. """
         assert self.skiparg is None, "ormcache_context() no longer supports skiparg"
         # build a string that represents function code and evaluate it
-        sign = signature(self.method)
+        sign = signature(method)
         args = ', '.join(
             str(params.replace(annotation=Parameter.empty, default=Parameter.empty))
             for params in sign.parameters.values()
@@ -174,8 +184,10 @@ def get_cache_key_counter(bound_method, *args, **kwargs):
     """ Return the cache, key and stat counter for the given call. """
     model = bound_method.__self__
     ormcache = bound_method.cache
-    cache, key0, counter = ormcache.lru(model)
-    key = key0 + ormcache.key(model, *args, **kwargs)
+    cache = model.pool._Registry__caches[ormcache.cache_name]
+    base_key = (model._name, ormcache.method)
+    counter = ormcache.get_counter(model)
+    key = base_key + ormcache.key(model, *args, **kwargs)
     return cache, key, counter
 
 # For backward compatibility
