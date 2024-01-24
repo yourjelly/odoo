@@ -1417,7 +1417,7 @@ class Task(models.Model):
         if len(self) == 1:
             waiting_subtype = self.env.ref('project.mt_task_waiting')
             if ((self.project_id and not self.project_id.allow_task_dependencies)\
-                or (not self.project_id and not self.user_has_groups('project.group_project_task_dependencies')))\
+                or (not self.project_id and not self.env.user.has_group('project.group_project_task_dependencies')))\
                 and waiting_subtype in res:
                 res -= waiting_subtype
         return res
@@ -1615,7 +1615,7 @@ class Task(models.Model):
         }
 
     def action_project_sharing_view_parent_task(self):
-        if self.parent_id.project_id != self.project_id and self.user_has_groups('base.group_portal'):
+        if self.parent_id.project_id != self.project_id and self.env.user.has_group('base.group_portal'):
             project = self.parent_id.project_id._filter_access_rules_python('read')
             if project:
                 url = f"/my/projects/{self.parent_id.project_id.id}/task/{self.parent_id.id}"

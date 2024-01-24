@@ -3520,7 +3520,7 @@ class BaseModel(metaclass=MetaModel):
         for fname, field in self._fields.items():
             if allfields and fname not in allfields:
                 continue
-            if field.groups and not self.env.su and not self.user_has_groups(field.groups):
+            if field.groups and not self.env.su and not self.env.user.has_group(field.groups):
                 continue
 
             description = field.get_description(self.env, attributes=attributes)
@@ -3548,7 +3548,7 @@ class BaseModel(metaclass=MetaModel):
             """ determine whether user has access to field ``fname`` """
             field = self._fields.get(fname)
             if field and field.groups:
-                return self.user_has_groups(field.groups)
+                return self.env.user.has_group(field.groups)
             else:
                 return True
 
@@ -3875,7 +3875,7 @@ class BaseModel(metaclass=MetaModel):
                 # select fields with the same prefetch group
                 if f.prefetch == field.prefetch
                 # discard fields with groups that the user may not access
-                if not (f.groups and not self.user_has_groups(f.groups))
+                if not (f.groups and not self.env.user.has_group(f.groups))
             ]
             if field.name not in fnames:
                 fnames.append(field.name)
@@ -3976,7 +3976,7 @@ class BaseModel(metaclass=MetaModel):
                 for dotname in self.pool.field_depends[field]:
                     dep_field = self._fields[dotname.split('.', 1)[0]]
                     if (not dep_field.store) or (dep_field.prefetch is True and (
-                        not dep_field.groups or self.user_has_groups(dep_field.groups)
+                        not dep_field.groups or self.env.user.has_group(dep_field.groups)
                     )):
                         field_names_todo.append(dep_field.name)
 

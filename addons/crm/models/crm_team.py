@@ -607,7 +607,7 @@ class Team(models.Model):
             user_team_id = self.search([], limit=1).id
             action['help'] = "<p class='o_view_nocontent_smiling_face'>%s</p><p>" % _("Create an Opportunity")
             if user_team_id:
-                if self.user_has_groups('sales_team.group_sale_manager'):
+                if self.env.user.has_group('sales_team.group_sale_manager'):
                     action['help'] += "<p>%s</p>" % _("""As you are a member of no Sales Team, you are showed the Pipeline of the <b>first team by default.</b>
                                         To work with the CRM, you should <a name="%d" type="action" tabindex="-1">join a team.</a>""",
                                         self.env.ref('sales_team.crm_team_action_config').id)

@@ -59,7 +59,7 @@ class ResPartner(models.Model):
         """ Check if the user is a subcontractor before giving sudo access
         """
         for partner in self:
-            partner.is_subcontractor = (partner.user_has_groups('base.group_portal') and partner.env['mrp.bom'].search_count([
+            partner.is_subcontractor = (partner.user_ids and partner.user_ids[0].has_group('base.group_portal') and partner.env['mrp.bom'].search_count([
                 ('type', '=', 'subcontract'),
                 ('subcontractor_ids', 'in', (partner.env.user.partner_id | partner.env.user.partner_id.commercial_partner_id).ids),
             ]))

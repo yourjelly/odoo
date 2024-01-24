@@ -1832,14 +1832,14 @@ class IrQWeb(models.AbstractModel):
         """Compile `t-groups` expressions into a python code as a list of
         strings.
 
-        The code will contain the condition `if self.user_has_groups(groups)`
+        The code will contain the condition `if self.env.user.has_group(groups)`
         part that wrap the rest of the compiled code of this element.
         """
         groups = el.attrib.pop('t-groups', el.attrib.pop('groups', None))
 
         strip = self._rstrip_text(compile_context)
         code = self._flush_text(compile_context, level)
-        code.append(indent_code(f"if self.user_has_groups({groups!r}):", level))
+        code.append(indent_code(f"if self.env.user.has_group({groups!r}):", level))
         if strip and el.tag.lower() != 't':
             self._append_text(strip, compile_context)
         code.extend([

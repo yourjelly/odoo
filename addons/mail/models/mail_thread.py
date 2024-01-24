@@ -394,7 +394,7 @@ class MailThread(models.AbstractModel):
         return super().get_empty_list_help(help_message)
 
     def _condition_to_sql(self, alias: str, fname: str, operator: str, value, query: Query) -> SQL:
-        if self.env.su or self.user_has_groups('base.group_user'):
+        if self.env.su or self.env.user.has_group('base.group_user'):
             return super()._condition_to_sql(alias, fname, operator, value, query)
         if fname != 'message_partner_ids':
             return super()._condition_to_sql(alias, fname, operator, value, query)
@@ -2113,7 +2113,7 @@ class MailThread(models.AbstractModel):
             # use sudo as record access is not always granted (notably when replying
             # a notification) -> final check is done at message creation level
             msg_values['record_name'] = self.sudo().display_name
-        if body_is_html and self.user_has_groups("base.group_user"):
+        if body_is_html and self.env.user.has_group("base.group_user"):
             _logger.warning("Posting HTML message using body_is_html=True, use a Markup object instead (user: %s)",
                 self.env.user.id)
             body = Markup(body)
@@ -3408,7 +3408,7 @@ class MailThread(models.AbstractModel):
             tracking_values = self.env['mail.tracking.value'].sudo().search(
                 [('mail_message_id', '=', message.id)]
             ).filtered(
-                lambda track: not track.field_groups or self.env.is_superuser() or self.user_has_groups(track.field_groups)
+                lambda track: not track.field_groups or self.env.is_superuser() or self.env.user.has_group(track.field_groups)
             )
             if tracking_values and hasattr(record_wlang, '_track_filter_for_display'):
                 tracking_values = record_wlang._track_filter_for_display(tracking_values)

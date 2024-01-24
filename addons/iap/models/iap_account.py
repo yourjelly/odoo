@@ -9,6 +9,7 @@ import werkzeug.urls
 from odoo import api, fields, models
 from odoo.addons.iap.tools import iap_tools
 from odoo.exceptions import AccessError
+from odoo.http import request
 
 _logger = logging.getLogger(__name__)
 
@@ -210,12 +211,11 @@ class IapAccount(models.Model):
         account = self.env['iap.account'].get('partner_autocomplete')
         action = self.env.ref('iap.iap_account_action')
         menu = self.env.ref('iap.iap_account_menu')
-        no_one = self.user_has_groups('base.group_no_one')
         if account:
             url = "/web#id=%s&action=%s&model=iap.account&view_type=form&menu_id=%s" % (account.id, action.id, menu.id)
         else:
             url = "/web#action=%s&model=iap.account&view_type=form&menu_id=%s" % (action.id, menu.id)
-        return no_one and url
+        return bool(request and request.session.debug) and url
 
     @api.model
     def get_credits(self, service_name):

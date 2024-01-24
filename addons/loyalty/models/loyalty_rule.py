@@ -5,6 +5,7 @@ import ast
 
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
+from odoo.http import request
 from odoo.osv import expression
 
 class LoyaltyRule(models.Model):
@@ -112,7 +113,7 @@ class LoyaltyRule(models.Model):
     @api.depends_context('uid')
     @api.depends("mode")
     def _compute_user_has_debug(self):
-        self.user_has_debug = self.user_has_groups('base.group_no_one')
+        self.user_has_debug = bool(request and request.session.debug)
 
     def _get_valid_product_domain(self):
         self.ensure_one()

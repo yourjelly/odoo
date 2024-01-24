@@ -282,7 +282,7 @@ class HrEmployee(models.Model):
         }
 
     def _is_leave_user(self):
-        return self == self.env.user.employee_id and self.user_has_groups('hr_holidays.group_hr_holidays_user')
+        return self == self.env.user.employee_id and self.env.user.has_group('hr_holidays.group_hr_holidays_user')
 
     def get_mandatory_days(self, start_date, end_date):
         all_days = {}

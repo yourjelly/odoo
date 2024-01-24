@@ -1790,7 +1790,7 @@ class UsersView(models.Model):
                 lambda g:
                 g.category_id not in (group.category_id | categories_to_ignore) and
                 g not in current_groups_by_category[g.category_id] and
-                (self.user_has_groups('base.group_no_one') or g.category_id)
+                (request and request.session.debug or g.category_id)
             )
             if missing_implied_groups:
                 # prepare missing group message, by categories
@@ -2254,7 +2254,7 @@ class APIKeyDescription(models.TransientModel):
         }
 
     def check_access_make_key(self):
-        if not self.user_has_groups('base.group_user'):
+        if not self.env.user.has_group('base.group_user'):
             raise AccessError(_("Only internal users can create API keys"))
 
 class APIKeyShow(models.AbstractModel):

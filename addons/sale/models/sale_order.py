@@ -428,7 +428,7 @@ class SaleOrder(models.Model):
                 order.user_id = (
                     order.partner_id.user_id
                     or order.partner_id.commercial_partner_id.user_id
-                    or (self.user_has_groups('sales_team.group_sale_salesman') and self.env.user)
+                    or (self.env.user.has_group('sales_team.group_sale_salesman') and self.env.user)
                 )
 
     @api.depends('partner_id', 'user_id')

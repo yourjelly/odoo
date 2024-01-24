@@ -2025,7 +2025,7 @@ class Html(_String):
         }
 
         if self.sanitize_overridable:
-            if record.user_has_groups('base.group_sanitize_override'):
+            if record.env.user.has_group('base.group_sanitize_override'):
                 return value
 
             original_value = record[self.name]

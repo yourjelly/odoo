@@ -129,7 +129,7 @@ class IrActions(models.Model):
             for action in all_actions:
                 action = dict(action)
                 groups = action.pop('groups_id', None)
-                if groups and not self.user_has_groups(groups):
+                if groups and not self.env.user.has_group(groups):
                     # the user may not perform this action
                     continue
                 res_model = action.pop('res_model', None)

@@ -325,7 +325,7 @@ class HolidaysRequest(models.Model):
         self.check_access_rights('read')
         self.check_access_rule('read')
 
-        is_officer = self.user_has_groups('hr_holidays.group_hr_holidays_user')
+        is_officer = self.env.user.has_group('hr_holidays.group_hr_holidays_user')
 
         for leave in self:
             if is_officer or leave.user_id == self.env.user or leave.employee_id.leave_manager_id == self.env.user:
@@ -334,14 +334,14 @@ class HolidaysRequest(models.Model):
                 leave.name = '*****'
 
     def _inverse_description(self):
-        is_officer = self.user_has_groups('hr_holidays.group_hr_holidays_user')
+        is_officer = self.env.user.has_group('hr_holidays.group_hr_holidays_user')
 
         for leave in self:
             if is_officer or leave.user_id == self.env.user or leave.employee_id.leave_manager_id == self.env.user:
                 leave.sudo().private_name = leave.name
 
     def _search_description(self, operator, value):
-        is_officer = self.user_has_groups('hr_holidays.group_hr_holidays_user')
+        is_officer = self.env.user.has_group('hr_holidays.group_hr_holidays_user')
         domain = [('private_name', operator, value)]
 
         if not is_officer:
@@ -850,15 +850,15 @@ Attempting to double-book your time off won't magically make your vacation 2x be
 
     @api.constrains('date_from', 'date_to')
     def _check_mandatory_day(self):
-        is_leave_user = self.user_has_groups('hr_holidays.group_hr_holidays_user')
+        is_leave_user = self.env.user.has_group('hr_holidays.group_hr_holidays_user')
         if not is_leave_user and any(leave.has_mandatory_day for leave in self):
             raise ValidationError(_('You are not allowed to request a time off on a Mandatory Day.'))
 
     def _check_double_validation_rules(self, employees, state):
-        if self.user_has_groups('hr_holidays.group_hr_holidays_manager'):
+        if self.env.user.has_group('hr_holidays.group_hr_holidays_manager'):
             return
 
-        is_leave_user = self.user_has_groups('hr_holidays.group_hr_holidays_user')
+        is_leave_user = self.env.user.has_group('hr_holidays.group_hr_holidays_user')
         if state == 'validate1':
             employees = employees.filtered(lambda employee: employee.leave_manager_id != self.env.user)
             if employees and not is_leave_user:
@@ -961,7 +961,7 @@ Attempting to double-book your time off won't magically make your vacation 2x be
         state_description_values = {elem[0]: elem[1] for elem in self._fields['state']._description_selection(self.env)}
         now = fields.Datetime.now()
 
-        if not self.user_has_groups('hr_holidays.group_hr_holidays_user'):
+        if not self.env.user.has_group('hr_holidays.group_hr_holidays_user'):
             for hol in self:
                 if hol.state not in ['draft', 'confirm', 'validate1', 'cancel']:
                     raise UserError(error_message % state_description_values.get(self[:1].state))

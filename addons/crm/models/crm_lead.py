@@ -15,6 +15,7 @@ from odoo.addons.iap.tools import iap_tools
 from odoo.addons.mail.tools import mail_validation
 from odoo.addons.phone_validation.tools import phone_validation
 from odoo.exceptions import UserError, AccessError
+from odoo.http import request
 from odoo.osv import expression
 from odoo.tools.translate import _
 from odoo.tools import date_utils, email_split, is_html_empty, groupby, parse_contact_from_email
@@ -642,7 +643,7 @@ class Lead(models.Model):
         When it's set however, we want to display it, mainly because there are a few automatic synchronizations between
         the lead and its partner (phone and email for examples), and this needs to be clear that modifying
         one of those fields will in turn modify the linked partner."""
-        is_debug_mode = self.user_has_groups('base.group_no_one')
+        is_debug_mode = bool(request and request.session.debug)
         for lead in self:
             lead.is_partner_visible = bool(lead.type == 'opportunity' or lead.partner_id or is_debug_mode)
 
