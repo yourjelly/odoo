@@ -15,6 +15,9 @@
         "security/ir.model.access.csv",
         "views/l10n_in_ewaybill_views.xml",
         "views/stock_picking_views.xml",
+        "report/ewaybill_report_views.xml",
+        "report/ewaybill_report.xml",
+
     ],
     'installable': True,
     'auto_install': True,

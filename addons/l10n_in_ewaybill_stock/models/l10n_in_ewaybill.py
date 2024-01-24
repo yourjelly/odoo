@@ -54,7 +54,7 @@ class Ewaybill(models.Model):
     is_bill_from_editable = fields.Boolean(compute="_compute_is_editable")
     is_ship_to_editable = fields.Boolean(compute="_compute_is_editable")
     is_ship_from_editable = fields.Boolean(compute="_compute_is_editable")
-    
+
     transaction_type = fields.Selection(
         selection=[
             ("inter_state", "Inter State"),
@@ -132,7 +132,7 @@ class Ewaybill(models.Model):
         string='Currency',
         tracking=True,
         compute='_compute_currency_id', store=True)
-           
+
     @api.depends('move_ids')
     def _compute_amounts(self):
         for record in self:
@@ -553,7 +553,7 @@ class Ewaybill(models.Model):
         return state_code
 
     def _l10n_in_tax_details_by_line(self, move):
-        taxes = move.ewaybill_tax_ids.compute_all(price_unit=move.price_unit, quantity=move.quantity)
+        taxes = move.ewaybill_tax_ids.compute_all(price_unit=move.ewaybill_price_unit, quantity=move.quantity)
         igst_rate = 0.0
         igst_amount = 0.0
         cgst_rate = 0.0
