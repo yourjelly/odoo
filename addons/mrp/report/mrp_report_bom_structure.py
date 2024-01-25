@@ -113,7 +113,8 @@ class ReportBomStructure(models.AbstractModel):
         else:
             warehouse = self.env['stock.warehouse'].browse(self.get_warehouses()[0]['id'])
 
-        lines = self._get_bom_data(bom, warehouse, product=product, line_qty=bom_quantity, level=0)
+        rule_cache = self.env['procurement.group']._build_rule_cache()
+        lines = self.with_context(rule_cache=rule_cache)._get_bom_data(bom, warehouse, product=product, line_qty=bom_quantity, level=0)
         production_capacities = self._compute_production_capacities(bom_quantity, lines)
         lines.update(production_capacities)
         return {
@@ -561,7 +562,7 @@ class ReportBomStructure(models.AbstractModel):
         if self._need_special_rules(self.env.context.get('product_info'), self.env.context.get('parent_bom'), self.env.context.get('parent_product_id')):
             found_rules = self._find_special_rules(product, self.env.context.get('product_info'), self.env.context.get('parent_bom'), self.env.context.get('parent_product_id'))
         if not found_rules:
-            found_rules = product._get_rules_from_location(warehouse.lot_stock_id)
+            found_rules = product.with_context(rule_cache=self.env.context.get('rule_cache', {}))._get_rules_from_location(warehouse.lot_stock_id)
         if not found_rules:
             return {}
         rules_delay = sum(rule.delay for rule in found_rules)

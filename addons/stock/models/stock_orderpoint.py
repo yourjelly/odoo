@@ -126,7 +126,8 @@ class StockWarehouseOrderpoint(models.Model):
 
     @api.depends('route_id', 'product_id', 'location_id', 'company_id', 'warehouse_id', 'product_id.route_ids')
     def _compute_rules(self):
-        for orderpoint in self:
+        rule_cache = self.env['procurement.group']._build_rule_cache()
+        for orderpoint in self.with_context(rule_cache=rule_cache):
             if not orderpoint.product_id or not orderpoint.location_id:
                 orderpoint.rule_ids = False
                 continue
@@ -369,6 +370,7 @@ class StockWarehouseOrderpoint(models.Model):
 
         rounding = {product.id: product.uom_id.rounding for product in all_product_ids}
         path = {loc.id: loc.parent_path for loc in self.env['stock.location'].with_context(active_test=False).search([('id', 'child_of', all_replenish_location_ids.ids)])}
+        rule_cache = self.env['procurement.group']._build_rule_cache()
         for loc in all_replenish_location_ids:
             for product in all_product_ids:
                 qty_available = sum(q[1] for q in quants.get(product.id, [(0, 0)]) if q[0] and loc.parent_path in path[q[0]])
@@ -377,7 +379,7 @@ class StockWarehouseOrderpoint(models.Model):
                 if float_compare(qty_available + incoming_qty - outgoing_qty, 0, precision_rounding=rounding[product.id]) < 0:
                     # group product by lead_days and location in order to read virtual_available
                     # in batch
-                    rules = product._get_rules_from_location(loc)
+                    rules = product.with_context(rule_cache=rule_cache)._get_rules_from_location(loc)
                     lead_days = rules.with_context(bypass_delay_description=True)._get_lead_days(product)[0]
                     ploc_per_day[(lead_days, loc)].add(product.id)
 
@@ -519,11 +521,14 @@ class StockWarehouseOrderpoint(models.Model):
             This is appropriate for batch jobs only.
         """
         self = self.with_company(company_id)
+        rule_cache = self.env['procurement.group']._build_rule_cache()
 
         for orderpoints_batch_ids in split_every(1000, self.ids):
             if use_new_cursor:
                 cr = registry(self._cr.dbname).cursor()
                 self = self.with_env(self.env(cr=cr))
+                # Reconstruct the rule_cache when using new cursor as the transaction is committed after each batch.
+                rule_cache = self.env['procurement.group']._build_rule_cache()
             try:
                 orderpoints_batch = self.env['stock.warehouse.orderpoint'].browse(orderpoints_batch_ids)
                 all_orderpoints_exceptions = []
@@ -548,7 +553,9 @@ class StockWarehouseOrderpoint(models.Model):
 
                     try:
                         with self.env.cr.savepoint():
-                            self.env['procurement.group'].with_context(from_orderpoint=True).run(procurements, raise_user_error=raise_user_error)
+                            self.env['procurement.group'].with_context(
+                                from_orderpoint=True, rule_cache=rule_cache
+                            ).run(procurements, raise_user_error=raise_user_error)
                     except ProcurementException as errors:
                         orderpoints_exceptions = []
                         for procurement, error_msg in errors.procurement_exceptions:

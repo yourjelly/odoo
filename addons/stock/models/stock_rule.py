@@ -9,7 +9,7 @@ from dateutil.relativedelta import relativedelta
 from odoo import SUPERUSER_ID, _, api, fields, models, registry
 from odoo.exceptions import UserError, ValidationError
 from odoo.osv import expression
-from odoo.tools import float_compare, float_is_zero, html_escape
+from odoo.tools import float_compare, float_is_zero, frozendict, html_escape
 from odoo.tools.misc import split_every
 
 _logger = logging.getLogger(__name__)
@@ -483,6 +483,26 @@ class ProcurementGroup(models.Model):
         return True
 
     @api.model
+    def _search_rule_cache(self, route_ids, packaging_id, product_id, warehouse_id, domain):
+        """ Search the rule_cache in context to find a rule for the current spec.
+        Fall back on _search_rule if the context is empty.
+        """
+        rule_cache = self.env.context.get('rule_cache')
+        if not rule_cache:
+            return self._search_rule(route_ids, packaging_id, product_id, warehouse_id, domain)
+        if warehouse_id:
+            domain = expression.AND([['|', ('warehouse_id', '=', warehouse_id.id), ('warehouse_id', '=', False)], domain])
+        all_routes_ids = (route_ids and route_ids.ids or []) \
+            + (packaging_id and packaging_id.route_ids.ids or []) \
+            + (product_id and (product_id.route_ids.ids + product_id.categ_id.total_route_ids.ids) or []) \
+            + (warehouse_id and warehouse_id.route_ids.ids or [])
+        rule = self.env['stock.rule'].concat(*[
+            rule_cache.get(route_id, self.env['stock.rule'])
+            for route_id in all_routes_ids
+        ]).filtered_domain(domain)
+        return (rule and rule[0]) or rule
+
+    @api.model
     def _search_rule(self, route_ids, packaging_id, product_id, warehouse_id, domain):
         """ First find a rule among the ones defined on the procurement
         group, then try on the routes defined for the product, finally fallback
@@ -517,9 +537,16 @@ class ProcurementGroup(models.Model):
         location = location_id
         while (not result) and location:
             domain = self._get_rule_domain(location, values)
-            result = self._search_rule(values.get('route_ids', False), values.get('product_packaging_id', False), product_id, values.get('warehouse_id', False), domain)
+            result = self._search_rule_cache(values.get('route_ids', False), values.get('product_packaging_id', False), product_id, values.get('warehouse_id', False), domain)
             location = location.location_id
         return result
+
+    @api.model
+    def _build_rule_cache(self):
+        rule_cache = {}
+        for rule in self.env['stock.rule'].search([], order='route_sequence, sequence'):
+            rule_cache.setdefault(rule.route_id.id, rule) # Use setdefault to mimic a search with limit=1
+        return frozendict(rule_cache)
 
     @api.model
     def _get_rule_domain(self, location, values):
