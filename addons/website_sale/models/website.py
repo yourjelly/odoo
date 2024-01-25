@@ -118,6 +118,15 @@ class Website(models.Model):
         required=True,
         default='small',
     )
+    ecommerce_access = fields.Selection(
+        string='Shop visibility',
+        selection=[
+            ('everyone', 'All users'),
+            ('logged', 'Logged in users'),
+        ],
+        required=True,
+        default='everyone'
+    )
     product_page_grid_columns = fields.Integer(default=2)
 
     prevent_zero_price_sale = fields.Boolean(string="Hide 'Add To Cart' when price = 0")
@@ -666,3 +675,19 @@ class Website(models.Model):
         if current_step:
             return next(step for step in steps if current_step in step[0])[1]
         return steps
+
+
+class Menu(models.Model):
+    _inherit = "website.menu"
+
+    def _compute_visible(self):
+        """ Hide shop menus even if ecommerse is allowed only to logged users
+            and current user is public"""
+        shop_menus = self.filtered(lambda menu: menu.url[:9] == "/shop")
+
+        for menu in shop_menus:
+            visible = True
+            if menu.website_id.ecommerce_access == 'logged' and request.env.user._is_public():
+                visible = False
+            menu.is_visible = visible
+        return super(Menu, self - shop_menus)._compute_visible()

@@ -196,3 +196,10 @@ class WebsiteSnippetFilter(models.Model):
                     display_default_code=False,
                 ).search(domain, limit=limit)
         return products
+
+    def _prepare_values(self, limit=None, search_domain=None):
+        website = self.env['website'].get_current_website()
+        if website.ecommerce_access == 'logged' and self.env.user._is_public() and self.model_name == 'product.product':
+            return []
+
+        return super()._prepare_values(limit, search_domain)

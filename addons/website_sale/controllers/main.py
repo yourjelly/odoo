@@ -214,6 +214,10 @@ class WebsiteSale(payment_portal.PaymentPortal):
         '/shop/category/<model("product.public.category"):category>/page/<int:page>',
     ], type='http', auth="public", website=True, sitemap=sitemap_shop)
     def shop(self, page=0, category=None, search='', min_price=0.0, max_price=0.0, ppg=False, **post):
+        not_allowed = self.check_shop_access()
+        if not_allowed:
+            return not_allowed
+
         add_qty = int(post.get('add_qty', 1))
         try:
             min_price = float(min_price)
@@ -426,6 +430,10 @@ class WebsiteSale(payment_portal.PaymentPortal):
 
     @route(['/shop/<model("product.template"):product>'], type='http', auth="public", website=True, sitemap=True)
     def product(self, product, category='', search='', **kwargs):
+
+        not_allowed = self.check_shop_access()
+        if not_allowed:
+            return not_allowed
         return request.render("website_sale.product", self._prepare_product_values(product, category, search, **kwargs))
 
     @route(
@@ -694,6 +702,9 @@ class WebsiteSale(payment_portal.PaymentPortal):
         access_token: Abandoned cart SO access token
         revive: Revival method when abandoned cart. Can be 'merge' or 'squash'
         """
+        not_allowed = self.check_shop_access()
+        if not_allowed:
+            return not_allowed
         order = request.website.sale_get_order()
         if order and order.carrier_id:
             # Express checkout is based on the amout of the sale order. If there is already a
@@ -1893,3 +1904,9 @@ class WebsiteSale(payment_portal.PaymentPortal):
         if visitor_sudo:
             request.env['website.track'].sudo().search([('visitor_id', '=', visitor_sudo.id), ('product_id', '=', product_id)]).unlink()
         return {}
+
+    @staticmethod
+    def check_shop_access():
+        """Checks if current user is allowed to see pages containing products."""
+        if request.website.is_public_user() and request.website.ecommerce_access == 'logged':
+            return request.redirect('/web/login')

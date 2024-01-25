@@ -137,7 +137,12 @@ class Product(models.Model):
 
     def _is_add_to_cart_allowed(self):
         self.ensure_one()
-        return self.user_has_groups('base.group_system') or (self.active and self.sale_ok and self.website_published)
+        website = self.env['website'].get_current_website()
+        is_allowed = (self.user_has_groups('base.group_system')
+                      or (self.active and self.sale_ok and self.website_published
+                          and not (website.ecommerce_access == 'logged'
+                                   and self.env.user._is_public())))
+        return is_allowed
 
     def _get_contextual_price_tax_selection(self):
         self.ensure_one()

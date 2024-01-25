@@ -84,6 +84,17 @@ class ResConfigSettings(models.TransientModel):
         readonly=False,
         required=True,
     )
+    ecommerce_access = fields.Selection(
+        string='Shop visibility',
+        selection=[
+            ('everyone', 'Everyone'),
+            ('logged', 'Logged in users'),
+        ],
+        compute="_compute_ecommerce_access",
+        inverse="_inverse_ecommerce_access",
+        readonly=False,
+        required=True,
+    )
 
     enabled_extra_checkout_step = fields.Boolean(string="Extra Step During Checkout")
     enabled_buy_now_button = fields.Boolean(string="Buy Now")
@@ -105,6 +116,16 @@ class ResConfigSettings(models.TransientModel):
                 record.website_id.auth_signup_uninvited = 'b2c'
             else:
                 record.website_id.auth_signup_uninvited = 'b2b'
+
+    @api.depends('website_id.ecommerce_access')
+    def _compute_ecommerce_access(self):
+        for record in self:
+            record.ecommerce_access = record.website_id.ecommerce_access
+
+    def _inverse_ecommerce_access(self):
+        for record in self:
+            if record.website_id:
+                record.website_id.ecommerce_access = record.ecommerce_access
 
     #=== CRUD METHODS ===#
 

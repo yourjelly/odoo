@@ -236,6 +236,14 @@
                     <field name="module_website_sale_autocomplete"/>
                 </setting>
             </setting>
+
+            <setting id="website_login_documents" position="after">
+                <setting id="shop_access_setting" title="Shop, products, cart and wishlist visibility "
+                         help="Enforce a customer to be logged in to access 'Shop'">
+                    <field name="ecommerce_access" class="o_light_label" widget="radio" options="{'horizontal': true}"
+                           required="True"/>
+                </setting>
+            </setting>
         </field>
     </record>
 </odoo>
