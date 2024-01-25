@@ -126,17 +126,7 @@ class AccountEdiCommon(models.AbstractModel):
     # TAXES
     # -------------------------------------------------------------------------
 
-    def _validate_taxes(self, invoice):
-        """ Validate the structure of the tax repartition lines (invalid structure could lead to unexpected results)
-        """
-        for tax in invoice.invoice_line_ids.tax_ids:
-            try:
-                tax._validate_repartition_lines()
-            except ValidationError as e:
-                error_msg = _("Tax '%s' is invalid: %s", tax.name, e.args[0])  # args[0] gives the error message
-                raise ValidationError(error_msg)
-
-    def _get_tax_unece_codes(self, invoice, tax):
+    def _get_tax_unece_code(self, collected_values, tax):
         """
         Source: doc of Peppol (but the CEF norm is also used by factur-x, yet not detailed)
         https://docs.peppol.eu/poacc/billing/3.0/syntax/ubl-invoice/cac-TaxTotal/cac-TaxSubtotal/cac-TaxCategory/cbc-TaxExemptionReasonCode/
@@ -155,8 +145,8 @@ class AccountEdiCommon(models.AbstractModel):
                 'tax_exemption_reason': tax_exemption_reason,
             }
 
-        supplier = invoice.company_id.partner_id.commercial_partner_id
-        customer = invoice.commercial_partner_id
+        supplier = collected_values['supplier']
+        customer = collected_values['customer']
 
         # add Norway, Iceland, Liechtenstein
         european_economic_area = self.env.ref('base.europe').country_ids.mapped('code') + ['NO', 'IS', 'LI']
@@ -197,25 +187,20 @@ class AccountEdiCommon(models.AbstractModel):
             return create_dict(tax_category_code='S')
         else:
             return create_dict(tax_category_code='E', tax_exemption_reason=_('Articles 226 items 11 to 15 Directive 2006/112/EN'))
-
-    def _get_tax_category_list(self, invoice, taxes):
-        """ Full list: https://unece.org/fileadmin/DAM/trade/untdid/d16b/tred/tred5305.htm
-        Subset: https://docs.peppol.eu/poacc/billing/3.0/codelist/UNCL5305/
-
-        :param taxes:   account.tax records.
-        :return:        A list of values to fill the TaxCategory foreach template.
-        """
-        res = []
-        for tax in taxes:
-            tax_unece_codes = self._get_tax_unece_codes(invoice, tax)
-            res.append({
-                'id': tax_unece_codes.get('tax_category_code'),
-                'percent': tax.amount if tax.amount_type == 'percent' else False,
-                'name': tax_unece_codes.get('tax_exemption_reason'),
-                'tax_scheme_vals': {'id': 'VAT'},
-                **tax_unece_codes,
-            })
-        return res
+    #
+    # def _get_tax_category_list(self, collected_values, taxes):
+    #     # TO REMOVE
+    #     res = []
+    #     for tax in taxes:
+    #         tax_unece_codes = self._get_tax_unece_code(tax)
+    #         res.append({
+    #             'id': tax_unece_codes.get('tax_category_code'),
+    #             'percent': tax.amount if tax.amount_type == 'percent' else False,
+    #             'name': tax_unece_codes.get('tax_exemption_reason'),
+    #             'tax_scheme_vals': {'id': 'VAT'},
+    #             **tax_unece_codes,
+    #         })
+    #     return res
 
     # -------------------------------------------------------------------------
     # CONSTRAINTS

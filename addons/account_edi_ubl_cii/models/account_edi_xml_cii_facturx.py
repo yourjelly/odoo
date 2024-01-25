@@ -126,7 +126,7 @@ class AccountEdiXmlCII(models.AbstractModel):
         def grouping_key_generator(base_line, tax_values):
             tax = tax_values['tax_repartition_line'].tax_id
             grouping_key = {
-                **self._get_tax_unece_codes(invoice, tax),
+                **self._get_tax_unece_code(tax),
                 'amount': tax.amount,
                 'amount_type': tax.amount_type,
             }
@@ -135,9 +135,6 @@ class AccountEdiXmlCII(models.AbstractModel):
             if tax.amount_type == 'fixed':
                 grouping_key['tax_name'] = tax.name
             return grouping_key
-
-        # Validate the structure of the taxes
-        self._validate_taxes(invoice)
 
         # Create file content.
         tax_details = invoice._prepare_invoice_aggregated_taxes(grouping_key_generator=grouping_key_generator)

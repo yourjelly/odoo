@@ -38,14 +38,13 @@ class AccountEdiXmlUBLNL(models.AbstractModel):
             'credit_note': 'org.simplerinvoicing:creditnote:2.0.3.3',
         }
 
-    def _get_tax_category_list(self, invoice, taxes):
+    def _get_tax_grouping_key(self, collected_values, base_line, tax):
         # EXTENDS account.edi.xml.ubl_bis3
-        vals_list = super()._get_tax_category_list(invoice, taxes)
-        for tax in vals_list:
-            # [BR-NL-35] The use of a tax exemption reason code (cac:TaxTotal/cac:TaxSubtotal/cac:TaxCategory
-            # /cbc:TaxExemptionReasonCode) is not recommended
-            tax.pop('tax_exemption_reason_code')
-        return vals_list
+        values = super()._get_tax_grouping_key(collected_values, base_line, tax)
+        # [BR-NL-35] The use of a tax exemption reason code (cac:TaxTotal/cac:TaxSubtotal/cac:TaxCategory
+        # /cbc:TaxExemptionReasonCode) is not recommended
+        values.pop('tax_exemption_reason_code', None)
+        return values
 
     def _get_partner_address_vals(self, partner):
         # EXTENDS account.edi.xml.ubl_bis3

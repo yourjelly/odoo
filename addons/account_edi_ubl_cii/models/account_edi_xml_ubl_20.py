@@ -3,7 +3,7 @@ from collections import defaultdict
 from lxml import etree
 
 from odoo import models, _
-from odoo.tools import html2plaintext, cleanup_xml_node
+from odoo.tools import html2plaintext, cleanup_xml_node, frozendict
 
 
 class AccountEdiXmlUBL20(models.AbstractModel):
@@ -143,6 +143,78 @@ class AccountEdiXmlUBL20(models.AbstractModel):
             vals['financial_institution_branch_vals'] = self._get_financial_institution_branch_vals(partner_bank.bank_id)
 
         return vals
+
+    def _get_base_values(self):
+        return {
+            'builder': self,
+            'format_float': self.format_float,
+            'AddressType_template': 'account_edi_ubl_cii.ubl_20_AddressType',
+            'ContactType_template': 'account_edi_ubl_cii.ubl_20_ContactType',
+            'PartyType_template': 'account_edi_ubl_cii.ubl_20_PartyType',
+            'PaymentMeansType_template': 'account_edi_ubl_cii.ubl_20_PaymentMeansType',
+            'PaymentTermsType_template': 'account_edi_ubl_cii.ubl_20_PaymentTermsType',
+            'TaxCategoryType_template': 'account_edi_ubl_cii.ubl_20_TaxCategoryType',
+            'TaxTotalType_template': 'account_edi_ubl_cii.ubl_20_TaxTotalType',
+            'AllowanceChargeType_template': 'account_edi_ubl_cii.ubl_20_AllowanceChargeType',
+            'SignatureType_template': 'account_edi_ubl_cii.ubl_20_SignatureType',
+            'ResponseType_template': 'account_edi_ubl_cii.ubl_20_ResponseType',
+            'DeliveryType_template': 'account_edi_ubl_cii.ubl_20_DeliveryType',
+            'MonetaryTotalType_template': 'account_edi_ubl_cii.ubl_20_MonetaryTotalType',
+            'InvoiceLineType_template': 'account_edi_ubl_cii.ubl_20_InvoiceLineType',
+            'CreditNoteLineType_template': 'account_edi_ubl_cii.ubl_20_CreditNoteLineType',
+            'DebitNoteLineType_template': 'account_edi_ubl_cii.ubl_20_DebitNoteLineType',
+            'InvoiceType_template': 'account_edi_ubl_cii.ubl_20_InvoiceType',
+            'CreditNoteType_template': 'account_edi_ubl_cii.ubl_20_CreditNoteType',
+            'DebitNoteType_template': 'account_edi_ubl_cii.ubl_20_DebitNoteType',
+        }
+
+    def _add_company_values(self, values, company):
+        """ Add the values about the company.
+
+        :param values: The values for the rendering.
+        """
+        values.update({
+            'company': company,
+            'supplier': company.partner_id.commercial_partner_id,
+        })
+
+    def _get_tax_grouping_key(self, values, base_line, tax):
+        """
+
+        Full list: https://unece.org/fileadmin/DAM/trade/untdid/d16b/tred/tred5305.htm
+        Subset: https://docs.peppol.eu/poacc/billing/3.0/codelist/UNCL5305/
+
+        :param values:      The values so far for the rendering.
+        :param base_line:   The base line owning the tax.
+        :param tax:         The tax.
+        :return:            The grouping key to aggregate the taxes.
+        """
+        unece_code = self._get_tax_unece_code(values, tax)
+        return {
+            **unece_code,
+            'percent': tax.amount if tax.amount_type == 'percent' else None,
+            'tax_name': tax.name if tax.amount_type == 'fixed' else None,
+        }
+
+    def _add_tax_values(self, values):
+        """ Add the values about taxes.
+
+        :param values: The values for the rendering.
+        """
+        base_lines = values['base_lines']
+        taxes_values_to_aggregate = []
+        for base_line in base_lines:
+            to_update_vals, tax_values_list = self.env['account.tax']._compute_taxes_for_single_line(base_line)
+            taxes_values_to_aggregate.append((base_line, to_update_vals, tax_values_list))
+
+        tax_details = self.env['account.tax']._aggregate_taxes(
+            taxes_values_to_aggregate,
+            grouping_key_generator=lambda x: self._get_tax_grouping_key(values, *x),
+        )
+        for base_line in base_lines:
+            base_line['tax_details'] = list(tax_details['tax_details_per_record'][base_line['record']]['tax_details'].values())
+
+        values['tax_details'] = tax_details
 
     def _get_invoice_payment_means_vals_list(self, invoice):
         vals = {
@@ -419,43 +491,57 @@ class AccountEdiXmlUBL20(models.AbstractModel):
                 tax_to_discount[tax.amount] += line.amount_currency
         return tax_to_discount
 
+    def _add_invoice_line_values(self, values, invoice):
+        """ Convert the invoice lines to a list of dictionaries and add them to 'values'.
+
+        :param values:  The values for the rendering.
+        :param invoice: The invoice.
+        """
+        base_lines = [
+            invl._convert_to_tax_base_line_dict()
+            for invl in invoice.invoice_line_ids.filtered(lambda x: x.display_type == 'product')
+        ]
+
+        # Fixed Taxes don't exist in UBL. Convert them to others base_lines.
+        fixed_taxes_mapping = defaultdict(lambda: {
+            'quantity': 0.0,
+        })
+        for base_line in base_lines:
+            fixed_taxes = base_line['taxes'].filtered(lambda x: x.amount_type == 'fixed')[:1]
+            if not fixed_taxes:
+                continue
+
+            # New base line.
+            taxes = base_line['taxes'] - fixed_taxes
+            key = frozendict({
+                'taxes': taxes,
+                'partner': base_line['partner'],
+                'currency': base_line['currency'],
+                'fixed_tax': fixed_taxes,
+            })
+            fixed_taxes_mapping[key]['quantity'] += base_line['quantity']
+
+            # Update the current one.
+            base_line['taxes'] = taxes
+
+        # Create new base lines.
+        for key, value in fixed_taxes_mapping:
+            base_lines.append(self.env['account.tax']._convert_to_tax_base_line_dict(
+                key['fixed_tax'],
+                partner=key['partner'],
+                currency=key['currency'],
+                taxes=key['taxes'],
+                quantity=value['quantity'],
+            ))
+
+        collected_values['base_lines'] = base_lines
+
     def _export_invoice_vals(self, invoice):
-        def grouping_key_generator(base_line, tax_values):
-            tax = tax_values['tax_repartition_line'].tax_id
-            tax_category_vals = self._get_tax_category_list(invoice, tax)[0]
-            grouping_key = {
-                'tax_category_id': tax_category_vals['id'],
-                'tax_category_percent': tax_category_vals['percent'],
-                '_tax_category_vals_': tax_category_vals,
-                'tax_amount_type': tax.amount_type,
-            }
-            # If the tax is fixed, we want to have one group per tax
-            # s.t. when the invoice is imported, we can try to guess the fixed taxes
-            if tax.amount_type == 'fixed':
-                grouping_key['tax_name'] = tax.name
-            return grouping_key
-
-        # Validate the structure of the taxes
-        self._validate_taxes(invoice)
-
-        # Compute the tax details for the whole invoice and each invoice line separately.
-        taxes_vals = invoice._prepare_invoice_aggregated_taxes(
-            grouping_key_generator=grouping_key_generator,
-            filter_tax_values_to_apply=self._apply_invoice_tax_filter,
-            filter_invl_to_apply=self._apply_invoice_line_filter,
-        )
-
-        # Fixed Taxes: filter them on the document level, and adapt the totals
-        # Fixed taxes are not supposed to be taxes in real live. However, this is the way in Odoo to manage recupel
-        # taxes in Belgium. Since only one tax is allowed, the fixed tax is removed from totals of lines but added
-        # as an extra charge/allowance.
-        fixed_taxes_keys = [k for k in taxes_vals['tax_details'] if k['tax_amount_type'] == 'fixed']
-        for key in fixed_taxes_keys:
-            fixed_tax_details = taxes_vals['tax_details'].pop(key)
-            taxes_vals['tax_amount_currency'] -= fixed_tax_details['tax_amount_currency']
-            taxes_vals['tax_amount'] -= fixed_tax_details['tax_amount']
-            taxes_vals['base_amount_currency'] += fixed_tax_details['tax_amount_currency']
-            taxes_vals['base_amount'] += fixed_tax_details['tax_amount']
+        base_values = self._get_base_values()
+        values = base_values['values'] = {}
+        self._add_company_values(values, invoice.company_id)
+        self._add_invoice_line_values(values, invoice)
+        self._add_tax_values(values)
 
         # Compute values for invoice lines.
         line_extension_amount = 0.0
@@ -489,33 +575,6 @@ class AccountEdiXmlUBL20(models.AbstractModel):
         order_reference = invoice.ref or invoice.name
 
         vals = {
-            'builder': self,
-            'invoice': invoice,
-            'supplier': supplier,
-            'customer': customer,
-
-            'taxes_vals': taxes_vals,
-
-            'format_float': self.format_float,
-            'AddressType_template': 'account_edi_ubl_cii.ubl_20_AddressType',
-            'ContactType_template': 'account_edi_ubl_cii.ubl_20_ContactType',
-            'PartyType_template': 'account_edi_ubl_cii.ubl_20_PartyType',
-            'PaymentMeansType_template': 'account_edi_ubl_cii.ubl_20_PaymentMeansType',
-            'PaymentTermsType_template': 'account_edi_ubl_cii.ubl_20_PaymentTermsType',
-            'TaxCategoryType_template': 'account_edi_ubl_cii.ubl_20_TaxCategoryType',
-            'TaxTotalType_template': 'account_edi_ubl_cii.ubl_20_TaxTotalType',
-            'AllowanceChargeType_template': 'account_edi_ubl_cii.ubl_20_AllowanceChargeType',
-            'SignatureType_template': 'account_edi_ubl_cii.ubl_20_SignatureType',
-            'ResponseType_template': 'account_edi_ubl_cii.ubl_20_ResponseType',
-            'DeliveryType_template': 'account_edi_ubl_cii.ubl_20_DeliveryType',
-            'MonetaryTotalType_template': 'account_edi_ubl_cii.ubl_20_MonetaryTotalType',
-            'InvoiceLineType_template': 'account_edi_ubl_cii.ubl_20_InvoiceLineType',
-            'CreditNoteLineType_template': 'account_edi_ubl_cii.ubl_20_CreditNoteLineType',
-            'DebitNoteLineType_template': 'account_edi_ubl_cii.ubl_20_DebitNoteLineType',
-            'InvoiceType_template': 'account_edi_ubl_cii.ubl_20_InvoiceType',
-            'CreditNoteType_template': 'account_edi_ubl_cii.ubl_20_CreditNoteType',
-            'DebitNoteType_template': 'account_edi_ubl_cii.ubl_20_DebitNoteType',
-
             'vals': {
                 'ubl_version_id': 2.0,
                 'id': invoice.name,

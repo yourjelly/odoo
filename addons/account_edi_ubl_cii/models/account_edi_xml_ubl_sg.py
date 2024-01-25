@@ -45,24 +45,30 @@ class AccountEdiXmlUBLSG(models.AbstractModel):
 
         return vals_list
 
-    def _get_tax_sg_codes(self, invoice, tax):
-        """ https://www.peppolguide.sg/billing/bis/#_gst_category_codes
-        """
-        tax_category_code = 'SR'
-        if tax.amount == 0:
-            tax_category_code = 'ZR'
-        return tax_category_code
+    def _get_tax_unece_code(self, collected_values, tax):
+        # EXTENDS account.edi.xml.ubl_bis3
+        return {
+            'tax_category_code': 'SR' if tax.amount else 'ZR',
+        }
 
-    def _get_tax_category_list(self, invoice, taxes):
-        # OVERRIDE
-        res = []
-        for tax in taxes:
-            res.append({
-                'id': self._get_tax_sg_codes(invoice, tax),
-                'percent': tax.amount if tax.amount_type == 'percent' else False,
-                'tax_scheme_vals': {'id': 'GST'},
-            })
-        return res
+
+    # def _get_tax_sg_codes(self, invoice, tax):
+    #     """ https://www.peppolguide.sg/billing/bis/#_gst_category_codes
+    #     """
+    #     tax_category_code = 'SR'
+    #     if tax.amount == 0:
+    #         tax_category_code = 'ZR'
+    #     return tax_category_code
+
+    # def _get_tax_category_list(self, taxes):
+    #     # OVERRIDE
+    #     res = []
+    #     for tax in taxes:
+    #         res.append({
+    #             'id': self._get_tax_sg_codes(tax),
+    #             'tax_scheme_vals': {'id': 'GST'},
+    #         })
+    #     return res
 
     def _export_invoice_vals(self, invoice):
         # EXTENDS account.edi.xml.ubl_bis3

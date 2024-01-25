@@ -236,10 +236,10 @@ class AccountEdiXmlUBL21Zatca(models.AbstractModel):
             'payable_amount': payable_amount
         }
 
-    def _get_tax_category_list(self, invoice, taxes):
+    def _get_tax_category_list(self, taxes):
         """ Override to filter out withholding taxes """
         non_retention_taxes = taxes.filtered(lambda t: not t.l10n_sa_is_retention)
-        return super()._get_tax_category_list(invoice, non_retention_taxes)
+        return super()._get_tax_category_list(non_retention_taxes)
 
     def _export_invoice_vals(self, invoice):
         """ Override to include/update values specific to ZATCA's UBL 2.1 specs """
@@ -377,7 +377,7 @@ class AccountEdiXmlUBL21Zatca(models.AbstractModel):
         }]
         return res
 
-    def _get_tax_unece_codes(self, invoice, tax):
+    def _get_tax_unece_code(self, invoice, tax):
         """ Override to include/update values specific to ZATCA's UBL 2.1 specs """
 
         def _exemption_reason(code, reason):
@@ -407,7 +407,7 @@ class AccountEdiXmlUBL21Zatca(models.AbstractModel):
                     'tax_exemption_reason_code': None,
                     'tax_exemption_reason': None,
                 }
-        return super()._get_tax_unece_codes(invoice, tax)
+        return super()._get_tax_unece_code(tax)
 
     def _get_invoice_payment_terms_vals_list(self, invoice):
         """ Override to include/update values specific to ZATCA's UBL 2.1 specs """
