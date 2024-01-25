@@ -29,7 +29,6 @@ class ormcache_counter(object):
 # statistic counters dictionary, maps (dbname, modelname, method) to counter
 STAT = defaultdict(ormcache_counter)
 
-
 class ormcache(object):
     """ LRU cache decorator for model methods.
     The parameters are strings that represent expressions referring to the

@@ -1281,6 +1281,7 @@ def preload_registries(dbnames):
     dbnames = dbnames or []
     rc = 0
     for dbname in dbnames:
+      with odoo.tools.profiler.Profiler(db=dbname, collectors=[odoo.tools.profiler.PeriodicCollector(interval=0.1)]):
         try:
             update_module = config['init'] or config['update']
             registry = Registry.new(dbname, update_module=update_module)
