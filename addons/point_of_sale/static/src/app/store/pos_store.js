@@ -1410,7 +1410,7 @@ export class PosStore extends Reactive {
      *
      * Read comments in the python side method for more details about each sub-methods.
      */
-    compute_all(taxes, price_unit, quantity, currency_rounding, handle_price_include = true) {
+    compute_all(taxes, price_unit, quantity, currency_rounding, handle_price_include = true, round_base = false) {
         var self = this;
 
         // 1) Flatten the taxes.
@@ -1436,8 +1436,7 @@ export class PosStore extends Reactive {
 
         // 2) Deal with the rounding methods
 
-        const company = this.company;
-        var round_tax = company.tax_calculation_rounding_method != 'round_globally';
+        var round_tax = this.company.tax_calculation_rounding_method != "round_globally";
 
         var initial_currency_rounding = currency_rounding;
         if (!round_tax) {
@@ -1445,36 +1444,18 @@ export class PosStore extends Reactive {
         }
 
         // 3) Iterate the taxes in the reversed sequence order to retrieve the initial base of the computation.
-        var recompute_base = function(base_amount, incl_tax_amounts){
-            let fixed_amount = incl_tax_amounts.fixed_amount;
-            let division_amount = 0.0;
-            for(const [, tax_factor] of incl_tax_amounts.division_taxes){
-                division_amount += tax_factor;
-            }
-            let percent_amount = 0.0;
-            for(const [, tax_factor] of incl_tax_amounts.percent_taxes){
-                percent_amount += tax_factor;
-            }
+        var recompute_base = function (base_amount, fixed_amount, percent_amount, division_amount) {
+            return (
+                (((base_amount - fixed_amount) / (1.0 + percent_amount / 100.0)) *
+                    (100 - division_amount)) /
+                100
+            );
+        };
 
-            if(company.country && company.country.code === "IN"){
-                for(const [i, tax_factor] of incl_tax_amounts.percent_taxes){
-                    const tax_amount = round_pr(base_amount * tax_factor / (100 + percent_amount), currency_rounding);
-                    cached_tax_amounts[i] = tax_amount;
-                    fixed_amount += tax_amount;
-                }
-                percent_amount = 0.0;
-            }
-
-            Object.assign(incl_tax_amounts, {
-                percent_taxes: [],
-                division_taxes: [],
-                fixed_amount: 0.0,
-            });
-
-            return (base_amount - fixed_amount) / (1.0 + percent_amount / 100.0) * (100 - division_amount) / 100;
+        var base = price_unit * quantity;
+        if(round_base){
+            base = round_pr(base, initial_currency_rounding);
         }
-
-        var base = round_pr(price_unit * quantity, initial_currency_rounding);
 
         var sign = 1;
         if (base < 0) {
@@ -1486,29 +1467,36 @@ export class PosStore extends Reactive {
         var i = taxes.length - 1;
         var store_included_tax_total = true;
 
-        const incl_tax_amounts = {
-            percent_taxes: [],
-            division_taxes: [],
-            fixed_amount: 0.0,
-        }
+        var incl_fixed_amount = 0.0;
+        var incl_percent_amount = 0.0;
+        var incl_division_amount = 0.0;
 
         var cached_tax_amounts = {};
         if (handle_price_include) {
             taxes.reverse().forEach(function (tax) {
                 if (tax.include_base_amount) {
-                    base = recompute_base(base, incl_tax_amounts);
+                    base = recompute_base(
+                        base,
+                        incl_fixed_amount,
+                        incl_percent_amount,
+                        incl_division_amount
+                    );
+                    incl_fixed_amount = 0.0;
+                    incl_percent_amount = 0.0;
+                    incl_division_amount = 0.0;
                     store_included_tax_total = true;
                 }
                 if (tax.price_include) {
                     if (tax.amount_type === "percent") {
-                        incl_tax_amounts.percent_taxes.push([i, tax.amount * tax.sum_repartition_factor]);
+                        incl_percent_amount += tax.amount * tax.sum_repartition_factor;
                     } else if (tax.amount_type === "division") {
-                        incl_tax_amounts.division_taxes.push([i, tax.amount * tax.sum_repartition_factor]);
+                        incl_division_amount += tax.amount * tax.sum_repartition_factor;
                     } else if (tax.amount_type === "fixed") {
-                        incl_tax_amounts.fixed_amount += Math.abs(quantity) * tax.amount * tax.sum_repartition_factor;
+                        incl_fixed_amount +=
+                            Math.abs(quantity) * tax.amount * tax.sum_repartition_factor;
                     } else {
                         var tax_amount = self._compute_all(tax, base, quantity);
-                        incl_tax_amounts.fixed_amount += tax_amount;
+                        incl_fixed_amount += tax_amount;
                         cached_tax_amounts[i] = tax_amount;
                     }
                     if (store_included_tax_total) {
@@ -1520,9 +1508,11 @@ export class PosStore extends Reactive {
             });
         }
 
-        var total_excluded = round_pr(recompute_base(base, incl_tax_amounts), initial_currency_rounding);
+        var total_excluded = recompute_base(base, incl_fixed_amount, incl_percent_amount, incl_division_amount)
+        if(round_base){
+            total_excluded = round_pr(total_excluded, initial_currency_rounding);
+        }
         var total_included = total_excluded;
-
         // 4) Iterate the taxes in the sequence order to fill missing base/amount values.
 
         base = total_excluded;
@@ -1545,12 +1535,11 @@ export class PosStore extends Reactive {
                 total_included_checkpoints[i] !== undefined &&
                 tax.sum_repartition_factor != 0
             ) {
-                var tax_amount = total_included_checkpoints[i] - (base + cumulated_tax_included_amount);
+                var tax_amount =
+                    total_included_checkpoints[i] - (base + cumulated_tax_included_amount);
                 cumulated_tax_included_amount = 0;
-            }else if(tax.price_include && cached_tax_amounts.hasOwnProperty(i)){
-                var tax_amount = cached_tax_amounts[i];
-            }else{
-                var tax_amount = self._compute_all(tax, tax_base_amount, quantity, true);
+            } else {
+                tax_amount = self._compute_all(tax, tax_base_amount, quantity, true);
             }
 
             tax_amount = round_pr(tax_amount, currency_rounding);
@@ -1580,11 +1569,11 @@ export class PosStore extends Reactive {
             total_included += factorized_tax_amount;
             i += 1;
         });
-
+        debugger;
         return {
             taxes: taxes_vals,
-            total_excluded: sign * round_pr(total_excluded, this.currency.rounding),
-            total_included: sign * round_pr(total_included, this.currency.rounding),
+            total_excluded: sign * round_base ? round_pr(total_excluded, this.currency.rounding) : total_excluded,
+            total_included: sign * round_base ? round_pr(total_included, this.currency.rounding) : total_included,
         };
     }
 
@@ -1728,11 +1717,6 @@ export class PosStore extends Reactive {
     async sendOrderInPreparationUpdateLastChange(order, cancelled = false) {
         await this.sendOrderInPreparation(order, cancelled);
         order.updateLastOrderChange();
-
-        //We make sure that the last_order_change is updated in the backend
-        order.save_to_db();
-        order.pos.ordersToUpdateSet.add(this);
-        order.pos.sendDraftToServer();
     }
     closeScreen() {
         this.addOrderIfEmpty();
