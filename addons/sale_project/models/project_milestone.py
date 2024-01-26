@@ -22,24 +22,35 @@ class ProjectMilestone(models.Model):
 
     sale_line_id = fields.Many2one('sale.order.line', 'Sales Order Item', default=_default_sale_line_id, help='Sales Order Item that will be updated once the milestone is reached.',
         domain="[('order_partner_id', '=?', project_partner_id), ('qty_delivered_method', '=', 'milestones')]")
-    quantity_percentage = fields.Float('Quantity (%)', compute="_compute_quantity_percentage", store=True, help='Percentage of the ordered quantity that will automatically be delivered once the milestone is reached.')
 
     sale_line_display_name = fields.Char("Sale Line Display Name", related='sale_line_id.display_name')
-    product_uom = fields.Many2one(related="sale_line_id.product_uom")
-    product_uom_qty = fields.Float("Quantity", compute="_compute_product_uom_qty", readonly=False)
 
     @api.depends('sale_line_id.product_uom_qty', 'product_uom_qty')
     def _compute_quantity_percentage(self):
         for milestone in self:
-            milestone.quantity_percentage = milestone.sale_line_id.product_uom_qty and milestone.product_uom_qty / milestone.sale_line_id.product_uom_qty
+            if milestone.sale_line_id:
+                milestone.quantity_percentage = milestone.sale_line_id.product_uom_qty and milestone.product_uom_qty / milestone.sale_line_id.product_uom_qty
+            else:
+                super(ProjectMilestone, milestone)._compute_quantity_percentage()
 
     @api.depends('sale_line_id', 'quantity_percentage')
     def _compute_product_uom_qty(self):
         for milestone in self:
-            if milestone.quantity_percentage:
-                milestone.product_uom_qty = milestone.quantity_percentage * milestone.sale_line_id.product_uom_qty
+            if milestone.sale_line_id:
+                if milestone.quantity_percentage:
+                    milestone.product_uom_qty = milestone.quantity_percentage * milestone.sale_line_id.product_uom_qty
+                else:
+                    milestone.product_uom_qty = milestone.sale_line_id.product_uom_qty
             else:
-                milestone.product_uom_qty = milestone.sale_line_id.product_uom_qty
+                super(ProjectMilestone, milestone)._compute_product_uom_qty()
+
+    @api.depends('sale_line_id.product_uom')
+    def _compute_product_uom(self):
+        for milestone in self:
+            if milestone.sale_line_id:
+                milestone.product_uom = milestone.sale_line_id.product_uom
+            else:
+                super(ProjectMilestone, milestone)._compute_product_uom()
 
     @api.model
     def _get_fields_to_export(self):

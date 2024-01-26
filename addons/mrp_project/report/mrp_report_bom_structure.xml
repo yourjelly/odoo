@@ -1,0 +1,7 @@
+<odoo>
+    <template id="report_mrp_bom_inherit_mrp_project" inherit_id="mrp.report_mrp_bom_pdf_line">
+        <xpath expr="//td[@name='bom_cost']" position="attributes">
+            <attribute name="t-attf-class">text-end {{ 'text-muted' if l['type'] in ('component', 'service') else '' }}</attribute>
+        </xpath>
+    </template>
+</odoo>

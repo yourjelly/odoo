@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="project_project_view_inherit_mrp_project" model="ir.ui.view">
+        <field name="name">project.project.select.inherit.mrp.project</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.view_project_project_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="production_id"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="project_project_view_tree_inherit_mrp_project" model="ir.ui.view">
+        <field name="name">project.project.tree.inherit.mrp.project</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.view_project"/>
+        <field name="priority">50</field>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="production_service_id" optional="hide" readonly="1"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_edit_project_inherit_form_mrp_project" model="ir.ui.view">
+        <field name="name">project.project.view.inherit.mrp.project</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.edit_project"/>
+        <field name="arch" type="xml">
+            <div name="button_box" position="inside">
+                <button
+                    class="oe_stat_button"
+                    type="object"
+                    name="action_view_mos"
+                    icon="fa-wrench"
+                    invisible="production_count == 0"
+                    groups="mrp.group_mrp_user"
+                    context="{
+                        'create_for_project_id': id,
+                        'default_project_id': id
+                    }">
+                    <div class="o_field_widget o_stat_info">
+                        <span class="o_stat_value">
+                            <field name="production_count" nolabel="1"/>
+                        </span>
+                        <span class="o_stat_text">
+                            Manufacturing Orders
+                        </span>
+                    </div>
+                </button>
+            </div>
+            <xpath expr="//page[@name='settings']//field[@name='analytic_account_id']" position="before">
+                <label for="production_service_id"/>
+                <div
+                    class="o_row">
+                    <field name="production_service_id"
+                        groups="!mrp.group_mrp_user"
+                        options="{'no_create': True, 'no_edit': True, 'delete': False, 'no_open': True}"/>
+                    <span
+                        class="fa fa-exclamation-triangle text-warning"
+                        title="The manufacturing order associated with this project has been canceled. We recommend either updating the manufacturing order service or canceling this project in alignment with the cancellation of the manufacturing order."
+                        invisible="production_state != 'cancel'"/>
+                </div>
+                <field name="production_state" invisible="1"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_mrp_project_inherit_form" model="ir.ui.view">
+        <field name="name">project.task.view.inherit</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="project.view_task_form2"/>
+        <field name="priority">100</field>
+        <field name="arch" type="xml">
+            <xpath expr="//span[@id='start_rating_buttons']" position="before">
+                <button class="oe_stat_button"
+                        type="object" name="action_view_mo" icon="fa-wrench"
+                        invisible="not production_id"
+                        groups="mrp.group_mrp_user">
+                        <div class="o_stat_info">
+                            <span class="o_stat_text">Manufacturing Order</span>
+                        </div>
+                </button>
+            </xpath>
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="project_production_id" invisible="1"/>
+                <field name="production_id" invisible="True" groups="mrp.group_mrp_user"/>
+                <label for="production_service_id" invisible="not project_id"/>
+                <div
+                    class="o_row"
+                    invisible="not project_id">
+                    <field name="production_service_id"
+                        groups="!mrp.group_mrp_user"
+                        string="Manufacturing Order Service line"
+                        options='{"no_open": True}'
+                        readonly="1"
+                        context="{'create': False, 'edit': False, 'delete': False}"
+                        invisible="not production_service_id"/>
+                    <span
+                        class="fa fa-exclamation-triangle text-warning"
+                        title="The manufacturing order associated with this task has been canceled. We recommend either updating the manufacturing order or canceling this task in alignment with the cancellation of the manufacturing order."
+                        invisible="production_state != 'cancel'"/>
+                </div>
+                <field name="production_state" invisible="1"/>
+            </xpath>
+            <xpath expr="//field[@name='child_ids']/tree/field[@name='partner_id']" position="after">
+                <field name="production_service_id"
+                       optional="hide"
+                       options='{"no_create": True}'
+                       context="{'create': False, 'edit': False, 'delete': False, 'with_price_unit': True}"
+                       placeholder="Non-billable"
+                       groups="mrp.group_mrp_user"/>
+                <field name="production_service_id" optional="hide" options="{'no_open': True}" readonly="1" groups="!mrp.group_mrp_user"/>
+            </xpath>
+            <xpath expr="//field[@name='depend_on_ids']/tree/field[@name='partner_id']" position="after">
+                <field name="production_service_id" optional="hide" readonly="1" groups="mrp.group_mrp_user"/>
+                <field name="production_service_id" optional="hide" options="{'no_open': True}" readonly="1" groups="!mrp.group_mrp_user"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_task_tree2_inherit_mrp_project" model="ir.ui.view">
+        <field name="name">project.task.form.inherit.mrp.project</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="project.project_task_view_tree_base"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="production_service_id" optional="hide" groups="mrp.group_mrp_user" options="{'no_create': True}"/>
+                <field name="production_service_id" optional="hide" options="{'no_open': True}" readonly="1" groups="!mrp.group_mrp_user"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="project_milestone_view_form" model="ir.ui.view">
+        <field name="name">project.milestone.view.form.inherit</field>
+        <field name="model">project.milestone</field>
+        <field name="inherit_id" ref="project.project_milestone_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='main_details']" position="after">
+                <group>
+                    <field name="production_service_id" groups="!mrp.group_mrp_user" placeholder="Non-billable" options="{'no_open': True}" readonly="1"/>
+                    <field name="production_service_id" groups="mrp.group_mrp_user" options="{'no_create': True}" placeholder="Non-billable" readonly="0"/>
+                    <label for="quantity_percentage" invisible="not production_service_id"/>
+                    <div class="col-6" invisible="not production_service_id">
+                        <field name="quantity_percentage" groups="!mrp.group_mrp_user" widget="percentage" readonly="1" class="mw-25"/>
+                        <field name="quantity_percentage" class="mw-25" groups="mrp.group_mrp_user"
+                            widget="percentage" decoration-danger="quantity_percentage &lt; 0 or 1 &lt; quantity_percentage" readonly="0"/>
+                        <span>
+                            (<field name="product_uom_qty" class="mw-25"  decoration-danger="quantity_percentage &lt; 0 or 1 &lt; quantity_percentage"/>
+                            <field name="product_uom" class="mw-25 text-end" groups="uom.group_uom" options="{'no_open': True}"/>
+                            <span>)</span>
+                        </span>
+                    </div>
+                </group>
+            </xpath>
+            <xpath expr="//button[@name='%(project.action_view_task_from_milestone)d']" position="before">
+                <button name="action_view_production_order" type="object" class="oe_stat_button" icon="fa-wrench" invisible="not production_service_id">
+                    <div class="o_stat_info">
+                        <span class="o_stat_text">Manufacturing Order</span>
+                    </div>
+                </button>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="project_milestone_view_tree" model="ir.ui.view">
+        <field name="name">project.milestone.view.tree.inherit</field>
+        <field name="model">project.milestone</field>
+        <field name="inherit_id" ref="project.project_milestone_view_tree"/>
+        <field name="mode">primary</field>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='name']" position="after">
+                <field name="production_service_id" optional="hide" options="{'no_open': True}" placeholder="Non-billable" readonly="1" groups="!mrp.group_mrp_user"/>
+                <field name="production_service_id" optional="hide" options="{'no_create': True}" placeholder="Non-billable" groups="mrp.group_mrp_user"/>
+                <field name="quantity_percentage" string="Quantity (%)" optional="show" widget="percentage" groups="!mrp.group_mrp_user"/>
+                <field name="quantity_percentage" string="Quantity (%)" optional="show" widget="percentage" readonly="0" groups="mrp.group_mrp_user"/>
+                <field name="product_uom_qty" optional="show" groups="!mrp.group_mrp_user" readonly="1"/>
+                <field name="product_uom_qty" optional="show" groups="mrp.group_mrp_user"/>
+            </xpath>
+            <xpath expr="//button[@name='action_view_tasks']" position="after">
+                <button name="action_view_production_order" type="object" string="View Manufacturing Order"
+                    class="btn btn-link float-end" invisible="not production_service_id"/>
+            </xpath>
+        </field>
+    </record>
+
+
+</odoo>

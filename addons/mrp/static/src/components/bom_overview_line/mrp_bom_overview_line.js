@@ -170,4 +170,8 @@ export class BomOverviewLine extends Component {
                 return "action_product_tmpl_forecast_report";
         }
     }
+
+    _shouldBeGreyedOut(data) {
+        return data.type === 'component';
+    }
 }

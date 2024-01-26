@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="MoOverviewComponentsBlock" t-inherit="mrp.MoOverviewComponentsBlock" t-inherit-mode="extension">
+        <xpath expr="//MoOverviewByproductsBlock" position="after">
+            <MoOverviewServicesBlock
+                unfoldAll="state.unfoldAll"
+                summary="props.services.summary"
+                services="props.services.details"
+                showOptions="props.showOptions"/>
+        </xpath>
+    </t>
+</templates>

@@ -44,7 +44,7 @@
                 <a href="#" t-on-click.prevent="() => this.goToRoute(data.route_type)" t-esc="data.route_detail"/>
             </div>
         </td>
-        <td t-if="showCosts" t-attf-class="text-end {{ data.type == 'component' ? 'opacity-50' : '' }}" t-esc="formatMonetary(data.bom_cost)"/>
+        <td t-if="showCosts" t-attf-class="text-end {{ this._shouldBeGreyedOut(data) ? 'opacity-50' : '' }}" t-esc="formatMonetary(data.bom_cost)"/>
         <td t-if="showCosts" class="text-end">
             <span t-if="data.hasOwnProperty('prod_cost')" t-esc="formatMonetary(data.prod_cost)"/>
         </td>

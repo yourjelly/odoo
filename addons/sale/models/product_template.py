@@ -10,13 +10,6 @@ class ProductTemplate(models.Model):
     _inherit = 'product.template'
     _check_company_auto = True
 
-    service_type = fields.Selection(
-        selection=[('manual', "Manually set quantities on order")],
-        string="Track Service",
-        compute='_compute_service_type', store=True, readonly=False, precompute=True,
-        help="Manually set quantities on order: Invoice based on the manually entered quantity, without creating an analytic account.\n"
-             "Timesheets on contract: Invoice based on the tracked hours on the related timesheet.\n"
-             "Create a task and track hours: Create a task on the sales order validation and track the work hours.")
     sale_line_warn = fields.Selection(
         WARNING_MESSAGE, string="Sales Order Line",
         help=WARNING_HELP, required=True, default="no-message")
@@ -124,10 +117,6 @@ class ProductTemplate(models.Model):
                 'message': _("You cannot change the product's type because it is already used in sales orders.")
             }
         return res
-
-    @api.depends('type')
-    def _compute_service_type(self):
-        self.filtered(lambda t: t.type == 'consu' or not t.service_type).service_type = 'manual'
 
     @api.depends('type')
     def _compute_invoice_policy(self):

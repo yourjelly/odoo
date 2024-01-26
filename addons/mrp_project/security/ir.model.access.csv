@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_mrp_production_service,mrp.production.service,model_mrp_production_service,mrp.group_mrp_user,1,0,0,0
+access_mrp_production_service_manager,mrp.production.service.manager,model_mrp_production_service,mrp.group_mrp_manager,1,1,1,1
+access_subcontracting_portal_production_service,subcontracting.portal.production.service,mrp_project.model_mrp_production_service,base.group_portal,1,1,0,0

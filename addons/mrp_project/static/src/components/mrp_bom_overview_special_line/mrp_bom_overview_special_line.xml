@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="BomOverviewSpecialLine" t-inherit="mrp.BomOverviewSpecialLine" t-inherit-mode="extension">
+        <xpath expr="//button" position="inside">
+            <t t-elif="props.type === 'services'">Services</t>
+        </xpath>
+        <xpath expr="//td[@name='quantity']" position="inside">
+            <span t-elif="props.type === 'services'" t-esc="formatFloat(data.services_total)"/>
+        </xpath>
+        <xpath expr="//td[@name='bom_cost']" position="inside">
+            <span t-elif="props.type === 'services'" t-esc="formatMonetary(data.services_cost)" class="opacity-50"/>
+        </xpath>
+        <xpath expr="//td[@name='prod_cost']" position="inside">
+            <span t-if="props.type === 'services'" t-esc="formatMonetary(data.services_cost)"/>
+        </xpath>
+    </t>
+</templates>

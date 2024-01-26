@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="mrp_bom_form_view_inherited" model="ir.ui.view">
+        <field name="name">mrp.bom.form.inherited</field>
+        <field name="model">mrp.bom</field>
+        <field name="inherit_id" ref="mrp.mrp_bom_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='operations']" position="after">
+                <page string="Services" name="services">
+                    <field name="service_ids" widget="one2many" context="{'default_parent_product_tmpl_id': product_tmpl_id, 'default_product_id': False, 'default_bom_id': id}">
+                        <tree string="Services" editable="bottom">
+                            <field name="company_id" column_invisible="True"/>
+                            <field name="sequence" widget="handle"/>
+                            <field name="product_id" string="Service" domain="[('type', '=', 'service')]"/>
+                            <field name="product_tmpl_id" column_invisible="True"/>
+                            <field name="product_qty"/>
+                            <field name="product_uom_category_id" column_invisible="True"/>
+                            <field name="product_uom_id" options="{'no_open':True,'no_create':True}" groups="uom.group_uom"/>
+                            <field name="possible_bom_product_template_attribute_value_ids" column_invisible="True"/>
+                            <field name="bom_product_template_attribute_value_ids" optional="hide" widget="many2many_tags" options="{'no_create': True}" column_invisible="parent.product_id" groups="product.group_product_variant"/>
+                        </tree>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

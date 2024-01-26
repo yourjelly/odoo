@@ -68,4 +68,8 @@ export class BomOverviewExtraBlock extends Component {
     get identifier() {
         return `${this.props.type}_${this.props.data.index}`;
     }
+
+    get extraData() {
+        return this.props.type === 'operations' ? this.props.data.operations : this.props.data.byproducts
+    }
 }
