@@ -417,7 +417,7 @@ class HolidaysRequest(models.Model):
             else:
                 if holiday.request_unit_half or holiday.request_unit_hours:
                     holiday.request_date_to = holiday.request_date_from
-                resource_calendar_id = holiday.employee_id.resource_calendar_id or self.env.company.resource_calendar_id
+                resource_calendar_id = holiday.employee_id._get_calendar()
                 domain = [('calendar_id', '=', resource_calendar_id.id), ('display_type', '=', False)]
                 attendances = self.env['resource.calendar.attendance'].read_group(domain, ['ids:array_agg(id)', 'hour_from:min(hour_from)', 'hour_to:max(hour_to)', 'week_type', 'dayofweek', 'day_period'], ['week_type', 'dayofweek', 'day_period'], lazy=False)
 
@@ -589,7 +589,7 @@ class HolidaysRequest(models.Model):
     @api.depends('number_of_days')
     def _compute_number_of_hours_display(self):
         for holiday in self:
-            calendar = holiday._get_calendar()
+            calendar = holiday.employee_id._get_calendar(holiday.date_from)
             if holiday.date_from and holiday.date_to:
                 # Take attendances into account, in case the leave validated
                 # Otherwise, this will result into number_of_hours = 0
@@ -997,7 +997,7 @@ class HolidaysRequest(models.Model):
             'holiday_id': leave.id,
             'date_to': leave.date_to,
             'resource_id': leave.employee_id.resource_id.id,
-            'calendar_id': leave.employee_id.resource_calendar_id.id,
+            'calendar_id': leave.employee_id._get_calendar(leave.date_from).id,
             'time_type': leave.holiday_status_id.time_type,
         } for leave in self]
 
@@ -1035,9 +1035,8 @@ class HolidaysRequest(models.Model):
 
     def _prepare_holidays_meeting_values(self):
         result = defaultdict(list)
-        company_calendar = self.env.company.resource_calendar_id
         for holiday in self:
-            calendar = holiday.employee_id.resource_calendar_id or company_calendar
+            calendar = holiday.employee_id._get_calendar(holiday.date_from)
             user = holiday.user_id
             if holiday.leave_type_request_unit == 'hour':
                 meeting_name = _("%s on Time Off : %.2f hour(s)") % (holiday.employee_id.name or holiday.category_id.name, holiday.number_of_hours_display)

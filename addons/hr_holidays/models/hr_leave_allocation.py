@@ -377,12 +377,12 @@ class HolidaysAllocation(models.Model):
         if level.is_based_on_worked_time:
             start_dt = datetime.combine(start_date, datetime.min.time())
             end_dt = datetime.combine(end_date, datetime.min.time())
-            worked = self.employee_id._get_work_days_data_batch(start_dt, end_dt, calendar=self.employee_id.resource_calendar_id)\
+            worked = self.employee_id._get_work_days_data_batch(start_dt, end_dt, calendar=self.employee_id._get_calendar(start_dt))\
                 [self.employee_id.id]['hours']
             if start_period != start_date or end_period != end_date:
                 start_dt = datetime.combine(start_period, datetime.min.time())
                 end_dt = datetime.combine(end_period, datetime.min.time())
-                planned_worked = self.employee_id._get_work_days_data_batch(start_dt, end_dt, calendar=self.employee_id.resource_calendar_id)\
+                planned_worked = self.employee_id._get_work_days_data_batch(start_dt, end_dt, calendar=self.employee_id._get_calendar(start_dt))\
                     [self.employee_id.id]['hours']
             else:
                 planned_worked = worked

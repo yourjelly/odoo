@@ -4,6 +4,7 @@
 from datetime import date
 from odoo import api, fields, models
 from odoo.osv import expression
+from odoo.addons.resource.models.resource_mixin import ResourceMixin
 
 
 class Employee(models.Model):
@@ -25,6 +26,7 @@ class Employee(models.Model):
 
     def _get_first_contract_date(self, no_gap=True):
         self.ensure_one()
+
         def remove_gap(contracts):
             # We do not consider a gap of more than 4 days to be a same occupation
             # contracts are considered to be ordered correctly
@@ -64,6 +66,29 @@ class Employee(models.Model):
         result = dict((data['employee_id'][0], data['employee_id_count']) for data in contract_data)
         for employee in self:
             employee.contracts_count = result.get(employee.id, 0)
+
+    def _get_calendar(self, target_date=None):
+        if not target_date:
+            return super().get_calendar(target_date)
+        contracts = self.env['hr.contract'].search([
+            ('employee_id', 'in', self.ids),
+            ('date_start', '<=', target_date),
+            '|',
+                ('date_end', '=', False),
+                ('date_end', '>=', target_date),
+            '|',
+                ('state', 'in', ('open', 'close')),
+                '&',
+                    ('state', '=', 'draft'),
+                    ('kanban_state', '=', 'done'),
+        ])
+        calendars = self.env['resource.calendar']
+        employee_with_contract = self.env['hr.employee']
+        for contract in contracts:
+            calendars |= contract.resource_calendar_id
+            employee_with_contract |= contract.employee_id
+        calendars |= super(ResourceMixin, (self - employee_with_contract))._get_calendar(target_date)
+        return calendars
 
     def _get_contracts(self, date_from, date_to, states=['open'], kanban_state=False):
         """

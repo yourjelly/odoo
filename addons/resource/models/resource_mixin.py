@@ -2,7 +2,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from collections import defaultdict
-from dateutil.relativedelta import relativedelta
 from pytz import utc
 
 from odoo import api, fields, models
@@ -54,6 +53,9 @@ class ResourceMixin(models.AbstractModel):
         default['resource_calendar_id'] = resource.calendar_id.id
         return super(ResourceMixin, self).copy_data(default)
 
+    def _get_calendar(self, target_date=None):
+        return self.resource_calendar_id or self.company_id.resource_calendar_id
+
     def _get_work_days_data_batch(self, from_datetime, to_datetime, compute_leaves=True, calendar=None, domain=None):
         """
             By default the resource calendar is used, but it can be
@@ -75,7 +77,7 @@ class ResourceMixin(models.AbstractModel):
 
         mapped_resources = defaultdict(lambda: self.env['resource.resource'])
         for record in self:
-            mapped_resources[calendar or record.resource_calendar_id] |= record.resource_id
+            mapped_resources[calendar or record._get_calendar(from_datetime)] |= record.resource_id
 
         for calendar, calendar_resources in mapped_resources.items():
             if not calendar:
@@ -117,7 +119,7 @@ class ResourceMixin(models.AbstractModel):
 
         mapped_resources = defaultdict(lambda: self.env['resource.resource'])
         for record in self:
-            mapped_resources[calendar or record.resource_calendar_id] |= record.resource_id
+            mapped_resources[calendar or record._get_calendar(from_datetime)] |= record.resource_id
 
         for calendar, calendar_resources in mapped_resources.items():
             day_total = calendar._get_resources_day_total(from_datetime, to_datetime, calendar_resources)
@@ -154,14 +156,15 @@ class ResourceMixin(models.AbstractModel):
             Returns a list of tuples (day, hours) for each day
             containing at least an attendance.
         """
-        resource = self.resource_id
-        calendar = calendar or self.resource_calendar_id
 
         # naive datetimes are made explicit in UTC
         if not from_datetime.tzinfo:
             from_datetime = from_datetime.replace(tzinfo=utc)
         if not to_datetime.tzinfo:
             to_datetime = to_datetime.replace(tzinfo=utc)
+
+        resource = self.resource_id
+        calendar = calendar or self._get_calendar(from_datetime)
 
         intervals = calendar._work_intervals_batch(from_datetime, to_datetime, resource, domain)[resource.id]
         result = defaultdict(float)
@@ -180,14 +183,15 @@ class ResourceMixin(models.AbstractModel):
             Returns a list of tuples (day, hours, resource.calendar.leaves)
             for each leave in the calendar.
         """
-        resource = self.resource_id
-        calendar = calendar or self.resource_calendar_id
 
         # naive datetimes are made explicit in UTC
         if not from_datetime.tzinfo:
             from_datetime = from_datetime.replace(tzinfo=utc)
         if not to_datetime.tzinfo:
             to_datetime = to_datetime.replace(tzinfo=utc)
+
+        resource = self.resource_id
+        calendar = calendar or self._get_calendar(from_datetime)
 
         attendances = calendar._attendance_intervals_batch(from_datetime, to_datetime, resource)[resource.id]
         leaves = calendar._leave_intervals_batch(from_datetime, to_datetime, resource, domain)[resource.id]
