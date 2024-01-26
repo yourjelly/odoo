@@ -20488,10 +20488,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             }
         }
         onPaste(ev) {
-            if (this.env.model.getters.getEditionMode() === "inactive") {
-                return;
-            }
-            else {
+            if (this.env.model.getters.getEditionMode() !== "inactive") {
                 ev.stopPropagation();
             }
         }
@@ -20777,7 +20774,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     class GridComposer extends owl.Component {
         constructor() {
             super(...arguments);
-            this.rect = { x: 0, y: 0, width: 0, height: 0 };
+            this.rect = undefined;
             this.isEditing = false;
         }
         get defaultRect() {
@@ -20789,7 +20786,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 if (this.isEditing !== isEditing) {
                     this.isEditing = isEditing;
                     if (!isEditing) {
-                        this.rect = this.defaultRect;
+                        this.rect = undefined;
+                        this.env.focusManager.focus();
                         return;
                     }
                     const position = this.env.model.getters.getPosition();
@@ -20801,7 +20799,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         get composerProps() {
             const { width, height } = this.env.model.getters.getSheetViewDimensionWithHeaders();
             return {
-                rect: { ...this.rect },
+                rect: this.rect && { ...this.rect },
                 delimitation: {
                     width,
                     height,
@@ -20814,7 +20812,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             };
         }
         get containerStyle() {
-            if (this.env.model.getters.getEditionMode() === "inactive") {
+            if (this.env.model.getters.getEditionMode() === "inactive" || !this.rect) {
                 return `
         position: absolute;
         z-index: -1000;
@@ -22761,10 +22759,10 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             owl.useExternalListener(document.body, "cut", this.copy.bind(this, true));
             owl.useExternalListener(document.body, "copy", this.copy.bind(this, false));
             owl.useExternalListener(document.body, "paste", this.paste);
-            owl.onMounted(() => this.defaultFocus());
-            this.props.exposeFocus(() => this.defaultFocus());
+            owl.onMounted(() => this.focusDefaultElement());
+            this.props.exposeFocus(() => this.focusDefaultElement());
             useGridDrawing("canvas", this.env.model, () => this.env.model.getters.getSheetViewDimensionWithHeaders());
-            owl.useEffect(() => this.defaultFocus(), () => [this.env.model.getters.getActiveSheetId()]);
+            owl.useEffect(() => this.focusDefaultElement(), () => [this.env.model.getters.getActiveSheetId()]);
             this.onMouseWheel = useWheelHandler((deltaX, deltaY) => {
                 this.moveCanvas(deltaX, deltaY);
                 this.hoveredCell.col = undefined;
@@ -22785,9 +22783,9 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         }
         onClosePopover() {
             this.closeOpenedPopover();
-            this.defaultFocus();
+            this.focusDefaultElement();
         }
-        defaultFocus() {
+        focusDefaultElement() {
             if (!this.env.model.getters.getSelectedFigureId() &&
                 this.env.model.getters.getEditionMode() === "inactive") {
                 this.env.focusManager.focus();
@@ -23019,7 +23017,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         }
         closeMenu() {
             this.menuState.isOpen = false;
-            this.defaultFocus();
+            this.focusDefaultElement();
         }
     }
     Grid.template = "o-spreadsheet-Grid";
@@ -43173,8 +43171,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
 
 
     __info__.version = '16.0.28';
-    __info__.date = '2024-01-18T09:23:36.958Z';
-    __info__.hash = '5187f20';
+    __info__.date = '2024-01-26T15:20:07.333Z';
+    __info__.hash = '344ea54';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);

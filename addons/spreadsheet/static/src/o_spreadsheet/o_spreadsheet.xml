@@ -585,7 +585,7 @@
       class="o-grid"
       tabindex="-1"
       t-att-class="{'o-two-columns': !props.sidePanelIsOpen}"
-      t-on-click="defaultFocus"
+      t-on-click="focusDefaultElement"
       t-on-keydown="onKeydown"
       t-on-wheel="onMouseWheel"
       t-on-contextmenu="onInputContextMenu"
@@ -599,7 +599,7 @@
         onGridMoved.bind="moveCanvas"
         gridOverlayDimensions="gridOverlayDimensions"
         sidePanelIsOpen="props.sidePanelIsOpen"
-        onFigureDeleted.bind="defaultFocus"
+        onFigureDeleted.bind="focusDefaultElement"
       />
       <HeadersOverlay onOpenContextMenu="(type, x, y) => this.toggleContextMenu(type, x, y)"/>
       <GridComposer
@@ -3238,6 +3238,6 @@ https://fontawesome.com/license -->
 </odoo>
 <!--
   __info__.version = '16.0.28';
-  __info__.date = '2024-01-18T09:23:39.448Z';
-  __info__.hash = '5187f20';
+  __info__.date = '2024-01-26T15:20:08.685Z';
+  __info__.hash = '344ea54';
 -->
