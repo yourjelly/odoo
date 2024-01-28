@@ -1748,7 +1748,8 @@ class Request:
                 else:
                     return self._serve_nodb()
             ir_http = self.registry['ir.http']
-            self.env = odoo.api.Environment(cr, self.session.uid, self.session.context)
+            lang = odoo.api.Environment(cr, odoo.SUPERUSER_ID, {})['res.lang']._get_active(self.session.context['lang'])
+            self.env = odoo.api.Environment(cr, self.session.uid, {**self.session.context, **{'lang': lang}})
             with contextlib.suppress(NotFound):
                 rule, args = ir_http._match(self.httprequest.path)
         if not rule:
