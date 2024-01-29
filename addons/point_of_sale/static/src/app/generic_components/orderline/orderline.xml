@@ -38,6 +38,7 @@
                         </li>
                     </t>
                 </t>
+                <li t-foreach="line.packLotLines" t-as="lot" t-key="lot_index" t-esc="lot" />
             </ul>
         </li>
     </t>
