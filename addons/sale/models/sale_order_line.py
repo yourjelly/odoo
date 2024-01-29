@@ -470,6 +470,13 @@ class SaleOrderLine(models.Model):
                 line.price_unit = 0.0
             else:
                 price = line.with_company(line.company_id)._get_display_price()
+                if self.order_id.pricelist_id.pricelist_rules:
+                    if price < line.product_id.product_tmpl_id.minimum_price:
+                        raise UserError("Price cannot be less than the minimum price for the product.")
+
+                    if price > line.product_id.product_tmpl_id.maximum_price:
+                        raise UserError("Price cannot be greater than the maximum price for the product.")
+
                 line.price_unit = line.product_id._get_tax_included_unit_price(
                     line.company_id or line.env.company,
                     line.order_id.currency_id,

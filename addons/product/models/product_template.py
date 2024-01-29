@@ -74,6 +74,10 @@ class ProductTemplate(models.Model):
         digits='Product Price',
         help="Price at which the product is sold to customers.",
     )
+
+    minimum_price = fields.Float('Minimum Price', help="Set minimum price of product according to price rules")
+    maximum_price = fields.Float('Maximum Price', help="Set maximum price of product according to price rules")
+
     standard_price = fields.Float(
         'Cost', compute='_compute_standard_price',
         inverse='_set_standard_price', search='_search_standard_price',

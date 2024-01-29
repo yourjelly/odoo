@@ -30,6 +30,8 @@ class Pricelist(models.Model):
         tracking=1,
     )
 
+    pricelist_rules = fields.Boolean(default=False, help="Check this field to set the minimum and maximum price of the product")
+
     company_id = fields.Many2one(
         comodel_name='res.company',
         tracking=5,
