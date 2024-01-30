@@ -14509,4 +14509,58 @@ QUnit.module("Fields", (hooks) => {
             assert.containsN(target, ".o_kanban_record:not(.o_kanban_ghost)", 2);
         }
     );
+
+    QUnit.debug("WIP", async function (assert) {
+        assert.expect(7);
+
+        serverData.models.partner.records[1].turtles = [1, 2];
+
+        // serverData.views = {
+        //     "turtle,false,form": `
+        //         <form>
+        //             <field name="turtle_foo"/>
+        //         </form>`,
+        // };
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            resId: 1,
+            resIds: [1, 2],
+            arch: `
+                <form>
+                <field name="display_name"/>
+                    <field name="turtles">
+                        <tree>
+                            <field name="display_name"/>
+                        </tree>
+                        <form>
+                    <field name="turtle_foo"/>
+                </form>
+                    </field>
+                </form>`,
+            mockRPC(route, { kwargs, method, args }) {
+                if (method === "web_save") {
+                    assert.deepEqual(kwargs.specification, {
+                        display_name: {},
+                        turtles: {
+                            fields: {
+                                display_name: {},
+                            },
+                            limit: 40,
+                            order: "",
+                        },
+                    });
+                }
+            },
+        });
+
+        await click(target.querySelector(".o_data_cell"));
+        assert.containsOnce(target, ".modal");
+
+        await editInput(target, ".modal [name='turtle_foo'] input", "new value");
+        await click(target, ".modal .o_form_button_save");
+
+        await click(target.querySelector(".o_pager_next"));
+    });
 });
