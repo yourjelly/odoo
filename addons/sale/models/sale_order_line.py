@@ -26,6 +26,9 @@ class SaleOrderLine(models.Model):
         ('non_accountable_null_fields',
             "CHECK(display_type IS NULL OR (product_id IS NULL AND price_unit = 0 AND product_uom_qty = 0 AND product_uom IS NULL AND customer_lead = 0))",
             "Forbidden values on non-accountable sale order line"),
+        ('positive_qty',
+            "CHECK(product_uom_qty >= 0)",
+            "Qty has to be positive !"),
     ]
 
     # Fields are ordered according by tech & business logics
