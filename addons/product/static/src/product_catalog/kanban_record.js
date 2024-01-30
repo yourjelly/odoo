@@ -11,6 +11,7 @@ export class ProductCatalogKanbanRecord extends KanbanRecord {
         ...KanbanRecord.components,
         ProductCatalogOrderLine,
     };
+    static showWarning = false
 
     setup() {
         super.setup();
@@ -18,6 +19,7 @@ export class ProductCatalogKanbanRecord extends KanbanRecord {
         this.debouncedUpdateQuantity = useDebounced(this._updateQuantity, 500, {
             execBeforeUnmount: true,
         });
+        this.notificationService = useService("notification");
 
         useSubEnv({
             currencyId: this.props.record.context.product_catalog_currency_id,
@@ -60,8 +62,14 @@ export class ProductCatalogKanbanRecord extends KanbanRecord {
     //--------------------------------------------------------------------------
 
     async _updateQuantity() {
+        console.log(this)
+        console.log(this.productCatalogData.quantity)
         const price = await this._updateQuantityAndGetPrice();
         this.productCatalogData.price = parseFloat(price);
+        if (this.productCatalogData.warning && this.showWarning) {
+            this.notificationService.add(this.productCatalogData.warning)
+            this.showWarning = false
+        }
     }
 
     _updateQuantityAndGetPrice() {
@@ -80,6 +88,9 @@ export class ProductCatalogKanbanRecord extends KanbanRecord {
     updateQuantity(quantity) {
         if (this.productCatalogData.readOnly) {
             return;
+        }
+        if (this.productCatalogData.quantity === 0){
+            this.showWarning = true
         }
         this.productCatalogData.quantity = quantity || 0;
         this.debouncedUpdateQuantity();

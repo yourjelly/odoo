@@ -6,7 +6,7 @@
         <t t-portal="`#product-${props.productId}-price`">
             <span class="o_product_catalog_price">Unit price: <t t-out="price"/></span>
         </t>
-        <span t-if="props.readOnly" class="my-2 pt-3 border-top">
+        <span t-if="props.readOnly" class="my-2 pt-3 border-top" t-out="props.warning">
             You can't edit this product in the catalog.
         </span>
         <div t-else="" class="d-flex justify-content-end">

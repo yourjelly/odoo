@@ -1193,7 +1193,8 @@ class SaleOrderLine(models.Model):
         the product is read-only or not.
 
         A product is considered read-only if the order is considered read-only (see
-        ``SaleOrder._is_readonly`` for more details) or if `self` contains multiple records.
+        ``SaleOrder._is_readonly`` for more details) or if `self` contains multiple records
+        or if it has sale_line_warn == "block".
 
         Note: This method cannot be called with multiple records that have different products linked.
 
@@ -1204,13 +1205,15 @@ class SaleOrderLine(models.Model):
                 'quantity': float,
                 'price': float,
                 'readOnly': bool,
+                'warning': String
             }
         """
         if len(self) == 1:
             return {
                 'quantity': self.product_uom_qty,
                 'price': self.price_unit,
-                'readOnly': self.order_id._is_readonly(),
+                'readOnly': self.order_id._is_readonly() or (self.product_id.sale_line_warn == "block"),
+                'warning': self.product_id.sale_line_warn_msg,
             }
         elif self:
             self.product_id.ensure_one()
@@ -1233,6 +1236,7 @@ class SaleOrderLine(models.Model):
                         )
                     )
                 ),
+                'warning': order_line.product_id.sale_line_warn_msg,
             }
         else:
             return {
