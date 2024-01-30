@@ -1673,6 +1673,9 @@
     function formatValue(value, format) {
         switch (typeof value) {
             case "string":
+                if (value.includes('\\"')) {
+                    return value.replace(/\\"/g, '"');
+                }
                 return value;
             case "boolean":
                 return value ? "TRUE" : "FALSE";
@@ -34604,8 +34607,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             let row = zone.bottom;
             if (col > 0) {
                 let leftPosition = { sheetId, col: col - 1, row };
-                while (this.getters.getEvaluatedCell(leftPosition).type !== CellValueType.empty ||
-                    ((_a = this.getters.getCell(leftPosition)) === null || _a === void 0 ? void 0 : _a.content)) {
+                while ((_a = this.getters.getCell(leftPosition)) === null || _a === void 0 ? void 0 : _a.content) {
                     row += 1;
                     leftPosition = { sheetId, col: col - 1, row };
                 }
@@ -34614,8 +34616,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 col = zone.right;
                 if (col <= this.getters.getNumberCols(sheetId)) {
                     let rightPosition = { sheetId, col: col + 1, row };
-                    while (this.getters.getEvaluatedCell(rightPosition).type !== CellValueType.empty ||
-                        ((_b = this.getters.getCell(rightPosition)) === null || _b === void 0 ? void 0 : _b.content)) {
+                    while ((_b = this.getters.getCell(rightPosition)) === null || _b === void 0 ? void 0 : _b.content) {
                         row += 1;
                         rightPosition = { sheetId, col: col + 1, row };
                     }
@@ -42460,11 +42461,10 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
          * next cluster if the given cell is outside a cluster or at the border of a cluster in the given direction.
          */
         getEndOfCluster(startPosition, dim, dir) {
-            const sheet = this.getters.getActiveSheet();
             let currentPosition = startPosition;
             // If both the current cell and the next cell are not empty, we want to go to the end of the cluster
             const nextCellPosition = this.getNextCellPosition(startPosition, dim, dir);
-            let mode = !this.isCellEmpty(currentPosition, sheet.id) && !this.isCellEmpty(nextCellPosition, sheet.id)
+            let mode = !this.isEvaluatedCellEmpty(currentPosition) && !this.isEvaluatedCellEmpty(nextCellPosition)
                 ? "endOfCluster"
                 : "nextCluster";
             while (true) {
@@ -42474,7 +42474,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                     currentPosition.row === nextCellPosition.row) {
                     break;
                 }
-                const isNextCellEmpty = this.isCellEmpty(nextCellPosition, sheet.id);
+                const isNextCellEmpty = this.isEvaluatedCellEmpty(nextCellPosition);
                 if (mode === "endOfCluster" && isNextCellEmpty) {
                     break;
                 }
@@ -42488,13 +42488,24 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             return dim === "cols" ? currentPosition.col : currentPosition.row;
         }
         /**
-         * Check if a cell is empty or undefined in the model. If the cell is part of a merge,
-         * check if the merge containing the cell is empty.
+         * Check if a cell evaluated value is empty. If the cell is part of a merge,
+         * the check applies to the main cell of the merge.
          */
-        isCellEmpty({ col, row }, sheetId = this.getters.getActiveSheetId()) {
+        isEvaluatedCellEmpty({ col, row }) {
+            const sheetId = this.getters.getActiveSheetId();
             const position = this.getters.getMainCellPosition({ sheetId, col, row });
             const cell = this.getters.getEvaluatedCell(position);
             return cell.type === CellValueType.empty;
+        }
+        /**
+         * Checks if a cell is empty (i.e. does not have a content). If the cell is part of a merge,
+         * the check applies to the main cell of the merge.
+         */
+        isCellEmpty({ col, row }) {
+            var _a;
+            const sheetId = this.getters.getActiveSheetId();
+            const position = this.getters.getMainCellPosition({ sheetId, col, row });
+            return !((_a = this.getters.getCell(position)) === null || _a === void 0 ? void 0 : _a.content);
         }
         /** Computes the next cell position in the given direction by crossing through merges and skipping hidden cells.
          *
@@ -44593,8 +44604,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
 
 
     __info__.version = '16.1.33';
-    __info__.date = '2024-01-29T15:36:52.604Z';
-    __info__.hash = 'b8e0395';
+    __info__.date = '2024-01-30T18:34:03.327Z';
+    __info__.hash = 'c03cbf2';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
