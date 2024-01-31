@@ -1,6 +1,6 @@
 /* @odoo-module */
 
-import { Component, useRef, useState } from "@odoo/owl";
+import { Component, useRef, useState, onWillUpdateProps } from "@odoo/owl";
 import { useAutofocus, useService } from "@web/core/utils/hooks";
 
 /**
@@ -25,7 +25,7 @@ import { useAutofocus, useService } from "@web/core/utils/hooks";
 export class FileViewer extends Component {
     static template = "web.FileViewer";
     static components = {};
-    static props = ["files", "startIndex", "close?", "modal?"];
+    static props = ["files", "startIndex", "close?", "modal?", "currentFileIndex?", "documentList"];
     static defaultProps = {
         modal: true,
     };
@@ -57,6 +57,7 @@ export class FileViewer extends Component {
             angle: 0,
         });
         this.ui = useState(useService("ui"));
+        // onWillUpdateProps((newProps)=>console.log(newProps));
     }
 
     onImageLoaded() {
