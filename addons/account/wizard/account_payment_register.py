@@ -891,13 +891,16 @@ class AccountPaymentRegister(models.TransientModel):
             ('reconciled', '=', False),
         ]
         for vals in to_process:
-            payment_lines = vals['payment'].line_ids.filtered_domain(domain)
+            payment = vals['payment']
+            payment_lines = payment.line_ids.filtered_domain(domain)
             lines = vals['to_reconcile']
 
             for account in payment_lines.account_id:
                 (payment_lines + lines)\
                     .filtered_domain([('account_id', '=', account.id), ('reconciled', '=', False)])\
                     .reconcile()
+                if len(payment.partner_bank_id) == 1 and not lines.move_id.partner_bank_id:
+                    lines.move_id.partner_bank_id = payment.partner_bank_id
 
     def _create_payments(self):
         self.ensure_one()

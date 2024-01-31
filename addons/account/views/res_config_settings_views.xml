@@ -326,7 +326,7 @@
                                 </setting>
                             </block>
                         </t>
-                        <block title="Analytics" id="analytic">
+                        <block title="Analytics" id="analytic" groups="account.group_account_user">
                             <setting id="track_costs_revenues" title="Allows you to use the analytic accounting." groups="account.group_account_user" help="Track costs &amp; revenues by project, department, etc"
                                 documentation="/applications/finance/accounting/others/analytic_accounting.html">
                                 <field name="group_analytic_accounting"/>
@@ -334,9 +334,6 @@
                             <setting id="account_budget" title="This allows accountants to manage analytic and crossovered budgets. Once the master budgets and the budgets are defined, the project managers can set the planned amount on each analytic account." groups="account.group_account_user" help="Use budgets to compare actual with expected revenues and costs"
                                 documentation="/applications/finance/accounting/others/adviser/budget.html">
                                 <field name="module_account_budget" widget="upgrade_boolean"/>
-                            </setting>
-                            <setting id="monitor_product_margins" string="Margin Analysis" help="Monitor your product margins from invoices">
-                                <field name="module_product_margin"/>
                             </setting>
                         </block>
                         <field name="is_account_peppol_eligible" invisible="1"/>
@@ -352,11 +349,6 @@
                                     </div>
                                 </div>
                             </div>
-                        </block>
-                        <block title="Storno Accounting" id="storno">
-                            <setting id="enable_storno_accounting" company_dependent="1" help="Use Storno accounting" title="Allows you to use Storno accounting.">
-                                <field name="account_storno"/>
-                            </setting>
                         </block>
                         <block title="Accounting Firms mode" id="quick_edit_mode">
                             <div class="text-muted">

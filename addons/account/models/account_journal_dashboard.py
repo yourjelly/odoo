@@ -313,6 +313,7 @@ class account_journal(models.Model):
         self._fill_bank_cash_dashboard_data(dashboard_data)
         self._fill_sale_purchase_dashboard_data(dashboard_data)
         self._fill_general_dashboard_data(dashboard_data)
+        self._fill_onboarding_data(dashboard_data)
         return dashboard_data
 
     def _fill_dashboard_data_count(self, dashboard_data, model, name, domain):
@@ -411,6 +412,10 @@ class account_journal(models.Model):
             to_check_balance, number_to_check = to_check.get(journal, (0, 0))
             misc_balance, number_misc = misc_totals.get(journal.default_account_id, (0, 0))
             accessible = journal.company_id.id in self.env.company._accessible_branches().ids
+            drag_drop_content = {
+                'image': '/account/static/src/img/bank.svg' if journal.type == 'bank' else '/web/static/img/rfq.svg',
+                'text': _('Drop to import %s transactions.', journal.type),
+            }
 
             dashboard_data[journal.id].update({
                 'number_to_check': number_to_check,
@@ -427,6 +432,7 @@ class account_journal(models.Model):
                 'is_sample_data': journal.has_statement_lines,
                 'nb_misc_operations': number_misc,
                 'misc_operations_balance': currency.format(misc_balance),
+                'drag_drop': drag_drop_content,
             })
 
     def _fill_sale_purchase_dashboard_data(self, dashboard_data):
@@ -506,6 +512,10 @@ class account_journal(models.Model):
                 title_has_sequence_holes = _("Irregularities due to draft, cancelled or deleted bills with a sequence number since last lock date.")
             else:
                 title_has_sequence_holes = _("Irregularities due to draft, cancelled or deleted invoices with a sequence number since last lock date.")
+            drag_drop_content = {
+                'image': '/account/static/src/img/Bill.svg' if journal.type == 'purchase' else '/sale/static/src/img/quotation.svg',
+                'text': _('Drop and let the AI process your bills automatically.') if journal.type == 'purchase' else 'Drop to import your invoices.',
+            }
             dashboard_data[journal.id].update({
                 'number_to_check': count,
                 'to_check_balance': currency.format(amount_total_signed_sum),
@@ -519,6 +529,7 @@ class account_journal(models.Model):
                 'has_sequence_holes': journal.has_sequence_holes,
                 'title_has_sequence_holes': title_has_sequence_holes,
                 'is_sample_data': dashboard_data[journal.id]['entries_count'],
+                'drag_drop': drag_drop_content,
             })
 
     def _fill_general_dashboard_data(self, dashboard_data):
@@ -537,10 +548,38 @@ class account_journal(models.Model):
         for journal in general_journals:
             currency = journal.currency_id or self.env['res.currency'].browse(journal.company_id.sudo().currency_id.id)
             amount_total_signed_sum, count = to_check_vals.get(journal.id, (0, 0))
+            drag_drop_content = {
+                'image': '/web/static/img/folder.svg',
+                'text': _('Drop to create journal entries with attachments.'),
+            }
             dashboard_data[journal.id].update({
                 'number_to_check': count,
                 'to_check_balance': currency.format(amount_total_signed_sum),
+                'drag_drop': drag_drop_content,
             })
+
+    def _fill_onboarding_data(self, dashboard_data):
+        """ Populate journals with onboarding data if they have no entries"""
+        journal_onboarding_map = {
+            'general': 'account_dashboard',
+        }
+        onboarding_data = {}
+        onboardings = self.env['onboarding.onboarding'].search([('route_name', 'in', list(journal_onboarding_map.values()))])
+        onboardings._search_or_create_progress()  # may need try/catch to avoid concurrency issue (see OnboardingController)
+        for onboarding in onboardings:
+            onboarding_data[onboarding.route_name] = onboarding._prepare_rendering_values()
+            onboarding_data[onboarding.route_name]['current_onboarding_state'] = onboarding.current_onboarding_state
+            onboarding_data[onboarding.route_name]['steps'] = [
+                {
+                    'id': step.id,
+                    'title': step.title,
+                    'description': step.description,
+                    'state': onboarding_data[onboarding.route_name]['state'][step.id],
+                    'action': step.panel_step_open_action_name,
+                }
+                for step in onboarding_data[onboarding.route_name]['steps']]
+        for journal in self:
+            dashboard_data[journal.id]['onboarding'] = onboarding_data.get(journal_onboarding_map.get(journal.type))
 
     def _get_open_bills_to_pay_query(self):
         return self.env['account.move']._where_calc([
@@ -681,7 +720,10 @@ class account_journal(models.Model):
 
     def _get_move_action_context(self):
         ctx = self._context.copy()
-        ctx['default_journal_id'] = self.id
+        if not ctx.get('default_journal_id'):
+            ctx['default_journal_id'] = self.id
+        elif not self:
+            self = self.browse(ctx['default_journal_id'])
         if self.type == 'sale':
             ctx['default_move_type'] = 'out_refund' if ctx.get('refund') else 'out_invoice'
         elif self.type == 'purchase':
@@ -718,6 +760,7 @@ class account_journal(models.Model):
             'target': 'new',
             'res_id': new_wizard.id,
             'views': [[view_id, 'form']],
+            'context': self.env.context,
         }
 
     def to_check_ids(self):

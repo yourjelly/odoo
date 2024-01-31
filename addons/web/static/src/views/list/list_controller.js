@@ -106,6 +106,10 @@ export class ListController extends Component {
                 renderer.scrollLeft = rendererScrollPositions.left;
                 renderer.scrollTop = rendererScrollPositions.top;
             }
+            // This is just an idea to test the capability of automatically adding new records in editable list views
+            if (this.editable && this.props.context?.create_new) {
+                this.createRecord();
+            }
         });
 
         this.archiveEnabled =

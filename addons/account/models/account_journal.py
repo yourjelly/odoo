@@ -286,6 +286,17 @@ class AccountJournal(models.Model):
         for journal, pay_method_ids_commands in pay_method_ids_commands_x_journal.items():
             journal.available_payment_method_ids = pay_method_ids_commands
 
+    def get_journal_alias(self):
+        self.ensure_one()
+        if self.alias_domain_id:
+            return self.alias_id.alias_full_name
+        else:
+            return self.search([
+                    ('alias_domain_id', '!=', False),
+                    ('alias_id', '!=', False),
+                    ('type', '=', self.type),
+                   ], limit=1).alias_id.alias_full_name
+
     @api.model
     def _get_reusable_payment_methods(self):
         return {'manual'}
@@ -739,9 +750,15 @@ class AccountJournal(models.Model):
         visible on dashboard if no bank statement source has been defined yet
         """
         # We simply call the setup bar function.
-        return self.env['res.company'].setting_init_bank_account_action()
+        ctx = {
+            'dialog_size': 'medium'
+        }
+        if not self.bank_account_id:
+            ctx['default_linked_journal_id'] = self.id
+        return self.env['res.company'].with_context(ctx).setting_init_bank_account_action()
 
     def action_new_transaction(self):
+        # this makes no sense and should be removed.
         action = self.env['ir.actions.act_window']._for_xml_id('account.action_bank_statement_tree')
         action['context'] = {'default_journal_id': self.id}
         return action
@@ -798,7 +815,7 @@ class AccountJournal(models.Model):
         """
         invoices = self._create_document_from_attachment(attachment_ids)
         action_vals = {
-            'name': _('Generated Documents'),
+            'name': _('Generated Documents'),  # Should this name be based on the context or invoices
             'domain': [('id', 'in', invoices.ids)],
             'res_model': 'account.move',
             'type': 'ir.actions.act_window',

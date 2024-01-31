@@ -31,11 +31,25 @@
         .o_dashboard_graph {
             margin-bottom: -$o-horizontal-padding/2;
         }
+
+        .bill_guide_left, .bill_guide_right {
+            width: 45%;
+        }
+
+        .separator_wrapper {
+            // height: 100px;
+            width: 10%;
+            // .word-separator {
+            //     color: $border-color;
+            // }
+        }
+
     }
 
     &.o_kanban_ungrouped {
+        // Needs a @media size or col-sm-6 col-md-4
         .o_kanban_record {
-            width: 450px;
+            width: 32vw;
         }
     }
 
@@ -55,6 +69,11 @@
         height: 75px;
     }
 
+}
+
+.account_drag_drop_btn {
+    border-style: dashed !important;
+    @extend .btn;
 }
 
 .o_sample_data .o_dashboard_graph.o_graph_linechart > svg g.nv-linesWrap g.nv-group.nv-series-0 {

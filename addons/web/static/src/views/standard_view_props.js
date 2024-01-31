@@ -20,6 +20,7 @@ export const standardViewProps = {
     className: { type: String, optional: true },
     comparison: { type: [Object, { value: null }], optional: true },
     context: { type: Object },
+    createNew: { type: Boolean, optional: true },
     createRecord: { type: Function, optional: true },
     display: { type: Object, optional: true },
     domain: { type: Array },

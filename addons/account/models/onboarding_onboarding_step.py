@@ -89,37 +89,6 @@ class OnboardingStep(models.Model):
             'context': {'search_default_sale': True, 'search_default_purchase': True, 'active_test': False},
         }
 
-    @api.model
-    def action_open_step_chart_of_accounts(self):
-        """ Called by the 'Chart of Accounts' button of the dashboard onboarding panel."""
-        company = self.env.company
-        self.sudo().action_validate_step('account.onboarding_onboarding_step_chart_of_accounts')
-
-        # If an opening move has already been posted, we open the tree view showing all the accounts
-        if company.opening_move_posted():
-            return 'account.action_account_form'
-
-        # Otherwise, we create the opening move
-        company.create_op_move_if_non_existant()
-
-        # Then, we open will open a custom tree view allowing to edit opening balances of the account
-        view_id = self.env.ref('account.init_accounts_tree').id
-        # Hide the current year earnings account as it is automatically computed
-        domain = [
-            *self.env['account.account']._check_company_domain(company),
-            ('account_type', '!=', 'equity_unaffected'),
-        ]
-        return {
-            'type': 'ir.actions.act_window',
-            'name': _('Chart of Accounts'),
-            'res_model': 'account.account',
-            'view_mode': 'tree',
-            'limit': 99999999,
-            'search_view_id': [self.env.ref('account.view_account_search').id],
-            'views': [[view_id, 'list'], [False, 'form']],
-            'domain': domain,
-        }
-
     # STEPS WITHOUT PANEL
     @api.model
     def action_open_step_sales_tax(self):
