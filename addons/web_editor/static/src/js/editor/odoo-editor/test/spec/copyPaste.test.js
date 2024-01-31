@@ -1474,6 +1474,24 @@ describe('Paste', () => {
                     contentAfter: '<ul><li>123</li><li>456[]abc</li><li>def</li><li>ghi</li></ul>',
                 });
             });
+            it('should insert a list and a p tag inside a new list', async () => {
+                await testEditor(BasicEditor, {
+                    contentBefore: '<ul><li>[]<br></li></ul>',
+                    stepFunction: async editor => {
+                        await pasteHtml(editor, '<ul><li>abc</li><li>def</li></ul><p>ghi</p>');
+                    },
+                    contentAfter: '<ul><li>abc</li><li>def</li><li>ghi[]<br></li></ul>',
+                });
+            })
+            it('should not unwrap a list twice when pasting on new list', async () => {
+                await testEditor(BasicEditor, {
+                    contentBefore: '<ul><li>[]<br></li></ul>',
+                    stepFunction: async editor => {
+                        await pasteHtml(editor, '<ul><ul><li>abc</li><li>def</li></ul></ul>');
+                    },
+                    contentAfter: '<ul><ul><li>abc</li><li>def[]<br></li></ul></ul>',
+                });
+            });
         });
     });
 
