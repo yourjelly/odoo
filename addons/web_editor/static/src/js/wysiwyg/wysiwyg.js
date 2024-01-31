@@ -34,6 +34,7 @@ import { ConflictDialog } from "./conflict_dialog";
 import { getOrCreateLink } from "./widgets/link";
 import { shouldUnlink } from '@web_editor/js/wysiwyg/widgets/link_tools';
 import { LinkDialog } from "./widgets/link_dialog";
+import { TestWidget } from "./widgets/test_widget";
 import {
     Component,
     useRef,
@@ -1475,6 +1476,22 @@ export class Wysiwyg extends Component {
         }
     }
     /**
+     * 
+     */
+    openTestWidget() {
+        const restore = preserveCursor(this.odooEditor.document);
+        const insert = function(value) {
+            this.odooEditor.execCommand('insert', String(value));
+        }.bind(this);
+        this.env.services.dialog.add(
+            TestWidget,
+            {
+                insert,
+            },
+            {onClose: restore}
+        )
+    }
+    /**
      * Open one of the ChatGPTDialogs to generate or modify content.
      *
      * @param {'prompt'|'alternatives'} [mode='prompt']
@@ -2403,6 +2420,14 @@ export class Wysiwyg extends Component {
                 priority: 1,
                 isDisabled: () => !this.odooEditor.isSelectionInBlockRoot(),
                 callback: async () => this.openChatGPTDialog(),
+            },
+            {
+                category: _t('Calculators'),
+                name: _t('Calculator'),
+                description: _t('Open a test widget'),
+                fontawesome: 'fa-calculator',
+                isDisabled: () => !this.odooEditor.isSelectionInBlockRoot(),
+                callback: async () => this.openTestWidget(),
             },
         ];
         if (!editorOptions.inlineStyle) {

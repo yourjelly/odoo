@@ -107,6 +107,27 @@
             </div>
         </Dialog>
     </div>
+    <t t-name="web_editor.TestWidget">
+        <Dialog size="'lg'" title="'A simple calculator'">
+            <form class="col-lg-8">
+                <div t-attf-class="mb-3 row">
+                    <label class="col-form-label col-md-3">Value 1</label>
+                    <div class="col-md-9">
+                        <input type="number" class="form-control" required="required" t-model="state.valueFirst"/>
+                    </div>
+                </div>
+                <div t-attf-class="mb-3 row">
+                    <label class="col-form-label col-md-3" for="o_link_dialog_url_input">Value 2</label>
+                    <div class="col-md-9">
+                        <input type="number" class="form-control" required="required" t-model="state.valueSecond"/>
+                    </div>
+                </div>
+                <t t-set-slot="footer">
+                    <button class="btn btn-primary" t-on-click="this.insert">Insert</button>
+                </t>
+            </form>
+        </Dialog>
+    </t>
 
     <we-customizeblock-option t-name="web_editor.LinkTools">
         <div style="display: contents" t-ref="linkComponentWrapper">
