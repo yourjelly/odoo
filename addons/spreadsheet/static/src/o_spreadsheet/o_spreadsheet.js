@@ -49291,11 +49291,10 @@
          * next cluster if the given cell is outside a cluster or at the border of a cluster in the given direction.
          */
         getEndOfCluster(startPosition, dim, dir) {
-            const sheet = this.getters.getActiveSheet();
             let currentPosition = startPosition;
             // If both the current cell and the next cell are not empty, we want to go to the end of the cluster
             const nextCellPosition = this.getNextCellPosition(startPosition, dim, dir);
-            let mode = !this.isCellEmpty(currentPosition, sheet.id) && !this.isCellEmpty(nextCellPosition, sheet.id)
+            let mode = !this.isEvaluatedCellEmpty(currentPosition) && !this.isEvaluatedCellEmpty(nextCellPosition)
                 ? "endOfCluster"
                 : "nextCluster";
             while (true) {
@@ -49305,7 +49304,7 @@
                     currentPosition.row === nextCellPosition.row) {
                     break;
                 }
-                const isNextCellEmpty = this.isCellEmpty(nextCellPosition, sheet.id);
+                const isNextCellEmpty = this.isEvaluatedCellEmpty(nextCellPosition);
                 if (mode === "endOfCluster" && isNextCellEmpty) {
                     break;
                 }
@@ -49319,10 +49318,20 @@
             return dim === "cols" ? currentPosition.col : currentPosition.row;
         }
         /**
-         * Check if a cell is empty or undefined in the model. If the cell is part of a merge,
-         * check if the merge containing the cell is empty.
+         * Checks if a cell is empty (i.e. does not have a content). If the cell is part of a merge,
+         * the check applies to the main cell of the merge.
          */
-        isCellEmpty({ col, row }, sheetId = this.getters.getActiveSheetId()) {
+        isCellEmpty({ col, row }) {
+            const sheetId = this.getters.getActiveSheetId();
+            const position = this.getters.getMainCellPosition({ sheetId, col, row });
+            return !(this.getters.getCorrespondingFormulaCell(position) || this.getters.getCell(position)?.content);
+        }
+        /**
+         * Checks if a cell evaluated value is empty. If the cell is part of a merge,
+         * the check applies to the main cell of the merge.
+         */
+        isEvaluatedCellEmpty({ col, row }) {
+            const sheetId = this.getters.getActiveSheetId();
             const position = this.getters.getMainCellPosition({ sheetId, col, row });
             const cell = this.getters.getEvaluatedCell(position);
             return cell.type === CellValueType.empty;
@@ -51611,9 +51620,9 @@
     Object.defineProperty(exports, '__esModule', { value: true });
 
 
-    __info__.version = '16.4.20';
-    __info__.date = '2024-01-29T15:40:01.780Z';
-    __info__.hash = '06c0ecf';
+    __info__.version = '16.4.19';
+    __info__.date = '2024-01-31T10:10:39.860Z';
+    __info__.hash = 'f994899';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
