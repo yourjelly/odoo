@@ -33,3 +33,10 @@ class ProductTemplate(models.Model):
     alert_time = fields.Integer(string='Alert Date',
         help='Number of days before the Expiration Date after which an alert should be'
         ' raised on the lot/serial number. It will be computed on the lot/serial number.')
+
+class ProductCategory(models.Model):
+    _inherit = 'product.category'
+
+    def _selection_removal_strategy(self):
+        # Override to add the `fefo` strategy.
+        return super()._selection_removal_strategy() + [('fefo', '(FEFO) First Expiry First Out')]

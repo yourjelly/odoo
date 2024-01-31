@@ -11,7 +11,6 @@ from odoo.exceptions import UserError, ValidationError
 from odoo.osv import expression
 from odoo.tools.float_utils import float_compare
 
-
 class Location(models.Model):
     _name = "stock.location"
     _description = "Inventory Locations"
@@ -72,8 +71,8 @@ class Location(models.Model):
     return_location = fields.Boolean('Is a Return Location?', help='Check this box to allow using this location as a return location.')
     replenish_location = fields.Boolean('Replenish Location', copy=False, compute="_compute_replenish_location", readonly=False, store=True,
                                         help='Activate this function to get all quantities to replenish at this particular location')
-    removal_strategy_id = fields.Many2one(
-        'product.removal', 'Removal Strategy',
+    removal_strategy = fields.Selection(
+        lambda self: self.env['product.category']._selection_removal_strategy(), 'Removal Strategy',
         help="Defines the default method used for suggesting the exact location (shelf) "
              "where to take the products from, which lot etc. for this location. "
              "This method can be enforced at the product category level, "

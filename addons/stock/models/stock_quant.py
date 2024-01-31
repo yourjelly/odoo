@@ -603,12 +603,12 @@ class StockQuant(models.Model):
     def _get_removal_strategy(self, product_id, location_id):
         product_id = product_id.sudo()
         location_id = location_id.sudo()
-        if product_id.categ_id.removal_strategy_id:
-            return product_id.categ_id.removal_strategy_id.method
+        if product_id.categ_id.removal_strategy:
+            return product_id.categ_id.removal_strategy
         loc = location_id
         while loc:
-            if loc.removal_strategy_id:
-                return loc.removal_strategy_id.method
+            if loc.removal_strategy:
+                return loc.removal_strategy
             loc = loc.location_id
         return 'fifo'
 

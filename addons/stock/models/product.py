@@ -1017,8 +1017,8 @@ class ProductCategory(models.Model):
     route_ids = fields.Many2many(
         'stock.route', 'stock_route_categ', 'categ_id', 'route_id', 'Routes',
         domain=[('product_categ_selectable', '=', True)])
-    removal_strategy_id = fields.Many2one(
-        'product.removal', 'Force Removal Strategy',
+    removal_strategy = fields.Selection(
+        selection='_selection_removal_strategy', string='Force Removal Strategy',
         help="Set a specific removal strategy that will be used regardless of the source location for this product category.\n\n"
              "FIFO: products/lots that were stocked first will be moved out first.\n"
              "LIFO: products/lots that were stocked last will be moved out first.\n"
@@ -1045,6 +1045,15 @@ class ProductCategory(models.Model):
                 base_cat = base_cat.parent_id
                 routes |= base_cat.route_ids
             category.total_route_ids = routes
+
+    @api.model
+    def _selection_removal_strategy(self):
+        return [
+            ('fifo', 'FIFO (First In First Out)'),
+            ('lifo', 'LIFO (Last In First Out)'),
+            ('closest', 'Closest Location'),
+            ('least_packages', 'Least Packages'),
+        ]
 
     def _search_filter_for_stock_putaway_rule(self, operator, value):
         assert operator == '='

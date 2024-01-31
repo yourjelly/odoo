@@ -5,15 +5,6 @@ from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 from odoo.tools.float_utils import float_compare
 
-
-class RemovalStrategy(models.Model):
-    _name = 'product.removal'
-    _description = 'Removal Strategy'
-
-    name = fields.Char('Name', required=True, translate=True)
-    method = fields.Char("Method", required=True, translate=True, help="FIFO, LIFO...")
-
-
 class StockPutawayRule(models.Model):
     _name = 'stock.putaway.rule'
     _order = 'sequence,product_id'
