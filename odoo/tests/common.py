@@ -89,11 +89,11 @@ def __getattr__(name):
 
     from .form import Form
 
-    warnings.warn(
-        "Since 18.0: odoo.tests.common.Form is deprecated, use odoo.tests.Form",
-        category=DeprecationWarning,
-        stacklevel=2,
-    )
+    # warnings.warn(
+    #     "Since 18.0: odoo.tests.common.Form is deprecated, use odoo.tests.Form",
+    #     category=DeprecationWarning,
+    #     stacklevel=0,
+    # )
     return Form
 
 

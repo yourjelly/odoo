@@ -19,7 +19,7 @@ class PurchaseOrderLine(models.Model):
         string='Description', required=True, compute='_compute_price_unit_and_date_planned_and_name', store=True, readonly=False)
     sequence = fields.Integer(string='Sequence', default=10)
     product_qty = fields.Float(string='Quantity', digits='Product Unit of Measure', required=True,
-                               compute='_compute_product_qty', store=True, readonly=False)
+                               compute='_compute_product_qty', store=True, readonly=False, default=1.0)
     product_uom_qty = fields.Float(string='Total Quantity', compute='_compute_product_uom_qty', store=True)
     date_planned = fields.Datetime(
         string='Expected Arrival', index=True,
@@ -274,11 +274,12 @@ class PurchaseOrderLine(models.Model):
             return
 
         # Reset date, price and quantity since _onchange_quantity will provide default values
-        self.price_unit = self.product_qty = 0.0
+        # self.price_unit = self.product_qty = 0.0
 
         self._product_id_change()
+        # self.product_id.seller_ids
 
-        self._suggest_quantity()
+        # self._suggest_quantity()
 
     def _product_id_change(self):
         if not self.product_id:
@@ -410,10 +411,12 @@ class PurchaseOrderLine(models.Model):
                 continue
             line.product_packaging_qty = line.product_packaging_id._compute_qty(line.product_qty, line.product_uom)
 
-    @api.depends('product_packaging_qty')
+    @api.depends('product_packaging_qty', 'display_type')
     def _compute_product_qty(self):
         for line in self:
-            if line.product_packaging_id:
+            if line.display_type:
+                line.product_qty = 0.0
+            elif line.product_packaging_id:
                 packaging_uom = line.product_packaging_id.product_uom_id
                 qty_per_packaging = line.product_packaging_id.qty
                 product_qty = packaging_uom._compute_quantity(line.product_packaging_qty * qty_per_packaging, line.product_uom)
@@ -463,14 +466,18 @@ class PurchaseOrderLine(models.Model):
         '''
         if not self.product_id:
             return
-        seller_min_qty = self.product_id.seller_ids\
-            .filtered(lambda r: r.partner_id == self.order_id.partner_id and (not r.product_id or r.product_id == self.product_id))\
-            .sorted(key=lambda r: r.min_qty)
+        # print(self.env.company)
+        seller_min_qty = self.product_id.seller_ids
+        # print(self.env.company)
         if seller_min_qty:
-            self.product_qty = seller_min_qty[0].min_qty or 1.0
+            # print(f"product_qty:    {self.product_qty}")
+            # print(f"seller_min_qty: {seller_min_qty[0].min_qty}")
+            # self.product_qty = seller_min_qty[0].min_qty or 1.0
             self.product_uom = seller_min_qty[0].product_uom
+            pass
         else:
-            self.product_qty = 1.0
+            # self.product_qty = 1.0
+            pass
 
     def _get_product_catalog_lines_data(self):
         """ Return information about purchase order lines in `self`.
@@ -567,7 +574,7 @@ class PurchaseOrderLine(models.Model):
     def _prepare_add_missing_fields(self, values):
         """ Deduce missing required fields from the onchange """
         res = {}
-        onchange_fields = ['name', 'price_unit', 'product_qty', 'product_uom', 'taxes_id', 'date_planned']
+        onchange_fields = ['name', 'price_unit', 'product_uom', 'taxes_id', 'date_planned']
         if values.get('order_id') and values.get('product_id') and any(f not in values for f in onchange_fields):
             line = self.new(values)
             line.onchange_product_id()

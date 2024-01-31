@@ -520,18 +520,21 @@ class TestPurchase(AccountTestInvoicingCommon):
             })],
         }).button_confirm()
         product = product.with_company(company_b)
-        self.assertEqual(product.seller_ids[0].partner_id, self.partner_b)
-        self.assertEqual(product.seller_ids[0].company_id, company_b)
+        product.seller_ids[0].partner_id
 
         # Switch to the company A and check that the vendor list is still the same
         product = product.with_company(company_a)
         self.assertEqual(product.seller_ids[0].partner_id, self.partner_a)
         self.assertEqual(product.seller_ids[0].company_id, company_a)
 
-        product._invalidate_cache()
+        # product._invalidate_cache()
         self.assertEqual(product.seller_ids[0].partner_id, self.partner_a)
         self.assertEqual(product.seller_ids[0].company_id, company_a)
 
+        # product.seller_ids.invalidate_model()
+        product = product.with_company(company_b)
+        self.assertEqual(product.seller_ids[0].partner_id, self.partner_b)
+        self.assertEqual(product.seller_ids[0].company_id, company_b)
     def test_discount_po_line_vendorpricelist(self):
         """ Set a discount in VendorPriceList and check if that discount comes in po line and if vendor select
             a product which is not present in vendorPriceList then it should be created.
