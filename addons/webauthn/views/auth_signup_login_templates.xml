@@ -1,10 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <template id="webauthn.login" inherit_id="web.login" name="Sign up - Reset Password">
-        <xpath expr="//button[@type='submit']/../div[1]" position="after">
-            <div class="text-start small">
-                <a href="#" onclick="webauthn_login()">Login with Passkey</a>
-            </div>
+        <xpath expr="//div[hasclass('o_login_auth')]" position="before">
+            <t t-if="not debug">
+                <div class="text-start small">
+                    <a href="#" onclick="webauthn_login()">Login with Passkey</a>
+                </div>
+            </t>
+            <t t-if="debug">
+                <button class="btn btn-link btn-sm" onclick="webauthn_login()">Login with Passkey</button>
+            </t>
         </xpath>
     </template>
 </odoo>
