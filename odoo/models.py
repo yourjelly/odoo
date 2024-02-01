@@ -3882,6 +3882,7 @@ class BaseModel(metaclass=MetaModel):
         """
         self.check_field_access_rights('read', [field.name])
         # determine which fields can be prefetched
+        prefetch_lang = self.env.context.get('prefetch_lang', True)
         if self._context.get('prefetch_fields', True) and field.prefetch:
             fnames = [
                 name
@@ -3890,6 +3891,8 @@ class BaseModel(metaclass=MetaModel):
                 if f.prefetch == field.prefetch
                 # discard fields with groups that the user may not access
                 if not (f.groups and not self.user_has_groups(f.groups))
+                # discard translated fields if prefetch_translations is False
+                if not (not prefetch_lang and f.translate)
             ]
             if field.name not in fnames:
                 fnames.append(field.name)
