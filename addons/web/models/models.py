@@ -166,7 +166,7 @@ class Base(models.AbstractModel):
 
         result = {}
         for group in self._read_progress_bar(domain, group_by, progress_bar):
-            group_by_value = adapt(group[group_by])
+            group_by_value = str(adapt(group[group_by]))
             field_value = group[progress_bar['field']]
             if group_by_value not in result:
                 result[group_by_value] = dict.fromkeys(progress_bar['colors'], 0)
