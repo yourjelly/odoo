@@ -1,0 +1,3 @@
+"id","name","model_id:id","group_id:id","perm_read","perm_write","perm_create","perm_unlink"
+access_pos_terminal,access.pos.terminal,model_pos_terminal,base.group_system,1,1,1,1
+access_pos_terminal_user,access.pos.terminal,model_pos_terminal,point_of_sale.group_pos_user,1,0,0,0
