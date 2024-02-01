@@ -5583,6 +5583,12 @@
         let { col, row } = env.model.getters.getPosition();
         env.model.dispatch("OPEN_CELL_POPOVER", { col, row, popoverType: "LinkEditor" });
     };
+    const INSERT_LINK_NAME = (env) => {
+        const sheetId = env.model.getters.getActiveSheetId();
+        const { col, row } = env.model.getters.getPosition();
+        const cell = env.model.getters.getCell(sheetId, col, row);
+        return cell && cell.isLink() ? _lt("Edit link") : _lt("Insert link");
+    };
     //------------------------------------------------------------------------------
     // Filters action
     //------------------------------------------------------------------------------
@@ -5720,7 +5726,7 @@
         action: DELETE_CELL_SHIFT_LEFT,
     })
         .add("insert_link", {
-        name: _lt("Insert link"),
+        name: INSERT_LINK_NAME,
         separator: true,
         sequence: 150,
         action: INSERT_LINK,
@@ -43193,8 +43199,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
 
 
     __info__.version = '16.0.30';
-    __info__.date = '2024-01-29T15:35:19.499Z';
-    __info__.hash = '636dde1';
+    __info__.date = '2024-02-01T10:34:03.183Z';
+    __info__.hash = 'c01c583';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
