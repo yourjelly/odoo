@@ -41,6 +41,7 @@ from contextlib import contextmanager, ExitStack
 from datetime import datetime
 from functools import lru_cache
 from itertools import zip_longest as izip_longest
+from passlib.context import CryptContext
 from unittest.mock import patch, _patch
 from xmlrpc import client as xmlrpclib
 
@@ -799,6 +800,16 @@ class TransactionCase(BaseCase):
         cls.addClassCleanup(cls.cr.close)
 
         cls.env = api.Environment(cls.cr, odoo.SUPERUSER_ID, {})
+
+        # speedup CryptContext. Many user an password are done during tests, avoid spending time hasing password with many rounds
+        def _crypt_context(self):  # noqa: ARG001
+            return CryptContext(
+                ['pbkdf2_sha512', 'plaintext'],
+                deprecated=['auto'],
+                pbkdf2_sha512__rounds=1,
+            )
+        cls._crypt_context_patcher = patch('odoo.addons.base.models.res_users.Users._crypt_context', _crypt_context)
+        cls.startClassPatcher(cls._crypt_context_patcher)
 
     def setUp(self):
         super().setUp()
@@ -1743,7 +1754,7 @@ class HttpCase(TransactionCase):
             # than this transaction.
             self.cr.flush()
             self.cr.clear()
-            uid = self.registry['res.users'].authenticate(session.db, user, password, {'interactive': False})
+            uid = self.env['res.users'].search([('login', '=', user)]).id
             env = api.Environment(self.cr, uid, {})
             session.uid = uid
             session.login = user
