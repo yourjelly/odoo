@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="auth_passkey.VerifyIdentityPasskeyButton">
+        <a
+            t-att-title="title"
+            t-on-click.prevent.stop="identityVerificationPasskey"
+            role="button"
+            data-hotkey="a"
+        >
+            <span class="btn btn-primary">Use Passkey</span>
+        </a>
+    </t>
+
+</templates>

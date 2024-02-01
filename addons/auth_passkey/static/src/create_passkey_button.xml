@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="auth_passkey.CreatePasskeyButton">
+        <a
+            t-att-title="title"
+            t-on-click.prevent.stop="createNewPasskey"
+            role="button"
+            data-hotkey="a"
+        >
+            <span class="btn btn-primary">Add Passkey</span>
+        </a>
+    </t>
+
+</templates>

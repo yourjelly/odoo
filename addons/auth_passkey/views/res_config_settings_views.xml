@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.auth.passkey</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base_setup.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//setting[@id='access_rights']" position="after">
+                <setting string="Enable Password After Reset" help="Allow users to re-enable their login via password by resetting their password">
+                    <field name="auth_passkey_reset_enabled"/>
+                </setting>
+                <setting string="Allow Password Deletion" help="Allow users to delete their own password">
+                    <field name="auth_passkey_allow_delete_password"/>
+                </setting>
+            </xpath>
+        </field>
+    </record>
+</odoo>
