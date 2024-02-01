@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record model="ir.ui.view" id="webauthn_users_preferences_hr">
+        <field name="name">webauthn.users.preferences.hr</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="hr.res_users_view_form_profile"/>
+        <field name="arch" type="xml">
+            <form position="attributes">
+                <attribute name="js_class">webauthn_insert_creds_form_hr</attribute>
+            </form>
+        </field>
+    </record>
+</odoo>

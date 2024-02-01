@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record model="ir.ui.view" id="webauthn_users_form">
+        <field name="name">webauthn.users.form</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form"/>
+        <field name="arch" type="xml">
+            <form position="attributes">
+                <attribute name="js_class">webauthn_insert_creds_form</attribute>
+            </form>
+            <notebook>
+                <page string="Passkeys" name="passkeys">
+                    <field name="webauth_key_ids"/>
+                </page>
+            </notebook>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="webauthn_users_preferences">
+        <field name="name">webauthn.users.preferences</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form_simple_modif"/>
+        <field name="arch" type="xml">
+            <form position="attributes">
+                <attribute name="js_class">webauthn_insert_creds_form</attribute>
+            </form>
+            <page string="Account Security" name="page_account_security">
+                <group string="Passkeys">
+                    <div colspan="2">
+                        <field name="webauth_key_ids" colspan="4"/>
+                    </div>
+                </group>
+            </page>
+        </field>
+    </record>
+</odoo>
