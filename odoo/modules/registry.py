@@ -756,6 +756,8 @@ class Registry(Mapping):
         """ Clear the caches associated to methods decorated with
         ``tools.ormcache``.
         """
+
+        print('clearing all caches')
         for cache_name, caches in _CACHES_BY_KEY.items():
             for cache in caches:
                 self.__caches[cache].clear()

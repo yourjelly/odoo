@@ -524,3 +524,19 @@ class TestSkipMethof(BaseCase):
     @skip
     def test_skip_method(self):
         raise Exception('This should be skipped')
+    
+class TestOrmCacheWarmup(TransactionCase):
+    def test_01_ormcache_warmup(self):
+        with self.assertQueryCount(system=0):
+            self.env['ir.model.data']._xmlid_lookup('base.main_company')
+            self.env['ir.model.data']._xmlid_lookup('base.module_base')
+            self.env['ir.model.data']._xmlid_lookup('base.user_root')
+            self.env['ir.model.data']._xmlid_lookup('base.autovacuum_job')
+
+    def test_02_ormcache_warmup(self):
+        # second method to be executed should also have the cache warmup
+        with self.assertQueryCount(system=0):
+            self.env['ir.model.data']._xmlid_lookup('base.main_company')
+            self.env['ir.model.data']._xmlid_lookup('base.module_base')
+            self.env['ir.model.data']._xmlid_lookup('base.user_root')
+            self.env['ir.model.data']._xmlid_lookup('base.autovacuum_job')

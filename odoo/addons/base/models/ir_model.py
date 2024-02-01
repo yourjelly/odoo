@@ -2179,6 +2179,7 @@ class IrModelData(models.Model):
         result = self.env.cr.fetchone()
         if not (result and result[1]):
             raise ValueError('External ID not found in the system: %s' % xmlid)
+        print(xmlid, result)
         return result
 
     @api.model

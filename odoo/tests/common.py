@@ -766,7 +766,7 @@ class TransactionCase(BaseCase):
     env: api.Environment = None
     cr: Cursor = None
     muted_registry_logger = mute_logger(odoo.modules.registry._logger.name)
-
+    warmups = {}
 
     @classmethod
     def _gc_filestore(cls):
@@ -777,6 +777,30 @@ class TransactionCase(BaseCase):
         with odoo.registry(get_db_name()).cursor() as cr:
             gc_env = api.Environment(cr, odoo.SUPERUSER_ID, {})
             gc_env['ir.attachment']._gc_file_store_unsafe()
+
+    @classmethod
+    def _warmup(cls):
+        """
+        Some value are frecently used and should be stored in the ormcache, but by nature,
+        test will frenquently invalidate this cache. Actually, almost all test will stat
+        with an empty ormcache.
+        Having an empty ormcache to starts ensure that the test is not biased by some
+        value added in previous tests but drastically reduce performances.
+        This method is called before each test and should be used to fill the ormcache
+        with some frecently used value, based on the state of the database before the test.
+        """
+        # xmlids
+        if 'xmlids' not in cls.warmups:
+            _logger.info('Warming up xmlids')
+            cls.warmups['xmlids'] = [
+                (f'{imd.module}.{imd.name}', (imd.model, imd.res_id))
+                for imd in cls.env['ir.model.data'].search_fetch([], ['module', 'name', 'model', 'res_id'])
+                if imd.res_id and not imd.model.startswith('ir.model') and imd.module in ['base', 'mail', 'web']
+            ]
+        model = cls.env['ir.model.data']
+        cache = model._xmlid_lookup.cache
+        for key, value in cls.warmups['xmlids']:
+            cache.add_value(model, key, cache_value=value)
 
     @classmethod
     def setUpClass(cls):
@@ -810,6 +834,7 @@ class TransactionCase(BaseCase):
             )
         cls._crypt_context_patcher = patch('odoo.addons.base.models.res_users.Users._crypt_context', _crypt_context)
         cls.startClassPatcher(cls._crypt_context_patcher)
+        cls._warmup()
 
     def setUp(self):
         super().setUp()
@@ -842,6 +867,7 @@ class TransactionCase(BaseCase):
         self._savepoint_id = next(savepoint_seq)
         self.cr.execute('SAVEPOINT test_%d' % self._savepoint_id)
         self.addCleanup(self.cr.execute, 'ROLLBACK TO SAVEPOINT test_%d' % self._savepoint_id)
+        self._warmup()
 
 
 class SingleTransactionCase(BaseCase):
