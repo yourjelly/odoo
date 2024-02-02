@@ -23,7 +23,7 @@ SALE_ORDER_STATE = [
     ('draft', "Quotation"),
     ('sent', "Quotation Sent"),
     ('sale', "Sales Order"),
-    ('cancel', "Cancelled"),
+    ('cancel', "Canceled"),
 ]
 
 

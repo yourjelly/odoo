@@ -1861,7 +1861,7 @@
                     </record>
                     <record id="tax_report_line_185" model="account.report.line">
                         <field name="hierarchy_level">3</field>
-                        <field name="name">185 - Amount of cancelled credit, remaining chargeable, not reimbursed for investment property</field>
+                        <field name="name">185 - Amount of canceled credit, remaining chargeable, not reimbursed for investment property</field>
                         <field name="code">l10n_ma_vat_185</field>
                         <field name="expression_ids">
                             <record id="tax_report_line_185_tax" model="account.report.expression">

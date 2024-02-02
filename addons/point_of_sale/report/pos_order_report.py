@@ -18,7 +18,7 @@ class PosOrderReport(models.Model):
     product_tmpl_id = fields.Many2one('product.template', string='Product Template', readonly=True)
     state = fields.Selection(
         [('draft', 'New'), ('paid', 'Paid'), ('done', 'Posted'),
-         ('invoiced', 'Invoiced'), ('cancel', 'Cancelled')],
+         ('invoiced', 'Invoiced'), ('cancel', 'Canceled')],
         string='Status', readonly=True)
     user_id = fields.Many2one('res.users', string='User', readonly=True)
     price_total = fields.Float(string='Total Price', readonly=True)

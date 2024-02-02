@@ -2230,7 +2230,7 @@ class PosSession(models.Model):
 
     def log_partner_message(self, partner_id, action, message_type):
         if message_type == 'ACTION_CANCELLED':
-            body = 'Action cancelled ({ACTION})'.format(ACTION=action)
+            body = 'Action canceled ({ACTION})'.format(ACTION=action)
         elif message_type == 'CASH_DRAWER_ACTION':
             body = 'Cash drawer opened ({ACTION})'.format(ACTION=action)
 

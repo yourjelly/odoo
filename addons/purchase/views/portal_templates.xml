@@ -113,7 +113,7 @@
                               <i class="fa fa-fw fa-file-text" role="img" aria-label="Waiting for Bill" title="Waiting for Bill"></i><span class="d-none d-md-inline"> Waiting for Bill</span>
                           </span>
                           <span t-if="order.state == 'cancel'" class="badge rounded-pill text-bg-secondary">
-                              <i class="fa fa-fw fa-remove" role="img" aria-label="Cancelled" title="Cancelled"></i><span class="d-none d-md-inline"> Cancelled</span>
+                              <i class="fa fa-fw fa-remove" role="img" aria-label="Canceled" title="Canceled"></i><span class="d-none d-md-inline"> Canceled</span>
                           </span>
                           <span t-if="order.state == 'done'" class="badge rounded-pill text-bg-success">
                               <i class="fa fa-fw fa-check" role="img" aria-label="Done" title="Done"></i><span class="d-none d-md-inline"> Done</span>

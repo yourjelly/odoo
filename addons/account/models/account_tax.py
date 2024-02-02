@@ -149,7 +149,7 @@ class AccountTax(models.Model):
         check_company=True,
         domain="[('deprecated', '=', False)]",
         comodel_name='account.account',
-        help="Account used to transition the tax amount for cash basis taxes. It will contain the tax amount as long as the original invoice has not been reconciled ; at reconciliation, this amount cancelled on this account and put on the regular tax account.")
+        help="Account used to transition the tax amount for cash basis taxes. It will contain the tax amount as long as the original invoice has not been reconciled ; at reconciliation, this amount canceled on this account and put on the regular tax account.")
     invoice_repartition_line_ids = fields.One2many(
         string="Distribution for Invoices",
         comodel_name="account.tax.repartition.line",

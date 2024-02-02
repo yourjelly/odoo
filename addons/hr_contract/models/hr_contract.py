@@ -45,7 +45,7 @@ class Contract(models.Model):
         ('draft', 'New'),
         ('open', 'Running'),
         ('close', 'Expired'),
-        ('cancel', 'Cancelled')
+        ('cancel', 'Canceled')
     ], string='Status', group_expand='_expand_states', copy=False,
         tracking=True, help='Status of the contract', default='draft')
     company_id = fields.Many2one('res.company', compute='_compute_employee_contract', store=True, readonly=False,
@@ -144,7 +144,7 @@ class Contract(models.Model):
             if self.search_count(domain):
                 raise ValidationError(
                     _(
-                        'An employee can only have one contract at the same time. (Excluding Draft and Cancelled contracts).\n\nEmployee: %(employee_name)s',
+                        'An employee can only have one contract at the same time. (Excluding Draft and Canceled contracts).\n\nEmployee: %(employee_name)s',
                         employee_name=contract.employee_id.name
                     )
                 )

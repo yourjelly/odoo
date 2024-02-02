@@ -11,7 +11,7 @@
                 <span id="display_purchase_orders_alert"
                         invisible="not display_purchase_orders_alert"
                         groups="purchase.group_purchase_user">
-                    There are active purchase orders linked to this sale order that are not cancelled automatically! <br/>
+                    There are active purchase orders linked to this sale order that are not canceled automatically! <br/>
                 </span>
             </span>
         </field>

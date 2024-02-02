@@ -5,7 +5,7 @@ from odoo import api, fields, models, tools
 
 STATE = [
     ('none', 'Non Member'),
-    ('canceled', 'Cancelled Member'),
+    ('canceled', 'Canceled Member'),
     ('old', 'Old Member'),
     ('waiting', 'Waiting Member'),
     ('invoiced', 'Invoiced Member'),

@@ -100,7 +100,7 @@ class PurchaseOrder(models.Model):
         ('to approve', 'To Approve'),
         ('purchase', 'Purchase Order'),
         ('done', 'Locked'),
-        ('cancel', 'Cancelled')
+        ('cancel', 'Canceled')
     ], string='Status', readonly=True, index=True, copy=False, default='draft', tracking=True)
     order_line = fields.One2many('purchase.order.line', 'order_id', string='Order Lines', copy=True)
     notes = fields.Html('Terms and Conditions')

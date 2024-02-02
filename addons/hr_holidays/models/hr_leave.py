@@ -1421,7 +1421,7 @@ Attempting to double-book your time off won't magically make your vacation 2x be
                     model_description='Time Off',
                     subject=_('Canceled Time Off'),
                     body=_(
-                        "%(leave_name)s has been cancelled with the justification: <br/> %(reason)s.",
+                        "%(leave_name)s has been canceled with the justification: <br/> %(reason)s.",
                         leave_name=leave.display_name,
                         reason=reason
                     ),

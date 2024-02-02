@@ -67,7 +67,7 @@ class MailMail(models.Model):
         ('sent', 'Sent'),
         ('received', 'Received'),
         ('exception', 'Delivery Failed'),
-        ('cancel', 'Cancelled'),
+        ('cancel', 'Canceled'),
     ], 'Status', readonly=True, copy=False, default='outgoing')
     failure_type = fields.Selection(selection=[
         # generic

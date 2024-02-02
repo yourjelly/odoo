@@ -255,7 +255,7 @@
                 <filter string="Confirmed" domain="[('state', '=', 'confirmed')]" name="filter_confirmed" />
                 <filter string="Under Repair" name="filter_under_repair" domain="[('state', '=', 'under_repair')]"/>
                 <filter string="Repaired" name="filter_done" domain="[('state', '=', 'done')]"/>
-                <filter string="Cancelled" name="filter_cancel" domain="[('state', '=', 'cancel')]"/>
+                <filter string="Canceled" name="filter_cancel" domain="[('state', '=', 'cancel')]"/>
                 <filter string="Returned" name="returned" domain="[('picking_id', '!=', False), ('picking_id.state', '=', 'done')]"/>
                 <separator/>
                 <filter string="Ready" name="ready" domain="[('state', 'in', ('confirmed', 'under_repair')),('is_parts_available', '=', True)]" invisible="True"/>

@@ -142,7 +142,7 @@ class PickingType(models.Model):
         help="When validating a transfer:\n"
              " * Ask: users are asked to choose if they want to make a backorder for remaining products\n"
              " * Always: a backorder is automatically created for the remaining products\n"
-             " * Never: remaining products are cancelled")
+             " * Never: remaining products are canceled")
     show_picking_type = fields.Boolean(compute='_compute_show_picking_type')
 
     picking_properties_definition = fields.PropertiesDefinition("Picking Properties")
@@ -406,7 +406,7 @@ class Picking(models.Model):
         ('confirmed', 'Waiting'),
         ('assigned', 'Ready'),
         ('done', 'Done'),
-        ('cancel', 'Cancelled'),
+        ('cancel', 'Canceled'),
     ], string='Status', compute='_compute_state',
         copy=False, index=True, readonly=True, store=True, tracking=True,
         help=" * Draft: The transfer is not confirmed yet. Reservation doesn't apply.\n"
@@ -414,7 +414,7 @@ class Picking(models.Model):
              " * Waiting: The transfer is waiting for the availability of some products.\n(a) The shipping policy is \"As soon as possible\": no product could be reserved.\n(b) The shipping policy is \"When all products are ready\": not all the products could be reserved.\n"
              " * Ready: The transfer is ready to be processed.\n(a) The shipping policy is \"As soon as possible\": at least one product has been reserved.\n(b) The shipping policy is \"When all products are ready\": all product have been reserved.\n"
              " * Done: The transfer has been processed.\n"
-             " * Cancelled: The transfer has been cancelled.")
+             " * Canceled: The transfer has been canceled.")
     group_id = fields.Many2one(
         'procurement.group', 'Procurement Group',
         readonly=True, related='move_ids.group_id', store=True)
@@ -435,7 +435,7 @@ class Picking(models.Model):
         'Creation Date',
         default=fields.Datetime.now, tracking=True,
         help="Creation Date, usually the time of the order")
-    date_done = fields.Datetime('Date of Transfer', copy=False, readonly=True, help="Date at which the transfer has been processed or cancelled.")
+    date_done = fields.Datetime('Date of Transfer', copy=False, readonly=True, help="Date at which the transfer has been processed or canceled.")
     delay_alert_date = fields.Datetime('Delay Alert Date', compute='_compute_delay_alert_date', search='_search_delay_alert_date')
     json_popover = fields.Char('JSON data for the popover widget', compute='_compute_json_popover')
     location_id = fields.Many2one(
@@ -676,7 +676,7 @@ class Picking(models.Model):
     def _set_scheduled_date(self):
         for picking in self:
             if picking.state in ('done', 'cancel'):
-                raise UserError(_("You cannot change the Scheduled Date on a done or cancelled transfer."))
+                raise UserError(_("You cannot change the Scheduled Date on a done or canceled transfer."))
             picking.move_ids.write({'date': picking.scheduled_date})
 
     def _has_scrap_move(self):

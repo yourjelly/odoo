@@ -22,7 +22,7 @@ class Partner(models.Model):
         string='Current Membership Status', store=True, recursive=True,
         help='It indicates the membership state.\n'
              '-Non Member: A partner who has not applied for any membership.\n'
-             '-Cancelled Member: A member who has cancelled his membership.\n'
+             '-Canceled Member: A member who has canceled his membership.\n'
              '-Old Member: A member whose membership date has expired.\n'
              '-Waiting Member: A member who has applied for the membership and whose invoice is going to be created.\n'
              '-Invoiced Member: A member whose invoice has been created.\n'
@@ -35,7 +35,7 @@ class Partner(models.Model):
         help="Date until which membership remains active.")
     membership_cancel = fields.Date(compute='_compute_membership_state',
         string ='Cancel Membership Date', store=True,
-        help="Date on which membership has been cancelled")
+        help="Date on which membership has been canceled")
 
     @api.depends('member_lines.account_invoice_line',
                  'member_lines.account_invoice_line.move_id.state',

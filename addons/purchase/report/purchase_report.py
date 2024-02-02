@@ -21,7 +21,7 @@ class PurchaseReport(models.Model):
         ('to approve', 'To Approve'),
         ('purchase', 'Purchase Order'),
         ('done', 'Done'),
-        ('cancel', 'Cancelled')
+        ('cancel', 'Canceled')
     ], 'Status', readonly=True)
     product_id = fields.Many2one('product.product', 'Product', readonly=True)
     partner_id = fields.Many2one('res.partner', 'Vendor', readonly=True)

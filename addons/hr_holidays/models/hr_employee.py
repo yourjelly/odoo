@@ -31,7 +31,7 @@ class HrEmployeeBase(models.AbstractModel):
             ('refuse', 'Refused'),
             ('validate1', 'Waiting Second Approval'),
             ('validate', 'Approved'),
-            ('cancel', 'Cancelled')
+            ('cancel', 'Canceled')
         ])
     leave_date_from = fields.Date('From Date', compute='_compute_leave_status')
     leave_date_to = fields.Date('To Date', compute='_compute_leave_status')

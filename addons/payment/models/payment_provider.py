@@ -145,7 +145,7 @@ class PaymentProvider(models.Model):
     cancel_msg = fields.Html(
         string="Canceled Message",
         help="The message displayed if the order is canceled during the payment process",
-        default=lambda self: _("Your payment has been cancelled."), translate=True)
+        default=lambda self: _("Your payment has been canceled."), translate=True)
 
     # Feature support fields
     support_tokenization = fields.Boolean(

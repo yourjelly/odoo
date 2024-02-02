@@ -25,7 +25,7 @@
                                 Draft Invoice
                             </span>
                             <span t-elif="o.move_type == 'out_invoice' and o.state == 'cancel'">
-                                Cancelled Invoice
+                                Canceled Invoice
                             </span>
                             <span t-elif="o.move_type == 'out_refund' and o.state == 'posted'">
                                 Credit Note
@@ -34,7 +34,7 @@
                                 Draft Credit Note
                             </span>
                             <span t-elif="o.move_type == 'out_refund' and o.state == 'cancel'">
-                                Cancelled Credit Note
+                                Canceled Credit Note
                             </span>
                             <span t-elif="o.move_type == 'in_refund'">
                                 Vendor Credit Note

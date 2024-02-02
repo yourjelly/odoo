@@ -1458,7 +1458,7 @@
                     <separator/>
                     <filter name="draft" string="Draft" domain="[('state','=','draft')]"/>
                     <filter name="posted" string="Posted" domain="[('state', '=', 'posted')]"/>
-                    <filter name="cancel" string="Cancelled" domain="[('state', '=', 'cancel')]"/>
+                    <filter name="cancel" string="Canceled" domain="[('state', '=', 'cancel')]"/>
                     <separator/>
                     <filter string="To Check" name="to_check" domain="[('to_check', '=', True)]"/>
                     <separator/>

@@ -87,8 +87,8 @@
                             </t>
                             <t t-elif="invoice.state == 'cancel'">
                                 <span class="badge rounded-pill text-bg-warning">
-                                    <i class="fa fa-fw fa-remove" aria-label="Cancelled" title="Cancelled" role="img"/>
-                                    <span class="d-none d-md-inline"> Cancelled</span>
+                                    <i class="fa fa-fw fa-remove" aria-label="Canceled" title="Canceled" role="img"/>
+                                    <span class="d-none d-md-inline"> Canceled</span>
                                 </span>
                             </t>
                         </td>

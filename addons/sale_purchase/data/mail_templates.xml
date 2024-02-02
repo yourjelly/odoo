@@ -25,7 +25,7 @@
     </div>
 </template>
 
-<template id="exception_purchase_on_sale_cancellation" name="Message: Alert on purchase orders when sales orders are cancelled">
+<template id="exception_purchase_on_sale_cancellation" name="Message: Alert on purchase orders when sales orders are canceled">
     <div>
         <p>
             Exception(s) occurred on the sale order(s):
@@ -38,14 +38,14 @@
             <p>Exception(s):</p>
             <ul t-foreach="sale_order_lines" t-as="sale_line">
                 <li>
-                    <a href="#" data-oe-model="sale.order" t-att-data-oe-id="sale_line.order_id.id"><t t-esc="sale_line.order_id.name"/></a>: <t t-esc="sale_line.product_uom_qty"/> <t t-esc="sale_line.product_uom.name"/> of <t t-esc="sale_line.product_id.name"/> cancelled
+                    <a href="#" data-oe-model="sale.order" t-att-data-oe-id="sale_line.order_id.id"><t t-esc="sale_line.order_id.name"/></a>: <t t-esc="sale_line.product_uom_qty"/> <t t-esc="sale_line.product_uom.name"/> of <t t-esc="sale_line.product_id.name"/> canceled
                 </li>
             </ul>
         </div>
     </div>
 </template>
 
-<template id="exception_sale_on_purchase_cancellation" name="Message: Alert on sale orders when purchase orders are cancelled">
+<template id="exception_sale_on_purchase_cancellation" name="Message: Alert on sale orders when purchase orders are canceled">
     <div>
         <p>
             Exception(s) occurred on the purchase order(s):
@@ -58,7 +58,7 @@
             <p>Exception(s):</p>
             <ul t-foreach="purchase_order_lines" t-as="purchase_line">
                 <li>
-                    <a href="#" data-oe-model="purchase.order" t-att-data-oe-id="purchase_line.order_id.id"><t t-esc="purchase_line.order_id.name"/></a>: <t t-esc="purchase_line.product_qty"/> <t t-esc="purchase_line.product_uom.name"/> of <t t-esc="purchase_line.product_id.name"/> cancelled
+                    <a href="#" data-oe-model="purchase.order" t-att-data-oe-id="purchase_line.order_id.id"><t t-esc="purchase_line.order_id.name"/></a>: <t t-esc="purchase_line.product_qty"/> <t t-esc="purchase_line.product_uom.name"/> of <t t-esc="purchase_line.product_id.name"/> canceled
                 </li>
             </ul>
         </div>

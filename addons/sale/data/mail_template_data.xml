@@ -299,7 +299,7 @@
         <record id="sale.mail_template_sale_cancellation" model="mail.template">
             <field name="name">Sales: Order Cancellation</field>
             <field name="model_id" ref="sale.model_sale_order"/>
-            <field name="subject">{{ object.company_id.name }} {{ object.type_name }} Cancelled (Ref {{ object.name or 'n/a' }})</field>
+            <field name="subject">{{ object.company_id.name }} {{ object.type_name }} Canceled (Ref {{ object.name or 'n/a' }})</field>
             <field name="email_from">{{ (object.user_id.email_formatted or object.company_id.email_formatted or user.email_formatted) }}</field>
             <field name="partner_to">{{ object.partner_id.id }}</field>
             <field name="description">Sent automatically to customers when you cancel an order</field>
@@ -314,7 +314,7 @@
         <t t-if="object.origin">
             (with reference: <t t-out="object.origin or ''">S00052</t> )
         </t>
-        has been cancelled. Therefore, you should not be charged further for this order.
+        has been canceled. Therefore, you should not be charged further for this order.
         If any refund is necessary, this will be executed at best convenience.
         <br/><br/>
         Do not hesitate to contact us if you have any questions.

@@ -30,7 +30,7 @@ class HrWorkEntry(models.Model):
         ('draft', 'Draft'),
         ('validated', 'Validated'),
         ('conflict', 'Conflict'),
-        ('cancelled', 'Cancelled')
+        ('cancelled', 'Canceled')
     ], default='draft')
     company_id = fields.Many2one('res.company', string='Company', readonly=True, required=True,
         default=lambda self: self.env.company)

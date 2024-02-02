@@ -709,7 +709,7 @@
                                 </field>
                             </record>
                             <record id="l10n_dz_tax_report_E3B95" model="account.report.line">
-                                <field name="name">E3B95 - VAT to be recovered on cancelled or unpaid invoices (Art. 18 C. TCA)</field>
+                                <field name="name">E3B95 - VAT to be recovered on canceled or unpaid invoices (Art. 18 C. TCA)</field>
                                 <field name="code">l10n_dz_tr_E3B95</field>
                                 <field name="expression_ids">
                                     <record id="l10n_dz_tax_report_E3B95_balance_tag" model="account.report.expression">

@@ -313,7 +313,7 @@ class PosOrder(models.Model):
         help='The rate of the currency to the currency of rate applicable at the date of the order')
 
     state = fields.Selection(
-        [('draft', 'New'), ('cancel', 'Cancelled'), ('paid', 'Paid'), ('done', 'Posted'), ('invoiced', 'Invoiced')],
+        [('draft', 'New'), ('cancel', 'Canceled'), ('paid', 'Paid'), ('done', 'Posted'), ('invoiced', 'Invoiced')],
         'Status', readonly=True, copy=False, default='draft', index=True)
 
     account_move = fields.Many2one('account.move', string='Invoice', readonly=True, copy=False, index="btree_not_null")
@@ -470,7 +470,7 @@ class PosOrder(models.Model):
     @api.ondelete(at_uninstall=False)
     def _unlink_except_draft_or_cancel(self):
         for pos_order in self.filtered(lambda pos_order: pos_order.state not in ['draft', 'cancel']):
-            raise UserError(_('In order to delete a sale, it must be new or cancelled.'))
+            raise UserError(_('In order to delete a sale, it must be new or canceled.'))
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -1321,7 +1321,7 @@ class PosOrderLine(models.Model):
     @api.ondelete(at_uninstall=False)
     def _unlink_except_order_state(self):
         if self.filtered(lambda x: x.order_id.state not in ["draft", "cancel"]):
-            raise UserError(_("You can only unlink PoS order lines that are related to orders in new or cancelled state."))
+            raise UserError(_("You can only unlink PoS order lines that are related to orders in new or canceled state."))
 
     @api.onchange('price_unit', 'tax_ids', 'qty', 'discount', 'product_id')
     def _onchange_amount_line_all(self):

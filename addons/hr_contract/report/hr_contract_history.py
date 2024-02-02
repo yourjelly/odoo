@@ -32,7 +32,7 @@ class ContractHistory(models.Model):
         ('draft', 'New'),
         ('open', 'Running'),
         ('close', 'Expired'),
-        ('cancel', 'Cancelled')
+        ('cancel', 'Canceled')
     ], string='Status', readonly=True)
     resource_calendar_id = fields.Many2one('resource.calendar', string="Working Schedule", readonly=True)
     wage = fields.Monetary('Wage', help="Employee's monthly gross wage.", readonly=True, group_operator="avg")

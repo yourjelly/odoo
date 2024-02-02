@@ -34,7 +34,7 @@ class LunchOrder(models.Model):
                               ('ordered', 'Ordered'),       # "Internally" ordered
                               ('sent', 'Sent'),             # Order sent to the supplier
                               ('confirmed', 'Received'),    # Order received
-                              ('cancelled', 'Cancelled')],
+                              ('cancelled', 'Canceled')],
                              'Status', readonly=True, index=True, default='new')
     notified = fields.Boolean(default=False)
     company_id = fields.Many2one('res.company', default=lambda self: self.env.company.id)

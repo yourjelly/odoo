@@ -58,7 +58,7 @@ export class SaleOrderRow extends Component {
             sent: _t("Quotation Sent"),
             sale: _t("Sales Order"),
             done: _t("Locked"),
-            cancel: _t("Cancelled"),
+            cancel: _t("Canceled"),
         };
 
         return state_mapping[this.order.state];

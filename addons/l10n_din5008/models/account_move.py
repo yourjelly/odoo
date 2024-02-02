@@ -34,7 +34,7 @@ class AccountMove(models.Model):
                 elif record.state == 'draft':
                     record.l10n_din5008_document_title = _('Draft Invoice')
                 elif record.state == 'cancel':
-                    record.l10n_din5008_document_title = _('Cancelled Invoice')
+                    record.l10n_din5008_document_title = _('Canceled Invoice')
             elif record.move_type == 'out_refund':
                 record.l10n_din5008_document_title = _('Credit Note')
             elif record.move_type == 'in_refund':

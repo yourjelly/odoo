@@ -16,7 +16,7 @@ class AccountMove(models.Model):
         comodel_name='account.edi.document',
         inverse_name='move_id')
     edi_state = fields.Selection(
-        selection=[('to_send', 'To Send'), ('sent', 'Sent'), ('to_cancel', 'To Cancel'), ('cancelled', 'Cancelled')],
+        selection=[('to_send', 'To Send'), ('sent', 'Sent'), ('to_cancel', 'To Cancel'), ('cancelled', 'Canceled')],
         string="Electronic invoicing",
         store=True,
         compute='_compute_edi_state',

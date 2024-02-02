@@ -99,7 +99,7 @@ class StockMove(models.Model):
         ('partially_available', 'Partially Available'),
         ('assigned', 'Available'),
         ('done', 'Done'),
-        ('cancel', 'Cancelled')], string='Status',
+        ('cancel', 'Canceled')], string='Status',
         copy=False, default='draft', index=True, readonly=True,
         help="* New: The stock move is created but not confirmed.\n"
              "* Waiting Another Move: A linked stock move should be done before this one.\n"
@@ -133,7 +133,7 @@ class StockMove(models.Model):
         check_company=True)
     propagate_cancel = fields.Boolean(
         'Propagate cancel and split', default=True,
-        help='If checked, when this move is cancelled, cancel the linked move too')
+        help='If checked, when this move is canceled, cancel the linked move too')
     delay_alert_date = fields.Datetime('Delay Alert Date', help='Process at this date to be on time', compute="_compute_delay_alert_date", store=True)
     picking_type_id = fields.Many2one('stock.picking.type', 'Operation Type', compute='_compute_picking_type_id', store=True, readonly=False, check_company=True)
     is_inventory = fields.Boolean('Inventory')
@@ -616,7 +616,7 @@ Please change the quantity done or the rounding precision of your unit of measur
         move_to_check_dest_location = self.env['stock.move']
         if 'quantity' in vals:
             if any(move.state == 'cancel' for move in self):
-                raise UserError(_('You cannot change a cancelled stock move, create a new line instead.'))
+                raise UserError(_('You cannot change a canceled stock move, create a new line instead.'))
         if 'product_uom' in vals and any(move.state == 'done' for move in self):
             raise UserError(_('You cannot change the UoM for a stock move that has been set to \'Done\'.'))
         if 'product_uom_qty' in vals:

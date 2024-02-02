@@ -17,7 +17,7 @@
                             <a href="#" data-oe-model="mrp.production" t-att-data-oe-id="production_order.id"><t t-esc="production_order.name"/></a>:
                             <t t-esc="new_qty"/> <t t-esc="move_raw_id.product_uom.name"/> of <t t-esc="move_raw_id.product_id.name"/>
                             <t t-if="cancel">
-                                cancelled
+                                canceled
                             </t>
                             <t t-if="not cancel">
                                 ordered instead of <t t-esc="old_qty"/> <t t-esc="move_raw_id.product_uom.name"/>

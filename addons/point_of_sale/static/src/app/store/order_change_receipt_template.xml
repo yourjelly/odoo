@@ -15,7 +15,7 @@
             <t t-if="changes.cancelled.length > 0">
                 <div class="pos-order-receipt-cancel">
                     <div class="pos-receipt-title">
-                        CANCELLED
+                        CANCELED
                         <t t-esc='changes.time.hours'/>:<t t-esc='changes.time.minutes'/>
                     </div>
                     <br />

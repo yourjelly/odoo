@@ -65,13 +65,13 @@ class EventRegistration(models.Model):
         ('draft', 'Unconfirmed'),
         ('open', 'Registered'),
         ('done', 'Attended'),
-        ('cancel', 'Cancelled')],
+        ('cancel', 'Canceled')],
         string='Status', default='open',
         readonly=True, copy=False, tracking=6,
         help='Unconfirmed: registrations in a pending state waiting for an action (specific case, notably with sale status)\n'
              'Registered: registrations considered taken by a client\n'
              'Attended: registrations for which the attendee attended the event\n'
-             'Cancelled: registrations cancelled manually')
+             'Canceled: registrations canceled manually')
     # properties
     registration_properties = fields.Properties(
         'Properties', definition='event_id.registration_properties_definition', copy=True)

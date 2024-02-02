@@ -84,7 +84,7 @@ class StockRule(models.Model):
         help="Address where goods should be delivered. Optional.")
     propagate_cancel = fields.Boolean(
         'Cancel Next Move', default=False,
-        help="When ticked, if the move created by this rule is cancelled, the next move will be cancelled too.")
+        help="When ticked, if the move created by this rule is canceled, the next move will be canceled too.")
     propagate_carrier = fields.Boolean(
         'Propagation of carrier', default=False,
         help="When ticked, carrier of shipment will be propagated.")

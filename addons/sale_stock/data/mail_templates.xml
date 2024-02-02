@@ -18,7 +18,7 @@
                                 <a href="#" data-oe-model="sale.order" t-att-data-oe-id="order_line.order_id.id"><t t-esc="order_line.order_id.name"/></a>:
                                 <t t-esc="new_qty"/> <t t-esc="order_line.product_uom.name"/> of <t t-esc="order_line.product_id.name"/>
                                 <t t-if="cancel">
-                                    cancelled
+                                    canceled
                                 </t>
                                 <t t-if="not cancel">
                                     ordered instead of <t t-esc="old_qty"/> <t t-esc="order_line.product_uom.name"/>

@@ -13,7 +13,7 @@ class AccountMove(models.Model):
     l10n_in_edi_cancel_reason = fields.Selection(selection=[
         ("1", "Duplicate"),
         ("2", "Data Entry Mistake"),
-        ("3", "Order Cancelled"),
+        ("3", "Order Canceled"),
         ("4", "Others"),
         ], string="Cancel reason", copy=False)
     l10n_in_edi_cancel_remarks = fields.Char("Cancel remarks", copy=False)

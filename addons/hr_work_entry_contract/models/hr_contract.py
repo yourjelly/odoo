@@ -335,7 +335,7 @@ class HrContract(models.Model):
         canceled_contracts = self.filtered(lambda c: c.state == 'cancel')
         if canceled_contracts:
             raise UserError(
-                _("Sorry, generating work entries from cancelled contracts is not allowed.") + '\n%s' % (
+                _("Sorry, generating work entries from canceled contracts is not allowed.") + '\n%s' % (
                     ', '.join(canceled_contracts.mapped('name'))))
         vals_list = []
         self.write({'last_generation_date': fields.Date.today()})

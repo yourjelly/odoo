@@ -109,7 +109,7 @@ class AccountMove(models.Model):
         selection=[
             ('draft', 'Draft'),
             ('posted', 'Posted'),
-            ('cancel', 'Cancelled'),
+            ('cancel', 'Canceled'),
         ],
         string='Status',
         required=True,
@@ -4089,7 +4089,7 @@ class AccountMove(models.Model):
 
     def button_draft(self):
         if any(move.state not in ('cancel', 'posted') for move in self):
-            raise UserError(_("Only posted/cancelled journal entries can be reset to draft."))
+            raise UserError(_("Only posted/canceled journal entries can be reset to draft."))
 
         exchange_move_ids = set()
         if self:
@@ -4146,7 +4146,7 @@ class AccountMove(models.Model):
             moves_to_reset_draft.button_draft()
 
         if any(move.state != 'draft' for move in self):
-            raise UserError(_("Only draft journal entries can be cancelled."))
+            raise UserError(_("Only draft journal entries can be canceled."))
 
         self.write({'auto_post': 'no', 'state': 'cancel'})
 

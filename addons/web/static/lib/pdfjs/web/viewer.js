@@ -18218,7 +18218,7 @@ PDFPrintService.prototype = {
 
   throwIfInactive() {
     if (!this.active) {
-      throw new Error("This print request was cancelled or completed.");
+      throw new Error("This print request was canceled or completed.");
     }
   }
 

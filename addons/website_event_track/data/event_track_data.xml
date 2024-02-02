@@ -32,7 +32,7 @@
             <field name="fold" eval="True"/>
         </record>
         <record id="event_track_stage5" model="event.track.stage">
-            <field name="name">Cancelled</field>
+            <field name="name">Canceled</field>
             <field name="sequence">6</field>
             <field name="fold" eval="True"/>
             <field name="is_cancel" eval="True"/>

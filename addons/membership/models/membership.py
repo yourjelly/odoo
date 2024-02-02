@@ -5,7 +5,7 @@ from odoo import api, fields, models
 
 STATE = [
     ('none', 'Non Member'),
-    ('canceled', 'Cancelled Member'),
+    ('canceled', 'Canceled Member'),
     ('old', 'Old Member'),
     ('waiting', 'Waiting Member'),
     ('invoiced', 'Invoiced Member'),
@@ -36,7 +36,7 @@ class MembershipLine(models.Model):
     state = fields.Selection(STATE, compute='_compute_state', string='Membership Status', store=True,
         help="It indicates the membership status.\n"
              "-Non Member: A member who has not applied for any membership.\n"
-             "-Cancelled Member: A member who has cancelled his membership.\n"
+             "-Canceled Member: A member who has canceled his membership.\n"
              "-Old Member: A member whose membership date has expired.\n"
              "-Waiting Member: A member who has applied for the membership and whose invoice is going to be created.\n"
              "-Invoiced Member: A member whose invoice has been created.\n"

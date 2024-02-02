@@ -32,7 +32,7 @@
                             </span>
                             <span t-elif="mo.state == 'cancel'"
                                 class="small badge text-bg-danger orders_label_text_align">
-                                <i class="fa fa-fw fa-times"/> <b>Cancelled</b>
+                                <i class="fa fa-fw fa-times"/> <b>Canceled</b>
                             </span>
                             <span t-elif="mo.state in ['confirmed']"
                                 class="small badge text-bg-info orders_label_text_align">

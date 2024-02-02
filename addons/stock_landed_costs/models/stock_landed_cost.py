@@ -58,7 +58,7 @@ class StockLandedCost(models.Model):
     state = fields.Selection([
         ('draft', 'Draft'),
         ('done', 'Posted'),
-        ('cancel', 'Cancelled')], 'State', default='draft',
+        ('cancel', 'Canceled')], 'State', default='draft',
         copy=False, readonly=True, tracking=True)
     account_move_id = fields.Many2one(
         'account.move', 'Journal Entry',
@@ -103,7 +103,7 @@ class StockLandedCost(models.Model):
     def button_cancel(self):
         if any(cost.state == 'done' for cost in self):
             raise UserError(
-                _('Validated landed costs cannot be cancelled, but you could create negative landed costs to reverse them'))
+                _('Validated landed costs cannot be canceled, but you could create negative landed costs to reverse them'))
         return self.write({'state': 'cancel'})
 
     def button_validate(self):

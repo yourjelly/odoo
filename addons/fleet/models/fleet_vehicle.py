@@ -63,7 +63,7 @@ class FleetVehicle(models.Model):
     order_date = fields.Date('Order Date')
     acquisition_date = fields.Date('Registration Date', required=False,
         default=fields.Date.today, help='Date of vehicle registration')
-    write_off_date = fields.Date('Cancellation Date', tracking=True, help="Date when the vehicle's license plate has been cancelled/removed.")
+    write_off_date = fields.Date('Cancellation Date', tracking=True, help="Date when the vehicle's license plate has been canceled/removed.")
     first_contract_date = fields.Date(string="First Contract Date", default=fields.Date.today)
     color = fields.Char(help='Color of the vehicle', compute='_compute_model_fields', store=True, readonly=False)
     state_id = fields.Many2one('fleet.vehicle.state', 'State',

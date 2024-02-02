@@ -170,7 +170,7 @@ class LunchAlert(models.Model):
         self.ensure_one()
 
         if not self.available_today:
-            _logger.warning("cancelled, not available today")
+            _logger.warning("canceled, not available today")
             if self.cron_id and self.until and fields.Date.context_today(self) > self.until:
                 self.cron_id.unlink()
                 self.cron_id = False

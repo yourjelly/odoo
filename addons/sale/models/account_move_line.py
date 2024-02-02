@@ -85,8 +85,8 @@ class AccountMoveLine(models.Model):
                 ))
             elif sale_order.state == 'cancel':
                 raise UserError(_(
-                    "The Sales Order %(order)s linked to the Analytic Account %(account)s is cancelled."
-                    " You cannot register an expense on a cancelled Sales Order.",
+                    "The Sales Order %(order)s linked to the Analytic Account %(account)s is canceled."
+                    " You cannot register an expense on a canceled Sales Order.",
                     order=sale_order.name,
                     account=sale_order.analytic_account_id.name,
                 ))

@@ -23,7 +23,7 @@ class LeaveReportCalendar(models.Model):
     company_id = fields.Many2one('res.company', readonly=True)
     state = fields.Selection([
         ('draft', 'To Submit'),
-        ('cancel', 'Cancelled'),  # YTI This state seems to be unused. To remove
+        ('cancel', 'Canceled'),  # YTI This state seems to be unused. To remove
         ('confirm', 'To Approve'),
         ('refuse', 'Refused'),
         ('validate1', 'Second Approval'),

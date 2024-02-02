@@ -61,7 +61,7 @@ class MrpWorkorder(models.Model):
         ('ready', 'Ready'),
         ('progress', 'In Progress'),
         ('done', 'Finished'),
-        ('cancel', 'Cancelled')], string='Status',
+        ('cancel', 'Canceled')], string='Status',
         compute='_compute_state', store=True,
         default='pending', copy=False, readonly=True, recursive=True, index=True)
     leave_id = fields.Many2one(
@@ -693,7 +693,7 @@ class MrpWorkorder(models.Model):
 
     def button_done(self):
         if any(x.state in ('done', 'cancel') for x in self):
-            raise UserError(_('A Manufacturing Order is already done or cancelled.'))
+            raise UserError(_('A Manufacturing Order is already done or canceled.'))
         self.end_all()
         end_date = datetime.now()
         return self.write({

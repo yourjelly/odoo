@@ -42,7 +42,7 @@ class StockPickingBatch(models.Model):
         ('draft', 'Draft'),
         ('in_progress', 'In progress'),
         ('done', 'Done'),
-        ('cancel', 'Cancelled')], default='draft',
+        ('cancel', 'Canceled')], default='draft',
         store=True, compute='_compute_state',
         copy=False, tracking=True, required=True, readonly=True, index=True)
     picking_type_id = fields.Many2one(

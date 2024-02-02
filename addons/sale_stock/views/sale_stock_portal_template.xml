@@ -43,7 +43,7 @@
                                 </div>
                                 <span t-elif="picking.state == 'cancel'"
                                     class="small badge text-bg-danger orders_label_text_align">
-                                    <i class="fa fa-fw fa-times"/>Cancelled
+                                    <i class="fa fa-fw fa-times"/>Canceled
                                 </span>
                                 <span t-elif="picking.state in ['draft', 'waiting', 'confirmed', 'assigned']"
                                     class="small badge text-bg-info orders_label_text_align">
@@ -82,7 +82,7 @@
                             </span>
                             <span t-elif="picking.state == 'cancel'"
                                 class="small badge text-bg-danger orders_label_text_align">
-                                <i class="fa fa-fw fa-times"/> Cancelled
+                                <i class="fa fa-fw fa-times"/> Canceled
                             </span>
                             <span t-elif="picking.state in ['draft', 'waiting', 'confirmed', 'assigned']"
                                 class="small badge text-bg-info orders_label_text_align">

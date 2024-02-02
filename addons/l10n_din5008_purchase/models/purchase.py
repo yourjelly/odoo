@@ -17,7 +17,7 @@ class PurchaseOrder(models.Model):
             elif record.state in ['sent', 'to approve', 'purchase', 'done']:
                 data.append((_("Purchase Order No."), record.name))
             elif record.state == 'cancel':
-                data.append((_("Cancelled Purchase Order No."), record.name))
+                data.append((_("Canceled Purchase Order No."), record.name))
 
             if record.user_id:
                 data.append((_("Purchase Representative"), record.user_id.name))
@@ -39,7 +39,7 @@ class PurchaseOrder(models.Model):
             elif record.state in ['purchase', 'done']:
                 record.l10n_din5008_document_title = _("Purchase Order")
             elif record.state == 'cancel':
-                record.l10n_din5008_document_title = _("Cancelled Purchase Order")
+                record.l10n_din5008_document_title = _("Canceled Purchase Order")
 
     def _compute_l10n_din5008_addresses(self):
         for record in self:

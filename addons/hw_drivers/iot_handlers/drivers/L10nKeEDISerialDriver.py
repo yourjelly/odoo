@@ -213,10 +213,10 @@ class TremolG03Driver(SerialDriver):
         self._connection.write(request)
         response = self._connection.read(COMMAND_OUTPUT_SIZE[0x39])
         if response and response[0] == 0x02:
-            self.data['status'] += "\n The invoice was successfully cancelled"
-            _logger.info("Invoice successfully cancelled")
+            self.data['status'] += "\n The invoice was successfully canceled"
+            _logger.info("Invoice successfully canceled")
         else:
-            self.data['status'] += "\n The invoice could not be cancelled."
+            self.data['status'] += "\n The invoice could not be canceled."
             _logger.error("Failed to cancel invoice, received response: %s", response)
 
 

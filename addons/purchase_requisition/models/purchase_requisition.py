@@ -12,7 +12,7 @@ PURCHASE_REQUISITION_STATES = [
     ('in_progress', 'Confirmed'),
     ('open', 'Bid Selection'),
     ('done', 'Closed'),
-    ('cancel', 'Cancelled')
+    ('cancel', 'Canceled')
 ]
 
 
@@ -110,7 +110,7 @@ class PurchaseRequisition(models.Model):
                 requisition_line.supplier_info_ids.sudo().unlink()
             requisition.purchase_ids.button_cancel()
             for po in requisition.purchase_ids:
-                po.message_post(body=_('Cancelled by the agreement associated to this quotation.'))
+                po.message_post(body=_('Canceled by the agreement associated to this quotation.'))
         self.write({'state': 'cancel'})
 
     def action_in_progress(self):
@@ -153,7 +153,7 @@ class PurchaseRequisition(models.Model):
     @api.ondelete(at_uninstall=False)
     def _unlink_if_draft_or_cancel(self):
         if any(requisition.state not in ('draft', 'cancel') for requisition in self):
-            raise UserError(_('You can only delete draft or cancelled requisitions.'))
+            raise UserError(_('You can only delete draft or canceled requisitions.'))
 
     def unlink(self):
         # Draft requisitions could have some requisition lines.

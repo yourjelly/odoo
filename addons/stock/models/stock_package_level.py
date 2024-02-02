@@ -30,7 +30,7 @@ class StockPackageLevel(models.Model):
         ('assigned', 'Reserved'),
         ('new', 'New'),
         ('done', 'Done'),
-        ('cancel', 'Cancelled'),
+        ('cancel', 'Canceled'),
     ],string='State', compute='_compute_state')
     is_fresh_package = fields.Boolean(compute='_compute_fresh_pack')
 

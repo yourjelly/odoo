@@ -41,7 +41,7 @@
                     domain="[('my_activity_date_deadline', '&gt;', context_today().strftime('%Y-%m-%d'))]"/>
                 <separator/>
                 <filter string="Active" name="active" domain="[('archive', '=', False)]"/>
-                <filter string="Cancelled" name="inactive" domain="[('archive', '=', True)]"/>
+                <filter string="Canceled" name="inactive" domain="[('archive', '=', True)]"/>
                 <group  expand='0' string='Group by...'>
                     <filter string='Assigned to' name="assigned" domain="[]" context="{'group_by': 'user_id'}"/>
                     <filter string='Category' name="category" domain="[]" context="{'group_by' : 'category_id'}"/>
@@ -205,7 +205,7 @@
                                     </div>
                                     <div class="oe_kanban_bottom_right">
                                         <div invisible="not archive">
-                                            <span class="badge text-bg-warning float-end">Cancelled</span>
+                                            <span class="badge text-bg-warning float-end">Canceled</span>
                                         </div>
                                         <field name="kanban_state" widget="state_selection"/>
                                         <field name="user_id" widget="many2one_avatar_user"/>

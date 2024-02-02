@@ -21,7 +21,7 @@ class EventSaleReport(models.Model):
     event_ticket_price = fields.Float(string='Ticket price', readonly=True)
     event_registration_create_date = fields.Date(string='Registration Date', readonly=True)
     event_registration_state = fields.Selection([
-        ('draft', 'Unconfirmed'), ('cancel', 'Cancelled'),
+        ('draft', 'Unconfirmed'), ('cancel', 'Canceled'),
         ('open', 'Confirmed'), ('done', 'Attended')],
         string='Registration Status', readonly=True)
     active = fields.Boolean('Is registration active (not archived)?')

@@ -42,13 +42,13 @@ class Repair(models.Model):
         ('confirmed', 'Confirmed'),
         ('under_repair', 'Under Repair'),
         ('done', 'Repaired'),
-        ('cancel', 'Cancelled')], string='Status',
+        ('cancel', 'Canceled')], string='Status',
         copy=False, default='draft', readonly=True, tracking=True, index=True,
         help="* The \'New\' status is used when a user is encoding a new and unconfirmed repair order.\n"
              "* The \'Confirmed\' status is used when a user confirms the repair order.\n"
              "* The \'Under Repair\' status is used when the repair is ongoing.\n"
              "* The \'Repaired\' status is set when repairing is completed.\n"
-             "* The \'Cancelled\' status is used when user cancel repair order.")
+             "* The \'Canceled\' status is used when user cancel repair order.")
     priority = fields.Selection([('0', 'Normal'), ('1', 'Urgent')], default='0', string="Priority")
     partner_id = fields.Many2one(
         'res.partner', 'Customer',

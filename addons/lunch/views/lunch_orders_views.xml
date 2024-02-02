@@ -12,7 +12,7 @@
                 <separator/>
                 <filter name="not_confirmed" string="Not Received" domain="[('state', '!=', ('confirmed'))]"/>
                 <filter name="confirmed" string="Received" domain="[('state', '=', 'confirmed')]"/>
-                <filter name="cancelled" string="Cancelled" domain="[('state', '=', 'cancelled')]"/>
+                <filter name="cancelled" string="Canceled" domain="[('state', '=', 'cancelled')]"/>
                 <separator/>
                 <filter name="date_filter" string="Today" domain="[('date', '=', context_today().strftime('%Y-%m-%d'))]" />
                 <separator/>

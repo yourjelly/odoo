@@ -31,7 +31,7 @@ class AccountInvoiceReport(models.Model):
     state = fields.Selection([
         ('draft', 'Draft'),
         ('posted', 'Open'),
-        ('cancel', 'Cancelled')
+        ('cancel', 'Canceled')
         ], string='Invoice Status', readonly=True)
     payment_state = fields.Selection(selection=PAYMENT_STATE_SELECTION, string='Payment Status', readonly=True)
     fiscal_position_id = fields.Many2one('account.fiscal.position', string='Fiscal Position', readonly=True)

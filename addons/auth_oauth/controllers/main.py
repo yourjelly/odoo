@@ -160,7 +160,7 @@ class OAuthController(http.Controller):
             return resp
         except AttributeError:  # TODO juc master: useless since ensure_db()
             # auth_signup is not installed
-            _logger.error("auth_signup not installed on database %s: oauth sign up cancelled.", dbname)
+            _logger.error("auth_signup not installed on database %s: oauth sign up canceled.", dbname)
             url = "/web/login?oauth_error=1"
         except AccessDenied:
             # oauth credentials not valid, user could be on a temporary session

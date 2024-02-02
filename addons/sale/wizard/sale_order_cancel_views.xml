@@ -18,7 +18,7 @@
                         <span>Are you sure you want to cancel this order? <br/></span>
                         <span id="display_invoice_alert"
                               invisible="not display_invoice_alert">
-                            Draft invoices for this order will be cancelled. <br/>
+                            Draft invoices for this order will be canceled. <br/>
                         </span>
                     </div>
                     <group col="2">
