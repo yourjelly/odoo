@@ -2278,3 +2278,35 @@ Please change the quantity done or the rounding precision of your unit of measur
         else:
             raise UserError(_('Operation not supported'))
         return len(moves) == len(self)
+
+    # -------------------------------------------------------------------------
+    # CATALOG
+    # -------------------------------------------------------------------------
+
+    def action_add_from_catalog(self):
+        parent = self.env[self.env.context.get('parent_model')].browse(self.env.context.get('order_id'))
+        return parent.with_context(child_model=self.env.context.get('child_model')).action_add_from_catalog()
+
+    def _get_product_catalog_lines_data(self, **kwargs):
+        parent_id_key = (
+            'production_id'
+            if kwargs.get('parent_model') == 'mrp.production' else
+            ''
+        )
+        if self and parent_id_key:
+            self.product_id.ensure_one()
+            return {
+                **self[0][parent_id_key]._get_product_price_and_data(self[0].product_id),
+                'quantity': sum(
+                    self.mapped(
+                        lambda line: line.product_uom._compute_quantity(
+                            qty=line.product_qty,
+                            to_unit=line.product_uom,
+                        )
+                    )
+                ),
+                'readOnly': False,
+            }
+        return {
+            'quantity': 0,
+        }

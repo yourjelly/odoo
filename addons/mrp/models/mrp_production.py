@@ -13,6 +13,7 @@ from dateutil.relativedelta import relativedelta
 from odoo import api, fields, models, _, Command
 from odoo.addons.web.controllers.utils import clean_action
 from odoo.exceptions import UserError, ValidationError
+from odoo.osv import expression
 from odoo.tools import float_compare, float_round, float_is_zero, format_datetime
 from odoo.tools.misc import OrderedSet, format_date, groupby as tools_groupby
 
@@ -26,7 +27,7 @@ class MrpProduction(models.Model):
     _name = 'mrp.production'
     _description = 'Production Order'
     _date_name = 'date_start'
-    _inherit = ['mail.thread', 'mail.activity.mixin']
+    _inherit = ['mail.thread', 'mail.activity.mixin', 'product.catalog.mixin']
     _order = 'priority desc, date_start asc,id'
 
     @api.model
@@ -970,7 +971,6 @@ class MrpProduction(models.Model):
         action = self.env['ir.actions.act_window']._for_xml_id('mrp.mrp_bom_form_action')
         action['view_mode'] = 'form'
         action['views'] = [(False, 'form')]
-        action['target'] = 'new'
 
         bom_lines_vals, byproduct_vals, operations_vals = self._get_bom_values()
         action['context'] = {
@@ -2761,3 +2761,73 @@ class MrpProduction(models.Model):
                 'context': {'default_production_ids': self.ids},
             }
         return self.action_open_label_layout()
+
+    # -------------------------------------------------------------------------
+    # CATALOG
+    # -------------------------------------------------------------------------
+
+    def action_add_from_catalog(self):
+        res = super().action_add_from_catalog()
+        if res['context'].get('product_catalog_order_model') == 'mrp.production':
+            res['context']['child_model'] = self._context.get('child_model')
+
+        return res
+
+    def _default_order_line_values(self):
+        default_data = super()._default_order_line_values()
+        new_default_data = self.env['stock.move']._get_product_catalog_lines_data(parent_model='mrp.production')
+
+        return {**default_data, **new_default_data}
+
+    def _get_product_catalog_order_data(self, products, **kwargs):
+        return {product.id: self._get_product_price_and_data(product) for product in products}
+
+    def _get_product_price_and_data(self, product):
+        return {'price': product.standard_price}
+
+    def _get_product_catalog_record_lines(self, product_ids):
+        child_model = self._context.get('child_model')
+        grouped_lines = defaultdict(lambda: self.env['stock.move'])
+        lines = (
+            self.move_raw_ids
+            if child_model == 'mrp.production.component' else
+            self.move_byproduct_ids
+            if child_model == 'mrp.production.byproduct' else
+            []
+        )
+
+        for line in lines:
+            if line.product_id.id in product_ids:
+                grouped_lines[line.product_id] |= line
+
+        return grouped_lines
+
+    def _update_order_line_info(self, product_id, quantity, **kwargs):
+        child_model = self._context.get('child_model')
+        entities = (
+            self.move_raw_ids
+            if child_model == 'mrp.production.component'
+            else
+            self.move_byproduct_ids
+            if child_model == 'mrp.production.byproduct' else
+            []
+        )
+
+        entity = entities.filtered(lambda e: e.product_id.id == product_id)
+        if entity:
+            if quantity != 0:
+                entity.product_uom_qty = quantity
+            else:
+                entity.unlink()
+        elif quantity > 0:
+            command = Command.create({
+                'product_uom_qty': quantity,
+                'product_id': product_id,
+            })
+            key = 'move_raw_ids' if child_model == 'mrp.production.component' else 'move_byproduct_ids'
+            self.write({ key: [command] })
+
+        return self.env['product.product'].browse(product_id).standard_price
+
+    def _get_product_catalog_domain(self):
+        return expression.AND([super()._get_product_catalog_domain(), [('id', '!=', self.product_id.id)]])
