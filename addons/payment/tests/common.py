@@ -35,13 +35,11 @@ class PaymentCommon(BaseCommon):
         cls.internal_user = cls.env['res.users'].create({
             'name': 'Internal User (Test)',
             'login': 'internal',
-            'password': 'internal',
             'groups_id': [Command.link(cls.group_user.id)]
         })
         cls.portal_user = cls.env['res.users'].create({
             'name': 'Portal User (Test)',
             'login': 'payment_portal',
-            'password': 'payment_portal',
             'groups_id': [Command.link(cls.group_portal.id)]
         })
         cls.public_user = cls.env.ref('base.public_user')

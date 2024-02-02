@@ -69,6 +69,7 @@ class TestResources(common.SlidesCase, HttpCase):
                     'AuIwF4pT92AAAAD0lEQVQIHQEEAPv/AIdaewLIAV0IjhGPAAAAAElFTkSuQmCC',
             'slide_id': self.slide.id,
         })
+        self.env.user.password = self.env.user.login
         self.authenticate(self.env.user.login, self.env.user.login)
 
         for name, file_name, expected_download_name in (

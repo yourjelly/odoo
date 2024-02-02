@@ -99,12 +99,14 @@ class TestFlows(PaymentHttpCommon):
         self._test_flow('direct')
 
     def test_11_direct_checkout_portal(self):
+        self.portal_user.password = self.portal_user.login
         self.authenticate(self.portal_user.login, self.portal_user.login)
         self.user = self.portal_user
         self.partner = self.portal_partner
         self._test_flow('direct')
 
     def test_12_direct_checkout_internal(self):
+        self.internal_user.password = self.internal_user.login
         self.authenticate(self.internal_user.login, self.internal_user.login)
         self.user = self.internal_user
         self.partner = self.internal_partner
@@ -118,12 +120,14 @@ class TestFlows(PaymentHttpCommon):
         self._test_flow('redirect')
 
     def test_21_redirect_checkout_portal(self):
+        self.portal_user.password = self.portal_user.login
         self.authenticate(self.portal_user.login, self.portal_user.login)
         self.user = self.portal_user
         self.partner = self.portal_partner
         self._test_flow('redirect')
 
     def test_22_redirect_checkout_internal(self):
+        self.internal_user.password = self.internal_user.login
         self.authenticate(self.internal_user.login, self.internal_user.login)
         self.user = self.internal_user
         self.partner = self.internal_partner
@@ -135,12 +139,14 @@ class TestFlows(PaymentHttpCommon):
     # NOTE: not tested as public user because a public user cannot save payment details
 
     def test_31_tokenize_portal(self):
+        self.portal_user.password = self.portal_user.login
         self.authenticate(self.portal_user.login, self.portal_user.login)
         self.partner = self.portal_partner
         self.user = self.portal_user
         self._test_flow('token')
 
     def test_32_tokenize_internal(self):
+        self.internal_user.password = self.internal_user.login
         self.authenticate(self.internal_user.login, self.internal_user.login)
         self.partner = self.internal_partner
         self.user = self.internal_user

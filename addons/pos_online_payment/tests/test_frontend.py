@@ -99,7 +99,6 @@ class TestUi(AccountTestInvoicingCommon, OnlinePaymentCommon):
         cls.pos_user = cls.env['res.users'].create({
             'name': 'A simple PoS man!',
             'login': 'pos_op_user',
-            'password': 'pos_op_user',
             'groups_id': [
                 (4, cls.env.ref('base.group_user').id),
                 (4, cls.env.ref('point_of_sale.group_pos_user').id),

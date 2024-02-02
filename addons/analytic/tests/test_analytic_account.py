@@ -16,7 +16,6 @@ class TestAnalyticAccount(TransactionCase):
         user = cls.env['res.users'].create({
             'name': 'The anal(ytic) expert!',
             'login': 'analytic',
-            'password': 'analytic',
             'groups_id': [
                 (6, 0, cls.env.user.groups_id.ids),
                 (4, cls.env.ref('analytic.group_analytic_accounting').id),

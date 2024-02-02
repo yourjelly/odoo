@@ -20,7 +20,6 @@ class SalesTeamCommon(TransactionCase):
         cls.sale_user = cls.env['res.users'].create({
             'name': 'Test Salesman',
             'login': 'salesman',
-            'password': 'salesman',
             'email': 'default_user_salesman@example.com',
             'signature': '--\nMark',
             'notification_type': 'email',
@@ -29,7 +28,6 @@ class SalesTeamCommon(TransactionCase):
         cls.sale_manager = cls.env['res.users'].create({
             'name': 'Test Sales Manager',
             'login': 'salesmanager',
-            'password': 'salesmanager',
             'email': 'default_user_salesmanager@example.com',
             'signature': '--\nDamien',
             'notification_type': 'email',

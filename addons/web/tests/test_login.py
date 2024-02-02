@@ -8,8 +8,8 @@ class TestWebLoginCommon(HttpCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        new_test_user(cls.env, 'internal_user', context={'lang': 'en_US'})
-        new_test_user(cls.env, 'portal_user', groups='base.group_portal')
+        new_test_user(cls.env, 'internal_user', password='internal_user', context={'lang': 'en_US'})
+        new_test_user(cls.env, 'portal_user', password='portal_user', groups='base.group_portal')
 
     def setUp(self):
         super().setUp()

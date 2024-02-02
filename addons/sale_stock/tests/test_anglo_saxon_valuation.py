@@ -1644,7 +1644,6 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
         accountman = self.env['res.users'].create({
             'name': 'Super Accountman',
             'login': 'super_accountman',
-            'password': 'super_accountman',
             'groups_id': [(6, 0, self.env.ref('account.group_account_invoice').ids)],
         })
 

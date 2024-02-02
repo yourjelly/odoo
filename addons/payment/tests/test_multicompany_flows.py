@@ -21,7 +21,6 @@ class TestMultiCompanyFlows(PaymentHttpCommon):
         cls.user_company_b = cls.env['res.users'].create({
             'name': f"{cls.company_b.name} User (TEST)",
             'login': 'user_company_b',
-            'password': 'user_company_b',
             'company_id': cls.company_b.id,
             'company_ids': [Command.set(cls.company_b.ids)],
             'groups_id': [Command.link(cls.group_user.id)],
@@ -29,7 +28,6 @@ class TestMultiCompanyFlows(PaymentHttpCommon):
         cls.user_multi_company = cls.env['res.users'].create({
             'name': "Multi Company User (TEST)",
             'login': 'user_multi_company',
-            'password': 'user_multi_company',
             'company_id': cls.company_a.id,
             'company_ids': [Command.set([cls.company_a.id, cls.company_b.id])],
             'groups_id': [Command.link(cls.group_user.id)],

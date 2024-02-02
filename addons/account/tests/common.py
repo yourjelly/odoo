@@ -14,7 +14,6 @@ def instantiate_accountman(cls):
     cls.user = cls.env['res.users'].create({
         'name': 'Because I am accountman!',
         'login': 'accountman',
-        'password': 'accountman',
         'groups_id': [
             Command.set(cls.env.user.groups_id.ids),
             Command.link(cls.env.ref('account.group_account_manager').id),

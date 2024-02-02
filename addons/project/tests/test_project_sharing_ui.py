@@ -13,7 +13,6 @@ class TestProjectSharingUi(HttpCase):
         user = cls.env['res.users'].with_context({'no_reset_password': True, 'mail_create_nolog': True}).create({
             'name': 'Georges',
             'login': 'georges1',
-            'password': 'georges1',
             'email': 'georges@project.portal',
             'signature': 'SignGeorges',
             'notification_type': 'email',

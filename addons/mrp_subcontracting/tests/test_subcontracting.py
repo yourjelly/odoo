@@ -1317,7 +1317,6 @@ class TestSubcontractingPortal(TransactionCase):
             'name': 'portal user (subcontractor)',
             'partner_id': cls.subcontractor_partner1.id,
             'login': 'subcontractor',
-            'password': 'subcontractor',
             'email': 'subcontractor@subcontracting.portal',
             'groups_id': [(6, 0, [cls.env.ref('base.group_portal').id, cls.env.ref('stock.group_production_lot').id])]
         })
