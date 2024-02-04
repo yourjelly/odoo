@@ -1726,6 +1726,35 @@ export function insertListAfter(afterNode, mode, content = []) {
     return list;
 }
 
+export function toggleList(nodes, mode) {
+    const li = new Set();
+    const blocks = new Set();
+
+    for (const node of nodes) {
+        if (node.nodeType === Node.TEXT_NODE && !isVisibleStr(node) && closestElement(node).isContentEditable) {
+            node.remove();
+        } else {
+            let block = closestBlock(node);
+            if (!['OL', 'UL'].includes(block.tagName) && block.isContentEditable) {
+                block = block.closest('li') || block;
+                const ublock = block.closest('ol, ul');
+                ublock && getListMode(ublock) == mode ? li.add(block) : blocks.add(block);
+            }
+        }
+    }
+
+    let target = [...(blocks.size ? blocks : li)];
+    while (target.length) {
+        const node = target.pop();
+        // only apply one li per ul
+        if (!node.oToggleList(0, mode)) {
+            target = target.filter(
+                li => li.parentNode != node.parentNode || li.tagName != 'LI',
+            );
+        }
+    }
+}
+
 export function toggleClass(node, className) {
     node.classList.toggle(className);
     if (!node.className) {
