@@ -51,6 +51,7 @@ import {
     getCursorDirection,
     firstLeaf,
     toggleList,
+    toggleCompleteList,
 } from '../utils/utils.js';
 
 const TEXT_CLASSES_REGEX = /\btext-[^\s]*\b/;
@@ -201,6 +202,11 @@ export const editorCommands = {
         } else if (container.childElementCount > 1) {
             // Grab the content of the first child block and isolate it.
             if (isBlock(container.firstChild) && !['TABLE', 'UL', 'OL'].includes(container.firstChild.nodeName)) {
+                if (container.firstChild.classList.contains('oe-nested')) {
+                    const deepestLi = closestElement(firstLeaf(container.firstChild), 'li');
+                    splitAroundUntil(deepestLi, container.firstChild);
+                    container.firstElementChild.replaceChildren(...deepestLi.childNodes);
+                }
                 containerFirstChild.replaceChildren(...container.firstElementChild.childNodes);
                 container.firstElementChild.remove();
             }
@@ -229,6 +235,8 @@ export const editorCommands = {
         // element if it's a block then we insert the content in the right places.
         let currentNode = startNode;
         let lastChildNode = false;
+        const currentList = currentNode && closestElement(currentNode, 'UL, OL');
+        const mode = currentList && getListMode(currentList);
         const _insertAt = (reference, nodes, insertBefore) => {
             for (const child of (insertBefore ? nodes.reverse() : nodes)) {
                 reference[insertBefore ? 'before' : 'after'](child);
@@ -238,13 +246,23 @@ export const editorCommands = {
         if (containerLastChild.hasChildNodes()) {
             const toInsert = [...containerLastChild.childNodes]; // Prevent mutation
             _insertAt(currentNode, [...toInsert], insertBefore);
-            currentNode = insertBefore ? toInsert[0] : currentNode;
-            lastChildNode = toInsert[toInsert.length - 1];
+            let convertedList;
+            if (currentList && isList(toInsert[0])) {
+                convertedList = toggleCompleteList(toInsert[0], mode);
+            }
+            currentNode = insertBefore ?
+                            convertedList || toInsert[0] :
+                            currentNode;
+            lastChildNode = convertedList || toInsert[toInsert.length - 1];
         }
         if (containerFirstChild.hasChildNodes()) {
             const toInsert = [...containerFirstChild.childNodes]; // Prevent mutation
             _insertAt(currentNode, [...toInsert], insertBefore);
-            currentNode = toInsert[toInsert.length - 1];
+            let convertedList;
+            if (currentList && isList(toInsert[0])) {
+                convertedList = toggleCompleteList(toInsert[0], mode);
+            }
+            currentNode = convertedList || toInsert[toInsert.length - 1];
             insertBefore = false;
         }
 
@@ -257,7 +275,7 @@ export const editorCommands = {
                 // If we arrive here, the o_enter index should always be 0.
                 const parent = currentNode.nextSibling.parentElement;
                 const index = [...parent.childNodes].indexOf(currentNode.nextSibling);
-                currentNode.nextSibling.parentElement.oEnter(index);
+                parent.oEnter(index);
             }
         }
 
@@ -289,11 +307,20 @@ export const editorCommands = {
                     }
                 }
             }
+            // When inserting multiple adjacent <p> into a list, only the first
+            // and last were converted to <li>. The rest was simply inserted as
+            // <p>. Now convert these as well.
+            if (isBlock(nodeToInsert) && currentNode.nodeName === 'LI') {
+                setTagName(nodeToInsert, 'LI');
+            }
             if (insertBefore) {
                 currentNode.before(nodeToInsert);
                 insertBefore = false;
             } else {
                 currentNode.after(nodeToInsert);
+            }
+            if (nodeToInsert.nodeName === 'LI' && nodeToInsert.classList.contains('oe-nested')) {
+                toggleCompleteList(nodeToInsert.firstChild, mode);
             }
             if (currentNode.tagName !== 'BR' && isShrunkBlock(currentNode)) {
                 currentNode.remove();
@@ -305,7 +332,7 @@ export const editorCommands = {
         selection.removeAllRanges();
         const newRange = new Range();
         let lastPosition = rightPos(currentNode);
-        if (lastPosition[0] === editor.editable) {
+        if (lastPosition[0] === editor.editable || lastPosition[0].nodeName === 'LI') {
             // Correct the position if it happens to be in the editable root.
             lastPosition = getDeepestPosition(...lastPosition);
         }
@@ -521,9 +548,6 @@ export const editorCommands = {
         return true;
     },
     toggleList: (editor, mode) => {
-        const li = new Set();
-        const blocks = new Set();
-
         const selectedBlocks = getTraversedNodes(editor.editable);
         const deepestSelectedBlocks = selectedBlocks.filter(block => (
             !descendants(block).some(descendant => selectedBlocks.includes(descendant))

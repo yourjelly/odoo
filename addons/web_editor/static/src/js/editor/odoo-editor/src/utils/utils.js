@@ -1755,6 +1755,28 @@ export function toggleList(nodes, mode) {
     }
 }
 
+export function toggleCompleteList(node, mode) {
+    // const currentNode = node.firstChild;
+    // const startNode = firstLeaf(node);
+    // const toConvert = closestElement(startNode, 'UL, OL');
+    // if (mode !== getListMode(toConvert)) {
+    //     toggleList([node], mode);
+    // } else if (currentNode && mode === getListMode(node) || node.classList.contains('oe-nested')) {
+    //     const childNodes = node.childNodes;
+    //     [...childNodes].forEach(n => n.classList.contains('oe-nested') && toggleCompleteList(n, mode));
+    // }
+    // return currentNode.parentNode;
+    const childNodes = [...node.childNodes];
+    for(const list of childNodes) {
+        const toConvert = closestElement(list, 'UL, OL');
+        if(list.classList.contains('oe-nested')) {
+            toggleCompleteList(list.firstChild, mode);
+        } else if(mode !== getListMode(toConvert)) {
+            toggleList([list], mode);
+        }
+    }
+}
+
 export function toggleClass(node, className) {
     node.classList.toggle(className);
     if (!node.className) {
