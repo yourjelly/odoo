@@ -24131,7 +24131,6 @@
             F2: () => console.warn("Not implemented"),
             F4: this.processF4Key,
             Tab: (ev) => this.processTabKey(ev),
-            " ": (ev) => this.processSpaceKey(ev),
         };
         keyCodeMapping = {
             NumpadDecimal: this.processNumpadDecimal,
@@ -24201,14 +24200,6 @@
             const direction = ev.shiftKey ? "left" : "right";
             this.env.model.dispatch("STOP_EDITION");
             this.env.model.selection.moveAnchorCell(direction, 1);
-        }
-        processSpaceKey(ev) {
-            if (ev.ctrlKey) {
-                ev.preventDefault();
-                ev.stopPropagation();
-                this.showAutocomplete("");
-                this.env.model.dispatch("STOP_COMPOSER_RANGE_SELECTION");
-            }
         }
         processEnterKey(ev) {
             ev.preventDefault();
@@ -40977,11 +40968,9 @@
                     if (cmd.id !== this.focusedInputId) {
                         const input = this.inputs[cmd.id];
                         const range = input.ranges.find((range) => range.id === cmd.rangeId);
-                        if (this.isRangeValid(range?.xc || "A1")) {
-                            const sheetId = this.getters.getActiveSheetId();
-                            const zone = this.getters.getRangeFromSheetXC(sheetId, range?.xc || "A1").zone;
-                            this.selection.capture(input, { cell: { col: zone.left, row: zone.top }, zone }, { handleEvent: input.handleEvent.bind(input) });
-                        }
+                        const sheetId = this.getters.getActiveSheetId();
+                        const zone = this.getters.getRangeFromSheetXC(sheetId, range?.xc || "A1").zone;
+                        this.selection.capture(input, { cell: { col: zone.left, row: zone.top }, zone }, { handleEvent: input.handleEvent.bind(input) });
                         this.focusedInputId = cmd.id;
                     }
                     break;
@@ -51613,8 +51602,8 @@
 
 
     __info__.version = '16.4.21';
-    __info__.date = '2024-02-02T14:05:57.857Z';
-    __info__.hash = '73662b1';
+    __info__.date = '2024-02-05T12:09:21.402Z';
+    __info__.hash = '734201c';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
