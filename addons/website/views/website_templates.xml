@@ -1582,9 +1582,10 @@
 </template>
 
 <!-- Footer templates -->
+<!-- "Default" template -->
 <template id="footer_custom" inherit_id="website.layout" name="Default" active="True">
     <xpath expr="//div[@id='footer']" position="replace">
-        <div id="footer" class="oe_structure oe_structure_solo" t-ignore="true" t-if="not no_footer">
+        <div id="footer" class="oe_structure oe_structure_solo text-break" t-ignore="true" t-if="not no_footer">
             <section class="s_text_block pt40 pb16" data-snippet="s_text_block" data-name="Text">
                 <div class="container">
                     <div class="row">
