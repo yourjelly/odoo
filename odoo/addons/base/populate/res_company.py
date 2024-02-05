@@ -12,7 +12,7 @@ class Partner(models.Model):
 
     _populate_sizes = {
         'small': 5,
-        'medium': 10,
+        'medium': 3,
         'large': 50,
     }
 

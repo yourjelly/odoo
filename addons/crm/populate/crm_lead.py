@@ -15,7 +15,7 @@ class CrmLead(models.Model):
     ]
     _populate_sizes = {
         'small': 5,
-        'medium': 150,
+        'medium': 15000,
         'large': 400
     }
 

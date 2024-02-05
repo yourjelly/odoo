@@ -16,6 +16,8 @@ from odoo.tools.misc import OrderedSet, get_lang
 from odoo.exceptions import UserError
 from collections import defaultdict
 
+from odoo.tools.sql import SQL
+
 SEARCH_PANEL_ERROR_MESSAGE = _lt("Too many items to display.")
 
 def is_true_domain(domain):

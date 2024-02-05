@@ -426,6 +426,7 @@ export class RelationalModel extends Model {
                 }
             }
             const groupConfig = config.groups[group.value];
+            // TODO: count_limit == limit because we already have the count
             groupConfig.list.orderBy = config.orderBy;
             groupConfig.initialDomain = group.domain;
             if (groupConfig.extraDomain) {

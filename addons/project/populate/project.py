@@ -10,19 +10,19 @@ _logger = logging.getLogger(__name__)
 
 class ProjectStage(models.Model):
     _inherit = "project.task.type"
-    _populate_sizes = {"small": 10, "medium": 50, "large": 500}
+    _populate_sizes = {"small": 10, "medium": 30, "large": 500}
 
     def _populate_factories(self):
         return [
             ("name", populate.constant('stage_{counter}')),
             ("sequence", populate.randomize([False] + [i for i in range(1, 101)])),
             ("active", populate.randomize([True, False], [0.8, 0.2])),
-            ("fold", populate.randomize([True, False], [0.9, 0.1]))
+            ("fold", populate.randomize([True, False], [0.1, 0.9]))
         ]
 
 class ProjectProject(models.Model):
     _inherit = "project.project"
-    _populate_sizes = {"small": 10, "medium": 50, "large": 1000}
+    _populate_sizes = {"small": 10, "medium": 20, "large": 1000}
     _populate_dependencies = ["res.company", "project.task.type"]
 
     def _populate_factories(self):
@@ -55,7 +55,7 @@ class ProjectProject(models.Model):
 
 class ProjectTask(models.Model):
     _inherit = "project.task"
-    _populate_sizes = {"small": 500, "medium": 5000, "large": 50000}
+    _populate_sizes = {"small": 500, "medium": 10000, "large": 50000}
     _populate_dependencies = ["project.project", "res.partner", "res.users"]
 
     def _populate_factories(self):
