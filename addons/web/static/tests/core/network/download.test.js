@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { after, expect, test } from "@odoo/hoot";
 import { download } from "@web/core/network/download";
 import { ConnectionLostError, RPCError } from "@web/core/network/rpc";

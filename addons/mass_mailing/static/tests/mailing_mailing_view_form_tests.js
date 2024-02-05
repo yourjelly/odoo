@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { setupViewRegistries } from "@web/../tests/views/helpers";
 import { patchWithCleanup } from "@web/../tests/helpers/utils";
 import { createWebClient, doAction } from "@web/../tests/webclient/helpers";

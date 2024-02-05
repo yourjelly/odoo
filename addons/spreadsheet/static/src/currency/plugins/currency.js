@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { helpers, registries } from "@odoo/o-spreadsheet";
 import { CurrencyDataSource } from "../currency_data_source";
 import { OdooUIPlugin } from "@spreadsheet/plugins";

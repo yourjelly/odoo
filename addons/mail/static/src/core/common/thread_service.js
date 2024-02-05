@@ -1,5 +1,3 @@
-/* @odoo-module */
-
 import { loadEmoji } from "@web/core/emoji_picker/emoji_picker";
 import { Record } from "@mail/core/common/record";
 import { prettifyMessageContent } from "@mail/utils/common/format";

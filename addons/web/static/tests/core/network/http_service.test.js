@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { after, expect, test } from "@odoo/hoot";
 import { mockFetch } from "@odoo/hoot-mock";
 

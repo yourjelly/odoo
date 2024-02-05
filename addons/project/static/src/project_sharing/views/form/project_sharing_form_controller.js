@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { useService } from '@web/core/utils/hooks';
 import { createElement } from "@web/core/utils/xml";
 import { FormController } from '@web/views/form/form_controller';

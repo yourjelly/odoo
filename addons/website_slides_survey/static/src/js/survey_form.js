@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { ShareMail } from '@website_slides/js/slides_share';
 import SurveyFormWidget from '@survey/js/survey_form';
 

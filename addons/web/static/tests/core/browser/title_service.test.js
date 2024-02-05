@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { makeMockEnv, getService } from "@web/../tests/web_test_helpers";
 import { expect, test, beforeEach, afterEach } from "@odoo/hoot";
 

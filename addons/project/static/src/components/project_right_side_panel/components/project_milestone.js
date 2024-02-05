@@ -1,5 +1,3 @@
-/** @odoo-module  */
-
 import { formatDate } from "@web/core/l10n/dates";
 import { useService } from '@web/core/utils/hooks';
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";

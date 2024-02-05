@@ -1,5 +1,3 @@
-/* @odoo-module */
-
 import { ThreadService, threadService } from "@mail/core/common/thread_service";
 import { parseEmail } from "@mail/utils/common/format";
 

@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { uniqueId } from '@web/core/utils/functions';
 import { renderToElement } from "@web/core/utils/render";
 import { getDataURLFromFile } from "@web/core/utils/urls";

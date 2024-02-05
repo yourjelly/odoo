@@ -1,5 +1,3 @@
-/* @odoo-module */
-
 import { Record } from "@mail/core/common/record";
 import { htmlToTextContentInline } from "@mail/utils/common/format";
 

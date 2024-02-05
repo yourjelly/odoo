@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { Dialog } from '@web/core/dialog/dialog';
 import { formatDateTime } from '@web/core/l10n/dates';
 import { useService } from '@web/core/utils/hooks';

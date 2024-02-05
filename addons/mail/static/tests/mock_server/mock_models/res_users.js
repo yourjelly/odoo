@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { webModels } from "@web/../tests/web_test_helpers";
 import { serializeDate, today } from "@web/core/l10n/dates";
 import { session } from "@web/session";

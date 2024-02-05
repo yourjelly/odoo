@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { AccountingDataSource } from "../accounting_datasource";
 import { OdooUIPlugin } from "@spreadsheet/plugins";
 const DATA_SOURCE_ID = "ACCOUNTING_AGGREGATES";
