@@ -110,10 +110,9 @@ class RecurrenceRule(models.Model):
                 self.calendar_event_ids.write({'attendee_ids': [(0, 0, {'state': attendee[2].get('responseStatus'), 'partner_id': partner.id})]})
                 if attendee[2].get('displayName') and not partner.name:
                     partner.name = attendee[2].get('displayName')
-
         for odoo_attendee_email in set(existing_attendees.mapped('email')):
             # Remove old attendees. Sometimes, several partners have the same email.
-            if email_normalize(odoo_attendee_email) not in emails:
+            if email_normalize(odoo_attendee_email) not in emails and email_normalize(odoo_attendee_email) != self.base_event_id.user_id.email:
                 attendees = existing_attendees.exists().filtered(lambda att: att.email == email_normalize(odoo_attendee_email))
                 self.calendar_event_ids.write({'need_sync': False, 'partner_ids': [Command.unlink(att.partner_id.id) for att in attendees]})
 
