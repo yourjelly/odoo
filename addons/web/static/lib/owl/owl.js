@@ -1911,6 +1911,8 @@
         return targets.has(value) ? targets.get(value) : value;
     }
     const targetToKeysToCallbacks = new WeakMap();
+    window.maxCallbackSetSize = 0;
+    window.maxTargetSetSize = 0;
     /**
      * Observes a given key on a target with an callback. The callback will be
      * called when the given key changes on the target.
@@ -1931,11 +1933,21 @@
         if (!keyToCallbacks.get(key)) {
             keyToCallbacks.set(key, new Set());
         }
-        keyToCallbacks.get(key).add(callback);
+        const callbackSet = keyToCallbacks.get(key);
+        callbackSet.add(callback);
+        if (callbackSet.size > window.maxCallbackSetSize) {
+            window.maxCallbackSetSize = callbackSet.size;
+            console.log("maxCallbackSetSize", window.maxCallbackSetSize);
+        }
         if (!callbacksToTargets.has(callback)) {
             callbacksToTargets.set(callback, new Set());
         }
-        callbacksToTargets.get(callback).add(target);
+        const targetSet = callbacksToTargets.get(callback);
+        targetSet.add(target);
+        if (targetSet.size > window.maxTargetSetSize) {
+            window.maxTargetSetSize = targetSet.size;
+            console.log("maxTargetSetSize", window.maxTargetSetSize);
+        }
     }
     /**
      * Notify Reactives that are observing a given target that a key has changed on
