@@ -119,13 +119,13 @@ class Partner(models.Model):
         """Returns first 100 messages, sent by the current partner, that have errors, in
         the format expected by the web client."""
         self.ensure_one()
-        messages = self.env['mail.message'].search([
-            ('has_error', '=', True),
-            ('author_id', '=', self.id),
-            ('res_id', '!=', 0),
-            ('model', '!=', False),
-            ('message_type', '!=', 'user_notification')
-        ], limit=100)
+        self.env['mail.message'].flush()
+        query = self.env['mail.message']._search([],limit=100)
+        query.join('mail_message','id','mail_notification','mail_message_id','notification_id',extra="{rhs}.notification_status in ('bounce','exception')")
+        query.add_where("""
+                        author_id = %s AND res_id != 0 and (message_type != 'user_notification' OR message_type IS NULL)
+                        """, (self.id,))
+        messages = self.env['mail.message'].browse(query)
         return messages._message_notification_format()
 
     def _get_channels_as_member(self):
