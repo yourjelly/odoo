@@ -54,6 +54,7 @@ class ResCompany(models.Model):
         tracking=True,
         help="No users can edit journal entries related to a tax prior and inclusive of this date.")
     max_tax_lock_date = fields.Date(compute='_compute_max_tax_lock_date', recursive=True)  # TODO maybe store
+    #TODO OCO c'est quoi max_tax_lock_date ?
     transfer_account_id = fields.Many2one('account.account',
         check_company=True,
         domain="[('reconcile', '=', True), ('account_type', '=', 'asset_current'), ('deprecated', '=', False)]", string="Inter-Banks Transfer Account", help="Intermediary account used when moving money from a liqity account to another")
@@ -360,6 +361,18 @@ class ResCompany(models.Model):
             lock_date = max(lock_date, self.sudo().parent_id._get_user_fiscal_lock_date())
         return lock_date
 
+    def _get_tax_lock_date(self):
+        #TODO OCO voir si on ajoute les familles de taxes
+        #TODO OCO généraliser son usage
+        self.ensure_one()
+        most_restrictive_closing = self.env['account.move'].search([
+            ('company_id', '=', self.id),
+            ('tax_closing_report_id', '!=', False),
+            ('state', '=', 'posted'),
+        ], order='date DESC', limit=1)
+
+        return most_restrictive_closing.date or date.min
+
     def _get_violated_lock_dates(self, accounting_date, has_tax):
         """Get all the lock dates affecting the current accounting_date.
         :param accoutiaccounting_dateng_date: The accounting date
@@ -371,9 +384,12 @@ class ResCompany(models.Model):
         user_lock_date = self._get_user_fiscal_lock_date()
         if accounting_date and user_lock_date and accounting_date <= user_lock_date:
             locks.append((user_lock_date, _('user')))
-        tax_lock_date = self.max_tax_lock_date
-        if accounting_date and tax_lock_date and has_tax and accounting_date <= tax_lock_date:
-            locks.append((tax_lock_date, _('tax')))
+
+        if has_tax:
+            tax_lock_date = self._get_tax_lock_date()
+            if accounting_date and accounting_date <= tax_lock_date:
+                locks.append((tax_lock_date, _('tax'))) #TODO OCO pourquoi on mes les string traduits là-dedans ? C'est louche
+
         locks.sort()
         return locks
 

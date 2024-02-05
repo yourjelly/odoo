@@ -4542,7 +4542,7 @@ class AccountMove(models.Model):
         if self.is_sale_document(include_receipts=True):
             if lock_dates:
                 if not highest_name or number_reset == 'month':
-                    return min(today, date_utils.get_month(invoice_date)[1])
+                    return min(today, date_utils.get_month(invoice_date)[1]) #TODO OCO ça, ça marche dans le warning, mais quand on poste, il ne réassigne pas la date comme il devrait, et du coup on pète la lock date => sans doute lié à un truc à adapter ailleurs
                 elif number_reset == 'year':
                     return min(today, date_utils.end_of(invoice_date, 'year'))
         else:
