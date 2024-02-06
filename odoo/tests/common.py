@@ -59,7 +59,7 @@ from odoo.modules.registry import Registry
 from odoo.service import security
 from odoo.sql_db import BaseCursor, Cursor
 from odoo.tools import float_compare, single_email_re, profiler, lower_logging, SQL
-from odoo.tools.misc import find_in_path, mute_logger
+from odoo.tools.misc import find_in_path, mute_logger, DotDict
 
 from . import case
 

@@ -1651,7 +1651,7 @@ class TestQWebBasic(TransactionCase):
             'arch_db': '''<t t-name='master'>
                 <meta name="1"/>
                 <t t-set="data" t-value="1"/>
-                <meta groups="base.group_no_one" name="2"/>
+                <meta groups="base.group_multi_company" name="2"/>
                 <meta t-if="False" name="3"/>
                 <meta t-if="True" name="4"/>
                 <span t-out="1"/>
@@ -1711,7 +1711,7 @@ class TestQWebBasic(TransactionCase):
                     <section>
                         <meta name="1"/>
                         <t t-set="data" t-value="1"/>
-                        <meta groups="base.group_no_one" name="2"/>
+                        <meta groups="base.group_multi_company" name="2"/>
                         <meta t-if="False" name="3"/>
                         <meta t-if="True" name="4"/>
 
