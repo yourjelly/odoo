@@ -1782,19 +1782,20 @@
     </xpath>
 </template>
 
+<!-- "Minimalist" template -->
 <template id="template_footer_minimalist" inherit_id="website.layout" name="Minimalist" active="False">
     <xpath expr="//div[@id='footer']" position="replace">
         <div id="footer" class="oe_structure oe_structure_solo" t-ignore="true" t-if="not no_footer">
-            <section class="s_text_block" data-snippet="s_text_block" data-name="Text">
+            <section class="s_text_block pt16 pb16" data-snippet="s_text_block" data-name="Text">
                 <div class="container">
-                    <div class="row align-items-center">
-                        <div class="col-lg-2 pt16 pb16">
+                    <div class="row">
+                        <div class="col-6 col-lg-2 offset-3 offset-lg-0 order-0 order-lg-1 pt16 pb16">
                             <a href="/" class="o_footer_logo logo">
-                                <img src="/website/static/src/img/website_logo.svg" class="img-fluid mx-auto" aria-label="Logo of MyCompany" title="MyCompany" role="img"/>
+                                <img src="/website/static/src/img/website_logo.svg" class="img-fluid mx-auto" style="width: 50% !important;" aria-label="Logo of MyCompany" title="MyCompany" role="img"/>
                             </a>
                         </div>
-                        <div class="col-lg-5 d-flex align-items-center justify-content-center justify-content-lg-start pt16 pb16">
-                            <ul class="list-inline mb-0 ms-3">
+                        <div class="col-lg-5 order-1 order-lg-0 pt24 pb0">
+                            <ul class="list-inline mb-0 o-list-inline-backslash" style="text-align: center;">
                                 <li class="list-inline-item"><a href="/">Home</a></li>
                                 <li class="list-inline-item"><a href="#">About us</a></li>
                                 <li class="list-inline-item"><a href="#">Products</a></li>
@@ -1805,22 +1806,13 @@
                                 </li>
                             </ul>
                         </div>
-                        <div class="col-lg-3 pt16 pb16">
-                            <div class="s_social_media text-end no_icon_color o_not_editable" data-snippet="s_social_media" data-name="Social Media" contenteditable="false">
-                                <h5 class="s_social_media_title d-none" contenteditable="true">Follow us</h5>
-                                <a href="/website/social/github" class="s_social_media_github" target="_blank">
-                                    <i class="fa fa-2x fa-github m-1 o_editable_media"/>
-                                </a>
-                                <a href="/website/social/twitter" class="s_social_media_twitter" target="_blank">
-                                    <i class="fa fa-2x fa-twitter m-1 o_editable_media"/>
-                                </a>
-                                <a href="/website/social/instagram" class="s_social_media_instagram" target="_blank">
-                                    <i class="fa fa-2x fa-instagram m-1 o_editable_media"/>
-                                </a>
-                            </div>
-                        </div>
-                        <div class="col-lg-2 pt16 pb16">
-                            <a href="/contactus" class="btn btn-block btn-primary">Get in touch</a>
+                        <div class="col-lg-5 order-2 pt24 pb0">
+                            <ul class="list-inline mb-0 o-list-inline-slash" style="text-align: center;">
+                                <li class="list-inline-item"><a href="#">Facebook</a></li>
+                                <li class="list-inline-item"><a href="#">Twitter</a></li>
+                                <li class="list-inline-item"><a href="#">Instagram</a></li>
+                                <li class="list-inline-item"><a href="#">Tik Tok</a></li>
+                            </ul>
                         </div>
                     </div>
                 </div>
