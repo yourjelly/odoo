@@ -18347,8 +18347,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             if (x === cell) {
                 found = true;
             }
-            const cellValue = evaluateLiteral(x === null || x === void 0 ? void 0 : x.content);
-            if (cellValue.type === CellValueType.number) {
+            const cellValue = (x === null || x === void 0 ? void 0 : x.isFormula) ? undefined : evaluateLiteral(x === null || x === void 0 ? void 0 : x.content);
+            if ((cellValue === null || cellValue === void 0 ? void 0 : cellValue.type) === CellValueType.number) {
                 group.push(cellValue.value);
             }
             else {
@@ -44590,8 +44590,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
 
 
     __info__.version = '16.1.34';
-    __info__.date = '2024-02-02T14:03:56.859Z';
-    __info__.hash = '72d92c1';
+    __info__.date = '2024-02-06T10:49:33.374Z';
+    __info__.hash = '689c6bd';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
