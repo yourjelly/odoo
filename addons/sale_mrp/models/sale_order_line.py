@@ -112,13 +112,17 @@ class SaleOrderLine(models.Model):
                 components[product] = {'qty': qty, 'uom': to_uom.id}
         return components
 
+    def _check_product_procurement_compatibility(self):
+        """ Method to be override: check conditions to compute kit quantities. """
+        return True
+
     def _get_qty_procurement(self, previous_product_uom_qty=False):
         self.ensure_one()
         # Specific case when we change the qty on a SO for a kit product.
         # We don't try to be too smart and keep a simple approach: we use the quantity of entire
         # kits that are currently in delivery
         bom = self.env['mrp.bom']._bom_find(self.product_id, bom_type='phantom')[self.product_id]
-        if bom:
+        if bom and self._check_product_procurement_compatibility():
             moves = self.move_ids.filtered(lambda r: r.state != 'cancel' and not r.scrapped)
             filters = {
                 'incoming_moves': lambda m: m.location_dest_id.usage == 'customer' and (not m.origin_returned_move_id or (m.origin_returned_move_id and m.to_refund)),
