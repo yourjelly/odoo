@@ -1639,43 +1639,52 @@
     </xpath>
 </template>
 
+<!-- "Descriptive" template -->
 <template id="template_footer_descriptive" inherit_id="website.layout" name="Descriptive" active="False">
     <xpath expr="//div[@id='footer']" position="replace">
         <div id="footer" class="oe_structure oe_structure_solo" t-ignore="true" t-if="not no_footer">
-            <section class="s_title pt48 pb24" data-vcss="001" data-snippet="s_title">
-                <div class="container s_allow_columns">
-                    <h4><b>Designed</b> for companies</h4>
-                </div>
-            </section>
-            <section class="s_text_block pb32" data-snippet="s_text_block" data-name="Text">
+            <section class="s_text_block pt32 pb32" data-snippet="s_text_block" data-name="Text">
                 <div class="container">
-                    <div class="row">
-                        <div class="col-lg-5">
-                            <p>We are a team of passionate people whose goal is to improve everyone's life through disruptive products. We build great products to solve your business problems. Our products are designed for small to medium size companies willing to optimize their performance.</p>
-                        </div>
-                        <div class="col-lg-3 offset-lg-1">
-                            <p class="text-muted"><b>My Company</b><br/>250 Executive Park Blvd, Suite 3400 <br/> San Francisco CA 94134 <br/>United States</p>
-                        </div>
-                        <div class="col-lg-3">
-                            <ul class="list-unstyled mb-2">
-                                <li><i class="fa fa-phone fa-fw me-2"/><span class="o_force_ltr"><a href="tel:+1(650)555-0111">+1 (650) 555-0111</a></span></li>
-                                <li><i class="fa fa-envelope fa-fw me-2"/><span><a href="mailto:hello@mycompany.com">hello@mycompany.com</a></span></li>
-                            </ul>
-                            <div class="s_social_media text-start no_icon_color o_not_editable" data-snippet="s_social_media" data-name="Social Media" contenteditable="false">
-                                <h5 class="s_social_media_title d-none" contenteditable="true">Follow us</h5>
-                                <a href="/website/social/github" class="s_social_media_github" target="_blank">
-                                    <i class="fa fa-2x fa-github m-1 o_editable_media"/>
+                    <div class="row o_grid_mode" data-row-count="6" style="gap: 16px;">
+                        <div class="o_grid_item g-col-lg-4 g-height-6 col-lg-4" style="grid-area: 1 / 1 / 7 / 5; --grid-item-padding-x: 24px; --grid-item-padding-y: 24px; z-index: 1;">
+                            <h2><span class="h1-fs">Designed for companies</span></h2>
+                            <p><br/></p>
+                            <div class="s_social_media o_not_editable text-start" data-snippet="s_social_media" data-name="Social Media">
+                                <h5 class="s_social_media_title d-none">Follow us</h5>
+                                <a href="/website/social/facebook" class="s_social_media_facebook" target="_blank">
+                                    <i class="fa fa-facebook o_editable_media rounded-circle shadow-sm"/>
                                 </a>
                                 <a href="/website/social/twitter" class="s_social_media_twitter" target="_blank">
-                                    <i class="fa fa-2x fa-twitter m-1 o_editable_media"/>
-                                </a>
-                                <a href="/website/social/instagram" class="s_social_media_instagram" target="_blank">
-                                    <i class="fa fa-2x fa-instagram m-1 o_editable_media"/>
+                                    <i class="fa fa-twitter o_editable_media rounded-circle shadow-sm"/>
                                 </a>
                                 <a href="/website/social/linkedin" class="s_social_media_linkedin" target="_blank">
-                                    <i class="fa fa-2x fa-linkedin m-1 o_editable_media"/>
+                                    <i class="fa fa-linkedin o_editable_media rounded-circle shadow-sm"/>
+                                </a>
+                                <a href="/website/social/youtube" class="s_social_media_youtube" target="_blank">
+                                    <i class="fa o_editable_media fa-youtube rounded-circle shadow-sm"/>
                                 </a>
                             </div>
+                        </div>
+                        <div class="o_grid_item o_cc o_cc4 g-height-4 g-col-lg-4 col-lg-4" style="--grid-item-padding-y: 24px; --grid-item-padding-x: 24px; grid-area: 1 / 5 / 5 / 9; z-index: 2;">
+                            <p><i class="fa fa-map-o fa-2x"/></p>
+                            <p><b>My Company</b><br/>250 Executive Park Blvd, Suite 3400 <br/> San Francisco CA 94134 <br/>United States</p>
+                        </div>
+                        <div class="o_grid_item o_cc o_cc1 g-height-2 g-col-lg-4 col-lg-4" style="--grid-item-padding-y: 24px; --grid-item-padding-x: 24px; grid-area: 5 / 5 / 7 / 9; z-index: 3;">
+                            <p>
+                                <span class="o_force_ltr"><a href="tel://+1 (650) 555-0111">+1 (650) 555-0111</a></span>
+                                <br/>
+                                <a href="mailto:hello@mycompany.com">hello@mycompany.com</a>
+                            </p>
+                        </div>
+                        <div class="o_grid_item g-height-3 o_cc o_cc3 g-col-lg-4 col-lg-4 d-lg-block d-none o_snippet_mobile_invisible" style="--grid-item-padding-y: 24px; --grid-item-padding-x: 24px; grid-area: 4 / 9 / 7 / 13; z-index: 4;">
+                            <h4>Check out our services</h4>
+                            <p>Our services ensure seamless operations.</p>
+                            <p><a href="#">More infos</a></p>
+                        </div>
+                        <div class="o_grid_item g-height-3 o_cc o_cc1 g-col-lg-4 col-lg-4 d-lg-block d-none o_snippet_mobile_invisible" style="--grid-item-padding-y: 24px; --grid-item-padding-x: 24px; grid-area: 1 / 9 / 4 / 13; z-index: 5;">
+                            <h4>Discover our products</h4>
+                            <p>Our products are designed for every companies.</p>
+                            <p><a href="#">More infos</a></p>
                         </div>
                     </div>
                 </div>
