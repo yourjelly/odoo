@@ -1723,13 +1723,20 @@
     </xpath>
 </template>
 
+<!-- "Links" template -->
 <template id="template_footer_links" inherit_id="website.layout" name="Links" active="False">
     <xpath expr="//div[@id='footer']" position="replace">
         <div id="footer" class="oe_structure oe_structure_solo" t-ignore="true" t-if="not no_footer">
             <section class="s_text_block pt48 pb16" data-snippet="s_text_block" data-name="Text">
                 <div class="container">
                     <div class="row">
-                        <div class="col-lg-2 pb16">
+                        <div class="col-lg-2 order-0 order-lg-0 pb16 text-break">
+                        <!-- Could be replace by the logo template -->
+                            <a href="/" class="o_footer_logo logo">
+                                <img src="/website/static/src/img/website_logo.svg" class="img-fluid" aria-label="Logo of MyCompany" title="MyCompany" role="img" width="95" height="4"/>
+                            </a>
+                        </div>
+                        <div class="col-lg-2 order-2 order-lg-0 pb16 text-break">
                             <h5>Explore</h5>
                             <ul class="list-unstyled">
                                 <li class="list-item py-1"><a href="/">Home</a></li>
@@ -1742,7 +1749,7 @@
                                 </li>
                             </ul>
                         </div>
-                        <div class="col-lg-2 pb16">
+                        <div class="col-lg-2 order-3 order-lg-0 pb16 text-break">
                             <h5>Services</h5>
                             <ul class="list-unstyled">
                                 <li class="py-1"><a href="#">Documentation</a></li>
@@ -1751,7 +1758,7 @@
                                 <li class="py-1"><a href="#">Resources</a></li>
                             </ul>
                         </div>
-                        <div class="col-lg-2 pb16">
+                        <div class="col-lg-2 order-4 order-lg-0 pb16 text-break">
                             <h5>Follow us</h5>
                             <ul class="list-unstyled">
                                 <li class="py-1"><i class="fa fa-1x fa-fw fa-facebook-square me-2"/><a href="/website/social/facebook" target="_blank">Facebook</a></li>
@@ -1760,16 +1767,13 @@
                                 <li class="py-1"><i class="fa fa-1x fa-fw fa-instagram me-2"/><a href="/website/social/instagram" target="_blank">Instagram</a></li>
                             </ul>
                         </div>
-                        <div class="col-lg-3 pb16">
-                            <h5>Get in touch</h5>
+                        <div class="col-lg-3 order-1 order-lg-0 pb16 text-break">
+                            <h5>MyCompany</h5>
+                            <p class="text-muted">250 Executive Park Blvd, Suite 3400 <br/> San Francisco CA 94134 <br/>United States</p>
                             <ul class="list-unstyled">
                                 <li class="py-1"><i class="fa fa-1x fa-fw fa-envelope me-2"/><a href="mailto:info@yourcompany.com">info@yourcompany.com</a></li>
                                 <li class="py-1"><i class="fa fa-1x fa-fw fa-phone me-2"/><span class="o_force_ltr"><a href="tel:+1(650)555-0111">+1 (650) 555-0111</a></span></li>
                             </ul>
-                        </div>
-                        <div class="col-lg-3 pb16">
-                            <h5>MyCompany</h5>
-                            <p class="text-muted">250 Executive Park Blvd, Suite 3400 <br/> San Francisco CA 94134 <br/>United States</p>
                         </div>
                     </div>
                 </div>
