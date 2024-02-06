@@ -1033,7 +1033,7 @@ class SaleOrder(models.Model):
         return {
             'type': 'ir.actions.act_url',
             'target': 'self',
-            'url': self.get_portal_url(),
+            'url': self._get_lang()+self.get_portal_url(),
         }
 
     def action_update_taxes(self):
