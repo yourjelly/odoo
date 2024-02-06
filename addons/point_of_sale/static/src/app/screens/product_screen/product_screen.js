@@ -6,7 +6,7 @@ import { useBarcodeReader } from "@point_of_sale/app/barcode/barcode_reader_hook
 import { _t } from "@web/core/l10n/translation";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { usePos } from "@point_of_sale/app/store/pos_hook";
-import { Component, onMounted, useExternalListener, useState, reactive } from "@odoo/owl";
+import { Component, onMounted, useExternalListener, useState, reactive, useRef } from "@odoo/owl";
 import { CategorySelector } from "@point_of_sale/app/generic_components/category_selector/category_selector";
 import { Input } from "@point_of_sale/app/generic_components/inputs/input/input";
 import { Numpad } from "@point_of_sale/app/generic_components/numpad/numpad";
@@ -47,11 +47,16 @@ export class ProductScreen extends Component {
         this.dialog = useService("dialog");
         this.notification = useService("notification");
         this.numberBuffer = useService("number_buffer");
+        this.categoryBox = useRef("category-box");
+        this.productBox = useRef("products");
         this.state = useState({
             showProductReminder: false,
             loadingDemo: false,
             previousSearchWord: "",
             currentOffset: 0,
+            catWidth: 0,
+            containerWidth: 0,
+            search: false,
         });
         onMounted(() => {
             this.pos.openCashControl();
@@ -64,6 +69,15 @@ export class ProductScreen extends Component {
             // We don't do this in the `mounted` lifecycle method because it is called before
             // the callbacks in `onMounted` hook.
             this.numberBuffer.reset();
+            if (!this.ui.isSmall) {
+                this.computeCategoryContainer();
+            }
+
+            window.addEventListener("resize", () => {
+                if (!this.ui.isSmall) {
+                    this.computeCategoryContainer();
+                }
+            });
         });
         this.barcodeReader = useService("barcode_reader");
         useExternalListener(window, "click", this.clickEvent.bind(this));
@@ -83,6 +97,67 @@ export class ProductScreen extends Component {
         });
         this.scrollDirection = useScrollDirection("products");
     }
+    get isRestaurant() {
+        return this.pos.config.module_pos_restaurant;
+    }
+    computeCategoryContainer() {
+        const catW =
+            this.categoryBox?.el?.children[1]?.children[0]?.children[0]?.children[0]?.offsetWidth;
+        this.state.catWidth = !catW ? 122 : catW;
+        this.state.containerWidth = this.categoryBox?.el?.offsetWidth;
+    }
+    getSlicedChildCategories(category) {
+        const childs = this.getCategoriesInfo(
+            category
+                ? [...category.child_id]
+                : this.pos.models["pos.category"].filter((c) => !c.parent_id),
+            this.pos.selectedCategory
+        );
+        const nbrForDisplay = Math.floor(this.state.containerWidth / this.state.catWidth) * 2;
+
+        return childs.length < nbrForDisplay
+            ? [childs]
+            : Array.from({ length: Math.ceil(childs.length / nbrForDisplay) }, (_, i) =>
+                  childs.slice(i * nbrForDisplay, (i + 1) * nbrForDisplay)
+              );
+    }
+    getChildCategories(selectedCategory) {
+        return selectedCategory
+            ? this.getCategoriesInfo([...selectedCategory.child_id], selectedCategory)
+            : this.pos.models["pos.category"].filter((category) => !category.parent_id);
+    }
+    getChildCategoriesNotRoot(selectedCategory) {
+        return selectedCategory
+            ? this.getCategoriesInfo([...selectedCategory.child_id], selectedCategory)
+            : [];
+    }
+    getCategoriesPath() {
+        const selectedCategory = this.pos.selectedCategory;
+        const path = selectedCategory
+            ? this.getCategoriesInfo(
+                  [...selectedCategory.allParents, selectedCategory],
+                  selectedCategory
+              )
+            : [];
+        return [
+            {
+                id: 0,
+                name: "",
+                icon: "fa-home fa-2x",
+            },
+            ...path,
+        ];
+    }
+    getAncestorsAndCurrent() {
+        const selectedCategory = this.pos.selectedCategory;
+        return selectedCategory
+            ? [undefined, ...selectedCategory.allParents, selectedCategory]
+            : [selectedCategory];
+    }
+
+    /**
+     * @returns {import("@point_of_sale/app/generic_components/category_selector/category_selector").Category[]}
+     */
     getCategories() {
         const selectedCategory = this.pos.selectedCategory;
         const categoriesToDisplay = selectedCategory
@@ -94,23 +169,34 @@ export class ProductScreen extends Component {
                 name: "",
                 icon: "fa-home fa-2x",
             },
-            ...categoriesToDisplay.map((category) => {
-                return {
-                    ...pick(category, "id", "name", "color"),
-                    showSeparator:
-                        selectedCategory &&
-                        [
-                            ...selectedCategory.allParents.map((p) => p.id),
-                            this.pos.selectedCategory.id,
-                        ].includes(category.id),
-                    imgSrc:
-                        this.pos.config.show_category_images && category.has_image
-                            ? `/web/image?model=pos.category&field=image_128&id=${category.id}`
-                            : undefined,
-                };
-            }),
+            ...this.getCategoriesInfo(categoriesToDisplay, selectedCategory),
         ];
     }
+
+    getCategoriesInfo(categories, selectedCategory) {
+        return categories.map((category) => {
+            return {
+                ...pick(category, "id", "name", "color"),
+                showSeparator:
+                    selectedCategory &&
+                    [
+                        ...selectedCategory.allParents.map((p) => p.id),
+                        this.pos.selectedCategory.id,
+                    ].includes(category.id) &&
+                    (this.ui.isSmall || !this.pos.config.module_pos_restaurant),
+                imgSrc:
+                    this.pos.config.show_category_images && category.has_image
+                        ? `/web/image?model=pos.category&field=image_128&id=${category.id}`
+                        : undefined,
+                isSelected:
+                    selectedCategory &&
+                    this.getAncestorsAndCurrent().includes(category) &&
+                    !this.ui.isSmall &&
+                    this.pos.config.module_pos_restaurant,
+            };
+        });
+    }
+
     getNumpadButtons() {
         return [
             { value: "1" },
@@ -368,8 +454,10 @@ export class ProductScreen extends Component {
         }
 
         list = list
-            .filter((product) => !this.getProductListToNotDisplay().includes(product.id))
-            .slice(0, 100);
+            ? list
+                  .filter((product) => !this.getProductListToNotDisplay().includes(product.id))
+                  .slice(0, 100)
+            : [];
 
         return list.sort(function (a, b) {
             return a.display_name.localeCompare(b.display_name);
@@ -489,6 +577,17 @@ export class ProductScreen extends Component {
     async onProductInfoClick(product) {
         const info = await reactive(this.pos).getProductInfo(product, 1);
         this.dialog.add(ProductInfoPopup, { info: info, product: product });
+    }
+
+    focusSearch() {
+        if (this.ui.isSmall) {
+            this.state.search = !this.state.search;
+
+            if (!this.state.search) {
+                this.pos.searchProductWord = "";
+            }
+        }
+        this.pos.searchProductWord = "";
     }
 }
 

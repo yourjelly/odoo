@@ -32,7 +32,6 @@ export class ProductCard extends Component {
         if (!toOrder || window.getComputedStyle(toOrder).display === "none") {
             return;
         }
-
         let pic = this.selfRef.el.querySelector(".o_self_order_item_card_image");
         if (!pic) {
             pic = this.selfRef.el.querySelector(".o_self_order_item_card_no_image");

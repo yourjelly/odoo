@@ -22,10 +22,13 @@ export class CategorySelector extends Component {
                 imgSrc: String,
                 icon: { type: String, optional: true },
                 showSeparator: { type: Boolean, optional: true },
+                isSelected: { type: Boolean, optional: true },
             },
         },
         class: { type: String, optional: true },
         onClick: { type: Function },
+        catWidth: { type: Number, optional: true },
+        containerWidth: { type: Number, optional: true },
     };
     static defaultProps = {
         class: "",

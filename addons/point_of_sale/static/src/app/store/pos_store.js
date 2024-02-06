@@ -355,7 +355,10 @@ export class PosStore extends Reactive {
             this.db.save("TO_REFUND_LINES", this.toRefundLines)
         );
         const { start_category, iface_start_categ_id } = this.config;
-        this.setSelectedCategory((start_category && iface_start_categ_id?.[0]) || 0);
+        this.setSelectedCategory(
+            (start_category && iface_start_categ_id?.[0]) ||
+                this.models["pos.category"].filter((c) => !c.parent_id)[0].id
+        );
         // Push orders in background, do not await
         this.push_orders();
         // This method is to load the demo datas.
@@ -1542,7 +1545,7 @@ export class PosStore extends Reactive {
         // If there are orders in the db left unsynced, we try to sync.
         const syncSuccess = await this.push_orders_with_closing_popup();
         if (syncSuccess) {
-            window.location = '/web#action=point_of_sale.action_client_pos_menu';
+            window.location = "/web#action=point_of_sale.action_client_pos_menu";
         }
     }
     shouldShowNavbarButtons() {

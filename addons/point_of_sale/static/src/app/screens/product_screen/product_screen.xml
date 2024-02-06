@@ -18,47 +18,82 @@
                 </div>
             </div>
             <div class="rightpane d-flex flex-grow-1 flex-column bg-300 w-60" t-if="!ui.isSmall || pos.mobile_pane === 'right'">
-                <div t-att-class="{'d-none': scrollDirection.down and ui.isSmall}" class="d-flex bg-view shadow-sm control-top-bar">
-                    <CategorySelector categories="getCategories()" onClick="(id) => this.pos.setSelectedCategory(id)" class="ui.isSmall ? 'scrollbar-hidden' : ''" />
-                    <Input tModel="[pos, 'searchProductWord']"
-                        class="'p-2'"
-                        isSmall="ui.isSmall"
-                        placeholder="'Search products...'"
-                        icon="{type: 'fa', value: 'fa-search'}"
-                        debounceMillis="100" />
+                <div t-ref="category-box" t-att-class="{'d-none': scrollDirection.down and ui.isSmall}" class="d-flex flex-column bg-view shadow-sm control-top-bar">
+                    <div class="p-1" t-if="this.state.search or !ui.isSmall">
+                        <div t-attf-class="form-control pos-topheader input-container d-flex align-items-center py-1 bg-view">
+                            <input type="text"
+                                class="form-control ps-0 border-0 shadow-none"
+                                placeholder="Search product..."
+                                t-model="this.pos.searchProductWord" />
+                            <button class="btn-close" t-on-click="focusSearch"/>
+                        </div>
+                    </div>
+                    <t t-if="!pos.config.module_pos_restaurant">
+                        <CategorySelector class="'d-flex overflow-auto w-100 flex-grow-1 align-items-center'" categories="getCategories()" onClick="(id) => this.pos.setSelectedCategory(id)" />
+                    </t>
+                    <t t-else="">
+                        <div t-if="ui.isSmall" class="d-flex bg-view shadow-sm control-top-bar">
+                            <CategorySelector class="'d-flex overflow-auto w-100 flex-grow-1 align-items-center' + ui.isSmall ? 'scrollbar-hidden' : ''" categories="getCategoriesPath()" onClick="(id) => this.pos.setSelectedCategory(id)"/>
+                            <button t-if="!this.state.search" class="search-button btn btn-light border-0 border-start rounded-0" t-on-click="focusSearch">
+                                <i class="oi oi-search"/>
+                            </button>
+                        </div>
+                        <t t-else="" t-foreach="getAncestorsAndCurrent().slice(0,2)" t-as="category" t-key="category_index">
+                            <div t-if="getChildCategories(category).length != 0" class="category-box d-flex bg-300">
+                                <div class="d-flex">
+                                    <t t-foreach="getSlicedChildCategories(category)" t-as="children" t-key="children_index">
+                                        <CategorySelector class="'category-selector d-grid p-1 gap-1'" categories="children" onClick="(id) => this.pos.setSelectedCategory(id)" containerWidth="this.state.containerWidth"/>
+                                    </t>
+                                </div>
+                            </div>
+                        </t>
+                    </t>
                 </div>
                 <div t-ref="products" class="overflow-y-auto flex-grow-1">
-                    <div t-if="productsToDisplay.length != 0 and pos.posHasValidProduct()" t-attf-class="product-list {{this.pos.productListViewMode}} p-1">
-                        <t  t-foreach="productsToDisplay" t-as="product" t-key="product.id">
-                            <ProductCard
-                                class="pos.productViewMode"
-                                name="product.display_name"
-                                productId="product.id"
-                                color="product.pos_categ_ids?.at(-1)?.color"
-                                price="pos.getProductPriceFormatted(product)"
-                                imageUrl="pos.config.show_product_images and product.getImageUrl()"
-                                onClick.bind="() => this.addProductToOrder(product)"
-                                productInfo="true"
-                                onProductInfoClick.bind="() => this.onProductInfoClick(product)"
-                            />
-                        </t>
-                    </div>
-                    <div t-else="" class="flex-grow-1 text-center mt-5">
-                        <p t-if="searchWord">No products found for <b>"<t t-esc="searchWord"/>"</b> in this category.</p>
-                        <p t-elif="pos.posHasValidProduct()">There are no products in this category.</p>
-                        <p t-elif="!state.loadingDemo" class="text-large">No products available. Explore <a role="button" class="button-no-demo fw-bolder" t-on-click="loadDemoDataProducts">demo data</a> or <a role="button" class="button-no-demo fw-bolder" t-on-click="createNewProducts">create your own</a>.</p>
-                        <div t-else="" class="block-top-header position-absolute top-0 start-0 bg-black opacity-50 w-100 h-100 z-1000">
-                            <div class="d-flex h-100 w-100 text-white flex-row align-items-center justify-content-center">
-                                <div class="o_spinner d-flex flex-column mb-4">
-                                    <img src="/web/static/img/spin.svg" alt="Loading..."/>
-                                    Loading...
+                    <t t-if="!ui.isSmall or getChildCategories(this.pos.selectedCategory).length === 0 or searchWord">
+                        <div t-if="productsToDisplay.length != 0 and pos.posHasValidProduct()" t-attf-class="product-list {{this.pos.productListViewMode}} p-1">
+                            <t  t-foreach="productsToDisplay" t-as="product" t-key="product.id">
+                                <ProductCard
+                                    class="pos.productViewMode"
+                                    name="product.display_name"
+                                    productId="product.id"
+                                    color="product.pos_categ_ids?.at(-1)?.color"
+                                    price="pos.getProductPriceFormatted(product)"
+                                    imageUrl="pos.config.show_product_images and product.getImageUrl()"
+                                    onClick.bind="() => this.addProductToOrder(product)"
+                                    productInfo="true"
+                                    onProductInfoClick.bind="() => this.onProductInfoClick(product)"
+                                />
+                            </t>
+                        </div>
+                        <div t-else="" class="flex-grow-1 text-center mt-5">
+                            <p t-if="searchWord">No products found for <b>"<t t-esc="searchWord"/>"</b> in this category.</p>
+                            <p t-elif="pos.posHasValidProduct()">There are no products in this category.</p>
+                            <p t-elif="!state.loadingDemo" class="text-large">No products available. Explore <a role="button" class="button-no-demo fw-bolder" t-on-click="loadDemoDataProducts">demo data</a> or <a role="button" class="button-no-demo fw-bolder" t-on-click="createNewProducts">create your own</a>.</p>
+                            <div t-else="" class="block-top-header position-absolute top-0 start-0 bg-black opacity-50 w-100 h-100 z-1000">
+                                <div class="d-flex h-100 w-100 text-white flex-row align-items-center justify-content-center">
+                                    <div class="o_spinner d-flex flex-column mb-4">
+                                        <img src="/web/static/img/spin.svg" alt="Loading..."/>
+                                        Loading...
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div t-if="searchWord" class="search-more-button d-flex justify-content-center m-2">
-                        <button class="btn btn-primary btn-lg" t-on-click="onPressEnterKey">Search more</button>
-                    </div>
+                        <div t-if="searchWord" class="search-more-button d-flex justify-content-center m-2">
+                            <button class="btn btn-primary btn-lg" t-on-click="onPressEnterKey">Search more</button>
+                        </div>
+                    </t>
+                    <t t-else="">
+                        <div class="container text-center mw-100 m-1">
+                            <div t-attf-style="display: grid; grid-template-rows: repeat(calc({{getChildCategories(this.pos.selectedCategory).length}}/2) ,auto); grid-auto-flow: column; grid-template-columns: repeat(2, minmax(122px, 1fr))">
+                                <t t-foreach="getChildCategories(this.pos.selectedCategory)" t-as="category" t-key="category.id">
+                                    <button t-if="category.name" class="category-button col btn btn-light rounded-2 btn-primary m-1" style="aspect-ratio: 1/0.3;" t-on-click="() => this.pos.setSelectedCategory(category.id)">
+                                        <span class="text-wrap-categ text-center fs-5 mx-2" t-esc="category.name" style="min-height: 1.2rem;"/>
+                                    </button>
+                                </t>
+                            </div>
+                        </div>
+                    </t>
                 </div>
                 <t t-if="ui.isSmall">
                     <div class="product-reminder d-flex justify-content-center align-items-center py-1 text-bg-warning bg-opacity-50 fw-bolder" t-if="state.showProductReminder" t-key="animationKey" >
