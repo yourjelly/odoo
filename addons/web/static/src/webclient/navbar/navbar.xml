@@ -50,7 +50,8 @@
         t-foreach="apps"
         t-as="app"
         t-key="app.id"
-        class="{ 'o_app': true, focus: menuService.getCurrentApp() === app }"
+        t-if="!app.technical_chm || app.technical_chm == this.technical_chm.active"
+        class="{ 'o_app': true, focus: menuService.getCurrentApp() === app}"
         href="getMenuItemHref(app)"
         t-esc="app.name"
         dataset="{ menuXmlid: app.xmlid, section: app.id }"
@@ -75,9 +76,9 @@
           <t t-set="hotkey" t-value="undefined" />
         </t>
 
-        <t t-if="!section.childrenTree.length">
+        <t t-if="!section.childrenTree.length &amp;&amp; (!section.technical_chm || section.technical_chm == this.technical_chm.active)">
           <DropdownItem
-            class="'o_nav_entry'"
+            class="{o_nav_entry: true}"
             href="getMenuItemHref(section)"
             hotkey="hotkey"
             t-esc="section.name"
@@ -85,13 +86,13 @@
             onSelected="() => this.onNavBarDropdownItemSelection(section)"
           />
         </t>
-        <t t-else="">
+        <t t-elif="!section.technical_chm || section.technical_chm == this.technical_chm.active">
           <MenuDropdown
             hotkey="hotkey"
             xmlid="section.xmlid"
           >
             <t t-set-slot="toggler">
-              <span t-esc="section.name" t-att-data-section="section.id" />
+              <span t-esc="section.name" t-att-data-section="section.id"/>
             </t>
             <t t-call="web.NavBar.SectionsMenu.Dropdown.MenuSlot">
               <t t-set="items" t-value="section.childrenTree" />
@@ -119,7 +120,7 @@
 
   <t t-name="web.NavBar.SectionsMenu.Dropdown.MenuSlot">
     <t t-set="style" t-value="`padding-left: ${decalage}px;`" />
-    <t t-foreach="items" t-as="item" t-key="item.id">
+    <t t-foreach="items" t-as="item" t-key="item.id" t-if="!item.technical_chm || item.technical_chm == this.technical_chm.active">
       <DropdownItem
         t-if="!item.childrenTree.length"
         href="getMenuItemHref(item)"
@@ -150,9 +151,9 @@
       </t>
       <t t-foreach="sections" t-as="section" t-key="section.id">
 
-        <t t-if="!section.childrenTree.length">
+        <t t-if="!section.childrenTree.length &amp;&amp; (!section.technical_chm || section.technical_chm == this.technical_chm.active)">
           <DropdownItem
-            class="'o_more_dropdown_section'"
+            class="{o_more_dropdown_section: true}"
             href="getMenuItemHref(section)"
             t-esc="section.name"
             dataset="{ menuXmlid: section.xmlid, section: section.id }"

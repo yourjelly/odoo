@@ -233,7 +233,7 @@ QUnit.test(
 
             // Unassign me
             await triggerHotkey("control+k");
-            await click("#o_command_2");
+            await click(".o_command_name[title='Unassign from me']");
             await contains(".o_field_many2one_avatar_user input", { value: "" });
         });
     }

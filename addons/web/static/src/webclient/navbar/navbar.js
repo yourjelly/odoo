@@ -10,6 +10,7 @@ import {
     onWillDestroy,
     useExternalListener,
     useEffect,
+    useState,
     useRef,
     onWillUnmount,
 } from "@odoo/owl";
@@ -54,6 +55,8 @@ export class NavBar extends Component {
         this.menuService = useService("menu");
         this.root = useRef("root");
         this.appSubMenus = useRef("appSubMenus");
+        this.technical_chm = useState(useService("technical-chm"));
+
         const debouncedAdapt = debounce(this.adapt.bind(this), 250);
         onWillDestroy(() => debouncedAdapt.cancel());
         useExternalListener(window, "resize", debouncedAdapt);

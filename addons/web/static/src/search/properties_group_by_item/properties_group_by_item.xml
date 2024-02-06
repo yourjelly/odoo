@@ -24,7 +24,7 @@
                     </AccordionItem>
                     <!-- Standard items without option -->
                     <CheckboxItem t-else=""
-                        class="{ o_menu_item: true, selected: item.isActive }"
+                        class="{ o_menu_item: true, selected: item.isActive}"
                         checked="item.isActive"
                         parentClosingMode="'none'"
                         t-esc="description"

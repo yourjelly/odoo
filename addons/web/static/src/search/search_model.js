@@ -4,6 +4,7 @@ import { evaluateExpr } from "@web/core/py_js/py";
 import { user } from "@web/core/user";
 import { sortBy, groupBy } from "@web/core/utils/arrays";
 import { deepCopy } from "@web/core/utils/objects";
+import { useService } from "@web/core/utils/hooks";
 import { SearchArchParser } from "./search_arch_parser";
 import {
     constructDateDomain,
@@ -16,7 +17,7 @@ import {
 } from "./utils/dates";
 import { FACET_ICONS, FACET_COLORS } from "./utils/misc";
 
-import { EventBus, toRaw } from "@odoo/owl";
+import { useState, EventBus, toRaw } from "@odoo/owl";
 import { domainFromTree, treeFromDomain } from "@web/core/tree_editor/condition_tree";
 import { _t } from "@web/core/l10n/translation";
 import { useGetDomainTreeDescription } from "@web/core/domain_selector/utils";
@@ -174,6 +175,8 @@ export class SearchModel extends EventBus {
         this.viewService = view;
 
         this.getDomainTreeDescription = useGetDomainTreeDescription(fieldService, nameService);
+
+        this.technical_chm = useState(useService("technical-chm"));
 
         // used to manage search items related to date/datetime fields
         this.referenceMoment = DateTime.local();
@@ -772,11 +775,16 @@ export class SearchModel extends EventBus {
     getSearchItems(predicate) {
         const searchItems = [];
         for (const searchItem of Object.values(this.searchItems)) {
+            if (
+                "is_technical_chm" in searchItem &&
+                (searchItem.is_technical_chm === "1") !== this.technical_chm.active
+            ) {
+                continue;
+            }
             const enrichedSearchitem = this._enrichItem(searchItem);
             if (enrichedSearchitem) {
                 const isInvisible =
-                    "invisible" in searchItem &&
-                    evaluateExpr(searchItem.invisible, this.globalContext);
+                    searchItem.invisible && evaluateExpr(searchItem.invisible, this.globalContext);
                 if (!isInvisible && (!predicate || predicate(enrichedSearchitem))) {
                     searchItems.push(enrichedSearchitem);
                 }

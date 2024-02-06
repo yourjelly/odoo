@@ -108,6 +108,9 @@ export class SearchArchParser {
         if (node.hasAttribute("invisible")) {
             preField.invisible = node.getAttribute("invisible");
         }
+        if (node.hasAttribute("technical-chm")) {
+            preField.is_technical_chm = node.getAttribute("technical-chm");
+        }
         if (node.hasAttribute("domain")) {
             preField.domain = node.getAttribute("domain");
         }
@@ -226,6 +229,9 @@ export class SearchArchParser {
                 // as it may still be present in the view (in 'invisible' state)
                 return;
             }
+        }
+        if (node.hasAttribute("technical-chm")) {
+            preSearchItem.is_technical_chm = node.getAttribute("technical-chm");
         }
         preSearchItem.groupNumber = this.groupNumber;
         if (node.hasAttribute("name")) {

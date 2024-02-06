@@ -18,6 +18,7 @@ import { useBounceButton } from "@web/views/view_hook";
 import { Widget } from "@web/views/widgets/widget";
 import { getFormattedValue } from "../utils";
 import { localization } from "@web/core/l10n/localization";
+import { effect } from "@web/core/utils/reactive";
 
 import {
     Component,
@@ -97,6 +98,7 @@ export class ListRenderer extends Component {
 
     setup() {
         this.uiService = useService("ui");
+        this.technical_chm = useState(useService("technical-chm"));
         this.allColumns = this.processAllColumn(this.props.archInfo.columns, this.props.list);
         this.notificationService = useService("notification");
         this.keyOptionalFields = this.createKeyOptionalFields();
@@ -145,6 +147,14 @@ export class ListRenderer extends Component {
             this.allColumns = this.processAllColumn(nextProps.archInfo.columns, nextProps.list);
             this.state.columns = this.getActiveColumns(nextProps.list);
         });
+        effect(
+            (technical) => {
+                technical.active; // force the reactive value subscription.
+                this.state.columns = this.getActiveColumns(this.props.list);
+            },
+            [this.technical_chm]
+        );
+
         let dataRowId;
         this.rootRef = useRef("root");
         this.resequencePromise = Promise.resolve();
@@ -250,6 +260,9 @@ export class ListRenderer extends Component {
                 return false; // no handle column if the list is grouped
             }
             if (col.optional && !this.optionalActiveFields[col.name]) {
+                return false;
+            }
+            if ("is_technical_chm" in col && col.is_technical_chm !== this.technical_chm.active) {
                 return false;
             }
             if (this.evalColumnInvisible(col.column_invisible)) {
@@ -611,6 +624,9 @@ export class ListRenderer extends Component {
                 name: col.name,
                 value: this.optionalActiveFields[col.name],
             };
+            if ("is_technical_chm" in col) {
+                optionalField.is_technical_chm = col.is_technical_chm;
+            }
             if (!col.relatedPropertyField) {
                 optionalFields.push(optionalField);
             } else {
@@ -795,7 +811,6 @@ export class ListRenderer extends Component {
         if (column.widget) {
             classNames.push(`o_${column.widget}_cell`);
         }
-
         return classNames.join(" ");
     }
 

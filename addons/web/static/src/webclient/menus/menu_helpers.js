@@ -35,6 +35,7 @@ export function computeAppsAndMenuItems(menuTree) {
             xmlid: menuItem.xmlid,
             actionID: menuItem.actionID,
             appID: menuItem.appID,
+            technical_chm: menuItem.technical_chm,
         };
         if (isApp) {
             if (menuItem.webIconData) {

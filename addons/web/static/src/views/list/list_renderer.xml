@@ -59,7 +59,9 @@
                                         <div class="fw-bold" t-esc="group.displayName"/>
                                     </DropdownItem>
                                     <t t-foreach="group.optionalFields" t-as="field" t-key="field_index">
-                                        <DropdownItem parentClosingMode="'none'" onSelected="() => this.toggleOptionalField(field.name)">
+                                        <DropdownItem parentClosingMode="'none'"
+                                            onSelected="() => this.toggleOptionalField(field.name)"
+                                            t-if="!('is_technical_chm' in field) || field.is_technical_chm === this.technical_chm.active">
                                             <CheckBox
                                                 onChange="() => this.toggleOptionalField(field.name)"
                                                 value="field.value"

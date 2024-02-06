@@ -3,6 +3,7 @@
 import { overlayService } from "@web/core/overlay/overlay_service";
 import { browser } from "@web/core/browser/browser";
 import { notificationService } from "@web/core/notifications/notification_service";
+import { technicalService } from "@web/webclient/technical_chm/technical_chm_service";
 import { menuService } from "@web/webclient/menus/menu_service";
 import { registry } from "@web/core/registry";
 import { uiService } from "@web/core/ui/ui_service";
@@ -42,6 +43,7 @@ QUnit.module("Navbar", {
         serviceRegistry.add("hotkey", hotkeyService);
         serviceRegistry.add("ui", uiService);
         systrayRegistry.add("addon.myitem", { Component: MySystrayItem });
+        serviceRegistry.add("technical-chm", technicalService);
         patchWithCleanup(browser, {
             setTimeout: (handler, delay, ...args) => handler(...args),
             clearTimeout: () => {},
