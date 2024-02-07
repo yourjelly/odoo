@@ -1259,6 +1259,9 @@ class ChromeBrowser:
             message += '\n' + stack
 
         log_type = type
+        if message.startswith('[RUNBOT]'):
+            message = message.removeprefix('[RUNBOT]')
+            log_type = 'runbot'
         _logger = self._logger.getChild('browser')
         _logger.log(
             self._TO_LEVEL.get(log_type, logging.INFO),
@@ -1378,6 +1381,7 @@ which leads to stray network requests and inconsistencies."""
         'info': logging.INFO,
         'warning': logging.WARNING,
         'error': logging.ERROR,
+        'runbot': logging.RUNBOT,
         # TODO: what do with
         # dir, dirxml, table, trace, clear, startGroup, startGroupCollapsed,
         # endGroup, assert, profile, profileEnd, count, timeEnd
