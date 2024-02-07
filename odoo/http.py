@@ -151,6 +151,8 @@ from pathlib import Path
 from urllib.parse import urlparse
 from zlib import adler32
 
+from odoo.tools import get_diff
+
 import babel.core
 
 try:
@@ -1273,7 +1275,31 @@ class Response(werkzeug.wrappers.Response):
                 _logger.warning("LEAK from %s", request.httprequest.environ['REQUEST_URI'])
             except:
                 _logger.warning("LEAK from %...")
-        return request.env["ir.ui.view"]._render_template(self.template, self.qcontext)
+        dom1 = request.env["ir.ui.view"]._render_template(self.template, self.qcontext)
+
+        orig_qc = self.qcontext
+        pp = request.get_http_params().copy()
+        pp.update(self.qcontext)
+        pp.pop('debug', '')
+
+        if orig_qc != pp:
+            print(self.qcontext)
+            self.qcontext = pp
+            print(self.qcontext)
+            dom2 = request.env["ir.ui.view"]._render_template(self.template, self.qcontext)
+
+            import difflib
+            output_list = [li for li in difflib.ndiff(dom1, dom2) if li[0] != ' ']
+            if dom1 != dom2 and 'csrf' not in get_diff([dom1, 'DOM1'], [dom2, 'DOM2']):  # session differ
+                print(get_diff([dom1, 'DOM1'], [dom2, 'DOM2']).splitlines()[9])
+                print(dom1, dom2)
+                print(get_diff([dom1, 'DOM1'], [dom2, 'DOM2']))
+                print(output_list)
+
+                _logger.warning("Oupsy %s", request.httprequest.environ['REQUEST_URI'])
+                _logger.warning((get_diff([dom1, 'DOM1'], [dom2, 'DOM2'])))
+
+        return dom1
 
     def flatten(self):
         """
