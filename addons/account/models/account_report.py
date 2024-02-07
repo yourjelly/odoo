@@ -56,6 +56,7 @@ class AccountReport(models.Model):
     search_bar = fields.Boolean(string="Search Bar")
     prefix_groups_threshold = fields.Integer(string="Prefix Groups Threshold")
     integer_rounding = fields.Selection(string="Integer Rounding", selection=[('HALF-UP', "Half-up (away from 0)"), ('UP', "Up"), ('DOWN', "Down")])
+    closing_type_id = fields.Many2one(string="Closing Type", comodel_name='account.report.closing.type')
 
     default_opening_date_filter = fields.Selection(
         string="Default Opening",

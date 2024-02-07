@@ -251,6 +251,7 @@ class AccountMove(models.Model):
     type_name = fields.Char('Type Name', compute='_compute_type_name')
     country_code = fields.Char(related='company_id.account_fiscal_country_id.code', readonly=True)
     attachment_ids = fields.One2many('ir.attachment', 'res_id', domain=[('res_model', '=', 'account.move')], string='Attachments')
+    report_closing_id = fields.Many2one(string="Parent Closing", comodel_name='account.report.closing')# TODO OCO en community par cohérence; à voir
 
     # === Hash Fields === #
     restrict_mode_hash_table = fields.Boolean(related='journal_id.restrict_mode_hash_table')
