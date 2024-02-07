@@ -51,3 +51,8 @@ class TestHttpCase(HttpCase):
                 self.assertEqual(text, "Object(custom=Object, value=1, description='dummy')")
                 console_log_count +=1
         self.assertEqual(console_log_count, 1)
+
+@tagged('-at_install', 'post_install')
+class TestRunbotLog(HttpCase):
+    def test_runbot_log(self):
+        self.browser_js("about:blank", "console.log('[RUNBOT]this is a small test'); console.log('test successful');")
