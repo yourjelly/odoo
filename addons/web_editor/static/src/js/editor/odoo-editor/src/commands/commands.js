@@ -202,7 +202,7 @@ export const editorCommands = {
             container.replaceChildren(...p.childNodes);
         } else if (container.childElementCount > 1) {
             // Grab the content of the first child block and isolate it.
-            if (isBlock(container.firstChild) && !['TABLE', 'UL', 'OL'].includes(container.firstChild.nodeName)) {
+            if (isBlock(container.firstChild) && !['TABLE', 'UL', 'OL'].includes(container.firstChild.nodeName) && !isEmptyBlock(startNode)) {
                 if (container.firstChild.nodeName === 'LI') {
                     const deepestLi = closestBlock(firstLeaf(container.firstChild));
                     splitAroundUntil(deepestLi, container.firstChild);
@@ -212,7 +212,7 @@ export const editorCommands = {
                 container.firstElementChild.remove();
             }
             // Grab the content of the last child block and isolate it.
-            if (isBlock(container.lastChild) && !['TABLE', 'UL', 'OL'].includes(container.lastChild.nodeName)) {
+            if (isBlock(container.lastChild) && !['TABLE', 'UL', 'OL'].includes(container.lastChild.nodeName) && !isEmptyBlock(startNode)) {
                 if (container.lastChild.nodeName === 'LI') {
                     const deepestLi = closestBlock(lastLeaf(container.lastChild));
                     splitAroundUntil(deepestLi, container.lastChild);
