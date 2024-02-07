@@ -1766,6 +1766,7 @@ export function toggleCompleteList(node, mode) {
     //     [...childNodes].forEach(n => n.classList.contains('oe-nested') && toggleCompleteList(n, mode));
     // }
     // return currentNode.parentNode;
+    const toReturn = node.firstChild;
     const childNodes = [...node.childNodes];
     for(const list of childNodes) {
         const toConvert = closestElement(list, 'UL, OL');
@@ -1775,6 +1776,7 @@ export function toggleCompleteList(node, mode) {
             toggleList([list], mode);
         }
     }
+    return toReturn.parentNode;
 }
 
 export function toggleClass(node, className) {

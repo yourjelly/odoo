@@ -275,7 +275,10 @@ export const editorCommands = {
                 // If we arrive here, the o_enter index should always be 0.
                 const parent = currentNode.nextSibling.parentElement;
                 const index = [...parent.childNodes].indexOf(currentNode.nextSibling);
-                parent.oEnter(index);
+                const result = parent.oEnter(index);
+                if (result.nodeName === 'LI' && isList(result.firstChild)) {
+                    result.classList.add('oe-nested');
+                }
             }
         }
 
@@ -301,6 +304,9 @@ export const editorCommands = {
                     }
                     if (offset) {
                         const [left, right] = splitElement(currentNode.parentElement, offset);
+                        if (right.nodeName === 'LI' && right.firstChild && isList(right.firstChild)) {
+                            right.classList.add('oe-nested');
+                        }
                         currentNode = insertBefore ? right : left;
                     } else {
                         currentNode = currentNode.parentElement;
