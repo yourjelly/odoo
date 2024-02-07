@@ -190,7 +190,7 @@ class Product(models.Model):
                     0.0,
                 )
                 continue
-            rounding = product.uom_id.rounding
+            rounding = product.product_tmpl_id.uom_id.rounding
             res[product_id] = {}
             if dates_in_the_past:
                 qty_available = quants_res.get(origin_product_id, [0.0])[0] - moves_in_res_past.get(origin_product_id, 0.0) + moves_out_res_past.get(origin_product_id, 0.0)
@@ -722,20 +722,21 @@ class ProductTemplate(models.Model):
             template.outgoing_qty = res[template.id]['outgoing_qty']
 
     def _compute_quantities_dict(self):
-        variants_available = {
-            p['id']: p for p in self.product_variant_ids._origin.read(['qty_available', 'virtual_available', 'incoming_qty', 'outgoing_qty'])
-        }
+        products = self.filtered(lambda p: p.type != 'service')
+        variants = products.product_variant_ids._origin
+        variants_quantites_dict = variants._compute_quantities_dict(self._context.get('lot_id'), self._context.get('owner_id'), self._context.get('package_id'), self._context.get('from_date'), self._context.get('to_date'))
+
         prod_available = {}
         for template in self:
             qty_available = 0
             virtual_available = 0
             incoming_qty = 0
             outgoing_qty = 0
-            for p in template.product_variant_ids._origin:
-                qty_available += variants_available[p.id]["qty_available"]
-                virtual_available += variants_available[p.id]["virtual_available"]
-                incoming_qty += variants_available[p.id]["incoming_qty"]
-                outgoing_qty += variants_available[p.id]["outgoing_qty"]
+            for p in variants.ids:
+                qty_available += variants_quantites_dict[p]["qty_available"]
+                virtual_available += variants_quantites_dict[p]["virtual_available"]
+                incoming_qty += variants_quantites_dict[p]["incoming_qty"]
+                outgoing_qty += variants_quantites_dict[p]["outgoing_qty"]
             prod_available[template.id] = {
                 "qty_available": qty_available,
                 "virtual_available": virtual_available,
