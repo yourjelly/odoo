@@ -52,6 +52,7 @@ import {
     firstLeaf,
     toggleList,
     toggleCompleteList,
+    lastLeaf,
 } from '../utils/utils.js';
 
 const TEXT_CLASSES_REGEX = /\btext-[^\s]*\b/;
@@ -202,8 +203,8 @@ export const editorCommands = {
         } else if (container.childElementCount > 1) {
             // Grab the content of the first child block and isolate it.
             if (isBlock(container.firstChild) && !['TABLE', 'UL', 'OL'].includes(container.firstChild.nodeName)) {
-                if (container.firstChild.classList.contains('oe-nested')) {
-                    const deepestLi = closestElement(firstLeaf(container.firstChild), 'li');
+                if (container.firstChild.nodeName === 'LI') {
+                    const deepestLi = closestBlock(firstLeaf(container.firstChild));
                     splitAroundUntil(deepestLi, container.firstChild);
                     container.firstElementChild.replaceChildren(...deepestLi.childNodes);
                 }
@@ -212,6 +213,11 @@ export const editorCommands = {
             }
             // Grab the content of the last child block and isolate it.
             if (isBlock(container.lastChild) && !['TABLE', 'UL', 'OL'].includes(container.lastChild.nodeName)) {
+                if (container.lastChild.nodeName === 'LI') {
+                    const deepestLi = closestBlock(lastLeaf(container.lastChild));
+                    splitAroundUntil(deepestLi, container.lastChild);
+                    container.lastElementChild.replaceChildren(...deepestLi.childNodes);
+                }
                 containerLastChild.replaceChildren(...container.lastElementChild.childNodes);
                 container.lastElementChild.remove();
             }
@@ -249,11 +255,12 @@ export const editorCommands = {
             let convertedList;
             if (currentList && isList(toInsert[0])) {
                 convertedList = toggleCompleteList(toInsert[0], mode);
+                lastChildNode = lastLeaf(convertedList);
             }
             currentNode = insertBefore ?
                             convertedList || toInsert[0] :
                             currentNode;
-            lastChildNode = convertedList || toInsert[toInsert.length - 1];
+            lastChildNode = lastChildNode || toInsert[toInsert.length - 1];
         }
         if (containerFirstChild.hasChildNodes()) {
             const toInsert = [...containerFirstChild.childNodes]; // Prevent mutation
