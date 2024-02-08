@@ -1,4 +1,4 @@
-from odoo import fields, models, _
+from odoo import api, fields, models
 
 class ResCompany(models.Model):
     _inherit = 'res.company'
@@ -11,4 +11,15 @@ class ResCompany(models.Model):
             ("8", "8 Digits"),
         ],
         string="HSN Code Digit",
+        compute="_compute_l10n_in_hsn_code_digit",
+        store=True,
+        readonly=False,
     )
+
+    @api.depends('vat')
+    def _compute_l10n_in_hsn_code_digit(self):
+        for record in self:
+            if record.vat:
+                record.l10n_in_hsn_code_digit = "4"
+            else:
+                record.l10n_in_hsn_code_digit = False

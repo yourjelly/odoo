@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_move_line_tree_hsn_l10n_in" model="ir.ui.view">
+        <field name="name">account.move.line.tree.l10n_in</field>
+        <field name="model">account.move.line</field>
+        <field name="arch" type="xml">
+            <tree string="Products" editable="top" create="0">
+                <!-- Others fields -->
+                <field name="move_id" column_invisible="1"/>
+                <field name="partner_id" column_invisible="1"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="company_id" column_invisible="1"/>
+                <field name="company_currency_id" column_invisible="1"/>
+                <field name="display_type" force_save="1" column_invisible="1"/>
+                <field name="product_uom_id" column_invisible="1"/>
+                <field name="is_valid_l10n_in_hsn_code" column_invisible="1"/>
+                <!-- Displayed fields -->
+                <field name="sequence" widget="handle"/>
+                <field name="product_id" optional="show" widget="many2one_barcode" domain="context.get('default_move_type') in ('out_invoice', 'out_refund', 'out_receipt') and [('sale_ok', '=', True)] or [('purchase_ok', '=', True)]"/>
+                <field name="name" widget="section_and_note_text" optional="show"/>
+                <field name="l10n_in_hsn_code" decoration-danger="is_valid_l10n_in_hsn_code"/>
+                <field name="account_id" context="{'partner_id': partner_id, 'move_type': move_id.move_type}" groups="account.group_account_readonly" options="{'no_quick_create': True}" domain="[('deprecated', '=', False), ('account_type', 'not in', ('asset_receivable', 'liability_payable', 'off_balance')), ('company_id', 'move_id_of', move_id.company_id)]" required="display_type not in ('line_note', 'line_section')"/>
+                <field name="quantity" optional="show"/>
+                <field name="product_uom_category_id" column_invisible="1"/>
+                <field name="product_uom_id" string="UoM" groups="uom.group_uom" optional="show"/>
+                <field name="price_unit" string="Price"/>
+                <field name="discount" string="Disc.%" optional="hide"/>
+                <field name="tax_ids" widget="many2many_tags" domain="[('type_tax_use', '=?', move_id.invoice_filter_type_domain), ('company_id', 'move_id_of', move_id.company_id), ('country_id', '=', move_id.tax_country_id)]" context="{'append_type_to_tax_name': not move_id.invoice_filter_type_domain, 'active_test': True}" options="{'no_create': True}" optional="show"/>
+                <field name="price_subtotal" string="Tax excl."/>
+            </tree>
+        </field>
+    </record>
+</odoo>

@@ -33,6 +33,7 @@ class AccountMove(models.Model):
     l10n_in_shipping_port_code_id = fields.Many2one('l10n_in.port.code', 'Port code')
     l10n_in_reseller_partner_id = fields.Many2one('res.partner', 'Reseller', domain=[('vat', '!=', False)], help="Only Registered Reseller")
     l10n_in_journal_type = fields.Selection(string="Journal Type", related='journal_id.type')
+    l10n_in_hsn_code_warning = fields.Json(compute="_compute_hsn_code_warning")
 
     @api.depends('partner_id', 'partner_id.l10n_in_gst_treatment', 'state')
     def _compute_l10n_in_gst_treatment(self):
@@ -76,6 +77,51 @@ class AccountMove(models.Model):
                 )
             }}
         return super()._onchange_name_warning()
+
+    @api.depends('invoice_line_ids.product_id', 'company_id.l10n_in_hsn_code_digit')
+    def _compute_hsn_code_warning(self):
+
+        def build_warning(record, action_name, message, views, domain=False):
+            return {
+                'message': message,
+                'action_text': _("View %s", action_name),
+                'action': record._get_records_action(name=_("Check %s") % action_name, target='current', views=views, domain=domain or [])
+            }
+
+        indian_invoice = self.filtered(lambda m: m.country_code == 'IN')
+        for move in indian_invoice:
+            product_lines = move.invoice_line_ids.filtered(lambda l: l.display_type == 'product')
+            if any(l.tax_ids for l in product_lines) and not move.company_id.vat:
+                move.l10n_in_hsn_code_warning = {
+                    'invalid_hsn_digit_in_company': build_warning(
+                        message=_("Ensure that the GSTN number is included in the company information for the GST tax invoice."),
+                        action_name=_("Company(s)"),
+                        record=move.company_id,
+                        views=[(self.env.ref("base.view_company_form").id, "form")]
+                    )
+                }
+            elif lines := move.invoice_line_ids.filtered(
+                            lambda line: line.display_type == 'product' and
+                              line.tax_ids and (
+                                  (line.l10n_in_hsn_code and len(line.l10n_in_hsn_code) < int(move.company_id.l10n_in_hsn_code_digit)) or
+                                  not line.l10n_in_hsn_code
+                              )):
+                new_lines = self.env['account.move.line']
+                for line in lines:
+                    if line._origin:
+                        new_lines |= line._origin
+                move.l10n_in_hsn_code_warning = {
+                    'invalid_hsn_code_length': build_warning(
+                        message=_("Ensure that the HSN/SAC Code consists of at least %s digits in Product lines.", move.company_id.l10n_in_hsn_code_digit),
+                        action_name=_("Journal Items(s)"),
+                        record=new_lines,
+                        views=[(self.env.ref("l10n_in.view_move_line_tree_hsn_l10n_in").id, "tree")],
+                        domain=[('id', 'in', new_lines.ids)]
+                    )
+                } if new_lines else {}
+            else:
+                move.l10n_in_hsn_code_warning = {}
+        (self - indian_invoice).l10n_in_hsn_code_warning = {}
 
     def _get_name_invoice_report(self):
         if self.country_code == 'IN':
