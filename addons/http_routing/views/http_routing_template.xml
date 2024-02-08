@@ -6,9 +6,8 @@
                 <div class="oe_structure">
                     <h1 class="container mt32"><t t-esc="status_code"/>: <t t-esc="status_message"/></h1>
                 </div>
-                <t t-if="editable or debug">
-                    <t t-call="http_routing.http_error_debug"/>
-                </t>
+                <t t-if="editable" t-call="http_routing.http_error_debug"/>
+                <t t-else="" t-attrs="{'technical-chm': '1'}" t-call="http_routing.http_error_debug"/>
             </div>
         </t>
     </template>

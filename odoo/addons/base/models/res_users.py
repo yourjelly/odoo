@@ -1529,20 +1529,36 @@ class GroupsView(models.Model):
                 master_category_name = xml_cat[1]
                 xml3.append(E.group(*(xml_by_category[xml_cat]), string=master_category_name))
 
-            field_name = 'user_group_warning'
-            user_group_warning_xml = E.div({
-                'class': "alert alert-warning",
-                'role': "alert",
-                'colspan': "2",
-                'invisible': f'not {field_name}',
-            })
-            user_group_warning_xml.append(E.label({
-                'for': field_name,
-                'string': "Access Rights Mismatch",
-                'class': "text text-warning fw-bold",
-            }))
-            user_group_warning_xml.append(E.field(name=field_name))
-            xml2.append(user_group_warning_xml)
+            if self._context.get('show_user_group_warning'):
+                user_group_warning_xml = E.div({
+                    'class': "alert alert-warning",
+                    'role': "alert",
+                    'colspan': "2",
+                    'invisible': 'not user_group_warning',
+                    'technical-chm': '0',
+                })
+                user_group_warning_xml.append(E.label({
+                    'for': 'user_group_warning',
+                    'string': "Access Rights Mismatch",
+                    'class': "text text-warning fw-bold",
+                }))
+                user_group_warning_xml.append(E.field(name=field_name))
+                xml2.append(user_group_warning_xml)
+
+                user_group_technical_warning_xml = E.div({
+                    'class': "alert alert-warning",
+                    'role': "alert",
+                    'colspan': "2",
+                    'invisible': 'not user_group_technical_warning',
+                    'technical-chm': '1',
+                })
+                user_group_technical_warning_xml.append(E.label({
+                    'for': 'user_group_technical_warning',
+                    'string': "Access Rights Mismatch",
+                    'class': "text text-warning fw-bold",
+                }))
+                user_group_technical_warning_xml.append(E.field(name=field_name))
+                xml2.append(user_group_technical_warning_xml)
 
             xml = E.field(
                 *(xml0),
@@ -1631,16 +1647,16 @@ class UsersView(models.Model):
     _inherit = 'res.users'
 
     user_group_warning = fields.Text(string="User Group Warning", compute="_compute_user_group_warning")
+    user_group_technical_warning = fields.Text(string="User Group Warning", compute="_compute_user_group_warning")
 
     @api.depends('groups_id', 'share')
     @api.depends_context('show_user_group_warning')
     def _compute_user_group_warning(self):
         self.user_group_warning = False
-        if self._context.get('show_user_group_warning'):
+        if self.env.context.get('show_user_group_warning'):
             for user in self.filtered_domain([('share', '=', False)]):
-                group_inheritance_warnings = self._prepare_warning_for_group_inheritance(user)
-                if group_inheritance_warnings:
-                    user.user_group_warning = group_inheritance_warnings
+                user.user_group_warning = self._prepare_warning_for_group_inheritance(user) or False
+                user.user_group_technical_warning = self._prepare_warning_for_group_inheritance(user, technical_chm=True) or False
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -1686,7 +1702,7 @@ class UsersView(models.Model):
                 user.update({'groups_id': [Command.link(group_multi_company.id)]})
         return user
 
-    def _prepare_warning_for_group_inheritance(self, user):
+    def _prepare_warning_for_group_inheritance(self, user, technical_chm=False):
         """ Check (updated) groups configuration for user. If implieds groups
         will be added back due to inheritance and hierarchy in groups return
         a message explaining the missing groups.
@@ -1703,7 +1719,9 @@ class UsersView(models.Model):
 
         missing_groups = {}
         # We don't want to show warning for "Technical" and "Extra Rights" groups
-        categories_to_ignore = self.env.ref('base.module_category_hidden') + self.env.ref('base.module_category_usability')
+        categories_to_ignore = self.env.ref('base.module_category_usability')
+        if not technical_chm:
+            categories_to_ignore += self.env.ref('base.module_category_hidden')
         for group in current_groups:
             # Get the updated group from current groups
             missing_implied_groups = group.implied_ids - user.groups_id
@@ -1714,7 +1732,7 @@ class UsersView(models.Model):
                 lambda g:
                 g.category_id not in (group.category_id | categories_to_ignore) and
                 g not in current_groups_by_category[g.category_id] and
-                (bool(request and request.session.debug) or g.category_id)
+                (technical_chm or g.category_id)
             )
             if missing_implied_groups:
                 # prepare missing group message, by categories

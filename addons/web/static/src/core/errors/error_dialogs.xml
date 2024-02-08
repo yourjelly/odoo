@@ -5,6 +5,7 @@
       <Dialog title="title" size="'md'" contentClass="'o_error_dialog'">
         <div role="alert">
           <p t-esc="message" class="text-prewrap"/>
+          <p t-esc="this.props.data.message_technical_chm" class="text-prewrap o_technical_chm" t-if="this.technical_chm.active"/>
         </div>
         <t t-set-slot="footer">
           <button class="btn btn-primary o-default-button" t-on-click="props.close">Close</button>

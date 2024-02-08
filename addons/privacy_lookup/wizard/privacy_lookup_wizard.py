@@ -204,7 +204,7 @@ class PrivacyLookupWizard(models.TransientModel):
             for line in wizard.line_ids:
                 records_by_model[line.res_model_id].append(line.res_id)
             wizard.records_description = '\n'.join('{model_name} ({count}): {ids_str}'.format(
-                model_name=model.name if not (request and request.session.debug) else '%s - %s' % (model.name, model.model),
+                model_name='%s - %s' % (model.name, model.model),
                 count=len(ids),
                 ids_str=', '.join('#%s' % (rec_id) for rec_id in ids),
             ) for model, ids in records_by_model.items())

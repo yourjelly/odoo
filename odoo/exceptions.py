@@ -22,11 +22,12 @@ class UserError(Exception):
     state of a record. Semantically comparable to the generic 400 HTTP status codes.
     """
 
-    def __init__(self, message):
+    def __init__(self, message, technical_chm=''):
         """
         :param message: exception message and frontend modal content
         """
         super().__init__(message)
+        self.technical_chm = technical_chm
 
 
 class RedirectWarning(Exception):

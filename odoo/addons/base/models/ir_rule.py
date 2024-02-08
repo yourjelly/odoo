@@ -219,9 +219,9 @@ class IrRule(models.Model):
 
         resolution_info = _("If you really, really need access, perhaps you can win over your friendly administrator with a batch of freshly baked cookies.")
 
-        if not (request and request.session.debug) or not self.env.user._has_group('base.group_user'):
+        if not self.env.user.has_group('base.group_user'):
             records.invalidate_recordset()
-            return AccessError(f"{operation_error}\n{failing_model}\n\n{resolution_info}")
+            return AccessError(error_message)
 
         # This extended AccessError is only displayed in debug mode.
         rules = self._get_failing(records, mode=operation).sudo()
@@ -247,8 +247,8 @@ class IrRule(models.Model):
         # clean up the cache of records prefetched with display_name above
         records_sudo.invalidate_recordset()
 
-        msg = f"{operation_error}\n{failing_records}\n\n{failing_rules}\n\n{resolution_info}"
-        return AccessError(msg)
+        technical_error_message = f"{failing_records}\n\n{failing_rules}"
+        return AccessError(msg, technical_chm=technical_error_message)
 
 
 #

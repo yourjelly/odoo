@@ -99,7 +99,7 @@ ir.http._authenticate
 
 ir.http._pre_dispatch/Dispatcher.pre_dispatch
   Prepare the system the handle the current request, often used to save
-  some extra query-string parameters in the session (e.g. ?debug=1)
+  some extra query-string parameters in the session (e.g. ?debug=assets)
 
 ir.http._dispatch/Dispatcher.dispatch
   Deserialize the HTTP request body into ``request.params`` according to
@@ -415,6 +415,7 @@ def serialize_exception(exception):
         'name': f'{module}.{name}' if module else name,
         'debug': traceback.format_exc(),
         'message': ustr(exception),
+        'message_technical_chm': exception.technical_chm if isinstance(exception, UserError) else '',
         'arguments': exception.args,
         'context': getattr(exception, 'context', {}),
     }

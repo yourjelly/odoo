@@ -717,17 +717,9 @@ class IrActionsReport(models.Model):
                 # bypassed
                 raise UserError(_("Unable to find Wkhtmltopdf on this system. The PDF can not be created."))
 
-            # Disable the debug mode in the PDF rendering in order to not split the assets bundle
-            # into separated files to load. This is done because of an issue in wkhtmltopdf
-            # failing to load the CSS/Javascript resources in time.
-            # Without this, the header/footer of the reports randomly disappear
-            # because the resources files are not loaded in time.
-            # https://github.com/wkhtmltopdf/wkhtmltopdf/issues/2083
-            additional_context = {'debug': False}
+            html = self._render_qweb_html(report_ref, res_ids_wo_stream, data=data)[0]
 
-            html = self.with_context(**additional_context)._render_qweb_html(report_ref, res_ids_wo_stream, data=data)[0]
-
-            bodies, html_ids, header, footer, specific_paperformat_args = self.with_context(**additional_context)._prepare_html(html, report_model=report_sudo.model)
+            bodies, html_ids, header, footer, specific_paperformat_args = self._prepare_html(html, report_model=report_sudo.model)
 
             if report_sudo.attachment and set(res_ids_wo_stream) != set(html_ids):
                 raise UserError(_(

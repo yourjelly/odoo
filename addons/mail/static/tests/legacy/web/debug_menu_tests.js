@@ -43,7 +43,7 @@ QUnit.test("Manage Messages", async (assert) => {
     await doAction(wc, 3, { viewType: "form", props: { resId: 5 } });
     await click(target, ".o_debug_manager .dropdown-toggle");
     const dropdownItems = target.querySelectorAll(".o_debug_manager .dropdown-menu .dropdown-item");
-    assert.strictEqual(dropdownItems.length, 1);
+    assert.strictEqual(dropdownItems.length, 2);
     assert.strictEqual(dropdownItems[0].innerText.trim(), "Manage Messages");
 
     await click(dropdownItems[0]);
