@@ -190,7 +190,7 @@ class Product(models.Model):
                     0.0,
                 )
                 continue
-            rounding = product.uom_id.rounding
+            rounding = product.product_tmpl_id.uom_id.rounding
             res[product_id] = {}
             if dates_in_the_past:
                 qty_available = quants_res.get(origin_product_id, [0.0])[0] - moves_in_res_past.get(origin_product_id, 0.0) + moves_out_res_past.get(origin_product_id, 0.0)
