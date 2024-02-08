@@ -19,6 +19,8 @@ class RegistrationEditor(models.TransientModel):
         if not res.get('sale_order_id'):
             sale_order_id = res.get('sale_order_id', self._context.get('active_id'))
             res['sale_order_id'] = sale_order_id
+        if 'event_registration_ids' not in fields or 'event_registration_ids' in res:
+            return res
         sale_order = self.env['sale.order'].browse(res.get('sale_order_id'))
         registrations = self.env['event.registration'].search([
             ('sale_order_id', '=', sale_order.id),

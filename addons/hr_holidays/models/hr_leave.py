@@ -87,7 +87,6 @@ class HolidaysRequest(models.Model):
             lt = self.env['hr.leave.type'].search(['|', ('requires_allocation', '=', 'no'), ('has_valid_allocation', '=', True)], limit=1, order='sequence')
             if lt:
                 defaults['holiday_status_id'] = lt.id
-                defaults['request_unit_custom'] = False
 
         if 'state' in fields_list and not defaults.get('state'):
             defaults['state'] = 'confirm' if lt.leave_validation_type != 'no_validation' else 'draft'

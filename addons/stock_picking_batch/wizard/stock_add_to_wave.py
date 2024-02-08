@@ -12,11 +12,11 @@ class StockPickingToWave(models.TransientModel):
     @api.model
     def default_get(self, fields_list):
         res = super().default_get(fields_list)
-        if self.env.context.get('active_model') == 'stock.move.line':
+        if self.env.context.get('active_model') == 'stock.move.line' and 'line_ids' in fields_list and 'line_ids' not in res:
             lines = self.env['stock.move.line'].browse(self.env.context.get('active_ids'))
             res['line_ids'] = self.env.context.get('active_ids')
             picking_types = lines.picking_type_id
-        elif self.env.context.get('active_model') == 'stock.picking':
+        elif self.env.context.get('active_model') == 'stock.picking' and 'picking_ids' in fields_list and 'picking_ids' not in res:
             pickings = self.env['stock.picking'].browse(self.env.context.get('active_ids'))
             res['picking_ids'] = self.env.context.get('active_ids')
             picking_types = pickings.picking_type_id

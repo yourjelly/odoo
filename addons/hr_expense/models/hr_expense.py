@@ -149,7 +149,6 @@ class HrExpense(models.Model):
         string="Currency",
         compute='_compute_currency_id', precompute=True, store=True, readonly=False,
         required=True,
-        default=lambda self: self.env.company.currency_id,
     )
     company_currency_id = fields.Many2one(
         comodel_name='res.currency',
@@ -204,7 +203,7 @@ class HrExpense(models.Model):
     @api.depends('product_has_cost')
     def _compute_currency_id(self):
         for expense in self:
-            if expense.product_has_cost and expense.state in {'draft', 'reported'}:
+            if expense.product_has_cost and expense.state in {'draft', 'reported'} or not expense.currency_id:
                 expense.currency_id = expense.company_currency_id
 
     @api.depends('sheet_id.is_editable')

@@ -33,7 +33,7 @@ from .tools import (
     float_repr, float_round, float_compare, float_is_zero, human_size,
     pg_varchar, ustr, OrderedSet, pycompat, sql, SQL, date_utils, unique,
     image_process, merge_sequences, SQL_ORDER_BY_TYPE, is_list_of, has_list_types,
-    html_normalize, html_sanitize,
+    html_normalize, html_sanitize, groupby,
 )
 from .tools.misc import unquote
 from .tools import DEFAULT_SERVER_DATE_FORMAT as DATE_FORMAT
@@ -4586,6 +4586,11 @@ class One2many(_RelationalMulti):
 
         if self.store:
             inverse = self.inverse_name
+            to_assign = {}  # {line.id: inverse_value}
+            def flush():
+                for value, line_ids in groupby(to_assign, to_assign.__getitem__):
+                    browse(line_ids)[inverse] = value
+                to_assign.clear()
 
             # make sure self's inverse is in cache
             inverse_field = comodel._fields[inverse]
@@ -4597,23 +4602,28 @@ class One2many(_RelationalMulti):
                     if command[0] == Command.CREATE:
                         for record in recs:
                             line = comodel.new(command[2], ref=command[1])
-                            line[inverse] = record
+                            to_assign[line.id] = record.id
                     elif command[0] == Command.UPDATE:
                         browse([command[1]]).update(command[2])
                     elif command[0] == Command.DELETE:
-                        browse([command[1]])[inverse] = False
+                        to_assign[command[1]] = False
                     elif command[0] == Command.UNLINK:
-                        browse([command[1]])[inverse] = False
+                        to_assign[command[1]] = False
                     elif command[0] == Command.LINK:
-                        browse([command[1]])[inverse] = recs[-1]
+                        to_assign[command[1]] = recs[-1].id
                     elif command[0] == Command.CLEAR:
-                        cache.update(recs, self, itertools.repeat(()))
+                        flush()
+                        lines_to_unlink = recs[-1][self.name]
+                        to_assign.update({line.id: False for line in lines_to_unlink})
                     elif command[0] == Command.SET:
-                        # assign the given lines to the last record only
-                        cache.update(recs, self, itertools.repeat(()))
-                        last, lines = recs[-1], browse(command[2])
-                        cache.set(last, self, lines._ids)
-                        cache.update(lines, inverse_field, itertools.repeat(last.id))
+                        flush()  # to apply the command to the result of former commands
+                        record = recs[-1]  # assign the given lines to the last record only
+                        line_ids = OrderedSet(command[2])
+                        lines_to_unlink = OrderedSet(record[self.name]._ids) - line_ids
+                        lines_to_link = line_ids - OrderedSet(record[self.name]._ids)
+                        to_assign.update((line_id, False) for line_id in lines_to_unlink)
+                        to_assign.update((line_id, record.id) for line_id in lines_to_link)
+            flush()
 
         else:
             def link(record, lines):

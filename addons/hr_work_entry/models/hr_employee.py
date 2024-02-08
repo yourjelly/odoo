@@ -12,8 +12,8 @@ class HrEmployee(models.Model):
         self.env.cr.execute("""
         SELECT id, EXISTS(SELECT 1 FROM hr_work_entry WHERE employee_id = e.id limit 1)
           FROM hr_employee e
-         WHERE id in %s
-        """, (tuple(self.ids), ))
+         WHERE id = ANY(%s)
+        """, (self.ids,))
 
         result = {eid[0]: eid[1] for eid in self.env.cr.fetchall()}
 

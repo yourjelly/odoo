@@ -1500,6 +1500,11 @@ class BaseModel(metaclass=MetaModel):
             if field and field.inherited:
                 field = field.related_field
                 parent_fields[field.model_name].append(field.name)
+                continue
+
+            # 5. let the field compute its value based on other fields
+            if field and field.precompute:
+                continue
 
         # convert default values to the right format
         #
@@ -4110,7 +4115,7 @@ class BaseModel(metaclass=MetaModel):
         if not invalid:
             return
 
-        forbidden = invalid.exists()
+        forbidden = invalid.filtered('id').exists()
         if forbidden:
             # the invalid records are (partially) hidden by access rules
             raise self.env['ir.rule']._make_access_error(operation, forbidden)
@@ -4135,7 +4140,7 @@ class BaseModel(metaclass=MetaModel):
         if self.env.su:
             return self
 
-        if not self._ids:
+        if not self.ids:
             return self
 
         query = Query(self.env.cr, self._table, self._table_query)
