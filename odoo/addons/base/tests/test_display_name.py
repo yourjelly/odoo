@@ -10,6 +10,7 @@ IGNORE_MODEL_NAMES = {
     'payment.link.wizard',
     'account.multicurrency.revaluation.wizard',
     'account_followup.manual_reminder',
+    'website.visitor',
 }
 
 @tagged('-at_install', 'post_install')

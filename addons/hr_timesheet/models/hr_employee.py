@@ -15,13 +15,13 @@ class HrEmployee(models.Model):
         self.env.cr.execute("""
         SELECT id, EXISTS(SELECT 1 FROM account_analytic_line WHERE project_id IS NOT NULL AND employee_id = e.id limit 1)
           FROM hr_employee e
-         WHERE id in %s
-        """, (tuple(self.ids), ))
+         WHERE id = ANY(%s)
+        """, (self.ids, ))
 
         result = {eid[0]: eid[1] for eid in self.env.cr.fetchall()}
 
         for employee in self:
-            employee.has_timesheet = result.get(employee.id, False)
+            employee.has_timesheet = result.get(employee._origin.id, False)
 
     @api.depends('company_id', 'user_id')
     @api.depends_context('allowed_company_ids')
