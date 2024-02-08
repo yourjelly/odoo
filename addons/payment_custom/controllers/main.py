@@ -13,7 +13,6 @@ class CustomController(Controller):
 
     @route(_process_url, type='http', auth='public', methods=['POST'], csrf=False)
     def custom_process_transaction(self, **post):
-        print("custom_process_transaction-------------------------")
         _logger.info("Handling custom processing with data:\n%s", pprint.pformat(post))
         request.env['payment.transaction'].sudo()._handle_notification_data('custom', post)
         return request.redirect('/payment/status')

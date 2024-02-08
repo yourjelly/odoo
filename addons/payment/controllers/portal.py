@@ -296,7 +296,6 @@ class PaymentPortal(portal.CustomerPortal):
         :rtype: payment.transaction
         :raise UserError: If the flow is invalid.
         """
-        print("_create_transaction--------------------",flow)
         # Prepare create values
         if flow in ['redirect', 'direct']:  # Direct payment or payment with redirection
             provider_sudo = request.env['payment.provider'].sudo().browse(provider_id)
@@ -335,7 +334,6 @@ class PaymentPortal(portal.CustomerPortal):
             amount = provider_sudo._get_validation_amount()
             currency_id = provider_sudo._get_validation_currency().id
 
-        print("token_id--------------------",token_id)
         # Create the transaction
         tx_sudo = request.env['payment.transaction'].sudo().create({
             'provider_id': provider_sudo.id,
@@ -482,7 +480,6 @@ class PaymentPortal(portal.CustomerPortal):
         :return: None
         :raise ValidationError: If some kwargs keys are rejected.
         """
-        print("_validate_transaction_kwargs---------------------",kwargs)
         whitelist = {
             'provider_id',
             'payment_method_id',

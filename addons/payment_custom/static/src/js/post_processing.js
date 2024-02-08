@@ -11,7 +11,6 @@ paymentPostProcessing.include({
      * @param {string} providerCode - The code of the provider handling the transaction.
      */
     _getFinalStates(providerCode) {
-        console.log('_getFinalStates---------------',providerCode)
         const finalStates = this._super(...arguments);
         if (providerCode === 'custom') {
             finalStates.push('pending');

@@ -22,13 +22,10 @@ class PaymentTransaction(models.Model):
         :return: The dict of provider-specific processing values
         :rtype: dict
         """
-        print("_get_specific_rendering_values---------------",processing_values)
         res = super()._get_specific_rendering_values(processing_values)
-        print("res--------_get_specific_rendering_values---------",res)
         if self.provider_code != 'custom':
             return res
 
-        print("self.reference------------------",self.reference)
         return {
             'api_url': CustomController._process_url,
             'reference': self.reference,
@@ -44,7 +41,6 @@ class PaymentTransaction(models.Model):
         :return: The selected communication.
         :rtype: str
         """
-        print("_get_communication--------------------")
         self.ensure_one()
         communication = ""
         if hasattr(self, 'invoice_ids') and self.invoice_ids:
@@ -62,7 +58,6 @@ class PaymentTransaction(models.Model):
         :rtype: recordset of `payment.transaction`
         :raise: ValidationError if the data match no transaction
         """
-        print("_get_tx_from_notification_data------------------",self,provider_code,notification_data)
         tx = super()._get_tx_from_notification_data(provider_code, notification_data)
         if provider_code != 'custom' or len(tx) == 1:
             return tx
@@ -83,7 +78,6 @@ class PaymentTransaction(models.Model):
         :param dict notification_data: The custom data
         :return: None
         """
-        print("_process_notification_data---------------------",notification_data)
         super()._process_notification_data(notification_data)
         if self.provider_code != 'custom':
             return
@@ -99,7 +93,6 @@ class PaymentTransaction(models.Model):
 
         :return: None
         """
-        print("_log_received_message-----------------")
         other_provider_txs = self.filtered(lambda t: t.provider_code != 'custom')
         super(PaymentTransaction, other_provider_txs)._log_received_message()
 
@@ -109,7 +102,6 @@ class PaymentTransaction(models.Model):
         :return: The 'transaction sent' message
         :rtype: str
         """
-        print("_get_sent_message-----------------------")
         message = super()._get_sent_message()
         if self.provider_code == 'custom':
             message = _(
