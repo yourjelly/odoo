@@ -202,16 +202,21 @@ class ProductTemplate(models.Model):
         :param default: default value to set when there are multiple or no variants on the template
         :return: None
         """
+        variants = self.env['product.product']
         for template in self:
             variant_count = len(template.product_variant_ids)
             if variant_count == 1:
-                template[fname] = template.product_variant_ids[fname]
+                variants |= template.product_variant_ids
             elif variant_count == 0 and self.env.context.get("active_test", True):
                 # If the product has no active variants, retry without the active_test
                 template_ctx = template.with_context(active_test=False)
                 template_ctx._compute_template_field_from_variant_field(fname, default=default)
             else:
                 template[fname] = default
+        # read field on variant in batch
+        variants.read([fname])
+        for variant in variants:
+            variant.product_tmpl_id[fname] = variant[fname]
 
     def _set_product_variant_field(self, fname):
         """Propagate the value of the given field from the templates to their unique variant.
