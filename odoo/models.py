@@ -3536,7 +3536,7 @@ class BaseModel(metaclass=MetaModel):
 
                 # pylint: disable=import-outside-toplevel
                 from odoo.http import request
-                if self.env.user._has_group('base.group_no_one') and request and request.session.debug:
+                if request and request.session.debug:
                     def format_groups(field):
                         if field.groups == '.':
                             return _("always forbidden")
