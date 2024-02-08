@@ -722,9 +722,10 @@ class ProductTemplate(models.Model):
             template.outgoing_qty = res[template.id]['outgoing_qty']
 
     def _compute_quantities_dict(self):
-        variants_available = {
-            p['id']: p for p in self.product_variant_ids._origin.read(['qty_available', 'virtual_available', 'incoming_qty', 'outgoing_qty'])
-        }
+        products = self.filtered(lambda p: p.type != 'service')
+        variants = products.product_variant_ids._origin
+        variants_available = variants._compute_quantities_dict(self._context.get('lot_id'), self._context.get('owner_id'), self._context.get('package_id'), self._context.get('from_date'), self._context.get('to_date'))
+
         prod_available = {}
         for template in self:
             qty_available = 0
@@ -732,6 +733,8 @@ class ProductTemplate(models.Model):
             incoming_qty = 0
             outgoing_qty = 0
             for p in template.product_variant_ids._origin:
+                if not variants_available.get(p.id):
+                    continue
                 qty_available += variants_available[p.id]["qty_available"]
                 virtual_available += variants_available[p.id]["virtual_available"]
                 incoming_qty += variants_available[p.id]["incoming_qty"]
