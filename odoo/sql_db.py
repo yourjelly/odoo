@@ -538,7 +538,12 @@ class TestCursor(BaseCursor):
         self.readonly = readonly
         # we use a lock to serialize concurrent requests
         self._lock = lock
-        self._lock.acquire()
+        import traceback
+        traceback.print_stack()
+        print(self._lock)
+        if not self._lock.acquire(timeout=10):
+            e = "couldn't acquire a test cursor in 1 minute"
+            raise RuntimeError(e)
         last_cursor = self._cursors_stack and self._cursors_stack[-1]
         if last_cursor and last_cursor.readonly and not readonly and last_cursor._savepoint:
             raise Exception('Opening a read/write test cursor from a readonly one')
@@ -563,6 +568,7 @@ class TestCursor(BaseCursor):
         return self._cursor.execute(*args, **kwargs)
 
     def close(self):
+        print(self._closed)
         if not self._closed:
             self.rollback()
             self._closed = True
@@ -572,6 +578,7 @@ class TestCursor(BaseCursor):
             tos = self._cursors_stack.pop()
             if tos is not self:
                 _logger.warning("Found different un-closed cursor when trying to close %s: %s", self, tos)
+            print("release")
             self._lock.release()
 
     def commit(self):

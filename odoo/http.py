@@ -1727,62 +1727,69 @@ class Request:
         Prepare the user session and load the ORM before forwarding the
         request to ``_serve_ir_http``.
         """
+        self.registry, readonly_cr = self._open_registry()
+        if not self.registry:
+            self._serve_nodb()
+        self.env = odoo.api.Environment(readonly_cr, self.session.uid, self.session.context)
+
         try:
-            rule = None
-            cr = None
-            try:
-                registry = Registry(self.db)
-                cr = registry.cursor(readonly=True)
-                self.registry = registry.check_signaling(cr)
-            except (AttributeError, psycopg2.OperationalError, psycopg2.ProgrammingError) as e:
-                # psycopg2 error or attribute error while constructing
-                # the registry. That means either
-                #  - the database probably does not exists anymore, or
-                #  - the database is corrupted, or
-                #  - the database version doesn't match the server version.
-                # So remove the database from the cookie
-                self.db = None
-                self.session.db = None
-                root.session_store.save(self.session)
-                if request.httprequest.path == '/web':
-                    # Internal Server Error
-                    raise
-                else:
-                    return self._serve_nodb()
-            ir_http = self.registry['ir.http']
-            self.env = odoo.api.Environment(cr, self.session.uid, self.session.context)
-            with contextlib.suppress(NotFound):
-                rule, args = ir_http._match(self.httprequest.path)
-        finally:
-            if cr is not None:
+            rule, args = self.registry['ir.http']._match(self.httprequest.path)
+        except NotFound as not_found:
+            func = functools.partial(self._serve_fallback, not_found)
+            return self._transactioning(func, readonly_cr=readonly_cr)
+
+        func = functools.partial(self._serve_ir_http, rule, args)
+        readonly = rule.endpoint.routing['readonly']
+        if callable(readonly):
+            readonly = readonly(self.registry, self)
+        if not readonly:
+            readonly_cr.close()
+            readonly_cr = None
+        return self._transactioning(func, readonly_cr=readonly_cr)
+
+    def _open_registry(self):
+        """
+        Attempt to open and return a (registry, cursor) on the database
+        found inside the session. In case of error, It removes the
+        session and return (None, None).
+        """
+        newer_registry = None
+        cr = None
+        try:
+            older_registry = Registry(self.db)
+            cr = older_registry.cursor(readonly=True)
+            newer_registry = older_registry.check_signaling(cr)
+        except (AttributeError, psycopg2.OperationalError, psycopg2.ProgrammingError) as exc:
+            _logger.warning("Could not open a registry on database %r", self.db)
+            if cr:
                 cr.close()
+                cr = None
+            self.db = None
+            self.session.logout()
+            root.session_store.rotate(self.session)
+            if request.httprequest.path == '/web':
+                raise InternalServerError("Could not connect to the database") from exc
+        return newer_registry, cr
 
-        if not rule:
-            # _serve_fallback can be readwrite in some rare case, imagine a website.page were the qweb contains insert/update
-            # could be interresting to add a field on website.page to define if it is read/write or not and maybe retry just this part or open another cursor?
-            # todo write a test
-            # also, we need to _handle_error inside _transactioning to se the same cursor, will be close in other case
-            def _serve_fallback():
-                self.params = self.get_http_params()  # todo move outside _serve_fallback
-                request.params = request.get_http_params()
-                response = ir_http._serve_fallback()
-                if response:
-                    self.registry['ir.http']._post_dispatch(response)
-                    return response
-                return self.registry['ir.http']._handle_error(NotFound())
-
-            return self._transactioning(_serve_fallback, readonly=True)
-        else:
-            ro = rule.endpoint.routing['readonly']
-            if callable(ro):
-                ro = ro(registry, request)
-
-            def _serve_ir_http():
-                return self._serve_ir_http(rule, args)
-
-            return self._transactioning(_serve_ir_http, readonly=ro)
+    def _serve_fallback(self, not_found):
+        """
+        Called when no controller matches the request path. Attempts to
+        find an alternative resource matching the path. Otherwise shows
+        the "HTTP 404: Not Found" error page.
+        """
+        self.params = self.get_http_params()  # todo move outside _serve_fallback
+        request.params = request.get_http_params()
+        response = self.registry['ir.http']._serve_fallback()
+        if response:
+            self.registry['ir.http']._post_dispatch(response)
+            return response
+        return self.registry['ir.http']._handle_error(not_found)
 
     def _serve_ir_http(self, rule, args):
+        """
+        Called when a controller matches the request path. Call the
+        controller via the ``ir.http`` abtract model (middlewares).
+        """
         self._set_request_dispatcher(rule)
         self.registry['ir.http']._authenticate(rule.endpoint)
         self.registry['ir.http']._pre_dispatch(rule, args)
@@ -1790,16 +1797,36 @@ class Request:
         self.registry['ir.http']._post_dispatch(response)
         return response
 
-    def _transactioning(self, func, readonly):
-        for readonly_cr in (True, False) if readonly else (False,):
-            threading.current_thread().cursor_mode = (
-                'ro' if readonly_cr
-                else 'ro->rw' if readonly
-                else 'rw'
-            )
+    def _transactioning(self, func, *, readonly_cr=None):
+        """
+        Call :param:`func` inside a new transaction.
 
-            with contextlib.closing(self.registry.cursor(readonly=readonly_cr)) as cr:
-                self.env = self.env(cr=cr)
+        The transaction is rollback in case of exception, otherwise it
+        is commit. See :func:`odoo.service.model.retrying`.
+
+        In case of :class:`psycopg2.errors.ReadOnlySqlTransaction`, the
+        transaction is still rollback but :param:`func` is called again,
+        that time with a read/write transaction.
+
+        :param callable func: The function to call, you can pass
+            arguments using :func:`functools.partial`:.
+        :param bool readonly: whether to try first with a readonly
+            cursor or to directly use a read/write one.
+        :param odoo.sql_db.BaseCursor: an already opened readonly cursor
+            that this function will manage, ignored when param:`readonly`.
+        """
+        def gen_cursors():
+            if readonly_cr:
+                readonly_cr.rollback()  # reset the transaction
+                yield readonly_cr
+            yield self.registry.cursor(readonly=False)
+
+        for cursor, retried in zip(gen_cursors(), [False, True]):
+            with contextlib.closing(cursor):
+                threading.current_thread().cursor_mode = (
+                    'ro->rw' if retried else ('ro' if cursor.readonly else 'rw')
+                )
+                self.env = self.env(cr=cursor)
                 try:
                     return service_model.retrying(func, env=self.env)
                 except psycopg2.errors.ReadOnlySqlTransaction as exc:
