@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="closing_type_vat" model="account.report.closing.type">
+        <field name="name">VAT Closing</field>
+        <field name"on_interval" eval="1"/>
+        <field name="move_generator_code">vat_closing</field>
+        <field name="periodicity">monthly</field>
+    </record>
+
+    <record id="closing_type_all" model="account.report.closing.type">
+        <field name="name">General Closing</field><!--TODO OCO nom temporaire-->
+        <field name="periodicity">yearly</field>
+    </record>
+
+</odoo

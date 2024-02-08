@@ -17,6 +17,12 @@ class AccountChartTemplate(models.AbstractModel):
             'property_account_payable_id': 'a440',
             'property_account_expense_categ_id': 'a600',
             'property_account_income_categ_id': 'a7000',
+            'closing_types': {
+                'account.closing_type_vat': {
+                    'tax_closing_payable_account_id': 'a4512',
+                    'tax_closing_receivable_account_id': 'a4112',
+                }, #TODO OCO ajouter le support pour ça en _post_load_data
+            },
         }
 
     @template('be', 'res.company')

@@ -575,6 +575,10 @@ class AccountChartTemplate(models.AbstractModel):
             if value and field in self.env[model]._fields:
                 self.env['ir.property']._set_default(field, model, self.ref(value).id, company=company)
 
+        # Update closing types' company-dependent fields if needed
+        for closing_type_xmlid, closing_type_vals template_data.get('closing_types', []):
+            self.env.ref(closing_type_xmlid).with_company(company).write(closing_type_vals)
+
     def _get_chart_template_data(self, template_code):
         template_data = defaultdict(lambda: defaultdict(dict))
         template_data['res.company']  # ensure it's the first property when iterating

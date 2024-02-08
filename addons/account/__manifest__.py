@@ -74,6 +74,7 @@ You could use this simplified accounting in case you work with an (external) acc
         'data/account_reports_data.xml',
         'views/uom_uom_views.xml',
         'views/product_views.xml',
+        'data/closing_types_data.xml',
     ],
     'demo': [
         'demo/account_demo.xml',
