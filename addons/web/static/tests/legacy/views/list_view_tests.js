@@ -16523,26 +16523,35 @@ QUnit.module("Views", (hooks) => {
             patchWithCleanup(browser.localStorage, {
                 getItem(key) {
                     assert.step("getItem " + key);
-                    return forceLocalStorage ? "m2o" : super.getItem(arguments);
+                    return forceLocalStorage ? "m2o" : super.getItem(...arguments);
                 },
                 setItem(key, value) {
                     assert.step("setItem " + key + " to " + JSON.stringify(String(value)));
-                    return super.setItem(arguments);
+                    return super.setItem(...arguments);
                 },
             });
 
-            await makeView({
-                type: "list",
-                resModel: "foo",
-                serverData,
-                arch: `
+            serverData.actions = {
+                1: {
+                    id: 1,
+                    name: "Action 1",
+                    res_model: "foo",
+                    type: "ir.actions.act_window",
+                    views: [[42, "list"]],
+                    search_view_id: [1, "search"],
+                },
+            };
+            serverData.views = {
+                "foo,1,search": "<search></search>",
+                "foo,42,list": `
                     <tree>
                         <field name="foo"/>
                         <field name="m2o" optional="hide"/>
                         <field name="reference" optional="show"/>
                     </tree>`,
-                viewId: 42,
-            });
+            };
+            const webClient = await createWebClient({ serverData });
+            await doAction(webClient, 1);
 
             const localStorageKey = "optional_fields,foo,list,42,foo,m2o,reference";
 
@@ -16577,6 +16586,27 @@ QUnit.module("Views", (hooks) => {
             );
 
             forceLocalStorage = false;
+
+            // disable optional field (no optional column enabled)
+            await click(target.querySelector(".o-dropdown--menu span.dropdown-item input"));
+            assert.verifySteps(["setItem " + localStorageKey + ' to ""']);
+            assert.containsN(target, "th", 3, "should have 3 th");
+
+            // mount again to ensure that active optional columns will not be reset while empty
+            await doAction(webClient, 1);
+            assert.verifySteps(["getItem " + localStorageKey]);
+            assert.containsN(target, "th", 3, "should have 3 th");
+
+            // mount again to get back to original state (with m2o enabled)
+            forceLocalStorage = true;
+            await doAction(webClient, 1);
+            assert.verifySteps(["getItem " + localStorageKey]);
+            assert.containsN(target, "th", 4, "should have 4 th");
+
+            // optional fields
+            await click(target.querySelector("table .o_optional_columns_dropdown button"));
+            forceLocalStorage = false;
+
             // enable optional field
             await click($(target).find(".o-dropdown--menu span.dropdown-item:eq(1) input")[0]);
 
