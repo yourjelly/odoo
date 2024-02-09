@@ -9,19 +9,18 @@ import * as ProductScreenPos from "@point_of_sale/../tests/tours/helpers/Product
 import * as ProductScreenResto from "@pos_restaurant/../tests/tours/helpers/ProductScreenTourMethods";
 import * as Order from "@point_of_sale/../tests/tours/helpers/generic_components/OrderWidgetMethods";
 import * as TicketScreen from "@point_of_sale/../tests/tours/helpers/TicketScreenTourMethods";
-import {inLeftSide} from "@point_of_sale/../tests/tours/helpers/utils";
-import {registry} from "@web/core/registry";
-import {TourError} from "@web_tour/tour_service/tour_utils";
+import { inLeftSide } from "@point_of_sale/../tests/tours/helpers/utils";
+import { registry } from "@web/core/registry";
+import { TourError } from "@web_tour/tour_service/tour_utils";
 
-const ProductScreen = {...ProductScreenPos, ...ProductScreenResto};
+const ProductScreen = { ...ProductScreenPos, ...ProductScreenResto };
 
 function isSyncStatusPending() {
     return [
         {
             trigger:
                 ".pos-topheader .pos-rightheader .status-buttons .oe_status:has(.js_connecting)",
-            run: () => {
-            },
+            run: () => {},
         },
     ];
 }
@@ -31,8 +30,7 @@ function isSyncStatusConnected() {
         {
             trigger:
                 ".pos-topheader .pos-rightheader .status-buttons .oe_status:has(.js_connected)",
-            run: () => {
-            },
+            run: () => {},
         },
     ];
 }
@@ -49,7 +47,7 @@ registry.category("web_tour.tours").add("pos_restaurant_sync", {
             ProductScreen.orderBtnIsPresent(),
             ProductScreen.clickDisplayedProduct("Coca-Cola"),
             ProductScreen.selectedOrderlineHas("Coca-Cola"),
-            inLeftSide(Order.hasLine({productName: "Coca-Cola", run: "dblclick"})),
+            inLeftSide(Order.hasLine({ productName: "Coca-Cola", run: "dblclick" })),
             ProductScreen.clickDisplayedProduct("Water"),
             ProductScreen.selectedOrderlineHas("Water"),
             ProductScreen.orderlineIsToOrder("Water"),
@@ -173,37 +171,38 @@ registry.category("web_tour.tours").add("pos_restaurant_sync_second_login", {
 registry.category("web_tour.tours").add("SaveLastPreparationChangesTour", {
     test: true,
     url: "/pos/ui",
-    steps: () => [
-        Dialog.confirm("Open session"),
-        FloorScreen.clickTable("5"),
-        ProductScreen.clickDisplayedProduct("Coca-Cola"),
-        ProductScreen.selectedOrderlineHas("Coca-Cola", "1.0"),
-        ProductScreen.clickOrderButton(),
-        ProductScreen.orderlinesHaveNoChange()
-    ].flat(),
+    steps: () =>
+        [
+            Dialog.confirm("Open session"),
+            FloorScreen.clickTable("5"),
+            ProductScreen.clickDisplayedProduct("Coca-Cola"),
+            ProductScreen.selectedOrderlineHas("Coca-Cola", "1.0"),
+            ProductScreen.clickOrderButton(),
+            ProductScreen.orderlinesHaveNoChange(),
+        ].flat(),
 });
 
-function mergeTableHelpers() {
+function mergeTableHelpers(childName, parentName) {
     return [
-        FloorScreen.clickTable("5"),
+        FloorScreen.clickTable(childName),
         ProductScreen.controlButton("Merge"),
         {
             content: `click the merge button`,
             trigger: 'i[aria-label="Merge"]',
         },
-        FloorScreen.clickTable("4"),
+        FloorScreen.clickTable(parentName),
         FloorScreen.backToFloor(),
         {
-            content: `Verify table 4 and 5 is merge`,
-            trigger: 'div.table div.label:contains("4")',
+            content: `Verify table ${childName} is merged into table ${parentName}`,
+            trigger: `div.table div.label:contains("${parentName}")`,
             isCheck: true,
             run: () => {
-                if ($("div.table div.label:contains('4')").length < 2) {
-                    throw new TourError("Table isn't merge");
+                if ($(`div.table div.label:contains('${parentName}')`).length < 2) {
+                    throw new TourError("Tables aren't merged");
                 }
-            }
+            },
         },
-    ]
+    ];
 }
 
 function checkMergeTableIsCancelHelpers() {
@@ -216,7 +215,7 @@ function checkMergeTableIsCancelHelpers() {
                 if ($("div.table div.label:contains('4')").length !== 1) {
                     throw new TourError("Table is still merge");
                 }
-            }
+            },
         },
         {
             content: `Verify table 4 and 5 isn't merge anymore`,
@@ -226,75 +225,68 @@ function checkMergeTableIsCancelHelpers() {
                 if ($("div.table div.label:contains('5')").length !== 1) {
                     throw new TourError("Table is still merge");
                 }
-            }
+            },
         },
-    ]
+    ];
 }
 
 registry.category("web_tour.tours").add("MergeTableTour", {
     test: true,
     url: "/pos/ui",
-    steps: () => [
-        Dialog.confirm("Open session"),
-        ...mergeTableHelpers(),
-        FloorScreen.clickTable("4"),
-        ProductScreen.clickDisplayedProduct("Coca-Cola"),
-        ProductScreen.clickPayButton(),
-        PaymentScreen.clickPaymentMethod("Cash"),
-        PaymentScreen.clickValidate(),
-        {
-            ...Dialog.confirm(),
-            content:
-                "acknowledge printing error ( because we don't have printer in the test. )",
-        },
-        ReceiptScreen.clickNextOrder(),
-        ...checkMergeTableIsCancelHelpers(),
-        ...mergeTableHelpers(),
-        {
-            content: `click on the burger menu`,
-            trigger: 'i.fa-bars',
-        },
-        {
-            content: `click on Edit Plan in the burger menu`,
-            trigger: 'a.dropdown-item:contains("Edit Plan")',
-        },
-        {
-            content: `select linked table`,
-            trigger: 'div.isLinked div.label:contains("4")',
-        },
-        {
-            content: `unlink in edit plan if unlink possible`,
-            trigger: '.edit-buttons button:contains("Unlink")',
-        },
-        {
-            content: `click on the burger menu`,
-            trigger: 'i.fa-bars',
-        },
-        {
-            content: `click on Edit Plan in the burger menu`,
-            trigger: 'a.dropdown-item:contains("Edit Plan")',
-        },
-        ...checkMergeTableIsCancelHelpers(),
-        ...mergeTableHelpers(),
-        {
-            content: `refresh page`,
-            trigger: 'div.table div.label:contains("4")',
-            isCheck: true,
-            run: () => {
-                $(document).ready(function () {
-                    location.reload();
-                });
-            }
-        },
-        {
-            content: `Verify table 4 and 5 is merge`,
-            trigger: 'div.table div.label:contains("4")',
-            isCheck: true,
-            run: () => {
-                if ($("div.table div.label:contains('4')").length < 2) {
-                    throw new TourError("Table isn't merge");
-                }
-            }
-        },
-    ].flat(),
+    steps: () =>
+        [
+            Dialog.confirm("Open session"),
+            ...mergeTableHelpers("5", "4"),
+            FloorScreen.clickTable("4"),
+            ProductScreen.clickDisplayedProduct("Coca-Cola"),
+            ProductScreen.clickPayButton(),
+            PaymentScreen.clickPaymentMethod("Cash"),
+            PaymentScreen.clickValidate(),
+            {
+                ...Dialog.confirm(),
+                content:
+                    "acknowledge printing error ( because we don't have printer in the test. )",
+            },
+            ReceiptScreen.clickNextOrder(),
+            ...checkMergeTableIsCancelHelpers(),
+            ...mergeTableHelpers("5", "4"),
+            Chrome.clickMenuButton(),
+            {
+                content: `click on Edit Plan in the burger menu`,
+                trigger: 'a.dropdown-item:contains("Edit Plan")',
+            },
+            {
+                content: `select linked table`,
+                trigger: 'div.isLinked div.label:contains("4")',
+            },
+            {
+                content: `unlink in edit plan if unlink possible`,
+                trigger: '.edit-buttons button:contains("Unlink")',
+            },
+            Chrome.clickMenuButton(),
+            {
+                content: `click on Edit Plan in the burger menu`,
+                trigger: 'a.dropdown-item:contains("Edit Plan")',
+            },
+            ...checkMergeTableIsCancelHelpers(),
+            ...mergeTableHelpers("5", "4"),
+            {
+                content: `refresh page`,
+                trigger: 'div.table div.label:contains("4")',
+                isCheck: true,
+                run: () => {
+                    window.location.reload();
+                },
+            },
+            {
+                content: `Verify table 4 and 5 is merge`,
+                trigger: 'div.table div.label:contains("4")',
+                isCheck: true,
+                run: () => {
+                    if ($("div.table div.label:contains('4')").length < 2) {
+                        throw new TourError("Table isn't merge");
+                    }
+                },
+            },
+        ].flat(),
 });
