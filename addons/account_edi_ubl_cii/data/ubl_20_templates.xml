@@ -372,6 +372,13 @@
     <template id="ubl_20_CommonType">
         <t xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
            xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+            <ext:UBLExtensions xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+                <ext:UBLExtension>
+                    <ext:ExtensionContent>
+                        <ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#" t-out="vals.get('ubl_extensions_signature')"/>
+                    </ext:ExtensionContent>
+                </ext:UBLExtension>
+            </ext:UBLExtensions>
             <cbc:UBLVersionID t-out="vals.get('ubl_version_id')"/>
             <cbc:CustomizationID t-out="vals.get('customization_id')"/>
             <cbc:ProfileID
