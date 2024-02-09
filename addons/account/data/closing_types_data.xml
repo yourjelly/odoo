@@ -4,8 +4,9 @@
     <record id="closing_type_vat" model="account.report.closing.type">
         <field name="name">VAT Closing</field>
         <field name"on_interval" eval="1"/>
-        <field name="move_generator_code">vat_closing</field>
+        <field name="move_generator_code">tax_closing</field>
         <field name="periodicity">monthly</field>
+        <field name="split_per_report" eval="1"/>
     </record>
 
     <record id="closing_type_all" model="account.report.closing.type">
