@@ -96,3 +96,10 @@ export function loadAllImages(el) {
     const images = el.querySelectorAll("img");
     return Promise.all(Array.from(images).map(img => loadImage(img.src)));
 }
+
+export function getHoursAndMinutesFromDatetimeString(datetimeString) {
+    const dateTimeObject = new Date(datetimeString);
+    const hours = dateTimeObject.getHours().toString().padStart(2, "0");
+    const minutes = dateTimeObject.getMinutes().toString().padStart(2, "0");
+    return `${hours}:${minutes}`;
+}
