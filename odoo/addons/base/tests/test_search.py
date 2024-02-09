@@ -278,3 +278,10 @@ class test_search(TransactionCase):
         ])
         self.assertEqual(len(partners) + count_partner_before, Partner.search_count([]))
         self.assertEqual(3, Partner.search_count([], limit=3))
+
+    def test_22_large_domain(self):
+        """ Ensure search and its unerlying SQL mechanism is able to handle large domains"""
+        User = self.env['res.users']
+        N = 9500
+        dom = [*('|' for x in range(N-1)), *(('login', '=', 'admin') for x in range(N))]
+        User.search(dom)

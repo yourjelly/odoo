@@ -79,24 +79,45 @@ class SQL:
         self.__args = args
         return self
 
+    def __reduce(self, generator):
+        """ Uses `generator` to reduce `self` after reducing all children """
+        stack = [generator(self)]
+        child = None
+        while stack:
+            child = stack[-1].send(child)
+            if isinstance(child, SQL):
+                stack.append(generator(child))
+                child = None
+            else:
+                stack.pop()
+        return child
+
     @property
     def code(self) -> str:
         """ Return the combined SQL code string. """
-        return self.__code % tuple(
-            arg.code if isinstance(arg, SQL) else "%s"
-            for arg in self.__args
-        ) if self.__args else self.__code
+        def expand_code(ss):
+            if not ss.__args:
+                yield ss.__code
+            new_args = []
+            for arg in ss.__args:
+                new_args.append((yield arg) if isinstance(arg, SQL) else "%s")
+            yield ss.__code % tuple(new_args)
+
+        return self.__reduce(expand_code)
 
     @property
     def params(self) -> list:
         """ Return the combined SQL code params as a list of values. """
-        result = []
-        for arg in self.__args:
-            if isinstance(arg, SQL):
-                result.extend(arg.params)
-            else:
-                result.append(arg)
-        return result
+        def collect_args(ss):
+            res = []
+            for arg in ss.__args:
+                if isinstance(arg, SQL):
+                    res.extend((yield arg))
+                else:
+                    res.append(arg)
+            yield res
+
+        return self.__reduce(collect_args)
 
     def __repr__(self):
         return f"SQL({', '.join(map(repr, [self.code, *self.params]))})"
