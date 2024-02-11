@@ -79,44 +79,58 @@ class SQL:
         self.__args = args
         return self
 
-    def __reduce(self, generator):
-        """ Uses `generator` to reduce `self` after reducing all children """
+    def __reduce(self, combine):
+        """ Reduce `self` with the operation `combine(node, reduced_args)`
+
+        `self.__reduce(comb)` is equivalent to:
+        ```
+        def rec(node):
+            return comb(node, [rec(arg) for arg in node.__args])
+        rec(self)
+        ```
+        """
+        if all(not isinstance(arg, SQL) for arg in self.__args):
+            return combine(self, self.__args)
+
+        def generator(node):
+            reduced_args = []
+            for arg in node.__args:
+                reduced_args.append((yield arg))
+            yield combine(node, reduced_args)
+
         stack = [generator(self)]
         child = None
         while stack:
-            child = stack[-1].send(child)
+            try:
+                child = stack[-1].send(child)
+            except StopIteration:
+                stack.pop()
+                continue
             if isinstance(child, SQL):
                 stack.append(generator(child))
                 child = None
-            else:
-                stack.pop()
         return child
 
     @property
     def code(self) -> str:
         """ Return the combined SQL code string. """
-        def expand_code(ss):
-            if not ss.__args:
-                yield ss.__code
-            new_args = []
-            for arg in ss.__args:
-                new_args.append((yield arg) if isinstance(arg, SQL) else "%s")
-            yield ss.__code % tuple(new_args)
-
+        def expand_code(node, reduced_args):
+            return node.__code % tuple(
+                ra if isinstance(a, SQL) else "%s" for a, ra in zip(node.__args, reduced_args)
+            )
         return self.__reduce(expand_code)
 
     @property
     def params(self) -> list:
         """ Return the combined SQL code params as a list of values. """
-        def collect_args(ss):
+        def collect_args(node, reduced_args):
             res = []
-            for arg in ss.__args:
-                if isinstance(arg, SQL):
-                    res.extend((yield arg))
+            for a, ra in zip(node.__args, reduced_args):
+                if isinstance(a, SQL):
+                    res.extend(ra)
                 else:
-                    res.append(arg)
-            yield res
-
+                    res.append(a)
+            return res
         return self.__reduce(collect_args)
 
     def __repr__(self):
