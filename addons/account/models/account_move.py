@@ -4565,6 +4565,9 @@ class AccountMoveLine(models.Model):
                     tax_type = record.tax_ids[0].type_tax_use
                     is_refund = (tax_type == 'sale' and record.debit) or (tax_type == 'purchase' and record.credit)
 
+                if record.tax_ids and record.move_id.reversed_entry_id:
+                    is_refund = not is_refund
+
                 record.tax_tag_invert = (tax_type == 'purchase' and is_refund) or (tax_type == 'sale' and not is_refund)
 
             else:
