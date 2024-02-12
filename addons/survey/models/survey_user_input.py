@@ -785,23 +785,36 @@ class SurveyUser_InputLine(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        for vals in vals_list:
+        # Setup prefetching
+        suggested_answers = self.env['survey.question.answer'].browse(vals.get('suggested_answer_id', False) for vals in vals_list)
+        questions = self.env['survey.question'].browse(vals.get('question_id', False) for vals in vals_list)
+        user_inputs = self.env['survey.user_input'].browse(vals.get('user_input_id', False) for vals in vals_list)
+
+        for vals, suggested_answer, question, user_input in zip(vals_list, suggested_answers, questions, user_inputs):
             if not vals.get('answer_score'):
-                score_vals = self._get_answer_score_values(vals)
+                score_vals = self._get_answer_score_values(
+                    vals
+                    | {'question': question, 'user_input': user_input}
+                    | ({'suggested_answer': suggested_answer} if suggested_answer else {})
+                )
                 vals.update(score_vals)
         return super().create(vals_list)
 
     def write(self, vals):
         res = True
+        suggested_answer_vals = (
+            {'suggested_answer': self.env['survey.question.answer'].browse(suggested_answer_id)}
+            if (suggested_answer_id := vals.get('suggested_answer_id'))
+            else {}
+        )
         for line in self:
             vals_copy = {**vals}
-            getter_params = {
-                'user_input_id': line.user_input_id.id,
-                'answer_type': line.answer_type,
-                'question_id': line.question_id.id,
-                **vals_copy
-            }
-            if not vals_copy.get('answer_score'):
+            if not vals.get('answer_score'):
+                getter_params = (
+                    {'answer_type': line.answer_type, 'question': line.question_id, 'user_input': line.user_input_id}
+                    | suggested_answer_vals
+                    | vals_copy
+                )
                 score_vals = self._get_answer_score_values(getter_params, compute_speed_score=False)
                 vals_copy.update(score_vals)
             res = super(SurveyUser_InputLine, line).write(vals_copy) and res
@@ -834,9 +847,8 @@ class SurveyUser_InputLine(models.Model):
     def _get_answer_score_values(self, vals, compute_speed_score=True):
         """ Get values for: answer_is_correct and associated answer_score.
 
-        Requires vals to contain 'answer_type', 'question_id', and 'user_input_id'.
-        Depending on 'answer_type' additional value of 'suggested_answer_id' may also be
-        required.
+        Requires vals to contain 'answer_type' (str) and 'question', and 'user_input' (records)
+        Depending on 'answer_type', 'suggested_answer' (record) may also be required.
 
         Calculates whether an answer_is_correct and its score based on 'answer_type' and
         corresponding question. Handles choice (answer_type == 'suggestion') questions
@@ -853,25 +865,21 @@ class SurveyUser_InputLine(models.Model):
             * {'answer_is_correct': False, 'answer_score': 0} (default)
             * {'answer_is_correct': True, 'answer_score': 2.0}
         """
-        user_input_id = vals.get('user_input_id')
-        answer_type = vals.get('answer_type')
-        question_id = vals.get('question_id')
-        if not question_id:
+        question = vals.get('question')
+        if not question:
             raise ValueError(_('Computing score requires a question in arguments.'))
-        question = self.env['survey.question'].browse(int(question_id))
 
         # default and non-scored questions
         answer_is_correct = False
         answer_score = 0
 
+        answer_type = vals.get('answer_type')
         # record selected suggested choice answer_score (can be: pos, neg, or 0)
         if question.question_type in ['simple_choice', 'multiple_choice']:
             if answer_type == 'suggestion':
-                suggested_answer_id = vals.get('suggested_answer_id')
-                if suggested_answer_id:
-                    question_answer = self.env['survey.question.answer'].browse(int(suggested_answer_id))
-                    answer_score = question_answer.answer_score
-                    answer_is_correct = question_answer.is_correct
+                if suggested_answer := vals.get('suggested_answer'):
+                    answer_score = suggested_answer.answer_score
+                    answer_is_correct = suggested_answer.is_correct
         # for all other scored question cases, record question answer_score (can be: pos or 0)
         elif question.question_type in ['date', 'datetime', 'numerical_box']:
             answer = vals.get('value_%s' % answer_type)
@@ -886,7 +894,7 @@ class SurveyUser_InputLine(models.Model):
                 answer_score = question.answer_score
 
         if compute_speed_score and answer_score > 0:
-            user_input = self.env['survey.user_input'].browse(user_input_id)
+            user_input = vals.get('user_input')
             session_speed_rating = user_input.exists() and user_input.is_session_answer and user_input.survey_id.session_speed_rating
             if session_speed_rating and question.is_time_limited:
                 max_score_delay = 2
