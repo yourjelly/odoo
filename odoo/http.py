@@ -407,17 +407,21 @@ def is_cors_preflight(request, endpoint):
     return request.httprequest.method == 'OPTIONS' and endpoint.routing.get('cors', False)
 
 
-def serialize_exception(exception):
+def serialize_exception(exception, level="debug"):
     name = type(exception).__name__
     module = type(exception).__module__
 
-    return {
-        'name': f'{module}.{name}' if module else name,
-        'debug': traceback.format_exc(),
+    res = {
         'message': ustr(exception),
-        'arguments': exception.args,
-        'context': getattr(exception, 'context', {}),
     }
+    if level == "debug":
+        res.update({
+            'name': f'{module}.{name}' if module else name,
+            'debug': traceback.format_exc(),
+            'arguments': exception.args,
+            'context': getattr(exception, 'context', {}),
+        })
+    return res
 
 
 # =========================================================
@@ -2064,13 +2068,16 @@ class JsonRPCDispatcher(Dispatcher):
         :param exc: the exception that occurred.
         :returns: a WSGI application
         """
+        cr = request.env.cr
+        cr.execute("SELECT value FROM ir_config_parameter WHERE key='exception.http.response.level'")
+        level = cr.fetchone()[0] if cr.rowcount else "debug"
         error = {
             'code': 200,  # this code is the JSON-RPC level code, it is
                           # distinct from the HTTP status code. This
                           # code is ignored and the value 200 (while
                           # misleading) is totally arbitrary.
             'message': "Odoo Server Error",
-            'data': serialize_exception(exc),
+            'data': serialize_exception(exc, level),
         }
         if isinstance(exc, NotFound):
             error['code'] = 404
