@@ -438,3 +438,29 @@ class Company(models.Model):
             },
             'views': [[False, 'tree'], [False, 'kanban'], [False, 'form']],
         }
+
+    @api.model
+    def _ensure_company_exists(self, xml_id):
+        if self.env.ref(xml_id, raise_if_not_found=False):
+            return
+
+        company_data = {
+            'base.demo_company_be': {
+                'name': "BE Company CoA",
+                'vat': "BE246697724",
+                'street': "1021 Sint-Bernardsesteenweg",
+                'city': "Antwerpen",
+                'country_id': self.env.ref("base.be").id,
+                'zip': "2660",
+                'phone': "+32 470 12 34 56",
+                'email': "info@company.beexample.com",
+                'website': "www.beexample.com",
+            },
+        }[xml_id]
+
+        company = self.env['res.company'].create(company_data)
+        self.env['ir.model.data']._update_xmlids([{
+            'xml_id': xml_id,
+            'record': company,
+            'noupdate': True,
+        }])
