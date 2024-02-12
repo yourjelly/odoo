@@ -1938,14 +1938,14 @@
     </xpath>
 </template>
 
-<!-- Headline -->
+<!-- "Headline" template -->
 <template id="template_footer_headline" inherit_id="website.layout" name="Headline" active="False">
     <xpath expr="//div[@id='footer']" position="replace">
         <div id="footer" class="oe_structure oe_structure_solo" t-ignore="true" t-if="not no_footer">
             <section class="s_text_block pt48" data-snippet="s_text_block" data-name="Text">
                 <div class="container">
                     <div class="row">
-                        <div class="col-lg-3 pb24">
+                        <div class="col-lg-3 pb24 text-break">
                             <h4><b>Designed</b> <br/>for Companies</h4>
                         </div>
                         <div class="col-lg-9 pb24">
@@ -1957,7 +1957,7 @@
             <section class="s_text_block" data-snippet="s_text_block" data-name="Text">
                 <div class="container">
                     <div class="row align-items-center">
-                        <div class="col-lg-3 pb24">
+                        <div class="col-lg-3 pb24 text-break">
                             <ul class="ps-3 mb-0">
                                 <li><a href="/">Home</a></li>
                                 <li><a href="/contactus">Contact us</a></li>
