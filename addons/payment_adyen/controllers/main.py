@@ -284,14 +284,14 @@ class AdyenController(http.Controller):
         received_signature = notification_data.get('additionalData', {}).get('hmacSignature')
         if not received_signature:
             _logger.warning("received notification with missing signature")
-            raise Forbidden()
+            raise Forbidden
 
         # Compare the received signature with the expected signature computed from the payload
         hmac_key = tx_sudo.provider_id.adyen_hmac_key
         expected_signature = AdyenController._compute_signature(notification_data, hmac_key)
         if not hmac.compare_digest(received_signature, expected_signature):
             _logger.warning("received notification with invalid signature")
-            raise Forbidden()
+            raise Forbidden
 
     @staticmethod
     def _compute_signature(payload, hmac_key):

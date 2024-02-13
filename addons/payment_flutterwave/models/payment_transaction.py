@@ -12,7 +12,6 @@ from odoo.addons.payment import utils as payment_utils
 from odoo.addons.payment_flutterwave import const
 from odoo.addons.payment_flutterwave.controllers.main import FlutterwaveController
 
-
 _logger = logging.getLogger(__name__)
 
 

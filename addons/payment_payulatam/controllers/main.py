@@ -108,10 +108,10 @@ class PayuLatamController(http.Controller):
         received_signature = notification_data.get('signature')
         if not received_signature:
             _logger.warning("received notification with missing signature")
-            raise Forbidden()
+            raise Forbidden
 
         # Compare the received signature with the expected signature computed from the data
         expected_signature = tx_sudo.provider_id._payulatam_generate_sign(notification_data)
         if not consteq(received_signature, expected_signature):
             _logger.warning("received notification with invalid signature")
-            raise Forbidden()
+            raise Forbidden

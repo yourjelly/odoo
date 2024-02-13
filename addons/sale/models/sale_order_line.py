@@ -1,15 +1,15 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from collections import defaultdict
 from datetime import timedelta
+
 from markupsafe import Markup
 
-from odoo import api, fields, models, _
+from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 from odoo.fields import Command
 from odoo.osv import expression
-from odoo.tools import float_is_zero, float_compare, float_round, format_date, groupby
+from odoo.tools import float_compare, float_is_zero, float_round, format_date, groupby
 
 
 class SaleOrderLine(models.Model):
@@ -1156,11 +1156,11 @@ class SaleOrderLine(models.Model):
 
     def _validate_analytic_distribution(self):
         for line in self.filtered(lambda l: not l.display_type and l.state in ['draft', 'sent']):
-            line._validate_distribution(**{
-                'product': line.product_id.id,
-                'business_domain': 'sale_order',
-                'company_id': line.company_id.id,
-            })
+            line._validate_distribution(
+                product=line.product_id.id,
+                business_domain='sale_order',
+                company_id=line.company_id.id,
+            )
 
     #=== CORE METHODS OVERRIDES ===#
 

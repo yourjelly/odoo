@@ -11,7 +11,6 @@ from odoo.exceptions import ValidationError
 from odoo.addons.payment_mollie import const
 from odoo.addons.payment_mollie.controllers.main import MollieController
 
-
 _logger = logging.getLogger(__name__)
 
 

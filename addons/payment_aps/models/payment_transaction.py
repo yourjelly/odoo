@@ -12,7 +12,6 @@ from odoo.addons.payment_aps import utils as aps_utils
 from odoo.addons.payment_aps.const import PAYMENT_STATUS_MAPPING
 from odoo.addons.payment_aps.controllers.main import APSController
 
-
 _logger = logging.getLogger(__name__)
 
 

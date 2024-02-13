@@ -4,9 +4,11 @@ import logging
 import pprint
 import re
 import unicodedata
+
 from datetime import datetime
 
 import psycopg2
+
 from dateutil import relativedelta
 from markupsafe import Markup
 

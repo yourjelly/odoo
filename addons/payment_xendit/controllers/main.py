@@ -10,7 +10,6 @@ from odoo.exceptions import ValidationError
 from odoo.http import request
 from odoo.tools import consteq
 
-
 _logger = logging.getLogger(__name__)
 
 
@@ -53,8 +52,8 @@ class XenditController(http.Controller):
         # Check for the received token.
         if not received_token:
             _logger.warning("Received notification with missing token.")
-            raise Forbidden()
+            raise Forbidden
 
         if not consteq(tx_sudo.provider_id.xendit_webhook_token, received_token):
             _logger.warning("Received notification with invalid callback token %r.", received_token)
-            raise Forbidden()
+            raise Forbidden

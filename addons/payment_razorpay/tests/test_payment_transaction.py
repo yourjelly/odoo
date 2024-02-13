@@ -1,6 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import time
+
 from datetime import datetime
 from unittest.mock import patch
 
@@ -50,11 +51,9 @@ class TestPaymentTransaction(RazorpayCommon):
         notification data. """
         refund_tx = self._create_transaction('direct')
         returned_tx = self.env['payment.transaction']._get_tx_from_notification_data(
-            'razorpay', dict(self.refund_data, **{
-                'entity_type': 'refund',
-                'notes': {
-                    'reference': refund_tx.reference,
-                },
+            'razorpay',
+            dict(self.refund_data, entity_type='refund', notes={
+                'reference': refund_tx.reference,
             })
         )
         self.assertEqual(returned_tx, refund_tx)

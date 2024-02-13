@@ -4,6 +4,7 @@ import hashlib
 import hmac
 import logging
 import pprint
+
 from datetime import datetime
 
 from werkzeug.exceptions import Forbidden
@@ -16,7 +17,6 @@ from odoo.tools.misc import file_open
 from odoo.addons.payment import utils as payment_utils
 from odoo.addons.payment_stripe import utils as stripe_utils
 from odoo.addons.payment_stripe.const import HANDLED_WEBHOOK_EVENTS
-
 
 _logger = logging.getLogger(__name__)
 
@@ -210,18 +210,18 @@ class StripeController(http.Controller):
         event_timestamp = int(signature_data.get('t', '0'))
         if not event_timestamp:
             _logger.warning("received notification with missing timestamp")
-            raise Forbidden()
+            raise Forbidden
 
         # Check if the timestamp is not too old
         if datetime.utcnow().timestamp() - event_timestamp > self.WEBHOOK_AGE_TOLERANCE:
             _logger.warning("received notification with outdated timestamp: %s", event_timestamp)
-            raise Forbidden()
+            raise Forbidden
 
         # Retrieve the received signature from the data
         received_signature = signature_data.get('v1')
         if not received_signature:
             _logger.warning("received notification with missing signature")
-            raise Forbidden()
+            raise Forbidden
 
         # Compare the received signature with the expected signature computed from the data
         signed_payload = f'{event_timestamp}.{notification_payload}'
@@ -230,7 +230,7 @@ class StripeController(http.Controller):
         ).hexdigest()
         if not hmac.compare_digest(received_signature, expected_signature):
             _logger.warning("received notification with invalid signature")
-            raise Forbidden()
+            raise Forbidden
 
     @http.route(_apple_pay_domain_association_url, type='http', auth='public', csrf=False)
     def stripe_apple_pay_get_domain_association_file(self):

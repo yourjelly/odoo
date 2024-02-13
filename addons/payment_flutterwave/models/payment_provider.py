@@ -4,13 +4,13 @@ import logging
 import pprint
 
 import requests
+
 from werkzeug.urls import url_join
 
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 
 from odoo.addons.payment_flutterwave import const
-
 
 _logger = logging.getLogger(__name__)
 

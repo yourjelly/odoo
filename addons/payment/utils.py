@@ -7,7 +7,6 @@ from odoo.http import request
 from odoo.tools import consteq, float_round, ustr
 from odoo.tools.misc import hmac as hmac_tool
 
-
 # Access token management
 
 def generate_access_token(*values):

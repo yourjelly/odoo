@@ -12,7 +12,6 @@ from odoo.http import request
 
 from odoo.addons.payment_razorpay.const import HANDLED_WEBHOOK_EVENTS
 
-
 _logger = logging.getLogger(__name__)
 
 
@@ -65,10 +64,10 @@ class RazorpayController(http.Controller):
         # Check for the received signature.
         if not received_signature:
             _logger.warning("Received notification with missing signature.")
-            raise Forbidden()
+            raise Forbidden
 
         # Compare the received signature with the expected signature.
         expected_signature = tx_sudo.provider_id._razorpay_calculate_signature(notification_data)
         if not hmac.compare_digest(received_signature, expected_signature):
             _logger.warning("Received notification with invalid signature.")
-            raise Forbidden()
+            raise Forbidden

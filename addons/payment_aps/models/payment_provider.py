@@ -7,7 +7,6 @@ from odoo import fields, models
 
 from odoo.addons.payment_aps import const
 
-
 _logger = logging.getLogger(__name__)
 
 

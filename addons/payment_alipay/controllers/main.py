@@ -5,6 +5,7 @@ import logging
 import pprint
 
 import requests
+
 from werkzeug.exceptions import Forbidden
 
 from odoo import http
@@ -90,14 +91,14 @@ class AlipayController(http.Controller):
                 "could not verify notification origin at %(url)s with data: %(data)s:\n%(error)s",
                 {'url': url, 'data': payload, 'error': pprint.pformat(error.response.text)},
             )
-            raise Forbidden()
+            raise Forbidden
         else:
             response_content = response.text
             if response_content != 'true':
                 _logger.warning(
                     "Alipay did not confirm the origin of the notification with data:\n%s", payload
                 )
-                raise Forbidden()
+                raise Forbidden
 
     @staticmethod
     def _verify_notification_signature(notification_data, tx_sudo):
@@ -113,10 +114,10 @@ class AlipayController(http.Controller):
         received_signature = notification_data.get('sign')
         if not received_signature:
             _logger.warning("received notification with missing signature")
-            raise Forbidden()
+            raise Forbidden
 
         # Compare the received signature with the expected signature computed from the data
         expected_signature = tx_sudo.provider_id._alipay_compute_signature(notification_data)
         if not hmac.compare_digest(received_signature, expected_signature):
             _logger.warning("received notification with invalid signature")
-            raise Forbidden()
+            raise Forbidden

@@ -1,16 +1,16 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 from datetime import timedelta
+
 from freezegun import freeze_time
 
 from odoo import fields
-from odoo.fields import Command
 from odoo.exceptions import AccessError, UserError, ValidationError
-from odoo.tests import tagged, Form
+from odoo.fields import Command
+from odoo.tests import Form, tagged
 from odoo.tools import float_compare
 
-from odoo.addons.sale.tests.common import SaleCommon
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
+from odoo.addons.sale.tests.common import SaleCommon
 
 
 @tagged('post_install', '-at_install')

@@ -100,7 +100,7 @@ class BuckarooController(http.Controller):
         # Check for the received signature
         if not received_signature:
             _logger.warning("received notification with missing signature")
-            raise Forbidden()
+            raise Forbidden
 
         # Compare the received signature with the expected signature computed from the data
         expected_signature = tx_sudo.provider_id._buckaroo_generate_digital_sign(
@@ -108,4 +108,4 @@ class BuckarooController(http.Controller):
         )
         if not hmac.compare_digest(received_signature, expected_signature):
             _logger.warning("received notification with invalid signature")
-            raise Forbidden()
+            raise Forbidden

@@ -6,7 +6,6 @@ from odoo import _, fields, models
 
 from odoo.addons.payment_paypal import const
 
-
 _logger = logging.getLogger(__name__)
 
 

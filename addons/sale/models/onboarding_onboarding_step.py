@@ -2,7 +2,7 @@
 
 import base64
 
-from odoo import _, api, Command, models
+from odoo import Command, _, api, models
 from odoo.tools import file_open
 
 

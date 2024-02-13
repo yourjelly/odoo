@@ -10,7 +10,6 @@ from odoo import http
 from odoo.exceptions import ValidationError
 from odoo.http import request
 
-
 _logger = logging.getLogger(__name__)
 
 
@@ -64,7 +63,7 @@ class AsiaPayController(http.Controller):
         received_signature = notification_data.get('secureHash')
         if not received_signature:
             _logger.warning("Received notification with missing signature.")
-            raise Forbidden()
+            raise Forbidden
 
         # Compare the received signature with the expected signature computed from the data.
         expected_signature = tx_sudo.provider_id._asiapay_calculate_signature(
@@ -72,4 +71,4 @@ class AsiaPayController(http.Controller):
         )
         if not hmac.compare_digest(received_signature, expected_signature):
             _logger.warning("Received notification with invalid signature.")
-            raise Forbidden()
+            raise Forbidden

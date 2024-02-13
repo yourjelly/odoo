@@ -2,10 +2,11 @@
 
 from unittest.mock import patch
 
-from odoo.addons.payment import utils as payment_utils
 from odoo.exceptions import UserError
 from odoo.tests import tagged
 from odoo.tools import mute_logger
+
+from odoo.addons.payment import utils as payment_utils
 
 from .common import AuthorizeCommon
 

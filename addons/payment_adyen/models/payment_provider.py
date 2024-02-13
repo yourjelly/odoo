@@ -3,6 +3,7 @@
 import json
 import logging
 import re
+
 import requests
 
 from odoo import _, api, fields, models

@@ -1,7 +1,8 @@
 import uuid
 
-from odoo.tests import tagged
 from odoo import Command
+from odoo.tests import tagged
+
 from .common import TestSaleCommon
 
 

@@ -1,6 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import logging
+
 from hashlib import new as hashnew
 
 import requests
@@ -9,7 +10,6 @@ from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 
 from odoo.addons.payment_ogone import const
-
 
 _logger = logging.getLogger(__name__)
 

@@ -4,6 +4,7 @@ import logging
 import pprint
 
 import requests
+
 from werkzeug import urls
 from werkzeug.exceptions import Forbidden
 
@@ -13,7 +14,6 @@ from odoo.http import request
 from odoo.tools import html_escape
 
 from odoo.addons.payment import utils as payment_utils
-
 
 _logger = logging.getLogger(__name__)
 
@@ -80,7 +80,7 @@ class PaypalController(http.Controller):
             'paypal', {'item_number': tx_ref}
         )
         if not payment_utils.check_access_token(access_token, tx_ref):
-            raise Forbidden()
+            raise Forbidden
         tx_sudo._handle_notification_data('paypal', {})
 
         return request.redirect('/payment/status')
@@ -213,7 +213,7 @@ class PaypalController(http.Controller):
                     'error': pprint.pformat(error.response.text),
                 },
             )
-            raise Forbidden()
+            raise Forbidden
         else:
             response_content = response.text
             if response_content != 'VERIFIED':
@@ -221,4 +221,4 @@ class PaypalController(http.Controller):
                     "PayPal did not confirm the origin of the notification with data:\n%s",
                     pprint.pformat(notification_data),
                 )
-                raise Forbidden()
+                raise Forbidden

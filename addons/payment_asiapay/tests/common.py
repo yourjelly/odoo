@@ -2,8 +2,8 @@
 
 from odoo import Command
 
-from odoo.addons.payment.tests.common import PaymentCommon
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
+from odoo.addons.payment.tests.common import PaymentCommon
 
 
 class AsiaPayCommon(AccountTestInvoicingCommon, PaymentCommon):

@@ -11,7 +11,6 @@ from odoo.addons.payment import utils as payment_utils
 from odoo.addons.payment_asiapay import const
 from odoo.addons.payment_asiapay.controllers.main import AsiaPayController
 
-
 _logger = logging.getLogger(__name__)
 
 

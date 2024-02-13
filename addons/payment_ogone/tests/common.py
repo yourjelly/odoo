@@ -1,7 +1,8 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo.addons.payment.tests.common import PaymentCommon
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
+from odoo.addons.payment.tests.common import PaymentCommon
+
 
 class OgoneCommon(AccountTestInvoicingCommon, PaymentCommon):
 
