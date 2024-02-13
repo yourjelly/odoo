@@ -362,16 +362,16 @@ class ResCompany(models.Model):
         return lock_date
 
     def _get_tax_lock_date(self):
-        #TODO OCO voir si on ajoute les familles de taxes
-        #TODO OCO généraliser son usage
+        #TODO OCO refaire
         self.ensure_one()
-        most_restrictive_closing = self.env['account.move'].search([
+        """most_restrictive_closing = self.env['account.move'].search([
             ('company_id', '=', self.id),
             ('tax_closing_report_id', '!=', False),
             ('state', '=', 'posted'),
         ], order='date DESC', limit=1)
 
-        return most_restrictive_closing.date or date.min
+        return most_restrictive_closing.date or date.min"""
+        return date.min
 
     def _get_violated_lock_dates(self, accounting_date, has_tax):
         """Get all the lock dates affecting the current accounting_date.

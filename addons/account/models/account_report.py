@@ -68,8 +68,8 @@ class AccountReport(models.Model):
             ('last_month', "Last Month"),
             ('last_quarter', "Last Quarter"),
             ('last_year', "Last Year"),
-            ('this_tax_period', "This Tax Period"),
-            ('last_tax_period', "Last Tax Period"),
+            ('this_tax_period', "This Tax Period"), #TODO OCO virer/adapter
+            ('last_tax_period', "Last Tax Period"), #TODO OCO virer/adapter
         ],
         compute=lambda x: x._compute_report_option_filter('default_opening_date_filter', 'last_month'),
         readonly=False, store=True, depends=['root_report_id', 'section_main_report_ids'],
@@ -527,7 +527,7 @@ class AccountReportExpression(models.Model):
             ('to_beginning_of_period', 'At the beginning of the period'),
             ('normal', 'According to each type of account'),
             ('strict_range', 'Strictly on the given dates'),
-            ('previous_tax_period', "From previous tax period")
+            ('previous_tax_period', "From previous tax period") #TODO OCO adapter ça
         ],
         required=True,
         default='strict_range',

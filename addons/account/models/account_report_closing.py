@@ -26,7 +26,7 @@ class AccountReportClosingType(models.Model):
     name = fields.Char(string="Name", required=True)
     tax_ids = fields.One2many(string="Taxes", comodel_name='account.tax', inverse_name='closing_type_id')
     on_interval = fields.Boolean(string="On Interval")
-    report_ids = fields.One2many(string="Reports", comodel_name='account.report', inverse_name='closing_type_id') #TODO OCO ou m2m ?
+    report_ids = fields.One2many(string="Reports", comodel_name='account.report', inverse_name='closing_type_id')
     move_generator_code = fields.Char(string="Entry Generator")
     lock_journals = fields.Boolean(string="Lock Journals")
     split_per_report = fields.Boolean(string="Split per Report")
