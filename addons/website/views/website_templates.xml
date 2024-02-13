@@ -1994,6 +1994,39 @@
     </xpath>
 </template>
 
+<!-- "Minimalist centered" template -->
+<template id="template_footer_minimalist_centered" inherit_id="website.layout" name="Headline" active="False">
+    <xpath expr="//div[@id='footer']" position="replace">
+        <div id="footer" class="oe_structure oe_structure_solo" t-ignore="true" t-if="not no_footer">
+            <section class="s_text_block pt24 pb24" data-snippet="s_text_block" data-name="Text">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg-5 order-1 order-lg-0 pt24 pb24">
+                            <h5>Contact</h5>
+                            <ul class="list-unstyled mb-0">
+                                <li><i class="fa fa-phone fa-fw me-2"/><span class="o_force_ltr"><a href="tel:+1(650)555-0111">+1 (650) 555-0111</a></span></li>
+                                <li><i class="fa fa-envelope fa-fw me-2"/><span><a href="mailto:info@yourcompany.example.com">info@yourcompany.example.com</a></span></li>
+                            </ul>
+                        </div>
+                        <div class="col-4 col-lg-2 order-0 pt24">
+                            <a href="/" class="o_footer_logo logo">
+                                <img src="/website/static/src/img/website_logo.svg" class="img-fluid mx-auto" aria-label="Logo of MyCompany" title="MyCompany" role="img"/>
+                            </a>
+                        </div>
+                        <div class="col-lg-5 d-lg-block d-none pt24 pb24 o_snippet_mobile_invisible">
+                        <h5 style="text-align: right;">Help</h5>
+                            <ul class="list-unstyled mb-0" style="text-align: right;">
+                                <li><a href="#">Shipping &amp; Returns</a></li>
+                                <li><a href="#">Terms of Services</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </xpath>
+</template>
+
 <!-- slideout effect -->
 <template id="template_footer_slideout" inherit_id="website.layout" name="Template Footer Slideout" active="False">
     <xpath expr="//footer[@id='bottom']" position="attributes">

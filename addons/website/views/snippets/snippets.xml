@@ -1178,6 +1178,10 @@
                        data-customize-website-views="website.template_footer_headline"
                        data-customize-website-variable="'headline'"
                        data-img="/website/static/src/img/snippets_options/footer_template_headline.svg"/>
+            <we-button title="Minimalist Centered"
+                       data-customize-website-views="website.template_footer_minimalist_centered"
+                       data-customize-website-variable="'minimalist_centered'"
+                       data-img="/website/static/src/img/snippets_options/footer_template_minimalist_centered.svg"/>
         </we-select>
         <!-- Colors -->
         <we-colorpicker string="Colors"
