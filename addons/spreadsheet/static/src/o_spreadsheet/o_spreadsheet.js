@@ -21150,6 +21150,12 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         onMouseDown(ev) {
             this.props.onMouseDown(ev);
         }
+        handleUndoRedo(action) {
+            // When performing an undo/redo, if a figure is selected and focused,
+            // CTRL+Y & CTRL+Z may not work as expected unless we manually click on the grid.
+            this.env.model.dispatch(action);
+            this.env.focusableElement.focus();
+        }
         onKeyDown(ev) {
             const figure = this.props.figure;
             switch (ev.key) {
@@ -21179,6 +21185,13 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                         y: figure.y + delta[1],
                     });
                     ev.preventDefault();
+                    break;
+                case "y":
+                case "z":
+                    if (isCtrlKey(ev)) {
+                        ev.preventDefault();
+                        this.handleUndoRedo(ev.key === "y" ? "REQUEST_REDO" : "REQUEST_UNDO");
+                    }
                     break;
             }
         }
@@ -43259,8 +43272,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
 
 
     __info__.version = '16.0.32';
-    __info__.date = '2024-02-09T14:25:28.385Z';
-    __info__.hash = '452dce2';
+    __info__.date = '2024-02-13T06:45:16.589Z';
+    __info__.hash = 'a63e64c';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
