@@ -1,6 +1,7 @@
 import { _t } from "@web/core/l10n/translation";
 import { useBus, useService } from "@web/core/utils/hooks";
 import { formatFloat } from "@web/views/fields/formatters";
+import { useDateTimePicker } from "@web/core/datetime/datetime_hook";
 import { ViewButton } from '@web/views/view_button/view_button';
 
 import { ProjectRightSidePanelSection } from './components/project_right_side_panel_section';
@@ -42,6 +43,19 @@ export class ProjectRightSidePanel extends Component {
                 currency_id: false,
             },
             gridTemplateColumns: this._getGridTemplateColumns(),
+            startDate: false,
+            endDate: false,
+        });
+
+        this.projectUpdateDateFilter = useService("project_update_date_filter");
+        this.projectUpdateDateFilter.initializeDates();
+        useDateTimePicker({
+            pickerProps: {
+                type: "date",
+                range: true,
+                value: [this.state.startDate, this.state.endDate],
+            },
+            onApply: (args) => this._updateDates(args),
         });
 
         onWillStart(() => this.loadData());
@@ -124,7 +138,7 @@ export class ProjectRightSidePanel extends Component {
         const data = await this.orm.call(
             'project.project',
             'get_panel_data',
-            [[this.projectId]],
+            [[this.projectId], this.state.startDate, this.state.endDate],
             { context: this.context },
         );
         this.state.data = data;
@@ -173,5 +187,11 @@ export class ProjectRightSidePanel extends Component {
             context: JSON.stringify(this.context),
             resModel: 'project.project',
         };
+    }
+
+    async _updateDates(dates) {
+        [this.state.startDate, this.state.endDate] = dates;
+        this.projectUpdateDateFilter.dates = dates;
+        await this.loadData();
     }
 }
