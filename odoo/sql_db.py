@@ -17,6 +17,7 @@ import uuid
 from contextlib import contextmanager
 from datetime import datetime, timedelta
 from inspect import currentframe
+from typing import Any
 
 import psycopg2
 import psycopg2.extensions
@@ -28,7 +29,7 @@ from werkzeug import urls
 
 import odoo
 from . import tools
-from .tools import SQL
+from odoo.tools import SQL
 from .tools.func import frame_codeinfo, locked
 
 def undecimalize(value, cr):
@@ -90,7 +91,7 @@ class Savepoint:
         self.name = str(uuid.uuid1())
         self._cr = cr
         self.closed = False
-        cr.execute('SAVEPOINT "%s"' % self.name)
+        cr.execute(SQL('SAVEPOINT %s', SQL.identifier(self.name)))
 
     def __enter__(self):
         return self
@@ -103,12 +104,12 @@ class Savepoint:
             self._close(rollback)
 
     def rollback(self):
-        self._cr.execute('ROLLBACK TO SAVEPOINT "%s"' % self.name)
+        self._cr.execute(SQL('ROLLBACK TO SAVEPOINT %s', SQL.identifier(self.name)))
 
     def _close(self, rollback):
         if rollback:
             self.rollback()
-        self._cr.execute('RELEASE SAVEPOINT "%s"' % self.name)
+        self._cr.execute(SQL('RELEASE SAVEPOINT %s', SQL.identifier(self.name)))
         self.closed = True
 
 
@@ -329,16 +330,15 @@ class Cursor(BaseCursor):
             query, params = query.code, query.params
         return self._obj.mogrify(query, params)
 
-    def execute(self, query, params=None, log_exceptions=True):
+    def execute(self, query: SQL | psycopg2.sql.Composable, params: Any = None, log_exceptions: bool = True) -> None:
         global sql_counter
 
         if isinstance(query, SQL):
-            assert params is None, "Unexpected parameters for SQL query object"
+            assert params is None
             query, params = query.code, query.params
-
-        if params and not isinstance(params, (tuple, list, dict)):
-            # psycopg2's TypeError is not clear if you mess up the params
-            raise ValueError("SQL query parameters should be a tuple, list or dict; got %r" % (params,))
+        else:
+            assert isinstance(query, psycopg2.sql.Composable)
+            assert not params or isinstance(params, (list, tuple, dict))
 
         start = real_time()
         try:
@@ -503,7 +503,7 @@ class Cursor(BaseCursor):
     def now(self):
         """ Return the transaction's timestamp ``NOW() AT TIME ZONE 'UTC'``. """
         if self._now is None:
-            self.execute("SELECT (now() AT TIME ZONE 'UTC')")
+            self.execute(SQL("SELECT (now() AT TIME ZONE 'UTC')"))
             self._now = self.fetchone()[0]
         return self._now
 

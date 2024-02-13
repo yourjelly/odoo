@@ -1,19 +1,17 @@
 # -*- coding: utf-8 -*-
 import base64
+import contextlib
 import json
 import logging
 import os
 import shutil
 import subprocess
 import tempfile
-import threading
-import traceback
 from xml.etree import ElementTree as ET
 import zipfile
 
 from psycopg2 import sql
 from pytz import country_timezones
-from functools import wraps
 from contextlib import closing
 from decorator import decorator
 
@@ -28,6 +26,7 @@ import odoo.tools
 from odoo.sql_db import db_connect
 from odoo.release import version_info
 from odoo.tools import find_pg_tool, exec_pg_environ
+from odoo.tools.sql import SQL
 
 _logger = logging.getLogger(__name__)
 
@@ -99,8 +98,7 @@ def _create_empty_database(name):
     db = odoo.sql_db.db_connect('postgres')
     with closing(db.cursor()) as cr:
         chosen_template = odoo.tools.config['db_template']
-        cr.execute("SELECT datname FROM pg_database WHERE datname = %s",
-                   (name,), log_exceptions=False)
+        cr.execute(SQL("SELECT datname FROM pg_database WHERE datname = %s", name), log_exceptions=False)
         if cr.fetchall():
             raise DatabaseExists("database %r already exists!" % (name,))
         else:
@@ -119,16 +117,16 @@ def _create_empty_database(name):
     try:
         db = odoo.sql_db.db_connect(name)
         with db.cursor() as cr:
-            cr.execute("CREATE EXTENSION IF NOT EXISTS pg_trgm")
+            cr.execute(SQL("CREATE EXTENSION IF NOT EXISTS pg_trgm"))
             if odoo.tools.config['unaccent']:
-                cr.execute("CREATE EXTENSION IF NOT EXISTS unaccent")
+                cr.execute(SQL("CREATE EXTENSION IF NOT EXISTS unaccent"))
                 # From PostgreSQL's point of view, making 'unaccent' immutable is incorrect
                 # because it depends on external data - see
                 # https://www.postgresql.org/message-id/flat/201012021544.oB2FiTn1041521@wwwmaster.postgresql.org#201012021544.oB2FiTn1041521@wwwmaster.postgresql.org
                 # But in the case of Odoo, we consider that those data don't
                 # change in the lifetime of a database. If they do change, all
                 # indexes created with this function become corrupted!
-                cr.execute("ALTER FUNCTION unaccent(text) IMMUTABLE")
+                cr.execute(SQL("ALTER FUNCTION unaccent(text) IMMUTABLE"))
     except psycopg2.Error as e:
         _logger.warning("Unable to create PostgreSQL extensions : %s", e)
 
@@ -136,7 +134,7 @@ def _create_empty_database(name):
     try:
         db = odoo.sql_db.db_connect(name)
         with db.cursor() as cr:
-            cr.execute("GRANT CREATE ON SCHEMA PUBLIC TO PUBLIC")
+            cr.execute(SQL("GRANT CREATE ON SCHEMA PUBLIC TO PUBLIC"))
     except psycopg2.Error as e:
         _logger.warning("Unable to make public schema public-accessible: %s", e)
 
@@ -179,18 +177,16 @@ def exp_duplicate_database(db_original_name, db_name, neutralize_database=False)
 def _drop_conn(cr, db_name):
     # Try to terminate all other connections that might prevent
     # dropping the database
-    try:
+    with contextlib.suppress(Exception):
         # PostgreSQL 9.2 renamed pg_stat_activity.procpid to pid:
         # http://www.postgresql.org/docs/9.2/static/release-9-2.html#AEN110389
         pid_col = 'pid' if cr._cnx.server_version >= 90200 else 'procpid'
 
-        cr.execute("""SELECT pg_terminate_backend(%(pid_col)s)
-                      FROM pg_stat_activity
-                      WHERE datname = %%s AND
-                            %(pid_col)s != pg_backend_pid()""" % {'pid_col': pid_col},
-                   (db_name,))
-    except Exception:
-        pass
+        cr.execute(SQL("""
+            SELECT pg_terminate_backend(%s)
+            FROM pg_stat_activity
+            WHERE datname = %s AND %s != pg_backend_pid()
+        """, pid_col, db_name, pid_col))
 
 @check_db_management_enabled
 def exp_drop(db_name):
@@ -228,7 +224,7 @@ def exp_dump(db_name, format):
 @check_db_management_enabled
 def dump_db_manifest(cr):
     pg_version = "%d.%d" % divmod(cr._obj.connection.server_version / 100, 100)
-    cr.execute("SELECT name, latest_version FROM ir_module_module WHERE state = 'installed'")
+    cr.execute(SQL("SELECT name, latest_version FROM ir_module_module WHERE state = 'installed'"))
     modules = dict(cr.fetchall())
     manifest = {
         'odoo_dump': '1',
@@ -409,11 +405,11 @@ def list_dbs(force=False):
         return res
 
     chosen_template = odoo.tools.config['db_template']
-    templates_list = tuple(set(['postgres', chosen_template]))
+    templates_list = tuple({'postgres', chosen_template})
     db = odoo.sql_db.db_connect('postgres')
     with closing(db.cursor()) as cr:
         try:
-            cr.execute("select datname from pg_database where datdba=(select usesysid from pg_user where usename=current_user) and not datistemplate and datallowconn and datname not in %s order by datname", (templates_list,))
+            cr.execute(SQL("select datname from pg_database where datdba=(select usesysid from pg_user where usename=current_user) and not datistemplate and datallowconn and datname not in %s order by datname", templates_list))
             res = [odoo.tools.ustr(name) for (name,) in cr.fetchall()]
         except Exception:
             _logger.exception('Listing databases failed:')
@@ -431,7 +427,7 @@ def list_db_incompatible(databases):
     for database_name in databases:
         with closing(db_connect(database_name).cursor()) as cr:
             if odoo.tools.table_exists(cr, 'ir_module_module'):
-                cr.execute("SELECT latest_version FROM ir_module_module WHERE name=%s", ('base',))
+                cr.execute(SQL("SELECT latest_version FROM ir_module_module WHERE name='base'"))
                 base_version = cr.fetchone()
                 if not base_version or not base_version[0]:
                     incompatible_databases.append(database_name)

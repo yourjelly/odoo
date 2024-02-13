@@ -29,6 +29,7 @@ from psycopg2.extras import Json
 
 import odoo
 from odoo.exceptions import UserError
+from odoo.tools.sql import SQL
 from . import config, pycompat
 from .misc import file_open, file_path, get_iso_codes, SKIPPED_ELEMENT_TYPES
 
@@ -1443,15 +1444,18 @@ class TranslationImporter:
                 field = fields.get(field_name)
                 for sub_xmlids in cr.split_for_in_conditions(field_dictionary.keys()):
                     # [module_name, imd_name, module_name, imd_name, ...]
-                    params = []
-                    for xmlid in sub_xmlids:
-                        params.extend(xmlid.split('.'))
-                    cr.execute(f'''
-                        SELECT m.id, imd.module || '.' || imd.name, m."{field_name}", imd.noupdate
-                        FROM "{model_table}" m, "ir_model_data" imd
+                    cr.execute(SQL("""
+                        SELECT m.id, imd.module || '.' || imd.name, m.%s, imd.noupdate
+                        FROM %s m, ir_model_data imd
                         WHERE m.id = imd.res_id
-                        AND ({" OR ".join(["(imd.module = %s AND imd.name = %s)"] * (len(params) // 2))})
-                    ''', params)
+                        AND %s 
+                    """, SQL.identifier(field_name),
+                         SQL.identifier(model_table),
+                         SQL(" OR ").join(
+                             SQL("(imd.module = %s AND imd.name = %s)", *xmlid.split('.'))
+                             for xmlid in sub_xmlids
+                         ),
+                    ))
 
                     # [id, translations, id, translations, ...]
                     params = []
@@ -1488,16 +1492,14 @@ class TranslationImporter:
                             # translate and confirm model_terms translations
                             values[lang] = field.translate(lambda term: translation_dictionary.get(term, {}).get(lang), _value_en)
                             values.pop(f'_{lang}', None)
-                        params.extend((id_, Json(values)))
+                        params.append(SQL("(%s, %s::jsonb)", id_, Json(values)))
                     if params:
-                        env.cr.execute(f"""
-                            UPDATE "{model_table}" AS m
-                            SET "{field_name}" =  t.value
-                            FROM (
-                                VALUES {', '.join(['(%s, %s::jsonb)'] * (len(params) // 2))}
-                            ) AS t(id, value)
+                        env.cr.execute(SQL("""
+                            UPDATE %s AS m
+                            SET %s =  t.value
+                            FROM (VALUES %s) AS t(id, value)
                             WHERE m.id = t.id
-                        """, params)
+                        """, SQL.identifier(model_table), SQL.identifier(field_name), SQL(', ').join(params)))
 
         self.model_terms_translations.clear()
 
@@ -1506,26 +1508,32 @@ class TranslationImporter:
             model_table = Model._table
             for field_name, field_dictionary in model_dictionary.items():
                 for sub_field_dictionary in cr.split_for_in_conditions(field_dictionary.items()):
-                    # [xmlid, translations, xmlid, translations, ...]
-                    params = []
-                    for xmlid, translations in sub_field_dictionary:
-                        params.extend([*xmlid.split('.'), Json(translations)])
                     if not force_overwrite:
-                        value_query = f"""CASE WHEN {overwrite} IS TRUE AND imd.noupdate IS FALSE
-                        THEN m."{field_name}" || t.value
-                        ELSE t.value || m."{field_name}"END"""
+                        value_query = SQL("""
+                        CASE WHEN %s IS TRUE AND imd.noupdate IS FALSE
+                            THEN m.%s || t.value
+                            ELSE t.value || m.%s
+                        END
+                        """, overwrite, SQL.identifier(field_name), SQL.identifier(field_name))
                     else:
-                        value_query = f'm."{field_name}" || t.value'
-                    env.cr.execute(f"""
-                        UPDATE "{model_table}" AS m
-                        SET "{field_name}" = {value_query}
-                        FROM (
-                            VALUES {', '.join(['(%s, %s, %s::jsonb)'] * (len(params) // 3))}
-                        ) AS t(imd_module, imd_name, value)
+                        value_query = SQL('m.%s || t.value', SQL.identifier(field_name))
+                    env.cr.execute(SQL("""
+                        UPDATE %s AS m
+                        SET %s = %s
+                        FROM ( VALUES %s ) AS t(imd_module, imd_name, value)
                         JOIN "ir_model_data" AS imd
-                        ON imd."model" = '{model_name}' AND imd.name = t.imd_name AND imd.module = t.imd_module
+                        ON imd."model" = %s AND imd.name = t.imd_name AND imd.module = t.imd_module
                         WHERE imd."res_id" = m."id"
-                    """, params)
+                    """,
+                       SQL.identifier(model_table),
+                       SQL.identifier(field_name),
+                       value_query,
+                       SQL(', ').join(
+                           SQL("(%s, %s, %s::jsonb)", *xmlid.split('.'), Json(translations))
+                           for xmlid, translations in sub_field_dictionary
+                       ),
+                       model_name,
+                    ))
 
         self.model_translations.clear()
 
@@ -1705,52 +1713,51 @@ def _get_translation_upgrade_queries(cr, field):
     cleanup_queries = []
 
     if field.translate is True:
-        query = f"""
+        migrate_queries.append(SQL("""
             WITH t AS (
                 SELECT it.res_id as res_id, jsonb_object_agg(it.lang, it.value) AS value, bool_or(imd.noupdate) AS noupdate
                   FROM _ir_translation it
              LEFT JOIN ir_model_data imd
-                    ON imd.model = %s AND imd.res_id = it.res_id
-                 WHERE it.type = 'model' AND it.name = %s AND it.state = 'translated'
+                    ON imd.model = %(model)s AND imd.res_id = it.res_id
+                 WHERE it.type = 'model' AND it.name = %(tx)s AND it.state = 'translated'
               GROUP BY it.res_id
             )
-            UPDATE {Model._table} m
-               SET "{field.name}" = CASE WHEN t.noupdate IS FALSE THEN t.value || m."{field.name}"
-                                         ELSE m."{field.name}" || t.value
-                                     END
+            UPDATE %(table)s m
+               SET %(field)s = CASE WHEN t.noupdate IS FALSE
+                   THEN t.value || m.%(field)s
+                   ELSE m.%(field)s || t.value
+               END
               FROM t
              WHERE t.res_id = m.id
-        """
-        migrate_queries.append(cr.mogrify(query, [Model._name, translation_name]).decode())
+        """, model=Model._name, tx=translation_name, table=SQL.identifier(Model._table), field=SQL.identifier(field.name)))
 
-        query = "DELETE FROM _ir_translation WHERE type = 'model' AND name = %s"
-        cleanup_queries.append(cr.mogrify(query, [translation_name]).decode())
+        cleanup_queries.append(SQL("DELETE FROM _ir_translation WHERE type = 'model' AND name = %s", [translation_name]))
 
     # upgrade model_terms translation: one update per field per record
     if callable(field.translate):
         cr.execute("SELECT code FROM res_lang WHERE active = 't'")
         languages = {l[0] for l in cr.fetchall()}
-        query = f"""
-            SELECT t.res_id, m."{field.name}", t.value, t.noupdate
+        query = SQL("""
+            SELECT t.res_id, m.%(field)s, t.value, t.noupdate
               FROM t
-              JOIN "{Model._table}" m ON t.res_id = m.id
-        """
+              JOIN %(table)s m ON t.res_id = m.id
+        """, field=SQL.identifier(field.name), table=SQL.identifier(Model._table))
         if translation_name == 'ir.ui.view,arch_db':
             cr.execute("SELECT id from ir_module_module WHERE name = 'website' AND state='installed'")
             if cr.fetchone():
-                query = f"""
-                    SELECT t.res_id, m."{field.name}", t.value, t.noupdate, l.code
+                query = SQL("""
+                    SELECT t.res_id, m.%(field)s, t.value, t.noupdate, l.code
                       FROM t
-                      JOIN "{Model._table}" m ON t.res_id = m.id
+                      JOIN %(table)s m ON t.res_id = m.id
                       JOIN website w ON m.website_id = w.id
                       JOIN res_lang l ON w.default_lang_id = l.id
                     UNION
                     SELECT t.res_id, m."{field.name}", t.value, t.noupdate, 'en_US'
                       FROM t
-                      JOIN "{Model._table}" m ON t.res_id = m.id
+                      JOIN %(table)s m ON t.res_id = m.id
                      WHERE m.website_id IS NULL
-                """
-        cr.execute(f"""
+                """, field=SQL.identifier(field.name), table=SQL.identifier(Model._table))
+        cr.execute(SQL("""
             WITH t0 AS (
                 -- aggregate translations by source term --
                 SELECT res_id, lang, jsonb_object_agg(src, value) AS value
@@ -1765,7 +1772,8 @@ def _get_translation_upgrade_queries(cr, field):
              LEFT JOIN ir_model_data imd
                     ON imd.model = %s AND imd.res_id = t0.res_id
               GROUP BY t0.res_id
-            )""" + query, [translation_name, Model._name])
+            )
+            %s""", translation_name, Model._name, query))
         for id_, new_translations, translations, noupdate, *extra in cr.fetchall():
             if not new_translations:
                 continue
@@ -1794,10 +1802,17 @@ def _get_translation_upgrade_queries(cr, field):
                     src_value = field.translate(lambda v: None, src_value)
                     for lang in sorted(missing_languages):
                         new_values[lang] = src_value
-            query = f'UPDATE "{Model._table}" SET "{field.name}" = %s WHERE id = %s'
-            migrate_queries.append(cr.mogrify(query, [Json(new_values), id_]).decode())
+            migrate_queries.append(SQL(
+                'UPDATE %s SET %s = %s WHERE id = %s',
+                SQL.identifier(Model._table),
+                SQL.identifier(field.name),
+                Json(new_values),
+                id_,
+            ))
 
-        query = "DELETE FROM _ir_translation WHERE type = 'model_terms' AND name = %s"
-        cleanup_queries.append(cr.mogrify(query, [translation_name]).decode())
+        cleanup_queries.append(SQL(
+            "DELETE FROM _ir_translation WHERE type = 'model_terms' AND name = %s",
+            translation_name
+        ))
 
     return migrate_queries, cleanup_queries

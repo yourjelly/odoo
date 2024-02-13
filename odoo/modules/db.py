@@ -6,6 +6,7 @@ import logging
 from enum import IntEnum
 
 import odoo.modules
+from odoo.tools.sql import SQL
 
 _logger = logging.getLogger(__name__)
 
@@ -53,10 +54,10 @@ def initialize(cr):
         else:
             state = 'uninstallable'
 
-        cr.execute('INSERT INTO ir_module_module \
+        cr.execute(SQL('INSERT INTO ir_module_module \
                 (author, website, name, shortdesc, description, \
                     category_id, auto_install, state, web, license, application, icon, sequence, summary) \
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id', (
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id',
             info['author'],
             info['website'], i, Json({'en_US': info['name']}),
             Json({'en_US': info['description']}), category_id,
@@ -66,22 +67,22 @@ def initialize(cr):
             info['application'], info['icon'],
             info['sequence'], Json({'en_US': info['summary']})))
         id = cr.fetchone()[0]
-        cr.execute('INSERT INTO ir_model_data \
-            (name,model,module, res_id, noupdate) VALUES (%s,%s,%s,%s,%s)', (
+        cr.execute(SQL('INSERT INTO ir_model_data \
+            (name,model,module, res_id, noupdate) VALUES (%s,%s,%s,%s,%s)',
                 'module_'+i, 'ir.module.module', 'base', id, True))
         dependencies = info['depends']
         for d in dependencies:
-            cr.execute(
+            cr.execute(SQL(
                 'INSERT INTO ir_module_module_dependency (module_id, name, auto_install_required)'
                 ' VALUES (%s, %s, %s)',
-                (id, d, d in (info['auto_install'] or ()))
+                id, d, d in (info['auto_install'] or ()))
             )
 
     # Install recursively all auto-installing modules
     while True:
         # this selects all the auto_install modules whose auto_install_required
         # deps are marked as to install
-        cr.execute("""
+        cr.execute(SQL("""
         SELECT m.name FROM ir_module_module m
         WHERE m.auto_install
         AND state != 'to install'
@@ -91,23 +92,23 @@ def initialize(cr):
             WHERE d.module_id = m.id
               AND d.auto_install_required
               AND mdep.state != 'to install'
-        )""")
+        )"""))
         to_auto_install = [x[0] for x in cr.fetchall()]
         # however if the module has non-required deps we need to install
         # those, so merge-in the modules which have a dependen*t* which is
         # *either* to_install or in to_auto_install and merge it in?
-        cr.execute("""
+        cr.execute(SQL("""
         SELECT d.name FROM ir_module_module_dependency d
         JOIN ir_module_module m ON (d.module_id = m.id)
         JOIN ir_module_module mdep ON (d.name = mdep.name)
         WHERE (m.state = 'to install' OR m.name = any(%s))
             -- don't re-mark marked modules
         AND NOT (mdep.state = 'to install' OR mdep.name = any(%s))
-        """, [to_auto_install, to_auto_install])
+        """, to_auto_install, to_auto_install))
         to_auto_install.extend(x[0] for x in cr.fetchall())
 
         if not to_auto_install: break
-        cr.execute("""UPDATE ir_module_module SET state='to install' WHERE name in %s""", (tuple(to_auto_install),))
+        cr.execute(SQL("""UPDATE ir_module_module SET state='to install' WHERE name in %s""", tuple(to_auto_install)))
 
 def create_categories(cr, categories):
     """ Create the ir_module_category entries for some categories.
@@ -124,17 +125,17 @@ def create_categories(cr, categories):
         category.append(categories[0])
         xml_id = 'module_category_' + ('_'.join(x.lower() for x in category)).replace('&', 'and').replace(' ', '_')
         # search via xml_id (because some categories are renamed)
-        cr.execute("SELECT res_id FROM ir_model_data WHERE name=%s AND module=%s AND model=%s",
-                   (xml_id, "base", "ir.module.category"))
+        cr.execute(SQL("SELECT res_id FROM ir_model_data WHERE name=%s AND module=%s AND model=%s",
+                   xml_id, "base", "ir.module.category"))
 
         c_id = cr.fetchone()
         if not c_id:
-            cr.execute('INSERT INTO ir_module_category \
+            cr.execute(SQL('INSERT INTO ir_module_category \
                     (name, parent_id) \
-                    VALUES (%s, %s) RETURNING id', (Json({'en_US': categories[0]}), p_id))
+                    VALUES (%s, %s) RETURNING id', Json({'en_US': categories[0]}), p_id))
             c_id = cr.fetchone()[0]
-            cr.execute('INSERT INTO ir_model_data (module, name, res_id, model, noupdate) \
-                       VALUES (%s, %s, %s, %s, %s)', ('base', xml_id, c_id, 'ir.module.category', True))
+            cr.execute(SQL('INSERT INTO ir_model_data (module, name, res_id, model, noupdate) \
+                       VALUES (%s, %s, %s, %s, %s)', 'base', xml_id, c_id, 'ir.module.category', True))
         else:
             c_id = c_id[0]
         p_id = c_id
@@ -154,14 +155,14 @@ def has_unaccent(cr):
 
     :rtype: FunctionStatus
     """
-    cr.execute("""
+    cr.execute(SQL("""
         SELECT p.provolatile
         FROM pg_proc p
             LEFT JOIN pg_catalog.pg_namespace ns ON p.pronamespace = ns.oid
         WHERE p.proname = 'unaccent'
               AND p.pronargs = 1
               AND ns.nspname = 'public'
-    """)
+    """))
     result = cr.fetchone()
     if not result:
         return FunctionStatus.MISSING
@@ -177,5 +178,5 @@ def has_trigram(cr):
     pg_trgm module but any similar function will be picked by Odoo.
 
     """
-    cr.execute("SELECT proname FROM pg_proc WHERE proname='word_similarity'")
+    cr.execute(SQL("SELECT proname FROM pg_proc WHERE proname='word_similarity'"))
     return len(cr.fetchall()) > 0

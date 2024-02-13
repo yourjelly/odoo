@@ -7,11 +7,11 @@ import psycopg2
 import pytz
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
-from psycopg2 import sql
 
 import odoo
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
+from odoo.tools import SQL
 
 _logger = logging.getLogger(__name__)
 
@@ -403,14 +403,18 @@ class ir_cron(models.Model):
         """
         if not self:
             return
-        row_level_lock = "UPDATE" if lockfk else "NO KEY UPDATE"
+        row_level_lock = SQL("UPDATE") if lockfk else SQL("NO KEY UPDATE")
         try:
-            self._cr.execute(f"""
+            self._cr.execute(SQL("""
                 SELECT id
-                FROM "{self._table}"
+                FROM %s
                 WHERE id IN %s
-                FOR {row_level_lock} NOWAIT
-            """, [tuple(self.ids)], log_exceptions=False)
+                FOR %s NOWAIT
+            """,
+                SQL.identifier(self._table),
+                tuple(self.ids),
+                row_level_lock,
+            ), log_exceptions=False)
         except psycopg2.OperationalError:
             self._cr.rollback()  # early rollback to allow translations to work for the user feedback
             raise UserError(_("Record cannot be modified right now: "
@@ -430,12 +434,12 @@ class ir_cron(models.Model):
     def try_write(self, values):
         try:
             with self._cr.savepoint():
-                self._cr.execute(f"""
+                self._cr.execute(SQL("""
                     SELECT id
-                    FROM "{self._table}"
+                    FROM %s
                     WHERE id IN %s
                     FOR NO KEY UPDATE NOWAIT
-                """, [tuple(self.ids)], log_exceptions=False)
+                """, SQL.identifier(self._table), tuple(self.ids)), log_exceptions=False)
         except psycopg2.OperationalError:
             pass
         else:
@@ -518,7 +522,7 @@ class ir_cron(models.Model):
         ir_cron modification and on trigger creation (regardless of call_at)
         """
         with odoo.sql_db.db_connect('postgres').cursor() as cr:
-            query = sql.SQL("SELECT {}('cron_trigger', %s)").format(sql.Identifier(ODOO_NOTIFY_FUNCTION))
+            query = SQL("SELECT {}('cron_trigger', %s)", SQL.identifier(ODOO_NOTIFY_FUNCTION))
             cr.execute(query, [self.env.cr.dbname])
         _logger.debug("cron workers notified")
 

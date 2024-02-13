@@ -29,7 +29,7 @@ from odoo.addons.base.models.ir_model import MODULE_UNINSTALL_FLAG
 from odoo.exceptions import AccessDenied, AccessError, UserError, ValidationError
 from odoo.http import request, DEFAULT_LANG
 from odoo.osv import expression
-from odoo.tools import is_html_empty, partition, collections, frozendict, lazy_property
+from odoo.tools import is_html_empty, partition, collections, frozendict, lazy_property, SQL
 
 _logger = logging.getLogger(__name__)
 
@@ -384,10 +384,10 @@ class Users(models.Model):
     def _set_encrypted_password(self, uid, pw):
         assert self._crypt_context().identify(pw) != 'plaintext'
 
-        self.env.cr.execute(
+        self.env.cr.execute(SQL(
             'UPDATE res_users SET password=%s WHERE id=%s',
-            (pw, uid)
-        )
+            pw, uid,
+        ))
         self.browse(uid).invalidate_recordset(['password'])
 
     def _check_credentials(self, password, env):
@@ -407,10 +407,10 @@ class Users(models.Model):
         """
         """ Override this method to plug additional authentication methods"""
         assert password
-        self.env.cr.execute(
+        self.env.cr.execute(SQL(
             "SELECT COALESCE(password, '') FROM res_users WHERE id=%s",
-            [self.env.user.id]
-        )
+            self.env.user.id,
+        ))
         [hashed] = self.env.cr.fetchone()
         valid, replacement = self._crypt_context()\
             .verify_and_update(password, hashed)
@@ -2130,12 +2130,11 @@ class APIKeys(models.Model):
     def _check_credentials(self, *, scope, key):
         assert scope, "scope is required"
         index = key[:INDEX_SIZE]
-        self.env.cr.execute('''
+        self.env.cr.execute(SQL('''
             SELECT user_id, key
-            FROM {} INNER JOIN res_users u ON (u.id = user_id)
+            FROM %s INNER JOIN res_users u ON (u.id = user_id)
             WHERE u.active and index = %s AND (scope IS NULL OR scope = %s)
-        '''.format(self._table),
-        [index, scope])
+        ''', SQL.identifier(self._table), index, scope))
         for user_id, current_key in self.env.cr.fetchall():
             if KEY_CRYPT_CONTEXT.verify(key, current_key):
                 return user_id
@@ -2149,12 +2148,14 @@ class APIKeys(models.Model):
         """
         # no need to clear the LRU when *adding* a key, only when removing
         k = binascii.hexlify(os.urandom(API_KEY_SIZE)).decode()
-        self.env.cr.execute("""
-        INSERT INTO {table} (name, user_id, scope, key, index)
+        self.env.cr.execute(SQL("""
+        INSERT INTO %s (name, user_id, scope, key, index)
         VALUES (%s, %s, %s, %s, %s)
         RETURNING id
-        """.format(table=self._table),
-        [name, self.env.user.id, scope, KEY_CRYPT_CONTEXT.hash(k), k[:INDEX_SIZE]])
+        """,
+            SQL.identifier(self._table),
+            name, self.env.user.id, scope, KEY_CRYPT_CONTEXT.hash(k), k[:INDEX_SIZE],
+        ))
 
         ip = request.httprequest.environ['REMOTE_ADDR'] if request else 'n/a'
         _logger.info("%s generated: scope: <%s> for '%s' (#%s) from %s",

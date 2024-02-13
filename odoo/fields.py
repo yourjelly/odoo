@@ -30,7 +30,7 @@ from .models import check_property_field_value_name
 from .netsvc import ColoredFormatter, GREEN, RED, DEFAULT, COLOR_PATTERN
 from .tools import (
     float_repr, float_round, float_compare, float_is_zero, human_size,
-    pg_varchar, ustr, OrderedSet, pycompat, sql, SQL, date_utils, unique,
+    pg_varchar, ustr, OrderedSet, pycompat, sql, date_utils, unique,
     image_process, merge_sequences, SQL_ORDER_BY_TYPE, is_list_of, has_list_types,
     html_normalize, html_sanitize,
 )
@@ -39,7 +39,7 @@ from .tools import DEFAULT_SERVER_DATE_FORMAT as DATE_FORMAT
 from .tools import DEFAULT_SERVER_DATETIME_FORMAT as DATETIME_FORMAT
 from .tools.translate import html_translate, _
 from .tools.mimetypes import guess_mimetype
-
+from odoo.tools import SQL
 from odoo.exceptions import CacheMiss
 from odoo.osv import expression
 
