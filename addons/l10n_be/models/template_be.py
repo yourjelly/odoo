@@ -21,7 +21,7 @@ class AccountChartTemplate(models.AbstractModel):
                 'account.closing_type_vat': {
                     'tax_closing_payable_account_id': 'a4512',
                     'tax_closing_receivable_account_id': 'a4112',
-                }, #TODO OCO ajouter le support pour ça en _post_load_data
+                },
             },
         }
 

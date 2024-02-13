@@ -3,7 +3,7 @@
 
     <record id="closing_type_vat" model="account.report.closing.type">
         <field name="name">VAT Closing</field>
-        <field name"on_interval" eval="1"/>
+        <field name="on_interval" eval="1"/>
         <field name="move_generator_code">tax_closing</field>
         <field name="periodicity">monthly</field>
         <field name="split_per_report" eval="1"/>
@@ -11,7 +11,7 @@
 
     <record id="closing_type_all" model="account.report.closing.type">
         <field name="name">General Closing</field><!--TODO OCO nom temporaire-->
-        <field name="periodicity">yearly</field>
+        <field name="periodicity">year</field>
     </record>
 
-</odoo
+</odoo>

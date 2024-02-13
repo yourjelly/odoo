@@ -16,13 +16,14 @@ class AccountReportClosing(models.Model):
     notes = fields.Html(string="Notes") #TODO OCO on pourrait lui mettre une valeur par défaut set sur le closing type; peut-être too much, mais pas sûr; ce sont des flux cycliques
     #TODO OCO statuer sur le fait de mettre la fpos dessus (si on garde le cas de multivat indien)
     company_id = fields.Many2one(string="Company", comodel_name='res.company', required=True)
-    report_id = fields.Many2one(string="Report", comodel_name='account_report') # Only set when generating closings with split_per_report
+    report_id = fields.Many2one(string="Report", comodel_name='account.report') # Only set when generating closings with split_per_report
 
 
 class AccountReportClosingType(models.Model):
     _name = "account.report.closing.type"
     _description = "Account Report Closing Type"
 
+    name = fields.Char(string="Name", required=True)
     tax_ids = fields.One2many(string="Taxes", comodel_name='account.tax', inverse_name='closing_type_id')
     on_interval = fields.Boolean(string="On Interval")
     report_ids = fields.One2many(string="Reports", comodel_name='account.report', inverse_name='closing_type_id') #TODO OCO ou m2m ?
@@ -35,22 +36,22 @@ class AccountReportClosingType(models.Model):
     periodicity = fields.Selection(
         string="Periodicity",
         selection=[
-            ('year', 'annually'),
-            ('semester', 'semi-annually'),
-            ('4_months', 'every 4 months'),
-            ('trimester', 'quarterly'),
-            ('2_months', 'every 2 months'),
-            ('monthly', 'monthly'),
-        ],
+            ('year', 'Annually'),
+            ('semester', 'Semi-annually'),
+            ('4_months', 'Every 4 months'),
+            ('trimester', 'Quarterly'),
+            ('2_months', 'Every 2 months'),
+            ('monthly', 'Monthly'),
+        ], #TODO OCO renommer les labels techniques, ce serait pas mal, je pense... c'est super incohérent
         company_dependent=True,
         required=True,
     ) # TODO OCO mais du coup, si on le met ici, c'est cross company :/ => un peu nul, quand même. => un par société ? Ou champ company_dependent, simpplement ?
     #TODO OCO on devrait sans doute en faire un par compagnie, justement pour que le mec puisse en créer lui-même, en fait
     # ====> non parce que sinon, comment on lie les rapports à une closing ? Ca marcherait pas :/
 
-    tax_closing_payable_account_id = fields.Many2one(string="Tax Payable Account", company_dependent=True, required=True)
-    tax_closing_receivable_account_id = fields.Many2one(string="Tax Receivable Account", company_dependent=True, required=True)
-    tax_closing_journal_id = fields.Many2one(string="Tax Closing Journal", company_depend=True, required=True)
+    tax_closing_payable_account_id = fields.Many2one(string="Tax Payable Account", comodel_name='account.account', company_dependent=True, required=True)
+    tax_closing_receivable_account_id = fields.Many2one(string="Tax Receivable Account", comodel_name='account.account', company_dependent=True, required=True)
+    tax_closing_journal_id = fields.Many2one(string="Tax Closing Journal", comodel_name='account.journal', company_dependent=True, required=True)
 
 
 
@@ -64,5 +65,5 @@ class AccountReportClosingType(models.Model):
     def create(self, vals_list):
         rslt = super().create(vals_list)
         for closing_type in rslt:
-            self.env['ir.property']._set_default('periodicity', 'account_report.closing.type', closing_type.periodicity, res_id=closing_type.id) #TODO OCO à tester, mais ça devrait le faire
+            self.env['ir.property']._set_default('periodicity', 'account.report.closing.type', closing_type.periodicity, res_id=closing_type.id) #TODO OCO à tester, mais ça devrait le faire
         return rslt
