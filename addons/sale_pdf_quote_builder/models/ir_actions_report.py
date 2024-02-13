@@ -3,7 +3,7 @@
 import base64
 import io
 
-from PyPDF2 import PdfFileWriter, PdfFileReader
+from PyPDF2 import PdfFileReader, PdfFileWriter
 from PyPDF2.generic import NameObject, createStringObject
 
 from odoo import models
@@ -68,7 +68,7 @@ class IrActionsReport(models.Model):
         prefix = f'{sol_id}_' if sol_id else ''
         reader = PdfFileReader(io.BytesIO(document), strict=False)
         sol_field_names = self._get_sol_form_fields_names()
-        for page_id in range(0, reader.getNumPages()):
+        for page_id in range(reader.getNumPages()):
             page = reader.getPage(page_id)
             if sol_id and page.get('/Annots'):
                 # Prefix all form fields in the document with the sale order line id.

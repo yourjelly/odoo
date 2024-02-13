@@ -1,9 +1,8 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from werkzeug.exceptions import NotFound
 
-from odoo import http, _
+from odoo import _, http
 from odoo.exceptions import AccessError, MissingError
 from odoo.http import request
 from odoo.osv import expression

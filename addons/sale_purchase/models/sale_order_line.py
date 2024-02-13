@@ -1,9 +1,8 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from dateutil.relativedelta import relativedelta
 
-from odoo import api, fields, models, _
+from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 from odoo.tools import float_compare
 from odoo.tools.misc import get_lang
@@ -41,7 +40,7 @@ class SaleOrderLine(models.Model):
 
     @api.model_create_multi
     def create(self, values):
-        lines = super(SaleOrderLine, self).create(values)
+        lines = super().create(values)
         # Do not generate purchase when expense SO line since the product is already delivered
         lines.filtered(
             lambda line: line.state == 'sale' and not line.is_expense
@@ -60,7 +59,7 @@ class SaleOrderLine(models.Model):
             increased_values = {line.id: line.product_uom_qty for line in increased_lines}
             decreased_values = {line.id: line.product_uom_qty for line in decreased_lines}
 
-        result = super(SaleOrderLine, self).write(values)
+        result = super().write(values)
 
         if increased_lines:
             increased_lines._purchase_increase_ordered_qty(values['product_uom_qty'], increased_values)

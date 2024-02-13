@@ -20,7 +20,7 @@ class AccountMoveLine(models.Model):
             Note: if no SO but an AA is given on the expense, we will determine anyway the SO from the AA, using the same
             mecanism as in Vendor Bills.
         """
-        mapping_from_invoice = super(AccountMoveLine, self)._sale_determine_order()
+        mapping_from_invoice = super()._sale_determine_order()
 
         mapping_from_expense = {}
         for move_line in self.filtered(lambda move_line: move_line.expense_id):

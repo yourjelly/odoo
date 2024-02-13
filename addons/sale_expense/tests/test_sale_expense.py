@@ -1,8 +1,9 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 from odoo import Command, fields
+from odoo.tests import tagged
+
 from odoo.addons.hr_expense.tests.common import TestExpenseCommon
 from odoo.addons.sale.tests.common import TestSaleCommon
-from odoo.tests import tagged
 
 
 @tagged('post_install', '-at_install')

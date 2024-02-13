@@ -4,6 +4,7 @@ import base64
 from odoo.tests.common import TransactionCase
 from odoo.tools.misc import file_open
 
+
 class TestProductConfiguratorCommon(TransactionCase):
 
     @classmethod

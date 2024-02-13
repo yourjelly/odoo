@@ -1,14 +1,13 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import json
+
 from collections import defaultdict
 
-from odoo import api, fields, models, _, _lt
-from odoo.exceptions import ValidationError, AccessError
+from odoo import _, _lt, api, fields, models
+from odoo.exceptions import AccessError, ValidationError
 from odoo.osv import expression
-from odoo.tools import Query, SQL
-
+from odoo.tools import SQL, Query
 
 
 class Project(models.Model):
@@ -633,7 +632,7 @@ class Project(models.Model):
         return profitability_items
 
     def _get_stat_buttons(self):
-        buttons = super(Project, self)._get_stat_buttons()
+        buttons = super()._get_stat_buttons()
         if self.user_has_groups('sales_team.group_sale_salesman_all_leads'):
             self_sudo = self.sudo()
             buttons.append({
@@ -930,4 +929,4 @@ class ProjectTaskRecurrence(models.Model):
 
     @api.model
     def _get_recurring_fields_to_copy(self):
-        return super(ProjectTaskRecurrence, self)._get_recurring_fields_to_copy() + ['sale_line_id']
+        return super()._get_recurring_fields_to_copy() + ['sale_line_id']

@@ -1,16 +1,16 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo.addons.sale_loyalty.tests.common import TestSaleCouponCommon
 from odoo.exceptions import UserError
 from odoo.tests import tagged
+
+from odoo.addons.sale_loyalty.tests.common import TestSaleCouponCommon
 
 
 @tagged('post_install', '-at_install')
 class TestSaleCouponMultiCompany(TestSaleCouponCommon):
 
     def setUp(self):
-        super(TestSaleCouponMultiCompany, self).setUp()
+        super().setUp()
 
         self.company_a = self.env.company
         self.company_b = self.env['res.company'].create(dict(name="TEST"))

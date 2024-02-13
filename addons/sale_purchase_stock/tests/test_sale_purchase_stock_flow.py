@@ -1,8 +1,8 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from freezegun import freeze_time
 from datetime import datetime, timedelta
+
+from freezegun import freeze_time
 
 from odoo.tests import Form, TransactionCase
 
@@ -11,7 +11,7 @@ class TestSalePurchaseStockFlow(TransactionCase):
 
     @classmethod
     def setUpClass(cls):
-        super(TestSalePurchaseStockFlow, cls).setUpClass()
+        super().setUpClass()
         cls.mto_route = cls.env.ref('stock.route_warehouse0_mto')
         cls.buy_route = cls.env.ref('purchase_stock.route_warehouse0_buy')
         cls.mto_route.active = True

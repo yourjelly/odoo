@@ -1,16 +1,19 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from collections import defaultdict
-from odoo.addons.sale.tests.test_sale_product_attribute_value_config import TestSaleProductAttributeValueCommon
+
 from odoo.exceptions import ValidationError
+
+from odoo.addons.sale.tests.test_sale_product_attribute_value_config import (
+    TestSaleProductAttributeValueCommon,
+)
 
 
 class TestSaleCouponCommon(TestSaleProductAttributeValueCommon):
 
     @classmethod
     def setUpClass(cls):
-        super(TestSaleCouponCommon, cls).setUpClass()
+        super().setUpClass()
         # set currency to not rely on demo data and avoid possible race condition
         cls.currency_ratio = 1.0
 

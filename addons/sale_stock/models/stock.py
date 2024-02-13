@@ -1,19 +1,20 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from collections import defaultdict
 
-from odoo import api, fields, models, _
+from odoo import _, api, fields, models
 from odoo.tools.sql import column_exists, create_column
 
 
 class StockRoute(models.Model):
     _inherit = "stock.route"
+
     sale_selectable = fields.Boolean("Selectable on Sales Order Line")
 
 
 class StockMove(models.Model):
     _inherit = "stock.move"
+
     sale_line_id = fields.Many2one('sale.order.line', 'Sale Line', index='btree_not_null')
 
     @api.model
@@ -27,7 +28,7 @@ class StockMove(models.Model):
 
     @api.model
     def _prepare_merge_moves_distinct_fields(self):
-        distinct_fields = super(StockMove, self)._prepare_merge_moves_distinct_fields()
+        distinct_fields = super()._prepare_merge_moves_distinct_fields()
         distinct_fields.append('sale_line_id')
         return distinct_fields
 
@@ -35,7 +36,7 @@ class StockMove(models.Model):
         """ Overridden from stock_account to return the customer invoices
         related to this stock move.
         """
-        rslt = super(StockMove, self)._get_related_invoices()
+        rslt = super()._get_related_invoices()
         invoices = self.mapped('picking_id.sale_id.invoice_ids').filtered(lambda x: x.state == 'posted')
         rslt += invoices
         #rslt += invoices.mapped('reverse_entry_ids')
@@ -51,7 +52,7 @@ class StockMove(models.Model):
         return (self + self.browse(self._rollup_move_origs() | self._rollup_move_dests())).sale_line_id
 
     def _assign_picking_post_process(self, new=False):
-        super(StockMove, self)._assign_picking_post_process(new=new)
+        super()._assign_picking_post_process(new=new)
         if new:
             picking_id = self.mapped('picking_id')
             sale_order_ids = self.mapped('sale_line_id.order_id')
@@ -75,7 +76,7 @@ class StockRule(models.Model):
     _inherit = 'stock.rule'
 
     def _get_custom_move_fields(self):
-        fields = super(StockRule, self)._get_custom_move_fields()
+        fields = super()._get_custom_move_fields()
         fields += ['sale_line_id', 'partner_id', 'sequence', 'to_refund']
         return fields
 
@@ -167,7 +168,7 @@ class StockPicking(models.Model):
         documents = self.sudo()._log_activity_get_documents(moves, 'sale_line_id', 'DOWN', _keys_in_groupby)
         self._log_activity(_render_note_exception_quantity, documents)
 
-        return super(StockPicking, self)._log_less_quantities_than_expected(moves)
+        return super()._log_less_quantities_than_expected(moves)
 
 class StockLot(models.Model):
     _inherit = 'stock.lot'

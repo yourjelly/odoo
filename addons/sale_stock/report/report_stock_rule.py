@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, models
@@ -9,7 +8,7 @@ class ReportStockRule(models.AbstractModel):
 
     @api.model
     def _get_routes(self, data):
-        res = super(ReportStockRule, self)._get_routes(data)
+        res = super()._get_routes(data)
         if data.get('so_route_ids'):
             res = self.env['stock.route'].browse(data['so_route_ids']) | res
         return res

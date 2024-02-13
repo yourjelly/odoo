@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from collections import defaultdict
 
-from odoo import models, api
-from odoo.tools import float_is_zero, float_compare
+from odoo import api, models
+from odoo.tools import float_compare, float_is_zero
 from odoo.tools.misc import formatLang
 
 
@@ -14,7 +13,7 @@ class AccountMove(models.Model):
     def _stock_account_get_last_step_stock_moves(self):
         """ Overridden from stock_account.
         Returns the stock moves associated to this invoice."""
-        rslt = super(AccountMove, self)._stock_account_get_last_step_stock_moves()
+        rslt = super()._stock_account_get_last_step_stock_moves()
         for invoice in self.filtered(lambda x: x.move_type == 'out_invoice'):
             rslt += invoice.mapped('invoice_line_ids.sale_line_ids.move_ids').filtered(lambda x: x.state == 'done' and x.location_dest_id.usage == 'customer')
         for invoice in self.filtered(lambda x: x.move_type == 'out_refund'):
@@ -27,7 +26,7 @@ class AccountMove(models.Model):
         """ Get and prepare data to show a table of invoiced lot on the invoice's report. """
         self.ensure_one()
 
-        res = super(AccountMove, self)._get_invoiced_lot_values()
+        res = super()._get_invoiced_lot_values()
 
         if self.state == 'draft' or not self.invoice_date or self.move_type not in ('out_invoice', 'out_refund'):
             return res
@@ -133,11 +132,11 @@ class AccountMoveLine(models.Model):
 
     def _sale_can_be_reinvoice(self):
         self.ensure_one()
-        return self.move_type != 'entry' and self.display_type != 'cogs' and super(AccountMoveLine, self)._sale_can_be_reinvoice()
+        return self.move_type != 'entry' and self.display_type != 'cogs' and super()._sale_can_be_reinvoice()
 
     def _stock_account_get_anglo_saxon_price_unit(self):
         self.ensure_one()
-        price_unit = super(AccountMoveLine, self)._stock_account_get_anglo_saxon_price_unit()
+        price_unit = super()._stock_account_get_anglo_saxon_price_unit()
 
         so_line = self.sale_line_ids and self.sale_line_ids[-1] or False
         if so_line:

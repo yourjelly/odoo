@@ -1,14 +1,14 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import json
 
 from collections import defaultdict
 
-from odoo import api, fields, models, _, _lt
+from odoo import _, _lt, api, fields, models
+from odoo.exceptions import UserError, ValidationError
 from odoo.osv import expression
 from odoo.tools import SQL
-from odoo.exceptions import ValidationError, UserError
+
 
 # YTI PLEASE SPLIT ME
 class Project(models.Model):
@@ -17,7 +17,7 @@ class Project(models.Model):
     @api.model
     def default_get(self, fields):
         """ Pre-fill timesheet product as "Time" data product when creating new project allowing billable tasks by default. """
-        result = super(Project, self).default_get(fields)
+        result = super().default_get(fields)
         if 'timesheet_product_id' in fields and result.get('allow_billable') and result.get('allow_timesheets') and not result.get('timesheet_product_id'):
             default_product = self.env.ref('sale_timesheet.time_product', False)
             if default_product:
@@ -202,7 +202,7 @@ class Project(models.Model):
                 raise ValidationError(_("You cannot link a billable project to a sales order item that comes from an expense or a vendor bill."))
 
     def write(self, values):
-        res = super(Project, self).write(values)
+        res = super().write(values)
         if 'allow_billable' in values and not values.get('allow_billable'):
             self.task_ids._get_timesheet().write({
                 'so_line': False,
@@ -287,7 +287,7 @@ class Project(models.Model):
     # ----------------------------
 
     def get_panel_data(self):
-        panel_data = super(Project, self).get_panel_data()
+        panel_data = super().get_panel_data()
         return {
             **panel_data,
             'analytic_account_id': self.analytic_account_id.id,
@@ -595,7 +595,7 @@ class ProjectTask(models.Model):
 
     def _get_timesheet(self):
         # return not invoiced timesheet and timesheet without so_line or so_line linked to task
-        timesheet_ids = super(ProjectTask, self)._get_timesheet()
+        timesheet_ids = super()._get_timesheet()
         return timesheet_ids.filtered(lambda t: t._is_not_billed())
 
     def _get_action_view_so_ids(self):
@@ -606,4 +606,4 @@ class ProjectTaskRecurrence(models.Model):
 
     @api.model
     def _get_recurring_fields_to_copy(self):
-        return super(ProjectTaskRecurrence, self)._get_recurring_fields_to_copy() + ['so_analytic_account_id']
+        return super()._get_recurring_fields_to_copy() + ['so_analytic_account_id']

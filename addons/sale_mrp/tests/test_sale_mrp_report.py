@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 from odoo.tests import common
-
 from odoo.tools import html2plaintext
+
+from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 
 
 @common.tagged('post_install', '-at_install')

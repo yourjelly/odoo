@@ -1,10 +1,10 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import math
+
 from collections import defaultdict
 
-from odoo import api, fields, models, _
+from odoo import _, api, fields, models
 from odoo.osv import expression
 from odoo.tools import float_compare
 
@@ -200,14 +200,8 @@ class SaleOrderLine(models.Model):
                             remaining=unit_label)
                     elif is_day:
                         remaining_days = company.project_time_mode_id._compute_quantity(line.remaining_hours, encoding_uom, round=False)
-                        remaining_time = ' ({qty:.02f} {unit})'.format(
-                            qty=remaining_days,
-                            unit=unit_label
-                        )
-                    name = '{name}{remaining_time}'.format(
-                        name=line.display_name,
-                        remaining_time=remaining_time
-                    )
+                        remaining_time = f' ({remaining_days:.02f} {unit_label})'
+                    name = f'{line.display_name}{remaining_time}'
                     line.display_name = name
 
     @api.depends('product_id.service_policy')
@@ -231,14 +225,14 @@ class SaleOrderLine(models.Model):
     @api.depends('product_id')
     def _compute_qty_delivered_method(self):
         """ Sale Timesheet module compute delivered qty for product [('type', 'in', ['service']), ('service_type', '=', 'timesheet')] """
-        super(SaleOrderLine, self)._compute_qty_delivered_method()
+        super()._compute_qty_delivered_method()
         for line in self:
             if not line.is_expense and line.product_id.type == 'service' and line.product_id.service_type == 'timesheet':
                 line.qty_delivered_method = 'timesheet'
 
     @api.depends('analytic_line_ids.project_id', 'project_id.pricing_type')
     def _compute_qty_delivered(self):
-        super(SaleOrderLine, self)._compute_qty_delivered()
+        super()._compute_qty_delivered()
         lines_by_timesheet = self.filtered(lambda sol: sol.qty_delivered_method == 'timesheet')
         domain = lines_by_timesheet._timesheet_compute_delivered_quantity_domain()
         mapping = lines_by_timesheet.sudo()._get_delivered_quantity_by_analytic(domain)

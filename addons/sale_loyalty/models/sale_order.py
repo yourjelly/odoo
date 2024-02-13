@@ -1,17 +1,16 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+
+import itertools
+import random
 
 from collections import defaultdict
 
-import itertools
-
-import random
-
-from odoo import api, fields, models, _
+from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
 from odoo.fields import Command
-from odoo.tools.float_utils import float_is_zero, float_round
 from odoo.osv import expression
+from odoo.tools.float_utils import float_is_zero, float_round
+
 
 def _generate_random_reward_code():
     return str(random.getrandbits(32))
@@ -136,7 +135,7 @@ class SaleOrder(models.Model):
 
         reward_products = reward.reward_product_ids
         product = product or reward_products[:1]
-        if not product or not product in reward_products:
+        if not product or product not in reward_products:
             raise UserError(_('Invalid product to claim.'))
         taxes = self.fiscal_position_id.map_tax(product.taxes_id.filtered(lambda t: t.company_id == self.company_id))
         points = self._get_real_points_for_coupon(coupon)

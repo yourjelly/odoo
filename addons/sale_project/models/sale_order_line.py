@@ -1,9 +1,8 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from collections import defaultdict
 
-from odoo import api, Command, fields, models, _
+from odoo import Command, _, api, fields, models
 from odoo.exceptions import AccessError
 from odoo.tools import format_amount
 from odoo.tools.sql import column_exists, create_column
@@ -354,7 +353,7 @@ class SaleOrderLine(models.Model):
             this method allows to retrieve the analytic account which is linked to project or task directly linked
             to this sale order line, or the analytic account of the project which uses this sale order line, if it exists.
         """
-        values = super(SaleOrderLine, self)._prepare_invoice_line(**optional_values)
+        values = super()._prepare_invoice_line(**optional_values)
         if not values.get('analytic_distribution'):
             task_analytic_account = self.task_id._get_task_analytic_account_id() if self.task_id else False
             if task_analytic_account:

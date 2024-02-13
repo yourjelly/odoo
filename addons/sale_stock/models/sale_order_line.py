@@ -1,12 +1,11 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from datetime import timedelta
 from collections import defaultdict
+from datetime import timedelta
 
-from odoo import api, fields, models, _
-from odoo.tools import float_compare
+from odoo import _, api, fields, models
 from odoo.exceptions import UserError
+from odoo.tools import float_compare
 
 
 class SaleOrderLine(models.Model):
@@ -142,7 +141,7 @@ class SaleOrderLine(models.Model):
             For SO line coming from expense, no picking should be generate: we don't manage stock for
             those lines, even if the product is a storable.
         """
-        super(SaleOrderLine, self)._compute_qty_delivered_method()
+        super()._compute_qty_delivered_method()
 
         for line in self:
             if not line.is_expense and line.product_id.type in ['consu', 'product']:
@@ -150,7 +149,7 @@ class SaleOrderLine(models.Model):
 
     @api.depends('move_ids.state', 'move_ids.scrapped', 'move_ids.quantity', 'move_ids.product_uom')
     def _compute_qty_delivered(self):
-        super(SaleOrderLine, self)._compute_qty_delivered()
+        super()._compute_qty_delivered()
 
         for line in self:  # TODO: maybe one day, this should be done in SQL for performance sake
             if line.qty_delivered_method == 'stock_move':
@@ -168,7 +167,7 @@ class SaleOrderLine(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        lines = super(SaleOrderLine, self).create(vals_list)
+        lines = super().create(vals_list)
         lines.filtered(lambda line: line.state == 'sale')._action_launch_stock_rule()
         return lines
 
@@ -183,7 +182,7 @@ class SaleOrderLine(models.Model):
             ).product_packaging_id = values['product_packaging_id']
 
         previous_product_uom_qty = {line.id: line.product_uom_qty for line in lines}
-        res = super(SaleOrderLine, self).write(values)
+        res = super().write(values)
         if lines:
             lines._action_launch_stock_rule(previous_product_uom_qty)
         return res
@@ -212,7 +211,7 @@ class SaleOrderLine(models.Model):
         coming from a sale order line. This method could be override in order to add other custom key that could
         be used in move/po creation.
         """
-        values = super(SaleOrderLine, self)._prepare_procurement_values(group_id)
+        values = super()._prepare_procurement_values(group_id)
         self.ensure_one()
         # Use the delivery date if there is else use date_order and lead time
         date_deadline = self.order_id.commitment_date or (self.order_id.date_order + timedelta(days=self.customer_lead or 0.0))
@@ -290,7 +289,7 @@ class SaleOrderLine(models.Model):
         procurements = []
         for line in self:
             line = line.with_company(line.company_id)
-            if line.state != 'sale' or line.order_id.locked or not line.product_id.type in ('consu', 'product'):
+            if line.state != 'sale' or line.order_id.locked or line.product_id.type not in ('consu', 'product'):
                 continue
             qty = line._get_qty_procurement(previous_product_uom_qty)
             if float_compare(qty, line.product_uom_qty, precision_digits=precision) == 0:
@@ -335,7 +334,7 @@ class SaleOrderLine(models.Model):
         line_products = self.filtered(lambda l: l.product_id.type in ['product', 'consu'])
         if line_products.mapped('qty_delivered') and float_compare(values['product_uom_qty'], max(line_products.mapped('qty_delivered')), precision_digits=precision) == -1:
             raise UserError(_('The ordered quantity of a sale order line cannot be decreased below the amount already delivered. Instead, create a return in your inventory.'))
-        super(SaleOrderLine, self)._update_line_quantity(values)
+        super()._update_line_quantity(values)
 
     #=== HOOKS ===#
 

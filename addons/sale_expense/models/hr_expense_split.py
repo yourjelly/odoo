@@ -1,14 +1,13 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import fields, models, api
+from odoo import api, fields, models
 
 
 class HrExpenseSplit(models.TransientModel):
     _inherit = "hr.expense.split"
 
     def default_get(self, fields):
-        result = super(HrExpenseSplit, self).default_get(fields)
+        result = super().default_get(fields)
         if 'expense_id' in result:
             expense = self.env['hr.expense'].browse(result['expense_id'])
             result['sale_order_id'] = expense.sale_order_id
@@ -19,7 +18,7 @@ class HrExpenseSplit(models.TransientModel):
 
     def _get_values(self):
         self.ensure_one()
-        vals = super(HrExpenseSplit, self)._get_values()
+        vals = super()._get_values()
         vals['sale_order_id'] = self.sale_order_id.id
         return vals
 

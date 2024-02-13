@@ -1,10 +1,12 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo.addons.stock_account.tests.test_anglo_saxon_valuation_reconciliation_common import ValuationReconciliationTestCommon
-from odoo.tests import common, Form
 from odoo.exceptions import UserError
-from odoo.tools import mute_logger, float_compare
+from odoo.tests import Form, common
+from odoo.tools import float_compare, mute_logger
+
+from odoo.addons.stock_account.tests.test_anglo_saxon_valuation_reconciliation_common import (
+    ValuationReconciliationTestCommon,
+)
 from odoo.addons.stock_account.tests.test_stockvaluation import _create_accounting_data
 
 

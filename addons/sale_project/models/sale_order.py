@@ -1,13 +1,13 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import ast
+
 from collections import defaultdict
 
-from odoo import api, fields, models, _, Command
+from odoo import Command, _, api, fields, models
 from odoo.exceptions import UserError
-from odoo.tools.safe_eval import safe_eval
 from odoo.osv.expression import AND
+from odoo.tools.safe_eval import safe_eval
 
 
 class SaleOrder(models.Model):
@@ -263,10 +263,10 @@ class SaleOrder(models.Model):
     def write(self, values):
         if 'state' in values and values['state'] == 'cancel':
             self.project_id.sudo().sale_line_id = False
-        return super(SaleOrder, self).write(values)
+        return super().write(values)
 
     def _prepare_analytic_account_data(self, prefix=None):
-        result = super(SaleOrder, self)._prepare_analytic_account_data(prefix=prefix)
+        result = super()._prepare_analytic_account_data(prefix=prefix)
         project_plan, _other_plans = self.env['account.analytic.plan']._get_all_plans()
         result['plan_id'] = project_plan.id or result['plan_id']
         return result

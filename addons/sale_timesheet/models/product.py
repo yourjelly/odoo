@@ -1,9 +1,8 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import threading
 
-from odoo import api, fields, models, tools, _
+from odoo import _, api, fields, models, tools
 from odoo.exceptions import ValidationError
 
 
@@ -44,7 +43,7 @@ class ProductTemplate(models.Model):
         for product_template in self:
             if not product_template.visible_expense_policy:
                 product_template.visible_expense_policy = visibility
-        return super(ProductTemplate, self)._compute_visible_expense_policy()
+        return super()._compute_visible_expense_policy()
 
     @api.depends('service_tracking', 'service_policy', 'type', 'sale_ok')
     def _compute_product_tooltip(self):
@@ -125,7 +124,7 @@ class ProductTemplate(models.Model):
             time_product = self.env.ref('sale_timesheet.time_product')
             if time_product.product_tmpl_id in self:
                 raise ValidationError(_('The %s product is required by the Timesheets app and cannot be archived nor deleted.', time_product.name))
-        return super(ProductTemplate, self).write(vals)
+        return super().write(vals)
 
 
 class ProductProduct(models.Model):
@@ -175,4 +174,4 @@ class ProductProduct(models.Model):
             time_product = self.env.ref('sale_timesheet.time_product')
             if time_product in self:
                 raise ValidationError(_('The %s product is required by the Timesheets app and cannot be archived nor deleted.', time_product.name))
-        return super(ProductProduct, self).write(vals)
+        return super().write(vals)

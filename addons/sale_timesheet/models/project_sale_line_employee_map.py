@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, fields, models
@@ -124,7 +123,7 @@ class ProjectProductEmployeeMap(models.Model):
         return maps
 
     def write(self, values):
-        res = super(ProjectProductEmployeeMap, self).write(values)
+        res = super().write(values)
         self._update_project_timesheet()
         return res
 

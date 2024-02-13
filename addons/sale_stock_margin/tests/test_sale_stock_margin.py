@@ -1,9 +1,8 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import fields
-
 from odoo.tests import Form, tagged
+
 from odoo.addons.stock_account.tests.test_stockvaluationlayer import TestStockValuationCommon
 
 
@@ -12,7 +11,7 @@ class TestSaleStockMargin(TestStockValuationCommon):
 
     @classmethod
     def setUpClass(cls):
-        super(TestSaleStockMargin, cls).setUpClass()
+        super().setUpClass()
         cls.pricelist = cls.env['product.pricelist'].create({'name': 'Simple Pricelist'})
         cls.env['res.currency.rate'].search([]).unlink()
 

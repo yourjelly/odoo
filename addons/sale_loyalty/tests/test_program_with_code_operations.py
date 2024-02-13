@@ -1,8 +1,8 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo.addons.sale_loyalty.tests.common import TestSaleCouponCommon
 from odoo.exceptions import ValidationError
+
+from odoo.addons.sale_loyalty.tests.common import TestSaleCouponCommon
 
 
 class TestProgramWithCodeOperations(TestSaleCouponCommon):

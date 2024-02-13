@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, fields, models, _
+from odoo import _, api, fields, models
 
 
 class PurchaseOrder(models.Model):
@@ -38,7 +37,7 @@ class PurchaseOrder(models.Model):
         return action
 
     def button_cancel(self):
-        result = super(PurchaseOrder, self).button_cancel()
+        result = super().button_cancel()
         self.sudo()._activity_cancel_on_sale()
         return result
 

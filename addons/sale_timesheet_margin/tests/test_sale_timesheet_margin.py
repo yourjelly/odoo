@@ -1,16 +1,16 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo.addons.sale_timesheet.tests.common import TestCommonSaleTimesheet
 from odoo import Command
 from odoo.tests import tagged
+
+from odoo.addons.sale_timesheet.tests.common import TestCommonSaleTimesheet
 
 
 @tagged('-at_install', 'post_install')
 class TestSaleTimesheetMargin(TestCommonSaleTimesheet):
 
     def setUp(self):
-        super(TestSaleTimesheetMargin, self).setUp()
+        super().setUp()
         uom_day_id = self.ref('uom.product_uom_day')
         self.uom_day = self.env['uom.uom'].browse(uom_day_id)
         self.product_1 = self.env['product.product'].create({

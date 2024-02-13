@@ -1,11 +1,11 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import Command
-from odoo.tests.common import new_test_user
-from .common import TestSaleProjectCommon
 from odoo.tests import Form
-from odoo.tests.common import tagged
+from odoo.tests.common import new_test_user, tagged
+
+from .common import TestSaleProjectCommon
+
 
 @tagged('post_install', '-at_install')
 class TestSaleProject(TestSaleProjectCommon):

@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, fields, models, _
+from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
 
@@ -11,7 +10,7 @@ class ProjectCreateInvoice(models.TransientModel):
 
     @api.model
     def default_get(self, fields):
-        result = super(ProjectCreateInvoice, self).default_get(fields)
+        result = super().default_get(fields)
 
         active_model = self._context.get('active_model')
         if active_model != 'project.project':
