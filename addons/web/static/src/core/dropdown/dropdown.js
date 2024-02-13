@@ -71,7 +71,7 @@ export class Dropdown extends Component {
         useEffect(
             () => {
                 Promise.resolve().then(() => {
-                    this.myActiveEl = this.ui.activeElement;
+                    this.myActiveEl = this.ui.getActiveOwnerElementOf(this);
                 });
             },
             () => []

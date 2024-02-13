@@ -8,7 +8,7 @@ import { browser } from "@web/core/browser/browser";
 import { getTabableElements } from "@web/core/utils/ui";
 import { getActiveHotkey } from "../hotkeys/hotkey_service";
 
-import { EventBus, useEffect, useRef } from "@odoo/owl";
+import { EventBus, onWillDestroy, useComponent, useEffect, useRef } from "@odoo/owl";
 
 export const SIZES = { XS: 0, VSM: 1, SM: 2, MD: 3, LG: 4, XL: 5, XXL: 6 };
 
@@ -29,6 +29,7 @@ export function useActiveElement(refName) {
     }
     const uiService = useService("ui");
     const owner = useRef(refName);
+    useActiveOwner(owner);
 
     function trapFocus(e) {
         const hotkey = getActiveHotkey(e);
@@ -90,6 +91,22 @@ export function useActiveElement(refName) {
         },
         () => [owner.el]
     );
+}
+
+export function useActiveOwner(ref) {
+    const component = useComponent();
+    const uiService = useService("ui");
+    if (!ref) {
+        ref = {
+            get el() {
+                return (component.__owl__.bdom && component.__owl__.bdom.parentEl) || null;
+            },
+        };
+    }
+    uiService.registerActiveOwner(component, ref);
+    onWillDestroy(() => {
+        uiService.unregisterActiveOwner(component, ref);
+    });
 }
 
 // window size handling
@@ -154,6 +171,7 @@ export const uiService = {
         }
 
         // UI active element code
+        const activeOwners = new Map();
         let activeElems = [document];
 
         function activateElement(el) {
@@ -168,6 +186,44 @@ export const uiService = {
             for (const activeElement of [...activeElems].reverse()) {
                 if (activeElement.contains(el)) {
                     return activeElement;
+                }
+            }
+        }
+        function getActiveOwnerElementOf(component) {
+            let componentNode = component.__owl__;
+            const el = componentNode.bdom && componentNode.bdom.el;
+            let activeOwnerEl = el ? undefined : document;
+            while (!activeOwnerEl && componentNode) {
+                for (const ref of activeOwners.get(componentNode.component) || []) {
+                    if (
+                        ref.el &&
+                        (!activeOwnerEl || activeOwners.contains(ref.el)) &&
+                        ref.el.contains(el)
+                    ) {
+                        activeOwnerEl = ref.el;
+                    }
+                }
+                componentNode = componentNode.parent;
+            }
+            return activeOwnerEl || document;
+        }
+        function registerActiveOwner(component, ref) {
+            if (activeOwners.has(component)) {
+                activeOwners.get(component).add(ref);
+            } else {
+                activeOwners.set(component, new Set([ref]));
+            }
+        }
+        function unregisterActiveOwner(component, ref) {
+            if (!ref) {
+                activeOwners.delete(component);
+            } else {
+                const set = activeOwners.get(component);
+                if (set) {
+                    set.delete(ref);
+                    if (!set.size) {
+                        activeOwners.delete(component);
+                    }
                 }
             }
         }
@@ -189,6 +245,9 @@ export const uiService = {
             activateElement,
             deactivateElement,
             getActiveElementOf,
+            getActiveOwnerElementOf,
+            registerActiveOwner,
+            unregisterActiveOwner,
         };
 
         // listen to media query status changes
