@@ -8,7 +8,6 @@ from odoo.tests import tagged
 from odoo.addons.base.tests.common import HttpCaseWithUserPortal, TransactionCaseWithUserDemo
 from odoo.addons.website_sale.tests.common import WebsiteSaleCommon
 
-
 ''' /!\/!\
 Calling `get_pricelist_available` after setting `property_product_pricelist` on
 a partner will not work as expected. That field will change the output of

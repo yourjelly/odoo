@@ -648,12 +648,12 @@ class ProductTemplate(models.Model):
             self.env.cr.execute("SELECT id FROM %s WHERE website_sequence IS NULL" % self._table)
             prod_tmpl_ids = self.env.cr.dictfetchall()
             max_seq = self._default_website_sequence()
-            query = """
-                UPDATE {table}
+            query = f"""
+                UPDATE {self._table}
                 SET website_sequence = p.web_seq
                 FROM (VALUES %s) AS p(p_id, web_seq)
                 WHERE id = p.p_id
-            """.format(table=self._table)
+            """
             values_args = [(prod_tmpl['id'], max_seq + i * 5) for i, prod_tmpl in enumerate(prod_tmpl_ids)]
             self.env.cr.execute_values(query, values_args)
         else:

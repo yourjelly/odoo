@@ -3,8 +3,11 @@ from datetime import timedelta
 
 from odoo import fields
 from odoo.exceptions import ValidationError
-from odoo.tests import HttpCase, tagged, TransactionCase
-from odoo.addons.sale.tests.test_sale_product_attribute_value_config import TestSaleProductAttributeValueCommon
+from odoo.tests import HttpCase, TransactionCase, tagged
+
+from odoo.addons.sale.tests.test_sale_product_attribute_value_config import (
+    TestSaleProductAttributeValueCommon,
+)
 
 
 @tagged('post_install', '-at_install')
@@ -192,7 +195,7 @@ class TestWebsiteSaleCoupon(HttpCase):
 
     @classmethod
     def setUpClass(cls):
-        super(TestWebsiteSaleCoupon, cls).setUpClass()
+        super().setUpClass()
         program = cls.env['loyalty.program'].create({
             'name': '10% TEST Discount',
             'trigger': 'with_code',

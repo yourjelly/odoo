@@ -1,6 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import random
+
 from datetime import datetime
 
 from dateutil.relativedelta import relativedelta

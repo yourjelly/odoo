@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, fields, models, _
+from odoo import _, api, fields, models
 from odoo.exceptions import AccessError
 
 
@@ -42,12 +41,12 @@ class Channel(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        channels = super(Channel, self).create(vals_list)
+        channels = super().create(vals_list)
         channels.filtered(lambda channel: channel.enroll == 'payment')._synchronize_product_publish()
         return channels
 
     def write(self, vals):
-        res = super(Channel, self).write(vals)
+        res = super().write(vals)
         if 'is_published' in vals:
             self.filtered(lambda channel: channel.enroll == 'payment')._synchronize_product_publish()
         return res
@@ -79,7 +78,7 @@ class Channel(models.Model):
     def _filter_add_members(self, target_partners, raise_on_access=False):
         """ Overridden to add 'payment' channels to the filtered channels. People
         that can write on payment-based channels can add members. """
-        result = super(Channel, self)._filter_add_members(target_partners, raise_on_access=raise_on_access)
+        result = super()._filter_add_members(target_partners, raise_on_access=raise_on_access)
         on_payment = self.filtered(lambda channel: channel.enroll == 'payment')
         if on_payment:
             try:

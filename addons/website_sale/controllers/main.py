@@ -1,6 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import logging
+
 from datetime import datetime
 
 from werkzeug.exceptions import Forbidden, NotFound
@@ -228,7 +229,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
         if category:
             category = Category.search([('id', '=', int(category))], limit=1)
             if not category or not category.can_access_from_current_website():
-                raise NotFound()
+                raise NotFound
         else:
             category = Category
 
@@ -466,7 +467,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
         """
 
         if not request.env.user.has_group('website.group_website_restricted_editor'):
-            raise NotFound()
+            raise NotFound
 
         image_ids = request.env["ir.attachment"].browse(i['id'] for i in images)
         image_create_data = [Command.create({
@@ -500,7 +501,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
         Unlinks all images from the product.
         """
         if not request.env.user.has_group('website.group_website_restricted_editor'):
-            raise NotFound()
+            raise NotFound
 
         product_product = request.env['product.product'].browse(int(product_product_id)) if product_product_id else False
         product_template = request.env['product.template'].browse(int(product_template_id)) if product_template_id else False
@@ -520,7 +521,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
             or image_res_model not in ['product.product', 'product.template', 'product.image']
             or move not in ['first', 'left', 'right', 'last']
         ):
-            raise NotFound()
+            raise NotFound
 
         image_res_id = int(image_res_id)
         image_to_resequence = request.env[image_res_model].browse(image_res_id)
@@ -711,7 +712,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
         if access_token:
             abandoned_order = request.env['sale.order'].sudo().search([('access_token', '=', access_token)], limit=1)
             if not abandoned_order:  # wrong token (or SO has been deleted)
-                raise NotFound()
+                raise NotFound
             if abandoned_order.state != 'draft':  # abandoned cart already finished
                 values.update({'abandoned_proceed': True})
             elif revive == 'squash' or (revive == 'merge' and not request.session.get('sale_order_id')):  # restore old cart or merge with unexistant
@@ -1184,11 +1185,11 @@ class WebsiteSale(payment_portal.PaymentPortal):
                     if address_mode == 'billing':
                         billing_partners = partners_sudo.filtered(lambda p: p.type != 'delivery')
                         if partner_sudo not in billing_partners:
-                            raise Forbidden()
+                            raise Forbidden
                     elif address_mode == 'shipping':
                         shipping_partners = partners_sudo.filtered(lambda p: p.type != 'invoice')
                         if partner_sudo not in shipping_partners:
-                            raise Forbidden()
+                            raise Forbidden
 
                     can_edit_vat = partner_sudo.can_edit_vat()
 
@@ -1517,7 +1518,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
             and partner_sudo != order_sudo.partner_id.commercial_partner_id
             and partner_sudo.id not in children
         ):
-            raise Forbidden()
+            raise Forbidden
 
         fpos_before = order_sudo.fiscal_position_id
         if (
@@ -1790,7 +1791,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
     @route(['/shop/config/product'], type='json', auth='user')
     def change_product_config(self, product_id, **options):
         if not request.env.user.has_group('website.group_website_restricted_editor'):
-            raise NotFound()
+            raise NotFound
 
         product = request.env['product.template'].browse(product_id)
         if "sequence" in options:
@@ -1809,7 +1810,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
     @route(['/shop/config/attribute'], type='json', auth='user')
     def change_attribute_config(self, attribute_id, **options):
         if not request.env.user.has_group('website.group_website_restricted_editor'):
-            raise NotFound()
+            raise NotFound
 
         attribute = request.env['product.attribute'].browse(attribute_id)
         if 'display_type' in options:
@@ -1819,7 +1820,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
     @route(['/shop/config/website'], type='json', auth='user')
     def _change_website_config(self, **options):
         if not request.env.user.has_group('website.group_website_restricted_editor'):
-            raise NotFound()
+            raise NotFound
 
         current_website = request.env['website'].get_current_website()
         # Restrict options we can write to.

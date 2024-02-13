@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import models, _
+from odoo import _, models
 
 
 class SaleOrder(models.Model):
@@ -10,7 +9,7 @@ class SaleOrder(models.Model):
     def _action_confirm(self):
         """ If the product of an order line is a 'course', we add the client of the sale_order
         as a member of the channel(s) on which this product is configured (see slide.channel.product_id). """
-        result = super(SaleOrder, self)._action_confirm()
+        result = super()._action_confirm()
 
         so_lines = self.env['sale.order.line'].search(
             [('order_id', 'in', self.ids)]

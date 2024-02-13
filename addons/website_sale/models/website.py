@@ -226,9 +226,11 @@ class Website(models.Model):
 
         if show_visible:
             # Only show selectable or currently used pricelist (cart or session)
-            check_pricelist = lambda pl: pl.selectable or pl.id in (current_pl_id, order_pl_id)
+            def check_pricelist(pl):
+                return pl.selectable or pl.id in (current_pl_id, order_pl_id)
         else:
-            check_pricelist = lambda _pl: True
+            def check_pricelist(_pl):
+                return True
 
         # Note: 1. pricelists from all_pl are already website compliant (went through
         #          `_get_website_pricelists_domain`)

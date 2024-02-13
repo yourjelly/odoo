@@ -7,7 +7,7 @@ import odoo.tests
 class TestWebsiteSequence(odoo.tests.TransactionCase):
 
     def setUp(self):
-        super(TestWebsiteSequence, self).setUp()
+        super().setUp()
 
         ProductTemplate = self.env['product.template']
         product_templates = ProductTemplate.search([])

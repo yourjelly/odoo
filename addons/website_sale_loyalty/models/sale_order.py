@@ -142,7 +142,7 @@ class SaleOrder(models.Model):
                 order.website_order_line += new_lines
 
     def _compute_cart_info(self):
-        super(SaleOrder, self)._compute_cart_info()
+        super()._compute_cart_info()
         for order in self:
             reward_lines = order.website_order_line.filtered(lambda line: line.is_reward_line)
             order.cart_quantity -= int(sum(reward_lines.mapped('product_uom_qty')))
@@ -162,7 +162,7 @@ class SaleOrder(models.Model):
         return code
 
     def _cart_update(self, *args, **kwargs):
-        res = super(SaleOrder, self)._cart_update(*args, **kwargs)
+        res = super()._cart_update(*args, **kwargs)
         self._update_programs_and_rewards()
         self._auto_apply_rewards()
         return res

@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import fields, models, api
+from odoo import api, fields, models
 
 
 class ResConfigSettings(models.TransientModel):
@@ -23,7 +22,7 @@ class ResConfigSettings(models.TransientModel):
         readonly=False)
 
     def set_values(self):
-        super(ResConfigSettings, self).set_values()
+        super().set_values()
         IrDefault = self.env['ir.default'].sudo()
 
         IrDefault.set('product.template', 'allow_out_of_stock_order', self.allow_out_of_stock_order)
@@ -32,7 +31,7 @@ class ResConfigSettings(models.TransientModel):
 
     @api.model
     def get_values(self):
-        res = super(ResConfigSettings, self).get_values()
+        res = super().get_values()
         IrDefaultGet = self.env['ir.default'].sudo()._get
         allow_out_of_stock_order = IrDefaultGet('product.template', 'allow_out_of_stock_order')
 
