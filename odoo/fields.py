@@ -2054,7 +2054,7 @@ class _String(Field):
         context_key = records.env.cache_key(self)
         if self.translate:
             prefetch_langs = records.env.context.get('prefetch_langs')
-            lang = None if prefetch_langs else self._lang(records.env)
+            lang = None if prefetch_langs else self._lang(records.env, validate=True)
             inserter = self._get_translation_inserter(prefetch_langs, lang)
         else:
             inserter = dict.setdefault

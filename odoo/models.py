@@ -4602,7 +4602,7 @@ class BaseModel(metaclass=MetaModel):
             field = self._fields[name]
             assert field.store
             assert field.column_type
-            if field.translate is True and val and not isinstance(val, odoo.fields.TranslatedCacheValue):
+            if field.translate is True and val and not isinstance(val.adapted, odoo.fields.TranslatedCacheValue):
                 # The first param is for the fallback value {'en_US': 'first_written_value'}
                 # which fills the 'en_US' key of jsonb only when the old column value is NULL.
                 # The second param is for the real value {'fr_FR': 'French', 'nl_NL': 'Dutch'}
