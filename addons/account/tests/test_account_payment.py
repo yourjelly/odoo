@@ -1002,3 +1002,39 @@ class TestAccountPayment(AccountTestInvoicingCommon):
             {'account_id': bank_2.inbound_payment_method_line_ids.payment_account_id.id},
             {'account_id': transfer_account.id},
         ])
+
+    def test_outstanding_account_onchange(self):
+        '''
+            Test that the outstanding account is correctly updated if you change back the
+            journal_id to its original value.
+        '''
+        company = self.env.company
+        bank_journal = self.bank_journal_1
+        cash_journal = self.company_data['default_journal_cash']
+        account = self.env['account.account'].create({
+            'name': "Super outstanding account",
+            'code': "101077",
+            'account_type': "asset_current",
+            'company_id': company.id,
+        })
+        cash_journal.inbound_payment_method_line_ids.payment_account_id = account
+        #We need to add the oustanding_account_id in the form view to access it with Forms
+        original_form_view = self.env['ir.ui.view'].search([('name', '=', 'account.payment.form')])
+        new_form_view = self.env['ir.ui.view'].create({
+            'name': "account.payment.form",
+            'type': 'form',
+            'model': 'account.payment',
+            'inherit_id': original_form_view.id,
+            'arch': """
+                <xpath expr="//field[@name='available_journal_ids']" position="after">
+                    <field name="outstanding_account_id" invisible="1"/>
+                </xpath>
+            """
+        })
+        context = {'payment_type': 'inbound', 'partner_type': 'customer'}
+        with Form(self.env['account.payment'].with_context(context), view=new_form_view) as payment_form:
+            payment_form.journal_id = bank_journal
+            default_outstanding_account = payment_form.outstanding_account_id
+            payment_form.journal_id = cash_journal
+            payment_form.journal_id = bank_journal
+            self.assertEqual(payment_form.outstanding_account_id, default_outstanding_account)
