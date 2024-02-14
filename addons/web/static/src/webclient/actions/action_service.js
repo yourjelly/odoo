@@ -446,8 +446,21 @@ export function makeActionManager(env, router = _router) {
                 }
             }
         }
-        // If no action => falls back on the user default action (if any).
-        if (!actionRequest && user.homeActionId) {
+        if (!actionRequest) {
+            const { actionStack } = state;
+            // Keep unwinding the actionStack until we find a valid action
+            if (actionStack?.length > 1) {
+                const nextState = { actionStack: actionStack.slice(0, -1) };
+                Object.assign(nextState, nextState.actionStack.at(-1));
+                const params = _getActionParams(nextState);
+                // Set the index so that we use the existing virtual controller
+                // instead of a new one
+                if (params.options && params.options.index === undefined) {
+                    params.options.index = nextState.actionStack.length - 1;
+                }
+                return params;
+            }
+            // Fall back to the home action if no valid action was found
             actionRequest = user.homeActionId;
         }
         return actionRequest ? { actionRequest, options } : null;
@@ -502,8 +515,7 @@ export function makeActionManager(env, router = _router) {
         const state = router.current;
         if (state.action && !actionRegistry.contains(state.action)) {
             const currentController = controllerStack[controllerStack.length - 1];
-            const currentActionId =
-                currentController && currentController.action && currentController.action.id;
+            const currentActionId = currentController?.action?.id;
             // Window Action: determines model, viewType etc....
             if (
                 currentController &&
@@ -1488,16 +1500,15 @@ export function makeActionManager(env, router = _router) {
                 await switchView(viewType, props);
                 return true;
             }
-        } else {
-            const actionParams = _getActionParams();
-            if (actionParams) {
-                // Params valid => performs a "doAction"
-                const { actionRequest, options } = actionParams;
-                await doAction(actionRequest, options);
-                return true;
-            }
+            return false;
         }
-        return false;
+        const actionParams = _getActionParams();
+        if (actionParams) {
+            // Params valid => performs a "doAction"
+            const { actionRequest, options } = actionParams;
+            await doAction(actionRequest, options);
+            return true;
+        }
     }
 
     function pushState(controllerStack) {
