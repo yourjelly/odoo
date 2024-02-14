@@ -3111,3 +3111,14 @@ class TestQwebCache(TransactionCase):
         rendering = render('html', {'val': 3}, load).strip()
 
         self.assertEqual(html.document_fromstring(rendering), html.document_fromstring(expected))
+
+from odoo.tests import tagged
+import logging
+_logger = logging.getLogger(__name__)
+@tagged('post_install', '-at_install')
+class TestQwebTMP(TransactionCase):
+    def test_log_like_translate_fields(self):
+        for model in self.env.values():
+            for field in model._fields.values():
+                if field.inverse and 'lang' in field.get_depends(model)[1]:
+                    _logger.warning("translate like field %s", field)
