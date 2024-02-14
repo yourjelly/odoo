@@ -1,14 +1,39 @@
 /* @odoo-module */
 
+import { Record } from "@mail/core/common/record";
 import { Thread } from "@mail/core/common/thread_model";
+import { _t } from "@web/core/l10n/translation";
 
 import { patch } from "@web/core/utils/patch";
+import { LivechatChannel } from "@im_livechat/core/web/livechat_channel_model";
 
 patch(Thread.prototype, {
+    setup() {
+        super.setup(...arguments);
+        this.livechatChannel = Record.one("LivechatChannel");
+        this.discussAppAsLivechat = Record.one("DiscussApp", {
+            compute() {
+                if (this.channel_type === "livechat") {
+                    return this._store.discuss;
+                }
+            },
+        });
+    },
     _computeDiscussAppCategory() {
-        return this.channel_type === "livechat"
-            ? this._store.discuss.livechat
-            : super._computeDiscussAppCategory();
+        if (this.channel_type !== "livechat") {
+            return super._computeDiscussAppCategory();
+        }
+        if (this.livechatChannel) {
+            return {
+                id: `${LivechatChannel.APP_CATEGORY_PREFIX}_${this.livechatChannel.id}`,
+            };
+        }
+        return {
+            id: `${LivechatChannel.APP_CATEGORY_PREFIX}_default`,
+            name: _t("Livechat"),
+            sequence: LivechatChannel.APP_CATEGORY_SEQUENCE,
+            extraClass: "o-mail-DiscussSidebarCategory-livechat",
+        };
     },
     get hasMemberList() {
         return this.channel_type === "livechat" || super.hasMemberList;

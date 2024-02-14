@@ -19,7 +19,8 @@ class TestDiscussFullPerformance(HttpCase):
     #     1: mt_comment_id
     #     6: odoobot format
     #     4: settings
-    _query_count_init_store = 16
+    #     1: hasLivechatAccess
+    _query_count_init_store = 17
     _query_count = 48 + 1  # +1 is necessary to fix nondeterministic issue on runbot
     _query_count_discuss_channels = 68
 
@@ -167,6 +168,7 @@ class TestDiscussFullPerformance(HttpCase):
                 "action_discuss_id": xmlid_to_res_id("mail.action_discuss"),
                 "hasGifPickerFeature": False,
                 "hasLinkPreviewFeature": True,
+                "hasLivechatAccess": False,
                 "hasMessageTranslationFeature": False,
                 "internalUserGroupId": self.env.ref("base.group_user").id,
                 "mt_comment_id": xmlid_to_res_id("mail.mt_comment"),
@@ -197,7 +199,6 @@ class TestDiscussFullPerformance(HttpCase):
                     "id": self.env["res.users.settings"]._find_or_create_for_user(self.users[0]).id,
                     "is_discuss_sidebar_category_channel_open": True,
                     "is_discuss_sidebar_category_chat_open": True,
-                    "is_discuss_sidebar_category_livechat_open": True,
                     "livechat_lang_ids": [],
                     "livechat_username": False,
                     "push_to_talk_key": False,
@@ -1168,6 +1169,7 @@ class TestDiscussFullPerformance(HttpCase):
                 "is_editable": False,
                 "is_pinned": True,
                 "last_interest_dt": last_interest_dt,
+                "livechatChannel": {"id": self.channel_livechat_1.livechat_channel_id.id},
                 "message_needaction_counter": 0,
                 "name": "test1 Ernest Employee",
                 "custom_notifications": False,
@@ -1249,6 +1251,7 @@ class TestDiscussFullPerformance(HttpCase):
                 "is_editable": False,
                 "is_pinned": True,
                 "last_interest_dt": last_interest_dt,
+                "livechatChannel": {"id": self.channel_livechat_2.livechat_channel_id.id},
                 "message_needaction_counter": 0,
                 "name": "anon 2 Ernest Employee",
                 "custom_notifications": False,

@@ -27,6 +27,13 @@ patch(MockServer.prototype, {
                         operator.id
                     );
                 }
+                channelInfo.livechatChannel = this.pyEnv["im_livechat.channel"]
+                    .searchRead([["id", "=", channel.livechat_channel_id]])
+                    .map((c) => ({
+                        id: c.id,
+                        name: c.name,
+                        hasSelfAsMember: c.user_ids.includes(this.pyEnv.currentUserId),
+                    }))[0];
             }
         }
         return channelInfos;

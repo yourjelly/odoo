@@ -5,6 +5,20 @@ import { Store } from "@mail/core/common/store_service";
 import { patch } from "@web/core/utils/patch";
 
 patch(Store.prototype, {
+    setup() {
+        super.setup(...arguments);
+        this.livechatChannels = this.makeCachedFetchData({ livechat_channels: true });
+        this.hasLivechatAccess = false;
+    },
+    /**
+     * @override
+     */
+    onStarted() {
+        super.onStarted(...arguments);
+        if (this.discuss.isActive && this.hasLivechatAccess) {
+            this.livechatChannels.fetch();
+        }
+    },
     /**
      * @override
      */
