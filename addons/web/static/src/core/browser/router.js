@@ -1,5 +1,5 @@
 import { EventBus } from "@odoo/owl";
-import { shallowEqual } from "../utils/objects";
+import { pick, shallowEqual } from "../utils/objects";
 import { objectToUrlEncodedString } from "../utils/urls";
 import { browser } from "./browser";
 
@@ -203,7 +203,7 @@ export function urlToState(urlObj) {
 
     if (splitPath.length > 1 && splitPath[0] === "apps") {
         splitPath.splice(0, 1);
-        const actions = [];
+        let actions = [];
         let action = {};
         let aid = undefined;
         for (const part of splitPath) {
@@ -250,31 +250,23 @@ export function urlToState(urlObj) {
                 }
                 if (part === "new") {
                     action.resId = part;
+                    action.view_type = "form";
                 } else {
                     action.resId = parseInt(part);
                 }
                 continue;
             }
         }
-        if (actions.length > 0 && actions[actions.length - 1].resId) {
-            action.active_id = actions[actions.length - 1].resId;
+        if (actions.at(-1)?.resId) {
+            action.active_id = actions.at(-1).resId;
         }
         actions.push(action);
-        if (actions.length > 0) {
-            actions.filter((a) => a.action || a.resId);
+        actions = actions.filter((a) => a.action || a.resId);
+        const activeAction = actions.at(-1);
+        if (activeAction.resId && activeAction.resId !== "new") {
+            state.id = activeAction.resId;
         }
-        if (actions[actions.length - 1].resId && actions[actions.length - 1].resId !== "new") {
-            state.id = actions[actions.length - 1].resId;
-        }
-        if (actions[actions.length - 1].action) {
-            state.action = actions[actions.length - 1].action;
-        }
-        if (actions[actions.length - 1].model) {
-            state.model = actions[actions.length - 1].model;
-        }
-        if (actions[actions.length - 1].active_id) {
-            state.active_id = actions[actions.length - 1].active_id;
-        }
+        Object.assign(state, pick(activeAction, "action", "model", "active_id", "view_type"));
         state.actionStack = actions;
     }
 

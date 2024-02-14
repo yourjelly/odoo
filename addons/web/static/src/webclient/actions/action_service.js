@@ -420,12 +420,12 @@ export function makeActionManager(env, router = _router) {
                 }
             }
         } else if (state.model) {
-            if (state.id) {
+            if (state.id || state.view_type === "form") {
                 actionRequest = {
                     res_model: state.model,
                     res_id: state.id,
                     type: "ir.actions.act_window",
-                    views: [[state.view_id ? state.view_id : false, "form"]],
+                    views: [[state.view_id ? state.view_id : false, "form"]], // TODO add tests for view_id
                 };
             } else if (state.view_type) {
                 // This is a window action on a multi-record view => restores it from
