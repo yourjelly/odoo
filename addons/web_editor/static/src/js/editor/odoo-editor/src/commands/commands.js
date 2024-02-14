@@ -314,6 +314,9 @@ export const editorCommands = {
                         if (right.nodeName === 'LI' && right.firstChild && isList(right.firstChild)) {
                             right.classList.add('oe-nested');
                         }
+                        if (isEmptyBlock(right)) {
+                            right.remove();
+                        }
                         currentNode = insertBefore ? right : left;
                     } else {
                         currentNode = currentNode.parentElement;
