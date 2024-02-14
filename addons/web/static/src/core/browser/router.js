@@ -143,6 +143,7 @@ export function stateToUrl(state) {
         delete tmpState.action;
         delete tmpState.active_id;
         delete tmpState.actionStack;
+        delete tmpState.model;
         if (tmpState.id) {
             pathname.pop();
             pathname.push(tmpState.id);
