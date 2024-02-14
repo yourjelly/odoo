@@ -2291,6 +2291,8 @@ Please change the quantity done or the rounding precision of your unit of measur
         parent_id_key = (
             'production_id'
             if kwargs.get('parent_model') == 'mrp.production' else
+            'repair_id'
+            if kwargs.get('parent_model') == 'repair.order' else
             ''
         )
         if self and parent_id_key:
