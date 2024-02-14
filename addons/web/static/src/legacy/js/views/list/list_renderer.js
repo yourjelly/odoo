@@ -1126,7 +1126,8 @@ var ListRenderer = BasicRenderer.extend({
             if (document.body.contains(this.el)) {
                 this.pagers.forEach(pager => pager.on_attach_callback());
             }
-            if (this._shouldRenderOptionalColumnsDropdown()) {
+            if (_.isNumber(this._shouldRenderOptionalColumnsDropdown()) && 
+            this._shouldRenderOptionalColumnsDropdown() > 0 ) {
                 this.el.classList.add('o_list_optional_columns');
                 this.$('table').append(
                     $('<i class="o_optional_columns_dropdown_toggle fa fa-ellipsis-v"/>')
