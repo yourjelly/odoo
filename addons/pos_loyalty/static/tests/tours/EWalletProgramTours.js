@@ -22,11 +22,13 @@ registry.category("web_tour.tours").add("EWalletProgramTour1", {
             ProductScreen.clickPayButton(false),
             // If there's no partner, we asked to redirect to the partner list screen.
             Dialog.confirm(),
+            PartnerList.searchPartner("AAAAAAA"),
             PartnerList.clickPartner("AAAAAAA"),
             PosLoyalty.finalizeOrder("Cash", "50"),
 
             // Topup 10$ for partner_bbb
             ProductScreen.clickPartnerButton(),
+            PartnerList.searchPartner("BBBBBBB"),
             ProductScreen.clickCustomer("BBBBBBB"),
             ProductScreen.addOrderline("Top-up eWallet", "1", "10"),
             PosLoyalty.orderTotalIs("10.00"),
@@ -45,6 +47,7 @@ registry.category("web_tour.tours").add("EWalletProgramTour2", {
             ProductScreen.addOrderline("Whiteboard Pen", "2", "6", "12.00"),
             PosLoyalty.eWalletButtonState({ highlighted: false }),
             ProductScreen.clickPartnerButton(),
+            PartnerList.searchPartner("AAAAAAA"),
             ProductScreen.clickCustomer("AAAAAAA"),
             PosLoyalty.eWalletButtonState({ highlighted: true, text: getEWalletText("Pay") }),
             PosLoyalty.clickEWalletButton(getEWalletText("Pay")),
@@ -53,6 +56,7 @@ registry.category("web_tour.tours").add("EWalletProgramTour2", {
 
             // Consume partner_bbb's full eWallet.
             ProductScreen.clickPartnerButton(),
+            PartnerList.searchPartner("BBBBBBB"),
             ProductScreen.clickCustomer("BBBBBBB"),
             PosLoyalty.eWalletButtonState({ highlighted: false }),
             ProductScreen.addOrderline("Desk Pad", "6", "6", "36.00"),
@@ -105,17 +109,17 @@ registry.category("web_tour.tours").add("EWalletProgramTour2", {
 
 //#endregion
 
-registry
-    .category("web_tour.tours")
-    .add('ExpiredEWalletProgramTour', {
-        test: true,
-        url: '/pos/ui',
-        steps: () => [
+registry.category("web_tour.tours").add("ExpiredEWalletProgramTour", {
+    test: true,
+    url: "/pos/ui",
+    steps: () =>
+        [
             Dialog.confirm("Open session"),
             ProductScreen.clickHomeCategory(),
             ProductScreen.clickPartnerButton(),
-            ProductScreen.clickCustomer('AAAA'),
-            ProductScreen.addOrderline('Whiteboard Pen', '2', '6', '12.00'),
+            PartnerList.searchPartner("AAAA"),
+            ProductScreen.clickCustomer("AAAA"),
+            ProductScreen.addOrderline("Whiteboard Pen", "2", "6", "12.00"),
             PosLoyalty.eWalletButtonState({ highlighted: false }),
             PosLoyalty.clickEWalletButton(),
             Dialog.is({ title: "No valid eWallet found" }),

@@ -4,6 +4,7 @@ import * as Dialog from "@point_of_sale/../tests/tours/helpers/DialogTourMethods
 import * as PosLoyalty from "@pos_loyalty/../tests/tours/PosLoyaltyTourMethods";
 import * as ProductScreen from "@point_of_sale/../tests/tours/helpers/ProductScreenTourMethods";
 import * as SelectionPopup from "@point_of_sale/../tests/tours/helpers/SelectionPopupTourMethods";
+import * as PartnerList from "@point_of_sale/../tests/tours/helpers/PartnerListTourMethods";
 import { registry } from "@web/core/registry";
 
 registry.category("web_tour.tours").add("PosLoyaltyFreeProductTour", {
@@ -144,6 +145,7 @@ registry.category("web_tour.tours").add("PosLoyaltyFreeProductTour2", {
             ProductScreen.clickHomeCategory(),
 
             ProductScreen.clickPartnerButton(),
+            PartnerList.searchPartner("AAA Partner"),
             ProductScreen.clickCustomer("AAA Partner"),
             ProductScreen.addOrderline("Test Product A", "1"),
             PosLoyalty.isRewardButtonHighlighted(true),

@@ -11,7 +11,7 @@
                     <t t-else="">Create</t>
                 </button>
                 <Input tModel="[state, 'query']"
-                    class="'ms-auto'"
+                    class="'search-customer ms-auto'"
                     isSmall="ui.isSmall"
                     placeholder="'Search Customers...'"
                     icon="{type: 'fa', value: 'fa-search'}"

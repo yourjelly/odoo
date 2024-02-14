@@ -5,6 +5,7 @@ import * as ReceiptScreen from "@point_of_sale/../tests/tours/helpers/ReceiptScr
 import * as Dialog from "@point_of_sale/../tests/tours/helpers/DialogTourMethods";
 import * as PaymentScreen from "@point_of_sale/../tests/tours/helpers/PaymentScreenTourMethods";
 import * as TicketScreen from "@point_of_sale/../tests/tours/helpers/TicketScreenTourMethods";
+import * as PartnerList from "@point_of_sale/../tests/tours/helpers/PartnerListTourMethods";
 import * as Chrome from "@point_of_sale/../tests/tours/helpers/ChromeTourMethods";
 import { registry } from "@web/core/registry";
 
@@ -112,6 +113,7 @@ registry.category("web_tour.tours").add("ChromeTour", {
             // Invoice an order
             ProductScreen.addOrderline("Whiteboard Pen", "5", "6"),
             ProductScreen.clickPartnerButton(),
+            PartnerList.searchPartner("Partner Test 1"),
             ProductScreen.clickCustomer("Partner Test 1"),
             ProductScreen.clickPayButton(),
             PaymentScreen.clickPaymentMethod("Bank"),

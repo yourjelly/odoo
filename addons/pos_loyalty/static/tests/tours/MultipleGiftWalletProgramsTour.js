@@ -4,6 +4,7 @@ import * as PosLoyalty from "@pos_loyalty/../tests/tours/PosLoyaltyTourMethods";
 import * as ProductScreen from "@point_of_sale/../tests/tours/helpers/ProductScreenTourMethods";
 import * as SelectionPopup from "@point_of_sale/../tests/tours/helpers/SelectionPopupTourMethods";
 import * as Dialog from "@point_of_sale/../tests/tours/helpers/DialogTourMethods";
+import * as PartnerList from "@point_of_sale/../tests/tours/helpers/PartnerListTourMethods";
 import { registry } from "@web/core/registry";
 
 const getEWalletText = (suffix) => "eWallet" + (suffix !== "" ? ` ${suffix}` : "");
@@ -40,6 +41,7 @@ registry.category("web_tour.tours").add("MultipleGiftWalletProgramsTour", {
             SelectionPopup.has("ewallet_2"),
             SelectionPopup.has("ewallet_1", { run: "click" }),
             ProductScreen.clickPartnerButton(),
+            PartnerList.searchPartner("AAAAAAA"),
             ProductScreen.clickCustomer("AAAAAAA"),
             ProductScreen.pressNumpad("Price"),
             ProductScreen.modeIsActive("Price"),
@@ -60,6 +62,7 @@ registry.category("web_tour.tours").add("MultipleGiftWalletProgramsTour", {
             ProductScreen.clickDisplayedProduct("Top-up eWallet"),
             SelectionPopup.has("ewallet_1", { run: "click" }),
             ProductScreen.clickPartnerButton(),
+            PartnerList.searchPartner("BBBBBBB"),
             ProductScreen.clickCustomer("BBBBBBB"),
             PosLoyalty.orderTotalIs("50.00"),
             PosLoyalty.finalizeOrder("Cash", "50"),

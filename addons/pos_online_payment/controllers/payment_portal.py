@@ -267,7 +267,7 @@ class PaymentPortal(payment_portal.PaymentPortal):
 
         pos_order_sudo = self._check_order_access(pos_order_id, access_token)
 
-        tx_sudo = request.env['payment.transaction'].sudo().search([('id', '=', tx_id)])
+        tx_sudo = request.env['payment.transaction'].sudo().with_company(pos_order_sudo.company_id).search([('id', '=', tx_id)])
         if tx_sudo.pos_order_id.id != pos_order_sudo.id:
             return self._render_pay_confirmation(rendering_context)
 
