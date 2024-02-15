@@ -97,6 +97,7 @@ export class Chatter extends Component {
         this.store = useState(useService("mail.store"));
         this.orm = useService("orm");
         this.state = useState({
+            isFolded: true,
             composerType: false,
             isAttachmentBoxOpened: this.props.isAttachmentBoxVisibleInitially,
             jumpThreadPresent: 0,

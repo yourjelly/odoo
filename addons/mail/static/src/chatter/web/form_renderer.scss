@@ -2,7 +2,7 @@
 // Layout
 // ------------------------------------------------------------------
 
-.o-mail-Form-chatter {
+.o-mail-Form-chatter:not(:has(.o-mail-ChatterSidebar.o-folded)) {
     --ChatterTopbar-padding-v: #{map-get($spacers, 2)};
     --ChatterTopbar-padding-left: #{$o-horizontal-padding};
     --ChatterTopbar-padding-right: #{$o-horizontal-padding};
@@ -39,12 +39,28 @@
 
 .o-mail-Form-chatter {
     display: flex;
-    margin: 0 auto;
     padding-bottom: map-get($spacers, 5);
-    width: 100%;
+
+    &:not(:has(.o-mail-ChatterSidebar.o-folded)) {
+        margin: 0 auto;
+        width: 100%;
+    }
 }
 
 // FIX to hide chatter in dialogs when they are opened from an action returned by python code
 .modal .modal-dialog .o_form_view .o-mail-Form-chatter {
     display: none;
+}
+
+.o_form_renderer:has(.o-mail-ChatterSidebar.o-folded) .o_form_sheet_bg {
+    padding-right: 0;
+    max-width: unset;
+}
+
+.o-mail-ChatterSidebar .btn {
+    width: fit-content;
+    &:active, &:focus {
+        outline: none;
+        box-shadow: none;
+    }
 }
