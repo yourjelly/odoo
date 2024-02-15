@@ -14,7 +14,7 @@ class MrpBom(models.Model):
     """ Defines bills of material for a product or a product template """
     _name = 'mrp.bom'
     _description = 'Bill of Material'
-    _inherit = ['mail.thread']
+    _inherit = ['mail.thread', 'product.catalog.mixin']
     _rec_name = 'product_tmpl_id'
     _rec_names_search = ['product_tmpl_id', 'code']
     _order = "sequence, id"
@@ -432,6 +432,72 @@ class MrpBom(models.Model):
             if productions:
                 productions.is_outdated_bom = True
 
+    # -------------------------------------------------------------------------
+    # CATALOG
+    # -------------------------------------------------------------------------
+
+    def action_add_from_catalog(self):
+        res = super().action_add_from_catalog()
+        if res['context'].get('product_catalog_order_model') == self._name:
+            res['context']['child_model'] = self._context.get('child_model')
+
+        return res
+
+    def _default_order_line_values(self):
+        default_data = super()._default_order_line_values()
+        new_default_data = self.env[self._context.get('child_model')]._get_product_catalog_lines_data()
+
+        return {**default_data, **new_default_data}
+
+    def _get_product_catalog_order_data(self, products, **kwagrs):
+        return {product.id: self._get_product_price_and_data(product) for product in products}
+
+    def _get_product_price_and_data(self, product):
+        self.ensure_one()
+        return {'price': product.standard_price}
+
+    def _get_product_catalog_record_lines(self, product_ids):
+        child_model = self._context.get('child_model')
+        grouped_lines = defaultdict(lambda: self.env[child_model])
+        lines = (
+            self.bom_line_ids
+            if child_model == 'mrp.bom.line' else
+            self.byproduct_ids
+            if child_model == 'mrp.bom.byproduct' else
+            []
+        )
+
+        for line in lines:
+            if line.product_id.id in product_ids:
+                grouped_lines[line.product_id] |= line
+
+        return grouped_lines
+
+    def _update_order_line_info(self, product_id, quantity, **kwargs):
+        child_model = self._context.get('child_model')
+        entities = (
+            self.bom_line_ids
+            if child_model == 'mrp.bom.line' else
+            self.byproduct_ids
+            if child_model == 'mrp.bom.byproduct' else
+            []
+        )
+
+        entity = entities.filtered(lambda e: e.product_id.id == product_id)
+        if entity:
+            if quantity != 0:
+                entity.product_qty = quantity
+            else:
+                entity.unlink()
+        elif quantity > 0:
+            command = Command.create({
+                'product_qty': quantity,
+                'product_id': product_id,
+            })
+            key = 'bom_line_ids' if child_model == 'mrp.bom.line' else 'byproduct_ids'
+            self.write({ key: [command] })
+
+        return self.env['product.product'].browse(product_id).standard_price
 
 class MrpBomLine(models.Model):
     _name = 'mrp.bom.line'
@@ -583,6 +649,33 @@ class MrpBomLine(models.Model):
             'context': "{'default_res_model': '%s','default_res_id': %d, 'default_company_id': %s}" % ('product.product', self.product_id.id, self.company_id.id)
         }
 
+    # -------------------------------------------------------------------------
+    # CATALOG
+    # -------------------------------------------------------------------------
+
+    def action_add_from_catalog(self):
+        bom = self.env['mrp.bom'].browse(self.env.context.get('order_id'))
+        return bom.with_context(child_model='mrp.bom.line').action_add_from_catalog()
+
+    def _get_product_catalog_lines_data(self, **kwargs):
+        if self:
+            self.product_id.ensure_one()
+            return {
+                **self[0].bom_id._get_product_price_and_data(self[0].product_id),
+                'quantity': sum(
+                    self.mapped(
+                        lambda line: line.product_uom_id._compute_quantity(
+                            qty=line.product_qty,
+                            to_unit=line.product_uom_id,
+                        )
+                    )
+                ),
+                'readOnly': len(self) > 1,
+            }
+        return {
+            'quantity': 0,
+        }
+
 
 class MrpByProduct(models.Model):
     _name = 'mrp.bom.byproduct'
@@ -630,3 +723,30 @@ class MrpByProduct(models.Model):
         if product._name == 'product.template':
             return False
         return not product._match_all_variant_values(self.bom_product_template_attribute_value_ids)
+
+    # -------------------------------------------------------------------------
+    # CATALOG
+    # -------------------------------------------------------------------------
+
+    def action_add_from_catalog(self):
+        bom = self.env['mrp.bom'].browse(self.env.context.get('order_id'))
+        return bom.with_context(child_model='mrp.bom.byproduct').action_add_from_catalog()
+
+    def _get_product_catalog_lines_data(self, **kwargs):
+        if self:
+            self.product_id.ensure_one()
+            return {
+                **self[0].bom_id._get_product_price_and_data(self[0].product_id),
+                'quantity': sum(
+                    self.mapped(
+                        lambda line: line.product_uom_id._compute_quantity(
+                            qty=line.product_qty,
+                            to_unit=line.product_uom_id,
+                        )
+                    )
+                ),
+                'readOnly': len(self) > 1
+            }
+        return {
+            'quantity': 0,
+        }
