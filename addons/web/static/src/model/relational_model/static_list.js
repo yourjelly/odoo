@@ -485,175 +485,110 @@ export class StaticList extends DataPoint {
     _applyCommands(commands, { canAddOverLimit, reload } = {}) {
         const isOnLastPage = this.limit + this.offset >= this.count;
         const { CREATE, UPDATE, DELETE, UNLINK, LINK, SET } = x2ManyCommands;
-
         const recordsToLoad = [];
+        const createOrUpdateCommandIds = new Set();
+    
         for (const command of commands) {
-            switch (command[0]) {
-                case CREATE: {
-                    const virtualId = getId("virtual");
-                    const record = this._createRecordDatapoint(command[2], { virtualId });
-                    this.records.push(record);
-                    this._commands.push([CREATE, virtualId]);
-                    this._currentIds.splice(this.offset + this.limit, 0, virtualId);
-                    this.count++;
-                    break;
-                }
+            const [action, recordId, changes] = command;
+    
+            switch (action) {
+                case CREATE:
                 case UPDATE: {
-                    const existingCommand = this._commands.find((c) => {
-                        return (c[0] === CREATE || c[0] === UPDATE) && c[1] === command[1];
-                    });
+                    createOrUpdateCommandIds.add(recordId);
+                    const existingCommand = this._commands.find(
+                        c => (c[0] === CREATE || c[0] === UPDATE) && c[1] === recordId
+                    );
+    
                     if (!existingCommand) {
-                        this._commands.push([UPDATE, command[1]]);
+                        this._commands.push([UPDATE, recordId]);
                     }
-                    const record = this._cache[command[1]];
-                    if (!record) {
-                        // the record isn't in the cache, it means it is on a page we haven't loaded
-                        // so we say the record is "unknown", and store all update commands we
-                        // receive about it in a separated structure, s.t. we can easily apply them
-                        // later on after loading the record, if we ever load it.
-                        if (!(command[1] in this._unknownRecordCommands)) {
-                            this._unknownRecordCommands[command[1]] = [];
-                        }
-                        this._unknownRecordCommands[command[1]].push(command);
-                    } else if (command[1] in this._unknownRecordCommands) {
-                        // this case is more tricky: the record is in the cache, but it isn't loaded
-                        // yet, as we are currently loading it (see below, where we load missing
-                        // records for the current page)
-                        this._unknownRecordCommands[command[1]].push(command);
+    
+                    const record = this._cache[recordId];
+                    if (!record || (recordId in this._unknownRecordCommands)) {
+                        const unknownCommands = this._unknownRecordCommands[recordId] || [];
+                        unknownCommands.push(command);
+                        this._unknownRecordCommands[recordId] = unknownCommands;
                     } else {
-                        const changes = {};
-                        for (const fieldName in command[2]) {
-                            if (["one2many", "many2many"].includes(this.fields[fieldName].type)) {
-                                const invisible = record.activeFields[fieldName].invisible;
-                                if (invisible === "True" || invisible === "1") {
-                                    if (!(command[1] in this._unknownRecordCommands)) {
-                                        this._unknownRecordCommands[command[1]] = [];
-                                    }
-                                    this._unknownRecordCommands[command[1]].push(command);
-                                    continue;
-                                }
-                            }
-                            changes[fieldName] = command[2][fieldName];
-                        }
-                        record._applyChanges(record._parseServerValues(changes, record.data));
+                        const visibleChanges = Object.fromEntries(
+                            Object.entries(changes).filter(
+                                ([fieldName, value]) =>
+                                    !["one2many", "many2many"].includes(this.fields[fieldName].type) ||
+                                    (record.activeFields[fieldName].invisible !== "True" &&
+                                        record.activeFields[fieldName].invisible !== "1")
+                            )
+                        );
+                        record._applyChanges(record._parseServerValues(visibleChanges, record.data));
                     }
                     break;
                 }
                 case DELETE:
                 case UNLINK: {
-                    if (command[0] === DELETE) {
-                        if (!this._commands.find((c) => c[0] === CREATE && c[1] === command[1])) {
-                            this._commands.push([DELETE, command[1]]);
-                        }
-                        this._commands = this._commands.filter((c) => {
-                            return !(c[0] === CREATE || c[0] === UPDATE) || c[1] !== command[1];
-                        });
-                    } else {
-                        // FORGET
-                        const replaceWithIndex = this._commands.findIndex(
-                            (c) => c[0] === SET && c[2].includes(command[1])
-                        );
-                        if (replaceWithIndex >= 0) {
-                            const ids = this._commands[replaceWithIndex][2];
-                            this._commands[replaceWithIndex][2] = ids.filter(
-                                (id) => id !== command[1]
-                            );
-                        } else {
-                            const linkToIndex = this._commands.findIndex(
-                                (c) => c[0] === LINK && c[1] === command[1]
-                            );
-                            if (linkToIndex >= 0) {
-                                this._commands.splice(linkToIndex, 1);
-                            } else {
-                                this._commands.push([UNLINK, command[1]]);
-                            }
-                        }
+                    createOrUpdateCommandIds.delete(recordId);
+                    const index = this._commands.findIndex(
+                        c => (c[0] === CREATE || c[0] === UPDATE) && c[1] === recordId
+                    );
+    
+                    if (index >= 0) {
+                        this._commands.splice(index, 1);
                     }
-                    const record = this._cache[command[1]];
-                    if (record) {
-                        const index = this.records.findIndex((r) => r.id === record.id);
-                        if (index >= 0) {
-                            this.records.splice(index, 1);
-                        }
-                    }
-                    const index = this._currentIds.findIndex((id) => id === command[1]);
-                    this._currentIds.splice(index, 1);
+                    delete this._cache[recordId];
+                    this._currentIds = this._currentIds.filter(id => id !== recordId);
                     this.count--;
                     break;
                 }
                 case LINK: {
-                    let record;
-                    if (command[1] in this._cache) {
-                        record = this._cache[command[1]];
-                    } else {
-                        record = this._createRecordDatapoint({ ...command[2], id: command[1] });
-                    }
+                    const record = this._cache[recordId] || this._createRecordDatapoint({ ...changes, id: recordId });
                     if (!this.limit || this.records.length < this.limit || canAddOverLimit) {
-                        if (!command[2]) {
+                        if (!changes) {
                             recordsToLoad.push(record);
                         }
                         this.records.push(record);
                         if (this.records.length > this.limit) {
                             this._tmpIncreaseLimit = this.records.length - this.limit;
-                            const nextLimit = this.limit + this._tmpIncreaseLimit;
-                            this.model._updateConfig(
-                                this.config,
-                                { limit: nextLimit },
-                                { reload: false }
-                            );
+                            this.model._updateConfig(this.config, { limit: this.limit + this._tmpIncreaseLimit }, { reload: false });
                         }
                     }
                     this._currentIds.push(record.resId);
-                    this._commands.push([command[0], command[1]]);
+                    this._commands.push([LINK, recordId]);
                     this.count++;
                     break;
                 }
             }
         }
-        // if we aren't on the last page, and *n* records of the current page have been removed,
-        // the first *n* records of the next page become the last *n* ones of the current
-        // page, so we need to add (and maybe load) them.
+    
         const nbMissingRecords = this.limit - this.records.length;
         if (!isOnLastPage && nbMissingRecords > 0) {
-            const lastRecordIndex = this.limit + this.offset;
-            const firstRecordIndex = lastRecordIndex - nbMissingRecords;
-            const nextRecordIds = this._currentIds.slice(firstRecordIndex, lastRecordIndex);
+            const nextRecordIds = this._currentIds.slice(-nbMissingRecords);
             for (const id of nextRecordIds) {
-                if (this._cache[id]) {
-                    this.records.push(this._cache[id]);
-                } else {
-                    // id isn't in the cache, so we know it's not a virtual id
-                    const record = this._createRecordDatapoint({ id }, { dontApplyCommands: true });
-                    this.records.push(record);
-                    recordsToLoad.push(record);
-                }
+                const record = this._cache[id] || this._createRecordDatapoint({ id }, { dontApplyCommands: true });
+                this.records.push(record);
+                recordsToLoad.push(record);
             }
         }
+    
         if (recordsToLoad.length || reload) {
-            const resIds = reload
-                ? this.records.map((r) => r.resId)
-                : recordsToLoad.map((r) => r.resId);
-            return this.model._loadRecords({ ...this.config, resIds }).then((recordValues) => {
+            const resIds = reload ? this.records.map(r => r.resId) : recordsToLoad.map(r => r.resId);
+            return this.model._loadRecords({ ...this.config, resIds }).then(recordValues => {
                 if (reload) {
                     for (const record of recordValues) {
                         this._createRecordDatapoint(record);
                     }
-                    this.records = resIds.map((id) => this._cache[id]);
-                    return;
-                }
-                for (let i = 0; i < recordsToLoad.length; i++) {
-                    const record = recordsToLoad[i];
-                    record._applyValues(recordValues[i]);
-                    const commands = this._unknownRecordCommands[record.resId];
-                    if (commands) {
-                        delete this._unknownRecordCommands[record.resId];
-                        this._applyCommands(commands);
+                    this.records = resIds.map(id => this._cache[id]);
+                } else {
+                    for (let i = 0; i < recordsToLoad.length; i++) {
+                        const record = recordsToLoad[i];
+                        record._applyValues(recordValues[i]);
+                        const commands = this._unknownRecordCommands[record.resId];
+                        if (commands) {
+                            delete this._unknownRecordCommands[record.resId];
+                            this._applyCommands(commands);
+                        }
                     }
                 }
             });
         }
     }
-
+    
     async _createNewRecordDatapoint(params = {}) {
         const changes = {};
         if (!params.withoutParent && this.config.relationField) {
