@@ -3120,5 +3120,5 @@ class TestQwebTMP(TransactionCase):
     def test_log_like_translate_fields(self):
         for model in self.env.values():
             for field in model._fields.values():
-                if field.inverse and 'lang' in field.get_depends(model)[1]:
+                if not field.readonly and 'lang' in field.get_depends(model)[1]:
                     _logger.warning("translate like field %s", field)

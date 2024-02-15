@@ -2421,7 +2421,7 @@ class IrQWeb(models.AbstractModel):
         translate = self.env.context.get('edit_translations') and values.get('translatable') and (
                 # mark translated fields including stored translated fields and non-stored related translated fields
                 # mark non-translated fields which behave like a translated field
-                field.translate or (field.inverse and 'lang' in field.get_depends(record)[1]))
+                field.translate or (not field.readonly and 'lang' in field.get_depends(record)[1]))
 
         field_options['translate'] = translate
 
