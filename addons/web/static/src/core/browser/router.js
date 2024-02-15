@@ -145,7 +145,7 @@ export function stateToUrl(state) {
         delete tmpState.actionStack;
         delete tmpState.model;
         if (tmpState.id) {
-            pathname.pop();
+            pathname.pop(); // FIXME why do we pop?
             pathname.push(tmpState.id);
             delete tmpState.id;
         }
@@ -172,9 +172,9 @@ export function stateToUrl(state) {
                 }
                 delete tmpState.model;
             }
-            if (tmpState.resId) {
-                pathname.push(tmpState.resId);
-                delete tmpState.resId;
+            if (tmpState.id) {
+                pathname.push(tmpState.id);
+                delete tmpState.id;
             }
         }
     }
@@ -271,7 +271,6 @@ export function urlToState(urlObj) {
             state.actionStack = actions;
         }
     }
-
     return state;
 }
 
