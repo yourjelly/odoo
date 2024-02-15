@@ -1,0 +1,62 @@
+[1mdiff --git a/odoo/addons/base/tests/test_api.py b/odoo/addons/base/tests/test_api.py[m
+[1mindex 6b191f478a80..f3b75e87c080 100644[m
+[1m--- a/odoo/addons/base/tests/test_api.py[m
+[1m+++ b/odoo/addons/base/tests/test_api.py[m
+[36m@@ -163,56 +163,11 @@[m [mclass TestAPI(SavepointCaseWithUserDemo):[m
+     @mute_logger('odoo.models')[m
+     @mute_logger('odoo.addons.base.models.ir_model')[m
+     def test_50_environment(self):[m
+[31m-        """ Test environment on records. """[m
+[31m-        # partners and reachable records are attached to self.env[m
+[31m-        partners = self.env['res.partner'].search([('name', 'ilike', 'j'), ('id', 'in', self.partners.ids)])[m
+[31m-        self.assertEqual(partners.env, self.env)[m
+[31m-        for x in (partners, partners[0], partners[0].company_id):[m
+[31m-            self.assertEqual(x.env, self.env)[m
+[31m-        for p in partners:[m
+[31m-            self.assertEqual(p.env, self.env)[m
+[31m-[m
+[31m-        # check that the current user can read and modify company data[m
+[31m-        partners[0].company_id.name[m
+[31m-        partners[0].company_id.write({'name': 'Fools'})[m
+[31m-[m
+[31m-        # create an environment with a demo user[m
+[31m-        demo = self.env['res.users'].create({[m
+[31m-            'name': 'test_environment_demo',[m
+[31m-            'login': 'test_environment_demo',[m
+[31m-            'password': 'test_environment_demo',[m
+[31m-        })[m
+[31m-        demo_env = self.env(user=demo)[m
+[31m-        self.assertNotEqual(demo_env, self.env)[m
+[31m-[m
+[31m-        # partners and related records are still attached to self.env[m
+[31m-        self.assertEqual(partners.env, self.env)[m
+[31m-        for x in (partners, partners[0], partners[0].company_id):[m
+[31m-            self.assertEqual(x.env, self.env)[m
+[31m-        for p in partners:[m
+[31m-            self.assertEqual(p.env, self.env)[m
+[31m-[m
+[31m-        # create record instances attached to demo_env[m
+[31m-        demo_partners = partners.with_user(demo)[m
+[31m-        self.assertEqual(demo_partners.env, demo_env)[m
+[31m-        for x in (demo_partners, demo_partners[0], demo_partners[0].company_id):[m
+[31m-            self.assertEqual(x.env, demo_env)[m
+[31m-        for p in demo_partners:[m
+[31m-            self.assertEqual(p.env, demo_env)[m
+[31m-[m
+[32m+[m[32m        demo = self.env.ref('base.user_demo')[m
+         # demo user can read but not modify company data[m
+         demo_partner = self.env['res.partner'].search([('name', '=', 'Landon Roberts')]).with_user(demo)[m
+[31m-        self.assertTrue(demo_partner.company_id, 'This partner is supposed to be linked to a company')[m
+         demo_partner.company_id.name[m
+[31m-        with self.assertRaises(AccessError):[m
+[31m-            demo_partner.company_id.write({'name': 'Pricks'})[m
+[31m-[m
+[31m-        # remove demo user from all groups[m
+[31m-        demo.write({'groups_id': [Command.clear()]})[m
+ [m
+[31m-        # demo user can no longer access partner data[m
+[31m-        with self.assertRaises(AccessError):[m
+[31m-            demo_partner.company_id.name[m
+ [m
+     def test_56_environment_uid_origin(self):[m
+         """Check the expected behavior of `env.uid_origin`"""[m
