@@ -232,6 +232,7 @@ class IrActions(models.Model):
         return {
             "binding_model_id", "binding_type", "binding_view_types",
             "display_name", "help", "id", "name", "type", "xml_id",
+            "path",
         }
 
 
@@ -352,7 +353,6 @@ class IrActionsActWindow(models.Model):
         return super()._get_readable_fields() | {
             "context", "mobile_view_mode", "domain", "filter", "groups_id", "limit",
             "res_id", "res_model", "search_view_id", "target", "view_id", "view_mode", "views",
-            "path",
             # `flags` is not a real field of ir.actions.act_window but is used
             # to give the parameters to generate the action
             "flags"
