@@ -263,11 +263,13 @@ export function urlToState(urlObj) {
         actions.push(action);
         actions = actions.filter((a) => a.action || a.resId);
         const activeAction = actions.at(-1);
-        if (activeAction.resId && activeAction.resId !== "new") {
-            state.id = activeAction.resId;
+        if (activeAction) {
+            if (activeAction.resId && activeAction.resId !== "new") {
+                state.id = activeAction.resId;
+            }
+            Object.assign(state, pick(activeAction, "action", "model", "active_id", "view_type"));
+            state.actionStack = actions;
         }
-        Object.assign(state, pick(activeAction, "action", "model", "active_id", "view_type"));
-        state.actionStack = actions;
     }
 
     return state;
