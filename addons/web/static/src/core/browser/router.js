@@ -1,5 +1,5 @@
 import { EventBus } from "@odoo/owl";
-import { pick, shallowEqual } from "../utils/objects";
+import { deepEqual, pick } from "../utils/objects";
 import { objectToUrlEncodedString } from "../utils/urls";
 import { browser } from "./browser";
 
@@ -55,7 +55,7 @@ function computeNewRoute(search, replace, currentRoute) {
         search = Object.assign({}, currentRoute, search);
     }
     search = sanitizeSearch(search);
-    if (!shallowEqual(currentRoute, search)) {
+    if (!deepEqual(currentRoute, search)) {
         return search;
     }
     return false;
@@ -290,10 +290,12 @@ export function startRouter() {
 // To make the back button appear to work, we need to simulate a new document being loaded.
 
 browser.addEventListener("popstate", (ev) => {
-    if (ev.state?.newURL) {
+    // FIXME add breadcrumb display names to state so we don't lose them if we back out of odoo then
+    // forward back into it
+    console.log("popState");
+    if (ev.state?.newRoute) {
         browser.clearTimeout(pushTimeout);
-        const loc = new URL(ev.state.newURL);
-        current = urlToState(loc);
+        current = ev.state.newRoute;
         routerBus.trigger("ROUTE_CHANGE");
     }
 });
@@ -317,9 +319,10 @@ function makeDebouncedPush(mode) {
             // If the route changed: pushes or replaces browser state
             const url = browser.location.origin + stateToUrl(newRoute);
             if (mode === "push") {
-                browser.history.pushState({ newURL: url }, "", url);
+                console.log("pushState", url);
+                browser.history.pushState({ newRoute }, "", url);
             } else {
-                browser.history.replaceState({ newURL: url }, "", url);
+                browser.history.replaceState({ newRoute }, "", url);
             }
             current = urlToState(browser.location);
         }

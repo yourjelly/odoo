@@ -27,6 +27,8 @@ import {
     reactive,
 } from "@odoo/owl";
 import { downloadReport, getReportUrl } from "./reports/utils";
+import { pick } from "@web/core/utils/objects";
+import { zip } from "@web/core/utils/arrays";
 
 class BlankComponent extends Component {
     static props = ["onMounted", "withControlPanel", "*"];
@@ -119,18 +121,44 @@ const CTX_KEY_REGEX =
 // only register this template once for all dynamic classes ControllerComponent
 const ControllerComponentTemplate = xml`<t t-component="Component" t-props="componentProps"/>`;
 
+let id = 0;
+
 export function makeActionManager(env, router = _router) {
+    const breadcrumbCache = {};
     const keepLast = new KeepLast();
-    let id = 0;
-    let controllerStack = [];
+    let controllerStack = _controllersFromState();
     let dialogCloseProm;
     let actionCache = {};
     let dialog = null;
 
+    // The state action (or default user action if none) is loaded as soon as possible
+    // so that the next "doAction" will have its action ready when needed.
+    const actionParams = _getActionParams();
+    if (actionParams && typeof actionParams.actionRequest === "number") {
+        const { actionRequest, options } = actionParams;
+        _loadAction(actionRequest, options.additionalContext);
+    }
+
+    env.bus.addEventListener("CLEAR-CACHES", () => {
+        actionCache = {};
+    });
+    rpcBus.addEventListener("RPC:RESPONSE", (ev) => {
+        const { model, method } = ev.detail.data.params;
+        if (model === "ir.actions.act_window" && UPDATE_METHODS.includes(method)) {
+            actionCache = {};
+        }
+    });
+
     // ---------------------------------------------------------------------------
-    if ("actionStack" in router.current && router.current.actionStack.length > 1) {
-        for (var i = 0; i < router.current.actionStack.length - 1; i++) {
-            const action = router.current.actionStack[i];
+    // misc
+    // ---------------------------------------------------------------------------
+
+    function _controllersFromState() {
+        const state = router.current;
+        if (!state?.actionStack?.length) {
+            return [];
+        }
+        const controllers = state.actionStack.slice(0, -1).map((action) => {
             // create a better display name :
             const controller = {
                 jsId: `controller_${++id}`,
@@ -159,70 +187,54 @@ export function makeActionManager(env, router = _router) {
                 controller.state.view_type = "form";
                 controller.props.viewType = "form";
             }
-            controllerStack.push(controller);
-        }
-        // actionRegistry.contains(actionRequest)
-        const actionsLoadBreadcrumb = controllerStack
-            .filter(
-                (c) =>
-                    !c.action.id ||
-                    (!actionRegistry.contains(c.action.id) && c.action.id !== "menu")
-            )
-            .map((c) => ({ jsId: c.jsId, ...c.state }));
-        if (actionsLoadBreadcrumb.length) {
-            rpc("/web/action/load_breadcrump", {
-                actions: actionsLoadBreadcrumb,
-            }).then((res) => {
-                for (const r of res) {
-                    const index = controllerStack.findIndex(
-                        (controller) => controller.jsId === r[0]
-                    );
-                    controllerStack[index].displayName = r[1];
-                }
-                if (actionsLoadBreadcrumb.length !== res.length) {
-                    const actionsToRemove = actionsLoadBreadcrumb
-                        .filter((a) => res.filter((r) => r[0] === a.jsId).length === 0)
-                        .map((a) => a.jsId);
-                    for (const jsId of actionsToRemove) {
-                        const index = controllerStack.findIndex(
-                            (controller) => controller.jsId === jsId
-                        );
-                        if (index > -1) {
-                            const deleted = controllerStack.splice(index, 1);
-                            console.error(
-                                "Following element was removed from the breadcrumb and from the url.",
-                                "This could be because the action wasn't found or because the user doesn't have the right to access to the record",
-                                deleted[0].state
-                            );
-                        }
-                    }
-                }
-            });
-        }
-    }
-    // ---------------------------------------------------------------------------
-
-    // The state action (or default user action if none) is loaded as soon as possible
-    // so that the next "doAction" will have its action ready when needed.
-    const actionParams = _getActionParams();
-    if (actionParams && typeof actionParams.actionRequest === "number") {
-        const { actionRequest, options } = actionParams;
-        _loadAction(actionRequest, options.additionalContext);
+            return controller;
+        });
+        _loadBreadcrumbs(controllers); // Pursposefully not awaited
+        return controllers;
     }
 
-    env.bus.addEventListener("CLEAR-CACHES", () => {
-        actionCache = {};
-    });
-    rpcBus.addEventListener("RPC:RESPONSE", (ev) => {
-        const { model, method } = ev.detail.data.params;
-        if (model === "ir.actions.act_window" && UPDATE_METHODS.includes(method)) {
-            actionCache = {};
+    async function _loadBreadcrumbs(controllers) {
+        const toFetch = [];
+        const keys = [];
+        for (const { action, state } of controllers) {
+            if (action.id === "menu" || actionRegistry.contains(action.id)) {
+                continue;
+            }
+            const actionInfo = pick(state, "action", "model", "resId");
+            const key = JSON.stringify(actionInfo);
+            keys.push(key);
+            if (key in breadcrumbCache) {
+                continue;
+            }
+            toFetch.push(actionInfo);
         }
-    });
-
-    // ---------------------------------------------------------------------------
-    // misc
-    // ---------------------------------------------------------------------------
+        if (toFetch.length) {
+            const req = rpc("/web/action/load_breadcrump", { actions: toFetch });
+            for (const [i, info] of toFetch.entries()) {
+                const key = JSON.stringify(info);
+                breadcrumbCache[key] = req.then((res) => {
+                    breadcrumbCache[key] = res[i];
+                    return res[i];
+                });
+            }
+        }
+        const displayNames = await Promise.all(keys.map((k) => breadcrumbCache[k]));
+        const newStack = [];
+        for (const [controller, displayName] of zip(controllers, displayNames)) {
+            if (displayName === null) {
+                console.warn(
+                    "The following element was removed from the breadcrumb and from the url.",
+                    "This could be because the action wasn't found or because the user doesn't have the right to access to the record",
+                    controller.state
+                );
+                continue;
+            }
+            controller.displayName = displayName;
+            newStack.push(controller);
+        }
+        // FIXME race condition on controllerStack
+        controllerStack = newStack;
+    }
 
     /**
      * Removes the current dialog from the action service's state.
@@ -702,6 +714,7 @@ export function makeActionManager(env, router = _router) {
         let index = _computeStackIndex(options);
         const controllerArray = [controller];
         if (options.lazyController) {
+            // TODO SAD: understand this, maybe remove lazyController
             controllerArray.unshift(options.lazyController);
             if (index !== 0 && controllerStack.length > 0) {
                 const lastCtrl = controllerStack[index - 1];
@@ -1490,6 +1503,7 @@ export function makeActionManager(env, router = _router) {
      * @returns {Promise<boolean>} true iff the state could have been loaded
      */
     async function loadState() {
+        controllerStack = _controllersFromState();
         const switchViewParams = _getSwitchViewParams();
         if (switchViewParams) {
             // only when we already have an action in dom
@@ -1560,6 +1574,10 @@ export function makeActionManager(env, router = _router) {
         }
         if (actions.length) {
             newState.actionStack = actions;
+            Object.assign(
+                newState,
+                pick(newState.actionStack.at(-1), "action", "model", "active_id")
+            );
         }
         if (
             lastCtrl.action.type === "ir.actions.act_window" &&
