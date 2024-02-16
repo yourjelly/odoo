@@ -226,7 +226,6 @@ export function urlToState(urlObj) {
                     action.action = isNaN(parseInt(part.slice(4)))
                         ? part.slice(4)
                         : parseInt(part.slice(4));
-                    continue;
                 } else if (part.includes(".") || part.startsWith("m-")) {
                     // it's a model
                     // Note that the shourtcut don't have "."
@@ -235,33 +234,32 @@ export function urlToState(urlObj) {
                     } else {
                         action.model = part;
                     }
-                    continue;
                 } else {
                     // it's a shortcut of an action
                     action.action = part;
-                    continue;
-                }
-            }
-            if (!isNaN(parseInt(part)) || part === "new") {
-                // Action with a resId
-                if (Object.values(action).length > 0) {
-                    // We push the action without the id, to have a multimodel action view
-                    actions.push({ ...action });
-                }
-                if (part === "new") {
-                    action.resId = part;
-                    action.view_type = "form";
-                } else {
-                    action.resId = parseInt(part);
                 }
                 continue;
             }
+            // Action with a resId
+            if (Object.values(action).length > 0) {
+                // We push the action without the id, to have a multimodel action view
+                actions.push({ ...action });
+            }
+            if (part === "new") {
+                action.resId = part;
+                action.view_type = "form";
+            } else {
+                action.resId = parseInt(part);
+            }
+            continue;
         }
         if (actions.at(-1)?.resId) {
             action.active_id = actions.at(-1).resId;
         }
         actions.push(action);
-        actions = actions.filter((a) => a.action || a.resId);
+        // Don't keep actions for models unless they're the last one.
+        // FIXME: should we remove the last action if there is no view_type?
+        actions = actions.filter((a) => a.action || a.resId || a === actions.at(-1));
         const activeAction = actions.at(-1);
         if (activeAction) {
             if (activeAction.resId && activeAction.resId !== "new") {
