@@ -483,6 +483,9 @@ export class StaticList extends DataPoint {
     }
 
     _applyCommands(commands, { canAddOverLimit, reload } = {}) {
+        const id = Math.random();
+        console.time(id);
+
         const { CREATE, UPDATE, DELETE, UNLINK, LINK, SET } = x2ManyCommands;
 
         // To prevent from iterating over all commands each time we apply an UPDATE command, we
@@ -702,6 +705,7 @@ export class StaticList extends DataPoint {
                 }
             });
         }
+        console.timeEnd(id);
     }
 
     async _createNewRecordDatapoint(params = {}) {
