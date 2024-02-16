@@ -24,6 +24,13 @@ class Users(models.Model):
         help="Policy on how to handle Chatter notifications:\n"
              "- Handle by Emails: notifications are sent to your email address\n"
              "- Handle in Odoo: notifications appear in your Odoo Inbox")
+    notification_planning = fields.Selection([
+        ('online', 'Only when I\'m online'),
+        ('schedule', 'According to a schedule'),
+        ('always', 'Always'),
+    ], 'Send Notifications', default='always')
+    notification_schedule_start = fields.Float(string='Notification Schedule')
+    notification_schedule_end = fields.Float()
 
     _sql_constraints = [(
         "notification_type",
@@ -63,11 +70,11 @@ class Users(models.Model):
 
     @property
     def SELF_READABLE_FIELDS(self):
-        return super().SELF_READABLE_FIELDS + ['notification_type']
+        return super().SELF_READABLE_FIELDS + ['notification_type', 'notification_planning', 'notification_schedule_start', 'notification_schedule_end']
 
     @property
     def SELF_WRITEABLE_FIELDS(self):
-        return super().SELF_WRITEABLE_FIELDS + ['notification_type']
+        return super().SELF_WRITEABLE_FIELDS + ['notification_type', 'notification_planning', 'notification_schedule_start', 'notification_schedule_end']
 
     @api.model_create_multi
     def create(self, vals_list):
