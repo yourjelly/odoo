@@ -23,6 +23,8 @@
 "tax_tag_sgst","SGST","taxes"
 "tax_tag_cgst","CGST","taxes"
 "tax_tag_igst","IGST","taxes"
+"tax_tag_tds","TDS","taxes"
+"tax_tag_tcs","TCS","taxes"
 "tax_tag_non_itc_sgst","NON ITC SGST","taxes"
 "tax_tag_non_itc_cgst","NON ITC CGST","taxes"
 "tax_tag_non_itc_igst","NON ITC IGST","taxes"

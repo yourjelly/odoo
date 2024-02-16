@@ -10,6 +10,15 @@
                 <field name="l10n_in_edi_cancel_reason" attrs="{'invisible': ['|', '|', ('country_code', '!=', 'IN'), ('state', '!=', 'posted'), ('l10n_in_edi_show_cancel', '!=', True)]}"/>
                 <field name="l10n_in_edi_cancel_remarks" attrs="{'invisible': ['|', '|', ('country_code', '!=', 'IN'), ('state', '!=', 'posted'), ('l10n_in_edi_show_cancel', '!=', True)]}"/>
             </xpath>
+            <xpath expr="//div[hasclass('alert')]" position="after">
+                <field name="show_alert" invisible="1"/>
+            </xpath>
+            <xpath expr="//div[hasclass('alert')]" position="after">
+                <div class="alert alert-warning main mb-0" role="alert"
+                        attrs="{'invisible': [('show_alert', '=', False)]}">
+                        In the absence of PAN No. in Vendor master, It is advised to apply TDS/TCS at a higher rate
+                    </div>
+            </xpath>
         </field>
     </record>
 </odoo>

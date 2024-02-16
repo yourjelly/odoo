@@ -18,6 +18,7 @@ class AccountMove(models.Model):
         ], string="Cancel reason", copy=False)
     l10n_in_edi_cancel_remarks = fields.Char("Cancel remarks", copy=False)
     l10n_in_edi_show_cancel = fields.Boolean(compute="_compute_l10n_in_edi_show_cancel", string="E-invoice(IN) is sent?")
+    show_alert = fields.Boolean(string="Show Alert", compute="_compute_show_alert")
 
     @api.depends('edi_document_ids')
     def _compute_l10n_in_edi_show_cancel(self):
@@ -61,3 +62,61 @@ class AccountMove(models.Model):
         """
         param_name = 'l10n_in_edi.manage_invoice_negative_lines'
         return bool(self.env['ir.config_parameter'].sudo().get_param(param_name))
+
+    @api.depends('move_type')
+    def _compute_show_alert(self):
+        breakpoint()
+        tax_tags = (
+            self.env.ref("l10n_in.tax_tag_tds")+
+            self.env.ref("l10n_in.tax_tag_tcs")
+        )
+        for record in self:
+            record.show_alert = (
+                record.partner_id.l10n_in_pan and record.move_type == 'in_invoice' and record.amount_residual > 0
+                and any(line.tax_tag_ids in tax_tags.ids for line in record.line_ids)
+            )
+        # for record in self:line
+        #     if record.move_type == 'in_invoice' and record.amount_residual > 0:
+        #         for line in record.line_ids:
+        #             breakpoint()
+        #     # record.show_alert = (
+        #     #     record.move_type == 'in_invoice' and record.amount_residual > 0
+        #     #     and any(line.tax_tag_ids in tax_tags.ids for line in record.line_ids)
+        #     # )
+        #     record.show_alert = True
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    # def action_post(self):
+    #     # super().action_post();
+    #     if self.move_type == 'in_invoice' and self.state == 'draft':
+    #         if self.line_ids.filtered(lambda line : line.tax_ids.tax_group_id.name in ['TCS','TDS']):
+        
+    # def high_rate_warning(self):
+    #     return {'warning': {
+    #         'title': _("warning"),
+    #         'message': "warning message"
+    #     }}
+            
