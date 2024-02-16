@@ -33,20 +33,20 @@
                                     <span t-esc="picking.name"/>
                                 </a>
                                 <div t-if="picking.state == 'done'">
-                                    <span class="small badge text-bg-success orders_label_text_align">
+                                    <span class="small badge rounded-pill text-bg-success orders_label_text_align">
                                         <i class="fa fa-fw fa-truck"/> Shipped
                                     </span>
-                                    <a class="badge text-bg-secondary orders_label_text_align" target="_blank"
+                                    <a class="badge rounded-pill text-bg-secondary orders_label_text_align" target="_blank"
                                         t-att-href="'/my/picking/return/pdf/%s?%s' % (picking.id, keep_query())">
                                         RETURN
                                     </a>
                                 </div>
                                 <span t-elif="picking.state == 'cancel'"
-                                    class="small badge text-bg-danger orders_label_text_align">
+                                    class="small badge rounded-pill text-bg-danger orders_label_text_align">
                                     <i class="fa fa-fw fa-times"/>Cancelled
                                 </span>
                                 <span t-elif="picking.state in ['draft', 'waiting', 'confirmed', 'assigned']"
-                                    class="small badge text-bg-info orders_label_text_align">
+                                    class="small badge rounded-pill text-bg-info orders_label_text_align">
                                     <i class="fa fa-fw fa-clock-o"/>Preparation
                                 </span>
                             </div>
@@ -77,15 +77,15 @@
                                 <span t-esc="picking.name"/>
                             </a>
                             <span t-if="picking.state == 'done'"
-                                class="small badge text-bg-success orders_label_text_align">
+                                class="small badge rounded-pill text-bg-success orders_label_text_align">
                                 <i class="fa fa-fw fa-truck"/> Received
                             </span>
                             <span t-elif="picking.state == 'cancel'"
-                                class="small badge text-bg-danger orders_label_text_align">
+                                class="small badge rounded-pill text-bg-danger orders_label_text_align">
                                 <i class="fa fa-fw fa-times"/> Cancelled
                             </span>
                             <span t-elif="picking.state in ['draft', 'waiting', 'confirmed', 'assigned']"
-                                class="small badge text-bg-info orders_label_text_align">
+                                class="small badge rounded-pill text-bg-info orders_label_text_align">
                                 <i class="fa fa-fw fa-clock-o"/> Awaiting arrival
                             </span>
                         </div>
