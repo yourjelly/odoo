@@ -26,3 +26,19 @@ class SaleOrder(models.Model):
         mapped_data = dict([(item['sale_order_id'][0], item['sale_order_id_count']) for item in expense_data])
         for sale_order in self:
             sale_order.expense_count = mapped_data.get(sale_order.id, 0)
+
+    def _action_confirm(self):
+        """ Implementation of additional mechanism of Sales Order confirmation.
+            This method should be extended when the confirmation should generated
+            other documents. In this method, the SO are in 'sale' state (not yet 'done').
+        """
+        # create an analytic account if at least an expense product
+        expense = False
+        for order in self:
+            expense = False
+            for product in order.order_line.product_id:
+                if product.can_be_expensed and product.expense_policy not in [False, 'no']:
+                    expense = True
+            if expense:
+                if not order.analytic_account_id:
+                        order._create_analytic_account()
