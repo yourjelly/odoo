@@ -1,5 +1,69 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <record id="project_sharing_project_task_view_form_hr_timesheet" model="ir.ui.view">
+        <field name="name">project.sharing.project.task.view.form.hr.timesheet</field>
+        <field name="model">project.task</field>
+        <field name="priority">500</field>
+        <field name="inherit_id" ref="project.project_sharing_project_task_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//tree[@name='sub_tasks_tree']/field[@name='allocated_hours']"  position="attributes">
+                <attribute name="groups"></attribute>
+            </xpath>
+            <xpath expr="//tree[@name='sub_tasks_tree']/field[@name='effective_hours']" position="attributes">
+                <attribute name="groups"></attribute>
+            </xpath>
+            <xpath expr="//tree[@name='sub_tasks_tree']/field[@name='subtask_effective_hours']"  position="attributes">
+                <attribute name="groups"></attribute>
+            </xpath>
+            <xpath expr="//tree[@name='sub_tasks_tree']/field[@name='total_hours_spent']"  position="attributes">
+                <attribute name="groups"></attribute>
+            </xpath>
+            <xpath expr="//tree[@name='sub_tasks_tree']/field[@name='remaining_hours']"  position="attributes">
+                <attribute name="groups"></attribute>
+            </xpath>
+            <xpath expr="//tree[@name='sub_tasks_tree']/field[@name='progress']"  position="attributes">
+                <attribute name="groups"></attribute>
+            </xpath>
+            <xpath expr="//tree[@name='blocked_by_tree']/field[@name='allocated_hours']"  position="attributes">
+                <attribute name="groups"></attribute>
+            </xpath>
+            <xpath expr="//tree[@name='blocked_by_tree']/field[@name='effective_hours']" position="attributes">
+                <attribute name="groups"></attribute>
+            </xpath>
+            <xpath expr="//tree[@name='blocked_by_tree']/field[@name='subtask_effective_hours']"  position="attributes">
+                <attribute name="groups"></attribute>
+            </xpath>
+            <xpath expr="//tree[@name='blocked_by_tree']/field[@name='total_hours_spent']"  position="attributes">
+                <attribute name="groups"></attribute>
+            </xpath>
+            <xpath expr="//tree[@name='blocked_by_tree']/field[@name='remaining_hours']"  position="attributes">
+                <attribute name="groups"></attribute>
+            </xpath>
+            <xpath expr="//tree[@name='blocked_by_tree']/field[@name='progress']"  position="attributes">
+                <attribute name="groups"></attribute>
+            </xpath>
+            <label for="allocated_hours" position="attributes">
+                <attribute name="groups"></attribute>
+            </label>
+            <div name="allocated_hours_div" position="attributes">
+                <attribute name="groups"></attribute>
+            </div>
+            </field>
+            <page id="timesheets_tab" position="attributes">
+                <attribute name="groups"></attribute>
+            </page>
+            <tree name="timesheet_tree" position="attributes">
+                <attribute name="editable">False</attribute>
+                <attribute name="create">0</attribute>
+                <attribute name="delete">0</attribute>
+                <attribute name="no_open">1</attribute>
+            </tree>
+            <xpath expr="//tree[@name='timesheet_tree']/field[@name='employee_id']" position="attributes">
+                <attribute name="widget"></attribute>
+            </xpath>
+        </field>
+    </record>
+
     <record id="project_sharing_kanban_inherit_project_task_view_kanban" model="ir.ui.view">
         <field name="name">project.sharing.project.task.timesheet.kanban.inherited</field>
         <field name="model">project.task</field>

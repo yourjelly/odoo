@@ -138,10 +138,10 @@
             </field>
         </record>
 
-        <record id="project_task_view_form_sale_timesheet" model="ir.ui.view">
+        <record id="project_task_view_form_base_sale_timesheet" model="ir.ui.view">
             <field name="name">project.task.view.form.sale.timesheet</field>
             <field name="model">project.task</field>
-            <field name="inherit_id" ref="project.project_task_view_form"/>
+            <field name="inherit_id" ref="project.project_task_view_form_base"/>
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='user_ids']" position="after">
                     <field name="is_project_map_empty" invisible="1" groups="hr_timesheet.group_hr_timesheet_user"/>

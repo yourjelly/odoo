@@ -277,7 +277,7 @@
         <record id="project_task_view_form_base" model="ir.ui.view">
             <field name="name">project.task.view.form.base</field>
             <field name="model">project.task</field>
-            <field name="priority">1</field>
+            <field eval="2" name="priority"/>
             <field name="arch" type="xml">
                 <form class="o_form_project_tasks" name="Tasks" js_class="project_task_form">
                     <header>
@@ -353,24 +353,23 @@
                     </div>
                     <group>
                         <group>
-                            <field name="project_id" domain="[('active', '=', True), '|', ('company_id', '=', False), ('company_id', '=?', company_id)]"
-                                widget="project"/>
-                            <field name="milestone_id" placeholder="e.g. Product Launch" context="{'default_project_id': project_id}"
-                                invisible="not project_id or not allow_milestones"/>
-                            <field name="user_ids" options="{'no_open': True, 'no_quick_create': True}" widget="many2many_avatar_user"
-                                domain="[('share', '=', False), ('active', '=', True)]"/>
-                            <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color', 'no_create_edit': True}"
-                                context="{'project_id': project_id}"/>
+                            <field name="project_id" widget="project"
+                                domain="[('active', '=', True), '|', ('company_id', '=', False), ('company_id', '=?', company_id)]"/>
+                            <field name="milestone_id" placeholder="e.g. Product Launch"
+                                context="{'default_project_id': project_id}" invisible="not project_id or not allow_milestones"/>
+                            <field name="user_ids" options="{'no_open': True, 'no_quick_create': True}"
+                                widget="many2many_avatar_user" domain="[('share', '=', False), ('active', '=', True)]"/>
+                            <field name="tag_ids" widget="many2many_tags"
+                                options="{'color_field': 'color', 'no_create_edit': True}" context="{'project_id': project_id}"/>
                         </group>
                         <group>
                             <field name="partner_id" widget="res_partner_many2one" invisible="not project_id"/>
-                            <label for="date_deadline" decoration-danger="date_deadline &lt; current_date  and state not in ['1_done', '1_canceled']"/>
+                            <label for="date_deadline" decoration-danger="date_deadline &lt; current_date and state not in ['1_done', '1_canceled']"/>
                             <div id="date_deadline_and_recurring_task" class="d-inline-flex w-100" groups="base.group_user">
                                 <field name="date_deadline" nolabel="1"
-                                    decoration-danger="date_deadline &lt; current_date  and state not in ['1_done', '1_canceled']"/>
+                                    decoration-danger="date_deadline &lt; current_date and state not in ['1_done', '1_canceled']"/>
                                 <field name="recurring_task" nolabel="1" class="ms-0" style="width: fit-content;"
-                                    widget="boolean_icon" options="{'icon': 'fa-repeat'}"
-                                    invisible="not active or parent_id"
+                                    widget="boolean_icon" options="{'icon': 'fa-repeat'}" invisible="not active or parent_id"
                                     groups="project.group_project_recurring_tasks"/>
                             </div>
                             <label for="repeat_interval" invisible="not recurring_task" groups="project.group_project_recurring_tasks"/>
@@ -393,10 +392,8 @@
                         </page>
                         <page name="sub_tasks_page" string="Sub-tasks" invisible="not project_id">
                             <field name="child_ids" context="{
-                                    'default_display_in_project': False,
-                                    'default_user_ids': user_ids,
-                                    'default_parent_id': id,
-                                    'default_partner_id': partner_id,
+                                    'default_display_in_project': False, 'default_user_ids': user_ids,
+                                    'default_parent_id': id, 'default_partner_id': partner_id,
                                     'default_milestone_id': allow_milestones and milestone_id,
                                 }" widget="subtasks_one2many">
                                 <tree name="sub_tasks_tree" editable="bottom" decoration-muted="state in ['1_done','1_canceled']" open_form_view="True">

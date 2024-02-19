@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <record id="project_task_view_form_project_timesheet_holidays" model="ir.ui.view">
+    <record id="project_task_view_form_base_project_timesheet_holidays" model="ir.ui.view">
         <field name="name">project.task.view.form.project.timesheet.holidays</field>
         <field name="model">project.task</field>
-        <field name="inherit_id" ref="hr_timesheet.project_task_view_form_hr_timesheet"/>
+        <field name="inherit_id" ref="hr_timesheet.project_task_view_form_base_hr_timesheet"/>
         <field name="arch" type="xml">
             <xpath expr="/form" position="inside">
-                <field name="is_timeoff_task" invisible="1"/>
+                <field name="is_timeoff_task" invisible="1" groups="base.group_user"/>
             </xpath>
             <xpath expr="//field[@name='timesheet_ids']" position="attributes">
                 <attribute name="readonly">is_timeoff_task</attribute>

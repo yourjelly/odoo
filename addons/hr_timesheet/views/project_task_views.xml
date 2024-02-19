@@ -8,31 +8,43 @@
             <field name="arch" type="xml">
                 <xpath expr="//tree[@name='sub_tasks_tree']/field[@name='company_id']" position="after">
                     <field name="allow_timesheets" column_invisible="1"/>
-                    <field name="allocated_hours" widget="timesheet_uom_no_toggle" sum="Total Allocated Time" optional="hide" column_invisible="not parent.allow_timesheets"/>
-                    <field name="effective_hours" widget="timesheet_uom" sum="Hours Spent" optional="hide" column_invisible="not parent.allow_timesheets"/>
-                    <field name="subtask_effective_hours" widget="timesheet_uom" sum="Sub-tasks Hours Spent" optional="hide" column_invisible="not parent.allow_timesheets"/>
-                    <field name="total_hours_spent" widget="timesheet_uom" sum="Total Hours" optional="hide" column_invisible="not parent.allow_timesheets"/>
-                    <field name="remaining_hours" widget="timesheet_uom" sum="Remaining Hours" optional="hide" column_invisible="not parent.allow_timesheets"
+                    <field name="allocated_hours" widget="timesheet_uom_no_toggle" sum="Total Allocated Time" optional="hide" 
+                        column_invisible="not parent.allow_timesheets" groups="hr_timesheet.group_hr_timesheet_user"/>
+                    <field name="effective_hours" widget="timesheet_uom" sum="Hours Spent" optional="hide"
+                        column_invisible="not parent.allow_timesheets" groups="hr_timesheet.group_hr_timesheet_user"/>
+                    <field name="subtask_effective_hours" widget="timesheet_uom" sum="Sub-tasks Hours Spent" optional="hide"
+                        column_invisible="not parent.allow_timesheets" groups="hr_timesheet.group_hr_timesheet_user"/>
+                    <field name="total_hours_spent" widget="timesheet_uom" sum="Total Hours" optional="hide"
+                        column_invisible="not parent.allow_timesheets" groups="hr_timesheet.group_hr_timesheet_user"/>
+                    <field name="remaining_hours" widget="timesheet_uom" sum="Remaining Hours" optional="hide"
+                        column_invisible="not parent.allow_timesheets" groups="hr_timesheet.group_hr_timesheet_user"
                         decoration-danger="progress &gt;= 1" decoration-warning="progress &gt;= 0.8 and progress &lt; 1"/>
-                    <field name="progress" widget="project_task_progressbar" optional="hide" options="{'overflow_class': 'bg-danger'}" column_invisible="not parent.allow_timesheets"/>
+                    <field name="progress" widget="project_task_progressbar" optional="hide" options="{'overflow_class': 'bg-danger'}"
+                        column_invisible="not parent.allow_timesheets" groups="hr_timesheet.group_hr_timesheet_user"/>
                 </xpath>
                 <xpath expr="//tree[@name='blocked_by_tree']/field[@name='company_id']" position="after">
                     <field name="allow_timesheets" column_invisible="1"/>
-                    <field name="allocated_hours" widget="timesheet_uom_no_toggle" sum="Total Allocated Time" optional="hide" column_invisible="not parent.allow_timesheets"/>
-                    <field name="effective_hours" widget="timesheet_uom" sum="Hours Spent" optional="hide" column_invisible="not parent.allow_timesheets"/>
-                    <field name="subtask_effective_hours" widget="timesheet_uom" sum="Sub-tasks Hours Spent" optional="hide" column_invisible="not parent.allow_timesheets"/>
-                    <field name="total_hours_spent" widget="timesheet_uom" sum="Total Hours" optional="hide" column_invisible="not parent.allow_timesheets"/>
-                    <field name="remaining_hours" widget="timesheet_uom" sum="Remaining Hours" optional="hide" column_invisible="not parent.allow_timesheets"
+                    <field name="allocated_hours" widget="timesheet_uom_no_toggle" sum="Total Allocated Time" optional="hide"
+                        column_invisible="not parent.allow_timesheets" groups="hr_timesheet.group_hr_timesheet_user"/>
+                    <field name="effective_hours" widget="timesheet_uom" sum="Hours Spent" optional="hide"
+                        column_invisible="not parent.allow_timesheets" groups="hr_timesheet.group_hr_timesheet_user"/>
+                    <field name="subtask_effective_hours" widget="timesheet_uom" sum="Sub-tasks Hours Spent" optional="hide"
+                        column_invisible="not parent.allow_timesheets" groups="hr_timesheet.group_hr_timesheet_user"/>
+                    <field name="total_hours_spent" widget="timesheet_uom" sum="Total Hours" optional="hide"
+                        column_invisible="not parent.allow_timesheets" groups="hr_timesheet.group_hr_timesheet_user"/>
+                    <field name="remaining_hours" widget="timesheet_uom" sum="Remaining Hours" optional="hide"
+                        column_invisible="not parent.allow_timesheets" groups="hr_timesheet.group_hr_timesheet_user"
                         decoration-danger="progress &gt;= 1" decoration-warning="progress &gt;= 0.8 and progress &lt; 1"/>
-                    <field name="progress" widget="project_task_progressbar" optional="hide" options="{'overflow_class': 'bg-danger'}" column_invisible="not parent.allow_timesheets"/>
+                    <field name="progress" widget="project_task_progressbar" optional="hide" options="{'overflow_class': 'bg-danger'}" 
+                        column_invisible="not parent.allow_timesheets" groups="hr_timesheet.group_hr_timesheet_user"/>
                 </xpath>
                 <xpath expr="//field[@name='date_deadline']" position="after">
                     <field name="allow_timesheets" invisible="1"/>
                     <field name="encode_uom_in_days" invisible="1"/>
                     <field name="subtask_count" invisible="1"/>
-                    <label for="allocated_hours" invisible="not allow_timesheets"/>
-                    <div name="allocated_hours_div" invisible="not allow_timesheets" class="text-nowrap">
-                        <field name="allocated_hours" class="oe_inline o_field_float_time o_task_planned_hours" widget="timesheet_uom_no_toggle" />
+                    <label for="allocated_hours" invisible="not allow_timesheets" groups="hr_timesheet.group_hr_timesheet_user"/>
+                    <div name="allocated_hours_div" invisible="not allow_timesheets" class="text-nowrap" groups="hr_timesheet.group_hr_timesheet_user">
+                        <field name="allocated_hours" class="oe_inline o_field_float_time o_task_planned_hours" widget="timesheet_uom_no_toggle"/>
                         <span invisible="subtask_count == 0">
                             (incl. <field name="subtask_allocated_hours" nolabel="1" widget="timesheet_uom_no_toggle" class="oe_inline"/> on
                             <span class="fw-bold text-dark"> Sub-tasks</span>)
@@ -41,15 +53,24 @@
                     </div>
                 </xpath>
                 <xpath expr="//notebook/page[@name='description_page']" position="after">
-                    <page string="Timesheets" name="page_timesheets" id="timesheets_tab" invisible="not allow_timesheets">
+                    <page string="Timesheets" name="page_timesheets" id="timesheets_tab" invisible="not allow_timesheets" groups="hr_timesheet.group_hr_timesheet_user">
                         <field name="analytic_account_active" invisible="1"/>
+                        <group name="timesheet_error" invisible="analytic_account_active" groups="base.group_user">
+                            <div class="alert alert-warning mb-n4 mt-3" role="alert" colspan="2">
+                                You cannot log timesheets on this project since it is linked to an inactive analytic account. Please change this account, or reactivate the current one to timesheet on the project.
+                            </div>
+                        </group>
                         <field name="timesheet_ids" mode="tree,kanban" invisible="not analytic_account_active" context="{'default_project_id': project_id, 'default_name':''}">
-                            <tree name="timesheet_tree" string="Timesheet Activities" default_order="date" no_open="1" create="false" delete="0" decoration-muted="readonly_timesheet">
+                            <tree name="timesheet_tree" string="Timesheet Activities" default_order="date" editable="bottom" decoration-muted="readonly_timesheet">
                                 <field name="readonly_timesheet" column_invisible="1"/>
                                 <field name="date" readonly="readonly_timesheet"/>
-                                <field name="employee_id" readonly="readonly_timesheet" context="{'active_test': True}" required="1"/>
+                                <field name="employee_id" readonly="readonly_timesheet" context="{'active_test': True}" required="1" widget="many2one_avatar_employee"/>
                                 <field name="name" readonly="readonly_timesheet" required="0"/>
                                 <field name="unit_amount" readonly="readonly_timesheet" widget="timesheet_uom" decoration-danger="unit_amount &gt; 24"/>
+                                <field name="project_id" column_invisible="True" groups="base.group_user"/>
+                                <field name="task_id" column_invisible="True" groups="base.group_user"/>
+                                <field name="company_id" column_invisible="True" groups="base.group_user"/>
+                                <field name="user_id" column_invisible="True" groups="base.group_user"/>
                             </tree>
                             <kanban name="timesheet_kanban" class="o_kanban_mobile">
                                 <field name="date"/>
@@ -63,6 +84,8 @@
                                         <div t-attf-class="oe_kanban_card oe_kanban_global_click">
                                             <div class="row">
                                                 <div class="col-6">
+                                                    <field name="employee_id" class="me-1" widget="many2one_avatar_employee" context="{'active_test': True}"
+                                                        readonly="readonly_timesheet" groups="base.group_user"/>
                                                     <strong name="employee_data"><span><t t-esc="record.employee_id.value"/></span></strong>
                                                 </div>
                                                 <div class="col-6 float-end text-end">
@@ -83,8 +106,23 @@
                                     </t>
                                 </templates>
                             </kanban>
+                            <form name="timesheet_form" string="Timesheet Activities" groups="base.group_user">
+                                <sheet>
+                                    <group>
+                                        <field name="readonly_timesheet" invisible="1"/>
+                                        <field name="date" readonly="readonly_timesheet"/>
+                                        <field name="user_id" invisible="1" readonly="readonly_timesheet"/>
+                                        <field name="employee_id" widget="many2one_avatar_employee" context="{'active_test': True}" required="1" readonly="readonly_timesheet"/>
+                                        <field name="name" required="0" readonly="readonly_timesheet"/>
+                                        <field name="unit_amount" string="Duration" widget="float_time" decoration-danger="unit_amount &gt; 24" readonly="readonly_timesheet"/>
+                                        <field name="project_id" invisible="1"/>
+                                        <field name="task_id" invisible="1"/>
+                                        <field name="company_id" invisible="1"/>
+                                    </group>
+                                </sheet>
+                            </form>
                         </field>
-                        <group invisible="not analytic_account_active">
+                        <group invisible="not analytic_account_active" groups="hr_timesheet.group_hr_timesheet_user">
                             <group class="oe_subtotal_footer" name="project_hours">
                                 <span class="o_td_label float-start">
                                     <label class="fw-bold" for="effective_hours" string="Hours Spent" invisible="encode_uom_in_days"/>
@@ -117,105 +155,11 @@
                                 </span>
                                 <field name="remaining_hours" widget="timesheet_uom" class="oe_subtotal_footer_separator"
                                     invisible="allocated_hours == 0.0" nolabel="1" decoration-danger="remaining_hours &lt; 0"/>
+                                <field name="allocated_hours"/>
                             </group>
                         </group>
                     </page>
                 </xpath>
-            </field>
-        </record>
-
-        <record id="project_task_view_form_hr_timesheet" model="ir.ui.view">
-            <field name="name">project.task.view.form.hr.timesheet</field>
-            <field name="model">project.task</field>
-            <field name="inherit_id" ref="project.project_task_view_form"/>
-            <field name="arch" type="xml">
-                <xpath expr="//tree[@name='sub_tasks_tree']/field[@name='allocated_hours']"  position="attributes">
-                    <attribute name="groups">hr_timesheet.group_hr_timesheet_user</attribute>
-                </xpath>
-                <xpath expr="//tree[@name='sub_tasks_tree']/field[@name='effective_hours']" position="attributes">
-                    <attribute name="groups">hr_timesheet.group_hr_timesheet_user</attribute>
-                </xpath>
-                <xpath expr="//tree[@name='sub_tasks_tree']/field[@name='subtask_effective_hours']"  position="attributes">
-                    <attribute name="groups">hr_timesheet.group_hr_timesheet_user</attribute>
-                </xpath>
-                <xpath expr="//tree[@name='sub_tasks_tree']/field[@name='total_hours_spent']"  position="attributes">
-                    <attribute name="groups">hr_timesheet.group_hr_timesheet_user</attribute>
-                </xpath>
-                <xpath expr="//tree[@name='sub_tasks_tree']/field[@name='remaining_hours']"  position="attributes">
-                    <attribute name="groups">hr_timesheet.group_hr_timesheet_user</attribute>
-                </xpath>
-                <xpath expr="//tree[@name='sub_tasks_tree']/field[@name='progress']"  position="attributes">
-                    <attribute name="groups">hr_timesheet.group_hr_timesheet_user</attribute>
-                </xpath>
-                <xpath expr="//tree[@name='blocked_by_tree']/field[@name='allocated_hours']"  position="attributes">
-                    <attribute name="groups">hr_timesheet.group_hr_timesheet_user</attribute>
-                </xpath>
-                <xpath expr="//tree[@name='blocked_by_tree']/field[@name='effective_hours']" position="attributes">
-                    <attribute name="groups">hr_timesheet.group_hr_timesheet_user</attribute>
-                </xpath>
-                <xpath expr="//tree[@name='blocked_by_tree']/field[@name='subtask_effective_hours']"  position="attributes">
-                    <attribute name="groups">hr_timesheet.group_hr_timesheet_user</attribute>
-                </xpath>
-                <xpath expr="//tree[@name='blocked_by_tree']/field[@name='total_hours_spent']"  position="attributes">
-                    <attribute name="groups">hr_timesheet.group_hr_timesheet_user</attribute>
-                </xpath>
-                <xpath expr="//tree[@name='blocked_by_tree']/field[@name='remaining_hours']"  position="attributes">
-                    <attribute name="groups">hr_timesheet.group_hr_timesheet_user</attribute>
-                </xpath>
-                <xpath expr="//tree[@name='blocked_by_tree']/field[@name='progress']"  position="attributes">
-                    <attribute name="groups">hr_timesheet.group_hr_timesheet_user</attribute>
-                </xpath>
-                <label for="allocated_hours" position="attributes">
-                    <attribute name="groups">hr_timesheet.group_hr_timesheet_user</attribute>
-                </label>
-                <div name="allocated_hours_div" position="attributes">
-                    <attribute name="groups">hr_timesheet.group_hr_timesheet_user</attribute>
-                </div>
-                <field name="analytic_account_active" position="after">
-                    <group name="timesheet_error" invisible="analytic_account_active">
-                        <div class="alert alert-warning mb-n4 mt-3" role="alert" colspan="2">
-                            You cannot log timesheets on this project since it is linked to an inactive analytic account. Please change this account, or reactivate the current one to timesheet on the project.
-                        </div>
-                    </group>
-                </field>
-                <page id="timesheets_tab" position="attributes">
-                    <attribute name="groups">hr_timesheet.group_hr_timesheet_user</attribute>
-                </page>
-                <tree name="timesheet_tree" position="attributes">
-                    <attribute name="editable">bottom</attribute>
-                    <attribute name="create">1</attribute>
-                    <attribute name="delete">1</attribute>
-                    <attribute name="no_open">0</attribute>
-                </tree>
-                <tree name="timesheet_tree" position="inside">
-                    <field name="project_id" column_invisible="True"/>
-                    <field name="task_id" column_invisible="True"/>
-                    <field name="company_id" column_invisible="True"/>
-                    <field name="user_id" column_invisible="True"/>
-                </tree>
-                <xpath expr="//tree[@name='timesheet_tree']/field[@name='employee_id']" position="attributes">
-                    <attribute name="widget">many2one_avatar_employee</attribute>
-                </xpath>
-                <xpath expr="//kanban[@name='timesheet_kanban']//strong[@name='employee_data']" position="before">
-                    <field name="employee_id" class="me-1" widget="many2one_avatar_employee" context="{'active_test': True}" readonly="readonly_timesheet"/>
-                </xpath>
-                <kanban name="timesheet_kanban" position="after">
-                    <form name="timesheet_form" string="Timesheet Activities">
-                        <sheet>
-                             <group>
-                                <field name="readonly_timesheet" invisible="1"/>
-                                <field name="date" readonly="readonly_timesheet"/>
-                                <field name="user_id" invisible="1" readonly="readonly_timesheet"/>
-                                <field name="employee_id" widget="many2one_avatar_employee" context="{'active_test': True}" required="1" readonly="readonly_timesheet"/>
-                                <field name="name" required="0" readonly="readonly_timesheet"/>
-                                <field name="unit_amount" string="Duration" widget="float_time" decoration-danger="unit_amount &gt; 24" readonly="readonly_timesheet"/>
-                                <field name="project_id" invisible="1"/>
-                                <field name="task_id" invisible="1"/>
-                                <field name="company_id" invisible="1"/>
-                            </group>
-                        </sheet>
-                    </form>
-                </kanban>
             </field>
         </record>
 
