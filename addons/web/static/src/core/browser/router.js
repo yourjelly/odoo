@@ -248,7 +248,6 @@ export function urlToState(urlObj) {
             } else {
                 action.resId = parseInt(part);
             }
-            continue;
         }
         if (actions.at(-1)?.resId) {
             action.active_id = actions.at(-1).resId;
@@ -256,7 +255,7 @@ export function urlToState(urlObj) {
         actions.push(action);
         // Don't keep actions for models unless they're the last one.
         // FIXME: should we remove the last action if there is no view_type?
-        actions = actions.filter((a) => a.action || a.resId || a === actions.at(-1));
+        actions = actions.filter((a) => a.action || (a.model && a.resId) || a === actions.at(-1));
         const activeAction = actions.at(-1);
         if (activeAction) {
             if (activeAction.resId && activeAction.resId !== "new") {
