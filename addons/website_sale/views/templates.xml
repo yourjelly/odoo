@@ -1626,7 +1626,7 @@
     </template>
 
     <!-- /shop/cart route -->
-    <template id="cart" name="Shopping Cart">
+    <template id="website_sale.cart" name="Shopping Cart">
         <t t-call="website_sale.checkout_layout">
             <t t-set="show_shorter_cart_summary" t-value="True"/>
             <t t-set="show_footer" t-value="True"/>

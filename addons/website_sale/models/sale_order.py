@@ -493,6 +493,8 @@ class SaleOrder(models.Model):
 
     def _cart_accessories(self):
         """ Suggest accessories based on 'Accessory Products' of products in cart """
+        if not self:
+            return []
         product_ids = set(self.website_order_line.product_id.ids)
         all_accessory_products = self.env['product.product']
         for line in self.website_order_line.filtered('product_id'):
