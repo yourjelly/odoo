@@ -6,7 +6,7 @@ import { useBarcodeReader } from "@point_of_sale/app/barcode/barcode_reader_hook
 import { _t } from "@web/core/l10n/translation";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { usePos } from "@point_of_sale/app/store/pos_hook";
-import { Component, onMounted, useExternalListener, useState, reactive, useRef } from "@odoo/owl";
+import { Component, onMounted, useExternalListener, useState, reactive } from "@odoo/owl";
 import { CategorySelector } from "@point_of_sale/app/generic_components/category_selector/category_selector";
 import { Input } from "@point_of_sale/app/generic_components/inputs/input/input";
 import { Numpad } from "@point_of_sale/app/generic_components/numpad/numpad";
@@ -47,16 +47,11 @@ export class ProductScreen extends Component {
         this.dialog = useService("dialog");
         this.notification = useService("notification");
         this.numberBuffer = useService("number_buffer");
-        this.categoryBox = useRef("category-box");
-        this.productBox = useRef("products");
         this.state = useState({
             showProductReminder: false,
             loadingDemo: false,
             previousSearchWord: "",
             currentOffset: 0,
-            catWidth: 0,
-            containerWidth: 0,
-            search: false,
         });
         onMounted(() => {
             this.pos.openCashControl();
@@ -69,15 +64,6 @@ export class ProductScreen extends Component {
             // We don't do this in the `mounted` lifecycle method because it is called before
             // the callbacks in `onMounted` hook.
             this.numberBuffer.reset();
-            if (!this.ui.isSmall) {
-                this.computeCategoryContainer();
-            }
-
-            window.addEventListener("resize", () => {
-                if (!this.ui.isSmall) {
-                    this.computeCategoryContainer();
-                }
-            });
         });
         this.barcodeReader = useService("barcode_reader");
         useExternalListener(window, "click", this.clickEvent.bind(this));
@@ -97,39 +83,27 @@ export class ProductScreen extends Component {
         });
         this.scrollDirection = useScrollDirection("products");
     }
-    get isRestaurant() {
-        return this.pos.config.module_pos_restaurant;
-    }
-    computeCategoryContainer() {
-        const catW =
-            this.categoryBox?.el?.children[1]?.children[0]?.children[0]?.children[0]?.offsetWidth;
-        this.state.catWidth = !catW ? 122 : catW;
-        this.state.containerWidth = this.categoryBox?.el?.offsetWidth;
-    }
-    getSlicedChildCategories(category) {
-        const childs = this.getCategoriesInfo(
-            category
-                ? [...category.child_id]
-                : this.pos.models["pos.category"].filter((c) => !c.parent_id),
-            this.pos.selectedCategory
-        );
-        const nbrForDisplay = Math.floor(this.state.containerWidth / this.state.catWidth) * 2;
-
-        return childs.length < nbrForDisplay
-            ? [childs]
-            : Array.from({ length: Math.ceil(childs.length / nbrForDisplay) }, (_, i) =>
-                  childs.slice(i * nbrForDisplay, (i + 1) * nbrForDisplay)
-              );
+    getCategoriesAndSub() {
+        const categories = [];
+        for (const category of this.getAncestorsAndCurrent()) {
+            categories.push(
+                ...this.getCategoriesInfo(
+                    category
+                        ? [...category.child_id]
+                        : this.pos.models["pos.category"].filter((c) => !c.parent_id),
+                    this.pos.selectedCategory
+                )
+            );
+        }
+        return categories;
     }
     getChildCategories(selectedCategory) {
         return selectedCategory
-            ? this.getCategoriesInfo([...selectedCategory.child_id], selectedCategory)
+            ? [...selectedCategory.child_id]
             : this.pos.models["pos.category"].filter((category) => !category.parent_id);
     }
-    getChildCategoriesNotRoot(selectedCategory) {
-        return selectedCategory
-            ? this.getCategoriesInfo([...selectedCategory.child_id], selectedCategory)
-            : [];
+    getChildCategoriesInfo(selectedCategory) {
+        return this.getCategoriesInfo(this.getChildCategories(selectedCategory), selectedCategory);
     }
     getCategoriesPath() {
         const selectedCategory = this.pos.selectedCategory;
@@ -183,7 +157,7 @@ export class ProductScreen extends Component {
                         ...selectedCategory.allParents.map((p) => p.id),
                         this.pos.selectedCategory.id,
                     ].includes(category.id) &&
-                    (this.ui.isSmall || !this.pos.config.module_pos_restaurant),
+                    this.ui.isSmall,
                 imgSrc:
                     this.pos.config.show_category_images && category.has_image
                         ? `/web/image?model=pos.category&field=image_128&id=${category.id}`
@@ -191,8 +165,8 @@ export class ProductScreen extends Component {
                 isSelected:
                     selectedCategory &&
                     this.getAncestorsAndCurrent().includes(category) &&
-                    !this.ui.isSmall &&
-                    this.pos.config.module_pos_restaurant,
+                    !this.ui.isSmall,
+                isChildren: this.getChildCategories(this.pos.selectedCategory).includes(category),
             };
         });
     }
@@ -439,6 +413,9 @@ export class ProductScreen extends Component {
                       this.pos.selectedCategory.id
                   )
                 : this.pos.models["product.product"].getAll();
+            if (!product) {
+                return list;
+            }
             list = fuzzyLookup(
                 this.searchWord,
                 product,
@@ -449,15 +426,16 @@ export class ProductScreen extends Component {
                 "pos_categ_ids",
                 this.pos.selectedCategory.id
             );
+            if (!list) {
+                return [];
+            }
         } else {
             list = this.pos.models["product.product"].getAll();
         }
 
         list = list
-            ? list
-                  .filter((product) => !this.getProductListToNotDisplay().includes(product.id))
-                  .slice(0, 100)
-            : [];
+            .filter((product) => !this.getProductListToNotDisplay().includes(product.id))
+            .slice(0, 100);
 
         return list.sort(function (a, b) {
             return a.display_name.localeCompare(b.display_name);
@@ -577,17 +555,6 @@ export class ProductScreen extends Component {
     async onProductInfoClick(product) {
         const info = await reactive(this.pos).getProductInfo(product, 1);
         this.dialog.add(ProductInfoPopup, { info: info, product: product });
-    }
-
-    focusSearch() {
-        if (this.ui.isSmall) {
-            this.state.search = !this.state.search;
-
-            if (!this.state.search) {
-                this.pos.searchProductWord = "";
-            }
-        }
-        this.pos.searchProductWord = "";
     }
 }
 

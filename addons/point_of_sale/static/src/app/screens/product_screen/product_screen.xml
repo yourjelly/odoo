@@ -17,36 +17,15 @@
                     </div>
                 </div>
             </div>
-            <div class="rightpane d-flex flex-grow-1 flex-column bg-300 w-60" t-if="!ui.isSmall || pos.mobile_pane === 'right'">
+            <div class="rightpane d-flex flex-grow-1 flex-column bg-100 w-60" t-if="!ui.isSmall || pos.mobile_pane === 'right'">
                 <div t-ref="category-box" t-att-class="{'d-none': scrollDirection.down and ui.isSmall}" class="d-flex flex-column bg-view shadow-sm control-top-bar">
-                    <div class="p-1" t-if="this.state.search or !ui.isSmall">
-                        <div t-attf-class="form-control pos-topheader input-container d-flex align-items-center py-1 bg-view">
-                            <input type="text"
-                                class="form-control ps-0 border-0 shadow-none"
-                                placeholder="Search product..."
-                                t-model="this.pos.searchProductWord" />
-                            <button class="btn-close" t-on-click="focusSearch"/>
-                        </div>
+                    <div t-if="ui.isSmall" class="d-flex bg-view shadow-sm control-top-bar">
+                        <CategorySelector class="'d-flex overflow-auto w-100 flex-grow-1 align-items-center scrollbar-hidden'" categories="getCategoriesPath()" onClick="(id) => this.pos.setSelectedCategory(id)"/>
                     </div>
-                    <t t-if="!pos.config.module_pos_restaurant">
-                        <CategorySelector class="'d-flex overflow-auto w-100 flex-grow-1 align-items-center'" categories="getCategories()" onClick="(id) => this.pos.setSelectedCategory(id)" />
-                    </t>
                     <t t-else="">
-                        <div t-if="ui.isSmall" class="d-flex bg-view shadow-sm control-top-bar">
-                            <CategorySelector class="'d-flex overflow-auto w-100 flex-grow-1 align-items-center' + ui.isSmall ? 'scrollbar-hidden' : ''" categories="getCategoriesPath()" onClick="(id) => this.pos.setSelectedCategory(id)"/>
-                            <button t-if="!this.state.search" class="search-button btn btn-light border-0 border-start rounded-0" t-on-click="focusSearch">
-                                <i class="oi oi-search"/>
-                            </button>
+                        <div class="category-box flex-grow-1">
+                            <CategorySelector class="'category-selector d-grid p-1 gap-1'" categories="getCategoriesAndSub()" onClick="(id) => this.pos.setSelectedCategory(id)"/>
                         </div>
-                        <t t-else="" t-foreach="getAncestorsAndCurrent().slice(0,2)" t-as="category" t-key="category_index">
-                            <div t-if="getChildCategories(category).length != 0" class="category-box d-flex bg-300">
-                                <div class="d-flex">
-                                    <t t-foreach="getSlicedChildCategories(category)" t-as="children" t-key="children_index">
-                                        <CategorySelector class="'category-selector d-grid p-1 gap-1'" categories="children" onClick="(id) => this.pos.setSelectedCategory(id)" containerWidth="this.state.containerWidth"/>
-                                    </t>
-                                </div>
-                            </div>
-                        </t>
                     </t>
                 </div>
                 <div t-ref="products" class="overflow-y-auto flex-grow-1">
@@ -86,7 +65,7 @@
                     <t t-else="">
                         <div class="container text-center mw-100 m-1">
                             <div t-attf-style="display: grid; grid-template-rows: repeat(calc({{getChildCategories(this.pos.selectedCategory).length}}/2) ,auto); grid-auto-flow: column; grid-template-columns: repeat(2, minmax(122px, 1fr))">
-                                <t t-foreach="getChildCategories(this.pos.selectedCategory)" t-as="category" t-key="category.id">
+                                <t t-foreach="getChildCategoriesInfo(this.pos.selectedCategory)" t-as="category" t-key="category.id">
                                     <button t-if="category.name" class="category-button col btn btn-light rounded-2 btn-primary m-1" style="aspect-ratio: 1/0.3;" t-on-click="() => this.pos.setSelectedCategory(category.id)">
                                         <span class="text-wrap-categ text-center fs-5 mx-2" t-esc="category.name" style="min-height: 1.2rem;"/>
                                     </button>

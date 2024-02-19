@@ -355,10 +355,7 @@ export class PosStore extends Reactive {
             this.db.save("TO_REFUND_LINES", this.toRefundLines)
         );
         const { start_category, iface_start_categ_id } = this.config;
-        this.setSelectedCategory(
-            (start_category && iface_start_categ_id?.[0]) ||
-                this.models["pos.category"].filter((c) => !c.parent_id)[0].id
-        );
+        this.setSelectedCategory((start_category && iface_start_categ_id?.[0]) || 0);
         // Push orders in background, do not await
         this.push_orders();
         // This method is to load the demo datas.
@@ -572,7 +569,15 @@ export class PosStore extends Reactive {
     }
 
     setSelectedCategory(categoryId) {
-        this.selectedCategory = this.models["pos.category"].get(categoryId);
+        if (categoryId === this.selectedCategory?.id) {
+            if (this.selectedCategory.parent_id) {
+                this.selectedCategory = this.selectedCategory.parent_id;
+            } else {
+                this.selectedCategory = this.models["pos.category"].get(0);
+            }
+        } else {
+            this.selectedCategory = this.models["pos.category"].get(categoryId);
+        }
     }
 
     /**
@@ -1722,6 +1727,10 @@ export class PosStore extends Reactive {
             (this.mainScreen.component === ProductScreen && this.mobile_pane == "left") ||
             this.mainScreen.component === TicketScreen
         );
+    }
+
+    showSearchButton() {
+        return this.mainScreen.component === ProductScreen;
     }
 
     doNotAllowRefundAndSales() {
