@@ -931,7 +931,6 @@ export function getNodeValue(node) {
         case "date":
         case "datetime-local":
         case "month":
-        case "time":
         case "week":
             return node.valueAsDate.toISOString();
     }
