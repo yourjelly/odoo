@@ -179,8 +179,6 @@
                 <field name="portal_user_names" string="Assignees"/>
             </field>
             <label for="date_deadline" position="after">
-                <field name="date_deadline" nolabel="1" invisible="state in ['1_done', '1_canceled']" groups="base.group_portal"
-                    decoration-danger="date_deadline &lt; current_date  and state not in ['1_done', '1_canceled']"/>
                 <field name="recurring_task" invisible="not active or parent_id" groups="base.group_portal"/>
             </label>
             <label for="repeat_interval" position="attributes">

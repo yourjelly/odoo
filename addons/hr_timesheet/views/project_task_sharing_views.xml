@@ -48,7 +48,6 @@
             <div name="allocated_hours_div" position="attributes">
                 <attribute name="groups"></attribute>
             </div>
-            </field>
             <page id="timesheets_tab" position="attributes">
                 <attribute name="groups"></attribute>
             </page>
