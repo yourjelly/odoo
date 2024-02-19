@@ -121,3 +121,38 @@ class ImageUrlConverter(models.AbstractModel):
     def _get_src_urls(self, record, field_name, options):
         image_url = record[options.get('preview_image', field_name)]
         return image_url, options.get("zoom", None)
+
+class Many2ManyTags(models.AbstractModel):
+    _name = 'ir.qweb.field.many2many_tags'
+    _description = 'Qweb Field Many2Many Tags'
+    _inherit = 'ir.qweb.field'
+
+    @api.model
+    def record_to_html(self, record, field_name, options):
+        if record[field_name]:
+            field_values = record[field_name]
+            atts = OrderedDict()
+            aclasses = ['o_tag o_badge badge rounded-pill']
+            aclasses += options.get('class', '').split()
+            tag_info = [{'name': item['display_name'], 'color': item['color']} for item in field_values]
+
+            tags = ['<div class="o_field_tags d-inline-flex flex-wrap gap-1">']
+            for tag in tag_info:
+                tagclasses = aclasses + [f"o_tag_color_{tag['color']}"]
+                classes = ' '.join(map(escape, tagclasses))
+                atts["class"] = classes
+                atts = self.env['ir.qweb']._post_processing_att('span', atts)
+                tags.append('<span')
+                for name, value in atts.items():
+                    if value:
+                        tags.append(' ')
+                        tags.append(escape(pycompat.to_text(name)))
+                        tags.append('="')
+                        tags.append(escape(pycompat.to_text(value)))
+                        tags.append('"')
+                tags.append('>')
+                tags.append(tag['name'])
+                tags.append('</span>')
+            tags.append('</div>')
+
+            return Markup(''.join(tags))
