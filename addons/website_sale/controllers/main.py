@@ -735,7 +735,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
         if order_sudo:
             values.update(self._get_express_shop_payment_values(order_sudo))
 
-        values.update(self._cart_values(**post))
+        values.update(self._cart_values(order_sudo, **post))
         return request.render("website_sale.cart", values)
 
     @route(['/shop/cart/update'], type='http', auth="public", methods=['POST'], website=True)

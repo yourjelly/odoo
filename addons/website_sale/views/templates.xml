@@ -1556,7 +1556,7 @@
                                        title="Remove one">
                                         <i class="position-relative z-index-1 fa fa-minus"/>
                                     </a>
-                                    <input type="text"
+                                    <input type="number"
                                            class="js_quantity quantity form-control border-start-0 border-end-0"
                                            t-att-data-line-id="line.id"
                                            t-att-data-product-id="line.product_id.id"
