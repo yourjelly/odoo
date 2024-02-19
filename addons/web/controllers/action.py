@@ -51,8 +51,8 @@ class Action(Controller):
         result = action.run()
         return clean_action(result, env=action.env) if result else False
 
-    @route('/web/action/load_breadcrump', type='json', auth='user', readonly=True)
-    def load_breadcrump(self, actions):
+    @route('/web/action/load_breadcrumbs', type='json', auth='user', readonly=True)
+    def load_breadcrumbs(self, actions):
         display_names = []
         for action in actions:
             try:

@@ -1,5 +1,5 @@
 import { EventBus } from "@odoo/owl";
-import { deepEqual, pick } from "../utils/objects";
+import { pick } from "../utils/objects";
 import { objectToUrlEncodedString } from "../utils/urls";
 import { browser } from "./browser";
 
@@ -50,15 +50,12 @@ function applyLocking(search, currentSearch) {
     return newSearch;
 }
 
-function computeNewRoute(search, replace, currentRoute) {
+// FIXME: do we need this (ditto with sanitize etc)
+function computeNewState(search, replace, currentRoute) {
     if (!replace) {
         search = Object.assign({}, currentRoute, search);
     }
-    search = sanitizeSearch(search);
-    if (!deepEqual(currentRoute, search)) {
-        return search;
-    }
-    return false;
+    return sanitizeSearch(search);
 }
 
 function sanitize(obj, valueToRemove) {
@@ -293,9 +290,9 @@ browser.addEventListener("popstate", (ev) => {
     // FIXME add breadcrumb display names to state so we don't lose them if we back out of odoo then
     // forward back into it
     console.log("popState");
-    if (ev.state?.newRoute) {
+    if (ev.state?.newState) {
         browser.clearTimeout(pushTimeout);
-        current = ev.state.newRoute;
+        current = ev.state.newState;
         routerBus.trigger("ROUTE_CHANGE");
     }
 });
@@ -314,15 +311,16 @@ function makeDebouncedPush(mode) {
         // apply Locking on the final search
         newSearch = applyLocking(newSearch, current);
         // Calculates new route based on aggregated search and options
-        const newRoute = computeNewRoute(newSearch, replace, current);
-        if (newRoute) {
+        const newState = computeNewState(newSearch, replace, current);
+        const url = browser.location.origin + stateToUrl(newState);
+        // FIXME is url equality sufficient to skip push/replace? Comparing state seems problematic
+        if (url !== browser.location.href) {
             // If the route changed: pushes or replaces browser state
-            const url = browser.location.origin + stateToUrl(newRoute);
             if (mode === "push") {
                 console.log("pushState", url);
-                browser.history.pushState({ newRoute }, "", url);
+                browser.history.pushState({ newState }, "", url);
             } else {
-                browser.history.replaceState({ newRoute }, "", url);
+                browser.history.replaceState({ newState }, "", url);
             }
             current = urlToState(browser.location);
         }

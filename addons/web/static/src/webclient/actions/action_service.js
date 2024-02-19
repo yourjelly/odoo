@@ -193,6 +193,8 @@ export function makeActionManager(env, router = _router) {
         return controllers;
     }
 
+    // FIXME don't load breadcrumbs for controllers for which we already got the
+    // display name from itself instead of through here on back/forward.
     async function _loadBreadcrumbs(controllers) {
         const toFetch = [];
         const keys = [];
@@ -209,7 +211,7 @@ export function makeActionManager(env, router = _router) {
             toFetch.push(actionInfo);
         }
         if (toFetch.length) {
-            const req = rpc("/web/action/load_breadcrump", { actions: toFetch });
+            const req = rpc("/web/action/load_breadcrumbs", { actions: toFetch });
             for (const [i, info] of toFetch.entries()) {
                 const key = JSON.stringify(info);
                 breadcrumbCache[key] = req.then((res) => {
