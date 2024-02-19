@@ -127,6 +127,7 @@
         <field name="arch" type="xml">
             <form position="attributes">
                 <attribute name="string">Project Sharing: Task</attribute>
+                <attribute name="widget"></attribute>
             </form>
             <header position="after">
                 <div groups="base.group_user" role="status" class="alert alert-info alert-dismissible rounded-0 fade show d-print-none css_editable_mode_hidden">
@@ -135,8 +136,11 @@
                     </div>
                 </div>
             </header>
-            <div class="oe_button_box" position="inside">
-                <div class="oe_button_box" name="button_box">
+            <field name="priority" position="attributes">
+                <attribute name="widget">priority</attribute>
+            </field>
+            <div class="oe_button_box_main" position="after">
+                <div class="oe_button_box_portal" name="button_box">
                     <field name="display_parent_task_button" invisible="1"/>
                     <button name="action_project_sharing_view_parent_task" type="object" class="oe_stat_button" icon="fa-tasks" invisible="not display_parent_task_button">
                         <div class="o_stat_info">
@@ -161,21 +165,52 @@
                     </button>
                 </div>
             </div>
+            <field name="project_id" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </field>
             <field name="milestone_id" position="attributes">
                 <attribute name="options">{'no_open': True, 'no_create': True, 'no_edit': True}</attribute>
+            </field>
+            <field name="user_ids" position="attributes">
+                <attribute name="invisible">1</attribute>
             </field>
             <field name="user_ids" position="after">
                 <field name="depend_on_count" invisible="1"/>
                 <field name="portal_user_names" string="Assignees"/>
             </field>
+            <label for="date_deadline" position="after">
+                <field name="date_deadline" nolabel="1" invisible="state in ['1_done', '1_canceled']" groups="base.group_portal"
+                    decoration-danger="date_deadline &lt; current_date  and state not in ['1_done', '1_canceled']"/>
+                <field name="recurring_task" invisible="not active or parent_id" groups="base.group_portal"/>
+            </label>
+            <label for="repeat_interval" position="attributes">
+                <attribute name="groups">base.group_portal</attribute>
+            </label>
+            <div name="repeat_intervals" position="attributes">
+                <attribute name="groups">base.group_portal</attribute>
+            </div>
             <field name="description" position="attributes">
                 <attribute name="options">{'collaborative': true, 'allowCommandImage': false, 'allowCommandVideo': false, 'allowCommandFile': false}</attribute>
+            </field>
+            <field name="child_ids" position="attributes">
+                <attribute name="widget"></attribute>
+                <attribute name="context">{
+                    'default_parent_id': id,
+                    'default_partner_id': partner_id,
+                    'form_view_ref' : 'project.project_sharing_project_task_view_form',
+                }</attribute>
             </field>
             <xpath expr="//tree[@name='sub_tasks_tree']" position="attributes">
                 <attribute name="open_form_view">False</attribute>
             </xpath>
+            <xpath expr="//tree[@name='sub_tasks_tree']/field[@name='project_id']" position="attributes">
+                <attribute name="column_invisible">True</attribute>
+            </xpath>
             <xpath expr="//tree[@name='sub_tasks_tree']/field[@name='partner_id']" position="attributes">
                 <attribute name="options">{'no_open': True, 'no_create': True, 'no_edit': True}</attribute>
+            </xpath>
+            <xpath expr="//tree[@name='sub_tasks_tree']/field[@name='user_ids']" position="attributes">
+                <attribute name="column_invisible">True</attribute>
             </xpath>
             <xpath expr="//tree[@name='sub_tasks_tree']/field[@name='user_ids']" position="after">
                 <field name="portal_user_names" string="Assignees" optional="show"/>
@@ -198,8 +233,14 @@
             <xpath expr="//tree[@name='blocked_by_tree']" position="attributes">
                 <attribute name="open_form_view">False</attribute>
             </xpath>
+            <xpath expr="//tree[@name='blocked_by_tree']/field[@name='project_id']" position="attributes">
+                <attribute name="column_invisible">True</attribute>
+            </xpath>
             <xpath expr="//tree[@name='blocked_by_tree']/field[@name='partner_id']" position="attributes">
                 <attribute name="options">{'no_open': True, 'no_create': True, 'no_edit': True}</attribute>
+            </xpath>
+            <xpath expr="//tree[@name='blocked_by_tree']/field[@name='user_ids']" position="attributes">
+                <attribute name="column_invisible">True</attribute>
             </xpath>
              <xpath expr="//tree[@name='blocked_by_tree']/field[@name='user_ids']" position="after">
                 <field name="portal_user_names" string="Assignees" optional="show"/>
