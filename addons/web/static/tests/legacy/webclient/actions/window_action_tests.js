@@ -519,7 +519,16 @@ QUnit.module("ActionManager", (hooks) => {
     });
 
     QUnit.test("A new form view can be reloaded after a failed one", async function (assert) {
-        const webClient = await createWebClient({ serverData });
+        const webClient = await createWebClient({
+            serverData,
+            mockRPC: (route, args) => {
+                if (route === "/web/action/load_breadcrumbs") {
+                    const breadcrumbs = args.actions.map((a) => serverData.actions[a.action].name);
+                    assert.step(`load_breadcrumbs: ${JSON.stringify(breadcrumbs)}`);
+                    return breadcrumbs;
+                }
+            },
+        });
         serviceRegistry.add("error", errorService);
 
         await doAction(webClient, 3);
@@ -542,19 +551,7 @@ QUnit.module("ActionManager", (hooks) => {
             "First record"
         );
         await nextTick(); // wait for the update of the router
-        assert.deepEqual(router.current, {
-            action: 3,
-            actionStack: [
-                {
-                    action: 3,
-                },
-                {
-                    action: 3,
-                    resId: 1,
-                },
-            ],
-            id: 1,
-        });
+        assert.strictEqual(browser.location.pathname, "/apps/act-3/1");
 
         // Delete the current record
         await click(target, ".o_cp_action_menus .fa-cog");
@@ -571,35 +568,13 @@ QUnit.module("ActionManager", (hooks) => {
             "Second record"
         );
         await nextTick(); // wait for the update of the router
-        assert.deepEqual(router.current, {
-            action: 3,
-            actionStack: [
-                {
-                    action: 3,
-                },
-                {
-                    action: 3,
-                    resId: 2,
-                },
-            ],
-            id: 2,
-        });
+        assert.strictEqual(browser.location.pathname, "/apps/act-3/2");
 
         // Go back to the previous (now deleted) record
         browser.history.back();
-        assert.deepEqual(router.current, {
-            action: 3,
-            actionStack: [
-                {
-                    action: 3,
-                },
-                {
-                    action: 3,
-                    resId: 1,
-                },
-            ],
-            id: 1, // This is the id of the deleted record
-        });
+        await nextTick();
+        assert.verifySteps([`load_breadcrumbs: ["Partners"]`]);
+        assert.strictEqual(browser.location.pathname, "/apps/act-3/1");
         // As the previous one is deleted, we go back to the list
         await nextTick(); // wait for the update of the router
         await nextTick(); // wait for the doAction

@@ -360,9 +360,8 @@ QUnit.module("ActionManager", (hooks) => {
     QUnit.test("test reload client action", async function (assert) {
         patchWithCleanup(browser.location, {
             assign: (url) => {
-                assert.step(url.replace(location.pathname, ""));
+                assert.step(url.replace(browser.location.origin, ""));
             },
-            origin: "",
             reload: function () {
                 assert.step("window_reload");
             },
