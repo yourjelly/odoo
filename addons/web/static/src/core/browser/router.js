@@ -289,11 +289,9 @@ browser.addEventListener("popstate", (ev) => {
     // FIXME add breadcrumb display names to state so we don't lose them if we back out of odoo then
     // forward back into it
     console.log("popState");
-    if (ev.state?.newState) {
-        browser.clearTimeout(pushTimeout);
-        current = ev.state.newState;
-        routerBus.trigger("ROUTE_CHANGE");
-    }
+    browser.clearTimeout(pushTimeout);
+    current = ev.state?.newState || {};
+    routerBus.trigger("ROUTE_CHANGE");
 });
 
 /**
