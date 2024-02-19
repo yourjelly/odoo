@@ -40,6 +40,23 @@
                            required="state == 'mail_post'"
                            context="{'default_model': model_name,
                                      'default_use_default_to': True}"/>
+                    <field name="notify_user_id" placeholder="Choose a user..."
+                           invisible="state != 'notify_user'"
+                           required="state == 'notify_user'"
+                           options="{'no_create': True, 'no_open': True}"/>
+                    <field name="notify_user_is_member" invisible="True"/>
+                    <field name="notify_channel_id" placeholder="Choose a channel..."
+                        invisible="state != 'notify_channel'"
+                        required="state == 'notify_channel'"
+                        options="{'no_create': True, 'no_open': True}"/> 
+                    <label for="notify_from" invisible="state not in ['notify_user', 'notify_channel']"/>
+                    <div class="d-flex flex-column" invisible="state not in ['notify_user', 'notify_channel']">
+                        <field name="notify_from" invisible="state not in ['notify_user', 'notify_channel']" placeholder="Force a specific sender..." options="{'no_create': True, 'no_open': True}"/>
+                        <div class="alert alert-warning" role="status" invisible="state != 'notify_channel' or notify_from == False or notify_user_is_member == True">
+                            <i class="fa fa-info" /> The selected will automatically be added to the channel when posting.
+                        </div>
+                    </div>
+                    <field name="notify_msg" invisible="state not in ['notify_user', 'notify_channel']"/>
                     <label for="mail_post_method" invisible="state != 'mail_post'"/>
                     <div class="d-flex flex-column" invisible="state != 'mail_post'">
                         <field name="mail_post_method" required="state == 'mail_post'"/>

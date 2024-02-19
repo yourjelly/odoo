@@ -5,6 +5,7 @@ from dateutil.relativedelta import relativedelta
 
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
+from markupsafe import Markup
 
 
 class ServerActions(models.Model):
@@ -17,11 +18,15 @@ class ServerActions(models.Model):
         selection_add=[
             ('next_activity', 'Create Activity'),
             ('mail_post', 'Send Email'),
+            ('notify_user', 'Notify User'),
+            ('notify_channel', 'Notify Channel'),
             ('followers', 'Add Followers'),
             ('remove_followers', 'Remove Followers'),
             ('object_create',),
         ],
         ondelete={'mail_post': 'cascade',
+                  'notify_user': 'cascade',
+                  'notify_channel': 'cascade',
                   'followers': 'cascade',
                   'remove_followers': 'cascade',
                   'next_activity': 'cascade',
@@ -29,6 +34,12 @@ class ServerActions(models.Model):
     )
     # Followers
     partner_ids = fields.Many2many('res.partner', compute='_compute_partner_ids', readonly=False, store=True)
+    # Notify
+    notify_user_id = fields.Many2one('res.users', string='User to Notify', domain="[('share', '=', False), ('active', '=', True)]")
+    notify_channel_id = fields.Many2one('discuss.channel', string='Channel to Notify')
+    notify_user_is_member = fields.Boolean('User is Member', compute='_compute_notify_user_is_member')
+    notify_from = fields.Many2one('res.users', string='Send as', domain="[('share', '=', False), '|', ('id', '=', 1), ('active', '=', True)]", default=lambda self: self.env.user)
+    notify_msg = fields.Html('Message', default=lambda self: _('You have a new message'))
     # Message Post / Email
     template_id = fields.Many2one(
         'mail.template', 'Email Template',
@@ -99,6 +110,14 @@ class ServerActions(models.Model):
         )
         if to_reset:
             to_reset.template_id = False
+
+    @api.depends('notify_from', 'notify_channel_id')
+    def _compute_notify_user_is_member(self):
+        for action in self:
+            if action.notify_from and action.notify_channel_id:
+                action.notify_user_is_member = action.notify_from.partner_id in action.notify_channel_id.sudo().channel_partner_ids
+            else:
+                action.notify_user_is_member = False
 
     @api.depends('state', 'mail_post_method')
     def _compute_mail_post_autofollow(self):
@@ -192,6 +211,35 @@ class ServerActions(models.Model):
         if self.partner_ids and hasattr(Model, 'message_unsubscribe'):
             records = Model.browse(self._context.get('active_ids', self._context.get('active_id')))
             records.message_unsubscribe(partner_ids=self.partner_ids.ids)
+        return False
+
+    def _run_action_notify_user_multi(self, eval_context=None):
+        if not self.notify_user_id or not self._context.get('active_id'):
+            return False
+        records = self.env[self.model_name].browse(self._context.get('active_ids', self._context.get('active_id')))
+        from_user = self.notify_from or self.env.user
+        to_partner = self.notify_user_id.partner_id
+        channel = self.env['discuss.channel'].channel_get(set((from_user.partner_id + to_partner).ids))
+        body = self.notify_msg
+        for record in records:
+            sent_from_automation = _("Sent by an Automation Rule on <a href='#' data-oe-model='%s' data-oe-id='%s'>%s</a>", record._name, record.id, record.display_name)
+            body += Markup("<p class='small text-muted mt-2'>%s</p>" % sent_from_automation)
+            channel.with_user(from_user).message_post(body=body, message_type='comment', subtype_xmlid='mail.mt_comment')
+        return False
+
+    def _run_action_notify_channel_multi(self, eval_context=None):
+        if not self.notify_channel_id or not self._context.get('active_id'):
+            return False
+        records = self.env[self.model_name].browse(self._context.get('active_ids', self._context.get('active_id')))
+        from_user = self.notify_from or self.env.user
+        channel_sudo = self.notify_channel_id.with_user(from_user).sudo()
+        if from_user.partner_id not in channel_sudo.channel_partner_ids:
+            channel_sudo.add_members(partner_ids=from_user.partner_id.ids)
+        body = self.notify_msg
+        for record in records:
+            sent_from_automation = _("Sent by an Automation Rule on <a href='#' data-oe-model='%s' data-oe-id='%s'>%s</a>", record._name, record.id, record.display_name)
+            body += Markup("<p class='small text-muted mt-2'>%s</p>" % sent_from_automation)
+            channel_sudo.with_user(from_user).sudo().message_post(body=body, message_type='comment', subtype_xmlid='mail.mt_comment')
         return False
 
     def _is_recompute(self):

@@ -19,6 +19,8 @@
                                 'object_write': 'fa-refresh',
                                 'multi': 'fa-list-ul',
                                 'mail_post': 'fa-envelope',
+                                'notify_user': 'fa-comment-o',
+                                'notify_channel': 'fa-comments-o',
                                 'followers': 'fa-user-o',
                                 'remove_followers': 'fa-user-times',
                                 'next_activity': 'fa-clock-o',

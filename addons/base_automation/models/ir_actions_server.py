@@ -63,6 +63,16 @@ class ServerAction(models.Model):
                         'Send email: %(template_name)s',
                         template_name=action.template_id.name
                     )
+                case 'notify_user':
+                    action.name = _(
+                        'Notify user: %(user)s',
+                        user=action.notify_user_id.name
+                    )
+                case 'notify_channel':
+                    action.name = _(
+                        'Notify channel: %(channel)s',
+                        channel=action.notify_channel_id.name
+                    )
                 case 'followers':
                     action.name = _(
                         'Add followers: %(partner_names)s',
