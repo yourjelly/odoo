@@ -1498,13 +1498,14 @@ export function makeActionManager(env, router = _router) {
     }
 
     /**
-     * Performs a "doAction" or a "switchView" according to the current content of
-     * the URL. The id of the underlying action is be returned if one of these
-     * operations has successfully started.
+     * Performs a "doAction" or a "switchView" and restores a stack of virtual
+     * controllers from the current contents of the URL.
      *
-     * @returns {Promise<boolean>} true iff the state could have been loaded
+     * @returns {Promise<boolean>} true if doAction or switchView was performed
      */
     async function loadState() {
+        // FIXME are we losing important controller state here?
+        // In master and under we lose breadcrumbs on back/fw
         controllerStack = _controllersFromState();
         const switchViewParams = _getSwitchViewParams();
         if (switchViewParams) {
