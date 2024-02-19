@@ -359,14 +359,10 @@ export class ProductScreen extends Component {
                 (product) => product.display_name + product.description_sale
             );
         } else if (this.pos.selectedCategoryId) {
-            list = this.pos.models["product.product"].getBy(
-                "pos_categ_ids",
-                this.pos.selectedCategoryId
-            );
+            list = this.getProductByCategory();
         } else {
             list = this.pos.models["product.product"].getAll();
         }
-
         list = list
             .filter((product) => !this.getProductListToNotDisplay().includes(product.id))
             .slice(0, 100);
@@ -374,6 +370,21 @@ export class ProductScreen extends Component {
         return list.sort(function (a, b) {
             return a.display_name.localeCompare(b.display_name);
         });
+    }
+
+    getProductByCategory() {
+        const products = [];
+        function children_category_products(categoryId, pos) {
+            products.push(
+                ...(pos.models["product.product"].getBy("pos_categ_ids", categoryId) || [])
+            );
+            const category = pos.models["pos.category"].get(categoryId);
+            for (const child of category.child_id) {
+                children_category_products(child.id, pos);
+            }
+        }
+        children_category_products(this.pos.selectedCategoryId, this.pos);
+        return products;
     }
 
     getProductListToNotDisplay() {
