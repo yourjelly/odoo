@@ -17,6 +17,7 @@ class AccountReportClosing(models.Model):
     #TODO OCO statuer sur le fait de mettre la fpos dessus (si on garde le cas de multivat indien)
     company_id = fields.Many2one(string="Company", comodel_name='res.company', required=True)
     report_id = fields.Many2one(string="Report", comodel_name='account.report') # Only set when generating closings with split_per_report
+    move_generator_code = fields.Char(related='closing_type_id.move_generator_code')
 
 
 class AccountReportClosingType(models.Model):

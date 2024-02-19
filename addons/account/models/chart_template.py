@@ -579,6 +579,8 @@ class AccountChartTemplate(models.AbstractModel):
         for closing_type_xmlid, closing_type_vals in template_data.get('closing_types', []):
             self.env.ref(closing_type_xmlid).with_company(company).write(closing_type_vals)
 
+        self.env['ir.property']._set_default('tax_closing_journal_id', 'account.report.closing.type', self.ref('general').id, company=company.id)
+
     def _get_chart_template_data(self, template_code):
         template_data = defaultdict(lambda: defaultdict(dict))
         template_data['res.company']  # ensure it's the first property when iterating
