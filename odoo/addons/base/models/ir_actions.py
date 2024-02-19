@@ -565,6 +565,7 @@ class IrActionsServer(models.Model):
     ], compute='_compute_value_field_to_show')
     # Webhook
     webhook_url = fields.Char(string='Webhook URL', help="URL to send the POST request to.")
+    use_custom_webhook_payload = fields.Boolean(string='Custom Payload', help="Use a custom-built JSON payload instead of a fields list or customize headers.")
     webhook_field_ids = fields.Many2many('ir.model.fields', 'ir_act_server_webhook_field_rel', 'server_id', 'field_id',
                                          string='Webhook Fields',
                                          help="Fields to send in the POST request. "
@@ -803,11 +804,24 @@ class IrActionsServer(models.Model):
             '_id': record.id,
             '_action': f'{self.name}(#{self.id})',
         }
-        if self.webhook_field_ids:
+        headers = {'Content-Type': 'application/json'}
+        if not self.use_custom_webhook_payload and self.webhook_field_ids:
             # you might think we could use the default json serializer of the requests library
             # but it will fail on many fields, e.g. datetime, date or binary
             # so we use the json.dumps serializer instead with the str() function as default
             vals.update(record.read(self.webhook_field_ids.mapped('name'), load=None)[0])
+        else:
+            # safe_eval the code and check the output
+            safe_eval(self.code.strip(), eval_context, mode="exec", nocopy=True, filename=str(self))  # nocopy allows to return 'webhook'
+            webhook_content = eval_context.get('webhook', {})
+            payload = webhook_content.get('payload', {})
+            if not isinstance(payload, dict):
+                raise UserError(_("The payload returned by the webhook action must be a dictionary."))
+            vals = payload
+            custom_headers = webhook_content.get('headers', {})
+            # TODO SECURITY: check if headers should be stringified first? could a callable be provided here?
+            custom_headers.update(headers)
+            headers = custom_headers
         json_values = json.dumps(vals, sort_keys=True, default=str)
         _logger.info("Webhook call to %s", url)
         _logger.debug("POST JSON data for webhook call: %s", json_values)
@@ -815,7 +829,7 @@ class IrActionsServer(models.Model):
             # 'send and forget' strategy, and avoid locking the user if the webhook
             # is slow or non-functional (we still allow for a 1s timeout so that
             # if we get a proper error response code like 400, 404 or 500 we can log)
-            response = requests.post(url, data=json_values, headers={'Content-Type': 'application/json'}, timeout=1)
+            response = requests.post(url, data=json_values, headers=headers, timeout=1)
             response.raise_for_status()
         except requests.exceptions.ReadTimeout:
             _logger.warning("Webhook call timed out after 1s - it may or may not have failed. "

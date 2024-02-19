@@ -510,6 +510,32 @@ ZeroDivisionError: division by zero""" % self.test_server_action.id
             self.action.with_context(self.context).run()
         self.assertEqual(num_requests, 2)
 
+    def test_95_custom_webhook(self):
+        self.action.write({
+            'state': 'webhook',
+            'code': """
+webhook = {}
+webhook['payload'] = {'CustomField': 'TEST123'}
+webhook['headers'] = {'Authorization': 'Bearer 123', 'Content-Type': 'text/html'}
+""",
+            'webhook_url': 'http://example.com/webhook',
+        })
+        # write a mock for the requests.post method that checks the data and headers
+        # and returns a 200 response
+        def _patched_post(*args, **kwargs):
+            headers = kwargs['headers']
+            self.assertEqual(headers['Authorization'], 'Bearer 123')
+            self.assertEqual(headers['Content-Type'], 'application/json', 'Content-Type header should be protected')
+            response = requests.Response()
+            response.status_code = 200
+            self.assertEqual(kwargs['data'], json.dumps({
+                'CustomField': 'TEST123',
+            }))
+            return response
+
+        with patch.object(requests, 'post', _patched_post):
+            self.action.with_context(self.context).run()
+
 class TestCommonCustomFields(common.TransactionCase):
     MODEL = 'res.partner'
     COMODEL = 'res.users'

@@ -396,9 +396,10 @@
                                     invisible="state != 'object_create'"
                                     context="{'default_model_id': model_id, 'default_relation': crud_model_name}"/>
                                     <field name="webhook_url" string="URL" invisible="state != 'webhook'" placeholder="e.g. https://maker.ifttt.com/use/..."/>
-                                    <field name="webhook_field_ids" string="Fields" invisible="state != 'webhook'" widget="many2many_tags" context="{'hide_model': 1}" domain="[('model_id', '=', model_id)]" placeholder="Select fields to include in the request..."/>
+                                    <field name="use_custom_webhook_payload" string="Custom-built Payload" invisible="state != 'webhook'" widget="boolean_toggle" />
+                                    <field name="webhook_field_ids" invisible="state != 'webhook' or use_custom_webhook_payload == True" string="Fields" widget="many2many_tags" context="{'hide_model': 1}" domain="[('model_id', '=', model_id)]" placeholder="Select fields to include in the request..."/>
                                 </group>
-                                <group invisible="state != 'webhook'">
+                                <group invisible="state != 'webhook' or use_custom_webhook_payload == True">
                                     <label for="webhook_sample_payload" />
                                     <field name="webhook_sample_payload" string="Sample Payload" nolabel="1" colspan="2" readonly="1" widget="code" options="{'mode': 'javascript'}" />
                                 </group>
@@ -408,9 +409,17 @@
                             If several child actions return an action, only the last one will be executed.
                             This may happen when having server actions executing code that returns an action, or server actions returning a client action.
                         </p>
-                        <notebook invisible="state != 'code'">
+                        <notebook invisible="not (state == 'code' or (state == 'webhook' and use_custom_webhook_payload == True))">
                             <page string="Code">
-                                <field name="code" invisible="state != 'code'" widget="code" options="{'mode': 'python'}" placeholder="Enter Python code here. Help about Python expression is available in the help tab of this document."/>
+                                <div invisible="state != 'webhook' or use_custom_webhook_payload != True">
+                                    <p>For custom webhook payloads, assign the payload and headers members of the webhook variable:</p>
+                                    <ul>
+                                        <li><code>webhook['payload']</code>: dict that will be sent as payload</li>
+                                        <li><code>webhook['headers']</code>: dict of headers to send with the request</li>
+                                    </ul>
+                                    Both members must be dictionaries and will be dumped to json before being sent using the <code>str</code> function.
+                                </div>
+                                <field name="code" invisible="state != 'code' and (state == 'webhook' and use_custom_webhook_payload != True)" widget="code" options="{'mode': 'python'}" placeholder="Enter Python code here. Help about Python expression is available in the help tab of this document."/>
                             </page>
                             <page string="Help">
                                 <p>The following variables can be used:</p>
@@ -427,7 +436,7 @@
                                     <li><code>Command</code>: x2many commands namespace</li>
                                     <li>To return an action, assign: <code>action = {...}</code></li>
                                 </ul>
-                                <div >
+                                <div>
                                     <p>Example of Python code:</p>
 <pre style='white-space: pre-wrap'>partner_name = record.name + '_code'
 env['res.partner'].create({'name': partner_name})
