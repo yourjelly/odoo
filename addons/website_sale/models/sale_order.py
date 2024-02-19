@@ -46,6 +46,40 @@ class SaleOrder(models.Model):
 
     #=== COMPUTE METHODS ===#
 
+    @api.depends()
+    def _compute_fiscal_position_id(self):
+        carts = request and self.filtered('website_id') or self.browse()
+        super(SaleOrder, self-carts)._compute_fiscal_position_id()
+        for cart in carts:
+            cart.fiscal_position_id = cart.website_id.fiscal_position_id
+
+    @api.depends()
+    def _compute_pricelist_id(self):
+        carts = request and self.filtered('website_id') or self.browse()
+        super(SaleOrder, self-carts)._compute_pricelist_id()
+        for cart in carts:
+            cart.pricelist_id = cart.website_id.pricelist_id
+
+    @api.depends()
+    def _compute_user_id(self):
+        carts = request and self.filtered('website_id') or self.browse()
+        super(SaleOrder, self-carts)._compute_user_id()
+        for cart in carts:
+            cart.team_id = (
+                cart.website_id.salesperson_id
+                or cart.partner_id.commercial_partner_id.user_id
+            )
+
+    @api.depends()
+    def _compute_team_id(self):
+        carts = request and self.filtered('website_id') or self.browse()
+        super(SaleOrder, self-carts)._compute_team_id()
+        for cart in carts:
+            cart.team_id = (
+                cart.website_id.salesteam_id
+                or cart.partner_id.commercial_partner_id.team_id
+            )
+
     @api.depends('order_line')
     def _compute_website_order_line(self):
         for order in self:

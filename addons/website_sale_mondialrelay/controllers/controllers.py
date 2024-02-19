@@ -1,10 +1,11 @@
-# -*- coding: utf-8 -*-
-from odoo import http, _
-from odoo.addons.website_sale.controllers.main import WebsiteSale
-from odoo.addons.website_sale.controllers.delivery import WebsiteSaleDelivery
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from odoo import _, http
 from odoo.exceptions import AccessDenied, UserError
 from odoo.http import request
+
+from odoo.addons.website_sale.controllers.delivery import WebsiteSaleDelivery
+from odoo.addons.website_sale.controllers.main import WebsiteSale
 
 
 class MondialRelay(http.Controller):
@@ -13,7 +14,7 @@ class MondialRelay(http.Controller):
     def mondial_relay_update_shipping(self, **data):
         order = request.website.sale_get_order()
 
-        if order.partner_id == request.website.user_id.sudo().partner_id:
+        if order._is_public_order():
             raise AccessDenied('Customer of the order cannot be the public user at this step.')
 
         if order.carrier_id.country_ids:

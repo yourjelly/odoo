@@ -157,16 +157,10 @@ class Website(models.Model):
         comodel_name='product.pricelist',
         compute="_compute_pricelist_ids",
     )
-    # Technical: Used to recompute pricelist_ids
-    all_pricelist_ids = fields.One2many(
-        string="All pricelists",
-        comodel_name='product.pricelist',
-        inverse_name='website_id',
-    )
 
     #=== COMPUTE METHODS ===#
 
-    @api.depends('all_pricelist_ids')
+    @api.depends()
     def _compute_pricelist_ids(self):
         for website in self:
             website = website.with_company(website.company_id)
@@ -183,7 +177,7 @@ class Website(models.Model):
         for website in self:
             website.fiscal_position_id = website._get_current_fiscal_position()
 
-    @api.depends('all_pricelist_ids', 'pricelist_id', 'company_id')
+    @api.depends('pricelist_id', 'company_id')
     def _compute_currency_id(self):
         for website in self:
             website.currency_id = website.pricelist_id.currency_id or website.company_id.currency_id
@@ -487,38 +481,25 @@ class Website(models.Model):
 
     def _prepare_sale_order_values(self, partner_sudo):
         self.ensure_one()
-        addr = partner_sudo.address_get(['delivery', 'invoice'])
+
+        values = {
+            'company_id': self.company_id.id,
+            'partner_id': partner_sudo.id,
+            'website_id': self.id,
+        }
         if not request.website.is_public_user():
             last_sale_order = self.env['sale.order'].sudo().search(
-                [('partner_id', '=', partner_sudo.id)],
+                [('partner_id', '=', partner_sudo.id), ('website_id', '=', self.id)],
                 limit=1,
                 order='date_order desc, id desc',
             )
             if last_sale_order:
                 if last_sale_order.partner_shipping_id.active:  # first = me
-                    addr['delivery'] = last_sale_order.partner_shipping_id.id
+                    values['partner_shipping_id'] = last_sale_order.partner_shipping_id.id
                 if last_sale_order.partner_invoice_id.active:
-                    addr['invoice'] = last_sale_order.partner_invoice_id.id
+                    values['partner_invoice_id'] = last_sale_order.partner_invoice_id.id
 
-        affiliate_id = request.session.get('affiliate_id')
-        salesperson_user_sudo = self.env['res.users'].sudo().browse(affiliate_id).exists()
-        if not salesperson_user_sudo:
-            salesperson_user_sudo = self.salesperson_id or partner_sudo.parent_id.user_id or partner_sudo.user_id
-
-        return {
-            'company_id': self.company_id.id,
-
-            'fiscal_position_id': self.fiscal_position_id.id,
-            'partner_id': partner_sudo.id,
-            'partner_invoice_id': addr['invoice'],
-            'partner_shipping_id': addr['delivery'],
-
-            'pricelist_id': self.pricelist_id.id,
-
-            'team_id': self.salesteam_id.id,
-            'user_id': salesperson_user_sudo.id,
-            'website_id': self.id,
-        }
+        return values
 
     def _get_current_fiscal_position(self):
         AccountFiscalPosition = self.env['account.fiscal.position'].sudo()
@@ -691,5 +672,3 @@ class Website(models.Model):
     def has_ecommerce_access(self):
         """ Return whether the current user is allowed to access eCommerce-related content. """
         return not (self.env.user._is_public() and self.ecommerce_access == 'logged_in')
-
-
