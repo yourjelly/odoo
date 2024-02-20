@@ -29,7 +29,19 @@ export class OrderlineNoteButton extends Component {
         });
 
         if (confirmed) {
-            this.selectedOrderline.setNote(inputNote);
+            if (this.selectedOrderline.saved_quantity == 0) {
+                this.selectedOrderline.setNote(inputNote);
+            } else {
+                //If we add a note on a line already ordered, the note should only appear for the unordered quantities
+                const qty_with_note =
+                    this.selectedOrderline.quantity - this.selectedOrderline.saved_quantity;
+                const new_order_line = this.selectedOrderline.clone();
+                new_order_line.order = this.selectedOrderline.order;
+                new_order_line.set_quantity(qty_with_note);
+                new_order_line.setNote(inputNote);
+                this.selectedOrderline.set_quantity(this.selectedOrderline.saved_quantity);
+                this.selectedOrderline.order.orderlines.push(new_order_line);
+            }
         }
 
         return { confirmed, inputNote, oldNote };
