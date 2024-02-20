@@ -144,3 +144,26 @@ class TestPatchUtils(BaseCase):
             reconstruct_content = apply_patch(reconstruct_content, patch)
 
         self.assertEqual(reconstruct_content, contents[0])
+
+    # When replacing a tag with another one, invalid html is generated:
+    # <code><removed>foo</removed><added>foo</added></blockquote></code>
+    # with a closed blockquote that is not opened
+    def test_replace_tag(self):
+        initial_content = "<blockquote>foo</blockquote>"
+        new_content = "<code>foo</code>"
+
+        comparison = generate_comparison(new_content, initial_content)
+        self.assertEqual(
+            comparison, "<blockquote><removed>foo</removed></blockquote><code><added>foo</added></code>"
+        )
+
+    # When replacing nested divs with other nested divs, invalid hmtl is generated:
+    # <div class='B1'><added></added><div class='A2'><added>Hello</added><div class='B2'><removed>World</removed></div></div>
+    # 3 divs are opened but 2 are closed
+    def test_replace_nested_divs(self):
+        initial_content = "<div class='A1'><div class='A2'>A</div></div>"
+        new_content = "<div class='B1'><div class='B2'>B</div></div>"
+
+        comparison = generate_comparison(new_content, initial_content)
+        self.assertEqual(
+            comparison, "<div class='B1'><div class='B2'><removed>B</removed></div></div><div class='A1'><div class='A2'><added>A</added></div></div>")
