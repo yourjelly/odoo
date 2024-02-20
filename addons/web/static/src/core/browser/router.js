@@ -291,7 +291,11 @@ browser.addEventListener("popstate", (ev) => {
     console.log("popState");
     browser.clearTimeout(pushTimeout);
     current = ev.state?.newState || {};
-    routerBus.trigger("ROUTE_CHANGE");
+    // Some client actions want to handle loading their own state
+    if (!ev.state?.skipRouteChange && !router.skipLoad) {
+        routerBus.trigger("ROUTE_CHANGE");
+    }
+    router.skipLoad = false;
 });
 
 /**
@@ -347,6 +351,7 @@ export const router = {
     replaceState: makeDebouncedPush("replace"),
     cancelPushes: () => browser.clearTimeout(pushTimeout),
     addLockedKey: (key) => _lockedKeys.add(key),
+    skipLoad: false,
 };
 
 export function objectToQuery(obj) {

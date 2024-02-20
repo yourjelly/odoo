@@ -184,24 +184,8 @@ export class WebsitePreview extends Component {
             };
         }, () => []);
 
-        useEffect(() => {
-            let leftOnBackNavigation = false;
-            const handleBackNavigation = () => {
-                if (window.location.pathname === '/web') {
-                    leftOnBackNavigation = true;
-                }
-            };
-            window.addEventListener('popstate', handleBackNavigation);
-            return () => {
-                window.removeEventListener('popstate', handleBackNavigation);
-                // When leaving the client action, its original url is pushed
-                // so that the router can replay the action on back navigation
-                // from other screens.
-                if (!leftOnBackNavigation) {
-                    history.pushState({}, null, this.backendUrl);
-                }
-            };
-        }, () => []);
+        // FIXME: note in commit that this is no longer needed because we restore state from
+        // event state instead of solely from URL.
 
         const toggleIsMobile = () => {
             const wrapwrapEl = this.iframe.el.contentDocument.querySelector('#wrapwrap');
@@ -345,7 +329,7 @@ export class WebsitePreview extends Component {
             // loads "about:blank"), do not push that into the history
             // state as that could prevent the user from going back and could
             // trigger a traceback.
-            history.replaceState({}, document.title, '/web');
+            history.replaceState(history.state, document.title, '/web');
             return;
         }
         // The original /web#action=... url is saved to be pushed on top of the
@@ -355,7 +339,7 @@ export class WebsitePreview extends Component {
             this.backendUrl = stateToUrl(router.current);
         }
         const currentTitle = this.iframe.el.contentDocument.title;
-        history.replaceState({}, currentTitle, this.iframe.el.contentDocument.location.href);
+        history.replaceState(history.state, currentTitle, this.iframe.el.contentDocument.location.href);
         this.title.setParts({ action: currentTitle });
     }
 
