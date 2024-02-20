@@ -576,7 +576,11 @@ class AccountChartTemplate(models.AbstractModel):
                 self.env['ir.property']._set_default(field, model, self.ref(value).id, company=company)
 
         # Update closing types' company-dependent fields if needed
-        for closing_type_xmlid, closing_type_vals in template_data.get('closing_types', []):
+        for closing_type_xmlid, template_vals in template_data.get('closing_types', {}).items():
+            closing_type_vals = {
+                field: self.ref(account_template_key)
+                for field, account_template_key in template_vals.items()
+            }
             self.env.ref(closing_type_xmlid).with_company(company).write(closing_type_vals)
 
         self.env['ir.property']._set_default('tax_closing_journal_id', 'account.report.closing.type', self.ref('general').id, company=company.id)
