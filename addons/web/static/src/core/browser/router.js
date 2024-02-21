@@ -96,7 +96,7 @@ export function parseSearchQuery(search) {
  */
 export function stateToUrl(state) {
     const tmpState = Object.assign({}, state);
-    const pathname = ["/apps"];
+    const pathname = ["/home"];
     if (tmpState.actionStack) {
         for (const actIndex in tmpState.actionStack) {
             const action = tmpState.actionStack[actIndex];
@@ -198,7 +198,7 @@ export function urlToState(urlObj) {
 
     const splitPath = pathname.split("/").filter(Boolean);
 
-    if (splitPath.length > 1 && splitPath[0] === "apps") {
+    if (splitPath.length > 1 && splitPath[0] === "home") {
         splitPath.splice(0, 1);
         let actions = [];
         let action = {};
