@@ -86,6 +86,7 @@ function makeActionManager(env) {
     let dialogCloseProm;
     let actionCache = {};
     let dialog = null;
+    let ongoingAction = false;
 
     // The state action (or default user action if none) is loaded as soon as possible
     // so that the next "doAction" will have its action ready when needed.
@@ -537,6 +538,10 @@ function makeActionManager(env) {
 
         // Compute breadcrumbs
         if (action.target === "new") {
+            if (ongoingAction && action.view_mode) {
+                return;
+            }
+            ongoingAction = true;
             controller.config.breadcrumbs = [];
         } else {
             controller.config.breadcrumbs = _getBreadcrumbs(nextStack.slice(0, -1));
@@ -656,6 +661,7 @@ function makeActionManager(env) {
             }
             willUnmount() {
                 if (action.target === "new" && dialogCloseResolve) {
+                    ongoingAction = false;
                     dialogCloseResolve();
                 }
             }
