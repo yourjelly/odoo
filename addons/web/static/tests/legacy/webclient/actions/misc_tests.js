@@ -258,7 +258,7 @@ QUnit.module("ActionManager", (hooks) => {
         currentState = router.current;
         assert.deepEqual(currentState, {
             action: 8,
-            id: 4,
+            resId: 4,
             actionStack: [
                 {
                     action: 4,

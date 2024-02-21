@@ -252,3 +252,11 @@ export function zip(iter1, iter2, fill = false) {
 export function zipWith(iter1, iter2, mapFn) {
     return zip(iter1, iter2).map(([e1, e2]) => mapFn(e1, e2));
 }
+
+export function slidingWindow(arr, width) {
+    const res = [];
+    for (let i = 0; i <= arr.length - width; i++) {
+        res.push(arr.slice(i, i + width));
+    }
+    return res;
+}

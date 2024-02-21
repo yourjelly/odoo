@@ -207,7 +207,7 @@ QUnit.module("ActionManager", (hooks) => {
                     resId: 4,
                 },
             ],
-            id: 4,
+            resId: 4,
         });
     });
 

@@ -11,7 +11,6 @@ import { WebsiteTranslator } from '../../components/translator/translator';
 import { unslugHtmlDataObject } from '../../services/website_service';
 import {OptimizeSEODialog} from '@website/components/dialog/seo';
 import { WebsiteDialog } from "@website/components/dialog/dialog";
-import { stateToUrl, router } from "@web/core/browser/router";
 import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
 import wUtils from '@website/js/utils';
 import { renderToElement } from "@web/core/utils/render";
@@ -331,12 +330,6 @@ export class WebsitePreview extends Component {
             // trigger a traceback.
             history.replaceState(history.state, document.title, '/web');
             return;
-        }
-        // The original /web#action=... url is saved to be pushed on top of the
-        // history when leaving the component, so that the webclient can
-        // correctly find back and replay the client action.
-        if (!this.backendUrl) {
-            this.backendUrl = stateToUrl(router.current);
         }
         const currentTitle = this.iframe.el.contentDocument.title;
         history.replaceState(history.state, currentTitle, this.iframe.el.contentDocument.location.href);

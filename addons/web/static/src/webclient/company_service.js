@@ -58,8 +58,8 @@ function accessErrorHandler(env, error, originalError) {
         return false;
     }
     if (originalError?.exceptionName === "odoo.exceptions.AccessError") {
-        const { id, actionStack } = router.current;
-        if (!actionStack || !id) {
+        const { resId, actionStack } = router.current;
+        if (!actionStack || !resId) {
             return false;
         }
         if (error.event) {

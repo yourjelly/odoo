@@ -1278,15 +1278,15 @@ QUnit.module("ActionManager", (hooks) => {
             // open a record in form view
             await click(target.querySelector(".o_list_view .o_data_row .o_data_cell"));
             await nextTick(); // wait for the router to update its state
-            assert.strictEqual(router.current.id, 1);
+            assert.strictEqual(router.current.resId, 1);
             // do some other action
             await doAction(webClient, 4);
             await nextTick(); // wait for the router to update its state
-            assert.notOk(router.current.id);
+            assert.notOk(router.current.resId);
             // go back to form view
             await click(target.querySelectorAll(".o_control_panel .breadcrumb a")[1]);
             await nextTick(); // wait for the router to update its state
-            assert.strictEqual(router.current.id, 1);
+            assert.strictEqual(router.current.resId, 1);
         }
     );
 

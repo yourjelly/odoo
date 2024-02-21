@@ -5,6 +5,7 @@ from odoo import _
 from odoo.exceptions import MissingError
 from odoo.http import Controller, request, route
 from .utils import clean_action
+from werkzeug.exceptions import BadRequest
 
 
 _logger = logging.getLogger(__name__)
@@ -20,16 +21,14 @@ class Action(Controller):
             action_id = int(action_id)
         except ValueError:
             try:
-                action = request.env.ref(action_id)
+                if '.' in action_id:
+                    action = request.env.ref(action_id)
+                else:
+                    action = Actions.search([('path', '=', action_id)], limit=1)
                 assert action._name.startswith('ir.actions.')
                 action_id = action.id
             except Exception as exc:
-                try:
-                    action = Actions.search([('path', '=', action_id)], limit=1)
-                    assert action._name.startswith('ir.actions.')
-                    action_id = action.id
-                except Exception:
-                    raise MissingError(_("The action %r does not exist.", action_id)) from exc
+                raise MissingError(_("The action %r does not exist.", action_id)) from exc
 
         base_action = Actions.browse([action_id]).sudo().read(['type'])
         if base_action:
@@ -55,20 +54,22 @@ class Action(Controller):
     def load_breadcrumbs(self, actions):
         display_names = []
         for action in actions:
+            record_id = action.get('resId')
             try:
                 if action.get('action'):
                     act = self.load(action.get('action'))
-                    if action.get("resId"):
-                        display_names.append(request.env[act["res_model"]].browse([action.get("resId")]).display_name)
+                    if record_id:
+                        display_names.append(request.env[act['res_model']].browse(record_id).display_name)
                     else:
-                        display_names.append(act["display_name"])
-                elif action.get("model"):
-                    if action.get("resId"):
-                        display_names.append(request.env[action.get("model")].browse([action.get("resId")]).display_name)
-                    else:
-                        display_names.append(request.env[action.get("model")]._description)
+                        display_names.append(act['display_name'])
+                elif action.get('model'):
+                    Model = request.env[action.get('model')]
+                    if record_id:
+                        display_names.append(Model.browse(record_id).display_name)
+                    else: # FIXME: is this needed? These actions should not be loaded through here
+                        display_names.append(Model._description)
                 else:
-                    display_names.append(None)
-            except Exception:
-                display_names.append(None)
+                    raise BadRequest('Actions should have either an action (id or path) or a model')
+            except Exception: # FIXME don't catch blind exceptions
+                display_names.append(None) # TODO: add something that could allow the webclient to show a warning for some things?
         return display_names

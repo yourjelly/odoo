@@ -49,8 +49,7 @@ class IrUiMenu(models.Model):
                 action_model, action_id = action.split(',') if action else (False, False)
                 action_id = int(action_id) if action_id else False
                 if action_model and action_id:
-                    # To change this is not optimal !!!!!
-                    action_path = self.env[action_model].browse(action_id).sudo().path
+                    action_path = self.env[action_model].browse(action_id).path
                 else:
                     action_path = False
 

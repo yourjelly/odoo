@@ -427,17 +427,17 @@ export function makeActionManager(env, router = _router) {
                 context.params = state;
                 Object.assign(options, {
                     additionalContext: context,
-                    viewType: state.id ? "form" : state.view_type,
+                    viewType: state.resId ? "form" : state.view_type,
                 });
-                if (state.id) {
-                    options.props = { resId: state.id };
+                if (state.resId) {
+                    options.props = { resId: state.resId };
                 }
             }
         } else if (state.model) {
-            if (state.id || state.view_type === "form") {
+            if (state.resId || state.view_type === "form") {
                 actionRequest = {
                     res_model: state.model,
-                    res_id: state.id,
+                    res_id: state.resId,
                     type: "ir.actions.act_window",
                     views: [[state.view_id ? state.view_id : false, "form"]], // TODO add tests for view_id
                 };
@@ -537,7 +537,7 @@ export function makeActionManager(env, router = _router) {
                 currentActionId === state.action
             ) {
                 const props = {
-                    resId: state.id || false,
+                    resId: state.resId || false,
                 };
                 const viewType = state.view_type || currentController.view.type;
                 return { viewType, props };

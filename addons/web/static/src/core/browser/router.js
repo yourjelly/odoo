@@ -1,7 +1,10 @@
 import { EventBus } from "@odoo/owl";
-import { pick } from "../utils/objects";
+import { omit, pick } from "../utils/objects";
 import { objectToUrlEncodedString } from "../utils/urls";
 import { browser } from "./browser";
+import { slidingWindow } from "@web/core/utils/arrays";
+
+const ACTION_KEYS = ["resId", "action", "active_id", "model"];
 
 export const routerBus = new EventBus();
 
@@ -51,11 +54,14 @@ function applyLocking(search, currentSearch) {
 }
 
 // FIXME: do we need this (ditto with sanitize etc)
-function computeNewState(search, replace, currentRoute) {
+function computeNewState(nextState, replace, currentState) {
     if (!replace) {
-        search = Object.assign({}, currentRoute, search);
+        nextState = Object.assign({}, currentState, nextState);
+        if (nextState.actionStack?.length) {
+            Object.assign(nextState.actionStack.at(-1), pick(nextState, ...ACTION_KEYS));
+        }
     }
-    return sanitizeSearch(search);
+    return sanitizeSearch(nextState);
 }
 
 function sanitize(obj, valueToRemove) {
@@ -90,94 +96,51 @@ export function parseSearchQuery(search) {
     return search ? parseString(search.slice(1)) : {};
 }
 
+function pathFromActionState(state) {
+    const path = [];
+    const { action, model, active_id, resId } = state;
+    if (active_id) {
+        path.push(active_id);
+    }
+    if (action) {
+        if (typeof action === "number" || action.includes(".")) {
+            path.push(`act-${action}`);
+        } else {
+            path.push(action);
+        }
+    } else if (model) {
+        if (model.includes(".")) {
+            path.push(model);
+        } else {
+            path.push(`m-${model}`);
+        }
+    }
+    if (resId) {
+        path.push(resId);
+    }
+    return path.join("/");
+}
+
 /**
  * @param {{ [key: string]: any }} route
  * @returns
  */
 export function stateToUrl(state) {
-    const tmpState = Object.assign({}, state);
-    const pathname = ["/home"];
-    if (tmpState.actionStack) {
-        for (const actIndex in tmpState.actionStack) {
-            const action = tmpState.actionStack[actIndex];
-            if (action.resId && actIndex > 0) {
-                const previousAction = tmpState.actionStack[actIndex - 1];
-                if (
-                    action.action === previousAction.action &&
-                    action.model === previousAction.model &&
-                    action.active_id === previousAction.active_id
-                ) {
-                    pathname.push(action.resId);
-                    continue;
-                }
-            }
-            if (action.active_id) {
-                if (
-                    actIndex === 0 ||
-                    action.active_id !== tmpState.actionStack[actIndex - 1]?.resId
-                ) {
-                    pathname.push(action.active_id);
-                }
-            }
-            if (action.action) {
-                if (typeof action.action === "number" || action.action.includes(".")) {
-                    pathname.push(`act-${action.action}`);
-                } else {
-                    pathname.push(action.action);
-                }
-            } else if (action.model) {
-                // Note that the shourtcut don't have "."
-                if (action.model.includes(".")) {
-                    pathname.push(action.model);
-                } else {
-                    pathname.push(`m-${action.model}`);
-                }
-            }
-            if (action.resId) {
-                pathname.push(action.resId);
-            }
+    const actionStack = (state.actionStack || [state]).map((a) => ({ ...a }));
+    for (const [prevAct, act] of slidingWindow(actionStack, 2)) {
+        if (act.active_id === prevAct.resId) {
+            // actions would typically map to a path like `active_id/action/res_id`
+            // avoid doubling up when the active_id is the same as the previous action's res_id
+            delete act.active_id;
         }
-        delete tmpState.action;
-        delete tmpState.active_id;
-        delete tmpState.actionStack;
-        delete tmpState.model;
-        if (tmpState.id) {
-            pathname.pop(); // FIXME why do we pop?
-            pathname.push(tmpState.id);
-            delete tmpState.id;
-        }
-    } else {
-        if (tmpState.action || tmpState.model) {
-            // This is done for retro-compatibility in case of the state has only action or model and not actionStack
-            if (tmpState.active_id) {
-                pathname.push(tmpState.active_id);
-                delete tmpState.active_id;
-            }
-            if (tmpState.action) {
-                if (typeof tmpState.action === "number" || tmpState.action.includes(".")) {
-                    pathname.push(`act-${tmpState.action}`);
-                } else {
-                    pathname.push(tmpState.action);
-                }
-                delete tmpState.action;
-            } else if (tmpState.model) {
-                // Note that the shourtcut don't have "."
-                if (tmpState.model.includes(".")) {
-                    pathname.push(tmpState.model);
-                } else {
-                    pathname.push(`m-${tmpState.model}`);
-                }
-                delete tmpState.model;
-            }
-            if (tmpState.id) {
-                pathname.push(tmpState.id);
-                delete tmpState.id;
-            }
+        if (prevAct.action === act.action) {
+            delete act.action;
         }
     }
-    // Maybe we need to remove id ! (as we remove menu_id)
-    const search = objectToUrlEncodedString(tmpState);
-    return pathname.join("/") + (search ? "?" + search : "");
+    const pathSegments = actionStack.map(pathFromActionState).filter(Boolean);
+    const path = pathSegments.length ? `/${pathSegments.join("/")}` : "";
+    const search = objectToUrlEncodedString(omit(state, "actionStack", ...ACTION_KEYS));
+    return `/home${path}${search ? `?${search}` : ""}`;
 }
 
 export function urlToState(urlObj) {
@@ -190,6 +153,10 @@ export function urlToState(urlObj) {
     // 2. It has one or more keys/values, in that case, we merge it with the search.
     if (pathname === "/web") {
         const sanitizedHash = sanitizeHash(parseHash(hash));
+        if (sanitizedHash.id) {
+            sanitizedHash.resId = sanitizedHash.id;
+            delete sanitizedHash.id;
+        }
         Object.assign(state, sanitizedHash);
         const addHash = hash && !Object.keys(sanitizedHash).length;
         const url = browser.location.origin + stateToUrl(state) + (addHash ? hash : "");
@@ -259,7 +226,7 @@ export function urlToState(urlObj) {
         const activeAction = actions.at(-1);
         if (activeAction) {
             if (activeAction.resId && activeAction.resId !== "new") {
-                state.id = activeAction.resId;
+                state.resId = activeAction.resId;
             }
             Object.assign(state, pick(activeAction, "action", "model", "active_id", "view_type"));
             state.actionStack = actions;
