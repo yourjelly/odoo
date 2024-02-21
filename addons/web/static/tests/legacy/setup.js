@@ -31,7 +31,7 @@ function forceLocaleAndTimezoneWithCleanup() {
 
 function makeMockLocation() {
     return Object.assign(document.createElement("a"), {
-        href: window.location.origin + "/apps",
+        href: window.location.origin + "/home",
         assign(url) {
             this.href = url;
         },

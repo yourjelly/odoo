@@ -551,7 +551,7 @@ QUnit.module("ActionManager", (hooks) => {
             "First record"
         );
         await nextTick(); // wait for the update of the router
-        assert.strictEqual(browser.location.pathname, "/apps/act-3/1");
+        assert.strictEqual(browser.location.pathname, "/home/act-3/1");
 
         // Delete the current record
         await click(target, ".o_cp_action_menus .fa-cog");
@@ -568,13 +568,13 @@ QUnit.module("ActionManager", (hooks) => {
             "Second record"
         );
         await nextTick(); // wait for the update of the router
-        assert.strictEqual(browser.location.pathname, "/apps/act-3/2");
+        assert.strictEqual(browser.location.pathname, "/home/act-3/2");
 
         // Go back to the previous (now deleted) record
         browser.history.back();
         await nextTick();
         assert.verifySteps([`load_breadcrumbs: ["Partners"]`]);
-        assert.strictEqual(browser.location.pathname, "/apps/act-3/1");
+        assert.strictEqual(browser.location.pathname, "/home/act-3/1");
         // As the previous one is deleted, we go back to the list
         await nextTick(); // wait for the update of the router
         await nextTick(); // wait for the doAction
