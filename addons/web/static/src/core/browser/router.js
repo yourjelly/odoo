@@ -267,19 +267,18 @@ browser.addEventListener("popstate", (ev) => {
 
 /**
  * @param {string} mode
- * @returns {(hash: string, options: any) => any}
  */
 function makeDebouncedPush(mode) {
     function doPush() {
         // Aggregates push/replace state arguments
         const replace = allPushArgs.some(([, options]) => options && options.replace);
-        let newSearch = allPushArgs.reduce((finalSearch, [search]) => {
-            return Object.assign(finalSearch || {}, search);
+        let nextState = allPushArgs.reduce((state, [search]) => {
+            return Object.assign(state || {}, search);
         }, null);
         // apply Locking on the final search
-        newSearch = applyLocking(newSearch, current);
+        nextState = applyLocking(nextState, current);
         // Calculates new route based on aggregated search and options
-        const newState = computeNewState(newSearch, replace, current);
+        const newState = computeNewState(nextState, replace, current);
         const url = browser.location.origin + stateToUrl(newState);
         // FIXME is url equality sufficient to skip push/replace? Comparing state seems problematic
         if (url !== browser.location.href) {
@@ -297,8 +296,12 @@ function makeDebouncedPush(mode) {
             browser.location.reload();
         }
     }
-    return function pushOrReplaceState(search, options) {
-        allPushArgs.push([search, options]);
+    /**
+     * @param {object} state
+     * @param {object} options
+     */
+    return function pushOrReplaceState(state, options) {
+        allPushArgs.push([state, options]);
         browser.clearTimeout(pushTimeout);
         pushTimeout = browser.setTimeout(() => {
             doPush();
