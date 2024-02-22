@@ -196,7 +196,7 @@ class Property(models.Model):
         if prop:
             prop.write({'value': value})
         else:
-            prop.create({
+            record = prop.create({
                 'fields_id': field_id,
                 'company_id': company_id,
                 'res_id': False,
@@ -204,6 +204,19 @@ class Property(models.Model):
                 'value': value,
                 'type': self.env[model]._fields[name].type,
             })
+            if self._context.get('module'):
+                 xml_id = self._context.get('module') + '.' + name
+                 self.env['ir.model.data']._update_xmlids([{
+                     'xml_id': xml_id,
+                     'values': {
+                         'name': name,
+                         'fields_id': field_id,
+                         'company_id': company_id,
+                         'value_reference': False
+                     },
+                     'noupdate': True,
+                     'record': record
+                 }], False)
 
     @api.model
     def _get(self, name, model, res_id=False):

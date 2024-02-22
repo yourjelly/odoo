@@ -23,7 +23,8 @@ class AccountChartTemplate(models.AbstractModel):
                 continue
             value = template_data.get(fname)
             if value:
-                self.env['ir.property']._set_default(fname, 'product.category', self.ref(value).id, company=company)
+                # self.env['ir.property']._set_default(fname, 'product.category', self.ref(value).id, company=company)
+                self.env['ir.property'].with_context(module='stock_account')._set_default(fname, 'product.category', self.ref(value).id, company=company)
 
     @template(model='account.journal')
     def _get_stock_account_journal(self, template_code):
