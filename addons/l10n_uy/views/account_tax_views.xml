@@ -12,4 +12,15 @@
         </field>
     </record>
 
+     <record id="account_invoice_form_uy_inherit" model="ir.ui.view">
+        <field name="name">account.move.form.uy.inherit</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <button name="button_draft">
+                <button name="action_assign_name" type="object" string="Assign Name"/>
+            </button>
+        </field>
+    </record>
+
 </odoo>

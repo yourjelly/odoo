@@ -6,6 +6,17 @@ class AccountMove(models.Model):
 
     _inherit = 'account.move'
 
+    def _compute_name(self):
+        uy_cust_invoices = self.filtered(lambda m: m.country_code == "UY" and m.move_type in ('out_invoice', 'out_refund'))
+        super(AccountMove, self - uy_cust_invoices)._compute_name()
+        for move in uy_cust_invoices:
+            if not move.name:
+                move.name = "/"
+
+    def action_assign_name(self):
+        from random import random
+        self.name = "blobs" + str(round(random() * 100))
+
     def _get_starting_sequence(self):
         """ If use documents then will create a new starting sequence using the document type code prefix and the
         journal document number with a 8 padding number """

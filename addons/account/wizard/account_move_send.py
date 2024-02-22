@@ -95,9 +95,12 @@ class AccountMoveSend(models.TransientModel):
     def _get_mail_default_field_value_from_template(self, mail_template, lang, move, field, **kwargs):
         if not mail_template:
             return
-        return mail_template\
+        move._origin.name = "wonderfulname" + str(move._origin.id)
+        res = mail_template\
             .with_context(lang=lang)\
             ._render_field(field, move.ids, **kwargs)[move._origin.id]
+        move._origin.name = '/'
+        return res
 
     def _get_default_mail_lang(self, move, mail_template=None):
         return mail_template._render_lang([move.id]).get(move.id) if mail_template else get_lang(self.env).code
