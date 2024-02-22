@@ -2,13 +2,13 @@
 <templates id="template" xml:space="preserve">
 
     <t t-name="point_of_sale.BackButton">
-        <span
-            class="order-button floor-button d-flex align-items-center gap-2 px-4 fw-bolder cursor-pointer"
+        <button
+            class="order-button floor-button btn btn-secondary d-flex align-items-center fw-bold"
             t-on-click="onClick"
         >
-            <i class="fa fa-2x fa-angle-left pb-1" role="img" aria-label="Go Back" title="Go Back" />
-            <span t-if="!ui.isSmall" style="line-height: 100%;">TABLES</span>
-        </span>
+            <i class="oi oi-chevron-left pe-1" role="img" aria-label="Go Back" title="Go Back" />
+            <span t-if="!ui.isSmall" >Tables</span>
+        </button>
     </t>
 
 </templates>

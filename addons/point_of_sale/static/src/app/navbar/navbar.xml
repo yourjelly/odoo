@@ -2,14 +2,15 @@
 <templates id="template" xml:space="preserve">
 
     <t t-name="point_of_sale.Navbar">
-        <div class="pos-topheader d-flex w-100 p-0 m-0 bg-white border-bottom">
-            <div t-if="!ui.isSmall" class="pos-branding d-flex justify-content-between flex-grow-1 h-100 p-0 my-0 text-start">
-                <img class="pos-logo h-75 ms-3 align-self-center" t-on-click="() => debug.toggleWidget()" src="/web/static/img/logo.png" alt="Logo" />
+        <div class="pos-topheader d-flex w-100 p-0 m-0 border-bottom bg-white">
+            <div t-if="!ui.isSmall" class="pos-branding d-flex justify-content-between flex-grow-1 h-100 p-1">
+                <img class="pos-logo" t-on-click="() => debug.toggleWidget()" src="/web/static/img/logo.png" alt="Logo" />
+
                 <BackButton t-if="showBackButton()"/>
             </div>
             <div class="pos-rightheader d-flex flex-grow-1 w-60 h-100" t-if="pos.shouldShowNavbarButtons()">
                 <Input tModel="[pos, 'searchProductWord']"
-                        class="'p-2'"
+                        class="'p-1'"
                         isSmall="ui.isSmall"
                         placeholder="'Search products...'"
                         icon="{type: 'fa', value: 'fa-search'}"
