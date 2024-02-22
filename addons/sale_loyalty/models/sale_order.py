@@ -171,7 +171,7 @@ class SaleOrder(models.Model):
             tax_data['taxes'] = tax_data['taxes'].filtered(lambda t: t.amount_type == 'fixed')
             tax_results = self.env['account.tax']._compute_taxes([tax_data])
             totals = list(tax_results['totals'].values())[0]
-            discountable += line.price_total - totals['amount_tax']
+            discountable += totals['amount_untaxed'] #this should be the untaxed amount
             taxes = line.tax_id.filtered(lambda t: t.amount_type != 'fixed')
             discountable_per_tax[taxes] += totals['amount_untaxed']
         return discountable, discountable_per_tax
