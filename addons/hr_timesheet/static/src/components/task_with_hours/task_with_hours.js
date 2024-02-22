@@ -4,7 +4,7 @@ import { registry } from "@web/core/registry";
 import { Many2OneField, many2OneField } from "@web/views/fields/many2one/many2one_field";
 
 
-class TaskWithHours extends Many2OneField {
+export class TaskWithHours extends Many2OneField {
 
     canCreate() {
         return Boolean(this.context.default_project_id);
