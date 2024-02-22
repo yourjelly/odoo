@@ -454,3 +454,9 @@ class Task(models.Model):
         uom_hour = self.env.ref('uom.product_uom_hour')
         uom_day = self.env.ref('uom.product_uom_day')
         return round(uom_hour._compute_quantity(time, uom_day, raise_if_failure=False), 2)
+
+    @api.model
+    def get_views(self, views, options=None):
+        allow_timesheets = self.env['project.project'].browse(self._context.get('default_project_id')).allow_timesheets
+        self = self.with_context(allow_timesheets=allow_timesheets)
+        return super().get_views(views, options)
