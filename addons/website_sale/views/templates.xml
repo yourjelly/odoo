@@ -1135,7 +1135,7 @@
                                     </t>
                                 </table>
                             </div>
-                            <t t-set="product_documents" t-value="product.sudo().product_document_ids.filtered(lambda doc: doc.shown_on_product_page)"/>
+                            <t t-set="product_documents" t-value="product.sudo().product_document_ids.filtered(lambda doc: doc.shown_on_product_page).sorted(lambda x: x.name)"/>
                             <div id="product_documents" t-if="product_documents" class="row">
                                 <u class="h5">Documents</u>
                                 <t t-foreach="product_documents" t-as="document_sudo">
