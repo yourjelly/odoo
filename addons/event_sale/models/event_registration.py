@@ -15,8 +15,8 @@ class EventRegistration(models.Model):
             ('to_pay', 'Not Sold'),
             ('sold', 'Sold'),
             ('free', 'Free'),
-        ], compute="_compute_registration_status", compute_sudo=True, store=True)
-    state = fields.Selection(default=None, compute="_compute_registration_status", store=True, readonly=False)
+        ], compute="_compute_registration_status", compute_sudo=True, store=True, precompute=True)
+    state = fields.Selection(default=None, compute="_compute_registration_status", store=True, readonly=False, precompute=True)
     utm_campaign_id = fields.Many2one(compute='_compute_utm_campaign_id', readonly=False,
         store=True, ondelete="set null")
     utm_source_id = fields.Many2one(compute='_compute_utm_source_id', readonly=False,
@@ -26,7 +26,7 @@ class EventRegistration(models.Model):
 
     @api.depends('sale_order_id.state', 'sale_order_id.currency_id', 'sale_order_line_id.price_total')
     def _compute_registration_status(self):
-        self.filtered(lambda reg: not reg.state).state = 'draft'
+        self.filtered(lambda reg: reg and not reg.state).state = 'draft'
         for so_line, registrations in self.grouped('sale_order_line_id').items():
             cancelled_so_registrations = registrations.filtered(lambda reg: reg.sale_order_id.state == 'cancel')
             cancelled_so_registrations.state = 'cancel'
