@@ -1182,6 +1182,10 @@
                        data-customize-website-views="website.template_footer_minimalist_centered"
                        data-customize-website-variable="'minimalist_centered'"
                        data-img="/website/static/src/img/snippets_options/footer_template_minimalist_centered.svg"/>
+            <we-button title="Big Map"
+                       data-customize-website-views="website.template_footer_big_map"
+                       data-customize-website-variable="'big_map'"
+                       data-img="/website/static/src/img/snippets_options/footer_template_big_map.svg"/>
         </we-select>
         <!-- Colors -->
         <we-colorpicker string="Colors"
