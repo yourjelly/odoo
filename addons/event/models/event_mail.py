@@ -163,10 +163,7 @@ class EventMailScheduler(models.Model):
         """
         self.ensure_one()
         if self.notification_type == "mail":
-            self.event_id.mail_attendees(
-                self.template_ref.id,
-                filter_func=lambda self: self.id in registrations.ids,
-            )
+            self._send_mail(registrations)
         return True
 
     def _execute_attendee_based(self):
@@ -211,6 +208,27 @@ class EventMailScheduler(models.Model):
         if new:
             return self.env['event.mail.registration'].create(new)
         return self.env['event.mail.registration']
+
+    def _send_mail(self, registrations):
+        """ Mail action: send mail to attendees """
+        organizer = self.event_id.organizer_id
+        company = self.env.company
+        author = self.env.ref('base.user_root').partner_id
+        if organizer.email:
+            author = organizer
+        elif company.email:
+            author = company.partner_id
+        elif self.env.user.email:
+            author = self.env.user.partner_id
+
+        template = self.template_ref
+        email_values = {
+            'author_id': author.id,
+        }
+        if not template.email_from:
+            email_values['email_from'] = author.email_formatted
+        for registration in registrations:
+            template.send_mail(registration.id, email_values=email_values)
 
     def _filter_template_ref(self):
         """ Check for valid template reference: existing, working template """
@@ -352,28 +370,10 @@ class EventMailRegistration(models.Model):
         todo = self.filtered(
             lambda r: r.scheduler_id.notification_type == "mail"
         )
-        done = self.browse()
-        for reg_mail in todo:
-            organizer = reg_mail.scheduler_id.event_id.organizer_id
-            company = self.env.company
-            author = self.env.ref('base.user_root').partner_id
-            if organizer.email:
-                author = organizer
-            elif company.email:
-                author = company.partner_id
-            elif self.env.user.email:
-                author = self.env.user.partner_id
-
-            template = reg_mail.scheduler_id.template_ref
-            email_values = {
-                'author_id': author.id,
-            }
-            if not template.email_from:
-                email_values['email_from'] = author.email_formatted
-            template.send_mail(reg_mail.registration_id.id, email_values=email_values)
-            done += reg_mail
-        done.write({'mail_sent': True})
-        return done
+        for scheduler, reg_mails in todo.grouped('scheduler_id').items():
+            scheduler._send_mail(reg_mails.registration_id)
+        todo.mail_sent = True
+        return todo
 
     def _get_skip_domain(self):
         """ Domain of mail registrations ot skip: not already done, linked to

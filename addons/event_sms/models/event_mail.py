@@ -29,16 +29,20 @@ class EventMailScheduler(models.Model):
 
     def _execute_event_based_for_registrations(self, registrations):
         if self.notification_type == "sms":
-            registrations._message_sms_schedule_mass(
-                template=self.template_ref,
-                mass_keep_log=True
-            )
+            self._send_sms(registrations)
         return super()._execute_event_based_for_registrations(registrations)
 
     def _template_model_by_notification_type(self):
         info = super()._template_model_by_notification_type()
         info["sms"] = "sms.template"
         return info
+
+    def _send_sms(self, registrations):
+        """ SMS action: send SMS to attendees """
+        registrations._message_sms_schedule_mass(
+            template=self.template_ref,
+            mass_keep_log=True
+        )
 
 
 class EventMailRegistration(models.Model):
@@ -48,11 +52,8 @@ class EventMailRegistration(models.Model):
         todo = self.filtered(
             lambda r: r.scheduler_id.notification_type == "sms"
         )
-        for reg_mail in todo:
-            reg_mail.registration_id._message_sms_schedule_mass(
-                template=reg_mail.scheduler_id.template_ref,
-                mass_keep_log=True
-            )
-        todo.write({'mail_sent': True})
+        for scheduler, reg_mails in todo.grouped('scheduler_id').items():
+            scheduler._send_sms(reg_mails.registration_id)
+        todo.mail_sent = True
 
         return super(EventMailRegistration, self - todo)._execute_on_registrations()
