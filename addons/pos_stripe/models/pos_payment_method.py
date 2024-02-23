@@ -16,8 +16,20 @@ class PosPaymentMethod(models.Model):
     def _get_payment_terminal_selection(self):
         return super()._get_payment_terminal_selection() + [('stripe', 'Stripe')]
 
+    def _default_pos_stripe_payment_method(self):
+        return self.env['payment.provider'].search([('code', '=', 'stripe'), ('company_id', '=', self.env.company.id)
+            ], limit=1)
+
+    def _default_stripe_secret_key(self):
+        stripe_payment_provider = self._default_pos_stripe_payment_method()
+        if stripe_payment_provider:
+            return stripe_payment_provider.stripe_secret_key
+        return ''
+
     # Stripe
     stripe_serial_number = fields.Char(help='[Serial number of the stripe terminal], for example: WSC513105011295', copy=False)
+    pos_stripe_payment_method = fields.Many2one('payment.provider', string="Payment_provider", default=_default_pos_stripe_payment_method)
+    stripe_secret_key = fields.Char(string="Secret Key", related="pos_stripe_payment_method.stripe_secret_key", readonly=False, default=_default_stripe_secret_key)
 
     @api.constrains('stripe_serial_number')
     def _check_stripe_serial_number(self):
