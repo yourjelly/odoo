@@ -14,7 +14,7 @@ import { CallbackRecorder } from "./action_hook";
 import { ReportAction } from "./reports/report_action";
 import { UPDATE_METHODS } from "@web/core/orm_service";
 import { ControlPanel } from "@web/search/control_panel/control_panel";
-import { router as _router } from "@web/core/browser/router";
+import { ACTION_KEYS, router as _router } from "@web/core/browser/router";
 
 import {
     Component,
@@ -159,12 +159,13 @@ export function makeActionManager(env, router = _router) {
             return [];
         }
         const controllers = state.actionStack.slice(0, -1).map((action) => {
-            // create a better display name :
+            // FIXME: store and restore display name
             const controller = {
                 jsId: `controller_${++id}`,
-                displayName: action.resId
-                    ? `${action.model || action.action}:${action.resId}`
-                    : action.model || action.action,
+                displayName: "", // TODO: if not displayName loadBreadcrumb, add displayName from _getBreadCrumb to pushState
+                // action.resId
+                //     ? `${action.model || action.action}:${action.resId}`
+                //     : action.model || action.action,
                 virtual: true,
                 action: {},
                 props: {},
@@ -185,7 +186,7 @@ export function makeActionManager(env, router = _router) {
                 controller.action.type = "ir.actions.act_window";
                 controller.props.resId = action.resId;
                 controller.state.view_type = "form";
-                controller.props.viewType = "form";
+                controller.props.viewType = "form"; // FIXME props.viewType? Should probably be just type
             }
             return controller;
         });
@@ -551,7 +552,6 @@ export function makeActionManager(env, router = _router) {
      * @param {ActWindowAction} action
      * @param {BaseView[]} views
      * @param {Object} props
-     * @returns {{ props: ViewProps, config: Config }}
      */
     function _getViewInfo(view, action, views, props = {}) {
         const target = action.target;
@@ -596,6 +596,13 @@ export function makeActionManager(env, router = _router) {
         });
 
         if (view.type === "form") {
+            viewProps.updateResId = (newId) => {
+                const changed = resId !== newId;
+                resId = newId;
+                if (changed && target !== "new") {
+                    pushState();
+                }
+            };
             if (action.target === "new") {
                 viewProps.mode = "edit";
                 if (!viewProps.onSave) {
@@ -631,15 +638,18 @@ export function makeActionManager(env, router = _router) {
         }
 
         // view specific
-        if (action.res_id && !viewProps.resId) {
-            viewProps.resId = action.res_id;
+        if (!viewProps.resId) {
+            viewProps.resId = action.res_id || false;
         }
 
         viewProps.noBreadcrumbs =
             "no_breadcrumbs" in action.context ? action.context.no_breadcrumbs : target === "new";
         delete action.context.no_breadcrumbs;
+
+        let resId = viewProps.resId;
         return {
             props: viewProps,
+            resId: () => resId,
             config: {
                 actionId: action.id,
                 actionType: "ir.actions.act_window",
@@ -722,7 +732,7 @@ export function makeActionManager(env, router = _router) {
                 const lastCtrl = controllerStack[index - 1];
                 if (
                     lastCtrl.virtual &&
-                    lastCtrl.props.viewType !== "form" &&
+                    lastCtrl.props.viewType !== "form" && // FIXME props.viewType?
                     (lastCtrl.action.id === options.lazyController.action.id ||
                         lastCtrl.action.id === options.lazyController.action.path)
                 ) {
@@ -857,7 +867,7 @@ export function makeActionManager(env, router = _router) {
                     };
 
                     controllerStack = nextStack; // the controller is mounted, commit the new stack
-                    pushState(controllerStack);
+                    pushState();
                     this.titleService.setParts({ action: controller.displayName });
                     browser.sessionStorage.setItem(
                         "current_action",
@@ -1528,11 +1538,10 @@ export function makeActionManager(env, router = _router) {
         }
     }
 
-    function pushState(controllerStack) {
+    function pushState() {
         const newState = {};
-        const actions = [];
-        const lastCtrl = controllerStack[controllerStack.length - 1];
-        if (lastCtrl.action.tag === "menu") {
+        const lastCtrl = controllerStack.at(-1);
+        if (lastCtrl?.action.tag === "menu") {
             router.pushState(
                 {
                     actionStack: undefined,
@@ -1541,11 +1550,10 @@ export function makeActionManager(env, router = _router) {
             );
             return;
         }
-        for (const controller of controllerStack) {
-            const action = controller.action;
-            const props = controller.props;
+        const actions = controllerStack.map((controller) => {
+            const { action, props } = controller;
             const actionState = {};
-            if (action.id) {
+            if (action.path || action.id) {
                 actionState.action = action.path || action.id;
             } else if (action.type === "ir.actions.client") {
                 actionState.action = action.tag;
@@ -1553,12 +1561,9 @@ export function makeActionManager(env, router = _router) {
                 actionState.model = props.resModel;
             }
             if (action.type === "ir.actions.act_window") {
-                if (props.resId || (props.state && props.state.resId)) {
-                    actionState.resId = props.resId || (props.state && props.state.resId);
-                }
                 actionState.view_type = props.type;
-                if (actionState.view_type === "form" && !actionState.resId) {
-                    actionState.resId = "new";
+                if (props.type === "form") {
+                    actionState.resId = controller.resId() || "new";
                 }
             }
             if (action.context) {
@@ -1569,18 +1574,16 @@ export function makeActionManager(env, router = _router) {
                 const activeIds = action.context.active_ids;
                 // we don't push active_ids if it's a single element array containing
                 // the active_id to make the url shorter in most cases
+                // FIXME: is this still needed? When do we have active_ids?
                 if (activeIds && !(activeIds.length === 1 && activeIds[0] === activeId)) {
                     actionState.active_ids = activeIds.join(",");
                 }
             }
-            actions.push(actionState);
-        }
+            return actionState;
+        });
         if (actions.length) {
             newState.actionStack = actions;
-            Object.assign(
-                newState,
-                pick(newState.actionStack.at(-1), "action", "model", "active_id")
-            );
+            Object.assign(newState, pick(newState.actionStack.at(-1), ...ACTION_KEYS));
         }
         if (
             lastCtrl.action.type === "ir.actions.act_window" &&

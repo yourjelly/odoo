@@ -6101,11 +6101,14 @@ QUnit.module("Views", (hooks) => {
         });
 
         assert.strictEqual(target.querySelector(".o_pager_value").textContent, "1");
-        assert.strictEqual(router.current.resId, 1);
+        // FIXME move these asserts to a test in action service: standalone form views
+        // should not update the url (eg form view embedded in client action)
+        // assert.strictEqual(router.current.resId, 1);
 
         await click(target.querySelector(".o_pager_next"));
         assert.strictEqual(target.querySelector(".o_pager_value").textContent, "2");
-        assert.strictEqual(router.current.resId, 2);
+        // FIXME same as above
+        // assert.strictEqual(router.current.resId, 2);
     });
 
     QUnit.test("switching to non-existing record", async function (assert) {
@@ -6126,19 +6129,24 @@ QUnit.module("Views", (hooks) => {
 
         assert.strictEqual(target.querySelector(".o_pager_value").textContent, "1");
         assert.strictEqual(target.querySelector(".o_pager_limit").textContent, "3");
-        assert.strictEqual(router.current.resId, 1);
+        // FIXME same as above
+        // assert.strictEqual(router.current.resId, 1);
+
         await click(target.querySelector(".o_pager_next"));
 
         assert.strictEqual(target.querySelector(".o_pager_value").textContent, "1");
         assert.strictEqual(target.querySelector(".o_pager_limit").textContent, "2");
-        assert.strictEqual(router.current.resId, 1);
+        // FIXME same as above
+        // assert.strictEqual(router.current.resId, 1);
+
         await nextTick();
         assert.containsN(target, ".o_notification_body", 1, "should have a notification");
 
         await click(target.querySelector(".o_pager_next"));
         assert.strictEqual(target.querySelector(".o_pager_value").textContent, "2");
         assert.strictEqual(target.querySelector(".o_pager_limit").textContent, "2");
-        assert.strictEqual(router.current.resId, 2);
+        // FIXME same as above
+        // assert.strictEqual(router.current.resId, 2);
         assert.containsN(target, ".o_notification_body", 1, "notification should be sticky");
     });
 

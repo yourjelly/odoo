@@ -571,6 +571,8 @@ export class MockServer {
                 return this.mockLoadMenus();
             case "/web/action/load":
                 return this.mockLoadAction(args);
+            case "/web/action/load_breadcrumbs":
+                return this.mockLoadBreadcrumbs(args);
             case "/web/dataset/resequence":
                 return this.mockResequence(args);
         }
@@ -755,6 +757,25 @@ export class MockServer {
             );
         }
         return action || false;
+    }
+
+    mockLoadBreadcrumbs({ actions }) {
+        throw new Error("Load breadcrumbs shouldn't be invoked yet");
+        return actions.map(({ action: action_id, model, resId }) => {
+            if (action_id) {
+                const act = this.mockLoadAction({ action_id });
+                if (resId) {
+                    return this.models[act.res_model].records[resId].display_name;
+                }
+                return act.display_name;
+            } else if (model) {
+                if (resId) {
+                    return this.models[model].records[resId].display_name;
+                }
+                throw new Error("Actions with a model should also have a resId");
+            }
+            throw new Error("Actions should have either an action (id or path) or a model");
+        });
     }
 
     mockLoadMenus() {

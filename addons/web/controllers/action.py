@@ -66,8 +66,10 @@ class Action(Controller):
                     Model = request.env[action.get('model')]
                     if record_id:
                         display_names.append(Model.browse(record_id).display_name)
-                    else: # FIXME: is this needed? These actions should not be loaded through here
-                        display_names.append(Model._description)
+                    else:
+                        # This case cannot be produced by the web client
+                        # display_names.append(Model._description)
+                        raise BadRequest('Actions with a model should also have a resId')
                 else:
                     raise BadRequest('Actions should have either an action (id or path) or a model')
             except Exception: # FIXME don't catch blind exceptions

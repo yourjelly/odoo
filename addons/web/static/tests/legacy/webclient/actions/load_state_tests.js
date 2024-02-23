@@ -44,7 +44,7 @@ QUnit.module("ActionManager", (hooks) => {
 
     QUnit.test("action loading", async (assert) => {
         assert.expect(2);
-        Object.assign(browser.location, { search: "action=1001" });
+        browser.location.href = "/web#action=1001";
         await createWebClient({ serverData });
         assert.containsOnce(target, ".test_client_action");
         assert.strictEqual(target.querySelector(".o_menu_brand").textContent, "App1");
@@ -52,7 +52,7 @@ QUnit.module("ActionManager", (hooks) => {
 
     QUnit.test("menu loading", async (assert) => {
         assert.expect(2);
-        Object.assign(browser.location, { search: "menu_id=2" });
+        browser.location.href = "/web#menu_id=2";
         await createWebClient({ serverData });
         assert.strictEqual(
             target.querySelector(".test_client_action").textContent.trim(),
@@ -63,7 +63,7 @@ QUnit.module("ActionManager", (hooks) => {
 
     QUnit.test("action and menu loading", async (assert) => {
         assert.expect(3);
-        Object.assign(browser.location, { search: "action=1001&menu_id=2" });
+        browser.location.href = "/web#action=1001&menu_id=2";
         await createWebClient({ serverData });
         assert.strictEqual(
             target.querySelector(".test_client_action").textContent.trim(),
@@ -144,7 +144,7 @@ QUnit.module("ActionManager", (hooks) => {
 
     QUnit.test("supports action as xmlId", async (assert) => {
         assert.expect(2);
-        Object.assign(browser.location, { search: "action=wowl.client_action" });
+        browser.location.href = "/web#action=wowl.client_action";
         await createWebClient({ serverData });
         assert.strictEqual(
             target.querySelector(".test_client_action").textContent.trim(),
@@ -156,7 +156,7 @@ QUnit.module("ActionManager", (hooks) => {
     QUnit.test("supports opening action in dialog", async (assert) => {
         assert.expect(3);
         serverData.actions["wowl.client_action"].target = "new";
-        Object.assign(browser.location, { search: "action=wowl.client_action" });
+        browser.location.href = "/web#action=wowl.client_action";
         await createWebClient({ serverData });
         assert.containsOnce(target, ".test_client_action");
         assert.containsOnce(target, ".modal .test_client_action");
@@ -168,7 +168,7 @@ QUnit.module("ActionManager", (hooks) => {
         const mockRPC = async function (route, { method }) {
             assert.step(method || route);
         };
-        Object.assign(browser.location, { search: "res_model=partner" });
+        browser.location.href = "/web#res_model=partner";
         await createWebClient({ serverData, mockRPC });
         assert.strictEqual($(target).text(), "", "should display nothing");
         assert.verifySteps(["/web/webclient/load_menus"]);
@@ -184,7 +184,7 @@ QUnit.module("ActionManager", (hooks) => {
         const mockRPC = async function (route, { method }) {
             assert.step(method || route);
         };
-        Object.assign(browser.location, { search: "action=HelloWorldTest" });
+        browser.location.href = "/web#action=HelloWorldTest";
         await createWebClient({ serverData, mockRPC });
         assert.strictEqual(
             $(target).find(".o_client_action_test").text(),
@@ -199,7 +199,7 @@ QUnit.module("ActionManager", (hooks) => {
         const mockRPC = async function (route, { method }) {
             assert.step(method || route);
         };
-        Object.assign(browser.location, { search: "action=1" });
+        browser.location.href = "/web#action=1";
         await createWebClient({ serverData, mockRPC });
         assert.containsOnce(target, ".o_control_panel");
         assert.containsOnce(target, ".o_kanban_view");
@@ -216,7 +216,7 @@ QUnit.module("ActionManager", (hooks) => {
         const mockRPC = async function (route, { method }) {
             assert.step(method || route);
         };
-        Object.assign(browser.location, { search: "id=2&model=partner" });
+        browser.location.href = "/web#id=2&model=partner";
         await createWebClient({ serverData, mockRPC });
         assert.containsOnce(target, ".o_form_view");
         assert.deepEqual(getBreadCrumbTexts(target), ["Second record"]);
@@ -235,8 +235,7 @@ QUnit.module("ActionManager", (hooks) => {
             1: { id: 1, children: [], name: "App1", appID: 1, actionID: 1001, xmlid: "menu_1" },
             2: { id: 2, children: [], name: "App2", appID: 2, actionID: 1002, xmlid: "menu_2" },
         };
-        const search = "?id=2&model=partner";
-        Object.assign(browser.location, { search });
+        browser.location.href = "/web#id=2&model=partner";
         await createWebClient({ serverData, mockRPC });
 
         await nextTick();
@@ -251,7 +250,7 @@ QUnit.module("ActionManager", (hooks) => {
         const mockRPC = async function (route, { method }) {
             assert.step(method || route);
         };
-        Object.assign(browser.location, { search: "action=3&id=&model=partner&view_type=form" });
+        browser.location.href = "/web#action=3&id=&model=partner&view_type=form";
         await createWebClient({ serverData, mockRPC });
         assert.containsOnce(target, ".o_form_view");
         assert.verifySteps([
@@ -267,7 +266,7 @@ QUnit.module("ActionManager", (hooks) => {
         const mockRPC = async function (route, { method }) {
             assert.step(method || route);
         };
-        Object.assign(browser.location, { search: "action=3&view_type=kanban" });
+        browser.location.href = "/web#action=3&view_type=kanban";
         await createWebClient({ serverData, mockRPC });
         assert.containsNone(target, ".o_list_view");
         assert.containsOnce(target, ".o_kanban_view");
@@ -290,7 +289,7 @@ QUnit.module("ActionManager", (hooks) => {
                     assert.step(method || route);
                 }
             };
-            Object.assign(browser.location, { search: "action=3&id=2&view_type=form" });
+            browser.location.href = "/web#action=3&id=2&view_type=form";
             await createWebClient({ serverData, mockRPC });
             assert.containsNone(target, ".o_list_view");
             assert.containsOnce(target, ".o_form_view");
@@ -336,7 +335,7 @@ QUnit.module("ActionManager", (hooks) => {
                     return Promise.reject();
                 }
             };
-            Object.assign(browser.location, { search: "action=3&id=2&view_type=form" });
+            browser.location.href = "/web#action=3&id=2&view_type=form";
             const webClient = await createWebClient({ serverData, mockRPC });
             assert.containsNone(target, ".o_form_view");
             assert.containsOnce(target, ".o_list_view"); // Show the lazy loaded list view
@@ -347,7 +346,6 @@ QUnit.module("ActionManager", (hooks) => {
 
     QUnit.test("should push the correct state at the right time", async function (assert) {
         // formerly "should not push a loaded state"
-        assert.expect(6);
         const pushState = browser.history.pushState;
         patchWithCleanup(browser, {
             history: Object.assign({}, browser.history, {
@@ -357,7 +355,7 @@ QUnit.module("ActionManager", (hooks) => {
                 },
             }),
         });
-        Object.assign(browser.location, { search: "action=3" });
+        browser.location.href = "/web#action=3";
         await createWebClient({ serverData });
         let currentState = router.current;
         assert.deepEqual(currentState, {
@@ -368,7 +366,7 @@ QUnit.module("ActionManager", (hooks) => {
                 },
             ],
         });
-        assert.verifySteps(["push_state"], "should have pushed the final state");
+        assert.verifySteps([], "loading the initial state shouldn't push the state");
         await click(target.querySelector("tr .o_data_cell"));
         await nextTick();
         currentState = router.current;
@@ -400,7 +398,7 @@ QUnit.module("ActionManager", (hooks) => {
         const mockRPC = async function (route) {
             assert.step(route);
         };
-        Object.assign(browser.location, { search: "menu_id=666" });
+        browser.location.href = "/web#menu_id=666";
         await createWebClient({ serverData, mockRPC });
         assert.containsOnce(target, ".o_kanban_view", "should display a kanban view");
         assert.deepEqual(getBreadCrumbTexts(target), ["Partners Action 1"]);
@@ -427,7 +425,7 @@ QUnit.module("ActionManager", (hooks) => {
         const mockRPC = async (route) => {
             assert.step(route);
         };
-        Object.assign(browser.location, { search: "action=999&view_type=form&id=" });
+        browser.location.href = "/web#action=999&view_type=form&id=";
         await createWebClient({ serverData, mockRPC });
         assert.containsOnce(target, ".o_form_view");
         assert.deepEqual(getBreadCrumbTexts(target), ["Partner", "New"]);
@@ -452,7 +450,7 @@ QUnit.module("ActionManager", (hooks) => {
                 [false, "form"],
             ],
         };
-        Object.assign(browser.location, { search: "action=1000&view_type=form&id=999" });
+        browser.location.href = "/web#action=1000&view_type=form&id=999";
         await createWebClient({ serverData });
         assert.containsOnce(target, ".o_list_view");
         assert.containsN(target, ".o_notification_body", 1, "should have a notification");
@@ -468,7 +466,7 @@ QUnit.module("ActionManager", (hooks) => {
                 return new Promise(() => {});
             }
         };
-        Object.assign(browser.location, { search: "action=2&active_ids=3" });
+        browser.location.href = "/web#action=2&active_ids=3";
         await createWebClient({ serverData, mockRPC });
     });
 
@@ -486,7 +484,7 @@ QUnit.module("ActionManager", (hooks) => {
                 `,
             };
 
-            Object.assign(browser.location, { search: "action=3&model=partner&view_type=form" });
+            browser.location.href = "/web#action=3&model=partner&view_type=form";
             await createWebClient({ serverData });
 
             await click(target.querySelector(".o_control_panel .breadcrumb-item"));
@@ -504,7 +502,7 @@ QUnit.module("ActionManager", (hooks) => {
         assert.expect(8);
         assert.expectErrors();
 
-        Object.assign(browser.location, { search: "?action=__test__client__action__&menu_id=1" });
+        browser.location.href = "/web#action=__test__client__action__&menu_id=1";
         const ClientAction = registry.category("actions").get("__test__client__action__");
         class Override extends ClientAction {
             setup() {
@@ -531,6 +529,11 @@ QUnit.module("ActionManager", (hooks) => {
         assert.deepEqual(router.current, {
             action: "__test__client__action__",
             menu_id: 1,
+            actionStack: [
+                {
+                    action: "__test__client__action__",
+                },
+            ],
         });
     });
 });

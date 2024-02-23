@@ -4,7 +4,7 @@ import { objectToUrlEncodedString } from "../utils/urls";
 import { browser } from "./browser";
 import { slidingWindow } from "@web/core/utils/arrays";
 
-const ACTION_KEYS = ["resId", "action", "active_id", "model"];
+export const ACTION_KEYS = ["resId", "action", "active_id", "model"];
 
 export const routerBus = new EventBus();
 
@@ -112,6 +112,8 @@ function pathFromActionState(state) {
         if (model.includes(".")) {
             path.push(model);
         } else {
+            // A few models don't have a dot at all, we need to distinguish
+            // them from action paths (eg: website)
             path.push(`m-${model}`);
         }
     }
@@ -160,10 +162,11 @@ export function urlToState(urlObj) {
         Object.assign(state, sanitizedHash);
         const addHash = hash && !Object.keys(sanitizedHash).length;
         const url = browser.location.origin + stateToUrl(state) + (addHash ? hash : "");
-        browser.history.replaceState({}, "", url);
+        browser.history.replaceState(browser.history.state, null, url);
+        urlObj.href = url;
     }
 
-    const splitPath = pathname.split("/").filter(Boolean);
+    const splitPath = urlObj.pathname.split("/").filter(Boolean);
 
     if (splitPath.length > 1 && splitPath[0] === "home") {
         splitPath.splice(0, 1);

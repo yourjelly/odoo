@@ -519,16 +519,7 @@ QUnit.module("ActionManager", (hooks) => {
     });
 
     QUnit.test("A new form view can be reloaded after a failed one", async function (assert) {
-        const webClient = await createWebClient({
-            serverData,
-            mockRPC: (route, args) => {
-                if (route === "/web/action/load_breadcrumbs") {
-                    const breadcrumbs = args.actions.map((a) => serverData.actions[a.action].name);
-                    assert.step(`load_breadcrumbs: ${JSON.stringify(breadcrumbs)}`);
-                    return breadcrumbs;
-                }
-            },
-        });
+        const webClient = await createWebClient({ serverData });
         serviceRegistry.add("error", errorService);
 
         await doAction(webClient, 3);
@@ -1598,7 +1589,7 @@ QUnit.module("ActionManager", (hooks) => {
     );
 
     QUnit.test("destroy action with lazy loaded controller", async function (assert) {
-        Object.assign(browser.location, { search: "action=3&id=2&view_type=form" });
+        browser.location.href = "/web#action=3&id=2&view_type=form";
         const webClient = await createWebClient({ serverData });
         assert.containsNone(target, ".o_list_view");
         assert.containsOnce(target, ".o_form_view");
