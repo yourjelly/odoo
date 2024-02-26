@@ -1,0 +1,7 @@
+// .input-group:not(.has-validation) .js_subscribe_btn:not(:last-child):not(.dropdown-toggle):not(.dropdown-menu):not(.o_dropdown_menu) {
+//     border-radius: 0 $input-border-radius $input-border-radius 0;
+// }
+// OR
+.input-group .js_subscribe_btn {
+    border-radius: 0 $input-border-radius $input-border-radius 0 !important;
+}
