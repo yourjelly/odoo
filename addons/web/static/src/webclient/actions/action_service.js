@@ -159,13 +159,9 @@ export function makeActionManager(env, router = _router) {
             return [];
         }
         const controllers = state.actionStack.slice(0, -1).map((action) => {
-            // FIXME: store and restore display name
             const controller = {
                 jsId: `controller_${++id}`,
-                displayName: "", // TODO: if not displayName loadBreadcrumb, add displayName from _getBreadCrumb to pushState
-                // action.resId
-                //     ? `${action.model || action.action}:${action.resId}`
-                //     : action.model || action.action,
+                displayName: action.displayName,
                 virtual: true,
                 action: {},
                 props: {},
@@ -185,27 +181,34 @@ export function makeActionManager(env, router = _router) {
                 controller.state.id = action.resId;
                 controller.action.type = "ir.actions.act_window";
                 controller.props.resId = action.resId;
+                controller.resId = () => action.resId;
                 controller.state.view_type = "form";
-                controller.props.viewType = "form"; // FIXME props.viewType? Should probably be just type
+                controller.props.type = "form";
             }
             return controller;
         });
-        _loadBreadcrumbs(controllers); // Pursposefully not awaited
+        if (controllers.at(-1)?.action?.id === state.action) {
+            // The display name of this action will be loaded by _loadAction
+            _loadBreadcrumbs(controllers.slice(0, -1));
+        } else {
+            _loadBreadcrumbs(controllers);
+        }
         return controllers;
     }
 
-    // FIXME don't load breadcrumbs for controllers for which we already got the
-    // display name from itself instead of through here on back/forward.
     async function _loadBreadcrumbs(controllers) {
         const toFetch = [];
         const keys = [];
-        for (const { action, state } of controllers) {
+        for (const { action, state, displayName } of controllers) {
             if (action.id === "menu" || actionRegistry.contains(action.id)) {
                 continue;
             }
             const actionInfo = pick(state, "action", "model", "resId");
             const key = JSON.stringify(actionInfo);
             keys.push(key);
+            if (displayName) {
+                breadcrumbCache[key] = displayName;
+            }
             if (key in breadcrumbCache) {
                 continue;
             }
@@ -732,7 +735,7 @@ export function makeActionManager(env, router = _router) {
                 const lastCtrl = controllerStack[index - 1];
                 if (
                     lastCtrl.virtual &&
-                    lastCtrl.props.viewType !== "form" && // FIXME props.viewType?
+                    lastCtrl.props.type !== "form" &&
                     (lastCtrl.action.id === options.lazyController.action.id ||
                         lastCtrl.action.id === options.lazyController.action.path)
                 ) {
@@ -1551,8 +1554,8 @@ export function makeActionManager(env, router = _router) {
             return;
         }
         const actions = controllerStack.map((controller) => {
-            const { action, props } = controller;
-            const actionState = {};
+            const { action, props, displayName } = controller;
+            const actionState = { displayName };
             if (action.path || action.id) {
                 actionState.action = action.path || action.id;
             } else if (action.type === "ir.actions.client") {

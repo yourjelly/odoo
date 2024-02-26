@@ -564,7 +564,6 @@ QUnit.module("ActionManager", (hooks) => {
         // Go back to the previous (now deleted) record
         browser.history.back();
         await nextTick();
-        assert.verifySteps([`load_breadcrumbs: ["Partners"]`]);
         assert.strictEqual(browser.location.pathname, "/home/act-3/1");
         // As the previous one is deleted, we go back to the list
         await nextTick(); // wait for the update of the router
