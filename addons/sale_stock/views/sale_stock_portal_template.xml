@@ -5,16 +5,14 @@
         name="Orders Shipping Followup"
         inherit_id="sale.sale_order_portal_content">
         <ul id="sale_info_list" position="inside">
-            <tr t-if="sale_order.incoterm">
-                <th class="pb-0">Incoterm:</th>
-                <td class="w-100 pb-0 text-wrap">
-                    <p t-if="sale_order.incoterm_location">
-                        <span t-field="sale_order.incoterm.code"/> <br/>
-                        <span t-field="sale_order.incoterm_location"/>
-                    </p>
-                    <p t-else="" t-field="sale_order.incoterm.code" class="m-0"/>
-                </td>
-            </tr>
+            <li t-if="sale_order.incoterm" class="list-group-item col border-0">
+                <h6 class="fw-bolder">Incoterm</h6>
+                <p t-if="sale_order.incoterm_location">
+                    <span t-field="sale_order.incoterm.code"/> <br/>
+                    <span t-field="sale_order.incoterm_location"/>
+                </p>
+                <p t-else="" t-field="sale_order.incoterm.code" class="m-0"/>
+            </li>
         </ul>
 
         <div id="sale_invoices" position="after">

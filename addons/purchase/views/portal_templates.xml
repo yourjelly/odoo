@@ -137,7 +137,7 @@
           <div class="row o_portal_purchase_sidebar">
               <!-- Sidebar -->
               <t t-call="portal.portal_record_sidebar">
-                  <t t-set="classes" t-value="'col-lg-4 col-xl-3 -print-none'"/>
+                  <t t-set="classes" t-value="'d-print-none col-lg-4 col-xl-3'"/>
 
                   <t t-set="title">
                       <h2 t-field="order.amount_total" data-id="total_amount" class="text-break"/>
@@ -167,7 +167,7 @@
               </t>
 
               <!-- Page content -->
-              <div id="quote_content" class="o_portal_content col-12 col-lg-7 col-xl-8 offset-1">
+              <div id="quote_content" class="o_portal_content col-12 col-lg-8 col-xl-9 ps-lg-5">
 
                   <!-- status messages -->
                   <div t-if="order.state == 'cancel'" class="alert alert-danger alert-dismissable d-print-none" role="alert">

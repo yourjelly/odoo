@@ -111,7 +111,7 @@
             <div class="row o_portal_invoice_sidebar">
                 <!-- Sidebar -->
                 <t t-call="portal.portal_record_sidebar">
-                    <t t-set="classes" t-value="'col-lg-4 col-xl-3 d-print-none me-lg-auto'"/>
+                    <t t-set="classes" t-value="'col-lg-4 col-xl-3 d-print-none'"/>
                     <t t-set="title">
                     <t t-if="invoice.amount_residual > 0">
                         <h2 t-field="invoice.amount_residual" class="text-break"/>
@@ -159,7 +159,7 @@
                 </t>
 
                 <!-- Page Content -->
-                <div id="invoice_content" class="o_portal_content col-12 col-lg-7 col-xl-8 offset-1">
+                <div id="invoice_content" class="o_portal_content col-12 col-lg-8 col-xl-9 ps-lg-5">
                     <t t-if="error or warning" t-call="account.portal_invoice_error"/>
                     <t t-if="success and (not error and not warning)" t-call="account.portal_invoice_success"/>
 

@@ -198,8 +198,8 @@
                 </t>
 
                 <!-- Page content -->
-                <div id="quote_content" class="col-12 col-lg-7 col-xl-8 offset-1 mt-5 mt-lg-0">
-
+                <div id="quote_content" class="col-12 col-lg-8 col-xl-9 ps-lg-5 mt-5 mt-lg-0">
+                <div>
                     <!-- modal relative to the actions sign and pay -->
                     <div role="dialog" class="modal fade" id="modalaccept">
                         <div class="modal-dialog" t-if="sale_order._has_to_be_signed()">
@@ -398,6 +398,7 @@
                         <h3>Communication history</h3>
                         <t t-call="portal.message_thread"/>
                     </div>
+                    </div>
                 </div><!-- // #quote_content -->
             </div>
         </xpath>
@@ -411,11 +412,18 @@
     <template id="sale_order_portal_content" name="Sales Order Portal Content">
         <!-- Intro -->
         <div id="introduction" t-attf-class="#{'border-bottom-0 pt-0 pb-3' if report_type == 'html' else ''}">
-            <div class="row" id="intro_row">
-                <h2 class="my-0 col-12 col-lg flex-grow-1 mb-1 mb-lg-0">
-                    <t t-out="sale_order.type_name"/> -
-                    <em t-out="sale_order.name"/>
-                </h2>
+            <div class="row">
+                <div t-field="sale_order.partner_invoice_id" t-options='{"widget": "contact", "fields": ["name", "address", "phone", "email"], "no_marker": True, "phone_icons": False}' class="col-5"/>
+                <div class="col-5 offset-2 mb-5">
+                    <h6>Shipping address</h6>
+                    <div t-field="sale_order.partner_shipping_id" t-options='{ "widget": "contact", "fields": [ "name", "address"], "no_marker": True}'/>
+                </div>
+                <div class="row" id="intro_row">
+                    <h2 class="my-0 col-12 col-lg flex-grow-1 mb-1 mb-lg-0">
+                        <t t-out="sale_order.type_name"/> -
+                        <em t-out="sale_order.name"/>
+                    </h2>
+                </div>
             </div>
         </div>
         <div id="content">
@@ -431,50 +439,23 @@
                     </div>
                 </span>
                 <!-- Information -->
-                <ul id="sale_info_list" class="list-group list-group-flush list-group-horizontal row">
+                <ul id="sale_info_list" class="list-group list-group-flush list-group-horizontal row mb-3 mx-0">
                     <li class="list-group-item col border-0">
-                        <h5 t-if="sale_order.state in ['sale', 'cancel']">Order Date</h5>
-                        <h5 t-else="">Date</h5>
+                        <h6 t-if="sale_order.state in ['sale', 'cancel']" class="fw-bolder">Order Date</h6>
+                        <h6 t-else="" class="fw-bolder">Date</h6>
                         <span t-field="sale_order.date_order" t-options='{"widget": "date"}'/>
                     </li>
                     <li t-if="sale_order.validity_date" class="list-group-item col border-0">
-                        <h5>Expiration Date</h5>
+                        <h6 class="fw-bolder">Expiration Date</h6>
                         <span t-field="sale_order.validity_date" t-options='{"widget": "date"}'/>
                     </li>
                     <li t-if="sale_order.client_order_ref" class="list-group-item col border-0">
-                        <h5>Your Reference</h5>
+                        <h6 class="fw-bolder">Your Reference</h6>
                         <span t-field="sale_order.client_order_ref"/>
                     </li>
                 </ul>
 
                 <!-- ======  Customer Information  ====== -->
-                <div id="customer_info" class="col-12 col-lg-6 mb-4">
-                    <h4 class="mb-1">
-                        <t t-if="sale_order.partner_shipping_id == sale_order.partner_invoice_id">
-                            Invoicing and Shipping Address
-                        </t>
-                        <t t-else="">
-                            Invoicing Address
-                        </t>
-                        <small t-if="sale_order.partner_id == sale_order.partner_invoice_id == sale_order.env.user.partner_id">
-                            <a class="small" t-attf-href="/my/account?redirect={{sale_order.get_portal_url()}}">
-                                <i class="fa fa-fw fa-pencil"/>
-                            </a>
-                        </small>
-                    </h4>
-                    <hr class="mt-1 mb-2"/>
-                    <div t-field="sale_order.partner_invoice_id" t-options="{'widget': 'contact', 'fields': ['name', 'address', 'phone', 'email']}"/>
-                    <span t-if="sale_order.partner_shipping_id != sale_order.partner_invoice_id"
-                            id="shipping_address"
-                            class="col-lg-6">
-                        <br/>
-                        <h4 class="mb-1">
-                            Shipping Address
-                        </h4>
-                        <hr class="mt-1 mb-2"/>
-                        <div t-field="sale_order.partner_shipping_id" t-options='{ "widget": "contact", "fields": [ "name", "address"]}'/>
-                    </span>
-                </div>
                 <t t-set="invoices" t-value="sale_order.invoice_ids.filtered(lambda i: i.state not in ['draft', 'cancel']).sorted('date', reverse=True)[:3]"/>
                 <div id="sale_invoices" t-if="invoices and sale_order.state in ['sale', 'cancel']" class="col-12 col-lg-6 mb-4">
                     <h4 class="mb-1">Last Invoices</h4>
