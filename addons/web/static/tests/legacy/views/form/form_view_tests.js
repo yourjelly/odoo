@@ -58,7 +58,6 @@ import { X2ManyField, x2ManyField } from "@web/views/fields/x2many/x2many_field"
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { FormController } from "@web/views/form/form_controller";
 import { companyService } from "@web/webclient/company_service";
-import { router } from "@web/core/browser/router";
 
 const fieldRegistry = registry.category("fields");
 const serviceRegistry = registry.category("services");
