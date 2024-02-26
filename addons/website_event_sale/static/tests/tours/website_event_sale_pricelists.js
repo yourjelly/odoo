@@ -25,15 +25,15 @@
             content: "Fill attendees details",
             trigger: 'form[id="attendee_registration"]',
             run: function () {
-                $("input[name*='1-name']").val("Great Name");
-                $("input[name*='1-phone']").val("111 111");
-                $("input[name*='1-email']").val("great@name.com");
+                document.querySelector("input[name*='1-name']").value = "Great Name";
+                document.querySelector("input[name*='1-phone']").value = "111 111";
+                document.querySelector("input[name*='1-email']").value = "great@name.com";
             },
         },
         {
             content: "Validate attendees details",
             extra_trigger: "input[name*='1-name'], input[name*='2-name']",
-            trigger: 'button[type=submit]',
+            trigger: "button[type=submit]:contains(Go to Payment)",
         },
         ...getPriceListChecksSteps({
             pricelistName: "EUR With Discount Included",

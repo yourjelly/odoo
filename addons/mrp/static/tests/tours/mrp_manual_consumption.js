@@ -53,7 +53,7 @@ registry.category("web_tour.tours").add('test_mrp_manual_consumption', {
         },
         {
             content: "Click Pager",
-            trigger: ".o_pager_value:first()",
+            trigger: ".o_pager_value:first",
         },
         {
             trigger: 'div[name=move_raw_ids] td[name="quantity"]:last:contains("2.00")',

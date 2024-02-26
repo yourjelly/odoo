@@ -35,15 +35,11 @@ const getChartData = () => {
 };
 
 const nextScreen = () => {
-    const e = $.Event('keydown');
-    e.key = "ArrowRight";
-    $(document).trigger(e);
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight" }));
 };
 
 const previousScreen = () => {
-    const e = $.Event('keydown');
-    e.key = "ArrowLeft";
-    $(document).trigger(e);
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft" }));
 };
 
 const REGULAR_ANSWER_COLOR = '#212529';
@@ -331,7 +327,7 @@ registry.category("web_tour.tours").add('test_survey_session_manage_tour', {
     trigger: 'h1:contains("Final Leaderboard")',
     isCheck: true // Final Leaderboard is displayed
 }, {
-    trigger: '.o_survey_session_close:has("i.fa-close")'
+    trigger: '.o_survey_session_close:has(i.fa-close)'
 }, {
     trigger: 'button[name="action_start_session"]',
     isCheck: true // check that we can start another session
