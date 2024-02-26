@@ -27,7 +27,7 @@ export class Notification extends Record {
         /** @this {import("models").Notification} */
         compute() {
             const thread = this.message?.thread;
-            if (!this.message?.author?.eq(this._store.self)) {
+            if (!this.isFailure || !this.message?.author?.eq(this._store.self)) {
                 return;
             }
             const failure = Object.values(this._store.Failure.records).find((f) => {
@@ -37,11 +37,7 @@ export class Notification extends Record {
                     (f.resModel !== "discuss.channel" || f.resIds.has(thread?.id))
                 );
             });
-            return this.isFailure
-                ? {
-                      id: failure ? failure.id : this._store.Failure.nextId.value++,
-                  }
-                : false;
+            return { id: failure ? failure.id : this._store.Failure.nextId.value++ };
         },
         eager: true,
     });
