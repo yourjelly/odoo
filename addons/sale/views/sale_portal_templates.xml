@@ -431,29 +431,21 @@
                     </div>
                 </span>
                 <!-- Information -->
-                <div id="sale_info" class="col-12 col-lg-6 mb-4">
-                    <span id="sale_info_title">
-                        <h4 class="mb-1">Sale Information</h4>
-                        <hr class="mt-1 mb-2"/>
-                    </span>
-                    <table class="table table-borderless table-sm">
-                        <tbody style="white-space:nowrap" id="sale_info_table">
-                            <tr>
-                                <th t-if="sale_order.state in ['sale', 'cancel']" class="ps-0 pb-0">Order Date:</th>
-                                <th t-else="" class="ps-0 pb-0">Date:</th>
-                                <td class="w-100 pb-0 text-wrap"><span t-field="sale_order.date_order" t-options='{"widget": "date"}'/></td>
-                            </tr>
-                            <tr t-if="sale_order.validity_date">
-                                <th class="ps-0 pb-0">Expiration Date:</th>
-                                <td class="w-100 pb-0 text-wrap"><span t-field="sale_order.validity_date" t-options='{"widget": "date"}'/></td>
-                            </tr>
-                            <tr t-if="sale_order.client_order_ref">
-                                <th class="ps-0 pb-0">Your Reference:</th>
-                                <td class="w-100 pb-0 text-wrap"><span t-field="sale_order.client_order_ref"/></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+                <ul id="sale_info" class="list-group list-group-flush list-group-horizontal row">
+                    <li class="list-group-item col border-0">
+                        <h5 t-if="sale_order.state in ['sale', 'cancel']">Order Date</h5>
+                        <h5 t-else="">Date</h5>
+                        <span t-field="sale_order.date_order" t-options='{"widget": "date"}'/>
+                    </li>
+                    <li t-if="sale_order.validity_date" class="list-group-item col border-0">
+                        <h5>Expiration Date</h5>
+                        <span t-field="sale_order.validity_date" t-options='{"widget": "date"}'/>
+                    </li>
+                    <li t-if="sale_order.client_order_ref" class="list-group-item col border-0">
+                        <h5>Your Reference</h5>
+                        <span t-field="sale_order.client_order_ref"/>
+                    </li>
+                </ul>
 
                 <!-- ======  Customer Information  ====== -->
                 <div id="customer_info" class="col-12 col-lg-6 mb-4">
