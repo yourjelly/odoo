@@ -1,7 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import _, api, fields, models
-from odoo.exceptions import UserError
 
 
 class AccountMove(models.Model):
@@ -25,7 +24,9 @@ class AccountMove(models.Model):
     sale_order_count = fields.Integer(compute="_compute_origin_so_count", string='Sale Order Count')
 
     def unlink(self):
-        downpayment_lines = self.mapped('line_ids.sale_line_ids').filtered(lambda line: line.is_downpayment and line.invoice_lines <= self.mapped('line_ids'))
+        downpayment_lines = self.mapped('line_ids.sale_line_ids').filtered(
+            lambda line: line.is_downpayment and line.invoice_lines <= self.mapped('line_ids')
+        )
         res = super().unlink()
         if downpayment_lines:
             downpayment_lines.unlink()
@@ -62,14 +63,16 @@ class AccountMove(models.Model):
         res = super().action_post()
 
         # We cannot change lines content on locked SO, changes on invoices are not forwarded to the SO if the SO is locked
-        downpayment_lines = self.line_ids.sale_line_ids.filtered(lambda l: l.is_downpayment and not l.display_type and not l.order_id.locked)
+        downpayment_lines = self.line_ids.sale_line_ids.filtered(
+            lambda l: l.is_downpayment and not l.display_type and not l.order_id.locked
+        )
         other_so_lines = downpayment_lines.order_id.order_line - downpayment_lines
         real_invoices = set(other_so_lines.invoice_lines.move_id)
         for so_dpl in downpayment_lines:
             so_dpl.price_unit = sum(
-                l.price_unit if l.move_id.move_type == 'out_invoice' else -l.price_unit
-                for l in so_dpl.invoice_lines
-                if l.move_id.state == 'posted' and l.move_id not in real_invoices  # don't recompute with the final invoice
+                aml.price_unit if aml.move_id.move_type == 'out_invoice' else -aml.price_unit
+                for aml in so_dpl.invoice_lines
+                if aml.move_id.state == 'posted' and aml.move_id not in real_invoices  # don't recompute with the final invoice
             )
             so_dpl.tax_id = so_dpl.invoice_lines.tax_ids
 
@@ -98,8 +101,14 @@ class AccountMove(models.Model):
         posted = super()._post(soft)
 
         for invoice in posted.filtered(lambda move: move.is_invoice()):
-            payments = invoice.mapped('transaction_ids.payment_id').filtered(lambda x: x.state == 'posted')
-            move_lines = payments.line_ids.filtered(lambda line: line.account_type in ('asset_receivable', 'liability_payable') and not line.reconciled)
+            payments = invoice.mapped('transaction_ids.payment_id').filtered(
+                lambda x: x.state == 'posted',
+            )
+            move_lines = payments.line_ids.filtered(
+                lambda line:
+                    line.account_type in ('asset_receivable', 'liability_payable')
+                    and not line.reconciled
+            )
             for line in move_lines:
                 invoice.js_assign_outstanding_line(line.id)
         return posted
@@ -134,7 +143,9 @@ class AccountMove(models.Model):
         if len(source_orders) > 1:
             result['domain'] = [('id', 'in', source_orders.ids)]
         elif len(source_orders) == 1:
-            result['views'] = [(self.env.ref('sale.view_order_form', False).id, 'form')]
+            result['views'] = [
+                (self.env.ref('sale.view_order_form', raise_if_not_found=False).id, 'form'),
+            ]
             result['res_id'] = source_orders.id
         else:
             result = {'type': 'ir.actions.act_window_close'}
@@ -143,7 +154,9 @@ class AccountMove(models.Model):
     def _is_downpayment(self):
         # OVERRIDE
         self.ensure_one()
-        return self.line_ids.sale_line_ids and all(sale_line.is_downpayment for sale_line in self.line_ids.sale_line_ids) or False
+        return self.line_ids.sale_line_ids and all(
+            sale_line.is_downpayment for sale_line in self.line_ids.sale_line_ids
+        ) or False
 
     @api.depends('line_ids.sale_line_ids.order_id', 'currency_id', 'tax_totals', 'date')
     def _compute_partner_credit(self):

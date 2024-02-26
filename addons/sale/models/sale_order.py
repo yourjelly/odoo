@@ -1311,7 +1311,10 @@ class SaleOrder(models.Model):
                     x.get(grouping_key) for grouping_key in invoice_grouping_keys
                 ]
             )
-            for _grouping_keys, invoices in groupby(invoice_vals_list, key=lambda x: [x.get(grouping_key) for grouping_key in invoice_grouping_keys]):
+            for _grouping_keys, invoices in groupby(
+                invoice_vals_list,
+                key=lambda x: [x.get(grouping_key) for grouping_key in invoice_grouping_keys]
+            ):
                 origins = set()
                 payment_refs = set()
                 refs = set()

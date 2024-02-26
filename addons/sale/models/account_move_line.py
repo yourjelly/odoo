@@ -31,9 +31,8 @@ class AccountMoveLine(models.Model):
         if len(values_list) > 0:
             for index, move_line in enumerate(self):
                 values = values_list[index]
-                if 'so_line' not in values:
-                    if move_line._sale_can_be_reinvoice():
-                        move_to_reinvoice |= move_line
+                if 'so_line' not in values and move_line._sale_can_be_reinvoice():
+                    move_to_reinvoice |= move_line
 
         # insert the sale line in the create values of the analytic entries
         if move_to_reinvoice.filtered(lambda aml: not aml.move_id.reversed_entry_id):  # only if the move line is not a reversal one
@@ -154,15 +153,24 @@ class AccountMoveLine(models.Model):
         for move_line in self:
             if move_line.analytic_distribution:
                 distribution_json = move_line.analytic_distribution
-                account_ids = [int(account_id) for key in distribution_json.keys() for account_id in key.split(',')]
+                account_ids = [
+                    int(account_id)
+                    for key in distribution_json
+                    for account_id in key.split(',')
+                ]
 
-                sale_order = self.env['sale.order'].search([('analytic_account_id', 'in', account_ids),
-                                                            ('state', '=', 'sale')], order='create_date ASC', limit=1)
+                sale_order = self.env['sale.order'].search([
+                    ('analytic_account_id', 'in', account_ids),
+                    ('state', '=', 'sale')
+                ], order='create_date ASC', limit=1)
                 if sale_order:
                     mapping[move_line.id] = sale_order
                 else:
-                    sale_order = self.env['sale.order'].search([('analytic_account_id', 'in', account_ids)],
-                                                               order='create_date ASC', limit=1)
+                    sale_order = self.env['sale.order'].search(
+                        [('analytic_account_id', 'in', account_ids)],
+                        order='create_date ASC',
+                        limit=1,
+                    )
                     mapping[move_line.id] = sale_order
 
         # map of AAL index with the SO on which it needs to be reinvoiced. Maybe be None if no SO found
@@ -171,7 +179,9 @@ class AccountMoveLine(models.Model):
     def _sale_prepare_sale_line_values(self, order, price):
         """ Generate the sale.line creation value from the current move line """
         self.ensure_one()
-        last_so_line = self.env['sale.order.line'].search([('order_id', '=', order.id)], order='sequence desc', limit=1)
+        last_so_line = self.env['sale.order.line'].search(
+            [('order_id', '=', order.id)], order='sequence desc', limit=1,
+        )
         last_sequence = last_so_line.sequence + 1 if last_so_line else 100
 
         fpos = order.fiscal_position_id or order.fiscal_position_id._get_fiscal_position(order.partner_id)
@@ -220,9 +230,16 @@ class AccountMoveLine(models.Model):
         price_unit = abs(amount / unit_amount)
         currency_id = self.company_id.currency_id
         if currency_id and currency_id != order.currency_id:
-            price_unit = currency_id._convert(price_unit, order.currency_id, order.company_id, order.date_order or fields.Date.today())
+            price_unit = currency_id._convert(
+                from_amount=price_unit,
+                to_currency=order.currency_id,
+                company=order.company_id,
+                date=order.date_order or fields.Date.today(),
+            )
         return price_unit
 
     def _get_downpayment_lines(self):
         # OVERRIDE
-        return self.sale_line_ids.filtered('is_downpayment').invoice_lines.filtered(lambda line: line.move_id._is_downpayment())
+        return self.sale_line_ids.filtered('is_downpayment').invoice_lines.filtered(
+            lambda line: line.move_id._is_downpayment(),
+        )

@@ -10,7 +10,9 @@ from odoo.tools import float_round
 class ProductProduct(models.Model):
     _inherit = 'product.product'
 
-    sales_count = fields.Float(compute='_compute_sales_count', string='Sold', digits='Product Unit of Measure')
+    sales_count = fields.Float(
+        string="Sold", digits='Product Unit of Measure', compute='_compute_sales_count',
+    )
 
     # Catalog related fields
     product_catalog_product_is_in_sale_order = fields.Boolean(
@@ -19,12 +21,15 @@ class ProductProduct(models.Model):
     )
 
     def _compute_sales_count(self):
-        r = {}
         self.sales_count = 0
         if not self.user_has_groups('sales_team.group_sale_salesman'):
-            return r
-        date_from = fields.Datetime.to_string(fields.datetime.combine(fields.datetime.now() - timedelta(days=365),
-                                                                      time.min))
+            return
+        date_from = fields.Datetime.to_string(
+            fields.datetime.combine(
+                fields.datetime.now() - timedelta(days=365),
+                time.min
+            )
+        )
 
         done_states = self.env['sale.report']._get_done_states()
 
@@ -33,14 +38,18 @@ class ProductProduct(models.Model):
             ('product_id', 'in', self.ids),
             ('date', '>=', date_from),
         ]
-        for product, product_uom_qty in self.env['sale.report']._read_group(domain, ['product_id'], ['product_uom_qty:sum']):
+        r = {}
+        for product, product_uom_qty in self.env['sale.report']._read_group(
+            domain, ['product_id'], ['product_uom_qty:sum'],
+        ):
             r[product.id] = product_uom_qty
         for product in self:
             if not product.id:
                 product.sales_count = 0.0
                 continue
-            product.sales_count = float_round(r.get(product.id, 0), precision_rounding=product.uom_id.rounding)
-        return r
+            product.sales_count = float_round(
+                r.get(product.id, 0), precision_rounding=product.uom_id.rounding,
+            )
 
     @api.onchange('type')
     def _onchange_type(self):
@@ -94,18 +103,3 @@ class ProductProduct(models.Model):
         lines = self.env['sale.order.line']._read_group(domain, ['product_id'])
         linked_product_ids = [product.id for [product] in lines]
         return super(ProductProduct, self - self.browse(linked_product_ids))._filter_to_unlink()
-
-
-class ProductAttributeCustomValue(models.Model):
-    _inherit = "product.attribute.custom.value"
-
-    sale_order_line_id = fields.Many2one('sale.order.line', string="Sales Order Line", ondelete='cascade')
-
-    _sql_constraints = [
-        ('sol_custom_value_unique', 'unique(custom_product_template_attribute_value_id, sale_order_line_id)', "Only one Custom Value is allowed per Attribute Value per Sales Order Line.")
-    ]
-
-class ProductPackaging(models.Model):
-    _inherit = 'product.packaging'
-
-    sales = fields.Boolean("Sales", default=True, help="If true, the packaging can be used for sales orders")

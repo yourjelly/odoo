@@ -12,7 +12,7 @@ class OnboardingStep(models.Model):
     @api.model
     def action_open_step_sale_order_confirmation(self):
         self.env.company.get_chart_of_accounts_or_fail()
-        action = {
+        return {
             'type': 'ir.actions.act_window',
             'name': _('Choose how to confirm quotations'),
             'res_model': 'sale.payment.provider.onboarding.wizard',
@@ -20,7 +20,6 @@ class OnboardingStep(models.Model):
             'views': [(self.env.ref('payment.payment_provider_onboarding_wizard_form').id, 'form')],
             'target': 'new',
         }
-        return action
 
     @api.model
     def _get_sample_sales_order(self):
@@ -63,7 +62,7 @@ class OnboardingStep(models.Model):
         """ Onboarding step for sending a sample quotation. Open a window to compose an email,
             with the edi_invoice_template message loaded by default. """
         sample_sales_order = self._get_sample_sales_order()
-        template = self.env.ref('sale.email_template_edi_sale', False)
+        template = self.env.ref('sale.email_template_edi_sale', raise_if_not_found=False)
 
         self.env['mail.compose.message'].with_context(
             mark_so_as_sent=True,
@@ -77,7 +76,9 @@ class OnboardingStep(models.Model):
         })._action_send_mail()
 
         self.action_validate_step('sale.onboarding_onboarding_step_sample_quotation')
-        sale_quotation_onboarding = self.env.ref('sale.onboarding_onboarding_sale_quotation', raise_if_not_found=False)
+        sale_quotation_onboarding = self.env.ref(
+            'sale.onboarding_onboarding_sale_quotation', raise_if_not_found=False,
+        )
         if sale_quotation_onboarding:
             sale_quotation_onboarding.action_close()
 

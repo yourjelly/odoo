@@ -8,24 +8,29 @@ class CrmTeam(models.Model):
     _inherit = 'crm.team'
 
     invoiced = fields.Float(
-        compute='_compute_invoiced',
-        string='Invoiced This Month', readonly=True,
+        string="Invoiced This Month",
         help="Invoice revenue for the current month. This is the amount the sales "
                 "channel has invoiced this month. It is used to compute the progression ratio "
-                "of the current and target revenue on the kanban view.")
+                "of the current and target revenue on the kanban view.",
+        compute='_compute_invoiced',
+    )
     invoiced_target = fields.Float(
-        string='Invoicing Target',
-        help="Revenue target for the current month (untaxed total of confirmed invoices).")
+        string="Invoicing Target",
+        help="Revenue target for the current month (untaxed total of confirmed invoices).",
+    )
     quotations_count = fields.Integer(
+        string="Number of quotations to invoice",
         compute='_compute_quotations_to_invoice',
-        string='Number of quotations to invoice', readonly=True)
+    )
     quotations_amount = fields.Float(
+        string="Amount of quotations to invoice",
         compute='_compute_quotations_to_invoice',
-        string='Amount of quotations to invoice', readonly=True)
+    )
     sales_to_invoice_count = fields.Integer(
+        string="Number of sales to invoice",
         compute='_compute_sales_to_invoice',
-        string='Number of sales to invoice', readonly=True)
-    sale_order_count = fields.Integer(compute='_compute_sale_order_count', string='# Sale Orders')
+    )
+    sale_order_count = fields.Integer(string='# Sale Orders', compute='_compute_sale_order_count')
 
     def _compute_quotations_to_invoice(self):
         query = self.env['sale.order']._where_calc([
@@ -60,7 +65,7 @@ class CrmTeam(models.Model):
     def _compute_sales_to_invoice(self):
         sale_order_data = self.env['sale.order']._read_group([
             ('team_id', 'in', self.ids),
-            ('invoice_status','=','to invoice'),
+            ('invoice_status', '=', 'to invoice'),
         ], ['team_id'], ['__count'])
         data_map = {team.id: count for team, count in sale_order_data}
         for team in self:
@@ -83,10 +88,14 @@ class CrmTeam(models.Model):
             GROUP BY move.team_id
         '''
         today = fields.Date.today()
-        params = [tuple(self.ids), fields.Date.to_string(today.replace(day=1)), fields.Date.to_string(today)]
+        params = [
+            tuple(self.ids),
+            fields.Date.to_string(today.replace(day=1)),
+            fields.Date.to_string(today),
+        ]
         self._cr.execute(query, params)
 
-        data_map = dict((v[0], v[1]) for v in self._cr.fetchall())
+        data_map = {v[0]: v[1] for v in self._cr.fetchall()}
         for team in self:
             team.invoiced = data_map.get(team.id, 0.0)
 
@@ -158,8 +167,9 @@ class CrmTeam(models.Model):
         SO_COUNT_TRIGGER = 5
         for team in self:
             if team.sale_order_count >= SO_COUNT_TRIGGER:
-                raise UserError(
-                    _('Team %(team_name)s has %(sale_order_count)s active sale orders. Consider cancelling them or archiving the team instead.',
-                      team_name=team.name,
-                      sale_order_count=team.sale_order_count
-                      ))
+                raise UserError(_(
+                    "Team %(team_name)s has %(sale_order_count)s active sale orders."
+                    " Consider cancelling them or archiving the team instead.",
+                    team_name=team.name,
+                    sale_order_count=team.sale_order_count
+                ))

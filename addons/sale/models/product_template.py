@@ -14,35 +14,47 @@ class ProductTemplate(models.Model):
         selection=[('manual', "Manually set quantities on order")],
         string="Track Service",
         compute='_compute_service_type', store=True, readonly=False, precompute=True,
-        help="Manually set quantities on order: Invoice based on the manually entered quantity, without creating an analytic account.\n"
+        help="Manually set quantities on order: Invoice based on the manually entered quantity,"
+            " without creating an analytic account.\n"
              "Timesheets on contract: Invoice based on the tracked hours on the related timesheet.\n"
-             "Create a task and track hours: Create a task on the sales order validation and track the work hours.")
+             "Create a task and track hours: Create a task on the sales order validation and track"
+             " the work hours.",
+    )
     sale_line_warn = fields.Selection(
-        WARNING_MESSAGE, string="Sales Order Line",
-        help=WARNING_HELP, required=True, default="no-message")
+        string="Sales Order Line",
+        help=WARNING_HELP,
+        selection=WARNING_MESSAGE,
+        default='no-message',
+        required=True,
+    )
     sale_line_warn_msg = fields.Text(string="Message for Sales Order Line")
     expense_policy = fields.Selection(
+        string="Re-Invoice Expenses", default='no',
+        help="Validated expenses and vendor bills can be re-invoiced to a customer at its cost or"
+            " sales price.",
         selection=[
             ('no', "No"),
             ('cost', "At cost"),
             ('sales_price', "Sales price"),
         ],
-        string="Re-Invoice Expenses", default='no',
         compute='_compute_expense_policy', store=True, readonly=False,
-        help="Validated expenses and vendor bills can be re-invoiced to a customer at its cost or sales price.")
+    )
     visible_expense_policy = fields.Boolean(
-        string="Re-Invoice Policy visible", compute='_compute_visible_expense_policy')
+        string="Re-Invoice Policy visible", compute='_compute_visible_expense_policy',
+    )
     sales_count = fields.Float(
-        string="Sold", compute='_compute_sales_count', digits='Product Unit of Measure')
+        string="Sold", compute='_compute_sales_count', digits='Product Unit of Measure',
+    )
     invoice_policy = fields.Selection(
+        string="Invoicing Policy",
+        help="Ordered Quantity: Invoice quantities ordered by the customer.\n"
+             "Delivered Quantity: Invoice quantities delivered to the customer.",
         selection=[
             ('order', "Ordered quantities"),
             ('delivery', "Delivered quantities"),
         ],
-        string="Invoicing Policy",
         compute='_compute_invoice_policy', store=True, readonly=False, precompute=True,
-        help="Ordered Quantity: Invoice quantities ordered by the customer.\n"
-             "Delivered Quantity: Invoice quantities delivered to the customer.")
+    )
 
     @api.depends('name')
     def _compute_visible_expense_policy(self):
@@ -57,7 +69,12 @@ class ProductTemplate(models.Model):
     @api.depends('product_variant_ids.sales_count')
     def _compute_sales_count(self):
         for product in self:
-            product.sales_count = float_round(sum([p.sales_count for p in product.with_context(active_test=False).product_variant_ids]), precision_rounding=product.uom_id.rounding)
+            product.sales_count = float_round(
+                sum(
+                    product.with_context(active_test=False).product_variant_ids.mapped('sale_count')
+                ),
+                precision_rounding=product.uom_id.rounding,
+            )
 
     @api.constrains('company_id')
     def _check_sale_product_company(self):
@@ -65,19 +82,27 @@ class ProductTemplate(models.Model):
         having been sold in another one in the past, as this could cause issues."""
         target_company = self.company_id
         if target_company:  # don't prevent writing `False`, should always work
-            subquery_products = self.env['product.product'].sudo().with_context(active_test=False)._search([('product_tmpl_id', 'in', self.ids)])
+            subquery_products = self.env['product.product'].sudo().with_context(
+                active_test=False
+            )._search([('product_tmpl_id', 'in', self.ids)])
             so_lines = self.env['sale.order.line'].sudo().search_read(
-                [('product_id', 'in', subquery_products), '!', ('company_id', 'child_of', target_company.root_id.id)],
+                [
+                    ('product_id', 'in', subquery_products),
+                    '!', ('company_id', 'child_of', target_company.root_id.id),
+                ],
                 fields=['id', 'product_id'],
             )
-            used_products = list(map(lambda sol: sol['product_id'][1], so_lines))
+            used_products = [sol['product_id'][1] for sol in so_lines]
             if so_lines:
-                raise ValidationError(_('The following products cannot be restricted to the company'
-                                        ' %s because they have already been used in quotations or '
-                                        'sales orders in another company:\n%s\n'
-                                        'You can archive these products and recreate them '
-                                        'with your company restriction instead, or leave them as '
-                                        'shared product.', target_company.name, ', '.join(used_products)))
+                raise ValidationError(_(
+                    "The following products cannot be restricted to the company %s because they"
+                    " have already been used in quotations or sales orders in another company:\n"
+                    "%s\n"
+                    "You can archive these products and recreate them with your company restriction"
+                    " instead, or leave them as shared product.",
+                    target_company.name,
+                    ', '.join(used_products),
+                ))
 
     def action_view_sales(self):
         action = self.env['ir.actions.actions']._for_xml_id('sale.report_all_channels_sales_action')
@@ -112,12 +137,14 @@ class ProductTemplate(models.Model):
     @api.model
     def get_import_templates(self):
         res = super().get_import_templates()
-        if self.env.context.get('sale_multi_pricelist_product_template'):
-            if self.user_has_groups('product.group_sale_pricelist'):
-                return [{
-                    'label': _("Import Template for Products"),
-                    'template': '/product/static/xls/product_template.xls'
-                }]
+        if (
+            self.env.context.get('sale_multi_pricelist_product_template')
+            and self.user_has_groups('product.group_sale_pricelist')
+        ):
+            return [{
+                'label': _("Import Template for Products"),
+                'template': '/product/static/xls/product_template.xls'
+            }]
         return res
 
     @api.model

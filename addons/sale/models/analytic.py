@@ -4,9 +4,13 @@ from odoo import fields, models
 
 
 class AccountAnalyticLine(models.Model):
-    _inherit = "account.analytic.line"
+    _inherit = 'account.analytic.line'
 
-    so_line = fields.Many2one('sale.order.line', string='Sales Order Item', domain=[('qty_delivered_method', '=', 'analytic')])
+    so_line = fields.Many2one(
+        string="Sales Order Item",
+        comodel_name='sale.order.line',
+        domain=[('qty_delivered_method', '=', 'analytic')]
+    )
 
 
 class AccountAnalyticApplicability(models.Model):

@@ -11,9 +11,18 @@ from odoo.tools import str2bool
 class PaymentTransaction(models.Model):
     _inherit = 'payment.transaction'
 
-    sale_order_ids = fields.Many2many('sale.order', 'sale_order_transaction_rel', 'transaction_id', 'sale_order_id',
-                                      string='Sales Orders', copy=False, readonly=True)
-    sale_order_ids_nbr = fields.Integer(compute='_compute_sale_order_ids_nbr', string='# of Sales Orders')
+    sale_order_ids = fields.Many2many(
+        string="Sales Orders",
+        comodel_name='sale.order',
+        relation='sale_order_transaction_rel',
+        column1='transaction_id',
+        column2='sale_order_id',
+        copy=False,
+        readonly=True,
+    )
+    sale_order_ids_nbr = fields.Integer(
+        string="# of Sales Orders", compute='_compute_sale_order_ids_nbr',
+    )
 
     def _compute_sale_order_reference(self, order):
         self.ensure_one()
@@ -24,7 +33,10 @@ class PaymentTransaction(models.Model):
             identification_number = order.partner_id.id
             order_reference = '%s/%s' % ('CUST', str(identification_number % 97).rjust(2, '0'))
 
-        invoice_journal = self.env['account.journal'].search([('type', '=', 'sale'), ('company_id', '=', self.env.company.id)], limit=1)
+        invoice_journal = self.env['account.journal'].search([
+            ('type', '=', 'sale'),
+            ('company_id', '=', self.env.company.id)
+        ], limit=1)
         if invoice_journal:
             order_reference = invoice_journal._process_reference_for_sale_order(order_reference)
 
