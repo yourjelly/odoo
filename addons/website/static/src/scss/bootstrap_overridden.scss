@@ -311,11 +311,10 @@ $accordion-bg: inherit !default;
 $accordion-padding-x: 1.5rem !default;
 $accordion-border-width: 1px !default;
 $accordion-border-color: $border-color !default;
-$accordion-button-active-bg: $light !default;
-$accordion-button-active-color: color-contrast($light) !default;
+$accordion-button-active-bg: $o-gray-100 !default;
+$accordion-button-active-color: color-contrast($accordion-button-active-bg) !default;
 $accordion-button-focus-box-shadow: none !default;
-$accordion-icon-color: $body-color !default;
-$accordion-icon-active-color: $accordion-button-active-color !default;
+$accordion-icon-active-color: color-contrast($o-gray-100) !default;
 
 // Popovers
 $popover-bg: $body-bg !default;

@@ -1,0 +1,79 @@
+.s_accordion {
+    .accordion-button {
+        justify-content: space-between;
+        &.s_accordion_left_icon {
+            flex-direction: row-reverse;
+            justify-content: flex-end;
+
+            &:after {
+                margin: 0 map-get($spacers, 2) 0 0;
+            }
+        }
+    }
+
+    &.s_accordion_light {
+        .accordion .accordion-item {
+            border-width: 0 0 1px;
+            border-radius: 0;
+
+            .accordion-button {
+                padding: map-get($spacers, 4) 0;
+                color: currentColor;
+                font-weight: bold;
+                background-color: transparent;
+
+                &:not(.collapsed) {
+                    box-shadow: none;
+
+                    &::after {
+                        // Change icon color based on preset;
+                    }
+                }
+            }
+
+            &:last-child {
+                border-bottom: 0;
+            }
+
+            .accordion-body {
+                padding: 0;
+            }
+        }
+    }
+    &.s_accordion_boxed {
+        .accordion .accordion-item {
+            border: 0;
+
+            &:has(.accordion-collapse.show) {
+                background-color: $accordion-button-active-bg;
+                color: $accordion-button-active-color;
+                border-radius: $border-radius;
+                transition: $btn-transition;
+            }
+
+            .accordion-button {
+                padding-top: map-get($spacers, 4);
+                padding-bottom: map-get($spacers, 4);
+                font-weight: bold;
+
+                &:not(.collapsed) {
+                    background-color: transparent;
+                    box-shadow: none;
+                }
+            }
+
+            .accordion-button, .accordion-collapse {
+                box-shadow: none;
+
+                &.collapsed {
+                    background-color: transparent;
+                }
+            }
+
+            .accordion-body {
+                color: $accordion-button-active-color;
+                padding-top: 0;
+            }
+        }
+    }
+}

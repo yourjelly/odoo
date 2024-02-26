@@ -73,7 +73,7 @@
                 <t t-snippet="website.s_references" string="References" t-thumbnail="/website/static/src/img/snippets_thumbs/s_references.svg">
                     <keywords>customers, clients</keywords>
                 </t>
-                <t t-snippet="website.s_faq_collapse" string="Accordion" t-thumbnail="/website/static/src/img/snippets_thumbs/s_faq_collapse.svg">
+                <t t-snippet="website.s_faq_collapse" string="FAQ" t-thumbnail="/website/static/src/img/snippets_thumbs/s_faq_collapse.svg">
                     <keywords>common answers, common questions</keywords>
                 </t>
                 <t t-snippet="website.s_features_grid" string="Features Grid" t-thumbnail="/website/static/src/img/snippets_thumbs/s_features_grid.svg"/>
@@ -132,6 +132,7 @@
                 <t t-snippet="website.s_hr" string="Separator" t-thumbnail="/website/static/src/img/snippets_thumbs/s_hr.svg">
                     <keywords>separator, divider</keywords>
                 </t>
+                <t t-snippet="website.s_accordion" string="Accordion" t-thumbnail="/website/static/src/img/snippets_thumbs/s_accordion.svg"/>
                 <t t-snippet="website.s_alert" string="Alert" t-thumbnail="/website/static/src/img/snippets_thumbs/s_alert.svg"/>
                 <t t-snippet="website.s_rating" string="Rating" t-thumbnail="/website/static/src/img/snippets_thumbs/s_rating.svg">
                     <keywords>valuation, rank</keywords>
@@ -534,12 +535,12 @@
     </div>
     <!-- Accordion -->
     <div data-js="collapse"
-         data-selector='.accordion > .card'
-         data-drop-in='.accordion:has(> .card)'/>
+         data-selector='.accordion > .accordion-item'
+         data-drop-in='.accordion:has(> .accordiont-item)'/>
 
-    <div data-js="MultipleItems" data-selector=".s_faq_collapse">
+    <div data-js="MultipleItems" data-selector=".s_accordion">
         <we-row string="Item">
-            <we-button data-add-item="" data-item=".accordion > .card:last" data-select-item="" data-no-preview="true" class="o_we_bg_brand_primary">
+            <we-button data-add-item="" data-item=".accordion > .accordion-item:last" data-select-item="" data-no-preview="true" class="o_we_bg_brand_primary">
                 Add Item
             </we-button>
         </we-row>
@@ -697,7 +698,7 @@
         <!-- TODO should be improved -->
 
     <t t-set="so_content_addition_selector" t-translation="off">
-        blockquote, .s_card:not(.s_timeline_card), .s_alert, .o_facebook_page, .s_share, .s_social_media, .s_rating,
+        blockquote, .s_card:not(.s_timeline_card), .s_accordion, .s_alert, .o_facebook_page, .s_share, .s_social_media, .s_rating,
         .s_hr, .s_google_map, .s_map, .s_countdown, .s_chart, .s_text_highlight, .s_progress_bar, .s_badge,
         .s_embed_code, .s_donation, .s_add_to_cart, .s_online_appointment, .o_snippet_drop_in_only, .s_image
     </t>

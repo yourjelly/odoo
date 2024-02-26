@@ -713,6 +713,9 @@ blockquote {
                     border-color: $-btn-primary-color;
                 }
             }
+            .accordion .accordion-item:has(.collapsed) .accordion-button::after {
+                background-image: str-replace($accordion-button-icon, "inherit", str-replace(#{color-contrast($-bg-color)}, "#", "%23"));
+            }
         }
     }
 }
