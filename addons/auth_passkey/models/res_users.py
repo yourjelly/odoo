@@ -28,12 +28,13 @@ class Users(models.Model):
         self.ensure_one()
         chal_bytes = uuid.uuid4().bytes
         challenge = base64.b64encode(chal_bytes)
-        print(chal_bytes, challenge)
+        # print(chal_bytes, challenge)
         return {
             'challenge': challenge,
             'rp': {
-                'name': "Example", # company?
-                'id': self.env['ir.config_parameter'].sudo().get_param('web.base.url').replace("http://", "").replace("https://", ""),  # base url?
+                'name': "Example",  # company?
+                'id': self.get_base_url().replace("http://", "").replace("https://", "").split(':')[0],  # base url?
+                # 'id': 'localhost',
             },
             'user': {
                 'id': self.passkey,
@@ -62,10 +63,10 @@ class Users(models.Model):
                 'userVerification': "preferred",  # optional as preferred is the default
             },
         }
-    
+
     def save_passkey_credential(self, credential, ex_options):
         self.ensure_one()
-        print(credential, ex_options)
+        # print(credential, ex_options)
         registration_verification = verify_registration_response(
             credential=credential,
             expected_challenge=base64.b64decode(ex_options.get('challenge')),
@@ -77,7 +78,7 @@ class Users(models.Model):
         c = self.env['public.key.credential'].sudo().create({
             'user_id': self.id,
             'key': bytes_to_base64url(registration_verification.credential_id),
-            'type': credential.get('type'),
+            'ctype': credential.get('type'),
             'auth_attachment': credential.get('authenticatorAttachment'),  # string eg. 'platform'
             'public_key': bytes_to_base64url(registration_verification.credential_public_key),
             # 'key': credential.get('id'),

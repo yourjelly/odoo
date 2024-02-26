@@ -7,7 +7,7 @@ Allows users to configure passkeys on their user account
 for extra security, using asymmetric public key cryptography.
 
 Once enabled, the user is able to generate a passkey which can used
-to sign in. Passkeys are a safer and easier alternative to a username/password + 
+to sign in. Passkeys are a safer and easier alternative to a username/password +
 One Time Pin. With passkeys users are able to sign in with biometrics.
 
 A passkey can meet multifactor authentication requirements in a single step.

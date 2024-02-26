@@ -1,6 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, fields, models
+from odoo import fields, models
 
 
 class PublicKeyCredential(models.Model):
@@ -13,7 +13,7 @@ class PublicKeyCredential(models.Model):
     )
     key = fields.Char(string="Credential ID", index=True)
     auth_attachment = fields.Char()
-    type = fields.Selection(selection=[
+    ctype = fields.Selection(selection=[
             ('public-key', 'Public Key'),
         ],
     )

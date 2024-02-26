@@ -1,34 +1,28 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-# from odoo.addons.auth_signup.controllers.main import AuthSignupHome as Home
 
-import json
 import werkzeug
 
-from webauthn import (
-    verify_authentication_response,
-)
+from webauthn import verify_authentication_response
 from webauthn.helpers import (
     bytes_to_base64url,
-    byteslike_to_bytes,
     base64url_to_bytes,
-    parse_client_data_json,
     parse_authentication_credential_json,
 )
 
-from odoo import api, http, _
-from odoo.http import request, Response
-from odoo.addons.web.controllers.utils import ensure_db, _get_login_redirect_url
+from odoo import http
+from odoo.http import request
+from odoo.addons.web.controllers.utils import _get_login_redirect_url
 
 
 class PasskeyController(http.Controller):
     @http.route('/auth_passkey/signin', type='http', auth='none')
     def signin(self, **kw):
         c = parse_authentication_credential_json(kw.get('cred'))
-        print(c)
+        # print(c)
         dbname = request.db
-        url = '/web' # we should get the url from the js
+        url = '/web'  # we should get the url from the js
         if c.id:
-            print('logging in to', dbname, 'with', c.id)
+            # print('logging in to', dbname, 'with', c.id)
             # response = c.response
             # client_data_bytes = byteslike_to_bytes(response.client_data_json)
             # client_data = parse_client_data_json(client_data_bytes)

@@ -1,6 +1,5 @@
 /** @odoo-module **/
 
-import { _t } from "@web/core/l10n/translation";
 import { handleCheckIdentity } from "@portal/js/portal_security";
 import publicWidget from "@web/legacy/js/public/public_widget";
 import { session } from "@web/session";
@@ -25,8 +24,8 @@ publicWidget.registry.passkeyLoginButton = publicWidget.Widget.extend({
         this.http = this.bindService('http');
     },
     async enableIfAvailable() {
-        if (window.PublicKeyCredential && PublicKeyCredential.isConditionalMediationAvailable) {
-            const isCMA = await PublicKeyCredential.isConditionalMediationAvailable();
+        if (window.PublicKeyCredential && window.PublicKeyCredential.isConditionalMediationAvailable) {
+            const isCMA = await window.PublicKeyCredential.isConditionalMediationAvailable();
             if (isCMA) {
                 this.el.disabled = false;
             }
@@ -101,12 +100,12 @@ publicWidget.registry.EnablePasskeyButton = publicWidget.Widget.extend({
     enableIfAvailable() {
         if (
             window.PublicKeyCredential
-            && PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable
-            && PublicKeyCredential.isConditionalMediationAvailable
+            && window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable
+            && window.PublicKeyCredential.isConditionalMediationAvailable
            ) {
             Promise.all([
-                PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable(),
-                PublicKeyCredential.isConditionalMediationAvailable(),
+                window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable(),
+                window.PublicKeyCredential.isConditionalMediationAvailable(),
             ]).then( results => {
                 if (results.every(r => r === true)) {
                     console.log('Passkeys are supported', results);
