@@ -20862,6 +20862,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 isDefaultFocus: true,
                 onComposerContentFocused: this.props.onComposerContentFocused,
                 onComposerCellFocused: this.props.onComposerCellFocused,
+                onInputContextMenu: this.props.onInputContextMenu,
             };
         }
         get containerStyle() {
@@ -22890,6 +22891,9 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         isCellHovered(col, row) {
             return this.hoveredCell.col === col && this.hoveredCell.row === row;
         }
+        getGridRect() {
+            return { ...this.canvasPosition, ...this.env.model.getters.getSheetViewDimensionWithHeaders() };
+        }
         // ---------------------------------------------------------------------------
         // Zone selection with mouse
         // ---------------------------------------------------------------------------
@@ -23005,8 +23009,9 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             else if (this.env.model.getters.getActiveRows().has(row)) {
                 type = "ROW";
             }
-            const { x, y, width, height } = this.env.model.getters.getVisibleRect(lastZone);
-            this.toggleContextMenu(type, x + width, y + height);
+            const { x, y, width } = this.env.model.getters.getVisibleRect(lastZone);
+            const gridRect = this.getGridRect();
+            this.toggleContextMenu(type, gridRect.x + x + width, gridRect.y + y);
         }
         onCellRightClicked(col, row, { x, y }) {
             const zones = this.env.model.getters.getSelectedZones();
@@ -43271,8 +43276,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
 
 
     __info__.version = '16.0.33';
-    __info__.date = '2024-02-16T14:59:44.946Z';
-    __info__.hash = 'c0cefe8';
+    __info__.date = '2024-02-26T06:46:28.666Z';
+    __info__.hash = 'fb82d80';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
