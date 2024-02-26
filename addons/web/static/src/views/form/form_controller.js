@@ -119,7 +119,6 @@ export class FormController extends Component {
 
     static props = {
         ...standardViewProps,
-        resId: { type: [Number, { value: false }] }, // not optional in form view
         discardRecord: { type: Function, optional: true },
         mode: {
             optional: true,
