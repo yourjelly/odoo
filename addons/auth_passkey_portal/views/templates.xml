@@ -1,0 +1,23 @@
+<odoo>
+    <template id="passkey_portal_hook" name="Passkey Portal hook" inherit_id="portal.portal_my_security">
+        <xpath expr="//section[@name='portal_change_password']" position="after">
+            <section>
+                <h4>
+                    Passkeys
+                </h4>
+                <button type="button" class="btn btn-secondary" id="auth_passkey_portal_enable" disabled="disabled">
+                    Create a passkey
+                </button>
+            </section>
+        </xpath>
+    </template>
+
+    <template id="passkey_login" inherit_id="web.login" name="Passkey username">
+        <xpath expr="//input[@id='login']" position="attributes">
+            <attribute name="autocomplete">username webauthn"</attribute>
+        </xpath>
+        <xpath expr="//div[hasclass('o_login_auth')]" position="after">
+            <button type="button" class="btn btn-secondary" id="auth_passkey_login" disabled="disabled">Login with Passkey</button>
+        </xpath>
+    </template>
+</odoo>
