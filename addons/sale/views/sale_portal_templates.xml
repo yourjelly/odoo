@@ -431,7 +431,7 @@
                     </div>
                 </span>
                 <!-- Information -->
-                <ul id="sale_info" class="list-group list-group-flush list-group-horizontal row">
+                <ul id="sale_info_list" class="list-group list-group-flush list-group-horizontal row">
                     <li class="list-group-item col border-0">
                         <h5 t-if="sale_order.state in ['sale', 'cancel']">Order Date</h5>
                         <h5 t-else="">Date</h5>
