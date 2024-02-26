@@ -71,6 +71,10 @@
       jQuery
     } = window;
 
+    if (!document.body) {
+      console.log("WHAT alert", new Error().stack);
+      debugger;
+    }
     if (jQuery && !document.body.hasAttribute('data-bs-no-jquery')) {
       return jQuery;
     }

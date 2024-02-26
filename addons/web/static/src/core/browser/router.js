@@ -244,7 +244,7 @@ let allPushArgs;
 let _lockedKeys;
 
 export function startRouter() {
-    current = urlToState(browser.location);
+    current = urlToState(new URL(browser.location));
     pushTimeout = null;
     allPushArgs = [];
     _lockedKeys = new Set(["debug"]);
@@ -292,7 +292,7 @@ function makeDebouncedPush(mode) {
             } else {
                 browser.history.replaceState({ newState }, "", url);
             }
-            current = urlToState(browser.location);
+            current = newState;
         }
         const reload = allPushArgs.some(([, options]) => options && options.reload);
         if (reload) {
