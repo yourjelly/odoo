@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- First Discount Field -->
+    <record id="field_model_sale_order_line_x_first_discount" model="ir.model.fields">
+        <field name="name">x_first_discount</field>
+        <field name="field_description">Discount</field>
+        <field name="ttype">char</field>
+        <field name="model_id" ref="sale.model_sale_order_line"/>
+        <field name="related">pricelist_item_id.x_first_discount</field>
+        <field name="readonly" eval="True"/>
+    </record>
+
+    <!-- Second Discount Field -->
+    <record id="field_model_sale_order_line_x_second_discount" model="ir.model.fields">
+        <field name="name">x_second_discount</field>
+        <field name="field_description">Scheme/Coupon discount@ 1 per Ltr</field>
+        <field name="ttype">char</field>
+        <field name="model_id" ref="sale.model_sale_order_line"/>
+        <field name="related">pricelist_item_id.x_second_discount</field>
+        <field name="readonly" eval="True"/>
+    </record>
+
+    <!-- Third Discount Field -->
+    <record id="field_model_sale_order_line_x_third_discount" model="ir.model.fields">
+        <field name="name">x_third_discount</field>
+        <field name="field_description">Cash discount on balance @ 4%</field>
+        <field name="ttype">char</field>
+        <field name="model_id" ref="sale.model_sale_order_line"/>
+        <field name="related">pricelist_item_id.x_third_discount</field>
+        <field name="readonly" eval="True"/> 
+    </record>
+
+    <!-- Fourth Discount Field -->
+    <record id="field_model_sale_order_line_x_fourth_discount" model="ir.model.fields">
+        <field name="name">x_fourth_discount</field>
+        <field name="field_description">Extra Discount @%</field>
+        <field name="ttype">char</field>
+        <field name="model_id" ref="sale.model_sale_order_line"/>
+        <field name="related">pricelist_item_id.x_fourth_discount</field>
+        <field name="readonly" eval="True"/>
+    </record>
+
+    <!-- Dummy unit price-->
+    <record id="field_model_sale_order_line_x_unit_price" model="ir.model.fields">
+        <field name="name">x_unit_price</field>
+        <field name="field_description">Unit Price</field>
+        <field name="ttype">float</field>
+        <field name="model_id" ref="sale.model_sale_order_line"/>
+        <field name="related">pricelist_item_id.fixed_price</field>
+        <field name="readonly" eval="True"/>
+    </record>
+
+    <record id="field_model_sale_order_line_x_final_price" model="ir.model.fields">
+        <field name="name">x_final_price</field>
+        <field name="field_description">Final Price</field>
+        <field name="ttype">float</field>
+        <field name="model_id" ref="sale.model_sale_order_line"/>
+        <field name="related">pricelist_item_id.x_final_price</field>
+        <field name="readonly" eval="True"/>
+    </record>
+
+    <record id="base_automation_update_unit_price" model="base.automation">
+        <field name="name">Update price</field>
+        <field name="model_id" ref="sale.model_sale_order_line"/>
+        <field name="state">code</field>
+        <field name="trigger">on_change</field>
+        <field name="on_change_field_ids" eval="[Command.link(ref('sale_discount.field_model_sale_order_line_x_final_price')),Command.link(ref('sale.field_sale_order_line__product_uom_qty'))]"/>
+        <field name="code">
+            <![CDATA[
+            record['price_unit'] = record.x_final_price
+        ]]>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <template id="extended_report_saleorder_document" inherit_id="sale.report_saleorder_document">
+            <xpath expr="//span[@t-field='line.price_unit']" position="replace">
+                    <span t-field="line.x_unit_price"/>
+            </xpath>
+            <xpath expr="//table/thead/tr/th[@name='th_discount']" position="after">
+                <th><span>Discount</span></th>
+                <th><span>Scheme/Coupon discount @1 per Ltr</span></th>
+                <th><span>Cash discount on balance @ 4%</span></th>
+                <th><span>Extra Discount @%</span></th>
+                <th><span>Final Price</span></th>
+            </xpath>
+            <xpath expr="//td[@name='td_priceunit']" position="after">
+                    <td><span t-field="line.x_first_discount"/></td>
+                    <td><span t-field="line.x_second_discount"/></td>
+                    <td><span t-field="line.x_third_discount"/></td>
+                    <td><span t-field="line.x_fourth_discount"/></td>
+                    <td><span t-field="line.x_final_price"/></td>
+            </xpath>
+        </template>
+    </data>
+</odoo>

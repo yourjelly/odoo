@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="field_model_product_pricelist_item_x_first_discount" model="ir.model.fields">
+        <field name="name">x_first_discount</field>
+        <field name="field_description">Discount</field>
+        <field name="ttype">char</field>
+        <field name="model_id" ref="product.model_product_pricelist_item"/>
+    </record>
+
+    <record id="field_model_product_pricelist_item_x_second_discount" model="ir.model.fields">
+        <field name="name">x_second_discount</field>
+        <field name="field_description">Scheme/Coupon discount@ 1 per Ltr</field>
+        <field name="ttype">char</field>
+        <field name="model_id" ref="product.model_product_pricelist_item"/>
+    </record>
+
+    <record id="field_model_product_pricelist_item_x_third_discount" model="ir.model.fields">
+        <field name="name">x_third_discount</field>
+        <field name="field_description">Cash discount on balance @ 4%</field>
+        <field name="ttype">char</field>
+        <field name="model_id" ref="product.model_product_pricelist_item"/>
+    </record>
+
+    <record id="field_model_product_pricelist_item_x_fourth_discount" model="ir.model.fields">
+        <field name="name">x_fourth_discount</field>
+        <field name="field_description">Extra Discount @%</field>
+        <field name="ttype">char</field>
+        <field name="model_id" ref="product.model_product_pricelist_item"/>
+    </record>
+
+    <record id="field_model_product_pricelist_item_x_final_price" model="ir.model.fields">
+        <field name="name">x_final_price</field>
+        <field name="field_description">Final Price</field>
+        <field name="ttype">float</field>
+        <field name="model_id" ref="product.model_product_pricelist_item"/>
+    </record>
+</odoo>

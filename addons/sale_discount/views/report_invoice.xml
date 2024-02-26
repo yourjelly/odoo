@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <template id="extended_report_invoice_document" inherit_id="account.report_invoice_document">
+            <xpath expr="//span[@t-field='line.price_unit']" position="replace">
+                <span t-field="line.x_unit_price"/>
+            </xpath>
+            <xpath expr="//table[@name='invoice_line_table']/thead/tr/th[@name='th_price_unit']" position="after">
+                <th><span>Discount</span></th>
+                <th><span>Scheme/Coupon discount @1 per Ltr</span></th>
+                <th><span>Cash discount on balance @ 4%</span></th>
+                <th><span>Extra Discount @%</span></th>
+                <th><span>Final Price</span></th>
+            </xpath>
+
+            <xpath expr="//t[@name='account_invoice_line_accountable']/td[3]" position="after">
+                <td>
+                  <span t-if="line.x_first_discount" t-field="line.x_first_discount"></span>
+                </td>
+
+            </xpath>
+            <xpath expr="//t[@name='account_invoice_line_accountable']/td[4]" position="after">
+                <td>
+                  <span t-if="line.x_second_discount" t-field="line.x_second_discount"></span>
+                </td>
+            </xpath>
+            <xpath expr="//t[@name='account_invoice_line_accountable']/td[5]" position="after">
+                <td>
+                  <span t-if="line.x_third_discount" t-field="line.x_third_discount"></span>
+                </td>
+            </xpath>
+            <xpath expr="//t[@name='account_invoice_line_accountable']/td[6]" position="after">
+                <td>
+                  <span t-if="line.x_fourth_discount" t-field="line.x_fourth_discount"></span>
+                </td>
+            </xpath>
+            <xpath expr="//t[@name='account_invoice_line_accountable']/td[7]" position="after">
+              <td>
+                <span t-if="line.x_final_price" t-field="line.x_final_price"></span>
+              </td>
+          </xpath>
+        </template>
+    </data>
+</odoo>
