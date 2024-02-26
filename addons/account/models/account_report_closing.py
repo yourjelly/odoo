@@ -10,13 +10,13 @@ class AccountReportClosing(models.Model):
     name = fields.Char(string="Name", required=True)
     closing_type_id = fields.Many2one(string="Type", comodel_name='account.report.closing.type', required=True)
     date = fields.Date(string="Date", required=True)
-    locked_journal_ids = fields.Many2many(string="Locked Journals", comodel_name='account.journal')
+    locked_journal_ids = fields.Many2many(string="Locked Journals", comodel_name='account.journal') #TODO OCO implémenter ça
     move_ids = fields.One2many(string="Closing Moves", comodel_name='account.move', inverse_name='report_closing_id') #TODO OCO du coup, empêcher l'édition de ces moves semble indiqué
     state = fields.Selection(string="State", selection=[('in_progress', "In Progress"), ('closed', "Closed")], required=True, default='in_progress')
     notes = fields.Html(string="Notes") #TODO OCO on pourrait lui mettre une valeur par défaut set sur le closing type; peut-être too much, mais pas sûr; ce sont des flux cycliques
     #TODO OCO statuer sur le fait de mettre la fpos dessus (si on garde le cas de multivat indien)
     company_ids = fields.Many2many(string="Companies", comodel_name='res.company', required=True) #TODO OCO vérifier que check_company_auto comprend ça
-    main_company_id = fields.Many2many(string="Main Compnay", commodel_name='res.company', required=True)
+    main_company_id = fields.Many2one(string="Main Company", comodel_name='res.company', required=True)
     # TOCO OCO pour que chaque membre de la closing ait possibilité de set un tax lock date avant que la mère ne close, que faire ? m2m cochable ? Champ property à set chacune ? Rien et osef ? => garder le bouton pour poster l'entrée, la poster et tout déduire de son état  ? ==> mais alors, comment on connaît la mère ? Comment on gère le posting intermédiaire ? :/ => un champ main_company_id en plus ?
     report_id = fields.Many2one(string="Report", comodel_name='account.report') # Only set when generating closings with split_per_report
     move_generator_code = fields.Char(related='closing_type_id.move_generator_code')
