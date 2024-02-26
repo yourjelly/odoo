@@ -36,13 +36,6 @@ class TestMenusDemo(HttpCaseWithUserDemo):
 class TestMenusAdminLight(odoo.tests.HttpCase):
     allow_end_on_form = True
     def test_01_click_apps_menus_as_admin(self):
-        # Due to action_pos_preparation_display_kitchen_display, cliking on the "Kitchen Display"
-        # menuitem could open the UI display, which will break the crawler tests as there is no
-        # way for the tour to be executed, leading to a timeout
-        if 'pos_preparation_display.display' in self.env:
-            self.env['pos_preparation_display.display'].create({
-                'name': 'Super Smart Kitchen Display',
-            })
         # There is a bug when we go the Field Service app (without any demo data) and we
         # click on the Studio button. It seems the fake group generated containing one record
         # to be used in the KanbanEditorRenderer has groupByField to undefined

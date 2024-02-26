@@ -19,6 +19,10 @@ const BLACKLISTED_MENUS = [
     "mrp_workorder.menu_mrp_workorder_root", // same here (tablet mode)
     "account.menu_action_account_bank_journal_form", // Modal in an iFrame
 ];
+const BLACKLISTED_APPS = [
+    "pos_preparation_display.menu_point_kitchen_display_root", // redirects to app Point of Sale
+];
+
 // If you change this selector, adapt Studio test "Studio icon matches the clickbot selector"
 const STUDIO_SYSTRAY_ICON_SELECTOR = ".o_web_studio_navbar_item:not(.o_disabled) i";
 
@@ -439,6 +443,11 @@ async function testMenuItem(element) {
  */
 async function testApp() {
     let element;
+
+    if (BLACKLISTED_APPS.includes(state.app)) {
+        browser.console.log(`Skipping blacklisted app ${state.app}`);
+        return Promise.resolve(); // Skip black listed apps
+    }
 
     if (!state.testedApps.includes(state.app)) {
         if (isEnterprise) {
