@@ -281,7 +281,7 @@ export class SearchBar extends Component {
      */
     async computeSubItems(searchItem, query) {
         const field = this.fields[searchItem.fieldName];
-        const context = { ...this.env.searchModel.domainEvalContext, ...field.context }
+        const context = { ...this.env.searchModel.domainEvalContext, ...field.context };
         let domain = [];
         if (searchItem.domain) {
             try {
