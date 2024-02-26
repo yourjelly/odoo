@@ -22,6 +22,7 @@ const StorePatch = {
                 return getSortId(g1) - getSortId(g2);
             },
         });
+        this.allActivities = Record.many("Activity", { inverse: "storeAsAllActivities" });
     },
     onUpdateActivityGroups() {},
 };

@@ -67,7 +67,7 @@ export class MessageService {
      * @returns {number}
      */
     getLastMessageId() {
-        return Object.values(this.store.Message.records).reduce(
+        return this.store.allMessages.reduce(
             (lastMessageId, message) => Math.max(lastMessageId, message.id),
             0
         );

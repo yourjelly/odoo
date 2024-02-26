@@ -61,8 +61,7 @@ export class Messaging {
     async searchPartners(searchStr = "", limit = 10) {
         const partners = [];
         const searchTerm = cleanTerm(searchStr);
-        for (const localId in this.store.Persona.records) {
-            const persona = this.store.Persona.records[localId];
+        for (const persona of this.store.allPersonas) {
             if (persona.type !== "partner") {
                 continue;
             }

@@ -5,6 +5,7 @@ declare module "models" {
     export interface Store {
         activityCounter: number,
         activityGroups: Object[],
+        Activity;
     }
     export interface Thread {
         recipients: Follower[],

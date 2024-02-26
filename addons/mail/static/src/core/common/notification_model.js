@@ -4,8 +4,6 @@ import { _t } from "@web/core/l10n/translation";
 
 export class Notification extends Record {
     static id = "id";
-    /** @type {Object.<number, import("models").Notification>} */
-    static records = {};
     /** @returns {import("models").Notification} */
     static get(data) {
         return super.get(data);
@@ -30,7 +28,7 @@ export class Notification extends Record {
             if (!this.message?.author?.eq(this._store.self)) {
                 return;
             }
-            const failure = Object.values(this._store.Failure.records).find((f) => {
+            const failure = this._store.allFailures.find((f) => {
                 return (
                     f.resModel === thread?.model &&
                     f.type === this.notification_type &&

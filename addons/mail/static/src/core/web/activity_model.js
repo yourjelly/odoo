@@ -34,8 +34,6 @@ import { assignDefined } from "@mail/utils/common/misc";
 
 export class Activity extends Record {
     static id = "id";
-    /** @type {Object.<number, import("models").Activity>} */
-    static records = {};
     /** @returns {import("models").Activity} */
     static get(data) {
         return super.get(data);
@@ -126,6 +124,12 @@ export class Activity extends Record {
     request_partner_id;
     /** @type {'overdue'|'planned'|'today'} */
     state;
+    storeAsAllActivities = Record.one("Store", {
+        default() {
+            return this._store;
+        },
+        inverse: "allActivities",
+    });
     /** @type {string} */
     summary;
     /** @type {[number, string]} */

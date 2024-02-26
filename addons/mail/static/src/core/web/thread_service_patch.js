@@ -149,7 +149,7 @@ patch(ThreadService.prototype, {
         this.chatWindowService.notifyState(chatWindow);
     },
     getRecentChannels() {
-        return Object.values(this.store.Thread.records)
+        return this.store.allThreads
             .filter((thread) => thread.model === "discuss.channel")
             .sort((a, b) => compareDatetime(b.last_interest_dt, a.last_interest_dt) || b.id - a.id);
     },

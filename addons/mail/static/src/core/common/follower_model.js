@@ -2,8 +2,6 @@ import { Record } from "@mail/core/common/record";
 
 export class Follower extends Record {
     static id = "id";
-    /** @type {Object.<number, import("models").Follower>} */
-    static records = {};
     /** @returns {import("models").Follower} */
     static get(data) {
         return super.get(data);

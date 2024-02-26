@@ -6,8 +6,6 @@ import { _t } from "@web/core/l10n/translation";
 export class Failure extends Record {
     static nextId = markRaw({ value: 1 });
     static id = "id";
-    /** @type {Object.<number, import("models").Failure>} */
-    static records = {};
     /** @returns {import("models").Failure} */
     static get(data) {
         return super.get(data);
@@ -27,6 +25,13 @@ export class Failure extends Record {
             }
         },
     });
+    storeAsAllFailures = Record.one("Store", {
+        default() {
+            return this._store;
+        },
+        inverse: "allFailures",
+    });
+
     get modelName() {
         return this.notifications?.[0]?.message?.thread?.modelName;
     }

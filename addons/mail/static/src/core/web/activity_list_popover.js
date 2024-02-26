@@ -36,9 +36,7 @@ export class ActivityListPopover extends Component {
     }
 
     get activities() {
-        /** @type {import("models").Activity[]} */
-        const allActivities = Object.values(this.store.Activity.records);
-        return allActivities
+        return this.store.allActivities
             .filter((activity) => this.props.activityIds.includes(activity.id))
             .sort(function (a, b) {
                 if (a.date_deadline === b.date_deadline) {

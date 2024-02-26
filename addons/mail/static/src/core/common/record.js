@@ -268,8 +268,10 @@ export function makeStore(env) {
                     record._proxyInternal = recordProxyInternal;
                     const recordProxy = reactive(recordProxyInternal);
                     record._proxy = recordProxy;
+                    record._store = res.store._proxy;
                     if (record instanceof BaseStore) {
                         res.store = record;
+                        record._store = recordProxy;
                     }
                     for (const [name, fieldDefinition] of Model._fields) {
                         const SYM = record[name]?.[0];
@@ -292,7 +294,7 @@ export function makeStore(env) {
                             recordList.store = res.store;
                             field.value = recordList;
                         } else {
-                            record[name] = fieldDefinition.default;
+                            record[name] = undefined;
                         }
                         if (fieldDefinition.compute) {
                             if (!fieldDefinition.eager) {
@@ -409,7 +411,6 @@ export function makeStore(env) {
         Object.assign(Model, {
             Class,
             env,
-            records: reactive({}),
             _fields: new Map(),
         });
         Models[name] = Model;
@@ -1044,8 +1045,6 @@ export class Record {
      */
     static trusted = false;
     static id;
-    /** @type {Object<string, Record>} */
-    static records;
     /** @type {import("models").Store} */
     static store;
     /** @type {RecordField[]} */
@@ -1151,7 +1150,6 @@ export class Record {
                             }
                         }
                     }
-                    delete record.Model.records[record.localId];
                     record.Model._rawStore.recordByLocalId.delete(record.localId);
                 }
             }
@@ -1305,7 +1303,7 @@ export class Record {
     }
     static get(data) {
         const Model = toRaw(this);
-        return this.records[Model.localId(data)];
+        return this.store.recordByLocalId.get(Model.localId(data));
     }
     static register() {
         modelRegistry.add(this.name, this);
@@ -1454,7 +1452,6 @@ export class Record {
             }
             Object.assign(record, { localId: Model.localId(ids) });
             Object.assign(recordProxy, { ...ids });
-            Model.records[record.localId] = recordProxy;
             if (record.Model.name === "Store") {
                 Object.assign(record, {
                     env: Model._rawStore.env,
@@ -1462,7 +1459,12 @@ export class Record {
                 });
             }
             Model._rawStore.recordByLocalId.set(record.localId, recordProxy);
-            for (const field of record._fields.values()) {
+            for (const [name, field] of record._fields) {
+                const def = Model._fields.get(name).default;
+                if (def !== undefined) {
+                    record._proxyInternal[name] =
+                        typeof def === "function" ? def.call(record._proxyInternal) : def;
+                }
                 field.requestCompute?.();
                 field.requestSort?.();
             }
@@ -1490,8 +1492,14 @@ export class Record {
      *   This is called at least once at record creation.
      * @returns {import("models").Models[M]}
      */
-    static one(targetModel, { compute, eager = false, inverse, onAdd, onDelete, onUpdate } = {}) {
-        return [ONE_SYM, { targetModel, compute, eager, inverse, onAdd, onDelete, onUpdate }];
+    static one(
+        targetModel,
+        { compute, default: def, eager = false, inverse, onAdd, onDelete, onUpdate } = {}
+    ) {
+        return [
+            ONE_SYM,
+            { targetModel, compute, default: def, eager, inverse, onAdd, onDelete, onUpdate },
+        ];
     }
     /**
      * @template {keyof import("models").Models} M
@@ -1601,10 +1609,6 @@ export class Record {
      */
     _fields = new Map();
     __uses__ = markRaw(new RecordUses());
-    /** @returns {import("models").Store} */
-    get _store() {
-        return toRaw(this)._raw.Model._rawStore._proxy;
-    }
     /**
      * Technical attribute, contains the Model entry in the store.
      * This is almost the same as the class, except it's an object
@@ -1693,6 +1697,7 @@ export class Record {
             }
         }
         delete data._fields;
+        delete data._store;
         delete data._proxy;
         delete data._proxyInternal;
         delete data._proxyUsed;

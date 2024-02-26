@@ -2,8 +2,6 @@ import { Record } from "@mail/core/common/record";
 
 export class RtcSession extends Record {
     static id = "id";
-    /** @type {Object.<number, import("models").RtcSession>} */
-    static records = {};
     /** @returns {import("models").RtcSession} */
     static get(data) {
         return super.get(data);
@@ -40,6 +38,12 @@ export class RtcSession extends Record {
     /** @type {RTCDataChannel} */
     dataChannel;
     audioError;
+    storeAsAllRtcSessions = Record.one("Store", {
+        default() {
+            return this._store;
+        },
+        inverse: "allRtcSessions",
+    });
     videoError;
     isTalking;
     localVolume;

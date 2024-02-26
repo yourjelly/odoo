@@ -73,11 +73,9 @@ export class SuggestionService {
     }
 
     searchCannedResponseSuggestions(cleanedSearchTerm, sort) {
-        const cannedResponses = Object.values(this.store.CannedResponse.records).filter(
-            (cannedResponse) => {
-                return cleanTerm(cannedResponse.source).includes(cleanedSearchTerm);
-            }
-        );
+        const cannedResponses = this.store.allCannnedResponses.filter((cannedResponse) => {
+            return cleanTerm(cannedResponse.source).includes(cleanedSearchTerm);
+        });
         const sortFunc = (c1, c2) => {
             const cleanedName1 = cleanTerm(c1.source);
             const cleanedName2 = cleanTerm(c2.source);
@@ -153,9 +151,7 @@ export class SuggestionService {
                 .map((member) => member.persona)
                 .filter((persona) => persona.type === "partner");
         } else {
-            partners = Object.values(this.store.Persona.records).filter(
-                (persona) => persona.type === "partner"
-            );
+            partners = this.store.allPersonas.filter((persona) => persona.type === "partner");
         }
         const mainSuggestionList = [];
         const extraSuggestionList = [];
@@ -225,7 +221,7 @@ export class SuggestionService {
             // channel.
             threads = [thread];
         } else {
-            threads = Object.values(this.store.Thread.records);
+            threads = this.store.allThreads;
         }
         const suggestionList = threads.filter(
             (thread) =>

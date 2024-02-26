@@ -14,8 +14,6 @@ import { imageUrl } from "@web/core/utils/urls";
 
 export class Persona extends Record {
     static id = AND("type", "id");
-    /** @type {Object.<number, import("models").Persona>} */
-    static records = {};
     /** @returns {import("models").Persona} */
     static get(data) {
         return super.get(data);
@@ -34,6 +32,12 @@ export class Persona extends Record {
     landlineNumber;
     /** @type {string} */
     mobileNumber;
+    storeAsAllPersonas = Record.one("Store", {
+        default() {
+            return this._store;
+        },
+        inverse: "allPersonas",
+    });
     /** @type {'partner' | 'guest'} */
     type;
     /** @type {string} */

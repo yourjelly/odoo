@@ -218,7 +218,7 @@ export class MessagingMenu extends Component {
             (!this.store.discuss.thread || this.store.discuss.thread.model !== "mail.box")
         ) {
             this.threadService.setDiscussThread(
-                Object.values(this.store.Thread.records).find((thread) => thread.id === "inbox")
+                this.store.allThreads.find((thread) => thread.id === "inbox")
             );
         }
         if (this.store.discuss.activeTab !== "main") {

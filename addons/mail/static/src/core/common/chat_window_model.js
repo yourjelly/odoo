@@ -7,8 +7,6 @@ import { _t } from "@web/core/l10n/translation";
 
 export class ChatWindow extends Record {
     static id = "thread";
-    /** @type {Object<number, import("models").ChatWindow} */
-    static records = {};
     /** @returns {import("models").ChatWindow} */
     static get(data) {
         return super.get(data);

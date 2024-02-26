@@ -2,8 +2,6 @@ import { Record } from "@mail/core/common/record";
 
 export class CannedResponse extends Record {
     static id = "id";
-    /** @type {Object.<number, import("models").CannedResponse>} */
-    static records = {};
     /** @returns {import("models").CannedResponse} */
     static get(data) {
         return super.get(data);
@@ -17,6 +15,12 @@ export class CannedResponse extends Record {
     id;
     /** @type {string} */
     source;
+    storeAsAllCannedResponses = Record.one("Store", {
+        default() {
+            return this._store;
+        },
+        inverse: "allCannedResponses",
+    });
     /** @type {string} */
     substitution;
 }

@@ -16,8 +16,6 @@ import { Deferred } from "@web/core/utils/concurrency";
 
 export class Thread extends Record {
     static id = AND("model", "id");
-    /** @type {Object.<string, import("models").Thread>} */
-    static records = {};
     /** @returns {import("models").Thread} */
     static get(data) {
         return super.get(data);
@@ -105,6 +103,12 @@ export class Thread extends Record {
         onDelete(r) {
             this._store.discuss.ringingThreads.delete(this);
         },
+    });
+    storeAsAllThreads = Record.one("Store", {
+        default() {
+            return this._store;
+        },
+        inverse: "allThreads",
     });
     invitedMembers = Record.many("ChannelMember");
     composer = Record.one("Composer", {
@@ -525,8 +529,7 @@ export class Thread extends Record {
     }
 
     get videoCount() {
-        return Object.values(this._store.RtcSession.records).filter((session) => session.hasVideo)
-            .length;
+        return this._store.allRtcSessions.filter((session) => session.hasVideo).length;
     }
 
     /** @param {import("models").Persona} persona */

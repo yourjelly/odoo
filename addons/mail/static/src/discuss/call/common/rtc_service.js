@@ -1143,7 +1143,7 @@ export class Rtc {
     }
 
     clearPeerToPeer() {
-        for (const session of Object.values(this.store.RtcSession.records)) {
+        for (const session of this.store.allRtcSessions) {
             if (session === this.state.selfSession) {
                 continue;
             }

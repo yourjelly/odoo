@@ -423,7 +423,7 @@ export class ThreadService {
         if (!partner) {
             return;
         }
-        return Object.values(this.store.Thread.records).find(
+        return this.store.allThreads.find(
             (thread) => thread.channel_type === "chat" && thread.correspondent?.eq(partner)
         );
     }
@@ -626,7 +626,7 @@ export class ThreadService {
         if (!data) {
             return;
         }
-        if (data.id in this.store.Message.records) {
+        if (this.store.Message.get({ id: data.id })) {
             data.temporary_id = null;
         }
         const message = this.store.Message.insert(data, { html: true });

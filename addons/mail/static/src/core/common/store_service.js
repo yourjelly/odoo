@@ -17,8 +17,6 @@ export class Store extends BaseStore {
         return super.insert(...arguments);
     }
 
-    /** @type {typeof import("@mail/core/web/activity_model").Activity} */
-    Activity;
     /** @type {typeof import("@mail/core/common/attachment_model").Attachment} */
     Attachment;
     /** @type {typeof import("@mail/core/common/canned_response_model").CannedResponse} */
@@ -58,6 +56,17 @@ export class Store extends BaseStore {
 
     /** @type {number} */
     action_discuss_id;
+    allCannedResponses = Record.many("CannedResponse", { inverse: "storeAsAllCannedResponses" });
+    allFailures = Record.many("Failure", { inverse: "storeAsAllFailures" });
+    allMessages = Record.many("Message", { inverse: "storeAsAllMessages" });
+    allPersonas = Record.many("Persona", { inverse: "storeAsAllPersonas" });
+    allRtcSessions = Record.many("RtcSession", { inverse: "storeAsAllRtcSessions" });
+    allThreads = Record.many("Thread", {
+        inverse: "storeAsAllThreads",
+        onUpdate() {
+            this.updateBusSubscription();
+        },
+    });
     knownChannelIds = new Set();
     /** This is the current logged partner / guest */
     self = Record.one("Persona");
@@ -88,7 +97,7 @@ export class Store extends BaseStore {
     imStatusTrackedPersonas = Record.many("Persona", {
         /** @this {import("models").Store} */
         compute() {
-            return Object.values(this.Persona?.records ?? []).filter(
+            return this.allPersonas.filter(
                 (persona) => persona.im_status !== "im_partner" && !persona.is_public
             );
         },
@@ -107,8 +116,7 @@ export class Store extends BaseStore {
     menuThreads = Record.many("Thread", {
         /** @this {import("models").Store} */
         compute() {
-            /** @type {import("models").Thread[]} */
-            let threads = Object.values(this.Thread.records).filter(
+            let threads = this.allThreads.filter(
                 (thread) =>
                     thread.displayToSelf ||
                     (thread.needactionMessages.length > 0 && thread.model !== "mail.box")
@@ -320,7 +328,7 @@ export class Store extends BaseStore {
 
     updateBusSubscription() {
         const allSelfChannelIds = new Set();
-        for (const thread of Object.values(this.Thread.records)) {
+        for (const thread of this.allThreads) {
             if (
                 thread.model === "discuss.channel" &&
                 thread.fetchChannelInfoState === "fetched" &&
@@ -375,7 +383,6 @@ export const storeService = {
             discussActionIds.push(store.action_discuss_id);
         }
         store.discuss.isActive ||= discussActionIds.includes(router.current.action);
-        Record.onChange(store.Thread, "records", () => store.updateBusSubscription());
         services.ui.bus.addEventListener("resize", () => {
             store.discuss.activeTab = "main";
             if (services.ui.isSmall && store.discuss.thread?.channel_type) {

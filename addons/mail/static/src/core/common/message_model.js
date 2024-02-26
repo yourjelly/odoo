@@ -10,8 +10,6 @@ const { DateTime } = luxon;
 
 export class Message extends Record {
     static id = "id";
-    /** @type {Object.<number, import("models").Message>} */
-    static records = {};
     /** @returns {import("models").Message} */
     static get(data) {
         return super.get(data);
@@ -66,6 +64,12 @@ export class Message extends Record {
     reactions = Record.many("MessageReactions", { inverse: "message" });
     notifications = Record.many("Notification", { inverse: "message" });
     recipients = Record.many("Persona");
+    storeAsAllMessages = Record.one("Store", {
+        default() {
+            return this._store;
+        },
+        inverse: "allMessages",
+    });
     thread = Record.one("Thread");
     threadAsNeedaction = Record.one("Thread", {
         compute() {
