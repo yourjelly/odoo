@@ -157,7 +157,7 @@ class SaleOrder(models.Model):
         """
         self.ensure_one()
         assert reward.discount_applicability == 'order'
-
+        #the other tax should be taken into account and added somewhere
         discountable = 0
         discountable_per_tax = defaultdict(int)
         lines = self.order_line if reward.program_id.is_payment_program else (self.order_line - self._get_no_effect_on_threshold_lines())
@@ -171,10 +171,11 @@ class SaleOrder(models.Model):
             tax_data['taxes'] = tax_data['taxes'].filtered(lambda t: t.amount_type == 'fixed')
             tax_results = self.env['account.tax']._compute_taxes([tax_data])
             totals = list(tax_results['totals'].values())[0]
-            discountable += totals['amount_untaxed'] #this should be the untaxed amount
+            discountable += line.price_total - totals['amount_tax']
             taxes = line.tax_id.filtered(lambda t: t.amount_type != 'fixed')
             discountable_per_tax[taxes] += totals['amount_untaxed']
-        return discountable, discountable_per_tax
+            #discountable_per_tax[taxes] += line.price_total - totals['amount_tax']
+        return discountable, discountable_per_tax #300 is the old value
 
     def _cheapest_line(self):
         self.ensure_one()
@@ -359,7 +360,7 @@ class SaleOrder(models.Model):
                 'sequence': sequence,
                 'tax_id': [(Command.CLEAR, 0, 0)],
             }]
-        discount_factor = min(1, (max_discount / discountable)) if discountable else 1
+        discount_factor = min(1, (max_discount / discountable)) if discountable else 1 #actually in this case max_discount shouldn't be 31,5 but 30
         mapped_taxes = {tax: self.fiscal_position_id.map_tax(tax) for tax in discountable_per_tax}
         reward_dict = {tax: {
             'name': _(
@@ -557,7 +558,7 @@ class SaleOrder(models.Model):
             command_list.extend((Command.CREATE, 0, vals) for vals in reward_vals[len(old_lines):])
         elif len(reward_vals) < len(old_lines) and delete:
             command_list.extend((Command.DELETE, line.id) for line in old_lines[len(reward_vals):])
-        self.write({'order_line': command_list})
+        self.write({'order_line': command_list}) #this one is broken
         return self.env['sale.order.line'] if delete else old_lines[len(reward_vals):]
 
     def _apply_program_reward(self, reward, coupon, **kwargs):
