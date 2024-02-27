@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { registry } from "@web/core/registry";
+import tourUtils from "@website_sale/js/tours/tour_utils";
 
 registry.category("web_tour.tours").add(
     "website_sale.website_sale_shop_pricelist_tour",
@@ -17,16 +18,11 @@ registry.category("web_tour.tours").add(
                 content: "Go to login page",
                 trigger: ".btn:contains('Sign in')"
             },
-            {
-                content: "Submit login",
-                trigger: '.oe_login_form',
-                run: function () {
-                    $('.oe_login_form input[name="login"]').val("toto");
-                    $('.oe_login_form input[name="password"]').val("long_enough_password");
-                    $('.oe_login_form input[name="redirect"]').val("/shop");
-                    $('.oe_login_form').submit();
-                }
-            },
+            tourUtils.submitLogin({
+                login: 'toto',
+                password: 'long_enough_password',
+                redirect: '/shop',
+            }),
             {
                 content: "Check pricelist",
                 trigger: ".o_pricelist_dropdown .dropdown-toggle:contains('User Pricelist')",

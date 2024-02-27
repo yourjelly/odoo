@@ -119,6 +119,36 @@ function goToCheckout() {
     };
 }
 
+function goToLogin() {
+    return {
+        content: 'Log In',
+        trigger: 'header a[href="/web/login"]',
+    }
+}
+
+function submitLogin({ login, password, redirect }) {
+    return {
+        content: "Submit login",
+        trigger: '.oe_login_form',
+        run: function () {
+            const form = document.querySelector('form.oe_login_form');
+            form.login.value = login || 'admin';
+            form.password.value = password || 'admin';
+            if (!! redirect) {
+                form.querySelector('input[name="redirect"]').value = redirect;
+            }
+            form.submit();
+        },
+    }
+}
+
+function logIn({ login, password, redirect }) {
+    return [
+        goToLogin(),
+        submitLogin({login, password, redirect}),
+    ]
+}
+
 function pay() {
     return {
         content: 'Pay',
@@ -216,6 +246,8 @@ export default {
     fillAdressForm,
     goToCart,
     goToCheckout,
+    logIn,
+    submitLogin,
     pay,
     payWithDemo,
     payWithTransfer,

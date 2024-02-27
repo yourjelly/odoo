@@ -1,14 +1,14 @@
 /** @odoo-module **/
 
-    import { rpc } from "@web/core/network/rpc";
-    import { registry } from "@web/core/registry";
-    import tourUtils from "@website_sale/js/tours/tour_utils";
+import { rpc } from "@web/core/network/rpc";
+import { registry } from "@web/core/registry";
+import tourUtils from "@website_sale/js/tours/tour_utils";
 
-    registry.category("web_tour.tours").add('website_sale_tour_1', {
-        test: true,
-        checkDelay: 250,
-        url: '/shop?search=Storage Box Test',
-        steps: () => [
+registry.category("web_tour.tours").add('website_sale_tour_1', {
+    test: true,
+    checkDelay: 250,
+    url: '/shop?debug=assets&search=Storage Box Test',
+    steps: () => [
     // Testing b2c with Tax-Excluded Prices
     {
         content: "Open product page",
@@ -118,15 +118,7 @@
         trigger: '#shipping_and_billing:contains(SO1 Billing Street Edited, 33):contains(SO1BillingCityEdited):contains(Afghanistan)',
         run: function () {}, // it's a check
     },
-    {
-        content: "Select `Wire Transfer` payment method",
-        trigger: 'input[name="o_payment_radio"][data-payment-method-code="wire_transfer"]',
-    },
-    {
-        content: "Pay Now",
-        extra_trigger: 'input[name="o_payment_radio"][data-payment-method-code="wire_transfer"]:checked',
-        trigger: 'button[name="o_payment_submit_button"]:not(:disabled)',
-    },
+    ...tourUtils.payWithTransfer(),
     {
         content: "Sign up",
         trigger: '.oe_cart a:contains("Sign Up")',
@@ -154,20 +146,7 @@
         content: "Logout",
         trigger: '#o_logout:contains("Logout")',
     },
-    {
-        content: "Sign in as admin",
-        trigger: 'header a[href="/web/login"]',
-    },
-    {
-        content: "Submit login",
-        trigger: '.oe_login_form',
-        run: function () {
-            $('.oe_login_form input[name="login"]').val("admin");
-            $('.oe_login_form input[name="password"]').val("admin");
-            $('.oe_login_form input[name="redirect"]').val("/");
-            $('.oe_login_form').submit();
-        },
-    },
+    ...tourUtils.logIn({ redirect: '/' }),
     {
         content: "Configuration Settings for 'Tax Included' and sign up 'On Invitation'",
         extra_trigger: '.o_frontend_to_backend_nav', // Check if the user is connected
@@ -195,6 +174,7 @@
             });
         },
     },
+    // TODO logout
     // Testing b2b with Tax-Included Prices
     {
         content: "Open product page",
@@ -228,15 +208,7 @@
         content: "Click on Sign in Button",
         trigger: '.oe_cart a:contains(" Sign in")',
     },
-    {
-        content: "Submit login",
-        trigger: '.oe_login_form',
-        run: function () {
-            $('.oe_login_form input[name="login"]').val("abc@odoo.com");
-            $('.oe_login_form input[name="password"]').val("1admin@admin");
-            $('.oe_login_form').submit();
-        },
-    },
+    tourUtils.submitLogin({ login: 'abc@odoo.com', password: '1admin@admin' }),
     {
         content: "Add new shipping address",
         trigger: '.all_shipping a[href^="/shop/address"]:contains("Add address")',
@@ -257,15 +229,7 @@
         content: "Click on next button",
         trigger: '.oe_cart .btn:contains("Save address")',
     },
-    {
-        content: "Select `Wire Transfer` payment method",
-        trigger: 'input[name="o_payment_radio"][data-payment-method-code="wire_transfer"]',
-    },
-    {
-        content: "Pay Now",
-        extra_trigger: 'input[name="o_payment_radio"][data-payment-method-code="wire_transfer"]:checked',
-        trigger: 'button[name="o_payment_submit_button"]:not(:disabled)',
-    },
+    ...tourUtils.payWithTransfer(),
     {
         content: "Open Dropdown for See quotation",
         extra_trigger: '.oe_cart .oe_website_sale_tx_status',
@@ -287,48 +251,18 @@
         content: "Logout",
         trigger: '#o_logout:contains("Logout")',
     },
-    {
-        content: "Sign in as admin",
-        trigger: 'header a[href="/web/login"]',
-    },
-    {
-        content: "Submit login",
-        trigger: '.oe_login_form',
-        run: function () {
-            $('.oe_login_form input[name="login"]').val("admin");
-            $('.oe_login_form input[name="password"]').val("admin");
-            $('.oe_login_form input[name="redirect"]').val("/shop/cart");
-            $('.oe_login_form').submit();
-        },
-    }]});
+    ...tourUtils.logIn({ redirect: '/shop/cart' }),
+]});
 
-    registry.category("web_tour.tours").add('website_sale_tour_2', {
-        test: true,
-        url: '/shop/cart',
-        steps: () => [
-    {
-        content: "Open Dropdown for logout",
-        extra_trigger: '.o_wizard:contains("Extra Info")',
-        trigger: 'header#top li.dropdown:visible a:contains("Mitchell Admin")',
-    },
-    {
-        content: "Logout",
-        trigger: '#o_logout:contains("Logout")',
-    },
-    {
-        content: "Sign in as abc",
-        trigger: 'header a[href="/web/login"]',
-    },
-    {
-        content: "Submit login",
-        trigger: '.oe_login_form',
-        run: function () {
-            $('.oe_login_form input[name="login"]').val("abc@odoo.com");
-            $('.oe_login_form input[name="password"]').val("1admin@admin");
-            $('.oe_login_form input[name="redirect"]').val("/shop?search=Storage Box Test");
-            $('.oe_login_form').submit();
-        },
-    },
+registry.category("web_tour.tours").add('website_sale_tour_2', {
+    test: true,
+    url: '/shop',
+    steps: () => [
+    tourUtils.logIn({
+        login: 'abc@odoo.com',
+        password: '1admin@admin',
+        redirect: '/shop?search=Storage Box Test',
+    }),
     {
         content: "Open product page",
         trigger: '.oe_product_cart a:contains("Storage Box Test")',

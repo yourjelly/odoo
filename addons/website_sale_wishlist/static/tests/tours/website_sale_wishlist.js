@@ -2,6 +2,7 @@
 
 import { registry } from "@web/core/registry";
 import { rpc } from "@web/core/network/rpc";
+import tourUtils from "@website_sale/js/tours/tour_utils";
 
 registry.category("web_tour.tours").add('shop_wishlist', {
     test: true,
@@ -30,20 +31,11 @@ registry.category("web_tour.tours").add('shop_wishlist', {
             trigger: '.o_add_wishlist',
         },
         {
-            content: "check value of wishlist and go to login",
-            extra_trigger: ".my_wish_quantity:contains(1)",
-            trigger: 'a[href="/web/login"]',
+            content: "check value of wishlist",
+            trigger: ".my_wish_quantity:contains(1)",
+            isCheck: true,
         },
-        {
-            content: "submit login",
-            trigger: ".oe_login_form",
-            run: function (){
-                $('.oe_login_form input[name="login"]').val("admin");
-                $('.oe_login_form input[name="password"]').val("admin");
-                $('.oe_login_form input[name="redirect"]').val("/shop?search=Customizable Desk");
-                $('.oe_login_form').submit();
-            },
-        },
+        ...tourUtils.logIn({ redirect: '/shop?search=Customizable Desk'}),
         {
             content: "check that logged in",
             trigger: "li span:contains('Mitchell Admin')",
@@ -222,20 +214,9 @@ registry.category("web_tour.tours").add('shop_wishlist', {
         {
             content: "Check wishlist contains third variant, then go to login",
             trigger: '#o_comparelist_table tr:contains("black")',
-            run: function () {
-                window.location.href = "/web/login";
-            },
+            isCheck: true,
         },
-        {
-            content: "Submit login as admin",
-            trigger: '.oe_login_form',
-            run: function () {
-                $('.oe_login_form input[name="login"]').val("admin");
-                $('.oe_login_form input[name="password"]').val("admin");
-                $('.oe_login_form input[name="redirect"]').val("/");
-                $('.oe_login_form').submit();
-            },
-        },
+        ...tourUtils.logIn({ redirect: '/'}),
         // Test one impossible combination while other combinations are possible
         {
             content: "Archive the first variant",
@@ -290,20 +271,9 @@ registry.category("web_tour.tours").add('shop_wishlist', {
         {
             content: "Check product added to wishlist and go to login",
             trigger: '.my_wish_quantity:contains(1)',
-            run: function () {
-                window.location.href = "/web/login";
-            },
+            isCheck: true,
         },
-        {
-            content: "Submit login",
-            trigger: '.oe_login_form',
-            run: function () {
-                $('.oe_login_form input[name="login"]').val("admin");
-                $('.oe_login_form input[name="password"]').val("admin");
-                $('.oe_login_form input[name="redirect"]').val("/");
-                $('.oe_login_form').submit();
-            },
-        },
+        ...tourUtils.logIn({ redirect: '/'}),
         // test when all combinations are impossible
         {
             content: "Archive all variants",
