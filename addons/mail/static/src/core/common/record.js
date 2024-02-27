@@ -34,10 +34,27 @@ export function OR(...args) {
 function updateFields(record, vals) {
     for (const [fieldName, value] of Object.entries(vals)) {
         const fieldDefinition = record.Model._fields.get(fieldName);
+        let hasChanged;
         if (!fieldDefinition || Record.isAttr(fieldDefinition)) {
-            updateAttr(record, fieldName, value);
+            hasChanged = updateAttr(record, fieldName, value);
+            if (hasChanged) {
+                const obs = record._store?.obs;
+                if (obs) {
+                    for (const observer of obs.observersByRecord.get(record) || []) {
+                        Record.OBSERVERS_TO_EXECUTE.add(observer);
+                        console.log(`Setting to execute ${observer.name} from update fields`);
+                    }
+                }
+            }
         } else {
-            updateRelation(record, fieldName, value);
+            hasChanged = updateRelation(record, fieldName, value);
+            const obs = record._store?.obs;
+            if (obs) {
+                for (const observer of obs.observersByRecord.get(record) || []) {
+                    Record.OBSERVERS_TO_EXECUTE.add(observer);
+                    console.log(`Setting to execute ${observer.name} from update fields`);
+                }
+            }
         }
     }
 }
@@ -76,6 +93,7 @@ function updateAttr(record, fieldName, value) {
         targetRecord[fieldName] = newValue;
         record._updateFields.delete(fieldName);
     }
+    return shouldChange;
 }
 
 /**
@@ -171,9 +189,22 @@ function sortRecordList(recordListFullProxy, func) {
     }
 }
 
+function addObserver(observersByTarget, target, observer) {
+    let observers = observersByTarget.get(target);
+    if (!observers) {
+        observers = new Set();
+        observersByTarget.set(target, observers);
+    }
+    observers.add(observer);
+}
+
 /** @returns {import("models").Store} */
 export function makeStore(env) {
     Record.UPDATE = 0;
+    const obs = markRaw({
+        currentObservers: new Set(),
+        observersByRecord: new Map(),
+    });
     const recordByLocalId = reactive(new Map());
     const res = {
         // fake store for now, until it becomes a model
@@ -181,6 +212,7 @@ export function makeStore(env) {
         store: {
             env,
             get: (...args) => BaseStore.prototype.get.call(this, ...args),
+            obs,
             recordByLocalId,
         },
     };
@@ -212,6 +244,15 @@ export function makeStore(env) {
                             recordFullProxy = record._downgradeProxy(recordFullProxy);
                             const field = record._fields.get(name);
                             if (field) {
+                                const obs = res.store.obs;
+                                if (obs) {
+                                    for (const observer of obs.currentObservers) {
+                                        addObserver(obs.observersByRecord, record, observer);
+                                        console.log(
+                                            `${observer.name} is observing ${record.localId}:${name}`
+                                        );
+                                    }
+                                }
                                 if (field.compute && !field.eager) {
                                     field.computeInNeed = true;
                                     if (field.computeOnNeed) {
@@ -238,6 +279,16 @@ export function makeStore(env) {
                         },
                         deleteProperty(record, name) {
                             return Record.MAKE_UPDATE(function recordDeleteProperty() {
+                                const obs = res.store.obs;
+                                if (obs) {
+                                    for (const observer of obs.observersByRecord.get(record) ||
+                                        []) {
+                                        Record.OBSERVERS_TO_EXECUTE.add(observer);
+                                        console.log(
+                                            `Setting to execute ${observer.name} from deleteProperty`
+                                        );
+                                    }
+                                }
                                 const field = record._fields.get(name);
                                 if (field && Record.isRelation(field)) {
                                     const recordList = field.value;
@@ -311,16 +362,20 @@ export function makeStore(env) {
                                 field.computeInNeed = false;
                                 field.sortInNeed = false;
                             }
-                            const proxy2 = reactive(recordProxy, function computeObserver() {
-                                field.requestCompute();
-                            });
                             Object.assign(field, {
                                 compute: () => {
                                     field.computing = true;
                                     field.computeOnNeed = false;
-                                    updateFields(record, {
-                                        [name]: fieldDefinition.compute.call(proxy2),
-                                    });
+                                    const observer = {
+                                        name: `compute:${record.localId}:${name}`,
+                                        onChange() {
+                                            field.requestCompute();
+                                        },
+                                    };
+                                    res.store.obs.currentObservers.add(observer);
+                                    const val = fieldDefinition.compute.call(record._proxyInternal);
+                                    res.store.obs.currentObservers.delete(observer);
+                                    updateFields(record, { [name]: val });
                                     field.computing = false;
                                 },
                                 requestCompute: ({ force = false } = {}) => {
@@ -537,6 +592,15 @@ class RecordList extends Array {
             /** @param {RecordList<R>} receiver */
             get(recordList, name, recordListFullProxy) {
                 recordListFullProxy = recordList._downgradeProxy(recordListFullProxy);
+                const obs = recordList.store?.obs;
+                if (obs && typeof name !== "symbol") {
+                    for (const observer of obs.currentObservers) {
+                        addObserver(obs.observersByRecord, recordList.owner, observer);
+                        console.log(
+                            `${observer.name} is observing ${recordList.owner.localId}:${recordList.name}:${name}`
+                        );
+                    }
+                }
                 if (
                     typeof name === "symbol" ||
                     Object.keys(recordList).includes(name) ||
@@ -575,6 +639,13 @@ class RecordList extends Array {
             /** @param {RecordList<R>} recordListProxy */
             set(recordList, name, val, recordListProxy) {
                 return Record.MAKE_UPDATE(function recordListSet() {
+                    const obs = recordList.store.obs;
+                    if (obs) {
+                        for (const observer of obs.observersByRecord.get(recordList.owner) || []) {
+                            Record.OBSERVERS_TO_EXECUTE.add(observer);
+                            console.log(`Setting to execute ${observer.name} from recordlist set`);
+                        }
+                    }
                     if (typeof name !== "symbol" && !window.isNaN(parseInt(name))) {
                         // support for "array[index] = r3" syntax
                         const index = parseInt(name);
@@ -1048,6 +1119,7 @@ export class Record {
     static records;
     /** @type {import("models").Store} */
     static store;
+    static OBSERVERS_TO_EXECUTE = new Set();
     /** @type {RecordField[]} */
     static FC_QUEUE = []; // field-computes
     /** @type {RecordField[]} */
@@ -1071,7 +1143,9 @@ export class Record {
         if (Record.UPDATE === 0) {
             // pretend an increased update cycle so that nothing in queue creates many small update cycles
             Record.UPDATE++;
+            const observersToExecute = Record.OBSERVERS_TO_EXECUTE;
             while (
+                observersToExecute.size > 0 ||
                 Record.FC_QUEUE.length > 0 ||
                 Record.FS_QUEUE.length > 0 ||
                 Record.FA_QUEUE.length > 0 ||
@@ -1080,6 +1154,7 @@ export class Record {
                 Record.RO_QUEUE.length > 0 ||
                 Record.RD_QUEUE.length > 0
             ) {
+                const observers = [...observersToExecute];
                 const FC_QUEUE = [...Record.FC_QUEUE];
                 const FS_QUEUE = [...Record.FS_QUEUE];
                 const FA_QUEUE = [...Record.FA_QUEUE];
@@ -1087,6 +1162,7 @@ export class Record {
                 const FU_QUEUE = [...Record.FU_QUEUE];
                 const RO_QUEUE = [...Record.RO_QUEUE];
                 const RD_QUEUE = [...Record.RD_QUEUE];
+                Record.OBSERVERS_TO_EXECUTE.clear();
                 Record.FC_QUEUE.length = 0;
                 Record.FS_QUEUE.length = 0;
                 Record.FA_QUEUE.length = 0;
@@ -1094,6 +1170,11 @@ export class Record {
                 Record.FU_QUEUE.length = 0;
                 Record.RO_QUEUE.length = 0;
                 Record.RD_QUEUE.length = 0;
+                while (observers.length > 0) {
+                    const observer = observers.pop();
+                    observer.onChange();
+                    console.log(`${observer.name} is executed`);
+                }
                 while (FC_QUEUE.length > 0) {
                     const field = FC_QUEUE.pop();
                     field.requestCompute({ force: true });
@@ -1457,6 +1538,7 @@ export class Record {
             Model.records[record.localId] = recordProxy;
             if (record.Model.name === "Store") {
                 Object.assign(record, {
+                    obs: Model._rawStore.obs,
                     env: Model._rawStore.env,
                     recordByLocalId: Model._rawStore.recordByLocalId,
                 });
