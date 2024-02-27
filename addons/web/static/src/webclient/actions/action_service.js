@@ -27,7 +27,7 @@ import {
     reactive,
 } from "@odoo/owl";
 import { downloadReport, getReportUrl } from "./reports/utils";
-import { pick } from "@web/core/utils/objects";
+import { omit, pick } from "@web/core/utils/objects";
 import { zip } from "@web/core/utils/arrays";
 
 class BlankComponent extends Component {
@@ -810,42 +810,39 @@ export function makeActionManager(env, router = _router) {
                 if (this.isMounted) {
                     // the error occurred on the controller which is
                     // already in the DOM, so simply show the error
-                    Promise.resolve().then(() => {
-                        throw error;
-                    });
-                } else {
-                    reject(error);
-                    if (action.target === "new") {
-                        removeDialogFn?.();
-                    } else {
-                        const index = controllerStack.findIndex(
-                            (ct) => ct.jsId === controller.jsId
-                        );
-                        if (index > 0) {
-                            // The error occurred while rendering an existing controller,
-                            // so go back to the previous controller, of the current faulty one.
-                            // This occurs when clicking on the breadcrumbs.
-                            return restore(controllerStack[index - 1].jsId);
-                        }
-                        if (options.lazyController) {
-                            // The error occured while rendering a new controller with a lazyController
-                            // we render this lazyController instead.
-                            const updateUIOptions = { ...options };
-                            delete updateUIOptions.lazyController;
-                            return _updateUI(options.lazyController, updateUIOptions);
-                        }
-                        const lastCt = controllerStack[controllerStack.length - 1];
-                        if (lastCt) {
-                            // the error occurred while rendering a new controller,
-                            // so go back to the last non faulty controller
-                            // (the error will be shown anyway as the promise
-                            // has been rejected)
-                            restore(lastCt.jsId);
-                        } else {
-                            env.bus.trigger("ACTION_MANAGER:UPDATE", {});
-                        }
-                    }
+                    Promise.reject(error);
+                    return;
                 }
+                // forward the error to the _updateUI caller then restore the action container
+                // to an unbroken state
+                reject(error);
+                if (action.target === "new") {
+                    removeDialogFn?.();
+                    return;
+                }
+                const index = controllerStack.findIndex((ct) => ct.jsId === controller.jsId);
+                if (index > 0) {
+                    // The error occurred while rendering an existing controller,
+                    // so go back to the previous controller, of the current faulty one.
+                    // This occurs when clicking on the breadcrumbs.
+                    // FIXME can this even happen? If the controller is in the stack, it should be
+                    // mounted
+                    return restore(controllerStack[index - 1].jsId);
+                }
+                if (options.lazyController) {
+                    // The error occured while rendering a new controller with a lazyController
+                    // we render this lazyController instead.
+                    return _updateUI(options.lazyController, omit(options, "lazyController"));
+                }
+                const lastCt = controllerStack.at(-1);
+                if (lastCt) {
+                    // the error occurred while rendering a new controller,
+                    // so go back to the last non faulty controller
+                    // (the error will be shown anyway as the promise
+                    // has been rejected)
+                    return restore(lastCt.jsId);
+                }
+                env.bus.trigger("ACTION_MANAGER:UPDATE", {});
             }
             onMounted() {
                 if (action.target === "new") {

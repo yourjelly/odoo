@@ -54,22 +54,26 @@ function getCompanyIdsFromBrowser(state) {
 
 const errorHandlerRegistry = registry.category("error_handlers");
 function accessErrorHandler(env, error, originalError) {
-    if (!router.current._company_switching) {
+    const { _company_switching, resId } = router.current;
+    if (
+        !_company_switching ||
+        originalError?.exceptionName !== "odoo.exceptions.AccessError" ||
+        !resId
+    ) {
         return false;
     }
-    if (originalError?.exceptionName === "odoo.exceptions.AccessError") {
-        const { resId, actionStack } = router.current;
-        if (!actionStack || !resId) {
-            return false;
-        }
-        if (error.event) {
-            error.event.preventDefault();
-        }
-        actionStack.pop();
-        router.pushState({ id: undefined, actionStack }, { reload: true });
-        return true;
-    }
-    return false;
+    error.event?.preventDefault();
+    // FIXME the action service will take care of restoring the previous valid controller, but because
+    // the loadState crashed, the loadRouterState from webclient will not be able to set the menu.
+    // Instead, we reload the page. This replaceState will race with the pushState of the actionService
+    // restoring the previous valid controller, ideally we should find a way to just keep the loadRouterState
+    // going after the loadState "failure" (ie it should communicate that it was able to load an action,
+    // just not the orignally targetted one)
+    router.replaceState(
+        { resId: undefined, actionStack: router.current.actionStack.slice(0, -1) },
+        { reload: true }
+    );
+    return true;
 }
 
 export const companyService = {
