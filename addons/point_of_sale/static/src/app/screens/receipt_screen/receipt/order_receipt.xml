@@ -70,9 +70,9 @@
                 <t t-foreach="props.data.tax_details" t-as="taxValues" t-key="taxValues.id">
                     <span t-esc="taxValues._letter || ''"/>
                     <span><t t-esc="taxValues.amount"/> %</span>
-                    <span t-esc="props.formatCurrency(taxValues.amount, false)" />
+                    <span t-esc="props.formatCurrency(taxValues.tax_amount, false)" />
                     <span t-esc="props.formatCurrency(taxValues.base, false)" />
-                    <span t-esc="props.formatCurrency(taxValues.amount + taxValues.base, false)" />
+                    <span t-esc="props.formatCurrency(taxValues.tax_amount + taxValues.base, false)" />
                 </t>
                 <t t-if="props.data.tax_details.length > 1">
                     <span />
