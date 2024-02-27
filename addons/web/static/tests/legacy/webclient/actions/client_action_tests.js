@@ -400,13 +400,13 @@ QUnit.module("ActionManager", (hooks) => {
         });
         await nextTick(); // wait for reload to be done
         assert.verifySteps([
-            // "/home?test=42", // This one was not push to the history because it's the current url (see router.js)
+            // "/odoo?test=42", // This one was not push to the history because it's the current url (see router.js)
             "window_reload",
-            "/home/act-2",
+            "/odoo/act-2",
             "window_reload",
-            "/home?menu_id=1",
+            "/odoo?menu_id=1",
             "window_reload",
-            "/home/act-1?menu_id=2",
+            "/odoo/act-1?menu_id=2",
             "window_reload",
         ]);
     });

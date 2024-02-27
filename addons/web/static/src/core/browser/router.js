@@ -142,7 +142,7 @@ export function stateToUrl(state) {
     const pathSegments = actionStack.map(pathFromActionState).filter(Boolean);
     const path = pathSegments.length ? `/${pathSegments.join("/")}` : "";
     const search = objectToUrlEncodedString(omit(state, "actionStack", ...ACTION_KEYS));
-    return `/home${path}${search ? `?${search}` : ""}`;
+    return `/odoo${path}${search ? `?${search}` : ""}`;
 }
 
 export function urlToState(urlObj) {
@@ -168,7 +168,7 @@ export function urlToState(urlObj) {
 
     const splitPath = urlObj.pathname.split("/").filter(Boolean);
 
-    if (splitPath.length > 1 && splitPath[0] === "home") {
+    if (splitPath.length > 1 && splitPath[0] === "odoo") {
         splitPath.splice(0, 1);
         let actions = [];
         let action = {};
