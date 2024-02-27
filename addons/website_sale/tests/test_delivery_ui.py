@@ -22,9 +22,9 @@ class TestUi(HttpCase, WebsiteSaleCommon):
 
         # Avoid Shipping/Billing address page
         admin_partner = self.env.ref('base.partner_admin')
-        self.partner = admin_partner
         admin_partner.write(self.dummy_partner_address_values)
 
+        self.partner = admin_partner  # override default from WebsiteSaleCommon
         cart = self._create_so()
 
         self.free_delivery.write({

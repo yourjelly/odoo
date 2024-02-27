@@ -130,9 +130,4 @@ class TestSaleProcess(HttpCaseWithUserDemo, WebsiteSaleCommon):
 
     def test_update_same_address_billing_shipping_edit(self):
         ''' Phone field should be required when updating an adress for billing and shipping '''
-        self.env['product.product'].create({
-            'name': 'Office Chair Black TEST',
-            'list_price': 12.50,
-            'is_published': True,
-        })
-        self.start_tour("/shop", 'update_billing_shipping_address', login="admin")
+        self.start_tour_with_dummy_cart("/shop", 'update_billing_shipping_address', login='admin')

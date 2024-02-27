@@ -79,3 +79,6 @@ class WebsiteSaleCommon(ProductCommon, DeliveryCommon):
     def _prepare_carrier(cls, product, website_published=True, **values):
         # Publish carriers by default
         return super()._prepare_carrier(product, website_published=website_published, **values)
+
+    def start_tour_with_dummy_cart(self, *args, **kwargs):
+        self.start_tour(*args, session_data={'sale_order_id': self.cart.id,}, **kwargs)

@@ -5,17 +5,14 @@ import tourUtils from "@website_sale/js/tours/tour_utils";
 
 registry.category("web_tour.tours").add('update_billing_shipping_address', {
     test: true,
-    url: '/shop',
+    url: '/shop/confirm_order',
     steps: () => [
-        ...tourUtils.addToCart({productName: "Office Chair Black TEST"}),
-        tourUtils.goToCart({quantity: 1}),
-        tourUtils.goToCheckout(),
         {
             content: "Edit Address",
             trigger: '#shipping_and_billing a:contains("Edit")'
         },
         {
-            content: "Edit  billing address which is shipping address too",
+            content: "Edit billing address which is shipping address too",
             trigger: 'a.js_edit_address'
         },
         {
