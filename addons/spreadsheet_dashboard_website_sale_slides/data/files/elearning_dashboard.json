@@ -438,20 +438,20 @@
                     "content": "=_t(\"Current\")"
                 },
                 "B2": {
-                    "content": "=ODOO.PIVOT(4,\"__count\")"
+                    "content": "=PIVOT(4,\"__count\")"
                 },
                 "B3": {
-                    "content": "=ODOO.PIVOT(5,\"__count\")"
+                    "content": "=PIVOT(5,\"__count\")"
                 },
                 "B4": {
-                    "content": "=ODOO.PIVOT(6,\"__count\")"
+                    "content": "=PIVOT(6,\"__count\")"
                 },
                 "B5": {
                     "format": 1,
-                    "content": "=ODOO.PIVOT(9,\"rating\")"
+                    "content": "=PIVOT(9,\"rating\")"
                 },
                 "B6": {
-                    "content": "=ODOO.PIVOT(10,\"price_total\")"
+                    "content": "=PIVOT(10,\"price_total\")"
                 },
                 "C1": {
                     "style": 2,
@@ -464,10 +464,10 @@
                     "content": "/"
                 },
                 "C4": {
-                    "content": "=ODOO.PIVOT(7,\"__count\")"
+                    "content": "=PIVOT(7,\"__count\")"
                 },
                 "C6": {
-                    "content": "=ODOO.PIVOT(11,\"price_total\")"
+                    "content": "=PIVOT(11,\"price_total\")"
                 },
                 "D1": {
                     "style": 2,

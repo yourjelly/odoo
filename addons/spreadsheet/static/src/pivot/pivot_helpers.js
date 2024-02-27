@@ -23,12 +23,8 @@ export const pivotFormulaRegex = /^=.*PIVOT/;
  * @returns {number}
  */
 export function getNumberOfPivotFormulas(tokens) {
-    return getOdooFunctions(tokens, [
-        "ODOO.PIVOT",
-        "ODOO.PIVOT.HEADER",
-        "ODOO.PIVOT.POSITION",
-        "ODOO.PIVOT.TABLE",
-    ]).length;
+    return getOdooFunctions(tokens, ["PIVOT", "PIVOT.HEADER", "ODOO.PIVOT.POSITION", "PIVOT.TABLE"])
+        .length;
 }
 
 /**
@@ -40,10 +36,10 @@ export function getNumberOfPivotFormulas(tokens) {
  */
 export function getFirstPivotFunction(tokens) {
     return getOdooFunctions(tokens, [
-        "ODOO.PIVOT",
-        "ODOO.PIVOT.HEADER",
+        "PIVOT",
+        "PIVOT.HEADER",
         "ODOO.PIVOT.POSITION",
-        "ODOO.PIVOT.TABLE",
+        "PIVOT.TABLE",
     ])[0];
 }
 

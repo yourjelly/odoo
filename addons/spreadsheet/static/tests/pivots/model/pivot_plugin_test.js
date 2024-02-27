@@ -110,7 +110,7 @@ QUnit.module("spreadsheet > pivot plugin", {}, () => {
         "can get a pivotId from cell formula where the id is a reference",
         async function (assert) {
             const { model } = await createSpreadsheetWithPivot();
-            setCellContent(model, "C3", `=ODOO.PIVOT(G10,"probability","bar","false","foo","2")+2`);
+            setCellContent(model, "C3", `=PIVOT(G10,"probability","bar","false","foo","2")+2`);
             setCellContent(model, "G10", "1");
             const sheetId = model.getters.getActiveSheetId();
             const pivotId = model.getters.getPivotIdFromPosition({ sheetId, col: 2, row: 2 });
@@ -141,7 +141,7 @@ QUnit.module("spreadsheet > pivot plugin", {}, () => {
 
     QUnit.test("Can remove a pivot with undo after editing a cell", async function (assert) {
         const { model } = await createSpreadsheetWithPivot();
-        assert.ok(getCellContent(model, "B1").startsWith("=ODOO.PIVOT.HEADER"));
+        assert.ok(getCellContent(model, "B1").startsWith("=PIVOT.HEADER"));
         setCellContent(model, "G10", "should be undoable");
         model.dispatch("REQUEST_UNDO");
         assert.equal(getCellContent(model, "G10"), "");
@@ -207,8 +207,8 @@ QUnit.module("spreadsheet > pivot plugin", {}, () => {
 
     QUnit.test("Format header displays an error for non-existing field", async function (assert) {
         const { model } = await createSpreadsheetWithPivot();
-        setCellContent(model, "G10", `=ODOO.PIVOT.HEADER("1", "measure", "non-existing")`);
-        setCellContent(model, "G11", `=ODOO.PIVOT.HEADER("1", "non-existing", "bla")`);
+        setCellContent(model, "G10", `=PIVOT.HEADER("1", "measure", "non-existing")`);
+        setCellContent(model, "G11", `=PIVOT.HEADER("1", "non-existing", "bla")`);
         await nextTick();
         assert.equal(getCellValue(model, "G10"), "#ERROR");
         assert.equal(getCellValue(model, "G11"), "#ERROR");
@@ -227,16 +227,16 @@ QUnit.module("spreadsheet > pivot plugin", {}, () => {
                 </pivot>`,
         });
         const invalids = [
-            '=ODOO.PIVOT(1,"probability", "product_id", 1, "bar", false, "foo", 1)', // inverted col dimensions
-            '=ODOO.PIVOT(1,"probability", "product_id", 1, "bar", false, "f"&"oo", 1)', // inverted col dimensions, "foo" computed
-            '=ODOO.PIVOT(1,"probability", "product_id", 1, "bar", false)', // missing first col dimension
-            '=ODOO.PIVOT(1,"probability", "#product_id", 1, "#bar", 1, "#foo", 1)',
-            '=ODOO.PIVOT(1,"probability", "bar", false, "foo", 1, "product_id", 1)', // columns before rows
+            '=PIVOT(1,"probability", "product_id", 1, "bar", false, "foo", 1)', // inverted col dimensions
+            '=PIVOT(1,"probability", "product_id", 1, "bar", false, "f"&"oo", 1)', // inverted col dimensions, "foo" computed
+            '=PIVOT(1,"probability", "product_id", 1, "bar", false)', // missing first col dimension
+            '=PIVOT(1,"probability", "#product_id", 1, "#bar", 1, "#foo", 1)',
+            '=PIVOT(1,"probability", "bar", false, "foo", 1, "product_id", 1)', // columns before rows
 
-            '=ODOO.PIVOT.HEADER(1, "product_id", 1, "bar", false, "foo", 1)', // inverted col dimensions
-            '=ODOO.PIVOT.HEADER(1, "product_id", 1, "bar", false)', // missing first col dimension
-            '=ODOO.PIVOT.HEADER(1, "#product_id", 1, "#bar", 1, "#foo", 1)',
-            '=ODOO.PIVOT.HEADER(1, "bar", false, "foo", 1, "product_id", 47)', // columns before rows
+            '=PIVOT.HEADER(1, "product_id", 1, "bar", false, "foo", 1)', // inverted col dimensions
+            '=PIVOT.HEADER(1, "product_id", 1, "bar", false)', // missing first col dimension
+            '=PIVOT.HEADER(1, "#product_id", 1, "#bar", 1, "#foo", 1)',
+            '=PIVOT.HEADER(1, "bar", false, "foo", 1, "product_id", 47)', // columns before rows
         ];
         for (const formula of invalids) {
             setCellContent(model, "G10", formula);
@@ -274,7 +274,7 @@ QUnit.module("spreadsheet > pivot plugin", {}, () => {
                     {
                         id: "sheet1",
                         cells: {
-                            A1: { content: `=ODOO.PIVOT(1, "probability")` },
+                            A1: { content: `=PIVOT(1, "probability")` },
                         },
                     },
                 ],
@@ -330,8 +330,8 @@ QUnit.module("spreadsheet > pivot plugin", {}, () => {
                 {
                     id: "sheet1",
                     cells: {
-                        A1: { content: `=ODOO.PIVOT(1, "probability")` },
-                        A2: { content: `=ODOO.PIVOT(2, "probability")` },
+                        A1: { content: `=PIVOT(1, "probability")` },
+                        A2: { content: `=PIVOT(2, "probability")` },
                     },
                 },
             ],
@@ -393,7 +393,7 @@ QUnit.module("spreadsheet > pivot plugin", {}, () => {
             },
         });
         assert.verifySteps([]);
-        setCellContent(model, "A1", `=ODOO.PIVOT("1", "probability")`);
+        setCellContent(model, "A1", `=PIVOT("1", "probability")`);
         assert.equal(getCellValue(model, "A1"), "Loading...");
         await nextTick();
         assert.verifySteps([
@@ -434,8 +434,8 @@ QUnit.module("spreadsheet > pivot plugin", {}, () => {
         model.config.custom.odooDataProvider.addEventListener("data-source-updated", () =>
             assert.step("data-source-notified")
         );
-        setCellContent(model, "A1", '=ODOO.PIVOT("1", "probability")');
-        setCellContent(model, "A2", '=ODOO.PIVOT("2", "probability")');
+        setCellContent(model, "A1", '=PIVOT("1", "probability")');
+        setCellContent(model, "A2", '=PIVOT("2", "probability")');
         assert.equal(getCellValue(model, "A1"), "Loading...");
         assert.equal(getCellValue(model, "A2"), "Loading...");
         await nextTick();
@@ -462,7 +462,7 @@ QUnit.module("spreadsheet > pivot plugin", {}, () => {
             spreadsheetData,
         });
         // the data loads first here, when we insert the first pivot function
-        setCellContent(model, "A1", '=ODOO.PIVOT("1", "probability")');
+        setCellContent(model, "A1", '=PIVOT("1", "probability")');
         assert.equal(getCellValue(model, "A1"), "Loading...");
         // concurrently reload the same pivot
         model.dispatch("REFRESH_PIVOT", { id: 1 });
@@ -478,9 +478,9 @@ QUnit.module("spreadsheet > pivot plugin", {}, () => {
                 {
                     id: "sheet1",
                     cells: {
-                        A1: { content: `=ODOO.PIVOT.HEADER(1, "measure", "probability")` },
-                        A2: { content: `=ODOO.PIVOT.HEADER(1, "product_id", 37)` },
-                        A3: { content: `=ODOO.PIVOT(1, "probability")` },
+                        A1: { content: `=PIVOT.HEADER(1, "measure", "probability")` },
+                        A2: { content: `=PIVOT.HEADER(1, "product_id", 37)` },
+                        A3: { content: `=PIVOT(1, "probability")` },
                     },
                 },
             ],
@@ -552,21 +552,15 @@ QUnit.module("spreadsheet > pivot plugin", {}, () => {
                     <field name="probability" type="measure"/>
                 </pivot>`,
         });
-        assert.strictEqual(getCell(model, "A3").content, '=ODOO.PIVOT.HEADER(1,"name","000111")');
-        assert.strictEqual(getCell(model, "A4").content, '=ODOO.PIVOT.HEADER(1,"name",111)');
-        assert.strictEqual(getCell(model, "A5").content, '=ODOO.PIVOT.HEADER(1,"name","14.0")');
+        assert.strictEqual(getCell(model, "A3").content, '=PIVOT.HEADER(1,"name","000111")');
+        assert.strictEqual(getCell(model, "A4").content, '=PIVOT.HEADER(1,"name",111)');
+        assert.strictEqual(getCell(model, "A5").content, '=PIVOT.HEADER(1,"name","14.0")');
         assert.strictEqual(getEvaluatedCell(model, "A3").value, "000111");
         assert.strictEqual(getEvaluatedCell(model, "A4").value, "111");
         assert.strictEqual(getEvaluatedCell(model, "A5").value, "14.0");
-        assert.strictEqual(
-            getCell(model, "B3").content,
-            '=ODOO.PIVOT(1,"probability","name","000111")'
-        );
-        assert.strictEqual(getCell(model, "B4").content, '=ODOO.PIVOT(1,"probability","name",111)');
-        assert.strictEqual(
-            getCell(model, "B5").content,
-            '=ODOO.PIVOT(1,"probability","name","14.0")'
-        );
+        assert.strictEqual(getCell(model, "B3").content, '=PIVOT(1,"probability","name","000111")');
+        assert.strictEqual(getCell(model, "B4").content, '=PIVOT(1,"probability","name",111)');
+        assert.strictEqual(getCell(model, "B5").content, '=PIVOT(1,"probability","name","14.0")');
         assert.strictEqual(getEvaluatedCell(model, "B3").value, 15);
         assert.strictEqual(getEvaluatedCell(model, "B4").value, 11);
         assert.strictEqual(getEvaluatedCell(model, "B5").value, 16);
@@ -587,7 +581,7 @@ QUnit.module("spreadsheet > pivot plugin", {}, () => {
         model.dispatch("UPDATE_CELL", {
             col: 4,
             row: 9,
-            content: `=ODOO.PIVOT.HEADER("1", "product_id", "1111111")`,
+            content: `=PIVOT.HEADER("1", "product_id", "1111111")`,
             sheetId,
         });
         await waitForDataLoaded(model);
@@ -608,7 +602,7 @@ QUnit.module("spreadsheet > pivot plugin", {}, () => {
                     <field name="probability" type="measure"/>
                 </pivot>`,
         });
-        setCellContent(model, "F10", `=ODOO.PIVOT.HEADER("1", "product_id", A25)`);
+        setCellContent(model, "F10", `=PIVOT.HEADER("1", "product_id", A25)`);
         assert.equal(getCell(model, "A25"), null, "the cell should be empty");
         await waitForDataLoaded(model);
         assert.equal(getCellValue(model, "F10"), "None");
@@ -632,7 +626,7 @@ QUnit.module("spreadsheet > pivot plugin", {}, () => {
                     <field name="__count" type="measure"/>
                 </pivot>`,
         });
-        setCellContent(model, "F10", '=ODOO.PIVOT(1, "__count")');
+        setCellContent(model, "F10", '=PIVOT(1, "__count")');
         const F10 = getEvaluatedCell(model, "F10");
         assert.strictEqual(F10.value, 4);
         assert.strictEqual(F10.format, "0");
@@ -693,7 +687,7 @@ QUnit.module("spreadsheet > pivot plugin", {}, () => {
                 }
             },
         });
-        setCellContent(model, "A1", '=ODOO.PIVOT(1, "probability")'); // load the data (and check the rpc domain)
+        setCellContent(model, "A1", '=PIVOT(1, "probability")'); // load the data (and check the rpc domain)
         await nextTick();
         assert.strictEqual(
             model.exportData().pivots[1].domain,
@@ -712,35 +706,23 @@ QUnit.module("spreadsheet > pivot plugin", {}, () => {
                 <field name="probability" type="measure"/>
             </pivot>`,
         });
-        assert.equal(getCellFormula(model, "A3"), '=ODOO.PIVOT.HEADER(1,"tag_ids","false")');
-        assert.equal(getCellFormula(model, "A4"), '=ODOO.PIVOT.HEADER(1,"tag_ids",42)');
-        assert.equal(getCellFormula(model, "A5"), '=ODOO.PIVOT.HEADER(1,"tag_ids",67)');
+        assert.equal(getCellFormula(model, "A3"), '=PIVOT.HEADER(1,"tag_ids","false")');
+        assert.equal(getCellFormula(model, "A4"), '=PIVOT.HEADER(1,"tag_ids",42)');
+        assert.equal(getCellFormula(model, "A5"), '=PIVOT.HEADER(1,"tag_ids",67)');
 
         assert.equal(
             getCellFormula(model, "B3"),
-            '=ODOO.PIVOT(1,"probability","tag_ids","false","foo",1)'
+            '=PIVOT(1,"probability","tag_ids","false","foo",1)'
         );
-        assert.equal(
-            getCellFormula(model, "B4"),
-            '=ODOO.PIVOT(1,"probability","tag_ids",42,"foo",1)'
-        );
-        assert.equal(
-            getCellFormula(model, "B5"),
-            '=ODOO.PIVOT(1,"probability","tag_ids",67,"foo",1)'
-        );
+        assert.equal(getCellFormula(model, "B4"), '=PIVOT(1,"probability","tag_ids",42,"foo",1)');
+        assert.equal(getCellFormula(model, "B5"), '=PIVOT(1,"probability","tag_ids",67,"foo",1)');
 
         assert.equal(
             getCellFormula(model, "C3"),
-            '=ODOO.PIVOT(1,"probability","tag_ids","false","foo",2)'
+            '=PIVOT(1,"probability","tag_ids","false","foo",2)'
         );
-        assert.equal(
-            getCellFormula(model, "C4"),
-            '=ODOO.PIVOT(1,"probability","tag_ids",42,"foo",2)'
-        );
-        assert.equal(
-            getCellFormula(model, "C5"),
-            '=ODOO.PIVOT(1,"probability","tag_ids",67,"foo",2)'
-        );
+        assert.equal(getCellFormula(model, "C4"), '=PIVOT(1,"probability","tag_ids",42,"foo",2)');
+        assert.equal(getCellFormula(model, "C5"), '=PIVOT(1,"probability","tag_ids",67,"foo",2)');
 
         assert.equal(getCellValue(model, "A3"), "None");
         assert.equal(getCellValue(model, "A4"), "isCool");
@@ -762,7 +744,7 @@ QUnit.module("spreadsheet > pivot plugin", {}, () => {
                         <field name="foo" type="measure"/>
                     </pivot>`,
             });
-            setCellContent(model, "A1", `=ODOO.PIVOT.HEADER(1, "date:${interval}", "false")`);
+            setCellContent(model, "A1", `=PIVOT.HEADER(1, "date:${interval}", "false")`);
             assert.equal(getCellValue(model, "A1"), "None");
         }
     });
@@ -1105,10 +1087,10 @@ QUnit.module("spreadsheet > pivot plugin", {}, () => {
         model.dispatch("DELETE_SHEET", { sheetId: sheetId });
         assert.equal(model.getters.isPivotUnused(pivotId), true);
 
-        setCellContent(model, "A1", "=ODOO.PIVOT.HEADER(1)");
+        setCellContent(model, "A1", "=PIVOT.HEADER(1)");
         assert.equal(model.getters.isPivotUnused(pivotId), false);
 
-        setCellContent(model, "A1", "=ODOO.PIVOT.HEADER(A2)");
+        setCellContent(model, "A1", "=PIVOT.HEADER(A2)");
         assert.equal(model.getters.isPivotUnused(pivotId), true);
 
         setCellContent(model, "A2", "1");
@@ -1117,7 +1099,7 @@ QUnit.module("spreadsheet > pivot plugin", {}, () => {
         model.dispatch("REQUEST_UNDO", {});
         assert.equal(model.getters.isPivotUnused(pivotId), true);
 
-        setCellContent(model, "A1", "=ODOO.PIVOT.TABLE(1)");
+        setCellContent(model, "A1", "=PIVOT.TABLE(1)");
         assert.equal(model.getters.isPivotUnused(pivotId), false);
     });
 });
