@@ -175,6 +175,8 @@ QUnit.module("ActionManager", (hooks) => {
             actionStack: [
                 {
                     action: 4,
+                    displayName: "Partners Action 4",
+                    view_type: "kanban",
                 },
             ],
         });
@@ -185,9 +187,13 @@ QUnit.module("ActionManager", (hooks) => {
             actionStack: [
                 {
                     action: 4,
+                    displayName: "Partners Action 4",
+                    view_type: "kanban",
                 },
                 {
                     action: 8,
+                    displayName: "Favorite Ponies",
+                    view_type: "list",
                 },
             ],
         });
@@ -198,13 +204,19 @@ QUnit.module("ActionManager", (hooks) => {
             actionStack: [
                 {
                     action: 4,
+                    displayName: "Partners Action 4",
+                    view_type: "kanban",
                 },
                 {
                     action: 8,
+                    displayName: "Favorite Ponies",
+                    view_type: "list",
                 },
                 {
                     action: 8,
+                    displayName: "Twilight Sparkle",
                     resId: 4,
+                    view_type: "form",
                 },
             ],
             resId: 4,
@@ -231,6 +243,8 @@ QUnit.module("ActionManager", (hooks) => {
             actionStack: [
                 {
                     action: 4,
+                    displayName: "Partners Action 4",
+                    view_type: "kanban",
                 },
             ],
         });
@@ -251,6 +265,8 @@ QUnit.module("ActionManager", (hooks) => {
             actionStack: [
                 {
                     action: 8,
+                    displayName: "Favorite Ponies",
+                    view_type: "list",
                 },
             ],
         });
@@ -263,6 +279,8 @@ QUnit.module("ActionManager", (hooks) => {
             actionStack: [
                 {
                     action: 8,
+                    displayName: "Favorite Ponies",
+                    view_type: "list",
                 },
             ],
         });

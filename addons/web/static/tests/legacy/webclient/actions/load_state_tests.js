@@ -75,6 +75,7 @@ QUnit.module("ActionManager", (hooks) => {
             actionStack: [
                 {
                     action: 1001,
+                    displayName: "", // FIXME: client actions should have display names (discuss client action has no name)
                 },
             ],
         });
@@ -376,10 +377,14 @@ QUnit.module("ActionManager", (hooks) => {
             actionStack: [
                 {
                     action: 3,
+                    displayName: "Partners",
+                    view_type: "list",
                 },
                 {
                     action: 3,
                     resId: 1,
+                    displayName: "First record",
+                    view_type: "form",
                 },
             ],
         });

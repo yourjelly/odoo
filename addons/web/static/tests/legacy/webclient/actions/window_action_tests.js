@@ -530,6 +530,8 @@ QUnit.module("ActionManager", (hooks) => {
             actionStack: [
                 {
                     action: 3,
+                    displayName: "Partners",
+                    view_type: "list",
                 },
             ],
         });
