@@ -1,11 +1,13 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-import odoo.tests
 from odoo.fields import Command
+from odoo.tests import HttpCase, tagged
+
+from odoo.addons.website_sale.tests.common import WebsiteSaleCommon
 
 
-@odoo.tests.tagged('post_install', '-at_install')
-class TestUi(odoo.tests.HttpCase):
+@tagged('post_install', '-at_install')
+class TestUi(HttpCase, WebsiteSaleCommon):
 
     def test_01_free_delivery_when_exceed_threshold(self):
         if self.env['ir.module.module']._get('payment_custom').state != 'installed':
@@ -19,42 +21,29 @@ class TestUi(odoo.tests.HttpCase):
         transfer_provider._transfer_ensure_pending_msg_is_set()
 
         # Avoid Shipping/Billing address page
-        self.env.ref('base.partner_admin').write({
-            'street': '215 Vine St',
-            'city': 'Scranton',
-            'zip': '18503',
-            'country_id': self.env.ref('base.us').id,
-            'state_id': self.env.ref('base.state_us_39').id,
-            'phone': '+1 555-555-5555',
-            'email': 'admin@yourcompany.example.com',
-        })
+        admin_partner = self.env.ref('base.partner_admin')
+        self.partner = admin_partner
+        admin_partner.write(self.dummy_partner_address_values)
 
-        self.env['product.product'].create({
-            'name': 'Office Chair Black TEST',
-            'list_price': 12.50,
-        })
-        self.env.ref("delivery.free_delivery_carrier").write({
+        cart = self._create_so()
+
+        self.free_delivery.write({
             'name': 'Delivery Now Free Over 10',
             'fixed_price': 2,
             'free_over': True,
             'amount': 10,
         })
-        self.product_delivery_poste = self.env['product.product'].create({
-            'name': 'The Poste',
-            'type': 'service',
-            'categ_id': self.env.ref('delivery.product_category_deliveries').id,
-            'sale_ok': False,
-            'purchase_ok': False,
-            'list_price': 20.0,
-        })
-        self.carrier = self.env['delivery.carrier'].create({
-            'name': 'The Poste',
-            'sequence': 9999, # ensure last to load price async
-            'fixed_price': 20.0,
-            'delivery_type': 'base_on_rule',
-            'product_id': self.product_delivery_poste.id,
-            'website_published': True,
-            'price_rule_ids': [
+
+        product_delivery_poste = self._prepare_carrier_product(
+            name="The Poste", list_price=20.0,
+        )
+        self.carrier = self._prepare_carrier(
+            product_delivery_poste,
+            name='The Poste',
+            sequence=9999,
+            fixed_price=20.0,
+            delivery_type='base_on_rule',
+            price_rule_ids=[
                 Command.create({
                     'max_value': 5,
                     'list_base_price': 20,
@@ -70,7 +59,9 @@ class TestUi(odoo.tests.HttpCase):
                     'variable': 'price',
                     'list_base_price': 0,
                 }),
-            ]
-        })
+            ],
+        )
 
-        self.start_tour("/", 'check_free_delivery', login="admin")
+        self.start_tour("/", 'check_free_delivery', login="admin", session_data={
+            'sale_order_id': cart.id,
+        })

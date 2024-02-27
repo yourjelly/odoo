@@ -1748,13 +1748,15 @@ class HttpCase(TransactionCase):
         self.session.logout(keep_db=keep_db)
         odoo.http.root.session_store.save(self.session)
 
-    def authenticate(self, user, password, browser: ChromeBrowser = None):
+    def authenticate(self, user, password, browser: ChromeBrowser = None, session_data=None):
         if getattr(self, 'session', None):
             odoo.http.root.session_store.delete(self.session)
 
         self.session = session = odoo.http.root.session_store.new()
         session.update(odoo.http.get_default_session(), db=get_db_name())
         session.context['lang'] = odoo.http.DEFAULT_LANG
+        if session_data:
+            session.update(session_data)
 
         if user: # if authenticated
             # Flush and clear the current transaction.  This is useful, because
@@ -1793,7 +1795,10 @@ class HttpCase(TransactionCase):
 
         return session
 
-    def browser_js(self, url_path, code, ready='', login=None, timeout=60, cookies=None, error_checker=None, watch=False, success_signal='test successful', debug=False, **kw):
+    def browser_js(
+        self, url_path, code, ready='', login=None, timeout=60, cookies=None, error_checker=None,
+        watch=False, success_signal='test successful', debug=False, session_data=None, **kw
+    ):
         """ Test js code running in the browser
         - optionnally log as 'login'
         - load page given by url_path
@@ -1823,7 +1828,7 @@ class HttpCase(TransactionCase):
 
         browser = ChromeBrowser(self, headless=not watch, success_signal=ss, debug=debug)
         try:
-            self.authenticate(login, login, browser=browser)
+            self.authenticate(login, login, browser=browser, session_data=session_data)
             # Flush and clear the current transaction.  This is useful in case
             # we make requests to the server, as these requests are made with
             # test cursors, which uses different caches than this transaction.

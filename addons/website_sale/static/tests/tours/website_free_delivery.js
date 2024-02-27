@@ -5,12 +5,9 @@ import tourUtils from "@website_sale/js/tours/tour_utils";
 
 registry.category("web_tour.tours").add('check_free_delivery', {
     test: true,
-    url: '/shop',
+    url: '/shop/confirm_order',
     steps: () => [
         // Part 1: Check free delivery
-        ...tourUtils.addToCart({productName: "Office Chair Black TEST"}),
-        tourUtils.goToCart({quantity: 1}),
-        tourUtils.goToCheckout(),
         {
             content: "Check Free Delivery value to be zero",
             extra_trigger: '#delivery_carrier label:containsExact("Delivery Now Free Over 10")',
