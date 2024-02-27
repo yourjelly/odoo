@@ -6,6 +6,8 @@ import { registry } from "@web/core/registry";
 import { clearRegistryWithCleanup, makeTestEnv } from "@web/../tests/helpers/mock_env";
 import { assertSteps, step } from "@web/../tests/utils";
 import { markup, reactive, toRaw } from "@odoo/owl";
+import { patchWithCleanup } from "@web/../tests/helpers/utils";
+import { Store } from "@mail/core/common/store_service";
 
 const serviceRegistry = registry.category("services");
 

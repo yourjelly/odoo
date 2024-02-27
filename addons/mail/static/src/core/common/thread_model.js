@@ -87,10 +87,6 @@ export class Thread extends Record {
     }
     channelMembers = Record.many("ChannelMember", {
         onDelete: (r) => r.delete(),
-        /** @this {import("models").Thread} */
-        onUpdate() {
-            this._store.updateBusSubscription();
-        },
     });
     rtcSessions = Record.many("RtcSession", {
         /** @this {import("models").Thread} */
@@ -107,6 +103,13 @@ export class Thread extends Record {
         /** @this {import("models").Thread} */
         onDelete(r) {
             this._store.discuss.ringingThreads.delete(this);
+        },
+    });
+    storeAsAllSelfChannels = Record.one("Store", {
+        compute() {
+            if (this.model === "discuss.channel" && this.hasSelfAsMember) {
+                return this._store;
+            }
         },
     });
     invitedMembers = Record.many("ChannelMember");

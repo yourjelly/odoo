@@ -173,7 +173,10 @@ export const busService = {
                 isActive = true;
             },
             deleteChannel: (channel) => send("delete_channel", channel),
-            forceUpdateChannels: () => send("force_update_channels"),
+            forceUpdateChannels: () => {
+                console.warn("force update");
+                send("force_update_channels");
+            },
             trigger: bus.trigger.bind(bus),
             removeEventListener: bus.removeEventListener.bind(bus),
             send: (eventName, data) => send("send", { event_name: eventName, data }),

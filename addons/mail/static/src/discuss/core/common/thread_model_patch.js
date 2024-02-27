@@ -15,14 +15,7 @@ const threadPatch = {
     setup() {
         super.setup();
         this.fetchChannelInfoDeferred = undefined;
-        this.fetchChannelInfoState = Record.attr("not_fetched", {
-            /** @this {import("models").Thread} */
-            onUpdate() {
-                if (this.fetchChannelInfoState === "fetched") {
-                    this._store.updateBusSubscription();
-                }
-            },
-        });
+        this.fetchChannelInfoState = undefined;
     },
     get SETTINGS() {
         return [
