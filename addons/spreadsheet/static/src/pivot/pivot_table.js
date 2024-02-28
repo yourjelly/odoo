@@ -79,26 +79,11 @@ export class SpreadsheetPivotTable {
     }
 
     /**
-     * @returns {SPTableColumn[][]}
-     */
-    getColHeaders() {
-        return this._cols;
-    }
-
-    /**
-     * Get the last row of the columns (i.e. the one with the measures)
-     * @returns {SPTableColumn[]}
-     */
-    getMeasureHeaders() {
-        return this._cols[this.getNumberOfHeaderRows() - 1];
-    }
-
-    /**
      * Get the number of columns leafs (i.e. the number of the last row of columns)
      * @returns {number}
      */
     getNumberOfDataColumns() {
-        return this._cols[this.getNumberOfHeaderRows() - 1].length;
+        return this._cols.at(-1).length;
     }
 
     /**
@@ -110,62 +95,12 @@ export class SpreadsheetPivotTable {
     }
 
     /**
-     * @returns {SPTableRow[]}
-     */
-    getRowHeaders() {
-        return this._rows;
-    }
-
-    /**
      * Get the number of rows
      *
      * @returns {number}
      */
     getNumberOfDataRows() {
         return this._rows.length;
-    }
-
-    /**
-     * Get the index of the cell in the measure row (i.e. the last one) which
-     * correspond to the given values
-     *
-     * @returns {number}
-     */
-    getColMeasureIndex(values) {
-        const vals = JSON.stringify(values);
-        const maxLength = Math.max(...this._cols.map((col) => col.length));
-        for (let i = 0; i < maxLength; i++) {
-            const cellValues = this._cols.map((col) => JSON.stringify((col[i] || {}).values));
-            if (cellValues.includes(vals)) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
-    /**
-     *
-     * @param {number} colIndex
-     * @param {number} rowIndex
-     * @returns {SPTableColumn}
-     */
-    getNextColCell(colIndex, rowIndex) {
-        return this._cols[rowIndex][colIndex];
-    }
-
-    getRowIndex(values) {
-        const vals = JSON.stringify(values);
-        return this._rows.findIndex(
-            (cell) => JSON.stringify(cell.values.map((val) => val.toString())) === vals
-        );
-    }
-
-    getCellFromMeasureRowAtIndex(index) {
-        return this.getMeasureHeaders()[index];
-    }
-
-    getCellsFromRowAtIndex(index) {
-        return this._rows[index];
     }
 
     /**

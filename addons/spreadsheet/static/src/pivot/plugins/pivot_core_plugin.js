@@ -311,7 +311,7 @@ export class PivotCorePlugin extends OdooCorePlugin {
     _addBorders(sheetId, { col, row }, table) {
         const colHeight = table.getNumberOfHeaderRows();
         const colWidth = table.getNumberOfDataColumns();
-        const totalRow = row + colHeight + table.getRowHeaders().length - 1;
+        const totalRow = row + colHeight + table.getNumberOfDataRows() - 1;
         const headerAndMeasureZone = {
             top: row,
             bottom: row + colHeight - 1,
