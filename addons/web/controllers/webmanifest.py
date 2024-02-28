@@ -39,12 +39,7 @@ class WebManifest(http.Controller):
                 })
         return shortcuts
 
-    @http.route('/web/manifest.webmanifest', type='http', auth='public', methods=['GET'])
-    def webmanifest(self):
-        """ Returns a WebManifest describing the metadata associated with a web application.
-        Using this metadata, user agents can provide developers with means to create user
-        experiences that are more comparable to that of a native application.
-        """
+    def _getManifest(self):
         web_app_name = request.env['ir.config_parameter'].sudo().get_param('web.web_app_name', 'Odoo')
         manifest = {
             'name': web_app_name,
@@ -62,7 +57,15 @@ class WebManifest(http.Controller):
             'type': 'image/png',
         } for size in icon_sizes]
         manifest['shortcuts'] = self._get_shortcuts()
-        body = json.dumps(manifest, default=ustr)
+        return manifest
+
+    @http.route('/web/manifest.webmanifest', type='http', auth='public', methods=['GET'])
+    def webmanifest(self):
+        """ Returns a WebManifest describing the metadata associated with a web application.
+        Using this metadata, user agents can provide developers with means to create user
+        experiences that are more comparable to that of a native application.
+        """
+        body = json.dumps(self._getManifest(), default=ustr)
         response = request.make_response(body, [
             ('Content-Type', 'application/manifest+json'),
         ])
@@ -84,6 +87,23 @@ class WebManifest(http.Controller):
         """
         with file_open('web/static/src/service_worker.js') as f:
             body = f.read()
+            body += """
+            self.addEventListener("message", async function (event) {
+                if (event.data.type === "GET_MANIFEST") {
+                    const clients = await self.clients.matchAll({
+                        includeUncontrolled: true,
+                        type: "window",
+                    });
+                    if (clients && clients.length) {
+                        // Send a response - the clients array is ordered by last focused
+                        clients[0].postMessage({
+                            type: "REPLY_GET_MANIFEST",
+                        manifest: %s,
+                        });
+                    }
+                }
+            });
+            """ % json.dumps(self._getManifest(), default=ustr)
             return body
 
     def _icon_path(self):

@@ -6,7 +6,6 @@ import {
     isMacOS,
     isBrowserSafari,
 } from "@web/core/browser/feature_detection";
-import { get } from "@web/core/network/http_service";
 import { registry } from "@web/core/registry";
 import { InstallPrompt } from "./install_prompt";
 
@@ -62,8 +61,16 @@ const installPromptService = {
 
         async function getAppName() {
             if (!_appName) {
-                const manifest = await get("/web/manifest.webmanifest", "text");
-                _appName = JSON.parse(manifest).name;
+                _appName = await new Promise((resolve) => {
+                    browser.navigator.serviceWorker.addEventListener("message", (event) => {
+                        if (event.data && event.data.type === "REPLY_GET_MANIFEST") {
+                            resolve(event.data.manifest.name);
+                        }
+                    });
+                    browser.navigator.serviceWorker.controller.postMessage({
+                        type: "GET_MANIFEST",
+                    });
+                });
             }
             return _appName;
         }
