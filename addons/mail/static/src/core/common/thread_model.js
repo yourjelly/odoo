@@ -87,10 +87,6 @@ export class Thread extends Record {
     }
     channelMembers = Record.many("ChannelMember", {
         onDelete: (r) => r.delete(),
-        /** @this {import("models").Thread} */
-        onUpdate() {
-            this._store.updateBusSubscription();
-        },
     });
     rtcSessions = Record.many("RtcSession", {
         /** @this {import("models").Thread} */
@@ -263,6 +259,17 @@ export class Thread extends Record {
     isLocallyPinned = false;
     /** @type {"not_fetched"|"pending"|"fetched"} */
     fetchMembersState = "not_fetched";
+    storeAsAllSelfChannels = Record.one("Store", {
+        compute() {
+            // Only add the channel to the relation once the user member is
+            // fully inserted (i.e. create_date is set) since this is required
+            // to decide whether this addition should trigger a bus
+            // subscription.
+            if (this.model === "discuss.channel" && this.selfMember?.create_date) {
+                return this._store;
+            }
+        },
+    });
 
     _computeDiscussAppCategory() {
         if (["group", "chat"].includes(this.type)) {
