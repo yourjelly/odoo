@@ -1,11 +1,11 @@
 /** @odoo-module */
 
 import * as spreadsheet from "@odoo/o-spreadsheet";
-import { getFirstPivotFunction, getNumberOfPivotFormulas } from "../pivot_helpers";
 import { OdooUIPlugin } from "@spreadsheet/plugins";
 import { pivotRegistry } from "./pivot_registry";
 
-const { astToFormula } = spreadsheet;
+const { astToFormula, helpers } = spreadsheet;
+const { getFirstPivotFunction, getNumberOfPivotFormulas } = helpers;
 
 /**
  * @typedef {import("@spreadsheet").Pivot} Pivot

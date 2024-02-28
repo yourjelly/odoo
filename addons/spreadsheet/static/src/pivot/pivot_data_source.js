@@ -6,13 +6,14 @@ import { _t } from "@web/core/l10n/translation";
 import { user } from "@web/core/user";
 import { OdooViewsDataSource } from "../data_sources/odoo_views_data_source";
 import { OdooPivotModel } from "./pivot_model";
-import { EvaluationError } from "@odoo/o-spreadsheet";
+import { EvaluationError, helpers } from "@odoo/o-spreadsheet";
 import { LOADING_ERROR } from "@spreadsheet/data_sources/data_source";
-import { PivotRuntimeDefinition } from "./pivot_runtime";
 import { pivotTimeAdapter } from "./pivot_time_adapters";
+
+const { PivotRuntimeDefinition } = helpers;
 /**
  * @typedef {import("@spreadsheet").Pivot<OdooPivotRuntimeDefinition>} IPivot
- * @typedef {import("./pivot_runtime").PivotMeasure} PivotMeasure
+ * @typedef {import("@odoo/o-spreadsheet").PivotMeasure} PivotMeasure
  * @typedef {import("@spreadsheet").WebPivotModelParams} WebPivotModelParams
  * @typedef {import("@spreadsheet").Fields} Fields
  * @typedef {import("@spreadsheet").OdooPivotDefinition} OdooPivotDefinition
@@ -56,6 +57,11 @@ export class OdooPivot extends OdooViewsDataSource {
 
     async _load() {
         await super._load();
+        this._metaData.fields["__count"] = {
+            string: _t("Count"),
+            type: "integer",
+            name: "__count",
+        };
         this._runtimeDefinition = new OdooPivotRuntimeDefinition(
             this._rawDefinition,
             this._metaData.fields

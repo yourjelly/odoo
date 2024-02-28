@@ -9,7 +9,6 @@
  */
 
 import { helpers } from "@odoo/o-spreadsheet";
-import { makePivotFormula } from "../pivot_helpers";
 import { getMaxObjectId } from "@spreadsheet/helpers/helpers";
 import { SpreadsheetPivotTable } from "../pivot_table";
 import { CommandResult } from "../../o_spreadsheet/cancelled_reason";
@@ -17,7 +16,7 @@ import { _t } from "@web/core/l10n/translation";
 import { deepCopy } from "@web/core/utils/objects";
 import { OdooCorePlugin } from "@spreadsheet/plugins";
 
-const { isDefined } = helpers;
+const { isDefined, makePivotFormula } = helpers;
 
 export class PivotCorePlugin extends OdooCorePlugin {
     static getters = /** @type {const} */ ([

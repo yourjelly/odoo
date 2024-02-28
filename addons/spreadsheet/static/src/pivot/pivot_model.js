@@ -8,9 +8,8 @@ import { PivotModel } from "@web/views/pivot/pivot_model";
 import { helpers, constants, EvaluationError } from "@odoo/o-spreadsheet";
 import { SpreadsheetPivotTable } from "@spreadsheet/pivot/pivot_table";
 import { pivotTimeAdapter } from "./pivot_time_adapters";
-import { parseGroupField } from "./pivot_helpers";
 
-const { toString, toNumber, toBoolean } = helpers;
+const { toString, toNumber, toBoolean, parseGroupField } = helpers;
 const { DEFAULT_LOCALE } = constants;
 
 /**
@@ -236,7 +235,13 @@ export class OdooPivotModel extends PivotModel {
      */
     async _loadData(config) {
         /** @type {(groupFieldString: string) => ReturnType<parseGroupField>} */
-        this.parseGroupField = parseGroupField.bind(null, this.metaData.fields);
+        this.parseGroupField = (groupFieldString) => {
+            try {
+                return parseGroupField(this.metaData.fields, groupFieldString);
+            } catch (e) {
+                throw new EvaluationError(e.message);
+            }
+        };
         /*
          * prune is manually set to false in order to expand all the groups
          * automatically

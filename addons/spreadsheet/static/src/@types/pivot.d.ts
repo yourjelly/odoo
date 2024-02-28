@@ -1,7 +1,5 @@
 import { MetadataRepository } from "@spreadsheet/data_sources/metadata_repository";
-import { OdooPivotRuntimeDefinition } from "@spreadsheet/pivot/pivot_runtime";
 import { ORM } from "@web/core/orm_service";
-import { PivotMeasure } from "@spreadsheet/pivot/pivot_runtime";
 import { SpreadsheetPivotTable } from "@spreadsheet/pivot/pivot_table";
 
 declare module "@spreadsheet" {

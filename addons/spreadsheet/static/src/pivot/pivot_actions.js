@@ -1,7 +1,8 @@
 /** @odoo-module */
 // @ts-check
 
-import { getFirstPivotFunction, getNumberOfPivotFormulas } from "./pivot_helpers";
+import { helpers } from "@odoo/o-spreadsheet";
+const { getFirstPivotFunction, getNumberOfPivotFormulas } = helpers;
 
 /**
  * @param {import("@odoo/o-spreadsheet").CellPosition} position
