@@ -10,8 +10,8 @@ from textwrap import dedent
 from odoo import tools
 from odoo.tests.common import TransactionCase
 
-from . import _odoo_checker_sql_injection
-
+from . import _odoo_checker_sql_injection2
+_odoo_checker_sql_injection = _odoo_checker_sql_injection2 
 try:
     import pylint
     from pylint.lint import PyLinter
@@ -129,332 +129,384 @@ class TestSqlLint(TransactionCase):
         self.linter.current_file = 'dummy.py' # should not be prefixed by test
         checker = _odoo_checker_sql_injection.OdooBaseChecker(self.linter)
 
-        node = _odoo_checker_sql_injection.astroid.extract_node("""
-        def test(): 
-            arg = "test"
-            arg = arg + arg
-            self.env.cr.execute(arg) #@
-        """)
-
-        with self.assertNoMessages():
+        # TEST CASE 0: Test should not trigger on unrelated functions
+        code = """
+        def case0(args):
+            something_else(arg) #@
+        """
+        with self.assertMessages():
+            node = _odoo_checker_sql_injection.astroid.extract_node(code)
+            checker.debug = code  #strictly to access the code from the debugger inside of the checker
             checker.visit_call(node)
 
-        node = _odoo_checker_sql_injection.astroid.extract_node("""
-        def test_function9(self,arg):
-            my_injection_variable= "aaa" % arg #Uninferable
-            self.env.cr.execute('select * from hello where id = %s' % my_injection_variable) #@
-        """)
+        # TEST CASE 1: public function - args injected
+        code = """
+        def case1(args):
+            self.env.cr.execute(args) #@
+        """
 
-        with self.assertMessages("sql-injection"):
+        with self.assertMessages('sql-injection'):
+            node = _odoo_checker_sql_injection.astroid.extract_node(code)
+            checker.debug = code
             checker.visit_call(node)
 
-        node = _odoo_checker_sql_injection.astroid.extract_node("""
-        def test_function10(self):
-            my_injection_variable= "aaa" + "aaa" #Const
-            self.env.cr.execute('select * from hello where id = %s' % my_injection_variable) #@
-        """)
-        with self.assertNoMessages():
-            checker.visit_call(node)
-
-        node = _odoo_checker_sql_injection.astroid.extract_node("""
-        def test_function11(self, arg):
-            my_injection_variable= "aaaaaaaa" + arg #Uninferable
-            self.env.cr.execute('select * from hello where id = %s' % my_injection_variable) #@
-        """)
-
-        with self.assertMessages("sql-injection"):
-            checker.visit_call(node)
-
-        node = _odoo_checker_sql_injection.astroid.extract_node("""
-        def test_function12(self):
-            arg1 = "a"
-            arg2 = "b" + arg1
-            arg3 = arg2 + arg1 + arg2
-            arg4 = arg1 + "d"
-            my_injection_variable= arg1 + arg2 + arg3 + arg4
-            self.env.cr.execute('select * from hello where id = %s' % my_injection_variable) #@
-        """)
-
-        with self.assertNoMessages():
-            checker.visit_call(node)
-
-        node = _odoo_checker_sql_injection.astroid.extract_node("""
-        def test_function1(self, arg):
-            my_injection_variable= f"aaaaa{arg}aaa" #Uninferable
-            self.env.cr.execute('select * from hello where id = %s' % my_injection_variable) #@
-        """)
-        with self.assertMessages("sql-injection"):
-            checker.visit_call(node)
-
-        node = _odoo_checker_sql_injection.astroid.extract_node("""
-        def test_function2(self):
-            arg = 'bbb'
-            my_injection_variable= f"aaaaa{arg}aaa" #Uninferable
-            self.env.cr.execute('select * from hello where id = %s' % my_injection_variable) #@
-        """)
-        with self.assertNoMessages():
-            checker.visit_call(node)
-
-        node = _odoo_checker_sql_injection.astroid.extract_node("""
-        def test_function3(self, arg):
-            my_injection_variable= "aaaaaaaa".format() # Const
-            self.env.cr.execute('select * from hello where id = %s' % my_injection_variable) #@
-        """)
-        with self.assertNoMessages():
-            checker.visit_call(node)
-
-        node = _odoo_checker_sql_injection.astroid.extract_node("""
-        def test_function4(self, arg):
-            my_injection_variable= "aaaaaaaa {test}".format(test="aaa") 
-            self.env.cr.execute('select * from hello where id = %s' % my_injection_variable) #@
-        """)
-        with self.assertNoMessages():
-            checker.visit_call(node)
-
-        node = _odoo_checker_sql_injection.astroid.extract_node("""
-        def test_function5(self):
-            arg = 'aaa'
-            my_injection_variable= "aaaaaaaa {test}".format(test=arg) #Uninferable
-            self.env.cr.execute('select * from hello where id = %s' % my_injection_variable) #@
-        """)
-        with self.assertNoMessages():
-            checker.visit_call(node)
-
-        node = _odoo_checker_sql_injection.astroid.extract_node("""
-        def test_function6(self,arg):
-            my_injection_variable= "aaaaaaaa {test}".format(test="aaa" + arg) #Uninferable
-            self.env.cr.execute('select * from hello where id = %s' % my_injection_variable) #@
-        """)
-        with self.assertMessages("sql-injection"):
-            checker.visit_call(node)
-
-        node = _odoo_checker_sql_injection.astroid.extract_node("""
-        def test_function7(self):
-            arg = "aaa"
-            my_injection_variable= "aaaaaaaa {test}".format(test="aaa" + arg) #Const
-            self.env.cr.execute('select * from hello where id = %s' % my_injection_variable)#@
-        """)
-        with self.assertNoMessages():
-            checker.visit_call(node)
-
-        node = _odoo_checker_sql_injection.astroid.extract_node("""
-        def test_function8(self):
-            global arg
-            my_injection_variable= "aaaaaaaa {test}".format(test="aaa" + arg) #Uninferable
-            self.env.cr.execute('select * from hello where id = %s' % my_injection_variable) #@
-        """)
-        with self.assertMessages("sql-injection"):
-            checker.visit_call(node)
-
-        #TODO
-        #node = _odoo_checker_sql_injection.astroid.extract_node("""
-        #def test_function(self):
-        #    def test():
-        #        return "hello world"
-        #    my_injection_variable= "aaaaaaaa {test}".format(test=test()) #Const
-        #    self.env.cr.execute('select * from hello where id = %s' % my_injection_variable) #@
-        #""")
-        #with self.assertNoMessages():
-        #    checker.visit_call(node)
-
-        node = _odoo_checker_sql_injection.astroid.extract_node("""
-        def test_function9(self,arg):
-            my_injection_variable= "aaa" % arg
-            self.env.cr.execute('select * from hello where id = %s' % my_injection_variable) #@
-        """)
-
-        with self.assertMessages("sql-injection"):
-            checker.visit_call(node)
-
-        node = _odoo_checker_sql_injection.astroid.extract_node("""
-        def test_function10(self,arg):
-            if_else_variable = "aaa" if arg else "bbb" # the two choice of a condition are constant, this is not injectable
-            self.env.cr.execute('select * from hello where id = %s' % if_else_variable) #@
-        """)
+        # TEST CASE 2: staticly defined string
+        code = """
+        def case2():
+            self.env.cr.execute('arg') #@
+        """
 
         with self.assertMessages():
+            node = _odoo_checker_sql_injection.astroid.extract_node(code)
+            checker.debug = code
             checker.visit_call(node)
 
-        node = _odoo_checker_sql_injection.astroid.extract_node("""
-        def _search_phone_mobile_search(self, operator, value):
-  
-            condition = 'IS NULL' if operator == '=' else 'IS NOT NULL'
-            query = '''
-                SELECT model.id
-                FROM %s model
-                WHERE model.phone %s
-                AND model.mobile %s
-            ''' % (self._table, condition, condition)
+
+        # TEST CASE 3 : staticly defined via a variable
+        code = """
+        def case3(args):
+            query = 'SELECT * FROM res_users'
             self.env.cr.execute(query) #@
-        """) #Real false positive example from the code
+        """
+
         with self.assertMessages():
+            node = _odoo_checker_sql_injection.astroid.extract_node(code)
+            checker.debug = code
             checker.visit_call(node)
 
-        node = _odoo_checker_sql_injection.astroid.extract_node("""
-        def test1(self):
-            operator = 'aaa' 
-            value = 'bbb'
-            op1 , val1 = (operator,value)
-            self.env.cr.execute('query' + op1) #@
-        """) #Test tuple assignement
+        # TEST CASE 4: staticly defined string with conditional syntax
+        code = """
+        def case4(args):
+            query = ''
+            if args:
+                query = 'SELECT * FROM res.users'
+            else:
+                query = 'SELECT * FROM res.users WHERE id=2'
+            self.env.cr.execute(query) #@
+        """
+
         with self.assertMessages():
+            node = _odoo_checker_sql_injection.astroid.extract_node(code)
+            checker.debug = code
             checker.visit_call(node)
 
-        node = _odoo_checker_sql_injection.astroid.extract_node("""
-        def test2(self):
-            operator = 'aaa' 
-            operator += 'bbb'
-            self.env.cr.execute('query' + operator) #@
-        """)
-        with self.assertMessages():
+        # TEST CASE 5 : out of scope variable
+        code = """
+        def case5():
+            self.env.cr.execute(query) #@
+        """
+
+        with self.assertMessages('sql-injection'):
+            node = _odoo_checker_sql_injection.astroid.extract_node(code)
+            checker.debug = code
             checker.visit_call(node)
 
-        node = _odoo_checker_sql_injection.astroid.extract_node("""
-        def test3(self):
-            self.env.cr.execute(f'{self._table}') #@
-        """)
+        # TEST CASE 6 : ternary assign
+        code = """
+        def case6(args):
+            query = 'SELECT * FROM res_users' if args else 'SELECT * FROM res_partner'
+            self.env.cr.execute(query) #@
+        """
+
         with self.assertMessages():
+            node = _odoo_checker_sql_injection.astroid.extract_node(code)
+            checker.debug = code
             checker.visit_call(node)
 
-        node = _odoo_checker_sql_injection.astroid.extract_node("""
-        def _init_column(self, column_name):
-            query = f'UPDATE "{self._table}" SET "{column_name}" = %s WHERE "{column_name}" IS NULL'
-            self._cr.execute(query, (value,)) #@
-        """) #Test private function arg should not flag
+        # TEST CASE 7 : f-string sucess
+        code = """
+        def case7():
+            args = "52"
+            query = f'SELECT * FROM res_user WHERE id={args}'
+            self.env.cr.execute(query) #@
+        """
+
         with self.assertMessages():
+            node = _odoo_checker_sql_injection.astroid.extract_node(code)
+            checker.debug = code
             checker.visit_call(node)
 
-        node = _odoo_checker_sql_injection.astroid.extract_node("""
-        def _init_column1(self, column_name):
-            query = 'SELECT %(var1)s FROM %(var2)s WHERE %(var3)s' % {'var1': 'field_name','var2': 'table_name','var3': 'where_clause'}
-            self._cr.execute(query) #@
-        """)
-        with self.assertMessages():
+        # TEST CASE 8 : f-string failure
+        code = """
+        def case8(args):
+            query = f'SELECT * FROM res_user WHERE id={args}'
+            self.env.cr.execute(query) #@
+        """
+
+        with self.assertMessages('sql-injection'):
+            node = _odoo_checker_sql_injection.astroid.extract_node(code)
+            checker.debug = code
             checker.visit_call(node)
 
-        node = _odoo_checker_sql_injection.astroid.extract_node("""
-        def _graph_data(self, start_date, end_date):
+        # TEST CASE 9 : string.format() failure
+        code = """
+        def case9(args):
+            query = 'SELECT * FROM res_user WHERE id=%s'.format(args=args)
+            self.env.cr.execute(query) #@
+        """
 
-            query = '''SELECT %(x_query)s as x_value, %(y_query)s as y_value
-                        FROM %(table)s
-                        WHERE team_id = %(team_id)s
-                        AND DATE(%(date_column)s) >= %(start_date)s
-                        AND DATE(%(date_column)s) <= %(end_date)s
-                        %(extra_conditions)s
-                        GROUP BY x_value;'''
-
-            # apply rules
-            dashboard_graph_model = self._graph_get_model()
-            GraphModel = self.env[dashboard_graph_model] 
-            graph_table = self._graph_get_table(GraphModel)
-            extra_conditions = self._extra_sql_conditions() 
-            where_query = GraphModel._where_calc([])  
-            GraphModel._apply_ir_rules(where_query, 'read')
-            from_clause, where_clause, where_clause_params = where_query.get_sql()
-            if where_clause:
-                extra_conditions += " AND " + where_clause
-
-            query = query % {
-                'x_query': self._graph_x_query(),
-                'y_query': self._graph_y_query(),
-                'table': graph_table,
-                'team_id': "%s",
-                'date_column': self._graph_date_column(),
-                'start_date': "%s",
-                'end_date': "%s",
-                'extra_conditions': extra_conditions 
-            }
-
-            self._cr.execute(query, [self.id, start_date, end_date] + where_clause_params) #@
-            return self.env.cr.dictfetchall()
-        """)
-        with self.assertMessages():
+        with self.assertMessages('sql-injection'):
+            node = _odoo_checker_sql_injection.astroid.extract_node(code)
+            checker.debug = code
             checker.visit_call(node)
 
-        node = _odoo_checker_sql_injection.astroid.extract_node("""
-        def first_fun():
-            anycall() #@
-            return 'a'
-        """)
+        # TEST CASE 10 : string.format() sucess
+        code = """
+        def case10():
+            args = "52"
+            query = f'SELECT * FROM res_user WHERE id={args}'.format(args=args)
+            self.env.cr.execute(query) #@
+        """
+
         with self.assertMessages():
-            checker.visit_call(node)
-        node = _odoo_checker_sql_injection.astroid.extract_node("""
-        def second_fun(value):
-            anycall() #@
-            return value
-        """)
-        with self.assertMessages():
-            checker.visit_call(node)
-        node = _odoo_checker_sql_injection.astroid.extract_node("""
-        def injectable():
-            cr.execute(first_fun())#@
-        """)
-        with self.assertMessages():
-            checker.visit_call(node)
-        node = _odoo_checker_sql_injection.astroid.extract_node("""
-        def injectable1():
-            cr.execute(second_fun('aaaaa'))#@
-        """)
-        with self.assertMessages():
+            node = _odoo_checker_sql_injection.astroid.extract_node(code)
+            checker.debug = code
             checker.visit_call(node)
 
-        node = _odoo_checker_sql_injection.astroid.extract_node("""
-        def injectable2(var):
-            a = ['a','b']
-            cr.execute('a'.join(a))#@
-        """)
+        # TEST CASE 11 : list assignement
+        code = """
+        def case11(unsafe):
+            safe = 'value'
+            l = [unsafe, safe]
+            query = l[1]
+            self.env.cr.execute(query) #@
+        """
+
         with self.assertMessages():
+            node = _odoo_checker_sql_injection.astroid.extract_node(code)
+            checker.debug = code
             checker.visit_call(node)
 
-        node = _odoo_checker_sql_injection.astroid.extract_node("""
-        def return_tuple(var):
-            return 'a',var
-        """)
-        with self.assertMessages():
-            checker.visit_functiondef(node)
+        # TEST CASE 12 : list slice
+        code = """
+        def case12(unsafe):
+            safe = 'value'
+            l = [unsafe, safe, safe, safe]
+            query = l[1:]
+            self.env.cr.execute(query) #@
+        """
 
-        node = _odoo_checker_sql_injection.astroid.extract_node("""
-        def injectable4(var):
-            a, _ =  return_tuple(var)
-            cr.execute(a) #@
-        """)
         with self.assertMessages():
-            checker.visit_call(node)
-        node = _odoo_checker_sql_injection.astroid.extract_node("""
-        def not_injectable5(var):
-            star = ('defined','constant','string')
-            cr.execute(*star)#@
-        """)
-        with self.assertMessages():
+            node = _odoo_checker_sql_injection.astroid.extract_node(code)
+            checker.debug = code
             checker.visit_call(node)
 
-        node = _odoo_checker_sql_injection.astroid.extract_node("""
-        def injectable6(var):
-            star = ('defined','variable','string',var)
-            cr.execute(*star)#@
-        """)
-        with self.assertMessages("sql-injection"):
-            checker.visit_call(node)
+        # TEST CASE 13: list slice
+        code = """
+        def case13(unsafe):
+            safe = 'value'
+            l = [unsafe, safe, safe, safe]
+            query = l[1:2]
+            self.env.cr.execute(query) #@
+        """
 
-        node = _odoo_checker_sql_injection.astroid.extract_node("""
-        def formatNumber(var):
-            cr.execute('LIMIT %d'  % var)#@
-        """)
         with self.assertMessages():
+            node = _odoo_checker_sql_injection.astroid.extract_node(code)
+            checker.debug = code
+            checker.visit_call(node)
+        
+        # TEST CASE 14 : list slice unguessable slicing
+        code = """
+        def case14(unsafe):
+            safe = 'value'
+            l = [unsafe, safe, safe, safe]
+            query = l[unsafe]
+            self.env.cr.execute(query) #@
+        """
+
+        with self.assertMessages('sql-injection'):
+            node = _odoo_checker_sql_injection.astroid.extract_node(code)
+            checker.debug = code
             checker.visit_call(node)
 
-        node = _odoo_checker_sql_injection.astroid.extract_node("""
-        def wrapper1(var):
-            query = SQL(var) #@
-            return query
-        """)
-        with self.assertMessages("sql-injection"):
-            checker.visit_call(list(node.get_children())[1])
+        # TEST CASE 15 : fucking up with list to see if the stack system work
+        code = """
+        def case15(unsafe):
+            safe = ['a','b',['a',['a','b','c']][1]]
+            intermediate = safe[2]
+            l = [unsafe, intermediate, intermediate, intermediate]
+            query = l[1]
+            self.env.cr.execute(query) #@
+        """
 
-        node = _odoo_checker_sql_injection.astroid.extract_node("""
-        def wrapper2(var):
-            query = tools.SQL(var) #@
-            return query
-        """)
-        with self.assertMessages("sql-injection"):
-            checker.visit_call(list(node.get_children())[1])
+        with self.assertMessages():
+            node = _odoo_checker_sql_injection.astroid.extract_node(code)
+            checker.debug = code
+            checker.visit_call(node)
+
+        # TEST CASE 16 : dict value safe 
+        code = """
+        def case16(unsafe):
+            safe = {'key1':'value1'}
+            query = safe['key1']
+            self.env.cr.execute(query) #@
+        """
+
+        with self.assertMessages():
+            node = _odoo_checker_sql_injection.astroid.extract_node(code)
+            checker.debug = code
+            checker.visit_call(node)
+        
+        # TEST CASE 17 : dict value unsafe 
+        code = """
+        def case17(unsafe):
+            safe = {'key1':unsafe}
+            query = safe['key1']
+            self.env.cr.execute(query) #@
+        """
+
+        with self.assertMessages('sql-injection'):
+            node = _odoo_checker_sql_injection.astroid.extract_node(code)
+            checker.debug = code
+            checker.visit_call(node)
+
+        # TEST CASE 18: bin op % fail
+        code = """
+        def case18(unsafe):
+            query = 'SELECT * FROM res_users WHERE id = %s' % usafe
+            self.env.cr.execute(query) #@
+        """
+        with self.assertMessages('sql-injection'):
+            node = _odoo_checker_sql_injection.astroid.extract_node(code)
+            checker.debug = code
+            checker.visit_call(node)
+        
+        # TEST CASE 19: bin op % sucess
+        code = """
+        def case19():
+            safe = '18'
+            query = 'SELECT * FROM res_users WHERE id = %s' % safe
+            self.env.cr.execute(query) #@
+        """
+        with self.assertMessages():
+            node = _odoo_checker_sql_injection.astroid.extract_node(code)
+            checker.debug = code
+            checker.visit_call(node)
+
+        # TEST CASE 20: bin op + fail
+        code = """
+        def case18(unsafe):
+            query = 'SELECT * FROM res_users WHERE id=' + usafe
+            self.env.cr.execute(query) #@
+        """
+        with self.assertMessages('sql-injection'):
+            node = _odoo_checker_sql_injection.astroid.extract_node(code)
+            checker.debug = code
+            checker.visit_call(node)
+
+        # TEST CASE 21: bin op + sucess
+        code = """
+        def case21():
+            safe = '18'
+            query = 'SELECT * FROM res_users WHERE id=' + safe
+            self.env.cr.execute(query) #@
+        """
+        with self.assertMessages():
+            node = _odoo_checker_sql_injection.astroid.extract_node(code)
+            checker.debug = code
+            checker.visit_call(node)
+
+        #TEST CASE 22: augAssign fail
+        code = """
+        def case22(unsafe):
+            query = 'SELECT * FROM res_users WHERE id='
+            query += unsafe
+            self.env.cr.execute(query) #@
+        """
+        with self.assertMessages('sql-injection'):
+            node = _odoo_checker_sql_injection.astroid.extract_node(code)
+            checker.debug = code
+            checker.visit_call(node)
+
+
+        #TEST CASE 23: augAssign sucess
+        code = """
+        def case23():
+            safe = '18'
+            query = 'SELECT * FROM res_users WHERE id='
+            query += safe
+            self.env.cr.execute(query) #@
+        """
+        with self.assertMessages():
+            node = _odoo_checker_sql_injection.astroid.extract_node(code)
+            checker.debug = code
+            checker.visit_call(node)
+
+        #TEST CASE 24: augAssign unsafe source
+        code = """
+        def case24(unsafe):
+            unsafe += '18'
+            query = unsafe
+            self.env.cr.execute(query) #@
+        """
+        with self.assertMessages('sql-injection'):
+            node = _odoo_checker_sql_injection.astroid.extract_node(code)
+            checker.debug = code
+            checker.visit_call(node)
+
+        #TEST CASE 25: special loop for loop with dict and items
+        code = """
+        def case25():
+            dic = {'key1':'value1' , 'key2': 'value2'}
+            query = ''
+            for key, value in dic.items():
+                query += ' AND ' + key
+            self.env.cr.execute(query) #@
+        """
+        with self.assertMessages():
+            node = _odoo_checker_sql_injection.astroid.extract_node(code)
+            checker.debug = code
+            checker.visit_call(node)
+
+        #TEST CASE 26: for loop fail
+        code = """
+        def case26(unsafe):
+            query = 'SELECT * FROM res_users WHERE id=2'
+            for values in unsafe:
+                query += ' AND ' + values
+            self.env.cr.execute(query) #@
+        """
+        with self.assertMessages('sql-injection'):
+            node = _odoo_checker_sql_injection.astroid.extract_node(code)
+            checker.debug = code
+            checker.visit_call(node)
+
+        #TEST CASE 27: for loop sucess
+        code = """
+        def case27():
+            safe = ['name="Marc"']
+            query = 'SELECT * FROM res_users WHERE id=2'
+            for values in safe:
+                query += ' AND ' + values
+            self.env.cr.execute(query) #@
+        """
+        with self.assertMessages():
+            node = _odoo_checker_sql_injection.astroid.extract_node(code)
+            checker.debug = code
+            checker.visit_call(node)
+
+        #TEST CASE 28: Tuple
+        code = """
+        def case28():
+            safe = ('Value1', 'Value2',)
+            safe1, safe2 = safe
+            query = safe1 + safe2
+            self.env.cr.execute(query) #@
+        """
+        with self.assertMessages():
+            node = _odoo_checker_sql_injection.astroid.extract_node(code)
+            checker.debug = code
+            checker.visit_call(node)
+
+        #TEST CASE 28: Tuple fail
+        code = """
+        def case28(unsafe):
+            safe = (unsafe, 'Value2',)
+            safe1, safe2 = safe
+            query = safe1 + safe2
+            self.env.cr.execute(query) #@
+        """
+        with self.assertMessages('sql-injection'):
+            node = _odoo_checker_sql_injection.astroid.extract_node(code)
+            checker.debug = code
+            checker.visit_call(node)
