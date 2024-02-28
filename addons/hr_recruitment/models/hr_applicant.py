@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import logging
+_logger = logging.getLogger(__name__)
 from markupsafe import Markup
 
 from odoo import api, fields, models, tools, SUPERUSER_ID
@@ -320,7 +322,22 @@ class Applicant(models.Model):
         for applicant in self:
             if not applicant.email_from:
                 continue
-            if applicant.partner_id:
+            if not applicant.partner_id:
+                if not applicant.partner_name:
+                    raise UserError(_('You must define a Contact Name for this applicant.'))
+                _logger.info("hr_recruitment_test")
+                applicant.partner_id = self.env['res.partner'].create({
+                    'is_company': False,
+                    'name': applicant.partner_name,
+                    'email': applicant.email_from,
+                    'mobile': applicant.partner_mobile,
+                    'phone': applicant.partner_phone,
+                })
+                _logger.info(applicant.partner_id.name)
+
+            else:
+                _logger.info("hr_recruitment_testelse")
+                _logger.info(applicant.partner_id.name)
                 applicant.partner_id.email = applicant.email_from
                 applicant.partner_id.mobile = applicant.partner_mobile
                 applicant.partner_id.phone = applicant.partner_phone
