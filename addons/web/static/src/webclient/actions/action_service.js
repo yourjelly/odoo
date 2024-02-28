@@ -187,7 +187,7 @@ export function makeActionManager(env, router = _router) {
             }
             return controller;
         });
-        if (controllers.at(-1)?.action?.id === state.action) {
+        if (state.action && controllers.at(-1)?.action?.id === state.action) {
             // The display name of this action will be loaded by _loadAction
             _loadBreadcrumbs(controllers.slice(0, -1));
         } else {
@@ -235,11 +235,11 @@ export function makeActionManager(env, router = _router) {
                 );
                 continue;
             }
+            // FIXME: this is a race condition: if the breadcrumb component is rendered before this
+            // executes, the breadcrumb will have a bunch of "unnamed" entries. This works in practice
             controller.displayName = displayName;
             newStack.push(controller);
         }
-        // FIXME race condition on controllerStack
-        controllerStack = newStack;
     }
 
     /**
