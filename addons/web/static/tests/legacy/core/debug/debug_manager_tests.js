@@ -372,7 +372,7 @@ QUnit.module("DebugMenu", (hooks) => {
         assert.containsOnce(target, ".modal");
         assert.strictEqual(
             target.querySelector(".modal-body").innerText,
-            `<tree><field name="foo" field_id="foo_0"/></tree>`
+            `<tree><field name="foo"/></tree>`
         );
     });
 
