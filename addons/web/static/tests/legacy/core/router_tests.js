@@ -5,11 +5,14 @@ import {
     parseHash,
     parseSearchQuery,
     stateToUrl,
+    urlToState,
     router,
     routerBus,
     startRouter,
 } from "@web/core/browser/router";
 import { nextTick, patchWithCleanup } from "../helpers/utils";
+
+const _urlToState = (url) => urlToState(new URL(url, browser.location.origin));
 
 async function createRouter(params = {}) {
     if (params.onPushState) {
@@ -90,15 +93,936 @@ QUnit.test("can parse URI encoded strings", (assert) => {
     assert.deepEqual(parseHash("#comma=that%2Cis"), { comma: "that,is" });
 });
 
-QUnit.test("stateToUrl encodes URI compatible strings", (assert) => {
-    let route = {};
-    assert.strictEqual(stateToUrl(route), "/odoo");
+QUnit.module("Router: stateToUrl", () => {
+    QUnit.test("encodes URI compatible strings", (assert) => {
+        let route = {};
+        assert.strictEqual(stateToUrl(route), "/odoo");
 
-    route = { a: "11", g: "summer wine" };
-    assert.strictEqual(stateToUrl(route), "/odoo?a=11&g=summer%20wine");
+        route = { a: "11", g: "summer wine" };
+        assert.strictEqual(stateToUrl(route), "/odoo?a=11&g=summer%20wine");
 
-    route = { g: "2", c: "", e: "kloug,gloubi" };
-    assert.strictEqual(stateToUrl(route), "/odoo?g=2&c=&e=kloug%2Cgloubi");
+        route = { g: "2", c: "", e: "kloug,gloubi" };
+        assert.strictEqual(stateToUrl(route), "/odoo?g=2&c=&e=kloug%2Cgloubi");
+    });
+
+    QUnit.test("backwards compatibility: no action stack, action encoded in path", (assert) => {
+        assert.strictEqual(stateToUrl({}), "/odoo");
+        // action
+        assert.strictEqual(stateToUrl({ action: "some-path" }), "/odoo/some-path");
+        assert.strictEqual(stateToUrl({ active_id: 5, action: "some-path" }), "/odoo/5/some-path");
+        assert.strictEqual(stateToUrl({ action: "some-path", resId: 2 }), "/odoo/some-path/2");
+        assert.strictEqual(
+            stateToUrl({ active_id: 5, action: "some-path", resId: 2 }),
+            "/odoo/5/some-path/2"
+        );
+        assert.strictEqual(
+            stateToUrl({ action: 1, resId: 2 }),
+            "/odoo/act-1/2",
+            "action id instead of path/tag"
+        );
+        // model
+        assert.strictEqual(stateToUrl({ model: "some.model" }), "/odoo/some.model");
+        assert.strictEqual(stateToUrl({ model: "some.model", resId: 2 }), "/odoo/some.model/2");
+        assert.strictEqual(stateToUrl({ active_id: 5, model: "some.model" }), "/odoo/5/some.model");
+        assert.strictEqual(
+            stateToUrl({ active_id: 5, model: "some.model", resId: 2 }),
+            "/odoo/5/some.model/2"
+        );
+        assert.strictEqual(
+            stateToUrl({ active_id: 5, model: "some.model", view_type: "some_viewtype" }),
+            "/odoo/5/some.model?view_type=some_viewtype"
+        );
+        // edge cases
+        assert.strictEqual(
+            stateToUrl({ active_id: 5, action: "some-path", resId: 2, some_key: "some_value" }),
+            "/odoo/5/some-path/2?some_key=some_value",
+            "pieces of state unrelated to actions are added as query string"
+        );
+        assert.strictEqual(
+            stateToUrl({ active_id: 5, action: "some-path", model: "some.model", resId: 2 }),
+            "/odoo/5/some-path/2",
+            "action has priority on model"
+        );
+        assert.strictEqual(
+            stateToUrl({ active_id: 5, model: "some.model", resId: 2, view_type: "list" }),
+            "/odoo/5/some.model/2?view_type=list",
+            "view_type and resId aren't incompatible"
+            // Should they be? view_type will just be stripped by action_service
+        );
+    });
+
+    QUnit.test("actionStack: one action", (assert) => {
+        assert.strictEqual(stateToUrl({ actionStack: [] }), "/odoo");
+        // action
+        assert.strictEqual(
+            stateToUrl({ actionStack: [{ action: "some-path" }] }),
+            "/odoo/some-path"
+        );
+        assert.strictEqual(
+            stateToUrl({ actionStack: [{ active_id: 5, action: "some-path" }] }),
+            "/odoo/5/some-path"
+        );
+        assert.strictEqual(
+            stateToUrl({ actionStack: [{ action: "some-path", resId: 2 }] }),
+            "/odoo/some-path/2"
+        );
+        assert.strictEqual(
+            stateToUrl({ actionStack: [{ active_id: 5, action: "some-path", resId: 2 }] }),
+            "/odoo/5/some-path/2"
+        );
+        assert.strictEqual(
+            stateToUrl({ actionStack: [{ action: 1, resId: 2 }] }),
+            "/odoo/act-1/2",
+            "numerical action id instead of path"
+        );
+        // model
+        assert.strictEqual(
+            stateToUrl({ actionStack: [{ model: "some.model" }] }),
+            "/odoo/some.model"
+        );
+        assert.strictEqual(
+            stateToUrl({ actionStack: [{ model: "some.model", resId: 2 }] }),
+            "/odoo/some.model/2"
+        );
+        assert.strictEqual(
+            stateToUrl({ actionStack: [{ active_id: 5, model: "some.model" }] }),
+            "/odoo/5/some.model"
+        );
+        assert.strictEqual(
+            stateToUrl({ actionStack: [{ active_id: 5, model: "some.model", resId: 2 }] }),
+            "/odoo/5/some.model/2"
+        );
+        assert.strictEqual(
+            stateToUrl({
+                actionStack: [{ active_id: 5, model: "some.model", view_type: "some_viewtype" }],
+            }),
+            "/odoo/5/some.model",
+            "view_type is ignored in the action stack"
+        );
+        assert.strictEqual(
+            stateToUrl({
+                actionStack: [{ active_id: 5, model: "some.model" }],
+                view_type: "some_viewtype",
+            }),
+            "/odoo/5/some.model?view_type=some_viewtype",
+            "view_type is added if it's on the state itself"
+        );
+        assert.strictEqual(
+            stateToUrl({ actionStack: [{ active_id: 5, model: "model_no_dot", resId: 2 }] }),
+            "/odoo/5/m-model_no_dot/2"
+        );
+        // edge cases
+        assert.strictEqual(
+            stateToUrl({
+                actionStack: [
+                    { active_id: 5, action: "some-path", resId: 2, some_key: "some_value" },
+                ],
+            }),
+            "/odoo/5/some-path/2",
+            "pieces of state unrelated to actions are ignored in the actionStack"
+        );
+        assert.strictEqual(
+            stateToUrl({
+                actionStack: [{ active_id: 5, action: "some-path", resId: 2 }],
+                some_key: "some_value",
+            }),
+            "/odoo/5/some-path/2?some_key=some_value",
+            "pieces of state unrelated to actions are added as query string even with actionStack"
+        );
+        assert.strictEqual(
+            stateToUrl({
+                actionStack: [{ active_id: 5, action: "some-path", model: "some.model", resId: 2 }],
+            }),
+            "/odoo/5/some-path/2",
+            "action has priority on model"
+        );
+        assert.strictEqual(
+            stateToUrl({
+                actionStack: [{ active_id: 5, model: "some.model", resId: 2 }],
+                view_type: "list",
+            }),
+            "/odoo/5/some.model/2?view_type=list",
+            "view_type and resId aren't incompatible"
+            // Should they be? view_type will just be stripped by action_service
+        );
+    });
+
+    QUnit.test("actionStack: multiple actions", (assert) => {
+        // action
+        assert.strictEqual(
+            stateToUrl({ actionStack: [{ action: "some-path" }, { action: "other-path" }] }),
+            "/odoo/some-path/other-path"
+        );
+        assert.strictEqual(
+            stateToUrl({
+                actionStack: [{ active_id: 5, action: "some-path" }, { action: "other-path" }],
+            }),
+            "/odoo/5/some-path/other-path"
+        );
+        assert.strictEqual(
+            stateToUrl({
+                actionStack: [{ action: "some-path" }, { active_id: 7, action: "other-path" }],
+            }),
+            // On reload, this will generate a form view for the first action even though there was
+            // originally none. This is probably fine.
+            "/odoo/some-path/7/other-path"
+        );
+        assert.strictEqual(
+            stateToUrl({
+                actionStack: [{ action: "some-path", resId: 2 }, { action: "other-path" }],
+            }),
+            // On reload, the second action will have an active_id even though it originally didn't
+            // have one. This might be a problem?
+            "/odoo/some-path/2/other-path"
+        );
+        assert.strictEqual(
+            stateToUrl({
+                actionStack: [{ action: "some-path" }, { action: "other-path", resId: 2 }],
+            }),
+            // On reload, this will generate an action in the default multi-record view for the second
+            // action. This is the desired behaviour.
+            "/odoo/some-path/other-path/2"
+        );
+        assert.strictEqual(
+            stateToUrl({
+                actionStack: [
+                    { active_id: 5, action: "some-path", resId: 2 },
+                    { action: "other-path" },
+                ],
+            }),
+            "/odoo/5/some-path/2/other-path"
+        );
+        assert.strictEqual(
+            stateToUrl({
+                actionStack: [
+                    { action: "some-path" },
+                    { active_id: 5, action: "other-path", resId: 2 },
+                ],
+            }),
+            "/odoo/some-path/5/other-path/2"
+        );
+        assert.strictEqual(
+            stateToUrl({
+                actionStack: [
+                    { action: "some-path", resId: 5 },
+                    { active_id: 5, action: "other-path" },
+                ],
+            }),
+            "/odoo/some-path/5/other-path",
+            "action with resId followed by action with same value as active_id is not duplicated"
+        );
+        assert.strictEqual(
+            stateToUrl({
+                actionStack: [
+                    { action: "some-path", resId: 5 },
+                    { active_id: 5, action: "other-path", resId: 2 },
+                ],
+            }),
+            "/odoo/some-path/5/other-path/2"
+        );
+        assert.strictEqual(
+            stateToUrl({
+                actionStack: [{ action: 1 }, { active_id: 5, action: 6, resId: 2 }],
+            }),
+            "/odoo/act-1/5/act-6/2",
+            "numerical actions"
+        );
+        // model
+        assert.strictEqual(
+            stateToUrl({ actionStack: [{ model: "some.model" }, { model: "other.model" }] }),
+            "/odoo/some.model/other.model"
+        );
+        assert.strictEqual(
+            stateToUrl({
+                actionStack: [{ active_id: 5, model: "some.model" }, { model: "other.model" }],
+            }),
+            "/odoo/5/some.model/other.model"
+        );
+        assert.strictEqual(
+            stateToUrl({
+                actionStack: [{ model: "some.model" }, { active_id: 7, model: "other.model" }],
+            }),
+            "/odoo/some.model/7/other.model"
+        );
+        assert.strictEqual(
+            stateToUrl({
+                actionStack: [{ model: "some.model", resId: 2 }, { model: "other.model" }],
+            }),
+            "/odoo/some.model/2/other.model"
+        );
+        assert.strictEqual(
+            stateToUrl({
+                actionStack: [{ model: "some.model" }, { model: "other.model", resId: 2 }],
+            }),
+            "/odoo/some.model/other.model/2"
+        );
+        assert.strictEqual(
+            stateToUrl({
+                actionStack: [
+                    { active_id: 5, model: "some.model", resId: 2 },
+                    { model: "other.model" },
+                ],
+            }),
+            "/odoo/5/some.model/2/other.model"
+        );
+        assert.strictEqual(
+            stateToUrl({
+                actionStack: [
+                    { model: "some.model" },
+                    { active_id: 5, model: "other.model", resId: 2 },
+                ],
+            }),
+            "/odoo/some.model/5/other.model/2"
+        );
+        assert.strictEqual(
+            stateToUrl({
+                actionStack: [
+                    { model: "some.model", resId: 5 },
+                    { active_id: 5, model: "other.model" },
+                ],
+            }),
+            "/odoo/some.model/5/other.model",
+            "action with resId followed by action with same value as active_id is not duplicated"
+        );
+        assert.strictEqual(
+            stateToUrl({
+                actionStack: [
+                    { model: "some.model", resId: 5 },
+                    { active_id: 5, model: "other.model", resId: 2 },
+                ],
+            }),
+            "/odoo/some.model/5/other.model/2"
+        );
+        assert.strictEqual(
+            stateToUrl({
+                actionStack: [
+                    { model: "model_no_dot", resId: 5 },
+                    { active_id: 5, model: "no_dot_model", resId: 2 },
+                ],
+            }),
+            "/odoo/m-model_no_dot/5/m-no_dot_model/2"
+        );
+        // action + model
+        assert.strictEqual(
+            stateToUrl({ actionStack: [{ action: "some-path" }, { model: "some.model" }] }),
+            "/odoo/some-path/some.model"
+        );
+        assert.strictEqual(
+            stateToUrl({
+                actionStack: [{ active_id: 5, action: "some-path" }, { model: "some.model" }],
+            }),
+            "/odoo/5/some-path/some.model"
+        );
+        assert.strictEqual(
+            stateToUrl({
+                actionStack: [{ action: "some-path" }, { active_id: 7, model: "some.model" }],
+            }),
+            "/odoo/some-path/7/some.model"
+        );
+        assert.strictEqual(
+            stateToUrl({
+                actionStack: [{ action: "some-path", resId: 2 }, { model: "some.model" }],
+            }),
+            "/odoo/some-path/2/some.model"
+        );
+        assert.strictEqual(
+            stateToUrl({
+                actionStack: [{ action: "some-path" }, { model: "some.model", resId: 2 }],
+            }),
+            "/odoo/some-path/some.model/2"
+        );
+        assert.strictEqual(
+            stateToUrl({
+                actionStack: [
+                    { active_id: 5, action: "some-path", resId: 2 },
+                    { model: "some.model" },
+                ],
+            }),
+            "/odoo/5/some-path/2/some.model"
+        );
+        assert.strictEqual(
+            stateToUrl({
+                actionStack: [
+                    { action: "some-path" },
+                    { active_id: 5, model: "some.model", resId: 2 },
+                ],
+            }),
+            "/odoo/some-path/5/some.model/2"
+        );
+        assert.strictEqual(
+            stateToUrl({
+                actionStack: [
+                    { action: "some-path", resId: 5 },
+                    { active_id: 5, model: "some.model" },
+                ],
+            }),
+            "/odoo/some-path/5/some.model",
+            "action with resId followed by action with same value as active_id is not duplicated"
+        );
+        assert.strictEqual(
+            stateToUrl({
+                actionStack: [
+                    { action: "some-path", resId: 5 },
+                    { active_id: 5, model: "some.model", resId: 2 },
+                ],
+            }),
+            "/odoo/some-path/5/some.model/2"
+        );
+        assert.strictEqual(
+            stateToUrl({
+                actionStack: [
+                    { action: 1, resId: 5 },
+                    { active_id: 5, model: "model_no_dot", resId: 2 },
+                ],
+            }),
+            "/odoo/act-1/5/m-model_no_dot/2"
+        );
+        // model + action
+        assert.strictEqual(
+            stateToUrl({ actionStack: [{ model: "some.model" }, { action: "other-path" }] }),
+            "/odoo/some.model/other-path"
+        );
+        assert.strictEqual(
+            stateToUrl({
+                actionStack: [{ active_id: 5, model: "some.model" }, { action: "other-path" }],
+            }),
+            "/odoo/5/some.model/other-path"
+        );
+        assert.strictEqual(
+            stateToUrl({
+                actionStack: [{ model: "some.model" }, { active_id: 7, action: "other-path" }],
+            }),
+            "/odoo/some.model/7/other-path"
+        );
+        assert.strictEqual(
+            stateToUrl({
+                actionStack: [{ model: "some.model", resId: 2 }, { action: "other-path" }],
+            }),
+            "/odoo/some.model/2/other-path"
+        );
+        assert.strictEqual(
+            stateToUrl({
+                actionStack: [{ model: "some.model" }, { action: "other-path", resId: 2 }],
+            }),
+            "/odoo/some.model/other-path/2"
+        );
+        assert.strictEqual(
+            stateToUrl({
+                actionStack: [
+                    { active_id: 5, model: "some.model", resId: 2 },
+                    { action: "other-path" },
+                ],
+            }),
+            "/odoo/5/some.model/2/other-path"
+        );
+        assert.strictEqual(
+            stateToUrl({
+                actionStack: [
+                    { model: "some.model" },
+                    { active_id: 5, action: "other-path", resId: 2 },
+                ],
+            }),
+            "/odoo/some.model/5/other-path/2"
+        );
+        assert.strictEqual(
+            stateToUrl({
+                actionStack: [
+                    { model: "some.model", resId: 5 },
+                    { active_id: 5, action: "other-path" },
+                ],
+            }),
+            "/odoo/some.model/5/other-path",
+            "action with resId followed by action with same value as active_id is not duplicated"
+        );
+        assert.strictEqual(
+            stateToUrl({
+                actionStack: [
+                    { model: "some.model", resId: 5 },
+                    { active_id: 5, action: "other-path", resId: 2 },
+                ],
+            }),
+            "/odoo/some.model/5/other-path/2"
+        );
+        assert.strictEqual(
+            stateToUrl({
+                actionStack: [
+                    { model: "model_no_dot", resId: 5 },
+                    { active_id: 5, action: 1, resId: 2 },
+                ],
+            }),
+            "/odoo/m-model_no_dot/5/act-1/2"
+        );
+
+        // edge cases
+        assert.strictEqual(
+            stateToUrl({
+                actionStack: [
+                    { action: "some-path", resId: 5, some_key: "some_value" },
+                    { active_id: 5, action: "other-path", resId: 2, other_key: "other_value" },
+                ],
+            }),
+            "/odoo/some-path/5/other-path/2",
+            "pieces of state unrelated to actions are ignored in the actionStack"
+        );
+        assert.strictEqual(
+            stateToUrl({
+                actionStack: [
+                    { action: "some-path", resId: 5 },
+                    { active_id: 5, action: "other-path", resId: 2 },
+                ],
+                some_key: "some_value",
+            }),
+            "/odoo/some-path/5/other-path/2?some_key=some_value",
+            "pieces of state unrelated to actions are added as query string even with actionStack"
+        );
+        assert.strictEqual(
+            stateToUrl({
+                actionStack: [
+                    { action: "some-path", model: "some.model", resId: 5 },
+                    { active_id: 5, action: "other-path", model: "other.model", resId: 2 },
+                ],
+            }),
+            "/odoo/some-path/5/other-path/2",
+            "action has priority on model"
+        );
+        assert.strictEqual(
+            stateToUrl({
+                actionStack: [
+                    { action: "some-path", resId: 5 },
+                    { active_id: 5, model: "some.model", resId: 2 },
+                ],
+                view_type: "list",
+            }),
+            "/odoo/some-path/5/some.model/2?view_type=list",
+            "view_type and resId aren't incompatible"
+        );
+        assert.strictEqual(
+            stateToUrl({
+                actionStack: [
+                    { action: "some-path", resId: 2 },
+                    { active_id: 5, action: "other-path" },
+                ],
+            }),
+            "/odoo/some-path/2/5/other-path",
+            "action with resId followed by action with different active_id gets both ids in a row"
+        );
+        assert.strictEqual(
+            stateToUrl({
+                actionStack: [
+                    { model: "some.model", resId: 2 },
+                    { active_id: 5, model: "other.model" },
+                ],
+            }),
+            "/odoo/some.model/2/5/other.model",
+            "action with resId followed by action with different active_id gets both ids in a row"
+        );
+    });
+});
+
+QUnit.module("Router: urlToState", () => {
+    QUnit.test("deserialize queryString", (assert) => {
+        assert.deepEqual(_urlToState("/odoo?a=11&g=summer%20wine"), {
+            a: 11,
+            g: "summer wine",
+        });
+        assert.deepEqual(_urlToState("/odoo?g=2&c=&e=kloug%2Cgloubi"), {
+            g: 2,
+            c: "",
+            e: "kloug,gloubi",
+        });
+    });
+
+    QUnit.test("deserialize single action", (assert) => {
+        assert.deepEqual(_urlToState(""), {});
+        assert.deepEqual(_urlToState("/odoo"), {});
+        // action
+        assert.deepEqual(_urlToState("/odoo/some-path"), {
+            action: "some-path",
+            actionStack: [{ action: "some-path" }],
+        });
+        assert.deepEqual(_urlToState("/odoo/5/some-path"), {
+            active_id: 5,
+            action: "some-path",
+            actionStack: [{ active_id: 5, action: "some-path" }],
+        });
+        assert.deepEqual(
+            _urlToState("/odoo/some-path/2"),
+            {
+                action: "some-path",
+                resId: 2,
+                actionStack: [{ action: "some-path" }, { action: "some-path", resId: 2 }],
+            },
+            "two actions are created for action with resId"
+        );
+        assert.deepEqual(_urlToState("/odoo/5/some-path/2"), {
+            active_id: 5,
+            action: "some-path",
+            resId: 2,
+            actionStack: [
+                {
+                    active_id: 5,
+                    action: "some-path",
+                },
+                {
+                    active_id: 5,
+                    action: "some-path",
+                    resId: 2,
+                },
+            ],
+        });
+        assert.deepEqual(_urlToState("/odoo/act-1/2"), {
+            action: 1,
+            resId: 2,
+            actionStack: [{ action: 1 }, { action: 1, resId: 2 }],
+        });
+        // model
+        assert.deepEqual(_urlToState("/odoo/some.model"), {
+            model: "some.model",
+            actionStack: [{ model: "some.model" }],
+        });
+        assert.deepEqual(
+            _urlToState("/odoo/some.model/2"),
+            {
+                model: "some.model",
+                resId: 2,
+                actionStack: [{ model: "some.model", resId: 2 }],
+            },
+            "single action is created for model with resId"
+        );
+        assert.deepEqual(_urlToState("/odoo/5/some.model"), {
+            active_id: 5,
+            model: "some.model",
+            actionStack: [{ active_id: 5, model: "some.model" }],
+        });
+        assert.deepEqual(_urlToState("/odoo/5/some.model/2"), {
+            active_id: 5,
+            model: "some.model",
+            resId: 2,
+            actionStack: [{ active_id: 5, model: "some.model", resId: 2 }],
+        });
+        assert.deepEqual(
+            _urlToState("/odoo/5/some.model?view_type=some_viewtype"),
+            {
+                active_id: 5,
+                model: "some.model",
+                view_type: "some_viewtype",
+                actionStack: [{ active_id: 5, model: "some.model" }],
+            },
+            "view_type doesn't end up in the actionStack"
+        );
+        assert.deepEqual(_urlToState("/odoo/m-model_no_dot/2"), {
+            model: "model_no_dot",
+            resId: 2,
+            actionStack: [{ model: "model_no_dot", resId: 2 }],
+        });
+        // edge cases
+        assert.deepEqual(
+            _urlToState("/odoo/5/some-path/2?some_key=some_value"),
+            {
+                active_id: 5,
+                action: "some-path",
+                resId: 2,
+                some_key: "some_value",
+                actionStack: [
+                    { active_id: 5, action: "some-path" },
+                    { active_id: 5, action: "some-path", resId: 2 },
+                ],
+            },
+            "pieces of state unrelated to actions end up on the state but not in the actionStack"
+        );
+        assert.deepEqual(
+            _urlToState("/odoo/5/some.model/2?view_type=list"),
+            {
+                active_id: 5,
+                model: "some.model",
+                resId: 2,
+                view_type: "list",
+                actionStack: [{ active_id: 5, model: "some.model", resId: 2 }],
+            },
+            "view_type and resId aren't incompatible"
+        );
+    });
+
+    QUnit.test("deserialize multiple actions", (assert) => {
+        // action
+        assert.deepEqual(_urlToState("/odoo/some-path/other-path"), {
+            action: "other-path",
+            actionStack: [{ action: "some-path" }, { action: "other-path" }],
+        });
+        assert.deepEqual(_urlToState("/odoo/5/some-path/other-path"), {
+            action: "other-path",
+            actionStack: [{ active_id: 5, action: "some-path" }, { action: "other-path" }],
+        });
+        assert.deepEqual(_urlToState("/odoo/some-path/2/other-path"), {
+            action: "other-path",
+            active_id: 2,
+            actionStack: [
+                { action: "some-path" },
+                { action: "some-path", resId: 2 },
+                { active_id: 2, action: "other-path" },
+            ],
+        });
+        assert.deepEqual(_urlToState("/odoo/some-path/other-path/2"), {
+            action: "other-path",
+            resId: 2,
+            actionStack: [
+                { action: "some-path" },
+                { action: "other-path" },
+                { action: "other-path", resId: 2 },
+            ],
+        });
+        assert.deepEqual(_urlToState("/odoo/5/some-path/2/other-path"), {
+            action: "other-path",
+            active_id: 2,
+            actionStack: [
+                { active_id: 5, action: "some-path" },
+                { active_id: 5, action: "some-path", resId: 2 },
+                { active_id: 2, action: "other-path" },
+            ],
+        });
+        assert.deepEqual(_urlToState("/odoo/some-path/5/other-path/2"), {
+            active_id: 5,
+            action: "other-path",
+            resId: 2,
+            actionStack: [
+                { action: "some-path" },
+                { action: "some-path", resId: 5 },
+                { active_id: 5, action: "other-path" },
+                { active_id: 5, action: "other-path", resId: 2 },
+            ],
+        });
+        assert.deepEqual(_urlToState("/odoo/act-1/5/act-6/2"), {
+            active_id: 5,
+            action: 6,
+            resId: 2,
+            actionStack: [
+                { action: 1 },
+                { action: 1, resId: 5 },
+                { active_id: 5, action: 6 },
+                { active_id: 5, action: 6, resId: 2 },
+            ],
+        });
+        // model
+        assert.deepEqual(
+            _urlToState("/odoo/some.model/other.model"),
+            {
+                model: "other.model",
+                actionStack: [{ model: "other.model" }],
+            },
+            "model not followed by resId doesn't generate an action unless it's the last one"
+        );
+        assert.deepEqual(
+            _urlToState("/odoo/5/some.model/other.model"),
+            {
+                model: "other.model",
+                actionStack: [{ model: "other.model" }],
+            },
+            "model not followed by resId doesn't generate an action unless it's the last one, even with an active_id"
+        );
+        assert.deepEqual(_urlToState("/odoo/some.model/7/other.model"), {
+            active_id: 7,
+            model: "other.model",
+            actionStack: [
+                { model: "some.model", resId: 7 },
+                { active_id: 7, model: "other.model" },
+            ],
+        });
+        assert.deepEqual(_urlToState("/odoo/some.model/other.model/2"), {
+            model: "other.model",
+            resId: 2,
+            actionStack: [{ model: "other.model", resId: 2 }],
+        });
+        assert.deepEqual(_urlToState("/odoo/5/some.model/2/other.model"), {
+            active_id: 2,
+            model: "other.model",
+            actionStack: [
+                { active_id: 5, model: "some.model", resId: 2 },
+                { active_id: 2, model: "other.model" },
+            ],
+        });
+        assert.deepEqual(_urlToState("/odoo/some.model/5/other.model/2"), {
+            active_id: 5,
+            model: "other.model",
+            resId: 2,
+            actionStack: [
+                { model: "some.model", resId: 5 },
+                { active_id: 5, model: "other.model", resId: 2 },
+            ],
+        });
+        assert.deepEqual(_urlToState("/odoo/m-model_no_dot/5/m-no_dot_model/2"), {
+            active_id: 5,
+            model: "no_dot_model",
+            resId: 2,
+            actionStack: [
+                { model: "model_no_dot", resId: 5 },
+                { active_id: 5, model: "no_dot_model", resId: 2 },
+            ],
+        });
+        // action + model
+        assert.deepEqual(_urlToState("/odoo/some-path/some.model"), {
+            model: "some.model",
+            actionStack: [{ action: "some-path" }, { model: "some.model" }],
+        });
+        assert.deepEqual(_urlToState("/odoo/5/some-path/some.model"), {
+            model: "some.model",
+            actionStack: [{ active_id: 5, action: "some-path" }, { model: "some.model" }],
+        });
+        assert.deepEqual(_urlToState("/odoo/some-path/7/some.model"), {
+            active_id: 7,
+            model: "some.model",
+            actionStack: [
+                { action: "some-path" },
+                { action: "some-path", resId: 7 },
+                { active_id: 7, model: "some.model" },
+            ],
+        });
+        assert.deepEqual(_urlToState("/odoo/some-path/some.model/2"), {
+            model: "some.model",
+            resId: 2,
+            actionStack: [{ action: "some-path" }, { model: "some.model", resId: 2 }],
+        });
+        assert.deepEqual(_urlToState("/odoo/5/some-path/2/some.model"), {
+            active_id: 2,
+            model: "some.model",
+            actionStack: [
+                { active_id: 5, action: "some-path" },
+                { active_id: 5, action: "some-path", resId: 2 },
+                { active_id: 2, model: "some.model" },
+            ],
+        });
+        assert.deepEqual(_urlToState("/odoo/some-path/5/some.model/2"), {
+            active_id: 5,
+            model: "some.model",
+            resId: 2,
+            actionStack: [
+                { action: "some-path" },
+                { action: "some-path", resId: 5 },
+                { active_id: 5, model: "some.model", resId: 2 },
+            ],
+        });
+        assert.deepEqual(_urlToState("/odoo/act-1/5/m-model_no_dot/2"), {
+            active_id: 5,
+            model: "model_no_dot",
+            resId: 2,
+            actionStack: [
+                { action: 1 },
+                { action: 1, resId: 5 },
+                { active_id: 5, model: "model_no_dot", resId: 2 },
+            ],
+        });
+        // model + action
+        assert.deepEqual(_urlToState("/odoo/some.model/other-path"), {
+            action: "other-path",
+            actionStack: [{ action: "other-path" }],
+        });
+        assert.deepEqual(_urlToState("/odoo/5/some.model/other-path"), {
+            action: "other-path",
+            actionStack: [{ action: "other-path" }],
+        });
+        assert.deepEqual(_urlToState("/odoo/some.model/2/other-path"), {
+            active_id: 2,
+            action: "other-path",
+            actionStack: [
+                { model: "some.model", resId: 2 },
+                { active_id: 2, action: "other-path" },
+            ],
+        });
+        assert.deepEqual(_urlToState("/odoo/some.model/other-path/2"), {
+            action: "other-path",
+            resId: 2,
+            actionStack: [{ action: "other-path" }, { action: "other-path", resId: 2 }],
+        });
+        assert.deepEqual(_urlToState("/odoo/5/some.model/2/other-path"), {
+            active_id: 2,
+            action: "other-path",
+            actionStack: [
+                { active_id: 5, model: "some.model", resId: 2 },
+                { active_id: 2, action: "other-path" },
+            ],
+        });
+        assert.deepEqual(_urlToState("/odoo/some.model/5/other-path/2"), {
+            active_id: 5,
+            action: "other-path",
+            resId: 2,
+            actionStack: [
+                { model: "some.model", resId: 5 },
+                { active_id: 5, action: "other-path" },
+                { active_id: 5, action: "other-path", resId: 2 },
+            ],
+        });
+        assert.deepEqual(_urlToState("/odoo/m-model_no_dot/5/act-1/2"), {
+            active_id: 5,
+            action: 1,
+            resId: 2,
+            actionStack: [
+                { model: "model_no_dot", resId: 5 },
+                { active_id: 5, action: 1 },
+                { active_id: 5, action: 1, resId: 2 },
+            ],
+        });
+
+        // edge cases
+        assert.deepEqual(_urlToState("/odoo/some-path/5/other-path/2?some_key=some_value"), {
+            active_id: 5,
+            action: "other-path",
+            resId: 2,
+            actionStack: [
+                { action: "some-path" },
+                { action: "some-path", resId: 5 },
+                { active_id: 5, action: "other-path" },
+                { active_id: 5, action: "other-path", resId: 2 },
+            ],
+            some_key: "some_value",
+        });
+        assert.deepEqual(
+            _urlToState("/odoo/some-path/5/some.model?view_type=list"),
+            {
+                active_id: 5,
+                model: "some.model",
+                actionStack: [
+                    { action: "some-path" },
+                    { action: "some-path", resId: 5 },
+                    { active_id: 5, model: "some.model" },
+                ],
+                view_type: "list",
+            },
+            "view_type doesn't end up in the actionStack"
+        );
+        assert.deepEqual(
+            _urlToState("/odoo/some-path/5/some.model/2?view_type=list"),
+            {
+                active_id: 5,
+                model: "some.model",
+                resId: 2,
+                actionStack: [
+                    { action: "some-path" },
+                    { action: "some-path", resId: 5 },
+                    { active_id: 5, model: "some.model", resId: 2 },
+                ],
+                view_type: "list",
+            },
+            "view_type and resId aren't incompatible"
+        );
+        // FIXME: this doesn't work yet: it generates 2 actions for some-path with 2 and 5 as resId
+        // assert.deepEqual(_urlToState("/odoo/some-path/2/5/other-path"), {
+        //     active_id: 5,
+        //     action: "other-path",
+        //     actionStack: [
+        //         { action: "some-path" },
+        //         { action: "some-path", resId: 2 },
+        //         { active_id: 5, action: "other-path" },
+        //     ],
+        // });
+        // FIXME: this doesn't work yet: it generates 2 actions for some.model with 2 and 5 as resId
+        // assert.deepEqual(_urlToState("/odoo/some.model/2/5/other.model"), {
+        //     active_id: 5,
+        //     model: "other.model",
+        //     actionStack: [
+        //         { model: "some.model", resId: 2 },
+        //         { active_id: 5, model: "other.model" },
+        //     ],
+        // });
+    });
 });
 
 QUnit.module("Router: Push state");
@@ -238,6 +1162,44 @@ QUnit.test("do not re-push when hash is same (with integers as strings)", async 
     assert.verifySteps([]);
 });
 
+QUnit.test("pushState adds action-related keys to last entry in actionStack", async (assert) => {
+    await createRouter();
+
+    router.pushState({ action: 1, resId: 2, actionStack: [{ action: 1, resId: 2 }] });
+    await nextTick();
+    assert.deepEqual(router.current, {
+        action: 1,
+        resId: 2,
+        actionStack: [{ action: 1, resId: 2 }],
+    });
+
+    router.pushState({
+        action: 3,
+        resId: 4,
+        view_type: "form",
+        model: "some.model",
+        active_id: 5,
+        someKey: "someVal",
+    });
+    await nextTick();
+    assert.deepEqual(router.current, {
+        action: 3,
+        resId: 4,
+        view_type: "form",
+        model: "some.model",
+        active_id: 5,
+        someKey: "someVal",
+        actionStack: [
+            {
+                action: 3,
+                resId: 4,
+                model: "some.model",
+                active_id: 5,
+            },
+        ],
+    });
+});
+
 QUnit.test("test the help utils history.back and history.forward", async (assert) => {
     patchWithCleanup(browser.location, {
         origin: "http://lordofthering",
@@ -275,6 +1237,43 @@ QUnit.test("test the help utils history.back and history.forward", async (assert
 
     assert.verifySteps(["ROUTE_CHANGE", "ROUTE_CHANGE", "ROUTE_CHANGE"]);
 });
+
+QUnit.test(
+    "unserialized parts of action stack are preserved when going back/forward",
+    async (assert) => {
+        browser.location.href = "http://example.com/odoo";
+        await createRouter();
+        assert.deepEqual(router.current, {});
+        router.pushState({
+            actionStack: [{ action: "some-path", displayName: "A cool display name" }],
+        });
+        await nextTick();
+        assert.strictEqual(browser.location.href, "http://example.com/odoo/some-path");
+        assert.deepEqual(router.current, {
+            actionStack: [{ action: "some-path", displayName: "A cool display name" }],
+        });
+        router.pushState({
+            actionStack: [{ action: "other-path", displayName: "A different display name" }],
+        });
+        await nextTick();
+        assert.strictEqual(browser.location.href, "http://example.com/odoo/other-path");
+        assert.deepEqual(router.current, {
+            actionStack: [{ action: "other-path", displayName: "A different display name" }],
+        });
+        browser.history.back();
+        await nextTick();
+        assert.strictEqual(browser.location.href, "http://example.com/odoo/some-path");
+        assert.deepEqual(router.current, {
+            actionStack: [{ action: "some-path", displayName: "A cool display name" }],
+        });
+        browser.history.forward();
+        await nextTick();
+        assert.strictEqual(browser.location.href, "http://example.com/odoo/other-path");
+        assert.deepEqual(router.current, {
+            actionStack: [{ action: "other-path", displayName: "A different display name" }],
+        });
+    }
+);
 
 QUnit.module("Router: Retrocompatibility");
 

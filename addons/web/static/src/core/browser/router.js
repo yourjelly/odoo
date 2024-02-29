@@ -4,6 +4,7 @@ import { objectToUrlEncodedString } from "../utils/urls";
 import { browser } from "./browser";
 import { slidingWindow } from "@web/core/utils/arrays";
 
+// FIXME rename
 export const ACTION_KEYS = ["resId", "action", "active_id", "model"];
 
 export const routerBus = new EventBus();
@@ -33,33 +34,18 @@ function parseString(str) {
     }
     return result;
 }
-
 /**
- * For each push request (replaceState or pushState), filterout keys that have been locked before
- * overrides locked keys that are explicitly re-locked or unlocked
- * registers keys in "search" in "lockedKeys" according to the "lock" Boolean
- *
- * @param {Query} search An Object representing the pushed url search
- * @param {Query} currentSearch The current search compare against
- * @return {Query} The resulting "search" where previous locking has been applied
+ * @param {object} values An object with the values of the new state
+ * @param {boolean} replace whether the values should replace the state or be
+ *  layered on top of the current state
+ * @returns {object} the next state of the router
  */
-function applyLocking(search, currentSearch) {
-    const newSearch = Object.assign({}, search);
-    for (const key in currentSearch) {
-        if ([..._lockedKeys].includes(key) && !(key in newSearch)) {
-            newSearch[key] = currentSearch[key];
-        }
-    }
-    return newSearch;
-}
-
-// FIXME: do we need this (ditto with sanitize etc)
-function computeNewState(nextState, replace, currentState) {
-    if (!replace) {
-        nextState = Object.assign({}, currentState, nextState);
-        if (nextState.actionStack?.length) {
-            Object.assign(nextState.actionStack.at(-1), pick(nextState, ...ACTION_KEYS));
-        }
+function computeNextState(values, replace) {
+    const nextState = replace ? pick(current, ..._lockedKeys) : { ...current };
+    Object.assign(nextState, values);
+    // Update last entry in the actionStack
+    if (nextState.actionStack?.length) {
+        Object.assign(nextState.actionStack.at(-1), pick(nextState, ...ACTION_KEYS));
     }
     return sanitizeSearch(nextState);
 }
@@ -130,12 +116,13 @@ function pathFromActionState(state) {
 export function stateToUrl(state) {
     const actionStack = (state.actionStack || [state]).map((a) => ({ ...a }));
     for (const [prevAct, act] of slidingWindow(actionStack, 2)) {
+        // actions would typically map to a path like `active_id/action/res_id`
         if (act.active_id === prevAct.resId) {
-            // actions would typically map to a path like `active_id/action/res_id`
             // avoid doubling up when the active_id is the same as the previous action's res_id
             delete act.active_id;
         }
         if (prevAct.action === act.action) {
+            // avoid doubling up when the action's id is the same as the previous action's
             delete act.action;
         }
     }
@@ -162,6 +149,7 @@ export function urlToState(urlObj) {
         Object.assign(state, sanitizedHash);
         const addHash = hash && !Object.keys(sanitizedHash).length;
         const url = browser.location.origin + stateToUrl(state) + (addHash ? hash : "");
+        // Change the url of the current history entry to the canonical url
         browser.history.replaceState(browser.history.state, null, url);
         urlObj.href = url;
     }
@@ -178,6 +166,7 @@ export function urlToState(urlObj) {
                 action.active_id = aid;
                 aid = undefined;
             }
+            // FIXME do we want parseInt? This precludes parts starting with numbers
             if (isNaN(parseInt(part)) && part !== "new") {
                 // part is an action (id or shortcut) or a model (when no action is found)
                 if (Object.values(action).length > 0) {
@@ -223,8 +212,8 @@ export function urlToState(urlObj) {
             action.active_id = actions.at(-1).resId;
         }
         actions.push(action);
-        // Don't keep actions for models unless they're the last one.
-        // FIXME: should we remove the last action if there is no view_type?
+        // Don't keep actions for models unless they're the last one. If the last one is a model but
+        // doesn't have a view_type, the action service will not mount anyway.
         actions = actions.filter((a) => a.action || (a.model && a.resId) || a === actions.at(-1));
         const activeAction = actions.at(-1);
         if (activeAction) {
@@ -250,17 +239,16 @@ export function startRouter() {
     _lockedKeys = new Set(["debug"]);
 }
 
+// FIXME rewrite this
 // pushState and replaceState keep the browser on the same document. It's a simulation of going to a new page.
 // The back button on the browser is a navigation tool that takes you to the previous document.
 // But in this case, there isn't a previous document.
 // To make the back button appear to work, we need to simulate a new document being loaded.
 
 browser.addEventListener("popstate", (ev) => {
-    // FIXME add breadcrumb display names to state so we don't lose them if we back out of odoo then
-    // forward back into it
     console.log("popState");
     browser.clearTimeout(pushTimeout);
-    current = ev.state?.newState || {};
+    current = ev.state?.nextState || {};
     // Some client actions want to handle loading their own state
     if (!ev.state?.skipRouteChange && !router.skipLoad) {
         routerBus.trigger("ROUTE_CHANGE");
@@ -274,25 +262,28 @@ browser.addEventListener("popstate", (ev) => {
 function makeDebouncedPush(mode) {
     function doPush() {
         // Aggregates push/replace state arguments
-        const replace = allPushArgs.some(([, options]) => options && options.replace);
-        let nextState = allPushArgs.reduce((state, [search]) => {
-            return Object.assign(state || {}, search);
-        }, null);
-        // apply Locking on the final search
-        nextState = applyLocking(nextState, current);
+        const replace = allPushArgs.some(([, options]) => options?.replace);
+        const newValues = allPushArgs.reduce((state, [search]) => Object.assign(state, search), {});
         // Calculates new route based on aggregated search and options
-        const newState = computeNewState(nextState, replace, current);
-        const url = browser.location.origin + stateToUrl(newState);
-        // FIXME is url equality sufficient to skip push/replace? Comparing state seems problematic
+        const nextState = computeNextState(newValues, replace);
+        const url = browser.location.origin + stateToUrl(nextState);
         if (url !== browser.location.href) {
             // If the route changed: pushes or replaces browser state
             if (mode === "push") {
                 console.log("pushState", url);
-                browser.history.pushState({ newState }, "", url);
+                // Because doPush is delayed, the history entry will have the wrong name.
+                // We set the document title to what it was at the time of the pushState
+                // call, then push, which generates the history entry with the right title
+                // then restore the title to what it's supposed to be
+                const prevTitle = allPushArgs.at(-1)[2];
+                const title = document.title;
+                document.title = prevTitle;
+                browser.history.pushState({ nextState }, "", url);
+                document.title = title;
             } else {
-                browser.history.replaceState({ newState }, "", url);
+                browser.history.replaceState({ nextState }, "", url);
             }
-            current = newState;
+            current = nextState;
         }
         const reload = allPushArgs.some(([, options]) => options && options.reload);
         if (reload) {
@@ -304,7 +295,7 @@ function makeDebouncedPush(mode) {
      * @param {object} options
      */
     return function pushOrReplaceState(state, options) {
-        allPushArgs.push([state, options]);
+        allPushArgs.push([state, options, document.title]);
         browser.clearTimeout(pushTimeout);
         pushTimeout = browser.setTimeout(() => {
             doPush();
