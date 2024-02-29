@@ -190,7 +190,7 @@ export class FormController extends Component {
             effect(
                 (model) => {
                     if (status(this) === "mounted") {
-                        this.updateURL(model.root.resId);
+                        this.updateURL(model.root.resId || "new");
                     }
                 },
                 [this.model]

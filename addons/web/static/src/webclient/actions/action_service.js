@@ -1564,7 +1564,7 @@ export function makeActionManager(env, router = _router) {
             if (action.type === "ir.actions.act_window") {
                 actionState.view_type = props.type;
                 if (props.type === "form") {
-                    actionState.resId = controller.resId() || "new";
+                    actionState.resId = controller.resId();
                 }
             }
             if (action.context) {
