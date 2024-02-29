@@ -54,6 +54,7 @@ export function url(route, queryParams, options = {}) {
         (el) => route.length >= el.length && route.slice(0, el.length) === el
     );
     prefix = prefix ? "" : origin;
+    route = route.replace('/null','')
     return `${prefix}${route}${queryString}`;
 }
 
