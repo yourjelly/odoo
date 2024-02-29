@@ -122,14 +122,10 @@
 
                     <t t-set="entries">
                         <div class="d-flex flex-column gap-4">
-                            <div class="flex-basis-100 flex-basis-sm-50 flex-basis-lg-100 order-1 order-lg-0">
-                                <div class="o_download_pdf d-flex gap-1 flex-lg-column flex-xl-row">
-                                    <div class="flex-grow-1">
-                                        <a class="btn btn-secondary d-block o_download_btn" t-att-href="invoice.get_portal_url(report_type='pdf', download=True)" title="Download"><i class="fa fa-download"/> Download</a>
-                                    </div>
-                                    <div class="flex-grow-1">
-                                        <a class="btn btn-secondary d-block o_print_btn o_portal_invoice_print" t-att-href="invoice.get_portal_url(report_type='pdf')" id="print_invoice_report" title="Print" target="_blank"><i class="fa fa-print"/> Print</a>
-                                    </div>
+                            <div>
+                                <div class="o_download_pdf d-flex flex-lg-column flex-xl-row flex-wrap gap-2">
+                                    <a class="btn btn-secondary flex-grow-1 o_download_btn" t-att-href="invoice.get_portal_url(report_type='pdf', download=True)" title="Download"><i class="fa fa-download"/> Download</a>
+                                    <a class="btn btn-secondary flex-grow-1 o_print_btn o_portal_invoice_print" t-att-href="invoice.get_portal_url(report_type='pdf')" id="print_invoice_report" title="Print" target="_blank"><i class="fa fa-print me-1"/> Print</a>
                                 </div>
                             </div>
                             <div t-if="invoice.invoice_user_id" class="flex-grow-1">

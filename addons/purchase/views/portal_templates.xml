@@ -144,14 +144,7 @@
                   </t>
                   <t t-set="entries">
                       <div class="d-flex flex-column gap-4">
-                          <div class="flex-grow-1 order-md-last order-lg-first">
-                              <div class="o_download_pdf btn-toolbar flex-sm-nowrap">
-                                  <div class="btn-group flex-grow-1 mb-1">
-                                      <a class="btn btn-secondary btn-block o_print_btn o_portal_invoice_print" t-att-href="order.get_portal_url(report_type='pdf')" id="print_invoice_report" title="View Details" target="_blank"><i class="fa fa-print"/> View Details</a>
-                                  </div>
-                              </div>
-                          </div>
-
+                        <a class="btn btn-secondary btn-block o_print_btn o_portal_invoice_print" t-att-href="order.get_portal_url(report_type='pdf')" id="print_invoice_report" title="Print" target="_blank"><i class="fa fa-print me-1"/> Print</a>
                           <div class="navspy flex-grow-1 ps-0" t-ignore="true" role="complementary">
                               <ul class="nav flex-column bs-sidenav"></ul>
                           </div>

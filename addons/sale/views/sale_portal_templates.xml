@@ -139,7 +139,7 @@
                     <t t-set="classes" t-value="'d-print-none col-lg-4 col-xl-3'"/>
 
                     <t t-set="title">
-                        <h2 t-field="sale_order.amount_total" data-id="total_amount"/>
+                        <h2 t-field="sale_order.amount_total" data-id="total_amount" class="text-break"/>
                     </t>
                     <t t-set="entries">
                         <div class="d-flex flex-column gap-4">
@@ -150,10 +150,8 @@
                                 <a t-elif="sale_order._has_to_be_paid()" role="button" id="o_sale_portal_paynow" data-bs-toggle="modal" data-bs-target="#modalaccept" href="#" t-att-class="'d-block %s' % ('btn btn-light' if sale_order.transaction_ids else 'btn btn-primary')" >
                                     <i class="fa fa-check"/> <t t-if="not sale_order.signature">Accept &amp; Pay</t><t t-else="">Pay Now</t>
                                 </a>
-                                <div class="o_download_pdf d-flex gap-1 flex-lg-column flex-xl-row">
-                                    <div class="flex-grow-1">
-                                        <a class="btn btn-secondary o_print_btn o_portal_invoice_print d-block" t-att-href="sale_order.get_portal_url(report_type='pdf')" id="print_invoice_report" title="View Details" target="_blank"><i class="fa fa-print"/> View Details</a>
-                                    </div>
+                                <div class="o_download_pdf d-flex gap-2 flex-lg-column flex-xl-row flex-wrap">
+                                    <a class="btn btn-secondary o_print_btn o_portal_invoice_print flex-grow-1" t-att-href="sale_order.get_portal_url(report_type='pdf')" id="print_invoice_report" title="Print" target="_blank"><i class="fa fa-print me-1"/>Print</a>
                                 </div>
                             </div>
 
