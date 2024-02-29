@@ -155,6 +155,9 @@ function patchBrowserWithCleanup() {
                 mockLocation.assign(url);
                 window.dispatchEvent(new PopStateEvent("popstate", { state }));
             },
+            get length() {
+                return historyStack.length;
+            },
         },
         // in tests, we never want to interact with the real local/session storages.
         localStorage: makeRAMLocalStorage(),

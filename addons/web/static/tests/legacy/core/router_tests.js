@@ -11,6 +11,7 @@ import {
     startRouter,
 } from "@web/core/browser/router";
 import { nextTick, patchWithCleanup } from "../helpers/utils";
+import { redirect } from "@web/core/utils/urls";
 
 const _urlToState = (url) => urlToState(new URL(url, browser.location.origin));
 
@@ -1432,38 +1433,39 @@ QUnit.test("pushState adds action-related keys to last entry in actionStack", as
 
 QUnit.test("test the help utils history.back and history.forward", async (assert) => {
     patchWithCleanup(browser.location, {
-        origin: "http://lordofthering",
+        origin: "http://example.com",
     });
+    redirect("/");
     routerBus.addEventListener("ROUTE_CHANGE", () => assert.step("ROUTE_CHANGE"));
     await createRouter();
 
     router.pushState({ k1: 1 });
     await nextTick();
-    assert.deepEqual(browser.location.href, "http://lordofthering/odoo?k1=1");
+    assert.deepEqual(browser.location.href, "http://example.com/odoo?k1=1");
 
     router.pushState({ k2: 2 });
     await nextTick();
-    assert.deepEqual(browser.location.href, "http://lordofthering/odoo?k1=1&k2=2");
+    assert.deepEqual(browser.location.href, "http://example.com/odoo?k1=1&k2=2");
 
     router.pushState({ k3: 3 }, { replace: true });
     await nextTick();
-    assert.deepEqual(browser.location.href, "http://lordofthering/odoo?k3=3");
+    assert.deepEqual(browser.location.href, "http://example.com/odoo?k3=3");
 
     browser.history.back(); // Click on back button
     await nextTick();
-    assert.deepEqual(browser.location.href, "http://lordofthering/odoo?k1=1&k2=2");
+    assert.deepEqual(browser.location.href, "http://example.com/odoo?k1=1&k2=2");
 
     router.pushState({ k4: 3 }, { replace: true }); // Click on a link
     await nextTick();
-    assert.deepEqual(browser.location.href, "http://lordofthering/odoo?k4=3");
+    assert.deepEqual(browser.location.href, "http://example.com/odoo?k4=3");
 
     browser.history.back(); // Click on back button
     await nextTick();
-    assert.deepEqual(browser.location.href, "http://lordofthering/odoo?k1=1&k2=2");
+    assert.deepEqual(browser.location.href, "http://example.com/odoo?k1=1&k2=2");
 
     browser.history.forward(); // Click on forward button
     await nextTick();
-    assert.deepEqual(browser.location.href, "http://lordofthering/odoo?k4=3");
+    assert.deepEqual(browser.location.href, "http://example.com/odoo?k4=3");
 
     assert.verifySteps(["ROUTE_CHANGE", "ROUTE_CHANGE", "ROUTE_CHANGE"]);
 });
@@ -1471,10 +1473,7 @@ QUnit.test("test the help utils history.back and history.forward", async (assert
 QUnit.test(
     "unserialized parts of action stack are preserved when going back/forward",
     async (assert) => {
-        patchWithCleanup(browser.location, {
-            origin: "http://example.com",
-            pathname: "/odoo",
-        });
+        browser.location.href = "http://example.com/odoo";
         await createRouter();
         assert.deepEqual(router.current, {});
         router.pushState({
