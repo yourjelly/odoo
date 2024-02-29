@@ -129,8 +129,7 @@ def unslug_url(s):
 # Language tools
 # ------------------------------------------------------------
 
-
-def url_localized(url=None, lang_code=None, canonical_domain=None, prefetch_langs=False, force_default_lang=False):
+def url_localized(url=None, lang_code=None, force_canonical_domain=False, prefetch_langs=False, force_default_lang=False):
     """ Returns the given URL adapted for the given lang, meaning that:
     1. It will have the lang suffixed to it
     2. The model converter parts will be translated
@@ -177,9 +176,9 @@ def url_localized(url=None, lang_code=None, canonical_domain=None, prefetch_lang
     if force_default_lang or lang != request.env['ir.http']._get_default_lang():
         path = f'/{lang._get_cached("url_code")}{path if path != "/" else ""}'
 
-    if canonical_domain:
+    if force_canonical_domain:
         # canonical URLs should not have qs
-        return werkzeug.urls.url_join(canonical_domain, path)
+        return werkzeug.urls.url_join(request.env['ir.http']._get_canonical_domain(), path)
 
     return path + sep + qs
 
@@ -344,6 +343,10 @@ class IrHttp(models.AbstractModel):
         if lang_code:
             return request.env['res.lang']._lang_get(lang_code)
         return request.env['res.lang'].search([], limit=1)
+
+    @classmethod
+    def _get_canonical_domain(cls):
+        return request.httprequest.url_root
 
     @api.model
     def get_frontend_session_info(self):

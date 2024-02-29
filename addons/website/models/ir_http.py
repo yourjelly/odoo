@@ -254,6 +254,13 @@ class Http(models.AbstractModel):
         return super()._get_default_lang()
 
     @classmethod
+    def _get_canonical_domain(cls):
+        if getattr(request, 'is_frontend', True):
+            website = request.env['website'].sudo().get_current_website()
+            return website.get_base_url()
+        return super()._get_canonical_domain()
+
+    @classmethod
     def _get_translation_frontend_modules_name(cls):
         mods = super()._get_translation_frontend_modules_name()
         installed = request.registry._init_modules.union(odoo.conf.server_wide_modules)
