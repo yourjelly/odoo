@@ -27,6 +27,7 @@ import { router } from "@web/core/browser/router";
 
 import { onMounted } from "@odoo/owl";
 import { patchUserContextWithCleanup } from "../../helpers/mock_services";
+import { redirect } from "@web/core/utils/urls";
 let serverData;
 let target;
 const serviceRegistry = registry.category("services");
@@ -1590,7 +1591,7 @@ QUnit.module("ActionManager", (hooks) => {
     );
 
     QUnit.test("destroy action with lazy loaded controller", async function (assert) {
-        browser.location.href = "/web#action=3&id=2&view_type=form";
+        redirect("/web#action=3&id=2&view_type=form");
         const webClient = await createWebClient({ serverData });
         assert.containsNone(target, ".o_list_view");
         assert.containsOnce(target, ".o_form_view");

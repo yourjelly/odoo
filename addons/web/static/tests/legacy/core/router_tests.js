@@ -1360,7 +1360,10 @@ QUnit.test("test the help utils history.back and history.forward", async (assert
 QUnit.test(
     "unserialized parts of action stack are preserved when going back/forward",
     async (assert) => {
-        browser.location.href = "http://example.com/odoo";
+        patchWithCleanup(browser.location, {
+            origin: "http://example.com",
+            pathname: "/odoo",
+        });
         await createRouter();
         assert.deepEqual(router.current, {});
         router.pushState({
