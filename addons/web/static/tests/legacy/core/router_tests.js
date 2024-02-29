@@ -95,14 +95,12 @@ QUnit.test("can parse URI encoded strings", (assert) => {
 
 QUnit.module("Router: stateToUrl", () => {
     QUnit.test("encodes URI compatible strings", (assert) => {
-        let route = {};
-        assert.strictEqual(stateToUrl(route), "/odoo");
-
-        route = { a: "11", g: "summer wine" };
-        assert.strictEqual(stateToUrl(route), "/odoo?a=11&g=summer%20wine");
-
-        route = { g: "2", c: "", e: "kloug,gloubi" };
-        assert.strictEqual(stateToUrl(route), "/odoo?g=2&c=&e=kloug%2Cgloubi");
+        assert.strictEqual(stateToUrl({}), "/odoo");
+        assert.strictEqual(stateToUrl({ a: "11", g: "summer wine" }), "/odoo?a=11&g=summer%20wine");
+        assert.strictEqual(
+            stateToUrl({ g: "2", c: "", e: "kloug,gloubi" }),
+            "/odoo?g=2&c=&e=kloug%2Cgloubi"
+        );
     });
 
     QUnit.test("backwards compatibility: no action stack, action encoded in path", (assert) => {
@@ -114,6 +112,10 @@ QUnit.module("Router: stateToUrl", () => {
         assert.strictEqual(
             stateToUrl({ active_id: 5, action: "some-path", resId: 2 }),
             "/odoo/5/some-path/2"
+        );
+        assert.strictEqual(
+            stateToUrl({ active_id: 5, action: "some-path", resId: "new" }),
+            "/odoo/5/some-path/new"
         );
         assert.strictEqual(
             stateToUrl({ action: 1, resId: 2 }),
@@ -132,6 +134,10 @@ QUnit.module("Router: stateToUrl", () => {
         assert.strictEqual(
             stateToUrl({ active_id: 5, model: "some.model", resId: 2 }),
             "/odoo/5/some.model/2"
+        );
+        assert.strictEqual(
+            stateToUrl({ active_id: 5, model: "some.model", resId: "new" }),
+            "/odoo/5/some.model/new"
         );
         assert.strictEqual(
             stateToUrl({ active_id: 5, model: "some.model", view_type: "some_viewtype" }),
@@ -176,6 +182,10 @@ QUnit.module("Router: stateToUrl", () => {
             "/odoo/5/some-path/2"
         );
         assert.strictEqual(
+            stateToUrl({ actionStack: [{ active_id: 5, action: "some-path", resId: "new" }] }),
+            "/odoo/5/some-path/new"
+        );
+        assert.strictEqual(
             stateToUrl({ actionStack: [{ action: 1, resId: 2 }] }),
             "/odoo/act-1/2",
             "numerical action id instead of path"
@@ -201,6 +211,10 @@ QUnit.module("Router: stateToUrl", () => {
         assert.strictEqual(
             stateToUrl({ actionStack: [{ active_id: 5, model: "some.model", resId: 2 }] }),
             "/odoo/5/some.model/2"
+        );
+        assert.strictEqual(
+            stateToUrl({ actionStack: [{ active_id: 5, model: "some.model", resId: "new" }] }),
+            "/odoo/5/some.model/new"
         );
         assert.strictEqual(
             stateToUrl({
@@ -314,6 +328,15 @@ QUnit.module("Router: stateToUrl", () => {
         assert.strictEqual(
             stateToUrl({
                 actionStack: [
+                    { action: "some-path" },
+                    { active_id: 5, action: "other-path", resId: "new" },
+                ],
+            }),
+            "/odoo/some-path/5/other-path/new"
+        );
+        assert.strictEqual(
+            stateToUrl({
+                actionStack: [
                     { action: "some-path", resId: 5 },
                     { active_id: 5, action: "other-path" },
                 ],
@@ -339,7 +362,10 @@ QUnit.module("Router: stateToUrl", () => {
         );
         assert.strictEqual(
             stateToUrl({
-                actionStack: [{ action: "module.xml_id" }, { active_id: 5, action: "module.other_xml_id", resId: 2 }],
+                actionStack: [
+                    { action: "module.xml_id" },
+                    { active_id: 5, action: "module.other_xml_id", resId: 2 },
+                ],
             }),
             "/odoo/act-module.xml_id/5/act-module.other_xml_id/2",
             "actions as xml_ids"
@@ -390,6 +416,15 @@ QUnit.module("Router: stateToUrl", () => {
                 ],
             }),
             "/odoo/some.model/5/other.model/2"
+        );
+        assert.strictEqual(
+            stateToUrl({
+                actionStack: [
+                    { model: "some.model" },
+                    { active_id: 5, model: "other.model", resId: "new" },
+                ],
+            }),
+            "/odoo/some.model/5/other.model/new"
         );
         assert.strictEqual(
             stateToUrl({
@@ -465,6 +500,15 @@ QUnit.module("Router: stateToUrl", () => {
                 ],
             }),
             "/odoo/some-path/5/some.model/2"
+        );
+        assert.strictEqual(
+            stateToUrl({
+                actionStack: [
+                    { action: "some-path" },
+                    { active_id: 5, model: "some.model", resId: "new" },
+                ],
+            }),
+            "/odoo/some-path/5/some.model/new"
         );
         assert.strictEqual(
             stateToUrl({
@@ -549,6 +593,15 @@ QUnit.module("Router: stateToUrl", () => {
                 ],
             }),
             "/odoo/some.model/5/other-path/2"
+        );
+        assert.strictEqual(
+            stateToUrl({
+                actionStack: [
+                    { model: "some.model" },
+                    { active_id: 5, action: "other-path", resId: "new" },
+                ],
+            }),
+            "/odoo/some.model/5/other-path/new"
         );
         assert.strictEqual(
             stateToUrl({
@@ -731,6 +784,15 @@ QUnit.module("Router: urlToState", () => {
             },
             "two actions are created for action with resId"
         );
+        assert.deepEqual(
+            _urlToState("/odoo/some-path/new"),
+            {
+                action: "some-path",
+                resId: "new",
+                actionStack: [{ action: "some-path" }, { action: "some-path", resId: "new" }],
+            },
+            "new record"
+        );
         assert.deepEqual(_urlToState("/odoo/5/some-path/2"), {
             active_id: 5,
             action: "some-path",
@@ -770,6 +832,15 @@ QUnit.module("Router: urlToState", () => {
                 actionStack: [{ model: "some.model", resId: 2 }],
             },
             "single action is created for model with resId"
+        );
+        assert.deepEqual(
+            _urlToState("/odoo/some.model/new"),
+            {
+                model: "some.model",
+                resId: "new",
+                actionStack: [{ model: "some.model", resId: "new" }],
+            },
+            "new record"
         );
         assert.deepEqual(_urlToState("/odoo/5/some.model"), {
             active_id: 5,
@@ -873,6 +944,17 @@ QUnit.module("Router: urlToState", () => {
                 { active_id: 5, action: "other-path", resId: 2 },
             ],
         });
+        assert.deepEqual(_urlToState("/odoo/some-path/5/other-path/new"), {
+            active_id: 5,
+            action: "other-path",
+            resId: "new",
+            actionStack: [
+                { action: "some-path" },
+                { action: "some-path", resId: 5 },
+                { active_id: 5, action: "other-path" },
+                { active_id: 5, action: "other-path", resId: "new" },
+            ],
+        });
         assert.deepEqual(_urlToState("/odoo/act-1/5/act-6/2"), {
             active_id: 5,
             action: 6,
@@ -942,6 +1024,15 @@ QUnit.module("Router: urlToState", () => {
                 { active_id: 5, model: "other.model", resId: 2 },
             ],
         });
+        assert.deepEqual(_urlToState("/odoo/some.model/5/other.model/new"), {
+            active_id: 5,
+            model: "other.model",
+            resId: "new",
+            actionStack: [
+                { model: "some.model", resId: 5 },
+                { active_id: 5, model: "other.model", resId: "new" },
+            ],
+        });
         assert.deepEqual(_urlToState("/odoo/m-model_no_dot/5/m-no_dot_model/2"), {
             active_id: 5,
             model: "no_dot_model",
@@ -991,6 +1082,16 @@ QUnit.module("Router: urlToState", () => {
                 { action: "some-path" },
                 { action: "some-path", resId: 5 },
                 { active_id: 5, model: "some.model", resId: 2 },
+            ],
+        });
+        assert.deepEqual(_urlToState("/odoo/some-path/5/some.model/new"), {
+            active_id: 5,
+            model: "some.model",
+            resId: "new",
+            actionStack: [
+                { action: "some-path" },
+                { action: "some-path", resId: 5 },
+                { active_id: 5, model: "some.model", resId: "new" },
             ],
         });
         assert.deepEqual(_urlToState("/odoo/act-1/5/m-model_no_dot/2"), {
@@ -1051,6 +1152,16 @@ QUnit.module("Router: urlToState", () => {
                 { model: "some.model", resId: 5 },
                 { active_id: 5, action: "other-path" },
                 { active_id: 5, action: "other-path", resId: 2 },
+            ],
+        });
+        assert.deepEqual(_urlToState("/odoo/some.model/5/other-path/new"), {
+            active_id: 5,
+            action: "other-path",
+            resId: "new",
+            actionStack: [
+                { model: "some.model", resId: 5 },
+                { active_id: 5, action: "other-path" },
+                { active_id: 5, action: "other-path", resId: "new" },
             ],
         });
         assert.deepEqual(_urlToState("/odoo/m-model_no_dot/5/act-1/2"), {

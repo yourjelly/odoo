@@ -1584,15 +1584,15 @@ export function makeActionManager(env, router = _router) {
         });
         if (actions.length) {
             newState.actionStack = actions;
-            Object.assign(newState, pick(newState.actionStack.at(-1), "view_type", ...PATH_KEYS));
+            const stateKeys = [...PATH_KEYS];
+            const { action, props } = lastCtrl;
+            if (props.type !== "form" && props.type !== action.views?.[0][1]) {
+                // add view_type only when it's not already known implicitly
+                stateKeys.push("view_type");
+            }
+            Object.assign(newState, pick(newState.actionStack.at(-1), ...stateKeys));
         }
-        if (
-            lastCtrl.action.type === "ir.actions.act_window" &&
-            (lastCtrl.props.type === "form" || lastCtrl.props.type === lastCtrl.action.views[0][1])
-        ) {
-            // view_type is already known implicitly
-            delete newState.view_type;
-        }
+
         router.pushState(newState, { replace: true });
     }
     return {
