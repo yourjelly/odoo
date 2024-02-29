@@ -4,8 +4,8 @@ import { objectToUrlEncodedString } from "../utils/urls";
 import { browser } from "./browser";
 import { slidingWindow } from "@web/core/utils/arrays";
 
-// FIXME rename
-export const ACTION_KEYS = ["resId", "action", "active_id", "model"];
+// Keys that are serialized in the URL as path segments instead of query string
+export const PATH_KEYS = ["resId", "action", "active_id", "model"];
 
 export const routerBus = new EventBus();
 
@@ -45,7 +45,7 @@ function computeNextState(values, replace) {
     Object.assign(nextState, values);
     // Update last entry in the actionStack
     if (nextState.actionStack?.length) {
-        Object.assign(nextState.actionStack.at(-1), pick(nextState, ...ACTION_KEYS));
+        Object.assign(nextState.actionStack.at(-1), pick(nextState, ...PATH_KEYS));
     }
     return sanitizeSearch(nextState);
 }
@@ -128,9 +128,11 @@ export function stateToUrl(state) {
     }
     const pathSegments = actionStack.map(pathFromActionState).filter(Boolean);
     const path = pathSegments.length ? `/${pathSegments.join("/")}` : "";
-    const search = objectToUrlEncodedString(omit(state, "actionStack", ...ACTION_KEYS));
+    const search = objectToUrlEncodedString(omit(state, "actionStack", ...PATH_KEYS));
     return `/odoo${path}${search ? `?${search}` : ""}`;
 }
+
+const isNumeric = (str) => str?.match(/^\d+$/);
 
 export function urlToState(urlObj) {
     const { pathname, hash, search } = urlObj;
@@ -142,6 +144,7 @@ export function urlToState(urlObj) {
     // 2. It has one or more keys/values, in that case, we merge it with the search.
     if (pathname === "/web") {
         const sanitizedHash = sanitizeHash(parseHash(hash));
+        // Old urls used "id", it is now resId for clarity. Remap to the new name.
         if (sanitizedHash.id) {
             sanitizedHash.resId = sanitizedHash.id;
             delete sanitizedHash.id;
@@ -157,72 +160,52 @@ export function urlToState(urlObj) {
     const splitPath = urlObj.pathname.split("/").filter(Boolean);
 
     if (splitPath.length > 1 && splitPath[0] === "odoo") {
-        splitPath.splice(0, 1);
-        let actions = [];
-        let action = {};
-        let aid = undefined;
-        for (const part of splitPath) {
-            if (aid) {
-                action.active_id = aid;
-                aid = undefined;
+        splitPath[0] = null;
+        const actionParts = [...splitPath.entries()].filter(
+            ([i, part]) => i !== 0 && !part.match(/^\d+$/) && part !== "new"
+        );
+        const actions = [];
+        for (const [i, part] of actionParts) {
+            const action = {};
+            const [left, right] = [splitPath[i - 1], splitPath[i + 1]];
+            if (isNumeric(left)) {
+                action.active_id = parseInt(left);
             }
-            // FIXME do we want parseInt? This precludes parts starting with numbers
-            if (isNaN(parseInt(part)) && part !== "new") {
-                // part is an action (id or shortcut) or a model (when no action is found)
-                if (Object.values(action).length > 0) {
-                    // We have a new action, so we push the previous one
-                    if (action.resId) {
-                        aid = action.resId;
-                    }
-                    actions.push({ ...action });
-                }
-                action = {};
-                if (part.startsWith("act-")) {
-                    // it's an action id or an action xmlid
-                    action.action = isNaN(parseInt(part.slice(4)))
-                        ? part.slice(4)
-                        : parseInt(part.slice(4));
-                } else if (part.includes(".") || part.startsWith("m-")) {
-                    // it's a model
-                    // Note that the shourtcut don't have "."
-                    if (part.startsWith("m-")) {
-                        action.model = part.slice(2);
-                    } else {
-                        action.model = part;
-                    }
-                } else {
-                    // it's a shortcut of an action
-                    action.action = part;
-                }
-                continue;
+
+            if (right === "new") {
+                action.resId = "new";
+            } else if (isNumeric(right)) {
+                action.resId = parseInt(right);
             }
-            // Action with a resId
-            if (Object.values(action).length > 0) {
-                // We push the action without the id, to have a multimodel action view
-                actions.push({ ...action });
-            }
-            if (part === "new") {
-                action.resId = part;
-                action.view_type = "form";
+
+            if (part.startsWith("act-")) {
+                // numeric id or xml_id
+                const actionId = part.slice(4);
+                action.action = isNumeric(actionId) ? parseInt(actionId) : actionId;
+            } else if (part.startsWith("m-")) {
+                action.model = part.slice(2);
+            } else if (part.includes(".")) {
+                action.model = part;
             } else {
-                action.resId = parseInt(part);
+                // action tag or path
+                action.action = part;
+            }
+
+            if (action.resId && action.action) {
+                actions.push(omit(action, "resId"));
+            }
+            // Don't create actions for models without resId unless they're the last one.
+            // If the last one is a model but doesn't have a view_type, the action service will not mount it anyway.
+            if (action.action || action.resId || i === splitPath.length - 1) {
+                actions.push(action);
             }
         }
-        if (actions.at(-1)?.resId) {
-            action.active_id = actions.at(-1).resId;
-        }
-        actions.push(action);
-        // Don't keep actions for models unless they're the last one. If the last one is a model but
-        // doesn't have a view_type, the action service will not mount anyway.
-        actions = actions.filter((a) => a.action || (a.model && a.resId) || a === actions.at(-1));
         const activeAction = actions.at(-1);
         if (activeAction) {
-            if (activeAction.resId && activeAction.resId !== "new") {
-                state.resId = activeAction.resId;
-            }
-            Object.assign(state, pick(activeAction, "action", "model", "active_id", "view_type"));
-            state.actionStack = actions;
+            Object.assign(state, activeAction);
+            Object.assign(activeAction, pick(state, ...PATH_KEYS));
         }
+        state.actionStack = actions;
     }
     return state;
 }
@@ -239,7 +222,7 @@ export function startRouter() {
     _lockedKeys = new Set(["debug"]);
 }
 
-// FIXME rewrite this
+// FIXME rewrite this comment
 // pushState and replaceState keep the browser on the same document. It's a simulation of going to a new page.
 // The back button on the browser is a navigation tool that takes you to the previous document.
 // But in this case, there isn't a previous document.
@@ -311,6 +294,7 @@ export const router = {
     get current() {
         return current;
     },
+    // TODO: stop debouncing these and remove the ugly hack to have the correct title for history entries
     pushState: makeDebouncedPush("push"),
     replaceState: makeDebouncedPush("replace"),
     cancelPushes: () => browser.clearTimeout(pushTimeout),

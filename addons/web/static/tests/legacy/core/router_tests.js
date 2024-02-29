@@ -120,6 +120,11 @@ QUnit.module("Router: stateToUrl", () => {
             "/odoo/act-1/2",
             "action id instead of path/tag"
         );
+        assert.strictEqual(
+            stateToUrl({ action: "module.xml_id", resId: 2 }),
+            "/odoo/act-module.xml_id/2",
+            "action xml_id instead of path/tag"
+        );
         // model
         assert.strictEqual(stateToUrl({ model: "some.model" }), "/odoo/some.model");
         assert.strictEqual(stateToUrl({ model: "some.model", resId: 2 }), "/odoo/some.model/2");
@@ -174,6 +179,11 @@ QUnit.module("Router: stateToUrl", () => {
             stateToUrl({ actionStack: [{ action: 1, resId: 2 }] }),
             "/odoo/act-1/2",
             "numerical action id instead of path"
+        );
+        assert.strictEqual(
+            stateToUrl({ actionStack: [{ action: "module.xml_id", resId: 2 }] }),
+            "/odoo/act-module.xml_id/2",
+            "action xml_id instead of path"
         );
         // model
         assert.strictEqual(
@@ -327,6 +337,13 @@ QUnit.module("Router: stateToUrl", () => {
             "/odoo/act-1/5/act-6/2",
             "numerical actions"
         );
+        assert.strictEqual(
+            stateToUrl({
+                actionStack: [{ action: "module.xml_id" }, { active_id: 5, action: "module.other_xml_id", resId: 2 }],
+            }),
+            "/odoo/act-module.xml_id/5/act-module.other_xml_id/2",
+            "actions as xml_ids"
+        );
         // model
         assert.strictEqual(
             stateToUrl({ actionStack: [{ model: "some.model" }, { model: "other.model" }] }),
@@ -477,6 +494,15 @@ QUnit.module("Router: stateToUrl", () => {
             }),
             "/odoo/act-1/5/m-model_no_dot/2"
         );
+        assert.strictEqual(
+            stateToUrl({
+                actionStack: [
+                    { action: "module.xml_id", resId: 5 },
+                    { active_id: 5, model: "model_no_dot", resId: 2 },
+                ],
+            }),
+            "/odoo/act-module.xml_id/5/m-model_no_dot/2"
+        );
         // model + action
         assert.strictEqual(
             stateToUrl({ actionStack: [{ model: "some.model" }, { action: "other-path" }] }),
@@ -551,6 +577,15 @@ QUnit.module("Router: stateToUrl", () => {
                 ],
             }),
             "/odoo/m-model_no_dot/5/act-1/2"
+        );
+        assert.strictEqual(
+            stateToUrl({
+                actionStack: [
+                    { model: "model_no_dot", resId: 5 },
+                    { active_id: 5, action: "module.xml_id", resId: 2 },
+                ],
+            }),
+            "/odoo/m-model_no_dot/5/act-module.xml_id/2"
         );
 
         // edge cases
@@ -632,6 +667,48 @@ QUnit.module("Router: urlToState", () => {
         });
     });
 
+    QUnit.test("deserialize action in legacy url form", (assert) => {
+        assert.deepEqual(
+            _urlToState("/web#id=5&action=1&model=some.model&view_type=form&menu_id=137&cids=1"),
+            {
+                action: 1,
+                resId: 5,
+                cids: 1,
+                menu_id: 137,
+                model: "some.model",
+                view_type: "form",
+                actionStack: [
+                    {
+                        action: 1,
+                    },
+                    {
+                        action: 1,
+                        resId: 5,
+                        model: "some.model",
+                    },
+                ],
+            }
+        );
+
+        assert.deepEqual(
+            _urlToState("/web#id=5&model=some.model&view_type=form&menu_id=137&cids=1"),
+            {
+                resId: 5,
+                cids: 1,
+                menu_id: 137,
+                model: "some.model",
+                view_type: "form",
+                actionStack: [
+                    {
+                        resId: 5,
+                        model: "some.model",
+                    },
+                ],
+            },
+            "no action"
+        );
+    });
+
     QUnit.test("deserialize single action", (assert) => {
         assert.deepEqual(_urlToState(""), {});
         assert.deepEqual(_urlToState("/odoo"), {});
@@ -674,6 +751,11 @@ QUnit.module("Router: urlToState", () => {
             action: 1,
             resId: 2,
             actionStack: [{ action: 1 }, { action: 1, resId: 2 }],
+        });
+        assert.deepEqual(_urlToState("/odoo/act-module.xml_id/2"), {
+            action: "module.xml_id",
+            resId: 2,
+            actionStack: [{ action: "module.xml_id" }, { action: "module.xml_id", resId: 2 }],
         });
         // model
         assert.deepEqual(_urlToState("/odoo/some.model"), {
@@ -802,6 +884,17 @@ QUnit.module("Router: urlToState", () => {
                 { active_id: 5, action: 6, resId: 2 },
             ],
         });
+        assert.deepEqual(_urlToState("/odoo/act-module.xml_id/5/act-module.other_xml_id/2"), {
+            active_id: 5,
+            action: "module.other_xml_id",
+            resId: 2,
+            actionStack: [
+                { action: "module.xml_id" },
+                { action: "module.xml_id", resId: 5 },
+                { active_id: 5, action: "module.other_xml_id" },
+                { active_id: 5, action: "module.other_xml_id", resId: 2 },
+            ],
+        });
         // model
         assert.deepEqual(
             _urlToState("/odoo/some.model/other.model"),
@@ -910,6 +1003,16 @@ QUnit.module("Router: urlToState", () => {
                 { active_id: 5, model: "model_no_dot", resId: 2 },
             ],
         });
+        assert.deepEqual(_urlToState("/odoo/act-module.xml_id/5/m-model_no_dot/2"), {
+            active_id: 5,
+            model: "model_no_dot",
+            resId: 2,
+            actionStack: [
+                { action: "module.xml_id" },
+                { action: "module.xml_id", resId: 5 },
+                { active_id: 5, model: "model_no_dot", resId: 2 },
+            ],
+        });
         // model + action
         assert.deepEqual(_urlToState("/odoo/some.model/other-path"), {
             action: "other-path",
@@ -960,6 +1063,16 @@ QUnit.module("Router: urlToState", () => {
                 { active_id: 5, action: 1, resId: 2 },
             ],
         });
+        assert.deepEqual(_urlToState("/odoo/m-model_no_dot/5/act-module.xml_id/2"), {
+            active_id: 5,
+            action: "module.xml_id",
+            resId: 2,
+            actionStack: [
+                { model: "model_no_dot", resId: 5 },
+                { active_id: 5, action: "module.xml_id" },
+                { active_id: 5, action: "module.xml_id", resId: 2 },
+            ],
+        });
 
         // edge cases
         assert.deepEqual(_urlToState("/odoo/some-path/5/other-path/2?some_key=some_value"), {
@@ -1003,25 +1116,31 @@ QUnit.module("Router: urlToState", () => {
             },
             "view_type and resId aren't incompatible"
         );
-        // FIXME: this doesn't work yet: it generates 2 actions for some-path with 2 and 5 as resId
-        // assert.deepEqual(_urlToState("/odoo/some-path/2/5/other-path"), {
-        //     active_id: 5,
-        //     action: "other-path",
-        //     actionStack: [
-        //         { action: "some-path" },
-        //         { action: "some-path", resId: 2 },
-        //         { active_id: 5, action: "other-path" },
-        //     ],
-        // });
-        // FIXME: this doesn't work yet: it generates 2 actions for some.model with 2 and 5 as resId
-        // assert.deepEqual(_urlToState("/odoo/some.model/2/5/other.model"), {
-        //     active_id: 5,
-        //     model: "other.model",
-        //     actionStack: [
-        //         { model: "some.model", resId: 2 },
-        //         { active_id: 5, model: "other.model" },
-        //     ],
-        // });
+        assert.deepEqual(
+            _urlToState("/odoo/some-path/2/5/other-path"),
+            {
+                active_id: 5,
+                action: "other-path",
+                actionStack: [
+                    { action: "some-path" },
+                    { action: "some-path", resId: 2 },
+                    { active_id: 5, action: "other-path" },
+                ],
+            },
+            "resId immediately following active_id: action"
+        );
+        assert.deepEqual(
+            _urlToState("/odoo/some.model/2/5/other.model"),
+            {
+                active_id: 5,
+                model: "other.model",
+                actionStack: [
+                    { model: "some.model", resId: 2 },
+                    { active_id: 5, model: "other.model" },
+                ],
+            },
+            "resId immediately following active_id: model"
+        );
     });
 });
 

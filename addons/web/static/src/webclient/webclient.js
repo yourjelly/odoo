@@ -54,6 +54,7 @@ export class WebClient extends Component {
         onWillStart(this.registerServiceWorker);
     }
 
+    // FIXME this is not re-entrant: multiple back/fw in quick succession may break the controllerStack
     async loadRouterState() {
         const firstAction = router.current.actionStack && router.current.actionStack[0].action;
         let stateLoaded = await this.actionService.loadState();

@@ -14,7 +14,7 @@ import { CallbackRecorder } from "./action_hook";
 import { ReportAction } from "./reports/report_action";
 import { UPDATE_METHODS } from "@web/core/orm_service";
 import { ControlPanel } from "@web/search/control_panel/control_panel";
-import { ACTION_KEYS, router as _router } from "@web/core/browser/router";
+import { PATH_KEYS, router as _router } from "@web/core/browser/router";
 
 import {
     Component,
@@ -225,9 +225,10 @@ export function makeActionManager(env, router = _router) {
             }
         }
         const displayNames = await Promise.all(keys.map((k) => breadcrumbCache[k]));
-        const newStack = [];
+        const newStack = []; // FIXME remove
         for (const [controller, displayName] of zip(controllers, displayNames)) {
             if (displayName === null) {
+                // FIXME remove controllers you don't have access to
                 console.warn(
                     "The following element was removed from the breadcrumb and from the url.",
                     "This could be because the action wasn't found or because the user doesn't have the right to access to the record",
@@ -433,7 +434,7 @@ export function makeActionManager(env, router = _router) {
                     additionalContext: context,
                     viewType: state.resId ? "form" : state.view_type,
                 });
-                if (state.resId) {
+                if (state.resId && state.resId !== "new") {
                     options.props = { resId: state.resId };
                 }
             }
@@ -441,7 +442,7 @@ export function makeActionManager(env, router = _router) {
             if (state.resId || state.view_type === "form") {
                 actionRequest = {
                     res_model: state.model,
-                    res_id: state.resId,
+                    res_id: state.resId === "new" ? undefined : state.resId,
                     type: "ir.actions.act_window",
                     views: [[state.view_id ? state.view_id : false, "form"]], // TODO add tests for view_id
                 };
@@ -1583,14 +1584,14 @@ export function makeActionManager(env, router = _router) {
         });
         if (actions.length) {
             newState.actionStack = actions;
-            Object.assign(newState, pick(newState.actionStack.at(-1), ...ACTION_KEYS));
+            Object.assign(newState, pick(newState.actionStack.at(-1), "view_type", ...PATH_KEYS));
         }
         if (
             lastCtrl.action.type === "ir.actions.act_window" &&
-            lastCtrl.props.type !== "form" &&
-            lastCtrl.props.type !== lastCtrl.action.views[0][1]
+            (lastCtrl.props.type === "form" || lastCtrl.props.type === lastCtrl.action.views[0][1])
         ) {
-            newState.view_type = lastCtrl.props.type;
+            // view_type is already known implicitly
+            delete newState.view_type;
         }
         router.pushState(newState, { replace: true });
     }
