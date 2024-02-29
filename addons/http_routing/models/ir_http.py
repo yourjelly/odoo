@@ -144,14 +144,27 @@ def url_localized(url=None, lang_code=None, force_canonical_domain=False, prefet
     - `_get_url_localized(lang_fr, '/shop/my-phone-14', True)` will return
         `<base_url>/fr/shop/mon-telephone-14`
     """
-    if not lang_code:
-        lang = request.lang
-    else:
-        lang = request.env['res.lang']._lang_get(lang_code)
+    url = pycompat.to_text(url).strip()
+    try:
+        url_parsed = werkzeug.urls.url_parse(url)
+    except ValueError:
+        # e.g. Invalid IPv6 URL, `werkzeug.urls.url_parse('http://]')`
+        url = False
 
-    if not url:
-        qs = keep_query()
-        url = request.httprequest.path + ('?%s' % qs if qs else '')
+    # relative URL with a path
+    if (
+        not url
+        or not url.startswith('/')
+        or url_parsed.netloc
+        or url_parsed.scheme
+        or not url_parsed.path
+        or not is_multilang_url(url)  # exclude /web/ and /static/ URLs
+    ):
+        return url
+
+    if not lang_code:
+        lang_code = request.context['lang']
+    lang = request.env['res.lang']._lang_get(lang_code)
 
     # '/shop/furn-0269-chaise-de-bureau-noire-17?' to
     # '/shop/furn-0269-chaise-de-bureau-noire-17', otherwise -> 404
@@ -170,7 +183,7 @@ def url_localized(url=None, lang_code=None, force_canonical_domain=False, prefet
                     args[key] = val = val.with_context(prefetch_langs=True)
         router = http.root.get_db_router(request.db).bind('')
         path = router.build(rule.endpoint, args)
-    except (NotFound, AccessError, MissingError):
+    except (NotFound, AccessError, MissingError, werkzeug.exceptions.MethodNotAllowed):
         # The build method returns a quoted URL so convert in this case for consistency.
         path = werkzeug.urls.url_quote_plus(url, safe='/')
     if force_default_lang or lang != request.env['ir.http']._get_default_lang():
