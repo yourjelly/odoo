@@ -144,6 +144,10 @@ def url_localized(url=None, lang_code=None, force_canonical_domain=False, prefet
     - `_get_url_localized(lang_fr, '/shop/my-phone-14', True)` will return
         `<base_url>/fr/shop/mon-telephone-14`
     """
+    if not url:
+        qs = keep_query()
+        url = request.httprequest.path + ('?%s' % qs if qs else '')
+
     url = pycompat.to_text(url).strip()
     try:
         url_parsed = werkzeug.urls.url_parse(url)
@@ -184,8 +188,7 @@ def url_localized(url=None, lang_code=None, force_canonical_domain=False, prefet
         router = http.root.get_db_router(request.db).bind('')
         path = router.build(rule.endpoint, args)
     except (NotFound, AccessError, MissingError, werkzeug.exceptions.MethodNotAllowed):
-        # The build method returns a quoted URL so convert in this case for consistency.
-        path = werkzeug.urls.url_quote_plus(url, safe='/')
+        path = url
     if force_default_lang or lang != request.env['ir.http']._get_default_lang():
         path = f'/{lang._get_cached("url_code")}{path if path != "/" else ""}'
 
