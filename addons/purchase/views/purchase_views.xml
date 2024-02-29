@@ -140,7 +140,8 @@
                     <button name="action_create_invoice" string="Create Bill" type="object" class="oe_highlight" context="{'create_bill':True}" invisible="state not in ('purchase', 'done') or invoice_status in ('no', 'invoiced')" data-hotkey="w"/>
                     <button name="action_rfq_send" invisible="state != 'sent'" string="Re-Send by Email" type="object" context="{'send_rfq':True}" data-hotkey="g"/>
                     <button name="print_quotation" string="Print RFQ" type="object" invisible="state != 'sent'" groups="base.group_user" data-hotkey="k"/>
-                    <button name="button_confirm" type="object" invisible="state != 'draft'" context="{'validate_analytic': True}" string="Confirm Order" id="draft_confirm" data-hotkey="q"/>
+                    <button name="button_confirm" type="object" invisible="state != 'draft' or send_for_approval" context="{'validate_analytic': True}" string="Confirm Order" id="draft_confirm" data-hotkey="q"/>
+                    <button name="button_confirm_with_approval_request" type="object" invisible="state != 'draft' or not send_for_approval" context="{'default_validate_analytic': True}" string="Send for approval" id="draft_confirm" data-hotkey="q"/>
                     <button name="action_rfq_send" invisible="state != 'purchase'" string="Send PO by Email" type="object" context="{'send_rfq':False}" data-hotkey="g"/>
                     <button name="confirm_reminder_mail" string="Confirm Receipt Date" type="object" invisible="state not in ('purchase', 'done') or mail_reminder_confirmed or not date_planned" groups="base.group_no_one" data-hotkey="o"/>
                     <button name="action_create_invoice" string="Create Bill" type="object" context="{'create_bill':True}" invisible="state not in ('purchase', 'done') or invoice_status not in ('no', 'invoiced') or not order_line" data-hotkey="w"/>
@@ -193,6 +194,8 @@
                                 <field name="mail_reminder_confirmed" invisible="1"/>
                                 <span class="text-muted" invisible="not mail_reminder_confirmed">(confirmed by vendor)</span>
                             </div>
+                            <field name="send_for_approval"/>
+                            <field name="approval_category_id" invisible="not send_for_approval"/>
                             <label for="receipt_reminder_email" class="d-none" groups="purchase.group_send_reminder"/>
                             <div name="reminder" class="o_row" groups='purchase.group_send_reminder' title="Automatically send a confirmation email to the vendor X days before the expected receipt date, asking him to confirm the exact date.">
                                 <field name="receipt_reminder_email"/>

@@ -134,7 +134,9 @@ class PurchaseOrder(models.Model):
         string='Tax calculation rounding method', readonly=True)
     payment_term_id = fields.Many2one('account.payment.term', 'Payment Terms', domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]")
     incoterm_id = fields.Many2one('account.incoterms', 'Incoterm', help="International Commercial Terms are a series of predefined commercial terms used in international transactions.")
-
+    send_for_approval = fields.Boolean("Send for approval", required=True)
+    approval_category_id = fields.Many2one('approval.category')
+    approver_request_id = fields.Many2one('approval.request')
     product_id = fields.Many2one('product.product', related='order_line.product_id', string='Product')
     user_id = fields.Many2one(
         'res.users', string='Buyer', index=True, tracking=True,
@@ -231,8 +233,16 @@ class PurchaseOrder(models.Model):
     def write(self, vals):
         vals, partner_vals = self._write_partner_values(vals)
         res = super().write(vals)
-        if partner_vals:
-            self.partner_id.sudo().write(partner_vals)  # Because the purchase user doesn't have write on `res.partner`
+        if 'state' in vals and vals['state'] == 'purchase':
+            user_id = self.create_uid.id
+            self.activity_schedule(
+                'mail.mail_activity_data_todo',
+                user_id=user_id,
+                date_deadline=fields.Date.today(),
+                summary=_('Purchase Order Approved'),
+                note=_('Your purchase order has been approved.'),
+            )
+
         return res
 
     @api.model_create_multi
@@ -482,6 +492,7 @@ class PurchaseOrder(models.Model):
         return {}
 
     def button_confirm(self):
+        # breakpoint()
         for order in self:
             if order.state not in ['draft', 'sent']:
                 continue
@@ -495,6 +506,36 @@ class PurchaseOrder(models.Model):
             if order.partner_id not in order.message_partner_ids:
                 order.message_subscribe([order.partner_id.id])
         return True
+
+    def button_confirm_with_approval_request(self):
+        for order in self:
+            if order.state not in ['draft', 'sent']:
+                continue
+
+            if order.send_for_approval and not order.approval_category_id:
+                raise UserError('Please select an approval category before confirming the order.')
+
+            approval_request_vals = {
+                'name': order.name,
+                'category_id': order.approval_category_id.id,
+                'request_owner_id': self.env.user.id,
+            }
+
+            approval_request = self.env['approval.request'].create(approval_request_vals)
+            order.approver_request_id = approval_request.id
+            approval_request.sudo().action_confirm()
+
+        return True
+
+        #     if order._approval_allowed():
+        #         order.button_approve()
+        #     else:
+        #         order.write({'state': 'to approve'})
+
+        #     if order.partner_id not in order.message_partner_ids:
+        #         order.message_subscribe([order.partner_id.id])
+
+        # return True
 
     def button_cancel(self):
         for order in self:
