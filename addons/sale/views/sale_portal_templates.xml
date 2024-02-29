@@ -136,7 +136,7 @@
             <div class="row o_portal_sale_sidebar">
                 <!-- Sidebar -->
                 <t t-call="portal.portal_record_sidebar" id="sale_order_portal_sidebar">
-                    <t t-set="classes" t-value="'d-print-none col-lg-3 col-xl-4'"/>
+                    <t t-set="classes" t-value="'d-print-none col-lg-4 col-xl-3'"/>
 
                     <t t-set="title">
                         <h2 t-field="sale_order.amount_total" data-id="total_amount"/>
@@ -200,7 +200,7 @@
                 </t>
 
                 <!-- Page content -->
-                <div id="quote_content" class="col-12 col-lg-9 col-xl-8 mt-5 mt-lg-0">
+                <div id="quote_content" class="col-12 col-lg-8 col-xl-9 mt-5 mt-lg-0 ps-lg-4">
 
                     <!-- modal relative to the actions sign and pay -->
                     <div role="dialog" class="modal fade" id="modalaccept">
