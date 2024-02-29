@@ -1,6 +1,5 @@
 /** @odoo-module alias=@web/../tests/webclient/actions/concurrency_tests default=false */
 
-import { browser } from "@web/core/browser/browser";
 import {
     click,
     getFixture,
