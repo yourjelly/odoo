@@ -15,6 +15,7 @@ import logging
 from operator import getitem
 import requests
 import json
+import re
 
 from pytz import timezone
 
@@ -74,16 +75,12 @@ class IrActions(models.Model):
     def _check_path(self):
         for action in self:
             if action.path:
-                if '/' in action.path:
-                    raise ValidationError(_('Error! Should not contain slashes.'))
-                if ' ' in action.path:
-                    raise ValidationError(_('Error! Should not contain spaces.'))
-                if action.path.isnumeric():
-                    raise ValidationError(_('Error! Should not be numeric.'))
-                # check special characters (except - and _ ) but avoid éèàçù etc.
-                # Maybe something like this : if not re.match(r'^[a-z][a-z0-9_-]*$':
-                # if self.env['ir.actions.actions'].search_count([('path', '=', action.path)]) > 1:
-                #     raise ValidationError(_('Another action already has this path on the same app.'))
+                if not re.match(r'^[a-z][a-z0-9_-]*$', action.path):
+                    raise ValidationError(_('The path should contain only lowercase alphanumeric characters, underscore, and dash, and it should start with a letter.'))
+                if action.path.startswith("m-"):
+                    raise ValidationError(_('\'m-\' is a reserved prefix.'))
+                if action.path.startswith("act-"):
+                    raise ValidationError(_('\'act-\' is a reserved prefix.'))
 
     def _compute_xml_id(self):
         res = self.get_external_id()
