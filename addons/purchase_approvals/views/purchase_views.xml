@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="purchase_order_form_inherited" model="ir.ui.view">
+        <field name="name">purchase.order.form.inherited</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='button_confirm']" position="after">
+                <button name="button_confirm_with_approval_request" type="object" invisible="state != 'draft' or approval_sent" context="{'default_validate_analytic': True}" string="Send for approval" id="draft_confirm_approval"/>
+            </xpath>
+            <xpath expr="//button[@name='button_confirm' and @id='draft_confirm']" position="attributes">
+                <attribute name="groups">base.group_erp_manager</attribute>
+            </xpath>
+            <xpath expr="//field[@name='date_order']" position="after">
+                <field name="approval_category_id"/>
+                <field name="approval_request_id" invisible="not approval_sent"/>
+                <field name="approval_sent" invisible="1"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -227,7 +227,7 @@ class Partner(models.Model):
                                     column2='category_id', string='Tags', default=_default_category)
     active = fields.Boolean(default=True)
     employee = fields.Boolean(help="Check this box if this contact is an Employee.")
-    function = fields.Char(string='Job Position')
+    function = fields.Char(string='Job Positionnn')
     type = fields.Selection(
         [('contact', 'Contact'),
          ('invoice', 'Invoice Address'),
