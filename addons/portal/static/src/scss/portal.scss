@@ -343,6 +343,7 @@ img, .media_iframe_video, .o_image {
 }
 
 .o_portal_sidebar {
+
     .o_portal_html_view {
         overflow: hidden;
         background: white;
@@ -357,8 +358,12 @@ img, .media_iframe_video, .o_image {
         }
     }
 
-    .o_portal_sidebar_content {
-        @include media-breakpoint-up(lg) {
+    @include media-breakpoint-up(lg) {
+        .o_portal_sidebar_border {
+            border-right: $border-width solid $border-color;
+        }
+
+        .o_portal_sidebar_content {
             @include o-position-sticky($top: $spacer * 5);
         }
     }
