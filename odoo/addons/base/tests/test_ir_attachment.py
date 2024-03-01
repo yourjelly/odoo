@@ -8,9 +8,9 @@ import os
 from PIL import Image
 
 import odoo
-from odoo.exceptions import AccessError
+from odoo.exceptions import AccessError, UserError
 from odoo.addons.base.tests.common import TransactionCaseWithUserDemo
-from odoo.tools import image_to_base64
+from odoo.tools import config, image_to_base64
 
 HASH_SPLIT = 2      # FIXME: testing implementations detail is not a good idea
 
@@ -259,6 +259,19 @@ class TestIrAttachment(TransactionCaseWithUserDemo):
         self.env.cr.rollback()
         self.Attachment._gc_file_store_unsafe()
         self.assertFalse(os.path.isfile(store_path), 'file removed')
+
+    def test_14_corrupt_image(self):
+        config['test_enable'] = False
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        with open(os.path.join(dir_path, 'corrupt_logo.jpeg'), 'rb') as logo:
+            img_data = logo.read()
+
+        with self.assertRaises(UserError):
+            self.Attachment.with_context().create({
+                'name': 'image',
+                'raw': img_data,
+                'mimetype': 'image/jpeg',
+            })
 
 
 class TestPermissions(TransactionCaseWithUserDemo):

@@ -320,7 +320,7 @@ class IrAttachment(models.Model):
         supported_subtype = ICP('base.image_autoresize_extensions', 'png,jpeg,bmp,tiff').split(',')
 
         mimetype = values['mimetype'] = self._compute_mimetype(values)
-        _type, _, _subtype = mimetype.partition('/')
+        _type, __, _subtype = mimetype.partition('/')
         is_image_resizable = _type == 'image' and _subtype in supported_subtype
         if is_image_resizable and (values.get('datas') or values.get('raw')):
             is_raw = values.get('raw')
@@ -335,6 +335,10 @@ class IrAttachment(models.Model):
                     else:  # datas
                         img = ImageProcess(base64.b64decode(values['datas']), verify_resolution=False)
 
+                    if not img.image:
+                        raise UserError(
+                            _("This file could not be decoded as an image file. Please try with a different file.")
+                        )
                     w, h = img.image.size
                     nw, nh = map(int, max_resolution.split('x'))
                     if w > nw or h > nh:
@@ -346,6 +350,8 @@ class IrAttachment(models.Model):
                         else:
                             values['datas'] = base64.b64encode(image_data)
                 except UserError as e:
+                    if not config['test_enable']:
+                        raise e
                     # Catch error during test where we provide fake image
                     # raise UserError(_("This file could not be decoded as an image file. Please try with a different file."))
                     _logger.info('Post processing ignored : %s', e)
