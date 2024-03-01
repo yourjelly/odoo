@@ -1134,6 +1134,8 @@ class expression(object):
 
             # Making search easier when there is a left operand as one2many or many2many
             elif operator in ('any', 'not any') and field.type in ('many2many', 'one2many'):
+                if domain := field.get_domain_list(model):
+                    right += domain
                 right_ids = comodel.with_context(**field.context)._search(right)
                 push((left, ANY_IN[operator], right_ids), model, alias)
 
@@ -1174,7 +1176,19 @@ class expression(object):
                 domain = field.get_domain_list(model)
                 inverse_field = comodel._fields[field.inverse_name]
                 inverse_is_int = inverse_field.type in ('integer', 'many2one_reference')
-                unwrap_inverse = (lambda ids: ids) if inverse_is_int else (lambda recs: recs.ids)
+
+                # Non-stored field should provide an implementation of search.
+                if not inverse_field.search:
+                    # field does not support search!
+                    _logger.error("Non-stored field %s cannot be searched.", inverse_field, exc_info=True)
+                    if _logger.isEnabledFor(logging.DEBUG):
+                        _logger.debug(''.join(traceback.format_stack()))
+                    # Ignore it: generate a dummy leaf.
+                    continue
+
+                if not inverse_field.store:
+                    # Let the field generate add extra domain.
+                    domain += inverse_field.determine_domain(model, operator, right)
 
                 if right is not False:
                     # determine ids2 in comodel
@@ -1182,37 +1196,32 @@ class expression(object):
                         op2 = (TERM_OPERATORS_NEGATION[operator]
                                if operator in NEGATIVE_TERM_OPERATORS else operator)
                         ids2 = comodel._name_search(right, domain or [], op2)
+                        # Domain already in
                     elif isinstance(right, collections.abc.Iterable):
                         ids2 = right
+                        # Domain already in if it is a query
                     else:
                         ids2 = [right]
+
                     if inverse_is_int and domain:
                         ids2 = comodel._search([('id', 'in', ids2)] + domain)
 
-                    if inverse_field.store:
-                        # In the condition, one must avoid subqueries to return
-                        # NULL values, since it makes the IN test NULL instead
-                        # of FALSE.  This may discard expected results, as for
-                        # instance "id NOT IN (42, NULL)" is never TRUE.
-                        sql_in = SQL('NOT IN') if operator in NEGATIVE_TERM_OPERATORS else SQL('IN')
-                        if not isinstance(ids2, Query):
-                            ids2 = comodel.browse(ids2)._as_query(ordered=False)
-                        sql_inverse = comodel._field_to_sql(ids2.table, inverse_field.name, ids2)
-                        if not inverse_field.required:
-                            ids2.add_where(SQL("%s IS NOT NULL", sql_inverse))
-                        push_result(SQL(
-                            "(%s %s %s)",
-                            SQL.identifier(alias, 'id'),
-                            sql_in,
-                            ids2.subselect(sql_inverse),
-                        ))
-                    else:
-                        # determine ids1 in model related to ids2
-                        recs = comodel.browse(ids2).sudo().with_context(prefetch_fields=False)
-                        ids1 = unwrap_inverse(recs.mapped(inverse_field.name))
-                        # rewrite condition in terms of ids1
-                        op1 = 'not in' if operator in NEGATIVE_TERM_OPERATORS else 'in'
-                        push(('id', op1, ids1), model, alias)
+                    # In the condition, one must avoid subqueries to return
+                    # NULL values, since it makes the IN test NULL instead
+                    # of FALSE.  This may discard expected results, as for
+                    # instance "id NOT IN (42, NULL)" is never TRUE.
+                    sql_in = SQL('NOT IN') if operator in NEGATIVE_TERM_OPERATORS else SQL('IN')
+                    if not isinstance(ids2, Query):
+                        ids2 = comodel.browse(ids2)._as_query(ordered=False)
+                    sql_inverse = comodel._field_to_sql(ids2.table, inverse_field.name, ids2)
+                    if not inverse_field.required:
+                        ids2.add_where(SQL("%s IS NOT NULL", sql_inverse))
+                    push_result(SQL(
+                        "(%s %s %s)",
+                        SQL.identifier(alias, 'id'),
+                        sql_in,
+                        ids2.subselect(sql_inverse),
+                    ))
 
                 else:
                     if inverse_field.store and not (inverse_is_int and domain):
@@ -1223,16 +1232,7 @@ class expression(object):
                         sql_inverse = comodel._field_to_sql(query.table, inverse_field.name, query)
                         sql = query.subselect(sql_inverse)
                         push(('id', sub_op, sql), model, alias)
-                    else:
-                        comodel_domain = [(inverse_field.name, '!=', False)]
-                        if inverse_is_int and domain:
-                            comodel_domain += domain
-                        recs = comodel.search(comodel_domain, order='id').sudo().with_context(prefetch_fields=False)
-                        # determine ids1 = records with lines
-                        ids1 = unwrap_inverse(recs.mapped(inverse_field.name))
-                        # rewrite condition to match records with/without lines
-                        op1 = 'in' if operator in NEGATIVE_TERM_OPERATORS else 'not in'
-                        push(('id', op1, ids1), model, alias)
+                    
 
             elif field.type == 'many2many':
                 rel_table, rel_id1, rel_id2 = field.relation, field.column1, field.column2
