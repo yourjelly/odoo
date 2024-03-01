@@ -537,6 +537,7 @@ export function makeActionManager(env, router = _router) {
             const currentActionId = currentController?.action?.id;
             // Window Action: determines model, viewType etc....
             if (
+                // FIXME this should never work on first load because the currentController is fake
                 currentController &&
                 currentController.action.type === "ir.actions.act_window" &&
                 currentActionId === state.action
@@ -1584,7 +1585,7 @@ export function makeActionManager(env, router = _router) {
         });
         if (actions.length) {
             newState.actionStack = actions;
-            const stateKeys = [...PATH_KEYS];
+            const stateKeys = [...PATH_KEYS, "active_ids"];
             const { action, props } = lastCtrl;
             if (props.type !== "form" && props.type !== action.views?.[0][1]) {
                 // add view_type only when it's not already known implicitly
