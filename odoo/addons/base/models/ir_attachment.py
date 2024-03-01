@@ -340,7 +340,8 @@ class IrAttachment(models.Model):
                         img = ImageProcess(values['raw'], verify_resolution=False)
                     else:  # datas
                         img = ImageProcess(base64.b64decode(values['datas']), verify_resolution=False)
-
+                    if not img.image:
+                        raise UserError("The image could not be processed. Please try again with a different image.")
                     w, h = img.image.size
                     nw, nh = map(int, max_resolution.split('x'))
                     if w > nw or h > nh:
@@ -351,10 +352,6 @@ class IrAttachment(models.Model):
                             values['raw'] = image_data
                         else:
                             values['datas'] = base64.b64encode(image_data)
-                except UserError as e:
-                    # Catch error during test where we provide fake image
-                    # raise UserError(_("This file could not be decoded as an image file. Please try with a different file."))
-                    _logger.info('Post processing ignored : %s', e)
         return values
 
     def _check_contents(self, values):
