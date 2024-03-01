@@ -582,11 +582,14 @@ class Field(MetaField('DummyField', (object,), {})):
             depends.extend(deps(model) if callable(deps) else deps)
             depends_context.extend(getattr(func, '_depends_context', ()))
 
-        # display_name may depend on context['lang'] (`test_lp1071710`)
-        if self.automatic and self.name == 'display_name' and model._rec_name:
-            if model._fields[model._rec_name].base_field.translate:
-                if 'lang' not in depends_context:
+        # abstract models may not have the dependency so checking is unnecessary
+        if not model._abstract and 'lang' not in depends_context:
+            for d in depends:
+                # TODO: resolve entire sequence?
+                name, _sep, _rest = d.partition('.')
+                if model._fields[name].translate:
                     depends_context.append('lang')
+                    break
 
         return depends, depends_context
 

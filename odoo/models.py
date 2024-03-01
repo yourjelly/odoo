@@ -266,8 +266,6 @@ class MetaModel(api.Meta):
                     field.__set_name__(self, name)
 
             add('id', fields.Id(automatic=True))
-            add_default('display_name', fields.Char(
-                string='Display Name', automatic=True, compute='_compute_display_name'))
 
             if attrs.get('_log_access', self._auto):
                 add_default('create_uid', fields.Many2one(
@@ -1675,25 +1673,8 @@ class BaseModel(metaclass=MetaModel):
         return self._fetch_query(query, fields_to_fetch)
 
     #
-    # display_name, name_create, name_search
+    # name_create, name_search
     #
-
-    @api.depends(lambda self: (self._rec_name,) if self._rec_name else ())
-    def _compute_display_name(self):
-        """Compute the value of the `display_name` field.
-
-        The `display_name` field is a textual representation of the record.
-        This method can be overridden to change the representation.  If needed,
-        it can be made field-dependent using :attr:`~odoo.api.depends` and
-        context-dependent using :attr:`~odoo.api.depends_context`.
-        """
-        if self._rec_name:
-            convert = self._fields[self._rec_name].convert_to_display_name
-            for record in self:
-                record.display_name = convert(record[self._rec_name], record)
-        else:
-            for record in self:
-                record.display_name = f"{record._name},{record.id}"
 
     @api.model
     def name_create(self, name):
