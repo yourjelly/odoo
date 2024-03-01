@@ -726,6 +726,19 @@ class BarcodeConverter(models.AbstractModel):
         if not value:
             return ''
         barcode_symbology = options.get('symbology', 'Code128')
+
+        if barcode_symbology == 'ECC200DataMatrix':
+            # In case of DataMatrix, we use another ppf.datamatrix to generate it
+            # more freely than with reportlab. That said, ppf.datamatrix returns
+            # it as a SVG only, so we handle it differently.
+            datamatrix_as_svg = self.env['ir.actions.report'].datamatrix_svg(
+                value,
+                options.get('width'),
+                options.get('height'),
+                options.get('rect'),
+            )
+            return Markup(datamatrix_as_svg)
+
         barcode = self.env['ir.actions.report'].barcode(
             barcode_symbology,
             value,

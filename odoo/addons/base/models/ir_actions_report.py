@@ -9,6 +9,7 @@ from odoo.tools.misc import find_in_path, ustr
 from odoo.tools import check_barcode_encoding, config, is_html_empty, parse_version, split_every
 from odoo.http import request
 from odoo.osv.expression import NEGATIVE_TERM_OPERATORS, FALSE_DOMAIN
+from odoo.addons.base.lib import ppf_datamatrix
 
 import io
 import logging
@@ -617,6 +618,39 @@ class IrActionsReport(models.Model):
                 raise ValueError("Cannot convert into QR code.")
             else:
                 return self.barcode('Code128', value, **kwargs)
+
+    @api.model
+    def datamatrix_svg(self, value, width, height, rect=False):
+        """ Generates a SVG HTML tag (as a string) containing a DataMatrix and
+        computes its size regarding given parameters.
+
+        :param value: the string to convert into a DataMatrix.
+        :type value: str
+        :param width: the SVG width. If an int is given, it will be converted into px.
+        :type width: str or int
+        :param height: the SVG height. If an int is given, it will be converted into px.
+        :type height: str or int
+        :param rect: defines if the DataMtrix should be drawn rectangular (square by default).
+        :type rect: bool
+        :returns: a SVG HTML tag.
+        :rtype: str
+        """
+        width = f'{width}px' if isinstance(width, int) else width
+        height = f'{height}px' if isinstance(height, int) else height
+        datamatrix = ppf_datamatrix.DataMatrix(value, rect=rect)
+        dtmtx = datamatrix.svg()
+
+        # Retrieves the SVG size.
+        height_search = re.search(r'height="([0-9.]+)[a-z%]+"', dtmtx)
+        width_search = re.search(r'width="([0-9.]+)[a-z%]+"', dtmtx)
+        viewbox_height = int(height_search.groups()[0])
+        viewbox_width = int(width_search.groups()[0])
+
+        # Computes the display SVG size.
+        viewbox = f'viewBox="0 0 {viewbox_width} {viewbox_height}"'
+        new_size = f'height="{height}" width="{width}" {viewbox}'
+        dtmtx = dtmtx[:height_search.start()] + new_size + dtmtx[width_search.end():]
+        return dtmtx
 
     @api.model
     def get_available_barcode_masks(self):
