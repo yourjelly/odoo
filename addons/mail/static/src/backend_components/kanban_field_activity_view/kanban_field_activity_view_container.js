@@ -6,8 +6,9 @@ import { getMessagingComponent } from '@mail/utils/messaging_component';
 
 import { registry } from "@web/core/registry";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
+import { useService } from '@web/core/utils/hooks';
 
-const { Component, onWillDestroy, onWillUpdateProps } = owl;
+const { Component, onWillDestroy, onMounted, onWillUnmount, onWillUpdateProps } = owl;
 
 const getNextId = (function () {
     let tmpId = 0;
@@ -33,6 +34,24 @@ export class KanbanFieldActivityViewContainer extends Component {
         this._insertFromProps(this.props);
         onWillUpdateProps(nextProps => this._insertFromProps(nextProps));
         onWillDestroy(() => this._deleteRecord());
+
+        this.messagingService = useService('messaging');
+        this.messagingService.get().then(messaging => this.messaging = messaging);
+
+        onMounted(() => {
+            this.messaging.messagingBus.addEventListener('update-activity-status', this._updateActivityStatus);
+        });
+        onWillUnmount(() => {
+            this.messaging.messagingBus.removeEventListener('update-activity-status', this._updateActivityStatus);
+        });
+    }
+
+    _updateActivityStatus = async (ev) => {
+        if (ev.detail.resId !== this.props.record.resId) {
+            return;
+        }
+        await this.props.record.load();
+        await this.messaging.messagingBus.trigger('reload-activity-button', this.props.record);
     }
 
     /**
