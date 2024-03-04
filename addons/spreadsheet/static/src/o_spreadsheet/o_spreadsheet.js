@@ -21403,6 +21403,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             ev.stopPropagation();
             const initialX = ev.clientX;
             const initialY = ev.clientY;
+            const { scrollX, scrollY } = this.env.model.getters.getActiveSheetScrollInfo();
             const { x: dndInitialX, y: dndInitialY } = this.internalToScreenCoordinates(figure);
             this.dnd.x = dndInitialX;
             this.dnd.y = dndInitialY;
@@ -21421,13 +21422,14 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 if (dirY < 0) {
                     this.dnd.y = dndInitialY - deltaY;
                 }
-                if (this.dnd.x < 0) {
-                    this.dnd.width += this.dnd.x;
-                    this.dnd.x = 0;
+                // Restrict resizing if x or y reaches header boundaries, and adjust width/height accordingly
+                if (this.dnd.x + scrollX <= 0) {
+                    this.dnd.width = this.dnd.width + this.dnd.x + scrollX;
+                    this.dnd.x = -scrollX;
                 }
-                if (this.dnd.y < 0) {
-                    this.dnd.height += this.dnd.y;
-                    this.dnd.y = 0;
+                if (this.dnd.y + scrollY <= 0) {
+                    this.dnd.height = this.dnd.height + this.dnd.y + scrollY;
+                    this.dnd.y = -scrollY;
                 }
             };
             const onMouseUp = (ev) => {
@@ -43271,8 +43273,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
 
 
     __info__.version = '16.0.33';
-    __info__.date = '2024-02-16T14:59:44.946Z';
-    __info__.hash = 'c0cefe8';
+    __info__.date = '2024-03-04T05:32:06.323Z';
+    __info__.hash = '274a68a';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
