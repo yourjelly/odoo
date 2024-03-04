@@ -30,12 +30,12 @@ paymentButton.include({
             return true; // Ignore the check.
         }
 
-        const checkedCarriers = document.querySelectorAll('input[name="delivery_type"]:checked');
+        const checkedCarriers = document.querySelectorAll('input[name="o_delivery_carrier"]:checked');
         if (checkedCarriers.length === 0) { // No carrier is selected.
             return false; // Nothing else to check.
         }
         const carriersContainer = checkedCarriers[0].closest('.o_delivery_carrier_select');
-        const isPickUpPointRequired = carriersContainer.querySelector('.o_show_pickup_locations');
+        const isPickUpPointRequired = carriersContainer.querySelector('button[name="o_delivery_location_selector"]');
         if (isPickUpPointRequired) {
             const address = carriersContainer.querySelector(
                 '.o_order_location_address'

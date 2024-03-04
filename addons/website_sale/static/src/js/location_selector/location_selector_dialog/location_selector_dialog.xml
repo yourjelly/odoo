@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="website_sale.locationSelector.dialog">
+        <Dialog size="size" title="title" footer="false">
+            <div class="container">
+                <!-- Address -->
+                <input t-model.lazy="this.state.zipCode"/>
+                <!-- Nav tabs -->
+                <ul class="nav nav-tabs d-md-none mb-2" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button
+                            class="nav-link active"
+                            data-bs-toggle="tab"
+                            data-bs-target="#o_location_selector_list_view"
+                            type="button"
+                            role="tab"
+                        >
+                            List view
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button
+                            class="nav-link"
+                            data-bs-toggle="tab"
+                            data-bs-target="#o_location_selector_map_view"
+                            type="button"
+                            role="tab"
+                        >
+                            Map view
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- Tab panes -->
+                <t t-if="this.state.error">
+                    <t t-out="this.state.error"/>
+                </t>
+                <div t-else="" class="tab-content d-md-flex">
+                    <div
+                        id="o_location_selector_list_view"
+                        class="tab-pane active d-md-flex flex-md-shrink-1 justify-content-md-center"
+                        role="tabpanel"
+                    >
+                        <div class="d-flex flex-column align-items-center">
+                            <t t-if="this.state.locations.length">
+
+                                <t
+                                    t-foreach="this.state.locations"
+                                    t-as="location"
+                                    t-key="location.id"
+                                >
+                                    <Location
+                                        id="location.id.toString()"
+                                        name="location.pick_up_point_name"
+                                        address="location.pick_up_point_address"
+                                        number="location_index + 1"
+                                        isSelected="this.state.selectedLocationId === location.id.toString()"
+                                        setSelectedLocation.bind="setSelectedLocation"
+                                    />
+                                </t>
+                                <button
+                                    type="button"
+                                    class="btn btn-primary"
+                                    name="o_location_selector_validate_selection"
+                                    t-att-disabled="!this.state.selectedLocationId"
+                                    t-on-click="validateSelection"
+                                >
+                                    Choose this location
+                                </button>
+                            </t>
+                            <t t-else="">
+                                SPINNER
+                            </t>
+                        </div>
+                    </div>
+                    <div
+                        id="o_location_selector_map_view"
+                        class="tab-pane d-md-flex flex-md-grow-1 justify-content-md-center"
+                        role="tabpanel"
+                    >
+                        <Map
+                            t-if="this.state.loadMap"
+                            locations="this.state.locations"
+                            selectedLocationId="this.state.selectedLocationId.toString()"
+                            setSelectedLocation.bind="setSelectedLocation"
+                        />
+                    </div>
+                </div>
+            </div>
+        </Dialog>
+    </t>
+</templates>

@@ -1,7 +1,7 @@
+import { Component, onWillStart, xml } from "@odoo/owl";
+import { session } from "@web/session";
 import { browser } from "./browser/browser";
 import { registry } from "./registry";
-import { session } from "@web/session";
-import { Component, xml, onWillStart } from "@odoo/owl";
 
 /**
  * This export is done only in order to modify the behavior of the exported
@@ -18,7 +18,7 @@ export const assets = {
 
 const cacheMap = new Map();
 
-class AssetsLoadingError extends Error {}
+export class AssetsLoadingError extends Error {}
 
 /**
  * Loads the given url inside a script tag.
