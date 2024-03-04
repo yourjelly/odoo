@@ -150,6 +150,17 @@ class PosOrder(models.Model):
             "tax_details": self._compute_tax_details(),
         }
 
+    def make_payment_zero_amount_order(self):
+        # If order total amount is 0 then it will make a payment and convert
+        # order into paid without redirecting to payment screen.
+        if self.amount_total == 0 and self.state == "draft":
+            make_payment = self.env['pos.make.payment'].with_context(active_id=self.id).create({
+                'amount': self.amount_total,
+                'config_id': self.config_id.id,
+                'payment_method_id': self.config_id._default_payment_methods()[:1].id,
+            })
+            make_payment.check()
+
     def get_standalone_self_order(self):
         orders = self.env['pos.order'].search([
             *self.env["pos.order"]._check_company_domain(self.env.company),

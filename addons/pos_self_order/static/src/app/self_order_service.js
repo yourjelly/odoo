@@ -166,6 +166,12 @@ export class SelfOrder extends Reactive {
         // this directive works for both mode each and meal
         if (order.amount_total === 0 && order.lines.length > 0) {
             await this.sendDraftOrderToServer();
+            this.env.services.orm.call(
+                "pos.order",
+                "make_payment_zero_amount_order",
+                [order.id],
+                {}
+            );
             this.confirmationPage("order", device);
             return;
         }
@@ -195,22 +201,11 @@ export class SelfOrder extends Reactive {
     }
 
     get currentOrder() {
-        if (
-            this.editedOrder &&
-            (this.editedOrder.state === "draft" ||
-                (this.editedOrder.state === "paid" &&
-                    this.editedOrder.amount_total === 0 &&
-                    this.config.self_ordering_mode === "kiosk"))
-        ) {
+        if (this.editedOrder && this.editedOrder.state === "draft") {
             return this.editedOrder;
         }
-        const existingOrder = this.orders.find(
-            (o) =>
-                o.state === "draft" ||
-                (o.state === "paid" &&
-                    o.amount_total === 0 &&
-                    this.config.self_ordering_mode === "kiosk")
-        );
+        const existingOrder = this.orders.find((o) => o.state === "draft");
+
         if (!existingOrder) {
             const newOrder = new Order({
                 pos_config_id: this.pos_config_id,
