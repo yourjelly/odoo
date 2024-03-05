@@ -125,13 +125,20 @@ patch(PaymentScreen.prototype, {
             ]);
             if (payload.coupon_updates) {
                 for (const couponUpdate of payload.coupon_updates) {
+                    // The following code is a workaround to update the id of an existing record.
+                    // It's so ugly.
+                    // FIXME: Find a better way of updating the id of an existing record.
+                    // It would be better if we can do this:
+                    // const coupon = this.pos.models["loyalty.card"].get(couponUpdate.old_id);
+                    // coupon.update({ id: couponUpdate.id, points: couponUpdate.points })
+
                     if (couponUpdate.old_id == couponUpdate.id) {
                         // just update the points
                         const coupon = this.pos.models["loyalty.card"].get(couponUpdate.id);
                         coupon.update({ points: couponUpdate.points });
                     } else {
                         // create a new coupon and delete the old one
-                        this.pos.models["loyalty.card"].create({
+                        const coupon = this.pos.models["loyalty.card"].create({
                             id: couponUpdate.id,
                             code: couponUpdate.code,
                             program_id: this.pos.models["loyalty.program"].get(
@@ -140,6 +147,14 @@ patch(PaymentScreen.prototype, {
                             partner_id: this.pos.models["res.partner"].get(couponUpdate.partner_id),
                             points: couponUpdate.points,
                         });
+
+                        // Before deleting the old coupon, update the order lines that use it.
+                        for (const line of order.lines) {
+                            if (line.coupon_id?.id == couponUpdate.old_id) {
+                                line.update({ coupon_id: coupon });
+                            }
+                        }
+
                         this.pos.models["loyalty.card"].get(couponUpdate.old_id)?.delete();
                     }
                 }
