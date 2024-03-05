@@ -48,8 +48,8 @@ import { AnimatedNumber } from "@web/views/view_components/animated_number";
 import { Component, onRendered, onWillRender, xml } from "@odoo/owl";
 import { SampleServer } from "@web/model/sample_server";
 import { KanbanRenderer } from "@web/views/kanban/kanban_renderer";
-import { KanbanCompiler } from "@web/views/kanban/kanban_compiler";
-import { KanbanRecord } from "@web/views/kanban/kanban_record";
+import { KanbanCompiler as KanbanCompilerLegacy } from "@web/views/kanban/kanban_compiler_legacy";
+import { KanbanRecord as KanbanRecordLegacy } from "@web/views/kanban/kanban_record_legacy";
 import { contains } from "@web/../tests/utils";
 
 import {
@@ -14529,7 +14529,7 @@ QUnit.module("Views", (hooks) => {
         // once with the basic one, and once with a custom renderer having a custom compiler. The
         // purpose of the test is to ensure that the template is compiled twice, once by each
         // compiler, even though the arch is the same.
-        class MyKanbanCompiler extends KanbanCompiler {
+        class MyKanbanCompiler extends KanbanCompilerLegacy {
             setup() {
                 super.setup();
                 this.compilers.push({ selector: "div", fn: this.compileDiv });
@@ -14541,12 +14541,12 @@ QUnit.module("Views", (hooks) => {
                 return compiledNode;
             }
         }
-        class MyKanbanRecord extends KanbanRecord {}
+        class MyKanbanRecord extends KanbanRecordLegacy {}
         MyKanbanRecord.Compiler = MyKanbanCompiler;
         class MyKanbanRenderer extends KanbanRenderer {}
         MyKanbanRenderer.components = {
             ...KanbanRenderer.components,
-            KanbanRecord: MyKanbanRecord,
+            KanbanRecordLegacy: MyKanbanRecord,
         };
         viewRegistry.add("my_kanban", {
             ...kanbanView,
@@ -14701,4 +14701,146 @@ QUnit.module("Views", (hooks) => {
             assert.containsN(target, ".o_kanban_group", 3);
         }
     );
+
+    QUnit.skip("legacy kanban abcde", async (assert) => {
+        await makeView({
+            type: "kanban",
+            resModel: "partner",
+            serverData,
+            arch:
+                `<kanban>
+                    <templates>
+                        <field name="bar" invisible="1"/>
+                        <t t-name="kanban-box">
+                            <div class="oe_kanban_global_click o_kanban_record_has_image_fill">
+                                <div class="o_kanban_image d-block o_kanban_image_full">
+                                    <img t-att-src=\"kanban_image('partner', 'image', record.id.raw_value)\"/>
+                                </div>
+                                <div class="ribbon ribbon-top-right" invisible="not bar">
+                                    <span class="text-bg-danger">Archived</span>
+                                </div>
+                                <div class="oe_kanban_details d-flex flex-column justify-content-between">
+                                    <div>
+                                        <strong class="o_kanban_record_title oe_partner_heading"><field name="foo"/></strong>
+                                        <ul>
+                                            <li><field name="int_field"/></li>
+                                            <li>
+                                                <div class="o_kanban_tags_section oe_kanban_partner_categories">
+                                                    <span class="oe_kanban_list_many2many">
+                                                        <field name="category_ids" widget="many2many_tags"/>
+                                                    </span>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="o_kanban_record_bottom">
+                                        <div class="oe_kanban_bottom_left"/>
+                                        <div class="oe_kanban_bottom_right">
+                                            <field name="state" widget="priority"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>`,
+        });
+
+        `<div role="article" class="o_kanban_record d-flex flex-grow-1 flex-md-shrink-1 flex-shrink-0" data-id="datapoint_2" tabindex="0">
+            <div class="oe_kanban_global_click o_kanban_record_has_image_fill">
+                <div class="o_kanban_image d-block o_kanban_image_full">
+                    <img loading="lazy" src="http://localhost:8069/web/image/partner/1/image">
+                </div>
+                <div class="ribbon ribbon-top-right">
+                    <span class="text-bg-danger">Archived</span>
+                </div>
+                <div class="oe_kanban_details d-flex flex-column justify-content-between">
+                    <div>
+                        <strong class="o_kanban_record_title oe_partner_heading">
+                            <span>yop</span>
+                        </strong>
+                        <ul>
+                            <li>
+                                <span>10</span>
+                            </li>
+                            <li>
+                                <div class="o_kanban_tags_section oe_kanban_partner_categories">
+                                    <span class="oe_kanban_list_many2many">
+                                        <div name="category_ids" class="o_field_widget o_field_many2many_tags">
+                                            <div class="d-flex flex-wrap gap-1"></div>
+                                        </div>
+                                    </span>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="o_kanban_record_bottom">
+                        <div class="oe_kanban_bottom_left"></div>
+                        <div class="oe_kanban_bottom_right">
+                            <div name="state" class="o_field_widget o_field_priority">
+                                <div class="o_priority" role="radiogroup" name="priority" aria-label="Priority">
+                                    <a href="#" class="o_priority_star fa fa-star-o" role="radio" tabindex="-1" data-tooltip="State: DEF" aria-label="DEF"></a>
+                                    <a href="#" class="o_priority_star fa fa-star-o" role="radio" tabindex="-1" data-tooltip="State: GHI" aria-label="GHI"></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>`
+    });
+
+    QUnit.skip("semantic kanban abcde", async (assert) => {
+        // TODO: global click
+        // TODO: progressbar ?
+        // TODO: color and colorpicker
+        // TODO: tooltip ? <tooltip> ?
+        // FIXME: <header> stands for control panel, like in list
+        // FIXME: <control> for x2manys (like list), used nowhere
+
+
+        serverData.models.category.records.push({ id: 10, name: "category 10", color: 1 });
+        serverData.models.category.records.push({ id: 11, name: "category 11", color: 2 });
+        serverData.models.category.records.push({ id: 12, name: "category 12", color: 3 });
+        serverData.models.category.records.push({ id: 13, name: "category 13", color: 4 });
+        serverData.models.partner.records[1].category_ids = [10, 11, 12, 13];
+
+        await makeView({
+            type: "kanban",
+            resModel: "partner",
+            serverData,
+            // <img t-att-src=\"kanban_image('partner', 'image', record.id.raw_value)\"/>
+            // <field name="displayed_image_id" widget="image"/>
+            arch:
+                `<kanban>
+                    <field name="bar" invisible="1"/>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="not bar"/>
+                    <menu>
+                        <a role="menuitem" type="edit" class="dropdown-item">Edit</a>
+                        <a role="menuitem" type="delete" class="dropdown-item">Delete</a>
+                        <a type="set_cover" data-field="displayed_image_id" class="dropdown-item">Set Cover Image</a>
+                        <ul class="oe_kanban_colorpicker" data-field="color"/>
+                    </menu>
+                    <aside>
+                        <widget name="kanban_image" options="{'main': 'id'}"/>
+                    </aside>
+                    <section>
+                        <div>
+                            <field class="me-2" name="state" widget="priority"/>
+                            <strong><field name="foo"/></strong>
+                        </div>
+                    </section>
+                    <section>
+                        <field name="int_field"/>
+                        <field name="product_id" widget="many2one"/>
+                        <field name="qux"/>
+                        <field name="state"/>
+                    </section>
+                    <section type="row">
+                        <field name="category_ids" widget="many2many_tags"/>
+                        <field name="state" widget="priority"/>
+                    </section>
+                </kanban>`,
+        });
+    });
 });

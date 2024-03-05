@@ -11,6 +11,7 @@ import { useBounceButton } from "@web/views/view_hook";
 import { KanbanColumnQuickCreate } from "./kanban_column_quick_create";
 import { KanbanHeader } from "./kanban_header";
 import { KanbanRecord } from "./kanban_record";
+import { KanbanRecord as KanbanRecordLegacy } from "./kanban_record_legacy";
 import { KanbanRecordQuickCreate } from "./kanban_record_quick_create";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { Component, onPatched, onWillDestroy, onWillPatch, useRef, useState } from "@odoo/owl";
@@ -42,6 +43,7 @@ export class KanbanRenderer extends Component {
         KanbanColumnQuickCreate,
         KanbanHeader,
         KanbanRecord,
+        KanbanRecordLegacy,
         KanbanRecordQuickCreate,
     };
     static props = [
@@ -167,6 +169,12 @@ export class KanbanRenderer extends Component {
                     return;
                 }
 
+                const { isLegacyKanban, allowGlobalClick } = this.props.archInfo;
+                if (!isLegacyKanban && allowGlobalClick) {
+                    target.click();
+                    return;
+                }
+
                 // Open first link
                 const firstLink = target.querySelector(".oe_kanban_global_click, a, button");
                 if (firstLink && firstLink instanceof HTMLElement) {
@@ -253,6 +261,11 @@ export class KanbanRenderer extends Component {
             recordsDraggable &&
                 (isGrouped || (handleField && (!orderBy[0] || orderBy[0].name === handleField)))
         );
+    }
+
+    get kanbanRecordComponent() {
+        const { KanbanRecord, KanbanRecordLegacy } = this.constructor.components;
+        return this.props.archInfo.isLegacyKanban ? KanbanRecordLegacy : KanbanRecord;
     }
 
     get showNoContentHelper() {

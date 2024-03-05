@@ -3,7 +3,7 @@
 import { registry } from '@web/core/registry';
 
 import { kanbanView } from '@web/views/kanban/kanban_view';
-import { KanbanRecord } from '@web/views/kanban/kanban_record';
+import { KanbanRecord } from '@web/views/kanban/kanban_record_legacy';
 import { KanbanRenderer } from '@web/views/kanban/kanban_renderer';
 
 import { LunchDashboard } from '../components/lunch_dashboard';
@@ -23,7 +23,7 @@ export class LunchKanbanRenderer extends LunchRendererMixin(KanbanRenderer) {
     static components = {
         ...LunchKanbanRenderer.components,
         LunchDashboard,
-        KanbanRecord: LunchKanbanRecord,
+        KanbanRecordLegacy: LunchKanbanRecord,
     };
 }
 
