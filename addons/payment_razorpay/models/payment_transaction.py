@@ -34,14 +34,16 @@ class PaymentTransaction(models.Model):
         if self.provider_code != 'razorpay':
             return res
 
-        customer_id = self._razorpay_create_customer()['id']
+        customer_id = self.tokenize and self._razorpay_create_customer()['id']
         order_id = self._razorpay_create_order(customer_id)['id']
-        return {
+        vals = {
             'razorpay_key_id': self.provider_id.razorpay_key_id,
-            'razorpay_customer_id': customer_id,
             'is_tokenize_request': self.tokenize,
             'razorpay_order_id': order_id,
         }
+        if customer_id:
+            vals['razorpay_customer_id'] = customer_id
+        return vals
 
     def _razorpay_create_customer(self):
         """ Create and return a Customer object.
