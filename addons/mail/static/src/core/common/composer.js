@@ -160,6 +160,7 @@ export class Composer extends Component {
         useEffect(
             () => {
                 this.ref.el.style.height = this.fakeTextarea.el.scrollHeight + "px";
+                console.log(this.cursorPosition());
                 this.saveContentDebounced();
             },
             () => [this.props.composer.textInputContent, this.ref.el]
@@ -180,6 +181,44 @@ export class Composer extends Component {
                 this.restoreContent();
             }
         });
+    }
+
+    cursorPosition() {
+        const textarea = this.ref.el;
+        const cursorPos = textarea.selectionStart;
+        const textBeforeCursor = textarea.value.substring(0, cursorPos);
+        const textAfterCursor = textarea.value.substring(cursorPos);
+        const pre = document.createTextNode(textBeforeCursor);
+        const post = document.createTextNode(textAfterCursor);
+        const caretEle = document.createElement("span");
+        caretEle.innerHTML = "&nbsp;";
+
+        const mirroredEle = document.createElement("div");
+
+        const textareaStyles = window.getComputedStyle(textarea);
+        [
+            "border",
+            "boxSizing",
+            "fontFamily",
+            "fontSize",
+            "fontWeight",
+            "letterSpacing",
+            "lineHeight",
+            "padding",
+            "textDecoration",
+            "textIndent",
+            "textTransform",
+            "whiteSpace",
+            "wordSpacing",
+            "wordWrap",
+        ].forEach((property) => {
+            mirroredEle.style[property] = textareaStyles[property];
+        });
+        mirroredEle.innerHTML = "";
+        mirroredEle.append(pre, caretEle, post);
+        const rect = caretEle.getBoundingClientRect();
+        console.log(rect);
+        // coordinatesButton.innerHTML = `Coordinates: (${rect.left}, ${rect.top})
     }
 
     get pickerSettings() {
