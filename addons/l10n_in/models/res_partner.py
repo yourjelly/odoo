@@ -26,6 +26,10 @@ class ResPartner(models.Model):
              " specified transactions, correspondence, and so on.\n"
              "Thus, PAN acts as an identifier for the person with the tax department."
     )
+    l10n_in_pan_based_credit_limit = fields.Float(
+        string='PAN Credit Limit', help='Credit limit specific to this partner.',
+        groups='account.group_account_invoice,account.group_account_readonly',
+        company_dependent=True, copy=False, tracking=True)
 
     @api.onchange('company_type')
     def onchange_company_type(self):
@@ -49,6 +53,13 @@ class ResPartner(models.Model):
             state_id = self.env['res.country.state'].search([('l10n_in_tin', '=', self.vat[:2])], limit=1)
             if state_id:
                 self.state_id = state_id
+            self.l10n_in_pan = self.vat[2:12]
+
+    @api.onchange('l10n_in_pan', 'l10n_in_pan_based_credit_limit')
+    def onchange_pan(self):
+        if self.l10n_in_pan:
+            same_partner_pan = self.search([('l10n_in_pan', '=', self.l10n_in_pan)])
+            same_partner_pan.l10n_in_pan_based_credit_limit = self.l10n_in_pan_based_credit_limit
 
     @api.model
     def _commercial_fields(self):

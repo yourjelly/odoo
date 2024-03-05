@@ -6,6 +6,7 @@ import re
 from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError, RedirectWarning, UserError
 from odoo.tools.image import image_data_uri
+from odoo.tools.misc import formatLang
 
 
 class AccountMove(models.Model):
@@ -142,3 +143,58 @@ class AccountMove(models.Model):
             for line in self.invoice_line_ids.filtered(lambda x: x.display_type == 'product')
         ]
         return self.env['account.tax']._l10n_in_get_hsn_summary_table(base_lines, display_uom)
+    def _build_credit_warning_message(self, record, current_amount=0.0, exclude_current=False):
+        """ Build the warning message that will be displayed in a yellow banner on top of the current record
+            if the partner exceeds a credit limit (set on the company or the partner itself).
+            :param record:                  The record where the warning will appear (Invoice, Sales Order...).
+            :param current_amount (float):  The partner's outstanding credit amount from the current document.
+            :param exclude_current (bool):  Whether to exclude `current_amount` from the credit to invoice.
+            :return (str):                  The warning message to be showed.
+        """
+
+        def _get_pan_based_credit_limit():
+            partner_id = record.partner_id.commercial_partner_id
+            credit_to_invoice = max(partner_id.credit_to_invoice - (current_amount if exclude_current else 0), 0)
+            same_partner_pan = self.env['res.partner'].search([('l10n_in_pan', '=', partner_id.l10n_in_pan)])
+            total_same_pan_partner_credit = sum(same_partner_pan.mapped('credit'))
+            total_credit = total_same_pan_partner_credit + credit_to_invoice + current_amount
+            if not partner_id.l10n_in_pan_based_credit_limit or total_credit <= partner_id.l10n_in_pan_based_credit_limit:
+                return ''
+            msg = _(
+                '%(partner_name)s has reached its PAN credit limit of: %(credit_limit)s',
+                partner_name=partner_id.name,
+                credit_limit=formatLang(self.env, partner_id.l10n_in_pan_based_credit_limit, currency_obj=record.company_id.currency_id)
+            )
+            total_credit_formatted = formatLang(self.env, total_credit, currency_obj=record.company_id.currency_id)
+            if credit_to_invoice > 0 and current_amount > 0:
+                return msg + '\n' + _(
+                    'Total amount due (including sales orders and this document): %(total_credit)s',
+                    total_credit=total_credit_formatted
+                )
+            elif credit_to_invoice > 0:
+                return msg + '\n' + _(
+                    'Total amount due (including sales orders): %(total_credit)s',
+                    total_credit=total_credit_formatted
+                )
+            elif current_amount > 0:
+                return msg + '\n' + _(
+                    'Total amount due (including this document): %(total_credit)s',
+                    total_credit=total_credit_formatted
+                )
+            else:
+                return msg + '\n' + _(
+                    'Total amount due: %(total_credit)s',
+                    total_credit=total_credit_formatted
+                )
+
+        #  Contact based credit limit warning msg
+        contact_based_limit_warning = super()._build_credit_warning_message(record, current_amount, exclude_current)
+        #  PAN based credit limit warning msg
+        pan_based_limit_warning = _get_pan_based_credit_limit()
+
+        msg = ''
+        if contact_based_limit_warning:
+            msg += contact_based_limit_warning + '\n'
+        if pan_based_limit_warning:
+            msg += pan_based_limit_warning + '\n'
+        return msg

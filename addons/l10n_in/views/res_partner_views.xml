@@ -16,6 +16,29 @@
             <xpath expr="//field[@name='vat']" position="after">
                 <field name="l10n_in_pan" placeholder="e.g. ABCTY1234D" invisible="'IN' not in fiscal_country_codes" />
             </xpath>
+            <xpath expr="//group[@name='credit_limits']/div[hasclass('o_row')]/field[@name='credit_limit']" position="attributes">
+                <attribute name="invisible">not use_partner_credit_limit or 'IN' in fiscal_country_codes</attribute>
+            </xpath>
+            <xpath expr="//group[@name='credit_limits']/div[hasclass('o_row')]/field[@name='use_partner_credit_limit']" position="attributes">
+                <attribute name="invisible">'IN' in fiscal_country_codes</attribute>
+            </xpath>
+            <xpath expr="//group[@name='credit_limits']/div[hasclass('o_row')]" position="inside">
+                <div class="o_row" invisible="'IN' not in fiscal_country_codes">
+                    <span>
+                        <field name="use_partner_credit_limit"/>
+                    </span>
+                    <div invisible="not use_partner_credit_limit">
+                        <div class="o_row">
+                            <label for="credit_limit" string="Contact based limit"/>
+                            <field name="credit_limit" class="oe_inline" string="Contact based limit"/>
+                        </div>
+                        <div class="o_row" invisible="not l10n_in_pan">
+                            <label for="l10n_in_pan_based_credit_limit" string="PAN based limit"/>
+                            <field name="l10n_in_pan_based_credit_limit" class="oe_inline" string="PAN based limit"/>
+                        </div>
+                    </div>
+                </div>
+            </xpath>
         </field>
     </record>
 </odoo>
