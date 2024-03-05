@@ -6978,6 +6978,12 @@ msgstr ""
 
 #. module: web
 #. odoo-python
+#: code:addons/web/controllers/dataset.py:0
+msgid "You are not allowed to access this"
+msgstr ""
+
+#. module: web
+#. odoo-python
 #: code:addons/web/controllers/binary.py:0
 msgid "You are not allowed to upload an attachment here."
 msgstr ""

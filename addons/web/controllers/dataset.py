@@ -8,13 +8,18 @@ from odoo.api import call_kw
 from odoo.http import request
 from odoo.models import check_method_name
 from .utils import clean_action
+from odoo.exceptions import AccessError
+from odoo.tools.translate import _
 
 
 _logger = logging.getLogger(__name__)
 
 
 def _call_kw_readonly(registry, request):
-    params = request.get_json_data()['params']
+    json_data = request.get_json_data()
+    params = json_data['params'] if json_data else None
+    if not params or not params['model'] in registry:
+        raise AccessError(_("You are not allowed to access this"))
     model_class = registry[params['model']]
     method_name = params['method']
     for cls in model_class.mro():
