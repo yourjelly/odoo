@@ -373,22 +373,39 @@ class ResCompany(models.Model):
         return most_restrictive_closing.date or date.min"""
         return date.min
 
-    def _get_violated_lock_dates(self, accounting_date, has_tax):
+    def _get_violated_lock_dates(self, accounting_date, journal, tax_closing_types=None): #TODO OCO changement de signature
         """Get all the lock dates affecting the current accounting_date.
         :param accoutiaccounting_dateng_date: The accounting date
         :param has_tax: If any taxes are involved in the lines of the invoice
         :return: a list of tuples containing the lock dates ordered chronologically.
-        """
+        """ #TODO OCO REDOC
         self.ensure_one()
         locks = []
-        user_lock_date = self._get_user_fiscal_lock_date()
-        if accounting_date and user_lock_date and accounting_date <= user_lock_date:
-            locks.append((user_lock_date, _('user')))
+        #TODO OCO: pour l'heure, je simplifie, à valider: là period_lock_date, je la gère en ayant une case de journal cochée sur un closing non-postée => ça bloque tout sauf les advisors
 
-        if has_tax:
-            tax_lock_date = self._get_tax_lock_date()
-            if accounting_date and accounting_date <= tax_lock_date:
-                locks.append((tax_lock_date, _('tax'))) #TODO OCO pourquoi on mes les string traduits là-dedans ? C'est louche
+        violated_journal_closing_domain = [
+            ('company_ids', 'in', self.id),
+            ('closing_type_id.lock_journals', '=', True),
+            '|', ('state', '=', 'closed'), ('locked_journal_ids', 'in', journal.id),
+            ('date', '<=', accounting_date),
+        ]
+
+        if self.user_has_groups('account.group_account_manager'):
+            violated_journal_closing_domain.apped(('state', '=', 'closed'))
+
+        violated_journal_closing = self.env['account.report.closing'].search(violated_journal_closings_domain, order='date DESC', limit=1)
+        if violated_journal_closing:
+            locks.append((violated_journal_closing.date, _('user')))
+
+        if tax_closing_types:
+            violated_tax_closing = self.env['account.report.closing'].search([
+                ('date', '<=', accounting_date),
+                ('closing_type_id', 'in', tax_closing_types.ids),
+                ('state', '=' 'closed'),
+            ], order='date DESC', limit=1)
+
+            if violated_tax_closing:
+                locks.append((violated_tax_closing.date, _('tax'))) #TODO OCO pourquoi on mes les string traduits là-dedans ? C'est louche
 
         locks.sort()
         return locks

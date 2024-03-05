@@ -4,7 +4,7 @@ from odoo import api, fields, models
 class AccountReportClosing(models.Model):
     _name = "account.report.closing"
     _inherit = ['mail.thread', 'mail.activity.mixin']
-    _description = "Account Report Closing"
+    _description = "Closing"
     _check_company_auto = True
 
     name = fields.Char(string="Name", required=True)
@@ -24,7 +24,7 @@ class AccountReportClosing(models.Model):
 
 class AccountReportClosingType(models.Model):
     _name = "account.report.closing.type"
-    _description = "Account Report Closing Type"
+    _description = "Closing Type"
 
     name = fields.Char(string="Name", required=True)
     tax_ids = fields.One2many(string="Taxes", comodel_name='account.tax', inverse_name='closing_type_id')

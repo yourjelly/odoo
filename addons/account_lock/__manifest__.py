@@ -14,3 +14,5 @@ Make the lock date irreversible:
     'depends': ['account'],
     'license': 'LGPL-3',
 }
+#TODO OCO On veut garder ça ? Comment on l'intègre avec les closings ? Juste l'impossibilité de les reset quand closed ? Mais avec ça, le souci ça va être la lock date pour les non-advisor, si ça se fait
+# en cochant des cases pour chaque journal => elle sera réversible en décochant, quoi ... Mais est-ce vraiment grave, ça ?

@@ -10,7 +10,7 @@ from odoo.exceptions import UserError
 class ResCompany(models.Model):
     _inherit = 'res.company'
 
-    def _autorise_lock_date_changes(self, vals):
+    def _autorise_lock_date_changes(self, vals): #TODO OCO voir comment on retravaille ça et pour qui ... la lock date pour les journal entries ... quid ? => pour moi, on peut tout virer et gérer avec des closings
         '''Check the lock dates for the current companies. This can't be done in a api.constrains because we need
         to perform some comparison between new/old values. This method forces the lock dates to be irreversible.
         * You cannot set stricter restrictions on accountants than on users.

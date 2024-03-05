@@ -1291,9 +1291,9 @@ class AccountMoveLine(models.Model):
                     line.product_id.product_tmpl_id.uom_id.category_id.name
                 ))
 
-    def _affect_tax_report(self):
+    def _affect_tax_report(self): #TODO OCO virer
         self.ensure_one()
-        return self.tax_ids or self.tax_line_id or self.tax_tag_ids.filtered(lambda x: x.applicability == "taxes")
+        return self.tax_ids or self.tax_line_id or self.tax_tag_ids.filtered(lambda x: x.applicability == "taxes") #TODO OCO la condition sur les tags est un poil chiante (surtout pout des non-signés)
 
     def _check_tax_lock_date(self):
         for line in self.filtered(lambda l: l.move_id.state == 'posted'):

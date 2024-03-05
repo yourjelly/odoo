@@ -1405,7 +1405,7 @@ class AccountMove(models.Model):
         for move in self:
             accounting_date = move.date or fields.Date.context_today(move)
             affects_tax_report = move._affect_tax_report()
-            move.tax_lock_date_message = move._get_lock_date_message(accounting_date, affects_tax_report)
+            move.tax_lock_date_message = move._get_lock_date_message(accounting_date, affects_tax_report) # TODO OCO adapter ça
 
     @api.depends('currency_id')
     def _compute_display_inactive_currency_warning(self):
@@ -3734,7 +3734,7 @@ class AccountMove(models.Model):
             for key, mapping in res.items()
         }
 
-    def _affect_tax_report(self):
+    def _affect_tax_report(self): #TODO OCO virer
         return any(line._affect_tax_report() for line in (self.line_ids | self.invoice_line_ids))
 
     def _get_move_display_name(self, show_ref=False):
@@ -4064,10 +4064,9 @@ class AccountMove(models.Model):
             to_post = self
 
         for move in to_post:
-            affects_tax_report = move._affect_tax_report()
-            lock_dates = move._get_violated_lock_dates(move.date, affects_tax_report)
+            lock_dates = move._get_violated_lock_dates()
             if lock_dates:
-                move.date = move._get_accounting_date(move.invoice_date or move.date, affects_tax_report)
+                move.date = move._get_accounting_date(move.invoice_date or move.date, affects_tax_report) #TODO OCO gérer
 
         # Create the analytic lines in batch is faster as it leads to less cache invalidation.
         to_post.line_ids._create_analytic_lines()
@@ -4534,7 +4533,7 @@ class AccountMove(models.Model):
         :param has_tax (bool): Iff any taxes are involved in the lines of the invoice
         :return (datetime.date):
         """
-        lock_dates = self._get_violated_lock_dates(invoice_date, has_tax)
+        lock_dates = self.company_id._get_violated_lock_dates(invoice_date, has_tax=has_tax) #TODO OCO corriger l'appel
         today = fields.Date.today()
         highest_name = self.highest_name or self._get_last_sequence(relaxed=True)
         number_reset = self._deduce_sequence_number_reset(highest_name)
@@ -4559,22 +4558,29 @@ class AccountMove(models.Model):
                     return max(invoice_date, today)
         return invoice_date
 
-    def _get_violated_lock_dates(self, invoice_date, has_tax):
+    def _get_violated_lock_dates(self):
         """Get all the lock dates affecting the current invoice_date.
         :param invoice_date: The invoice date
         :param has_tax: If any taxes are involved in the lines of the invoice
         :return: a list of tuples containing the lock dates affecting this move, ordered chronologically.
         """
-        return self.company_id._get_violated_lock_dates(invoice_date, has_tax)
+        self.ensure_one()
+        tax_closing_types = self._get_impacted_tax_closings()
+        return self.company_id._get_violated_lock_dates(self.date, tax_closing_types=tax_closing_types)
 
-    def _get_lock_date_message(self, invoice_date, has_tax):
+    def _get_impacted_tax_closings(self):
+        #TODO OCO DOC
+        self.ensure_one()
+        return (self.line_ids.tax_ids + self.line_ids.tax_line_id).closing_type_id
+
+    def _get_lock_date_message(self, invoice_date, has_tax): #TODO OCO virer has_tax
         """Get a message describing the latest lock date affecting the specified date.
         :param invoice_date: The date to be checked
         :param has_tax: If any taxes are involved in the lines of the invoice
         :return: a message describing the latest lock date affecting this move and the date it will be
                  accounted on if posted, or False if no lock dates affect this move.
         """
-        lock_dates = self._get_violated_lock_dates(invoice_date, has_tax)
+        lock_dates = self.company_id._get_violated_lock_dates(invoice_date, self.journal_id, has_tax)
         if lock_dates:
             invoice_date = self._get_accounting_date(invoice_date, has_tax)
             lock_date, lock_type = lock_dates[-1]
