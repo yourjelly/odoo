@@ -855,7 +855,6 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.main_pos_config.write({'gift_card_settings': 'create_set'})
         self.start_pos_tour("GiftCardWithRefundtTour")
 
-    @unittest.skip
     def test_loyalty_program_specific_product(self):
         #create a loyalty program with a rules of minimum 2 qty that applies on produt A and B and reward 5 points. The reward is 10$ per order in exchange of 2 points on product A and B
         LoyaltyProgram = self.env['loyalty.program']

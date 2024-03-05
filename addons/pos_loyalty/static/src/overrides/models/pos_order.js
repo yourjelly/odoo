@@ -1056,7 +1056,7 @@ patch(PosOrder.prototype, {
             }
             if (
                 applicableProductIds.has(line.get_product().id) ||
-                applicableProductIds.has(line.reward_product_id.id)
+                applicableProductIds.has(line.reward_product_id?.id)
             ) {
                 discountableLines.push(line);
             }
