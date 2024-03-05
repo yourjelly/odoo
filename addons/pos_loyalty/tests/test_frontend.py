@@ -714,7 +714,6 @@ class TestUi(TestPointOfSaleHttpCommon):
             login="pos_user",
         )
 
-    @unittest.skip
     def test_promotion_program_with_global_discount(self):
         """
         - Create a promotion with a discount of 10%
@@ -793,7 +792,7 @@ class TestUi(TestPointOfSaleHttpCommon):
 
         self.main_pos_config2.with_user(self.pos_user).open_ui()
 
-        self.start_pos_tour("PosCouponTour5")
+        self.start_pos_tour("PosCouponTour5", pos_config=self.main_pos_config2)
 
     def test_loyalty_program_using_same_product(self):
         """

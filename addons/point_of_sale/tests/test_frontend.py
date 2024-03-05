@@ -21,11 +21,12 @@ class TestPointOfSaleHttpCommon(AccountTestInvoicingHttpCommon):
     def _get_main_company(cls):
         return cls.company_data['company']
 
-    def _get_url(self):
-        return f"/pos/ui?config_id={self.main_pos_config.id}"
+    def _get_url(self, pos_config=None):
+        pos_config = pos_config or self.main_pos_config
+        return f"/pos/ui?config_id={pos_config.id}"
 
     def start_pos_tour(self, tour_name, login="pos_user", **kwargs):
-        self.start_tour(self._get_url(), tour_name, login=login, **kwargs)
+        self.start_tour(self._get_url(kwargs.get('pos_config')), tour_name, login=login, **kwargs)
 
     @classmethod
     def setUpClass(cls, chart_template_ref=None):

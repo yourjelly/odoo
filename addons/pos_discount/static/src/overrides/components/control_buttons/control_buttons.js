@@ -51,36 +51,17 @@ patch(ControlButtons.prototype, {
                 lines.filter((ll) => ll.isGlobalDiscountApplicable())
             );
 
-            const taxIds = this.pos.models["account.tax"].filter((tax) =>
-                tax_ids_array.includes(tax.id)
-            );
+            const taxes = tax_ids_array
+                .map((taxId) => this.pos.models["account.tax"].get(taxId))
+                .filter(Boolean);
+
             // We add the price as manually set to avoid recomputation when changing customer.
             const discount = (-pc / 100.0) * baseToDiscount;
             if (discount < 0) {
-                // FIXME handle discount
                 await this.pos.addLineToCurrentOrder(
-                    { product_id: product },
-                    {
-                        price_unit: discount,
-                        lst_price: discount,
-                        tax_ids: taxIds,
-                        merge: false,
-                    }
+                    { product_id: product, price_unit: discount, tax_ids: [["link", ...taxes]] },
+                    { merge: false }
                 );
-                // order.add_product(product, {
-                //     price: discount,
-                //     lst_price: discount,
-                //     tax_ids: taxIds,
-                //     merge: false,
-                //     description:
-                //         `${pc}%, ` +
-                //         (tax_ids_array.length
-                //             ? _t("Tax: %s", taxIds.map((tax) => tax.amount + "%").join(", "))
-                //             : _t("No tax")),
-                //     extras: {
-                //         price_type: "automatic",
-                //     },
-                // });
             }
         }
     },
