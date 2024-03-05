@@ -297,73 +297,6 @@ QUnit.module("Views", (hooks) => {
 
     QUnit.module("KanbanView");
 
-    QUnit.test("basic ungrouped rendering", async (assert) => {
-        assert.expect(7);
-
-        await makeView({
-            type: "kanban",
-            resModel: "partner",
-            serverData,
-            arch: `
-                <kanban class="o_kanban_test">
-                    <templates><t t-name="kanban-box">
-                        <div>
-                            <t t-esc="record.foo.value"/>
-                            <field name="foo"/>
-                        </div>
-                    </t></templates>
-                </kanban>`,
-            mockRPC(route, args) {
-                if (args.method === "web_search_read") {
-                    assert.ok(
-                        args.kwargs.context.bin_size,
-                        "should not request direct binary payload"
-                    );
-                }
-            },
-        });
-
-        assert.hasClass(target.querySelector(".o_kanban_view"), "o_kanban_test");
-        assert.hasClass(target.querySelector(".o_kanban_renderer"), "o_kanban_ungrouped");
-        assert.containsOnce(
-            target,
-            ".o_control_panel_main_buttons .d-none.d-xl-inline-flex button.o-kanban-button-new"
-        );
-        assert.containsN(target, ".o_kanban_record:not(.o_kanban_ghost)", 4);
-        assert.containsN(target, ".o_kanban_ghost", 6);
-        assert.containsOnce(target, ".o_kanban_record:contains(gnap)");
-    });
-
-    QUnit.test("kanban rendering with class and style attributes", async (assert) => {
-        await makeView({
-            type: "kanban",
-            resModel: "partner",
-            serverData,
-            arch: /* xml */ `
-                <kanban class="myCustomClass" style="border: 1px solid red;">
-                    <templates><t t-name="kanban-box">
-                        <field name="foo"/>
-                    </t></templates>
-                </kanban>
-            `,
-        });
-        assert.containsNone(
-            target,
-            ".o_view_controller[style*='border: 1px solid red;'], .o_view_controller [style*='border: 1px solid red;']",
-            "style attribute should not be copied"
-        );
-        assert.containsOnce(
-            target,
-            ".o_view_controller.o_kanban_view.myCustomClass",
-            "class attribute should be passed to the view controller"
-        );
-        assert.containsOnce(
-            target,
-            ".myCustomClass",
-            "class attribute should ONLY be passed to the view controller"
-        );
-    });
-
     QUnit.test("Hide tooltip when user click inside a kanban headers item", async (assert) => {
         patchWithCleanup(browser, {
             setTimeout: (fn) => fn(),
@@ -405,24 +338,6 @@ QUnit.module("Views", (hooks) => {
         await click(target, ".o_kanban_group:first-child .o_kanban_header_title .fa-gear");
         await nextTick();
         assert.containsNone(target, ".o-tooltip");
-    });
-
-    QUnit.test("generic tags are case insensitive", async function (assert) {
-        await makeView({
-            type: "kanban",
-            resModel: "partner",
-            serverData,
-            arch: `
-                <kanban>
-                    <templates>
-                        <t t-name="kanban-box">
-                            <Div class="test">Hello</Div>
-                        </t>
-                    </templates>
-                </kanban>`,
-        });
-
-        assert.containsN(target, "div.test", 4);
     });
 
     QUnit.test("display full is supported on fields", async (assert) => {
@@ -600,35 +515,6 @@ QUnit.module("Views", (hooks) => {
             assert.containsOnce(getColumn(target, 0), ".o_kanban_record");
             assert.containsNone(getColumn(target, 1), ".o_kanban_record");
             assert.verifySteps(["open-dialog"]);
-        }
-    );
-
-    QUnit.test(
-        "Ensure float fields are formatted properly without using a widget",
-        async (assert) => {
-            await makeView({
-                type: "kanban",
-                resModel: "partner",
-                serverData,
-                arch: `
-                <kanban>
-                    <templates>
-                        <t t-name="kanban-box">
-                            <div>
-                                <field name="qux" digits="[0,5]"/>
-                            </div>
-                            <div>
-                                <field name="qux" digits="[0,3]"/>
-                            </div>
-                        </t>
-                    </templates>
-                </kanban>`,
-            });
-            // Would display 0.40 if digits attr is not applied
-            assert.strictEqual(
-                target.querySelector(".o_kanban_record").innerText,
-                "0.40000\n0.400"
-            );
         }
     );
 
@@ -957,52 +843,6 @@ QUnit.module("Views", (hooks) => {
             getNodesTextContent(target.querySelectorAll(".o_kanban_record:not(.o_kanban_ghost)")),
             ["10", "9", "17", "Negative value"]
         );
-    });
-
-    QUnit.test("field with widget and attributes in kanban", async (assert) => {
-        assert.expect(1);
-
-        const myField = {
-            component: class MyField extends Component {
-                static template = xml`<span/>`;
-                static props = ["*"];
-                setup() {
-                    if (this.props.record.resId === 1) {
-                        assert.deepEqual(this.props.attrs, {
-                            name: "int_field",
-                            widget: "my_field",
-                            str: "some string",
-                            bool: "true",
-                            num: "4.5",
-                            field_id: "int_field_0",
-                        });
-                    }
-                }
-            },
-            extractProps: ({ attrs }) => ({ attrs }),
-        };
-        registry.category("fields").add("my_field", myField);
-
-        await makeView({
-            type: "kanban",
-            resModel: "partner",
-            serverData,
-            arch: `
-                <kanban>
-                    <field name="foo"/>
-                    <templates>
-                        <t t-name="kanban-box">
-                            <div>
-                                <field name="int_field" widget="my_field"
-                                    str="some string"
-                                    bool="true"
-                                    num="4.5"
-                                />
-                            </div>
-                        </t>
-                    </templates>
-                </kanban>`,
-        });
     });
 
     QUnit.test("field with widget and dynamic attributes in kanban", async (assert) => {
