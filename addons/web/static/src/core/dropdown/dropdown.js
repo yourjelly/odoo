@@ -96,6 +96,7 @@ export class Dropdown extends Component {
         },
         manual: { type: Boolean, optional: true },
         virtualFocus: { type: Boolean, optional: true },
+        toClose: { type: Boolean, optional: true },
     };
     static defaultProps = {
         disabled: false,
@@ -162,10 +163,14 @@ export class Dropdown extends Component {
             () => [this.target]
         );
 
-        onWillUpdateProps(({ disabled }) => {
-            if (disabled) {
+        onWillUpdateProps(({ disabled, toClose }) => {
+            if (disabled || toClose) {
                 this.closePopover();
             }
+            // if (toClose) {
+            //     this.closePopover();
+            // }
+            console.log(toClose);
         });
     }
 
@@ -214,11 +219,13 @@ export class Dropdown extends Component {
     }
 
     onStateChanged(state) {
+        // console.log(state);
         if (state.isOpen) {
             this.openPopover();
         } else {
             this.closePopover();
         }
+        // console.log(this.props.toClose);
     }
 
     setTargetElement(target) {
@@ -300,6 +307,7 @@ export class Dropdown extends Component {
     }
 
     onOpened() {
+        // console.log(this.props);
         this.navigation.enable();
         this.props.onOpened?.();
         this.props.onStateChanged?.(true);

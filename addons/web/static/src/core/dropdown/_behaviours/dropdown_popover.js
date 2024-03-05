@@ -4,6 +4,7 @@ import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 export class DropdownPopover extends Component {
     static components = { DropdownItem };
     static template = xml`
+        <!-- <t t-log="this.props"></t> returns undefined for this.props.items-->
         <t t-if="this.props.items">
             <t t-foreach="this.props.items" t-as="item" t-key="this.getKey(item, item_index)">
                 <DropdownItem class="item.class" onSelected="() => item.onSelected()" t-out="item.label"/>

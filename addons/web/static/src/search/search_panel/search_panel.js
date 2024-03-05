@@ -53,6 +53,7 @@ export class SearchPanel extends Component {
             expanded: {},
             showMobileSearch: false,
             sidebarExpanded: true,
+            isDropdownOpen: false,
         });
         this.root = useRef("root");
         this.scrollTop = 0;
@@ -235,10 +236,18 @@ export class SearchPanel extends Component {
                 categoryState[value.id] = true;
             }
         }
+        if (!this.state.isDropdownOpen) {
+            this.state.isDropdownOpen = true;
+        }
+        // this transfers the call to the documents_search_model.js
         if (category.activeValueId !== value.id) {
             this.env.searchModel.toggleCategoryValue(category.id, value.id);
         }
     }
+
+    // onSearchPanelStageChanged(value){
+    //     this.state.isDropdownOpen = value;
+    // }
 
     toggleSidebar() {
         this.state.sidebarExpanded = !this.state.sidebarExpanded;

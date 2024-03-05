@@ -39,7 +39,6 @@
                                 t-attf-class="o_search_panel_section_icon fa {{ filter.icon }} fa-rotate-90 mb-2"
                                 t-att-style="filter.color and ('color: ' + filter.color)"
                             />
-                            <t t-esc="filter.values.join(', ')" />
                         </span>
                     </t>
                 </t>
@@ -155,7 +154,8 @@
                     <div class="d-flex align-items-center me-2 ms-auto">All</div>
                 </button>
             </div>
-            <Dropdown t-foreach="sections" t-as="section" t-key="section.id" menuClass="'my-2 mx-1'" onOpened.bind="updateGroupHeadersChecked">
+            <Dropdown t-foreach="sections" t-as="section" t-key="section.id" menuClass="'my-2 mx-1'" onOpened.bind="updateGroupHeadersChecked" toClose="state.isDropdownOpen">
+                <t t-log="state.isDropdownOpen"></t>
                 <span class="btn btn-secondary my-2 mx-1 o-dropdown-caret">
                     <i t-if="hasSelection(section.id)" class="position-absolute fa fa-circle" style="color: red; top: -5px; right: -5px"/>
                     <i t-attf-class="fa {{ section.icon }} o_search_panel_section_icon {{!section.color &amp;&amp; section.type == 'filter' ? 'text-warning' : !section.color ? 'text-primary': ''}} me-2"
