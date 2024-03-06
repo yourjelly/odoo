@@ -5229,8 +5229,10 @@
             if (x === cell) {
                 found = true;
             }
-            const cellValue = evaluateLiteral(x?.content, { locale: DEFAULT_LOCALE });
-            if (filter(cellValue)) {
+            const cellValue = x?.isFormula
+                ? undefined
+                : evaluateLiteral(x?.content, { locale: DEFAULT_LOCALE });
+            if (cellValue && filter(cellValue)) {
                 group.push(cellValue);
             }
             else {
@@ -24024,6 +24026,9 @@
             this.timeOutId = setTimeout(() => {
                 this.assistantState.allowCellSelectionBehind = false;
             }, 2000);
+        }
+        get formulaArgSeparator() {
+            return this.env.model.getters.getLocale().formulaArgSeparator + " ";
         }
     }
     FunctionDescriptionProvider.props = {
@@ -51716,8 +51721,8 @@
 
 
     __info__.version = '16.4.24';
-    __info__.date = '2024-02-28T12:47:21.498Z';
-    __info__.hash = '90c74d1';
+    __info__.date = '2024-03-06T08:49:44.308Z';
+    __info__.hash = '6e58242';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
