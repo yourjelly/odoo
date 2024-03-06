@@ -273,7 +273,7 @@ class ResCompany(models.Model):
                         install_demo=False,
                     )
                 self.env.cr.precommit.add(try_loading)
-            self.env.ref('account.onboarding_onboarding_account_dashboard').with_company(company)._search_or_create_progress()
+            self.env.ref('account.onboarding_onboarding_account_dashboard').sudo().with_company(company)._search_or_create_progress()
         return companies
 
     def get_new_account_code(self, current_code, old_prefix, new_prefix):
