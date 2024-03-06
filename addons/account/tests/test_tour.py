@@ -3,11 +3,11 @@
 import odoo.tests
 
 from odoo import Command
-from odoo.addons.account.tests.common import AccountTestInvoicingCommon
+from odoo.addons.account.tests.common import AccountTestInvoicingHttpCommon
 
 
 @odoo.tests.tagged('post_install_l10n', 'post_install', '-at_install')
-class TestUi(AccountTestInvoicingCommon, odoo.tests.HttpCase):
+class TestUi(AccountTestInvoicingHttpCommon):
 
     @classmethod
     def setUpClass(cls):
