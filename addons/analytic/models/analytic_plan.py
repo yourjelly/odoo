@@ -304,6 +304,8 @@ class AccountAnalyticApplicability(models.Model):
     def _get_score(self, **kwargs):
         """ Gives the score of an applicability with the parameters of kwargs """
         self.ensure_one()
+        if self.company_id and self.company_id.id != kwargs.get('company_id', self.env.company.id):
+            return 0
         if not kwargs.get('business_domain'):
             return 0
         else:

@@ -106,6 +106,19 @@ class TestAnalyticAccount(TransactionCase):
         plans_json = self.env['account.analytic.plan'].get_relevant_plans(**kwargs)
         self.assertEqual(2, len(plans_json) - self.analytic_plan_offset, "All root plans should be available")
 
+        kwargs = {
+            'business_domain': 'general',
+            'company_id': self.company_data.id,
+        }
+        new_company = self.env['res.company'].create({'name': 'applicability_company'})
+        applicability.write({'company_id': new_company.id})
+        plans_json = self.env['account.analytic.plan'].get_relevant_plans(**kwargs)
+        self.assertEqual(2, len(plans_json) - self.analytic_plan_offset, "All root plans should be available")
+
+        applicability.write({'company_id': self.company_data.id})
+        plans_json = self.env['account.analytic.plan'].get_relevant_plans(**kwargs)
+        self.assertEqual(1, len(plans_json) - self.analytic_plan_offset, "Plan 1 should be unavailable")
+
     def test_analytic_distribution_model(self):
         """ Test the distribution returned from the distribution model """
         distribution_json = self.env['account.analytic.distribution.model']._get_distribution({})
