@@ -3,7 +3,6 @@
 
 import odoo.tests
 
-from unittest.mock import patch
 
 from odoo import Command
 from odoo.addons.account.tests.common import AccountTestInvoicingHttpCommon
@@ -57,27 +56,7 @@ class TestUi(AccountTestInvoicingHttpCommon):
                 invoice.button_draft()
         invoices.unlink()
 
-        def fetch_favorite_institutions_mock(*args, **kwargs):
-            return [
-                {
-                    'country': 'US',
-                    'id': 3245,
-                    'name': 'BMO Business Banking',
-                    'picture': '/base/static/img/logo_white.png',
-                },
-                {
-                    'country': 'US',
-                    'id': 8192,
-                    'name': 'Banc of California',
-                    'picture': '/base/static/img/logo_white.png'
-                },
-            ]
-
-        with patch.object(
-             target=self.registry['account.journal'],
-             attribute='fetch_online_sync_favorite_institutions',
-             new=fetch_favorite_institutions_mock,
-             create=True):
+        with self.mock_online_sync_favorite_institutions():
             self.start_tour("/web", 'account_tour', login="admin")
 
     def test_01_account_tax_groups_tour(self):
