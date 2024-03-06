@@ -47,14 +47,14 @@ options.registry.WebsiteSaleGridLayout = options.Class.extend({
      */
     setPpr: function (previewMode, widgetValue, params) {
         this.ppr = parseInt(widgetValue);
-        rpc('/shop/config/website', { 'shop_ppr': this.ppr });
+        return rpc('/shop/config/website', { 'shop_ppr': this.ppr });
     },
     /**
      * @see this.selectClass for params
      */
     setDefaultSort: function (previewMode, widgetValue, params) {
         this.default_sort = widgetValue;
-        rpc('/shop/config/website', { 'shop_default_sort': this.default_sort });
+        return rpc('/shop/config/website', { 'shop_default_sort': this.default_sort });
     },
 
     //--------------------------------------------------------------------------
@@ -220,6 +220,7 @@ options.registry.WebsiteSaleProductsItem = options.Class.extend({
      * @see this.selectClass for params
      */
     changeSequence: function (previewMode, widgetValue, params) {
+        // TODO this should be awaited
         rpc('/shop/config/product', {
             product_id: this.productTemplateID,
             sequence: widgetValue,
@@ -424,6 +425,7 @@ options.registry.WebsiteSaleProductsItem = options.Class.extend({
         var $td = $(ev.currentTarget);
         var x = $td.index() + 1;
         var y = $td.parent().index() + 1
+        // TODO this should be awaited
         rpc('/shop/config/product', {
             product_id: this.productTemplateID,
             x: x,
@@ -477,10 +479,6 @@ options.registry.WebsiteSaleProductPage = options.Class.extend({
         return this._super(...arguments);
     },
 
-    _updateWebsiteConfig(params) {
-        rpc('/shop/config/website', params).then(() => this.trigger_up('request_save', {reload: true, optionSelector: this.data.selector}));
-    },
-
     _getZoomOptionData() {
         return this._userValueWidgets.find(widget => {
             return widget.options && widget.options.dataAttributes && widget.options.dataAttributes.name === "o_wsale_zoom_mode";
@@ -492,14 +490,11 @@ options.registry.WebsiteSaleProductPage = options.Class.extend({
      */
     async setImageWidth(previewMode, widgetValue, params) {
         const zoomOption = this._getZoomOptionData();
-        const updateWidth = this._updateWebsiteConfig.bind(this, { product_page_image_width: widgetValue });
-        if (!zoomOption || widgetValue !== "100_pc") {
-            updateWidth();
-        } else {
+        if (zoomOption && widgetValue === "100_pc") {
             const defaultZoomOption = "website_sale.product_picture_magnify_click";
             await this._customizeWebsiteData(defaultZoomOption, { possibleValues: zoomOption._methodsParams.optionsPossibleValues["customizeWebsiteViews"] }, true);
-            updateWidth();
         }
+        return rpc('/shop/config/website', { product_page_image_width: widgetValue });
     },
 
     /**
@@ -507,18 +502,15 @@ options.registry.WebsiteSaleProductPage = options.Class.extend({
      */
     async setImageLayout(previewMode, widgetValue, params) {
         const zoomOption = this._getZoomOptionData();
-        const updateLayout = this._updateWebsiteConfig.bind(this, { product_page_image_layout: widgetValue });
-        if (!zoomOption) {
-            updateLayout();
-        } else {
+        if (zoomOption) {
             const imageWidthOption = this.productDetailMain.dataset.image_width;
             let defaultZoomOption = widgetValue === "grid" ? "website_sale.product_picture_magnify_click" : "website_sale.product_picture_magnify_hover";
             if (imageWidthOption === "100_pc" && defaultZoomOption === "website_sale.product_picture_magnify_hover") {
                 defaultZoomOption = "website_sale.product_picture_magnify_click";
             }
             await this._customizeWebsiteData(defaultZoomOption, { possibleValues: zoomOption._methodsParams.optionsPossibleValues["customizeWebsiteViews"] }, true);
-            updateLayout();
         }
+        return rpc('/shop/config/website', { product_page_image_layout: widgetValue });
     },
 
     /**
@@ -642,6 +634,7 @@ options.registry.WebsiteSaleProductPage = options.Class.extend({
      * Removes all extra-images from the product.
      */
     clearImages: function () {
+        // TODO this should be awaited
         rpc(`/shop/product/clear-images`, {
             model: this.mode,
             product_product_id: this.productProductID,
@@ -662,17 +655,18 @@ options.registry.WebsiteSaleProductPage = options.Class.extend({
             2: 'medium',
             3: 'big',
         }[widgetValue];
-        rpc('/shop/config/website', {
-            'product_page_image_spacing': spacing,
-        }).then(() => this.trigger_up('request_save', {reload: true, optionSelector: this.data.selector}));
         this.productPageGrid.dataset.image_spacing = spacing;
+
+        return rpc('/shop/config/website', {
+            'product_page_image_spacing': spacing,
+        });
     },
 
     setColumns(previewMode, widgetValue, params) {
-        rpc('/shop/config/website', {
-            'product_page_grid_columns': widgetValue,
-        }).then(() => this.trigger_up('request_save', {reload: true, optionSelector: this.data.selector}));
         this.productPageGrid.dataset.grid_columns = widgetValue;
+        return rpc('/shop/config/website', {
+            'product_page_grid_columns': widgetValue,
+        });
     },
 
     /**
@@ -736,6 +730,7 @@ options.registry.WebsiteSaleProductAttribute = options.Class.extend({
      * @see this.selectClass for params
      */
     setDisplayType: function (previewMode, widgetValue, params) {
+        // TODO this should be awaited
         rpc('/shop/config/attribute', {
             attribute_id: this.attributeID,
             display_type: widgetValue,
@@ -798,6 +793,7 @@ options.registry.ReplaceMedia.include({
      *
      */
     async setPosition(previewMode, widgetValue, params) {
+        // TODO this should be awaited
         rpc('/shop/product/resequence-image', {
             image_res_model: this.recordModel,
             image_res_id: this.recordId,
