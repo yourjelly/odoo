@@ -12,9 +12,25 @@ registry.category("web_tour.tours").add('account_tour', {
     steps: () => [
     ...stepUtils.goToAppSteps('account.menu_finance', markup(_t('Send invoices to your customers in no time with the <b>Invoicing app</b>.'))),
     {
+    // This should replace the previous onboarding tests, however it results in ReadOnlySqlTransaction error
+    //     trigger: "a[data-method=action_open_step_fiscal_year]",
+    //     extra_trigger: ".o_widget_account_onboarding .fa-circle",
+    //     content: _t("Set Periods"),
+    //     edition: "enterprise",
+    // }, {
+    //     trigger: "button[name=action_save_onboarding_fiscal_year]",
+    //     extra_trigger: ".o_dialog",
+    //     content: _t("Save Fiscal Year end"),
+    //     edition: "enterprise",
+    // }, {
+        trigger: "button[name=action_create_new]",
+        // extra_trigger: ".o_widget_account_onboarding .fa-check-circle",
+        content: _t("Now, we'll create your first invoice (enterprise)"),
+        edition: "enterprise",
+    }, {
         trigger: "button.o_list_button_add",
-        content: _t("Now, we'll create your first invoice."),
-        position: "bottom",
+        content: _t("Now, we'll create your first invoice (community)"),
+        edition: "community",
     }, {
         trigger: "div[name=partner_id] .o_input_dropdown",
         extra_trigger: "[name=move_type] [raw-value=out_invoice]",

@@ -9,9 +9,17 @@ def _set_fiscal_country(env):
     """
     env['res.company'].search([]).compute_account_tax_fiscal_country()
 
+def _initiate_onboardings(env):
+    """ Since account does not make use of the standard onboarding banner which is
+    responsible for the initiation of the onboarding, this is done on module installation
+    and on company creation.
+    """
+    for company in env['res.company'].search([]):
+        env.ref('account.onboarding_onboarding_account_dashboard').with_company(company)._search_or_create_progress()
 
 def _account_post_init(env):
     _set_fiscal_country(env)
+    _initiate_onboardings(env)
 
 # imported here to avoid dependency cycle issues
 # pylint: disable=wrong-import-position

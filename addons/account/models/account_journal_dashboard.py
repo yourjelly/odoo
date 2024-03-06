@@ -565,7 +565,6 @@ class account_journal(models.Model):
         }
         onboarding_data = {}
         onboardings = self.env['onboarding.onboarding'].sudo().search([('route_name', 'in', list(journal_onboarding_map.values()))])
-        onboardings.sudo()._search_or_create_progress()  # may need try/catch to avoid concurrency issue (see OnboardingController)
         for onboarding in onboardings:
             onboarding_data[onboarding.route_name] = onboarding._prepare_rendering_values()
             onboarding_data[onboarding.route_name]['current_onboarding_state'] = onboarding.current_onboarding_state

@@ -12,7 +12,7 @@
                    type="action"
                    t-att-data-method="step.action"
                    data-model="onboarding.onboarding.step"
-                   t-att-data-reloadOnClose="'1'"
+                   data-reloadOnClose="1"
                    t-out="step.title"
                    t-att-title="step.description"/>
             </div>
