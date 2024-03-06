@@ -230,7 +230,7 @@ Contracts:
             if self.request_unit_half and result['hours'] > 0:
                 result['days'] = 0.5
             return result
-        return super(HrLeave, self)._get_number_of_days(date_from, date_to, employee_id)
+        return super(HrLeave, self)._get_number_of_days(date_from, date_to, employee_id, self.env.company.resource_calendar_id)
 
     def _get_calendar(self):
         self.ensure_one()

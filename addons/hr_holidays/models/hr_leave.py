@@ -553,7 +553,7 @@ class HolidaysRequest(models.Model):
     def _compute_number_of_days(self):
         for holiday in self:
             if holiday.date_from and holiday.date_to:
-                holiday.number_of_days = holiday._get_number_of_days(holiday.date_from, holiday.date_to, holiday.employee_id.id)['days']
+                holiday.number_of_days = holiday._get_number_of_days(holiday.date_from, holiday.date_to, holiday.employee_id.id, self.env.company.resource_calendar_id)['days']
             else:
                 holiday.number_of_days = 0
 
@@ -608,7 +608,7 @@ class HolidaysRequest(models.Model):
                                 - calendar._leave_intervals_batch(start_dt, end_dt, None)[False]  # Substract Global Leaves
                     number_of_hours = sum((stop - start).total_seconds() / 3600 for start, stop, dummy in intervals)
                 else:
-                    number_of_hours = holiday._get_number_of_days(holiday.date_from, holiday.date_to, holiday.employee_id.id)['hours']
+                    number_of_hours = holiday._get_number_of_days(holiday.date_from, holiday.date_to, holiday.employee_id.id, calendar)['hours']
                 holiday.number_of_hours_display = number_of_hours or (holiday.number_of_days * (calendar.hours_per_day or HOURS_PER_DAY))
             else:
                 holiday.number_of_hours_display = 0
@@ -723,7 +723,7 @@ class HolidaysRequest(models.Model):
             if holiday.state in ['cancel', 'refuse', 'validate1', 'validate']:
                 raise ValidationError(_("This modification is not allowed in the current state."))
 
-    def _get_number_of_days(self, date_from, date_to, employee_id):
+    def _get_number_of_days(self, date_from, date_to, employee_id, calendar):
         """ Returns a float equals to the timedelta between two dates given as string."""
         if employee_id:
             employee = self.env['hr.employee'].browse(employee_id)
@@ -735,12 +735,12 @@ class HolidaysRequest(models.Model):
                 result['days'] = 0.5
             return result
 
-        today_hours = self.env.company.resource_calendar_id.get_work_hours_count(
+        today_hours = calendar.get_work_hours_count(
             datetime.combine(date_from.date(), time.min),
             datetime.combine(date_from.date(), time.max),
             False)
 
-        hours = self.env.company.resource_calendar_id.get_work_hours_count(date_from, date_to)
+        hours = calendar.get_work_hours_count(date_from, date_to)
         days = hours / (today_hours or HOURS_PER_DAY) if not self.request_unit_half else 0.5
         return {'days': days, 'hours': hours}
 
