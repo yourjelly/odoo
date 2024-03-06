@@ -14,6 +14,10 @@ class StockWarnInsufficientQtyRepair(models.TransientModel):
     def _get_reference_document_company_id(self):
         return self.repair_id.company_id
 
+    def _get_reference_company_id(self):
+        company = self.env['stock.scrap'].browse(self._context.get('default_repair_id')).company_id
+        return company
+
     def action_done(self):
         self.ensure_one()
         return self.repair_id._action_repair_confirm()

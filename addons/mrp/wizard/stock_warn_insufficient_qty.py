@@ -14,6 +14,9 @@ class StockWarnInsufficientQtyUnbuild(models.TransientModel):
     def _get_reference_document_company_id(self):
         return self.unbuild_id.company_id
 
+    def _get_reference_company_id(self):
+        company = self.env['stock.scrap'].browse(self._context.get('default_unbuild_id')).company_id
+        return company
     def action_done(self):
         self.ensure_one()
         return self.unbuild_id.action_unbuild()
