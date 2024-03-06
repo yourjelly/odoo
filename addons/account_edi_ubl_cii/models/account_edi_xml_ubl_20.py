@@ -691,7 +691,7 @@ class AccountEdiXmlUBL20(models.AbstractModel):
 
         # ==== invoice_line_ids: AllowanceCharge (document level) ====
 
-        logs += self._import_fill_invoice_allowance_charge(tree, invoice, qty_factor)
+        logs += self._import_fill_invoice_document_allowance_charge(tree, invoice, qty_factor)
 
         # ==== Prepaid amount ====
 
@@ -701,10 +701,9 @@ class AccountEdiXmlUBL20(models.AbstractModel):
         # ==== invoice_line_ids: InvoiceLine/CreditNoteLine ====
 
         invoice_line_tag = 'InvoiceLine' if invoice.move_type in ('in_invoice', 'out_invoice') or qty_factor == -1 else 'CreditNoteLine'
-        for i, invl_el in enumerate(tree.findall('./{*}' + invoice_line_tag)):
+        for line_tree in tree.findall('./{*}' + invoice_line_tag):
             invoice_line = invoice.invoice_line_ids.create({'move_id': invoice.id})
-            invl_logs = self._import_fill_invoice_line_form(invl_el, invoice_line, qty_factor)
-            logs += invl_logs
+            logs += self._import_fill_invoice_line_form(line_tree, invoice_line, qty_factor)
 
         return logs
 
@@ -745,9 +744,6 @@ class AccountEdiXmlUBL20(models.AbstractModel):
         inv_line_vals = self._import_fill_invoice_line_values(tree, xpath_dict, invoice_line, qty_factor)
         # retrieve tax nodes
         tax_nodes = tree.findall('.//{*}Item/{*}ClassifiedTaxCategory/{*}Percent')
-        if not tax_nodes:
-            for elem in tree.findall('.//{*}TaxTotal'):
-                tax_nodes += elem.findall('.//{*}TaxSubtotal/{*}TaxCategory/{*}Percent')
         return self._import_fill_invoice_line_taxes(tax_nodes, invoice_line, inv_line_vals, logs)
 
     def _correct_invoice_tax_amount(self, tree, invoice):

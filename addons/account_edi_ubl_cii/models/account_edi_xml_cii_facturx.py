@@ -334,7 +334,7 @@ class AccountEdiXmlCII(models.AbstractModel):
 
         # ==== invoice_line_ids: AllowanceCharge (document level) ====
 
-        logs += self._import_fill_invoice_allowance_charge(tree, invoice, qty_factor)
+        logs += self._import_fill_invoice_document_allowance_charge(tree, invoice, qty_factor)
 
         # ==== Prepaid amount ====
 
@@ -344,16 +344,13 @@ class AccountEdiXmlCII(models.AbstractModel):
 
         # ==== invoice_line_ids ====
 
-        line_nodes = tree.findall('./{*}SupplyChainTradeTransaction/{*}IncludedSupplyChainTradeLineItem')
-        if line_nodes is not None:
-            for invl_el in line_nodes:
-                invoice_line = invoice.invoice_line_ids.create({'move_id': invoice.id})
-                invl_logs = self._import_fill_invoice_line_form(invoice.journal_id, invl_el, invoice, invoice_line, qty_factor)
-                logs += invl_logs
+        for line_tree in tree.findall('./{*}SupplyChainTradeTransaction/{*}IncludedSupplyChainTradeLineItem'):
+            invoice_line = invoice.invoice_line_ids.create({'move_id': invoice.id})
+            logs += self._import_fill_invoice_line_form(line_tree, invoice_line, qty_factor)
 
         return logs
 
-    def _import_fill_invoice_line_form(self, journal, tree, invoice_form, invoice_line, qty_factor):
+    def _import_fill_invoice_line_form(self, tree, invoice_line, qty_factor):
         logs = []
 
         # Product.
