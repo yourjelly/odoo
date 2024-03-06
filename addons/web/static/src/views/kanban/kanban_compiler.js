@@ -24,7 +24,7 @@ export class KanbanCompiler extends ViewCompiler {
         const sectionContainer = createElement("div");
         sectionContainer.setAttribute(
             "class",
-            "o_kanban_section_container d-flex flex-column justify-content-between gap-2 w-100"
+            "o_kanban_section_container d-flex flex-column justify-content-between gap-2 w-100 h-100"
         );
         for (const child of el.childNodes) {
             if (getTag(child) === "aside") {
@@ -39,13 +39,14 @@ export class KanbanCompiler extends ViewCompiler {
             }
         }
         append(kanban, sectionContainer);
-        kanban.setAttribute("class", `w-100 ${withAside ? "d-flex flew-row" : ""}`);
+        kanban.setAttribute("class", `w-100${withAside ? " d-flex flew-row" : ""}`);
         return kanban;
     }
 
     compileAside(el, params) {
         const aside = createElement("div");
-        let asideClass = `${el.getAttribute("class") || ""} o_kanban_aside d-block`;
+        const elClass = el.getAttribute("class");
+        let asideClass = `o_kanban_aside d-block${elClass ? elClass : ""}`;
         if (archParseBoolean(el.getAttribute("full"), false)) {
             asideClass += " o_kanban_aside_full";
         }
@@ -58,8 +59,10 @@ export class KanbanCompiler extends ViewCompiler {
 
     compileSection(el, params) {
         const section = createElement("div");
-        let sectionClass = el.getAttribute("class") || "";
-        sectionClass += " d-flex justify-content-between overflow-hidden";
+        const elClass = el.getAttribute("class");
+        let sectionClass = `d-flex justify-content-between overflow-hidden${
+            elClass ? elClass : ""
+        }`;
         if (el.getAttribute("type") === "row") {
             sectionClass += " flex-row align-items-end";
         } else {
