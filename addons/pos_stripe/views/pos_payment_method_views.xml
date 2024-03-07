@@ -8,7 +8,7 @@
             <xpath expr="//field[@name='use_payment_terminal']" position="after">
                 <!-- Stripe -->
                 <field name="stripe_serial_number" invisible="use_payment_terminal != 'stripe'" required="use_payment_terminal == 'stripe'"/>
-                <field name="stripe_secret_key" invisible="use_payment_terminal != 'stripe'" required="use_payment_terminal == 'stripe'"/>
+                <field name="pos_stripe_payment_method" invisible="use_payment_terminal != 'stripe'" required="use_payment_terminal == 'stripe'"/>
             </xpath>
         </field>
     </record>

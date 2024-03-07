@@ -22,7 +22,7 @@ export class PaymentStripe extends PaymentInterface {
             const data = await this.pos.data.silentCall(
                 "pos.payment.method",
                 "stripe_connection_token",
-                []
+                [[this.payment_method.id]]
             );
             if (data.error) {
                 throw data.error;
@@ -208,7 +208,7 @@ export class PaymentStripe extends PaymentInterface {
             const data = await this.pos.data.silentCall(
                 "pos.payment.method",
                 "stripe_capture_payment",
-                [paymentIntentId]
+                [[this.payment_method.id], paymentIntentId]
             );
             if (data.error) {
                 throw data.error;

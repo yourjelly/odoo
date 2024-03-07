@@ -16,20 +16,9 @@ class PosPaymentMethod(models.Model):
     def _get_payment_terminal_selection(self):
         return super()._get_payment_terminal_selection() + [('stripe', 'Stripe')]
 
-    def _default_pos_stripe_payment_method(self):
-        return self.env['payment.provider'].search([('code', '=', 'stripe'), ('company_id', '=', self.env.company.id)
-            ], limit=1)
-
-    def _default_stripe_secret_key(self):
-        stripe_payment_provider = self._default_pos_stripe_payment_method()
-        if stripe_payment_provider:
-            return stripe_payment_provider.stripe_secret_key
-        return ''
-
     # Stripe
     stripe_serial_number = fields.Char(help='[Serial number of the stripe terminal], for example: WSC513105011295', copy=False)
-    pos_stripe_payment_method = fields.Many2one('payment.provider', string="Payment_provider", default=_default_pos_stripe_payment_method)
-    stripe_secret_key = fields.Char(string="Secret Key", related="pos_stripe_payment_method.stripe_secret_key", readonly=False, default=_default_stripe_secret_key)
+    pos_stripe_payment_method = fields.Many2one('payment.provider', string="Payment_provider", domain="[('code', '=', 'stripe')]")
 
     @api.constrains('stripe_serial_number')
     def _check_stripe_serial_number(self):
@@ -43,27 +32,6 @@ class PosPaymentMethod(models.Model):
                 raise ValidationError(_('Terminal %s is already used on payment method %s.',\
                      payment_method.stripe_serial_number, existing_payment_method.display_name))
 
-    def _get_stripe_payment_provider(self):
-        stripe_payment_provider = self.env['payment.provider'].search([
-            ('code', '=', 'stripe'),
-            ('company_id', '=', self.env.company.id)
-        ], limit=1)
-
-        if not stripe_payment_provider:
-            raise UserError(_("Stripe payment provider for company %s is missing", self.env.company.name))
-
-        return stripe_payment_provider
-
-    @api.model
-    def _get_stripe_secret_key(self):
-        stripe_secret_key = self._get_stripe_payment_provider().stripe_secret_key
-
-        if not stripe_secret_key:
-            raise ValidationError(_('Complete the Stripe onboarding for company %s.', self.env.company.name))
-
-        return stripe_secret_key
-
-    @api.model
     def stripe_connection_token(self):
         if not self.env.user.has_group('point_of_sale.group_pos_user'):
             raise AccessError(_("Do not have access to fetch token from Stripe"))
@@ -71,7 +39,7 @@ class PosPaymentMethod(models.Model):
         endpoint = 'https://api.stripe.com/v1/terminal/connection_tokens'
 
         try:
-            resp = requests.post(endpoint, auth=(self.sudo()._get_stripe_secret_key(), ''), timeout=TIMEOUT)
+            resp = requests.post(endpoint, auth=(self.pos_stripe_payment_method.stripe_secret_key, ''), timeout=TIMEOUT)
         except requests.exceptions.RequestException:
             _logger.exception("Failed to call stripe_connection_token endpoint")
             raise UserError(_("There are some issues between us and Stripe, try again later."))
@@ -107,14 +75,13 @@ class PosPaymentMethod(models.Model):
 
         try:
             data = werkzeug.urls.url_encode(params)
-            resp = requests.post(endpoint, data=data, auth=(self.sudo()._get_stripe_secret_key(), ''), timeout=TIMEOUT)
+            resp = requests.post(endpoint, data=data, auth=(self.pos_stripe_payment_method.stripe_secret_key, ''), timeout=TIMEOUT)
         except requests.exceptions.RequestException:
             _logger.exception("Failed to call stripe_payment_intent endpoint")
             raise UserError(_("There are some issues between us and Stripe, try again later."))
 
         return resp.json()
 
-    @api.model
     def stripe_capture_payment(self, paymentIntentId, amount=None):
         """Captures the payment identified by paymentIntentId.
 
@@ -134,15 +101,4 @@ class PosPaymentMethod(models.Model):
                 "amount_to_capture": self._stripe_calculate_amount(amount),
             }
 
-        return self.sudo()._get_stripe_payment_provider()._stripe_make_request(endpoint, data)
-
-    def action_stripe_key(self):
-        res_id = self._get_stripe_payment_provider().id
-        # Redirect
-        return {
-            'name': _('Stripe'),
-            'res_model': 'payment.provider',
-            'type': 'ir.actions.act_window',
-            'view_mode': 'form',
-            'res_id': res_id,
-        }
+        return self.pos_stripe_payment_method._stripe_make_request(endpoint, data)
