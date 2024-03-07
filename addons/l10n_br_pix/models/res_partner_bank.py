@@ -65,7 +65,7 @@ class ResPartnerBank(models.Model):
     def _compute_display_qr_setting(self):
         """Override."""
         bank_br = self.filtered(lambda b: b.country_code == "BR")
-        bank_br.display_qr_setting = self.env.company.qr_code
+        bank_br.display_qr_setting = True
         super(ResPartnerBank, self - bank_br)._compute_display_qr_setting()
 
     def _get_additional_data_field(self, comment):
