@@ -1,4 +1,4 @@
-import { beforeEach, expect, getFixture, test } from "@odoo/hoot";
+import { beforeEach, describe, expect, getFixture, test } from "@odoo/hoot";
 import { press } from "@odoo/hoot-dom";
 import { Deferred, animationFrame } from "@odoo/hoot-mock";
 import { contains, makeMockEnv, mountWithCleanup, patchWithCleanup } from "../../web_test_helpers";
@@ -25,6 +25,8 @@ class Parent extends Component {
 
 const commandProviderRegistry = registry.category("command_provider");
 const commandSetupRegistry = registry.category("command_setup");
+
+describe.current.tags("desktop");
 
 let env;
 beforeEach(async () => {
