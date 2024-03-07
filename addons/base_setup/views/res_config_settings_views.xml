@@ -177,6 +177,9 @@
                                     <div class="mt16 text-warning"><strong>Save</strong> this page and come back here to set up Cloudflare turnstile.</div>
                                 </div>
                             </setting>
+                            <setting help="Store attachments to the cloud storage" id="cloud_storage">
+                                <field name="module_cloud_storage"/>
+                            </setting>
 
                         </block>
 

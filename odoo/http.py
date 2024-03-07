@@ -552,6 +552,12 @@ class Stream:
             )
             if static_path:
                 self = cls.from_path(static_path)
+            elif 'cloud_storage_model' in attachment and attachment.cloud_storage_model:
+                self.type = 'url'
+                info = attachment.env[attachment.cloud_storage_model]._generate_download_info(attachment)
+                self.url = info['url']
+                # cache the redirection until 10 seconds before the expiry
+                self.max_age = max(info['time_to_expiry'] - 10, 0)
             else:
                 self.type = 'url'
                 self.url = attachment.url
@@ -605,6 +611,10 @@ class Stream:
         assert getattr(self, self.type) is not None, "There is nothing to stream, missing {self.type!r} attribute."
 
         if self.type == 'url':
+            if self.max_age is not None:
+                res = request.redirect(self.url, code=302, local=False)
+                res.headers['Cache-Control'] = f'max-age={self.max_age}'
+                return res
             return request.redirect(self.url, code=301, local=False)
 
         if as_attachment is None:
