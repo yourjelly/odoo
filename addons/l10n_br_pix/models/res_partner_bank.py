@@ -42,9 +42,9 @@ class ResPartnerBank(models.Model):
             if bank.proxy_type == "br_cpf_cnpj" and (
                 not self.partner_id.check_vat_br(value) or any(not char.isdigit() for char in value)
             ):
-                raise ValidationError(_("%s is not a valid CPF or CNPJ.", value))
+                raise ValidationError(_("%s is not a valid CPF or CNPJ (don't include periods or dashes).", value))
 
-            if bank.proxy_type == "mobile" and (not value or not value.startswith("+55") or not len(value) != 14):
+            if bank.proxy_type == "mobile" and (not value or not value.startswith("+55") or len(value) != 14):
                 raise ValidationError(
                     _(
                         "The mobile number %s is invalid. It must start with +55, contain a 2 digit territory or state code followed by a 9 digit number.",

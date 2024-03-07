@@ -19,8 +19,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/l10n_br_pix/models/res_partner_bank.py:0
 #, python-format
-msgid "%s is not a valid CPF or CNPJ."
-msgstr "%s não é um CPF ou CNPJ válido."
+msgid "%s is not a valid CPF or CNPJ (don't include periods or dashes)."
+msgstr "%s não é um CPF ou CNPJ válido (não inclua pontos ou travessões)."
 
 #. module: l10n_br_pix
 #. odoo-python
