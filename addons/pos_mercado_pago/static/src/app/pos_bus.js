@@ -7,11 +7,10 @@ patch(PosBus.prototype, {
     dispatch(message) {
         super.dispatch(...arguments);
         if (message.type === "MERCADO_PAGO_LATEST_MESSAGE") {
-            console.log("received notification with data", message)
-            const line = this.pos.getPendingPaymentLine("mercado_pago")
+            const line = this.pos.getPendingPaymentLine("mercado_pago");
             if (line) {
                 if (line.payment_method.payment_terminal.webhook_resolver) {
-                    line.payment_method.payment_terminal.webhook_resolver("mp_msg_received");
+                    line.payment_method.payment_terminal.webhook_resolver("mp_webhook");
                 }
             }
         }

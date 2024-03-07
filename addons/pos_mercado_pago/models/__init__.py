@@ -1,6 +1,3 @@
-# coding: utf-8
-# Part of Odoo. See LICENSE file for full copyright and licensing details.
-
+from . import mercado_pago_pos_request
 from . import pos_payment_method
 from . import pos_session
-from . import pos_terminal
