@@ -162,6 +162,9 @@ class MailRenderMixin(models.AbstractModel):
 
         return wrapper(html)
 
+    def _render_link_clip(self, name, link):
+        return self.env['ir.qweb']._render('mail.mail_url_clip', {'name': name, 'link': link}, minimal_qcontext=True)
+
     @api.model
     def _render_encapsulate(self, layout_xmlid, html, add_context=None, context_record=None):
         template_ctx = {

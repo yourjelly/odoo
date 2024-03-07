@@ -209,5 +209,13 @@
                 </t>
             </xpath>
         </template>
+
+        <template id="mail_url_clip">
+            <div style="width:386px;height:20px;max-height:20px;background-color:rgb(245,245,245);margin:6px 0px;padding:10px;font-style:normal;font-variant-caps:normal;font-stretch:normal;font-size:14px;line-height:20px;font-family:&quot;Google Sans&quot;,sans-serif;font-size-adjust:none;font-kerning:auto;font-variant-alternates:normal;font-variant-ligatures:normal;font-variant-numeric:normal;font-variant-east-asian:normal;font-feature-settings:normal;border:1px solid rgb(221,221,221)">
+                <a t-att-href="link" style="color:#202124;display:inline-block;max-width:356px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-decoration:none;border:none" target="_blank">
+                    <span dir="ltr" style="vertical-align:bottom"><t t-esc="name"/></span>
+                </a>
+            </div>
+        </template>
     </data>
 </odoo>

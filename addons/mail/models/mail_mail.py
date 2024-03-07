@@ -20,6 +20,8 @@ from odoo.addons.base.models.ir_mail_server import MailDeliveryException
 
 _logger = logging.getLogger(__name__)
 _UNFOLLOW_REGEX = re.compile(r'<span id="mail_unfollow".*?<\/span>', re.DOTALL)
+# maximum attachment size: 20MB for Outlook, 25MB for Gmail and Yahoo
+MAXIMUM_EMAIL_ATTACHMENT_SIZE = 20 * (10 ** 6)  # 20MB
 
 
 class MailMail(models.Model):
@@ -450,6 +452,14 @@ class MailMail(models.Model):
                 link_ids = {int(link) for link in re.findall(r'/web/(?:content|image)/([0-9]+)', body)}
                 if link_ids:
                     attachments = attachments - self.env['ir.attachment'].browse(list(link_ids))
+            if url_attachments := attachments.filtered(
+                    lambda a: a.file_size and a.file_size > MAXIMUM_EMAIL_ATTACHMENT_SIZE or
+                              a.url and a.url.startswith(('https://', 'http://', 'ftp://'))):
+                for attachment in url_attachments:
+                    attachment.generate_access_token()
+                    url = f'{attachment.get_base_url()}/web/content/{attachment.id}?access_token={attachment.access_token}'
+                    body = str(self.env['mail.render.mixin']._render_link_clip(name=attachment.name, link=url)) + body
+                attachments = attachments - url_attachments
             # load attachment binary data with a separate read(), as prefetching all
             # `datas` (binary field) could bloat the browse cache, triggering
             # soft/hard mem limits with temporary data.
