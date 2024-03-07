@@ -1,22 +1,24 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* crm_iap_mine
-# 
+#
 # Translators:
-# Wil Odoo, 2024
-# 
+# Ivana Bartonkova, 2023
+# Wil Odoo, 2023
+# Jakub Smolka, 2024
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~17.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-01-17 10:10+0000\n"
-"PO-Revision-Date: 2024-01-17 11:21+0000\n"
-"Last-Translator: Wil Odoo, 2024\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Jakub Smolka, 2024\n"
 "Language-Team: Czech (https://app.transifex.com/odoo/teams/41243/cs/)\n"
+"Language: cs\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: cs\n"
 "Plural-Forms: nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n <= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;\n"
 
 #. module: crm_iap_mine
@@ -59,9 +61,7 @@ msgstr "<span class=\"o_stat_text\">Příležitosti</span>"
 
 #. module: crm_iap_mine
 #: model_terms:ir.ui.view,arch_db:crm_iap_mine.crm_iap_lead_mining_request_view_form
-msgid ""
-"<span invisible=\"error_type != 'no_result'\">Your request did not return "
-"any result (no credits were used). Try removing some filters.</span>"
+msgid "<span invisible=\"error_type != 'no_result'\">Your request did not return any result (no credits were used). Try removing some filters.</span>"
 msgstr ""
 
 #. module: crm_iap_mine
@@ -316,9 +316,7 @@ msgstr "Generovat potenciální zákazníky"
 #. odoo-python
 #: code:addons/crm_iap_mine/models/crm_iap_lead_mining_request.py:0
 msgid "Generate new leads based on their country, industry, size, etc."
-msgstr ""
-"Generujte nové potenciální zákazníky podle jejich země, odvětví, velikosti, "
-"atd."
+msgstr "Generujte nové potenciální zákazníky podle jejich země, odvětví, velikosti, atd."
 
 #. module: crm_iap_mine
 #: model:ir.model.fields,field_description:crm_iap_mine.field_crm_iap_lead_mining_request__lead_ids
@@ -383,12 +381,12 @@ msgstr "Odvětví"
 #. module: crm_iap_mine
 #: model:ir.model.fields,field_description:crm_iap_mine.field_crm_iap_lead_industry__name
 msgid "Industry"
-msgstr "Průmysl"
+msgstr "Odvětví"
 
 #. module: crm_iap_mine
 #: model:ir.model.constraint,message:crm_iap_mine.constraint_crm_iap_lead_industry_name_uniq
 msgid "Industry name already exists!"
-msgstr "Název tagu již existuje!"
+msgstr "Název odvětví již existuje!"
 
 #. module: crm_iap_mine
 #: model:crm.iap.lead.role,name:crm_iap_mine.crm_iap_mine_role_11
@@ -469,8 +467,7 @@ msgstr "Právní"
 #. module: crm_iap_mine
 #. odoo-javascript
 #: code:addons/crm_iap_mine/static/src/js/tours/crm_iap_lead.js:0
-msgid ""
-"Looking for more opportunities?<br>Try the <b>Lead Generation</b> tool."
+msgid "Looking for more opportunities?<br>Try the <b>Lead Generation</b> tool."
 msgstr ""
 
 #. module: crm_iap_mine
@@ -507,9 +504,6 @@ msgstr ""
 
 #. module: crm_iap_mine
 #. odoo-python
-#: code:addons/crm_iap_mine/models/crm_iap_lead_mining_request.py:0
-#: code:addons/crm_iap_mine/models/crm_iap_lead_mining_request.py:0
-#: code:addons/crm_iap_mine/models/crm_iap_lead_mining_request.py:0
 #: code:addons/crm_iap_mine/models/crm_iap_lead_mining_request.py:0
 msgid "New"
 msgstr "Nové"
@@ -759,12 +753,8 @@ msgstr "Typ"
 #. module: crm_iap_mine
 #. odoo-python
 #: code:addons/crm_iap_mine/models/crm_iap_lead_mining_request.py:0
-msgid ""
-"Up to %d additional credits will be consumed to identify %d contacts per "
-"company."
-msgstr ""
-"Až do %d další kredity budou spotřebovány k identifikaci %d kontakty na "
-"společnost."
+msgid "Up to %d additional credits will be consumed to identify %d contacts per company."
+msgstr "Až do %d další kredity budou spotřebovány k identifikaci %d kontakty na společnost."
 
 #. module: crm_iap_mine
 #. odoo-javascript

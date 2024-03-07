@@ -1,23 +1,27 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* lunch
-# 
+#
 # Translators:
-# Wil Odoo, 2024
+# Tomáš Píšek, 2023
+# Ivana Bartonkova, 2023
+# Wil Odoo, 2023
+# Aleš Fiala <f.ales1@seznam.cz>, 2023
+# Jakub Smolka, 2023
 # Katerina Horylova, 2024
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~17.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-01-17 10:09+0000\n"
-"PO-Revision-Date: 2024-01-17 11:21+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
 "Last-Translator: Katerina Horylova, 2024\n"
 "Language-Team: Czech (https://app.transifex.com/odoo/teams/41243/cs/)\n"
+"Language: cs\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: cs\n"
 "Plural-Forms: nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n <= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;\n"
 
 #. module: lunch
@@ -47,12 +51,8 @@ msgstr ""
 
 #. module: lunch
 #: model_terms:ir.ui.view,arch_db:lunch.lunch_order_view_kanban
-msgid ""
-"<i class=\"fa fa-check\" role=\"img\" aria-label=\"Receive button\" "
-"title=\"Receive button\"/>"
-msgstr ""
-"<i class=\"fa fa-check\" role=\"img\" aria-label=\"Tlačítko přijmout\" "
-"title=\"Tlačítko přijmout\"/>"
+msgid "<i class=\"fa fa-check\" role=\"img\" aria-label=\"Receive button\" title=\"Receive button\"/>"
+msgstr "<i class=\"fa fa-check\" role=\"img\" aria-label=\"Tlačítko přijmout\" title=\"Tlačítko přijmout\"/>"
 
 #. module: lunch
 #: model_terms:ir.ui.view,arch_db:lunch.lunch_order_view_kanban
@@ -63,9 +63,7 @@ msgstr "<i class=\"fa fa-clock-o\" role=\"img\" aria-label=\"Date\" title=\"Datu
 
 #. module: lunch
 #: model_terms:ir.ui.view,arch_db:lunch.lunch_order_view_kanban
-msgid ""
-"<i class=\"fa fa-envelope\" role=\"img\" aria-label=\"Send notification\" "
-"title=\"Send notification\"/>"
+msgid "<i class=\"fa fa-envelope\" role=\"img\" aria-label=\"Send notification\" title=\"Send notification\"/>"
 msgstr ""
 
 #. module: lunch
@@ -81,28 +79,18 @@ msgstr "<i class=\"fa fa-money\" role=\"img\" aria-label=\"Peníze\" title=\"Pen
 
 #. module: lunch
 #: model_terms:ir.ui.view,arch_db:lunch.lunch_order_view_kanban
-msgid ""
-"<i class=\"fa fa-paper-plane\" role=\"img\" aria-label=\"Send button\" "
-"title=\"Send button\"/>"
+msgid "<i class=\"fa fa-paper-plane\" role=\"img\" aria-label=\"Send button\" title=\"Send button\"/>"
 msgstr ""
 
 #. module: lunch
 #: model_terms:ir.ui.view,arch_db:lunch.lunch_order_view_kanban
-msgid ""
-"<i class=\"fa fa-phone\" role=\"img\" aria-label=\"Order button\" "
-"title=\"Order button\"/>"
-msgstr ""
-"<i class=\"fa fa-phone\" role=\"img\" aria-label=\"Tlačítko objednat\" "
-"title=\"Tlačítko objednat\"/>"
+msgid "<i class=\"fa fa-phone\" role=\"img\" aria-label=\"Order button\" title=\"Order button\"/>"
+msgstr "<i class=\"fa fa-phone\" role=\"img\" aria-label=\"Tlačítko objednat\" title=\"Tlačítko objednat\"/>"
 
 #. module: lunch
 #: model_terms:ir.ui.view,arch_db:lunch.lunch_order_view_kanban
-msgid ""
-"<i class=\"fa fa-times\" role=\"img\" aria-label=\"Cancel button\" "
-"title=\"Cancel button\"/>"
-msgstr ""
-"<i class=\"fa fa-times\" role=\"img\" aria-label=\"Tlačítko zavřít\" "
-"title=\"Tlačítko zavřít\"/>"
+msgid "<i class=\"fa fa-times\" role=\"img\" aria-label=\"Cancel button\" title=\"Cancel button\"/>"
+msgstr "<i class=\"fa fa-times\" role=\"img\" aria-label=\"Tlačítko zavřít\" title=\"Tlačítko zavřít\"/>"
 
 #. module: lunch
 #: model:mail.template,body_html:lunch.lunch_order_mail_supplier
@@ -871,12 +859,8 @@ msgstr "Má zprávu"
 
 #. module: lunch
 #: model:ir.module.category,description:lunch.module_lunch_category
-msgid ""
-"Helps you handle your lunch needs, if you are a manager you will be able to "
-"create new products, cashmoves and to confirm or cancel orders."
-msgstr ""
-"Pomáhá vám zvládnout potřeby obědů, pokud jste manažer, budete moci vytvářet"
-" nové produkty, hotovost a potvrdit či zrušit objednávky."
+msgid "Helps you handle your lunch needs, if you are a manager you will be able to create new products, cashmoves and to confirm or cancel orders."
+msgstr "Pomáhá vám zvládnout potřeby obědů, pokud jste manažer, budete moci vytvářet nové produkty, hotovost a potvrdit či zrušit objednávky."
 
 #. module: lunch
 #: model_terms:ir.actions.act_window,help:lunch.lunch_product_category_action
@@ -1507,12 +1491,8 @@ msgstr "Platba"
 
 #. module: lunch
 #: model_terms:ir.actions.act_window,help:lunch.lunch_cashmove_action_payment
-msgid ""
-"Payments are used to register liquidity movements. You can process those "
-"payments by your own means or by using installed facilities."
-msgstr ""
-"Platby se používají k evidenci finančních pohybů. Tyto platby můžete "
-"zpracovat vlastním způsobem nebo pomocí instalovaných funkcionalit."
+msgid "Payments are used to register liquidity movements. You can process those payments by your own means or by using installed facilities."
+msgstr "Platby se používají k evidenci finančních pohybů. Tyto platby můžete zpracovat vlastním způsobem nebo pomocí instalovaných funkcionalit."
 
 #. module: lunch
 #: model:ir.model.fields,field_description:lunch.field_lunch_supplier__phone
@@ -1828,9 +1808,7 @@ msgstr "Ulice2"
 #. module: lunch
 #: model_terms:ir.actions.act_window,help:lunch.lunch_order_action_control_suppliers
 msgid "Summary of all lunch orders, grouped by vendor and by date."
-msgstr ""
-"Přehled všech objednávek na obědy, seskupených podle dodavatele a podle "
-"data."
+msgstr "Přehled všech objednávek na obědy, seskupených podle dodavatele a podle data."
 
 #. module: lunch
 #: model:ir.model.fields,field_description:lunch.field_lunch_alert__sun
@@ -1903,28 +1881,19 @@ msgstr ""
 
 #. module: lunch
 #: model:ir.model.fields,help:lunch.field_lunch_supplier__responsible_id
-msgid ""
-"The responsible is the person that will order lunch for everyone. It will be"
-" used as the 'from' when sending the automatic email."
-msgstr ""
-"Odpovědná osoba je osoba, která objedná oběd pro každého. Při odesílání "
-"automatického e-mailu bude použito jako „od“."
+msgid "The responsible is the person that will order lunch for everyone. It will be used as the 'from' when sending the automatic email."
+msgstr "Odpovědná osoba je osoba, která objedná oběd pro každého. Při odesílání automatického e-mailu bude použito jako „od“."
 
 #. module: lunch
 #. odoo-python
-#: code:addons/lunch/models/lunch_order.py:0
 #: code:addons/lunch/models/lunch_order.py:0
 msgid "The vendor related to this order is not available today."
 msgstr ""
 
 #. module: lunch
 #: model_terms:ir.actions.act_window,help:lunch.lunch_order_action
-msgid ""
-"There is no previous order recorded. Click on \"My Lunch\" and then create a"
-" new lunch order."
-msgstr ""
-"Není zaznamenána žádná předchozí objednávka. Klikněte na „Můj oběd“ a "
-"vytvořte novou objednávku na oběd."
+msgid "There is no previous order recorded. Click on \"My Lunch\" and then create a new lunch order."
+msgstr "Není zaznamenána žádná předchozí objednávka. Klikněte na „Můj oběd“ a vytvořte novou objednávku na oběd."
 
 #. module: lunch
 #: model_terms:ir.actions.act_window,help:lunch.lunch_product_action_order
@@ -1982,12 +1951,8 @@ msgstr ""
 
 #. module: lunch
 #: model_terms:ir.actions.act_window,help:lunch.lunch_product_action_order
-msgid ""
-"To see some products, check if your vendors are available today and that you"
-" have configured some products"
-msgstr ""
-"Chcete-li zobrazit některé produkty, zkontrolujte, zda jsou dnes k dispozici"
-" vaši dodavatelé a zda jste některé produkty nakonfigurovali"
+msgid "To see some products, check if your vendors are available today and that you have configured some products"
+msgstr "Chcete-li zobrazit některé produkty, zkontrolujte, zda jsou dnes k dispozici vaši dodavatelé a zda jste některé produkty nakonfigurovali"
 
 #. module: lunch
 #: model_terms:ir.ui.view,arch_db:lunch.lunch_order_view_search
@@ -2142,12 +2107,8 @@ msgstr "Středa"
 #. module: lunch
 #. odoo-python
 #: code:addons/lunch/controllers/main.py:0
-msgid ""
-"You are trying to impersonate another user, but this can only be done by a "
-"lunch manager"
-msgstr ""
-"Pokoušíte se vydávat za jiného uživatele, ale to může provést pouze vedoucí "
-"oběda"
+msgid "You are trying to impersonate another user, but this can only be done by a lunch manager"
+msgstr "Pokoušíte se vydávat za jiného uživatele, ale to může provést pouze vedoucí oběda"
 
 #. module: lunch
 #. odoo-python
@@ -2188,9 +2149,7 @@ msgstr ""
 #. module: lunch
 #. odoo-python
 #: code:addons/lunch/models/lunch_order.py:0
-msgid ""
-"Your wallet does not contain enough money to order that. To add some money "
-"to your wallet, please contact your lunch manager."
+msgid "Your wallet does not contain enough money to order that. To add some money to your wallet, please contact your lunch manager."
 msgstr ""
 
 #. module: lunch

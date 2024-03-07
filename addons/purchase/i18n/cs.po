@@ -1,25 +1,30 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* purchase
-# 
+#
 # Translators:
-# Wil Odoo, 2024
+# Jiří Podhorecký, 2023
+# SlavekB <slavek.banko@axis.cz>, 2023
+# Ivana Bartonkova, 2023
+# Wil Odoo, 2023
+# Tomáš Píšek, 2023
 # Vojtech Smolka, 2024
 # Aleš Fiala <f.ales1@seznam.cz>, 2024
 # Katerina Horylova, 2024
-# 
+# Jakub Smolka, 2024
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~17.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-01-17 10:09+0000\n"
-"PO-Revision-Date: 2024-01-17 11:21+0000\n"
-"Last-Translator: Katerina Horylova, 2024\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Jakub Smolka, 2024\n"
 "Language-Team: Czech (https://app.transifex.com/odoo/teams/41243/cs/)\n"
+"Language: cs\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: cs\n"
 "Plural-Forms: nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n <= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;\n"
 
 #. module: purchase
@@ -52,7 +57,6 @@ msgstr "%(amount)s splatných do %(date)s"
 
 #. module: purchase
 #. odoo-python
-#: code:addons/purchase/models/purchase_order.py:0
 #: code:addons/purchase/models/purchase_order.py:0
 msgid "%(product)s from %(original_receipt_date)s to %(new_receipt_date)s"
 msgstr "%(product)s od %(original_receipt_date)s do %(new_receipt_date)s"
@@ -94,7 +98,7 @@ msgstr "3cestné porovnávání"
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_res_config_settings__module_account_3way_match
 msgid "3-way matching: purchases, receptions and bills"
-msgstr "3cestné porovnávání: nákupy, účtenky a přijaté faktury"
+msgstr "3cestné porovnávání: objednávky, příjemky a přijaté faktury"
 
 #. module: purchase
 #: model:mail.template,body_html:purchase.email_template_edi_purchase_reminder
@@ -209,12 +213,8 @@ msgstr ""
 
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.portal_my_purchase_orders
-msgid ""
-"<i class=\"fa fa-fw fa-check\" role=\"img\" aria-label=\"Done\" "
-"title=\"Done\"/><span class=\"d-none d-md-inline\"> Done</span>"
-msgstr ""
-"<i class=\"fa fa-fw fa-check\" role=\"img\" aria-label=\"Done\" "
-"title=\"Done\"/><span class=\"d-none d-md-inline\">Hotovo</span>"
+msgid "<i class=\"fa fa-fw fa-check\" role=\"img\" aria-label=\"Done\" title=\"Done\"/><span class=\"d-none d-md-inline\"> Done</span>"
+msgstr "<i class=\"fa fa-fw fa-check\" role=\"img\" aria-label=\"Done\" title=\"Done\"/><span class=\"d-none d-md-inline\">Hotovo</span>"
 
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.purchase_order_portal_content
@@ -228,32 +228,18 @@ msgstr ""
 
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.purchase_partner_kanban_view
-msgid ""
-"<i class=\"fa fa-fw fa-credit-card\" role=\"img\" aria-label=\"Purchases\" "
-"title=\"Purchases\"/>"
-msgstr ""
-"<i class=\"fa fa-fw fa-credit-card\" role=\"img\" aria-label=\"Purchases\" "
-"title=\"Purchases\"/>"
+msgid "<i class=\"fa fa-fw fa-credit-card\" role=\"img\" aria-label=\"Purchases\" title=\"Purchases\"/>"
+msgstr "<i class=\"fa fa-fw fa-credit-card\" role=\"img\" aria-label=\"Purchases\" title=\"Purchases\"/>"
 
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.portal_my_purchase_orders
-msgid ""
-"<i class=\"fa fa-fw fa-file-text\" role=\"img\" aria-label=\"Waiting for "
-"Bill\" title=\"Waiting for Bill\"/><span class=\"d-none d-md-inline\"> "
-"Waiting for Bill</span>"
-msgstr ""
-"<i class=\"fa fa-fw fa-file-text\" role=\"img\" aria-label=\"Waiting for "
-"Bill\" title=\"Waiting for Bill\"/><span class=\"d-none d-md-inline\">Čekání"
-" na účet</span>"
+msgid "<i class=\"fa fa-fw fa-file-text\" role=\"img\" aria-label=\"Waiting for Bill\" title=\"Waiting for Bill\"/><span class=\"d-none d-md-inline\"> Waiting for Bill</span>"
+msgstr "<i class=\"fa fa-fw fa-file-text\" role=\"img\" aria-label=\"Waiting for Bill\" title=\"Waiting for Bill\"/><span class=\"d-none d-md-inline\">Čekání na účet</span>"
 
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.portal_my_purchase_orders
-msgid ""
-"<i class=\"fa fa-fw fa-remove\" role=\"img\" aria-label=\"Cancelled\" "
-"title=\"Cancelled\"/><span class=\"d-none d-md-inline\"> Cancelled</span>"
-msgstr ""
-"<i class=\"fa fa-fw fa-remove\" role=\"img\" aria-label=\"Cancelled\" "
-"title=\"Cancelled\"/><span class=\"d-none d-md-inline\">Zrušeno</span>"
+msgid "<i class=\"fa fa-fw fa-remove\" role=\"img\" aria-label=\"Cancelled\" title=\"Cancelled\"/><span class=\"d-none d-md-inline\"> Cancelled</span>"
+msgstr "<i class=\"fa fa-fw fa-remove\" role=\"img\" aria-label=\"Cancelled\" title=\"Cancelled\"/><span class=\"d-none d-md-inline\">Zrušeno</span>"
 
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.portal_my_purchase_order
@@ -307,16 +293,12 @@ msgstr "<span class=\"o_stat_text\">Zakoupeno</span>"
 
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.purchase_order_form
-msgid ""
-"<span class=\"text-muted\" invisible=\"not "
-"mail_reception_confirmed\">(confirmed by vendor)</span>"
+msgid "<span class=\"text-muted\" invisible=\"not mail_reception_confirmed\">(confirmed by vendor)</span>"
 msgstr ""
 
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.purchase_order_form
-msgid ""
-"<span class=\"text-muted\" invisible=\"not "
-"mail_reminder_confirmed\">(confirmed by vendor)</span>"
+msgid "<span class=\"text-muted\" invisible=\"not mail_reminder_confirmed\">(confirmed by vendor)</span>"
 msgstr ""
 
 #. module: purchase
@@ -473,12 +455,8 @@ msgstr "Varování lze nastavit na produkt nebo na zákazníka (nákup)"
 
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.res_config_settings_view_form_purchase
-msgid ""
-"Ability to select a package type in purchase orders and to force a quantity "
-"that is a multiple of the number of units per package."
-msgstr ""
-"Schopnost vybrat typ balíku v nákupních objednávkách a vynutit množství, "
-"které je násobkem počtu jednotek na balení."
+msgid "Ability to select a package type in purchase orders and to force a quantity that is a multiple of the number of units per package."
+msgstr "Schopnost vybrat typ balíku v nákupních objednávkách a vynutit množství, které je násobkem počtu jednotek na balení."
 
 #. module: purchase
 #. odoo-python
@@ -593,9 +571,7 @@ msgstr "Všechny čekající RFQ"
 #. module: purchase
 #: model:ir.model.fields,help:purchase.field_res_config_settings__group_send_reminder
 msgid "Allow automatically send email to remind your vendor the receipt date"
-msgstr ""
-"Umožněte automatické odesílání e-mailů, abyste připomněli prodejci datum "
-"přijetí"
+msgstr "Umožněte automatické odesílání e-mailů, abyste připomněli prodejci datum přijetí"
 
 #. module: purchase
 #: model:ir.model.fields.selection,name:purchase.selection__res_company__po_lock__edit
@@ -609,12 +585,8 @@ msgstr "Částka"
 
 #. module: purchase
 #: model:ir.model.fields,help:purchase.field_purchase_report__delay_pass
-msgid ""
-"Amount of time between date planned and order by date for each purchase "
-"order line."
-msgstr ""
-"Množství času mezi plánovaným datem a objednávkou podle data pro každý řádek"
-" nákupní objednávky."
+msgid "Amount of time between date planned and order by date for each purchase order line."
+msgstr "Množství času mezi plánovaným datem a objednávkou podle data pro každý řádek nákupní objednávky."
 
 #. module: purchase
 #: model:ir.model.fields,help:purchase.field_purchase_report__delay
@@ -696,12 +668,8 @@ msgstr "Automaticky připomenout datum přijetí vašim prodejcům"
 #: model:ir.model.fields,help:purchase.field_res_partner__receipt_reminder_email
 #: model:ir.model.fields,help:purchase.field_res_users__receipt_reminder_email
 #: model_terms:ir.ui.view,arch_db:purchase.purchase_order_form
-msgid ""
-"Automatically send a confirmation email to the vendor X days before the "
-"expected receipt date, asking him to confirm the exact date."
-msgstr ""
-"Automaticky pošlete e-mail s potvrzením prodejci X dní před očekávaným datem"
-" přijetí a požádejte ho o potvrzení přesného data."
+msgid "Automatically send a confirmation email to the vendor X days before the expected receipt date, asking him to confirm the exact date."
+msgstr "Automaticky pošlete e-mail s potvrzením prodejci X dní před očekávaným datem přijetí a požádejte ho o potvrzení přesného data."
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_report__price_average
@@ -784,12 +752,8 @@ msgstr "Zobrazení kalendáře"
 
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.res_config_settings_view_form_purchase
-msgid ""
-"Calls for tenders are when you want to generate requests for quotations with"
-" several vendors for a given set of products to compare offers."
-msgstr ""
-"Výzvy k podávání nabídek jsou, když chcete generovat žádosti o nabídky s "
-"několika dodavateli pro danou sadu produktů za účelem porovnání nabídek."
+msgid "Calls for tenders are when you want to generate requests for quotations with several vendors for a given set of products to compare offers."
+msgstr "Výzvy k podávání nabídek jsou, když chcete generovat žádosti o nabídky s několika dodavateli pro danou sadu produktů za účelem porovnání nabídek."
 
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.purchase_order_form
@@ -857,7 +821,6 @@ msgstr "Měna společnosti"
 #. module: purchase
 #. odoo-python
 #: code:addons/purchase/models/purchase_order.py:0
-#: code:addons/purchase/models/purchase_order.py:0
 msgid "Compose Email"
 msgstr "Napsat e-mail"
 
@@ -924,12 +887,8 @@ msgstr "Zásady kontroly"
 
 #. module: purchase
 #: model:ir.model.fields,help:purchase.field_purchase_order_line__product_uom_category_id
-msgid ""
-"Conversion between Units of Measure can only occur if they belong to the "
-"same category. The conversion will be made based on the ratios."
-msgstr ""
-"Převod mezi měrnými jednotkami lze uskutečnit pouze pokud patří do stejné "
-"kategorie. Převod bude proveden na základě vzájemných poměrů."
+msgid "Conversion between Units of Measure can only occur if they belong to the same category. The conversion will be made based on the ratios."
+msgstr "Převod mezi měrnými jednotkami lze uskutečnit pouze pokud patří do stejné kategorie. Převod bude proveden na základě vzájemných poměrů."
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_order__country_code
@@ -1000,7 +959,6 @@ msgstr "Datum zahájení kalendáře"
 #. module: purchase
 #. odoo-python
 #: code:addons/purchase/models/purchase_order.py:0
-#: code:addons/purchase/models/purchase_order.py:0
 msgid "Date Updated"
 msgstr "Datum aktualizace"
 
@@ -1039,31 +997,19 @@ msgstr "Definujte své smluvní podmínky ..."
 
 #. module: purchase
 #: model:ir.model.fields,help:purchase.field_purchase_order_line__date_planned
-msgid ""
-"Delivery date expected from vendor. This date respectively defaults to "
-"vendor pricelist lead time then today's date."
-msgstr ""
-"Datum dodání se očekává od dodavatele. Toto datum je výchozí doba dodání "
-"ceníku dodavatele než dnešní datum."
+msgid "Delivery date expected from vendor. This date respectively defaults to vendor pricelist lead time then today's date."
+msgstr "Datum dodání se očekává od dodavatele. Toto datum je výchozí doba dodání ceníku dodavatele než dnešní datum."
 
 #. module: purchase
 #: model:ir.model.fields,help:purchase.field_purchase_order__date_planned
-msgid ""
-"Delivery date promised by vendor. This date is used to determine expected "
-"arrival of products."
-msgstr ""
-"Dodací lhůta slíbená prodejcem. Toto datum se používá k určení očekávaného "
-"příjezdu produktů."
+msgid "Delivery date promised by vendor. This date is used to determine expected arrival of products."
+msgstr "Dodací lhůta slíbená prodejcem. Toto datum se používá k určení očekávaného příjezdu produktů."
 
 #. module: purchase
 #: model:ir.model.fields,help:purchase.field_purchase_order__date_order
 #: model:ir.model.fields,help:purchase.field_purchase_order_line__date_order
-msgid ""
-"Depicts the date within which the Quotation should be confirmed and "
-"converted into a purchase order."
-msgstr ""
-"Zobrazuje datum, do kterého by měla být nabídka potvrzena a převedena na "
-"nákupní objednávku."
+msgid "Depicts the date within which the Quotation should be confirmed and converted into a purchase order."
+msgstr "Zobrazuje datum, do kterého by měla být nabídka potvrzena a převedena na nákupní objednávku."
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_order_line__name
@@ -1263,21 +1209,13 @@ msgstr "Pokud zaškrtnuto, některé zprávy mají chybu při doručení."
 
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.res_config_settings_view_form_purchase
-msgid ""
-"If enabled, activates 3-way matching on vendor bills : the items must be "
-"received in order to pay the invoice."
-msgstr ""
-"Je-li povoleno, aktivuje se třísměrné párování na fakturach dodavatelů: "
-"položky je nutné obdržet, aby bylo možné zaplatit fakturu."
+msgid "If enabled, activates 3-way matching on vendor bills : the items must be received in order to pay the invoice."
+msgstr "Je-li povoleno, aktivuje se třísměrné párování na fakturach dodavatelů: položky je nutné obdržet, aby bylo možné zaplatit fakturu."
 
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.res_config_settings_view_form_purchase
-msgid ""
-"If installed, the product variants will be added to purchase orders through "
-"a grid entry."
-msgstr ""
-"Pokud je nainstalován, budou varianty produktu přidány do nákupních "
-"objednávek přes entitu mřížky"
+msgid "If installed, the product variants will be added to purchase orders through a grid entry."
+msgstr "Pokud je nainstalován, budou varianty produktu přidány do nákupních objednávek přes entitu mřížky"
 
 #. module: purchase
 #: model:ir.model.fields,help:purchase.field_product_packaging__purchase
@@ -1309,12 +1247,8 @@ msgstr "Uveďte množství produktu, které chcete objednat."
 
 #. module: purchase
 #: model:ir.model.fields,help:purchase.field_purchase_order__incoterm_id
-msgid ""
-"International Commercial Terms are a series of predefined commercial terms "
-"used in international transactions."
-msgstr ""
-"Mezinárodní obchodní podmínky jsou série předem definovaných obchodních "
-"termínů používaných v mezinárodních transakcích."
+msgid "International Commercial Terms are a series of predefined commercial terms used in international transactions."
+msgstr "Mezinárodní obchodní podmínky jsou série předem definovaných obchodních termínů používaných v mezinárodních transakcích."
 
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.purchase_order_form
@@ -1385,13 +1319,8 @@ msgstr "Vytvořme vaši první žádost o nabídku."
 #. module: purchase
 #. odoo-javascript
 #: code:addons/purchase/static/src/js/tours/purchase.js:0
-#: code:addons/purchase/static/src/js/tours/purchase.js:0
-msgid ""
-"Let's try the Purchase app to manage the flow from purchase to reception and"
-" invoice control."
-msgstr ""
-"Vyzkoušejte aplikaci Nákup ke správě toku od nákupu k recepci a kontrole "
-"faktur."
+msgid "Let's try the Purchase app to manage the flow from purchase to reception and invoice control."
+msgstr "Vyzkoušejte aplikaci Nákup ke správě toku od nákupu k recepci a kontrole faktur."
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_res_company__po_double_validation
@@ -1422,18 +1351,13 @@ msgstr "Uzamčeno"
 
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.res_config_settings_view_form_purchase
-msgid ""
-"Make sure you only pay bills for which you received the goods you ordered"
-msgstr ""
-"Ujistěte se, že platíte pouze přijaté faktury, za které jste obdrželi "
-"objednané zboží"
+msgid "Make sure you only pay bills for which you received the goods you ordered"
+msgstr "Ujistěte se, že platíte pouze přijaté faktury, za které jste obdrželi objednané zboží"
 
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.res_config_settings_view_form_purchase
 msgid "Manage your purchase agreements (call for tenders, blanket orders)"
-msgstr ""
-"Spravujte své nákupní smlouvy (výzva k podávání nabídek, hromadné "
-"objednávky)"
+msgstr "Spravujte své nákupní smlouvy (výzva k podávání nabídek, hromadné objednávky)"
 
 #. module: purchase
 #: model:ir.model.fields.selection,name:purchase.selection__purchase_order_line__qty_received_method__manual
@@ -1453,25 +1377,13 @@ msgstr "Manuálně přijato množství"
 #. module: purchase
 #: model:ir.model.fields,help:purchase.field_res_company__po_lead
 #: model:ir.model.fields,help:purchase.field_res_config_settings__po_lead
-msgid ""
-"Margin of error for vendor lead times. When the system generates Purchase "
-"Orders for procuring products, they will be scheduled that many days earlier"
-" to cope with unexpected vendor delays."
-msgstr ""
-"Hranice chyby pro dodací lhůty dodavatele. Když systém generuje nákupní "
-"objednávky pro získání produktů, tak bude plánováno, před kolika dny se "
-"budou vyrovnávat s neočekávaným zpožděním dodavatele."
+msgid "Margin of error for vendor lead times. When the system generates Purchase Orders for procuring products, they will be scheduled that many days earlier to cope with unexpected vendor delays."
+msgstr "Hranice chyby pro dodací lhůty dodavatele. Když systém generuje nákupní objednávky pro získání produktů, tak bude plánováno, před kolika dny se budou vyrovnávat s neočekávaným zpožděním dodavatele."
 
 #. module: purchase
 #: model:ir.model.fields,help:purchase.field_res_config_settings__use_po_lead
-msgid ""
-"Margin of error for vendor lead times. When the system generates Purchase "
-"Orders for reordering products,they will be scheduled that many days earlier"
-" to cope with unexpected vendor delays."
-msgstr ""
-"Rozpětí chyby pro dodací lhůty dodavatele. Když systém vygeneruje nákupní "
-"objednávky pro změnu pořadí produktů, bude naplánováno, že o mnoho dní dříve"
-" se vypořádají s neočekávanými prodlevami dodavatele."
+msgid "Margin of error for vendor lead times. When the system generates Purchase Orders for reordering products,they will be scheduled that many days earlier to cope with unexpected vendor delays."
+msgstr "Rozpětí chyby pro dodací lhůty dodavatele. Když systém vygeneruje nákupní objednávky pro změnu pořadí produktů, bude naplánováno, že o mnoho dní dříve se vypořádají s neočekávanými prodlevami dodavatele."
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_order__message_has_error
@@ -1693,21 +1605,13 @@ msgstr "Na přijatém množství"
 #. module: purchase
 #. odoo-javascript
 #: code:addons/purchase/static/src/js/tours/purchase.js:0
-msgid ""
-"Once you get the price from the vendor, you can complete the purchase order "
-"with the right price."
-msgstr ""
-"Jakmile získáte cenu od dodavatele, můžete dokončit objednávku se správnou "
-"cenou."
+msgid "Once you get the price from the vendor, you can complete the purchase order with the right price."
+msgstr "Jakmile získáte cenu od dodavatele, můžete dokončit objednávku se správnou cenou."
 
 #. module: purchase
 #: model_terms:ir.actions.act_window,help:purchase.purchase_form_action
-msgid ""
-"Once you ordered your products to your supplier, confirm your request for "
-"quotation and it will turn into a purchase order."
-msgstr ""
-"Jakmile své výrobky objednáte u svého dodavatele, potvrďte svou žádost o "
-"nabídku a promění se v nákupní objednávku."
+msgid "Once you ordered your products to your supplier, confirm your request for quotation and it will turn into a purchase order."
+msgstr "Jakmile své výrobky objednáte u svého dodavatele, potvrďte svou žádost o nabídku a promění se v nákupní objednávku."
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_report__order_id
@@ -1939,7 +1843,6 @@ msgstr "Historie nákupů"
 #. module: purchase
 #. odoo-python
 #: code:addons/purchase/models/product.py:0
-#: code:addons/purchase/models/product.py:0
 #: code:addons/purchase/models/purchase_order_line.py:0
 msgid "Purchase History for %s"
 msgstr "Historie nákupů pro %s"
@@ -1953,7 +1856,6 @@ msgstr "Čekací čas nákupu"
 #. module: purchase
 #. odoo-python
 #: code:addons/purchase/controllers/portal.py:0
-#: code:addons/purchase/models/purchase_order.py:0
 #: code:addons/purchase/models/purchase_order.py:0
 #: model:ir.actions.report,name:purchase.action_report_purchase_order
 #: model:ir.model,name:purchase.model_purchase_order
@@ -2032,11 +1934,8 @@ msgstr "Úprava objednávky *"
 #. module: purchase
 #: model:ir.model.fields,help:purchase.field_res_company__po_lock
 #: model:ir.model.fields,help:purchase.field_res_config_settings__po_lock
-msgid ""
-"Purchase Order Modification used when you want to purchase order editable "
-"after confirm"
-msgstr ""
-"Úprava objednávky se používá, když chcete objednávku upravit po potvrzení"
+msgid "Purchase Order Modification used when you want to purchase order editable after confirm"
+msgstr "Úprava objednávky se používá, když chcete objednávku upravit po potvrzení"
 
 #. module: purchase
 #. odoo-python
@@ -2141,12 +2040,8 @@ msgstr "Párování nákupů a přijatých faktur"
 
 #. module: purchase
 #: model:ir.model.fields,help:purchase.field_purchase_order__dest_address_id
-msgid ""
-"Put an address if you want to deliver directly from the vendor to the "
-"customer. Otherwise, keep empty to deliver to your own company."
-msgstr ""
-"Zadejte adresu, pokud chcete doručit přímo od dodavatele zákazníkovi. Jinak "
-"ponechte prázdné, abyste je mohli doručit své vlastní společnosti."
+msgid "Put an address if you want to deliver directly from the vendor to the customer. Otherwise, keep empty to deliver to your own company."
+msgstr "Zadejte adresu, pokud chcete doručit přímo od dodavatele zákazníkovi. Jinak ponechte prázdné, abyste je mohli doručit své vlastní společnosti."
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_report__qty_billed
@@ -2316,23 +2211,13 @@ msgstr "Doporučená měrná jednotka"
 
 #. module: purchase
 #: model:ir.model.fields,help:purchase.field_purchase_order__origin
-msgid ""
-"Reference of the document that generated this purchase order request (e.g. a"
-" sales order)"
-msgstr ""
-"Odkaz na dokument, který vygeneroval tento požadavek na objednávku (např. "
-"Prodejní objednávka)"
+msgid "Reference of the document that generated this purchase order request (e.g. a sales order)"
+msgstr "Odkaz na dokument, který vygeneroval tento požadavek na objednávku (např. Prodejní objednávka)"
 
 #. module: purchase
 #: model:ir.model.fields,help:purchase.field_purchase_order__partner_ref
-msgid ""
-"Reference of the sales order or bid sent by the vendor. It's used to do the "
-"matching when you receive the products as this reference is usually written "
-"on the delivery order sent by your vendor."
-msgstr ""
-"Odkaz na prodejní objednávku nebo nabídku zaslanou prodejcem. Slouží k "
-"porovnávání, když obdržíte produkty, protože tato reference je obvykle "
-"napsána na objednávce odeslané vaším prodejcem."
+msgid "Reference of the sales order or bid sent by the vendor. It's used to do the matching when you receive the products as this reference is usually written on the delivery order sent by your vendor."
+msgstr "Odkaz na prodejní objednávku nebo nabídku zaslanou prodejcem. Slouží k porovnávání, když obdržíte produkty, protože tato reference je obvykle napsána na objednávce odeslané vaším prodejcem."
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_order__mail_reminder_confirmed
@@ -2456,14 +2341,8 @@ msgstr "Vyberte nákupní objednávku nebo starý účet"
 #: model:ir.model.fields,help:purchase.field_product_template__purchase_line_warn
 #: model:ir.model.fields,help:purchase.field_res_partner__purchase_warn
 #: model:ir.model.fields,help:purchase.field_res_users__purchase_warn
-msgid ""
-"Selecting the \"Warning\" option will notify user with the message, "
-"Selecting \"Blocking Message\" will throw an exception with the message and "
-"block the flow. The Message has to be written in the next field."
-msgstr ""
-"Výběr možnosti \"Varování\" zobrazí uživateli zprávu, výběr možnosti "
-"\"Blokující zpráva\" zobrazí zprávu a zablokuje workflow. Zpráva musí být "
-"napsána v následujícím poli."
+msgid "Selecting the \"Warning\" option will notify user with the message, Selecting \"Blocking Message\" will throw an exception with the message and block the flow. The Message has to be written in the next field."
+msgstr "Výběr možnosti \"Varování\" zobrazí uživateli zprávu, výběr možnosti \"Blokující zpráva\" zobrazí zprávu a zablokuje workflow. Zpráva musí být napsána v následujícím poli."
 
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.res_config_settings_view_form_purchase
@@ -2498,7 +2377,6 @@ msgstr "Odeslat zprávu"
 #. module: purchase
 #. odoo-javascript
 #: code:addons/purchase/static/src/js/tours/purchase.js:0
-#: code:addons/purchase/static/src/js/tours/purchase.js:0
 msgid "Send the request for quotation to your vendor."
 msgstr "Zašlete žádost o nabídku prodejci."
 
@@ -2514,11 +2392,8 @@ msgstr "Odesláno dodavateli s nákupní objednávkou v příloze"
 
 #. module: purchase
 #: model:mail.template,description:purchase.email_template_edi_purchase_reminder
-msgid ""
-"Sent to vendors before expected arrival, based on the purchase order setting"
-msgstr ""
-"Odesláno dodavatelům před očekávaným příjezdem na základě nastavení nákupní "
-"objednávky"
+msgid "Sent to vendors before expected arrival, based on the purchase order setting"
+msgstr "Odesláno dodavatelům před očekávaným příjezdem na základě nastavení nákupní objednávky"
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_order_line__sequence
@@ -2545,8 +2420,7 @@ msgstr "Sdílet"
 #: model_terms:ir.ui.view,arch_db:purchase.purchase_order_view_search
 #: model_terms:ir.ui.view,arch_db:purchase.view_purchase_order_filter
 msgid "Show all records which has next action date is before today"
-msgstr ""
-"Zobrazit všechny záznamy, které mají datum příští aktivity před dneškem"
+msgstr "Zobrazit všechny záznamy, které mají datum příští aktivity před dneškem"
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_bill_union__reference
@@ -2682,12 +2556,8 @@ msgstr "Technické pole pro účel uživatelské zkušenosti."
 
 #. module: purchase
 #: model:ir.model.fields,help:purchase.field_purchase_order__tax_country_id
-msgid ""
-"Technical field to filter the available taxes depending on the fiscal "
-"country and fiscal position."
-msgstr ""
-"Technická oblast pro filtrování dostupných daní v závislosti na fiskální "
-"zemi a fiskální pozici."
+msgid "Technical field to filter the available taxes depending on the fiscal country and fiscal position."
+msgstr "Technická oblast pro filtrování dostupných daní v závislosti na fiskální zemi a fiskální pozici."
 
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.purchase_order_portal_content
@@ -2704,9 +2574,7 @@ msgstr "Všeobecné obchodní podmínky"
 msgid ""
 "The ISO country code in two chars. \n"
 "You can use this field for quick search."
-msgstr ""
-"ISO kód země ve dvou znacích. Toto pole můžete použít pro rychlé "
-"vyhledávání."
+msgstr "ISO kód země ve dvou znacích. Toto pole můžete použít pro rychlé vyhledávání."
 
 #. module: purchase
 #. odoo-python
@@ -2720,10 +2588,7 @@ msgid ""
 "The request for quotation is the first step of the purchases flow. Once\n"
 "                    converted into a purchase order, you will be able to control the receipt\n"
 "                    of the products and the vendor bill."
-msgstr ""
-"Žádost o cenovou nabídku je prvním krokem nákupního procesu. Po převedení na"
-" nákupní objednávku budete moci kontrolovat příjem výrobků a účet "
-"dodavatele."
+msgstr "Žádost o cenovou nabídku je prvním krokem nákupního procesu. Po převedení na nákupní objednávku budete moci kontrolovat příjem výrobků a účet dodavatele."
 
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.portal_my_purchase_orders
@@ -2738,12 +2603,8 @@ msgstr "V současné době nejsou pro váš účet žádné žádosti o cenovou 
 #. module: purchase
 #. odoo-python
 #: code:addons/purchase/models/purchase_order.py:0
-msgid ""
-"There is no invoiceable line. If a product has a control policy based on "
-"received quantity, please make sure that a quantity has been received."
-msgstr ""
-"Neexistuje žádný fakturovatelný řádek. Pokud má produkt zásady kontroly "
-"založené na přijatém množství, ujistěte se, že bylo přijato určité množství."
+msgid "There is no invoiceable line. If a product has a control policy based on received quantity, please make sure that a quantity has been received."
+msgstr "Neexistuje žádný fakturovatelný řádek. Pokud má produkt zásady kontroly založené na přijatém množství, ujistěte se, že bylo přijato určité množství."
 
 #. module: purchase
 #: model_terms:ir.actions.act_window,help:purchase.action_purchase_order_report_all
@@ -2757,21 +2618,14 @@ msgstr ""
 #. module: purchase
 #: model:ir.model.fields,help:purchase.field_res_partner__property_purchase_currency_id
 #: model:ir.model.fields,help:purchase.field_res_users__property_purchase_currency_id
-msgid ""
-"This currency will be used, instead of the default one, for purchases from "
-"the current partner"
-msgstr ""
-"Tato měna bude místo výchozí měny použita pro nákupy od současného partnera"
+msgid "This currency will be used, instead of the default one, for purchases from the current partner"
+msgstr "Tato měna bude místo výchozí měny použita pro nákupy od současného partnera"
 
 #. module: purchase
 #: model:ir.model.fields,help:purchase.field_res_config_settings__default_purchase_method
 #: model_terms:ir.ui.view,arch_db:purchase.res_config_settings_view_form_purchase
-msgid ""
-"This default value is applied to any new product created. This can be "
-"changed in the product detail form."
-msgstr ""
-"Tato výchozí hodnota se použije na jakýkoli nový vytvořený produkt. To lze "
-"změnit ve formuláři podrobností o produktu."
+msgid "This default value is applied to any new product created. This can be changed in the product detail form."
+msgstr "Tato výchozí hodnota se použije na jakýkoli nový vytvořený produkt. To lze změnit ve formuláři podrobností o produktu."
 
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.view_product_supplier_inherit
@@ -2781,12 +2635,8 @@ msgstr "Tato poznámka je přidána k nákupním objednávkám."
 #. module: purchase
 #. odoo-python
 #: code:addons/purchase/models/purchase_order_line.py:0
-msgid ""
-"This product is packaged by %(pack_size).2f %(pack_name)s. You should "
-"purchase %(quantity).2f %(unit)s."
-msgstr ""
-"Tento produkt je balen od %(pack_size).2f %(pack_name)s. Měli byste nakoupit"
-" %(quantity).2f %(unit)s."
+msgid "This product is packaged by %(pack_size).2f %(pack_name)s. You should purchase %(quantity).2f %(unit)s."
+msgstr "Tento produkt je balen od %(pack_size).2f %(pack_name)s. Měli byste nakoupit %(quantity).2f %(unit)s."
 
 #. module: purchase
 #. odoo-python
@@ -2895,12 +2745,8 @@ msgstr "Typ výjimečné aktivity na záznamu."
 #. module: purchase
 #. odoo-python
 #: code:addons/purchase/models/purchase_order.py:0
-msgid ""
-"Unable to cancel this purchase order. You must first cancel the related "
-"vendor bills."
-msgstr ""
-"Tuto objednávku nelze zrušit. Nejprve musíte zrušit související faktury "
-"dodavatele."
+msgid "Unable to cancel this purchase order. You must first cancel the related vendor bills."
+msgstr "Tuto objednávku nelze zrušit. Nejprve musíte zrušit související faktury dodavatele."
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_order_line__price_unit
@@ -3140,50 +2986,25 @@ msgstr "Webová historie komunikace"
 
 #. module: purchase
 #: model_terms:digest.tip,tip_description:purchase.digest_tip_purchase_0
-msgid ""
-"When creating a purchase order, have a look at the vendor's <i>On Time "
-"Delivery</i> rate: the percentage of products shipped on time. If it is too "
-"low, activate the <i>automated reminders</i>. A few days before the due "
-"shipment, Odoo will send the vendor an email to ask confirmation of shipment"
-" dates and keep you informed in case of any delays. To get the vendor's "
-"performance statistics, click on the OTD rate."
-msgstr ""
-"Při vytváření nákupní objednávky se podívejte na hodnocení <i>včasného "
-"dodání dodavatele</i>: procento produktů dodaných včas. Pokud je příliš "
-"nízká, aktivujte <i>automatické upomínky</i>. Několik dní před termínem "
-"odeslání Odoo zašle dodavateli e-mail s žádostí o potvrzení termínů odeslání"
-" a bude vás informovat v případě zpoždění. Chcete-li získat statistiku "
-"výkonnosti dodavatele, klikněte na ukazatel OTD."
+msgid "When creating a purchase order, have a look at the vendor's <i>On Time Delivery</i> rate: the percentage of products shipped on time. If it is too low, activate the <i>automated reminders</i>. A few days before the due shipment, Odoo will send the vendor an email to ask confirmation of shipment dates and keep you informed in case of any delays. To get the vendor's performance statistics, click on the OTD rate."
+msgstr "Při vytváření nákupní objednávky se podívejte na hodnocení <i>včasného dodání dodavatele</i>: procento produktů dodaných včas. Pokud je příliš nízká, aktivujte <i>automatické upomínky</i>. Několik dní před termínem odeslání Odoo zašle dodavateli e-mail s žádostí o potvrzení termínů odeslání a bude vás informovat v případě zpoždění. Chcete-li získat statistiku výkonnosti dodavatele, klikněte na ukazatel OTD."
 
 #. module: purchase
 #: model_terms:digest.tip,tip_description:purchase.digest_tip_purchase_1
-msgid ""
-"When sending a purchase order by email, Odoo asks the vendor to acknowledge "
-"the reception of the order. When the vendor acknowledges the order by "
-"clicking on a button in the email, the information is added on the purchase "
-"order. Use filters to track orders that have not been acknowledged."
-msgstr ""
-"Při odesílání nákupní objednávky e-mailem Odoo požádá prodejce, aby potvrdil"
-" přijetí objednávky. Když prodejce potvrdí objednávku kliknutím na tlačítko "
-"v e-mailu, informace se přidá k objednávce. Pomocí filtrů můžete sledovat "
-"objednávky, které nebyly potvrzeny."
+msgid "When sending a purchase order by email, Odoo asks the vendor to acknowledge the reception of the order. When the vendor acknowledges the order by clicking on a button in the email, the information is added on the purchase order. Use filters to track orders that have not been acknowledged."
+msgstr "Při odesílání nákupní objednávky e-mailem Odoo požádá prodejce, aby potvrdil přijetí objednávky. Když prodejce potvrdí objednávku kliknutím na tlačítko v e-mailu, informace se přidá k objednávce. Pomocí filtrů můžete sledovat objednávky, které nebyly potvrzeny."
 
 #. module: purchase
 #: model:ir.model.fields,help:purchase.field_purchase_order__partner_id
 #: model:ir.model.fields,help:purchase.field_purchase_order_line__partner_id
 msgid "You can find a vendor by its Name, TIN, Email or Internal Reference."
-msgstr ""
-"Prodejce najdete podle jeho jména, čísla TIN, e-mailu nebo interního odkazu."
+msgstr "Prodejce najdete podle jeho jména, čísla TIN, e-mailu nebo interního odkazu."
 
 #. module: purchase
 #. odoo-python
 #: code:addons/purchase/models/purchase_order_line.py:0
-msgid ""
-"You cannot change the type of a purchase order line. Instead you should "
-"delete the current line and create a new line of the proper type."
-msgstr ""
-"Nelze změnit typ řádku nákupní objednávky. Místo toho byste měli odstranit "
-"aktuální řádek a vytvořit nový řádek správného typu."
+msgid "You cannot change the type of a purchase order line. Instead you should delete the current line and create a new line of the proper type."
+msgstr "Nelze změnit typ řádku nákupní objednávky. Místo toho byste měli odstranit aktuální řádek a vytvořit nový řádek správného typu."
 
 #. module: purchase
 #: model_terms:ir.actions.act_window,help:purchase.product_product_action
@@ -3228,5 +3049,4 @@ msgstr "den (dny)"
 #: model:mail.template,subject:purchase.email_template_edi_purchase_done
 #: model:mail.template,subject:purchase.email_template_edi_purchase_reminder
 msgid "{{ object.company_id.name }} Order (Ref {{ object.name or 'n/a' }})"
-msgstr ""
-"{{ object.company_id.name }} Objednávka (Ref {{ object.name or 'n/a' }})"
+msgstr "{{ object.company_id.name }} Objednávka (Ref {{ object.name or 'n/a' }})"

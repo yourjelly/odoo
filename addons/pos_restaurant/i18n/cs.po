@@ -1,23 +1,25 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* pos_restaurant
-# 
+#
 # Translators:
-# Jiří Podhorecký, 2024
+# Ivana Bartonkova, 2023
+# Jakub Smolka, 2023
+# Aleš Fiala <f.ales1@seznam.cz>, 2023
 # Wil Odoo, 2024
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~17.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-02-07 10:22+0000\n"
-"PO-Revision-Date: 2024-01-17 11:21+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
 "Last-Translator: Wil Odoo, 2024\n"
 "Language-Team: Czech (https://app.transifex.com/odoo/teams/41243/cs/)\n"
+"Language: cs\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: cs\n"
 "Plural-Forms: nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n <= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;\n"
 
 #. module: pos_restaurant
@@ -35,9 +37,7 @@ msgstr ""
 msgid ""
 "A restaurant floor represents the place where customers are served, this is where you can\n"
 "                define and position the tables."
-msgstr ""
-"Půdorys restaurace představuje místo, kde jsou zákazníci obsluhováni, to je "
-"místo, kde můžete navrhnout a umístit stoly."
+msgstr "Půdorys restaurace představuje místo, kde jsou zákazníci obsluhováni, to je místo, kde můžete navrhnout a umístit stoly."
 
 #. module: pos_restaurant
 #: model:ir.model.fields,field_description:pos_restaurant.field_restaurant_floor__active
@@ -47,9 +47,6 @@ msgstr "Aktivní"
 
 #. module: pos_restaurant
 #. odoo-javascript
-#: code:addons/pos_restaurant/static/src/app/floor_screen/floor_screen.xml:0
-#: code:addons/pos_restaurant/static/src/app/floor_screen/floor_screen.xml:0
-#: code:addons/pos_restaurant/static/src/app/floor_screen/floor_screen.xml:0
 #: code:addons/pos_restaurant/static/src/app/floor_screen/floor_screen.xml:0
 msgid "Add"
 msgstr "Přidat"
@@ -96,18 +93,13 @@ msgstr ""
 #. module: pos_restaurant
 #. odoo-javascript
 #: code:addons/pos_restaurant/static/src/overrides/components/payment_screen/payment_screen_payment_lines/payment_screen_payment_lines.xml:0
-#: code:addons/pos_restaurant/static/src/overrides/components/payment_screen/payment_screen_payment_lines/payment_screen_payment_lines.xml:0
 msgid "Adjust Amount"
 msgstr "Upravit částku"
 
 #. module: pos_restaurant
 #: model:ir.model.fields,help:pos_restaurant.field_pos_config__set_tip_after_payment
-msgid ""
-"Adjust the amount authorized by payment terminals to add a tip after the "
-"customers left or at the end of the day."
-msgstr ""
-"Upravte částku autorizovanou platebními terminály a přidejte spropitné poté,"
-" co zákazníci odešli, nebo na konci dne."
+msgid "Adjust the amount authorized by payment terminals to add a tip after the customers left or at the end of the day."
+msgstr "Upravte částku autorizovanou platebními terminály a přidejte spropitné poté, co zákazníci odešli, nebo na konci dne."
 
 #. module: pos_restaurant
 #: model_terms:ir.ui.view,arch_db:pos_restaurant.res_config_settings_view_form
@@ -205,9 +197,7 @@ msgstr "Rozdělit Účet"
 #. module: pos_restaurant
 #. odoo-javascript
 #: code:addons/pos_restaurant/static/src/overrides/models/pos_store.js:0
-msgid ""
-"Both tables have an open order. If you proceed, both orders will live on the"
-" same table. You can access them anytime from the Orders menu."
+msgid "Both tables have an open order. If you proceed, both orders will live on the same table. You can access them anytime from the Orders menu."
 msgstr ""
 
 #. module: pos_restaurant
@@ -233,10 +223,6 @@ msgstr "Kuřecí kari sendvič"
 
 #. module: pos_restaurant
 #. odoo-javascript
-#: code:addons/pos_restaurant/static/src/app/floor_screen/floor_screen.xml:0
-#: code:addons/pos_restaurant/static/src/app/floor_screen/floor_screen.xml:0
-#: code:addons/pos_restaurant/static/src/app/floor_screen/floor_screen.xml:0
-#: code:addons/pos_restaurant/static/src/app/floor_screen/floor_screen.xml:0
 #: code:addons/pos_restaurant/static/src/app/floor_screen/floor_screen.xml:0
 msgid "Close"
 msgstr "Zavřít"
@@ -270,8 +256,6 @@ msgstr "Konfigurační nastavení"
 #. module: pos_restaurant
 #. odoo-javascript
 #: code:addons/pos_restaurant/static/src/app/floor_screen/floor_screen.xml:0
-#: code:addons/pos_restaurant/static/src/app/floor_screen/floor_screen.xml:0
-#: code:addons/pos_restaurant/static/src/app/floor_screen/floor_screen.xml:0
 msgid "Copy"
 msgstr "Kopírovat"
 
@@ -290,14 +274,11 @@ msgstr "Vytvořeno dne"
 #. module: pos_restaurant
 #. odoo-javascript
 #: code:addons/pos_restaurant/static/src/app/floor_screen/floor_screen.xml:0
-#: code:addons/pos_restaurant/static/src/app/floor_screen/floor_screen.xml:0
-#: code:addons/pos_restaurant/static/src/app/floor_screen/floor_screen.xml:0
 msgid "Delete"
 msgstr "Smazat"
 
 #. module: pos_restaurant
 #. odoo-javascript
-#: code:addons/pos_restaurant/static/src/app/floor_screen/floor_screen.js:0
 #: code:addons/pos_restaurant/static/src/app/floor_screen/floor_screen.js:0
 msgid "Delete Error"
 msgstr ""
@@ -467,12 +448,8 @@ msgstr ""
 
 #. module: pos_restaurant
 #: model:ir.model.fields,help:pos_restaurant.field_restaurant_table__active
-msgid ""
-"If false, the table is deactivated and will not be available in the point of"
-" sale"
-msgstr ""
-"Pokud je hodnota false, tabulka je deaktivována a nebude k dispozici v místě"
-" prodeje"
+msgid "If false, the table is deactivated and will not be available in the point of sale"
+msgstr "Pokud je hodnota false, tabulka je deaktivována a nebude k dispozici v místě prodeje"
 
 #. module: pos_restaurant
 #: model:ir.model.fields,field_description:pos_restaurant.field_pos_order_line__note
@@ -511,8 +488,6 @@ msgstr "Naposledy upraveno dne"
 #. module: pos_restaurant
 #. odoo-javascript
 #: code:addons/pos_restaurant/static/src/app/floor_screen/floor_screen.xml:0
-#: code:addons/pos_restaurant/static/src/app/floor_screen/floor_screen.xml:0
-#: code:addons/pos_restaurant/static/src/app/floor_screen/floor_screen.xml:0
 msgid "Link"
 msgstr "Odkaz"
 
@@ -550,8 +525,6 @@ msgstr "Margherita"
 
 #. module: pos_restaurant
 #. odoo-javascript
-#: code:addons/pos_restaurant/static/src/app/floor_screen/floor_screen.xml:0
-#: code:addons/pos_restaurant/static/src/app/floor_screen/floor_screen.xml:0
 #: code:addons/pos_restaurant/static/src/app/floor_screen/floor_screen.xml:0
 msgid "Merge"
 msgstr "Sloučit"
@@ -661,7 +634,6 @@ msgstr "Boloňské těstoviny"
 #. module: pos_restaurant
 #. odoo-javascript
 #: code:addons/pos_restaurant/static/src/overrides/components/product_screen/actionpad_widget/actionpad_widget.xml:0
-#: code:addons/pos_restaurant/static/src/overrides/components/product_screen/actionpad_widget/actionpad_widget.xml:0
 #: code:addons/pos_restaurant/static/src/overrides/components/product_screen/product_screen.xml:0
 msgid "Pay"
 msgstr "Zaplatit"
@@ -751,8 +723,6 @@ msgstr "Odstranění stolu nelze vrátit zpět"
 #. module: pos_restaurant
 #. odoo-javascript
 #: code:addons/pos_restaurant/static/src/app/floor_screen/floor_screen.xml:0
-#: code:addons/pos_restaurant/static/src/app/floor_screen/floor_screen.xml:0
-#: code:addons/pos_restaurant/static/src/app/floor_screen/floor_screen.xml:0
 msgid "Rename"
 msgstr "Přejmenovat"
 
@@ -822,8 +792,6 @@ msgstr ""
 #. module: pos_restaurant
 #. odoo-javascript
 #: code:addons/pos_restaurant/static/src/app/floor_screen/floor_screen.xml:0
-#: code:addons/pos_restaurant/static/src/app/floor_screen/floor_screen.xml:0
-#: code:addons/pos_restaurant/static/src/app/floor_screen/floor_screen.xml:0
 #: model:ir.model.fields,field_description:pos_restaurant.field_restaurant_table__seats
 msgid "Seats"
 msgstr "Místa"
@@ -847,7 +815,6 @@ msgstr "Sedlo"
 
 #. module: pos_restaurant
 #. odoo-javascript
-#: code:addons/pos_restaurant/static/src/app/floor_screen/floor_screen.xml:0
 #: code:addons/pos_restaurant/static/src/app/floor_screen/floor_screen.xml:0
 #: model:ir.model.fields,field_description:pos_restaurant.field_restaurant_table__shape
 msgid "Shape"
@@ -902,7 +869,6 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/pos_restaurant/static/src/app/floor_screen/floor_screen.xml:0
 #: code:addons/pos_restaurant/static/src/overrides/components/ticket_screen/ticket_screen.js:0
-#: code:addons/pos_restaurant/static/src/overrides/components/ticket_screen/ticket_screen.xml:0
 #: code:addons/pos_restaurant/static/src/overrides/components/ticket_screen/ticket_screen.xml:0
 #: model:ir.model.fields,field_description:pos_restaurant.field_pos_order__table_id
 msgid "Table"
@@ -965,10 +931,8 @@ msgstr "Stůl, kam je tato objednávka doručena"
 
 #. module: pos_restaurant
 #: model:ir.model.fields,help:pos_restaurant.field_restaurant_table__color
-msgid ""
-"The table's color, expressed as a valid 'background' CSS property value"
-msgstr ""
-"Barva tabulky vyjádřená jako platná hodnota vlastnosti CSS \"background\"."
+msgid "The table's color, expressed as a valid 'background' CSS property value"
+msgstr "Barva tabulky vyjádřená jako platná hodnota vlastnosti CSS \"background\"."
 
 #. module: pos_restaurant
 #: model:ir.model.fields,help:pos_restaurant.field_restaurant_table__height
@@ -977,15 +941,12 @@ msgstr "Výška stolu v pixelech"
 
 #. module: pos_restaurant
 #: model:ir.model.fields,help:pos_restaurant.field_restaurant_table__position_h
-msgid ""
-"The table's horizontal position from the left side to the table's center, in"
-" pixels"
+msgid "The table's horizontal position from the left side to the table's center, in pixels"
 msgstr "Vodorovná poloha tabulky od levé strany ke středu tabulky v pixelech."
 
 #. module: pos_restaurant
 #: model:ir.model.fields,help:pos_restaurant.field_restaurant_table__position_v
-msgid ""
-"The table's vertical position from the top to the table's center, in pixels"
+msgid "The table's vertical position from the top to the table's center, in pixels"
 msgstr "Svislá poloha tabulky od horního okraje ke středu tabulky v pixelech."
 
 #. module: pos_restaurant
@@ -996,23 +957,17 @@ msgstr "Šířka stolu v pixelech"
 #. module: pos_restaurant
 #. odoo-javascript
 #: code:addons/pos_restaurant/static/src/app/tip_screen/tip_screen.js:0
-msgid ""
-"This order is not yet synced to server. Make sure it is synced then try "
-"again."
-msgstr ""
-"Tato objednávka ještě není synchronizována se serverem. Ujistěte se, že je "
-"synchronizována, a zkuste to znovu."
+msgid "This order is not yet synced to server. Make sure it is synced then try again."
+msgstr "Tato objednávka ještě není synchronizována se serverem. Ujistěte se, že je synchronizována, a zkuste to znovu."
 
 #. module: pos_restaurant
 #. odoo-javascript
-#: code:addons/pos_restaurant/static/src/app/floor_screen/floor_screen.xml:0
 #: code:addons/pos_restaurant/static/src/app/floor_screen/floor_screen.xml:0
 msgid "Tint"
 msgstr "Nádech"
 
 #. module: pos_restaurant
 #. odoo-javascript
-#: code:addons/pos_restaurant/static/src/overrides/components/ticket_screen/ticket_screen.xml:0
 #: code:addons/pos_restaurant/static/src/overrides/components/ticket_screen/ticket_screen.xml:0
 msgid "Tip"
 msgstr "Tip"
@@ -1044,8 +999,6 @@ msgstr "Celkem:"
 #. module: pos_restaurant
 #. odoo-javascript
 #: code:addons/pos_restaurant/static/src/app/floor_screen/floor_screen.xml:0
-#: code:addons/pos_restaurant/static/src/app/floor_screen/floor_screen.xml:0
-#: code:addons/pos_restaurant/static/src/app/floor_screen/floor_screen.xml:0
 msgid "Transfer"
 msgstr "Převod"
 
@@ -1057,8 +1010,6 @@ msgstr ""
 
 #. module: pos_restaurant
 #. odoo-javascript
-#: code:addons/pos_restaurant/static/src/app/floor_screen/floor_screen.xml:0
-#: code:addons/pos_restaurant/static/src/app/floor_screen/floor_screen.xml:0
 #: code:addons/pos_restaurant/static/src/app/floor_screen/floor_screen.xml:0
 msgid "Unlink"
 msgstr "Odpojit"
@@ -1098,8 +1049,7 @@ msgstr "Šířka"
 #. module: pos_restaurant
 #. odoo-python
 #: code:addons/pos_restaurant/models/pos_restaurant.py:0
-msgid ""
-"You cannot delete a floor when orders are still in draft for this floor."
+msgid "You cannot delete a floor when orders are still in draft for this floor."
 msgstr ""
 
 #. module: pos_restaurant
@@ -1111,8 +1061,7 @@ msgstr ""
 #. module: pos_restaurant
 #. odoo-python
 #: code:addons/pos_restaurant/models/pos_restaurant.py:0
-msgid ""
-"You cannot delete a table when orders are still in draft for this table."
+msgid "You cannot delete a table when orders are still in draft for this table."
 msgstr ""
 
 #. module: pos_restaurant
@@ -1124,26 +1073,17 @@ msgstr ""
 #. module: pos_restaurant
 #. odoo-python
 #: code:addons/pos_restaurant/models/pos_restaurant.py:0
-msgid ""
-"You cannot remove a floor that is used in a PoS session, close the "
-"session(s) first: \n"
-msgstr ""
-"Lokál používaný v relaci PoS nelze odstranit, je třeba relaci (relace) "
-"nejprve uzavřít:\n"
+msgid "You cannot remove a floor that is used in a PoS session, close the session(s) first: \n"
+msgstr "Lokál používaný v relaci PoS nelze odstranit, je třeba relaci (relace) nejprve uzavřít:\n"
 
 #. module: pos_restaurant
 #. odoo-python
 #: code:addons/pos_restaurant/models/pos_restaurant.py:0
-msgid ""
-"You cannot remove a table that is used in a PoS session, close the "
-"session(s) first."
-msgstr ""
-"Tabulku, která se používá v relaci PoS, nelze odebrat, nejprve relaci "
-"(relace) zavřete."
+msgid "You cannot remove a table that is used in a PoS session, close the session(s) first."
+msgstr "Tabulku, která se používá v relaci PoS, nelze odebrat, nejprve relaci (relace) zavřete."
 
 #. module: pos_restaurant
 #. odoo-javascript
-#: code:addons/pos_restaurant/static/src/app/tip_receipt/tip_receipt.xml:0
 #: code:addons/pos_restaurant/static/src/app/tip_receipt/tip_receipt.xml:0
 msgid "________________________"
 msgstr "________________________"

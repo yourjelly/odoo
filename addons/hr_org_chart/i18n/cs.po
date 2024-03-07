@@ -1,23 +1,23 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* hr_org_chart
-# 
+#
 # Translators:
-# Wil Odoo, 2024
+# Wil Odoo, 2023
 # Jakub Smolka, 2024
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~17.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-01-17 10:10+0000\n"
-"PO-Revision-Date: 2024-01-17 11:21+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
 "Last-Translator: Jakub Smolka, 2024\n"
 "Language-Team: Czech (https://app.transifex.com/odoo/teams/41243/cs/)\n"
+"Language: cs\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: cs\n"
 "Plural-Forms: nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n <= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;\n"
 
 #. module: hr_org_chart
@@ -99,7 +99,6 @@ msgstr ""
 #. module: hr_org_chart
 #. odoo-javascript
 #: code:addons/hr_org_chart/static/src/fields/hr_org_chart.xml:0
-#: code:addons/hr_org_chart/static/src/fields/hr_org_chart.xml:0
 msgid "More managers"
 msgstr "Více manažerů"
 
@@ -135,7 +134,6 @@ msgstr "Veřejný zaměstnanec"
 
 #. module: hr_org_chart
 #. odoo-javascript
-#: code:addons/hr_org_chart/static/src/fields/hr_org_chart.xml:0
 #: code:addons/hr_org_chart/static/src/fields/hr_org_chart.xml:0
 msgid "Redirect"
 msgstr "Přesměrování"
@@ -176,10 +174,7 @@ msgid ""
 "With just a quick glance on the Odoo employee screen, you\n"
 "                can easily find all the information you need for each person;\n"
 "                contact data, job position, availability, etc."
-msgstr ""
-"Stačí krátký pohled na obrazovku zaměstnance Odoo, abyste mohli snadno "
-"najdete všechny potřebné informace o každé osobě; kontaktní údaje, pracovní "
-"pozici, dostupnost atd."
+msgstr "Stačí krátký pohled na obrazovku zaměstnance Odoo, abyste mohli snadno najdete všechny potřebné informace o každé osobě; kontaktní údaje, pracovní pozici, dostupnost atd."
 
 #. module: hr_org_chart
 #. odoo-javascript

@@ -1,23 +1,27 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* hr_recruitment
-# 
+#
 # Translators:
+# Ivana Bartonkova, 2023
 # Wil Odoo, 2024
+# Aleš Fiala <f.ales1@seznam.cz>, 2024
+# Tomáš Píšek, 2024
 # Katerina Horylova, 2024
-# 
+# Jakub Smolka, 2024
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~17.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-01-17 10:09+0000\n"
-"PO-Revision-Date: 2024-01-17 11:21+0000\n"
-"Last-Translator: Katerina Horylova, 2024\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Jakub Smolka, 2024\n"
 "Language-Team: Czech (https://app.transifex.com/odoo/teams/41243/cs/)\n"
+"Language: cs\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: cs\n"
 "Plural-Forms: nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n <= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;\n"
 
 #. module: hr_recruitment
@@ -36,8 +40,7 @@ msgstr "<b>Kliknutím zobrazíte</b> kandidáta."
 #. odoo-javascript
 #: code:addons/hr_recruitment/static/src/js/tours/hr_recruitment.js:0
 msgid "<b>Did you apply by sending an email?</b> Check incoming applications."
-msgstr ""
-"<b>Podali jste žádost zasláním e-mailu?</b> Zkontrolujte příchozí aplikace."
+msgstr "<b>Podali jste žádost zasláním e-mailu?</b> Zkontrolujte příchozí aplikace."
 
 #. module: hr_recruitment
 #. odoo-javascript
@@ -48,29 +51,19 @@ msgstr "<b>Přetáhněte tuto kartu</b>, kvalifikovat ho na první pohovor."
 #. module: hr_recruitment
 #. odoo-javascript
 #: code:addons/hr_recruitment/static/src/js/tours/hr_recruitment.js:0
-msgid ""
-"<div><b>Try to send an email</b> to the applicant.</div><div><i>Tips: All "
-"emails sent or received are saved in the history here</i>"
-msgstr ""
-"<div><b>Zkuste poslat e-mail</b>žadateli.</div><div><i>Tipy: Všechny "
-"odeslané nebo přijaté e-maily se ukládají do historie zde</i>"
+msgid "<div><b>Try to send an email</b> to the applicant.</div><div><i>Tips: All emails sent or received are saved in the history here</i>"
+msgstr "<div><b>Zkuste poslat e-mail</b>žadateli.</div><div><i>Tipy: Všechny odeslané nebo přijaté e-maily se ukládají do historie zde</i>"
 
 #. module: hr_recruitment
 #. odoo-javascript
 #: code:addons/hr_recruitment/static/src/js/tours/hr_recruitment.js:0
-msgid ""
-"<div>Great job! You hired a new colleague!</div><div>Try the Website app to "
-"publish job offers online.</div>"
-msgstr ""
-"<div>Dobrá práce! Přijali jste nového kolegu!</div><div>Vyzkoušejte aplikaci"
-" Webová stránka a zveřejňujte pracovní nabídky online.</div>"
+msgid "<div>Great job! You hired a new colleague!</div><div>Try the Website app to publish job offers online.</div>"
+msgstr "<div>Dobrá práce! Přijali jste nového kolegu!</div><div>Vyzkoušejte aplikaci Webová stránka a zveřejňujte pracovní nabídky online.</div>"
 
 #. module: hr_recruitment
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.view_hr_job_kanban
 msgid "<i class=\"fa fa-building-o\" role=\"img\" aria-label=\"Company\" title=\"Company\"/>"
-msgstr ""
-"<i class=\"fa fa-building-o\" role=\"img\" aria-label=\"Společnost\" "
-"title=\"Společnost\"/>"
+msgstr "<i class=\"fa fa-building-o\" role=\"img\" aria-label=\"Společnost\" title=\"Společnost\"/>"
 
 #. module: hr_recruitment
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.view_hr_job_kanban
@@ -397,12 +390,8 @@ msgstr ""
 
 #. module: hr_recruitment
 #: model:ir.model.fields,help:hr_recruitment.field_hr_job__alias_defaults
-msgid ""
-"A Python dictionary that will be evaluated to provide default values when "
-"creating new records for this alias."
-msgstr ""
-"Slovník Pythonu, který bude vyhodnocen tak, aby poskytoval výchozí hodnoty "
-"při vytváření nových záznamů pro tento alias."
+msgid "A Python dictionary that will be evaluated to provide default values when creating new records for this alias."
+msgstr "Slovník Pythonu, který bude vyhodnocen tak, aby poskytoval výchozí hodnoty při vytváření nových záznamů pro tento alias."
 
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__message_needaction
@@ -613,12 +602,8 @@ msgstr ""
 
 #. module: hr_recruitment
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_job_simple_form
-msgid ""
-"Applicants can send resume to this email address,<br/>it will create an "
-"application automatically"
-msgstr ""
-"Žadatelé mohou zaslat životopis na tuto e-mailovou adresu,<br/>automaticky "
-"vytvoří aplikaci"
+msgid "Applicants can send resume to this email address,<br/>it will create an application automatically"
+msgstr "Žadatelé mohou zaslat životopis na tuto e-mailovou adresu,<br/>automaticky vytvoří aplikaci"
 
 #. module: hr_recruitment
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.view_hr_job_kanban
@@ -762,11 +747,7 @@ msgstr "Dle pozic"
 
 #. module: hr_recruitment
 #: model_terms:digest.tip,tip_description:hr_recruitment.digest_tip_hr_recruitment_0
-msgid ""
-"By setting an alias to a job position, emails sent to this address create "
-"applications automatically. You can even use multiple trackers to get "
-"statistics according to the source of the application: LinkedIn, Monster, "
-"Indeed, etc."
+msgid "By setting an alias to a job position, emails sent to this address create applications automatically. You can even use multiple trackers to get statistics according to the source of the application: LinkedIn, Monster, Indeed, etc."
 msgstr ""
 
 #. module: hr_recruitment
@@ -888,9 +869,7 @@ msgstr "Podepsaná smlouva"
 #. odoo-javascript
 #: code:addons/hr_recruitment/static/src/js/tours/hr_recruitment.js:0
 msgid "Copy this email address, to paste it in your email composer, to apply."
-msgstr ""
-"Zkopírujte tuto e-mailovou adresu a vložte ji do svého e-mailového "
-"skladatele."
+msgstr "Zkopírujte tuto e-mailovou adresu a vložte ji do svého e-mailového skladatele."
 
 #. module: hr_recruitment
 #: model:ir.model.fields,help:hr_recruitment.field_hr_applicant__message_bounce
@@ -977,14 +956,8 @@ msgstr "Výchozí hodnoty"
 #. module: hr_recruitment
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_job_simple_form
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_job_survey
-msgid ""
-"Define a specific contact address for this job position. If you keep it "
-"empty, the default email address will be used which is in human resources "
-"settings"
-msgstr ""
-"Definujte specifickou adresu pro tuto pracovní pozici. Pokud ji necháte "
-"nevyplněnou, použije se výchozí e-mailová adresa která je použita u lidských"
-" zdrojů"
+msgid "Define a specific contact address for this job position. If you keep it empty, the default email address will be used which is in human resources settings"
+msgstr "Definujte specifickou adresu pro tuto pracovní pozici. Pokud ji necháte nevyplněnou, použije se výchozí e-mailová adresa která je použita u lidských zdrojů"
 
 #. module: hr_recruitment
 #: model_terms:ir.actions.act_window,help:hr_recruitment.hr_job_stage_act
@@ -1152,12 +1125,8 @@ msgstr "Emailová šablona"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,help:hr_recruitment.field_hr_job__alias_id
-msgid ""
-"Email alias for this job position. New emails will automatically create new "
-"applicants for this job position."
-msgstr ""
-"E-mailová přezdívka pro tuto pracovní pozici. Nové e-maily automaticky "
-"vytvoří novou žádost o tuto pracovní pozici."
+msgid "Email alias for this job position. New emails will automatically create new applicants for this job position."
+msgstr "E-mailová přezdívka pro tuto pracovní pozici. Nové e-maily automaticky vytvoří novou žádost o tuto pracovní pozici."
 
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__email_cc
@@ -1266,12 +1235,8 @@ msgstr "Oblíbený uživatel"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,help:hr_recruitment.field_hr_applicant__phone_sanitized
-msgid ""
-"Field used to store sanitized phone number. Helps speeding up searches and "
-"comparisons."
-msgstr ""
-"Pole slouží k ukládání sanitovaného telefonního čísla. Pomáhá urychlit "
-"vyhledávání a srovnávání."
+msgid "Field used to store sanitized phone number. Helps speeding up searches and comparisons."
+msgstr "Pole slouží k ukládání sanitovaného telefonního čísla. Pomáhá urychlit vyhledávání a srovnávání."
 
 #. module: hr_recruitment
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.ir_attachment_hr_recruitment_list_view
@@ -1406,12 +1371,8 @@ msgstr "ID"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,help:hr_recruitment.field_hr_job__alias_parent_thread_id
-msgid ""
-"ID of the parent record holding the alias (example: project holding the task"
-" creation alias)"
-msgstr ""
-"ID rodičovského záznamu obsahující alias (například: Projekt obsahující "
-"alias pro vytváření úkolů)"
+msgid "ID of the parent record holding the alias (example: project holding the task creation alias)"
+msgstr "ID rodičovského záznamu obsahující alias (například: Projekt obsahující alias pro vytváření úkolů)"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__activity_exception_icon
@@ -1436,63 +1397,38 @@ msgstr "Pokud zaškrtnuto, některé zprávy mají chybu při doručení."
 
 #. module: hr_recruitment
 #: model:ir.model.fields,help:hr_recruitment.field_hr_recruitment_stage__hired_stage
-msgid ""
-"If checked, this stage is used to determine the hire date of an applicant"
+msgid "If checked, this stage is used to determine the hire date of an applicant"
 msgstr ""
 
 #. module: hr_recruitment
 #: model:ir.model.fields,help:hr_recruitment.field_hr_recruitment_stage__template_id
-msgid ""
-"If set, a message is posted on the applicant using the template when the "
-"applicant is set to the stage."
-msgstr ""
-"Je-li nastaveno, je přihlašovateli zaslána zpráva pomocí šablony, když je "
-"žadatel nastaven na fázi."
+msgid "If set, a message is posted on the applicant using the template when the applicant is set to the stage."
+msgstr "Je-li nastaveno, je přihlašovateli zaslána zpráva pomocí šablony, když je žadatel nastaven na fázi."
 
 #. module: hr_recruitment
 #: model:ir.model.fields,help:hr_recruitment.field_hr_job__alias_bounced_content
-msgid ""
-"If set, this content will automatically be sent out to unauthorized users "
-"instead of the default message."
-msgstr ""
-"Pokud je nastaveno, bude tento obsah místo výchozí zprávy automaticky "
-"odeslán neoprávněným uživatelům."
+msgid "If set, this content will automatically be sent out to unauthorized users instead of the default message."
+msgstr "Pokud je nastaveno, bude tento obsah místo výchozí zprávy automaticky odeslán neoprávněným uživatelům."
 
 #. module: hr_recruitment
 #: model:ir.model.fields,help:hr_recruitment.field_hr_applicant__emp_is_active
-msgid ""
-"If the active field is set to False, it will allow you to hide the resource "
-"record without removing it."
-msgstr ""
-"Pokud je pole aktivní nastaveno na Nepravda, umožní vám to skrýt záznam "
-"zdroje bez jeho odstranění."
+msgid "If the active field is set to False, it will allow you to hide the resource record without removing it."
+msgstr "Pokud je pole aktivní nastaveno na Nepravda, umožní vám to skrýt záznam zdroje bez jeho odstranění."
 
 #. module: hr_recruitment
 #: model:ir.model.fields,help:hr_recruitment.field_hr_applicant__active
-msgid ""
-"If the active field is set to false, it will allow you to hide the case "
-"without removing it."
-msgstr ""
-"Pokud je aktivní pole nastaveno na hodnotu false, umožní vám skrýt případ "
-"bez jeho odstranění."
+msgid "If the active field is set to false, it will allow you to hide the case without removing it."
+msgstr "Pokud je aktivní pole nastaveno na hodnotu false, umožní vám skrýt případ bez jeho odstranění."
 
 #. module: hr_recruitment
 #: model:ir.model.fields,help:hr_recruitment.field_hr_applicant__is_blacklisted
-msgid ""
-"If the email address is on the blacklist, the contact won't receive mass "
-"mailing anymore, from any list"
-msgstr ""
-"Pokud je e-mailová adresa na černé listině, kontakt už nebude dostávat "
-"hromadnou poštu z jakéhokoli seznamu"
+msgid "If the email address is on the blacklist, the contact won't receive mass mailing anymore, from any list"
+msgstr "Pokud je e-mailová adresa na černé listině, kontakt už nebude dostávat hromadnou poštu z jakéhokoli seznamu"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,help:hr_recruitment.field_hr_applicant__phone_sanitized_blacklisted
-msgid ""
-"If the sanitized phone number is on the blacklist, the contact won't receive"
-" mass mailing sms anymore, from any list"
-msgstr ""
-"Pokud je ověřené telefonní číslo na černé listině, kontakt již nebude "
-"dostávat hromadné zprávy SMS ze žádného seznamu"
+msgid "If the sanitized phone number is on the blacklist, the contact won't receive mass mailing sms anymore, from any list"
+msgstr "Pokud je ověřené telefonní číslo na černé listině, kontakt již nebude dostávat hromadné zprávy SMS ze žádného seznamu"
 
 #. module: hr_recruitment
 #. odoo-python
@@ -1509,25 +1445,13 @@ msgstr "Probíhá"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,help:hr_recruitment.field_hr_applicant__mobile_blacklisted
-msgid ""
-"Indicates if a blacklisted sanitized phone number is a mobile number. Helps "
-"distinguish which number is blacklisted             when there is both a "
-"mobile and phone field in a model."
-msgstr ""
-"Označuje, zda je ověřené telefonní číslo na černé listině číslo mobilního "
-"telefonu. Pomáhá rozlišit, které číslo je na černé listině, když je v modelu"
-" pole pro mobil i telefon."
+msgid "Indicates if a blacklisted sanitized phone number is a mobile number. Helps distinguish which number is blacklisted             when there is both a mobile and phone field in a model."
+msgstr "Označuje, zda je ověřené telefonní číslo na černé listině číslo mobilního telefonu. Pomáhá rozlišit, které číslo je na černé listině, když je v modelu pole pro mobil i telefon."
 
 #. module: hr_recruitment
 #: model:ir.model.fields,help:hr_recruitment.field_hr_applicant__phone_blacklisted
-msgid ""
-"Indicates if a blacklisted sanitized phone number is a phone number. Helps "
-"distinguish which number is blacklisted             when there is both a "
-"mobile and phone field in a model."
-msgstr ""
-"Označuje, zda je ověřené telefonní číslo na černé listině telefonním číslem."
-" Pomáhá rozlišit, které číslo je na černé listině, když je v modelu pole pro"
-" mobil i telefon."
+msgid "Indicates if a blacklisted sanitized phone number is a phone number. Helps distinguish which number is blacklisted             when there is both a mobile and phone field in a model."
+msgstr "Označuje, zda je ověřené telefonní číslo na černé listině telefonním číslem. Pomáhá rozlišit, které číslo je na černé listině, když je v modelu pole pro mobil i telefon."
 
 #. module: hr_recruitment
 #: model:hr.recruitment.stage,name:hr_recruitment.stage_job1
@@ -1742,21 +1666,14 @@ msgstr "Vytvořme pracovní pozici."
 #. module: hr_recruitment
 #. odoo-javascript
 #: code:addons/hr_recruitment/static/src/js/tours/hr_recruitment.js:0
-msgid ""
-"Let's create the position. An email will be setup for applications, and a "
-"public job description, if you use the Website app."
-msgstr ""
-"Pojďme vytvořit pozici. Pokud používáte aplikaci Webstránka, nastaví se "
-"e-mail pro kandidáty a veřejný popis práce."
+msgid "Let's create the position. An email will be setup for applications, and a public job description, if you use the Website app."
+msgstr "Pojďme vytvořit pozici. Pokud používáte aplikaci Webstránka, nastaví se e-mail pro kandidáty a veřejný popis práce."
 
 #. module: hr_recruitment
 #. odoo-javascript
 #: code:addons/hr_recruitment/static/src/js/tours/hr_recruitment.js:0
-#: code:addons/hr_recruitment/static/src/js/tours/hr_recruitment.js:0
 msgid "Let's have a look at how to <b>improve</b> your <b>hiring process</b>."
-msgstr ""
-"Pojďme se podívat na to, jak <b>vylepšit</b> váš <b>proces přijímání do "
-"zaměstnání</b>."
+msgstr "Pojďme se podívat na to, jak <b>vylepšit</b> váš <b>proces přijímání do zaměstnání</b>."
 
 #. module: hr_recruitment
 #. odoo-javascript
@@ -1845,7 +1762,7 @@ msgstr "Zprávy"
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__partner_mobile
 msgid "Mobile"
-msgstr "Mobilní"
+msgstr "Mobil"
 
 #. module: hr_recruitment
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_form
@@ -2006,9 +1923,7 @@ msgstr "Počet příloh"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,help:hr_recruitment.field_hr_job__new_application_count
-msgid ""
-"Number of applications that are new in the flow (typically at first step of "
-"the flow)"
+msgid "Number of applications that are new in the flow (typically at first step of the flow)"
 msgstr "Počet aplikací, které jsou v toku nové (obvykle v prvním kroku toku)"
 
 #. module: hr_recruitment
@@ -2065,27 +1980,13 @@ msgstr "Online zveřejnené"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,help:hr_recruitment.field_hr_job__alias_force_thread_id
-msgid ""
-"Optional ID of a thread (record) to which all incoming messages will be "
-"attached, even if they did not reply to it. If set, this will disable the "
-"creation of new records completely."
-msgstr ""
-"Volitelné ID vlákna (záznamu), ke kterému budou připojeny všechny příchozí "
-"zprávy, i když na něj neodpověděly. Je-li nastaveno, zakáže se úplné "
-"vytvoření nových záznamů."
+msgid "Optional ID of a thread (record) to which all incoming messages will be attached, even if they did not reply to it. If set, this will disable the creation of new records completely."
+msgstr "Volitelné ID vlákna (záznamu), ke kterému budou připojeny všechny příchozí zprávy, i když na něj neodpověděly. Je-li nastaveno, zakáže se úplné vytvoření nových záznamů."
 
 #. module: hr_recruitment
 #: model:ir.model.fields,help:hr_recruitment.field_applicant_send_mail__lang
-msgid ""
-"Optional translation language (ISO code) to select when sending out an "
-"email. If not set, the english version will be used. This should usually be "
-"a placeholder expression that provides the appropriate language, e.g. {{ "
-"object.partner_id.lang }}."
-msgstr ""
-"Volitelný překladový jazyk (kód ISO), který lze vybrat při odesílání "
-"e-mailu. Pokud není nastavena, bude použita anglická verze. To by měl být "
-"obvykle zástupný výraz, který poskytuje vhodný jazyk, např. "
-"{{object.partner_id.lang}}."
+msgid "Optional translation language (ISO code) to select when sending out an email. If not set, the english version will be used. This should usually be a placeholder expression that provides the appropriate language, e.g. {{ object.partner_id.lang }}."
+msgstr "Volitelný překladový jazyk (kód ISO), který lze vybrat při odesílání e-mailu. Pokud není nastavena, bude použita anglická verze. To by měl být obvykle zástupný výraz, který poskytuje vhodný jazyk, např. {{object.partner_id.lang}}."
 
 #. module: hr_recruitment
 #. odoo-javascript
@@ -2110,14 +2011,8 @@ msgstr "ID vlákna nadřazeného záznamu"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,help:hr_recruitment.field_hr_job__alias_parent_model_id
-msgid ""
-"Parent model holding the alias. The model holding the alias reference is not"
-" necessarily the model given by alias_model_id (example: project "
-"(parent_model) and task (model))"
-msgstr ""
-"Nadřazený model s aliasem. Model obsahující odkaz na alias nemusí být nutně "
-"modelem daným od alias_model_id (příklad: project (parent_model) a task "
-"(model))"
+msgid "Parent model holding the alias. The model holding the alias reference is not necessarily the model given by alias_model_id (example: project (parent_model) and task (model))"
+msgstr "Nadřazený model s aliasem. Model obsahující odkaz na alias nemusí být nutně modelem daným od alias_model_id (příklad: project (parent_model) a task (model))"
 
 #. module: hr_recruitment
 #. odoo-python
@@ -2468,9 +2363,7 @@ msgstr "Druhý pohovor"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,help:hr_recruitment.field_hr_job__address_id
-msgid ""
-"Select the location where the applicant will work. Addresses listed here are"
-" defined on the company's contact information."
+msgid "Select the location where the applicant will work. Addresses listed here are defined on the company's contact information."
 msgstr ""
 
 #. module: hr_recruitment
@@ -2504,8 +2397,7 @@ msgstr "Odeslat SMS"
 
 #. module: hr_recruitment
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.res_config_settings_view_form
-msgid ""
-"Send an Interview Survey to the applicant during the recruitment process"
+msgid "Send an Interview Survey to the applicant during the recruitment process"
 msgstr ""
 
 #. module: hr_recruitment
@@ -2533,9 +2425,7 @@ msgstr "Sekvence"
 
 #. module: hr_recruitment
 #: model:mail.template,description:hr_recruitment.email_template_data_applicant_interest
-msgid ""
-"Set this template to a recruitment stage to send it when applications reach "
-"that stage"
+msgid "Set this template to a recruitment stage to send it when applications reach that stage"
 msgstr ""
 
 #. module: hr_recruitment
@@ -2547,8 +2437,7 @@ msgstr "Nastavení"
 #. module: hr_recruitment
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_search_bis
 msgid "Show all records which has next action date is before today"
-msgstr ""
-"Zobrazit všechny záznamy, které mají datum příští aktivity před dneškem"
+msgstr "Zobrazit všechny záznamy, které mají datum příští aktivity před dneškem"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__source_id
@@ -2578,11 +2467,8 @@ msgstr "Spam"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,help:hr_recruitment.field_hr_recruitment_stage__job_ids
-msgid ""
-"Specific jobs that uses this stage. Other jobs will not use this stage."
-msgstr ""
-"Konkrétní úlohy, které využívají tuto fázi. Ostatní úlohy tuto fázi "
-"nevyužijí."
+msgid "Specific jobs that uses this stage. Other jobs will not use this stage."
+msgstr "Konkrétní úlohy, které využívají tuto fázi. Ostatní úlohy tuto fázi nevyužijí."
 
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__stage_id
@@ -2614,12 +2500,8 @@ msgstr "Fáze změněna"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,help:hr_recruitment.field_hr_applicant__last_stage_id
-msgid ""
-"Stage of the applicant before being in the current stage. Used for lost "
-"cases analysis."
-msgstr ""
-"Fáze uchazeče než se dostal do nynější fáze. Používá se pro analýzu "
-"ztracených případů."
+msgid "Stage of the applicant before being in the current stage. Used for lost cases analysis."
+msgstr "Fáze uchazeče než se dostal do nynější fáze. Používá se pro analýzu ztracených případů."
 
 #. module: hr_recruitment
 #: model:ir.actions.act_window,name:hr_recruitment.hr_recruitment_stage_act
@@ -2674,27 +2556,18 @@ msgstr "Štítky"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,help:hr_recruitment.field_hr_job__interviewer_ids
-msgid ""
-"The Interviewers set on the job position can see all Applicants in it. They "
-"have access to the information, the attachments, the meeting management and "
-"they can refuse him. You don't need to have Recruitment rights to be set as "
-"an interviewer."
+msgid "The Interviewers set on the job position can see all Applicants in it. They have access to the information, the attachments, the meeting management and they can refuse him. You don't need to have Recruitment rights to be set as an interviewer."
 msgstr ""
 
 #. module: hr_recruitment
 #: model:ir.model.fields,help:hr_recruitment.field_hr_job__user_id
-msgid ""
-"The Recruiter will be the default value for all Applicants Recruiter's field"
-" in this job position. The Recruiter is automatically added to all meetings "
-"with the Applicant."
+msgid "The Recruiter will be the default value for all Applicants Recruiter's field in this job position. The Recruiter is automatically added to all meetings with the Applicant."
 msgstr ""
 
 #. module: hr_recruitment
 #. odoo-python
 #: code:addons/hr_recruitment/models/utm_campaign.py:0
-msgid ""
-"The UTM campaign '%s' cannot be deleted as it is used in the recruitment "
-"process."
+msgid "The UTM campaign '%s' cannot be deleted as it is used in the recruitment process."
 msgstr ""
 
 #. module: hr_recruitment
@@ -2705,9 +2578,7 @@ msgstr "Datum, kdy bude žadatel k dispozici, aby mohl začít pracovat"
 #. module: hr_recruitment
 #. odoo-python
 #: code:addons/hr_recruitment/wizard/applicant_refuse_reason.py:0
-msgid ""
-"The email will not be sent to the following applicant(s) as they don't have "
-"email address."
+msgid "The email will not be sent to the following applicant(s) as they don't have email address."
 msgstr ""
 
 #. module: hr_recruitment
@@ -2718,14 +2589,8 @@ msgstr ""
 
 #. module: hr_recruitment
 #: model:ir.model.fields,help:hr_recruitment.field_hr_job__alias_model_id
-msgid ""
-"The model (Odoo Document Kind) to which this alias corresponds. Any incoming"
-" email that does not reply to an existing record will cause the creation of "
-"a new record of this model (e.g. a Project Task)"
-msgstr ""
-"Model (Odoo Document Kind), ke kterému odpovídá tento alias. Jakýkoli "
-"příchozí e-mail, který neodpovídá stávajícímu záznamu, způsobí vytvoření "
-"nového záznamu tohoto modelu (například projektové úlohy)"
+msgid "The model (Odoo Document Kind) to which this alias corresponds. Any incoming email that does not reply to an existing record will cause the creation of a new record of this model (e.g. a Project Task)"
+msgstr "Model (Odoo Document Kind), ke kterému odpovídá tento alias. Jakýkoli příchozí e-mail, který neodpovídá stávajícímu záznamu, způsobí vytvoření nového záznamu tohoto modelu (například projektové úlohy)"
 
 #. module: hr_recruitment
 #: model:ir.model.constraint,message:hr_recruitment.constraint_hr_recruitment_degree_name_uniq
@@ -2734,55 +2599,33 @@ msgstr "Název stupně náboru musí být jedinečný!"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,help:hr_recruitment.field_hr_job__alias_name
-msgid ""
-"The name of the email alias, e.g. 'jobs' if you want to catch emails for "
-"<jobs@example.odoo.com>"
-msgstr ""
-"Název aliasu e-mailu, např. 'jobs', pokud chcete zachytit e-maily pro "
-"<jobs@example.odoo.com>"
+msgid "The name of the email alias, e.g. 'jobs' if you want to catch emails for <jobs@example.odoo.com>"
+msgstr "Název aliasu e-mailu, např. 'jobs', pokud chcete zachytit e-maily pro <jobs@example.odoo.com>"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,help:hr_recruitment.field_hr_applicant__email_normalized
-msgid ""
-"This field is used to search on email address as the primary email field can"
-" contain more than strictly an email address."
-msgstr ""
-"Toto pole se používá k vyhledávání na e-mailové adrese, protože pole "
-"primární e-mailové adresy může obsahovat více než striktně e-mailovou "
-"adresu."
+msgid "This field is used to search on email address as the primary email field can contain more than strictly an email address."
+msgstr "Toto pole se používá k vyhledávání na e-mailové adrese, protože pole primární e-mailové adresy může obsahovat více než striktně e-mailovou adresu."
 
 #. module: hr_recruitment
 #: model:ir.model.fields,help:hr_recruitment.field_hr_applicant__campaign_id
-msgid ""
-"This is a name that helps you keep track of your different campaign efforts,"
-" e.g. Fall_Drive, Christmas_Special"
-msgstr ""
-"Toto je název, který vám pomůže sledovat různé kampaně, např. Fall_Drive, "
-"Christmas_Special"
+msgid "This is a name that helps you keep track of your different campaign efforts, e.g. Fall_Drive, Christmas_Special"
+msgstr "Toto je název, který vám pomůže sledovat různé kampaně, např. Fall_Drive, Christmas_Special"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,help:hr_recruitment.field_hr_applicant__medium_id
 msgid "This is the method of delivery, e.g. Postcard, Email, or Banner Ad"
-msgstr ""
-"To je způsob doručování, např. Pohlednice, e-mail nebo bannerová reklama"
+msgstr "To je způsob doručování, např. Pohlednice, e-mail nebo bannerová reklama"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,help:hr_recruitment.field_hr_applicant__source_id
-msgid ""
-"This is the source of the link, e.g. Search Engine, another domain, or name "
-"of email list"
-msgstr ""
-"Toto je zdroj odkazu, např. vyhledávač, jiná doména nebo název seznamu "
-"e-mailů"
+msgid "This is the source of the link, e.g. Search Engine, another domain, or name of email list"
+msgstr "Toto je zdroj odkazu, např. vyhledávač, jiná doména nebo název seznamu e-mailů"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,help:hr_recruitment.field_hr_recruitment_stage__fold
-msgid ""
-"This stage is folded in the kanban view when there are no records in that "
-"stage to display."
-msgstr ""
-"Tato fáze je v kanbanovém pohledu přeložena, pokud v této fázi nejsou žádné "
-"záznamy k zobrazení."
+msgid "This stage is folded in the kanban view when there are no records in that stage to display."
+msgstr "Tato fáze je v kanbanovém pohledu přeložena, pokud v této fázi nejsou žádné záznamy k zobrazení."
 
 #. module: hr_recruitment
 #: model:digest.tip,name:hr_recruitment.digest_tip_hr_recruitment_0
@@ -2817,12 +2660,8 @@ msgstr "Zkuste odeslat e-mail"
 
 #. module: hr_recruitment
 #: model_terms:ir.actions.act_window,help:hr_recruitment.mail_activity_type_action_config_hr_applicant
-msgid ""
-"Try to add some records, or make sure that there is no active filter in the "
-"search bar."
-msgstr ""
-"Zkuste přidat nějaké záznamy, nebo se ujistěte, že není žádný aktivní filtr "
-"ve vyhledávací liště."
+msgid "Try to add some records, or make sure that there is no active filter in the search bar."
+msgstr "Zkuste přidat nějaké záznamy, nebo se ujistěte, že není žádný aktivní filtr ve vyhledávací liště."
 
 #. module: hr_recruitment
 #: model:ir.model.fields,help:hr_recruitment.field_hr_applicant__activity_exception_decoration
@@ -2872,14 +2711,8 @@ msgstr "Používejte sledovače e-mailů a odkazů"
 
 #. module: hr_recruitment
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.res_config_settings_view_form
-msgid ""
-"Use interview forms tailored to each job position during the recruitment "
-"process. Select the form to use in the job position detail form. This relies"
-" on the Survey app."
-msgstr ""
-"Během náborového procesu používejte formuláře pohovorů přizpůsobené každé "
-"pracovní pozici. Vyberte formulář, který chcete použít ve formuláři "
-"podrobností o pracovní pozici. To závisí na aplikaci Průzkum."
+msgid "Use interview forms tailored to each job position during the recruitment process. Select the form to use in the job position detail form. This relies on the Survey app."
+msgstr "Během náborového procesu používejte formuláře pohovorů přizpůsobené každé pracovní pozici. Vyberte formulář, který chcete použít ve formuláři podrobností o pracovní pozici. To závisí na aplikaci Průzkum."
 
 #. module: hr_recruitment
 #: model:ir.model,name:hr_recruitment.model_res_users
@@ -2944,8 +2777,7 @@ msgstr ""
 #. module: hr_recruitment
 #. odoo-python
 #: code:addons/hr_recruitment/models/hr_applicant.py:0
-msgid ""
-"You can search into attachment's content, like resumes, with the searchbar."
+msgid "You can search into attachment's content, like resumes, with the searchbar."
 msgstr ""
 
 #. module: hr_recruitment

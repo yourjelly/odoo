@@ -1,25 +1,32 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* website_sale
-# 
+#
 # Translators:
+# Tomáš Píšek, 2023
+# Rastislav Brencic <rastislav.brencic@azet.sk>, 2023
+# karolína schusterová <karolina.schusterova@vdp.sk>, 2023
+# Ivana Bartonkova, 2023
+# Jakub Krkoška, 2023
+# Jiří Podhorecký, 2023
+# Aleš Fiala <f.ales1@seznam.cz>, 2024
 # Wil Odoo, 2024
-# Jakub Smolka, 2024
-# Vojtech Smolka, 2024
 # Katerina Horylova, 2024
-# 
+# Vojtech Smolka, 2024
+# Jakub Smolka, 2024
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~17.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-02-27 04:56+0000\n"
-"PO-Revision-Date: 2024-01-17 11:21+0000\n"
-"Last-Translator: Katerina Horylova, 2024\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Jakub Smolka, 2024\n"
 "Language-Team: Czech (https://app.transifex.com/odoo/teams/41243/cs/)\n"
+"Language: cs\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: cs\n"
 "Plural-Forms: nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n <= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;\n"
 
 #. module: website_sale
@@ -29,9 +36,7 @@ msgstr "\" kategorie."
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
-msgid ""
-"\"Optional\" allows guests to register from the order confirmation email to "
-"track their order."
+msgid "\"Optional\" allows guests to register from the order confirmation email to track their order."
 msgstr ""
 
 #. module: website_sale
@@ -130,7 +135,7 @@ msgstr "<b>Doprava: </b>"
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.o_wsale_offcanvas
 msgid "<b>Sort By</b>"
-msgstr ""
+msgstr "<b>Třídit podle</b>"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.filter_products_tags
@@ -166,7 +171,7 @@ msgstr ""
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.s_add_to_cart
 msgid "<i class=\"fa fa-cart-plus me-2\"/>Add to Cart"
-msgstr "Přidat do košíku"
+msgstr "<i class=\"fa fa-cart-plus me-2\"/> Přidat do košíku"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.snippet_options
@@ -188,12 +193,8 @@ msgstr "<i class=\"fa fa-pencil me-1\"/>Upravit"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.row_addresses
-msgid ""
-"<i class=\"fa fa-plus me-md-2\"/><span class=\"d-none d-md-inline\">Add "
-"address</span>"
-msgstr ""
-"<i class=\"fa fa-plus me-md-2\"/><span class=\"d-none d-md-inline\">Přidat "
-"adresu</span>"
+msgid "<i class=\"fa fa-plus me-md-2\"/><span class=\"d-none d-md-inline\">Add address</span>"
+msgstr "<i class=\"fa fa-plus me-md-2\"/><span class=\"d-none d-md-inline\">Přidat adresu</span>"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.confirmation
@@ -206,15 +207,15 @@ msgid ""
 "<i class=\"fa fa-rotate-right me-1\"/>\n"
 "                    Order Again"
 msgstr ""
+"<i class=\"fa fa-rotate-right me-1\"/>\n"
+"                    Znovu objednat"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.product
 msgid ""
 "<i class=\"fa fa-shopping-cart me-2\"/>\n"
 "                                                Add to cart"
-msgstr ""
-"<span class=\"d-inline-block mx-sm-3 fa fa-angle-right text-muted fs-5\"/> "
-"Přidat do košíku"
+msgstr "<i class=\"fa fa-shopping-cart me-2\"/> Přidat do košíku"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.address
@@ -247,14 +248,11 @@ msgstr ""
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.sort
 msgid "<small class=\"d-none d-lg-inline text-muted\">Sort By:</small>"
-msgstr ""
+msgstr "<small class=\"d-none d-lg-inline text-muted\">Třídit podle:</small>"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.address
-msgid ""
-"<small class=\"form-text text-muted\">Changing company name or VAT number is"
-" not allowed once document(s) have been issued for your account. Please "
-"contact us directly for this operation.</small>"
+msgid "<small class=\"form-text text-muted\">Changing company name or VAT number is not allowed once document(s) have been issued for your account. Please contact us directly for this operation.</small>"
 msgstr ""
 
 #. module: website_sale
@@ -273,12 +271,8 @@ msgstr ""
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
-msgid ""
-"<span class=\"fa fa-lg fa-globe\" title=\"Values set here are website-"
-"specific.\" groups=\"website.group_multi_website\"/>"
-msgstr ""
-"<span class=\"fa fa-lg fa-globe\" title=\"Values set here are website-"
-"specific.\" groups=\"website.group_multi_website\"/>"
+msgid "<span class=\"fa fa-lg fa-globe\" title=\"Values set here are website-specific.\" groups=\"website.group_multi_website\"/>"
+msgstr "<span class=\"fa fa-lg fa-globe\" title=\"Values set here are website-specific.\" groups=\"website.group_multi_website\"/>"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.snippet_options
@@ -298,25 +292,17 @@ msgstr ""
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.payment_delivery_methods
-msgid ""
-"<span class=\"o_wsale_delivery_badge_price float-end fw-bold\" "
-"name=\"price\">Select to compute delivery rate</span>"
-msgstr ""
-"<span class=\"o_wsale_delivery_badge_price float-end fw-bold\" "
-"name=\"price\">Zvolte pro výpočet rychlosti doručení</span>"
+msgid "<span class=\"o_wsale_delivery_badge_price float-end fw-bold\" name=\"price\">Select to compute delivery rate</span>"
+msgstr "<span class=\"o_wsale_delivery_badge_price float-end fw-bold\" name=\"price\">Zvolte pro výpočet rychlosti doručení</span>"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.shop_product_carousel
-msgid ""
-"<span class=\"oi oi-chevron-left fa-2x oe_unmovable\" role=\"img\" aria-"
-"label=\"Previous\" title=\"Previous\"/>"
+msgid "<span class=\"oi oi-chevron-left fa-2x oe_unmovable\" role=\"img\" aria-label=\"Previous\" title=\"Previous\"/>"
 msgstr ""
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.shop_product_carousel
-msgid ""
-"<span class=\"oi oi-chevron-right fa-2x oe_unmovable\" role=\"img\" aria-"
-"label=\"Next\" title=\"Next\"/>"
+msgid "<span class=\"oi oi-chevron-right fa-2x oe_unmovable\" role=\"img\" aria-label=\"Next\" title=\"Next\"/>"
 msgstr ""
 
 #. module: website_sale
@@ -324,13 +310,12 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_sale.extra_info
 #: model_terms:ir.ui.view,arch_db:website_sale.navigation_buttons
 msgid "<span class=\"px-3\">or</span>"
-msgstr ""
+msgstr "<span class=\"px-3\">nebo</span>"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.extra_info
 msgid "<span class=\"s_website_form_label_content\">Give us your feedback</span>"
-msgstr ""
-"<span class=\"s_website_form_label_content\">Dejte nám zpětnou vazbu</span>"
+msgstr "<span class=\"s_website_form_label_content\">Dejte nám zpětnou vazbu</span>"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.extra_info
@@ -344,9 +329,7 @@ msgstr "<span class=\"s_website_form_label_content\">Vaše reference</span>"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.product_template_only_website_form_view
-msgid ""
-"<span class=\"text-muted\" invisible=\"product_variant_count &lt;= 1\">Based"
-" on variants</span>"
+msgid "<span class=\"text-muted\" invisible=\"product_variant_count &lt;= 1\">Based on variants</span>"
 msgstr ""
 
 #. module: website_sale
@@ -384,7 +367,7 @@ msgstr ""
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.payment
 msgid "<strong>No suitable payment option could be found.</strong><br/>"
-msgstr "<strong>Nebyla nalezena žádná platební metoda k výběru.</strong><br/>"
+msgstr "<strong>Nebyla nalezena žádná vhodná možnost platby.</strong><br/>"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.confirmation
@@ -503,30 +486,18 @@ msgstr "<u>Obchodní podmínky</u>"
 
 #. module: website_sale
 #: model:ir.model.fields,help:website_sale.field_delivery_carrier__website_description
-msgid ""
-"A description of the Product that you want to communicate to your customers."
-" This description will be copied to every Sales Order, Delivery Order and "
-"Customer Invoice/Credit Note"
-msgstr ""
-"Popis produktu, který chcete sdělit vašim zákazníkům. Tento popis bude "
-"zkopírován do každé objednávky, objednávky a zákaznické faktury / kreditní "
-"poznámky"
+msgid "A description of the Product that you want to communicate to your customers. This description will be copied to every Sales Order, Delivery Order and Customer Invoice/Credit Note"
+msgstr "Popis produktu, který chcete sdělit vašim zákazníkům. Tento popis bude zkopírován do každé objednávky, objednávky a zákaznické faktury / kreditní poznámky"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.product
-msgid ""
-"A detailed, formatted description to promote your product on this page. Use "
-"'/' to discover more features."
+msgid "A detailed, formatted description to promote your product on this page. Use '/' to discover more features."
 msgstr ""
 
 #. module: website_sale
 #: model_terms:ir.actions.act_window,help:website_sale.product_template_action_website
-msgid ""
-"A product can be either a physical product or a service that you sell to "
-"your customers."
-msgstr ""
-"Produkt může být buď fyzický produkt nebo služba, kterou prodáváte svým "
-"zákazníkům."
+msgid "A product can be either a physical product or a service that you sell to your customers."
+msgstr "Produkt může být buď fyzický produkt nebo služba, kterou prodáváte svým zákazníkům."
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.product
@@ -590,12 +561,8 @@ msgstr ""
 #. module: website_sale
 #: model:ir.model.fields,help:website_sale.field_product_product__accessory_product_ids
 #: model:ir.model.fields,help:website_sale.field_product_template__accessory_product_ids
-msgid ""
-"Accessories show up when the customer reviews the cart before payment "
-"(cross-sell strategy)."
-msgstr ""
-"Příslušenství se zobrazí, když zákazník zkontroluje košík před platbou "
-"(strategie křížového prodeje)."
+msgid "Accessories show up when the customer reviews the cart before payment (cross-sell strategy)."
+msgstr "Příslušenství se zobrazí, když zákazník zkontroluje košík před platbou (strategie křížového prodeje)."
 
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_product_product__accessory_product_ids
@@ -643,9 +610,7 @@ msgstr ""
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
-msgid ""
-"Add a reference price per UoM on products (i.e $/kg), in addition to the "
-"sale price"
+msgid "Add a reference price per UoM on products (i.e $/kg), in addition to the sale price"
 msgstr ""
 
 #. module: website_sale
@@ -655,7 +620,6 @@ msgstr ""
 
 #. module: website_sale
 #. odoo-javascript
-#: code:addons/website_sale/static/src/xml/website_sale_reorder_modal.xml:0
 #: code:addons/website_sale/static/src/xml/website_sale_reorder_modal.xml:0
 #: model_terms:ir.ui.view,arch_db:website_sale.cart_lines
 #: model_terms:ir.ui.view,arch_db:website_sale.product_quantity
@@ -749,7 +713,6 @@ msgstr "Množství opuštěných košíků"
 #. module: website_sale
 #. odoo-python
 #: code:addons/website_sale/controllers/delivery.py:0
-#: code:addons/website_sale/controllers/delivery.py:0
 msgid "Anonymous express checkout partner for order %s"
 msgstr ""
 
@@ -803,7 +766,6 @@ msgstr "Průměrné hodnocení"
 
 #. module: website_sale
 #. odoo-python
-#: code:addons/website_sale/models/website.py:0
 #: code:addons/website_sale/models/website.py:0
 msgid "Back to cart"
 msgstr "Zpět do košíku"
@@ -891,16 +853,8 @@ msgstr "Koše"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
-msgid ""
-"Boost your sales with multiple kinds of programs: Coupons, Promotions, Gift "
-"Card, Loyalty. Specific conditions can be set (products, customers, minimum "
-"purchase amount, period). Rewards can be discounts (% or amount) or free "
-"products."
-msgstr ""
-"Zvyšte své prodeje pomocí několika druhů programů: kupóny, akce, dárkové "
-"karty, věrnostní programy. Mohou být nastaveny konkrétní podmínky (produkty,"
-" zákazníci, minimální částka nákupu, doba). Odměny mohou být slevy (% nebo "
-"částka) nebo produkty zdarma."
+msgid "Boost your sales with multiple kinds of programs: Coupons, Promotions, Gift Card, Loyalty. Specific conditions can be set (products, customers, minimum purchase amount, period). Rewards can be discounts (% or amount) or free products."
+msgstr "Zvyšte své prodeje pomocí několika druhů programů: kupóny, akce, dárkové karty, věrnostní programy. Mohou být nastaveny konkrétní podmínky (produkty, zákazníci, minimální částka nákupu, doba). Odměny mohou být slevy (% nebo částka) nebo produkty zdarma."
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.snippet_options
@@ -1071,31 +1025,19 @@ msgstr "Židle"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.address
-msgid ""
-"Changing VAT number is not allowed once document(s) have been issued for "
-"your account. Please contact us directly for this operation."
-msgstr ""
-"Změna DIČ není povolena, pokud byly pro váš účet vydány dokument(y). Prosím "
-"kontaktujte nás přímo pro tuto operaci."
+msgid "Changing VAT number is not allowed once document(s) have been issued for your account. Please contact us directly for this operation."
+msgstr "Změna DIČ není povolena, pokud byly pro váš účet vydány dokument(y). Prosím kontaktujte nás přímo pro tuto operaci."
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.address
-msgid ""
-"Changing company name is not allowed once document(s) have been issued for "
-"your account. Please contact us directly for this operation."
-msgstr ""
-"Po vydání dokumentu(ů) pro váš účet není změna názvu společnosti povolena. "
-"Kontaktujte nás přímo pro tuto operaci."
+msgid "Changing company name is not allowed once document(s) have been issued for your account. Please contact us directly for this operation."
+msgstr "Po vydání dokumentu(ů) pro váš účet není změna názvu společnosti povolena. Kontaktujte nás přímo pro tuto operaci."
 
 #. module: website_sale
 #. odoo-python
 #: code:addons/website_sale/controllers/main.py:0
-msgid ""
-"Changing your name is not allowed once invoices have been issued for your "
-"account. Please contact us directly for this operation."
-msgstr ""
-"Změna jména není povolena po vystavení faktur na váš účet. Pro tuto úpravu "
-"nás kontaktujte přímo."
+msgid "Changing your name is not allowed once invoices have been issued for your account. Please contact us directly for this operation."
+msgstr "Změna jména není povolena po vystavení faktur na váš účet. Pro tuto úpravu nás kontaktujte přímo."
 
 #. module: website_sale
 #. odoo-python
@@ -1135,10 +1077,8 @@ msgstr ""
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.products
-msgid ""
-"Click <i>'New'</i> in the top-right corner to create your first product."
-msgstr ""
-"První produkt vytvoříte kliknutím na <i>'Nový'</i> v pravém horním rohu."
+msgid "Click <i>'New'</i> in the top-right corner to create your first product."
+msgstr "První produkt vytvoříte kliknutím na <i>'Nový'</i> v pravém horním rohu."
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.cart
@@ -1187,9 +1127,7 @@ msgstr "Sloupce"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.s_dynamic_snippet_products_template_options
-msgid ""
-"Comma-separated list of parts of product names, barcodes or internal "
-"reference"
+msgid "Comma-separated list of parts of product names, barcodes or internal reference"
 msgstr ""
 
 #. module: website_sale
@@ -1447,7 +1385,6 @@ msgstr ""
 #. module: website_sale
 #. odoo-python
 #: code:addons/website_sale/models/res_config_settings.py:0
-#: code:addons/website_sale/models/res_config_settings.py:0
 msgid "Customize Email Templates"
 msgstr ""
 
@@ -1495,8 +1432,7 @@ msgstr "Výchozí řazení"
 #: model:ir.model.fields,help:website_sale.field_product_product__base_unit_id
 #: model:ir.model.fields,help:website_sale.field_product_template__base_unit_id
 #: model:ir.model.fields,help:website_sale.field_website_base_unit__name
-msgid ""
-"Define a custom unit to display in the price per unit of measure field."
+msgid "Define a custom unit to display in the price per unit of measure field."
 msgstr ""
 
 #. module: website_sale
@@ -1512,7 +1448,7 @@ msgstr ""
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.cart_delivery
 msgid "Delivery"
-msgstr "Zásilky"
+msgstr "Doprava"
 
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_sale_order__amount_delivery
@@ -1610,9 +1546,7 @@ msgstr "Typ zobrazení"
 #. module: website_sale
 #: model:ir.model.fields,help:website_sale.field_product_product__base_unit_count
 #: model:ir.model.fields,help:website_sale.field_product_template__base_unit_count
-msgid ""
-"Display base unit price on your eCommerce pages. Set to 0 to hide it for "
-"this product."
+msgid "Display base unit price on your eCommerce pages. Set to 0 to hide it for this product."
 msgstr ""
 
 #. module: website_sale
@@ -1623,12 +1557,8 @@ msgstr "Zobrazuje se ve spodní části stránek produktu"
 #. module: website_sale
 #: model:ir.model.fields,help:website_sale.field_product_product__base_unit_name
 #: model:ir.model.fields,help:website_sale.field_product_template__base_unit_name
-msgid ""
-"Displays the custom unit for the products if defined or the selected unit of"
-" measure otherwise."
-msgstr ""
-"Zobrazuje celní jednotku pro výrobky, pokud je definována, nebo zvolenou "
-"měrnou jednotku v opačném případě."
+msgid "Displays the custom unit for the products if defined or the selected unit of measure otherwise."
+msgstr "Zobrazuje celní jednotku pro výrobky, pokud je definována, nebo zvolenou měrnou jednotku v opačném případě."
 
 #. module: website_sale
 #. odoo-python
@@ -1645,8 +1575,7 @@ msgstr ""
 #. module: website_sale
 #. odoo-python
 #: code:addons/website_sale/models/product_document.py:0
-msgid ""
-"Documents shown on product page cannot be restricted to a specific variant"
+msgid "Documents shown on product page cannot be restricted to a specific variant"
 msgstr ""
 
 #. module: website_sale
@@ -1843,7 +1772,7 @@ msgstr "Vyplnit"
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.address
 msgid "Fill in your address"
-msgstr ""
+msgstr "Vyplňte svou adresu"
 
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_website__fiscal_position_id
@@ -1864,7 +1793,7 @@ msgstr "Odběratelé (partneři)"
 #. odoo-javascript
 #: code:addons/website_sale/static/src/js/website_sale_delivery.js:0
 msgid "Free"
-msgstr "Volný"
+msgstr "Zdarma"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.view_sales_order_filter_ecommerce
@@ -1883,8 +1812,7 @@ msgstr "Nábytek"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
-msgid ""
-"Generate the invoice automatically when the online payment is confirmed"
+msgid "Generate the invoice automatically when the online payment is confirmed"
 msgstr "Fakturu vygenerujte automaticky při potvrzení platby online"
 
 #. module: website_sale
@@ -1942,8 +1870,7 @@ msgstr ""
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.product_image_view_kanban
 msgid "Huge file size. The image should be optimized/reduced."
-msgstr ""
-"Obrovská velikost souboru. Obrázek by měl být optimalizován / zmenšen."
+msgstr "Obrovská velikost souboru. Obrázek by měl být optimalizován / zmenšen."
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.accept_terms_and_conditions
@@ -1982,28 +1909,18 @@ msgstr ""
 
 #. module: website_sale
 #: model:mail.template,description:website_sale.mail_template_sale_cart_recovery
-msgid ""
-"If the setting is set, sent to authenticated visitors who abandoned their "
-"cart"
+msgid "If the setting is set, sent to authenticated visitors who abandoned their cart"
 msgstr ""
 
 #. module: website_sale
 #. odoo-python
 #: code:addons/website_sale/controllers/main.py:0
-msgid ""
-"If you are ordering for an external person, please place your order via the "
-"backend. If you wish to change your name or email address, please do so in "
-"the account settings or contact your administrator."
-msgstr ""
-"Pokud objednáváte za externí osobu, prosím proveďte objednávku "
-"prostřednictvím backendu. Pokud si přejete změnit své jméno nebo e-mailovou "
-"adresu, proveďte tak v nastavení účtu nebo kontaktujte svého správce."
+msgid "If you are ordering for an external person, please place your order via the backend. If you wish to change your name or email address, please do so in the account settings or contact your administrator."
+msgstr "Pokud objednáváte za externí osobu, prosím proveďte objednávku prostřednictvím backendu. Pokud si přejete změnit své jméno nebo e-mailovou adresu, proveďte tak v nastavení účtu nebo kontaktujte svého správce."
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.payment
-msgid ""
-"If you believe that it is an error, please contact the website "
-"administrator."
+msgid "If you believe that it is an error, please contact the website administrator."
 msgstr "Pokud se domníváte, že se jedná o chybu, obraťte se na správce webu."
 
 #. module: website_sale
@@ -2113,34 +2030,25 @@ msgstr "Vydávání faktur zákazníkům"
 #. odoo-python
 #: code:addons/website_sale/models/sale_order.py:0
 msgid "It is forbidden to modify a sales order which is not in draft status."
-msgstr ""
-"Je zakázáno upravovat prodejní objednávku, která není ve stavu konceptu."
+msgstr "Je zakázáno upravovat prodejní objednávku, která není ve stavu konceptu."
 
 #. module: website_sale
 #. odoo-python
 #: code:addons/website_sale/controllers/delivery.py:0
-msgid ""
-"It seems that a delivery method is not compatible with your address. Please "
-"refresh the page and try again."
-msgstr ""
-"Zdá se, že způsob doručení není kompatibilní s vaší adresou. Obnovte stránku"
-" a zkuste to znovu."
+msgid "It seems that a delivery method is not compatible with your address. Please refresh the page and try again."
+msgstr "Zdá se, že způsob doručení není kompatibilní s vaší adresou. Obnovte stránku a zkuste to znovu."
 
 #. module: website_sale
 #. odoo-python
 #: code:addons/website_sale/controllers/delivery.py:0
-msgid ""
-"It seems that there is already a transaction for your order, you can not "
-"change the delivery method anymore"
-msgstr ""
-"Zdá se, že pro vaši objednávku již proběhla transakce, způsob doručení již "
-"nelze změnit."
+msgid "It seems that there is already a transaction for your order, you can not change the delivery method anymore"
+msgstr "Zdá se, že pro vaši objednávku již proběhla transakce, způsob doručení již nelze změnit."
 
 #. module: website_sale
 #. odoo-javascript
 #: code:addons/website_sale/static/src/js/website_sale_utils.js:0
 msgid "Item(s) added to your cart"
-msgstr "Položky přidané do košíku"
+msgstr "Zboží přidané do košíku"
 
 #. module: website_sale
 #: model:ir.model,name:website_sale.model_account_move
@@ -2242,9 +2150,7 @@ msgstr "Vytvořme si svůj první produkt."
 #. module: website_sale
 #. odoo-javascript
 #: code:addons/website_sale/static/src/js/tours/website_sale_shop.js:0
-msgid ""
-"Let's now take a look at your eCommerce dashboard to get your eCommerce "
-"website ready in no time."
+msgid "Let's now take a look at your eCommerce dashboard to get your eCommerce website ready in no time."
 msgstr ""
 
 #. module: website_sale
@@ -2277,9 +2183,7 @@ msgstr ""
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
-msgid ""
-"Mail only sent to signed in customers with items available for sale in their"
-" cart."
+msgid "Mail only sent to signed in customers with items available for sale in their cart."
 msgstr ""
 
 #. module: website_sale
@@ -2290,15 +2194,11 @@ msgstr ""
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
 msgid "Manage Promotions, coupons, loyalty cards, Gift cards & eWallet"
-msgstr ""
-"Správa propagačních akcí, kupónů, věrnostních karet, dárkových karet a "
-"elektronické peněženky"
+msgstr "Správa propagačních akcí, kupónů, věrnostních karet, dárkových karet a elektronické peněženky"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
-msgid ""
-"Manage pricelists to apply specific prices per country, customer, products, "
-"etc"
+msgid "Manage pricelists to apply specific prices per country, customer, products, etc"
 msgstr ""
 
 #. module: website_sale
@@ -2464,12 +2364,8 @@ msgstr "Nenašly se výsledky pro '"
 #. module: website_sale
 #. odoo-python
 #: code:addons/website_sale/controllers/main.py:0
-msgid ""
-"No shipping method is available for your current order and shipping address."
-" Please contact us for more information."
-msgstr ""
-"Pro vaši aktuální objednávku a dodací adresu není k dispozici žádný způsob "
-"přepravy. Pro více informací nás prosím kontaktujte."
+msgid "No shipping method is available for your current order and shipping address. Please contact us for more information."
+msgstr "Pro vaši aktuální objednávku a dodací adresu není k dispozici žádný způsob přepravy. Pro více informací nás prosím kontaktujte."
 
 #. module: website_sale
 #: model:ir.model.fields.selection,name:website_sale.selection__website__product_page_image_spacing__none
@@ -2583,12 +2479,8 @@ msgstr "ECommerce s otevřeným zdrojovým kódem"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.product_image_view_kanban
-msgid ""
-"Optimization required! Reduce the image size or increase your compression "
-"settings."
-msgstr ""
-"Je nutná optimalizace! Zmenšete velikost obrázku nebo zvyšte nastavení "
-"komprese."
+msgid "Optimization required! Reduce the image size or increase your compression settings."
+msgstr "Je nutná optimalizace! Zmenšete velikost obrázku nebo zvyšte nastavení komprese."
 
 #. module: website_sale
 #. odoo-python
@@ -2856,7 +2748,7 @@ msgstr "Produkt"
 #. module: website_sale
 #: model:ir.actions.server,name:website_sale.dynamic_snippet_accessories_action
 msgid "Product Accessories"
-msgstr ""
+msgstr "Produktové doplňky"
 
 #. module: website_sale
 #: model:ir.model,name:website_sale.model_product_attribute
@@ -3072,11 +2964,8 @@ msgstr "Promo kód"
 #. module: website_sale
 #. odoo-python
 #: code:addons/website_sale/models/product_image.py:0
-msgid ""
-"Provided video URL for '%s' is not valid. Please enter a valid video URL."
-msgstr ""
-"Zadaná adresa videa pro  „%s“ není platná. Zadejte prosím platnou adresu "
-"videa."
+msgid "Provided video URL for '%s' is not valid. Please enter a valid video URL."
+msgstr "Zadaná adresa videa pro  „%s“ není platná. Zadejte prosím platnou adresu videa."
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.product_pages_kanban_view
@@ -3165,19 +3054,19 @@ msgstr "Hodnocení"
 #. odoo-javascript
 #: code:addons/website_sale/static/src/xml/website_sale_reorder_modal.xml:0
 msgid "Re-Order"
-msgstr ""
+msgstr "Znovu objednat"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.snippet_options
 #: model_terms:ir.ui.view,arch_db:website_sale.snippets_options_web_editor
 msgid "Re-order"
-msgstr "Přeobjednat"
+msgstr "Znovu objednat"
 
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_res_config_settings__website_sale_enabled_portal_reorder_button
 #: model:ir.model.fields,field_description:website_sale.field_website__enabled_portal_reorder_button
 msgid "Re-order From Portal"
-msgstr ""
+msgstr "Znovu objednat z portálu"
 
 #. module: website_sale
 #: model:ir.actions.server,name:website_sale.dynamic_snippet_latest_sold_products_action
@@ -3225,7 +3114,6 @@ msgstr "Odstranit z košíku"
 
 #. module: website_sale
 #. odoo-javascript
-#: code:addons/website_sale/static/src/xml/website_sale_reorder_modal.xml:0
 #: code:addons/website_sale/static/src/xml/website_sale_reorder_modal.xml:0
 #: model_terms:ir.ui.view,arch_db:website_sale.cart_lines
 #: model_terms:ir.ui.view,arch_db:website_sale.product_quantity
@@ -3397,12 +3285,8 @@ msgstr "Vybrat"
 #. module: website_sale
 #. odoo-javascript
 #: code:addons/website_sale/static/src/js/tours/website_sale_shop.js:0
-msgid ""
-"Select <b>New Product</b> to create it and manage its properties to boost "
-"your sales."
-msgstr ""
-"Vyberte <b>Nový produkt</b> a vytvořte jej a spravujte jeho vlastnosti, "
-"abyste zvýšili svůj prodej."
+msgid "Select <b>New Product</b> to create it and manage its properties to boost your sales."
+msgstr "Vyberte <b>Nový produkt</b> a vytvořte jej a spravujte jeho vlastnosti, abyste zvýšili svůj prodej."
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.snippet_options
@@ -3517,7 +3401,7 @@ msgstr "Obchod"
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.checkout
 msgid "Shop - Checkout"
-msgstr "Obchod - pokladna"
+msgstr "Obchod - Košík"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
@@ -3679,12 +3563,8 @@ msgstr ""
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.payment
-msgid ""
-"Stripe Connect is not available in your country, please use another payment "
-"provider."
-msgstr ""
-"Stripe Connect není ve vaší zemi dostupný, použijte prosím jiného "
-"poskytovatele plateb."
+msgid "Stripe Connect is not available in your country, please use another payment provider."
+msgstr "Stripe Connect není ve vaší zemi dostupný, použijte prosím jiného poskytovatele plateb."
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.snippet_options
@@ -3694,17 +3574,13 @@ msgstr "Styl"
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.total
 msgid "Subtotal"
-msgstr "Mezisoučet"
+msgstr "Cena bez DPH"
 
 #. module: website_sale
 #: model:ir.model.fields,help:website_sale.field_product_product__alternative_product_ids
 #: model:ir.model.fields,help:website_sale.field_product_template__alternative_product_ids
-msgid ""
-"Suggest alternatives to your customer (upsell strategy). Those products show"
-" up on the product page."
-msgstr ""
-"Navrhněte alternativy k vašemu zákazníkovi (strategie upsell). Tyto produkty"
-" se zobrazí na stránce produktu."
+msgid "Suggest alternatives to your customer (upsell strategy). Those products show up on the product page."
+msgstr "Navrhněte alternativy k vašemu zákazníkovi (strategie upsell). Tyto produkty se zobrazí na stránce produktu."
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.snippet_options
@@ -3787,8 +3663,7 @@ msgstr "Přístupový token je neplatný."
 #. module: website_sale
 #: model:ir.model.fields,help:website_sale.field_product_product__compare_list_price
 #: model:ir.model.fields,help:website_sale.field_product_template__compare_list_price
-msgid ""
-"The amount will be displayed strikethroughed on the eCommerce product page"
+msgid "The amount will be displayed strikethroughed on the eCommerce product page"
 msgstr ""
 
 #. module: website_sale
@@ -3800,9 +3675,7 @@ msgstr ""
 #. module: website_sale
 #. odoo-python
 #: code:addons/website_sale/models/sale_order.py:0
-msgid ""
-"The company of the website you are trying to sale from (%s) is different "
-"than the one you want to use (%s)"
+msgid "The company of the website you are trying to sale from (%s) is different than the one you want to use (%s)"
 msgstr ""
 
 #. module: website_sale
@@ -3815,8 +3688,7 @@ msgstr "Celá adresa URL pro přístup k dokumentu prostřednictvím webstránky
 #. module: website_sale
 #. odoo-python
 #: code:addons/website_sale/models/sale_order.py:0
-msgid ""
-"The given combination does not exist therefore it cannot be added to cart."
+msgid "The given combination does not exist therefore it cannot be added to cart."
 msgstr "Uvedená kombinace neexistuje, proto ji nelze přidat do košíku."
 
 #. module: website_sale
@@ -3828,19 +3700,13 @@ msgstr "Daný produkt neexistuje, proto jej nelze přidat do košíku."
 #. module: website_sale
 #. odoo-python
 #: code:addons/website_sale/models/sale_order.py:0
-msgid ""
-"The given product does not have a price therefore it cannot be added to "
-"cart."
+msgid "The given product does not have a price therefore it cannot be added to cart."
 msgstr ""
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
-msgid ""
-"The mode selected here applies as invoicing policy of any new product "
-"created but not of products already existing."
-msgstr ""
-"Zde zvolený režim platí jako fakturační politika pro každý nový vytvořený "
-"produkt, ale nikoli pro již existující produkty."
+msgid "The mode selected here applies as invoicing policy of any new product created but not of products already existing."
+msgstr "Zde zvolený režim platí jako fakturační politika pro každý nový vytvořený produkt, ale nikoli pro již existující produkty."
 
 #. module: website_sale
 #. odoo-python
@@ -3851,10 +3717,7 @@ msgstr ""
 #. module: website_sale
 #: model:ir.model.fields,help:website_sale.field_product_product__public_categ_ids
 #: model:ir.model.fields,help:website_sale.field_product_template__public_categ_ids
-msgid ""
-"The product will be available in each mentioned eCommerce category. Go to "
-"Shop > Edit Click on the page and enable 'Categories' to view all eCommerce "
-"categories."
+msgid "The product will be available in each mentioned eCommerce category. Go to Shop > Edit Click on the page and enable 'Categories' to view all eCommerce categories."
 msgstr ""
 
 #. module: website_sale
@@ -3865,9 +3728,7 @@ msgstr "Čas od kdy bude košík označen za opuštěný lze změnit v nastaven�
 #. module: website_sale
 #. odoo-python
 #: code:addons/website_sale/models/product_product.py:0
-msgid ""
-"The value of Base Unit Count must be greater than 0. Use 0 to hide the price"
-" per unit on this product."
+msgid "The value of Base Unit Count must be greater than 0. Use 0 to hide the price per unit on this product."
 msgstr ""
 
 #. module: website_sale
@@ -3894,10 +3755,7 @@ msgstr "Toto je váš aktuální košík."
 #. module: website_sale
 #. odoo-python
 #: code:addons/website_sale/models/res_partner.py:0
-msgid ""
-"This partner has an open cart. Please note that the pricelist will not be "
-"updated on that cart. Also, the cart might not be visible for the customer "
-"until you update the pricelist of that cart."
+msgid "This partner has an open cart. Please note that the pricelist will not be updated on that cart. Also, the cart might not be visible for the customer until you update the pricelist of that cart."
 msgstr ""
 
 #. module: website_sale
@@ -3939,14 +3797,8 @@ msgstr "Miniatury"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
-msgid ""
-"To send invitations in B2B mode, open a contact or select several ones in "
-"list view and click on 'Portal Access Management' option in the dropdown "
-"menu *Action*."
-msgstr ""
-"Chcete-li posílat pozvánky v režimu B2B, otevřete kontakt nebo vyberte "
-"několik v zobrazení seznamu a klikněte na možnost Správa portálového "
-"přístupu v rozevírací nabídce *Akce*."
+msgid "To send invitations in B2B mode, open a contact or select several ones in list view and click on 'Portal Access Management' option in the dropdown menu *Action*."
+msgstr "Chcete-li posílat pozvánky v režimu B2B, otevřete kontakt nebo vyberte několik v zobrazení seznamu a klikněte na možnost Správa portálového přístupu v rozevírací nabídce *Akce*."
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.snippet_options
@@ -3976,9 +3828,7 @@ msgstr "Celkový počet zobrazení produktů"
 
 #. module: website_sale
 #: model:ir.model.fields,help:website_sale.field_website_snippet_filter__product_cross_selling
-msgid ""
-"True only for product filters that require a product_id because they relate "
-"to cross selling"
+msgid "True only for product filters that require a product_id because they relate to cross selling"
 msgstr ""
 
 #. module: website_sale
@@ -4152,13 +4002,8 @@ msgstr "Záruka"
 
 #. module: website_sale
 #: model:product.template,description_sale:website_sale.product_product_1_product_template
-msgid ""
-"Warranty, issued to the purchaser of an article by its manufacturer, "
-"promising to repair or replace it if necessary within a specified period of "
-"time."
-msgstr ""
-"Záruka vydaná odběrateli předmětu výrobcem, slibující jej opravit nebo "
-"nahradit, je-li to nutné, ve stanovené lhůtě."
+msgid "Warranty, issued to the purchaser of an article by its manufacturer, promising to repair or replace it if necessary within a specified period of time."
+msgstr "Záruka vydaná odběrateli předmětu výrobcem, slibující jej opravit nebo nahradit, je-li to nutné, ve stanovené lhůtě."
 
 #. module: website_sale
 #: model:ir.model,name:website_sale.model_website
@@ -4293,14 +4138,8 @@ msgstr "Seznamy přání"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
-msgid ""
-"With the first mode you can set several prices in the product config form "
-"(from Sales tab). With the second one, you set prices and computation rules "
-"from Pricelists."
-msgstr ""
-"V prvním režimu můžete nastavit několik cen ve formuláři konfigurace "
-"produktu (z karty Prodej). S druhou nastavíte ceny a výpočetní pravidla z "
-"Ceníků."
+msgid "With the first mode you can set several prices in the product config form (from Sales tab). With the second one, you set prices and computation rules from Pricelists."
+msgstr "V prvním režimu můžete nastavit několik cen ve formuláři konfigurace produktu (z karty Prodej). S druhou nastavíte ceny a výpočetní pravidla z Ceníků."
 
 #. module: website_sale
 #. odoo-python
@@ -4456,6 +4295,11 @@ msgid "eCommerce Shop"
 msgstr ""
 
 #. module: website_sale
+#: model_terms:ir.ui.view,arch_db:website_sale.header_cart_link
+msgid "eCommerce cart"
+msgstr ""
+
+#. module: website_sale
 #: model:ir.actions.server,name:website_sale.ir_cron_send_availability_email_ir_actions_server
 msgid "eCommerce: send email to customers about their abandoned cart"
 msgstr ""
@@ -4467,12 +4311,8 @@ msgstr "Pokud chcete sloučit svůj předchozí košík do aktuálního košíku
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.cart
-msgid ""
-"if you want to restore your previous cart. Your current cart will be "
-"replaced with your previous cart."
-msgstr ""
-"Pokud chcete obnovit předchozí košík. Váš současný košík bude nahrazen vaším"
-" předchozím košíkem."
+msgid "if you want to restore your previous cart. Your current cart will be replaced with your previous cart."
+msgstr "Pokud chcete obnovit předchozí košík. Váš současný košík bude nahrazen vaším předchozím košíkem."
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.products

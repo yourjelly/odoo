@@ -1,22 +1,25 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* microsoft_outlook
-# 
+#
 # Translators:
-# Wil Odoo, 2024
-# 
+# Ivana Bartonkova, 2023
+# Jakub Smolka, 2023
+# Wil Odoo, 2023
+# Aleš Fiala <f.ales1@seznam.cz>, 2023
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~17.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-01-17 10:10+0000\n"
-"PO-Revision-Date: 2024-01-17 11:21+0000\n"
-"Last-Translator: Wil Odoo, 2024\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Aleš Fiala <f.ales1@seznam.cz>, 2023\n"
 "Language-Team: Czech (https://app.transifex.com/odoo/teams/41243/cs/)\n"
+"Language: cs\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: cs\n"
 "Plural-Forms: nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n <= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;\n"
 
 #. module: microsoft_outlook
@@ -111,9 +114,7 @@ msgstr "Příchozí mailový server"
 #. module: microsoft_outlook
 #. odoo-python
 #: code:addons/microsoft_outlook/models/ir_mail_server.py:0
-msgid ""
-"Incorrect Connection Security for Outlook mail server %r. Please set it to "
-"\"TLS (STARTTLS)\"."
+msgid "Incorrect Connection Security for Outlook mail server %r. Please set it to \"TLS (STARTTLS)\"."
 msgstr ""
 
 #. module: microsoft_outlook
@@ -191,18 +192,13 @@ msgstr ""
 #. module: microsoft_outlook
 #. odoo-python
 #: code:addons/microsoft_outlook/models/ir_mail_server.py:0
-msgid ""
-"Please fill the \"Username\" field with your Outlook/Office365 username "
-"(your email address). This should be the same account as the one used for "
-"the Outlook OAuthentication Token."
+msgid "Please fill the \"Username\" field with your Outlook/Office365 username (your email address). This should be the same account as the one used for the Outlook OAuthentication Token."
 msgstr ""
 
 #. module: microsoft_outlook
 #. odoo-python
 #: code:addons/microsoft_outlook/models/ir_mail_server.py:0
-msgid ""
-"Please leave the password field empty for Outlook mail server %r. The OAuth "
-"process does not require it"
+msgid "Please leave the password field empty for Outlook mail server %r. The OAuth process does not require it"
 msgstr ""
 
 #. module: microsoft_outlook
@@ -234,9 +230,7 @@ msgstr "Druh serveru"
 #. module: microsoft_outlook
 #: model_terms:ir.ui.view,arch_db:microsoft_outlook.fetchmail_server_view_form
 #: model_terms:ir.ui.view,arch_db:microsoft_outlook.ir_mail_server_view_form
-msgid ""
-"Setup your Outlook API credentials in the general settings to link a Outlook"
-" account."
+msgid "Setup your Outlook API credentials in the general settings to link a Outlook account."
 msgstr ""
 
 #. module: microsoft_outlook

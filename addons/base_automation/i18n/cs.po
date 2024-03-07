@@ -1,22 +1,25 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* base_automation
-# 
+#
 # Translators:
-# Wil Odoo, 2024
-# 
+# Jakub Smolka, 2023
+# Ivana Bartonkova, 2023
+# Wil Odoo, 2023
+# Tomáš Píšek, 2024
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~17.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-01-17 10:10+0000\n"
-"PO-Revision-Date: 2024-01-17 11:21+0000\n"
-"Last-Translator: Wil Odoo, 2024\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Tomáš Píšek, 2024\n"
 "Language-Team: Czech (https://app.transifex.com/odoo/teams/41243/cs/)\n"
+"Language: cs\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: cs\n"
 "Plural-Forms: nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n <= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;\n"
 
 #. module: base_automation
@@ -38,12 +41,8 @@ msgstr "\"%s\" štítek je přidán"
 #. module: base_automation
 #. odoo-python
 #: code:addons/base_automation/models/base_automation.py:0
-msgid ""
-"\"On live update\" automation rules can only be used with \"Execute Python "
-"Code\" action type."
-msgstr ""
-"\"On live update\" automatická pravidla mohou být použita  pouze s akcí typu"
-" \"Provést |Python kód\"."
+msgid "\"On live update\" automation rules can only be used with \"Execute Python Code\" action type."
+msgstr "\"On live update\" automatická pravidla mohou být použita  pouze s akcí typu \"Provést |Python kód\"."
 
 #. module: base_automation
 #. odoo-javascript
@@ -64,30 +63,18 @@ msgstr "<code>env</code>: environment (prostředí) ve kterém se akce spustila"
 
 #. module: base_automation
 #: model_terms:ir.ui.view,arch_db:base_automation.view_base_automation_form
-msgid ""
-"<code>model</code>: model of the record on which the action is triggered; is"
-" a void recordset"
-msgstr ""
-"<code>model</code>: model záznamu, pro který se akce spustila; je void "
-"recordset"
+msgid "<code>model</code>: model of the record on which the action is triggered; is a void recordset"
+msgstr "<code>model</code>: model záznamu, pro který se akce spustila; je void recordset"
 
 #. module: base_automation
 #: model_terms:ir.ui.view,arch_db:base_automation.view_base_automation_form
-msgid ""
-"<code>payload</code>: the payload of the call (GET parameters, JSON body), "
-"as a dict."
-msgstr ""
-"<code>payload</code>: payload volání (GET parametry, tělo JSON ), jako "
-"slovník."
+msgid "<code>payload</code>: the payload of the call (GET parameters, JSON body), as a dict."
+msgstr "<code>payload</code>: payload volání (GET parametry, tělo JSON ), jako slovník."
 
 #. module: base_automation
 #: model_terms:ir.ui.view,arch_db:base_automation.view_base_automation_form
-msgid ""
-"<code>time</code>, <code>datetime</code>, <code>dateutil</code>, "
-"<code>timezone</code>: useful Python libraries"
-msgstr ""
-"<code>time</code>, <code>datetime</code>, <code>dateutil</code>, "
-"<code>timezone</code>: užitečné Python knihovny"
+msgid "<code>time</code>, <code>datetime</code>, <code>dateutil</code>, <code>timezone</code>: useful Python libraries"
+msgstr "<code>time</code>, <code>datetime</code>, <code>dateutil</code>, <code>timezone</code>: užitečné Python knihovny"
 
 #. module: base_automation
 #: model_terms:ir.ui.view,arch_db:base_automation.view_base_automation_kanban
@@ -96,23 +83,13 @@ msgstr "<i class=\"fa fa-2x fa-arrow-right text-primary\" title=\"Actions\"/>"
 
 #. module: base_automation
 #: model_terms:ir.ui.view,arch_db:base_automation.view_base_automation_form
-msgid ""
-"<i class=\"fa fa-info-circle\"/> The default target record getter will work "
-"out-of-the-box for any webhook coming from another Odoo instance."
-msgstr ""
-"<i class=\"fa fa-info-circle\"/> Výchozí getter cílového záznamu bude vždy "
-"fungovat pro jakýkoliv webhook přicházející z jiné Odoo instance."
+msgid "<i class=\"fa fa-info-circle\"/> The default target record getter will work out-of-the-box for any webhook coming from another Odoo instance."
+msgstr "<i class=\"fa fa-info-circle\"/> Výchozí getter cílového záznamu bude vždy fungovat pro jakýkoliv webhook přicházející z jiné Odoo instance."
 
 #. module: base_automation
 #: model_terms:ir.ui.view,arch_db:base_automation.view_base_automation_form
-msgid ""
-"<i class=\"fa fa-warning\"/> Automation rules triggered by UI changes will "
-"be executed <em>every time</em> the watched fields change, <em>whether you "
-"save or not</em>."
-msgstr ""
-"<i class=\"fa fa-warning\"/> Automatická pravidla spouštěna změnou v "
-"uživatelském rozraní budou spuštěna <em>pokaždé</em> když se změní sledovaná"
-" pole, <em>bez ohledu na to za záznam uložíte nebo ne</em>."
+msgid "<i class=\"fa fa-warning\"/> Automation rules triggered by UI changes will be executed <em>every time</em> the watched fields change, <em>whether you save or not</em>."
+msgstr "<i class=\"fa fa-warning\"/> Automatická pravidla spouštěna změnou v uživatelském rozraní budou spuštěna <em>pokaždé</em> když se změní sledovaná pole, <em>bez ohledu na to za záznam uložíte nebo ne</em>."
 
 #. module: base_automation
 #: model_terms:ir.ui.view,arch_db:base_automation.view_base_automation_form
@@ -162,9 +139,7 @@ msgstr "<span>nastavením na</span>"
 #. module: base_automation
 #: model_terms:ir.ui.view,arch_db:base_automation.view_base_automation_form
 msgid "<strong><i class=\"fa fa-lock\"/> Keep it secret, keep it safe.</strong>"
-msgstr ""
-"<strong><i class=\"fa fa-lock\"/> Zachovejte tajné, zachovejte v "
-"bezpečí.</strong>"
+msgstr "<strong><i class=\"fa fa-lock\"/> Zachovejte tajné, zachovejte v bezpečí.</strong>"
 
 #. module: base_automation
 #: model:ir.model.fields,field_description:base_automation.field_ir_actions_server__name
@@ -194,7 +169,6 @@ msgstr "Přidat akci"
 
 #. module: base_automation
 #. odoo-javascript
-#: code:addons/base_automation/static/src/base_automation_actions_one2many_field.js:0
 #: code:addons/base_automation/static/src/base_automation_actions_one2many_field.js:0
 msgid "Add followers"
 msgstr "Přidat sledující"
@@ -277,13 +251,8 @@ msgstr "Před aktualizací domény"
 
 #. module: base_automation
 #: model_terms:ir.ui.view,arch_db:base_automation.view_base_automation_form
-msgid ""
-"Change the URL's secret if you think the URL is no longer secure. You will "
-"have to update any automated system that calls this webhook to the new URL."
-msgstr ""
-"Změňte 'URL secret' pokud si myslíte, že URL není nadále v bezpečí. Budete "
-"muset aktualizovat všechny automatické systémy, které volají tento webhook "
-"na nové URL."
+msgid "Change the URL's secret if you think the URL is no longer secure. You will have to update any automated system that calls this webhook to the new URL."
+msgstr "Změňte 'URL secret' pokud si myslíte, že URL není nadále v bezpečí. Budete muset aktualizovat všechny automatické systémy, které volají tento webhook na nové URL."
 
 #. module: base_automation
 #. odoo-python
@@ -300,7 +269,6 @@ msgstr "Vyvořte %(model_name)s se jménem %(value)s"
 #. module: base_automation
 #. odoo-javascript
 #: code:addons/base_automation/static/src/base_automation_actions_one2many_field.js:0
-#: code:addons/base_automation/static/src/base_automation_actions_one2many_field.js:0
 msgid "Create a new Record"
 msgstr "Vytvořit nový záznam"
 
@@ -312,7 +280,6 @@ msgstr "Vytvořit aktivitu: %(activity_name)s"
 
 #. module: base_automation
 #. odoo-javascript
-#: code:addons/base_automation/static/src/base_automation_actions_one2many_field.js:0
 #: code:addons/base_automation/static/src/base_automation_actions_one2many_field.js:0
 msgid "Create next activity"
 msgstr "Vytvořit další aktivitu"
@@ -352,14 +319,8 @@ msgstr "Zpoždění"
 
 #. module: base_automation
 #: model:ir.model.fields,help:base_automation.field_base_automation__trg_date_range
-msgid ""
-"Delay after the trigger date. You can put a negative number if you need a "
-"delay before the trigger date, like sending a reminder 15 minutes before a "
-"meeting."
-msgstr ""
-"Zpoždění po datumu spuštění. Pokud potřebujete zpoždění před datum spuštění,"
-" můžete zadat záporné číslo, například odeslání připomínky 15 minut před "
-"schůzkou."
+msgid "Delay after the trigger date. You can put a negative number if you need a delay before the trigger date, like sending a reminder 15 minutes before a meeting."
+msgstr "Zpoždění po datumu spuštění. Pokud potřebujete zpoždění před datum spuštění, můžete zadat záporné číslo, například odeslání připomínky 15 minut před schůzkou."
 
 #. module: base_automation
 #: model:ir.model.fields,field_description:base_automation.field_base_automation__trg_date_range
@@ -433,24 +394,17 @@ msgstr "E-mail událostí"
 #. module: base_automation
 #. odoo-python
 #: code:addons/base_automation/models/base_automation.py:0
-msgid ""
-"Email, follower or activity action types cannot be used when deleting "
-"records, as there are no more records to apply these changes to!"
-msgstr ""
-"Typy akcí e-mail, sledující nebo vytvoření aktivity nemohou být použity při "
-"smazání záznamů, jelikož záznamy na které se mají změny aplikovat, již "
-"neexistují!"
+msgid "Email, follower or activity action types cannot be used when deleting records, as there are no more records to apply these changes to!"
+msgstr "Typy akcí e-mail, sledující nebo vytvoření aktivity nemohou být použity při smazání záznamů, jelikož záznamy na které se mají změny aplikovat, již neexistují!"
 
 #. module: base_automation
 #. odoo-javascript
-#: code:addons/base_automation/static/src/base_automation_actions_one2many_field.js:0
 #: code:addons/base_automation/static/src/base_automation_actions_one2many_field.js:0
 msgid "Execute Python Code"
 msgstr "Spustit Python kód"
 
 #. module: base_automation
 #. odoo-javascript
-#: code:addons/base_automation/static/src/base_automation_actions_one2many_field.js:0
 #: code:addons/base_automation/static/src/base_automation_actions_one2many_field.js:0
 msgid "Execute several actions"
 msgstr "Spustit několik akcí"
@@ -494,25 +448,18 @@ msgstr "ID"
 
 #. module: base_automation
 #: model:ir.model.fields,help:base_automation.field_base_automation__filter_domain
-msgid ""
-"If present, this condition must be satisfied before executing the automation"
-" rule."
-msgstr ""
-"Je-li zadána, musí být tato podmínka splněna před spuštěním automatické "
-"akce."
+msgid "If present, this condition must be satisfied before executing the automation rule."
+msgstr "Je-li zadána, musí být tato podmínka splněna před spuštěním automatické akce."
 
 #. module: base_automation
 #: model:ir.model.fields,help:base_automation.field_base_automation__filter_pre_domain
-msgid ""
-"If present, this condition must be satisfied before the update of the "
-"record."
+msgid "If present, this condition must be satisfied before the update of the record."
 msgstr "Existuje-li, musí být podmínka spolněna po aktualizaci záznamu."
 
 #. module: base_automation
 #: model_terms:ir.ui.view,arch_db:base_automation.view_base_automation_form
 msgid "Keep track of what this automation does and why it exists..."
-msgstr ""
-"Udržujte si přehled o tom, co tato automatická akce dělá, a proč existuje..."
+msgstr "Udržujte si přehled o tom, co tato automatická akce dělá, a proč existuje..."
 
 #. module: base_automation
 #: model:ir.model.fields,field_description:base_automation.field_base_automation__last_run
@@ -547,12 +494,8 @@ msgstr "Záznamy"
 #. module: base_automation
 #. odoo-python
 #: code:addons/base_automation/models/base_automation.py:0
-msgid ""
-"Mail event can not be configured on model %s. Only models with discussion "
-"feature can be used."
-msgstr ""
-"Pro model %s nelze nastavit e-mail událost. Lze použít pouze pro modely s "
-"funcí diskuzí."
+msgid "Mail event can not be configured on model %s. Only models with discussion feature can be used."
+msgstr "Pro model %s nelze nastavit e-mail událost. Lze použít pouze pro modely s funcí diskuzí."
 
 #. module: base_automation
 #: model:ir.model.fields.selection,name:base_automation.selection__base_automation__trg_date_range_type__minutes
@@ -572,12 +515,8 @@ msgstr "Název modelu"
 #. module: base_automation
 #. odoo-python
 #: code:addons/base_automation/models/ir_actions_server.py:0
-msgid ""
-"Model of action %(action_name)s should match the one from automated rule "
-"%(rule_name)s."
-msgstr ""
-"Model akce %(action_name)s by měl odpovídat modelu na automatickém pravidlu "
-"%(rule_name)s."
+msgid "Model of action %(action_name)s should match the one from automated rule %(rule_name)s."
+msgstr "Model akce %(action_name)s by měl odpovídat modelu na automatickém pravidlu %(rule_name)s."
 
 #. module: base_automation
 #: model:ir.model.fields,help:base_automation.field_base_automation__model_id
@@ -600,12 +539,8 @@ msgstr "Nebyly nalezeny záznamy, na kterých by měla automatizace proběhnout.
 #. module: base_automation
 #. odoo-python
 #: code:addons/base_automation/models/base_automation.py:0
-msgid ""
-"Note that this automation rule can be triggered up to %d minutes after its "
-"schedule."
-msgstr ""
-"Vemte na vědomí, že automatické pravidlo může být spuštěno až %d minut po "
-"nastaveném rozvrhu."
+msgid "Note that this automation rule can be triggered up to %d minutes after its schedule."
+msgstr "Vemte na vědomí, že automatické pravidlo může být spuštěno až %d minut po nastaveném rozvrhu."
 
 #. module: base_automation
 #: model_terms:ir.ui.view,arch_db:base_automation.view_base_automation_form
@@ -692,7 +627,6 @@ msgstr "Getter záznamu"
 #. module: base_automation
 #. odoo-javascript
 #: code:addons/base_automation/static/src/base_automation_actions_one2many_field.js:0
-#: code:addons/base_automation/static/src/base_automation_actions_one2many_field.js:0
 msgid "Remove followers"
 msgstr "Odebrat sledující"
 
@@ -725,7 +659,6 @@ msgstr "Vyberte pole..."
 #. module: base_automation
 #. odoo-javascript
 #: code:addons/base_automation/static/src/base_automation_actions_one2many_field.js:0
-#: code:addons/base_automation/static/src/base_automation_actions_one2many_field.js:0
 msgid "Send SMS Text Message"
 msgstr "Odeslat SMS textovou zprávu"
 
@@ -755,7 +688,6 @@ msgstr ""
 #. module: base_automation
 #. odoo-javascript
 #: code:addons/base_automation/static/src/base_automation_actions_one2many_field.js:0
-#: code:addons/base_automation/static/src/base_automation_actions_one2many_field.js:0
 msgid "Send email"
 msgstr "Poslat e-mailem"
 
@@ -772,21 +704,13 @@ msgstr "Serverová akce"
 
 #. module: base_automation
 #: model:ir.model.fields,help:base_automation.field_base_automation__trg_selection_field_id
-msgid ""
-"Some triggers need a reference to a selection field. This field is used to "
-"store it."
-msgstr ""
-"Některé spouštěče potřebují referenci na výběrové pole. Toto pole se používá"
-" k její uložení."
+msgid "Some triggers need a reference to a selection field. This field is used to store it."
+msgstr "Některé spouštěče potřebují referenci na výběrové pole. Toto pole se používá k její uložení."
 
 #. module: base_automation
 #: model:ir.model.fields,help:base_automation.field_base_automation__trg_field_ref
-msgid ""
-"Some triggers need a reference to another field. This field is used to store"
-" it."
-msgstr ""
-"Některé spouštěče potřebují referenci na další pole. Toto pole se používá k "
-"její uložení."
+msgid "Some triggers need a reference to another field. This field is used to store it."
+msgstr "Některé spouštěče potřebují referenci na další pole. Toto pole se používá k její uložení."
 
 #. module: base_automation
 #. odoo-javascript
@@ -823,28 +747,19 @@ msgstr "Cílový záznam"
 #. module: base_automation
 #. odoo-python
 #: code:addons/base_automation/models/base_automation.py:0
-msgid ""
-"Target model of actions %(action_names)s are different from rule model."
+msgid "Target model of actions %(action_names)s are different from rule model."
 msgstr "Cílový model akce %(action_names)s se liší od modelu na pravidlu."
 
 #. module: base_automation
 #. odoo-python
 #: code:addons/base_automation/models/base_automation.py:0
-msgid ""
-"The \"%(trigger_value)s\" %(trigger_label)s can only be used with the "
-"\"%(state_value)s\" action type"
-msgstr ""
-" \"%(trigger_value)s\" %(trigger_label)s může být použit pouze s "
-"\"%(state_value)s\" typem akce"
+msgid "The \"%(trigger_value)s\" %(trigger_label)s can only be used with the \"%(state_value)s\" action type"
+msgstr " \"%(trigger_value)s\" %(trigger_label)s může být použit pouze s \"%(state_value)s\" typem akce"
 
 #. module: base_automation
 #: model:ir.model.fields,help:base_automation.field_base_automation__trigger_field_ids
-msgid ""
-"The automation rule will be triggered if and only if one of these fields is "
-"updated.If empty, all fields are watched."
-msgstr ""
-"Automatické pravidlo bude spuštěno pouze tehdy, pokud je alespoň jedno z "
-"těchto polí aktualizované.  Je-li prázdné, sledují se všechna pole."
+msgid "The automation rule will be triggered if and only if one of these fields is updated.If empty, all fields are watched."
+msgstr "Automatické pravidlo bude spuštěno pouze tehdy, pokud je alespoň jedno z těchto polí aktualizované.  Je-li prázdné, sledují se všechna pole."
 
 #. module: base_automation
 #. odoo-javascript
@@ -858,12 +773,8 @@ msgstr ""
 
 #. module: base_automation
 #: model:ir.model.fields,help:base_automation.field_base_automation__record_getter
-msgid ""
-"This code will be run to find on which record the automation rule should be "
-"run."
-msgstr ""
-"Tento kód bude spuštěn, aby se dohledaly záznamy, na kterých se má "
-"automatické pravidlo spustit."
+msgid "This code will be run to find on which record the automation rule should be run."
+msgstr "Tento kód bude spuštěn, aby se dohledaly záznamy, na kterých se má automatické pravidlo spustit."
 
 #. module: base_automation
 #. odoo-javascript
@@ -930,7 +841,6 @@ msgstr "Aktualizace"
 #. module: base_automation
 #. odoo-javascript
 #: code:addons/base_automation/static/src/base_automation_actions_one2many_field.js:0
-#: code:addons/base_automation/static/src/base_automation_actions_one2many_field.js:0
 msgid "Update the Record"
 msgstr "Aktualizovat záznam"
 
@@ -964,7 +874,6 @@ msgstr "Hodnoty aktualizovány"
 #. module: base_automation
 #. odoo-python
 #: code:addons/base_automation/models/base_automation.py:0
-#: code:addons/base_automation/models/base_automation.py:0
 msgid "Warning"
 msgstr "Varování"
 
@@ -993,12 +902,8 @@ msgstr "Týdny"
 
 #. module: base_automation
 #: model:ir.model.fields,help:base_automation.field_base_automation__trg_date_calendar_id
-msgid ""
-"When calculating a day-based timed condition, it is possibleto use a "
-"calendar to compute the date based on working days."
-msgstr ""
-"Při výpočtu časových podmínek na základě dnů, je možné pro výpočet data "
-"podle pracovních dnů použít kalendář."
+msgid "When calculating a day-based timed condition, it is possibleto use a calendar to compute the date based on working days."
+msgstr "Při výpočtu časových podmínek na základě dnů, je možné pro výpočet data podle pracovních dnů použít kalendář."
 
 #. module: base_automation
 #: model:ir.model.fields,help:base_automation.field_base_automation__trg_date_id
@@ -1031,36 +936,25 @@ msgstr ""
 #. module: base_automation
 #. odoo-javascript
 #: code:addons/base_automation/static/src/base_automation_error_dialog.xml:0
-msgid ""
-"You can ask an administrator to disable or correct this automation rule."
-msgstr ""
-"Můžete požádat správce, aby toto automatické pravidlo deaktivoval nebo "
-"opravil."
+msgid "You can ask an administrator to disable or correct this automation rule."
+msgstr "Můžete požádat správce, aby toto automatické pravidlo deaktivoval nebo opravil."
 
 #. module: base_automation
 #. odoo-javascript
 #: code:addons/base_automation/static/src/base_automation_error_dialog.xml:0
 msgid "You can disable this automation rule or edit it to solve the issue."
-msgstr ""
-"Pro vyřešení problému můžete toto automatické pravidlo pozastavit nebo "
-"editovat."
+msgstr "Pro vyřešení problému můžete toto automatické pravidlo pozastavit nebo editovat."
 
 #. module: base_automation
 #. odoo-python
 #: code:addons/base_automation/models/base_automation.py:0
-msgid ""
-"You cannot send an email, add followers or create an activity for a deleted "
-"record.  It simply does not work."
-msgstr ""
-"Ke smazanému záznamu nelze odeslat e-mail, přidat následovníky ani vytvořit "
-"aktivitu. Jednoduše to nefunguje."
+msgid "You cannot send an email, add followers or create an activity for a deleted record.  It simply does not work."
+msgstr "Ke smazanému záznamu nelze odeslat e-mail, přidat následovníky ani vytvořit aktivitu. Jednoduše to nefunguje."
 
 #. module: base_automation
 #: model_terms:ir.ui.view,arch_db:base_automation.view_base_automation_form
-msgid ""
-"Your webhook URL contains a secret. Don't share it online or carelessly."
-msgstr ""
-"Vaše webhook URL obsahuje 'secret'. Nesdílejte jej on-line nebo bez uvážení."
+msgid "Your webhook URL contains a secret. Don't share it online or carelessly."
+msgstr "Vaše webhook URL obsahuje 'secret'. Nesdílejte jej on-line nebo bez uvážení."
 
 #. module: base_automation
 #: model_terms:ir.ui.view,arch_db:base_automation.view_base_automation_kanban

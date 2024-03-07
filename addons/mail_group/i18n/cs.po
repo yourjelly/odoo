@@ -1,23 +1,30 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* mail_group
-# 
+#
 # Translators:
-# Wil Odoo, 2024
+# Michal Veselý <michal@veselyberanek.net>, 2023
+# Martin Trigaux, 2023
+# Jakub Smolka, 2023
+# Jiří Podhorecký, 2023
+# Wil Odoo, 2023
+# karolína schusterová <karolina.schusterova@vdp.sk>, 2023
+# Ivana Bartonkova, 2023
+# Tomáš Píšek, 2024
 # Aleš Fiala <f.ales1@seznam.cz>, 2024
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~17.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-01-17 10:10+0000\n"
-"PO-Revision-Date: 2024-01-17 11:21+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
 "Last-Translator: Aleš Fiala <f.ales1@seznam.cz>, 2024\n"
 "Language-Team: Czech (https://app.transifex.com/odoo/teams/41243/cs/)\n"
+"Language: cs\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: cs\n"
 "Plural-Forms: nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n <= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;\n"
 
 #. module: mail_group
@@ -86,51 +93,37 @@ msgstr "<i class=\"fa fa-envelope-o\" role=\"img\" aria-label=\"Alias\" title=\"
 
 #. module: mail_group
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_groups
-msgid ""
-"<i class=\"fa fa-fw fa-user\" role=\"img\" aria-label=\"Recipients\" "
-"title=\"Recipients\"/>"
+msgid "<i class=\"fa fa-fw fa-user\" role=\"img\" aria-label=\"Recipients\" title=\"Recipients\"/>"
 msgstr ""
 
 #. module: mail_group
 #: model_terms:ir.ui.view,arch_db:mail_group.group_message
-msgid ""
-"<i class=\"oi oi-arrow-left\" role=\"img\" aria-label=\"Previous message\" "
-"title=\"Previous message\"/>"
+msgid "<i class=\"oi oi-arrow-left\" role=\"img\" aria-label=\"Previous message\" title=\"Previous message\"/>"
 msgstr ""
 
 #. module: mail_group
 #: model_terms:ir.ui.view,arch_db:mail_group.group_message
-msgid ""
-"<i class=\"oi oi-arrow-right\" role=\"img\" aria-label=\"Next message\" "
-"title=\"Next message\"/>"
+msgid "<i class=\"oi oi-arrow-right\" role=\"img\" aria-label=\"Next message\" title=\"Next message\"/>"
 msgstr ""
 
 #. module: mail_group
 #: model_terms:ir.ui.view,arch_db:mail_group.message_attachments
-msgid ""
-"<i class=\"oi oi-chevron-down\" role=\"img\" aria-label=\"Show attachments\""
-" title=\"Show attachments\"/>"
+msgid "<i class=\"oi oi-chevron-down\" role=\"img\" aria-label=\"Show attachments\" title=\"Show attachments\"/>"
 msgstr ""
 
 #. module: mail_group
 #: model_terms:ir.ui.view,arch_db:mail_group.messages_short
-msgid ""
-"<i class=\"oi oi-chevron-down\" role=\"img\" aria-label=\"Show replies\" "
-"title=\"Show replies\"/>"
+msgid "<i class=\"oi oi-chevron-down\" role=\"img\" aria-label=\"Show replies\" title=\"Show replies\"/>"
 msgstr ""
 
 #. module: mail_group
 #: model_terms:ir.ui.view,arch_db:mail_group.message_attachments
-msgid ""
-"<i class=\"oi oi-chevron-right\" role=\"img\" aria-label=\"Hide "
-"attachments\" title=\"Hide attachments\"/>"
+msgid "<i class=\"oi oi-chevron-right\" role=\"img\" aria-label=\"Hide attachments\" title=\"Hide attachments\"/>"
 msgstr ""
 
 #. module: mail_group
 #: model_terms:ir.ui.view,arch_db:mail_group.messages_short
-msgid ""
-"<i class=\"oi oi-chevron-right\" role=\"img\" aria-label=\"Hide replies\" "
-"title=\"Hide replies\"/>"
+msgid "<i class=\"oi oi-chevron-right\" role=\"img\" aria-label=\"Hide replies\" title=\"Hide replies\"/>"
 msgstr ""
 
 #. module: mail_group
@@ -164,12 +157,8 @@ msgstr ""
 
 #. module: mail_group
 #: model:ir.model.fields,help:mail_group.field_mail_group__alias_defaults
-msgid ""
-"A Python dictionary that will be evaluated to provide default values when "
-"creating new records for this alias."
-msgstr ""
-"Slovník Pythonu, který bude vyhodnocen tak, aby poskytoval výchozí hodnoty "
-"při vytváření nových záznamů pro tento alias."
+msgid "A Python dictionary that will be evaluated to provide default values when creating new records for this alias."
+msgstr "Slovník Pythonu, který bude vyhodnocen tak, aby poskytoval výchozí hodnoty při vytváření nových záznamů pro tento alias."
 
 #. module: mail_group
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_group_message_view_form
@@ -196,9 +185,7 @@ msgstr "Aktivní"
 #. module: mail_group
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_group_message_view_form
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_group_message_view_list
-msgid ""
-"Add this email address to white list of people and accept all pending "
-"messages from the same author."
+msgid "Add this email address to white list of people and accept all pending messages from the same author."
 msgstr ""
 
 #. module: mail_group
@@ -300,12 +287,8 @@ msgstr ""
 
 #. module: mail_group
 #: model:ir.model.fields,help:mail_group.field_mail_group_message__author_id
-msgid ""
-"Author of the message. If not set, email_from may hold an email address that"
-" did not match any partner."
-msgstr ""
-"Autor zprávy. Pokud není nastaven, email_from může obsahovat e-mailovou "
-"adresu, která neodpovídá žádnému partnerovi."
+msgid "Author of the message. If not set, email_from may hold an email address that did not match any partner."
+msgstr "Autor zprávy. Pokud není nastaven, email_from může obsahovat e-mailovou adresu, která neodpovídá žádnému partnerovi."
 
 #. module: mail_group
 #: model:ir.model.fields,field_description:mail_group.field_mail_group__access_group_id
@@ -333,9 +316,7 @@ msgstr ""
 #. module: mail_group
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_group_message_view_form
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_group_message_view_list
-msgid ""
-"Ban this email address and reject all pending messages from the same author "
-"and send an email to the author"
+msgid "Ban this email address and reject all pending messages from the same author and send an email to the author"
 msgstr ""
 
 #. module: mail_group
@@ -475,12 +456,8 @@ msgstr "E-mail od"
 
 #. module: mail_group
 #: model:ir.model.fields,help:mail_group.field_mail_group_message__email_from
-msgid ""
-"Email address of the sender. This field is set when no matching partner is "
-"found and replaces the author_id field in the chatter."
-msgstr ""
-"E-mailová adresa odesílatele. Toto pole je nastaveno, pokud nebyl nalezen "
-"žádný odpovídající partner a nahrazuje pole autor_id v chatu."
+msgid "Email address of the sender. This field is set when no matching partner is found and replaces the author_id field in the chatter."
+msgstr "E-mailová adresa odesílatele. Toto pole je nastaveno, pokud nebyl nalezen žádný odpovídající partner a nahrazuje pole autor_id v chatu."
 
 #. module: mail_group
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_group_view_form
@@ -566,21 +543,13 @@ msgstr "ID"
 
 #. module: mail_group
 #: model:ir.model.fields,help:mail_group.field_mail_group__alias_parent_thread_id
-msgid ""
-"ID of the parent record holding the alias (example: project holding the task"
-" creation alias)"
-msgstr ""
-"ID rodičovského záznamu obsahující alias (například: Projekt obsahující "
-"alias pro vytváření úkolů)"
+msgid "ID of the parent record holding the alias (example: project holding the task creation alias)"
+msgstr "ID rodičovského záznamu obsahující alias (například: Projekt obsahující alias pro vytváření úkolů)"
 
 #. module: mail_group
 #: model:ir.model.fields,help:mail_group.field_mail_group__alias_bounced_content
-msgid ""
-"If set, this content will automatically be sent out to unauthorized users "
-"instead of the default message."
-msgstr ""
-"Pokud je nastaveno, bude tento obsah místo výchozí zprávy automaticky "
-"odeslán neoprávněným uživatelům."
+msgid "If set, this content will automatically be sent out to unauthorized users instead of the default message."
+msgstr "Pokud je nastaveno, bude tento obsah místo výchozí zprávy automaticky odeslán neoprávněným uživatelům."
 
 #. module: mail_group
 #: model:ir.model.fields,field_description:mail_group.field_mail_group__image_128
@@ -590,13 +559,11 @@ msgstr "Obrázek"
 #. module: mail_group
 #. odoo-python
 #: code:addons/mail_group/models/mail_group.py:0
-#: code:addons/mail_group/models/mail_group.py:0
 msgid "Invalid action for URL generation (%s)"
 msgstr ""
 
 #. module: mail_group
 #. odoo-python
-#: code:addons/mail_group/models/mail_group_moderation.py:0
 #: code:addons/mail_group/models/mail_group_moderation.py:0
 msgid "Invalid email address %r"
 msgstr "neplatná emailová adresa %r"
@@ -731,9 +698,7 @@ msgstr "Emailové seznamy"
 
 #. module: mail_group
 #: model_terms:ir.actions.act_window,help:mail_group.mail_group_action
-msgid ""
-"Mailing groups are communities that like to discuss a specific topic "
-"together."
+msgid "Mailing groups are communities that like to discuss a specific topic together."
 msgstr ""
 
 #. module: mail_group
@@ -898,15 +863,12 @@ msgstr "Název"
 
 #. module: mail_group
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_groups
-msgid ""
-"Need to unsubscribe? <br/>It's right here! <span class=\"oi fa-2x oi-arrow-"
-"down float-end\" role=\"img\" aria-label=\"\" title=\"Read this !\"/>"
+msgid "Need to unsubscribe? <br/>It's right here! <span class=\"oi fa-2x oi-arrow-down float-end\" role=\"img\" aria-label=\"\" title=\"Read this !\"/>"
 msgstr ""
 
 #. module: mail_group
 #: model:ir.model.fields,help:mail_group.field_mail_group__moderation_guidelines
-msgid ""
-"Newcomers on this moderated group will automatically receive the guidelines."
+msgid "Newcomers on this moderated group will automatically receive the guidelines."
 msgstr ""
 
 #. module: mail_group
@@ -947,8 +909,7 @@ msgstr ""
 #. module: mail_group
 #. odoo-python
 #: code:addons/mail_group/models/mail_group.py:0
-msgid ""
-"Only an administrator or a moderator can send guidelines to group members."
+msgid "Only an administrator or a moderator can send guidelines to group members."
 msgstr ""
 
 #. module: mail_group
@@ -959,14 +920,8 @@ msgstr ""
 
 #. module: mail_group
 #: model:ir.model.fields,help:mail_group.field_mail_group__alias_force_thread_id
-msgid ""
-"Optional ID of a thread (record) to which all incoming messages will be "
-"attached, even if they did not reply to it. If set, this will disable the "
-"creation of new records completely."
-msgstr ""
-"Volitelné ID vlákna (záznamu), ke kterému budou připojeny všechny příchozí "
-"zprávy, i když na něj neodpověděly. Je-li nastaveno, zakáže se úplné "
-"vytvoření nových záznamů."
+msgid "Optional ID of a thread (record) to which all incoming messages will be attached, even if they did not reply to it. If set, this will disable the creation of new records completely."
+msgstr "Volitelné ID vlákna (záznamu), ke kterému budou připojeny všechny příchozí zprávy, i když na něj neodpověděly. Je-li nastaveno, zakáže se úplné vytvoření nových záznamů."
 
 #. module: mail_group
 #: model:ir.model.fields,field_description:mail_group.field_mail_group_message__group_message_parent_id
@@ -985,14 +940,8 @@ msgstr "ID vlákna nadřazeného záznamu"
 
 #. module: mail_group
 #: model:ir.model.fields,help:mail_group.field_mail_group__alias_parent_model_id
-msgid ""
-"Parent model holding the alias. The model holding the alias reference is not"
-" necessarily the model given by alias_model_id (example: project "
-"(parent_model) and task (model))"
-msgstr ""
-"Nadřazený model s aliasem. Model obsahující odkaz na alias nemusí být nutně "
-"modelem daným od alias_model_id (příklad: project (parent_model) a task "
-"(model))"
+msgid "Parent model holding the alias. The model holding the alias reference is not necessarily the model given by alias_model_id (example: project (parent_model) and task (model))"
+msgstr "Nadřazený model s aliasem. Model obsahující odkaz na alias nemusí být nutně modelem daným od alias_model_id (příklad: project (parent_model) a task (model))"
 
 #. module: mail_group
 #: model:ir.model.fields,field_description:mail_group.field_mail_group_member__partner_id
@@ -1021,12 +970,8 @@ msgstr "Čekání na moderování"
 
 #. module: mail_group
 #: model:ir.model.fields,help:mail_group.field_mail_group__moderation_notify
-msgid ""
-"People receive an automatic notification about their message being waiting "
-"for moderation."
-msgstr ""
-"Lidé dostávají automatické oznámení o tom, že jejich zpráva čeká na "
-"moderování."
+msgid "People receive an automatic notification about their message being waiting for moderation."
+msgstr "Lidé dostávají automatické oznámení o tom, že jejich zpráva čeká na moderování."
 
 #. module: mail_group
 #: model:ir.model.fields.selection,name:mail_group.selection__mail_group_moderation__status__ban
@@ -1215,7 +1160,6 @@ msgstr "Předmět"
 #. module: mail_group
 #. odoo-javascript
 #: code:addons/mail_group/static/src/js/mail_group.js:0
-#: code:addons/mail_group/static/src/js/mail_group.js:0
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_groups
 msgid "Subscribe"
 msgstr "Odebírat"
@@ -1228,9 +1172,7 @@ msgstr ""
 #. module: mail_group
 #. odoo-python
 #: code:addons/mail_group/models/mail_group.py:0
-msgid ""
-"Template \"mail_group.mail_template_guidelines\" was not found. No email has"
-" been sent. Please contact an administrator to fix this issue."
+msgid "Template \"mail_group.mail_template_guidelines\" was not found. No email has been sent. Please contact an administrator to fix this issue."
 msgstr ""
 
 #. module: mail_group
@@ -1275,23 +1217,13 @@ msgstr ""
 
 #. module: mail_group
 #: model:ir.model.fields,help:mail_group.field_mail_group__alias_model_id
-msgid ""
-"The model (Odoo Document Kind) to which this alias corresponds. Any incoming"
-" email that does not reply to an existing record will cause the creation of "
-"a new record of this model (e.g. a Project Task)"
-msgstr ""
-"Model (Odoo Document Kind), ke kterému odpovídá tento alias. Jakýkoli "
-"příchozí e-mail, který neodpovídá stávajícímu záznamu, způsobí vytvoření "
-"nového záznamu tohoto modelu (například projektové úlohy)"
+msgid "The model (Odoo Document Kind) to which this alias corresponds. Any incoming email that does not reply to an existing record will cause the creation of a new record of this model (e.g. a Project Task)"
+msgstr "Model (Odoo Document Kind), ke kterému odpovídá tento alias. Jakýkoli příchozí e-mail, který neodpovídá stávajícímu záznamu, způsobí vytvoření nového záznamu tohoto modelu (například projektové úlohy)"
 
 #. module: mail_group
 #: model:ir.model.fields,help:mail_group.field_mail_group__alias_name
-msgid ""
-"The name of the email alias, e.g. 'jobs' if you want to catch emails for "
-"<jobs@example.odoo.com>"
-msgstr ""
-"Název aliasu e-mailu, např. 'jobs', pokud chcete zachytit e-maily pro "
-"<jobs@example.odoo.com>"
+msgid "The name of the email alias, e.g. 'jobs' if you want to catch emails for <jobs@example.odoo.com>"
+msgstr "Název aliasu e-mailu, např. 'jobs', pokud chcete zachytit e-maily pro <jobs@example.odoo.com>"
 
 #. module: mail_group
 #. odoo-python
@@ -1348,7 +1280,6 @@ msgstr "Ke kontrole"
 #. module: mail_group
 #. odoo-javascript
 #: code:addons/mail_group/static/src/js/mail_group.js:0
-#: code:addons/mail_group/static/src/js/mail_group.js:0
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_groups
 msgid "Unsubscribe"
 msgstr "Odhlásit odběr"
@@ -1360,8 +1291,7 @@ msgstr ""
 
 #. module: mail_group
 #: model_terms:ir.actions.act_window,help:mail_group.mail_group_message_action
-msgid ""
-"When people send an email to the alias of the list, they will appear here."
+msgid "When people send an email to the alias of the list, they will appear here."
 msgstr ""
 
 #. module: mail_group

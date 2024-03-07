@@ -1,22 +1,26 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* purchase_requisition
-# 
+#
 # Translators:
-# Wil Odoo, 2024
-# 
+# Aleš Fiala <f.ales1@seznam.cz>, 2023
+# Ivana Bartonkova, 2023
+# Wil Odoo, 2023
+# Tomáš Píšek, 2023
+# Jakub Smolka, 2023
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~17.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-01-17 10:10+0000\n"
-"PO-Revision-Date: 2024-01-17 11:21+0000\n"
-"Last-Translator: Wil Odoo, 2024\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Jakub Smolka, 2023\n"
 "Language-Team: Czech (https://app.transifex.com/odoo/teams/41243/cs/)\n"
+"Language: cs\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: cs\n"
 "Plural-Forms: nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n <= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;\n"
 
 #. module: purchase_requisition
@@ -311,12 +315,8 @@ msgstr "Potvrzený"
 
 #. module: purchase_requisition
 #: model:ir.model.fields,help:purchase_requisition.field_purchase_requisition_line__product_uom_category_id
-msgid ""
-"Conversion between Units of Measure can only occur if they belong to the "
-"same category. The conversion will be made based on the ratios."
-msgstr ""
-"Převod mezi měrnými jednotkami lze uskutečnit pouze pokud patří do stejné "
-"kategorie. Převod bude proveden na základě vzájemných poměrů."
+msgid "Conversion between Units of Measure can only occur if they belong to the same category. The conversion will be made based on the ratios."
+msgstr "Převod mezi měrnými jednotkami lze uskutečnit pouze pokud patří do stejné kategorie. Převod bude proveden na základě vzájemných poměrů."
 
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_create_alternative__copy_products
@@ -508,17 +508,12 @@ msgstr "Pokud zaškrtnuto, některé zprávy mají chybu při doručení."
 
 #. module: purchase_requisition
 #: model:ir.model.fields,help:purchase_requisition.field_purchase_requisition_create_alternative__creation_blocked
-msgid ""
-"If the chosen vendor or if any of the products in the original PO have a "
-"blocking warning then we prevent creation of alternative PO. This is because"
-" normally these fields are cleared w/warning message within form view, but "
-"we cannot recreate that in this case."
+msgid "If the chosen vendor or if any of the products in the original PO have a blocking warning then we prevent creation of alternative PO. This is because normally these fields are cleared w/warning message within form view, but we cannot recreate that in this case."
 msgstr ""
 
 #. module: purchase_requisition
 #: model:ir.model.fields,help:purchase_requisition.field_purchase_requisition_create_alternative__copy_products
-msgid ""
-"If this is checked, the product quantities of the original PO will be copied"
+msgid "If this is checked, the product quantities of the original PO will be copied"
 msgstr ""
 
 #. module: purchase_requisition
@@ -921,12 +916,8 @@ msgstr "Sekvence"
 
 #. module: purchase_requisition
 #: model:ir.model.fields,help:purchase_requisition.field_purchase_requisition_type__active
-msgid ""
-"Set active to false to hide the Purchase Agreement Types without removing "
-"it."
-msgstr ""
-"Chcete-li skrýt typy kupních smluv, aniž byste je odstranili, nastavte "
-"hodnotu active na false."
+msgid "Set active to false to hide the Purchase Agreement Types without removing it."
+msgstr "Chcete-li skrýt typy kupních smluv, aniž byste je odstranili, nastavte hodnotu active na false."
 
 #. module: purchase_requisition
 #: model:ir.model.fields.selection,name:purchase_requisition.selection__purchase_requisition_type__quantity_copy__none
@@ -936,8 +927,7 @@ msgstr "Nastavit množství ručně"
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.view_purchase_requisition_filter
 msgid "Show all records which has next action date is before today"
-msgstr ""
-"Zobrazit všechny záznamy, které mají datum příští aktivity před dneškem"
+msgstr "Zobrazit všechny záznamy, které mají datum příští aktivity před dneškem"
 
 #. module: purchase_requisition
 #. odoo-python
@@ -948,8 +938,7 @@ msgstr ""
 #. module: purchase_requisition
 #. odoo-python
 #: code:addons/purchase_requisition/models/purchase.py:0
-msgid ""
-"Some quantities were not cleared because their status is not a RFQ status."
+msgid "Some quantities were not cleared because their status is not a RFQ status."
 msgstr ""
 
 #. module: purchase_requisition
@@ -1008,8 +997,7 @@ msgstr "Všeobecné obchodní podmínky"
 
 #. module: purchase_requisition
 #: model:ir.model.fields,help:purchase_requisition.field_purchase_requisition__schedule_date
-msgid ""
-"The expected and scheduled delivery date where all the products are received"
+msgid "The expected and scheduled delivery date where all the products are received"
 msgstr "Očekávané a plánované datum dodání, kdy jsou přijaty všechny produkty"
 
 #. module: purchase_requisition
@@ -1020,10 +1008,7 @@ msgstr ""
 #. module: purchase_requisition
 #. odoo-python
 #: code:addons/purchase_requisition/wizard/purchase_requisition_create_alternative.py:0
-msgid ""
-"The vendor you have selected or at least one of the products you are copying"
-" from the original order has a blocking warning on it and cannot be selected"
-" to create an alternative."
+msgid "The vendor you have selected or at least one of the products you are copying from the original order has a blocking warning on it and cannot be selected to create an alternative."
 msgstr ""
 
 #. module: purchase_requisition
@@ -1035,17 +1020,11 @@ msgstr ""
 #. module: purchase_requisition
 #. odoo-python
 #: code:addons/purchase_requisition/models/purchase_requisition.py:0
-msgid ""
-"There is already an open blanket order for this supplier. We suggest you "
-"complete this open blanket order, instead of creating a new one."
-msgstr ""
-"U tohoto dodavatele již existuje otevřená hromadná objednávka. Doporučujeme "
-"vám dokončit tuto otevřenou hromadnou objednávku, místo abyste vytvořili "
-"novou."
+msgid "There is already an open blanket order for this supplier. We suggest you complete this open blanket order, instead of creating a new one."
+msgstr "U tohoto dodavatele již existuje otevřená hromadná objednávka. Doporučujeme vám dokončit tuto otevřenou hromadnou objednávku, místo abyste vytvořili novou."
 
 #. module: purchase_requisition
 #. odoo-python
-#: code:addons/purchase_requisition/wizard/purchase_requisition_create_alternative.py:0
 #: code:addons/purchase_requisition/wizard/purchase_requisition_create_alternative.py:0
 msgid "This is a blocking warning!\n"
 msgstr ""
@@ -1181,17 +1160,13 @@ msgstr ""
 
 #. module: purchase_requisition
 #: model:ir.model.fields,help:purchase_requisition.field_purchase_order__has_alternatives
-msgid ""
-"Whether or not this purchase order is linked to another purchase order as an"
-" alternative."
+msgid "Whether or not this purchase order is linked to another purchase order as an alternative."
 msgstr ""
 
 #. module: purchase_requisition
 #: model:ir.model,name:purchase_requisition.model_purchase_requisition_alternative_warning
 msgid "Wizard in case PO still has open alternative requests for quotation"
-msgstr ""
-"Průvodce případem, kdy má nákupní objednávka stále otevřené alternativní "
-"objednávky"
+msgstr "Průvodce případem, kdy má nákupní objednávka stále otevřené alternativní objednávky"
 
 #. module: purchase_requisition
 #: model:ir.model,name:purchase_requisition.model_purchase_requisition_create_alternative
@@ -1208,13 +1183,10 @@ msgstr ""
 #. odoo-python
 #: code:addons/purchase_requisition/models/purchase_requisition.py:0
 msgid "You cannot confirm agreement '%s' because there is no product line."
-msgstr ""
-"Souhlas nemůžete potvrdit'%s' protože neexistuje žádná produktová řada."
+msgstr "Souhlas nemůžete potvrdit'%s' protože neexistuje žádná produktová řada."
 
 #. module: purchase_requisition
 #. odoo-python
-#: code:addons/purchase_requisition/models/purchase_requisition.py:0
-#: code:addons/purchase_requisition/models/purchase_requisition.py:0
 #: code:addons/purchase_requisition/models/purchase_requisition.py:0
 msgid "You cannot confirm the blanket order without price."
 msgstr "Hromadnou objednávku nelze potvrdit bez ceny."

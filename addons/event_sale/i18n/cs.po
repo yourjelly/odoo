@@ -1,22 +1,25 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* event_sale
-# 
+#
 # Translators:
-# Wil Odoo, 2024
-# 
+# Ivana Bartonkova, 2023
+# Jakub Smolka, 2023
+# Wil Odoo, 2023
+# Aleš Fiala <f.ales1@seznam.cz>, 2024
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~17.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-01-17 10:10+0000\n"
-"PO-Revision-Date: 2024-01-17 11:21+0000\n"
-"Last-Translator: Wil Odoo, 2024\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Aleš Fiala <f.ales1@seznam.cz>, 2024\n"
 "Language-Team: Czech (https://app.transifex.com/odoo/teams/41243/cs/)\n"
+"Language: cs\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: cs\n"
 "Plural-Forms: nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n <= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;\n"
 
 #. module: event_sale
@@ -46,8 +49,7 @@ msgstr "<span>Změna registrace pro účastníka:</span>"
 #. module: event_sale
 #: model:ir.model.fields,help:event_sale.field_event_event_ticket__description
 #: model:ir.model.fields,help:event_sale.field_event_type_ticket__description
-msgid ""
-"A description of the ticket that you want to communicate to your customers."
+msgid "A description of the ticket that you want to communicate to your customers."
 msgstr "Popis lístku, který chcete sdělit svým zákazníkům."
 
 #. module: event_sale
@@ -115,26 +117,18 @@ msgstr "Zrušeno"
 
 #. module: event_sale
 #: model:ir.model.fields,help:event_sale.field_sale_order_line__event_id
-msgid ""
-"Choose an event and it will automatically create a registration for this "
-"event."
+msgid "Choose an event and it will automatically create a registration for this event."
 msgstr "Vyberte událost a to automaticky vytvoří registraci pro tuto událost."
 
 #. module: event_sale
 #: model:ir.model.fields,help:event_sale.field_sale_order_line__event_ticket_id
-msgid ""
-"Choose an event ticket and it will automatically create a registration for "
-"this event ticket."
-msgstr ""
-"Vyberte vstupenku na akci a automaticky vytvoří registraci pro tuto "
-"vstupenku na akci."
+msgid "Choose an event ticket and it will automatically create a registration for this event ticket."
+msgstr "Vyberte vstupenku na akci a automaticky vytvoří registraci pro tuto vstupenku na akci."
 
 #. module: event_sale
 #: model_terms:ir.actions.act_window,help:event_sale.event_sale_report_action
 msgid "Come back once tickets have been sold to overview your sales income."
-msgstr ""
-"Vraťte se, jakmile budou tikety prodány, abyste získali přehled o svých "
-"příjmech z prodeje."
+msgstr "Vraťte se, jakmile budou tikety prodány, abyste získali přehled o svých příjmech z prodeje."
 
 #. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_event_sale_report__company_id
@@ -432,9 +426,7 @@ msgstr "Telefon"
 #. module: event_sale
 #. odoo-python
 #: code:addons/event_sale/models/sale_order.py:0
-msgid ""
-"Please make sure all your event related lines are configured before "
-"confirming this order:%s"
+msgid "Please make sure all your event related lines are configured before confirming this order:%s"
 msgstr ""
 
 #. module: event_sale

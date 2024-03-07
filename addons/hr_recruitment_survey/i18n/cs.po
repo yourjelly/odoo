@@ -1,22 +1,24 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* hr_recruitment_survey
-# 
+#
 # Translators:
-# Wil Odoo, 2024
-# 
+# Jakub Smolka, 2023
+# Wil Odoo, 2023
+# Aleš Fiala <f.ales1@seznam.cz>, 2024
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~17.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-01-17 10:10+0000\n"
-"PO-Revision-Date: 2024-01-17 11:21+0000\n"
-"Last-Translator: Wil Odoo, 2024\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Aleš Fiala <f.ales1@seznam.cz>, 2024\n"
 "Language-Team: Czech (https://app.transifex.com/odoo/teams/41243/cs/)\n"
+"Language: cs\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: cs\n"
 "Plural-Forms: nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n <= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;\n"
 
 #. module: hr_recruitment_survey
@@ -80,13 +82,8 @@ msgstr ""
 #. module: hr_recruitment_survey
 #: model:ir.model.fields,help:hr_recruitment_survey.field_hr_applicant__survey_id
 #: model:ir.model.fields,help:hr_recruitment_survey.field_hr_job__survey_id
-msgid ""
-"Choose an interview form for this job position and you will be able to "
-"print/answer this interview from all applicants who apply for this job"
-msgstr ""
-"Vyberte si formulář pohovoru pro tuto pracovní pozici a budete si moci "
-"vytisknout / odpovědět na tento pohovor od všech uchazečů, kteří se ucházejí"
-" o tuto práci"
+msgid "Choose an interview form for this job position and you will be able to print/answer this interview from all applicants who apply for this job"
+msgstr "Vyberte si formulář pohovoru pro tuto pracovní pozici a budete si moci vytisknout / odpovědět na tento pohovor od všech uchazečů, kteří se ucházejí o tuto práci"
 
 #. module: hr_recruitment_survey
 #: model_terms:ir.ui.view,arch_db:hr_recruitment_survey.view_hr_job_kanban_inherit
@@ -192,12 +189,8 @@ msgstr "Minulé pracovní zkušenosti"
 
 #. module: hr_recruitment_survey
 #: model_terms:survey.survey,description:hr_recruitment_survey.survey_recruitment_form
-msgid ""
-"Please answer those questions to help recruitment officers to preprocess "
-"your application."
-msgstr ""
-"Odpovězte prosím na tyto otázky, abyste pomohli personalistům s přípravou "
-"vaší žádosti."
+msgid "Please answer those questions to help recruitment officers to preprocess your application."
+msgstr "Odpovězte prosím na tyto otázky, abyste pomohli personalistům s přípravou vaší žádosti."
 
 #. module: hr_recruitment_survey
 #: model_terms:survey.question,description:hr_recruitment_survey.survey_recruitment_form_p1
@@ -217,16 +210,13 @@ msgstr ""
 #. module: hr_recruitment_survey
 #: model_terms:survey.question,description:hr_recruitment_survey.survey_recruitment_form_p1_q4
 #: model_terms:survey.question,description:hr_recruitment_survey.survey_recruitment_form_p1_q5
-msgid ""
-"Please summarize your education history: schools, location, diplomas, ..."
+msgid "Please summarize your education history: schools, location, diplomas, ..."
 msgstr "Shrňte prosím svou historii vzdělávání: školy, umístění, diplomy, ..."
 
 #. module: hr_recruitment_survey
 #: model_terms:survey.question,description:hr_recruitment_survey.survey_recruitment_form_p1_q7
-msgid ""
-"Please tell us a bit more about yourself: what are your main activities, ..."
-msgstr ""
-"Řekněte nám prosím něco více o sobě: jaké jsou vaše hlavní činnosti, ..."
+msgid "Please tell us a bit more about yourself: what are your main activities, ..."
+msgstr "Řekněte nám prosím něco více o sobě: jaké jsou vaše hlavní činnosti, ..."
 
 #. module: hr_recruitment_survey
 #: model:survey.survey,title:hr_recruitment_survey.survey_recruitment_form

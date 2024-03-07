@@ -1,22 +1,25 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* event_booth_sale
-# 
+#
 # Translators:
-# Wil Odoo, 2024
-# 
+# Ivana Bartonkova, 2023
+# Jakub Smolka, 2023
+# Wil Odoo, 2023
+# Aleš Fiala <f.ales1@seznam.cz>, 2024
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~17.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-01-17 10:10+0000\n"
-"PO-Revision-Date: 2024-01-17 11:21+0000\n"
-"Last-Translator: Wil Odoo, 2024\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Aleš Fiala <f.ales1@seznam.cz>, 2024\n"
 "Language-Team: Czech (https://app.transifex.com/odoo/teams/41243/cs/)\n"
+"Language: cs\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: cs\n"
 "Plural-Forms: nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n <= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;\n"
 
 #. module: event_booth_sale
@@ -50,9 +53,7 @@ msgstr "Kategorie stánku"
 #. module: event_booth_sale
 #: model:ir.model.fields,help:event_booth_sale.field_event_booth_configurator__event_booth_category_available_ids
 msgid "Booth Category for which booths are still available. Used in frontend"
-msgstr ""
-"Kategorie stánků, pro které jsou stánky stále k dispozici. Používá se ve "
-"frontendu"
+msgstr "Kategorie stánků, pro které jsou stánky stále k dispozici. Používá se ve frontendu"
 
 #. module: event_booth_sale
 #: model:ir.model.fields,field_description:event_booth_sale.field_sale_order__event_booth_count
@@ -254,9 +255,7 @@ msgstr "Čekající stánky"
 #. module: event_booth_sale
 #. odoo-python
 #: code:addons/event_booth_sale/models/sale_order.py:0
-msgid ""
-"Please make sure all your event-booth related lines are configured before "
-"confirming this order:%s"
+msgid "Please make sure all your event-booth related lines are configured before confirming this order:%s"
 msgstr ""
 
 #. module: event_booth_sale
@@ -341,18 +340,13 @@ msgstr "Vyberte stánek události"
 #. module: event_booth_sale
 #. odoo-python
 #: code:addons/event_booth_sale/models/sale_order_line.py:0
-msgid ""
-"The following booths are unavailable, please remove them to continue : "
-"%(booth_names)s"
-msgstr ""
-"Následující stánky nejsou k dispozici, pro pokračování je prosím odeberte : "
-"%(booth_names)s"
+msgid "The following booths are unavailable, please remove them to continue : %(booth_names)s"
+msgstr "Následující stánky nejsou k dispozici, pro pokračování je prosím odeberte : %(booth_names)s"
 
 #. module: event_booth_sale
 #: model:ir.model.constraint,message:event_booth_sale.constraint_event_booth_registration_unique_registration
 msgid "There can be only one registration for a booth by sale order line"
-msgstr ""
-"Pro stánek může být pouze jedna registrace na položku prodejní objednávky"
+msgstr "Pro stánek může být pouze jedna registrace na položku prodejní objednávky"
 
 #. module: event_booth_sale
 #: model_terms:ir.ui.view,arch_db:event_booth_sale.event_booth_view_tree_from_event
@@ -362,19 +356,13 @@ msgstr "Celkem"
 #. module: event_booth_sale
 #: model:ir.model.fields,help:event_booth_sale.field_sale_order_line__event_booth_pending_ids
 msgid "Used to create registration when providing the desired event booth."
-msgstr ""
-"Používá se k vytvoření registrace při poskytování požadovaného stánku "
-"události."
+msgstr "Používá se k vytvoření registrace při poskytování požadovaného stánku události."
 
 #. module: event_booth_sale
 #. odoo-python
 #: code:addons/event_booth_sale/models/event_booth.py:0
-msgid ""
-"You can't delete the following booths as they are linked to sales orders: "
-"%(booths)s"
-msgstr ""
-"Následující stánky nelze odstranit, protože jsou propojeny s prodejními "
-"objednávkami: %(booths)s"
+msgid "You can't delete the following booths as they are linked to sales orders: %(booths)s"
+msgstr "Následující stánky nelze odstranit, protože jsou propojeny s prodejními objednávkami: %(booths)s"
 
 #. module: event_booth_sale
 #. odoo-python
@@ -385,8 +373,5 @@ msgstr "Musíte vybrat alespoň jeden stánek."
 #. module: event_booth_sale
 #. odoo-python
 #: code:addons/event_booth_sale/models/event_booth_registration.py:0
-msgid ""
-"Your order has been cancelled because the following booths have been "
-"reserved"
-msgstr ""
-"Vaše objednávka byla zrušena, protože byly rezervovány následující stánky"
+msgid "Your order has been cancelled because the following booths have been reserved"
+msgstr "Vaše objednávka byla zrušena, protože byly rezervovány následující stánky"

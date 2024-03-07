@@ -1,23 +1,28 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* website_crm_partner_assign
-# 
+#
 # Translators:
-# Wil Odoo, 2024
+# Jiří Podhorecký, 2023
+# Ivana Bartonkova, 2023
+# Wil Odoo, 2023
+# Tomáš Píšek, 2023
+# Aleš Fiala <f.ales1@seznam.cz>, 2024
 # Vojtech Smolka, 2024
-# 
+# Jakub Smolka, 2024
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~17.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-01-17 10:11+0000\n"
-"PO-Revision-Date: 2024-01-17 11:21+0000\n"
-"Last-Translator: Vojtech Smolka, 2024\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Jakub Smolka, 2024\n"
 "Language-Team: Czech (https://app.transifex.com/odoo/teams/41243/cs/)\n"
+"Language: cs\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: cs\n"
 "Plural-Forms: nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n <= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;\n"
 
 #. module: website_crm_partner_assign
@@ -33,9 +38,7 @@ msgstr ""
 
 #. module: website_crm_partner_assign
 #: model_terms:ir.ui.view,arch_db:website_crm_partner_assign.crm_lead_view_kanban
-msgid ""
-"(<i class=\"fa fa-long-arrow-right me-1\" aria-label=\"Assigned Partner\" "
-"title=\"Assigned Partner\"/>"
+msgid "(<i class=\"fa fa-long-arrow-right me-1\" aria-label=\"Assigned Partner\" title=\"Assigned Partner\"/>"
 msgstr ""
 
 #. module: website_crm_partner_assign
@@ -55,9 +58,7 @@ msgstr "<i class=\"fa fa-fw fa-times\"/> Nemám zájem"
 
 #. module: website_crm_partner_assign
 #: model_terms:ir.ui.view,arch_db:website_crm_partner_assign.ref_country
-msgid ""
-"<i class=\"fa fa-map-marker\" role=\"img\" aria-label=\"Open map\" "
-"title=\"Open map\"/>"
+msgid "<i class=\"fa fa-map-marker\" role=\"img\" aria-label=\"Open map\" title=\"Open map\"/>"
 msgstr ""
 
 #. module: website_crm_partner_assign
@@ -128,25 +129,13 @@ msgstr ""
 
 #. module: website_crm_partner_assign
 #: model_terms:ir.ui.view,arch_db:website_crm_partner_assign.portal_my_lead
-msgid ""
-"<span class=\"text-danger error_partner_assign_desinterested\" "
-"style=\"display:none;\">You need to fill up the next action and contact the "
-"customer before accepting the lead</span>"
-msgstr ""
-"<span class=\"text-danger error_partner_assign_desinterested\" "
-"style=\"display:none;\">Než přijmete potenciálního zákazníka, musíte vyplnit"
-" další akci a kontaktovat zákazníka</span>"
+msgid "<span class=\"text-danger error_partner_assign_desinterested\" style=\"display:none;\">You need to fill up the next action and contact the customer before accepting the lead</span>"
+msgstr "<span class=\"text-danger error_partner_assign_desinterested\" style=\"display:none;\">Než přijmete potenciálního zákazníka, musíte vyplnit další akci a kontaktovat zákazníka</span>"
 
 #. module: website_crm_partner_assign
 #: model_terms:ir.ui.view,arch_db:website_crm_partner_assign.portal_my_lead
-msgid ""
-"<span class=\"text-danger error_partner_assign_interested\" "
-"style=\"display:none;\">You need to fill up the next action and contact the "
-"customer before accepting the lead</span>"
-msgstr ""
-"<span class=\"text-danger error_partner_assign_interested\" "
-"style=\"display:none;\">Než přijmete potenciálního zákazníka, musíte vyplnit"
-" další akci a kontaktovat zákazníka</span>"
+msgid "<span class=\"text-danger error_partner_assign_interested\" style=\"display:none;\">You need to fill up the next action and contact the customer before accepting the lead</span>"
+msgstr "<span class=\"text-danger error_partner_assign_interested\" style=\"display:none;\">Než přijmete potenciálního zákazníka, musíte vyplnit další akci a kontaktovat zákazníka</span>"
 
 #. module: website_crm_partner_assign
 #: model_terms:ir.ui.view,arch_db:website_crm_partner_assign.portal_my_opportunity
@@ -417,7 +406,6 @@ msgstr "Kontakt"
 #. module: website_crm_partner_assign
 #. odoo-python
 #: code:addons/website_crm_partner_assign/controllers/main.py:0
-#: code:addons/website_crm_partner_assign/controllers/main.py:0
 #: model_terms:ir.ui.view,arch_db:website_crm_partner_assign.portal_my_leads
 msgid "Contact Name"
 msgstr "Kontaktní jméno"
@@ -648,12 +636,8 @@ msgstr ""
 
 #. module: website_crm_partner_assign
 #: model:ir.model.fields,help:website_crm_partner_assign.field_res_partner_grade__partner_weight
-msgid ""
-"Gives the probability to assign a lead to this partner. (0 means no "
-"assignment.)"
-msgstr ""
-"Dává pravděpodobnost přiřazení potenciálního partnera tomuto partnerovi. (0 "
-"znamená žádný úkol.)"
+msgid "Gives the probability to assign a lead to this partner. (0 means no assignment.)"
+msgstr "Dává pravděpodobnost přiřazení potenciálního partnera tomuto partnerovi. (0 znamená žádný úkol.)"
 
 #. module: website_crm_partner_assign
 #: model_terms:ir.ui.view,arch_db:website_crm_partner_assign.index
@@ -685,17 +669,13 @@ msgstr ""
 #. odoo-python
 #: code:addons/website_crm_partner_assign/models/crm_lead.py:0
 msgid "I am not interested by this lead. I contacted the lead."
-msgstr ""
-"Tento potenciální zákazník mě nezajímá. Kontaktoval jsem potenciální "
-"zákazník."
+msgstr "Tento potenciální zákazník mě nezajímá. Kontaktoval jsem potenciální zákazník."
 
 #. module: website_crm_partner_assign
 #. odoo-python
 #: code:addons/website_crm_partner_assign/models/crm_lead.py:0
 msgid "I am not interested by this lead. I have not contacted the lead."
-msgstr ""
-"Tento potenciální zákazník mě nezajímá. Nekontaktoval jsem potenciální "
-"zákazník."
+msgstr "Tento potenciální zákazník mě nezajímá. Nekontaktoval jsem potenciální zákazník."
 
 #. module: website_crm_partner_assign
 #: model_terms:ir.ui.view,arch_db:website_crm_partner_assign.portal_my_lead
@@ -851,7 +831,7 @@ msgstr "Médium"
 #. module: website_crm_partner_assign
 #: model_terms:ir.ui.view,arch_db:website_crm_partner_assign.portal_my_opportunity
 msgid "Mobile"
-msgstr "Mobilní"
+msgstr "Mobil"
 
 #. module: website_crm_partner_assign
 #: model_terms:ir.ui.view,arch_db:website_crm_partner_assign.crm_lead_partner_filter
@@ -861,7 +841,6 @@ msgstr "Moji přiřazení partneři"
 
 #. module: website_crm_partner_assign
 #. odoo-python
-#: code:addons/website_crm_partner_assign/controllers/main.py:0
 #: code:addons/website_crm_partner_assign/controllers/main.py:0
 #: model:ir.model.fields,field_description:website_crm_partner_assign.field_res_partner_activation__name
 msgid "Name"
@@ -874,7 +853,6 @@ msgstr "Nová příležitost"
 
 #. module: website_crm_partner_assign
 #. odoo-python
-#: code:addons/website_crm_partner_assign/controllers/main.py:0
 #: code:addons/website_crm_partner_assign/controllers/main.py:0
 msgid "Newest"
 msgstr "Nejnovější"
@@ -1010,8 +988,7 @@ msgstr "Úrovně partnerů"
 
 #. module: website_crm_partner_assign
 #: model_terms:ir.actions.act_window,help:website_crm_partner_assign.res_partner_grade_action
-msgid ""
-"Partner Levels allow you to rank your Partners based on their performances."
+msgid "Partner Levels allow you to rank your Partners based on their performances."
 msgstr ""
 
 #. module: website_crm_partner_assign
@@ -1296,17 +1273,12 @@ msgstr "Tento potenciální zákazník je spam"
 #. module: website_crm_partner_assign
 #: model:ir.model.fields,help:website_crm_partner_assign.field_res_partner__partner_weight
 #: model:ir.model.fields,help:website_crm_partner_assign.field_res_users__partner_weight
-msgid ""
-"This should be a numerical value greater than 0 which will decide the "
-"contention for this partner to take this lead/opportunity."
-msgstr ""
-"Mělo by se jednat o číselnou hodnotu větší než 0, která rozhodne o tom, zda "
-"tento partner využije tohoto potenciálního zákazníka / příležitosti."
+msgid "This should be a numerical value greater than 0 which will decide the contention for this partner to take this lead/opportunity."
+msgstr "Mělo by se jednat o číselnou hodnotu větší než 0, která rozhodne o tom, zda tento partner využije tohoto potenciálního zákazníka / příležitosti."
 
 #. module: website_crm_partner_assign
 #: model_terms:ir.actions.act_window,help:website_crm_partner_assign.res_partner_activation_act
-msgid ""
-"Those are used to know where your Partners stand in your onboarding process."
+msgid "Those are used to know where your Partners stand in your onboarding process."
 msgstr ""
 
 #. module: website_crm_partner_assign
@@ -1410,9 +1382,5 @@ msgstr "na"
 
 #. module: website_crm_partner_assign
 #: model:ir.model.fields.selection,name:website_crm_partner_assign.selection__crm_lead_forward_to_partner__forward_type__assigned
-msgid ""
-"several partners: automatic assignment, using GPS coordinates and partner's "
-"grades"
-msgstr ""
-"několik partnerů: automatické přiřazení, použití GPS souřadnic a hodnocení "
-"partnerů"
+msgid "several partners: automatic assignment, using GPS coordinates and partner's grades"
+msgstr "několik partnerů: automatické přiřazení, použití GPS souřadnic a hodnocení partnerů"

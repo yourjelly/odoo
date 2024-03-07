@@ -1,25 +1,31 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* stock
-# 
+#
 # Translators:
+# Jiří Podhorecký, 2023
+# Ivana Bartonkova, 2023
+# SlavekB <slavek.banko@axis.cz>, 2023
+# Tomáš Píšek, 2023
 # Wil Odoo, 2024
+# karolína schusterová <karolina.schusterova@vdp.sk>, 2024
 # Aleš Fiala <f.ales1@seznam.cz>, 2024
 # Petr Vojta <petvoj@gmail.com>, 2024
 # Katerina Horylova, 2024
-# 
+# Jakub Smolka, 2024
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~17.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-01-17 10:09+0000\n"
-"PO-Revision-Date: 2024-01-17 11:21+0000\n"
-"Last-Translator: Katerina Horylova, 2024\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Jakub Smolka, 2024\n"
 "Language-Team: Czech (https://app.transifex.com/odoo/teams/41243/cs/)\n"
+"Language: cs\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: cs\n"
 "Plural-Forms: nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n <= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;\n"
 
 #. module: stock
@@ -89,12 +95,8 @@ msgstr " - Produkt: %s, Sériové Číslo: %s"
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_location__cyclic_inventory_frequency
 #: model:ir.model.fields,help:stock.field_stock_quant__cyclic_inventory_frequency
-msgid ""
-" When different than 0, inventory count date for products stored at this "
-"location will be automatically set at the defined frequency."
-msgstr ""
-" Pokud se liší od 0, datum inventury produktů uložených na tomto místě se "
-"automaticky nastaví v definované frekvenci."
+msgid " When different than 0, inventory count date for products stored at this location will be automatically set at the defined frequency."
+msgstr " Pokud se liší od 0, datum inventury produktů uložených na tomto místě se automaticky nastaví v definované frekvenci."
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_picking__return_count
@@ -110,9 +112,7 @@ msgstr "%(name)s (kopie)(%(id)s)"
 #. module: stock
 #. odoo-python
 #: code:addons/stock/wizard/stock_replenishment_info.py:0
-msgid ""
-"%(warehouse)s can only provide %(free_qty)s %(uom)s, while the quantity to "
-"order is %(qty_to_order)s %(uom)s."
+msgid "%(warehouse)s can only provide %(free_qty)s %(uom)s, while the quantity to order is %(qty_to_order)s %(uom)s."
 msgstr ""
 
 #. module: stock
@@ -124,9 +124,7 @@ msgstr "%(warehouse)s: Dodání produktu z %(supplier)s"
 #. module: stock
 #. odoo-python
 #: code:addons/stock/models/stock_location.py:0
-#: code:addons/stock/models/stock_location.py:0
 #: code:addons/stock/models/stock_package_type.py:0
-#: code:addons/stock/models/stock_picking.py:0
 #: code:addons/stock/models/stock_picking.py:0
 #: code:addons/stock/models/stock_rule.py:0
 #: code:addons/stock/models/stock_storage_category.py:0
@@ -149,12 +147,8 @@ msgstr "%s [vráceno]"
 #. module: stock
 #. odoo-python
 #: code:addons/stock/models/stock_warehouse.py:0
-msgid ""
-"%s use default source or destination locations from warehouse %s that will "
-"be archived."
-msgstr ""
-"%s používá výchozí zdrojové nebo cílové umístění ze skladu %s, které bude "
-"archivováno."
+msgid "%s use default source or destination locations from warehouse %s that will be archived."
+msgstr "%s používá výchozí zdrojové nebo cílové umístění ze skladu %s, které bude archivováno."
 
 #. module: stock
 #: model:ir.actions.report,print_report_name:stock.action_report_inventory
@@ -163,8 +157,7 @@ msgstr "'Počet listů'"
 
 #. module: stock
 #: model:ir.actions.report,print_report_name:stock.action_report_delivery
-msgid ""
-"'Delivery Slip - %s - %s' % (object.partner_id.name or '', object.name)"
+msgid "'Delivery Slip - %s - %s' % (object.partner_id.name or '', object.name)"
 msgstr "'Dodací list - %s - %s' % (object.partner_id.name or '', object.name)"
 
 #. module: stock
@@ -189,10 +182,8 @@ msgstr "'Balíky - %s' % (object.name)"
 
 #. module: stock
 #: model:ir.actions.report,print_report_name:stock.action_report_picking
-msgid ""
-"'Picking Operations - %s - %s' % (object.partner_id.name or '', object.name)"
-msgstr ""
-"'Úkon vyzvednutí - %s - %s' % (object.partner_id.name or '', object.name)"
+msgid "'Picking Operations - %s - %s' % (object.partner_id.name or '', object.name)"
+msgstr "'Úkon vyzvednutí - %s - %s' % (object.partner_id.name or '', object.name)"
 
 #. module: stock
 #. odoo-python
@@ -258,7 +249,6 @@ msgstr ""
 
 #. module: stock
 #. odoo-python
-#: code:addons/stock/models/stock_rule.py:0
 #: code:addons/stock/models/stock_rule.py:0
 msgid "+ %d day(s)"
 msgstr "+ %d dní"
@@ -388,22 +378,14 @@ msgstr ""
 #. module: stock
 #. odoo-python
 #: code:addons/stock/models/stock_rule.py:0
-msgid ""
-"<br>A need is created in <b>%s</b> and a rule will be triggered to fulfill "
-"it."
-msgstr ""
-"<br>Je vytvořena potřeba v <b>%s</b> a bude spuštěno pravidlo k jejímu "
-"splnění."
+msgid "<br>A need is created in <b>%s</b> and a rule will be triggered to fulfill it."
+msgstr "<br>Je vytvořena potřeba v <b>%s</b> a bude spuštěno pravidlo k jejímu splnění."
 
 #. module: stock
 #. odoo-python
 #: code:addons/stock/models/stock_rule.py:0
-msgid ""
-"<br>If the products are not available in <b>%s</b>, a rule will be triggered"
-" to bring products in this location."
-msgstr ""
-"<br>Pokud produkty nejsou k dispozici v <b>%s</b>, bude spuštěno pravidlo, "
-"které dodá produkty na toto místo."
+msgid "<br>If the products are not available in <b>%s</b>, a rule will be triggered to bring products in this location."
+msgstr "<br>Pokud produkty nejsou k dispozici v <b>%s</b>, bude spuštěno pravidlo, které dodá produkty na toto místo."
 
 #. module: stock
 #: model:mail.template,body_html:stock.mail_template_data_delivery_confirmation
@@ -666,14 +648,8 @@ msgstr "<strong>Dodací adresa</strong>"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.stock_inventory_conflict_form_view
-msgid ""
-"<strong>Due to some stock moves done between your initial update of the "
-"quantity and now, the difference of quantity is not consistent "
-"anymore.</strong>"
-msgstr ""
-"<strong>Kvůli některým skladovým pohybům, které byly provedeny mezi vaší "
-"původní aktualizací množství a nyní, již rozdíl v množství není "
-"konzistentní.</strong>"
+msgid "<strong>Due to some stock moves done between your initial update of the quantity and now, the difference of quantity is not consistent anymore.</strong>"
+msgstr "<strong>Kvůli některým skladovým pohybům, které byly provedeny mezi vaší původní aktualizací množství a nyní, již rozdíl v množství není konzistentní.</strong>"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.report_picking
@@ -847,12 +823,8 @@ msgstr "Vyžadována akce"
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_location__replenish_location
-msgid ""
-"Activate this function to get all quantities to replenish at this particular"
-" location"
-msgstr ""
-"Aktivujte tuto funkci a získejte všechna množství k doplnění v této určité "
-"lokaci"
+msgid "Activate this function to get all quantities to replenish at this particular location"
+msgstr "Aktivujte tuto funkci a získejte všechna množství k doplnění v této určité lokaci"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_location__active
@@ -922,8 +894,7 @@ msgstr "Přidání nové kategorie úložiště"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_form
-msgid ""
-"Add an internal note that will be printed on the Picking Operations sheet"
+msgid "Add an internal note that will be printed on the Picking Operations sheet"
 msgstr "Přidejte interní poznámku, která bude vytištěna na přebíracím listu"
 
 #. module: stock
@@ -937,18 +908,8 @@ msgstr ""
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
-msgid ""
-"Add and customize route operations to process product moves in your "
-"warehouse(s): e.g. unload > quality control > stock for incoming products, "
-"pick > pack > ship for outgoing products. You can also set putaway "
-"strategies on warehouse locations in order to send incoming products into "
-"specific child locations straight away (e.g. specific bins, racks)."
-msgstr ""
-"Přidání a přizpůsobení operací trasy při zpracování přesunů produktů ve "
-"vašem skladu (skladech): např. vykládka > kontrola kvality > zásoba pro "
-"příchozí produkty, výběr > balení > přeprava pro odchozí produkty. Můžete "
-"také nastavit strategie umístění na skladech, abyste mohli okamžitě odeslat "
-"příchozí produkty do konkrétních míst  (například konkrétní koše, regály)."
+msgid "Add and customize route operations to process product moves in your warehouse(s): e.g. unload > quality control > stock for incoming products, pick > pack > ship for outgoing products. You can also set putaway strategies on warehouse locations in order to send incoming products into specific child locations straight away (e.g. specific bins, racks)."
+msgstr "Přidání a přizpůsobení operací trasy při zpracování přesunů produktů ve vašem skladu (skladech): např. vykládka > kontrola kvality > zásoba pro příchozí produkty, výběr > balení > přeprava pro odchozí produkty. Můžete také nastavit strategie umístění na skladech, abyste mohli okamžitě odeslat příchozí produkty do konkrétních míst  (například konkrétní koše, regály)."
 
 #. module: stock
 #. odoo-javascript
@@ -1025,11 +986,8 @@ msgstr "Vše najednou"
 
 #. module: stock
 #: model_terms:res.company,invoice_terms_html:stock.res_company_1
-msgid ""
-"All our contractual relations will be governed exclusively by United States "
-"law."
-msgstr ""
-"Veškeré naše smluvní vztahy se budou řídit výhradně zákony Spojených států."
+msgid "All our contractual relations will be governed exclusively by United States law."
+msgstr "Veškeré naše smluvní vztahy se budou řídit výhradně zákony Spojených států."
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_move__returned_move_ids
@@ -1080,23 +1038,14 @@ msgstr "Měsíc roční inventury"
 #. module: stock
 #: model:ir.model.fields,help:stock.field_res_company__annual_inventory_month
 #: model:ir.model.fields,help:stock.field_res_config_settings__annual_inventory_month
-msgid ""
-"Annual inventory month for products not in a location with a cyclic "
-"inventory date. Set to no month if no automatic annual inventory."
-msgstr ""
-"Měsíc roční inventury pro produkty, které nejsou v místě s datem cyklické "
-"inventury. Nastavte na žádný měsíc, pokud se neprovádí automatická roční "
-"inventura."
+msgid "Annual inventory month for products not in a location with a cyclic inventory date. Set to no month if no automatic annual inventory."
+msgstr "Měsíc roční inventury pro produkty, které nejsou v místě s datem cyklické inventury. Nastavte na žádný měsíc, pokud se neprovádí automatická roční inventura."
 
 #. module: stock
 #. odoo-python
 #: code:addons/stock/models/stock_location.py:0
-msgid ""
-"Another parent/sub replenish location %s exists, if you wish to change it, "
-"uncheck it first"
-msgstr ""
-"Jiná nadřazená/pod lokace doplňování %s existuje, pokud jej chcete změnit, "
-"nejprve zrušte zaškrtnutí"
+msgid "Another parent/sub replenish location %s exists, if you wish to change it, uncheck it first"
+msgstr "Jiná nadřazená/pod lokace doplňování %s existuje, pokud jej chcete změnit, nejprve zrušte zaškrtnutí"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_stock_rule_form
@@ -1143,9 +1092,7 @@ msgstr "Použít vše"
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_product_replenish__route_id
-msgid ""
-"Apply specific route for the replenishment instead of product's default "
-"routes."
+msgid "Apply specific route for the replenishment instead of product's default routes."
 msgstr ""
 
 #. module: stock
@@ -1409,12 +1356,8 @@ msgstr "Před plánovaným datem"
 
 #. module: stock
 #: model_terms:res.company,invoice_terms_html:stock.res_company_1
-msgid ""
-"Below text serves as a suggestion and doesn’t engage Odoo S.A. "
-"responsibility."
-msgstr ""
-"Níže uvedený text slouží jako návrh a nezavazuje společnost Odoo S.A. k "
-"zodpovědnosti."
+msgid "Below text serves as a suggestion and doesn’t engage Odoo S.A. responsibility."
+msgstr "Níže uvedený text slouží jako návrh a nezavazuje společnost Odoo S.A. k zodpovědnosti."
 
 #. module: stock
 #: model:ir.model.fields.selection,name:stock.selection__res_partner__picking_warn__block
@@ -1444,23 +1387,12 @@ msgstr "Podle jedinečného seriového čísla"
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_move__procure_method
-msgid ""
-"By default, the system will take from the stock in the source location and "
-"passively wait for availability. The other possibility allows you to "
-"directly create a procurement on the source location (and thus ignore its "
-"current stock) to gather products. If we want to chain moves and have this "
-"one to wait for the previous, this second option should be chosen."
-msgstr ""
-"Ve výchozím nastavení bude systém vycházet ze zásoby v místě zdroje a "
-"pasivně čekat na dostupnost. Druhá možnost vám umožní přímo vytvořit nákup "
-"na zdrojovém místě (a tím ignorovat jeho aktuální zásobu), abyste získali "
-"produkty. Pokud chceme provést řetězové pohyby a nechat ten, aby čekal na "
-"předchozí, měla by být zvolena druhá možnost."
+msgid "By default, the system will take from the stock in the source location and passively wait for availability. The other possibility allows you to directly create a procurement on the source location (and thus ignore its current stock) to gather products. If we want to chain moves and have this one to wait for the previous, this second option should be chosen."
+msgstr "Ve výchozím nastavení bude systém vycházet ze zásoby v místě zdroje a pasivně čekat na dostupnost. Druhá možnost vám umožní přímo vytvořit nákup na zdrojovém místě (a tím ignorovat jeho aktuální zásobu), abyste získali produkty. Pokud chceme provést řetězové pohyby a nechat ten, aby čekal na předchozí, měla by být zvolena druhá možnost."
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_location__active
-msgid ""
-"By unchecking the active field, you may hide a location without deleting it."
+msgid "By unchecking the active field, you may hide a location without deleting it."
 msgstr "Odškrtnutím aktivního pole, můžete skrýt umístění bez jeho smazání."
 
 #. module: stock
@@ -1566,22 +1498,8 @@ msgstr "Kategorie tras"
 
 #. module: stock
 #: model_terms:res.company,invoice_terms_html:stock.res_company_1
-msgid ""
-"Certain countries apply withholding at source on the amount of invoices, in "
-"accordance with their internal legislation. Any withholding at source will "
-"be paid by the client to the tax authorities. Under no circumstances can My "
-"Company (Chicago) become involved in costs related to a country's "
-"legislation. The amount of the invoice will therefore be due to My Company "
-"(Chicago) in its entirety and does not include any costs relating to the "
-"legislation of the country in which the client is located."
-msgstr ""
-"Některé země uplatňují srážku u zdroje z částky faktur v souladu se svými "
-"vnitrostátními právními předpisy. Případnou srážku u zdroje odvede klient "
-"finančnímu úřadu. Společnost My Company (Chicago) se v žádném případě nemůže"
-" podílet na nákladech souvisejících s legislativou dané země. Částka na "
-"faktuře proto bude společnosti My Company (Chicago) náležet v plné výši a "
-"nezahrnuje žádné náklady související s legislativou země, ve které se klient"
-" nachází."
+msgid "Certain countries apply withholding at source on the amount of invoices, in accordance with their internal legislation. Any withholding at source will be paid by the client to the tax authorities. Under no circumstances can My Company (Chicago) become involved in costs related to a country's legislation. The amount of the invoice will therefore be due to My Company (Chicago) in its entirety and does not include any costs relating to the legislation of the country in which the client is located."
+msgstr "Některé země uplatňují srážku u zdroje z částky faktur v souladu se svými vnitrostátními právními předpisy. Případnou srážku u zdroje odvede klient finančnímu úřadu. Společnost My Company (Chicago) se v žádném případě nemůže podílet na nákladech souvisejících s legislativou dané země. Částka na faktuře proto bude společnosti My Company (Chicago) náležet v plné výši a nezahrnuje žádné náklady související s legislativou země, ve které se klient nachází."
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_return_picking__move_dest_exists
@@ -1602,12 +1520,8 @@ msgstr "Změnit produktové množství"
 #: code:addons/stock/models/stock_orderpoint.py:0
 #: code:addons/stock/models/stock_picking.py:0
 #: code:addons/stock/models/stock_warehouse.py:0
-msgid ""
-"Changing the company of this record is forbidden at this point, you should "
-"rather archive it and create a new one."
-msgstr ""
-"Změna společnosti tohoto záznamu je v tuto chvíli zakázána, měli byste jej "
-"raději archivovat a vytvořit nový."
+msgid "Changing the company of this record is forbidden at this point, you should rather archive it and create a new one."
+msgstr "Změna společnosti tohoto záznamu je v tuto chvíli zakázána, měli byste jej raději archivovat a vytvořit nový."
 
 #. module: stock
 #. odoo-python
@@ -1640,18 +1554,13 @@ msgstr "Kontrola existence operace balení při vychystávání"
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_location__return_location
 msgid "Check this box to allow using this location as a return location."
-msgstr ""
-"Toto políčko zaškrtněte, chcete-li povolit použití tohoto umístění jako "
-"místo návratu."
+msgstr "Toto políčko zaškrtněte, chcete-li povolit použití tohoto umístění jako místo návratu."
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_location__scrap_location
 #: model:ir.model.fields,help:stock.field_stock_move__scrapped
-msgid ""
-"Check this box to allow using this location to put scrapped/damaged goods."
-msgstr ""
-"Zaškrtněte toto políčku k povolení použití tohoto umístění k odkládání "
-"zmetkového/poškozeného zboží."
+msgid "Check this box to allow using this location to put scrapped/damaged goods."
+msgstr "Zaškrtněte toto políčku k povolení použití tohoto umístění k odkládání zmetkového/poškozeného zboží."
 
 #. module: stock
 #. odoo-python
@@ -1691,8 +1600,7 @@ msgstr "Vyberte rozvržení stránky pro tisk štítků"
 #. module: stock
 #: model:ir.model,name:stock.model_picking_label_type
 msgid "Choose whether to print product or lot/sn labels"
-msgstr ""
-"Vyberte, zda tisknout produktový štítek nebo štítek šarží/sériových čísel"
+msgstr "Vyberte, zda tisknout produktový štítek nebo štítek šarží/sériových čísel"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_stock_quantity_history
@@ -1904,12 +1812,8 @@ msgstr "Tlačítka na ovládacím panelu"
 #: model:ir.model.fields,help:stock.field_stock_move__product_uom_category_id
 #: model:ir.model.fields,help:stock.field_stock_move_line__product_uom_category_id
 #: model:ir.model.fields,help:stock.field_stock_scrap__product_uom_category_id
-msgid ""
-"Conversion between Units of Measure can only occur if they belong to the "
-"same category. The conversion will be made based on the ratios."
-msgstr ""
-"Převod mezi měrnými jednotkami lze uskutečnit pouze pokud patří do stejné "
-"kategorie. Převod bude proveden na základě vzájemných poměrů."
+msgid "Conversion between Units of Measure can only occur if they belong to the same category. The conversion will be made based on the ratios."
+msgstr "Převod mezi měrnými jednotkami lze uskutečnit pouze pokud patří do stejné kategorie. Převod bude proveden na základě vzájemných poměrů."
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_location__posx
@@ -2026,20 +1930,13 @@ msgstr "Vytváření přizpůsobitelných pracovních listů pro kontroly kvalit
 
 #. module: stock
 #: model_terms:ir.actions.act_window,help:stock.action_putaway_tree
-msgid ""
-"Create new putaway rules to dispatch automatically specific products to "
-"their appropriate destination location upon receptions."
-msgstr ""
-"Vytvořte nová pravidla pro okamžité odesílání, abyste na recepcích "
-"automaticky odesílali konkrétní produkty do jejich příslušného cílového "
-"umístění."
+msgid "Create new putaway rules to dispatch automatically specific products to their appropriate destination location upon receptions."
+msgstr "Vytvořte nová pravidla pro okamžité odesílání, abyste na recepcích automaticky odesílali konkrétní produkty do jejich příslušného cílového umístění."
 
 #. module: stock
 #: model_terms:ir.actions.act_window,help:stock.action_product_stock_view
 msgid "Create some storable products to see their stock info in this view."
-msgstr ""
-"Vytvořte nějaké skladovatelné produkty, abyste v tomto zobrazení viděli "
-"jejich skladové informace."
+msgstr "Vytvořte nějaké skladovatelné produkty, abyste v tomto zobrazení viděli jejich skladové informace."
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_lot_label_layout__create_uid
@@ -2140,11 +2037,8 @@ msgstr "Vytvořeno dne"
 #. module: stock
 #. odoo-python
 #: code:addons/stock/models/stock_warehouse.py:0
-msgid ""
-"Creating a new warehouse will automatically activate the Storage Locations "
-"setting"
-msgstr ""
-"Vytvoření nového skladu automaticky aktivuje nastavení Umístění úložiště"
+msgid "Creating a new warehouse will automatically activate the Storage Locations setting"
+msgstr "Vytvoření nového skladu automaticky aktivuje nastavení Umístění úložiště"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_picking__date
@@ -2462,13 +2356,8 @@ msgstr "Předvolené trasy skrz sklad"
 
 #. module: stock
 #: model_terms:ir.actions.act_window,help:stock.action_orderpoint
-msgid ""
-"Define a minimum stock rule so that Odoo automatically creates requests for "
-"quotations or confirmed manufacturing orders to resupply your stock."
-msgstr ""
-"Definovat pravidlo minimálních zásob tak, aby Odoo vytvářel automaticky "
-"požadavky na nabídky nebo potvrzené výrobní zakázky, aby znovu zásobil váš "
-"sklad."
+msgid "Define a minimum stock rule so that Odoo automatically creates requests for quotations or confirmed manufacturing orders to resupply your stock."
+msgstr "Definovat pravidlo minimálních zásob tak, aby Odoo vytvářel automaticky požadavky na nabídky nebo potvrzené výrobní zakázky, aby znovu zásobil váš sklad."
 
 #. module: stock
 #: model_terms:ir.actions.act_window,help:stock.action_warehouse_form
@@ -2484,11 +2373,7 @@ msgid ""
 "            vendors) and virtual locations which are the counterpart of\n"
 "            the stock operations like the manufacturing orders\n"
 "            consumptions, inventories, etc."
-msgstr ""
-"Definujte umístění tak, aby odrážely strukturu a organizaci skladu. Odoo je "
-"schopen spravovat fyzická místa (sklady, police, přihrádky atd.), Partnerská"
-" místa (zákazníci, prodejci) a virtuální místa, která jsou protějškem "
-"skladových operací, jako jsou spotřeby výrobních objednávek, zásoby atd."
+msgstr "Definujte umístění tak, aby odrážely strukturu a organizaci skladu. Odoo je schopen spravovat fyzická místa (sklady, police, přihrádky atd.), Partnerská místa (zákazníci, prodejci) a virtuální místa, která jsou protějškem skladových operací, jako jsou spotřeby výrobních objednávek, zásoby atd."
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_location__removal_strategy_id
@@ -2566,7 +2451,7 @@ msgstr ""
 #: model:ir.model.fields.selection,name:stock.selection__stock_picking_type__code__outgoing
 #: model:ir.ui.menu,name:stock.menu_delivery
 msgid "Delivery"
-msgstr "Zásilky"
+msgstr "Výdejky"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_form
@@ -2605,12 +2490,8 @@ msgstr "Typ dodání"
 #. module: stock
 #: model:ir.model.fields,help:stock.field_product_product__sale_delay
 #: model:ir.model.fields,help:stock.field_product_template__sale_delay
-msgid ""
-"Delivery lead time, in days. It's the number of days, promised to the "
-"customer, between the confirmation of the sales order and the delivery."
-msgstr ""
-"Dodací lhůta, ve dnech. Je to počet dní, které byly zákazníkovi slíbeny, "
-"mezi potvrzením prodejní objednávky a dodávkou."
+msgid "Delivery lead time, in days. It's the number of days, promised to the customer, between the confirmation of the sales order and the delivery."
+msgstr "Dodací lhůta, ve dnech. Je to počet dní, které byly zákazníkovi slíbeny, mezi potvrzením prodejní objednávky a dodávkou."
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_lot__delivery_count
@@ -2652,24 +2533,14 @@ msgstr ""
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_product_packaging__route_ids
-msgid ""
-"Depending on the modules installed, this will allow you to define the route "
-"of the product in this packaging: whether it will be bought, manufactured, "
-"replenished on order, etc."
-msgstr ""
-"V závislosti na nainstalovaných modulech umožňuje definovat cestu výrobku v "
-"tomto balení: zda se bude nakupovat, vyrábět, doplňovat na objednávku atd."
+msgid "Depending on the modules installed, this will allow you to define the route of the product in this packaging: whether it will be bought, manufactured, replenished on order, etc."
+msgstr "V závislosti na nainstalovaných modulech umožňuje definovat cestu výrobku v tomto balení: zda se bude nakupovat, vyrábět, doplňovat na objednávku atd."
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_product_product__route_ids
 #: model:ir.model.fields,help:stock.field_product_template__route_ids
-msgid ""
-"Depending on the modules installed, this will allow you to define the route "
-"of the product: whether it will be bought, manufactured, replenished on "
-"order, etc."
-msgstr ""
-"V závislosti na nainstalovaných modulech vám to umožní definovat trasu "
-"produktu: zda bude zakoupen, vyroben, doplněn na objednávku atd."
+msgid "Depending on the modules installed, this will allow you to define the route of the product: whether it will be bought, manufactured, replenished on order, etc."
+msgstr "V závislosti na nainstalovaných modulech vám to umožní definovat trasu produktu: zda bude zakoupen, vyroben, doplněn na objednávku atd."
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_lot__note
@@ -2982,9 +2853,7 @@ msgstr "Drop doprava"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_warehouse_orderpoint_tree_editable
-msgid ""
-"Due to receipts scheduled in the future, you might end up with "
-"excessive stock . Check the Forecasted Report  before reordering"
+msgid "Due to receipts scheduled in the future, you might end up with excessive stock . Check the Forecasted Report  before reordering"
 msgstr ""
 
 #. module: stock
@@ -3016,12 +2885,8 @@ msgstr "Upravit produkt"
 #. module: stock
 #. odoo-python
 #: code:addons/stock/models/stock_quant.py:0
-msgid ""
-"Editing quantities in an Inventory Adjustment location is forbidden,those "
-"locations are used as counterpart when correcting the quantities."
-msgstr ""
-"Úpravy veličin v místě úpravy inventáře jsou zakázány, tato místa se "
-"používají jako protějšek při opravách veličin."
+msgid "Editing quantities in an Inventory Adjustment location is forbidden,those locations are used as counterpart when correcting the quantities."
+msgstr "Úpravy veličin v místě úpravy inventáře jsou zakázány, tato místa se používají jako protějšek při opravách veličin."
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_form
@@ -3052,17 +2917,8 @@ msgstr "E-mail odeslaný zákazníkovi po dokončení objednávky."
 
 #. module: stock
 #: model_terms:digest.tip,tip_description:stock.digest_tip_stock_0
-msgid ""
-"Enjoy a quick-paced experience with the Odoo barcode app. It is blazing fast"
-" and works even without a stable internet connection. It supports all flows:"
-" inventory adjustments, batch picking, moving lots or pallets, low inventory"
-" checks, etc. Go to the \"Apps\" menu to activate the barcode interface."
-msgstr ""
-"Vychutnejte si rychlý zážitek s aplikací čárových kódů Odoo. Je bleskurychlá"
-" a funguje i bez stabilního připojení k internetu. Podporuje všechny toky: "
-"úpravy zásob, vychystávání dávek, přesuny šarží nebo palet, kontroly nízkých"
-" zásob atd. Přejděte do nabídky \"Aplikace\" a aktivujte rozhraní čárového "
-"kódu."
+msgid "Enjoy a quick-paced experience with the Odoo barcode app. It is blazing fast and works even without a stable internet connection. It supports all flows: inventory adjustments, batch picking, moving lots or pallets, low inventory checks, etc. Go to the \"Apps\" menu to activate the barcode interface."
+msgstr "Vychutnejte si rychlý zážitek s aplikací čárových kódů Odoo. Je bleskurychlá a funguje i bez stabilního připojení k internetu. Podporuje všechny toky: úpravy zásob, vychystávání dávek, přesuny šarží nebo palet, kontroly nízkých zásob atd. Přejděte do nabídky \"Aplikace\" a aktivujte rozhraní čárového kódu."
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_product_product__tracking
@@ -3083,11 +2939,7 @@ msgid ""
 "            from a vendor, Odoo will move products from the Vendor\n"
 "            location to the Stock location. Each report can be performed on\n"
 "            physical, partner or virtual locations."
-msgstr ""
-"Každá skladová operace v Odoo přesouvá produkty z jednoho místa na druhé. "
-"Pokud například obdržíte produkty od dodavatele, Odoo bude přesouvat "
-"produkty z místa dodavatele do místa skladu. Každá sestava může být "
-"prováděna na fyzických, partnerských nebo virtuálních místech."
+msgstr "Každá skladová operace v Odoo přesouvá produkty z jednoho místa na druhé. Pokud například obdržíte produkty od dodavatele, Odoo bude přesouvat produkty z místa dodavatele do místa skladu. Každá sestava může být prováděna na fyzických, partnerských nebo virtuálních místech."
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.exception_on_picking
@@ -3363,12 +3215,12 @@ msgstr ""
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_product_product__free_qty
 msgid "Free To Use Quantity "
-msgstr "Zdarma k použití množství "
+msgstr "Množství k dispozici"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.product_product_stock_tree
 msgid "Free to Use"
-msgstr "Zdarma k použití"
+msgstr "K dispozici"
 
 #. module: stock
 #. odoo-javascript
@@ -3419,7 +3271,7 @@ msgstr "Budoucí výroba"
 #. odoo-python
 #: code:addons/stock/models/product.py:0
 msgid "Future Receipts"
-msgstr "Budoucí účtenky"
+msgstr "Budoucí příjemky"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_type_form
@@ -3450,12 +3302,8 @@ msgstr "Získání informativních nebo blokačních upozornění o partnerech"
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_putaway_rule__sequence
-msgid ""
-"Give to the more specialized category, a higher priority to have them in top"
-" of the list."
-msgstr ""
-"Přidej více specializovanou kategorii, vyšší prioritu, aby zůstaly v horní "
-"části seznamu."
+msgid "Give to the more specialized category, a higher priority to have them in top of the list."
+msgstr "Přidej více specializovanou kategorii, vyšší prioritu, aby zůstaly v horní části seznamu."
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_warehouse__sequence
@@ -3492,8 +3340,7 @@ msgstr "Seskupit podle..."
 #. module: stock
 #: model:ir.model.fields,help:stock.field_res_config_settings__group_stock_picking_wave
 msgid "Group your move operations in wave transfer to process them together"
-msgstr ""
-"Seskupte své operace pohybu ve skupinovém přenosu a zpracujte je společně"
+msgstr "Seskupte své operace pohybu ve skupinovém přenosu a zpracujte je společně"
 
 #. module: stock
 #. odoo-javascript
@@ -3652,15 +3499,8 @@ msgstr "Ikona, která označuje výjimečnou aktivitu."
 
 #. module: stock
 #: model_terms:res.company,invoice_terms_html:stock.res_company_1
-msgid ""
-"If a payment is still outstanding more than sixty (60) days after the due "
-"payment date, My Company (Chicago) reserves the right to call on the "
-"services of a debt recovery company. All legal expenses will be payable by "
-"the client."
-msgstr ""
-"Pokud je platba stále neuhrazena více než šedesát (60) dní po datu "
-"splatnosti, společnost My Company (Chicago) si vyhrazuje právo využít služeb"
-" společnosti pro vymáhání pohledávek. Veškeré právní výlohy hradí klient."
+msgid "If a payment is still outstanding more than sixty (60) days after the due payment date, My Company (Chicago) reserves the right to call on the services of a debt recovery company. All legal expenses will be payable by the client."
+msgstr "Pokud je platba stále neuhrazena více než šedesát (60) dní po datu splatnosti, společnost My Company (Chicago) si vyhrazuje právo využít služeb společnosti pro vymáhání pohledávek. Veškeré právní výlohy hradí klient."
 
 #. module: stock
 #: model:ir.model.fields.selection,name:stock.selection__stock_storage_category__allow_new_product__same
@@ -3687,9 +3527,7 @@ msgstr "Pokud zaškrtnuto, některé zprávy mají chybu při doručení."
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_move__propagate_cancel
 msgid "If checked, when this move is cancelled, cancel the linked move too"
-msgstr ""
-"Když dáme zkontrolovat, pokud je tento krok zrušen tak navazující kroky "
-"budou zrušeny také"
+msgstr "Když dáme zkontrolovat, pokud je tento krok zrušen tak navazující kroky budou zrušeny také"
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_move_line__result_package_id
@@ -3698,30 +3536,18 @@ msgstr "Pokud je nastaveno, operace jsou zabaleny do tohoto balíčku"
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_lot_label_layout__label_quantity
-msgid ""
-"If the UoM of a lot is not 'units', the lot will be considered as a unit and"
-" only one label will be printed for this lot."
-msgstr ""
-"Pokud MJ šarže nejsou 'jednotky', bude šarže považována za jednotku a pouze "
-"jeden štítek bude vytisknut pro šarži."
+msgid "If the UoM of a lot is not 'units', the lot will be considered as a unit and only one label will be printed for this lot."
+msgstr "Pokud MJ šarže nejsou 'jednotky', bude šarže považována za jednotku a pouze jeden štítek bude vytisknut pro šarži."
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_warehouse_orderpoint__active
-msgid ""
-"If the active field is set to False, it will allow you to hide the "
-"orderpoint without removing it."
-msgstr ""
-"Pokud je pole aktivní nastaveno na Nepravda, umožní vám skrýt úrovně pro "
-"doplnění bez jejich odebrání."
+msgid "If the active field is set to False, it will allow you to hide the orderpoint without removing it."
+msgstr "Pokud je pole aktivní nastaveno na Nepravda, umožní vám skrýt úrovně pro doplnění bez jejich odebrání."
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_route__active
-msgid ""
-"If the active field is set to False, it will allow you to hide the route "
-"without removing it."
-msgstr ""
-"Pokud je pole nastaveno na Nepravda, tak umožní skrýt směrování bez jeho "
-"odebrání."
+msgid "If the active field is set to False, it will allow you to hide the route without removing it."
+msgstr "Pokud je pole nastaveno na Nepravda, tak umožní skrýt směrování bez jeho odebrání."
 
 #. module: stock
 #: model:ir.model.fields.selection,name:stock.selection__stock_storage_category__allow_new_product__empty
@@ -3735,131 +3561,84 @@ msgstr "Pokud je stejné sériové číslo v jiném kvantu"
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_picking_type__auto_print_delivery_slip
-msgid ""
-"If this checkbox is ticked, Odoo will automatically print the delivery slip "
-"of a picking when it is validated."
-msgstr ""
-"Pokud je toto políčko zaškrtnuto, Odoo automaticky vytiskne dodací list "
-"vyskladnění po jeho potvrzení."
+msgid "If this checkbox is ticked, Odoo will automatically print the delivery slip of a picking when it is validated."
+msgstr "Pokud je toto políčko zaškrtnuto, Odoo automaticky vytiskne dodací list vyskladnění po jeho potvrzení."
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_picking_type__auto_print_lot_labels
-msgid ""
-"If this checkbox is ticked, Odoo will automatically print the lot/SN labels "
-"of a picking when it is validated."
+msgid "If this checkbox is ticked, Odoo will automatically print the lot/SN labels of a picking when it is validated."
 msgstr ""
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_picking_type__auto_print_package_label
-msgid ""
-"If this checkbox is ticked, Odoo will automatically print the package label "
-"when \"Put in Pack\" button is used."
+msgid "If this checkbox is ticked, Odoo will automatically print the package label when \"Put in Pack\" button is used."
 msgstr ""
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_picking_type__auto_print_packages
-msgid ""
-"If this checkbox is ticked, Odoo will automatically print the packages and "
-"their contents of a picking when it is validated."
+msgid "If this checkbox is ticked, Odoo will automatically print the packages and their contents of a picking when it is validated."
 msgstr ""
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_picking_type__auto_print_product_labels
-msgid ""
-"If this checkbox is ticked, Odoo will automatically print the product labels"
-" of a picking when it is validated."
+msgid "If this checkbox is ticked, Odoo will automatically print the product labels of a picking when it is validated."
 msgstr ""
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_picking_type__auto_print_reception_report_labels
-msgid ""
-"If this checkbox is ticked, Odoo will automatically print the reception "
-"report labels of a picking when it is validated."
+msgid "If this checkbox is ticked, Odoo will automatically print the reception report labels of a picking when it is validated."
 msgstr ""
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_picking_type__auto_print_reception_report
-msgid ""
-"If this checkbox is ticked, Odoo will automatically print the reception "
-"report of a picking when it is validated and has assigned moves."
+msgid "If this checkbox is ticked, Odoo will automatically print the reception report of a picking when it is validated and has assigned moves."
 msgstr ""
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_picking_type__auto_print_return_slip
-msgid ""
-"If this checkbox is ticked, Odoo will automatically print the return slip of"
-" a picking when it is validated."
+msgid "If this checkbox is ticked, Odoo will automatically print the return slip of a picking when it is validated."
 msgstr ""
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_picking_type__auto_show_reception_report
-msgid ""
-"If this checkbox is ticked, Odoo will automatically show the reception "
-"report (if there are moves to allocate to) when validating."
-msgstr ""
-"Pokud je toto zaškrtávací políčko zaškrtnuté, Odoo při ověřování automaticky"
-" zobrazí zprávu o příjmu (pokud existují přesuny k alokaci)."
+msgid "If this checkbox is ticked, Odoo will automatically show the reception report (if there are moves to allocate to) when validating."
+msgstr "Pokud je toto zaškrtávací políčko zaškrtnuté, Odoo při ověřování automaticky zobrazí zprávu o příjmu (pokud existují přesuny k alokaci)."
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_picking_type__print_label
 msgid "If this checkbox is ticked, label will be print in this operation."
-msgstr ""
-"Pokud je toto políčko zaškrtnuto, bude se při této operaci tisknout štítek."
+msgstr "Pokud je toto políčko zaškrtnuto, bude se při této operaci tisknout štítek."
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_move__show_operations
 #: model:ir.model.fields,help:stock.field_stock_picking__show_operations
 #: model:ir.model.fields,help:stock.field_stock_picking_type__show_operations
-msgid ""
-"If this checkbox is ticked, the pickings lines will represent detailed stock"
-" operations. If not, the picking lines will represent an aggregate of "
-"detailed stock operations."
-msgstr ""
-"Pokud je toto zaškrtávací políčko zaškrtnuto, řádky pro vyskladnění budou "
-"zobrazovat podrobné operace skladu. Pokud tomu tak není, řádky vyskladnění "
-"budou představovat jen souhrn podrobných skladových operací."
+msgid "If this checkbox is ticked, the pickings lines will represent detailed stock operations. If not, the picking lines will represent an aggregate of detailed stock operations."
+msgstr "Pokud je toto zaškrtávací políčko zaškrtnuto, řádky pro vyskladnění budou zobrazovat podrobné operace skladu. Pokud tomu tak není, řádky vyskladnění budou představovat jen souhrn podrobných skladových operací."
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_move_line__picking_type_use_create_lots
 #: model:ir.model.fields,help:stock.field_stock_picking__use_create_lots
 #: model:ir.model.fields,help:stock.field_stock_picking_type__use_create_lots
-msgid ""
-"If this is checked only, it will suppose you want to create new Lots/Serial "
-"Numbers, so you can provide them in a text field. "
-msgstr ""
-"Pokud je toto políčko zaškrtnuto, bude předpokládat, že budete chtít "
-"vytvořit nová produktová čísla / sériová čísla, takže je můžete zadat v "
-"textovém poli."
+msgid "If this is checked only, it will suppose you want to create new Lots/Serial Numbers, so you can provide them in a text field. "
+msgstr "Pokud je toto políčko zaškrtnuto, bude předpokládat, že budete chtít vytvořit nová produktová čísla / sériová čísla, takže je můžete zadat v textovém poli."
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_move_line__picking_type_use_existing_lots
 #: model:ir.model.fields,help:stock.field_stock_picking__use_existing_lots
 #: model:ir.model.fields,help:stock.field_stock_picking_type__use_existing_lots
-msgid ""
-"If this is checked, you will be able to choose the Lots/Serial Numbers. You "
-"can also decide to not put lots in this operation type.  This means it will "
-"create stock with no lot or not put a restriction on the lot taken. "
-msgstr ""
-"Pokud je tato volba zaškrtnuta, budete mít možnost zvolit si šíslo šarže /  "
-"Sériová čísla. Můžete také rozhodnout, že v tomto typu operace nebudete "
-"dávat šarži. Znamená to, že vytvoří zásoby bez šarže nebo neudělí omezení na"
-" přijatou šarži."
+msgid "If this is checked, you will be able to choose the Lots/Serial Numbers. You can also decide to not put lots in this operation type.  This means it will create stock with no lot or not put a restriction on the lot taken. "
+msgstr "Pokud je tato volba zaškrtnuta, budete mít možnost zvolit si šíslo šarže /  Sériová čísla. Můžete také rozhodnout, že v tomto typu operace nebudete dávat šarži. Znamená to, že vytvoří zásoby bez šarže nebo neudělí omezení na přijatou šarži."
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_picking__return_id
-msgid ""
-"If this picking was created as a return of another picking, this field links"
-" to the original picking."
+msgid "If this picking was created as a return of another picking, this field links to the original picking."
 msgstr ""
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_picking__backorder_id
-msgid ""
-"If this shipment was split, then this field links to the shipment which "
-"contains the already processed part."
-msgstr ""
-"Pokud byla dodávka rozdělena, potom toto pole odkazuje na dodávku, která "
-"obsahuje již zpracovanou část."
+msgid "If this shipment was split, then this field links to the shipment which contains the already processed part."
+msgstr "Pokud byla dodávka rozdělena, potom toto pole odkazuje na dodávku, která obsahuje již zpracovanou část."
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_move__picking_type_entire_packs
@@ -3867,8 +3646,7 @@ msgstr ""
 #: model:ir.model.fields,help:stock.field_stock_picking__picking_type_entire_packs
 #: model:ir.model.fields,help:stock.field_stock_picking_type__show_entire_packs
 msgid "If ticked, you will be able to select entire packages to move"
-msgstr ""
-"Pokud je zaškrtnuto, budete moci vybrat celé balíčky, které chcete přesunout"
+msgstr "Pokud je zaškrtnuto, budete moci vybrat celé balíčky, které chcete přesunout"
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_rule__active
@@ -3915,15 +3693,8 @@ msgstr ""
 
 #. module: stock
 #: model_terms:res.company,invoice_terms_html:stock.res_company_1
-msgid ""
-"In order for it to be admissible, My Company (Chicago) must be notified of "
-"any claim by means of a letter sent by recorded delivery to its registered "
-"office within 8 days of the delivery of the goods or the provision of the "
-"services."
-msgstr ""
-"Aby to bylo přípustné, moje společnost (Chicago) o případné reklamaci musí "
-"být informována doporučeným dopisem na adresu sídla společnosti do 8 dnů od "
-"doručení zboží nebo poskytnutí služby."
+msgid "In order for it to be admissible, My Company (Chicago) must be notified of any claim by means of a letter sent by recorded delivery to its registered office within 8 days of the delivery of the goods or the provision of the services."
+msgstr "Aby to bylo přípustné, moje společnost (Chicago) o případné reklamaci musí být informována doporučeným dopisem na adresu sídla společnosti do 8 dnů od doručení zboží nebo poskytnutí služby."
 
 #. module: stock
 #. odoo-javascript
@@ -3964,11 +3735,8 @@ msgstr ""
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_quant__inventory_diff_quantity
-msgid ""
-"Indicates the gap between the product's theoretical quantity and its counted"
-" quantity."
-msgstr ""
-"Udává rozdíl mezi teoretickým množstvím výrobku a jeho počítaným množstvím."
+msgid "Indicates the gap between the product's theoretical quantity and its counted quantity."
+msgstr "Udává rozdíl mezi teoretickým množstvím výrobku a jeho počítaným množstvím."
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_move_kandan
@@ -4046,16 +3814,12 @@ msgstr "Vnitřní umístění mezi potomky"
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_lot__ref
-msgid ""
-"Internal reference number in case it differs from the manufacturer's "
-"lot/serial number"
-msgstr ""
-"Interní referenční číslo v případě, že se liší od výrobního sériového čísla"
+msgid "Internal reference number in case it differs from the manufacturer's lot/serial number"
+msgstr "Interní referenční číslo v případě, že se liší od výrobního sériového čísla"
 
 #. module: stock
 #: model_terms:ir.actions.act_window,help:stock.action_picking_tree_internal
-msgid ""
-"Internal transfers allow you to move products from one location to another."
+msgid "Internal transfers allow you to move products from one location to another."
 msgstr ""
 
 #. module: stock
@@ -4066,14 +3830,14 @@ msgstr "Neplatný levý operand domény %s"
 
 #. module: stock
 #. odoo-python
-#: code:addons/stock/models/product.py:0 code:addons/stock/models/product.py:0
+#: code:addons/stock/models/product.py:0
 #: code:addons/stock/models/stock_lot.py:0
 msgid "Invalid domain operator %s"
 msgstr "Neplatný operátor domény %s"
 
 #. module: stock
 #. odoo-python
-#: code:addons/stock/models/product.py:0 code:addons/stock/models/product.py:0
+#: code:addons/stock/models/product.py:0
 #: code:addons/stock/models/stock_lot.py:0
 msgid "Invalid domain right operand '%s'. It must be of type Integer/Float"
 msgstr "Neplatný pravý operand domény '%s'. Musí být typu Integer/Float"
@@ -4081,11 +3845,8 @@ msgstr "Neplatný pravý operand domény '%s'. Musí být typu Integer/Float"
 #. module: stock
 #. odoo-python
 #: code:addons/stock/models/product.py:0
-msgid ""
-"Invalid rule's configuration, the following rule causes an endless loop: %s"
-msgstr ""
-"Neplatná konfigurace pravidla, následující pravidlo způsobuje nekonečnou "
-"smyčku: %s"
+msgid "Invalid rule's configuration, the following rule causes an endless loop: %s"
+msgstr "Neplatná konfigurace pravidla, následující pravidlo způsobuje nekonečnou smyčku: %s"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_quant__inventory_quantity_auto_apply
@@ -4163,7 +3924,6 @@ msgstr "Ztráty zásob"
 
 #. module: stock
 #. odoo-javascript
-#: code:addons/stock/static/src/stock_forecasted/forecasted_details.xml:0
 #: code:addons/stock/static/src/stock_forecasted/forecasted_details.xml:0
 msgid "Inventory On Hand"
 msgstr "Inventář po ruce"
@@ -4268,8 +4028,7 @@ msgstr "Je provedeno upravitelné množství"
 #. module: stock
 #. odoo-python
 #: code:addons/stock/models/stock_quant.py:0
-msgid ""
-"It is not possible to unreserve more products of %s than you have in stock."
+msgid "It is not possible to unreserve more products of %s than you have in stock."
 msgstr "Není možné zrušit rezervaci více produktům %s, než máte na skladě."
 
 #. module: stock
@@ -4331,25 +4090,18 @@ msgstr "Zachovat rozdíl"
 #. module: stock
 #. odoo-javascript
 #: code:addons/stock/static/src/widgets/lots_dialog.xml:0
-#: code:addons/stock/static/src/widgets/lots_dialog.xml:0
 msgid "Keep current lines"
 msgstr ""
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.stock_inventory_conflict_form_view
-msgid ""
-"Keep the <strong>Counted Quantity</strong> (the Difference will be updated)"
-msgstr ""
-"Zachovat <strong>započítané množství</strong> (rozdíl bude aktualizován)"
+msgid "Keep the <strong>Counted Quantity</strong> (the Difference will be updated)"
+msgstr "Zachovat <strong>započítané množství</strong> (rozdíl bude aktualizován)"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.stock_inventory_conflict_form_view
-msgid ""
-"Keep the <strong>Difference</strong> (the Counted Quantity will be updated "
-"to reflect the same difference as when you counted)"
-msgstr ""
-"Ponechat <strong>rozdíl</strong> (spočítané množství bude aktualizováno tak,"
-" aby odráželo stejný rozdíl jako při počítání)."
+msgid "Keep the <strong>Difference</strong> (the Counted Quantity will be updated to reflect the same difference as when you counted)"
+msgstr "Ponechat <strong>rozdíl</strong> (spočítané množství bude aktualizováno tak, aby odráželo stejný rozdíl jako při počítání)."
 
 #. module: stock
 #. odoo-javascript
@@ -4562,9 +4314,7 @@ msgstr "Nechat prázdné"
 #: model:ir.model.fields,help:stock.field_stock_route__company_id
 #: model:ir.model.fields,help:stock.field_stock_rule__route_company_id
 msgid "Leave this field empty if this route is shared between all companies"
-msgstr ""
-"Pokud je tato trasa sdílena mezi všemi společnostmi, ponechte toto pole "
-"prázdné"
+msgstr "Pokud je tato trasa sdílena mezi všemi společnostmi, ponechte toto pole prázdné"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.report_stock_rule
@@ -4592,8 +4342,7 @@ msgstr "Štítek měrné jednotky délky"
 #: model:ir.model.fields,help:stock.field_stock_quant__company_id
 #: model:ir.model.fields,help:stock.field_stock_quant_relocate__company_id
 msgid "Let this field empty if this location is shared between companies"
-msgstr ""
-"Pokud je toto umístění sdíleno mezi společnostmi, zanechte toto pole volné."
+msgstr "Pokud je toto umístění sdíleno mezi společnostmi, zanechte toto pole volné."
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_move_form
@@ -4873,8 +4622,7 @@ msgstr "Spravovat uskladňovací kategorie"
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
 msgid "Manage product packagings (e.g. pack of 6 bottles, box of 10 pieces)"
-msgstr ""
-"Spravujte obaly produktů (např. balení 6 lahví, krabička po 10 kusech)"
+msgstr "Spravujte obaly produktů (např. balení 6 lahví, krabička po 10 kusech)"
 
 #. module: stock
 #: model:ir.model.fields.selection,name:stock.selection__stock_warehouse_orderpoint__trigger__manual
@@ -4888,7 +4636,6 @@ msgstr "Manuální operace"
 
 #. module: stock
 #. odoo-python
-#: code:addons/stock/wizard/product_replenish.py:0
 #: code:addons/stock/wizard/product_replenish.py:0
 msgid "Manual Replenishment"
 msgstr "Ruční doplňování"
@@ -4937,21 +4684,13 @@ msgstr "Maximální hmotnost by měla být kladné číslo."
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_picking_type__reservation_days_before_priority
-msgid ""
-"Maximum number of days before scheduled date that priority picking products "
-"should be reserved."
-msgstr ""
-"Maximální počet dní před plánovaným datem, kdy by měly být produkty "
-"přednostního vyzvednutí rezervovány."
+msgid "Maximum number of days before scheduled date that priority picking products should be reserved."
+msgstr "Maximální počet dní před plánovaným datem, kdy by měly být produkty přednostního vyzvednutí rezervovány."
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_picking_type__reservation_days_before
-msgid ""
-"Maximum number of days before scheduled date that products should be "
-"reserved."
-msgstr ""
-"Maximální počet dní před plánovaným datem, kdy by měly být produkty "
-"rezervovány."
+msgid "Maximum number of days before scheduled date that products should be reserved."
+msgstr "Maximální počet dní před plánovaným datem, kdy by měly být produkty rezervovány."
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_package_type__max_weight
@@ -5071,14 +4810,8 @@ msgstr "Historie pohybů"
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_warehouse_orderpoint__group_id
-msgid ""
-"Moves created through this orderpoint will be put in this procurement group."
-" If none is given, the moves generated by stock rules will be grouped into "
-"one big picking."
-msgstr ""
-"Přesuny vytvořené tímto objednávacím bodem budou zařazeny do této skupiny "
-"nákupu. Není-li zadán žádný, pohyby generované skladovými pravidly budou "
-"seskupeny do jednoho velkého výběru."
+msgid "Moves created through this orderpoint will be put in this procurement group. If none is given, the moves generated by stock rules will be grouped into one big picking."
+msgstr "Přesuny vytvořené tímto objednávacím bodem budou zařazeny do této skupiny nákupu. Není-li zadán žádný, pohyby generované skladovými pravidly budou seskupeny do jednoho velkého výběru."
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_res_config_settings__group_stock_adv_location
@@ -5108,20 +4841,8 @@ msgstr "Termín mé aktivity"
 
 #. module: stock
 #: model_terms:res.company,invoice_terms_html:stock.res_company_1
-msgid ""
-"My Company (Chicago) undertakes to do its best to supply performant services"
-" in due time in accordance with the agreed timeframes. However, none of its "
-"obligations can be considered as being an obligation to achieve results. My "
-"Company (Chicago) cannot under any circumstances, be required by the client "
-"to appear as a third party in the context of any claim for damages filed "
-"against the client by an end consumer."
-msgstr ""
-"Moje společnost (Chicago) se zavazuje, že udělá vše pro to, aby poskytovala "
-"výkonné služby včas a v souladu s dohodnutými časovými rámci. Žádnou z "
-"jejích povinností však nelze považovat za povinnost dosahovat výsledků. Moje"
-" společnost (Chicago) nemůže být za žádných okolností požadována klientem, "
-"aby vystupovala jako třetí strana v souvislosti s jakýmkoli nárokem na "
-"náhradu škody vzneseným proti klientovi konečným spotřebitelem."
+msgid "My Company (Chicago) undertakes to do its best to supply performant services in due time in accordance with the agreed timeframes. However, none of its obligations can be considered as being an obligation to achieve results. My Company (Chicago) cannot under any circumstances, be required by the client to appear as a third party in the context of any claim for damages filed against the client by an end consumer."
+msgstr "Moje společnost (Chicago) se zavazuje, že udělá vše pro to, aby poskytovala výkonné služby včas a v souladu s dohodnutými časovými rámci. Žádnou z jejích povinností však nelze považovat za povinnost dosahovat výsledků. Moje společnost (Chicago) nemůže být za žádných okolností požadována klientem, aby vystupovala jako třetí strana v souvislosti s jakýmkoli nárokem na náhradu škody vzneseným proti klientovi konečným spotřebitelem."
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.quant_search_view
@@ -5181,7 +4902,6 @@ msgstr "Nikdy"
 
 #. module: stock
 #. odoo-python
-#: code:addons/stock/models/stock_scrap.py:0
 #: code:addons/stock/models/stock_scrap.py:0
 #: model:ir.model.fields.selection,name:stock.selection__stock_move__state__draft
 #: model:ir.model.fields.selection,name:stock.selection__stock_package_level__state__new
@@ -5313,12 +5033,8 @@ msgstr "Nebyl nalezen žádný produkt. Vytvořme si jeden!"
 #. module: stock
 #. odoo-python
 #: code:addons/stock/wizard/stock_picking_return.py:0
-msgid ""
-"No products to return (only lines in Done state and not fully returned yet "
-"can be returned)."
-msgstr ""
-"Žádné produkty k vrácení (vrátit lze pouze položky ve stavu Hotovo a dosud "
-"ne zcela vrácené)."
+msgid "No products to return (only lines in Done state and not fully returned yet can be returned)."
+msgstr "Žádné produkty k vrácení (vrátit lze pouze položky ve stavu Hotovo a dosud ne zcela vrácené)."
 
 #. module: stock
 #: model_terms:ir.actions.act_window,help:stock.action_putaway_tree
@@ -5505,12 +5221,8 @@ msgstr "Pohotové množství"
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_quant__available_quantity
-msgid ""
-"On hand quantity which hasn't been reserved on a transfer, in the default "
-"unit of measure of the product"
-msgstr ""
-"Množství na skladě, které nebylo rezervováno při převodu, ve výchozí měrné "
-"jednotce produktu."
+msgid "On hand quantity which hasn't been reserved on a transfer, in the default unit of measure of the product"
+msgstr "Množství na skladě, které nebylo rezervováno při převodu, ve výchozí měrné jednotce produktu."
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.product_template_kanban_stock_view
@@ -5610,11 +5322,8 @@ msgstr "Operace bez balení"
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_move__partner_id
-msgid ""
-"Optional address where goods are to be delivered, specifically used for "
-"allotment"
-msgstr ""
-"Doplňková adresa, kde bude zboží doručeno, speciálně použito pro rozdělování"
+msgid "Optional address where goods are to be delivered, specifically used for allotment"
+msgstr "Doplňková adresa, kde bude zboží doručeno, speciálně použito pro rozdělování"
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_location__posx
@@ -5716,20 +5425,8 @@ msgstr "Jiné informace"
 
 #. module: stock
 #: model_terms:res.company,invoice_terms_html:stock.res_company_1
-msgid ""
-"Our invoices are payable within 21 working days, unless another payment "
-"timeframe is indicated on either the invoice or the order. In the event of "
-"non-payment by the due date, My Company (Chicago) reserves the right to "
-"request a fixed interest payment amounting to 10% of the sum remaining due. "
-"My Company (Chicago) will be authorized to suspend any provision of services"
-" without prior warning in the event of late payment."
-msgstr ""
-"Naše faktury jsou splatné do 21 pracovních dnů, pokud není na faktuře nebo "
-"objednávce uvedena jiná lhůta splatnosti. V případě nezaplacení do data "
-"splatnosti si společnost My Company (Chicago) vyhrazuje právo požadovat "
-"pevný úrok ve výši 10 % ze zbývající dlužné částky. Společnost My Company "
-"(Chicago) bude oprávněna v případě pozdní platby pozastavit poskytování "
-"jakýchkoli služeb bez předchozího upozornění."
+msgid "Our invoices are payable within 21 working days, unless another payment timeframe is indicated on either the invoice or the order. In the event of non-payment by the due date, My Company (Chicago) reserves the right to request a fixed interest payment amounting to 10% of the sum remaining due. My Company (Chicago) will be authorized to suspend any provision of services without prior warning in the event of late payment."
+msgstr "Naše faktury jsou splatné do 21 pracovních dnů, pokud není na faktuře nebo objednávce uvedena jiná lhůta splatnosti. V případě nezaplacení do data splatnosti si společnost My Company (Chicago) vyhrazuje právo požadovat pevný úrok ve výši 10 % ze zbývající dlužné částky. Společnost My Company (Chicago) bude oprávněna v případě pozdní platby pozastavit poskytování jakýchkoli služeb bez předchozího upozornění."
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_warehouse__out_type_id
@@ -6196,17 +5893,12 @@ msgstr ""
 #. module: stock
 #. odoo-python
 #: code:addons/stock/models/stock_quant.py:0
-msgid ""
-"Press the CREATE button to define quantity for each product in your stock or"
-" import them from a spreadsheet throughout Favorites"
-msgstr ""
-"Stisknutím tlačítka VYTVOŘIT definujte množství pro každý produkt na skladě "
-"nebo je importujte z tabulky v Oblíbených"
+msgid "Press the CREATE button to define quantity for each product in your stock or import them from a spreadsheet throughout Favorites"
+msgstr "Stisknutím tlačítka VYTVOŘIT definujte množství pro každý produkt na skladě nebo je importujte z tabulky v Oblíbených"
 
 #. module: stock
 #. odoo-javascript
 #: code:addons/stock/static/src/client_actions/stock_traceability_report_backend.xml:0
-#: code:addons/stock/static/src/components/reception_report_main/stock_reception_report_main.xml:0
 #: code:addons/stock/static/src/components/reception_report_main/stock_reception_report_main.xml:0
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_form
 msgid "Print"
@@ -6516,12 +6208,8 @@ msgstr "Model produktu není definován. Obraťte se na svého správce."
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_production_lot_form
-msgid ""
-"Product this lot/serial number contains. You cannot change it anymore if it "
-"has already been moved."
-msgstr ""
-"Produkt, který toto produktové / sériové číslo obsahuje. Pokud již byl "
-"přesunut, nemůžete jej změnit."
+msgid "Product this lot/serial number contains. You cannot change it anymore if it has already been moved."
+msgstr "Produkt, který toto produktové / sériové číslo obsahuje. Pokud již byl přesunut, nemůžete jej změnit."
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_warehouse_orderpoint__product_uom_name
@@ -6572,11 +6260,8 @@ msgstr "Stav dostupnosti produktu"
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_picking__priority
-msgid ""
-"Products will be reserved first for the transfers with the highest "
-"priorities."
-msgstr ""
-"Produkty budou rezervovány nejprve pro převody s nejvyššími prioritami."
+msgid "Products will be reserved first for the transfers with the highest priorities."
+msgstr "Produkty budou rezervovány nejprve pro převody s nejvyššími prioritami."
 
 #. module: stock
 #. odoo-python
@@ -6863,19 +6548,13 @@ msgstr ""
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_quant__quantity
-msgid ""
-"Quantity of products in this quant, in the default unit of measure of the "
-"product"
+msgid "Quantity of products in this quant, in the default unit of measure of the product"
 msgstr "Počet produktů v tomto množství ve výchozí měrné jednotce produktu"
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_quant__reserved_quantity
-msgid ""
-"Quantity of reserved products in this quant, in the default unit of measure "
-"of the product"
-msgstr ""
-"Množství vyhrazených produktů v tomto množství, ve výchozí měrné jednotce "
-"produktu"
+msgid "Quantity of reserved products in this quant, in the default unit of measure of the product"
+msgstr "Množství vyhrazených produktů v tomto množství, ve výchozí měrné jednotce produktu"
 
 #. module: stock
 #. odoo-python
@@ -6911,12 +6590,8 @@ msgstr "Kvanty"
 #. module: stock
 #. odoo-python
 #: code:addons/stock/models/stock_quant.py:0
-msgid ""
-"Quants are auto-deleted when appropriate. If you must manually delete them, "
-"please ask a stock manager to do it."
-msgstr ""
-"Množství se v případě potřeby automaticky odstraní. Pokud jej musíte "
-"odstranit ručně, požádejte o to vedoucího skladu."
+msgid "Quants are auto-deleted when appropriate. If you must manually delete them, please ask a stock manager to do it."
+msgstr "Množství se v případě potřeby automaticky odstraní. Pokud jej musíte odstranit ručně, požádejte o to vedoucího skladu."
 
 #. module: stock
 #. odoo-python
@@ -6964,7 +6639,7 @@ msgstr ""
 #: code:addons/stock/static/src/stock_forecasted/forecasted_details.xml:0
 #: model:ir.model.fields.selection,name:stock.selection__stock_picking_type__code__incoming
 msgid "Receipt"
-msgstr "Účtenka"
+msgstr "Příjemka"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_warehouse__reception_route_id
@@ -7005,8 +6680,7 @@ msgstr "Přijmout zboží na vstup a poté na sklad (2 kroky)"
 #. module: stock
 #: model:ir.model.fields.selection,name:stock.selection__stock_warehouse__reception_steps__three_steps
 msgid "Receive goods in input, then quality and then stock (3 steps)"
-msgstr ""
-"Přijmout zboží na vstup, poté kontrola kvality a poté na sklad (3 kroky)"
+msgstr "Přijmout zboží na vstup, poté kontrola kvality a poté na sklad (3 kroky)"
 
 #. module: stock
 #. odoo-python
@@ -7162,7 +6836,6 @@ msgstr "Vyhledávání pravidel znovuobjednání"
 #. module: stock
 #. odoo-javascript
 #: code:addons/stock/static/src/stock_forecasted/forecasted_buttons.xml:0
-#: code:addons/stock/static/src/stock_forecasted/forecasted_buttons.xml:0
 #: model_terms:ir.ui.view,arch_db:stock.product_form_view_procurement_button
 #: model_terms:ir.ui.view,arch_db:stock.product_product_view_form_easy_inherit_stock
 #: model_terms:ir.ui.view,arch_db:stock.product_template_form_view_procurement_button
@@ -7181,7 +6854,6 @@ msgstr ""
 
 #. module: stock
 #. odoo-python
-#: code:addons/stock/models/stock_warehouse.py:0
 #: code:addons/stock/models/stock_warehouse.py:0
 #: model:stock.route,name:stock.route_warehouse0_mto
 msgid "Replenish on Order (MTO)"
@@ -7238,7 +6910,6 @@ msgstr "Dokumentová akce"
 
 #. module: stock
 #. odoo-javascript
-#: code:addons/stock/static/src/client_actions/multi_print.js:0
 #: code:addons/stock/static/src/client_actions/multi_print.js:0
 msgid "Report Printing Error"
 msgstr ""
@@ -7489,22 +7160,14 @@ msgstr "U tohoto produktu lze vybrat trasy"
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_warehouse__resupply_wh_ids
-msgid ""
-"Routes will be created automatically to resupply this warehouse from the "
-"warehouses ticked"
-msgstr ""
-"Trasy budou vytvořeny automaticky, aby sklad doplnil zásoby z vybraných "
-"skladů"
+msgid "Routes will be created automatically to resupply this warehouse from the warehouses ticked"
+msgstr "Trasy budou vytvořeny automaticky, aby sklad doplnil zásoby z vybraných skladů"
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_replenishment_info__warehouseinfo_ids
 #: model:ir.model.fields,help:stock.field_stock_warehouse__resupply_route_ids
-msgid ""
-"Routes will be created for these resupply warehouses and you can select them"
-" on products and product categories"
-msgstr ""
-"Pro tyto sklady budou vytvořeny trasy a můžete je vybrat na výrobcích a "
-"kategoriích výrobků"
+msgid "Routes will be created for these resupply warehouses and you can select them on products and product categories"
+msgstr "Pro tyto sklady budou vytvořeny trasy a můžete je vybrat na výrobcích a kategoriích výrobků"
 
 #. module: stock
 #. odoo-python
@@ -7612,9 +7275,7 @@ msgstr "Plánované datum"
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_move__date
 msgid "Scheduled date until move is done, then date of actual move processing"
-msgstr ""
-"Naplánované datum do dokončení přesunu, poté datum skutečného zpracování "
-"přesunu"
+msgstr "Naplánované datum do dokončení přesunu, poté datum skutečného zpracování přesunu"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_move_search
@@ -7623,13 +7284,8 @@ msgstr "Plánovaný datum na zpracování"
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_picking__scheduled_date
-msgid ""
-"Scheduled time for the first part of the shipment to be processed. Setting "
-"manually a value here would set it as expected date for all the stock moves."
-msgstr ""
-"Plánovaný čas pro první část zásilky, která má být zpracována. Ruční "
-"nastavení hodnoty zde nastaví jako očekávané datum pro všechny skladové "
-"pohyby."
+msgid "Scheduled time for the first part of the shipment to be processed. Setting manually a value here would set it as expected date for all the stock moves."
+msgstr "Plánovaný čas pro první část zásilky, která má být zpracována. Ruční nastavení hodnoty zde nastaví jako očekávané datum pro všechny skladové pohyby."
 
 #. module: stock
 #: model:ir.actions.server,name:stock.action_scrap
@@ -7718,14 +7374,8 @@ msgstr "Vyberte místa, kde lze tuto trasu zvolit"
 #. module: stock
 #: model:ir.model.fields,help:stock.field_res_partner__picking_warn
 #: model:ir.model.fields,help:stock.field_res_users__picking_warn
-msgid ""
-"Selecting the \"Warning\" option will notify user with the message, "
-"Selecting \"Blocking Message\" will throw an exception with the message and "
-"block the flow. The Message has to be written in the next field."
-msgstr ""
-"Výběr možnosti \"Varování\" zobrazí uživateli zprávu, výběr možnosti "
-"\"Blokující zpráva\" zobrazí zprávu a zablokuje workflow. Zpráva musí být "
-"napsána v následujícím poli."
+msgid "Selecting the \"Warning\" option will notify user with the message, Selecting \"Blocking Message\" will throw an exception with the message and block the flow. The Message has to be written in the next field."
+msgstr "Výběr možnosti \"Varování\" zobrazí uživateli zprávu, výběr možnosti \"Blokující zpráva\" zobrazí zprávu a zablokuje workflow. Zpráva musí být napsána v následujícím poli."
 
 #. module: stock
 #. odoo-python
@@ -7740,11 +7390,8 @@ msgstr "Prodej a nákup produktů v různých měrných jednotkách"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
-msgid ""
-"Send an automatic confirmation SMS Text Message when Delivery Orders are "
-"done"
-msgstr ""
-"Po dokončení doručovacích objednávek odešlete automatické potvrzovací SMS"
+msgid "Send an automatic confirmation SMS Text Message when Delivery Orders are done"
+msgstr "Po dokončení doručovacích objednávek odešlete automatické potvrzovací SMS"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
@@ -7768,11 +7415,8 @@ msgstr "Sendcloud konektor"
 
 #. module: stock
 #: model:mail.template,description:stock.mail_template_data_delivery_confirmation
-msgid ""
-"Sent to the customers when orders are delivered, if the setting is enabled"
-msgstr ""
-"Odesláno zákazníkům, když jsou objednávky doručeny, pokud je nastavení "
-"povoleno"
+msgid "Sent to the customers when orders are delivered, if the setting is enabled"
+msgstr "Odesláno zákazníkům, když jsou objednávky doručeny, pokud je nastavení povoleno"
 
 #. module: stock
 #: model:ir.model.fields.selection,name:stock.selection__res_company__annual_inventory_month__9
@@ -7781,9 +7425,6 @@ msgstr "Září"
 
 #. module: stock
 #. odoo-python
-#: code:addons/stock/models/stock_picking.py:0
-#: code:addons/stock/models/stock_picking.py:0
-#: code:addons/stock/models/stock_picking.py:0
 #: code:addons/stock/models/stock_picking.py:0
 #: model:ir.model.fields,field_description:stock.field_stock_move__sequence
 #: model:ir.model.fields,field_description:stock.field_stock_package_type__sequence
@@ -7839,12 +7480,8 @@ msgstr "Seriová čísla"
 #. module: stock
 #. odoo-python
 #: code:addons/stock/models/stock_move_line.py:0
-msgid ""
-"Serial number (%s) already exists in location(s): %s. Please correct the "
-"serial number encoded."
-msgstr ""
-"Sériové číslo (%s) již existuje v lokacích: %s. Opravte zakódované sériové "
-"číslo."
+msgid "Serial number (%s) already exists in location(s): %s. Please correct the serial number encoded."
+msgstr "Sériové číslo (%s) již existuje v lokacích: %s. Opravte zakódované sériové číslo."
 
 #. module: stock
 #. odoo-python
@@ -7917,8 +7554,7 @@ msgstr "Nastavit vlastníka na uložené produkty"
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
 msgid "Set product attributes (e.g. color, size) to manage variants"
-msgstr ""
-"Nastavte atributy produktu (například barvu, velikost) pro správu variant"
+msgstr "Nastavte atributy produktu (například barvu, velikost) pro správu variant"
 
 #. module: stock
 #: model:ir.actions.server,name:stock.action_view_set_to_zero_quants_tree
@@ -7932,12 +7568,8 @@ msgstr ""
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_move__location_id
-msgid ""
-"Sets a location if you produce at a fixed location. This can be a partner "
-"location if you subcontract the manufacturing operations."
-msgstr ""
-"Nastavuje umístění pokud výrobek vyrábíte na pevném umístění. Může jít o "
-"umístění partnera pokud pro vás výrobek vyrábí subdodavatel."
+msgid "Sets a location if you produce at a fixed location. This can be a partner location if you subcontract the manufacturing operations."
+msgstr "Nastavuje umístění pokud výrobek vyrábíte na pevném umístění. Může jít o umístění partnera pokud pro vás výrobek vyrábí subdodavatel."
 
 #. module: stock
 #: model:ir.actions.act_window,name:stock.action_stock_config_settings
@@ -7982,14 +7614,8 @@ msgstr "Přepravní politika"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
-msgid ""
-"Shipping connectors allow to compute accurate shipping costs, print shipping"
-" labels and request carrier picking at your warehouse to ship to the "
-"customer. Apply shipping connector from delivery methods."
-msgstr ""
-"Přepravní konektory umožňují vypočítat přesné přepravní náklady, vytisknout "
-"přepravní štítky a vyžádat si vychystání dopravce ve vašem skladu k odeslání"
-" zákazníkovi. Použijte přepravní konektor z dodacích metod."
+msgid "Shipping connectors allow to compute accurate shipping costs, print shipping labels and request carrier picking at your warehouse to ship to the customer. Apply shipping connector from delivery methods."
+msgstr "Přepravní konektory umožňují vypočítat přesné přepravní náklady, vytisknout přepravní štítky a vyžádat si vychystání dopravce ve vašem skladu k odeslání zákazníkovi. Použijte přepravní konektor z dodacích metod."
 
 #. module: stock
 #: model:mail.template,name:stock.mail_template_data_delivery_confirmation
@@ -8074,8 +7700,7 @@ msgstr "Zobrazit přesuny"
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_internal_search
 msgid "Show all records which has next action date is before today"
-msgstr ""
-"Zobrazit všechny záznamy, které mají datum příští aktivity před dneškem"
+msgstr "Zobrazit všechny záznamy, které mají datum příští aktivity před dneškem"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_move__show_lots_m2o
@@ -8151,8 +7776,7 @@ msgstr "Odloženo"
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.inventory_warning_set_view
 msgid "Some selected lines already have quantities set, they will be ignored."
-msgstr ""
-"Některé vybrané položky již mají nastavená množství, budou ignorovány."
+msgstr "Některé vybrané položky již mají nastavená množství, budou ignorovány."
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_move_line__origin
@@ -8429,12 +8053,8 @@ msgstr "Skladovatelný produkt"
 #. module: stock
 #. odoo-python
 #: code:addons/stock/models/product.py:0
-msgid ""
-"Storable products are physical items for which you manage the inventory "
-"level."
-msgstr ""
-"Skladovatelné produkty jsou fyzické položky, u kterých spravujete úroveň "
-"zásob."
+msgid "Storable products are physical items for which you manage the inventory level."
+msgstr "Skladovatelné produkty jsou fyzické položky, u kterých spravujete úroveň zásob."
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.product_form_view_procurement_button
@@ -8485,12 +8105,8 @@ msgstr ""
 #. module: stock
 #: model:ir.model.fields,help:stock.field_res_config_settings__group_stock_multi_locations
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
-msgid ""
-"Store products in specific locations of your warehouse (e.g. bins, racks) "
-"and to track inventory accordingly."
-msgstr ""
-"Skladujte produkty ve specifických lokacích skladiště (např. police, skříně)"
-" a podle toho sledujte inventuru."
+msgid "Store products in specific locations of your warehouse (e.g. bins, racks) and to track inventory accordingly."
+msgstr "Skladujte produkty ve specifických lokacích skladiště (např. police, skříně) a podle toho sledujte inventuru."
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_putaway_rule__location_out_id
@@ -8537,12 +8153,8 @@ msgstr ""
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_picking__show_allocation
-msgid ""
-"Technical Field used to decide whether the button \"Allocation\" should be "
-"displayed."
-msgstr ""
-"Technické pole používané k výpočtu, zda má být zobrazeno tlačítko "
-"\"Alokace\"."
+msgid "Technical Field used to decide whether the button \"Allocation\" should be displayed."
+msgstr "Technické pole používané k výpočtu, zda má být zobrazeno tlačítko \"Alokace\"."
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_warehouse
@@ -8551,12 +8163,8 @@ msgstr "Technické informace"
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_picking__show_check_availability
-msgid ""
-"Technical field used to compute whether the button \"Check Availability\" "
-"should be displayed."
-msgstr ""
-"Technické pole používané k výpočtu, zda má být zobrazeno tlačítko "
-"\"Zkontrolovat dostupnost\"."
+msgid "Technical field used to compute whether the button \"Check Availability\" should be displayed."
+msgstr "Technické pole používané k výpočtu, zda má být zobrazeno tlačítko \"Zkontrolovat dostupnost\"."
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_change_product_qty__product_tmpl_id
@@ -8565,13 +8173,8 @@ msgstr "Předloha"
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_rule__auto
-msgid ""
-"The 'Manual Operation' value will create a stock move after the current one."
-" With 'Automatic No Step Added', the location is replaced in the original "
-"move."
-msgstr ""
-"Hodnota 'Manuální operace' vytvoří pohyb zásob po aktuálním. S 'Automaticky "
-"nebyl přidán žádný krok' je lokace v původním pohybem nahrazena."
+msgid "The 'Manual Operation' value will create a stock move after the current one. With 'Automatic No Step Added', the location is replaced in the original move."
+msgstr "Hodnota 'Manuální operace' vytvoří pohyb zásob po aktuálním. S 'Automaticky nebyl přidán žádný krok' je lokace v původním pohybem nahrazena."
 
 #. module: stock
 #. odoo-python
@@ -8598,16 +8201,8 @@ msgstr ""
 
 #. module: stock
 #: model_terms:res.company,invoice_terms_html:stock.res_company_1
-msgid ""
-"The client explicitly waives its own standard terms and conditions, even if "
-"these were drawn up after these standard terms and conditions of sale. In "
-"order to be valid, any derogation must be expressly agreed to in advance in "
-"writing."
-msgstr ""
-"Klient se výslovně vzdává svých vlastních standardních obchodních podmínek, "
-"a to i v případě, že tyto byly sepsány až po jeho standardních obchodních "
-"podmínkách. Jakékoliv změny musí být výslovně odsouhlaseny v psané podobě, "
-"aby byly platné."
+msgid "The client explicitly waives its own standard terms and conditions, even if these were drawn up after these standard terms and conditions of sale. In order to be valid, any derogation must be expressly agreed to in advance in writing."
+msgstr "Klient se výslovně vzdává svých vlastních standardních obchodních podmínek, a to i v případě, že tyto byly sepsány až po jeho standardních obchodních podmínkách. Jakékoliv změny musí být výslovně odsouhlaseny v psané podobě, aby byly platné."
 
 #. module: stock
 #. odoo-python
@@ -8632,12 +8227,8 @@ msgstr "Termín byl automaticky aktualizován z důvodu prodlení na %s."
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_rule__delay
-msgid ""
-"The expected date of the created transfer will be computed based on this "
-"lead time."
-msgstr ""
-"Očekávané datum vytvořeného převodu bude vypočítáno na základě tohoto "
-"dodacího času."
+msgid "The expected date of the created transfer will be computed based on this lead time."
+msgstr "Očekávané datum vytvořeného převodu bude vypočítáno na základě tohoto dodacího času."
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_package_type__sequence
@@ -8709,21 +8300,13 @@ msgstr "Balení obsahující toto množství"
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_location__location_id
-msgid ""
-"The parent location that includes this location. Example : The 'Dispatch "
-"Zone' is the 'Gate 1' parent location."
-msgstr ""
-"Nadřazené umístění, které zahrnuje toto umístění. Příklad: \"Dispečerská "
-"zóna\" je nadřazená lokace \"Brána 1\"."
+msgid "The parent location that includes this location. Example : The 'Dispatch Zone' is the 'Gate 1' parent location."
+msgstr "Nadřazené umístění, které zahrnuje toto umístění. Příklad: \"Dispečerská zóna\" je nadřazená lokace \"Brána 1\"."
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_warehouse_orderpoint__qty_multiple
-msgid ""
-"The procurement quantity will be rounded up to this multiple.  If it is 0, "
-"the exact quantity will be used."
-msgstr ""
-"Množství zakázky bude zaokrouhleno na tento násobek. Pokud je 0, použije se "
-"přesné množství."
+msgid "The procurement quantity will be rounded up to this multiple.  If it is 0, the exact quantity will be used."
+msgstr "Množství zakázky bude zaokrouhleno na tento násobek. Pokud je 0, použije se přesné množství."
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.stock_warn_insufficient_qty_form_view
@@ -8745,34 +8328,20 @@ msgstr ""
 #. module: stock
 #. odoo-python
 #: code:addons/stock/models/stock_move_line.py:0
-msgid ""
-"The quantity done for the product \"%s\" doesn't respect the rounding "
-"precision defined on the unit of measure \"%s\". Please change the quantity "
-"done or the rounding precision of your unit of measure."
-msgstr ""
-"Množství provedené pro produkt \"%s\" nerespektuje přesnost zaokrouhlení "
-"definovanou v měrné jednotce \"%s\". Změňte prosím provedené množství nebo "
-"přesnost zaokrouhlení vaší měrné jednotky."
+msgid "The quantity done for the product \"%s\" doesn't respect the rounding precision defined on the unit of measure \"%s\". Please change the quantity done or the rounding precision of your unit of measure."
+msgstr "Množství provedené pro produkt \"%s\" nerespektuje přesnost zaokrouhlení definovanou v měrné jednotce \"%s\". Změňte prosím provedené množství nebo přesnost zaokrouhlení vaší měrné jednotky."
 
 #. module: stock
 #. odoo-python
 #: code:addons/stock/models/stock_move.py:0
-msgid ""
-"The requested operation cannot be processed because of a programming error "
-"setting the `product_qty` field instead of the `product_uom_qty`."
-msgstr ""
-"Požadovanou operaci nelze zpracovat z důvodu programovací chyby při "
-"nastavení pole `product_qty` namísto` product_uom_qty`."
+msgid "The requested operation cannot be processed because of a programming error setting the `product_qty` field instead of the `product_uom_qty`."
+msgstr "Požadovanou operaci nelze zpracovat z důvodu programovací chyby při nastavení pole `product_qty` namísto` product_uom_qty`."
 
 #. module: stock
 #. odoo-python
 #: code:addons/stock/models/stock_location.py:0
-msgid ""
-"The selected Inventory Frequency (Days) creates a date too far into the "
-"future."
-msgstr ""
-"Vybraná frekvence inventury (dny) vytváří datum příliš vzdálené do "
-"budoucnosti."
+msgid "The selected Inventory Frequency (Days) creates a date too far into the future."
+msgstr "Vybraná frekvence inventury (dny) vytváří datum příliš vzdálené do budoucnosti."
 
 #. module: stock
 #. odoo-python
@@ -8792,18 +8361,14 @@ msgstr "Krátký název skladu musí být pro každou společnost jedinečný!"
 #. module: stock
 #: model:ir.model.fields,help:stock.field_res_partner__property_stock_customer
 #: model:ir.model.fields,help:stock.field_res_users__property_stock_customer
-msgid ""
-"The stock location used as destination when sending goods to this contact."
-msgstr ""
-"Lokace skladu používaná jako cíl při dodání výrobků tomuto partnerovi."
+msgid "The stock location used as destination when sending goods to this contact."
+msgstr "Lokace skladu používaná jako cíl při dodání výrobků tomuto partnerovi."
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_res_partner__property_stock_supplier
 #: model:ir.model.fields,help:stock.field_res_users__property_stock_supplier
-msgid ""
-"The stock location used as source when receiving goods from this contact."
-msgstr ""
-"Lokace skladu používaná jako zdroj při dodání výrobků od tohoto partnera."
+msgid "The stock location used as source when receiving goods from this contact."
+msgstr "Lokace skladu používaná jako zdroj při dodání výrobků od tohoto partnera."
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_move_line__picking_id
@@ -8817,23 +8382,13 @@ msgstr "Pravidla skladu, které vytvořilo tento pohyb zásob"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_procurement_compute_wizard
-msgid ""
-"The stock will be reserved for operations waiting for availability and the "
-"reordering rules will be triggered."
-msgstr ""
-"Akcie budou vyčleněny na operace čekající na dostupnost a budou spuštěny "
-"pravidla pro přesměrování."
+msgid "The stock will be reserved for operations waiting for availability and the reordering rules will be triggered."
+msgstr "Akcie budou vyčleněny na operace čekající na dostupnost a budou spuštěny pravidla pro přesměrování."
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_rule__propagate_warehouse_id
-msgid ""
-"The warehouse to propagate on the created move/procurement, which can be "
-"different of the warehouse this rule is for (e.g for resupplying rules from "
-"another warehouse)"
-msgstr ""
-"Sklad, který se má zřídit na vytvořeném přesunu / veřejné zakázce, který se "
-"může lišit od skladu, pro který je toto pravidlo určeno (např. pro pravidla "
-"doplňování z jiného skladu)"
+msgid "The warehouse to propagate on the created move/procurement, which can be different of the warehouse this rule is for (e.g for resupplying rules from another warehouse)"
+msgstr "Sklad, který se má zřídit na vytvořeném přesunu / veřejné zakázce, který se může lišit od skladu, pro který je toto pravidlo určeno (např. pro pravidla doplňování z jiného skladu)"
 
 #. module: stock
 #. odoo-python
@@ -8844,9 +8399,7 @@ msgstr "Nejsou žádné inventury k vrácení."
 #. module: stock
 #. odoo-python
 #: code:addons/stock/models/stock_picking.py:0
-msgid ""
-"There is nothing eligible to put in a pack. Either there are no quantities "
-"to put in a pack or all products are already in a pack."
+msgid "There is nothing eligible to put in a pack. Either there are no quantities to put in a pack or all products are already in a pack."
 msgstr ""
 
 #. module: stock
@@ -8861,33 +8414,18 @@ msgstr "Toto sériové číslo je již v jiné lokaci."
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
-msgid ""
-"This adds a dropshipping route to apply on products in order to request your"
-" vendors to deliver to your customers. A product to dropship will generate a"
-" purchase request for quotation once the sales order confirmed. This is a "
-"on-demand flow. The requested delivery address will be the customer delivery"
-" address and not your warehouse."
-msgstr ""
-"Tím se přidává trasa pro dropshipping, která se použije na produkty, aby "
-"bylo možné požadovat, aby vaši dodavatelé doručili zákazníkům. Produkt na "
-"dropship vygeneruje požadavek na nákup po předložení nabídky po potvrzení "
-"prodejní objednávky. Jedná se o tok na vyžádání. Požadovaná adresa pro "
-"doručení bude adresa doručení zákazníka, nikoliv váš sklad."
+msgid "This adds a dropshipping route to apply on products in order to request your vendors to deliver to your customers. A product to dropship will generate a purchase request for quotation once the sales order confirmed. This is a on-demand flow. The requested delivery address will be the customer delivery address and not your warehouse."
+msgstr "Tím se přidává trasa pro dropshipping, která se použije na produkty, aby bylo možné požadovat, aby vaši dodavatelé doručili zákazníkům. Produkt na dropship vygeneruje požadavek na nákup po předložení nabídky po potvrzení prodejní objednávky. Jedná se o tok na vyžádání. Požadovaná adresa pro doručení bude adresa doručení zákazníka, nikoliv váš sklad."
 
 #. module: stock
 #. odoo-python
 #: code:addons/stock/models/stock_quant.py:0
-msgid ""
-"This analysis gives you an overview of the current stock level of your "
-"products."
-msgstr ""
-"Tato analýza vám poskytne přehled o aktuálním stavu zásob vašich produktů."
+msgid "This analysis gives you an overview of the current stock level of your products."
+msgstr "Tato analýza vám poskytne přehled o aktuálním stavu zásob vašich produktů."
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_move__picked
-msgid ""
-"This checkbox is just indicative, it doesn't validate or generate any "
-"product moves."
+msgid "This checkbox is just indicative, it doesn't validate or generate any product moves."
 msgstr ""
 
 #. module: stock
@@ -8897,34 +8435,18 @@ msgstr "Toto pole vyplní původ balení a jméno jeho pohybu"
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_picking_type__default_location_dest_id
-msgid ""
-"This is the default destination location when you create a picking manually "
-"with this operation type. It is possible however to change it or that the "
-"routes put another location. If it is empty, it will check for the customer "
-"location on the partner. "
-msgstr ""
-"Toto je výchozí cílové umístění, když vytváříte vychystávání ručně s tímto "
-"typem operace. Je však možné ji změnit, nebo že cesty změní na jiné místo. "
-"Pokud je prázdné, zkontroluje polohu zákazníka u partnera."
+msgid "This is the default destination location when you create a picking manually with this operation type. It is possible however to change it or that the routes put another location. If it is empty, it will check for the customer location on the partner. "
+msgstr "Toto je výchozí cílové umístění, když vytváříte vychystávání ručně s tímto typem operace. Je však možné ji změnit, nebo že cesty změní na jiné místo. Pokud je prázdné, zkontroluje polohu zákazníka u partnera."
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_picking_type__default_location_return_id
-msgid ""
-"This is the default location for returns created from a picking with this "
-"operation type."
+msgid "This is the default location for returns created from a picking with this operation type."
 msgstr ""
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_picking_type__default_location_src_id
-msgid ""
-"This is the default source location when you create a picking manually with "
-"this operation type. It is possible however to change it or that the routes "
-"put another location. If it is empty, it will check for the supplier "
-"location on the partner. "
-msgstr ""
-"Toto je výchozí umístění zdroje, když manuálně vybíráte tento typ operace. "
-"Je však možné jej změnit nebo že trasy mají jinou polohu. Je-li prázdný, "
-"zkontroluje umístění dodavatele u partnera."
+msgid "This is the default source location when you create a picking manually with this operation type. It is possible however to change it or that the routes put another location. If it is empty, it will check for the supplier location on the partner. "
+msgstr "Toto je výchozí umístění zdroje, když manuálně vybíráte tento typ operace. Je však možné jej změnit nebo že trasy mají jinou polohu. Je-li prázdný, zkontroluje umístění dodavatele u partnera."
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_quant__owner_id
@@ -8933,35 +8455,25 @@ msgstr "Toto je vlastník kvanta"
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_move__product_uom_qty
-msgid ""
-"This is the quantity of product that is planned to be moved.Lowering this "
-"quantity does not generate a backorder.Changing this quantity on assigned "
-"moves affects the product reservation, and should be done with care."
+msgid "This is the quantity of product that is planned to be moved.Lowering this quantity does not generate a backorder.Changing this quantity on assigned moves affects the product reservation, and should be done with care."
 msgstr ""
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_location__child_internal_location_ids
-msgid ""
-"This location (if it's internal) and all its descendants filtered by "
-"type=Internal."
-msgstr ""
-"Tato lokace (pokud je interní) a všechny její potomky filtrovány podle "
-"type=Internal."
+msgid "This location (if it's internal) and all its descendants filtered by type=Internal."
+msgstr "Tato lokace (pokud je interní) a všechny její potomky filtrovány podle type=Internal."
 
 #. module: stock
 #. odoo-python
 #: code:addons/stock/models/stock_location.py:0
-msgid ""
-"This location's usage cannot be changed to view as it contains products."
+msgid "This location's usage cannot be changed to view as it contains products."
 msgstr "Použití tohoto umístění nelze změnit, protože obsahuje produkty."
 
 #. module: stock
 #. odoo-python
 #: code:addons/stock/models/stock_move_line.py:0
-msgid ""
-"This lot %(lot_name)s is incompatible with this product %(product_name)s"
-msgstr ""
-"Tato šarže %(lot_name)s je nekompatibilní s tímto produktem %(product_name)s"
+msgid "This lot %(lot_name)s is incompatible with this product %(product_name)s"
+msgstr "Tato šarže %(lot_name)s je nekompatibilní s tímto produktem %(product_name)s"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_stock_quant_tree_inventory_editable
@@ -8974,10 +8486,7 @@ msgid ""
 "This menu gives you the full traceability of inventory\n"
 "                operations on a specific product. You can filter on the product\n"
 "                to see all the past or future movements for the product."
-msgstr ""
-"Toto menu vám dává plnou sledovatelnost operací inventáře na konkrétním "
-"produktu. Můžete filtrovat produkt a zobrazit všechny minulé nebo budoucí "
-"pohyby produktu."
+msgstr "Toto menu vám dává plnou sledovatelnost operací inventáře na konkrétním produktu. Můžete filtrovat produkt a zobrazit všechny minulé nebo budoucí pohyby produktu."
 
 #. module: stock
 #: model_terms:ir.actions.act_window,help:stock.stock_move_line_action
@@ -8995,72 +8504,40 @@ msgstr "Tato poznámka se přidává k dodacím objednávkám."
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_template_property_form
-msgid ""
-"This note is added to internal transfer orders (e.g. where to pick the "
-"product in the warehouse)."
-msgstr ""
-"Tato poznámka se přidává k interním převodním objednávkám (např. kde si "
-"vybrat produkt ve skladu)."
+msgid "This note is added to internal transfer orders (e.g. where to pick the product in the warehouse)."
+msgstr "Tato poznámka se přidává k interním převodním objednávkám (např. kde si vybrat produkt ve skladu)."
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_template_property_form
-msgid ""
-"This note is added to receipt orders (e.g. where to store the product in the"
-" warehouse)."
-msgstr ""
-"Tato poznámka se přidává k přijímacím objednávkám (např. kam uložit produkt "
-"ve skladu)."
+msgid "This note is added to receipt orders (e.g. where to store the product in the warehouse)."
+msgstr "Tato poznámka se přidává k přijímacím objednávkám (např. kam uložit produkt ve skladu)."
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_stock_return_picking_form
-msgid ""
-"This picking appears to be chained with another operation. Later, if you "
-"receive the goods you are returning now, make sure to <b>reverse</b> the "
-"returned picking in order to avoid logistic rules to be applied again (which"
-" would create duplicated operations)"
-msgstr ""
-"Zdá se, že tento výběr je zřetězený s jinou operací. Pokud později obdržíte "
-"zboží, které nyní vracíte, ujistěte se, že jste vrácenou vychystávku "
-"<b>obrátili</b>, abyste se vyhnuli opětovnému použití logistických pravidel "
-"(což by vytvořilo duplicitní operace)."
+msgid "This picking appears to be chained with another operation. Later, if you receive the goods you are returning now, make sure to <b>reverse</b> the returned picking in order to avoid logistic rules to be applied again (which would create duplicated operations)"
+msgstr "Zdá se, že tento výběr je zřetězený s jinou operací. Pokud později obdržíte zboží, které nyní vracíte, ujistěte se, že jste vrácenou vychystávku <b>obrátili</b>, abyste se vyhnuli opětovnému použití logistických pravidel (což by vytvořilo duplicitní operace)."
 
 #. module: stock
 #. odoo-python
 #: code:addons/stock/models/product.py:0
-msgid ""
-"This product has been used in at least one inventory movement. It is not "
-"advised to change the Product Type since it can lead to inconsistencies. A "
-"better solution could be to archive the product and create a new one "
-"instead."
-msgstr ""
-"Tento produkt byl použit alespoň v jednom pohybu zásob. Nedoporučuje se "
-"měnit typ produktu, protože to může vést k nesrovnalostem. Lepším řešením by"
-" mohlo být archivovat produkt a místo toho vytvořit nový."
+msgid "This product has been used in at least one inventory movement. It is not advised to change the Product Type since it can lead to inconsistencies. A better solution could be to archive the product and create a new one instead."
+msgstr "Tento produkt byl použit alespoň v jednom pohybu zásob. Nedoporučuje se měnit typ produktu, protože to může vést k nesrovnalostem. Lepším řešením by mohlo být archivovat produkt a místo toho vytvořit nový."
 
 #. module: stock
 #. odoo-python
 #: code:addons/stock/models/product.py:0
-msgid ""
-"This product's company cannot be changed as long as there are quantities of "
-"it belonging to another company."
-msgstr ""
-"Společnost tohoto produktu nelze změnit, pokud existuje množství patřící "
-"jiné společnosti."
+msgid "This product's company cannot be changed as long as there are quantities of it belonging to another company."
+msgstr "Společnost tohoto produktu nelze změnit, pokud existuje množství patřící jiné společnosti."
 
 #. module: stock
 #. odoo-python
 #: code:addons/stock/models/product.py:0
-msgid ""
-"This product's company cannot be changed as long as there are stock moves of"
-" it belonging to another company."
-msgstr ""
-"Společnost tohoto produktu nelze změnit, pokud existuje pohyb zásob patřící "
-"jiné společnosti."
+msgid "This product's company cannot be changed as long as there are stock moves of it belonging to another company."
+msgstr "Společnost tohoto produktu nelze změnit, pokud existuje pohyb zásob patřící jiné společnosti."
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_change_product_qty__new_quantity
-msgid ""
-"This quantity is expressed in the Default Unit of Measure of the product."
+msgid "This quantity is expressed in the Default Unit of Measure of the product."
 msgstr "Množství je vyjádřeno ve výchozí měrné jednotce výrobku."
 
 #. module: stock
@@ -9078,46 +8555,26 @@ msgstr "Tento výkaz nelze použít pro provedené a neprovedené %s současně"
 #. module: stock
 #. odoo-python
 #: code:addons/stock/models/stock_picking.py:0
-msgid ""
-"This sequence prefix is already being used by another operation type. It is "
-"recommended that you select a unique prefix to avoid issues and/or repeated "
-"reference values or assign the existing reference sequence to this operation"
-" type."
-msgstr ""
-"Tuto předponu sekvence již používá jiný typ operace. Doporučuje se vybrat "
-"jedinečnou předponu, abyste se vyhnuli problémům a/nebo opakovaným "
-"referenčním hodnotám, nebo přiřadit existující referenční sekvenci tomuto "
-"typu operace."
+msgid "This sequence prefix is already being used by another operation type. It is recommended that you select a unique prefix to avoid issues and/or repeated reference values or assign the existing reference sequence to this operation type."
+msgstr "Tuto předponu sekvence již používá jiný typ operace. Doporučuje se vybrat jedinečnou předponu, abyste se vyhnuli problémům a/nebo opakovaným referenčním hodnotám, nebo přiřadit existující referenční sekvenci tomuto typu operace."
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_product_product__property_stock_production
 #: model:ir.model.fields,help:stock.field_product_template__property_stock_production
-msgid ""
-"This stock location will be used, instead of the default one, as the source "
-"location for stock moves generated by manufacturing orders."
-msgstr ""
-"Toto umístění zásob bude použito místo výchozího jako zdrojové umístění pro "
-"pohyby zásob vytvořené na základě výrobních příkazů."
+msgid "This stock location will be used, instead of the default one, as the source location for stock moves generated by manufacturing orders."
+msgstr "Toto umístění zásob bude použito místo výchozího jako zdrojové umístění pro pohyby zásob vytvořené na základě výrobních příkazů."
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_product_product__property_stock_inventory
 #: model:ir.model.fields,help:stock.field_product_template__property_stock_inventory
-msgid ""
-"This stock location will be used, instead of the default one, as the source "
-"location for stock moves generated when you do an inventory."
-msgstr ""
-"Toto umístění zásob bude použito místo výchozího jako zdrojové umístění "
-"pohybů vytvořených na základě inventury."
+msgid "This stock location will be used, instead of the default one, as the source location for stock moves generated when you do an inventory."
+msgstr "Toto umístění zásob bude použito místo výchozího jako zdrojové umístění pohybů vytvořených na základě inventury."
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_product_product__responsible_id
 #: model:ir.model.fields,help:stock.field_product_template__responsible_id
-msgid ""
-"This user will be responsible of the next activities related to logistic "
-"operations for this product."
-msgstr ""
-"Tento uživatel bude zodpovědný za další činnosti související s logistickými "
-"operacemi pro tento produkt."
+msgid "This user will be responsible of the next activities related to logistic operations for this product."
+msgstr "Tento uživatel bude zodpovědný za další činnosti související s logistickými operacemi pro tento produkt."
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.inventory_warning_reset_view
@@ -9225,7 +8682,7 @@ msgstr "Celkem předpokládané"
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.product_product_stock_tree
 msgid "Total Free to Use"
-msgstr "Celkem zdarma k použití"
+msgstr "Celkem k dispozici"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.product_product_stock_tree
@@ -9268,8 +8725,6 @@ msgstr "Sledovatelnost"
 #. odoo-javascript
 #: code:addons/stock/static/src/client_actions/stock_traceability_report_backend.js:0
 #: code:addons/stock/static/src/client_actions/stock_traceability_report_backend.xml:0
-#: code:addons/stock/static/src/client_actions/stock_traceability_report_backend.xml:0
-#: code:addons/stock/static/src/client_actions/stock_traceability_report_backend.xml:0
 #: model:ir.actions.client,name:stock.action_stock_report
 #: model:ir.model,name:stock.model_stock_traceability_report
 #: model_terms:ir.ui.view,arch_db:stock.report_stock_body_print
@@ -9287,15 +8742,8 @@ msgstr ""
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
-msgid ""
-"Track following dates on lots & serial numbers: best before, removal, end of"
-" life, alert. Such dates are set automatically at lot/serial number creation"
-" based on values set on the product (in days)."
-msgstr ""
-"Sledujte následující data u produktových  a sériových čísel: minimální "
-"trvanlivost, odstranění, konec životnosti, upozornění. Taková data jsou "
-"nastavena automaticky při tvorbě produktového / sériového čísla na základě "
-"hodnot stanovených v produktu (ve dnech)."
+msgid "Track following dates on lots & serial numbers: best before, removal, end of life, alert. Such dates are set automatically at lot/serial number creation based on values set on the product (in days)."
+msgstr "Sledujte následující data u produktových  a sériových čísel: minimální trvanlivost, odstranění, konec životnosti, upozornění. Taková data jsou nastavena automaticky při tvorbě produktového / sériového čísla na základě hodnot stanovených v produktu (ve dnech)."
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
@@ -9381,11 +8829,8 @@ msgstr "Přesuny pro skupiny"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_internal_search
-msgid ""
-"Transfers that are late on scheduled time or one of pickings will be late"
-msgstr ""
-"Přesuny, které se zpozdí v plánovaném čase nebo některý z dodání, budou mít "
-"zpoždění"
+msgid "Transfers that are late on scheduled time or one of pickings will be late"
+msgstr "Přesuny, které se zpozdí v plánovaném čase nebo některý z dodání, budou mít zpoždění"
 
 #. module: stock
 #: model:ir.model.fields.selection,name:stock.selection__stock_location__usage__transit
@@ -9471,7 +8916,6 @@ msgstr "Nepřiřazovat"
 
 #. module: stock
 #. odoo-javascript
-#: code:addons/stock/static/src/client_actions/stock_traceability_report_backend.xml:0
 #: code:addons/stock/static/src/client_actions/stock_traceability_report_backend.xml:0
 msgid "Unfold"
 msgstr "Rozbalit"
@@ -9606,7 +9050,6 @@ msgstr ""
 #. odoo-python
 #: code:addons/stock/models/product.py:0
 #: code:addons/stock/static/src/stock_forecasted/forecasted_buttons.xml:0
-#: code:addons/stock/static/src/stock_forecasted/forecasted_buttons.xml:0
 #: model:ir.actions.act_window,name:stock.dashboard_open_quants
 #: model_terms:ir.ui.view,arch_db:stock.product_form_view_procurement_button
 #: model_terms:ir.ui.view,arch_db:stock.product_product_view_form_easy_inherit_stock
@@ -9634,12 +9077,8 @@ msgstr "Použít stávající"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
-msgid ""
-"Use GS1 nomenclature datamatrix whenever barcodes are printed for lots and "
-"serial numbers."
-msgstr ""
-"Kdykoli se tisknou čárové kódy pro šarže a sériová čísla, použijte datovou "
-"matici nomenklatury GS1."
+msgid "Use GS1 nomenclature datamatrix whenever barcodes are printed for lots and serial numbers."
+msgstr "Kdykoli se tisknou čárové kódy pro šarže a sériová čísla, použijte datovou matici nomenklatury GS1."
 
 #. module: stock
 #: model:res.groups,name:stock.group_reception_report
@@ -9922,7 +9361,7 @@ msgstr "Upozornění na výdejce"
 
 #. module: stock
 #. odoo-python
-#: code:addons/stock/models/product.py:0 code:addons/stock/models/product.py:0
+#: code:addons/stock/models/product.py:0
 msgid "Warning!"
 msgstr "Varování!"
 
@@ -9988,12 +9427,8 @@ msgstr "Možnost doplňování Wh"
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_route__warehouse_selectable
-msgid ""
-"When a warehouse is selected for this route, this route should be seen as "
-"the default route when products pass through this warehouse."
-msgstr ""
-"Když je pro tuto trasu vybrán sklad, měla by být tato trasa považována za "
-"výchozí trasu, pokud produkty procházejí tímto skladem."
+msgid "When a warehouse is selected for this route, this route should be seen as the default route when products pass through this warehouse."
+msgstr "Když je pro tuto trasu vybrán sklad, měla by být tato trasa považována za výchozí trasu, pokud produkty procházejí tímto skladem."
 
 #. module: stock
 #: model:ir.model.fields.selection,name:stock.selection__stock_picking__move_type__one
@@ -10002,12 +9437,8 @@ msgstr "Když jsou všechny produkty připraveny"
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_route__product_selectable
-msgid ""
-"When checked, the route will be selectable in the Inventory tab of the "
-"Product form."
-msgstr ""
-"Po zaškrtnutí bude možné trasu vybrat v záložce Inventář ve formuláři "
-"Produkt."
+msgid "When checked, the route will be selectable in the Inventory tab of the Product form."
+msgstr "Po zaškrtnutí bude možné trasu vybrat v záložce Inventář ve formuláři Produkt."
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_route__product_categ_selectable
@@ -10028,52 +9459,29 @@ msgstr "Kdy produkt dorazí do"
 #. module: stock
 #. odoo-python
 #: code:addons/stock/models/stock_rule.py:0
-msgid ""
-"When products are needed in <b>%s</b>, <br/> <b>%s</b> are created from "
-"<b>%s</b> to fulfill the need."
-msgstr ""
-"Když jsou produkty potřeba v <b>%s</b>, <br/>vytvoří se <b>%s</b> z "
-"<b>%s</b> ke splnění objednávky."
+msgid "When products are needed in <b>%s</b>, <br/> <b>%s</b> are created from <b>%s</b> to fulfill the need."
+msgstr "Když jsou produkty potřeba v <b>%s</b>, <br/>vytvoří se <b>%s</b> z <b>%s</b> ke splnění objednávky."
 
 #. module: stock
 #. odoo-python
 #: code:addons/stock/models/stock_rule.py:0
-msgid ""
-"When products arrive in <b>%s</b>, <br/> <b>%s</b> are created to send them "
-"in <b>%s</b>."
-msgstr ""
-"Když produkty dorazí do <b>%s</b>, <br/>bude vytvořeno <b>%s</b> na zaslání "
-"do <b>%s</b>."
+msgid "When products arrive in <b>%s</b>, <br/> <b>%s</b> are created to send them in <b>%s</b>."
+msgstr "Když produkty dorazí do <b>%s</b>, <br/>bude vytvořeno <b>%s</b> na zaslání do <b>%s</b>."
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_picking__is_locked
-msgid ""
-"When the picking is not done this allows changing the initial demand. When "
-"the picking is done this allows changing the done quantities."
-msgstr ""
-"Pokud není vyskladnění provedeno, umožní to změnu počáteční poptávky. Po "
-"vyskladnění to umožňuje změnu provedených množství."
+msgid "When the picking is not done this allows changing the initial demand. When the picking is done this allows changing the done quantities."
+msgstr "Pokud není vyskladnění provedeno, umožní to změnu počáteční poptávky. Po vyskladnění to umožňuje změnu provedených množství."
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_warehouse_orderpoint__product_min_qty
-msgid ""
-"When the virtual stock goes below the Min Quantity specified for this field,"
-" Odoo generates a procurement to bring the forecasted quantity to the Max "
-"Quantity."
-msgstr ""
-"Když virtuální zásoba klesne pod minimální množství určené pro toto pole, "
-"Odoo generuje zakázku, aby přivedl odhadované množství na maximální "
-"množství."
+msgid "When the virtual stock goes below the Min Quantity specified for this field, Odoo generates a procurement to bring the forecasted quantity to the Max Quantity."
+msgstr "Když virtuální zásoba klesne pod minimální množství určené pro toto pole, Odoo generuje zakázku, aby přivedl odhadované množství na maximální množství."
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_warehouse_orderpoint__product_max_qty
-msgid ""
-"When the virtual stock goes below the Min Quantity, Odoo generates a "
-"procurement to bring the forecasted quantity to the Quantity specified as "
-"Max Quantity."
-msgstr ""
-"Když virtuální zásoba klesne pod Min Množství, Odoo vygeneruje zakázku, "
-"která uvede předpokládané množství na Množství určené jako Max Množství."
+msgid "When the virtual stock goes below the Min Quantity, Odoo generates a procurement to bring the forecasted quantity to the Quantity specified as Max Quantity."
+msgstr "Když virtuální zásoba klesne pod Min Množství, Odoo vygeneruje zakázku, která uvede předpokládané množství na Množství určené jako Max Množství."
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_rule__propagate_carrier
@@ -10082,12 +9490,8 @@ msgstr "Po zaškrtnutí bude přepravce zásilky propagován."
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_rule__propagate_cancel
-msgid ""
-"When ticked, if the move created by this rule is cancelled, the next move "
-"will be cancelled too."
-msgstr ""
-"Když zaškrtnete, pokud je přesun vytvořený tímto pravidlem zrušen, bude "
-"zrušen i další přesun."
+msgid "When ticked, if the move created by this rule is cancelled, the next move will be cancelled too."
+msgstr "Když zaškrtnete, pokud je přesun vytvořený tímto pravidlem zrušen, bude zrušen i další přesun."
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_picking_type__create_backorder
@@ -10104,14 +9508,12 @@ msgstr ""
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_picking__owner_id
-msgid ""
-"When validating the transfer, the products will be assigned to this owner."
+msgid "When validating the transfer, the products will be assigned to this owner."
 msgstr "Po ověření převodu budou produkty přiděleny tomuto vlastníkovi."
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_move_line__owner_id
-msgid ""
-"When validating the transfer, the products will be taken from this owner."
+msgid "When validating the transfer, the products will be taken from this owner."
 msgstr "Po ověření převodu budou produkty převzaty od tohoto vlastníka."
 
 #. module: stock
@@ -10164,49 +9566,25 @@ msgstr "Jste dobří, žádné doplňování k výkonu!"
 #. module: stock
 #. odoo-python
 #: code:addons/stock/models/stock_lot.py:0
-msgid ""
-"You are not allowed to change the product linked to a serial or lot number "
-"if some stock moves have already been created with that number. This would "
-"lead to inconsistencies in your stock."
-msgstr ""
-"Není povoleno měnit produkt spojený se sériovým číslem nebo číslem šarže, "
-"pokud již byly s tímto číslem vytvořeny některé pohyby zásob. To by vedlo k "
-"nesrovnalostem ve vašich zásobách."
+msgid "You are not allowed to change the product linked to a serial or lot number if some stock moves have already been created with that number. This would lead to inconsistencies in your stock."
+msgstr "Není povoleno měnit produkt spojený se sériovým číslem nebo číslem šarže, pokud již byly s tímto číslem vytvořeny některé pohyby zásob. To by vedlo k nesrovnalostem ve vašich zásobách."
 
 #. module: stock
 #. odoo-python
 #: code:addons/stock/models/stock_lot.py:0
-msgid ""
-"You are not allowed to create a lot or serial number with this operation "
-"type. To change this, go on the operation type and tick the box \"Create New"
-" Lots/Serial Numbers\"."
-msgstr ""
-"Při tomto typu operace není možné vytvářet produktové  nebo sériové číslo. "
-"Chcete-li to změnit, přejděte na typ operace a zaškrtněte políčko „Vytvořit "
-"nové produktové  / sériové číslo“."
+msgid "You are not allowed to create a lot or serial number with this operation type. To change this, go on the operation type and tick the box \"Create New Lots/Serial Numbers\"."
+msgstr "Při tomto typu operace není možné vytvářet produktové  nebo sériové číslo. Chcete-li to změnit, přejděte na typ operace a zaškrtněte políčko „Vytvořit nové produktové  / sériové číslo“."
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.stock_package_destination_form_view
-msgid ""
-"You are trying to put products going to different locations into the same "
-"package"
+msgid "You are trying to put products going to different locations into the same package"
 msgstr "Pokoušíte se zadat produkty na rozdílné lokace do jednoho balíku"
 
 #. module: stock
 #. odoo-python
 #: code:addons/stock/models/stock_move.py:0
-msgid ""
-"You are using a unit of measure smaller than the one you are using in order "
-"to stock your product. This can lead to rounding problem on reserved "
-"quantity. You should use the smaller unit of measure possible in order to "
-"valuate your stock or change its rounding precision to a smaller value "
-"(example: 0.00001)."
-msgstr ""
-"Používáte měrnou jednotku, která je menší než ta, kterou používáte k nákupu "
-"produktu. To může vést k problémům zaokrouhlení na vyhrazené množství. Měli "
-"byste použít menší měrnou jednotku, aby bylo možné vyhodnotit vaše skladové "
-"zásoby nebo změnit její přesnost zaokrouhlením na menší hodnotu (příklad: "
-"0.00001)."
+msgid "You are using a unit of measure smaller than the one you are using in order to stock your product. This can lead to rounding problem on reserved quantity. You should use the smaller unit of measure possible in order to valuate your stock or change its rounding precision to a smaller value (example: 0.00001)."
+msgstr "Používáte měrnou jednotku, která je menší než ta, kterou používáte k nákupu produktu. To může vést k problémům zaokrouhlení na vyhrazené množství. Měli byste použít menší měrnou jednotku, aby bylo možné vyhodnotit vaše skladové zásoby nebo změnit její přesnost zaokrouhlením na menší hodnotu (příklad: 0.00001)."
 
 #. module: stock
 #: model_terms:ir.actions.act_window,help:stock.action_routes_form
@@ -10229,14 +9607,8 @@ msgstr "Můžete buď:"
 #. module: stock
 #. odoo-python
 #: code:addons/stock/models/product.py:0
-msgid ""
-"You can not change the type of a product that is currently reserved on a "
-"stock move. If you need to change the type, you should first unreserve the "
-"stock move."
-msgstr ""
-"Nemůžete změnit typ produktu, který je v současné době rezervován v pohybu "
-"zásob. Pokud potřebujete změnit typ, měli byste nejdříve rezervovat v pohybu"
-" zásob."
+msgid "You can not change the type of a product that is currently reserved on a stock move. If you need to change the type, you should first unreserve the stock move."
+msgstr "Nemůžete změnit typ produktu, který je v současné době rezervován v pohybu zásob. Pokud potřebujete změnit typ, měli byste nejdříve rezervovat v pohybu zásob."
 
 #. module: stock
 #. odoo-python
@@ -10253,12 +9625,8 @@ msgstr ""
 #. module: stock
 #. odoo-python
 #: code:addons/stock/models/stock_move_line.py:0
-msgid ""
-"You can not delete product moves if the picking is done. You can only "
-"correct the done quantities."
-msgstr ""
-"Nemůžete smazat pohyby produktu, pokud byl již dodán. Můžete opravit pouze "
-"provedené množství."
+msgid "You can not delete product moves if the picking is done. You can only correct the done quantities."
+msgstr "Nemůžete smazat pohyby produktu, pokud byl již dodán. Můžete opravit pouze provedené množství."
 
 #. module: stock
 #. odoo-python
@@ -10275,35 +9643,26 @@ msgstr "Můžete zadat pouze kladné množství."
 #. module: stock
 #. odoo-python
 #: code:addons/stock/models/stock_lot.py:0
-msgid ""
-"You can only move a lot/serial to a new location if it exists in a single "
-"location."
+msgid "You can only move a lot/serial to a new location if it exists in a single location."
 msgstr ""
 
 #. module: stock
 #. odoo-python
 #: code:addons/stock/models/stock_quant.py:0
-msgid ""
-"You can only move positive quantities stored in locations used by a single "
-"company per relocation."
+msgid "You can only move positive quantities stored in locations used by a single company per relocation."
 msgstr ""
 
 #. module: stock
 #. odoo-python
 #: code:addons/stock/models/stock_move_line.py:0
 msgid "You can only process 1.0 %s of products with unique serial number."
-msgstr ""
-"Můžete zpracovat pouze 1.0 %s produktů s jednoznačným sériovým číslem."
+msgstr "Můžete zpracovat pouze 1.0 %s produktů s jednoznačným sériovým číslem."
 
 #. module: stock
 #. odoo-python
 #: code:addons/stock/models/res_config_settings.py:0
-msgid ""
-"You can't deactivate the multi-location if you have more than once warehouse"
-" by company"
-msgstr ""
-"Pokud máte více než jeden sklad podle společnosti, nemůžete deaktivovat více"
-" lokalit."
+msgid "You can't deactivate the multi-location if you have more than once warehouse by company"
+msgstr "Pokud máte více než jeden sklad podle společnosti, nemůžete deaktivovat více lokalit."
 
 #. module: stock
 #. odoo-python
@@ -10320,12 +9679,8 @@ msgstr "Umístění nemůžete archivovat %s jako to používá váš sklad %s"
 #. module: stock
 #. odoo-python
 #: code:addons/stock/models/stock_move.py:0
-msgid ""
-"You cannot cancel a stock move that has been set to 'Done'. Create a return "
-"in order to reverse the moves which took place."
-msgstr ""
-"Nemůžete zrušit akciový přesun, který byl nastaven na 'Hotovo'. Vytvořte "
-"návrat, abyste zvrátili provedené pohyby."
+msgid "You cannot cancel a stock move that has been set to 'Done'. Create a return in order to reverse the moves which took place."
+msgstr "Nemůžete zrušit akciový přesun, který byl nastaven na 'Hotovo'. Vytvořte návrat, abyste zvrátili provedené pohyby."
 
 #. module: stock
 #. odoo-python
@@ -10337,48 +9692,31 @@ msgstr "Nemůžete měnit zrušený pohyb zásob, místo toho vytvořte nový ř
 #. odoo-python
 #: code:addons/stock/models/stock_picking.py:0
 msgid "You cannot change the Scheduled Date on a done or cancelled transfer."
-msgstr ""
-"Naplánované datum nemůžete změnit u provedeného nebo zrušeného převodu."
+msgstr "Naplánované datum nemůžete změnit u provedeného nebo zrušeného převodu."
 
 #. module: stock
 #. odoo-python
 #: code:addons/stock/models/stock_move.py:0
-msgid ""
-"You cannot change the UoM for a stock move that has been set to 'Done'."
+msgid "You cannot change the UoM for a stock move that has been set to 'Done'."
 msgstr "Nemůžete změnit MJ u pohybu zásob, která byla nastavena na \"Hotovo\"."
 
 #. module: stock
 #. odoo-python
 #: code:addons/stock/models/stock_location.py:0
-msgid ""
-"You cannot change the location type or its use as a scrap location as there "
-"are products reserved in this location. Please unreserve the products first."
-msgstr ""
-"Nelze změnit typ umístění ani jeho použití jako odkladiště, protože v tomto "
-"místě jsou rezervovány produkty. Nejdříve prosím u produktů zrušte "
-"rezervaci."
+msgid "You cannot change the location type or its use as a scrap location as there are products reserved in this location. Please unreserve the products first."
+msgstr "Nelze změnit typ umístění ani jeho použití jako odkladiště, protože v tomto místě jsou rezervovány produkty. Nejdříve prosím u produktů zrušte rezervaci."
 
 #. module: stock
 #. odoo-python
 #: code:addons/stock/models/product.py:0
-msgid ""
-"You cannot change the ratio of this unit of measure as some products with "
-"this UoM have already been moved or are currently reserved."
-msgstr ""
-"Poměr této měrné jednotky nemůžete změnit, protože některé produkty s touto "
-"MJ již byly přesunuty nebo jsou aktuálně rezervovány."
+msgid "You cannot change the ratio of this unit of measure as some products with this UoM have already been moved or are currently reserved."
+msgstr "Poměr této měrné jednotky nemůžete změnit, protože některé produkty s touto MJ již byly přesunuty nebo jsou aktuálně rezervovány."
 
 #. module: stock
 #. odoo-python
 #: code:addons/stock/models/product.py:0
-msgid ""
-"You cannot change the unit of measure as there are already stock moves for "
-"this product. If you want to change the unit of measure, you should rather "
-"archive this product and create a new one."
-msgstr ""
-"Nemůžete změnit měrnou jednotku, protože pro tento produkt již existují "
-"pohyby zásob. Pokud chcete změnit měrnou jednotku, měli byste tento produkt "
-"spíše archivovat a vytvořit nový."
+msgid "You cannot change the unit of measure as there are already stock moves for this product. If you want to change the unit of measure, you should rather archive this product and create a new one."
+msgstr "Nemůžete změnit měrnou jednotku, protože pro tento produkt již existují pohyby zásob. Pokud chcete změnit měrnou jednotku, měli byste tento produkt spíše archivovat a vytvořit nový."
 
 #. module: stock
 #. odoo-python
@@ -10395,42 +9733,26 @@ msgstr "Nelze upravit množství úbytku zásob"
 #. module: stock
 #. odoo-python
 #: code:addons/stock/models/stock_move.py:0
-msgid ""
-"You cannot move the same package content more than once in the same transfer"
-" or split the same package into two location."
-msgstr ""
-"Nelze přesunout stejný obsah balíku více než jednou ve stejném přenosu nebo "
-"rozdělit stejný balíček do dvou umístění."
+msgid "You cannot move the same package content more than once in the same transfer or split the same package into two location."
+msgstr "Nelze přesunout stejný obsah balíku více než jednou ve stejném přenosu nebo rozdělit stejný balíček do dvou umístění."
 
 #. module: stock
 #. odoo-python
 #: code:addons/stock/models/stock_move.py:0
-msgid ""
-"You cannot perform the move because the unit of measure has a different "
-"category as the product unit of measure."
-msgstr ""
-"Přesun nemůžete provést, protože měrná jednotka má jinou kategorii než měrná"
-" jednotka produktu."
+msgid "You cannot perform the move because the unit of measure has a different category as the product unit of measure."
+msgstr "Přesun nemůžete provést, protože měrná jednotka má jinou kategorii než měrná jednotka produktu."
 
 #. module: stock
 #. odoo-python
 #: code:addons/stock/models/stock_location.py:0
-msgid ""
-"You cannot set a location as a scrap location when it assigned as a "
-"destination location for a manufacturing type operation."
-msgstr ""
-"Nemůžete nastavit lokaci jako vyřazovací lokaci, když je přiřazena jako "
-"cílová lokace pro výrobní typ operace."
+msgid "You cannot set a location as a scrap location when it assigned as a destination location for a manufacturing type operation."
+msgstr "Nemůžete nastavit lokaci jako vyřazovací lokaci, když je přiřazena jako cílová lokace pro výrobní typ operace."
 
 #. module: stock
 #. odoo-python
 #: code:addons/stock/models/stock_picking.py:0
-msgid ""
-"You cannot set a scrap location as the destination location for a "
-"manufacturing type operation."
-msgstr ""
-"Nemůžete nastavit vyřazovací lokaci jako cílovou lokaci pro výrobní typ "
-"operace."
+msgid "You cannot set a scrap location as the destination location for a manufacturing type operation."
+msgstr "Nemůžete nastavit vyřazovací lokaci jako cílovou lokaci pro výrobní typ operace."
 
 #. module: stock
 #. odoo-python
@@ -10442,58 +9764,42 @@ msgstr "Nelze rozdělit návrh přesunu. Nejprve je třeba ho potvrdit."
 #. odoo-python
 #: code:addons/stock/models/stock_move.py:0
 msgid "You cannot split a stock move that has been set to 'Done' or 'Cancel'."
-msgstr ""
-"Nemůžete rozdělit rezervaci u změn ve skladu, která byla nastavena na "
-"\"Hotovo\" nebo \"Zrušit\"."
+msgstr "Nemůžete rozdělit rezervaci u změn ve skladu, která byla nastavena na \"Hotovo\" nebo \"Zrušit\"."
 
 #. module: stock
 #. odoo-python
 #: code:addons/stock/models/stock_quant.py:0
-msgid ""
-"You cannot take products from or deliver products to a location of type "
-"\"view\" (%s)."
-msgstr ""
-"Nemůžete odebírat produkty ani je doručovat do umístění typu „zobrazení“ "
-"(%s)."
+msgid "You cannot take products from or deliver products to a location of type \"view\" (%s)."
+msgstr "Nemůžete odebírat produkty ani je doručovat do umístění typu „zobrazení“ (%s)."
 
 #. module: stock
 #. odoo-python
 #: code:addons/stock/models/stock_move.py:0
 msgid "You cannot unreserve a stock move that has been set to 'Done'."
-msgstr ""
-"Nemůžete zrušit rezervaci u změn ve skladu, která byla nastavena na "
-"\"Hotovo\"."
+msgstr "Nemůžete zrušit rezervaci u změn ve skladu, která byla nastavena na \"Hotovo\"."
 
 #. module: stock
 #. odoo-python
 #: code:addons/stock/models/stock_move_line.py:0
-#: code:addons/stock/models/stock_move_line.py:0
-msgid ""
-"You cannot use the same serial number twice. Please correct the serial "
-"numbers encoded."
+msgid "You cannot use the same serial number twice. Please correct the serial numbers encoded."
 msgstr "Stejné sériové číslo nemůžete použít dvakrát. Opravte sériové číslo."
 
 #. module: stock
 #. odoo-python
 #: code:addons/stock/models/stock_picking.py:0
-msgid ""
-"You cannot validate a transfer if no quantities are reserved. To force the "
-"transfer, encode quantities."
+msgid "You cannot validate a transfer if no quantities are reserved. To force the transfer, encode quantities."
 msgstr ""
 
 #. module: stock
 #. odoo-python
 #: code:addons/stock/models/stock_picking.py:0
-msgid ""
-"You can’t validate an empty transfer. Please add some products to move "
-"before proceeding."
+msgid "You can’t validate an empty transfer. Please add some products to move before proceeding."
 msgstr ""
 
 #. module: stock
 #. odoo-python
 #: code:addons/stock/wizard/stock_picking_return.py:0
-msgid ""
-"You have manually created product lines, please delete them to proceed."
+msgid "You have manually created product lines, please delete them to proceed."
 msgstr "Ručně jste vytvořili produktové trasy, pokračujte prosím odstraněním."
 
 #. module: stock
@@ -10514,22 +9820,14 @@ msgstr ""
 #. module: stock
 #. odoo-python
 #: code:addons/stock/models/product.py:0
-msgid ""
-"You have product(s) in stock that have no lot/serial number. You can assign "
-"lot/serial numbers by doing an inventory adjustment."
-msgstr ""
-"Máte na skladě produkt(y), který nemá číslo šarže / sériové číslo. Čísla "
-"šarží / sériových čísel můžete přiřadit úpravou zásob."
+msgid "You have product(s) in stock that have no lot/serial number. You can assign lot/serial numbers by doing an inventory adjustment."
+msgstr "Máte na skladě produkt(y), který nemá číslo šarže / sériové číslo. Čísla šarží / sériových čísel můžete přiřadit úpravou zásob."
 
 #. module: stock
 #. odoo-python
 #: code:addons/stock/models/stock_orderpoint.py:0
-msgid ""
-"You have to select a product unit of measure that is in the same category as"
-" the default unit of measure of the product"
-msgstr ""
-"Musíte vybrat měrnou jednotku produktu, která je ve stejné kategorii jako je"
-" výchozí měrná jednotka produktu"
+msgid "You have to select a product unit of measure that is in the same category as the default unit of measure of the product"
+msgstr "Musíte vybrat měrnou jednotku produktu, která je ve stejné kategorii jako je výchozí měrná jednotka produktu"
 
 #. module: stock
 #. odoo-python
@@ -10552,9 +9850,7 @@ msgstr "Možná jste chtěli aktualizovat umístění tohoto operátora přesunu
 #. module: stock
 #. odoo-python
 #: code:addons/stock/models/stock_picking.py:0
-msgid ""
-"You need to activate storage locations to be able to do internal operation "
-"types."
+msgid "You need to activate storage locations to be able to do internal operation types."
 msgstr "Pro použití interních převodů je potřeba aktivovat lokaci skladu."
 
 #. module: stock
@@ -10588,9 +9884,7 @@ msgstr "U výrobků je třeba uvést výrobní číslo / sériové číslo %s."
 #. module: stock
 #: model_terms:res.company,invoice_terms_html:stock.res_company_1
 msgid "You should update this document to reflect your T&amp;C."
-msgstr ""
-"Měli byste aktualizovat tento dokument, aby odrážel vaše všeobecné obchodní "
-"podmínky."
+msgstr "Měli byste aktualizovat tento dokument, aby odrážel vaše všeobecné obchodní podmínky."
 
 #. module: stock
 #. odoo-python
@@ -10601,22 +9895,14 @@ msgstr "Stále máte probíhající operace pro vyskladnění typů %s ve skladu
 #. module: stock
 #. odoo-python
 #: code:addons/stock/models/product.py:0
-msgid ""
-"You still have some active reordering rules on this product. Please archive "
-"or delete them first."
-msgstr ""
-"Na tomto produktu stále existují některá aktivní pravidla přeskupování. "
-"Nejdříve je prosím archivujte nebo smažte."
+msgid "You still have some active reordering rules on this product. Please archive or delete them first."
+msgstr "Na tomto produktu stále existují některá aktivní pravidla přeskupování. Nejdříve je prosím archivujte nebo smažte."
 
 #. module: stock
 #. odoo-javascript
 #: code:addons/stock/static/src/views/list/inventory_report_list_model.js:0
-msgid ""
-"You tried to create a record that already exists. The existing record was "
-"modified instead."
-msgstr ""
-"Pokusili jste se vytvořit záznam, který již existuje. Místo toho byl změněn "
-"stávající záznam."
+msgid "You tried to create a record that already exists. The existing record was modified instead."
+msgstr "Pokusili jste se vytvořit záznam, který již existuje. Místo toho byl změněn stávající záznam."
 
 #. module: stock
 #: model_terms:ir.actions.act_window,help:stock.action_orderpoint_replenish
@@ -10843,12 +10129,8 @@ msgstr ""
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_move__warehouse_id
-msgid ""
-"the warehouse to consider for the route selection on the next procurement "
-"(if any)."
-msgstr ""
-"sklad, který je třeba vzít v úvahu při výběru trasy při příštím nákupu "
-"(pokud existuje)."
+msgid "the warehouse to consider for the route selection on the next procurement (if any)."
+msgstr "sklad, který je třeba vzít v úvahu při výběru trasy při příštím nákupu (pokud existuje)."
 
 #. module: stock
 #. odoo-javascript
@@ -10865,7 +10147,5 @@ msgstr "jednotky"
 
 #. module: stock
 #: model:mail.template,subject:stock.mail_template_data_delivery_confirmation
-msgid ""
-"{{ object.company_id.name }} Delivery Order (Ref {{ object.name or 'n/a' }})"
-msgstr ""
-"{{ object.company_id.name }} Objednávka (Ref {{ object.name or 'n/a' }})"
+msgid "{{ object.company_id.name }} Delivery Order (Ref {{ object.name or 'n/a' }})"
+msgstr "{{ object.company_id.name }} Objednávka (Ref {{ object.name or 'n/a' }})"

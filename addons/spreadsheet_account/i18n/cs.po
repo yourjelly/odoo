@@ -1,23 +1,24 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* spreadsheet_account
-# 
+#
 # Translators:
-# Wil Odoo, 2024
+# Wil Odoo, 2023
+# Aleš Fiala <f.ales1@seznam.cz>, 2023
 # Katerina Horylova, 2024
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~17.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-02-21 10:42+0000\n"
-"PO-Revision-Date: 2024-01-17 11:21+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
 "Last-Translator: Katerina Horylova, 2024\n"
 "Language-Team: Czech (https://app.transifex.com/odoo/teams/41243/cs/)\n"
+"Language: cs\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: cs\n"
 "Plural-Forms: nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n <= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;\n"
 
 #. module: spreadsheet_account
@@ -29,12 +30,8 @@ msgstr "%snení platný rok."
 #. module: spreadsheet_account
 #. odoo-javascript
 #: code:addons/spreadsheet_account/static/src/accounting_functions.js:0
-msgid ""
-"'%s' is not a valid period. Supported formats are \"21/12/2022\", "
-"\"Q1/2022\", \"12/2022\", and \"2022\"."
-msgstr ""
-"'%s' není platnou periodou. Podporované formáty jsou \"21/12/2022\", "
-"\"Q1/2022\", \"12/2022\" a \"2022\"."
+msgid "'%s' is not a valid period. Supported formats are \"21/12/2022\", \"Q1/2022\", \"12/2022\", and \"2022\"."
+msgstr "'%s' není platnou periodou. Podporované formáty jsou \"21/12/2022\", \"Q1/2022\", \"12/2022\" a \"2022\"."
 
 #. module: spreadsheet_account
 #: model:ir.model,name:spreadsheet_account.model_account_account
@@ -74,20 +71,22 @@ msgstr "Položky deníku pro předčíslí účtu %s"
 #. odoo-javascript
 #: code:addons/spreadsheet_account/static/src/accounting_functions.js:0
 msgid "Returns the account ids of a given group."
-msgstr "Vrátí id účtů dané skupiny."
+msgstr ""
+"Vrátí id účtů dané skupiny.\n"
+"skupina\n"
+"\n"
+"Může se v Odoo používat buď na: - Označení přístupových skupin - Seskupování záznamů - Číselníků skupin pro různé datasety"
 
 #. module: spreadsheet_account
 #. odoo-javascript
 #: code:addons/spreadsheet_account/static/src/accounting_functions.js:0
-msgid ""
-"Returns the ending date of the fiscal year encompassing the provided date."
+msgid "Returns the ending date of the fiscal year encompassing the provided date."
 msgstr "Vrací datum konce fiskálního roku zahrnující zadané datum."
 
 #. module: spreadsheet_account
 #. odoo-javascript
 #: code:addons/spreadsheet_account/static/src/accounting_functions.js:0
-msgid ""
-"Returns the starting date of the fiscal year encompassing the provided date."
+msgid "Returns the starting date of the fiscal year encompassing the provided date."
 msgstr "Vrací počáteční datum fiskálního roku zahrnující zadané datum."
 
 #. module: spreadsheet_account
@@ -123,19 +122,14 @@ msgstr "Společnost, na kterou se zaměřit (\"Pokročilé\")."
 #. module: spreadsheet_account
 #. odoo-javascript
 #: code:addons/spreadsheet_account/static/src/accounting_functions.js:0
-#: code:addons/spreadsheet_account/static/src/accounting_functions.js:0
 msgid "The company."
 msgstr "Společnost."
 
 #. module: spreadsheet_account
 #. odoo-javascript
 #: code:addons/spreadsheet_account/static/src/accounting_functions.js:0
-msgid ""
-"The date range. Supported formats are \"21/12/2022\", \"Q1/2022\", "
-"\"12/2022\", and \"2022\"."
-msgstr ""
-"Rozsah data. Podporované formáty jsou \"21/12/2022\", \"Q1/2022\", "
-"\"12/2022\" a \"2022\"."
+msgid "The date range. Supported formats are \"21/12/2022\", \"Q1/2022\", \"12/2022\", and \"2022\"."
+msgstr "Rozsah data. Podporované formáty jsou \"21/12/2022\", \"Q1/2022\", \"12/2022\" a \"2022\"."
 
 #. module: spreadsheet_account
 #. odoo-javascript

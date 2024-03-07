@@ -1,24 +1,30 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* hr_attendance
-# 
+#
 # Translators:
+# karolína schusterová <karolina.schusterova@vdp.sk>, 2023
+# Tomáš Píšek, 2023
+# Ivana Bartonkova, 2023
+# Jakub Smolka, 2023
+# Martin Trigaux, 2023
+# Jiří Podhorecký, 2023
 # Wil Odoo, 2024
 # Katerina Horylova, 2024
 # Aleš Fiala <f.ales1@seznam.cz>, 2024
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~17.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-01-17 10:09+0000\n"
-"PO-Revision-Date: 2024-01-17 11:21+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
 "Last-Translator: Aleš Fiala <f.ales1@seznam.cz>, 2024\n"
 "Language-Team: Czech (https://app.transifex.com/odoo/teams/41243/cs/)\n"
+"Language: cs\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: cs\n"
 "Plural-Forms: nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n <= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;\n"
 
 #. module: hr_attendance
@@ -65,9 +71,7 @@ msgstr ""
 
 #. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.hr_employees_view_kanban
-msgid ""
-"<span id=\"oe_hr_attendance_status\" class=\"fa fa-circle text-success "
-"me-1\" role=\"img\" aria-label=\"Available\" title=\"Available\"/>"
+msgid "<span id=\"oe_hr_attendance_status\" class=\"fa fa-circle text-success me-1\" role=\"img\" aria-label=\"Available\" title=\"Available\"/>"
 msgstr ""
 
 #. module: hr_attendance
@@ -142,16 +146,12 @@ msgstr ""
 
 #. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.res_config_settings_view_form
-msgid ""
-"Allow a period of time (around working hours) where extra time will not be "
-"counted, in benefit of the company"
+msgid "Allow a period of time (around working hours) where extra time will not be counted, in benefit of the company"
 msgstr ""
 
 #. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.res_config_settings_view_form
-msgid ""
-"Allow a period of time (around working hours) where extra time will not be "
-"deducted, in benefit of the employee"
+msgid "Allow a period of time (around working hours) where extra time will not be deducted, in benefit of the employee"
 msgstr ""
 
 #. module: hr_attendance
@@ -296,34 +296,20 @@ msgstr ""
 #. module: hr_attendance
 #. odoo-python
 #: code:addons/hr_attendance/models/hr_attendance.py:0
-msgid ""
-"Cannot create new attendance record for %(empl_name)s, the employee hasn't "
-"checked out since %(datetime)s"
-msgstr ""
-"Nelze vytvořit nový záznam docházky pro %(empl_name)s, zaměstnanec se od té "
-"doby neodhlásil %(datetime)s"
+msgid "Cannot create new attendance record for %(empl_name)s, the employee hasn't checked out since %(datetime)s"
+msgstr "Nelze vytvořit nový záznam docházky pro %(empl_name)s, zaměstnanec se od té doby neodhlásil %(datetime)s"
 
 #. module: hr_attendance
 #. odoo-python
 #: code:addons/hr_attendance/models/hr_attendance.py:0
-#: code:addons/hr_attendance/models/hr_attendance.py:0
-msgid ""
-"Cannot create new attendance record for %(empl_name)s, the employee was "
-"already checked in on %(datetime)s"
-msgstr ""
-"Nelze vytvořit nový záznam docházky pro %(empl_name)s, zaměstnanec byl již "
-"přihlášen dne %(datetime)s"
+msgid "Cannot create new attendance record for %(empl_name)s, the employee was already checked in on %(datetime)s"
+msgstr "Nelze vytvořit nový záznam docházky pro %(empl_name)s, zaměstnanec byl již přihlášen dne %(datetime)s"
 
 #. module: hr_attendance
 #. odoo-python
 #: code:addons/hr_attendance/models/hr_employee.py:0
-msgid ""
-"Cannot perform check out on %(empl_name)s, could not find corresponding "
-"check in. Your attendances have probably been modified manually by human "
-"resources."
-msgstr ""
-"Nelze provést rezervaci %(empl_name)s, nelze najít odpovídající přihlášení. "
-"Vaše docházky byly pravděpodobně upraveny ručně lidskými zdroji."
+msgid "Cannot perform check out on %(empl_name)s, could not find corresponding check in. Your attendances have probably been modified manually by human resources."
+msgstr "Nelze provést rezervaci %(empl_name)s, nelze najít odpovídající přihlášení. Vaše docházky byly pravděpodobně upraveny ručně lidskými zdroji."
 
 #. module: hr_attendance
 #. odoo-javascript
@@ -360,13 +346,11 @@ msgstr "Odhlásit se"
 #. module: hr_attendance
 #. odoo-javascript
 #: code:addons/hr_attendance/static/src/components/attendance_menu/attendance_menu.xml:0
-#: code:addons/hr_attendance/static/src/components/attendance_menu/attendance_menu.xml:0
 msgid "Check in"
 msgstr ""
 
 #. module: hr_attendance
 #. odoo-javascript
-#: code:addons/hr_attendance/static/src/components/attendance_menu/attendance_menu.xml:0
 #: code:addons/hr_attendance/static/src/components/attendance_menu/attendance_menu.xml:0
 msgid "Check out"
 msgstr ""
@@ -452,9 +436,7 @@ msgstr ""
 
 #. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.res_config_settings_view_form
-msgid ""
-"Count of extra hours is considered from this date. Potential extra hours "
-"prior to this date are not considered."
+msgid "Count of extra hours is considered from this date. Potential extra hours prior to this date are not considered."
 msgstr ""
 
 #. module: hr_attendance
@@ -533,8 +515,7 @@ msgstr ""
 #. module: hr_attendance
 #. odoo-python
 #: code:addons/hr_attendance/models/hr_attendance.py:0
-msgid ""
-"Do not have access, user cannot edit the attendances that are not his own."
+msgid "Do not have access, user cannot edit the attendances that are not his own."
 msgstr ""
 
 #. module: hr_attendance
@@ -641,16 +622,12 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/hr_attendance/static/src/components/greetings/greetings.xml:0
 #: code:addons/hr_attendance/static/src/components/manual_selection/manual_selection.xml:0
-#: code:addons/hr_attendance/static/src/components/manual_selection/manual_selection.xml:0
-#: code:addons/hr_attendance/static/src/components/pin_code/pin_code.xml:0
-#: code:addons/hr_attendance/static/src/components/pin_code/pin_code.xml:0
 #: code:addons/hr_attendance/static/src/components/pin_code/pin_code.xml:0
 msgid "Go back"
 msgstr "Vrátit se"
 
 #. module: hr_attendance
 #. odoo-javascript
-#: code:addons/hr_attendance/static/src/components/greetings/greetings.xml:0
 #: code:addons/hr_attendance/static/src/components/greetings/greetings.xml:0
 msgid "Goodbye"
 msgstr "Na shledanou"
@@ -1017,17 +994,13 @@ msgstr "Skener"
 #. module: hr_attendance
 #. odoo-javascript
 #: code:addons/hr_attendance/static/src/components/manual_selection/manual_selection.xml:0
-#: code:addons/hr_attendance/static/src/components/manual_selection/manual_selection.xml:0
-#: code:addons/hr_attendance/static/src/components/manual_selection/manual_selection.xml:0
 msgid "Search..."
 msgstr "Hledat..."
 
 #. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.res_config_settings_view_form
 msgid "Set PIN codes in the employee detail form (in HR Settings tab)."
-msgstr ""
-"Nastavte PIN kódy ve formuláři podrobností zaměstnance (na kartě Nastavení "
-"HR)."
+msgstr "Nastavte PIN kódy ve formuláři podrobností zaměstnance (na kartě Nastavení HR)."
 
 #. module: hr_attendance
 #: model:ir.actions.act_window,name:hr_attendance.action_hr_attendance_settings
@@ -1036,7 +1009,6 @@ msgstr "Nastavení"
 
 #. module: hr_attendance
 #. odoo-javascript
-#: code:addons/hr_attendance/static/src/components/pin_code/pin_code.xml:0
 #: code:addons/hr_attendance/static/src/components/pin_code/pin_code.xml:0
 msgid "Sign out"
 msgstr "Odhlásit"
@@ -1072,23 +1044,17 @@ msgstr ""
 #: model:ir.model.fields,help:hr_attendance.field_hr_employee__attendance_manager_id
 #: model:ir.model.fields,help:hr_attendance.field_hr_employee_public__attendance_manager_id
 #: model:ir.model.fields,help:hr_attendance.field_res_users__attendance_manager_id
-msgid ""
-"The user set in Attendance will access the attendance of the employee "
-"through the dedicated app and will be able to edit them."
+msgid "The user set in Attendance will access the attendance of the employee through the dedicated app and will be able to edit them."
 msgstr ""
 
 #. module: hr_attendance
 #: model:res.groups,comment:hr_attendance.group_hr_attendance_own_reader
-msgid ""
-"The user will have access to his own attendances on his user / employee "
-"profile"
+msgid "The user will have access to his own attendances on his user / employee profile"
 msgstr ""
 
 #. module: hr_attendance
 #: model:res.groups,comment:hr_attendance.group_hr_attendance_officer
-msgid ""
-"The user will have access to the attendance records and reporting of "
-"employees where he's set as an attendance manager"
+msgid "The user will have access to the attendance records and reporting of employees where he's set as an attendance manager"
 msgstr ""
 
 #. module: hr_attendance
@@ -1127,7 +1093,6 @@ msgstr ""
 #. module: hr_attendance
 #. odoo-python
 #: code:addons/hr_attendance/controllers/main.py:0
-#: code:addons/hr_attendance/controllers/main.py:0
 msgid "Unknown"
 msgstr "Neznámá"
 
@@ -1138,9 +1103,7 @@ msgstr ""
 
 #. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.res_config_settings_view_form
-msgid ""
-"Use this url to access your kiosk mode from any device. Warning, anybody "
-"with the link can access your kiosk."
+msgid "Use this url to access your kiosk mode from any device. Warning, anybody with the link can access your kiosk."
 msgstr ""
 
 #. module: hr_attendance

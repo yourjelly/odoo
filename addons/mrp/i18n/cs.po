@@ -1,25 +1,28 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* mrp
-# 
+#
 # Translators:
-# Wil Odoo, 2024
+# SlavekB <slavek.banko@axis.cz>, 2023
+# Ivana Bartonkova, 2023
+# Wil Odoo, 2023
+# Tomáš Píšek, 2023
 # Aleš Fiala <f.ales1@seznam.cz>, 2024
 # Jakub Smolka, 2024
 # Katerina Horylova, 2024
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~17.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-01-17 10:09+0000\n"
-"PO-Revision-Date: 2024-01-17 11:21+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
 "Last-Translator: Katerina Horylova, 2024\n"
 "Language-Team: Czech (https://app.transifex.com/odoo/teams/41243/cs/)\n"
+"Language: cs\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: cs\n"
 "Plural-Forms: nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n <= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;\n"
 
 #. module: mrp
@@ -136,15 +139,12 @@ msgstr ""
 #. module: mrp
 #. odoo-javascript
 #: code:addons/mrp/static/src/components/mo_overview/mrp_mo_overview.xml:0
-#: code:addons/mrp/static/src/components/mo_overview/mrp_mo_overview.xml:0
 #: model_terms:ir.ui.view,arch_db:mrp.mo_overview_content
 msgid "(in"
 msgstr ""
 
 #. module: mrp
 #. odoo-python
-#: code:addons/mrp/models/stock_rule.py:0
-#: code:addons/mrp/models/stock_rule.py:0
 #: code:addons/mrp/models/stock_rule.py:0
 msgid "+ %d day(s)"
 msgstr "+ %d dní"
@@ -346,10 +346,7 @@ msgstr ""
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.view_change_production_qty_wizard
-msgid ""
-"<span class=\"text-muted\">Modifying the quantity to produce will also "
-"modify the quantities of components to consume for this manufacturing "
-"order.</span>"
+msgid "<span class=\"text-muted\">Modifying the quantity to produce will also modify the quantities of components to consume for this manufacturing order.</span>"
 msgstr ""
 
 #. module: mrp
@@ -536,11 +533,8 @@ msgstr "Výrobní objednávka je již hotová nebo zrušena."
 #. module: mrp
 #. odoo-python
 #: code:addons/mrp/models/stock_warehouse.py:0
-msgid ""
-"A product with a kit-type bill of materials can not have a reordering rule."
-msgstr ""
-"Výrobek s kusovníkem typu stavebnice nemůže mít pravidlo pro změnu "
-"objednávky."
+msgid "A product with a kit-type bill of materials can not have a reordering rule."
+msgstr "Výrobek s kusovníkem typu stavebnice nemůže mít pravidlo pro změnu objednávky."
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_document__access_token
@@ -603,14 +597,8 @@ msgstr "Přidat položku"
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.res_config_settings_view_form
-msgid ""
-"Add by-products to bills of materials. This can be used to get several "
-"finished products as well. Without this option you only do: A + B = C. With "
-"the option: A + B = C + D."
-msgstr ""
-"Přidání vedlejších produktů do kusovníků. Toho lze využít i k získání "
-"několika hotových výrobků. Bez této možnosti můžete pouze: A + B = C. S "
-"touto možností: A + B = C + D."
+msgid "Add by-products to bills of materials. This can be used to get several finished products as well. Without this option you only do: A + B = C. With the option: A + B = C + D."
+msgstr "Přidání vedlejších produktů do kusovníků. Toho lze využít i k získání několika hotových výrobků. Bez této možnosti můžete pouze: A + B = C. S touto možností: A + B = C + D."
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.res_config_settings_view_form
@@ -680,12 +668,8 @@ msgstr ""
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.res_config_settings_view_form
-msgid ""
-"Allow manufacturing users to modify quantities to consume, without the need "
-"for prior approval"
-msgstr ""
-"Umožnit výrobním uživatelům upravovat množství ke spotřebě bez nutnosti "
-"předchozího schválení."
+msgid "Allow manufacturing users to modify quantities to consume, without the need for prior approval"
+msgstr "Umožnit výrobním uživatelům upravovat množství ke spotřebě bez nutnosti předchozího schválení."
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_production__use_create_components_lots
@@ -724,21 +708,13 @@ msgstr "Alternativní pracovní střediska"
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_workcenter__alternative_workcenter_ids
-msgid ""
-"Alternative workcenters that can be substituted to this one in order to "
-"dispatch production"
-msgstr ""
-"Alternativní pracovní střediska, která mohou být nahrazena tímto střediskem "
-"za účelem expedice výroby"
+msgid "Alternative workcenters that can be substituted to this one in order to dispatch production"
+msgstr "Alternativní pracovní střediska, která mohou být nahrazena tímto střediskem za účelem expedice výroby"
 
 #. module: mrp
 #: model_terms:ir.actions.act_window,help:mrp.mrp_unbuild
-msgid ""
-"An unbuild order is used to break down a finished product into its "
-"components."
-msgstr ""
-"Objednávka rozebrání se používá k rozdělení hotového produktu na jeho "
-"komponenty."
+msgid "An unbuild order is used to break down a finished product into its components."
+msgstr "Objednávka rozebrání se používá k rozdělení hotového produktu na jeho komponenty."
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_bom_byproduct__bom_product_template_attribute_value_ids
@@ -836,9 +812,7 @@ msgstr ""
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_stock_picking_type__auto_print_generated_mrp_lot
-msgid ""
-"Automatically print the lot/SN label when the \"Create a new serial/lot "
-"number\" button is used."
+msgid "Automatically print the lot/SN label when the \"Create a new serial/lot number\" button is used."
 msgstr ""
 
 #. module: mrp
@@ -883,11 +857,7 @@ msgstr "Avatar"
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_bom__produce_delay
-msgid ""
-"Average lead time in days to manufacture this product. In the case of multi-"
-"level BOM, the manufacturing lead times of the components will be added. In "
-"case the product is subcontracted, this can be used to determine the date at"
-" which components should be sent to the subcontractor."
+msgid "Average lead time in days to manufacture this product. In the case of multi-level BOM, the manufacturing lead times of the components will be added. In case the product is subcontracted, this can be used to determine the date at which components should be sent to the subcontractor."
 msgstr ""
 
 #. module: mrp
@@ -962,11 +932,8 @@ msgstr "Sekvence objednávek"
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_production__backorder_sequence
-msgid ""
-"Backorder sequence, if equals to 0 means there is not related backorder"
-msgstr ""
-"Pořadí zpětných objednávek, pokud se rovná 0, znamená to, že neexistuje "
-"žádná související zpětná objednávka."
+msgid "Backorder sequence, if equals to 0 means there is not related backorder"
+msgstr "Pořadí zpětných objednávek, pokud se rovná 0, znamená to, že neexistuje žádná související zpětná objednávka."
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_workorder__barcode
@@ -1034,9 +1001,7 @@ msgstr "Kusovníky"
 #: model:ir.model.fields,help:mrp.field_mrp_production__bom_id
 #: model:ir.model.fields,help:mrp.field_mrp_unbuild__mo_bom_id
 #: model:ir.model.fields,help:mrp.field_mrp_workorder__production_bom_id
-msgid ""
-"Bills of Materials, also called recipes, are used to autocomplete components"
-" and work order instructions."
+msgid "Bills of Materials, also called recipes, are used to autocomplete components and work order instructions."
 msgstr ""
 
 #. module: mrp
@@ -1168,8 +1133,7 @@ msgstr "Vedlejší produkt %s by neměl být stejný, jako produkt kusovníku."
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_stock_move__byproduct_id
 msgid "By-product line that generated the move in a manufacturing order"
-msgstr ""
-"Vedlejší produktová položka, která vyvolala přesun ve výrobním příkazu"
+msgstr "Vedlejší produktová položka, která vyvolala přesun ve výrobním příkazu"
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_bom__byproduct_ids
@@ -1297,8 +1261,7 @@ msgstr "Zvolte typ štítků k vytisknutí"
 #. module: mrp
 #: model:ir.model,name:mrp.model_picking_label_type
 msgid "Choose whether to print product or lot/sn labels"
-msgstr ""
-"Vyberte, zda tisknout produktový štítek nebo štítek šarží/sériových čísel"
+msgstr "Vyberte, zda tisknout produktový štítek nebo štítek šarží/sériových čísel"
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_workcenter__time_stop
@@ -1394,8 +1357,7 @@ msgstr "Umístění komponentů"
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_production__priority
-msgid ""
-"Components will be reserved first for the MO with the highest priorities."
+msgid "Components will be reserved first for the MO with the highest priorities."
 msgstr "Komponenty budou nejprve rezervovány pro MO s nejvyššími prioritami."
 
 #. module: mrp
@@ -1410,11 +1372,7 @@ msgstr "Vypočítat na základě sledovaného času"
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.mrp_bom_form_view
-msgid ""
-"Compute the days required to resupply all components from BoM, by either "
-"buying or manufacturing the components and/or subassemblies."
-"                                                       Also note that "
-"purchase security lead times will be added when appropriate."
+msgid "Compute the days required to resupply all components from BoM, by either buying or manufacturing the components and/or subassemblies.                                                       Also note that purchase security lead times will be added when appropriate."
 msgstr ""
 
 #. module: mrp
@@ -1499,12 +1457,8 @@ msgstr "Varování spotřeby"
 #: model:ir.model.fields,help:mrp.field_mrp_bom_byproduct__product_uom_category_id
 #: model:ir.model.fields,help:mrp.field_mrp_bom_line__product_uom_category_id
 #: model:ir.model.fields,help:mrp.field_mrp_production__product_uom_category_id
-msgid ""
-"Conversion between Units of Measure can only occur if they belong to the "
-"same category. The conversion will be made based on the ratios."
-msgstr ""
-"Převod mezi měrnými jednotkami lze uskutečnit pouze pokud patří do stejné "
-"kategorie. Převod bude proveden na základě vzájemných poměrů."
+msgid "Conversion between Units of Measure can only occur if they belong to the same category. The conversion will be made based on the ratios."
+msgstr "Převod mezi měrnými jednotkami lze uskutečnit pouze pokud patří do stejné kategorie. Převod bude proveden na základě vzájemných poměrů."
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.mrp_routing_workcenter_bom_tree_view
@@ -1601,13 +1555,8 @@ msgstr "Vytvořit zpětnou objednávku"
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.view_mrp_production_backorder_form
-msgid ""
-"Create a backorder if you expect to process the remaining products later. Do"
-" not create a backorder if you will not process the remaining products."
-msgstr ""
-"Pokud čekáte, že zbývající produkty zpracujete později, vytvořte zpětnou "
-"objednávku. Pokud nezpracujete zbývající produkty, nevytvářejte novou "
-"zpětnou objednávku."
+msgid "Create a backorder if you expect to process the remaining products later. Do not create a backorder if you will not process the remaining products."
+msgstr "Pokud čekáte, že zbývající produkty zpracujete později, vytvořte zpětnou objednávku. Pokud nezpracujete zbývající produkty, nevytvářejte novou zpětnou objednávku."
 
 #. module: mrp
 #: model_terms:ir.actions.act_window,help:mrp.mrp_routing_action
@@ -1648,11 +1597,7 @@ msgstr "Vytváření přizpůsobitelných pracovních listů pro kontroly kvalit
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_bom__allow_operation_dependencies
 #: model:ir.model.fields,help:mrp.field_mrp_routing_workcenter__allow_operation_dependencies
-msgid ""
-"Create operation level dependencies that will influence both planning and "
-"the status of work orders upon MO confirmation. If this feature is ticked, "
-"and nothing is specified, Odoo will assume that all operations can be "
-"started simultaneously."
+msgid "Create operation level dependencies that will influence both planning and the status of work orders upon MO confirmation. If this feature is ticked, and nothing is specified, Odoo will assume that all operations can be started simultaneously."
 msgstr ""
 
 #. module: mrp
@@ -1775,15 +1720,13 @@ msgstr ""
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_production__date_finished
-msgid ""
-"Date you expect to finish production or actual date you finished production."
+msgid "Date you expect to finish production or actual date you finished production."
 msgstr ""
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_production__date_start
 #: model:ir.model.fields,help:mrp.field_mrp_workorder__production_date
-msgid ""
-"Date you plan to start production or date you actually started production."
+msgid "Date you plan to start production or date you actually started production."
 msgstr ""
 
 #. module: mrp
@@ -1827,12 +1770,7 @@ msgstr "Výchozí doba výroby"
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_workcenter__default_capacity
-msgid ""
-"Default number of pieces (in product UoM) that can be produced in parallel "
-"(at the same time) at this work center. For example: the capacity is 5 and "
-"you need to produce 10 units, then the operation time listed on the BOM will"
-" be multiplied by two. However, note that both time before and after "
-"production will only be counted once."
+msgid "Default number of pieces (in product UoM) that can be produced in parallel (at the same time) at this work center. For example: the capacity is 5 and you need to produce 10 units, then the operation time listed on the BOM will be multiplied by two. However, note that both time before and after production will only be counted once."
 msgstr ""
 
 #. module: mrp
@@ -1846,9 +1784,7 @@ msgstr "Výchozí měrná jednotka používaná pro všechny akciové operace."
 msgid ""
 "Define the components and finished products you wish to use in\n"
 "                bill of materials and manufacturing orders."
-msgstr ""
-"Definujte komponenty a hotové výrobky, které chcete použít v kusovníku a "
-"výrobních objednávkách."
+msgstr "Definujte komponenty a hotové výrobky, které chcete použít v kusovníku a výrobních objednávkách."
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_bom__consumption
@@ -2294,7 +2230,7 @@ msgstr "Předpokládaný problém"
 #. odoo-javascript
 #: code:addons/mrp/static/src/components/bom_overview_table/mrp_bom_overview_table.xml:0
 msgid "Free to Use"
-msgstr "Zdarma k použití"
+msgstr "K dispozici"
 
 #. module: mrp
 #. odoo-javascript
@@ -2359,14 +2295,11 @@ msgstr ""
 #. module: mrp
 #: model_terms:ir.actions.act_window,help:mrp.action_mrp_routing_time
 msgid "Get statistics about the work orders duration related to this routing."
-msgstr ""
-"Získání statistik o délce trvání pracovních příkazů souvisejících s tímto "
-"směrováním."
+msgstr "Získání statistik o délce trvání pracovních příkazů souvisejících s tímto směrováním."
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_routing_workcenter__sequence
-msgid ""
-"Gives the sequence order when displaying a list of routing Work Centers."
+msgid "Gives the sequence order when displaying a list of routing Work Centers."
 msgstr "Určuje pořadí při zobrazení seznamu postupů výrobních středisek"
 
 #. module: mrp
@@ -2506,11 +2439,8 @@ msgstr "Ikona, která označuje výjimečnou aktivitu."
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_bom__product_id
-msgid ""
-"If a product variant is defined the BOM is available only for this product."
-msgstr ""
-"Pokud jsou definována varianta produktu, kusovník je dostupný pouze pro "
-"tento produkt."
+msgid "If a product variant is defined the BOM is available only for this product."
+msgstr "Pokud jsou definována varianta produktu, kusovník je dostupný pouze pro tento produkt."
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_bom__message_needaction
@@ -2531,57 +2461,37 @@ msgstr "Pokud zaškrtnuto, některé zprávy mají chybu při doručení."
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_production__propagate_cancel
-msgid ""
-"If checked, when the previous move of the move (which was generated by a "
-"next procurement) is cancelled or split, the move generated by this move "
-"will too"
-msgstr ""
-"Pokud je zaškrtnuto, při zrušení nebo rozdělení předchozího pohybu (který "
-"byl vygenerován dalším zadáním zakázky) se zruší i pohyb vygenerovaný tímto "
-"pohybem."
+msgid "If checked, when the previous move of the move (which was generated by a next procurement) is cancelled or split, the move generated by this move will too"
+msgstr "Pokud je zaškrtnuto, při zrušení nebo rozdělení předchozího pohybu (který byl vygenerován dalším zadáním zakázky) se zruší i pohyb vygenerovaný tímto pohybem."
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_workcenter__active
-msgid ""
-"If the active field is set to False, it will allow you to hide the resource "
-"record without removing it."
-msgstr ""
-"Pokud je pole aktivní nastaveno na Nepravda, umožní vám to skrýt záznam "
-"zdroje bez jeho odstranění."
+msgid "If the active field is set to False, it will allow you to hide the resource record without removing it."
+msgstr "Pokud je pole aktivní nastaveno na Nepravda, umožní vám to skrýt záznam zdroje bez jeho odstranění."
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_stock_picking_type__auto_print_mrp_reception_report_labels
-msgid ""
-"If this checkbox is ticked, Odoo will automatically print the allocation "
-"report labels of a MO when it is done."
+msgid "If this checkbox is ticked, Odoo will automatically print the allocation report labels of a MO when it is done."
 msgstr ""
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_stock_picking_type__auto_print_mrp_reception_report
-msgid ""
-"If this checkbox is ticked, Odoo will automatically print the allocation "
-"report of a MO when it is done and has assigned moves."
+msgid "If this checkbox is ticked, Odoo will automatically print the allocation report of a MO when it is done and has assigned moves."
 msgstr ""
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_stock_picking_type__auto_print_done_mrp_lot
-msgid ""
-"If this checkbox is ticked, Odoo will automatically print the lot/SN label "
-"of a MO when it is done."
+msgid "If this checkbox is ticked, Odoo will automatically print the lot/SN label of a MO when it is done."
 msgstr ""
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_stock_picking_type__auto_print_done_mrp_product_labels
-msgid ""
-"If this checkbox is ticked, Odoo will automatically print the product labels"
-" of a MO when it is done."
+msgid "If this checkbox is ticked, Odoo will automatically print the product labels of a MO when it is done."
 msgstr ""
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_stock_picking_type__auto_print_done_production_order
-msgid ""
-"If this checkbox is ticked, Odoo will automatically print the production "
-"order of a MO when it is done."
+msgid "If this checkbox is ticked, Odoo will automatically print the production order of a MO when it is done."
 msgstr ""
 
 #. module: mrp
@@ -2618,12 +2528,8 @@ msgstr "Importovat šablonu pro kusovníky"
 #. module: mrp
 #. odoo-python
 #: code:addons/mrp/models/mrp_workorder.py:0
-msgid ""
-"Impossible to plan the workorder. Please check the workcenter "
-"availabilities."
-msgstr ""
-"Nelze naplánovat pracovní příkaz. Zkontrolujte dostupnost pracovního "
-"střediska."
+msgid "Impossible to plan the workorder. Please check the workcenter availabilities."
+msgstr "Nelze naplánovat pracovní příkaz. Zkontrolujte dostupnost pracovního střediska."
 
 #. module: mrp
 #: model:ir.model.fields.selection,name:mrp.selection__mrp_production__state__progress
@@ -2650,12 +2556,8 @@ msgstr "Indexovaný obsah"
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_production__date_deadline
-msgid ""
-"Informative date allowing to define when the manufacturing order should be "
-"processed at the latest to fulfill delivery on time."
-msgstr ""
-"Informativní datum umožňující definovat, kdy má být výrobní zakázka "
-"nejpozději zpracována, aby byla dodávka provedena včas."
+msgid "Informative date allowing to define when the manufacturing order should be processed at the latest to fulfill delivery on time."
+msgstr "Informativní datum umožňující definovat, kdy má být výrobní zakázka nejpozději zpracována, aby byla dodávka provedena včas."
 
 #. module: mrp
 #: model:ir.actions.act_window,name:mrp.action_mrp_production_moves
@@ -2664,10 +2566,8 @@ msgstr "Pohyby zásob"
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_workorder__move_line_ids
-msgid ""
-"Inventory moves for which you must scan a lot number at this work order"
-msgstr ""
-"Pohyby inventáře, pro které musíte v této zakázce naskenovat číslo šarže"
+msgid "Inventory moves for which you must scan a lot number at this work order"
+msgstr "Pohyby inventáře, pro které musíte v této zakázce naskenovat číslo šarže"
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_production__is_delayed
@@ -2722,9 +2622,7 @@ msgstr "To už bylo odblokováno."
 #. module: mrp
 #. odoo-python
 #: code:addons/mrp/models/mrp_workorder.py:0
-msgid ""
-"It is not possible to unplan one single Work Order. You should unplan the "
-"Manufacturing Order instead in order to unplan all the linked operations."
+msgid "It is not possible to unplan one single Work Order. You should unplan the Manufacturing Order instead in order to unplan all the linked operations."
 msgstr ""
 
 #. module: mrp
@@ -2865,9 +2763,7 @@ msgstr "Pozdní MO nebo pozdní dodání komponentů"
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_production__components_availability
-msgid ""
-"Latest component availability status for this MO. If green, then the MO's "
-"readiness status is ready, as per BOM configuration."
+msgid "Latest component availability status for this MO. If green, then the MO's readiness status is ready, as per BOM configuration."
 msgstr ""
 
 #. module: mrp
@@ -2920,9 +2816,7 @@ msgstr "Umístění, kde systém naskladní hotové výrobky."
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_unbuild__location_dest_id
-msgid ""
-"Location where you want to send the components resulting from the unbuild "
-"order."
+msgid "Location where you want to send the components resulting from the unbuild order."
 msgstr "Místo, kam chcete poslat komponenty vzniklé z požadavků na rozebrání."
 
 #. module: mrp
@@ -2932,12 +2826,8 @@ msgstr "Zamknout"
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.mrp_production_form_view
-msgid ""
-"Lock the manufacturing order to prevent changes to what has been consumed or"
-" produced."
-msgstr ""
-"Zamkněte výrobní příkaz, aby nedocházelo ke změnám v tom, co bylo "
-"spotřebováno nebo vyrobeno."
+msgid "Lock the manufacturing order to prevent changes to what has been consumed or produced."
+msgstr "Zamkněte výrobní příkaz, aby nedocházelo ke změnám v tom, co bylo spotřebováno nebo vyrobeno."
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_workcenter_productivity__loss_id
@@ -3108,7 +2998,6 @@ msgstr "Výr. dodací lhůta"
 #. module: mrp
 #. odoo-python
 #: code:addons/mrp/models/stock_warehouse.py:0
-#: code:addons/mrp/models/stock_warehouse.py:0
 #: model:ir.model.fields,field_description:mrp.field_stock_warehouse__manufacture_steps
 #: model:ir.model.fields.selection,name:mrp.selection__stock_rule__action__manufacture
 #: model:stock.route,name:mrp.route_warehouse0_manufacture
@@ -3180,7 +3069,6 @@ msgstr "Výroba"
 
 #. module: mrp
 #. odoo-javascript
-#: code:addons/mrp/static/src/mrp_forecasted/forecasted_buttons.xml:0
 #: code:addons/mrp/static/src/mrp_forecasted/forecasted_buttons.xml:0
 msgid "Manufacturing Forecast"
 msgstr "Prognóza výroby"
@@ -3257,10 +3145,7 @@ msgstr ""
 msgid ""
 "Manufacturing operations are processed at Work Centers. A Work Center can be composed of\n"
 "                workers and/or machines, they are used for costing, scheduling, capacity planning, etc."
-msgstr ""
-"Výrobní operace se zpracovávají v pracovních střediscích. Pracovní středisko"
-" se může skládat z pracovníků a/nebo strojů, používá se pro kalkulaci "
-"nákladů, rozvrhování, plánování kapacit atd."
+msgstr "Výrobní operace se zpracovávají v pracovních střediscích. Pracovní středisko se může skládat z pracovníků a/nebo strojů, používá se pro kalkulaci nákladů, rozvrhování, plánování kapacit atd."
 
 #. module: mrp
 #: model_terms:ir.actions.act_window,help:mrp.mrp_workcenter_kanban_action
@@ -3268,11 +3153,7 @@ msgid ""
 "Manufacturing operations are processed at Work Centers. A Work Center can be composed of\n"
 "                workers and/or machines, they are used for costing, scheduling, capacity planning, etc.\n"
 "                They can be defined via the configuration menu."
-msgstr ""
-"Výrobní operace se zpracovávají v pracovních střediscích. Pracovní středisko"
-" se může skládat z pracovníků a/nebo strojů, používá se pro kalkulaci "
-"nákladů, rozvrhování, plánování kapacit atd. Lze je definovat "
-"prostřednictvím konfigurační nabídky."
+msgstr "Výrobní operace se zpracovávají v pracovních střediscích. Pracovní středisko se může skládat z pracovníků a/nebo strojů, používá se pro kalkulaci nákladů, rozvrhování, plánování kapacit atd. Lze je definovat prostřednictvím konfigurační nabídky."
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_production__reservation_state
@@ -3406,10 +3287,6 @@ msgstr "Název"
 #. module: mrp
 #. odoo-python
 #: code:addons/mrp/models/mrp_production.py:0
-#: code:addons/mrp/models/mrp_production.py:0
-#: code:addons/mrp/models/mrp_production.py:0
-#: code:addons/mrp/models/mrp_unbuild.py:0
-#: code:addons/mrp/models/mrp_unbuild.py:0
 #: code:addons/mrp/models/mrp_unbuild.py:0
 #: code:addons/mrp/models/stock_rule.py:0
 msgid "New"
@@ -3504,11 +3381,8 @@ msgstr "Žádné pracovní příkazy!"
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.mrp_workcenter_kanban
-msgid ""
-"No workorder currently in progress. Click to mark work center as blocked."
-msgstr ""
-"Nyní neprobíhá žádná zakázka. Klepnutím označte pracovní centrum jako "
-"blokované."
+msgid "No workorder currently in progress. Click to mark work center as blocked."
+msgstr "Nyní neprobíhá žádná zakázka. Klepnutím označte pracovní centrum jako blokované."
 
 #. module: mrp
 #: model:ir.model.fields.selection,name:mrp.selection__mrp_document__priority__0
@@ -3529,7 +3403,6 @@ msgstr "Není k dispozici"
 #. module: mrp
 #. odoo-python
 #: code:addons/mrp/report/mrp_report_mo_overview.py:0
-#: code:addons/mrp/report/mrp_report_mo_overview.py:0
 msgid "Not Ready"
 msgstr ""
 
@@ -3541,18 +3414,13 @@ msgstr ""
 #. module: mrp
 #. odoo-python
 #: code:addons/mrp/models/mrp_workcenter.py:0
-msgid ""
-"Note that archived work center(s): '%s' is/are still linked to active Bill "
-"of Materials, which means that operations can still be planned on it/them. "
-"To prevent this, deletion of the work center is recommended instead."
+msgid "Note that archived work center(s): '%s' is/are still linked to active Bill of Materials, which means that operations can still be planned on it/them. To prevent this, deletion of the work center is recommended instead."
 msgstr ""
 
 #. module: mrp
 #. odoo-python
-#: code:addons/mrp/models/product.py:0 code:addons/mrp/models/product.py:0
-msgid ""
-"Note that product(s): '%s' is/are still linked to active Bill of Materials, "
-"which means that the product can still be used on it/them."
+#: code:addons/mrp/models/product.py:0
+msgid "Note that product(s): '%s' is/are still linked to active Bill of Materials, which means that the product can still be used on it/them."
 msgstr ""
 
 #. module: mrp
@@ -3654,8 +3522,7 @@ msgstr "Po ruce"
 #. module: mrp
 #. odoo-python
 #: code:addons/mrp/models/mrp_production.py:0
-msgid ""
-"Only manufacturing orders in either a draft or confirmed state can be %s."
+msgid "Only manufacturing orders in either a draft or confirmed state can be %s."
 msgstr ""
 
 #. module: mrp
@@ -3849,9 +3716,7 @@ msgstr "Nadřazený průvodce"
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_routing_workcenter__worksheet_google_slide
 #: model:ir.model.fields,help:mrp.field_mrp_workorder__worksheet_google_slide
-msgid ""
-"Paste the url of your Google Slide. Make sure the access to the document is "
-"public."
+msgid "Paste the url of your Google Slide. Make sure the access to the document is public."
 msgstr ""
 
 #. module: mrp
@@ -4429,8 +4294,6 @@ msgstr "Množství"
 #. module: mrp
 #. odoo-javascript
 #: code:addons/mrp/static/src/components/bom_overview_control_panel/mrp_bom_overview_control_panel.xml:0
-#: code:addons/mrp/static/src/components/bom_overview_control_panel/mrp_bom_overview_control_panel.xml:0
-#: code:addons/mrp/static/src/components/bom_overview_control_panel/mrp_bom_overview_control_panel.xml:0
 #: code:addons/mrp/static/src/components/bom_overview_table/mrp_bom_overview_table.xml:0
 #: code:addons/mrp/static/src/components/mo_overview/mrp_mo_overview.xml:0
 #: model:ir.model.fields,field_description:mrp.field_mrp_bom__product_qty
@@ -4543,7 +4406,7 @@ msgstr "Skutečná doba trvání"
 #: code:addons/mrp/static/src/components/mo_overview/mrp_mo_overview.xml:0
 #: model_terms:ir.ui.view,arch_db:mrp.mo_overview_content
 msgid "Receipt"
-msgstr "Účtenka"
+msgstr "Příjemka"
 
 #. module: mrp
 #. odoo-javascript
@@ -4581,8 +4444,7 @@ msgstr "Značka musí být jedinečná pro každou společnost!"
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_production__origin
-msgid ""
-"Reference of the document that generated this production order request."
+msgid "Reference of the document that generated this production order request."
 msgstr "Odkaz na dokument, který vytvořit tuto objednávku výroby."
 
 #. module: mrp
@@ -4618,7 +4480,6 @@ msgstr "Doplnit"
 #. module: mrp
 #. odoo-python
 #: code:addons/mrp/models/stock_rule.py:0
-#: code:addons/mrp/models/stock_warehouse.py:0
 #: code:addons/mrp/models/stock_warehouse.py:0
 msgid "Replenish on Order (MTO)"
 msgstr "Doplnění na objednávku (MTO)"
@@ -4738,8 +4599,7 @@ msgstr "Plánované datum"
 #. module: mrp
 #. odoo-python
 #: code:addons/mrp/models/mrp_workorder.py:0
-msgid ""
-"Scheduled before the previous work order, planned from %(start)s to %(end)s"
+msgid "Scheduled before the previous work order, planned from %(start)s to %(end)s"
 msgstr ""
 
 #. module: mrp
@@ -4866,9 +4726,7 @@ msgstr "Nastavit délku trvání ručně"
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.res_config_settings_view_form
-msgid ""
-"Set the order that work orders should be processed in. Activate the feature "
-"within each BoM's Miscellaneous tab"
+msgid "Set the order that work orders should be processed in. Activate the feature within each BoM's Miscellaneous tab"
 msgstr ""
 
 #. module: mrp
@@ -4932,8 +4790,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:mrp.mrp_unbuild_search_view
 #: model_terms:ir.ui.view,arch_db:mrp.view_mrp_production_filter
 msgid "Show all records which has next action date is before today"
-msgstr ""
-"Zobrazit všechny záznamy, které mají datum příští aktivity před dneškem"
+msgstr "Zobrazit všechny záznamy, které mají datum příští aktivity před dneškem"
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_production_backorder__show_backorder_lines
@@ -4964,26 +4821,18 @@ msgstr ""
 #. module: mrp
 #. odoo-python
 #: code:addons/mrp/models/mrp_unbuild.py:0
-msgid ""
-"Some of your byproducts are tracked, you have to specify a manufacturing "
-"order in order to retrieve the correct byproducts."
+msgid "Some of your byproducts are tracked, you have to specify a manufacturing order in order to retrieve the correct byproducts."
 msgstr ""
 
 #. module: mrp
 #. odoo-python
 #: code:addons/mrp/models/mrp_unbuild.py:0
-msgid ""
-"Some of your components are tracked, you have to specify a manufacturing "
-"order in order to retrieve the correct components."
-msgstr ""
-"Některé komponenty jsou sledovány, musíte zadat výrobní zakázku, abyste "
-"získali správné komponenty."
+msgid "Some of your components are tracked, you have to specify a manufacturing order in order to retrieve the correct components."
+msgstr "Některé komponenty jsou sledovány, musíte zadat výrobní zakázku, abyste získali správné komponenty."
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.mrp_production_form_view
-msgid ""
-"Some product moves have already been confirmed, this manufacturing order "
-"can't be completely cancelled. Are you still sure you want to process?"
+msgid "Some product moves have already been confirmed, this manufacturing order can't be completely cancelled. Are you still sure you want to process?"
 msgstr ""
 
 #. module: mrp
@@ -5021,8 +4870,7 @@ msgstr ""
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_workcenter__capacity_ids
-msgid ""
-"Specific number of pieces that can be produced in parallel per product."
+msgid "Specific number of pieces that can be produced in parallel per product."
 msgstr ""
 
 #. module: mrp
@@ -5247,12 +5095,8 @@ msgstr "Název štítku"
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_production__show_allocation
-msgid ""
-"Technical Field used to decide whether the button \"Allocation\" should be "
-"displayed."
-msgstr ""
-"Technické pole používané k výpočtu, zda má být zobrazeno tlačítko "
-"\"Alokace\"."
+msgid "Technical Field used to decide whether the button \"Allocation\" should be displayed."
+msgstr "Technické pole používané k výpočtu, zda má být zobrazeno tlačítko \"Alokace\"."
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_workcenter__has_routing_lines
@@ -5291,10 +5135,8 @@ msgstr ""
 
 #. module: mrp
 #. odoo-python
-#: code:addons/mrp/models/mrp_bom.py:0 code:addons/mrp/models/mrp_bom.py:0
-msgid ""
-"The Product Unit of Measure you chose has a different category than in the "
-"product form."
+#: code:addons/mrp/models/mrp_bom.py:0
+msgid "The Product Unit of Measure you chose has a different category than in the product form."
 msgstr "Měrná jednotka výrobku je jiné kategorie než ve formuláři výrobku."
 
 #. module: mrp
@@ -5306,9 +5148,7 @@ msgstr ""
 #. module: mrp
 #. odoo-python
 #: code:addons/mrp/models/mrp_bom.py:0
-msgid ""
-"The attribute value %(attribute)s set on product %(product)s does not match "
-"the BoM product %(bom_product)s."
+msgid "The attribute value %(attribute)s set on product %(product)s does not match the BoM product %(bom_product)s."
 msgstr ""
 
 #. module: mrp
@@ -5326,12 +5166,8 @@ msgstr ""
 #. module: mrp
 #. odoo-python
 #: code:addons/mrp/models/mrp_bom.py:0
-msgid ""
-"The current configuration is incorrect because it would create a cycle "
-"between these products: %s."
-msgstr ""
-"Aktuální nastavení je nesprávné, protože by vytvořilo cyklus mezi těmito "
-"produkty: %s."
+msgid "The current configuration is incorrect because it would create a cycle between these products: %s."
+msgstr "Aktuální nastavení je nesprávné, protože by vytvořilo cyklus mezi těmito produkty: %s."
 
 #. module: mrp
 #. odoo-python
@@ -5346,48 +5182,34 @@ msgstr "Počet produktů již zpracovaných touto zakázkou"
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_bom_line__operation_id
-msgid ""
-"The operation where the components are consumed, or the finished products "
-"created."
-msgstr ""
-"Provoz, kde jsou komponenty spotřebovány, nebo dokončeny hotové výrobky."
+msgid "The operation where the components are consumed, or the finished products created."
+msgstr "Provoz, kde jsou komponenty spotřebovány, nebo dokončeny hotové výrobky."
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_bom_byproduct__cost_share
-msgid ""
-"The percentage of the final production cost for this by-product line "
-"(divided between the quantity produced).The total of all by-products' cost "
-"share must be less than or equal to 100."
+msgid "The percentage of the final production cost for this by-product line (divided between the quantity produced).The total of all by-products' cost share must be less than or equal to 100."
 msgstr ""
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_stock_move__cost_share
-msgid ""
-"The percentage of the final production cost for this by-product. The total "
-"of all by-products' cost share must be smaller or equal to 100."
+msgid "The percentage of the final production cost for this by-product. The total of all by-products' cost share must be smaller or equal to 100."
 msgstr ""
 
 #. module: mrp
 #. odoo-python
 #: code:addons/mrp/models/mrp_workorder.py:0
-msgid ""
-"The planned end date of the work order cannot be prior to the planned start "
-"date, please correct this to save the work order."
+msgid "The planned end date of the work order cannot be prior to the planned start date, please correct this to save the work order."
 msgstr ""
 
 #. module: mrp
 #. odoo-python
 #: code:addons/mrp/models/mrp_bom.py:0
-msgid ""
-"The product has already been used at least once, editing its structure may "
-"lead to undesirable behaviours. You should rather archive the product and "
-"create a new one with a new bill of materials."
+msgid "The product has already been used at least once, editing its structure may lead to undesirable behaviours. You should rather archive the product and create a new one with a new bill of materials."
 msgstr ""
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_workorder__qty_reported_from_previous_wo
-msgid ""
-"The quantity already produced awaiting allocation in the backorders chain."
+msgid "The quantity already produced awaiting allocation in the backorders chain."
 msgstr ""
 
 #. module: mrp
@@ -5404,17 +5226,13 @@ msgstr ""
 #. module: mrp
 #. odoo-python
 #: code:addons/mrp/models/mrp_production.py:0
-msgid ""
-"The serial number %(number)s used for byproduct %(product_name)s has already"
-" been produced"
+msgid "The serial number %(number)s used for byproduct %(product_name)s has already been produced"
 msgstr ""
 
 #. module: mrp
 #. odoo-python
 #: code:addons/mrp/models/mrp_production.py:0
-msgid ""
-"The serial number %(number)s used for component %(component)s has already "
-"been consumed"
+msgid "The serial number %(number)s used for component %(component)s has already been consumed"
 msgstr ""
 
 #. module: mrp
@@ -5431,9 +5249,7 @@ msgstr ""
 #. module: mrp
 #. odoo-python
 #: code:addons/mrp/models/mrp_production.py:0
-msgid ""
-"The total cost share for a manufacturing order's by-products cannot exceed "
-"100."
+msgid "The total cost share for a manufacturing order's by-products cannot exceed 100."
 msgstr ""
 
 #. module: mrp
@@ -5454,8 +5270,7 @@ msgstr "Šablona motivu"
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.mrp_production_form_view
-msgid ""
-"There are no components to consume. Are you still sure you want to continue?"
+msgid "There are no components to consume. Are you still sure you want to continue?"
 msgstr ""
 
 #. module: mrp
@@ -5471,30 +5286,16 @@ msgstr "Zatím není žádný produkt"
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_workcenter__tz
-msgid ""
-"This field is used in order to define in which timezone the resources will "
-"work."
-msgstr ""
-"This field is used in order to define in which timezone the resources will "
-"work."
+msgid "This field is used in order to define in which timezone the resources will work."
+msgstr "This field is used in order to define in which timezone the resources will work."
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_workcenter__time_efficiency
-msgid ""
-"This field is used to calculate the expected duration of a work order at "
-"this work center. For example, if a work order takes one hour and the "
-"efficiency factor is 100%, then the expected duration will be one hour. If "
-"the efficiency factor is 200%, however the expected duration will be 30 "
-"minutes."
-msgstr ""
-"Toto pole se používá k výpočtu očekávané doby trvání pracovního příkazu v "
-"tomto pracovním středisku. Pokud například pracovní příkaz trvá jednu hodinu"
-" a faktor efektivity je 100 %, pak očekávaná doba trvání bude jedna hodina. "
-"Pokud je však faktor efektivity 200 %, bude očekávaná doba trvání 30 minut."
+msgid "This field is used to calculate the expected duration of a work order at this work center. For example, if a work order takes one hour and the efficiency factor is 100%, then the expected duration will be one hour. If the efficiency factor is 200%, however the expected duration will be 30 minutes."
+msgstr "Toto pole se používá k výpočtu očekávané doby trvání pracovního příkazu v tomto pracovním středisku. Pokud například pracovní příkaz trvá jednu hodinu a faktor efektivity je 100 %, pak očekávaná doba trvání bude jedna hodina. Pokud je však faktor efektivity 200 %, bude očekávaná doba trvání 30 minut."
 
 #. module: mrp
 #. odoo-javascript
-#: code:addons/mrp/static/src/components/bom_overview_line/mrp_bom_overview_line.xml:0
 #: code:addons/mrp/static/src/components/bom_overview_line/mrp_bom_overview_line.xml:0
 msgid "This is a BoM of type Kit!"
 msgstr ""
@@ -5502,12 +5303,8 @@ msgstr ""
 #. module: mrp
 #. odoo-javascript
 #: code:addons/mrp/static/src/components/bom_overview_table/mrp_bom_overview_table.xml:0
-msgid ""
-"This is the cost based on the BoM of the product. It is computed by summing "
-"the costs of the components and operations needed to build the product."
-msgstr ""
-"Jedná se o náklady založené na BoM produktu. Vypočítá se součtem nákladů na "
-"komponenty a operace potřebné k vytvoření produktu."
+msgid "This is the cost based on the BoM of the product. It is computed by summing the costs of the components and operations needed to build the product."
+msgstr "Jedná se o náklady založené na BoM produktu. Vypočítá se součtem nákladů na komponenty a operace potřebné k vytvoření produktu."
 
 #. module: mrp
 #. odoo-javascript
@@ -5544,10 +5341,7 @@ msgstr ""
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_bom__product_qty
-msgid ""
-"This should be the smallest quantity that this product can be produced in. "
-"If the BOM contains operations, make sure the work center capacity is "
-"accurate."
+msgid "This should be the smallest quantity that this product can be produced in. If the BOM contains operations, make sure the work center capacity is accurate."
 msgstr ""
 
 #. module: mrp
@@ -5588,12 +5382,8 @@ msgstr ""
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_routing_workcenter__time_cycle_manual
-msgid ""
-"Time in minutes:- In manual mode, time used- In automatic mode, supposed "
-"first time when there aren't any work orders yet"
-msgstr ""
-"Čas v minutách:- v manuálním režimu, využitý čas- v automatickém režimu, "
-"předpokládaný první čas, když ještě nejsou žádné pracovní příkazy"
+msgid "Time in minutes:- In manual mode, time used- In automatic mode, supposed first time when there aren't any work orders yet"
+msgstr "Čas v minutách:- v manuálním režimu, využitý čas- v automatickém režimu, předpokládaný první čas, když ještě nejsou žádné pracovní příkazy"
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_workcenter__tz
@@ -5642,7 +5432,6 @@ msgstr ""
 
 #. module: mrp
 #. odoo-python
-#: code:addons/mrp/report/mrp_report_mo_overview.py:0
 #: code:addons/mrp/report/mrp_report_mo_overview.py:0
 msgid "To Order"
 msgstr "K objednání"
@@ -5860,8 +5649,6 @@ msgstr "Jednotka"
 #. module: mrp
 #. odoo-javascript
 #: code:addons/mrp/static/src/components/bom_overview_table/mrp_bom_overview_table.xml:0
-#: code:addons/mrp/static/src/components/bom_overview_table/mrp_bom_overview_table.xml:0
-#: code:addons/mrp/static/src/components/mo_overview/mrp_mo_overview.xml:0
 #: code:addons/mrp/static/src/components/mo_overview/mrp_mo_overview.xml:0
 #: model_terms:ir.ui.view,arch_db:mrp.mo_overview_content
 msgid "Unit Cost"
@@ -5896,12 +5683,8 @@ msgstr "Měrná jednotka"
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_bom__product_uom_id
 #: model:ir.model.fields,help:mrp.field_mrp_bom_line__product_uom_id
-msgid ""
-"Unit of Measure (Unit of Measure) is the unit of measurement for the "
-"inventory control"
-msgstr ""
-"Měrná jednotka (Měrná jednotka) je jednotka míry použitá pro řízení "
-"inventáře"
+msgid "Unit of Measure (Unit of Measure) is the unit of measurement for the inventory control"
+msgstr "Měrná jednotka (Měrná jednotka) je jednotka míry použitá pro řízení inventáře"
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.report_mrporder
@@ -5920,9 +5703,7 @@ msgstr ""
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.mrp_production_form_view
-msgid ""
-"Unlock to adjust component demand during production, or consumed quantities "
-"once the manufacturing order is done."
+msgid "Unlock to adjust component demand during production, or consumed quantities once the manufacturing order is done."
 msgstr ""
 
 #. module: mrp
@@ -5975,9 +5756,7 @@ msgstr "Url"
 
 #. module: mrp
 #: model_terms:ir.actions.act_window,help:mrp.mrp_production_action
-msgid ""
-"Use Manufacturing Orders (MO) to build finished products while consuming "
-"components: i.e. 1 Table = 4 Table Legs + 1 Table Top"
+msgid "Use Manufacturing Orders (MO) to build finished products while consuming components: i.e. 1 Table = 4 Table Legs + 1 Table Top"
 msgstr ""
 
 #. module: mrp
@@ -6005,14 +5784,8 @@ msgstr "Uživatel"
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.res_config_settings_view_form
-msgid ""
-"Using a MPS report to schedule your reordering and manufacturing operations "
-"is useful if you have long lead time and if you produce based on sales "
-"forecasts."
-msgstr ""
-"Použití výkazu MPS k naplánování změn objednávek a výrobních operací je "
-"užitečné, pokud máte dlouhou dodací lhůtu a vyrábíte na základě prognóz "
-"prodeje."
+msgid "Using a MPS report to schedule your reordering and manufacturing operations is useful if you have long lead time and if you produce based on sales forecasts."
+msgstr "Použití výkazu MPS k naplánování změn objednávek a výrobních operací je užitečné, pokud máte dlouhou dodací lhůtu a vyrábíte na základě prognóz prodeje."
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_production_split__valid_details
@@ -6102,8 +5875,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/mrp/models/mrp_workorder.py:0
 msgid "Waiting the previous work order, planned from %(start)s to %(end)s"
-msgstr ""
-"Čekání na předchozí pracovní příkaz, plánovaný od %(start)s do %(end)s"
+msgstr "Čekání na předchozí pracovní příkaz, plánovaný od %(start)s do %(end)s"
 
 #. module: mrp
 #. odoo-javascript
@@ -6120,9 +5892,7 @@ msgstr "Varování na nedostatečné množství při rozebrání"
 
 #. module: mrp
 #. odoo-python
-#: code:addons/mrp/models/mrp_bom.py:0 code:addons/mrp/models/mrp_bom.py:0
 #: code:addons/mrp/models/mrp_bom.py:0
-#: code:addons/mrp/models/mrp_production.py:0
 #: code:addons/mrp/models/mrp_production.py:0
 #: code:addons/mrp/models/stock_scrap.py:0
 msgid "Warning"
@@ -6159,16 +5929,8 @@ msgstr "Webová historie komunikace"
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_bom__picking_type_id
-msgid ""
-"When a procurement has a ‘produce’ route with a operation type set, it will "
-"try to create a Manufacturing Order for that product using a BoM of the same"
-" operation type. That allows to define stock rules which trigger different "
-"manufacturing orders with different BoMs."
-msgstr ""
-"Pokud má zakázka „výrobní“ trasu s nastaveným typem operací, pokusí se "
-"vytvořit výrobní zakázku pro tento produkt pomocí BoM stejného typu provozu."
-" To umožňuje definovat skladová pravidla, která spouštějí různé výrobní "
-"zakázky s různými BoM."
+msgid "When a procurement has a ‘produce’ route with a operation type set, it will try to create a Manufacturing Order for that product using a BoM of the same operation type. That allows to define stock rules which trigger different manufacturing orders with different BoMs."
+msgstr "Pokud má zakázka „výrobní“ trasu s nastaveným typem operací, pokusí se vytvořit výrobní zakázku pro tento produkt pomocí BoM stejného typu provozu. To umožňuje definovat skladová pravidla, která spouštějí různé výrobní zakázky s různými BoM."
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_bom_line__manual_consumption
@@ -6185,39 +5947,24 @@ msgstr ""
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_stock_warehouse__manufacture_to_resupply
-msgid ""
-"When products are manufactured, they can be manufactured in this warehouse."
+msgid "When products are manufactured, they can be manufactured in this warehouse."
 msgstr "K výrobě zboží lze použít tento sklad."
 
 #. module: mrp
 #. odoo-python
 #: code:addons/mrp/models/stock_rule.py:0
-msgid ""
-"When products are needed in <b>%s</b>, <br/> a manufacturing order is "
-"created to fulfill the need."
+msgid "When products are needed in <b>%s</b>, <br/> a manufacturing order is created to fulfill the need."
 msgstr ""
 
 #. module: mrp
 #: model_terms:digest.tip,tip_description:mrp.digest_tip_mrp_0
-msgid ""
-"With the Odoo work center control panel, your worker can start work orders "
-"in the shop and follow instructions of the worksheet. Quality tests are "
-"perfectly integrated into the process. Workers can trigger feedback loops, "
-"maintenance alerts, scrap products, etc."
-msgstr ""
-"S ovládacím panelem pracovního centra Odoo může váš pracovník zahájit "
-"pracovní příkazy v obchodě a postupovat podle pokynů v listu. Testy kvality "
-"jsou dokonale integrovány do procesu. Pracovníci mohou spouštět smyčky "
-"zpětné vazby, upozornění na údržbu, vyřazovat výrobky atd."
+msgid "With the Odoo work center control panel, your worker can start work orders in the shop and follow instructions of the worksheet. Quality tests are perfectly integrated into the process. Workers can trigger feedback loops, maintenance alerts, scrap products, etc."
+msgstr "S ovládacím panelem pracovního centra Odoo může váš pracovník zahájit pracovní příkazy v obchodě a postupovat podle pokynů v listu. Testy kvality jsou dokonale integrovány do procesu. Pracovníci mohou spouštět smyčky zpětné vazby, upozornění na údržbu, vyřazovat výrobky atd."
 
 #. module: mrp
 #: model:ir.model,name:mrp.model_mrp_consumption_warning
-msgid ""
-"Wizard in case of consumption in warning/strict and more component has been "
-"used for a MO (related to the bom)"
-msgstr ""
-"Průvodce případem, že je nastavena striktní spotřeba a na výrobu bylo "
-"použito více materiálu (ve vztahu ke kusovníku)"
+msgid "Wizard in case of consumption in warning/strict and more component has been used for a MO (related to the bom)"
+msgstr "Průvodce případem, že je nastavena striktní spotřeba a na výrobu bylo použito více materiálu (ve vztahu ke kusovníku)"
 
 #. module: mrp
 #: model:ir.model,name:mrp.model_mrp_production_split_multi
@@ -6320,15 +6067,8 @@ msgstr ""
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.res_config_settings_view_form
-msgid ""
-"Work Order Operations allow you to create and manage the manufacturing "
-"operations that should be followed within your work centers in order to "
-"produce a product. They are attached to bills of materials that will define "
-"the required components."
-msgstr ""
-"Work Order Operations vám umožní vytvářet a spravovat výrobní operace, které"
-" by měly být dodržovány ve vašich pracovních centrech za účelem výroby "
-"produktu. Jsou připojeny k kusovníku, který definuje požadované komponenty."
+msgid "Work Order Operations allow you to create and manage the manufacturing operations that should be followed within your work centers in order to produce a product. They are attached to bills of materials that will define the required components."
+msgstr "Work Order Operations vám umožní vytvářet a spravovat výrobní operace, které by měly být dodržovány ve vašich pracovních centrech za účelem výroby produktu. Jsou připojeny k kusovníku, který definuje požadované komponenty."
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_stock_move__workorder_id
@@ -6377,10 +6117,7 @@ msgstr "Výrobní středisko"
 msgid ""
 "Work orders are operations to do as part of a manufacturing order.\n"
 "                    Operations are defined in the bill of materials or added in the manufacturing order directly."
-msgstr ""
-"Pracovní příkazy jsou operace, které je třeba provést v rámci výrobní "
-"zakázky. Operace se definují v kusovníku nebo se přidávají přímo do "
-"výrobního příkazu."
+msgstr "Pracovní příkazy jsou operace, které je třeba provést v rámci výrobní zakázky. Operace se definují v kusovníku nebo se přidávají přímo do výrobního příkazu."
 
 #. module: mrp
 #: model_terms:ir.actions.act_window,help:mrp.action_mrp_workorder_production
@@ -6444,8 +6181,7 @@ msgstr "Stav pracovního střediska"
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.mrp_workcenter_kanban
 msgid "Workcenter blocked, click to unblock."
-msgstr ""
-"Pracovní středisko je blokováno, kliknutím na tlačítko blokování zrušíte."
+msgstr "Pracovní středisko je blokováno, kliknutím na tlačítko blokování zrušíte."
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_workcenter__resource_calendar_id
@@ -6476,39 +6212,24 @@ msgstr ""
 #. module: mrp
 #. odoo-python
 #: code:addons/mrp/wizard/mrp_batch_produce.py:0
-msgid ""
-"Write one line per finished product to produce, with serial numbers as "
-"follows:\n"
+msgid "Write one line per finished product to produce, with serial numbers as follows:\n"
 msgstr ""
 
 #. module: mrp
 #. odoo-python
 #: code:addons/mrp/models/stock_lot.py:0
-msgid ""
-"You are not allowed to create or edit a lot or serial number for the "
-"components with the operation type \"Manufacturing\". To change this, go on "
-"the operation type and tick the box \"Create New Lots/Serial Numbers for "
-"Components\"."
-msgstr ""
-"Není povoleno vytvářet ani upravovat šarže nebo sériové číslo komponent s "
-"typem operace „Výroba“. Chcete-li to změnit, přejděte na typ operace a "
-"zaškrtněte políčko „Vytvořit nové šarže / sériová čísla pro komponenty“."
+msgid "You are not allowed to create or edit a lot or serial number for the components with the operation type \"Manufacturing\". To change this, go on the operation type and tick the box \"Create New Lots/Serial Numbers for Components\"."
+msgstr "Není povoleno vytvářet ani upravovat šarže nebo sériové číslo komponent s typem operace „Výroba“. Chcete-li to změnit, přejděte na typ operace a zaškrtněte políčko „Vytvořit nové šarže / sériová čísla pro komponenty“."
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_document__type
-msgid ""
-"You can either upload a file from your computer or copy/paste an internet "
-"link to your file."
-msgstr ""
-"Můžete buď nahrát soubor z počítače, nebo zkopírovat / vložit internetový "
-"odkaz do souboru."
+msgid "You can either upload a file from your computer or copy/paste an internet link to your file."
+msgstr "Můžete buď nahrát soubor z počítače, nebo zkopírovat / vložit internetový odkaz do souboru."
 
 #. module: mrp
 #. odoo-python
 #: code:addons/mrp/models/mrp_bom.py:0
-msgid ""
-"You can not create a kit-type bill of materials for products that have at "
-"least one reordering rule."
+msgid "You can not create a kit-type bill of materials for products that have at least one reordering rule."
 msgstr ""
 
 #. module: mrp
@@ -6517,23 +6238,18 @@ msgstr ""
 msgid ""
 "You can not delete a Bill of Material with running manufacturing orders.\n"
 "Please close or cancel it first."
-msgstr ""
-"Nemůžete smazat kusovník, se kterým běží výroba. Nejdřív ji prosím ukončete "
-"nebo zrušte."
+msgstr "Nemůžete smazat kusovník, se kterým běží výroba. Nejdřív ji prosím ukončete nebo zrušte."
 
 #. module: mrp
 #. odoo-python
 #: code:addons/mrp/models/mrp_production.py:0
-msgid ""
-"You can only merge manufacturing orders of identical products with same BoM."
+msgid "You can only merge manufacturing orders of identical products with same BoM."
 msgstr ""
 
 #. module: mrp
 #. odoo-python
 #: code:addons/mrp/models/mrp_production.py:0
-msgid ""
-"You can only merge manufacturing orders with no additional components or by-"
-"products."
+msgid "You can only merge manufacturing orders with no additional components or by-products."
 msgstr ""
 
 #. module: mrp
@@ -6551,12 +6267,8 @@ msgstr ""
 #. module: mrp
 #. odoo-python
 #: code:addons/mrp/models/mrp_workorder.py:0
-msgid ""
-"You cannot change the workcenter of a work order that is in progress or "
-"done."
-msgstr ""
-"Pracovní středisko pracovního příkazu, který právě probíhá nebo je hotový, "
-"nelze změnit."
+msgid "You cannot change the workcenter of a work order that is in progress or done."
+msgstr "Pracovní středisko pracovního příkazu, který právě probíhá nebo je hotový, nelze změnit."
 
 #. module: mrp
 #. odoo-python
@@ -6593,8 +6305,7 @@ msgstr "Tuto pracovní zakázku nelze propojit s jinou výrobní zakázkou."
 #. odoo-python
 #: code:addons/mrp/models/mrp_production.py:0
 msgid "You cannot move a manufacturing order once it is cancelled or done."
-msgstr ""
-"Jakmile je výrobní zakázka zrušena nebo hotová, nemůžete ji přesunout."
+msgstr "Jakmile je výrobní zakázka zrušena nebo hotová, nemůžete ji přesunout."
 
 #. module: mrp
 #. odoo-python
@@ -6611,9 +6322,7 @@ msgstr "Nelze rozebrat nehotovou výrobní objednávku."
 #. module: mrp
 #. odoo-python
 #: code:addons/mrp/models/mrp_bom.py:0
-msgid ""
-"You cannot use the 'Apply on Variant' functionality and simultaneously "
-"create a BoM for a specific variant."
+msgid "You cannot use the 'Apply on Variant' functionality and simultaneously create a BoM for a specific variant."
 msgstr ""
 
 #. module: mrp
@@ -6639,36 +6348,20 @@ msgstr ""
 #. module: mrp
 #. odoo-python
 #: code:addons/mrp/models/mrp_workorder.py:0
-msgid ""
-"You need to define at least one productivity loss in the category "
-"'Performance'. Create one from the Manufacturing app, menu: Configuration / "
-"Productivity Losses."
-msgstr ""
-"Musíte definovat alespoň jednu ztrátu produktivity v kategorii 'Výkon'. "
-"Vytvořte si ji z aplikace Výroba, menu: Konfigurace / Ztráty produktivity."
+msgid "You need to define at least one productivity loss in the category 'Performance'. Create one from the Manufacturing app, menu: Configuration / Productivity Losses."
+msgstr "Musíte definovat alespoň jednu ztrátu produktivity v kategorii 'Výkon'. Vytvořte si ji z aplikace Výroba, menu: Konfigurace / Ztráty produktivity."
 
 #. module: mrp
 #. odoo-python
 #: code:addons/mrp/models/mrp_workorder.py:0
-msgid ""
-"You need to define at least one productivity loss in the category "
-"'Productivity'. Create one from the Manufacturing app, menu: Configuration /"
-" Productivity Losses."
-msgstr ""
-"Musíte definovat alespoň jednu ztrátu produktivity v kategorii "
-"„Produktivita“. Vytvořte si ji z aplikace Výroba, menu: Konfigurace / Ztráty"
-" produktivity."
+msgid "You need to define at least one productivity loss in the category 'Productivity'. Create one from the Manufacturing app, menu: Configuration / Productivity Losses."
+msgstr "Musíte definovat alespoň jednu ztrátu produktivity v kategorii „Produktivita“. Vytvořte si ji z aplikace Výroba, menu: Konfigurace / Ztráty produktivity."
 
 #. module: mrp
 #. odoo-python
 #: code:addons/mrp/models/mrp_workcenter.py:0
-msgid ""
-"You need to define at least one unactive productivity loss in the category "
-"'Performance'. Create one from the Manufacturing app, menu: Configuration / "
-"Productivity Losses."
-msgstr ""
-"V kategorii \"Výkon\" je třeba definovat alespoň jednu neaktivní ztrátu "
-"produktivity. Vytvořte ji v aplikaci Výroba, nabídka: Ztráty produktivity."
+msgid "You need to define at least one unactive productivity loss in the category 'Performance'. Create one from the Manufacturing app, menu: Configuration / Productivity Losses."
+msgstr "V kategorii \"Výkon\" je třeba definovat alespoň jednu neaktivní ztrátu produktivity. Vytvořte ji v aplikaci Výroba, nabídka: Ztráty produktivity."
 
 #. module: mrp
 #. odoo-python
@@ -6729,9 +6422,7 @@ msgstr ""
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.mrp_bom_form_view
-msgid ""
-"it is moved via a transfer, such as a receipt or a delivery order for "
-"instance."
+msgid "it is moved via a transfer, such as a receipt or a delivery order for instance."
 msgstr ""
 
 #. module: mrp
@@ -6753,7 +6444,6 @@ msgstr ""
 
 #. module: mrp
 #. odoo-python
-#: code:addons/mrp/report/mrp_report_bom_structure.py:0
 #: code:addons/mrp/report/mrp_report_bom_structure.py:0
 #: model_terms:ir.ui.view,arch_db:mrp.mrp_routing_workcenter_form_view
 #: model_terms:ir.ui.view,arch_db:mrp.mrp_workcenter_view

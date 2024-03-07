@@ -1,26 +1,28 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* portal
-# 
+#
 # Translators:
-# Wil Odoo, 2024
+# Ivana Bartonkova, 2023
+# Wil Odoo, 2023
+# Tomáš Píšek, 2023
 # Jakub Smolka, 2024
 # Vojtech Smolka, 2024
 # Aleš Fiala <f.ales1@seznam.cz>, 2024
 # Katerina Horylova, 2024
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~17.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-01-17 10:11+0000\n"
-"PO-Revision-Date: 2024-01-17 11:21+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
 "Last-Translator: Katerina Horylova, 2024\n"
 "Language-Team: Czech (https://app.transifex.com/odoo/teams/41243/cs/)\n"
+"Language: cs\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: cs\n"
 "Plural-Forms: nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n <= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;\n"
 
 #. module: portal
@@ -73,9 +75,7 @@ msgstr "<i class=\"oi oi-arrow-right me-1\"/>Back to edit mode"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.record_pager
-msgid ""
-"<i class=\"oi oi-chevron-left\" role=\"img\" aria-label=\"Previous\" "
-"title=\"Previous\"/>"
+msgid "<i class=\"oi oi-chevron-left\" role=\"img\" aria-label=\"Previous\" title=\"Previous\"/>"
 msgstr ""
 
 #. module: portal
@@ -109,9 +109,7 @@ msgstr ""
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.pager
-msgid ""
-"<span class=\"fa fa-chevron-left\" role=\"img\" aria-label=\"Previous\" "
-"title=\"Previous\"/>"
+msgid "<span class=\"fa fa-chevron-left\" role=\"img\" aria-label=\"Previous\" title=\"Previous\"/>"
 msgstr ""
 
 #. module: portal
@@ -315,32 +313,21 @@ msgstr "Změnit heslo"
 #. odoo-python
 #: code:addons/portal/controllers/portal.py:0
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_details_fields
-msgid ""
-"Changing VAT number is not allowed once document(s) have been issued for "
-"your account. Please contact us directly for this operation."
-msgstr ""
-"Změna DIČ není povolena, pokud byly pro váš účet vydány dokument(y). Prosím "
-"kontaktujte nás přímo pro tuto operaci."
+msgid "Changing VAT number is not allowed once document(s) have been issued for your account. Please contact us directly for this operation."
+msgstr "Změna DIČ není povolena, pokud byly pro váš účet vydány dokument(y). Prosím kontaktujte nás přímo pro tuto operaci."
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_details_fields
-msgid ""
-"Changing company name is not allowed once document(s) have been issued for "
-"your account. Please contact us directly for this operation."
-msgstr ""
-"Po vydání dokumentu(ů) pro váš účet není změna názvu společnosti povolena. "
-"Kontaktujte nás přímo pro tuto operaci."
+msgid "Changing company name is not allowed once document(s) have been issued for your account. Please contact us directly for this operation."
+msgstr "Po vydání dokumentu(ů) pro váš účet není změna názvu společnosti povolena. Kontaktujte nás přímo pro tuto operaci."
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_details_fields
-msgid ""
-"Changing the country is not allowed once document(s) have been issued for "
-"your account. Please contact us directly for this operation."
+msgid "Changing the country is not allowed once document(s) have been issued for your account. Please contact us directly for this operation."
 msgstr ""
 
 #. module: portal
 #. odoo-javascript
-#: code:addons/portal/static/src/js/portal_security.js:0
 #: code:addons/portal/static/src/js/portal_security.js:0
 msgid "Check failed"
 msgstr "Kontrola se nezdařila"
@@ -378,7 +365,7 @@ msgstr "Konfigurační nastavení"
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_home
 msgid "Configure your connection parameters"
-msgstr "Nastavte si vaše přihlašovací možnosti"
+msgstr "Nastavte si vaše možnosti přihlášení"
 
 #. module: portal
 #. odoo-javascript
@@ -444,22 +431,14 @@ msgstr "Vytvořeno dne"
 #. module: portal
 #. odoo-javascript
 #: code:addons/portal/static/src/xml/portal_chatter.xml:0
-msgid ""
-"Currently available to everyone viewing this document, click to restrict to "
-"internal employees."
-msgstr ""
-"Aktuálně k dispozici všem, kteří si prohlížejí tento dokument, kliknutím "
-"omezte na interní zaměstnance."
+msgid "Currently available to everyone viewing this document, click to restrict to internal employees."
+msgstr "Aktuálně k dispozici všem, kteří si prohlížejí tento dokument, kliknutím omezte na interní zaměstnance."
 
 #. module: portal
 #. odoo-javascript
 #: code:addons/portal/static/src/xml/portal_chatter.xml:0
-msgid ""
-"Currently restricted to internal employees, click to make it available to "
-"everyone viewing this document."
-msgstr ""
-"Aktuálně omezeno na interní zaměstnance. Kliknutím jej zpřístupníte všem, "
-"kteří si prohlížejí tento dokument."
+msgid "Currently restricted to internal employees, click to make it available to everyone viewing this document."
+msgstr "Aktuálně omezeno na interní zaměstnance. Kliknutím jej zpřístupníte všem, kteří si prohlížejí tento dokument."
 
 #. module: portal
 #: model:ir.model.fields,field_description:portal.field_res_config_settings__portal_allow_api_keys
@@ -673,7 +652,6 @@ msgstr ""
 #. module: portal
 #. odoo-python
 #: code:addons/portal/wizard/portal_share.py:0
-#: code:addons/portal/wizard/portal_share.py:0
 msgid "Invitation to access %s"
 msgstr "Pozvánka na přístup %s"
 
@@ -746,12 +724,8 @@ msgstr "Zpráva"
 #. module: portal
 #. odoo-python
 #: code:addons/portal/models/mail_thread.py:0
-msgid ""
-"Model %(model_name)s does not support token signature, as it does not have "
-"%(field_name)s field."
-msgstr ""
-"Modelka %(model_name)s nepodporuje podpis tokenu, protože nemá "
-"%(field_name)s pole."
+msgid "Model %(model_name)s does not support token signature, as it does not have %(field_name)s field."
+msgstr "Modelka %(model_name)s nepodporuje podpis tokenu, protože nemá %(field_name)s pole."
 
 #. module: portal
 #. odoo-python
@@ -789,7 +763,6 @@ msgstr "Nové heslo:"
 
 #. module: portal
 #. odoo-javascript
-#: code:addons/portal/static/src/xml/portal_chatter.xml:0
 #: code:addons/portal/static/src/xml/portal_chatter.xml:0
 msgid "Next"
 msgstr "Další"
@@ -892,13 +865,11 @@ msgstr "Běží na"
 #. module: portal
 #. odoo-javascript
 #: code:addons/portal/static/src/xml/portal_chatter.xml:0
-#: code:addons/portal/static/src/xml/portal_chatter.xml:0
 msgid "Previous"
 msgstr "Předchozí"
 
 #. module: portal
 #. odoo-javascript
-#: code:addons/portal/static/src/xml/portal_chatter.xml:0
 #: code:addons/portal/static/src/xml/portal_chatter.xml:0
 msgid "Public"
 msgstr "Veřejný"
@@ -911,9 +882,7 @@ msgstr "Publikováno dne"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_security
-msgid ""
-"Put my email and phone in a block list to make sure I'm never contacted "
-"again"
+msgid "Put my email and phone in a block list to make sure I'm never contacted again"
 msgstr ""
 
 #. module: portal
@@ -1024,9 +993,7 @@ msgstr "Přihlásit se"
 #. module: portal
 #. odoo-javascript
 #: code:addons/portal/static/src/js/portal_composer.js:0
-msgid ""
-"Some fields are required. Please make sure to write a message or attach a "
-"document"
+msgid "Some fields are required. Please make sure to write a message or attach a document"
 msgstr ""
 
 #. module: portal
@@ -1065,16 +1032,13 @@ msgstr "Přílohu %s nelze odstranit, protože je spojena se zprávou."
 #. module: portal
 #. odoo-python
 #: code:addons/portal/controllers/portal.py:0
-msgid ""
-"The attachment %s cannot be removed because it is not in a pending state."
-msgstr ""
-"The attachment %s nelze odebrat, protože není ve stavu čekající na vyřízení."
+msgid "The attachment %s cannot be removed because it is not in a pending state."
+msgstr "The attachment %s nelze odebrat, protože není ve stavu čekající na vyřízení."
 
 #. module: portal
 #. odoo-python
 #: code:addons/portal/controllers/portal.py:0
-msgid ""
-"The attachment does not exist or you do not have the rights to access it."
+msgid "The attachment does not exist or you do not have the rights to access it."
 msgstr "Příloha neexistuje nebo nemáte přístupová práva."
 
 #. module: portal
@@ -1092,8 +1056,7 @@ msgstr ""
 #. module: portal
 #. odoo-python
 #: code:addons/portal/controllers/portal.py:0
-msgid ""
-"The document does not exist or you do not have the rights to access it."
+msgid "The document does not exist or you do not have the rights to access it."
 msgstr "Dokument neexistuje nebo nemáte oprávnění k přístupu."
 
 #. module: portal
@@ -1111,10 +1074,8 @@ msgstr "Nové heslo a jeho potvrzení musí být stejné."
 #. module: portal
 #. odoo-python
 #: code:addons/portal/controllers/portal.py:0
-msgid ""
-"The old password you provided is incorrect, your password was not changed."
-msgstr ""
-"Staré heslo, které jste zadali, je neplatné. Vaše heslo nebylo změněno."
+msgid "The old password you provided is incorrect, your password was not changed."
+msgstr "Staré heslo, které jste zadali, je neplatné. Vaše heslo nebylo změněno."
 
 #. module: portal
 #. odoo-python
@@ -1131,9 +1092,7 @@ msgstr ""
 #. module: portal
 #. odoo-python
 #: code:addons/portal/wizard/portal_wizard.py:0
-msgid ""
-"The template \"Portal: new user\" not found for sending email to the portal "
-"user."
+msgid "The template \"Portal: new user\" not found for sending email to the portal user."
 msgstr ""
 
 #. module: portal
@@ -1155,15 +1114,12 @@ msgstr "Toto je náhled zákaznického portálu."
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.wizard_view
-msgid ""
-"This partner is linked to an internal User and already has access to the "
-"Portal."
+msgid "This partner is linked to an internal User and already has access to the Portal."
 msgstr ""
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.wizard_view
-msgid ""
-"This text is included at the end of the email sent to new portal users."
+msgid "This text is included at the end of the email sent to new portal users."
 msgstr ""
 
 #. module: portal
@@ -1318,9 +1274,7 @@ msgstr ""
 #. module: portal
 #. odoo-javascript
 #: code:addons/portal/static/src/xml/portal_security.xml:0
-msgid ""
-"You are about to log out from all devices that currently have access to this"
-" user's account."
+msgid "You are about to log out from all devices that currently have access to this user's account."
 msgstr ""
 
 #. module: portal

@@ -1,22 +1,24 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* mass_mailing_themes
-# 
+#
 # Translators:
-# Wil Odoo, 2024
-# 
+# Wil Odoo, 2023
+# Aleš Fiala <f.ales1@seznam.cz>, 2024
+# Jakub Smolka, 2024
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~17.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-01-17 10:11+0000\n"
-"PO-Revision-Date: 2024-01-17 11:21+0000\n"
-"Last-Translator: Wil Odoo, 2024\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Jakub Smolka, 2024\n"
 "Language-Team: Czech (https://app.transifex.com/odoo/teams/41243/cs/)\n"
+"Language: cs\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: cs\n"
 "Plural-Forms: nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n <= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;\n"
 
 #. module: mass_mailing_themes
@@ -57,11 +59,7 @@ msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_newsletter_template
-msgid ""
-". I put it on hold for 6 years, waiting for the right moment to use it. I "
-"thought it would take 3 years to deprecate a 77 billion dollars company just"
-" because open source is so cool. Sometimes it's better for your self-"
-"motivation not to face reality..."
+msgid ". I put it on hold for 6 years, waiting for the right moment to use it. I thought it would take 3 years to deprecate a 77 billion dollars company just because open source is so cool. Sometimes it's better for your self-motivation not to face reality..."
 msgstr ""
 
 #. module: mass_mailing_themes
@@ -71,12 +69,7 @@ msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_newsletter_template
-msgid ""
-"2011 was a complex year. We did not meet our expectations: we only achieved "
-"70% of the forecasted sales budget. Our management meetings were tense. We "
-"under-performed. We were not satisfied with ourselves. We had a constant "
-"feeling that we were missing something. It's a strange feeling to build "
-"extraordinary things but to not be proud of ourselves."
+msgid "2011 was a complex year. We did not meet our expectations: we only achieved 70% of the forecasted sales budget. Our management meetings were tense. We under-performed. We were not satisfied with ourselves. We had a constant feeling that we were missing something. It's a strange feeling to build extraordinary things but to not be proud of ourselves."
 msgstr ""
 
 #. module: mass_mailing_themes
@@ -96,9 +89,7 @@ msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_newsletter_template
-msgid ""
-"60 new modules are released every month (we became the wikipedia of the "
-"management software thanks to our strong community)"
+msgid "60 new modules are released every month (we became the wikipedia of the management software thanks to our strong community)"
 msgstr ""
 
 #. module: mass_mailing_themes
@@ -140,9 +131,7 @@ msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_event_template
-msgid ""
-"<font style=\"color: rgb(255, 255, 255);\">And it won't cost you a "
-"thing!</font>"
+msgid "<font style=\"color: rgb(255, 255, 255);\">And it won't cost you a thing!</font>"
 msgstr ""
 
 #. module: mass_mailing_themes
@@ -173,18 +162,12 @@ msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_event_template
-msgid ""
-"<font style=\"color: rgb(255, 255, 255);\">Zero, zilch, nada! Odoo "
-"Experience is free for everyone!</font>"
+msgid "<font style=\"color: rgb(255, 255, 255);\">Zero, zilch, nada! Odoo Experience is free for everyone!</font>"
 msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_training_template
-msgid ""
-"<font style=\"font-size: 24px; background-color: rgb(20, 102, 184);\" "
-"class=\"text-o-color-4\">A+</font> <font style=\"color: rgb(20, 102, 184); "
-"font-size: 24px;\"><span style=\"font-weight: "
-"normal\">Training</span></font>"
+msgid "<font style=\"font-size: 24px; background-color: rgb(20, 102, 184);\" class=\"text-o-color-4\">A+</font> <font style=\"color: rgb(20, 102, 184); font-size: 24px;\"><span style=\"font-weight: normal\">Training</span></font>"
 msgstr ""
 
 #. module: mass_mailing_themes
@@ -197,9 +180,7 @@ msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_coupon_template
-msgid ""
-"<i class=\"fa fa-2x fa-ticket\" style=\"color: rgb(36, 37, 48) "
-"!important;\"/>​"
+msgid "<i class=\"fa fa-2x fa-ticket\" style=\"color: rgb(36, 37, 48) !important;\"/>​"
 msgstr ""
 
 #. module: mass_mailing_themes
@@ -214,16 +195,12 @@ msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_blogging_template
-msgid ""
-"<span class=\"fa fa-facebook\" style=\"color: rgb(54, 166, 210) !important; "
-"font-size: 18px;\"/>​"
+msgid "<span class=\"fa fa-facebook\" style=\"color: rgb(54, 166, 210) !important; font-size: 18px;\"/>​"
 msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_coffeebreak_template
-msgid ""
-"<span class=\"fa fa-facebook\" style=\"color: rgb(84, 52, 39) !important; "
-"background-color: rgb(211, 197, 177) !important;\">​</span>"
+msgid "<span class=\"fa fa-facebook\" style=\"color: rgb(84, 52, 39) !important; background-color: rgb(211, 197, 177) !important;\">​</span>"
 msgstr ""
 
 #. module: mass_mailing_themes
@@ -233,9 +210,7 @@ msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_coffeebreak_template
-msgid ""
-"<span class=\"fa fa-instagram\" style=\"color: rgb(84, 52, 39) !important; "
-"background-color: rgb(211, 197, 177) !important;\">​</span>"
+msgid "<span class=\"fa fa-instagram\" style=\"color: rgb(84, 52, 39) !important; background-color: rgb(211, 197, 177) !important;\">​</span>"
 msgstr ""
 
 #. module: mass_mailing_themes
@@ -245,9 +220,7 @@ msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_blogging_template
-msgid ""
-"<span class=\"fa fa-linkedin\" style=\"color: rgb(54, 166, 210) !important; "
-"font-size: 18px;\"/>​"
+msgid "<span class=\"fa fa-linkedin\" style=\"color: rgb(54, 166, 210) !important; font-size: 18px;\"/>​"
 msgstr ""
 
 #. module: mass_mailing_themes
@@ -262,16 +235,12 @@ msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_blogging_template
-msgid ""
-"<span class=\"fa fa-twitter\" style=\"color: rgb(54, 166, 210) !important; "
-"font-size: 18px;\"/>​"
+msgid "<span class=\"fa fa-twitter\" style=\"color: rgb(54, 166, 210) !important; font-size: 18px;\"/>​"
 msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_coffeebreak_template
-msgid ""
-"<span class=\"fa fa-twitter\" style=\"color: rgb(84, 52, 39) !important; "
-"background-color: rgb(211, 197, 177) !important;\">​</span>"
+msgid "<span class=\"fa fa-twitter\" style=\"color: rgb(84, 52, 39) !important; background-color: rgb(211, 197, 177) !important;\">​</span>"
 msgstr ""
 
 #. module: mass_mailing_themes
@@ -304,9 +273,7 @@ msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_roadshow1_template
-msgid ""
-"<span class=\"font-weight: bolder\">Networking: Walking Dinner &amp; "
-"Drinks</span>"
+msgid "<span class=\"font-weight: bolder\">Networking: Walking Dinner &amp; Drinks</span>"
 msgstr ""
 
 #. module: mass_mailing_themes
@@ -321,9 +288,7 @@ msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_roadshow1_template
-msgid ""
-"<span class=\"font-weight: bolder\">[speaker] &amp; [speaker]'s "
-"conference</span>"
+msgid "<span class=\"font-weight: bolder\">[speaker] &amp; [speaker]'s conference</span>"
 msgstr ""
 
 #. module: mass_mailing_themes
@@ -345,16 +310,12 @@ msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_coffeebreak_template
-msgid ""
-"<span style=\"font-size: 12px; font-style: normal; font-weight: bolder;\">- "
-"Lee Brown</span>"
+msgid "<span style=\"font-size: 12px; font-style: normal; font-weight: bolder;\">- Lee Brown</span>"
 msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_newsletter_template
-msgid ""
-"<span style=\"font-size: 12px;\" class=\"o_default_snippet_text\"><font "
-"style=\"color: rgb(183, 191, 199);\">.</font></span>"
+msgid "<span style=\"font-size: 12px;\" class=\"o_default_snippet_text\"><font style=\"color: rgb(183, 191, 199);\">.</font></span>"
 msgstr ""
 
 #. module: mass_mailing_themes
@@ -369,33 +330,22 @@ msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_newsletter_template
-msgid ""
-"<span style=\"font-size: 12px;\" class=\"o_default_snippet_text\"><font "
-"style=\"color: rgb(183, 191, 199);\">click here</font></span>"
+msgid "<span style=\"font-size: 12px;\" class=\"o_default_snippet_text\"><font style=\"color: rgb(183, 191, 199);\">click here</font></span>"
 msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_newsletter_template
-msgid ""
-"<span style=\"font-size: 12px;\" class=\"o_default_snippet_text\"><font "
-"style=\"color: rgb(183, 191, "
-"199);\">hello@musingsoftheweek.com</font></span>"
+msgid "<span style=\"font-size: 12px;\" class=\"o_default_snippet_text\"><font style=\"color: rgb(183, 191, 199);\">hello@musingsoftheweek.com</font></span>"
 msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_promotion_template
-msgid ""
-"<span style=\"font-size: 32px;\"><font style=\"font-weight: bolder; color: "
-"rgb(255, 255, 255); background-color: rgb(255, 187, "
-"0);\">SOLAR</font></span>"
+msgid "<span style=\"font-size: 32px;\"><font style=\"font-weight: bolder; color: rgb(255, 255, 255); background-color: rgb(255, 187, 0);\">SOLAR</font></span>"
 msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_roadshow1_template
-msgid ""
-"<span style=\"font-style: italic;\"><font class=\"text-600\">The first 20 "
-"participants will get a free copy of our business game \"Scale-"
-"Up\".</font></span>"
+msgid "<span style=\"font-style: italic;\"><font class=\"text-600\">The first 20 participants will get a free copy of our business game \"Scale-Up\".</font></span>"
 msgstr ""
 
 #. module: mass_mailing_themes
@@ -413,26 +363,17 @@ msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_training_template
-msgid ""
-"<span style=\"font-weight: bolder;\">And what better field to upskill in "
-"than software development?</span> Jobs have been steadily booming for years,"
-" and will continue to do so. By taking some of these free courses, you can "
-"make your CV more competitive and your portfolio more interesting."
+msgid "<span style=\"font-weight: bolder;\">And what better field to upskill in than software development?</span> Jobs have been steadily booming for years, and will continue to do so. By taking some of these free courses, you can make your CV more competitive and your portfolio more interesting."
 msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_coffeebreak_template
-msgid ""
-"<span style=\"font-weight: bolder;\">Mark</span> will be helping our beloved"
-" HR team, he'll be taking care of your payroll, so be nice!"
+msgid "<span style=\"font-weight: bolder;\">Mark</span> will be helping our beloved HR team, he'll be taking care of your payroll, so be nice!"
 msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_coffeebreak_template
-msgid ""
-"<span style=\"font-weight: bolder;\">Martin</span> is currently doing his "
-"onboarding in our remote office but you'll be seeing him in the R&amp;D "
-"department very soon."
+msgid "<span style=\"font-weight: bolder;\">Martin</span> is currently doing his onboarding in our remote office but you'll be seeing him in the R&amp;D department very soon."
 msgstr ""
 
 #. module: mass_mailing_themes
@@ -447,9 +388,7 @@ msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_promotion_template
-msgid ""
-"<span style=\"font-weight: bolder;\">View online</span>&amp;nbsp;<span "
-"class=\"fa fa-external-link\"/>"
+msgid "<span style=\"font-weight: bolder;\">View online</span>&amp;nbsp;<span class=\"fa fa-external-link\"/>"
 msgstr ""
 
 #. module: mass_mailing_themes
@@ -464,31 +403,17 @@ msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_newsletter_template
-msgid ""
-"After a few months of pitching investors, I got roughly 10 LOI from "
-"different VCs. We chose Sofinnova Partners, the biggest European VC, and "
-"Xavier Niel the founder of Iliad, the only company in France funded in the "
-"past 10 years to have reached the 1 billion EUR valuation."
+msgid "After a few months of pitching investors, I got roughly 10 LOI from different VCs. We chose Sofinnova Partners, the biggest European VC, and Xavier Niel the founder of Iliad, the only company in France funded in the past 10 years to have reached the 1 billion EUR valuation."
 msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_newsletter_template
-msgid ""
-"After having disrupted the ERP market, OpenERP moved far beyond the "
-"boundaries of traditional ERP players. The integration of business "
-"activities is no longer restricted to sales, accounting, inventory and "
-"procurements. In June 2014, we released version 8 with awesome CMS &amp; "
-"eCommerce, a Point of Sale, an integrated Business Intelligence engine and "
-"much more (3000+ modules)."
+msgid "After having disrupted the ERP market, OpenERP moved far beyond the boundaries of traditional ERP players. The integration of business activities is no longer restricted to sales, accounting, inventory and procurements. In June 2014, we released version 8 with awesome CMS &amp; eCommerce, a Point of Sale, an integrated Business Intelligence engine and much more (3000+ modules)."
 msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_newsletter_template
-msgid ""
-"After years of rapid growth, we achieved another amazing goal - we secured a"
-" new round of 10 Million USD of financing, jointly provided by leading "
-"venture capital firms XAnge (France), SRIW (Belgium), Sofinnova (France), "
-"and the management team."
+msgid "After years of rapid growth, we achieved another amazing goal - we secured a new round of 10 Million USD of financing, jointly provided by leading venture capital firms XAnge (France), SRIW (Belgium), Sofinnova (France), and the management team."
 msgstr ""
 
 #. module: mass_mailing_themes
@@ -519,27 +444,17 @@ msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_blogging_template
-msgid ""
-"Anyone with an ounce of business acumen knows that any business that wants "
-"to succeed needs a website."
+msgid "Anyone with an ounce of business acumen knows that any business that wants to succeed needs a website."
 msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_newsletter_template
-msgid ""
-"As usual, I should have listened to my wife. She is way more lucid than I "
-"am. Every week I complained to her \"It's not good enough, we should grow "
-"faster, what am I missing?\" and she used to reply: \"But you already are "
-"the fastest growing company in Belgium!\" (Deloitte awarded us as"
+msgid "As usual, I should have listened to my wife. She is way more lucid than I am. Every week I complained to her \"It's not good enough, we should grow faster, what am I missing?\" and she used to reply: \"But you already are the fastest growing company in Belgium!\" (Deloitte awarded us as"
 msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_newsletter_template
-msgid ""
-"As we worked hard, things started to evolve. We were developing dozens of "
-"modules for OpenERP, the open source community was growing and I was even "
-"able to pay all employees' salaries at the end of the month without fear "
-"(which was a situation I struggled with for 4 years)."
+msgid "As we worked hard, things started to evolve. We were developing dozens of modules for OpenERP, the open source community was growing and I was even able to pay all employees' salaries at the end of the month without fear (which was a situation I struggled with for 4 years)."
 msgstr ""
 
 #. module: mass_mailing_themes
@@ -564,9 +479,7 @@ msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_magazine_template
-msgid ""
-"Bitten by the travel bug but looking to travel consciously? Eco-travel is "
-"the way forward."
+msgid "Bitten by the travel bug but looking to travel consciously? Eco-travel is the way forward."
 msgstr ""
 
 #. module: mass_mailing_themes
@@ -588,13 +501,7 @@ msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_newsletter_template
-msgid ""
-"But one day, someone (I don't remember who, I have a goldfish memory) made a"
-" graph of the monthly turnover of the past 2 years. It was like waking up "
-"from a nightmare. In fact, it was not that bad, we had multiplied the "
-"monthly turnover by 10 over the span of roughly two years! This is when we "
-"understood that OpenERP is a marathon, not a sprint. Only 100% growth a year"
-" is ok... if you can keep the rhythm for several years."
+msgid "But one day, someone (I don't remember who, I have a goldfish memory) made a graph of the monthly turnover of the past 2 years. It was like waking up from a nightmare. In fact, it was not that bad, we had multiplied the monthly turnover by 10 over the span of roughly two years! This is when we understood that OpenERP is a marathon, not a sprint. Only 100% growth a year is ok... if you can keep the rhythm for several years."
 msgstr ""
 
 #. module: mass_mailing_themes
@@ -646,9 +553,7 @@ msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_event_template
-msgid ""
-"Create your very own chat room or join an existing one that sparks your "
-"interest."
+msgid "Create your very own chat room or join an existing one that sparks your interest."
 msgstr ""
 
 #. module: mass_mailing_themes
@@ -687,11 +592,7 @@ msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_roadshow1_template
-msgid ""
-"Discover Odoo, the all-in-one management platform, and its apps designed to "
-"improve employees' daily tasks. From sales and deliveries, to logistics, "
-"marketing and accounting ; learn what are the best available options to "
-"digitize your company."
+msgid "Discover Odoo, the all-in-one management platform, and its apps designed to improve employees' daily tasks. From sales and deliveries, to logistics, marketing and accounting ; learn what are the best available options to digitize your company."
 msgstr ""
 
 #. module: mass_mailing_themes
@@ -726,9 +627,7 @@ msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_event_template
-msgid ""
-"Experience everything from a virtual exhibitor's hall to multiple "
-"interactive presentations and demos."
+msgid "Experience everything from a virtual exhibitor's hall to multiple interactive presentations and demos."
 msgstr ""
 
 #. module: mass_mailing_themes
@@ -781,10 +680,7 @@ msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_training_template
-msgid ""
-"Getting practical experience can be as likely as getting struck by lightning"
-" – <span style=\"font-style: italic;\">thank you, coronavirus</span> – but, "
-"you can take things into your own hands and use your free time to upskill."
+msgid "Getting practical experience can be as likely as getting struck by lightning – <span style=\"font-style: italic;\">thank you, coronavirus</span> – but, you can take things into your own hands and use your free time to upskill."
 msgstr ""
 
 #. module: mass_mailing_themes
@@ -814,24 +710,12 @@ msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_newsletter_template
-msgid ""
-"I needed to change the world. I wanted to... You know how it is when you are"
-" young; you have big dreams, a lot of energy and naive stupidity. My dream "
-"was to lead the enterprise management market with a fully open source "
-"software (I also wanted to get 100 employees before 30 years old with a "
-"self-financed company but I failed this one by only a few months)."
+msgid "I needed to change the world. I wanted to... You know how it is when you are young; you have big dreams, a lot of energy and naive stupidity. My dream was to lead the enterprise management market with a fully open source software (I also wanted to get 100 employees before 30 years old with a self-financed company but I failed this one by only a few months)."
 msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_newsletter_template
-msgid ""
-"I signed the LOI. I didn't realize that this contract could have turned me "
-"into a homeless person. (I already had a dog, all I needed was to lose a lot"
-" of money to become homeless). The fundraising was based on a company "
-"valuation but there was a financial mechanism to re-evaluate the company up "
-"by 9.8 m€ depending on the turnover of the next 4 years. I should have "
-"received warrants convertible into shares if we achieved the turnover "
-"targeted in the business plan."
+msgid "I signed the LOI. I didn't realize that this contract could have turned me into a homeless person. (I already had a dog, all I needed was to lose a lot of money to become homeless). The fundraising was based on a company valuation but there was a financial mechanism to re-evaluate the company up by 9.8 m€ depending on the turnover of the next 4 years. I should have received warrants convertible into shares if we achieved the turnover targeted in the business plan."
 msgstr ""
 
 #. module: mass_mailing_themes
@@ -841,11 +725,7 @@ msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_newsletter_template
-msgid ""
-"If current open source players have a real technical challenge to follow us,"
-" we also have a huge marketing challenge. Wordpress has 22% of all internet "
-"websites. We were the leader in management software, but we start with 0% of"
-" the website market."
+msgid "If current open source players have a real technical challenge to follow us, we also have a huge marketing challenge. Wordpress has 22% of all internet websites. We were the leader in management software, but we start with 0% of the website market."
 msgstr ""
 
 #. module: mass_mailing_themes
@@ -857,32 +737,22 @@ msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_roadshow2_template
-msgid ""
-"If you wish to become a partner and offer your services in [country], take a"
-" look at"
+msgid "If you wish to become a partner and offer your services in [country], take a look at"
 msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_roadshow2_template
-msgid ""
-"If you wish to evaluate Odoo while taking into account your company's "
-"specific needs, you can book a free appointment with one of our"
+msgid "If you wish to evaluate Odoo while taking into account your company's specific needs, you can book a free appointment with one of our"
 msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_magazine_template
-msgid ""
-"Imagine waking up with more energy, more flexibility, with less stress and "
-"fewer instances of anxiously rushing out the door."
+msgid "Imagine waking up with more energy, more flexibility, with less stress and fewer instances of anxiously rushing out the door."
 msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_newsletter_template
-msgid ""
-"In 2010, we had a 100+ employees selling services on OpenERP and a powerful "
-"but ugly product. This is what happens when delivering services to customers"
-" distracts you from building an exceptional product. It was time to do a "
-"pivot in the business model."
+msgid "In 2010, we had a 100+ employees selling services on OpenERP and a powerful but ugly product. This is what happens when delivering services to customers distracts you from building an exceptional product. It was time to do a pivot in the business model."
 msgstr ""
 
 #. module: mass_mailing_themes
@@ -929,8 +799,7 @@ msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_coupon_template
-msgid ""
-"Join the community to see our latest news, events, discounts and much more!"
+msgid "Join the community to see our latest news, events, discounts and much more!"
 msgstr ""
 
 #. module: mass_mailing_themes
@@ -945,9 +814,7 @@ msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_event_template
-msgid ""
-"Learn through workshops, product demos, and inspiring talks from Odoo "
-"Experts and Partners."
+msgid "Learn through workshops, product demos, and inspiring talks from Odoo Experts and Partners."
 msgstr ""
 
 #. module: mass_mailing_themes
@@ -1005,9 +872,7 @@ msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_blogging_template
-msgid ""
-"Modern smartphones have all the built-in tech equal to a majority of the "
-"current professional cameras."
+msgid "Modern smartphones have all the built-in tech equal to a majority of the current professional cameras."
 msgstr ""
 
 #. module: mass_mailing_themes
@@ -1037,41 +902,27 @@ msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_roadshow1_template
-msgid ""
-"Odoo invites you on <span class=\"font-weight: bolder\">[date]</span> at "
-"<span class=\"font-weight: bolder\">[time]</span> for their infamous "
-"roadshow in <span class=\"font-weight: bolder\">[city]</span>: an event that"
-" combines learning and networking in a casual afterwork-like atmosphere."
+msgid "Odoo invites you on <span class=\"font-weight: bolder\">[date]</span> at <span class=\"font-weight: bolder\">[time]</span> for their infamous roadshow in <span class=\"font-weight: bolder\">[city]</span>: an event that combines learning and networking in a casual afterwork-like atmosphere."
 msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_blogging_template
-msgid ""
-"One clever use of drones is for delivering gifts — but another that's "
-"becoming popular for event safety purposes."
+msgid "One clever use of drones is for delivering gifts — but another that's becoming popular for event safety purposes."
 msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_newsletter_template
-msgid ""
-"OpenERP is now a compulsory subject for the baccalaureate in France like "
-"Word, Excel and PowerPoint"
+msgid "OpenERP is now a compulsory subject for the baccalaureate in France like Word, Excel and PowerPoint"
 msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_newsletter_template
-msgid ""
-"Our exceptional technology allowed us to move to newer markets (CMS &amp; "
-"eCommerce) and propose a product that disrupts existing open source players "
-"(Wordpress, Magento, etc). The OpenERP CMS is so good that even top "
-"competitors admitted it publicly when we released the beta version."
+msgid "Our exceptional technology allowed us to move to newer markets (CMS &amp; eCommerce) and propose a product that disrupts existing open source players (Wordpress, Magento, etc). The OpenERP CMS is so good that even top competitors admitted it publicly when we released the beta version."
 msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_blogging_template
-msgid ""
-"Our roundup of the most popular and latest tech related videos from last "
-"week.<br/>"
+msgid "Our roundup of the most popular and latest tech related videos from last week.<br/>"
 msgstr ""
 
 #. module: mass_mailing_themes
@@ -1130,7 +981,7 @@ msgstr ""
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_roadshow1_template
 msgid "Schedule"
-msgstr "Kalendář pronájmů"
+msgstr "Rozvrh"
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_event_template
@@ -1159,18 +1010,12 @@ msgstr "Podpis"
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_newsletter_template
-msgid ""
-"So in 2005, I started to develop the TinyERP product, the software that (at "
-"least in my mind) would change the enterprise world. While preparing for the"
-" \"day of the fight\" in 2006, I"
+msgid "So in 2005, I started to develop the TinyERP product, the software that (at least in my mind) would change the enterprise world. While preparing for the \"day of the fight\" in 2006, I"
 msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_training_template
-msgid ""
-"Software developer training can be expensive, so we've compiled a list of "
-"free courses that are perfect for non-Computer Science graduates who want to"
-" upskill and learn to code."
+msgid "Software developer training can be expensive, so we've compiled a list of free courses that are perfect for non-Computer Science graduates who want to upskill and learn to code."
 msgstr ""
 
 #. module: mass_mailing_themes
@@ -1215,24 +1060,12 @@ msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_newsletter_template
-msgid ""
-"The new financing will support the acceleration of the outstanding growth "
-"the company has seen over the last years, enabling the doubling of the "
-"commercial force and increased R&amp;D staff - already 100+ people strong."
+msgid "The new financing will support the acceleration of the outstanding growth the company has seen over the last years, enabling the doubling of the commercial force and increased R&amp;D staff - already 100+ people strong."
 msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_newsletter_template
-msgid ""
-"The night before receiving the warrants in front of the notary, my wife "
-"checked the contracts. She asked me what would be the taxation on these "
-"warrants. I rang the lawyer and guess what? Belgium is probably the only "
-"country in the world where you have to pay taxes on warrants when you "
-"receive them, even if you never reach the conditions to convert them into "
-"shares. If I had accepted these warrants, I would have had to pay a 12.5% "
-"tax on 9.8 m€; resulting in a tax of 1.2m€ to pay in 18 months! So, my wife "
-"is worth 1.2 million EUR. I would have ended up a homeless person without "
-"her, as I still did not have a salary at that time."
+msgid "The night before receiving the warrants in front of the notary, my wife checked the contracts. She asked me what would be the taxation on these warrants. I rang the lawyer and guess what? Belgium is probably the only country in the world where you have to pay taxes on warrants when you receive them, even if you never reach the conditions to convert them into shares. If I had accepted these warrants, I would have had to pay a 12.5% tax on 9.8 m€; resulting in a tax of 1.2m€ to pay in 18 months! So, my wife is worth 1.2 million EUR. I would have ended up a homeless person without her, as I still did not have a salary at that time."
 msgstr ""
 
 #. module: mass_mailing_themes
@@ -1242,27 +1075,17 @@ msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_newsletter_template
-msgid ""
-"Then the dream started to become reality. We started to get clues that what "
-"we did would change the world:"
+msgid "Then the dream started to become reality. We started to get clues that what we did would change the world:"
 msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_newsletter_template
-msgid ""
-"Then, things became different. You know, tedious things like handling human "
-"resources, board meetings, dealing with big customer contracts, traveling to"
-" launch international subsidiaries. We did boring stuff like budgets, career"
-" paths, management meetings, etc."
+msgid "Then, things became different. You know, tedious things like handling human resources, board meetings, dealing with big customer contracts, traveling to launch international subsidiaries. We did boring stuff like budgets, career paths, management meetings, etc."
 msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_newsletter_template
-msgid ""
-"Three years later, I discovered you can't change the world if you are "
-"\"tiny\". Especially if the United States is part of this world, where it's "
-"better to be a BigERP, rather than a TinyERP. Can you imagine how small you "
-"feel"
+msgid "Three years later, I discovered you can't change the world if you are \"tiny\". Especially if the United States is part of this world, where it's better to be a BigERP, rather than a TinyERP. Can you imagine how small you feel"
 msgstr ""
 
 #. module: mass_mailing_themes
@@ -1272,31 +1095,17 @@ msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_newsletter_template
-msgid ""
-"To fuel my motivation, I had to pick someone to fight against. In business, "
-"it's like a playground. When you arrive in a new school, if you want to "
-"quickly become the leader, you must choose the class bully, the older guy "
-"who terrorizes small boys, and kick his butt in front of everyone. That was "
-"my strategy with SAP, the enterprise software giant."
+msgid "To fuel my motivation, I had to pick someone to fight against. In business, it's like a playground. When you arrive in a new school, if you want to quickly become the leader, you must choose the class bully, the older guy who terrorizes small boys, and kick his butt in front of everyone. That was my strategy with SAP, the enterprise software giant."
 msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_newsletter_template
-msgid ""
-"To make things happen, I worked hard, very hard. I worked 13 hours a day, 7 "
-"days a week, with no vacation for 7 years. I lost friendships and broke up "
-"with my girlfriend in the process."
+msgid "To make things happen, I worked hard, very hard. I worked 13 hours a day, 7 days a week, with no vacation for 7 years. I lost friendships and broke up with my girlfriend in the process."
 msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_newsletter_template
-msgid ""
-"To move forward, we raised 10 million USD in May 2014 in order to boost "
-"marketing and sales activities. In order to support our vision, we had to "
-"change the name that is not restricted to ERPs functions. We needed a name "
-"that allowed us to support our ambitions; build business solutions like CMS,"
-" eCommerce, Business Intelligence and, who knows, even sky rockets or "
-"driverless cars in the future..."
+msgid "To move forward, we raised 10 million USD in May 2014 in order to boost marketing and sales activities. In order to support our vision, we had to change the name that is not restricted to ERPs functions. We needed a name that allowed us to support our ambitions; build business solutions like CMS, eCommerce, Business Intelligence and, who knows, even sky rockets or driverless cars in the future..."
 msgstr ""
 
 #. module: mass_mailing_themes
@@ -1323,9 +1132,7 @@ msgstr "Tréning"
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_magazine_template
-msgid ""
-"Travel without leaving your kitchen with these international recipes. From "
-"Canada to Australia, Mexico to Sweden, and everywhere in between."
+msgid "Travel without leaving your kitchen with these international recipes. From Canada to Australia, Mexico to Sweden, and everywhere in between."
 msgstr ""
 
 #. module: mass_mailing_themes
@@ -1343,10 +1150,7 @@ msgstr "Zadejte \"/\" pro příkazy"
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_training_template
-msgid ""
-"Universities may give us a shiny degrees, but it does not give us the <span "
-"style=\"font-weight: bolder;\">practical skills we need to start an "
-"innovative career in tech</span>."
+msgid "Universities may give us a shiny degrees, but it does not give us the <span style=\"font-weight: bolder;\">practical skills we need to start an innovative career in tech</span>."
 msgstr ""
 
 #. module: mass_mailing_themes
@@ -1400,17 +1204,12 @@ msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_newsletter_template
-msgid ""
-"We changed the deal and I got the 3 million EUR. It allowed me to recruit a "
-"rocking management team."
+msgid "We changed the deal and I got the 3 million EUR. It allowed me to recruit a rocking management team."
 msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_newsletter_template
-msgid ""
-"We wanted to switch from a service company to a software publisher company. "
-"This would allow us to increase our efforts in our research and development "
-"activities. As a result,"
+msgid "We wanted to switch from a service company to a software publisher company. This would allow us to increase our efforts in our research and development activities. As a result,"
 msgstr ""
 
 #. module: mass_mailing_themes
@@ -1432,9 +1231,7 @@ msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_coffeebreak_template
-msgid ""
-"We're super excited to present our three new members, freshly arrived this "
-"week in our offices."
+msgid "We're super excited to present our three new members, freshly arrived this week in our offices."
 msgstr ""
 
 #. module: mass_mailing_themes
@@ -1449,18 +1246,12 @@ msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_newsletter_template
-msgid ""
-"With 1000 installations per day, we became the most installed management "
-"software in the world"
+msgid "With 1000 installations per day, we became the most installed management software in the world"
 msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_newsletter_template
-msgid ""
-"With this money in our bank account, we boosted two departments: R&amp;D and"
-" Sales. We burned 2 million EUR in 18 months, mostly in salaries. The "
-"company started to grow even faster. We developed a partner network of 500 "
-"partners in 100 countries and we started to sign contracts with 6 zeros."
+msgid "With this money in our bank account, we boosted two departments: R&amp;D and Sales. We burned 2 million EUR in 18 months, mostly in salaries. The company started to grow even faster. We developed a partner network of 500 partners in 100 countries and we started to sign contracts with 6 zeros."
 msgstr ""
 
 #. module: mass_mailing_themes
@@ -1488,18 +1279,12 @@ msgstr ""
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_roadshow1_template
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_roadshow2_template
-msgid ""
-"You may then take part in round table discussions with experts who will give"
-" you their tips and tricks to help digitize companies. We'll wrap up the "
-"event with a networking session including a walking dinner."
+msgid "You may then take part in round table discussions with experts who will give you their tips and tricks to help digitize companies. We'll wrap up the event with a networking session including a walking dinner."
 msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_coffeebreak_template
-msgid ""
-"You'll be seeing <span style=\"font-weight: bolder;\">Armando</span> around "
-"the kitchen since he's our new <span style=\"font-weight: bolder;\">chef's "
-"assistant</span>!"
+msgid "You'll be seeing <span style=\"font-weight: bolder;\">Armando</span> around the kitchen since he's our new <span style=\"font-weight: bolder;\">chef's assistant</span>!"
 msgstr ""
 
 #. module: mass_mailing_themes
@@ -1521,25 +1306,17 @@ msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_roadshow1_template
-msgid ""
-"[speaker] and [speaker] will rely on a unique demo concept in which YOU lead"
-" the demo and choose what you wish to see. They'll show how to tackle the "
-"challenge using the best tools, live. You will be amazed!"
+msgid "[speaker] and [speaker] will rely on a unique demo concept in which YOU lead the demo and choose what you wish to see. They'll show how to tackle the challenge using the best tools, live. You will be amazed!"
 msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_newsletter_template
-msgid ""
-"and decided to stop our services for customers and focus on building a "
-"strong partner network and maintenance offer. This would cost money, so I "
-"had to raise a few million euros."
+msgid "and decided to stop our services for customers and focus on building a strong partner network and maintenance offer. This would cost money, so I had to raise a few million euros."
 msgstr ""
 
 #. module: mass_mailing_themes
 #: model_terms:ir.ui.view,arch_db:mass_mailing_themes.theme_newsletter_template
-msgid ""
-"asking; \"But why should we pay millions of dollars for a tiny software?\" "
-"So, we renamed TinyERP to OpenERP."
+msgid "asking; \"But why should we pay millions of dollars for a tiny software?\" So, we renamed TinyERP to OpenERP."
 msgstr ""
 
 #. module: mass_mailing_themes

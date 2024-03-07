@@ -1,24 +1,27 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* fleet
-# 
+#
 # Translators:
-# Wil Odoo, 2024
-# Vojtech Smolka, 2024
+# Tomáš Píšek, 2023
+# Aleš Fiala <f.ales1@seznam.cz>, 2023
+# Ivana Bartonkova, 2023
+# Jakub Smolka, 2023
+# Wil Odoo, 2023
 # Katerina Horylova, 2024
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~17.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-01-17 10:09+0000\n"
-"PO-Revision-Date: 2024-01-17 11:21+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
 "Last-Translator: Katerina Horylova, 2024\n"
 "Language-Team: Czech (https://app.transifex.com/odoo/teams/41243/cs/)\n"
+"Language: cs\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: cs\n"
 "Plural-Forms: nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n <= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;\n"
 
 #. module: fleet
@@ -402,9 +405,7 @@ msgstr "Kategorie"
 
 #. module: fleet
 #: model_terms:ir.actions.act_window,help:fleet.fleet_vehicle_model_category_action
-msgid ""
-"Categories will help you manage your fleet more efficiently and arrange your"
-" vehicles."
+msgid "Categories will help you manage your fleet more efficiently and arrange your vehicles."
 msgstr ""
 
 #. module: fleet
@@ -448,8 +449,7 @@ msgstr "Zvolte, zda je smlouva stále platná nebo ne"
 
 #. module: fleet
 #: model:ir.model.fields,help:fleet.field_fleet_service_type__category
-msgid ""
-"Choose whether the service refer to contracts, vehicle services or both"
+msgid "Choose whether the service refer to contracts, vehicle services or both"
 msgstr "Vyberte, zda se služba týká smluv, služeb vozidel nebo obojího"
 
 #. module: fleet
@@ -734,11 +734,8 @@ msgstr "Datum, kdy plnění smlouvy začíná"
 
 #. module: fleet
 #: model:ir.model.fields,help:fleet.field_fleet_vehicle_log_contract__expiration_date
-msgid ""
-"Date when the coverage of the contract expirates (by default, one year after"
-" begin date)"
-msgstr ""
-"Datum, kdy plnění smlouvy zaniká (standardně jeden rok od počátku plnění)"
+msgid "Date when the coverage of the contract expirates (by default, one year after begin date)"
+msgstr "Datum, kdy plnění smlouvy zaniká (standardně jeden rok od počátku plnění)"
 
 #. module: fleet
 #: model:ir.model.fields,help:fleet.field_fleet_vehicle__write_off_date
@@ -866,9 +863,7 @@ msgstr ""
 #. module: fleet
 #: model_terms:ir.actions.act_window,help:fleet.fleet_vehicle_service_types_action
 msgid "Each service can used in contracts, as a standalone service or both."
-msgstr ""
-"Každá služba může být použita ve smlouvách, jako samostatná služba nebo "
-"obojí."
+msgstr "Každá služba může být použita ve smlouvách, jako samostatná služba nebo obojí."
 
 #. module: fleet
 #: model:ir.model.fields.selection,name:fleet.selection__fleet_vehicle__fuel_type__electric
@@ -937,9 +932,7 @@ msgstr "Poplatek za uvedení do provozu"
 #. module: fleet
 #. odoo-javascript
 #: code:addons/fleet/static/src/js/fleet_form.js:0
-msgid ""
-"Every service and contract of this vehicle will be considered as archived. "
-"Are you sure that you want to archive this record?"
+msgid "Every service and contract of this vehicle will be considered as archived. Are you sure that you want to archive this record?"
 msgstr ""
 
 #. module: fleet
@@ -1011,8 +1004,7 @@ msgstr "Typ údržby vozidel"
 #. module: fleet
 #: model:ir.actions.server,name:fleet.ir_cron_contract_costs_generator_ir_actions_server
 msgid "Fleet: Generate contracts costs based on costs frequency"
-msgstr ""
-"Vozový park: generování nákladů na zakázku na základě četnosti nákladů"
+msgstr "Vozový park: generování nákladů na zakázku na základě četnosti nákladů"
 
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__message_follower_ids
@@ -1741,16 +1733,8 @@ msgstr "Operace není podporována."
 
 #. module: fleet
 #: model:ir.model.fields,help:fleet.field_fleet_vehicle_send_mail__lang
-msgid ""
-"Optional translation language (ISO code) to select when sending out an "
-"email. If not set, the english version will be used. This should usually be "
-"a placeholder expression that provides the appropriate language, e.g. {{ "
-"object.partner_id.lang }}."
-msgstr ""
-"Volitelný překladový jazyk (kód ISO), který lze vybrat při odesílání "
-"e-mailu. Pokud není nastavena, bude použita anglická verze. To by měl být "
-"obvykle zástupný výraz, který poskytuje vhodný jazyk, např. "
-"{{object.partner_id.lang}}."
+msgid "Optional translation language (ISO code) to select when sending out an email. If not set, the english version will be used. This should usually be a placeholder expression that provides the appropriate language, e.g. {{ object.partner_id.lang }}."
+msgstr "Volitelný překladový jazyk (kód ISO), který lze vybrat při odesílání e-mailu. Pokud není nastavena, bude použita anglická verze. To by měl být obvykle zástupný výraz, který poskytuje vhodný jazyk, např. {{object.partner_id.lang}}."
 
 #. module: fleet
 #: model:fleet.service.type,name:fleet.type_service_service_15
@@ -2081,8 +2065,7 @@ msgstr "Nastavení"
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_log_contract_view_search
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_search
 msgid "Show all records which has next action date is before today"
-msgstr ""
-"Zobrazit všechny záznamy, které mají datum příští aktivity před dneškem"
+msgstr "Zobrazit všechny záznamy, které mají datum příští aktivity před dneškem"
 
 #. module: fleet
 #: model:fleet.service.type,name:fleet.type_service_service_6
@@ -2207,9 +2190,7 @@ msgstr "Všeobecné obchodní podmínky"
 msgid ""
 "The ISO country code in two chars. \n"
 "You can use this field for quick search."
-msgstr ""
-"ISO kód země ve dvou znacích. Toto pole můžete použít pro rychlé "
-"vyhledávání."
+msgstr "ISO kód země ve dvou znacích. Toto pole můžete použít pro rychlé vyhledávání."
 
 #. module: fleet
 #. odoo-python
@@ -2224,12 +2205,8 @@ msgstr "Výměna termostatu"
 
 #. module: fleet
 #: model:ir.model.fields,help:fleet.field_fleet_vehicle__next_assignation_date
-msgid ""
-"This is the date at which the car will be available, if not set it means "
-"available instantly"
-msgstr ""
-"Toto je datum, kdy bude vůz k dispozici. Pokud není nastaveno, znamená to, "
-"že je okamžitě k dispozici"
+msgid "This is the date at which the car will be available, if not set it means available instantly"
+msgstr "Toto je datum, kdy bude vůz k dispozici. Pokud není nastaveno, znamená to, že je okamžitě k dispozici"
 
 #. module: fleet
 #: model:fleet.service.type,name:fleet.type_service_44
@@ -2538,8 +2515,7 @@ msgstr "Zde napište jakékoliv další informace vztahující se ke kupní smlo
 #. module: fleet
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_log_services_view_form
 msgid "Write here any other information related to the service completed."
-msgstr ""
-"Zde napište jakékoliv další informace vztahující se k dokončenému servisu"
+msgstr "Zde napište jakékoliv další informace vztahující se k dokončenému servisu"
 
 #. module: fleet
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_form
@@ -2578,8 +2554,7 @@ msgstr ""
 #. module: fleet
 #: model_terms:ir.actions.act_window,help:fleet.fleet_vehicle_model_action
 msgid "You can define several models (e.g. A3, A4) for each make (Audi)."
-msgstr ""
-"Pro každou značku (Audi) můžete definovat několik modelů (např. A3, A4)."
+msgstr "Pro každou značku (Audi) můžete definovat několik modelů (např. A3, A4)."
 
 #. module: fleet
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_model_view_form
