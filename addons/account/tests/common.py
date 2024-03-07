@@ -317,31 +317,6 @@ class AccountTestInvoicingCommon(TransactionCase):
         }
 
     @classmethod
-    @contextmanager
-    def mock_online_sync_favorite_institutions(cls):
-        def get_institutions(*args, **kwargs):
-            return [
-                {
-                    'country': 'US',
-                    'id': 3245,
-                    'name': 'BMO Business Banking',
-                    'picture': '/base/static/img/logo_white.png',
-                },
-                {
-                    'country': 'US',
-                    'id': 8192,
-                    'name': 'Banc of California',
-                    'picture': '/base/static/img/logo_white.png'
-                },
-            ]
-        with patch.object(
-             target=cls.registry['account.journal'],
-             attribute='fetch_online_sync_favorite_institutions',
-             new=get_institutions,
-             create=True):
-            yield
-
-    @classmethod
     def _instantiate_basic_test_tax_group(cls, company=None, country=None):
         company = company or cls.env.company
         vals = {
@@ -697,8 +672,33 @@ class AccountTestInvoicingCommon(TransactionCase):
         '''
         return etree.fromstring(xml_tree_str)
 
+class AccountTestMockOnlineSyncCommon(HttpCase):
+    @classmethod
+    @contextmanager
+    def mock_online_sync_favorite_institutions(cls):
+        def get_institutions(*args, **kwargs):
+            return [
+                {
+                    'country': 'US',
+                    'id': 3245,
+                    'name': 'BMO Business Banking',
+                    'picture': '/base/static/img/logo_white.png',
+                },
+                {
+                    'country': 'US',
+                    'id': 8192,
+                    'name': 'Banc of California',
+                    'picture': '/base/static/img/logo_white.png'
+                },
+            ]
+        with patch.object(
+             target=cls.registry['account.journal'],
+             attribute='fetch_online_sync_favorite_institutions',
+             new=get_institutions,
+             create=True):
+            yield
 
-class AccountTestInvoicingHttpCommon(AccountTestInvoicingCommon, HttpCase):
+class AccountTestInvoicingHttpCommon(AccountTestInvoicingCommon, AccountTestMockOnlineSyncCommon):
     pass
 
 

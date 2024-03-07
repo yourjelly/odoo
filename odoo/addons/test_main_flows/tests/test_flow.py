@@ -1,5 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 from odoo import Command
+from odoo.addons.account.tests.common import AccountTestMockOnlineSyncCommon
 from odoo.tools import mute_logger
 
 import logging
@@ -8,7 +9,7 @@ import odoo.tests
 _logger = logging.getLogger(__name__)
 
 
-class BaseTestUi(odoo.tests.HttpCase):
+class BaseTestUi(AccountTestMockOnlineSyncCommon):
 
     def main_flow_tour(self):
         # Enable Make to Order
@@ -70,7 +71,8 @@ class BaseTestUi(odoo.tests.HttpCase):
             'refund_sequence': True,
         })
 
-        self.start_tour("/web", 'main_flow_tour', login="admin", timeout=180)
+        with self.mock_online_sync_favorite_institutions():
+            self.start_tour("/web", 'main_flow_tour', login="admin", timeout=180)
 
 @odoo.tests.tagged('post_install', '-at_install')
 class TestUi(BaseTestUi):

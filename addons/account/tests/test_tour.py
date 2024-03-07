@@ -57,7 +57,6 @@ class TestUi(AccountTestInvoicingHttpCommon):
         invoices.unlink()
 
         # ensure there is an empty miscellaneous journal to test the onboarding
-        # uncomment this and the onboarding steps in account.js
         self.empty_misc_journal = self.env['account.journal'].create({
             'name': 'Misc 2',
             'code': 'M2',
@@ -91,4 +90,5 @@ class TestUi(AccountTestInvoicingHttpCommon):
         })
         product.supplier_taxes_id = new_tax
 
-        self.start_tour("/web", 'account_tax_group', login="admin")
+        with self.mock_online_sync_favorite_institutions():
+            self.start_tour("/web", 'account_tax_group', login="admin")
