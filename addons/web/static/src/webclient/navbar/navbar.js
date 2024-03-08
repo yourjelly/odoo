@@ -187,6 +187,6 @@ export class NavBar extends Component {
     }
 
     getMenuItemHref(payload) {
-        return `/odoo/${payload.actionPath || "act-" + payload.actionID}`;
+        return `/odoo/${payload.actionPaths?.[0] || "act-" + payload.actionID}`;
     }
 }

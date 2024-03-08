@@ -21,7 +21,7 @@ class LoadMenusTests(HttpCase):
             str(self.menu.id): {
                 "actionID": False,
                 "actionModel": False,
-                "actionPath": False,
+                "actionPaths": [],
                 "appID": self.menu.id,
                 "children": [],
                 "id": self.menu.id,
@@ -34,7 +34,7 @@ class LoadMenusTests(HttpCase):
             "root": {
                 "actionID": False,
                 "actionModel": False,
-                "actionPath": False,
+                "actionPaths": [],
                 "appID": False,
                 "children": [
                     self.menu.id,

@@ -61,7 +61,9 @@ export class WebClient extends Component {
         if (!menuId && firstAction) {
             menuId = this.menuService
                 .getAll()
-                .find((m) => m.actionID === firstAction || m.actionPath === firstAction)?.appID;
+                .find(
+                    (m) => m.actionID === firstAction || m.actionPaths?.includes(firstAction)
+                )?.appID;
         }
         if (menuId) {
             this.menuService.setCurrentMenu(menuId);

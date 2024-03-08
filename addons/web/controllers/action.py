@@ -25,7 +25,7 @@ class Action(Controller):
                     action = request.env.ref(action_id)
                     assert action._name.startswith('ir.actions.')
                 else:
-                    action = Actions.sudo().search([('path', '=', action_id)], limit=1)
+                    action = request.env['ir.actions.path'].sudo().search([('path', '=', action_id)]).action_id
                     assert action
                 action_id = action.id
             except Exception as exc:
@@ -53,34 +53,37 @@ class Action(Controller):
 
     @route('/web/action/load_breadcrumbs', type='json', auth='user', readonly=True)
     def load_breadcrumbs(self, actions):
-        display_names = []
+        result = []
         for action in actions:
+            res = {}
             record_id = action.get('resId')
             try:
                 if action.get('action'):
                     act = self.load(action.get('action'))
+                    res['path'] = act['path']
                     if act['type'] == 'ir.actions.server':
                         if act['path']:
                             act = request.env['ir.actions.server'].browse(act['id']).run()
                         else:
-                            display_names.append({'error': 'A server action must have a path to be restored'})
+                            result.append({'error': 'A server action must have a path to be restored'})
                             continue
                     if record_id:
-                        display_names.append(request.env[act['res_model']].browse(record_id).display_name)
+                        res['display_name'] = request.env[act['res_model']].browse(record_id).display_name
                     else:
                         request.env[act['res_model']].check_access_rights('read')
                         # action shouldn't be available on its own if it doesn't have multi-record views
                         name = act['display_name'] if any(view[1] != 'form' and view[1] != 'search' for view in act['views']) else None
-                        display_names.append(name)
+                        res['display_name'] = name
                 elif action.get('model'):
                     Model = request.env[action.get('model')]
                     if record_id:
-                        display_names.append(Model.browse(record_id).display_name)
+                        res['display_name'] = Model.browse(record_id).display_name
                     else:
                         # This case cannot be produced by the web client
                         raise BadRequest('Actions with a model should also have a resId')
                 else:
                     raise BadRequest('Actions should have either an action (id or path) or a model')
+                result.append(res)
             except (MissingError, AccessError) as exc:
-                display_names.append({'error': str(exc)})
-        return display_names
+                result.append({'error': str(exc)})
+        return result

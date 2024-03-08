@@ -81,7 +81,7 @@ test("href attribute with paht on apps menu items", async () => {
                     name: "My app",
                     appID: 1,
                     actionID: 339,
-                    actionPath: "my-path",
+                    actionPaths: ["my-path"],
                 },
             ],
             name: "root",

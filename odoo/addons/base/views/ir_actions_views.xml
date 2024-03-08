@@ -50,6 +50,25 @@
         <menuitem id="next_id_6" name="Actions" parent="base.menu_custom" sequence="5"/>
         <menuitem action="ir_sequence_actions" id="menu_ir_sequence_actions" parent="next_id_6"/>
 
+        <!-- ir.actions.path -->
+
+        <record id="action_path_view_tree" model="ir.ui.view">
+            <field name="name">ir.actions.path.tree</field>
+            <field name="model">ir.actions.path</field>
+            <field name="arch" type="xml">
+                <tree string="Path">
+                    <field name="path"/>
+                    <field name="action_id"/>
+                </tree>
+            </field>
+        </record>
+        <record id="ir_action_path" model="ir.actions.act_window">
+            <field name="name">Action Paths</field>
+            <field name="res_model">ir.actions.path</field>
+            <field name="view_id" ref="action_path_view_tree"/>
+        </record>
+        <menuitem action="ir_action_path" id="menu_ir_action_path" parent="next_id_6"/>
+
         <!-- ir.actions.report -->
 
         <record id="act_report_xml_view" model="ir.ui.view">

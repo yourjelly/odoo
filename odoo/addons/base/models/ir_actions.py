@@ -55,12 +55,11 @@ class IrActions(models.Model):
     _order = 'name'
     _allow_sudo_commands = False
 
-    _sql_constraints = [('path_unique', 'unique(path)', "Path to shown in the URL must be unique! Please choose another one.")]
-
     name = fields.Char(string='Action Name', required=True, translate=True)
     type = fields.Char(string='Action Type', required=True)
     xml_id = fields.Char(compute='_compute_xml_id', string="External ID")
-    path = fields.Char(string="Path to show in the URL")
+    path_ids = fields.One2many('ir.actions.path', 'action_id', string="Paths")
+    path = fields.Char(string="Path to show in the URL", compute="_compute_path", inverse="_inverse_path")
     help = fields.Html(string='Action Description',
                        help='Optional help text for the users with a description of the target view, such as its usage and purpose.',
                        translate=True)
@@ -71,18 +70,15 @@ class IrActions(models.Model):
                                     required=True, default='action')
     binding_view_types = fields.Char(default='list,form')
 
-    @api.constrains('path')
-    def _check_path(self):
+    @api.depends('path_ids')
+    def _compute_path(self):
         for action in self:
-            if action.path:
-                if not re.fullmatch(r'[a-z][a-z0-9_-]*', action.path):
-                    raise ValidationError(_('The path should contain only lowercase alphanumeric characters, underscore, and dash, and it should start with a letter.'))
-                if action.path.startswith("m-"):
-                    raise ValidationError(_("'m-' is a reserved prefix."))
-                if action.path.startswith("act-"):
-                    raise ValidationError(_("'act-' is a reserved prefix."))
-                if action.path == "new":
-                    raise ValidationError(_("'new' is reserved, and can not be used as path."))
+            action.path = action.path_ids and action.path_ids[0].path or False
+
+    def _inverse_path(self):
+        for action in self:
+            if not self.path_ids.search_count([('action_id', '=', action.id), ('path', '=', action.path)]):
+                action.path_ids.create({'path': action.path, 'action_id': action.id})
 
     def _compute_xml_id(self):
         res = self.get_external_id()
@@ -233,6 +229,30 @@ class IrActions(models.Model):
             "display_name", "help", "id", "name", "type", "xml_id",
             "path",
         }
+
+class IrActionsPath(models.Model):
+    _name = 'ir.actions.path'
+    _description = 'Path for Actions'
+    _order = 'action_id asc, sequence asc, id'
+
+    _sql_constraints = [('path_unique', 'unique(path)', "Path to shown in the URL must be unique! Please choose another one.")]
+
+    path = fields.Char(string="Path to show in the URL")
+    action_id = fields.Many2one('ir.actions.actions', string="Action")
+    sequence = fields.Integer()
+
+    @api.constrains('path')
+    def _check_path(self):
+        for action_path in self:
+            if action_path.path:
+                if not re.fullmatch(r'[a-z][a-z0-9_-]*', action_path.path):
+                    raise ValidationError(_('The path should contain only lowercase alphanumeric characters, underscore, and dash, and it should start with a letter.'))
+                if action_path.path.startswith("m-"):
+                    raise ValidationError(_("'m-' is a reserved prefix."))
+                if action_path.path.startswith("act-"):
+                    raise ValidationError(_("'act-' is a reserved prefix."))
+                if action_path.path == "new":
+                    raise ValidationError(_("'new' is reserved, and can not be used as path."))
 
 
 class IrActionsActWindow(models.Model):
