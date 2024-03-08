@@ -893,12 +893,15 @@ class Project(models.Model):
     @api.model
     def _create_analytic_account_from_values(self, values):
         company = self.env['res.company'].browse(values.get('company_id', False))
-        project_plan, _other_plans = self.env['account.analytic.plan']._get_all_plans()
+        project_plan_id = self.env['ir.config_parameter'].sudo().get_param('analytic.analytic_plan_projects')
+        if not project_plan_id:
+            project_plan, _other_plans = self.env['account.analytic.plan']._get_all_plans()
+            project_plan_id = project_plan.id
         analytic_account = self.env['account.analytic.account'].create({
             'name': values.get('name', _('Unknown Analytic Account')),
             'company_id': company.id,
             'partner_id': values.get('partner_id'),
-            'plan_id': project_plan.id,
+            'plan_id': project_plan_id,
         })
         return analytic_account
 
