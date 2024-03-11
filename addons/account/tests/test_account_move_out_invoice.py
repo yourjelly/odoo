@@ -4082,3 +4082,28 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
             move_reversal.refund_moves()
 
         self.assertEqual(error_catcher.exception.args[0], "All selected moves for reversal must belong to the same company.")
+
+
+    def test_profiling_out_invoice(self):
+        default_income_account = self.company_data['default_account_revenue']
+        invoice = self.env['account.move'].create({
+            'move_type': 'out_invoice',
+            'invoice_date': '2017-01-01',
+            'date': '2017-01-01',
+            'partner_id': self.partner_a.id,
+            'currency_id': self.currency_data['currency'].id,
+            'invoice_line_ids': [
+                Command.create({
+                    'name': 'test line',
+                    'quantity': 1,
+                    'price_unit': 10,
+                    'account_id': default_income_account.id,
+                }),
+            ],
+        })
+        invoice.action_post()
+        self.assertFalse(invoice.attachment_ids)
+        wizard = self.env['account.move.send'].create({'move_ids': [Command.set(invoice.ids)]})
+        with self.profile():
+            wizard.action_send_and_print()
+        self.assertTrue(invoice.attachment_ids)
