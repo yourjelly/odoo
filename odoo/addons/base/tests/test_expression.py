@@ -5,7 +5,7 @@ import psycopg2
 
 from odoo.addons.base.tests.common import SavepointCaseWithUserDemo
 from odoo.fields import Date
-from odoo.models import BaseModel
+from odoo.models import BaseModel, NewId
 from odoo.tests.common import TransactionCase
 from odoo.tools import mute_logger
 from odoo.osv import expression
@@ -126,6 +126,10 @@ class TestExpression(SavepointCaseWithUserDemo):
         self.assertEqual(p2, p)
         p3 = self._search(Partner, [('parent_id', 'parent_of', p.id)], [('id', '=', p.id)])
         self.assertEqual(p3, p)
+        # test when type is NewId 
+        fake_new_id = NewId(origin=p.id)
+        p4 = self._search(Partner, [('parent_id', 'child_of', fake_new_id)])
+        self.assertEqual(p4, p)
 
     def test_10_hierarchy_in_m2m(self):
         Partner = self.env['res.partner']
