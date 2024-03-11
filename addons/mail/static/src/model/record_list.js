@@ -1,10 +1,13 @@
+import { reactive, toRaw } from "@odoo/owl";
+import { isMany, isOne, isRecord } from "./misc";
+
 /** * @template {Record} R */
-class RecordList extends Array {
+export class RecordList extends Array {
     static isOne(list) {
-        return Boolean(list?.[ONE_SYM]);
+        return isOne(list);
     }
     static isMany(list) {
-        return Boolean(list?.[MANY_SYM]);
+        return isMany(list);
     }
     /** @type {Record} */
     owner;
@@ -14,6 +17,12 @@ class RecordList extends Array {
     store;
     /** @type {string[]} */
     data = [];
+    /** @type {this} */
+    _raw;
+    /** @type {this} */
+    _proxyInternal;
+    /** @type {this} */
+    _proxy;
 
     get fieldDefinition() {
         return this.owner.Model._fields.get(this.name);
@@ -64,7 +73,8 @@ class RecordList extends Array {
             },
             /** @param {RecordList<R>} recordListProxy */
             set(recordList, name, val, recordListProxy) {
-                return Record.MAKE_UPDATE(function recordListSet() {
+                const store = recordList.store;
+                return store.MAKE_UPDATE(function recordListSet() {
                     if (typeof name !== "symbol" && !window.isNaN(parseInt(name))) {
                         // support for "array[index] = r3" syntax
                         const index = parseInt(name);
@@ -75,7 +85,7 @@ class RecordList extends Array {
                             if (oldRecord && oldRecord.notEq(newRecord)) {
                                 oldRecord.__uses__.delete(recordList);
                             }
-                            Record.ADD_QUEUE(recordList.field, "onDelete", oldRecord);
+                            store.ADD_QUEUE(recordList.field, "onDelete", oldRecord);
                             const { inverse } = recordList.fieldDefinition;
                             if (inverse) {
                                 oldRecord._fields.get(inverse).value.delete(recordList);
@@ -83,7 +93,7 @@ class RecordList extends Array {
                             recordListProxy.data[index] = newRecord?.localId;
                             if (newRecord) {
                                 newRecord.__uses__.add(recordList);
-                                Record.ADD_QUEUE(recordList.field, "onAdd", newRecord);
+                                store.ADD_QUEUE(recordList.field, "onAdd", newRecord);
                                 const { inverse } = recordList.fieldDefinition;
                                 if (inverse) {
                                     newRecord._fields.get(inverse).value.add(recordList);
@@ -145,7 +155,7 @@ class RecordList extends Array {
         }
         /** @type {R} */
         let newRecordProxy;
-        if (!Record.isRecord(val)) {
+        if (!isRecord(val)) {
             const { targetModel } = recordList.fieldDefinition;
             newRecordProxy = recordList.store[targetModel].preinsert(val);
         } else {
@@ -153,7 +163,7 @@ class RecordList extends Array {
         }
         const newRecord = toRaw(newRecordProxy)._raw;
         fn?.(newRecord);
-        if (!Record.isRecord(val)) {
+        if (!isRecord(val)) {
             // was preinserted, fully insert now
             const { targetModel } = recordList.fieldDefinition;
             recordList.store[targetModel].insert(val);
@@ -163,9 +173,10 @@ class RecordList extends Array {
     /** @param {R[]|any[]} data */
     assign(data) {
         const recordList = toRaw(this)._raw;
-        return Record.MAKE_UPDATE(function recordListAssign() {
+        const store = recordList.store;
+        return store.MAKE_UPDATE(function recordListAssign() {
             /** @type {Record[]|Set<Record>|RecordList<Record|any[]>} */
-            const collection = Record.isRecord(data) ? [data] : data;
+            const collection = isRecord(data) ? [data] : data;
             // data and collection could be same record list,
             // save before clear to not push mutated recordlist that is empty
             const vals = [...collection];
@@ -176,7 +187,7 @@ class RecordList extends Array {
                 recordList._insert(val, function recordListAssignInsert(record) {
                     if (record.notIn(oldRecords)) {
                         record.__uses__.add(recordList);
-                        Record.ADD_QUEUE(recordList.field, "onAdd", record);
+                        store.ADD_QUEUE(recordList.field, "onAdd", record);
                     }
                 })
             );
@@ -184,7 +195,7 @@ class RecordList extends Array {
             for (const oldRecord of oldRecords) {
                 if (oldRecord.notIn(newRecords)) {
                     oldRecord.__uses__.delete(recordList);
-                    Record.ADD_QUEUE(recordList.field, "onDelete", oldRecord);
+                    store.ADD_QUEUE(recordList.field, "onDelete", oldRecord);
                     if (inverse) {
                         oldRecord._fields.get(inverse).value.delete(recordList.owner);
                     }
@@ -197,13 +208,14 @@ class RecordList extends Array {
     push(...records) {
         const recordList = toRaw(this)._raw;
         const recordListFullProxy = recordList._downgradeProxy(this);
-        return Record.MAKE_UPDATE(function recordListPush() {
+        const store = recordList.store;
+        return store.MAKE_UPDATE(function recordListPush() {
             for (const val of records) {
                 const record = recordList._insert(val, function recordListPushInsert(record) {
                     recordList._proxy.data.push(record.localId);
                     record.__uses__.add(recordList);
                 });
-                Record.ADD_QUEUE(recordList.field, "onAdd", record);
+                store.ADD_QUEUE(recordList.field, "onAdd", record);
                 const { inverse } = recordList.fieldDefinition;
                 if (inverse) {
                     record._fields.get(inverse).value.add(recordList.owner);
@@ -216,7 +228,8 @@ class RecordList extends Array {
     pop() {
         const recordList = toRaw(this)._raw;
         const recordListFullProxy = recordList._downgradeProxy(this);
-        return Record.MAKE_UPDATE(function recordListPop() {
+        const store = recordList.store;
+        return store.MAKE_UPDATE(function recordListPop() {
             /** @type {R} */
             const oldRecordProxy = recordListFullProxy.at(-1);
             if (oldRecordProxy) {
@@ -229,7 +242,8 @@ class RecordList extends Array {
     shift() {
         const recordList = toRaw(this)._raw;
         const recordListFullProxy = recordList._downgradeProxy(this);
-        return Record.MAKE_UPDATE(function recordListShift() {
+        const store = recordList.store;
+        return store.MAKE_UPDATE(function recordListShift() {
             const recordProxy = recordListFullProxy.store.recordByLocalId.get(
                 recordListFullProxy.data.shift()
             );
@@ -238,7 +252,7 @@ class RecordList extends Array {
             }
             const record = toRaw(recordProxy)._raw;
             record.__uses__.delete(recordList);
-            Record.ADD_QUEUE(recordList.field, "onDelete", record);
+            store.ADD_QUEUE(recordList.field, "onDelete", record);
             const { inverse } = recordList.fieldDefinition;
             if (inverse) {
                 record._fields.get(inverse).value.delete(recordList.owner);
@@ -250,13 +264,14 @@ class RecordList extends Array {
     unshift(...records) {
         const recordList = toRaw(this)._raw;
         const recordListFullProxy = recordList._downgradeProxy(this);
-        return Record.MAKE_UPDATE(function recordListUnshift() {
+        const store = recordList.store;
+        return store.MAKE_UPDATE(function recordListUnshift() {
             for (let i = records.length - 1; i >= 0; i--) {
                 const record = recordList._insert(records[i], (record) => {
                     recordList._proxy.data.unshift(record.localId);
                     record.__uses__.add(recordList);
                 });
-                Record.ADD_QUEUE(recordList.field, "onAdd", record);
+                store.ADD_QUEUE(recordList.field, "onAdd", record);
                 const { inverse } = recordList.fieldDefinition;
                 if (inverse) {
                     record._fields.get(inverse).value.add(recordList.owner);
@@ -279,7 +294,8 @@ class RecordList extends Array {
     splice(start, deleteCount, ...newRecordsProxy) {
         const recordList = toRaw(this)._raw;
         const recordListFullProxy = recordList._downgradeProxy(this);
-        return Record.MAKE_UPDATE(function recordListSplice() {
+        const store = recordList.store;
+        return store.MAKE_UPDATE(function recordListSplice() {
             const oldRecordsProxy = recordList._proxyInternal.slice.call(
                 recordListFullProxy,
                 start,
@@ -295,7 +311,7 @@ class RecordList extends Array {
             for (const oldRecordProxy of oldRecordsProxy) {
                 const oldRecord = toRaw(oldRecordProxy)._raw;
                 oldRecord.__uses__.delete(recordList);
-                Record.ADD_QUEUE(recordList.field, "onDelete", oldRecord);
+                store.ADD_QUEUE(recordList.field, "onDelete", oldRecord);
                 const { inverse } = recordList.fieldDefinition;
                 if (inverse) {
                     oldRecord._fields.get(inverse).value.delete(recordList.owner);
@@ -304,7 +320,7 @@ class RecordList extends Array {
             for (const newRecordProxy of newRecordsProxy) {
                 const newRecord = toRaw(newRecordProxy)._raw;
                 newRecord.__uses__.add(recordList);
-                Record.ADD_QUEUE(recordList.field, "onAdd", newRecord);
+                store.ADD_QUEUE(recordList.field, "onAdd", newRecord);
                 const { inverse } = recordList.fieldDefinition;
                 if (inverse) {
                     newRecord._fields.get(inverse).value.add(recordList.owner);
@@ -316,8 +332,9 @@ class RecordList extends Array {
     sort(func) {
         const recordList = toRaw(this)._raw;
         const recordListFullProxy = recordList._downgradeProxy(this);
-        return Record.MAKE_UPDATE(function recordListSort() {
-            sortRecordList(recordListFullProxy, func);
+        const store = recordList.store;
+        return store.MAKE_UPDATE(function recordListSort() {
+            recordList.store.sortRecordList(recordListFullProxy, func);
             return recordListFullProxy;
         });
     }
@@ -332,10 +349,11 @@ class RecordList extends Array {
     /** @param {...R}  */
     add(...records) {
         const recordList = toRaw(this)._raw;
-        return Record.MAKE_UPDATE(function recordListAdd() {
-            if (RecordList.isOne(recordList)) {
+        const store = recordList.store;
+        return store.MAKE_UPDATE(function recordListAdd() {
+            if (isOne(recordList)) {
                 const last = records.at(-1);
-                if (Record.isRecord(last) && recordList.data.includes(toRaw(last)._raw.localId)) {
+                if (isRecord(last) && recordList.data.includes(toRaw(last)._raw.localId)) {
                     return;
                 }
                 recordList._insert(last, function recordListAddInsertOne(record) {
@@ -347,7 +365,7 @@ class RecordList extends Array {
                 return;
             }
             for (const val of records) {
-                if (Record.isRecord(val) && recordList.data.includes(val.localId)) {
+                if (isRecord(val) && recordList.data.includes(val.localId)) {
                     continue;
                 }
                 recordList._insert(val, function recordListAddInsertMany(record) {
@@ -367,9 +385,10 @@ class RecordList extends Array {
      */
     _addNoinv(...records) {
         const recordList = this;
-        if (RecordList.isOne(recordList)) {
+        const store = recordList.store;
+        if (isOne(recordList)) {
             const last = records.at(-1);
-            if (Record.isRecord(last) && last.in(recordList)) {
+            if (isRecord(last) && last.in(recordList)) {
                 return;
             }
             const record = recordList._insert(
@@ -385,11 +404,11 @@ class RecordList extends Array {
                 },
                 { inv: false }
             );
-            Record.ADD_QUEUE(recordList.field, "onAdd", record);
+            store.ADD_QUEUE(recordList.field, "onAdd", record);
             return;
         }
         for (const val of records) {
-            if (Record.isRecord(val) && val.in(recordList)) {
+            if (isRecord(val) && val.in(recordList)) {
                 continue;
             }
             const record = recordList._insert(
@@ -402,13 +421,14 @@ class RecordList extends Array {
                 },
                 { inv: false }
             );
-            Record.ADD_QUEUE(recordList.field, "onAdd", record);
+            store.ADD_QUEUE(recordList.field, "onAdd", record);
         }
     }
     /** @param {...R}  */
     delete(...records) {
         const recordList = toRaw(this)._raw;
-        return Record.MAKE_UPDATE(function recordListDelete() {
+        const store = recordList.store;
+        return store.MAKE_UPDATE(function recordListDelete() {
             for (const val of records) {
                 recordList._insert(
                     val,
@@ -432,6 +452,7 @@ class RecordList extends Array {
      */
     _deleteNoinv(...records) {
         const recordList = this;
+        const store = recordList.store;
         for (const val of records) {
             const record = recordList._insert(
                 val,
@@ -444,12 +465,13 @@ class RecordList extends Array {
                 },
                 { inv: false }
             );
-            Record.ADD_QUEUE(recordList.field, "onDelete", record);
+            store.ADD_QUEUE(recordList.field, "onDelete", record);
         }
     }
     clear() {
         const recordList = toRaw(this)._raw;
-        return Record.MAKE_UPDATE(function recordListClear() {
+        const store = recordList.store;
+        return store.MAKE_UPDATE(function recordListClear() {
             while (recordList.data.length > 0) {
                 recordList.pop.call(recordList._proxy);
             }

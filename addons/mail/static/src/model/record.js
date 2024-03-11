@@ -1,136 +1,38 @@
+import { markRaw, toRaw } from "@odoo/owl";
+import {
+    ATTR_SYM,
+    IS_DELETED_SYM,
+    MANY_SYM,
+    ONE_SYM,
+    OR_SYM,
+    isCommand,
+    isField,
+    isMany,
+    isOne,
+    isRecord,
+    isRecordList,
+    isRelation,
+    modelRegistry,
+} from "./misc";
+import { RecordUses } from "./record_uses";
+
+/** @typedef {import("./misc").FieldDefinition} FieldDefinition */
+/** @typedef {import("./misc").RecordField} RecordField */
+/** @typedef {import("./record_list").RecordList} RecordList */
+
 export class Record {
     /** @param {FieldDefinition} */
     static isAttr(definition) {
-        return Boolean(definition?.[ATTR_SYM]);
+        return this.isAttr(definition);
     }
-    /**
-     * Determines whether the inserts are considered trusted or not.
-     * Useful to auto-markup html fields when this is set
-     */
-    static trusted = false;
     static id;
     /** @type {Object<string, Record>} */
     static records;
     /** @type {import("models").Store} */
     static store;
-    /** @type {RecordField[]} */
-    static FC_QUEUE = []; // field-computes
-    /** @type {RecordField[]} */
-    static FS_QUEUE = []; // field-sorts
-    /** @type {Array<{field: RecordField, records: Record[]}>} */
-    static FA_QUEUE = []; // field-onadds
-    /** @type {Array<{field: RecordField, records: Record[]}>} */
-    static FD_QUEUE = []; // field-ondeletes
-    /** @type {RecordField[]} */
-    static FU_QUEUE = []; // field-onupdates
-    /** @type {Function[]} */
-    static RO_QUEUE = []; // record-onchanges
-    /** @type {Record[]} */
-    static RD_QUEUE = []; // record-deletes
-    static RHD_QUEUE = []; // record-hard-deletes
-    static UPDATE = 0;
     /** @param {() => any} fn */
     static MAKE_UPDATE(fn) {
-        Record.UPDATE++;
-        const res = fn();
-        Record.UPDATE--;
-        if (Record.UPDATE === 0) {
-            // pretend an increased update cycle so that nothing in queue creates many small update cycles
-            Record.UPDATE++;
-            while (
-                Record.FC_QUEUE.length > 0 ||
-                Record.FS_QUEUE.length > 0 ||
-                Record.FA_QUEUE.length > 0 ||
-                Record.FD_QUEUE.length > 0 ||
-                Record.FU_QUEUE.length > 0 ||
-                Record.RO_QUEUE.length > 0 ||
-                Record.RD_QUEUE.length > 0 ||
-                Record.RHD_QUEUE.length > 0
-            ) {
-                const FC_QUEUE = [...Record.FC_QUEUE];
-                const FS_QUEUE = [...Record.FS_QUEUE];
-                const FA_QUEUE = [...Record.FA_QUEUE];
-                const FD_QUEUE = [...Record.FD_QUEUE];
-                const FU_QUEUE = [...Record.FU_QUEUE];
-                const RO_QUEUE = [...Record.RO_QUEUE];
-                const RD_QUEUE = [...Record.RD_QUEUE];
-                const RHD_QUEUE = [...Record.RHD_QUEUE];
-                Record.FC_QUEUE.length = 0;
-                Record.FS_QUEUE.length = 0;
-                Record.FA_QUEUE.length = 0;
-                Record.FD_QUEUE.length = 0;
-                Record.FU_QUEUE.length = 0;
-                Record.RO_QUEUE.length = 0;
-                Record.RD_QUEUE.length = 0;
-                Record.RHD_QUEUE.length = 0;
-                while (FC_QUEUE.length > 0) {
-                    const field = FC_QUEUE.pop();
-                    field.requestCompute({ force: true });
-                }
-                while (FS_QUEUE.length > 0) {
-                    const field = FS_QUEUE.pop();
-                    field.requestSort({ force: true });
-                }
-                while (FA_QUEUE.length > 0) {
-                    const { field, records } = FA_QUEUE.pop();
-                    const { onAdd } = field.value.fieldDefinition;
-                    records.forEach((record) =>
-                        onAdd?.call(field.value.owner._proxy, record._proxy)
-                    );
-                }
-                while (FD_QUEUE.length > 0) {
-                    const { field, records } = FD_QUEUE.pop();
-                    const { onDelete } = field.value.fieldDefinition;
-                    records.forEach((record) =>
-                        onDelete?.call(field.value.owner._proxy, record._proxy)
-                    );
-                }
-                while (FU_QUEUE.length > 0) {
-                    const field = FU_QUEUE.pop();
-                    field.onUpdate();
-                }
-                while (RO_QUEUE.length > 0) {
-                    const cb = RO_QUEUE.pop();
-                    cb();
-                }
-                while (RD_QUEUE.length > 0) {
-                    const record = RD_QUEUE.pop();
-                    for (const name of record._fields.keys()) {
-                        record[name] = undefined;
-                    }
-                    for (const [localId, names] of record.__uses__.data.entries()) {
-                        for (const [name2, count] of names.entries()) {
-                            const usingRecordProxy = toRaw(
-                                record.Model._rawStore.recordByLocalId
-                            ).get(localId);
-                            if (!usingRecordProxy) {
-                                // record already deleted, clean inverses
-                                record.__uses__.data.delete(localId);
-                                continue;
-                            }
-                            const usingRecordList =
-                                toRaw(usingRecordProxy)._raw._fields.get(name2).value;
-                            if (RecordList.isMany(usingRecordList)) {
-                                for (let c = 0; c < count; c++) {
-                                    usingRecordProxy[name2].delete(record);
-                                }
-                            } else {
-                                usingRecordProxy[name2] = undefined;
-                            }
-                        }
-                    }
-                    this.ADD_QUEUE(record, "hard_delete");
-                }
-                while (RHD_QUEUE.length > 0) {
-                    const record = RHD_QUEUE.pop();
-                    record[IS_DELETED_SYM] = true;
-                    delete record.Model.records[record.localId];
-                    record.Model._rawStore.recordByLocalId.delete(record.localId);
-                }
-            }
-            Record.UPDATE--;
-        }
-        return res;
+        return this.store.MAKE_UPDATE(...arguments);
     }
     /**
      * @param {RecordField|Record} fieldOrRecord
@@ -138,86 +40,10 @@ export class Record {
      * @param {Record} [record] when field with onAdd/onDelete, the record being added or deleted
      */
     static ADD_QUEUE(fieldOrRecord, type, record) {
-        if (Record.isRecord(fieldOrRecord)) {
-            /** @type {Record} */
-            const record = fieldOrRecord;
-            if (type === "delete") {
-                if (!Record.RD_QUEUE.includes(record)) {
-                    Record.RD_QUEUE.push(record);
-                }
-            }
-            if (type === "hard_delete") {
-                if (!Record.RHD_QUEUE.includes(record)) {
-                    Record.RHD_QUEUE.push(record);
-                }
-            }
-        } else {
-            /** @type {RecordField} */
-            const field = fieldOrRecord;
-            const rawField = toRaw(field);
-            if (type === "compute") {
-                if (!Record.FC_QUEUE.some((f) => toRaw(f) === rawField)) {
-                    Record.FC_QUEUE.push(field);
-                }
-            }
-            if (type === "sort") {
-                if (!rawField.value?.fieldDefinition.sort) {
-                    return;
-                }
-                if (!Record.FS_QUEUE.some((f) => toRaw(f) === rawField)) {
-                    Record.FS_QUEUE.push(field);
-                }
-            }
-            if (type === "onAdd") {
-                if (rawField.value?.fieldDefinition.sort) {
-                    Record.ADD_QUEUE(fieldOrRecord, "sort");
-                }
-                if (!rawField.value?.fieldDefinition.onAdd) {
-                    return;
-                }
-                const item = Record.FA_QUEUE.find((item) => toRaw(item.field) === rawField);
-                if (!item) {
-                    Record.FA_QUEUE.push({ field, records: [record] });
-                } else {
-                    if (!item.records.some((recordProxy) => recordProxy.eq(record))) {
-                        item.records.push(record);
-                    }
-                }
-            }
-            if (type === "onDelete") {
-                if (!rawField.value?.fieldDefinition.onDelete) {
-                    return;
-                }
-                const item = Record.FD_QUEUE.find((item) => toRaw(item.field) === rawField);
-                if (!item) {
-                    Record.FD_QUEUE.push({ field, records: [record] });
-                } else {
-                    if (!item.records.some((recordProxy) => recordProxy.eq(record))) {
-                        item.records.push(record);
-                    }
-                }
-            }
-            if (type === "onUpdate") {
-                if (!Record.FU_QUEUE.some((f) => toRaw(f) === rawField)) {
-                    Record.FU_QUEUE.push(field);
-                }
-            }
-        }
+        return this.store.ADD_QUEUE(...arguments);
     }
     static onChange(record, name, cb) {
-        return Record._onChange(record, name, (observe) => {
-            const fn = () => {
-                observe();
-                cb();
-            };
-            if (Record.UPDATE !== 0) {
-                if (!Record.RO_QUEUE.some((f) => toRaw(f) === fn)) {
-                    Record.RO_QUEUE.push(fn);
-                }
-            } else {
-                fn();
-            }
-        });
+        return this.store.onChange(...arguments);
     }
     /**
      * Version of onChange where the callback receives observe function as param.
@@ -230,34 +56,7 @@ export class Record {
      * @returns {function} function to call to stop observing changes
      */
     static _onChange(record, key, callback) {
-        let proxy;
-        function _observe() {
-            // access proxy[key] only once to avoid triggering reactive get() many times
-            const val = proxy[key];
-            if (typeof val === "object" && val !== null) {
-                void Object.keys(val);
-            }
-            if (Array.isArray(val)) {
-                void val.length;
-                void toRaw(val).forEach.call(val, (i) => i);
-            }
-        }
-        if (Array.isArray(key)) {
-            for (const k of key) {
-                Record._onChange(record, k, callback);
-            }
-            return;
-        }
-        let ready = true;
-        proxy = reactive(record, () => {
-            if (ready) {
-                callback(_observe);
-            }
-        });
-        _observe();
-        return () => {
-            ready = false;
-        };
+        return this.store._onChange(...arguments);
     }
     /**
      * Contains field definitions of the model:
@@ -268,25 +67,27 @@ export class Record {
      */
     static _fields;
     static isRecord(record) {
-        return Boolean(record?.[IS_RECORD_SYM]);
+        return isRecord(record);
     }
     /** @param {FIELD_SYM|RecordList} val */
     static isRelation(val) {
-        if ([MANY_SYM, ONE_SYM].includes(val)) {
-            return true;
-        }
-        return RecordList.isOne(val) || RecordList.isMany(val);
+        return isRelation(val);
     }
     /** @param {FIELD_SYM} SYM */
     static isField(SYM) {
-        return [MANY_SYM, ONE_SYM, ATTR_SYM].includes(SYM);
+        return isField(SYM);
     }
     static get(data) {
         const Model = toRaw(this);
         return this.records[Model.localId(data)];
     }
-    static register() {
-        modelRegistry.add(this.name, this);
+    static register(localRegistry) {
+        if (localRegistry) {
+            // Record-specific tests use local registry as to not affect other tests
+            localRegistry.add(this.name, this);
+        } else {
+            modelRegistry.add(this.name, this);
+        }
     }
     static localId(data) {
         const Model = toRaw(this);
@@ -303,13 +104,13 @@ export class Record {
         if (!Array.isArray(expr)) {
             const fieldDefinition = Model._fields.get(expr);
             if (fieldDefinition) {
-                if (RecordList.isMany(fieldDefinition)) {
+                if (isMany(fieldDefinition)) {
                     throw new Error("Using a Record.Many() as id is not (yet) supported");
                 }
-                if (!Record.isRelation(fieldDefinition)) {
+                if (!isRelation(fieldDefinition)) {
                     return data[expr];
                 }
-                if (Record.isCommand(data[expr])) {
+                if (isCommand(data[expr])) {
                     // Note: only Record.one() is supported
                     const [cmd, data2] = data[expr].at(-1);
                     if (cmd === "DELETE") {
@@ -338,7 +139,7 @@ export class Record {
         const res = {};
         function _deepRetrieve(expr2) {
             if (typeof expr2 === "string") {
-                if (Record.isCommand(data[expr2])) {
+                if (isCommand(data[expr2])) {
                     // Note: only Record.one() is supported
                     const [cmd, data2] = data[expr2].at(-1);
                     return Object.assign(res, {
@@ -370,7 +171,7 @@ export class Record {
             if (typeof data !== "object" || data === null) {
                 return { [Model.id]: data }; // non-object data => single id
             }
-            if (Record.isCommand(data[Model.id])) {
+            if (isCommand(data[Model.id])) {
                 // Note: only Record.one() is supported
                 const [cmd, data2] = data[Model.id].at(-1);
                 return Object.assign(res, {
@@ -412,16 +213,17 @@ export class Record {
      */
     static new(data) {
         const Model = toRaw(this);
-        return Record.MAKE_UPDATE(function RecordNew() {
+        const store = Model.store;
+        return store.MAKE_UPDATE(function RecordNew() {
             const recordProxy = new Model.Class();
             const record = toRaw(recordProxy)._raw;
             const ids = Model._retrieveIdFromData(data);
             for (const name in ids) {
                 if (
                     ids[name] &&
-                    !Record.isRecord(ids[name]) &&
-                    !Record.isCommand(ids[name]) &&
-                    Record.isRelation(Model._fields.get(name))
+                    !isRecord(ids[name]) &&
+                    !isCommand(ids[name]) &&
+                    isRelation(Model._fields.get(name))
                 ) {
                     // preinsert that record in relational field,
                     // as it is required to make current local id
@@ -532,17 +334,18 @@ export class Record {
     static insert(data, options = {}) {
         const ModelFullProxy = this;
         const Model = toRaw(ModelFullProxy);
-        return Record.MAKE_UPDATE(function RecordInsert() {
+        const store = Model.store;
+        return store.MAKE_UPDATE(function RecordInsert() {
             const isMulti = Array.isArray(data);
             if (!isMulti) {
                 data = [data];
             }
-            const oldTrusted = Record.trusted;
-            Record.trusted = options.html ?? Record.trusted;
+            const oldTrusted = store._.trusted;
+            store._.trusted = options.html ?? store._.trusted;
             const res = data.map(function RecordInsertMap(d) {
                 return Model._insert.call(ModelFullProxy, d, options);
             });
-            Record.trusted = oldTrusted;
+            store._.trusted = oldTrusted;
             if (!isMulti) {
                 return res[0];
             }
@@ -567,7 +370,7 @@ export class Record {
         return Model.get.call(ModelFullProxy, data) ?? Model.new(data);
     }
     static isCommand(data) {
-        return ["ADD", "DELETE", "ADD.noinv", "DELETE.noinv"].includes(data?.[0]?.[0]);
+        return isCommand(data);
     }
 
     /**
@@ -600,6 +403,12 @@ export class Record {
     Model;
     /** @type {string} */
     localId;
+    /** @type {this} */
+    _raw;
+    /** @type {this} */
+    _proxyInternal;
+    /** @type {this} */
+    _proxy;
 
     constructor() {
         this.setup();
@@ -609,20 +418,22 @@ export class Record {
 
     update(data) {
         const record = toRaw(this)._raw;
-        return Record.MAKE_UPDATE(function recordUpdate() {
+        const store = record._store;
+        return store.MAKE_UPDATE(function recordUpdate() {
             if (typeof data === "object" && data !== null) {
-                updateFields(record, data);
+                record._store.updateFields(record, data);
             } else {
                 // update on single-id data
-                updateFields(record, { [record.Model.id]: data });
+                record._store.updateFields(record, { [record.Model.id]: data });
             }
         });
     }
 
     delete() {
         const record = toRaw(this)._raw;
-        return Record.MAKE_UPDATE(function recordDelete() {
-            Record.ADD_QUEUE(record, "delete");
+        const store = record._store;
+        return store.MAKE_UPDATE(function recordDelete() {
+            store.ADD_QUEUE(record, "delete");
         });
     }
 
@@ -645,7 +456,7 @@ export class Record {
         if (!collection) {
             return false;
         }
-        if (collection instanceof RecordList) {
+        if (isRecordList(collection)) {
             return collection.includes(this);
         }
         // Array
@@ -662,12 +473,12 @@ export class Record {
         const record = toRaw(recordProxy)._raw;
         const data = { ...recordProxy };
         for (const [name, { value }] of record._fields) {
-            if (RecordList.isMany(value)) {
+            if (isMany(value)) {
                 data[name] = value.map((recordProxy) => {
                     const record = toRaw(recordProxy)._raw;
                     return record.toIdData.call(record._proxyInternal);
                 });
-            } else if (RecordList.isOne(value)) {
+            } else if (isOne(value)) {
                 const record = toRaw(value[0])?._raw;
                 data[name] = record?.toIdData.call(record._proxyInternal);
             } else {
@@ -688,7 +499,7 @@ export class Record {
     toIdData() {
         const data = this.Model._retrieveIdFromData(this);
         for (const [name, val] of Object.entries(data)) {
-            if (Record.isRecord(val)) {
+            if (isRecord(val)) {
                 data[name] = val.toIdData();
             }
         }
@@ -704,5 +515,4 @@ export class Record {
         return this._proxy === fullProxy ? this._proxyInternal : fullProxy;
     }
 }
-
 Record.register();

@@ -1,6 +1,4 @@
-import { onChange } from "@mail/utils/common/misc";
-import { markRaw, markup, reactive, toRaw } from "@odoo/owl";
-import { deserializeDate, deserializeDateTime } from "@web/core/l10n/dates";
+import { markup } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 
 export const modelRegistry = registry.category("discuss.model");
@@ -9,17 +7,18 @@ export const modelRegistry = registry.category("discuss.model");
  * Class of markup, useful to detect content that is markup and to
  * automatically markup field during trusted insert
  */
-const Markup = markup("").constructor;
+export const Markup = markup("").constructor;
 
 /** @typedef {ATTR_SYM|MANY_SYM|ONE_SYM} FIELD_SYM */
-const ATTR_SYM = Symbol("attr");
-const MANY_SYM = Symbol("many");
-const ONE_SYM = Symbol("one");
-const OR_SYM = Symbol("or");
+export const ATTR_SYM = Symbol("attr");
+export const MANY_SYM = Symbol("many");
+export const ONE_SYM = Symbol("one");
+export const OR_SYM = Symbol("or");
 const AND_SYM = Symbol("and");
-const IS_RECORD_SYM = Symbol("isRecord");
-const IS_FIELD_SYM = Symbol("isField");
-const IS_DELETED_SYM = Symbol("isDeleted");
+export const IS_RECORD_SYM = Symbol("isRecord");
+export const IS_RECORD_LIST_SYM = Symbol("isRecordList");
+export const IS_FIELD_SYM = Symbol("isField");
+export const IS_DELETED_SYM = Symbol("isDeleted");
 
 export function AND(...args) {
     return [AND_SYM, ...args];
@@ -28,148 +27,34 @@ export function OR(...args) {
     return [OR_SYM, ...args];
 }
 
-/**
- * @param {Record} record
- * @param {Object} vals
- */
-function updateFields(record, vals) {
-    for (const [fieldName, value] of Object.entries(vals)) {
-        const fieldDefinition = record.Model._fields.get(fieldName);
-        if (!fieldDefinition || Record.isAttr(fieldDefinition)) {
-            updateAttr(record, fieldName, value);
-        } else {
-            updateRelation(record, fieldName, value);
-        }
-    }
+export function isAttr(definition) {
+    return Boolean(definition?.[ATTR_SYM]);
 }
-
-/**
- * @param {Record} record
- * @param {string} fieldName
- * @param {any} value
- */
-function updateAttr(record, fieldName, value) {
-    const fieldDefinition = record.Model._fields.get(fieldName);
-    // ensure each field write goes through the proxy exactly once to trigger reactives
-    const targetRecord = record._proxyUsed.has(fieldName) ? record : record._proxy;
-    let shouldChange = record[fieldName] !== value;
-    if (fieldDefinition?.type === "datetime" && value) {
-        if (!(value instanceof luxon.DateTime)) {
-            value = deserializeDateTime(value);
-        }
-        shouldChange = !record[fieldName] || !value.equals(record[fieldName]);
-    }
-    if (fieldDefinition?.type === "date" && value) {
-        if (!(value instanceof luxon.DateTime)) {
-            value = deserializeDate(value);
-        }
-        shouldChange = !record[fieldName] || !value.equals(record[fieldName]);
-    }
-    let newValue = value;
-    if (fieldDefinition?.html && Record.trusted) {
-        shouldChange =
-            record[fieldName]?.toString() !== value?.toString() ||
-            !(record[fieldName] instanceof Markup);
-        newValue = typeof value === "string" ? markup(value) : value;
-    }
-    if (shouldChange) {
-        record._updateFields.add(fieldName);
-        targetRecord[fieldName] = newValue;
-        record._updateFields.delete(fieldName);
-    }
+export function isCommand(data) {
+    return ["ADD", "DELETE", "ADD.noinv", "DELETE.noinv"].includes(data?.[0]?.[0]);
 }
-
-/**
- * @param {Record} record
- * @param {string} fieldName
- * @param {any} value
- */
-function updateRelation(record, fieldName, value) {
-    /** @type {RecordList<Record>} */
-    const recordList = record._fields.get(fieldName).value;
-    if (RecordList.isMany(recordList)) {
-        updateRelationMany(recordList, value);
-    } else {
-        updateRelationOne(recordList, value);
-    }
+export function isOne(list) {
+    return Boolean(list?.[ONE_SYM]);
 }
-
-/**
- * @param {RecordList} recordList
- * @param {any} value
- */
-function updateRelationMany(recordList, value) {
-    if (Record.isCommand(value)) {
-        for (const [cmd, cmdData] of value) {
-            if (Array.isArray(cmdData)) {
-                for (const item of cmdData) {
-                    if (cmd === "ADD") {
-                        recordList.add(item);
-                    } else if (cmd === "ADD.noinv") {
-                        recordList._addNoinv(item);
-                    } else if (cmd === "DELETE.noinv") {
-                        recordList._deleteNoinv(item);
-                    } else {
-                        recordList.delete(item);
-                    }
-                }
-            } else {
-                if (cmd === "ADD") {
-                    recordList.add(cmdData);
-                } else if (cmd === "ADD.noinv") {
-                    recordList._addNoinv(cmdData);
-                } else if (cmd === "DELETE.noinv") {
-                    recordList._deleteNoinv(cmdData);
-                } else {
-                    recordList.delete(cmdData);
-                }
-            }
-        }
-    } else if ([null, false, undefined].includes(value)) {
-        recordList.clear();
-    } else if (!Array.isArray(value)) {
-        recordList.assign([value]);
-    } else {
-        recordList.assign(value);
-    }
+export function isMany(list) {
+    return Boolean(list?.[MANY_SYM]);
 }
-
-/**
- * @param {RecordList} recordList
- * @param {any} value
- * @returns {boolean} whether the value has changed
- */
-function updateRelationOne(recordList, value) {
-    if (Record.isCommand(value)) {
-        const [cmd, cmdData] = value.at(-1);
-        if (cmd === "ADD") {
-            recordList.add(cmdData);
-        } else if (cmd === "ADD.noinv") {
-            recordList._addNoinv(cmdData);
-        } else if (cmd === "DELETE.noinv") {
-            recordList._deleteNoinv(cmdData);
-        } else {
-            recordList.delete(cmdData);
-        }
-    } else if ([null, false, undefined].includes(value)) {
-        recordList.clear();
-    } else {
-        recordList.add(value);
-    }
+export function isRecord(record) {
+    return Boolean(record?.[IS_RECORD_SYM]);
 }
-
-function sortRecordList(recordListFullProxy, func) {
-    const recordList = toRaw(recordListFullProxy)._raw;
-    // sort on copy of list so that reactive observers not triggered while sorting
-    const recordsFullProxy = recordListFullProxy.data.map((localId) =>
-        recordListFullProxy.store.recordByLocalId.get(localId)
-    );
-    recordsFullProxy.sort(func);
-    const data = recordsFullProxy.map((recordFullProxy) => toRaw(recordFullProxy)._raw.localId);
-    const hasChanged = recordList.data.some((localId, i) => localId !== data[i]);
-    if (hasChanged) {
-        recordListFullProxy.data = data;
+export function isRecordList(recordList) {
+    return Boolean(recordList?.[IS_RECORD_LIST_SYM]);
+}
+/** @param {FIELD_SYM|RecordList} val */
+export function isRelation(val) {
+    if ([MANY_SYM, ONE_SYM].includes(val)) {
+        return true;
     }
+    return isOne(val) || isMany(val);
+}
+/** @param {FIELD_SYM} SYM */
+export function isField(SYM) {
+    return [MANY_SYM, ONE_SYM, ATTR_SYM].includes(SYM);
 }
 
 /**

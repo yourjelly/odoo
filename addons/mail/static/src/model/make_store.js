@@ -1,21 +1,41 @@
+import { reactive, toRaw } from "@odoo/owl";
+import { Store } from "./store";
+import {
+    IS_FIELD_SYM,
+    IS_RECORD_LIST_SYM,
+    IS_RECORD_SYM,
+    isField,
+    isMany,
+    isRelation,
+    modelRegistry,
+} from "./misc";
+import { RecordList } from "./record_list";
+import { onChange } from "@mail/utils/common/misc";
+import { Record } from "./record";
+import { StoreInternal } from "./store_internal";
+
 /** @returns {import("models").Store} */
-export function makeStore(env) {
-    Record.UPDATE = 0;
+export function makeStore(env, { localRegistry } = {}) {
     const recordByLocalId = reactive(new Map());
-    const res = {
-        // fake store for now, until it becomes a model
-        /** @type {import("models").Store} */
-        store: {
-            env,
-            get: (...args) => BaseStore.prototype.get.call(this, ...args),
-            recordByLocalId,
-        },
-    };
+    // fake store for now, until it becomes a model
+    /** @type {import("models").Store} */
+    Store.env = env;
+    let store = new Store();
+    store.env = env;
+    store.Model = Store;
+    store._ = new StoreInternal();
+    store._raw = store;
+    store._proxyInternal = store;
+    store._proxy = store;
+    store.recordByLocalId = recordByLocalId;
+    Record.store = store;
+    /** @type {Object<string, typeof Record>} */
     const Models = {};
-    for (const [name, _OgClass] of modelRegistry.getEntries()) {
+    const chosenModelRegistry = localRegistry ?? modelRegistry;
+    for (const [name, _OgClass] of chosenModelRegistry.getEntries()) {
         /** @type {typeof Record} */
         const OgClass = _OgClass;
-        if (res.store[name]) {
+        if (store[name]) {
             throw new Error(`There must be no duplicated Model Names (duplicate found: ${name})`);
         }
         // classes cannot be made reactive because they are functions and they are not supported.
@@ -51,11 +71,11 @@ export function makeStore(env) {
                                         field.sort();
                                     }
                                 }
-                                if (Record.isRelation(field)) {
+                                if (isRelation(field)) {
                                     const recordList = field.value;
                                     const recordListFullProxy =
                                         recordFullProxy._fields.get(name).value._proxy;
-                                    if (RecordList.isMany(recordList)) {
+                                    if (isMany(recordList)) {
                                         return recordListFullProxy;
                                     }
                                     return recordListFullProxy[0];
@@ -64,9 +84,9 @@ export function makeStore(env) {
                             return Reflect.get(record, name, recordFullProxy);
                         },
                         deleteProperty(record, name) {
-                            return Record.MAKE_UPDATE(function recordDeleteProperty() {
+                            return store.MAKE_UPDATE(function recordDeleteProperty() {
                                 const field = record._fields.get(name);
-                                if (field && Record.isRelation(field)) {
+                                if (field && isRelation(field)) {
                                     const recordList = field.value;
                                     recordList.clear();
                                     return true;
@@ -84,9 +104,9 @@ export function makeStore(env) {
                                 record[name] = val;
                                 return true;
                             }
-                            return Record.MAKE_UPDATE(function recordSet() {
+                            return store.MAKE_UPDATE(function recordSet() {
                                 record._proxyUsed.add(name);
-                                updateFields(record, { [name]: val });
+                                store.updateFields(record, { [name]: val });
                                 record._proxyUsed.delete(name);
                                 return true;
                             });
@@ -95,14 +115,17 @@ export function makeStore(env) {
                     record._proxyInternal = recordProxyInternal;
                     const recordProxy = reactive(recordProxyInternal);
                     record._proxy = recordProxy;
-                    if (record instanceof BaseStore) {
-                        res.store = record;
+                    if (record instanceof Store) {
+                        record.recordByLocalId = store.recordByLocalId;
+                        record._ = store._;
+                        store = record;
+                        Record.store = store;
                     }
                     for (const [name, fieldDefinition] of Model._fields) {
                         const SYM = record[name]?.[0];
                         const field = { [SYM]: true, eager: fieldDefinition.eager, name };
                         record._fields.set(name, field);
-                        if (Record.isRelation(SYM)) {
+                        if (isRelation(SYM)) {
                             // Relational fields contain symbols for detection in original class.
                             // This constructor is called on genuine records:
                             // - 'one' fields => undefined
@@ -110,13 +133,14 @@ export function makeStore(env) {
                             // record[name]?.[0] is ONE_SYM or MANY_SYM
                             const recordList = new RecordList();
                             Object.assign(recordList, {
+                                [IS_RECORD_LIST_SYM]: true,
                                 [SYM]: true,
                                 field,
                                 name,
                                 owner: record,
                                 _raw: recordList,
                             });
-                            recordList.store = res.store;
+                            recordList.store = store;
                             field.value = recordList;
                         } else {
                             record[name] = fieldDefinition.default;
@@ -145,14 +169,14 @@ export function makeStore(env) {
                                 compute: () => {
                                     field.computing = true;
                                     field.computeOnNeed = false;
-                                    updateFields(record, {
+                                    store.updateFields(record, {
                                         [name]: fieldDefinition.compute.call(proxy2),
                                     });
                                     field.computing = false;
                                 },
                                 requestCompute: ({ force = false } = {}) => {
-                                    if (Record.UPDATE !== 0 && !force) {
-                                        Record.ADD_QUEUE(field, "compute");
+                                    if (store._.UPDATE !== 0 && !force) {
+                                        store.ADD_QUEUE(field, "compute");
                                     } else {
                                         if (field.eager || field.computeInNeed) {
                                             field.compute();
@@ -187,15 +211,15 @@ export function makeStore(env) {
                                 sort: () => {
                                     field.sortOnNeed = false;
                                     field.sorting = true;
-                                    sortRecordList(
+                                    store.sortRecordList(
                                         proxy2._fields.get(name).value._proxy,
                                         fieldDefinition.sort.bind(proxy2)
                                     );
                                     field.sorting = false;
                                 },
                                 requestSort: ({ force } = {}) => {
-                                    if (Record.UPDATE !== 0 && !force) {
-                                        Record.ADD_QUEUE(field, "sort");
+                                    if (store._.UPDATE !== 0 && !force) {
+                                        store.ADD_QUEUE(field, "sort");
                                     } else {
                                         if (field.eager || field.sortInNeed) {
                                             field.sort();
@@ -219,10 +243,10 @@ export function makeStore(env) {
                                     observe?.();
                                 },
                             });
-                            Record._onChange(recordProxy, name, (obs) => {
+                            store._onChange(recordProxy, name, (obs) => {
                                 observe = obs;
-                                if (Record.UPDATE !== 0) {
-                                    Record.ADD_QUEUE(field, "onUpdate");
+                                if (store._.UPDATE !== 0) {
+                                    store.ADD_QUEUE(field, "onUpdate");
                                 } else {
                                     field.onUpdate();
                                 }
@@ -240,12 +264,12 @@ export function makeStore(env) {
             _fields: new Map(),
         });
         Models[name] = Model;
-        res.store[name] = Model;
+        store[name] = Model;
         // Detect fields with a dummy record and setup getter/setters on them
         const obj = new OgClass();
         for (const [name, val] of Object.entries(obj)) {
             const SYM = val?.[0];
-            if (!Record.isField(SYM)) {
+            if (!isField(SYM)) {
                 continue;
             }
             Model._fields.set(name, { [IS_FIELD_SYM]: true, [SYM]: true, ...val[1] });
@@ -254,7 +278,7 @@ export function makeStore(env) {
     // Sync inverse fields
     for (const Model of Object.values(Models)) {
         for (const [name, fieldDefinition] of Model._fields) {
-            if (!Record.isRelation(fieldDefinition)) {
+            if (!isRelation(fieldDefinition)) {
                 continue;
             }
             const { targetModel, inverse } = fieldDefinition;
@@ -284,14 +308,14 @@ export function makeStore(env) {
      * store/_rawStore are assigned on models at next step, but they are
      * required on Store model to make the initial store insert.
      */
-    Object.assign(res.store.Store, { store: res.store, _rawStore: res.store });
+    Object.assign(store.Store, { store, _rawStore: store });
     // Make true store (as a model)
-    res.store = toRaw(res.store.Store.insert())._raw;
+    store = toRaw(store.Store.insert())._raw;
     for (const Model of Object.values(Models)) {
-        Model._rawStore = res.store;
-        Model.store = res.store._proxy;
-        res.store._proxy[Model.name] = Model;
+        Model._rawStore = store;
+        Model.store = store._proxy;
+        store._proxy[Model.name] = Model;
     }
-    Object.assign(res.store, { Models, storeReady: true });
-    return res.store._proxy;
+    Object.assign(store, { Models, storeReady: true });
+    return store._proxy;
 }
