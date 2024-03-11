@@ -42,6 +42,7 @@ class IrUiMenu(models.Model):
                                          ('ir.actions.client', 'ir.actions.client')])
 
     web_icon_data = fields.Binary(string='Web Icon Image', attachment=True)
+    country_id = fields.Many2one('res.country', string='Country', ondelete='restrict')
 
     @api.depends('name', 'parent_id.complete_name')
     def _compute_complete_name(self):
@@ -88,6 +89,10 @@ class IrUiMenu(models.Model):
         menus = menus.filtered(
             lambda menu: not menu.groups_id or menu.groups_id & groups)
 
+        # Discard menus where the user does not have permission for the associated company's country
+        menus = menus.filtered(
+            lambda menu: not menu.country_id or menu.country_id and menu.country_id in self.env.user.company_ids.mapped('country_id'))
+
         # take apart menus that have an action
         actions_by_model = defaultdict(set)
         for action in menus.mapped('action'):
@@ -126,7 +131,7 @@ class IrUiMenu(models.Model):
                 while menu and menu in folder_menus and menu not in visible:
                     visible += menu
                     menu = menu.parent_id
-
+        print('+++++++++++++++++++++++',[i.name for i in visible])
         return set(visible.ids)
 
     @api.returns('self')
@@ -253,6 +258,7 @@ class IrUiMenu(models.Model):
         """
         fields = ['name', 'sequence', 'parent_id', 'action', 'web_icon']
         menu_roots = self.get_user_roots()
+        print('...................................................................')
         menu_roots_data = menu_roots.read(fields) if menu_roots else []
         menu_root = {
             'id': False,

@@ -330,6 +330,9 @@ form: module.record_id""" % (xml_id,)
         if groups:
             values['groups_id'] = groups
 
+        if rec.get('country', False):
+            country_id = self.id_get(rec.attrib['country'])
+            values['country_id'] = country_id
 
         data = {
             'xml_id': self.make_xml_id(rec_id),
