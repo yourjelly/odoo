@@ -1,7 +1,7 @@
 /** @odoo-module alias=@mail/../tests/core/record_tests default=false */
 const test = QUnit.test; // QUnit.test()
 
-import { BaseStore, Record, makeStore, modelRegistry } from "@mail/core/common/record";
+import { Store, Record, makeStore } from "@mail/core/common/record";
 
 import { registry } from "@web/core/registry";
 import { clearRegistryWithCleanup, makeTestEnv } from "@web/../tests/helpers/mock_env";
@@ -9,14 +9,15 @@ import { assertSteps, step } from "@web/../tests/utils";
 import { markup, reactive, toRaw } from "@odoo/owl";
 
 const serviceRegistry = registry.category("services");
+const localRegistry = registry.category("discuss.model.test");
 
 let start;
 QUnit.module("record", {
     beforeEach() {
-        serviceRegistry.add("store", { start: (env) => makeStore(env) });
-        clearRegistryWithCleanup(modelRegistry);
-        Record.register();
-        ({ Store: class extends BaseStore {} }).Store.register();
+        clearRegistryWithCleanup(localRegistry);
+        serviceRegistry.add("store", { start: (env) => makeStore(env, { localRegistry }) });
+        Record.register(localRegistry);
+        Store.register(localRegistry);
         start = async () => {
             const env = await makeTestEnv();
             return env.services.store;
@@ -28,7 +29,7 @@ test("Insert by passing only single-id value (non-relational)", async (assert) =
     (class Persona extends Record {
         static id = "name";
         name;
-    }).register();
+    }).register(localRegistry);
     const store = await start();
     const john = store.Persona.insert("John");
     assert.strictEqual(john.name, "John");
@@ -39,11 +40,11 @@ test("Can pass object as data for relational field with inverse as id", async (a
         static id = "name";
         name;
         composer = Record.one("Composer", { inverse: "thread" });
-    }).register();
+    }).register(localRegistry);
     (class Composer extends Record {
         static id = "thread";
         thread = Record.one("Thread");
-    }).register();
+    }).register(localRegistry);
     const store = await start();
     const thread = store.Thread.insert("General");
     Object.assign(thread, { composer: {} });
@@ -58,21 +59,21 @@ test("Assign & Delete on fields with inverses", async (assert) => {
         composer = Record.one("Composer", { inverse: "thread" });
         members = Record.many("Member", { inverse: "thread" });
         messages = Record.many("Message", { inverse: "threads" });
-    }).register();
+    }).register(localRegistry);
     (class Composer extends Record {
         static id = "thread";
         thread = Record.one("Thread");
-    }).register();
+    }).register(localRegistry);
     (class Member extends Record {
         static id = "name";
         name;
         thread = Record.one("Thread");
-    }).register();
+    }).register(localRegistry);
     (class Message extends Record {
         static id = "content";
         content;
         threads = Record.many("Thread");
-    }).register();
+    }).register(localRegistry);
     const store = await start();
     const thread = store.Thread.insert("General");
     const [john, marc] = store.Member.insert(["John", "Marc"]);
@@ -124,12 +125,12 @@ test("onAdd/onDelete hooks on relational with inverse", async (assert) => {
             onAdd: (member) => logs.push(`Thread.onAdd(${member.name})`),
             onDelete: (member) => logs.push(`Thread.onDelete(${member.name})`),
         });
-    }).register();
+    }).register(localRegistry);
     (class Member extends Record {
         static id = "name";
         name;
         thread = Record.one("Thread");
-    }).register();
+    }).register(localRegistry);
     const store = await start();
     const thread = store.Thread.insert("General");
     const [john, marc] = store.Member.insert(["John", "Marc"]);
@@ -173,11 +174,11 @@ test("Computed fields", async (assert) => {
             },
         });
         members = Record.many("Persona");
-    }).register();
+    }).register(localRegistry);
     (class Persona extends Record {
         static id = "name";
         name;
-    }).register();
+    }).register(localRegistry);
     const store = await start();
     const thread = store.Thread.insert("General");
     const [john, marc, antony] = store.Persona.insert(["John", "Marc", "Antony"]);
@@ -221,11 +222,11 @@ test("Computed fields: lazy (default) vs. eager", async (assert) => {
             eager: true,
         });
         members = Record.many("Persona");
-    }).register();
+    }).register(localRegistry);
     (class Persona extends Record {
         static id = "name";
         name;
-    }).register();
+    }).register(localRegistry);
     const store = await start();
     const thread = store.Thread.insert("General");
     const members = thread.members;
@@ -253,7 +254,7 @@ test("Trusted insert on html field with { html: true }", async (assert) => {
     (class Message extends Record {
         static id = "body";
         body = Record.attr("", { html: true });
-    }).register();
+    }).register(localRegistry);
     const store = await start();
     const hello = store.Message.insert("<p>hello</p>", { html: true });
     const world = store.Message.insert("<p>world</p>");
@@ -267,7 +268,7 @@ test("(Un)trusted insertion is applied even with same field value", async (asser
         static id = "id";
         id;
         body = Record.attr("", { html: true });
-    }).register();
+    }).register(localRegistry);
     const store = await start();
     const rawMessage = { id: 1, body: "<p>hello</p>" };
     let message = store.Message.insert(rawMessage);
@@ -282,12 +283,12 @@ test("Unshift preserves order", async (assert) => {
     (class Message extends Record {
         static id = "id";
         id;
-    }).register();
+    }).register(localRegistry);
     (class Thread extends Record {
         static id = "name";
         name;
         messages = Record.many("Message");
-    }).register();
+    }).register(localRegistry);
     const store = await start();
     const thread = store.Thread.insert({ name: "General" });
     thread.messages.unshift({ id: 3 }, { id: 2 }, { id: 1 });
@@ -316,7 +317,7 @@ test("onAdd hook should see fully inserted data", async () => {
             onAdd: (member) =>
                 step(`Thread.onAdd::${member.name}.${member.type}.${member.isAdmin}`),
         });
-    }).register();
+    }).register(localRegistry);
     (class Member extends Record {
         static id = "name";
         name;
@@ -327,7 +328,7 @@ test("onAdd hook should see fully inserted data", async () => {
             },
         });
         thread = Record.one("Thread");
-    }).register();
+    }).register(localRegistry);
     const store = await start();
     const thread = store.Thread.insert("General");
     thread.members.add({ name: "John", type: "admin" });
@@ -339,12 +340,12 @@ test("Can insert with relation as id, using relation as data object", async (ass
         static id = "name";
         name;
         settings = Record.one("Settings");
-    }).register();
+    }).register(localRegistry);
     (class Settings extends Record {
         static id = "user";
         pushNotif;
         user = Record.one("User", { inverse: "settings" });
-    }).register();
+    }).register(localRegistry);
     const store = await start();
     store.Settings.insert([
         { pushNotif: true, user: { name: "John" } },
@@ -361,7 +362,7 @@ test("Set on attr should invoke onChange", async () => {
         static id = "id";
         id;
         body;
-    }).register();
+    }).register(localRegistry);
     const store = await start();
     const message = store.Message.insert(1);
     Record.onChange(message, "body", () => step("BODY_CHANGED"));
@@ -376,14 +377,14 @@ test("record list sort should be manually observable", async (assert) => {
         static id = "id";
         id;
         messages = Record.many("Message", { inverse: "thread" });
-    }).register();
+    }).register(localRegistry);
     (class Message extends Record {
         static id = "id";
         id;
         body;
         author;
         thread = Record.one("Thread", { inverse: "messages" });
-    }).register();
+    }).register(localRegistry);
     const store = await start();
     const thread = store.Thread.insert(1);
     const messages = store.Message.insert([
@@ -425,14 +426,14 @@ test("relation field sort should be automatically observed", async (assert) => {
             inverse: "thread",
             sort: (m1, m2) => (m1.body < m2.body ? -1 : 1),
         });
-    }).register();
+    }).register(localRegistry);
     (class Message extends Record {
         static id = "id";
         id;
         body;
         author;
         thread = Record.one("Thread", { inverse: "messages" });
-    }).register();
+    }).register(localRegistry);
     const store = await start();
     const thread = store.Thread.insert(1);
     const messages = store.Message.insert([
@@ -465,12 +466,12 @@ test("reading of lazy compute relation field should recompute", async (assert) =
                 return this.messages.map((m) => m.id);
             },
         });
-    }).register();
+    }).register(localRegistry);
     (class Message extends Record {
         static id = "id";
         id;
         thread = Record.one("Thread", { inverse: "messages" });
-    }).register();
+    }).register(localRegistry);
     const store = await start();
     const thread = store.Thread.insert(1);
     store.Message.insert([
@@ -499,7 +500,7 @@ test("lazy compute should re-compute while they are observed", async (assert) =>
                 return "few";
             },
         });
-    }).register();
+    }).register(localRegistry);
     const store = await start();
     const channel = store.Channel.insert(1);
     let observe = true;
@@ -547,12 +548,12 @@ test("lazy sort should re-sort while they are observed", async (assert) => {
         messages = Record.many("Message", {
             sort: (m1, m2) => m1.sequence - m2.sequence,
         });
-    }).register();
+    }).register(localRegistry);
     (class Message extends Record {
         static id = "id";
         id;
         sequence;
-    }).register();
+    }).register(localRegistry);
     const store = await start();
     const thread = store.Thread.insert(1);
     thread.messages.push({ id: 1, sequence: 1 }, { id: 2, sequence: 2 });
@@ -621,7 +622,7 @@ test("store updates can be observed", async () => {
 test("onAdd/onDelete hooks on one without inverse", async () => {
     (class Thread extends Record {
         static id = "name";
-    }).register();
+    }).register(localRegistry);
     (class Member extends Record {
         static id = "name";
         name;
@@ -629,7 +630,7 @@ test("onAdd/onDelete hooks on one without inverse", async () => {
             onAdd: (thread) => step(`thread.onAdd(${thread.name})`),
             onDelete: (thread) => step(`thread.onDelete(${thread.name})`),
         });
-    }).register();
+    }).register(localRegistry);
     const store = await start();
     const general = store.Thread.insert("General");
     const john = store.Member.insert("John");
@@ -650,10 +651,10 @@ test("onAdd/onDelete hooks on many without inverse", async () => {
             onAdd: (member) => step(`members.onAdd(${member.name})`),
             onDelete: (member) => step(`members.onDelete(${member.name})`),
         });
-    }).register();
+    }).register(localRegistry);
     (class Member extends Record {
         static id = "name";
-    }).register();
+    }).register(localRegistry);
     const store = await start();
     const general = store.Thread.insert("General");
     const jane = store.Member.insert("Jane");
@@ -674,11 +675,11 @@ test("record list assign should update inverse fields", async (assert) => {
         static id = "name";
         name;
         members = Record.many("Member", { inverse: "thread" });
-    }).register();
+    }).register(localRegistry);
     (class Member extends Record {
         static id = "name";
         thread = Record.one("Thread", { inverse: "members" });
-    }).register();
+    }).register(localRegistry);
     const store = await start();
     const general = store.Thread.insert("General");
     const jane = store.Member.insert("Jane");
@@ -700,7 +701,7 @@ test("datetime type record", async (assert) => {
             type: "datetime",
             onUpdate: () => step("DATE_UPDATED"),
         });
-    }).register();
+    }).register(localRegistry);
     const store = await start();
     await assertSteps([]);
     const general = store.Thread.insert({ name: "General", date: "2024-02-20 14:42:00" });
