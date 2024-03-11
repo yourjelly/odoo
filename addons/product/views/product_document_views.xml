@@ -20,6 +20,7 @@
                                required="type == 'binary'"
                                class="oe_inline"/>
                         <field name="url" widget="url" invisible="type == 'binary'" required="type == 'url'"/>
+                        <field name="lang" class="oe_inline"/>
                         <field name="res_name" string="Product Variant" invisible="res_model != 'product.product'"/>
                     </group>
                     <group string="Attached To" groups="base.group_no_one">
@@ -89,6 +90,10 @@
                                         <field name="url" widget="url" invisible="type == 'binary'"/>
                                     </div>
                                     <div class="o_kanban_record_bottom flex-column" name="bottom">
+                                        <div class="mt-2">
+                                            <span>Language</span>
+                                            <field name="lang" class="ms-2" widget="selection"/>
+                                        </div>
                                         <div class="mt-2" invisible="res_model != 'product.product'">
                                             <field name="res_name" style="font-style: italic; text-decoration-line: underline;"/>
                                         </div>

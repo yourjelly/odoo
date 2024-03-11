@@ -13,12 +13,17 @@ class ProductDocument(models.Model):
     }
     _order = 'sequence, name'
 
+    @api.model
+    def _lang_get(self):
+        return self.env['res.lang'].get_installed()
+
     ir_attachment_id = fields.Many2one(
         'ir.attachment',
         string="Related attachment",
         required=True,
         ondelete='cascade')
 
+    lang = fields.Selection(selection=_lang_get, string="Lang")
     active = fields.Boolean(default=True)
     sequence = fields.Integer(default=10)
 
