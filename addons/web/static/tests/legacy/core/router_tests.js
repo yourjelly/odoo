@@ -63,11 +63,10 @@ QUnit.test("a missing value is encoded as an empty string -- 2", (assert) => {
 });
 
 QUnit.test("can parse a realistic hash", (assert) => {
-    const hash = "#action=114&active_id=mail.box_inbox&cids=1&menu_id=91";
+    const hash = "#action=114&active_id=mail.box_inbox&menu_id=91";
     const expected = {
         action: 114,
         active_id: "mail.box_inbox",
-        cids: 1,
         menu_id: 91,
     };
     assert.deepEqual(parseHash(hash), expected);
@@ -865,11 +864,10 @@ QUnit.module("Router: urlToState", () => {
 
     QUnit.test("deserialize action in legacy url form", (assert) => {
         assert.deepEqual(
-            _urlToState("/web#id=5&action=1&model=some.model&view_type=form&menu_id=137&cids=1"),
+            _urlToState("/web#id=5&action=1&model=some.model&view_type=form&menu_id=137"),
             {
                 action: 1,
                 resId: 5,
-                cids: 1,
                 menu_id: 137,
                 model: "some.model",
                 actionStack: [
@@ -885,10 +883,9 @@ QUnit.module("Router: urlToState", () => {
         );
 
         assert.deepEqual(
-            _urlToState("/web#id=5&model=some.model&view_type=form&menu_id=137&cids=1"),
+            _urlToState("/web#id=5&model=some.model&view_type=form&menu_id=137"),
             {
                 resId: 5,
-                cids: 1,
                 menu_id: 137,
                 model: "some.model",
                 actionStack: [

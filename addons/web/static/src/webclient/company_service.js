@@ -7,19 +7,13 @@ import { cookie } from "@web/core/browser/cookie";
 import { user } from "@web/core/user";
 import { router } from "@web/core/browser/router";
 
-const CIDS_SEARCH_SEPARATOR = "-";
-
-function parseCompanyIds(cids, separator = ",") {
+function parseCompanyIds(cids) {
     if (typeof cids === "string") {
-        return cids.split(separator).map(Number);
+        return cids.split(",").map(Number);
     } else if (typeof cids === "number") {
         return [cids];
     }
     return [];
-}
-
-function formatCompanyIds(cids, separator = ",") {
-    return cids.join(separator);
 }
 
 function computeActiveCompanyIds(cids) {
@@ -36,17 +30,9 @@ function computeActiveCompanyIds(cids) {
     return activeCompanyIds;
 }
 
-function getCompanyIdsFromBrowser(state) {
+function getCompanyIds() {
     let cids;
-    if ("cids" in state) {
-        // backward compatibility s.t. old urls (still using "," as separator) keep working
-        // deprecated as of 17.0
-        let separator = CIDS_SEARCH_SEPARATOR;
-        if (typeof state.cids === "string" && !state.cids.includes(CIDS_SEARCH_SEPARATOR)) {
-            separator = ",";
-        }
-        cids = parseCompanyIds(state.cids, separator);
-    } else if (cookie.get("cids")) {
+    if (cookie.get("cids")) {
         cids = parseCompanyIds(cookie.get("cids"));
     }
     return cids || [];
@@ -79,13 +65,10 @@ export const companyService = {
             ...allowedCompanies,
             ...disallowedAncestorCompanies,
         };
-        const activeCompanyIds = computeActiveCompanyIds(getCompanyIdsFromBrowser(router.current));
+        const activeCompanyIds = computeActiveCompanyIds(getCompanyIds());
 
         // update browser data
-        const cidsSearch = formatCompanyIds(activeCompanyIds, CIDS_SEARCH_SEPARATOR);
-        router.addLockedKey("cids");
-        router.replaceState({ cids: cidsSearch });
-        cookie.set("cids", formatCompanyIds(activeCompanyIds));
+        cookie.set("cids", activeCompanyIds.join(","));
         user.updateContext({ allowed_company_ids: activeCompanyIds });
 
         // reload the page if changes are being done to `res.company`
@@ -139,9 +122,8 @@ export const companyService = {
                     );
                 }
 
-                const cidsSearch = formatCompanyIds(newCompanyIds, CIDS_SEARCH_SEPARATOR);
-                cookie.set("cids", formatCompanyIds(newCompanyIds));
-                router.pushState({ cids: cidsSearch, _company_switching: true }, { reload: true });
+                cookie.set("cids", newCompanyIds.join(","));
+                router.pushState({ _company_switching: true }, { reload: true });
             },
         };
     },
