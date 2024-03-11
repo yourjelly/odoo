@@ -67,12 +67,13 @@ class AccountTestInvoicingCommon(TransactionCase):
         cls.company_data_2 = cls.setup_company_data('company_2_data', chart_template=chart_template_ref)
         cls.company_data = cls.setup_company_data('company_1_data', chart_template=chart_template_ref)
 
-        cls.empty_purchase_journal = cls.env['account.journal'].create({
-            'name': 'Bills Two',
-            'code': 'B2',
-            'type': 'purchase',
-            'company_id': cls.env.ref('base.main_company').id,
-        })
+        # ensure there is an empty purchase journal to test
+        # cls.empty_purchase_journal = cls.env['account.journal'].create({
+        #     'name': 'Bills Two',
+        #     'code': 'B2',
+        #     'type': 'purchase',
+        #     'company_id': cls.env.ref('base.main_company').id,
+        # })
 
         cls.user.write({
             'company_ids': [Command.set((cls.company_data['company'] + cls.company_data_2['company']).ids)],
