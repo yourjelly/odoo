@@ -100,7 +100,7 @@ export class FloorScreen extends Component {
         }
     }
     getTablesSelectedByDefault() {
-        return this.pos.orderToTransfer ? [this.pos.orderToTransfer.tableId] : [];
+        return this.pos.tableEditOrder ? [this.pos.tableEditOrder.tableId] : [];
     }
     async onWillStart() {
         const table = this.pos.selectedTable;
@@ -348,9 +348,8 @@ export class FloorScreen extends Component {
             this.onSelectTable(table.parent_id, ev);
             return;
         }
-        if (this.pos.orderToTransfer) {
-            await this.pos.transferTable(table);
-        } else {
+
+        if (!this.pos.tableEditMode) {
             try {
                 await this.pos.setTable(table);
             } catch (e) {
@@ -360,11 +359,66 @@ export class FloorScreen extends Component {
                 // Reject error in a separate stack to display the offline popup, but continue the flow
                 Promise.reject(e);
             }
+
+            const order = this.pos.get_order();
+            if (order) {
+                this.pos.showScreen(order.get_screen_data().name);
+            }
+
+            return;
         }
-        const order = this.pos.get_order();
-        if (order) {
-            this.pos.showScreen(order.get_screen_data().name);
+
+        let status = false;
+        if (this.pos.tableEditMode === "transfer") {
+            status = await this.transferTable(table, this.pos.tableEditOrder);
+        } else if (this.pos.tableEditMode === "merge") {
+            status = await this.mergeTables(table);
         }
+
+        if (status) {
+            await this.pos.getTableOrderCount();
+            this.pos.set_order(this.pos.tableEditOrder);
+            this.pos.showScreen("ProductScreen");
+        }
+
+        this.pos.selectedTable = table;
+        this.pos.tableEditMode = false;
+        this.pos.tableEditOrder = null;
+    }
+    async mergeTables(table) {
+        const orderTable = this.pos.models["restaurant.table"].get(this.pos.tableEditOrder.tableId);
+        return await this.linkTables([table, orderTable]);
+    }
+    async transferTable(table, order) {
+        const originalTable = this.pos.models["restaurant.table"].get(order.tableId);
+        if (table.id === originalTable.id) {
+            return false;
+        }
+        if (
+            order.tableId !== table.id &&
+            this.pos.tableHasOrders(table) &&
+            this.pos.tableHasOrders(originalTable)
+        ) {
+            const confirm = await ask(this.dialog, {
+                title: _t("Multiple open orders"),
+                body: _t(
+                    "Both tables have an open order. If you proceed, both orders will live on the same table. You can access them anytime from the Orders menu."
+                ),
+            });
+            if (!confirm) {
+                return false;
+            }
+        }
+        try {
+            this.pos.loadingOrderState = true;
+            await this.pos._syncTableOrdersFromServer(table.id);
+        } finally {
+            this.pos.loadingOrderState = false;
+            order.tableId = table.id;
+            await this.pos.data.ormWrite("pos.order", [order.server_id], { table_id: table.id });
+            this.pos.transferredOrdersSet.add(order);
+        }
+        return true;
     }
     unselectTables() {
         if (this.selectedTables.length) {
@@ -493,10 +547,9 @@ export class FloorScreen extends Component {
         });
     }
     stopOrderTransfer() {
-        this.pos.set_order(this.pos.orderToTransfer);
+        this.pos.set_order(this.pos.tableEditOrder);
         this.pos.showScreen("ProductScreen");
-        this.pos.isTableToMerge = false;
-        this.pos.orderToTransfer = null;
+        this.pos.tableEditMode = false;
     }
     changeShape(form) {
         for (const table of this.selectedTables) {
@@ -508,14 +561,62 @@ export class FloorScreen extends Component {
             this.pos.data.write("restaurant.table", [table.id], { parent_id: false });
         }
     }
-    linkTables() {
-        const parentTable =
-            this.selectedTables.filter((t) => t.parent_id)?.[0] || this.selectedTables[0];
-        const childrenTables = this.selectedTables.filter((t) => t.id !== parentTable.id);
-        for (const table of childrenTables) {
-            table.update({ parent_id: parentTable });
+    async linkTables(selectedTables) {
+        let parent_id = selectedTables.filter((t) => !t.parent_id)[0];
+        const parents = new Set(
+            selectedTables.filter((t) => t.parent_id).map((t) => t.parent_id.id)
+        );
+
+        if (parents.size === 1) {
+            parent_id = this.pos.models["restaurant.table"].get(Array.from(parents)[0]);
+        } else if (parents.size > 1) {
+            this.dialog.add(AlertDialog, {
+                title: _t("Linking Error"),
+                body: _t("All the selected tables must have the same parent or no parent."),
+            });
+            return false;
         }
-        this.pos.updateTables(...childrenTables);
+
+        const childrenSets = new Set();
+        const unlinkChildren = new Set();
+        for (const table of selectedTables) {
+            if (table.id === parent_id.id) {
+                continue;
+            }
+
+            childrenSets.add(table.id);
+            const child = this.pos.models["restaurant.table"]
+                .filter((t) => t.parent_id?.id === table.id)
+                .map((t) => t.id);
+
+            if (child.length) {
+                unlinkChildren.add(...child);
+            }
+        }
+
+        if (childrenSets.size > 0) {
+            this.pos.data.write("restaurant.table", Array.from(childrenSets), {
+                parent_id: parent_id,
+            });
+        }
+        if (unlinkChildren.size > 0) {
+            this.pos.data.write("restaurant.table", Array.from(unlinkChildren), {
+                parent_id: null,
+            });
+        }
+
+        const childrenTables = this.pos.models["restaurant.table"]
+            .filter((t) => t.parent_id?.id === parent_id.id)
+            .map((t) => t.id);
+        const childrenOrders = this.pos.orders.filter((o) => childrenTables.includes(o.tableId));
+
+        for (const order of childrenOrders) {
+            order.tableId = parent_id.id;
+        }
+
+        const orderIdsToUpdate = childrenOrders.filter((o) => o.server_id).map((o) => o.server_id);
+        await this.pos.data.ormWrite("pos.order", orderIdsToUpdate, { table_id: parent_id.id });
+        return true;
     }
     isLinkingDisabled() {
         return (

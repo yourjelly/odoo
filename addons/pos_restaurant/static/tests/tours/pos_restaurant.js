@@ -265,8 +265,8 @@ registry.category("web_tour.tours").add("MergeTableTour", {
                 trigger: 'div.isLinked div.label:contains("4")',
             },
             {
-                content: `unlink in edit plan if unlink possible`,
-                trigger: '.edit-buttons button:contains("Unlink")',
+                content: `unmerge in edit plan if unmerge possible`,
+                trigger: '.edit-buttons button:contains("Unmerge")',
             },
             Chrome.clickMenuOption("Edit Plan"),
             ...checkMergeTableIsCancelHelpers(),
@@ -295,8 +295,8 @@ registry.category("web_tour.tours").add("MergeTableTour", {
                 trigger: 'div.isLinked div.label:contains("4")',
             },
             {
-                content: `unlink in edit plan if unlink possible`,
-                trigger: '.edit-buttons button:contains("Unlink")',
+                content: `unmerge in edit plan if unmerge possible`,
+                trigger: '.edit-buttons button:contains("Unmerge")',
             },
             Chrome.clickMenuOption("Edit Plan"),
             ...checkMergeTableIsCancelHelpers(),
@@ -304,8 +304,8 @@ registry.category("web_tour.tours").add("MergeTableTour", {
             FloorScreen.clickTable("4"),
             FloorScreen.ctrlClickTable("5"),
             {
-                content: `link in edit plan if link possible`,
-                trigger: '.edit-buttons button:contains("Link")',
+                content: `merge in edit plan if merge possible`,
+                trigger: '.edit-buttons button:contains("Merge")',
             },
             Chrome.clickMenuOption("Edit Plan"),
             {

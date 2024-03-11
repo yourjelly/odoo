@@ -38,7 +38,8 @@ patch(ControlButtons.prototype, {
         });
     },
     clickTransferOrder() {
-        this.pos.orderToTransfer = this.pos.selectedOrder;
+        this.pos.tableEditOrder = this.pos.selectedOrder;
+        this.pos.tableEditMode = "transfer";
         this.pos.get_order().setBooked(true);
         this.pos.showScreen("FloorScreen");
     },
