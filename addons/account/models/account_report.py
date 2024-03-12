@@ -56,7 +56,13 @@ class AccountReport(models.Model):
     search_bar = fields.Boolean(string="Search Bar")
     prefix_groups_threshold = fields.Integer(string="Prefix Groups Threshold")
     integer_rounding = fields.Selection(string="Integer Rounding", selection=[('HALF-UP', "Half-up (away from 0)"), ('UP', "Up"), ('DOWN', "Down")])
-    closing_type_id = fields.Many2one(string="Closing Type", comodel_name='account.report.closing.type')
+    closing_type_ids = fields.Many2many(
+        string="Closing Type",
+        comodel_name='account.report.closing.type',
+        store=True,
+        compute='_compute_closing_type_ids',
+        readonly=False,
+    )
 
     default_opening_date_filter = fields.Selection(
         string="Default Opening",
@@ -170,6 +176,11 @@ class AccountReport(models.Model):
     def _compute_use_sections(self):
         for report in self:
             report.use_sections = bool(report.section_report_ids)
+
+    @api.depends('section_report_ids')
+    def _compute_closing_type_ids(self):
+        for report in self:
+            report.closing_type_ids = report.closing_type_ids | report.section_report_ids.closing_type_ids
 
     @api.constrains('root_report_id')
     def _validate_root_report_id(self):

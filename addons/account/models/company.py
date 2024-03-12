@@ -399,9 +399,9 @@ class ResCompany(models.Model):
 
         if tax_closing_types:
             violated_tax_closing = self.env['account.report.closing'].search([
-                ('date', '<=', accounting_date),
+                ('date', '>=', accounting_date),
                 ('closing_type_id', 'in', tax_closing_types.ids),
-                ('state', '=' 'closed'),
+                ('state', '=', 'closed'),
             ], order='date DESC', limit=1)
 
             if violated_tax_closing:

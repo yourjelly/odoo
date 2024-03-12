@@ -4066,7 +4066,7 @@ class AccountMove(models.Model):
         for move in to_post:
             lock_dates = move._get_violated_lock_dates()
             if lock_dates:
-                move.date = move._get_accounting_date(move.invoice_date or move.date, move.journal_id, tax_closing_type=move._get_impacted_tax_closing_types())
+                move.date = move._get_accounting_date(move.invoice_date or move.date, move.journal_id, tax_closing_types=move._get_impacted_tax_closing_types())
 
         # Create the analytic lines in batch is faster as it leads to less cache invalidation.
         to_post.line_ids._create_analytic_lines()
@@ -4532,7 +4532,7 @@ class AccountMove(models.Model):
         :param invoice_date (datetime.date): The invoice date
         :param has_tax (bool): Iff any taxes are involved in the lines of the invoice
         :return (datetime.date):
-        """
+        """ #TODO OCO redoc
         lock_dates = self.company_id._get_violated_lock_dates(invoice_date, journal, tax_closing_types=tax_closing_types)
         today = fields.Date.today()
         highest_name = self.highest_name or self._get_last_sequence(relaxed=True)
@@ -4571,7 +4571,15 @@ class AccountMove(models.Model):
     def _get_impacted_tax_closing_types(self):
         #TODO OCO DOC
         self.ensure_one()
-        return (self.line_ids.tax_ids + self.line_ids.tax_line_id).closing_type_id
+        # Calling invoice_line_ids is necessart for new records of invoices ; they won't have line_ids until saved.
+        return (
+            self.line_ids.tax_ids
+            + self.line_ids.tax_line_id
+
+            # Necessary for invoice new records; no line_ids while not saved
+            + self.invoice_line_ids.tax_ids
+            + self.invoice_line_ids.tax_ids.children_tax_ids
+        ).closing_type_id
 
     def _get_lock_date_message(self, invoice_date):
         """Get a message describing the latest lock date affecting the specified date.
@@ -4581,9 +4589,10 @@ class AccountMove(models.Model):
                  accounted on if posted, or False if no lock dates affect this move.
         """
         self.ensure_one()
-        lock_dates = self.company_id._get_violated_lock_dates(invoice_date, self.journal_id, tax_closing_types=self._get_impacted_tax_closing_types())
+        tax_closing_types = self._get_impacted_tax_closing_types()
+        lock_dates = self.company_id._get_violated_lock_dates(invoice_date, self.journal_id, tax_closing_types=tax_closing_types)
         if lock_dates:
-            invoice_date = self._get_accounting_date(invoice_date, has_tax)
+            invoice_date = self._get_accounting_date(invoice_date, self.journal_id, tax_closing_types=tax_closing_types)
             lock_date, lock_type = lock_dates[-1]
             tax_lock_date_message = _(
                 "The date is being set prior to the %(lock_type)s lock date %(lock_date)s. "

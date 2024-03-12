@@ -17,7 +17,6 @@ class AccountReportClosing(models.Model):
     company_ids = fields.Many2many(string="Companies", comodel_name='res.company', required=True) #TODO OCO vérifier que check_company_auto comprend ça
     main_company_id = fields.Many2one(string="Main Company", comodel_name='res.company', required=True)
     # TOCO OCO pour que chaque membre de la closing ait possibilité de set un tax lock date avant que la mère ne close, que faire ? m2m cochable ? Champ property à set chacune ? Rien et osef ? => garder le bouton pour poster l'entrée, la poster et tout déduire de son état  ? ==> mais alors, comment on connaît la mère ? Comment on gère le posting intermédiaire ? :/ => un champ main_company_id en plus ?
-    report_id = fields.Many2one(string="Report", comodel_name='account.report') # Only set when generating closings with split_per_report
     move_generator_code = fields.Char(related='closing_type_id.move_generator_code')
 
     lock_journals = fields.Boolean(related='closing_type_id.lock_journals')
@@ -29,10 +28,9 @@ class AccountReportClosingType(models.Model):
 
     name = fields.Char(string="Name", required=True)
     tax_ids = fields.One2many(string="Taxes", comodel_name='account.tax', inverse_name='closing_type_id')
-    report_ids = fields.One2many(string="Reports", comodel_name='account.report', inverse_name='closing_type_id')
+    report_ids = fields.Many2many(string="Reports", comodel_name='account.report')
     move_generator_code = fields.Char(string="Entry Generator")
     lock_journals = fields.Boolean(string="Lock Journals")
-    split_per_report = fields.Boolean(string="Split per Report")
 
     # TODO OCO problème pour les droits d'accès: si l'advisor et l'accountant doivent pouvoir faire la tax closing, c'est pas le cas  de  la générale, si ? => un champ sur le closing type pour dire advisor_only ?
 
