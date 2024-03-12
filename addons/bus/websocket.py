@@ -5,6 +5,7 @@ import json
 import logging
 import os
 import psycopg2
+import queue
 import random
 import socket
 import struct
@@ -134,6 +135,27 @@ class LifecycleEvent(IntEnum):
 # ------------------------------------------------------
 
 
+# Idea taken from the python cookbook:
+# https://github.com/dabeaz/python-cookbook/blob/6e46b78e5644b3e5bf7426d900e2203b7cc630da/src/12/polling_multiple_thread_queues/pqueue.py
+class PollablePriorityQueue(queue.PriorityQueue):
+    """ A custom PriorityQueue than can be polled """
+    # This class allow this queue to be used with select.
+    def __init__(self):
+        super().__init__()
+        self._putsocket, self._getsocket = socket.socketpair()
+
+    def fileno(self):
+        return self._getsocket.fileno()
+
+    def put(self, item, **kwargs):
+        super().put(item, **kwargs)
+        self._putsocket.send(b'x')
+
+    def get(self, **kwargs):
+        self._getsocket.recv(1)
+        return super().get(**kwargs)
+
+
 class Opcode(IntEnum):
     CONTINUE = 0x00
     TEXT = 0x01
@@ -181,6 +203,10 @@ _XOR_TABLE = [bytes(a ^ b for a in range(256)) for b in range(256)]
 
 
 class Frame:
+    # This class implements the `__lt__` method in order for frames to
+    # be stored in a `PriorityQueue`: ping/pong frames are prioritary.
+    _frames_sent = 0
+
     def __init__(
         self,
         opcode,
