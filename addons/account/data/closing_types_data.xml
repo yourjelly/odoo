@@ -12,6 +12,7 @@
     <record id="closing_type_all" model="account.report.closing.type">
         <field name="name">General Closing</field><!--TODO OCO nom temporaire-->
         <field name="periodicity">year</field>
+        <field name="lock_journals" eval="True"/>
     </record>
 
 </odoo>

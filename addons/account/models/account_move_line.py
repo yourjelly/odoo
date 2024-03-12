@@ -2603,7 +2603,7 @@ class AccountMoveLine(models.Model):
         temp_exchange_move = self.env['account.move'].new({'journal_id': journal.id})
         accounting_exchange_date = temp_exchange_move._get_accounting_date(
             exchange_date or fields.Date.context_today(self),
-            False,
+            journal,
         )
 
         move_vals = {

@@ -373,7 +373,7 @@ class ResCompany(models.Model):
         return most_restrictive_closing.date or date.min"""
         return date.min
 
-    def _get_violated_lock_dates(self, accounting_date, journal, tax_closing_types=None): #TODO OCO changement de signature
+    def _get_violated_lock_dates(self, accounting_date, journal, tax_closing_types=None):
         """Get all the lock dates affecting the current accounting_date.
         :param accoutiaccounting_dateng_date: The accounting date
         :param has_tax: If any taxes are involved in the lines of the invoice
@@ -381,19 +381,19 @@ class ResCompany(models.Model):
         """ #TODO OCO REDOC
         self.ensure_one()
         locks = []
-        #TODO OCO: pour l'heure, je simplifie, à valider: là period_lock_date, je la gère en ayant une case de journal cochée sur un closing non-postée => ça bloque tout sauf les advisors
+        #TODO OCO: pour l'heure, je simplifie, à valider: la period_lock_date, je la gère en ayant une case de journal cochée sur un closing non-postée => ça bloque tout sauf les advisors
 
         violated_journal_closing_domain = [
             ('company_ids', 'in', self.id),
             ('closing_type_id.lock_journals', '=', True),
             '|', ('state', '=', 'closed'), ('locked_journal_ids', 'in', journal.id),
-            ('date', '<=', accounting_date),
+            ('date', '>=', accounting_date),
         ]
 
         if self.user_has_groups('account.group_account_manager'):
-            violated_journal_closing_domain.apped(('state', '=', 'closed'))
+            violated_journal_closing_domain.append(('state', '=', 'closed'))
 
-        violated_journal_closing = self.env['account.report.closing'].search(violated_journal_closings_domain, order='date DESC', limit=1)
+        violated_journal_closing = self.env['account.report.closing'].search(violated_journal_closing_domain, order='date DESC', limit=1)
         if violated_journal_closing:
             locks.append((violated_journal_closing.date, _('user')))
 
@@ -405,7 +405,7 @@ class ResCompany(models.Model):
             ], order='date DESC', limit=1)
 
             if violated_tax_closing:
-                locks.append((violated_tax_closing.date, _('tax'))) #TODO OCO pourquoi on mes les string traduits là-dedans ? C'est louche
+                locks.append((violated_tax_closing.date, _('tax'))) #TODO OCO pourquoi on met les string traduits là-dedans ? C'est louche
 
         locks.sort()
         return locks
