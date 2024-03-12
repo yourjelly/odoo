@@ -3642,6 +3642,8 @@ var SnippetsMenu = Widget.extend({
         this.$('#snippets_menu button').removeClass('active');
         this.$('.o_we_add_snippet_btn').toggleClass('active', this._currentTab === this.tabs.BLOCKS);
         this.$('.o_we_customize_snippet_btn').toggleClass('active', this._currentTab === this.tabs.OPTIONS);
+        // Set focus back to the search input when switching to the blocks tab.
+        this.$('.o_snippet_search_filter_input')[0]?.focus();
     },
     /**
      * Scrolls to given snippet.

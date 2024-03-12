@@ -3,7 +3,7 @@
 import { registry } from "@web/core/registry";
 import { useService } from '@web/core/utils/hooks';
 
-const { Component, useState, useEffect } = owl;
+const { Component, useState, useEffect, onPatched } = owl;
 
 class EditWebsiteSystray extends Component {
     setup() {
@@ -25,6 +25,12 @@ class EditWebsiteSystray extends Component {
                 this.state.isLoading = false;
             }
         }, () => [this.websiteContext.snippetsLoaded]);
+
+        onPatched(() => {
+            // Set focus on the search input when the snippets are loaded
+            this.snippetSearchInput = document.querySelector('.o_snippet_search_filter_input');
+            this.snippetSearchInput?.focus();
+        })
     }
 
     get translatable() {
