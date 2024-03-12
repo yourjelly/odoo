@@ -21,12 +21,24 @@ export class CallActionList extends Component {
 
     get moreActions() {
         const acts = [];
-        acts.push({
-            id: "raiseHand",
-            name: !this.rtc.state?.selfSession.raisingHand ? _t("Raise Hand") : _t("Lower Hand"),
-            icon: "fa fa-fw fa-hand-paper-o",
-            onSelect: (ev) => this.onClickRaiseHand(ev),
-        });
+        acts.push(
+            {
+                id: "recordCall",
+                name: _t("Record Call"),
+                icon: "fa fa-fw fa-circle",
+                onSelect: () => {
+                    console.log("TODO: Record call");
+                },
+            },
+            {
+                id: "raiseHand",
+                name: !this.rtc.state?.selfSession.raisingHand
+                    ? _t("Raise Hand")
+                    : _t("Lower Hand"),
+                icon: "fa fa-fw fa-hand-paper-o",
+                onSelect: (ev) => this.onClickRaiseHand(ev),
+            }
+        );
         if (isMobileOS) {
             acts.push({
                 id: "shareScreen",
