@@ -66,6 +66,7 @@ class AccountMoveLine(models.Model):
         related='move_id.ref', store=True,
         copy=False,
         index='trigram',
+        readonly=False,
     )
     is_storno = fields.Boolean(
         string="Company Storno Accounting",
