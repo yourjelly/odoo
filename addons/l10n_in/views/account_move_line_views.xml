@@ -13,12 +13,11 @@
                 <field name="company_currency_id" column_invisible="1"/>
                 <field name="display_type" force_save="1" column_invisible="1"/>
                 <field name="product_uom_id" column_invisible="1"/>
-                <field name="is_valid_l10n_in_hsn_code" column_invisible="1"/>
                 <!-- Displayed fields -->
                 <field name="sequence" widget="handle"/>
                 <field name="product_id" optional="show" widget="many2one_barcode" domain="context.get('default_move_type') in ('out_invoice', 'out_refund', 'out_receipt') and [('sale_ok', '=', True)] or [('purchase_ok', '=', True)]"/>
                 <field name="name" widget="section_and_note_text" optional="show"/>
-                <field name="l10n_in_hsn_code" decoration-danger="is_valid_l10n_in_hsn_code"/>
+                <field name="l10n_in_hsn_code"/>
                 <field name="account_id" context="{'partner_id': partner_id, 'move_type': move_id.move_type}" groups="account.group_account_readonly" options="{'no_quick_create': True}" domain="[('deprecated', '=', False), ('account_type', 'not in', ('asset_receivable', 'liability_payable', 'off_balance')), ('company_id', 'move_id_of', move_id.company_id)]" required="display_type not in ('line_note', 'line_section')"/>
                 <field name="quantity" optional="show"/>
                 <field name="product_uom_category_id" column_invisible="1"/>

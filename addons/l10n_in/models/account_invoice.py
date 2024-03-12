@@ -90,29 +90,27 @@ class AccountMove(models.Model):
 
         indian_invoice = self.filtered(lambda m: m.country_code == 'IN')
         for move in indian_invoice:
-            product_lines = move.invoice_line_ids.filtered(lambda l: l.display_type == 'product')
-            if any(l.tax_ids for l in product_lines) and not move.company_id.vat:
-                move.l10n_in_hsn_code_warning = {
-                    'invalid_hsn_digit_in_company': build_warning(
-                        message=_("Ensure that the GSTN number is included in the company information for the GST tax invoice."),
-                        action_name=_("Company(s)"),
-                        record=move.company_id,
-                        views=[(self.env.ref("base.view_company_form").id, "form")]
-                    )
-                }
-            elif lines := move.invoice_line_ids.filtered(
-                            lambda line: line.display_type == 'product' and
-                              line.tax_ids and (
-                                  (line.l10n_in_hsn_code and len(line.l10n_in_hsn_code) < int(move.company_id.l10n_in_hsn_code_digit)) or
-                                  not line.l10n_in_hsn_code
-                              )):
-                new_lines = self.env['account.move.line']
+            if move.company_id.l10n_in_hsn_code_digit and move.invoice_line_ids.filtered(lambda line: line.display_type == 'product' and line.tax_ids):
+                new_lines = lines = self.env['account.move.line']
+                for line in move.invoice_line_ids.filtered(lambda line: line.display_type == 'product' and line.tax_ids):
+                    if (line.l10n_in_hsn_code and (len(line.l10n_in_hsn_code) not in [4, 6, 8] or len(line.l10n_in_hsn_code) < int(move.company_id.l10n_in_hsn_code_digit))) or not line.l10n_in_hsn_code:
+                        lines |= line
+
                 for line in lines:
                     if line._origin:
                         new_lines |= line._origin
+
+                digit_suffixes = {
+                    '4': _("4 digits, 6 digits or 8 digits"),
+                    '6': _("6 digits or 8 digits"),
+                    '8': _("8 digits")
+                }
+                msg = _("Ensure that the HSN/SAC Code consists either {} in product line").format(
+                    digit_suffixes.get(move.company_id.l10n_in_hsn_code_digit, _("Invalid HSN/SAC Code digit"))
+                )
                 move.l10n_in_hsn_code_warning = {
                     'invalid_hsn_code_length': build_warning(
-                        message=_("Ensure that the HSN/SAC Code consists of at least %s digits in Product lines.", move.company_id.l10n_in_hsn_code_digit),
+                        message=msg,
                         action_name=_("Journal Items(s)"),
                         record=new_lines,
                         views=[(self.env.ref("l10n_in.view_move_line_tree_hsn_l10n_in").id, "tree")],
