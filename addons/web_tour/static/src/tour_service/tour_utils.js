@@ -246,9 +246,9 @@ export class RunningTourActionHelper {
             // element.dispatchEvent(new KeyboardEvent("keydown", { key: text.at(-1) }));
             // element.value = text;
             // element.dispatchEvent(new KeyboardEvent("keyup", { key: text.at(-1) }));
-            // element.dispatchEvent(new InputEvent("input", { bubbles: true }));
             hoot.pointerDown(element);
-            hoot.edit(text, { confirm: true });
+            hoot.edit(text);
+            // element.dispatchEvent(new InputEvent("input", { bubbles: true }));
         } else if (element.matches("select")) {
             // hoot.pointerDown(element);
             // hoot.select(text)
