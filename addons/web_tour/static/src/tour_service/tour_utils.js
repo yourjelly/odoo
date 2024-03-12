@@ -62,7 +62,7 @@ export function getConsumeEventType(element, runCommand) {
         tag === "textarea" ||
         (tag === "input" &&
             (!type ||
-                ["email", "number", "password", "search", "tel", "text", "url", "date"].includes(
+                ["email", "number", "password", "search", "tel", "text", "url", "date", "range"].includes(
                     type
                 )))
     ) {
@@ -160,23 +160,33 @@ export class RunningTourActionHelper {
     }
     dblclick(selector) {
         const element = this._get_action_element(selector);
-        this._click(element, 2);
+        hoot.dblclick(element);
     }
     text(text, selector) {
         const element = this._get_action_element(selector);
-        this._text(element, text);
+        this._edit(element, text);
     }
     remove_text(selector) {
+        const activeElement = hoot.getActiveElement();
         const element = this._get_action_element(selector);
-        this._text(element, "\n");
+        hoot.pointerDown(element);
+        hoot.clear();
+        if (activeElement !== element) {
+            hoot.click(activeElement);
+        } else {
+            hoot.click("body");
+        }
     }
     text_blur(text, selector) {
+        const activeElement = hoot.getActiveElement();
         const element = this._get_action_element(selector);
-        this._text_blur(element, text);
-    }
-    range(text, selector) {
-        const element = this._get_action_element(selector);
-        this._range(element, text);
+        hoot.pointerDown(element);
+        hoot.edit(text);
+        if (activeElement !== element) {
+            hoot.click(activeElement);
+        } else {
+            hoot.click("body");
+        }
     }
     drag_and_drop_native(toSel, fromSel) {
         const source = this._get_action_element(fromSel);
@@ -187,7 +197,7 @@ export class RunningTourActionHelper {
         const element = this._get_action_element(selector);
         const consume_event = this._get_action_consume_event(element);
         if (consume_event === "input") {
-            this._text(element);
+            this._edit(element);
         } else {
             this._click(element);
         }
@@ -217,32 +227,31 @@ export class RunningTourActionHelper {
         }
         return this.consume_event;
     }
-    _click(target, nb) {
+    _click(target) {
         triggerPointerEvent(target, "pointerover", true);
         triggerPointerEvent(target, "pointerenter", false);
         triggerPointerEvent(target, "pointermove", true);
-        for (let i = 1; i <= (nb || 1); i++) {
-            triggerPointerEvent(target, "pointerdown", true);
-            triggerPointerEvent(target, "pointerup", true);
-            triggerPointerEvent(target, "click", true, { detail: i });
-            if (i % 2 === 0) {
-                triggerPointerEvent(target, "dblclick", true);
-            }
-        }
+        triggerPointerEvent(target, "pointerdown", true);
+        triggerPointerEvent(target, "pointerup", true);
+        triggerPointerEvent(target, "click", true);
         triggerPointerEvent(target, "pointerout", true);
         triggerPointerEvent(target, "pointerleave", false);
     }
-    _text(element, text) {
+    _edit(element, text) {
         this._click(element);
         const consume_event = this._get_action_consume_event(element);
 
         text = text ? String(text) : "Test";
         if (consume_event === "input") {
-            element.dispatchEvent(new KeyboardEvent("keydown", { key: text.at(-1) }));
-            element.value = text;
-            element.dispatchEvent(new KeyboardEvent("keyup", { key: text.at(-1) }));
-            element.dispatchEvent(new InputEvent("input", { bubbles: true }));
+            // element.dispatchEvent(new KeyboardEvent("keydown", { key: text.at(-1) }));
+            // element.value = text;
+            // element.dispatchEvent(new KeyboardEvent("keyup", { key: text.at(-1) }));
+            // element.dispatchEvent(new InputEvent("input", { bubbles: true }));
+            hoot.pointerDown(element);
+            hoot.edit(text, { confirm: true });
         } else if (element.matches("select")) {
+            // hoot.pointerDown(element);
+            // hoot.select(text)
             const options = hoot.queryAll("option", { root: element });
             options.forEach((option) => {
                 delete option.selected;
@@ -300,15 +309,6 @@ export class RunningTourActionHelper {
         range.setStart(node, length);
         range.setEnd(node, length);
         selection.addRange(range);
-    }
-    _text_blur(element, text) {
-        this._text(element, text);
-        element.dispatchEvent(new Event("focusout"));
-        element.dispatchEvent(new Event("blur"));
-    }
-    _range(element, text) {
-        element.value = text;
-        element.dispatchEvent(new Event("change", { bubbles: true, cancelable: false }));
     }
     /**
      * ! This function is a reduced version of "drag" in @web/../tests/helpers/utils

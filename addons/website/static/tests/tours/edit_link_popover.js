@@ -149,11 +149,11 @@ wTourUtils.registerWebsitePreviewTour('edit_link_popover', {
     },
     {
         content: "Click 'Home' link in footer",
-        trigger: ':iframe footer a[href="/"]',
+        trigger: ':iframe footer li a:contains(Home)',
     },
     {
         content: "Popover should be shown (4)",
-        trigger: ':iframe .o_edit_menu_popover .o_we_url_link:contains("Home")',
+        trigger: ':iframe .o_edit_menu_popover .o_we_url_link:contains(/^Home/)',
         run: function () {}, // it's a check
     },
     {
