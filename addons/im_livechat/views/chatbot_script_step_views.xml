@@ -7,10 +7,10 @@
         <field name="arch" type="xml">
             <form disable_autofocus="1">
                 <field name="is_forward_operator_child" invisible="1"/>
-                <div class="alert alert-info text-center mb-0" role="alert" invisible="not is_forward_operator_child">
+                <div class="alert alert-info text-center" role="alert" invisible="not is_forward_operator_child">
                     <span>Reminder: This step will only be played if no operator is available.</span>
                 </div>
-                <div class="alert alert-info text-center mb-0" role="alert" invisible="step_type != 'forward_operator'">
+                <div class="alert alert-info text-center" role="alert" invisible="step_type != 'forward_operator'">
                     <span>Tip: Plan further steps for the Bot in case no operator is available.</span>
                 </div>
                 <sheet>

@@ -1306,7 +1306,7 @@
                                       </group>
                                     </form>
                                 </field>
-                                <div class="alert alert-info text-center mb-0" role="alert" invisible="payment_state != 'invoicing_legacy' or move_type == 'entry'">
+                                <div class="alert alert-info text-center" role="alert" invisible="payment_state != 'invoicing_legacy' or move_type == 'entry'">
                                     <span>This entry has been generated through the Invoicing app, before installing Accounting. Its balance has been imported separately.</span>
                                 </div>
                             </page>
