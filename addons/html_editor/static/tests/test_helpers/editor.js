@@ -22,7 +22,7 @@ class TestEditor extends Component {
             </t>
             <div t-ref="target"/>
         </t>`;
-    static props = ["content", "config", "inIFrame", "styleContent?"];
+    static props = ["content", "config", "inIFrame", "styleContent?", "onMounted"];
 
     setup() {
         this.ref = useRef("target");
@@ -46,7 +46,7 @@ class TestEditor extends Component {
                 if (configSelection) {
                     el.focus();
                 }
-                setContent(el, this.props.content);
+                this.props.onMounted?.(el);
             }
         });
         this.editor = useWysiwyg(target, { ...defaultConfig, ...this.props.config });
@@ -64,18 +64,32 @@ class TestEditor extends Component {
  * @param {TestConfig} [options]
  * @returns { Promise<{el: HTMLElement; editor: Editor; }> }
  */
-export async function setupEditor(content, options = {}) {
+export async function setupEditorBase(content, options = {}) {
     const config = options.config || {};
     const inIFrame = "inIFrame" in options ? options.inIFrame : false;
     const styleContent = options.styleContent || "";
     const testEditor = await mountWithCleanup(TestEditor, {
-        props: { content, config, inIFrame, styleContent },
+        props: { content, config, inIFrame, styleContent, onMounted: options.onMounted },
     });
 
     return {
         el: testEditor.editor.editable,
         editor: testEditor.editor,
     };
+}
+
+/**
+ * @param { string } content
+ * @param {TestConfig} [options]
+ * @returns { Promise<{el: HTMLElement; editor: Editor; }> }
+ */
+export async function setupEditor(content, options = {}) {
+    return setupEditorBase(content, {
+        onMounted: (el) => {
+            setContent(el, content);
+        },
+        ...options,
+    });
 }
 
 /**
