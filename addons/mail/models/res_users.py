@@ -160,6 +160,18 @@ class Users(models.Model):
         activities_to_delete.unlink()
         return super(Users, self).action_archive()
 
+    def check_push_notification_schedule(self):
+        if (self.notification_planning == 'schedule'):
+            now = datetime.now()
+            time = now.hour + now.minute / 60
+            if (self.notification_schedule_start < self.notification_schedule_end):
+                is_schedule_valid = self.notification_schedule_start <= time <= user.notification_schedule_end
+            else:
+                # time schedule starts a day and ends the next day
+                is_schedule_valid = self.notification_schedule_start <= time or user.notification_schedule_end >= time
+            return is_schedule_valid
+        return self.notification_planning == 'always'
+
     def _notify_security_setting_update(self, subject, content, mail_values=None, **kwargs):
         """ This method is meant to be called whenever a sensitive update is done on the user's account.
         It will send an email to the concerned user warning him about this change and making some security suggestions.

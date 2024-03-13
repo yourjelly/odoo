@@ -157,15 +157,3 @@ def push_to_end_point(base_url, device, payload, vapid_private_key, vapid_public
         # Invalid subscription
         if response.status_code == 404 or response.status_code == 410:
             raise DeviceUnreachableError("Device Unreachable")
-
-def check_push_notification_schedule(user):
-    if (user.notification_planning == 'schedule'):
-        now = datetime.now()
-        time = now.hour + now.minute / 60
-        if (user.notification_schedule_start < user.notification_schedule_end):
-            is_schedule_valid = user.notification_schedule_start <= time <= user.notification_schedule_end
-        else:
-            # time schedule starts a day and ends the next day
-            is_schedule_valid = user.notification_schedule_start <= time or user.notification_schedule_end >= time
-        return is_schedule_valid
-    return user.notification_planning == 'always'

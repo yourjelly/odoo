@@ -3613,7 +3613,7 @@ class MailThread(models.AbstractModel):
         user_ids = self.env['res.users'].search([('partner_id', 'in', partner_ids)])
         partners_to_notify = set(partner_ids)
         for user in user_ids:
-            if (check_push_notification_schedule(user) == False):
+            if (user.check_push_notification_schedule() == False):
                 partners_to_notify.remove(user.partner_id.id)
 
         partner_devices_sudo = self.env['mail.push.device'].sudo()
