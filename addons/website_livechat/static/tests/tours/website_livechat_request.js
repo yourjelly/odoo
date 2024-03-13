@@ -11,11 +11,7 @@ const chatRequest = [
     {
         content: "Send the message",
         trigger: ".o-mail-Composer-input",
-        run() {
-            this.anchor.dispatchEvent(
-                new KeyboardEvent("keydown", { key: "Enter", bubbles: true })
-            );
-        },
+        run: "press Enter",
     },
     {
         content: "Verify your message has been typed",

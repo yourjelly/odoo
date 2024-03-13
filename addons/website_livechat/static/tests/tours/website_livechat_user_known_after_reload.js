@@ -13,11 +13,7 @@ registry.category("web_tour.tours").add("website_livechat_user_known_after_reloa
         },
         {
             trigger: ".o-mail-Composer-input",
-            run() {
-                this.anchor.dispatchEvent(
-                    new KeyboardEvent("keydown", { key: "Enter", bubbles: true })
-                );
-            },
+            run: "press Enter",
         },
         {
             trigger: ".o-mail-Message:contains('Hello, I need help!').o-selfAuthored ",

@@ -72,9 +72,7 @@ registry.category("web_tour.tours").add('crm_forecast', {
                     .minus({ days: 1 })
                     .toFormat("MM/dd/yyyy")}`
             );
-            this.anchor.dispatchEvent(
-                new KeyboardEvent("keydown", { bubbles: true, key: "Escape" })
-            );
+            actions.press("Escape");
         },
     }, {
         trigger: ".o_field_widget[name=probability] input",

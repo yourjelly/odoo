@@ -24,9 +24,7 @@ registry.category("web_tour.tours").add("mail_template_dynamic_placeholder_tour"
             trigger: 'div[name="subject"] input[type="text"]',
             async run(actions) {
                 actions.text(`no_model_id #`);
-                this.anchor.dispatchEvent(
-                    new KeyboardEvent("keydown", { bubbles: true, key: "#" })
-                );
+                actions.press("#");
                 await waitFor(`div[name='subject'] input[type='text']:value(no_model_id #)`, {
                     timeout: 5000,
                 });
@@ -73,9 +71,7 @@ registry.category("web_tour.tours").add("mail_template_dynamic_placeholder_tour"
             trigger: 'div[name="subject"] input[type="text"]',
             run(actions) {
                 actions.text(`yes_model_id #`);
-                this.anchor.dispatchEvent(
-                    new KeyboardEvent("keydown", { bubbles: true, key: "#" })
-                );
+                actions.press("#")
             },
         },
         {

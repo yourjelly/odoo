@@ -18,7 +18,7 @@ wTourUtils.registerWebsitePreviewTour('website_image_quality', {
     {
         content: "Set low quality",
         trigger: 'we-customizeblock-options:has(we-title:contains("Image")) we-range[data-set-quality] input',
-        run: 'text 5',
+        run: 'range 5',
     },
     {
         content: "Wait for image update: NOT original image",
@@ -40,7 +40,7 @@ wTourUtils.registerWebsitePreviewTour('website_image_quality', {
     {
         content: "Set high quality",
         trigger: 'we-customizeblock-options:has(we-title:contains("Image")) we-range[data-set-quality] input',
-        run: 'text 99',
+        run: 'range 99',
     },
     {
         content: "Wait for image update: back to original image",

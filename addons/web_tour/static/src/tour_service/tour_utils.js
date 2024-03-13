@@ -164,7 +164,20 @@ export class RunningTourActionHelper {
     }
     text(text, selector) {
         const element = this._get_action_element(selector);
-        this._edit(element, text);
+        this._text(element, text);
+    }
+    press(text) {
+        hoot.press(text);
+    }
+    range(value, selector) {
+        const element = this._get_action_element(selector);
+        element.value = value;
+        element.dispatchEvent(new Event("change", { bubbles: true, cancelable: false }));
+    }
+    fill(text, selector) {
+        const element = this._get_action_element(selector);
+        hoot.pointerDown(element);
+        hoot.fill(text);
     }
     remove_text(selector) {
         const activeElement = hoot.getActiveElement();
@@ -178,15 +191,8 @@ export class RunningTourActionHelper {
         }
     }
     text_blur(text, selector) {
-        const activeElement = hoot.getActiveElement();
         const element = this._get_action_element(selector);
-        hoot.pointerDown(element);
-        hoot.edit(text);
-        if (activeElement !== element) {
-            hoot.click(activeElement);
-        } else {
-            hoot.click("body");
-        }
+        this._edit(element, text);
     }
     drag_and_drop_native(toSel, fromSel) {
         const source = this._get_action_element(fromSel);
@@ -197,7 +203,7 @@ export class RunningTourActionHelper {
         const element = this._get_action_element(selector);
         const consume_event = this._get_action_consume_event(element);
         if (consume_event === "input") {
-            this._edit(element);
+            this._text(element);
         } else {
             this._click(element);
         }
@@ -238,6 +244,16 @@ export class RunningTourActionHelper {
         triggerPointerEvent(target, "pointerleave", false);
     }
     _edit(element, text) {
+        const activeElement = hoot.getActiveElement();
+        hoot.pointerDown(element);
+        hoot.edit(text);
+        if (activeElement !== element) {
+            hoot.click(activeElement);
+        } else {
+            hoot.click("body");
+        }
+    }
+    _text(element, text) {
         this._click(element);
         const consume_event = this._get_action_consume_event(element);
 
@@ -246,9 +262,8 @@ export class RunningTourActionHelper {
             // element.dispatchEvent(new KeyboardEvent("keydown", { key: text.at(-1) }));
             // element.value = text;
             // element.dispatchEvent(new KeyboardEvent("keyup", { key: text.at(-1) }));
-            hoot.pointerDown(element);
-            hoot.edit(text);
             // element.dispatchEvent(new InputEvent("input", { bubbles: true }));
+            this._edit(element, text)
         } else if (element.matches("select")) {
             // hoot.pointerDown(element);
             // hoot.select(text)
@@ -483,15 +498,7 @@ export const stepUtils = {
             trigger: ".o_searchview_input",
             extra_trigger: ".dropdown-menu.o_searchview_autocomplete",
             position: "bottom",
-            run() {
-                const keyEventEnter = new KeyboardEvent("keydown", {
-                    bubbles: true,
-                    cancelable: true,
-                    key: "Enter",
-                    code: "Enter",
-                });
-                this.anchor.dispatchEvent(keyEventEnter);
-            },
+            run: "press Enter",
             debugHelp: this._getHelpMessage("simulateEnterKeyboardInSearchModal"),
         };
     },

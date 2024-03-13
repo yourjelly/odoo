@@ -51,14 +51,7 @@ registry.category("web_tour.tours").add("mail/static/tests/tours/mail_composer_t
         {
             content: "Check composer keeps open after pushing Escape",
             trigger: ".o_mail_composer_form_view",
-            run: () => {
-                window.dispatchEvent(
-                    new KeyboardEvent("keydown", {
-                        bubbles: true,
-                        key: "Escape",
-                    })
-                );
-            },
+            run: "press Escape",
         },
         {
             content: "Check the earlier provided attachment is listed",

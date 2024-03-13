@@ -15,11 +15,7 @@ registry.category("web_tour.tours").add("website_livechat_login_after_chat_start
         },
         {
             trigger: ".o-mail-Composer-input",
-            run: function () {
-                this.anchor.dispatchEvent(
-                    new KeyboardEvent("keydown", { key: "Enter", bubbles: true })
-                );
-            },
+            run: "press Enter",
         },
         {
             trigger: ".o-mail-Message-content:contains('Hello!')",
@@ -75,11 +71,7 @@ registry.category("web_tour.tours").add("website_livechat_logout_after_chat_star
         },
         {
             trigger: ".o-mail-Composer-input",
-            run: function () {
-                this.anchor.dispatchEvent(
-                    new KeyboardEvent("keydown", { key: "Enter", bubbles: true })
-                );
-            },
+            run: "press Enter",
         },
         {
             trigger: ".o-mail-Message-content:contains('Hello!')",

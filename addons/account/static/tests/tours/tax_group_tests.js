@@ -83,11 +83,7 @@ registry.category("web_tour.tours").add('account_tax_group', {
     {
         content: "Valid the new value",
         trigger: 'div[name="invoice_line_ids"] tbody tr.o_data_row .o_list_number[name="quantity"] input',
-        run: function (actions) {
-            this.anchor.dispatchEvent(
-                new KeyboardEvent("keydown", { key: "Enter", bubbles: true })
-            );
-        },
+        run: "press Enter",
     },
     // Check new tax group value
     {

@@ -23,13 +23,11 @@ registry.category("web_tour.tours").add("website_livechat.lazy_frontend_bus", {
         },
         {
             trigger: ".o-mail-Composer-input",
-            run() {
+            run(helpers) {
                 if (odoo.__WOWL_DEBUG__.root.env.services.bus_service.isActive) {
                     throw new Error("Bus service should not start for temporary live chat");
                 }
-                this.anchor.dispatchEvent(
-                    new KeyboardEvent("keydown", { key: "Enter", bubbles: true })
-                );
+                helpers.press("Enter");
             },
         },
         {

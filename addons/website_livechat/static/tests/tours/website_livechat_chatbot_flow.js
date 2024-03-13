@@ -55,11 +55,7 @@ registry.category("web_tour.tours").add("website_livechat_chatbot_flow_tour", {
         },
         {
             trigger: ".o-mail-Composer-input",
-            run() {
-                this.anchor.dispatchEvent(
-                    new KeyboardEvent("keydown", { key: "Enter", bubbles: true })
-                );
-            },
+            run: "press Enter",
         },
         {
             trigger: messagesContain(
@@ -73,11 +69,7 @@ registry.category("web_tour.tours").add("website_livechat_chatbot_flow_tour", {
         },
         {
             trigger: ".o-mail-Composer-input",
-            run() {
-                this.anchor.dispatchEvent(
-                    new KeyboardEvent("keydown", { key: "Enter", bubbles: true })
-                );
-            },
+            run: "press Enter",
         },
         {
             trigger: messagesContain("Your email is validated, thank you!"),
@@ -93,11 +85,7 @@ registry.category("web_tour.tours").add("website_livechat_chatbot_flow_tour", {
         },
         {
             trigger: ".o-mail-Composer-input",
-            run() {
-                this.anchor.dispatchEvent(
-                    new KeyboardEvent("keydown", { key: "Enter", bubbles: true })
-                );
-            },
+            run: "press Enter",
         },
         {
             trigger: messagesContain("Great, do you want to leave any feedback for us to improve?"),
@@ -109,11 +97,7 @@ registry.category("web_tour.tours").add("website_livechat_chatbot_flow_tour", {
         },
         {
             trigger: ".o-mail-Composer-input",
-            run() {
-                this.anchor.dispatchEvent(
-                    new KeyboardEvent("keydown", { key: "Enter", bubbles: true })
-                );
-            },
+            run: "press Enter",
         },
         {
             trigger: ".o-mail-Composer-input",
@@ -121,11 +105,7 @@ registry.category("web_tour.tours").add("website_livechat_chatbot_flow_tour", {
         },
         {
             trigger: ".o-mail-Composer-input",
-            run() {
-                this.anchor.dispatchEvent(
-                    new KeyboardEvent("keydown", { key: "Enter", bubbles: true })
-                );
-            },
+            run: "press Enter",
         },
         {
             trigger: ".o-mail-Composer-input",
@@ -133,11 +113,7 @@ registry.category("web_tour.tours").add("website_livechat_chatbot_flow_tour", {
         },
         {
             trigger: ".o-mail-Composer-input",
-            run() {
-                this.anchor.dispatchEvent(
-                    new KeyboardEvent("keydown", { key: "Enter", bubbles: true })
-                );
-            },
+            run: "press Enter",
         },
         {
             trigger: messagesContain("Ok bye!"),
@@ -187,11 +163,7 @@ registry.category("web_tour.tours").add("website_livechat_chatbot_flow_tour", {
         },
         {
             trigger: ".o-mail-Composer-input",
-            run() {
-                this.anchor.dispatchEvent(
-                    new KeyboardEvent("keydown", { key: "Enter", bubbles: true })
-                );
-            },
+            run: "press Enter",
         },
         {
             trigger: messagesContain("Great, do you want to leave any feedback for us to improve?"),
@@ -203,11 +175,7 @@ registry.category("web_tour.tours").add("website_livechat_chatbot_flow_tour", {
         },
         {
             trigger: ".o-mail-Composer-input",
-            run() {
-                this.anchor.dispatchEvent(
-                    new KeyboardEvent("keydown", { key: "Enter", bubbles: true })
-                );
-            },
+            run: "press Enter",
         },
         {
             trigger: messagesContain("Ok bye!"),
