@@ -681,10 +681,16 @@ class IrActionsReport(models.Model):
         # Reload the stream from the attachment in case of 'attachment_use'.
         if res_ids:
             records = self.env[report_sudo.model].browse(res_ids)
-            for record in records:
+            record_by_id = {record.id: record for record in records}
+            for res_id in res_ids:
+                if res_id in collected_streams:
+                    collected_streams[res_id]['multiplicity'] += 1
+                    continue
+
                 stream = None
                 attachment = None
                 if report_sudo.attachment and not self._context.get("report_pdf_no_attachment"):
+                    record = record_by_id[res_id]
                     attachment = report_sudo.retrieve_attachment(record)
 
                     # Extract the stream from the attachment.
@@ -699,13 +705,19 @@ class IrActionsReport(models.Model):
                             stream.close()
                             stream = new_stream
 
-                collected_streams[record.id] = {
+                collected_streams[res_id] = {
                     'stream': stream,
                     'attachment': attachment,
+                    'multiplicity': 1,
                 }
 
         # Call 'wkhtmltopdf' to generate the missing streams.
-        res_ids_wo_stream = [res_id for res_id, stream_data in collected_streams.items() if not stream_data['stream']]
+        res_ids_wo_stream = []
+        all_res_ids_wo_stream = []
+        for res_id, stream_data in collected_streams.items():
+            res_ids_wo_stream.append(res_id)
+            if not stream_data['stream']:
+                all_res_ids_wo_stream += [res_id] * stream_data['multiplicity']
         is_whtmltopdf_needed = not res_ids or res_ids_wo_stream
 
         if is_whtmltopdf_needed:
@@ -725,7 +737,7 @@ class IrActionsReport(models.Model):
             # https://github.com/wkhtmltopdf/wkhtmltopdf/issues/2083
             additional_context = {'debug': False}
 
-            html = self.with_context(**additional_context)._render_qweb_html(report_ref, res_ids_wo_stream, data=data)[0]
+            html = self.with_context(**additional_context)._render_qweb_html(report_ref, all_res_ids_wo_stream, data=data)[0]
 
             bodies, html_ids, header, footer, specific_paperformat_args = self.with_context(**additional_context)._prepare_html(html, report_model=report_sudo.model)
 
