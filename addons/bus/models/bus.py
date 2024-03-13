@@ -7,12 +7,17 @@ import os
 import selectors
 import threading
 import time
+from weakref import WeakKeyDictionary, WeakSet
 from psycopg2 import InterfaceError, sql
+from contextlib import suppress
 
 import odoo
 from odoo import api, fields, models
 from odoo.service.server import CommonServer
 from odoo.tools import date_utils
+from odoo.http import root
+from odoo.service.security import check_session
+from ..websocket import CloseCode, InvalidStateException, Websocket, acquire_cursor
 
 _logger = logging.getLogger(__name__)
 
@@ -126,26 +131,52 @@ class BusSubscription:
 class ImDispatch(threading.Thread):
     def __init__(self):
         super().__init__(daemon=True, name=f'{__name__}.Bus')
+        self._ws_to_subscription = WeakKeyDictionary()
         self._channels_to_ws = {}
 
     def subscribe(self, channels, last, db, websocket):
         """
-        Subcribe to bus notifications. Every notification related to the
-        given channels will be sent through the websocket. If a subscription
-        is already present, overwrite it.
+        Subcribe to bus notifications. Every notification related to the given
+        channels will be sent through the websocket. If a subscription is
+        already present, overwrite it.
         """
         channels = {hashable(channel_with_db(db, c)) for c in channels}
+        subscription = self._ws_to_subscription.get(websocket)
+        if subscription:
+            outdated_channels = subscription.channels - channels
+            self._clear_outdated_channels(websocket, outdated_channels)
         for channel in channels:
-            self._channels_to_ws.setdefault(channel, set()).add(websocket)
-        outdated_channels = websocket._channels - channels
-        self._clear_outdated_channels(websocket, outdated_channels)
-        websocket.subscribe(channels, last)
+            self._channels_to_ws.setdefault(channel, WeakSet()).add(websocket)
+        self._ws_to_subscription[websocket] = BusSubscription(channels, last)
         with contextlib.suppress(RuntimeError):
             if not self.is_alive():
                 self.start()
+        # Dispatch past notifications if there are any.
+        self._dispatch_notifications(websocket)
 
-    def unsubscribe(self, websocket):
-        self._clear_outdated_channels(websocket, websocket._channels)
+    def _dispatch_notifications(self, websocket):
+        """
+        Dispatch notifications available for the given websocket. If the
+        session is expired, close the connection with the `SESSION_EXPIRED`
+        close code.
+        """
+        subscription = self._ws_to_subscription.get(websocket)
+        if not subscription:
+            return
+        session = root.session_store.get(websocket._session.sid)
+        if not session:
+            return websocket.disconnect(CloseCode.SESSION_EXPIRED)
+        with acquire_cursor(session.db) as cr:
+            env = api.Environment(cr, session.uid, session.context)
+            if session.uid is not None and not check_session(session, env):
+                return websocket.disconnect(CloseCode.SESSION_EXPIRED)
+            notifications = env['bus.bus']._poll(
+                subscription.channels, subscription.last_notification_id)
+            if not notifications:
+                return
+            with suppress(InvalidStateException):
+                subscription.last_notification_id = notifications[-1]['id']
+                websocket.send(notifications)
 
     def _clear_outdated_channels(self, websocket, outdated_channels):
         """ Remove channels from channel to websocket map. """
@@ -169,13 +200,16 @@ class ImDispatch(threading.Thread):
                     channels = []
                     while conn.notifies:
                         channels.extend(json.loads(conn.notifies.pop().payload))
+                    # How to guarantee order?
                     # relay notifications to websockets that have
                     # subscribed to the corresponding channels.
                     websockets = set()
                     for channel in channels:
-                        websockets.update(self._channels_to_ws.get(hashable(channel), []))
+                        websockets.update(
+                            self._channels_to_ws.get(hashable(channel), [])
+                        )
                     for websocket in websockets:
-                        websocket.trigger_notification_dispatching()
+                        self._dispatch_notifications(websocket)
 
     def run(self):
         while not stop_event.is_set():
