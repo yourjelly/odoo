@@ -8,7 +8,7 @@ from odoo.fields import Date
 from odoo.tests import Form, tagged
 
 
-@tagged('-at_install', 'post_install')
+@tagged('-at_install')
 class TestReInvoice(TestCommonSaleTimesheet):
 
     @classmethod
