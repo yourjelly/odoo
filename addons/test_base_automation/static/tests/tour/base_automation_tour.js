@@ -532,7 +532,7 @@ registry.category("web_tour.tours").add("test_form_view_custom_reference_field",
         {
             extra_trigger: "body:not(:has(.o_field_widget[name='trg_field_ref']))",
             trigger: ".o_field_widget[name='trigger'] select",
-            run: 'text "on_stage_set"',
+            run: 'select "on_stage_set"',
         },
         {
             trigger: ".o_field_widget[name='trg_field_ref'] input",
@@ -546,7 +546,7 @@ registry.category("web_tour.tours").add("test_form_view_custom_reference_field",
         },
         {
             trigger: ".o_field_widget[name='trigger'] select",
-            run: 'text "on_tag_set"',
+            run: 'select "on_tag_set"',
         },
         {
             trigger: ".o_field_widget[name='trg_field_ref'] input",

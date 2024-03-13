@@ -201,6 +201,11 @@ export class RunningTourActionHelper {
             hoot.click("body");
         }
     }
+    select(value, selector) {
+        const element = this._get_action_element(selector);
+        hoot.pointerDown(element);
+        hoot.select(value);
+    }
     drag_and_drop_native(toSel, fromSel) {
         const source = this._get_action_element(fromSel);
         const target = queryFirst(toSel);

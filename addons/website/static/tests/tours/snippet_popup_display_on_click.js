@@ -70,7 +70,7 @@ wTourUtils.registerWebsitePreviewTour("snippet_popup_display_on_click", {
     {
         content: "Add a link to the homepage in the URL input",
         trigger: "#o_link_dialog_url_input",
-        run: "text /"
+        run: "text_blur /"
     },
     {
         content: "Open the page anchor selector",
