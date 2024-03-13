@@ -192,7 +192,14 @@ export class RunningTourActionHelper {
     }
     text_blur(text, selector) {
         const element = this._get_action_element(selector);
-        this._edit(element, text);
+        const activeElement = hoot.getActiveElement();
+        hoot.pointerDown(element);
+        hoot.edit(text);
+        if (activeElement !== element) {
+            hoot.click(activeElement);
+        } else {
+            hoot.click("body");
+        }
     }
     drag_and_drop_native(toSel, fromSel) {
         const source = this._get_action_element(fromSel);
@@ -243,18 +250,8 @@ export class RunningTourActionHelper {
         triggerPointerEvent(target, "pointerout", true);
         triggerPointerEvent(target, "pointerleave", false);
     }
-    _edit(element, text) {
-        const activeElement = hoot.getActiveElement();
-        hoot.pointerDown(element);
-        hoot.edit(text);
-        if (activeElement !== element) {
-            hoot.click(activeElement);
-        } else {
-            hoot.click("body");
-        }
-    }
     _text(element, text) {
-        this._click(element);
+        // this._click(element);
         const consume_event = this._get_action_consume_event(element);
 
         text = text ? String(text) : "Test";
@@ -263,8 +260,11 @@ export class RunningTourActionHelper {
             // element.value = text;
             // element.dispatchEvent(new KeyboardEvent("keyup", { key: text.at(-1) }));
             // element.dispatchEvent(new InputEvent("input", { bubbles: true }));
-            this._edit(element, text)
+            // element.dispatchEvent(new Event("change", { bubbles: true, cancelable: false }));
+            hoot.pointerDown(element);
+            hoot.edit(text);
         } else if (element.matches("select")) {
+            this._click();
             // hoot.pointerDown(element);
             // hoot.select(text)
             const options = hoot.queryAll("option", { root: element });
@@ -287,15 +287,17 @@ export class RunningTourActionHelper {
             this._click(element);
             // For situations where an `oninput` is defined.
             element.dispatchEvent(new Event("input"));
+            element.dispatchEvent(new Event("change", { bubbles: true, cancelable: false }));
         } else {
+            this._click();
             this._set_range(element, "start");
             element.dispatchEvent(new KeyboardEvent("keydown", { key: "_" }));
             element.textContent = text;
             element.dispatchEvent(new InputEvent("input", { bubbles: true }));
             this._set_range(element, "stop");
             element.dispatchEvent(new KeyboardEvent("keyup", { key: "_" }));
+            element.dispatchEvent(new Event("change", { bubbles: true, cancelable: false }));
         }
-        element.dispatchEvent(new Event("change", { bubbles: true, cancelable: false }));
     }
     // Useful for wysiwyg editor.
     _set_range(element, start_or_stop) {

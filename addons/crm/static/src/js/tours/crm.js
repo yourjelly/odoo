@@ -26,12 +26,10 @@ registry.category("web_tour.tours").add('crm_tour', {
     content: markup(_t("<b>Create your first opportunity.</b>")),
     position: 'bottom',
 }, {
-    trigger: ".o_kanban_quick_create .o_field_widget[name='partner_id']",
+    trigger: ".o_kanban_quick_create .o_field_widget[name='partner_id'] input",
     content: markup(_t('<b>Write a few letters</b> to look for a company, or create a new one.')),
     position: "top",
-    run: function (actions) {
-        actions.text("Brandon Freeman", this.anchor.querySelector("input"));
-    },
+    run: "Brandon Freeman",
 }, {
     trigger: ".ui-menu-item > a",
     auto: true,
