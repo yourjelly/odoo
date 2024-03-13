@@ -107,13 +107,11 @@ registry.category("web_tour.tours").add('project_tour', {
     position: "bottom",
     run: "click",
 }, {
-    trigger: ".o_field_widget[name='user_ids']",
+    trigger: ".o_field_widget[name='user_ids'] input",
     extra_trigger: '.o_form_project_tasks',
     content: _t("Assign a responsible to your task"),
     position: "right",
-    run() {
-        document.querySelector('.o_field_widget[name="user_ids"] input').click();
-    }
+    run: "click",
 }, {
     trigger: ".ui-autocomplete > li > a:not(:has(i.fa))",
     auto: true,
@@ -156,7 +154,7 @@ registry.category("web_tour.tours").add('project_tour', {
     trigger: ".o_kanban_record .o_widget_subtask_kanban_list .subtask_create_input input",
     extra_trigger: ".subtask_create_input",
     content: markup(_t("Give the sub-task a <b>name</b>")),
-    run: 'text Newer Sub-task'
+    run: 'text_blur Newer Sub-task'
 }, {
     trigger: ".o_kanban_record .o_widget_subtask_kanban_list .subtask_list_row:first-child .o_field_project_task_state_selection button",
     content: _t("You can change the sub-task state here!"),

@@ -16,7 +16,7 @@ registry.category("web_tour.tours").add('test_mrp_manual_consumption', {
         },
         {
             trigger: 'div[name="quantity"] input',
-            run: 'text 6.0'
+            run: 'text_blur 6.0'
         },
         {
             content: "Click Pager",
@@ -24,7 +24,7 @@ registry.category("web_tour.tours").add('test_mrp_manual_consumption', {
         },
         {
             trigger: "input[id='qty_producing_0']",
-            run: 'text 8.0',
+            run: 'text_blur 8.0',
         },
         {
             content: "Click Pager",
@@ -49,7 +49,7 @@ registry.category("web_tour.tours").add('test_mrp_manual_consumption', {
         },
         {
             trigger: "input[id='qty_producing_0']",
-            run: 'text 2.0',
+            run: 'text_blur 2.0',
         },
         {
             content: "Click Pager",
@@ -84,7 +84,7 @@ registry.category("web_tour.tours").add('test_mrp_manual_consumption_02', {
         },
         {
             trigger: 'div[name="quantity"] input',
-            run: 'text 16.0'
+            run: 'text_blur 16.0'
         },
         {
             trigger: 'div[name="picked"] input',
@@ -96,7 +96,7 @@ registry.category("web_tour.tours").add('test_mrp_manual_consumption_02', {
         },
         {
             trigger: "input[id='qty_producing_0']",
-            run: 'text 8.0',
+            run: 'text_blur 8.0',
         },
         {
             content: "Click Pager",

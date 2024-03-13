@@ -103,7 +103,7 @@ registry.category("web_tour.tours").add('project_update_tour', {
     run: 'text New milestone'
 }, {
     trigger: "input[data-field=deadline]",
-    run: 'text 12/12/2099'
+    run: 'text_blur 12/12/2099'
 }, {
     trigger: ".modal-footer .o_form_button_save"
 }, {
@@ -113,14 +113,14 @@ registry.category("web_tour.tours").add('project_update_tour', {
     run: 'text Second milestone'
 }, {
     trigger: "input[data-field=deadline]",
-    run: 'text 12/12/2022'
+    run: 'text_blur 12/12/2022'
 }, {
     trigger: ".modal-footer .o_form_button_save"
 }, {
     trigger: ".o_rightpanel_milestone:eq(1) .o_milestone_detail",
 }, {
     trigger: "input[data-field=deadline]",
-    run: 'text 12/12/2100'
+    run: 'text_blur 12/12/2100'
 }, {
     trigger: ".modal-footer .o_form_button_save"
 }, {

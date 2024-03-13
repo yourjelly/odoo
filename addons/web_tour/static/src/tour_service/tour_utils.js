@@ -264,9 +264,9 @@ export class RunningTourActionHelper {
             hoot.pointerDown(element);
             hoot.edit(text);
         } else if (element.matches("select")) {
-            this._click();
             // hoot.pointerDown(element);
             // hoot.select(text)
+            this._click(element);
             const options = hoot.queryAll("option", { root: element });
             options.forEach((option) => {
                 delete option.selected;
@@ -289,7 +289,7 @@ export class RunningTourActionHelper {
             element.dispatchEvent(new Event("input"));
             element.dispatchEvent(new Event("change", { bubbles: true, cancelable: false }));
         } else {
-            this._click();
+            this._click(element);
             this._set_range(element, "start");
             element.dispatchEvent(new KeyboardEvent("keydown", { key: "_" }));
             element.textContent = text;
