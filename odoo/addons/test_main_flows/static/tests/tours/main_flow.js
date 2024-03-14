@@ -455,6 +455,7 @@ stepUtils.autoExpandMoreButtons('.o_form_saved'),
     trigger: ".o_kanban_quick_create .o_field_widget[name=partner_id] input",
     content: _t("Write the name of your customer to create one on the fly, or select an existing one."),
     position: "left",
+    run: "text && press Enter"
 }, {
     mobile: true,
     trigger: ".modal-dialog .btn:contains('New')",
