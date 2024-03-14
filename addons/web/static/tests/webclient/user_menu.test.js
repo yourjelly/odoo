@@ -154,7 +154,7 @@ test("click on odoo account item", async () => {
     });
     onRpc("/*", (mock) => {
         expect.step(new URL(mock.url).pathname);
-        return new Error("not found");
+        throw new Error("not found");
     });
     userMenuRegistry.add("odoo_account", odooAccountItem);
     await mountWithCleanup(UserMenu);
