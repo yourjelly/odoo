@@ -190,12 +190,15 @@ export class RunningTourActionHelper {
             hoot.click("body");
         }
     }
-    text_blur(text, selector) {
+    text_blur(text, selector, selectorClickOutside) {
         const element = this._get_action_element(selector);
+        const elementClickOutside = queryFirst(selectorClickOutside);
         const activeElement = hoot.getActiveElement();
         hoot.pointerDown(element);
         hoot.edit(text);
-        if (activeElement !== element) {
+        if (elementClickOutside) {
+            hoot.click(elementClickOutside);
+        } else if (activeElement !== element) {
             hoot.click(activeElement);
         } else {
             hoot.click("body");

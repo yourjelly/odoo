@@ -70,7 +70,7 @@ registry.category("web_tour.tours").add("mail_template_dynamic_placeholder_tour"
             content: 'Retry insert # inside "Subject" input',
             trigger: 'div[name="subject"] input[type="text"]',
             run(actions) {
-                actions.text(`yes_model_id #`);
+                actions.text(`yes_model_id `);
                 actions.press("#")
             },
         },
@@ -116,7 +116,7 @@ registry.category("web_tour.tours").add("mail_template_dynamic_placeholder_tour"
             },
         },
         {
-            content: "Insert tesxt inside editable",
+            content: "Insert text inside editable",
             trigger: ".note-editable.odoo-editor-editable",
             run(actions) {
                 actions.text(`/`);

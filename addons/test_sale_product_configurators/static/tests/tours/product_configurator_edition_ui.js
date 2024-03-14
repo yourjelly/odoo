@@ -49,11 +49,15 @@ registry.category("web_tour.tours").add('sale_product_configurator_edition_tour'
     isCheck: true, // check updated price
 }, {
     trigger: 'table.o_sale_product_configurator_table tr:has(td>div[name="o_sale_product_configurator_name"] h5:contains("Customizable Desk")) td>div[name="ptal"]:has(div>label:contains("Legs")) label:has(span:contains("Custom")) ~ input',
+    run: "click",
 }, {
     trigger: 'table.o_sale_product_configurator_table tr:has(td>div[name="o_sale_product_configurator_name"] h5:contains("Customizable Desk")) td>div[name="ptal"]:has(div>label:contains("Legs")) input[type="text"]',
-    run: 'text nice custom value'
+    run(actions) {
+        actions.text_blur("nice custom value", null, ".modal-body");
+    },
 }, {
     trigger: 'tr:has(div[name="o_sale_product_configurator_name"]:contains("Customizable Desk")) label[style="background-color:#000000"] input',
+    run: "click", 
 }, {
     trigger: 'div[name="o_sale_product_configurator_name"]:contains("Customizable Desk (TEST) (Custom, Black)")',
     isCheck: true, // used to sync with server
