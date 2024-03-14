@@ -154,56 +154,64 @@ export class RunningTourActionHelper {
         this.anchor = anchor;
         this.consume_event = consume_event;
     }
+
     click(selector) {
         const element = this._get_action_element(selector);
         this._click(element);
     }
+
     dblclick(selector) {
         const element = this._get_action_element(selector);
         hoot.dblclick(element);
     }
+
     text(text, selector) {
         const element = this._get_action_element(selector);
         this._text(element, text);
     }
+    
     press(text) {
         hoot.press(text);
     }
+
     range(value, selector) {
         const element = this._get_action_element(selector);
         element.value = value;
         element.dispatchEvent(new Event("change", { bubbles: true, cancelable: false }));
     }
+
     fill(text, selector) {
         const element = this._get_action_element(selector);
         hoot.pointerDown(element);
         hoot.fill(text);
     }
+
     remove_text(selector) {
         const activeElement = hoot.getActiveElement();
         const element = this._get_action_element(selector);
         hoot.pointerDown(element);
         hoot.clear();
-        if (activeElement !== element) {
-            hoot.click(activeElement);
-        } else {
-            hoot.click("body");
-        }
+        this._blur(element, activeElement, clickOutsideSelector);
     }
-    text_blur(text, selector, selectorClickOutside) {
-        const element = this._get_action_element(selector);
-        const elementClickOutside = queryFirst(selectorClickOutside);
+    
+    text_blur(text, selector, clickOutsideSelector) {
         const activeElement = hoot.getActiveElement();
+        const element = this._get_action_element(selector);
         hoot.pointerDown(element);
         hoot.edit(text);
-        if (elementClickOutside) {
-            hoot.click(elementClickOutside);
+        this._blur(element, activeElement, clickOutsideSelector);
+    }
+
+    _blur(element, activeElement, clickOutsideSelector) {
+        if (clickOutsideSelector?.length) {
+            hoot.click(clickOutsideSelector);
         } else if (activeElement !== element) {
             hoot.click(activeElement);
         } else {
             hoot.click("body");
         }
     }
+
     select(value, selector) {
         const element = this._get_action_element(selector);
         hoot.pointerDown(element);

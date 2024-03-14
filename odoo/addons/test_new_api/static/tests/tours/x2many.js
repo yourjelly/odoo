@@ -100,7 +100,7 @@
         content: "insert content",
         trigger: '.o_field_widget[name=name] input',
         extra_trigger: '.o_field_widget[name="message_concat"] textarea:value([test] Mitchell Admin:a\n[test] Mitchell Admin:b)',
-        run: 'text test_trigger',
+        run: 'text_blur test_trigger',
     }, {
         content: "check onchange",
         trigger: '.o_field_widget[name="message_concat"] textarea:value([test_trigger] Mitchell Admin:a\n[test_trigger] Mitchell Admin:b)',
@@ -319,7 +319,7 @@
         content: "edit content",
         trigger: '.o_field_widget[name=name] input',
         extra_trigger: ".o_form_editable",
-        run: 'text test_trigger2'
+        run: 'text_blur test_trigger2'
     }, {
         content: "click outside to trigger onchange",
         trigger: '.o_form_sheet',
@@ -330,7 +330,7 @@
     }, {
         content: "change text value",
         trigger: '.o_field_widget[name="body"] textarea',
-        run: 'text ccc'
+        run: 'text_blur ccc'
     }, {
         content: "click on other field (trigger the line onchange)",
         trigger: '.o_field_widget[name=messages] .o_field_many2one[name="author"] input',
@@ -429,7 +429,7 @@
     }, {
         content: "set discussion title to generate dummy message",
         trigger: '.o_field_widget[name=name] input',
-        run:     'text {generate_dummy_message}',
+        run:     'text_blur {generate_dummy_message}',
     }, {
         content: "check new dummy message happened",
         trigger: '.o_field_widget[name=messages] .o_data_row .o_list_number:contains(/^13$/)',
@@ -442,7 +442,7 @@
     }, {
         content: "empty discussion title",
         trigger: '.o_field_widget[name=name] input',
-        run:     'text removed_title',
+        run:     'text_blur removed_title',
     }, {
         content: "onchange happened",
         trigger: '.o_field_widget[name=messages] .o_data_row td:contains([removed_title])',
@@ -450,7 +450,7 @@
     }, {
         content: "set discussion title to generate dummy message",
         trigger: '.o_field_widget[name=name] input',
-        run:     'text {generate_dummy_message}',
+        run:     'text_blur {generate_dummy_message}',
     }, {
         content: "check update and new dummy message happened",
         trigger: '.o_field_widget[name=messages] .o_data_row .o_list_number:contains(/^22$/)',

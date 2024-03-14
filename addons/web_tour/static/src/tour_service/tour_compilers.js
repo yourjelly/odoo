@@ -434,8 +434,10 @@ export function compileStepAuto(stepIndex, step, options) {
                     });
                     result = willUnload && "will unload";
                 } else if (typeof step.run === "string") {
-                    const m = step.run.match(/^([a-zA-Z0-9_]+) *(?:\(? *(.+?) *\)?)?$/);
-                    await tryToDoAction(() => actionHelper[m[1]](m[2]));
+                    step.run.split("&&").forEach(async (todo) => {
+                        const m = String(todo).trim().match(/^(?<action>\w*) *(?:\(? *(?<arguments>.*) *\)?)?$/);
+                        await tryToDoAction(() => actionHelper[m.groups?.action](m.groups?.arguments));
+                    });
                 } else if (!step.isCheck) {
                     if (stepIndex === tour.steps.length - 1) {
                         console.warn("Tour %s: ignoring action (auto) of last step", tour.name);

@@ -36,7 +36,9 @@ wTourUtils.registerWebsitePreviewTour('website_text_edition', {
     {
         content: "Input the website main color explicitly",
         trigger: '.o_hex_input',
-        run: `text ${WEBSITE_MAIN_COLOR}`,
+        run(actions) {
+            actions.text_blur(WEBSITE_MAIN_COLOR, null, "body");
+        },
     },
     {
         content: "Check that paragraph now uses the main color *class*",

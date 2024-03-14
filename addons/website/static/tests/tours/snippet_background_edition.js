@@ -282,7 +282,7 @@ switchTo('gradient'),
     updateStep: {
         trigger: '.colorpicker .o_color_picker_inputs .o_hex_div input',
         content: 'Pick step color',
-        run: 'text #FF0000',
+        run: "text #FF0000 && press Enter",
     },
     checkGradient: 'linear-gradient(135deg, rgb(203, 94, 238) 0%, rgb(255, 0, 0) 45%, rgb(75, 225, 236) 100%)',
 }),
