@@ -185,6 +185,12 @@ export class SessionExpiredDialog extends Component {
     static title = _t("Odoo Session Expired");
     static props = { ...standardErrorDialogProps };
 
+    setup() {
+        console.warn(this.props.name);
+        console.warn(this.props.message);
+        console.warn(this.props.traceback);
+    }
+
     onClick() {
         browser.location.reload();
     }
