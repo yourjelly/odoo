@@ -20,13 +20,17 @@ export class Orderline extends Component {
                 oldUnitPrice: { type: String, optional: true },
                 internalNote: { type: String, optional: true },
                 imageSrc: { type: String, optional: true },
+                imgSize: { type: String, optional: true },
                 packLotLines: { type: Array, optional: true },
                 "*": true,
             },
         },
+        infoListClasses: { type: String, optional: true },
         slots: { type: Object, optional: true },
     };
     static defaultProps = {
         class: {},
+        infoListClasses: "ms-2",
+        imgSize: "7rem",
     };
 }

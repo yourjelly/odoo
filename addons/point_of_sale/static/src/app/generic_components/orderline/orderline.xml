@@ -4,7 +4,7 @@
         <t t-set="line" t-value="props.line" />
         <li class="orderline py-2 lh-sm cursor-pointer" t-attf-class="{{ line.combo_parent_id ? 'border-start border-3 ms-4' : '' }}" t-att-class="props.class">
             <div class="d-flex">
-                <img class="p-2" style="width: 7rem; border-radius: 1rem;" t-if="line.imageSrc" t-att-src="line.imageSrc"/>
+                <img class="p-2" t-attf-style="width: {{props.imgSize}}; border-radius: 1rem;" t-if="line.imageSrc" t-att-src="line.imageSrc"/>
                 <div class="p-2 d-flex flex-column w-100">
                     <div class="d-flex justify-content-between">
                         <div class="product-name d-inline-block flex-grow-1 fw-bolder pe-1 text-truncate">
@@ -16,7 +16,7 @@
                             <t t-else="" t-esc="line.price"/>
                         </div>
                     </div>
-                    <ul class="info-list">
+                    <ul t-attf-class="info-list {{props.infoListClasses}}">
                         <li class="price-per-unit">
                             <em t-esc="line.qty" class="qty fst-normal fw-bolder me-1" /> <t t-if="line.unit" t-esc="line.unit" />
                             <t t-if="line.price !== 0">
