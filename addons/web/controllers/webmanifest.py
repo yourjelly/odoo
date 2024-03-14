@@ -48,8 +48,8 @@ class WebManifest(http.Controller):
         web_app_name = request.env['ir.config_parameter'].sudo().get_param('web.web_app_name', 'Odoo')
         manifest = {
             'name': web_app_name,
-            'scope': '/web',
-            'start_url': '/web',
+            'scope': '/',
+            'start_url': '/odoo',
             'display': 'standalone',
             'background_color': '#714B67',
             'theme_color': '#714B67',
@@ -74,7 +74,7 @@ class WebManifest(http.Controller):
             self._get_service_worker_content(),
             [
                 ('Content-Type', 'text/javascript'),
-                ('Service-Worker-Allowed', '/web'),
+                ('Service-Worker-Allowed', '/'),
             ]
         )
         return response
@@ -89,7 +89,7 @@ class WebManifest(http.Controller):
     def _icon_path(self):
         return 'web/static/img/odoo-icon-192x192.png'
 
-    @http.route('/web/offline', type='http', auth='public', methods=['GET'])
+    @http.route('/odoo/offline', type='http', auth='public', methods=['GET'])
     def offline(self):
         """ Returns the offline page delivered by the service worker """
         return request.render('web.webclient_offline', {
