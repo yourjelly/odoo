@@ -39,6 +39,8 @@ class ResCompany(models.Model):
     #TODO check all the options/fields are in the views (settings + company form view)
     fiscalyear_last_day = fields.Integer(default=31, required=True)
     fiscalyear_last_month = fields.Selection(MONTH_SELECTION, default='12', required=True)
+
+    #TODO OCO virer tous ces champs lock dates
     period_lock_date = fields.Date(
         string="Journals Entries Lock Date",
         tracking=True,
@@ -54,7 +56,7 @@ class ResCompany(models.Model):
         tracking=True,
         help="No users can edit journal entries related to a tax prior and inclusive of this date.")
     max_tax_lock_date = fields.Date(compute='_compute_max_tax_lock_date', recursive=True)  # TODO maybe store
-    #TODO OCO c'est quoi max_tax_lock_date ?
+
     transfer_account_id = fields.Many2one('account.account',
         check_company=True,
         domain="[('reconcile', '=', True), ('account_type', '=', 'asset_current'), ('deprecated', '=', False)]", string="Inter-Banks Transfer Account", help="Intermediary account used when moving money from a liqity account to another")
@@ -381,31 +383,37 @@ class ResCompany(models.Model):
         """ #TODO OCO REDOC
         self.ensure_one()
         locks = []
-        #TODO OCO: pour l'heure, je simplifie, à valider: la period_lock_date, je la gère en ayant une case de journal cochée sur un closing non-postée => ça bloque tout sauf les advisors
 
-        violated_journal_closing_domain = [
+        violated_closing_domain = [
             ('company_ids', 'in', self.id),
-            ('closing_type_id.lock_journals', '=', True),
-            '|', ('state', '=', 'closed'), ('locked_journal_ids', 'in', journal.id),
             ('date', '>=', accounting_date),
+            '|',
+                '&', '&', ('closing_type_id.lock_type', '=', 'taxes'), ('locked_company_ids', 'in', self.id), ('closing_type_id', 'in', tax_closing_types.ids),
+                '&', '&',
+                    ('closing_type_id.lock_type', '=', 'entries'),
+                    ('locked_journal_ids', 'in', journal.id),
+                    # For branches, locked_company_ids and locked_journal_ids will both be set; else, only locked_journal_ids
+                    #TODO OCO ça ^
+                    '|', ('locked_company_ids', '=', False), ('locked_company_ids', 'in', self.id),
         ]
 
         if self.user_has_groups('account.group_account_manager'):
-            violated_journal_closing_domain.append(('state', '=', 'closed'))
-
-        violated_journal_closing = self.env['account.report.closing'].search(violated_journal_closing_domain, order='date DESC', limit=1)
-        if violated_journal_closing:
-            locks.append((violated_journal_closing.date, _('user')))
-
-        if tax_closing_types:
-            violated_tax_closing = self.env['account.report.closing'].search([
-                ('date', '>=', accounting_date),
-                ('closing_type_id', 'in', tax_closing_types.ids),
+            # Top-level accounting users are only limited by 'closed' closings, if they have access to its main company. Else, they behave like any other users with lesser rights.
+            violated_closing_domain += [
+                '|',
                 ('state', '=', 'closed'),
-            ], order='date DESC', limit=1)
+                ('main_company_id', 'not in', self.env.user.company_ids.ids),
+            ]
 
-            if violated_tax_closing:
-                locks.append((violated_tax_closing.date, _('tax'))) #TODO OCO pourquoi on met les string traduits là-dedans ? C'est louche
+        violated_closings = self.env['account.report.closing'].search(violated_closing_domain, order='date DESC')
+        violated_tax_closings = violated_closings.filtered(lambda x: x.closing_type_id in tax_closing_types)
+
+        if violated_tax_closings:
+            locks.append((violated_tax_closings[0].date, _('tax'))) #TODO OCO pourquoi on met les string traduits là-dedans ? C'est louche
+
+        violated_journal_closings = violated_closings - violated_tax_closings
+        if violated_journal_closings:
+            locks.append((violated_journal_closings[0].date, _('user'))) #TODO OCO pourquoi on met les string traduits là-dedans ? C'est louche
 
         locks.sort()
         return locks

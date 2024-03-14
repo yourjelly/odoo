@@ -185,7 +185,7 @@ class Property(models.Model):
         :param model: the field's model name
         :param value: the field's value
         :param company: the company (record or id)
-        """ #TODO OCO DOC + PR à part
+        """ #TODO OCO DOC + commit à part
         field_id = self.env['ir.model.fields']._get(model, name).id
         company_id = int(company) if company else False
         prop = self.sudo().search([

@@ -715,7 +715,9 @@ class AccountJournal(models.Model):
     def _compute_display_name(self):
         for journal in self:
             name = journal.name
-            if journal.currency_id and journal.currency_id != journal.company_id.currency_id:
+            if self._context.get('append_company_to_journal_name'):
+                name = f"{name} ({journal.company_id.name})"
+            elif journal.currency_id and journal.currency_id != journal.company_id.currency_id:
                 name = f"{name} ({journal.currency_id.name})"
             journal.display_name = name
 

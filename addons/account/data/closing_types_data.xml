@@ -2,15 +2,16 @@
 <odoo>
 
     <record id="closing_type_vat" model="account.report.closing.type">
-        <field name="name">VAT Closing</field>
+        <field name="name">VAT Closing</field> <!--TODO OCO dans les loca-->
         <field name="move_generator_code">tax_closing</field>
         <field name="periodicity">monthly</field>
+        <field name="lock_type">taxes</field>
     </record>
 
     <record id="closing_type_all" model="account.report.closing.type">
-        <field name="name">General Closing</field><!--TODO OCO nom temporaire-->
+        <field name="name">Management Closing</field>
         <field name="periodicity">year</field>
-        <field name="lock_journals" eval="True"/>
+        <field name="lock_type">entries</field>
     </record>
 
 </odoo>
