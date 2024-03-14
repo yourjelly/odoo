@@ -1619,7 +1619,7 @@ class AccountMove(models.Model):
                        move.ref = duplicate_move.ref
                        AND (move.invoice_date = duplicate_move.invoice_date OR move.state = 'draft')
                    )
-               ) 
+               )
              WHERE move.id IN %(moves)s
              GROUP BY move.id
         """, {
@@ -2131,8 +2131,8 @@ class AccountMove(models.Model):
         else:  # In case of an entry
             return super()._get_product_catalog_domain()
 
-    def _default_order_line_values(self):
-        default_data = super()._default_order_line_values()
+    def _default_order_line_values(self, **kwargs):
+        default_data = super()._default_order_line_values(**kwargs)
         new_default_data = self.env['account.move.line']._get_product_catalog_lines_data()
         return {**default_data, **new_default_data}
 

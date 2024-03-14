@@ -595,8 +595,8 @@ class Repair(models.Model):
             res['search_view_id'] = [self.env.ref('repair.product_view_search_catalog').id, 'search']
         return res
 
-    def _default_order_line_values(self):
-        default_data = super()._default_order_line_values()
+    def _default_order_line_values(self, **kwargs):
+        default_data = super()._default_order_line_values(**kwargs)
         new_default_data = self.env['stock.move']._get_product_catalog_lines_data(parent_model='repair.order')
 
         return {**default_data, **new_default_data}
@@ -609,7 +609,7 @@ class Repair(models.Model):
 
         return {'price': product.list_price}
 
-    def _get_product_catalog_record_lines(self, product_ids):
+    def _get_product_catalog_record_lines(self, product_ids, **kwargs):
         grouped_lines = defaultdict(lambda: self.env['stock.move'])
 
         for line in self.move_ids:

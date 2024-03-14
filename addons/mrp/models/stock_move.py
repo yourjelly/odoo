@@ -414,6 +414,14 @@ class StockMove(models.Model):
             action['context']['show_reserved_quantity'] = False
         return action
 
+    def action_add_from_catalog_raw(self):
+        mo = self.env['mrp.production'].browse(self.env.context.get('order_id'))
+        return mo.with_context(child_model='stock.move.raw').action_add_from_catalog()
+
+    def action_add_from_catalog_byproduct(self):
+        mo = self.env['mrp.production'].browse(self.env.context.get('order_id'))
+        return mo.with_context(child_model='stock.move.byproduct').action_add_from_catalog()
+
     def _action_cancel(self):
         res = super(StockMove, self)._action_cancel()
         if not 'skip_mo_check' in self.env.context:

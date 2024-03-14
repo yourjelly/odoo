@@ -436,37 +436,29 @@ class MrpBom(models.Model):
     # CATALOG
     # -------------------------------------------------------------------------
 
-    def action_add_from_catalog(self):
-        res = super().action_add_from_catalog()
-        if res['context'].get('product_catalog_order_model') == self._name:
-            res['context']['child_model'] = self._context.get('child_model')
-
-        return res
-
-    def _default_order_line_values(self):
-        default_data = super()._default_order_line_values()
-        new_default_data = self.env[self._context.get('child_model')]._get_product_catalog_lines_data()
+    def _default_order_line_values(self, **kwargs):
+        default_data = super()._default_order_line_values(**kwargs)
+        new_default_data = self.env[kwargs.get('child_model')]._get_product_catalog_lines_data()
 
         return {**default_data, **new_default_data}
 
-    def _get_product_catalog_order_data(self, products, **kwagrs):
+    def _get_product_catalog_order_data(self, products, **kwargs):
         return {product.id: self._get_product_price_and_data(product) for product in products}
 
     def _get_product_price_and_data(self, product):
         self.ensure_one()
         return {'price': product.standard_price}
 
-    def _get_product_catalog_record_lines(self, product_ids):
-        child_model = self._context.get('child_model')
-        grouped_lines = defaultdict(lambda: self.env[child_model])
-        lines = (
-            self.bom_line_ids
-            if child_model == 'mrp.bom.line' else
-            self.byproduct_ids
-            if child_model == 'mrp.bom.byproduct' else
-            []
-        )
+    def _get_product_catalog_record_lines(self, product_ids, **kwargs):
+        child_model = kwargs.get('child_model')
+        if child_model == 'mrp.bom.line':
+            lines = self.bom_line_ids
+        elif child_model == 'mrp.bom.byproduct':
+            lines = self.byproduct_ids
+        else:
+            return {}
 
+        grouped_lines = defaultdict(lambda: self.env[child_model])
         for line in lines:
             if line.product_id.id in product_ids:
                 grouped_lines[line.product_id] |= line
@@ -474,14 +466,13 @@ class MrpBom(models.Model):
         return grouped_lines
 
     def _update_order_line_info(self, product_id, quantity, **kwargs):
-        child_model = self._context.get('child_model')
-        entities = (
-            self.bom_line_ids
-            if child_model == 'mrp.bom.line' else
-            self.byproduct_ids
-            if child_model == 'mrp.bom.byproduct' else
-            []
-        )
+        child_model = kwargs.get('child_model')
+        if child_model == 'mrp.bom.line':
+            entities = self.bom_line_ids
+        elif child_model == 'mrp.bom.byproduct':
+            entities = self.byproduct_ids
+        else:
+            return 0
 
         entity = entities.filtered(lambda e: e.product_id.id == product_id)
         if entity:

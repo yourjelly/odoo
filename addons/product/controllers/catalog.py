@@ -25,7 +25,7 @@ class ProductCatalogController(Controller):
             }
         """
         order = request.env[res_model].browse(order_id)
-        return order.with_company(order.company_id).with_context(child_model=kwargs.get('child_model', None))._get_product_catalog_order_line_info(
+        return order.with_company(order.company_id)._get_product_catalog_order_line_info(
             product_ids, **kwargs,
         )
 
@@ -41,6 +41,6 @@ class ProductCatalogController(Controller):
         :rtype: float
         """
         order = request.env[res_model].browse(order_id)
-        return order.with_company(order.company_id).with_context(child_model=kwargs.get('child_model', None))._update_order_line_info(
+        return order.with_company(order.company_id)._update_order_line_info(
             product_id, quantity, **kwargs,
         )

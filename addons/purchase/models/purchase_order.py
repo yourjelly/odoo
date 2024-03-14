@@ -827,8 +827,8 @@ class PurchaseOrder(models.Model):
         ]).filtered(lambda p: p.partner_id.with_company(p.company_id).receipt_reminder_email and\
             p.mapped('order_line.product_id.product_tmpl_id.type') != ['service'])
 
-    def _default_order_line_values(self):
-        default_data = super()._default_order_line_values()
+    def _default_order_line_values(self, **kwargs):
+        default_data = super()._default_order_line_values(**kwargs)
         new_default_data = self.env['purchase.order.line']._get_product_catalog_lines_data()
         return {**default_data, **new_default_data}
 

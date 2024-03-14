@@ -2283,10 +2283,6 @@ Please change the quantity done or the rounding precision of your unit of measur
     # CATALOG
     # -------------------------------------------------------------------------
 
-    def action_add_from_catalog(self):
-        parent = self.env[self.env.context.get('parent_model')].browse(self.env.context.get('order_id'))
-        return parent.with_context(child_model=self.env.context.get('child_model')).action_add_from_catalog()
-
     def _get_product_catalog_lines_data(self, **kwargs):
         parent_id_key = (
             'production_id'

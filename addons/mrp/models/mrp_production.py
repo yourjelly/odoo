@@ -2773,8 +2773,8 @@ class MrpProduction(models.Model):
 
         return res
 
-    def _default_order_line_values(self):
-        default_data = super()._default_order_line_values()
+    def _default_order_line_values(self, **kwargs):
+        default_data = super()._default_order_line_values(**kwargs)
         new_default_data = self.env['stock.move']._get_product_catalog_lines_data(parent_model='mrp.production')
 
         return {**default_data, **new_default_data}
@@ -2785,16 +2785,14 @@ class MrpProduction(models.Model):
     def _get_product_price_and_data(self, product):
         return {'price': product.standard_price}
 
-    def _get_product_catalog_record_lines(self, product_ids):
-        child_model = self._context.get('child_model')
+    def _get_product_catalog_record_lines(self, product_ids, **kwargs):
         grouped_lines = defaultdict(lambda: self.env['stock.move'])
-        lines = (
-            self.move_raw_ids
-            if child_model == 'mrp.production.component' else
-            self.move_byproduct_ids
-            if child_model == 'mrp.production.byproduct' else
-            []
-        )
+        if kwargs.get('child_model') == 'stock.move.raw':
+            lines = self.move_raw_ids
+        elif kwargs.get('child_model') == 'stock.move.byproduct':
+            lines = self.move_byproduct_ids
+        else:
+            return {}
 
         for line in lines:
             if line.product_id.id in product_ids:
@@ -2803,15 +2801,13 @@ class MrpProduction(models.Model):
         return grouped_lines
 
     def _update_order_line_info(self, product_id, quantity, **kwargs):
-        child_model = self._context.get('child_model')
-        entities = (
-            self.move_raw_ids
-            if child_model == 'mrp.production.component'
-            else
-            self.move_byproduct_ids
-            if child_model == 'mrp.production.byproduct' else
-            []
-        )
+        child_model = kwargs.get('child_model')
+        if child_model == 'stock.move.raw':
+            entities = self.move_raw_ids
+        elif child_model == 'stock.move.byproduct':
+            entities = self.move_byproduct_ids
+        else:
+            return 0
 
         entity = entities.filtered(lambda e: e.product_id.id == product_id)
         if entity:

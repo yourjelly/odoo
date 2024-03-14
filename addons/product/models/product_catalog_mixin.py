@@ -26,7 +26,7 @@ class ProductCatalogMixin(models.AbstractModel):
             'context': {**self.env.context, **additional_context},
         }
 
-    def _default_order_line_values(self):
+    def _default_order_line_values(self, **kwargs):
         return {
             'quantity': 0,
             'readOnly': self._is_readonly() if self else False,
@@ -42,7 +42,7 @@ class ProductCatalogMixin(models.AbstractModel):
         """
         return [('company_id', 'in', [self.company_id.id, False])]
 
-    def _get_product_catalog_record_lines(self, product_ids):
+    def _get_product_catalog_record_lines(self, product_ids, **kwargs):
         """ Returns the record's lines grouped by product.
         Must be overrided by each model using this mixin.
 
@@ -87,9 +87,9 @@ class ProductCatalogMixin(models.AbstractModel):
             }
         """
         order_line_info = {}
-        default_data = self._default_order_line_values()
+        default_data = self._default_order_line_values(**kwargs)
 
-        for product, record_lines in self._get_product_catalog_record_lines(product_ids).items():
+        for product, record_lines in self._get_product_catalog_record_lines(product_ids, **kwargs).items():
             order_line_info[product.id] = record_lines._get_product_catalog_lines_data(**kwargs)
             product_ids.remove(product.id)
 
