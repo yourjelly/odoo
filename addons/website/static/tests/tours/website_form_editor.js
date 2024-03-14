@@ -140,6 +140,7 @@
             content: "Select form by clicking on an input field",
             extra_trigger: ':iframe .s_website_form_field',
             trigger: ':iframe section.s_website_form input',
+            run: "click",
         }, {
             content: "Verify that the form editor appeared",
             trigger: '.o_we_customize_panel .snippet-option-WebsiteFormEditor',
@@ -633,7 +634,7 @@
             extra_trigger: ':iframe .s_website_form_field',
             trigger: ':iframe section.s_website_form input',
             run: function (actions) {
-                actions.auto();
+                actions.click();
 
                 // The next steps will be about removing non essential required
                 // fields. For the robustness of the test, check that amount
@@ -652,6 +653,7 @@
                 steps.push({
                     content: "Select required field to remove",
                     trigger: ':iframe .s_website_form_required .s_website_form_input',
+                    run: "click",
                 });
                 steps.push({
                     content: "Remove required field",

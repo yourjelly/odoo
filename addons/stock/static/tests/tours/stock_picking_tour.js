@@ -66,7 +66,7 @@ registry.category("web_tour.tours").add('test_generate_serial_1', { test: true, 
     },
     {
         trigger: "div[name=next_serial_count] input",
-        run: 'text 5',
+        run: 'text_blur 5',
     },
     {trigger: ".btn-primary:contains('Generate')"},
     {
@@ -128,11 +128,11 @@ registry.category("web_tour.tours").add('test_generate_serial_2', { test: true, 
     },
     {
         trigger: "div[name=next_serial_count] input",
-        run: "text 7.5",
+        run: "text_blur 7.5",
     },
     {
         trigger: "div[name=total_received] input",
-        run: "text 50",
+        run: "text_blur 50",
     },
     {trigger: ".btn-primary:contains('Generate')"},
     {
@@ -153,11 +153,11 @@ registry.category("web_tour.tours").add('test_generate_serial_2', { test: true, 
     },
     {
         trigger: "div[name=next_serial_count] input",
-        run: "text 13",
+        run: "text_blur 13",
     },
     {
         trigger: "div[name=total_received] input",
-        run: "text 50",
+        run: "text_blur 50",
     },
     {
         trigger: "div[name=keep_lines] input",
