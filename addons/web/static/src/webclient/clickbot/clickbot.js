@@ -148,6 +148,8 @@ async function waitForCondition(stopCondition) {
 
     while (!stopCondition() || hasPendingRPC() || hasScheduledTask()) {
         if (document.querySelector(".o_error_dialog")) {
+            browser.console.error("The error dialog detected is :");
+            browser.console.error(document.querySelector(".o_error_dialog").innerHTML);
             throw new Error("Error dialog detected");
         }
         if (timeLimit <= 0) {
