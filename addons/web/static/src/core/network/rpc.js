@@ -85,6 +85,8 @@ rpc._rpc = function (url, params, settings) {
                 rpcBus.trigger("RPC:RESPONSE", { data, settings, result: params.result });
                 return resolve(responseResult);
             }
+            console.warn("ERROR!!!!!");
+            console.warn(url);
             const error = makeErrorFromResponse(responseError);
             rpcBus.trigger("RPC:RESPONSE", { data, settings, error });
             reject(error);
