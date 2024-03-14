@@ -367,7 +367,7 @@ const getView = (model, args, kwargs) => {
     // find the arch
     let [requestViewId, viewType] = args;
     if (!requestViewId) {
-        const contextKey = (viewType === "list" ? "tree" : viewType) + "_view_ref";
+        const contextKey = getTag(viewType) + "_view_ref";
         if (contextKey in kwargs.context) {
             requestViewId = kwargs.context[contextKey];
         }
