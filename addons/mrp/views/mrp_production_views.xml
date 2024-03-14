@@ -629,7 +629,7 @@
                     <filter invisible="1" string="Future Activities" name="activities_upcoming_all"
                         domain="[('my_activity_date_deadline', '&gt;', context_today().strftime('%Y-%m-%d'))]"/>
                     <filter name="filter_date_start" string="Date" date="date_start"/>
-                    <filter name="filter_plan_date" invisible="1" string="Date: Last 365 Days" domain="[('date_start', '>', (datetime.datetime.now() + relativedelta(days=-365)).to_utc().strftime('%Y-%m-%d %H:%M:%S'))]"/>
+                    <filter name="filter_plan_date" invisible="1" string="Date: Last 365 Days" domain="[('date_start', '>', (datetime.datetime.now() + relativedelta(days=-365)).strftime('%Y-%m-%d %H:%M:%S'))]"/>
                     <separator/>
                     <filter string="Warnings" name="activities_exception"
                         domain="[('activity_exception_decoration', '!=', False)]"/>

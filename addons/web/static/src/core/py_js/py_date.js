@@ -217,119 +217,12 @@ function tmxxx(year, month, day, hour, minute, second, microsecond) {
 // Date/Time and related classes
 // -----------------------------------------------------------------------------
 
-export class PyDate {
-    /**
-     * @returns {PyDate}
-     */
-    static today() {
-        return this.convertDate(new Date());
-    }
-
-    /**
-     * Convert a date object into PyDate
-     * @param {Date} date
-     * @returns {PyDate}
-     */
-    static convertDate(date) {
-        const year = date.getFullYear();
-        const month = date.getMonth() + 1;
-        const day = date.getDate();
-        return new PyDate(year, month, day);
-    }
-
-    /**
-     * @param {integer} year
-     * @param {integer} month
-     * @param {integer} day
-     */
-    constructor(year, month, day) {
-        this.year = year;
-        this.month = month; // 1-indexed => 1 = january, 2 = february, ...
-        this.day = day; // 1-indexed => 1 = first day of month, ...
-    }
-
-    /**
-     * @param  {...any} args
-     * @returns {PyDate}
-     */
-    static create(...args) {
-        const { year, month, day } = parseArgs(args, ["year", "month", "day"]);
-        return new PyDate(year, month, day);
-    }
-
-    /**
-     * @param {PyTimeDelta} timedelta
-     * @returns {PyDate}
-     */
-    add(timedelta) {
-        const s = tmxxx(this.year, this.month, this.day + timedelta.days);
-        return new PyDate(s.year, s.month, s.day);
-    }
-
-    /**
-     * @param {any} other
-     * @returns {boolean}
-     */
-    isEqual(other) {
-        if (!(other instanceof PyDate)) {
-            return false;
-        }
-        return this.year === other.year && this.month === other.month && this.day === other.day;
-    }
-
-    /**
-     * @param {string} format
-     * @returns {string}
-     */
-    strftime(format) {
-        return format.replace(/%([A-Za-z])/g, (m, c) => {
-            switch (c) {
-                case "Y":
-                    return fmt4(this.year);
-                case "m":
-                    return fmt2(this.month);
-                case "d":
-                    return fmt2(this.day);
-            }
-            throw new ValueError(`No known conversion for ${m}`);
-        });
-    }
-
-    /**
-     * @param {PyTimeDelta | PyDate} other
-     * @returns {PyDate | PyTimeDelta}
-     */
-    substract(other) {
-        if (other instanceof PyTimeDelta) {
-            return this.add(other.negate());
-        }
-        if (other instanceof PyDate) {
-            return PyTimeDelta.create(this.toordinal() - other.toordinal());
-        }
-        throw NotSupportedError();
-    }
-
-    /**
-     * @returns {string}
-     */
-    toJSON() {
-        return this.strftime("%Y-%m-%d");
-    }
-
-    /**
-     * @returns {integer}
-     */
-    toordinal() {
-        return ymd2ord(this.year, this.month, this.day);
-    }
-}
-
 export class PyDateTime {
     /**
      * @returns {PyDateTime}
      */
     static now() {
-        return this.convertDate(new Date());
+        return this.convertDateTime(new Date());
     }
 
     /**
@@ -341,10 +234,15 @@ export class PyDateTime {
         const year = date.getFullYear();
         const month = date.getMonth() + 1;
         const day = date.getDate();
-        const hour = date.getHours();
-        const minute = date.getMinutes();
-        const second = date.getSeconds();
-        return new PyDateTime(year, month, day, hour, minute, second, 0);
+        return new PyDateTime(year, month, day, 0, 0, 0, 0, false);
+    }
+
+    static convertDateTime(date) {
+        const datetime = this.convertDate(date);
+        datetime.hour = date.getHours();
+        datetime.minute = date.getMinutes();
+        datetime.second = date.getSeconds();
+        return datetime;
     }
 
     /**
@@ -360,6 +258,7 @@ export class PyDateTime {
             "minute",
             "second",
             "microsecond",
+            "isUTC",
         ]);
         const year = namedArgs.year;
         const month = namedArgs.month;
@@ -368,7 +267,8 @@ export class PyDateTime {
         const minute = namedArgs.minute || 0;
         const second = namedArgs.second || 0;
         const ms = namedArgs.micro / 1000 || 0;
-        return new PyDateTime(year, month, day, hour, minute, second, ms);
+        const isUTC = namedArgs.isUTC;
+        return new PyDateTime(year, month, day, hour, minute, second, ms, isUTC);
     }
 
     /**
@@ -376,7 +276,12 @@ export class PyDateTime {
      * @returns {PyDateTime}
      */
     static combine(...args) {
-        const { date, time } = parseArgs(args, ["date", "time"]);
+        let { date, time } = parseArgs(args, ["date", "time"]);
+        if (date.isUTC) {
+            time = time.to_utc();
+        } else if (time.isUTC) {
+            date = date.to_utc();
+        }
         // not sure. should we go through constructor instead? what about args normalization?
         return PyDateTime.create(
             date.year,
@@ -384,7 +289,8 @@ export class PyDateTime {
             date.day,
             time.hour,
             time.minute,
-            time.second
+            time.second,
+            date.isUTC || time.isUTC,
         );
     }
 
@@ -397,7 +303,7 @@ export class PyDateTime {
      * @param {integer} second
      * @param {integer} microsecond
      */
-    constructor(year, month, day, hour, minute, second, microsecond) {
+    constructor(year, month, day, hour, minute, second, microsecond, isUTC) {
         this.year = year;
         this.month = month; // 1-indexed => 1 = january, 2 = february, ...
         this.day = day; // 1-indexed => 1 = first day of month, ...
@@ -405,6 +311,7 @@ export class PyDateTime {
         this.minute = minute;
         this.second = second;
         this.microsecond = microsecond;
+        this.isUTC = isUTC;
     }
 
     /**
@@ -422,7 +329,16 @@ export class PyDateTime {
             this.microsecond + timedelta.microseconds
         );
         // does not seem to closely follow python implementation.
-        return new PyDateTime(s.year, s.month, s.day, s.hour, s.minute, s.second, s.microsecond);
+        return new PyDateTime(
+            s.year,
+            s.month,
+            s.day,
+            s.hour,
+            s.minute,
+            s.second,
+            s.microsecond,
+            this.isUTC,
+        );
     }
 
     /**
@@ -433,14 +349,16 @@ export class PyDateTime {
         if (!(other instanceof PyDateTime)) {
             return false;
         }
+        const thisUTC = this.to_utc();
+        const otherUTC = other.to_utc();
         return (
-            this.year === other.year &&
-            this.month === other.month &&
-            this.day === other.day &&
-            this.hour === other.hour &&
-            this.minute === other.minute &&
-            this.second === other.second &&
-            this.microsecond === other.microsecond
+            thisUTC.year === otherUTC.year &&
+            thisUTC.month === otherUTC.month &&
+            thisUTC.day === otherUTC.day &&
+            thisUTC.hour === otherUTC.hour &&
+            thisUTC.minute === otherUTC.minute &&
+            thisUTC.second === otherUTC.second &&
+            thisUTC.microsecond === otherUTC.microsecond
         );
     }
 
@@ -473,76 +391,168 @@ export class PyDateTime {
      * @returns {PyDateTime}
      */
     substract(timedelta) {
-        return this.add(timedelta.negate());
+        if (timedelta instanceof PyTimeDelta) {
+            return this.add(timedelta.negate());
+        }
+        throw NotSupportedError();
     }
 
     /**
      * @returns {string}
      */
     toJSON() {
-        return this.strftime("%Y-%m-%d %H:%M:%S");
+        return this.to_utc().strftime("%Y-%m-%d %H:%M:%S");
     }
 
     /**
      * @returns {PyDateTime}
      */
     to_utc() {
+        if (this.isUTC) {
+            return this;
+        }
         const d = new Date(this.year, this.month -1, this.day, this.hour, this.minute, this.second);
         const timedelta = PyTimeDelta.create({ minutes: d.getTimezoneOffset() });
-        return this.add(timedelta);
+        const utcDateTime = this.add(timedelta);
+        utcDateTime.isUTC = true;
+        return utcDateTime;
     }
 }
 
-export class PyTime extends PyDate {
+export class PyDate extends PyDateTime {
+    /**
+     * @returns {PyDate}
+     */
+    static today() {
+        return this.convertDate(new Date());
+    }
+
+    /**
+     * @param {integer} year
+     * @param {integer} month
+     * @param {integer} day
+     */
+    constructor(year, month, day, isUTC) {
+        super(year, month, day, 0, 0, 0, 0, isUTC);
+    }
+
+    /**
+     * @param  {...any} args
+     * @returns {PyDate}
+     */
+    static create(...args) {
+        const { year, month, day } = parseArgs(args, ["year", "month", "day"]);
+        return new PyDate(year, month, day);
+    }
+
+    /**
+     * @param {PyTimeDelta} timedelta
+     * @returns {PyDate}
+     */
+    add(timedelta) {
+        const s = tmxxx(this.year, this.month, this.day + timedelta.days);
+        return new PyDate(s.year, s.month, s.day);
+    }
+
+    /**
+     * @param {any} other
+     * @returns {boolean}
+     */
+    isEqual(other) {
+        if (!(other instanceof PyDate)) {
+            return false;
+        }
+        const thisUTC = this.to_utc();
+        const otherUTC = other.to_utc();
+        return (
+            thisUTC.year === otherUTC.year &&
+            thisUTC.month === otherUTC.month &&
+            thisUTC.day === otherUTC.day
+        );
+    }
+
+    /**
+     * @param {PyTimeDelta | PyDate} other
+     * @returns {PyDate | PyTimeDelta}
+     */
+    substract(other) {
+        if (other instanceof PyDate) {
+            return PyTimeDelta.create(this.toordinal() - other.toordinal());
+        }
+        return super.substract(other);
+    }
+
+    /**
+     * @returns {string}
+     */
+    toJSON() {
+        return this.to_utc().strftime("%Y-%m-%d");
+    }
+
+    /**
+     * @returns {integer}
+     */
+    toordinal() {
+        return ymd2ord(this.year, this.month, this.day);
+    }
+}
+
+export class PyTime extends PyDateTime {
     /**
      * @param  {...any} args
      * @returns {PyTime}
      */
     static create(...args) {
-        const namedArgs = parseArgs(args, ["hour", "minute", "second"]);
+        const namedArgs = parseArgs(args, ["hour", "minute", "second", "isUTC"]);
         const hour = namedArgs.hour || 0;
         const minute = namedArgs.minute || 0;
         const second = namedArgs.second || 0;
-        return new PyTime(hour, minute, second);
+        const isUTC = namedArgs.isUTC || false;
+        return new PyTime(hour, minute, second, isUTC);
     }
 
-    constructor(hour, minute, second) {
+    constructor(hour, minute, second, isUTC) {
         const now = new Date();
         const year = now.getFullYear();
         const month = now.getMonth();
         const day = now.getDate();
-        super(year, month, day);
-        this.hour = hour;
-        this.minute = minute;
-        this.second = second;
+        if (isUTC) {
+            // if time is supposed to be UTC time, then the date should be UTC too
+            const pyNow = new PyDateTime(year, month, day, hour, minute, second, 0, false).to_utc();
+            super(
+                pyNow.year,
+                pyNow.month,
+                pyNow.day,
+                pyNow.hour,
+                pyNow.minute,
+                pyNow.second,
+                pyNow.microsecond,
+                isUTC,
+            );
+        } else {
+            super(year, month, day, hour, minute, second, 0, false);
+        }
     }
 
     /**
-     * @param {string} format
-     * @returns {string}
+     * @param {any} other
+     * @returns {boolean}
      */
-    strftime(format) {
-        return format.replace(/%([A-Za-z])/g, (m, c) => {
-            switch (c) {
-                case "Y":
-                    return fmt4(this.year);
-                case "m":
-                    return fmt2(this.month + 1);
-                case "d":
-                    return fmt2(this.day);
-                case "H":
-                    return fmt2(this.hour);
-                case "M":
-                    return fmt2(this.minute);
-                case "S":
-                    return fmt2(this.second);
-            }
-            throw new ValueError(`No known conversion for ${m}`);
-        });
+    isEqual(other) {
+        if (!(other instanceof PyTime)) {
+            return false;
+        }
+        const thisUTC = this.to_utc();
+        const otherUTC = other.to_utc();
+        return (
+            thisUTC.hour === otherUTC.hour &&
+            thisUTC.minute === otherUTC.minute &&
+            thisUTC.second === otherUTC.second
+        );
     }
 
     toJSON() {
-        return this.strftime("%H:%M:%S");
+        return this.to_utc().strftime("%H:%M:%S");
     }
 }
 
