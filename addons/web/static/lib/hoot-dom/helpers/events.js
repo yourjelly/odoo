@@ -1959,10 +1959,14 @@ export function press(keyStrokes, options) {
  * The target will be resized to the given dimensions, enforced by `!important` style
  * attributes.
  *
+ * IMPORTANT: this does NOT affect the CSS environment such as media queries,
+ * this will only affect JavaScript code relying on `window.innerWidth` and
+ * `window.innerHeight`.
+ *
  * @param {Dimensions} dimensions
  * @returns {Event[]}
  * @example
- *  resize("body", { width: 1000, height: 500 }); // Resizes <body> to 1000x500
+ *  resize({ width: 1000, height: 500 }); // Resizes the window to 1000x500
  */
 export function resize(dimensions) {
     const [width, height] = parseDimensions(dimensions);
