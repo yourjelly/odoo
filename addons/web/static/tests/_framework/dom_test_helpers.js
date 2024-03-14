@@ -202,7 +202,7 @@ export function contains(target, options) {
          */
         edit: async (value, options) => {
             await focusCurrent();
-            edit(value, { confirm: true, ...options });
+            edit(value, { confirm: "enter", ...options });
             await animationFrame();
         },
         /**
@@ -211,7 +211,7 @@ export function contains(target, options) {
          */
         fill: async (value, options) => {
             await focusCurrent();
-            fill(value, { confirm: true, ...options });
+            fill(value, { confirm: "enter", ...options });
             await animationFrame();
         },
         focus: async () => {
