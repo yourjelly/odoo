@@ -186,7 +186,7 @@ export class RunningTourActionHelper {
         hoot.fill(text);
     }
 
-    remove_text(selector) {
+    remove_text(selector, clickOutsideSelector) {
         const activeElement = hoot.getActiveElement();
         const element = this._get_action_element(selector);
         hoot.pointerDown(element);

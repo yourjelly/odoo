@@ -10,7 +10,7 @@ function openRoot() {
         content: "return to client root to avoid race condition",
         trigger: 'body',
         run() {
-            $('body').addClass('wait');
+            document.querySelector("body").classList.add("wait");
             window.location = '/web';
         }
     }, {
