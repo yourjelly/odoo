@@ -602,7 +602,7 @@ test("debug input in model field selector popover", async () => {
     }
     await mountWithCleanup(Parent);
     await openModelFieldSelectorPopover();
-    await contains(".o_model_field_selector_debug").edit("a");
+    await contains(".o_model_field_selector_debug").edit("a", { confirm: "tab" });
     await contains(".o_model_field_selector_popover_close").click();
     expect([`[("a", "=", 1)]`]).toVerifySteps();
     expect(getCurrentPath()).toBe("a");

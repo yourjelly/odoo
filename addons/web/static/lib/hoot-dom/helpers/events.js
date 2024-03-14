@@ -475,7 +475,7 @@ const registerForChange = (target, initialValue, confirmAction) => {
                 )
             );
         } else {
-            confirmAction = "tab";
+            throw new HootDomError(`"enter" confirm action is only supported on <input/> elements`);
         }
     }
 

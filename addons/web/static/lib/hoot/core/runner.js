@@ -602,36 +602,20 @@ export class TestRunner {
         const getInstance = () => {
             const currentJob = this.state.currentTest || this.#suiteStack.at(-1) || this;
             if (!instances.has(currentJob)) {
-                let parentInstance;
-                let current = currentJob;
-                while (current !== this) {
-                    current = current.parent || this;
-                    if (instances.has(current)) {
-                        parentInstance = instances.get(current);
-                        break;
-                    }
-                }
-
-                if (canRegisterAfterCallback) {
-                    this.after(() => {
-                        instances.delete(currentJob);
-
-                        if (afterCallback) {
-                            canRegisterAfterCallback = false;
-                            afterCallback();
-                            canRegisterAfterCallback = true;
-                        }
-                    });
-                }
-
+                const parentInstance = [...instances.values()].at(-1);
                 instances.set(currentJob, instanceGetter(parentInstance));
+
+                this.after(() => {
+                    instances.delete(currentJob);
+                    afterCallback?.();
+                });
             }
+
             return instances.get(currentJob);
         };
 
         /** @type {Map<Job, T>} */
         const instances = new Map();
-        let canRegisterAfterCallback = true;
 
         return getInstance;
     }
