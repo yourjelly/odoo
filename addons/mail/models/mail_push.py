@@ -6,7 +6,7 @@ import logging
 from requests import Session
 
 from odoo import api, fields, models
-from odoo.addons.mail.tools.web_push import check_push_notification_schedule, push_to_end_point, DeviceUnreachableError
+from odoo.addons.mail.tools.web_push import push_to_end_point, DeviceUnreachableError
 
 _logger = logging.getLogger(__name__)
 
@@ -38,18 +38,19 @@ class MailPush(models.Model):
         devices = web_push_notifications_sudo.mail_push_device_id.grouped('id')
 
         partners_to_notify = set()
-        for device in devices:
-            partners_to_notify.add(device.get("partner_id"))
+        for i in devices:
+            partners_to_notify.add(devices.get(i).partner_id.id)
         user_ids = self.env['res.users'].search([('partner_id', 'in', list(partners_to_notify))])
+
         for user in user_ids:
-            if (user.check_push_notification_schedule() == False):
+            if not user.check_push_notification_schedule():
                 partners_to_notify.remove(user.partner_id.id)
 
         for web_push_notification_sudo in web_push_notifications_sudo:
             device = devices.get(web_push_notification_sudo.mail_push_device_id.id)
             if device.id in devices_to_unlink:
                 continue
-            if device.partner_id not in partners_to_notify:
+            if device.partner_id.id not in partners_to_notify:
                 continue
             try:
                 push_to_end_point(
