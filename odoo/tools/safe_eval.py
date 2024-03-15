@@ -28,6 +28,8 @@ from .misc import ustr
 
 import odoo
 
+from odoo.exceptions import UserError
+
 unsafe_eval = eval
 
 __all__ = ['test_expr', 'safe_eval', 'const_eval']
@@ -165,7 +167,7 @@ def assert_valid_codeobj(allowed_codes, code_obj, expr):
     # when loading /web according to line_profiler
     code_codes = {i.opcode for i in dis.get_instructions(code_obj)}
     if not allowed_codes >= code_codes:
-        raise ValueError("forbidden opcode(s) in %r: %s" % (expr, ', '.join(opname[x] for x in (code_codes - allowed_codes))))
+        raise UserError("forbidden opcode(s) in %r: %s" % (expr, ', '.join(opname[x] for x in (code_codes - allowed_codes))))
 
     for const in code_obj.co_consts:
         if isinstance(const, CodeType):
@@ -184,10 +186,10 @@ def test_expr(expr, allowed_codes, mode="eval"):
             # eval() does not like leading/trailing whitespace
             expr = expr.strip()
         code_obj = compile(expr, "", mode)
-    except (SyntaxError, TypeError, ValueError):
-        raise
+    except (SyntaxError, TypeError, ValueError) as e:
+        raise UserError('%s: "%s" while evaluating\n%r' % (ustr(type(e)), ustr(e), expr))
     except Exception as e:
-        raise ValueError('"%s" while compiling\n%r' % (ustr(e), expr))
+        raise UserError('"%s" while compiling\n%r' % (ustr(e), expr))
     assert_valid_codeobj(allowed_codes, code_obj, expr)
     return code_obj
 
