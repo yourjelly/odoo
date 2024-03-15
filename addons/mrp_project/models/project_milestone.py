@@ -50,7 +50,7 @@ class ProjectMilestone(models.Model):
 
     @api.model
     def _get_fields_to_export(self):
-        return super()._get_fields_to_export() + ['quantity_percentage', 'production_service_display_name']
+        return super()._get_fields_to_export() + ['production_service_display_name']
 
     def action_view_production_order(self):
         self.ensure_one()

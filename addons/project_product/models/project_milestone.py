@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import fields, models
+from odoo import fields, models, api
+
 
 class ProjectMilestone(models.Model):
     _inherit = 'project.milestone'
@@ -19,3 +20,7 @@ class ProjectMilestone(models.Model):
 
     def _compute_product_uom_qty(self):
         self.product_uom_qty = 0  # To override
+
+    @api.model
+    def _get_fields_to_export(self):
+        return super()._get_fields_to_export() + ['quantity_percentage']

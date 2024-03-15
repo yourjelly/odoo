@@ -54,7 +54,7 @@ class ProjectMilestone(models.Model):
 
     @api.model
     def _get_fields_to_export(self):
-        return super()._get_fields_to_export() + ['allow_billable', 'quantity_percentage', 'sale_line_display_name']
+        return super()._get_fields_to_export() + ['allow_billable', 'sale_line_display_name']
 
     def action_view_sale_order(self):
         self.ensure_one()

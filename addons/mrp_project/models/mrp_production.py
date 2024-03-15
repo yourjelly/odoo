@@ -16,8 +16,7 @@ class MrpProduction(models.Model):
     tasks_count = fields.Integer(string='Tasks', compute='_compute_tasks_ids', groups="project.group_project_user")
 
     visible_project = fields.Boolean('Display project', compute='_compute_visible_project', readonly=True)
-    project_id = fields.Many2one('project.project', 'Project',
-        help='Select a non billable project on which tasks can be created.')
+    project_id = fields.Many2one('project.project', 'Project', help='Select a project on which tasks can be created.')
     project_ids = fields.Many2many('project.project', compute="_compute_project_ids", string='Projects', copy=False, groups="project.group_project_user", help="Projects used in this production order.")
     project_count = fields.Integer(string='Number of Projects', compute='_compute_project_ids', groups='project.group_project_user')
     milestone_count = fields.Integer(compute='_compute_milestone_count')
@@ -49,8 +48,7 @@ class MrpProduction(models.Model):
             factor = production.product_uom_id._compute_quantity(production.product_qty, production.bom_id.product_uom_id) / production.bom_id.product_qty
             _boms, lines = production.bom_id.explode(production.product_id, factor, picking_type=production.bom_id.picking_type_id)
             for bom_line, line_data in lines:
-                if bom_line.child_bom_id and bom_line.child_bom_id.type == 'phantom' or\
-                        bom_line.product_id.type != 'service':
+                if bom_line.child_bom_id and bom_line.child_bom_id.type == 'phantom' or bom_line.product_id.type != 'service':
                     continue
                 services.append({
                     'product_id': bom_line.product_id,
