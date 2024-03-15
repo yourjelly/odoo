@@ -26,13 +26,14 @@ export class VideoSelector extends Component {
             dailymotion: 'dailymotion',
             vimeo: 'vimeo',
             youku: 'youku',
+            google_drive: 'google_drive',
         };
 
         this.OPTIONS = {
             autoplay: {
                 label: _t("Autoplay"),
                 description: _t("Videos are muted when autoplay is enabled"),
-                platforms: [this.PLATFORMS.youtube, this.PLATFORMS.dailymotion, this.PLATFORMS.vimeo],
+                platforms: [this.PLATFORMS.youtube, this.PLATFORMS.dailymotion, this.PLATFORMS.vimeo, this.PLATFORMS.google_drive],
                 urlParameter: 'autoplay=1',
             },
             loop: {
