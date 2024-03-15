@@ -22,11 +22,6 @@ class StockMove(models.Model):
     _description = "Stock Move"
     _order = 'sequence, id'
 
-    def _default_group_id(self):
-        if self.env.context.get('default_picking_id'):
-            return self.env['stock.picking'].browse(self.env.context['default_picking_id']).group_id.id
-        return False
-
     name = fields.Char('Description', required=True)
     sequence = fields.Integer('Sequence', default=10)
     priority = fields.Selection(
@@ -120,7 +115,7 @@ class StockMove(models.Model):
              "this second option should be chosen.")
     scrapped = fields.Boolean('Scrapped', related='location_dest_id.scrap_location', readonly=True, store=True)
     scrap_ids = fields.One2many('stock.scrap', 'move_id')
-    group_id = fields.Many2one('procurement.group', 'Procurement Group', default=_default_group_id, index=True)
+    group_id = fields.Many2one('procurement.group', 'Procurement Group', index=True)
     rule_id = fields.Many2one(
         'stock.rule', 'Stock Rule', ondelete='restrict', help='The stock rule that created this stock move',
         check_company=True)
@@ -576,6 +571,15 @@ class StockMove(models.Model):
                 move.location_id.name, move.location_dest_id.name)))
         return res
 
+    @api.model
+    def create(self, vals):
+        if 'picking_id' in vals and 'group_id' not in vals:
+            picking = self.env['stock.picking'].browse(vals['picking_id'])
+            if picking.group_id:
+                vals['group_id'] = picking.group_id.id
+        res = super().create(vals)
+        return res
+
     def write(self, vals):
         # Handle the write on the initial demand by updating the reserved quantity and logging
         # messages according to the state of the stock.move records.
@@ -605,6 +609,11 @@ class StockMove(models.Model):
             self._propagate_product_packaging(vals['product_packaging_id'])
         if 'date_deadline' in vals:
             self._set_date_deadline(vals.get('date_deadline'))
+        # Propagates the operation's procurement group.
+        if 'picking_id' in vals and 'group_id' not in vals:
+            picking = self.env['stock.picking'].browse(vals['picking_id'])
+            if picking.group_id:
+                vals['group_id'] = picking.group_id.id
         res = super(StockMove, self).write(vals)
         if move_to_recompute_state:
             move_to_recompute_state._recompute_state()
