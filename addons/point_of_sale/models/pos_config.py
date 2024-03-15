@@ -729,7 +729,17 @@ class PosConfig(models.Model):
             ('sale_ok', '=', True),
         ]
         if self.limit_categories and self.iface_available_categ_ids:
-            domain.append(('pos_categ_ids', 'in', self.iface_available_categ_ids.ids))
+            pos_combos = self.env['pos.combo'].search([('combo_line_ids', '!=', False)])
+            # Extracting product IDs from combo lines
+            combos_categ_ids = pos_combos.mapped('combo_line_ids.product_id')
+            # Union of available category IDs and combo category IDs
+            total_categ_ids = self.iface_available_categ_ids | combos_categ_ids.mapped('pos_categ_ids')
+            # Constructing domain
+            domain.append(('pos_categ_ids', 'in', total_categ_ids.ids))
+            # Handling combos with false category IDs
+            combos_with_false_categ_ids = combos_categ_ids.filtered(lambda p: not p.pos_categ_ids)
+            if combos_with_false_categ_ids:
+                domain = OR([domain, [('pos_categ_ids', '=', False)]])
         if self.iface_tipproduct:
             domain = OR([domain, [('id', '=', self.tip_product_id.id)]])
         return domain
