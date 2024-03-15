@@ -43,7 +43,7 @@ export class WebsitePreview extends Component {
         });
         // The params used to configure the context should be ignored when the
         // action is restored (example: click on the breadcrumb).
-        this.isRestored = this.props.action.jsId === this.websiteService.actionJsId;
+        this.isRestored = this.props.action.jsId === this.websiteService.actionJsId || this.websiteService.lastUrl;
         this.websiteService.actionJsId = this.props.action.jsId;
 
         useBus(this.websiteService.bus, 'BLOCK', (event) => this.block(event.detail));
