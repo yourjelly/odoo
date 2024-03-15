@@ -597,7 +597,7 @@
         {
             content: 'Change the Recipient Email',
             trigger: '[data-field-name="email_to"] input',
-            run: 'text test@test.test',
+            run: 'text_blur test@test.test',
         },
     ]));
     wTourUtils.registerWebsitePreviewTour('website_form_contactus_edition_no_email', {

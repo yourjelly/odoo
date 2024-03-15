@@ -134,7 +134,7 @@ registry.category("web_tour.tours").add("mail/static/tests/tours/mail_composer_t
             trigger: ".o-mail-Composer-input",
             run() {
                 if (this.anchor.value !== "keep the content") {
-                    throw new Error(
+                    console.error(
                         "Composer in chatter should contain full composer text after discarding."
                     );
                 }
