@@ -3,12 +3,11 @@
 import { AttachmentList } from "@mail/core/common/attachment_list";
 import { useAttachmentUploader } from "@mail/core/common/attachment_uploader_hook";
 import { useDropzone } from "@mail/core/common/dropzone_hook";
-import { Picker, usePicker } from "@mail/core/common/picker";
 import { MessageConfirmDialog } from "@mail/core/common/message_confirm_dialog";
 import { NavigableList } from "@mail/core/common/navigable_list";
+import { Picker, usePicker } from "@mail/core/common/picker";
 import { useSuggestion } from "@mail/core/common/suggestion_hook";
 import { prettifyMessageContent } from "@mail/utils/common/format";
-import { useSelection } from "@mail/utils/common/hooks";
 import { isDragSourceExternalFile } from "@mail/utils/common/misc";
 import { isEventHandled, markEventHandled } from "@web/core/utils/misc";
 
@@ -22,11 +21,11 @@ import {
     useState,
 } from "@odoo/owl";
 
+import { CEInput } from "@mail/core/common/ceinput";
 import { _t } from "@web/core/l10n/translation";
+import { rpc } from "@web/core/network/rpc";
 import { useService } from "@web/core/utils/hooks";
 import { FileUploader } from "@web/views/fields/file_handler";
-import { rpc } from "@web/core/network/rpc";
-import { escape, sprintf } from "@web/core/utils/strings";
 
 const EDIT_CLICK_TYPE = {
     CANCEL: "cancel",
@@ -55,6 +54,7 @@ export class Composer extends Component {
         Picker,
         FileUploader,
         NavigableList,
+        CEInput,
     };
     static defaultProps = {
         mode: "normal",
@@ -83,6 +83,7 @@ export class Composer extends Component {
     static template = "mail.Composer";
 
     setup() {
+        window.c = this;
         this.SEND_KEYBIND_TO_SEND = markup(
             _t("<samp>%(send_keybind)s</samp><i> to send</i>", { send_keybind: this.sendKeybind })
         );
@@ -95,28 +96,25 @@ export class Composer extends Component {
         this.threadService = useService("mail.thread");
         this.ui = useState(useService("ui"));
         this.mainActionsRef = useRef("main-actions");
-        this.ref = useRef("textarea");
+        this.ref = null;
         this.fakeTextarea = useRef("fakeTextarea");
         this.emojiButton = useRef("emoji-button");
         this.state = useState({
             active: true,
+            restoreSelection: 0,
         });
-        this.selection = useSelection({
-            refName: "textarea",
-            model: this.props.composer.selection,
-            preserveOnClickAwayPredicate: async (ev) => {
-                // Let event be handled by bubbling handlers first.
-                await new Promise(setTimeout);
-                return (
-                    !this.isEventTrusted(ev) ||
-                    isEventHandled(ev, "sidebar.openThread") ||
-                    isEventHandled(ev, "emoji.selectEmoji") ||
-                    isEventHandled(ev, "Composer.onClickAddEmoji") ||
-                    isEventHandled(ev, "composer.clickOnAddAttachment") ||
-                    isEventHandled(ev, "composer.selectSuggestion")
-                );
+        this.selection = {
+            restore: () => {
+                this.state.restoreSelection++;
             },
-        });
+            moveCursor: (position) => {
+                Object.assign(this.props.composer.selection, {
+                    start: position,
+                    end: position,
+                    direction: "none",
+                });
+            },
+        };
         this.suggestion = this.store.self.type === "partner" ? useSuggestion() : undefined;
         this.markEventHandled = markEventHandled;
         this.onDropFile = this.onDropFile.bind(this);
@@ -137,7 +135,7 @@ export class Composer extends Component {
         this.picker = usePicker(this.pickerSettings);
         useEffect(
             (focus) => {
-                if (focus && this.ref.el) {
+                if (focus && this.ref?.el) {
                     this.selection.restore();
                     this.ref.el.focus();
                 }
@@ -154,9 +152,12 @@ export class Composer extends Component {
         );
         useEffect(
             () => {
+                if (!this.ref) {
+                    return;
+                }
                 this.ref.el.style.height = this.fakeTextarea.el.scrollHeight + "px";
             },
-            () => [this.props.composer.textInputContent, this.ref.el]
+            () => [this.props.composer.textInputContent, this.ref?.el]
         );
         useEffect(
             () => {
@@ -169,8 +170,26 @@ export class Composer extends Component {
             () => [this.props.composer.forceCursorMove]
         );
         onMounted(() => {
-            this.ref.el.scrollTo({ top: 0, behavior: "instant" });
+            this.ref?.el.scrollTo({ top: 0, behavior: "instant" });
         });
+    }
+
+    setRef(ref) {
+        this.ref = ref;
+    }
+
+    async onSelectionChanged(ev, newValue) {
+        await new Promise(setTimeout);
+        const shouldPreserve =
+            !this.isEventTrusted(ev) ||
+            isEventHandled(ev, "sidebar.openThread") ||
+            isEventHandled(ev, "emoji.selectEmoji") ||
+            isEventHandled(ev, "Composer.onClickAddEmoji") ||
+            isEventHandled(ev, "composer.clickOnAddAttachment") ||
+            isEventHandled(ev, "composer.selectSuggestion");
+        if (!shouldPreserve) {
+            this.props.composer.selection = newValue;
+        }
     }
 
     get pickerSettings() {
@@ -210,51 +229,17 @@ export class Composer extends Component {
     }
 
     get CANCEL_OR_SAVE_EDIT_TEXT() {
-        if (this.ui.isSmall) {
-            return markup(
-                sprintf(
-                    escape(
-                        _t(
-                            "%(open_button)s%(icon)s%(open_em)sDiscard editing%(close_em)s%(close_button)s"
-                        )
-                    ),
-                    {
-                        open_button: `<button class='btn px-1 py-0' data-type="${escape(
-                            EDIT_CLICK_TYPE.CANCEL
-                        )}">`,
-                        close_button: "</button>",
-                        icon: `<i class='fa fa-times-circle pe-1' data-type="${escape(
-                            EDIT_CLICK_TYPE.CANCEL
-                        )}"></i>`,
-                        open_em: `<em data-type="${escape(EDIT_CLICK_TYPE.CANCEL)}">`,
-                        close_em: "</em>",
-                    }
-                )
-            );
-        } else {
-            const translation1 = _t(
-                "%(open_samp)sEscape%(close_samp)s %(open_em)sto %(open_cancel)scancel%(close_cancel)s%(close_em)s, %(open_samp)sCTRL-Enter%(close_samp)s %(open_em)sto %(open_save)ssave%(close_save)s%(close_em)s"
-            );
-            const translation2 = _t(
-                "%(open_samp)sEscape%(close_samp)s %(open_em)sto %(open_cancel)scancel%(close_cancel)s%(close_em)s, %(open_samp)sEnter%(close_samp)s %(open_em)sto %(open_save)ssave%(close_save)s%(close_em)s"
-            );
-            return markup(
-                sprintf(escape(this.props.mode === "extended" ? translation1 : translation2), {
-                    open_samp: "<samp>",
-                    close_samp: "</samp>",
-                    open_em: "<em>",
-                    close_em: "</em>",
-                    open_cancel: `<a role="button" href="#" data-type="${escape(
-                        EDIT_CLICK_TYPE.CANCEL
-                    )}">`,
-                    close_cancel: "</a>",
-                    open_save: `<a role="button" href="#" data-type="${escape(
-                        EDIT_CLICK_TYPE.SAVE
-                    )}">`,
-                    close_save: "</a>",
-                })
-            );
-        }
+        return markup(
+            _t(
+                "<samp>%(cancel_keybind)s</samp><i> to <a href='#' data-type='%(cancel_type)s'>cancel</a></i>, <samp>%(save_keybind)s</samp><i> to <a href='#' data-type='%(save_type)s'>save</a></i>",
+                {
+                    cancel_keybind: _t("Escape"),
+                    cancel_type: EDIT_CLICK_TYPE.CANCEL,
+                    save_keybind: this.sendKeybind,
+                    save_type: EDIT_CLICK_TYPE.SAVE,
+                }
+            )
+        );
     }
 
     get SEND_TEXT() {
@@ -294,7 +279,7 @@ export class Composer extends Component {
 
     get navigableListProps() {
         const props = {
-            anchorRef: this.ref.el,
+            anchorRef: this.ref?.el,
             position: this.env.inChatter ? "bottom-fit" : "top-fit",
             placeholder: _t("Loading"),
             onSelect: (ev, option) => {
@@ -554,10 +539,6 @@ export class Composer extends Component {
     }
 
     async sendMessage() {
-        if (this.props.composer.message) {
-            this.editMessage();
-            return;
-        }
         await this.processMessage(async (value) => {
             const postData = {
                 attachments: this.props.composer.attachments,

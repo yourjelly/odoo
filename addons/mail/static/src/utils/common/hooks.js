@@ -198,6 +198,64 @@ export function useMessageHighlight(duration = 2000) {
     return state;
 }
 
+export function useSelectionChange({ refName, onSelectionChanged }) {
+    const ref = useRef(refName);
+    let ignoreNext = false;
+
+    function isSelectionBackwards() {
+        let backwards = false;
+        if (window.getSelection) {
+            var sel = window.getSelection();
+            if (!sel.isCollapsed) {
+                const range = document.createRange();
+                range.setStart(sel.anchorNode, sel.anchorOffset);
+                range.setEnd(sel.focusNode, sel.focusOffset);
+                backwards = range.collapsed;
+            }
+        }
+        return backwards;
+    }
+
+    function _onSelectionChange(ev) {
+        if (document.activeElement && document.activeElement === ref.el && !ignoreNext) {
+            const range = window.getSelection().getRangeAt(0);
+            const preSelectionRange = range.cloneRange();
+            preSelectionRange.selectNodeContents(ref.el);
+            preSelectionRange.setEnd(range.startContainer, range.startOffset);
+            const start = preSelectionRange.toString().length;
+            const end = start + range.toString().length;
+            if (start === 0) {
+                console.warn(ev);
+            }
+            onSelectionChanged(ev, {
+                start,
+                end,
+                direction: start === end ? "none" : isSelectionBackwards() ? "backward" : "forward",
+            });
+        }
+        ignoreNext = false;
+    }
+    onExternalClick(refName, async (ev) => {
+        if (!ref.el) {
+            return;
+        }
+        onSelectionChanged(ev, {
+            start: ref.el.textContent.length,
+            end: ref.el.textContent.length,
+            direction: "none",
+        });
+    });
+    onMounted(() => {
+        document.addEventListener("selectionchange", _onSelectionChange);
+        document.addEventListener("input", _onSelectionChange);
+        ref.el.addEventListener("focusin", () => (ignoreNext = true));
+    });
+    onWillUnmount(() => {
+        document.removeEventListener("selectionchange", _onSelectionChange);
+        document.removeEventListener("input", _onSelectionChange);
+    });
+}
+
 export function useSelection({ refName, model, preserveOnClickAwayPredicate = () => false }) {
     const ui = useState(useService("ui"));
     const ref = useRef(refName);

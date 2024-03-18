@@ -38,17 +38,22 @@
                     }"
                 >
                     <div class="position-relative flex-grow-1">
-                        <textarea class="o-mail-Composer-input form-control bg-view px-3 border-0 rounded-3 shadow-none overflow-auto"
-                            t-ref="textarea"
-                            style="height:40px;"
-                            t-on-keydown="onKeydown"
-                            t-on-focusin="onFocusin"
-                            t-on-focusout="() => this.props.composer.isFocused = false"
-                            t-on-click="(ev) => markEventHandled(ev, 'composer.onClickTextarea')"
-                            t-on-paste="onPaste"
-                            t-model="props.composer.textInputContent"
-                            t-att-placeholder="placeholder"
-                            t-att-readOnly="!state.active"
+                        <CEInput
+                            onSelectionChanged.bind="onSelectionChanged"
+                            selectionModel="props.composer.selection"
+                            class="'text-wrap o-mail-Composer-input form-control bg-view px-3 border-0 rounded-3 shadow-none overflow-auto'"
+                            model="props.composer.textInputContent"
+                            style="'height:40px; word-break: break-all;'"
+                            setRef.bind="setRef"
+                            setText.bind="(text) => this.props.composer.textInputContent = text"
+                            onKeydown.bind="onKeydown"
+                            onFocusin.bind="onFocusin"
+                            onFocusout.bind="() => this.props.composer.isFocused = false"
+                            onClick.bind="(ev) => markEventHandled(ev, 'composer.onClickTextarea')"
+                            onPaste.bind="onPaste"
+                            placeholder="placeholder"
+                            readonly="!state.active"
+                            restoreSelection="state.restoreSelection"
                         />
                         <!--
                              This is an invisible textarea used to compute the composer
@@ -98,7 +103,7 @@
         </div>
         <span t-if="props.composer.message" class="text-muted" t-out="CANCEL_OR_SAVE_EDIT_TEXT" t-on-click="onClickCancelOrSaveEditText"/>
     </div>
-    <NavigableList t-if="suggestion" class="'o-mail-Composer-suggestionList'" t-props="navigableListProps"/>
+    <NavigableList t-if="suggestion and ref" class="'o-mail-Composer-suggestionList'" t-props="navigableListProps"/>
 </t>
 
 <t t-name="mail.Composer.sendButton">
