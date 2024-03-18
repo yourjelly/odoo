@@ -407,16 +407,20 @@ def is_cors_preflight(request, endpoint):
 
 
 def serialize_exception(exception):
+    # TODO?: shouldn't serializing be a responsibility of the exception class itself?
     name = type(exception).__name__
     module = type(exception).__module__
 
-    return {
+    error = {
         'name': f'{module}.{name}' if module else name,
         'debug': traceback.format_exc(),
         'message': ustr(exception),
         'arguments': exception.args,
         'context': getattr(exception, 'context', {}),
     }
+    if isinstance(exception, AccessError):
+        error['suggested_company'] = exception.suggested_company and exception.suggested_company.read(['id', 'display_name'])[0]
+    return error
 
 
 # =========================================================

@@ -79,6 +79,10 @@ class AccessError(UserError):
         When you try to read a record that you are not allowed to.
     """
 
+    def __init__(self, message, suggested_company=None):
+        super().__init__(message)
+        self.suggested_company = suggested_company
+
 
 class CacheMiss(KeyError):
     """Missing value(s) in cache.

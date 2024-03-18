@@ -167,6 +167,43 @@ export class RedirectWarningDialog extends Component {
 }
 
 // -----------------------------------------------------------------------------
+// Redirect Company Dialog
+// -----------------------------------------------------------------------------
+export class RedirectCompanyDialog extends Component {
+    static template = "web.RedirectCompanyDialog";
+    static components = { Dialog };
+    static props = {
+        ...standardErrorDialogProps,
+        title: { type: String, optional: true },
+    };
+
+    setup() {
+        this.title = this.inferTitle();
+        this.companyService = useService("company");
+        const { data, message } = this.props;
+        if (data && data.arguments && data.arguments.length > 0) {
+            this.message = data.arguments[0];
+        } else {
+            this.message = message;
+        }
+        this.suggestedCompany = data.suggested_company;
+    }
+    inferTitle() {
+        if (this.props.exceptionName && odooExceptionTitleMap.has(this.props.exceptionName)) {
+            return odooExceptionTitleMap.get(this.props.exceptionName).toString();
+        }
+        return this.props.title || _t("Odoo Warning");
+    }
+
+    switchCompany() {
+        const activeCompanyIds = this.companyService.activeCompanyIds;
+        activeCompanyIds.push(this.suggestedCompany.id);
+        this.companyService.setCompanies(activeCompanyIds, true);
+    }
+
+}
+
+// -----------------------------------------------------------------------------
 // Error 504 Dialog
 // -----------------------------------------------------------------------------
 export class Error504Dialog extends Component {
@@ -193,7 +230,7 @@ export class SessionExpiredDialog extends Component {
 registry
     .category("error_dialogs")
     .add("odoo.exceptions.AccessDenied", WarningDialog)
-    .add("odoo.exceptions.AccessError", WarningDialog)
+    .add("odoo.exceptions.AccessError", RedirectCompanyDialog)
     .add("odoo.exceptions.MissingError", WarningDialog)
     .add("odoo.exceptions.UserError", WarningDialog)
     .add("odoo.exceptions.ValidationError", WarningDialog)

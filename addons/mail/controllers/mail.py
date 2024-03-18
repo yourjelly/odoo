@@ -88,6 +88,7 @@ class MailController(http.Controller):
                     if not suggested_company:
                         raise AccessError('')
                     cids = cids + [suggested_company.id]
+                    request.future_response.set_cookie('cids', ','.join([str(cid) for cid in cids]))
                     record_sudo.with_user(uid).with_context(allowed_company_ids=cids).check_access_rule('read')
             except AccessError:
                 return cls._redirect_to_messaging()
@@ -105,7 +106,8 @@ class MailController(http.Controller):
                     'action': record_action.get('id'),
                 }
                 if cids:
-                    url_params['cids'] = cids[0]
+                    # url_params['cids'] = cids[0]
+                    request.future_response.set_cookie('cids', ','.join([str(cid) for cid in cids]))
                 view_id = record_sudo.get_formview_id()
                 if view_id:
                     url_params['view_id'] = view_id
@@ -131,7 +133,8 @@ class MailController(http.Controller):
             url_params['view_id'] = view_id
 
         if cids:
-            url_params['cids'] = ','.join([str(cid) for cid in cids])
+            request.future_response.set_cookie('cids', ','.join([str(cid) for cid in cids]))
+            # url_params['cids'] = ','.join([str(cid) for cid in cids])
         url = '/web?#%s' % url_encode(url_params)
         return request.redirect(url)
 

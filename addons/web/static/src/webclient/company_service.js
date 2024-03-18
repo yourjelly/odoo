@@ -33,7 +33,7 @@ function computeActiveCompanyIds(cids) {
 function getCompanyIds() {
     let cids;
     if (cookie.get("cids")) {
-        cids = parseCompanyIds(cookie.get("cids"));
+        cids = parseCompanyIds(cookie.get("cids").replace(/\"/g, '').replace(/\\054/g, ','));
     }
     return cids || [];
 }
@@ -46,9 +46,11 @@ function accessErrorHandler(env, error, originalError) {
         originalError?.exceptionName !== "odoo.exceptions.AccessError" ||
         !resId
     ) {
+        console.log('not handled')
         return false;
     }
-    error.event?.preventDefault();
+    //error.event?.preventDefault();
+    console.log('handled')
     return true;
 }
 

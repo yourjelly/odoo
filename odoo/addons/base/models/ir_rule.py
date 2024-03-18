@@ -205,6 +205,7 @@ class IrRule(models.Model):
 
         model = records._name
         description = self.env['ir.model']._get(model).name or model
+        suggested_company = None
         operations = {
             'read':  _("read"),
             'write': _("write"),
@@ -244,13 +245,18 @@ class IrRule(models.Model):
         failing_rules = _("Blame the following rules:\n%s", rules_description)
 
         if company_related:
-            failing_rules += "\n\n" + _('Note: this might be a multi-company issue. Switching company may help - in Odoo, not in real life!')
+            suggested_company = records.sudo()._get_mail_redirect_suggested_company()
+            suggested_company = suggested_company if suggested_company and suggested_company in self.env.user.company_ids else None
+            if suggested_company:
+                resolution_info += "\n\n" + _('This seems to be a multi-company issue, you might be able to access the record by switching to the company: %s.', suggested_company.display_name)
+            else:
+                resolution_info += "\n\n" + _('This seems to be a multi-company issue, but you do not have access to the proper company to access the record anyhow.')
 
         # clean up the cache of records prefetched with display_name above
         records_sudo.invalidate_recordset()
 
         msg = f"{operation_error}\n{failing_records}\n\n{failing_rules}\n\n{resolution_info}"
-        return AccessError(msg)
+        return AccessError(msg, suggested_company)
 
 
 #
