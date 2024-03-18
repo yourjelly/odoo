@@ -61,4 +61,4 @@ class SaleOrder(models.Model):
         :rtype: list
         """
         domain = super()._get_product_catalog_domain()
-        return expression.AND([domain, [('detailed_type', '!=', 'event')]])
+        return expression.AND([domain, [('detailed_type', '!=', 'service')]])

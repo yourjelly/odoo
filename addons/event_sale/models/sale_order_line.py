@@ -20,7 +20,7 @@ class SaleOrderLine(models.Model):
     @api.constrains('event_id', 'event_ticket_id', 'product_id')
     def _check_event_registration_ticket(self):
         for so_line in self:
-            if so_line.product_id.detailed_type == "event" and (not so_line.event_id or not so_line.event_ticket_id):
+            if not so_line.event_id or not so_line.event_ticket_id:
                 raise ValidationError(
                     _("The sale order line with the product %(product_name)s needs an event and a ticket.", product_name=so_line.product_id.name))
 
@@ -52,7 +52,7 @@ class SaleOrderLine(models.Model):
 
     @api.depends('product_id')
     def _compute_event_id(self):
-        event_lines = self.filtered(lambda line: line.product_id and line.product_id.detailed_type == 'event')
+        event_lines = self.filtered(lambda line: line.product_id and line.product_id.detailed_type == 'service')
         (self - event_lines).event_id = False
         for line in event_lines:
             if line.product_id not in line.event_id.event_ticket_ids.product_id:

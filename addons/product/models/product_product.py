@@ -30,8 +30,8 @@ class ProductProduct(models.Model):
         digits='Product Price', inverse='_set_product_lst_price',
         help="The sale price is managed from the product template. Click on the 'Configure Variants' button to set the extra attribute prices.")
 
-    default_code = fields.Char('Internal Reference', index=True)
-    code = fields.Char('Reference', compute='_compute_product_code')
+    default_code = fields.Char('Reference', index=True)
+    code = fields.Char(compute='_compute_product_code')
     partner_ref = fields.Char('Customer Ref', compute='_compute_partner_ref')
 
     active = fields.Boolean(
@@ -353,7 +353,7 @@ class ProductProduct(models.Model):
         if self.env['product.product'].search_count(domain, limit=1):
             return {'warning': {
                 'title': _("Note:"),
-                'message': _("The Internal Reference '%s' already exists.", self.default_code),
+                'message': _("The Reference '%s' already exists.", self.default_code),
             }}
 
     @api.model_create_multi

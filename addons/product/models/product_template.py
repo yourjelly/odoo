@@ -49,13 +49,13 @@ class ProductTemplate(models.Model):
         help="A description of the Product that you want to communicate to your customers. "
              "This description will be copied to every Sales Order, Delivery Order and Customer Invoice/Credit Note")
     detailed_type = fields.Selection([
-        ('consu', 'Consumable'),
+        ('consu', 'Goods'),
         ('service', 'Service')], string='Product Type', default='consu', required=True,
         help='A storable product is a product for which you manage stock. The Inventory app has to be installed.\n'
              'A consumable product is a product for which stock is not managed.\n'
              'A service is a non-material product you provide.')
     type = fields.Selection(
-        [('consu', 'Consumable'),
+        [('consu', 'Goods'),
          ('service', 'Service')],
         compute='_compute_type', store=True, readonly=False, precompute=True)
     categ_id = fields.Many2one(
@@ -90,8 +90,8 @@ class ProductTemplate(models.Model):
         inverse='_set_weight', store=True)
     weight_uom_name = fields.Char(string='Weight unit of measure label', compute='_compute_weight_uom_name')
 
-    sale_ok = fields.Boolean('Can be Sold', default=True)
-    purchase_ok = fields.Boolean('Can be Purchased', default=True)
+    sale_ok = fields.Boolean('Sales', default=True)
+    purchase_ok = fields.Boolean('Purchase', default=True)
     uom_id = fields.Many2one(
         'uom.uom', 'Unit of Measure',
         default=_get_default_uom_id, required=True,
@@ -128,7 +128,7 @@ class ProductTemplate(models.Model):
     # related to display product product information if is_product_variant
     barcode = fields.Char('Barcode', compute='_compute_barcode', inverse='_set_barcode', search='_search_barcode')
     default_code = fields.Char(
-        'Internal Reference', compute='_compute_default_code',
+        'Reference', compute='_compute_default_code',
         inverse='_set_default_code', store=True)
 
     pricelist_item_count = fields.Integer("Number of price rules", compute="_compute_item_count")
@@ -370,7 +370,7 @@ class ProductTemplate(models.Model):
         if self.env['product.template'].search_count(domain, limit=1):
             return {'warning': {
                 'title': _("Note:"),
-                'message': _("The Internal Reference '%s' already exists.", self.default_code),
+                'message': _("The Reference '%s' already exists.", self.default_code),
             }}
 
     @api.depends('product_variant_ids.default_code')

@@ -35,7 +35,7 @@
                         <label for="name" string="Attribute Name"/>
                         <field name="name" nolabel="1"/>
                         <field name="display_type" widget="radio"/>
-                        <field name="create_variant" widget="radio" readonly="number_related_products != 0"/>
+                        <field name="create_variant" widget="radio" readonly="number_related_products != 0 or display_type=='multi'"/>
                     </group>
                 </group>
                 <notebook>
