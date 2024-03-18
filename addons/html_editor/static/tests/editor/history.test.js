@@ -178,7 +178,7 @@ describe("prevent renderingClasses to be set from history", () => {
             history_rendering_classes: ["x"],
         });
     }
-    const plugins = [...registry.category("phoenix_plugins").getAll(), TestRenderingClassesPlugin];
+    const Plugins = [...registry.category("phoenix_plugins").getAll(), TestRenderingClassesPlugin];
     test("should prevent renderingClasses to be added", async () => {
         await testEditor({
             contentBefore: `<p>a</p>`,
@@ -189,7 +189,7 @@ describe("prevent renderingClasses to be set from history", () => {
                 const history = editor.plugins.find((p) => p.constructor.name === "history");
                 expect(history.steps.length).toBe(1);
             },
-            config: { Plugins: plugins },
+            config: { Plugins: Plugins },
         });
     });
 
@@ -204,7 +204,7 @@ describe("prevent renderingClasses to be set from history", () => {
                 redo(editor);
             },
             contentAfter: `[]<p class="y">a</p>`,
-            config: { Plugins: plugins },
+            config: { Plugins: Plugins },
         });
     });
 
@@ -224,7 +224,7 @@ describe("prevent renderingClasses to be set from history", () => {
                 ]);
             },
             contentAfter: `<p class="y">a</p>`,
-            config: { Plugins: plugins },
+            config: { Plugins: Plugins },
         });
     });
 
@@ -240,7 +240,7 @@ describe("prevent renderingClasses to be set from history", () => {
                 editor.historyRevertCurrentStep(); // back to the initial state
             },
             contentAfter: `<p class="x">a</p>`,
-            config: { Plugins: plugins },
+            config: { Plugins: Plugins },
         });
     });
 });
