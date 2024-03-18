@@ -5,7 +5,7 @@ import { Deferred } from "@web/core/utils/concurrency";
 import { CollaborationPlugin } from "../../src/editor/core/collaboration_plugin";
 import { createDOMPathGenerator } from "../../src/editor/utils/dom_traversal";
 import { DIRECTIONS } from "../../src/editor/utils/position";
-import { setupEditorBase } from "../test_helpers/editor";
+import { setupEditor } from "../test_helpers/editor";
 import { unformat } from "../test_helpers/format";
 import { parseHTML } from "../../src/editor/utils/html";
 import { Plugin } from "../../src/editor/plugin";
@@ -70,7 +70,7 @@ const testMultiEditor = async (spec) => {
         HistoryPlugin.prototype.generateId = () => `fake_id_${n++}`;
         let selection;
         const defaultPlugins = registry.category("phoenix_plugins").getAll();
-        const base = await setupEditorBase(spec.contentBefore, {
+        const base = await setupEditor(spec.contentBefore, {
             inIFrame: true,
             onMounted: (editable) => {
                 selection = parseMultipleTextualSelection(editable, peerId);
