@@ -2,7 +2,7 @@
 from collections import defaultdict
 from lxml import etree
 
-from odoo import models, _
+from odoo import Command, models, _
 from odoo.tools import html2plaintext, cleanup_xml_node
 
 
@@ -703,15 +703,31 @@ class AccountEdiXmlUBL20(models.AbstractModel):
         invoice_line_tag = 'InvoiceLine' if invoice.move_type in ('in_invoice', 'out_invoice') or qty_factor == -1 else 'CreditNoteLine'
         for line_tree in tree.findall('./{*}' + invoice_line_tag):
             invoice_line = invoice.invoice_line_ids.create({'move_id': invoice.id})
-            logs += self._import_fill_invoice_line_form(line_tree, invoice_line, qty_factor)
-
+            logs += self._import_fill_invoice_line(line_tree, invoice_line, qty_factor)
         return logs
 
-    def _import_fill_invoice_line_form(self, tree, invoice_line, qty_factor):
-        logs = []
+    def _import_fill_invoice_line(self, tree, invoice_line, qty_factor):
+        xpath_dict = {
+            'basis_qty': ['./{*}Price/{*}BaseQuantity'],
+            'gross_price_unit': './{*}Price/{*}AllowanceCharge/{*}BaseAmount',
+            'rebate': './{*}Price/{*}AllowanceCharge/{*}Amount',
+            'net_price_unit': './{*}Price/{*}PriceAmount',
+            'billed_qty': (
+                './{*}InvoicedQuantity'
+                if invoice_line.move_id.move_type in ('in_invoice', 'out_invoice') or qty_factor == -1
+                else './{*}CreditedQuantity'
+            ),
+            'allowance_charge': './/{*}AllowanceCharge',
+            'allowance_charge_indicator': './{*}ChargeIndicator',
+            'allowance_charge_amount': './{*}Amount',
+            'allowance_charge_reason': './{*}AllowanceChargeReason',
+            'allowance_charge_reason_code': './{*}AllowanceChargeReasonCode',
+            'line_total_amount': './{*}LineExtensionAmount',
+        }
+        line_values = self._import_decode_invoice_line_values(tree, xpath_dict, qty_factor)
 
-        # Product.
-        invoice_line.product_id = self.env['product.product']._retrieve_product(
+        # Product
+        line_values['product_id'] = self.env['product.product']._retrieve_product(
             default_code=self._find_value('./cac:Item/cac:SellersItemIdentification/cbc:ID', tree),
             name=self._find_value('./cac:Item/cbc:Name', tree),
             barcode=self._find_value("./cac:Item/cac:StandardItemIdentification/cbc:ID[@schemeID='0160']", tree),
@@ -724,27 +740,8 @@ class AccountEdiXmlUBL20(models.AbstractModel):
         elif name_node is not None:
             invoice_line.name = name_node.text  # Fallback on Name if Description is not found.
 
-        xpath_dict = {
-            'basis_qty': [
-                './{*}Price/{*}BaseQuantity',
-            ],
-            'gross_price_unit': './{*}Price/{*}AllowanceCharge/{*}BaseAmount',
-            'rebate': './{*}Price/{*}AllowanceCharge/{*}Amount',
-            'net_price_unit': './{*}Price/{*}PriceAmount',
-            'billed_qty':  './{*}InvoicedQuantity' if invoice_line.move_id.move_type in ('in_invoice', 'out_invoice') or qty_factor == -1 else './{*}CreditedQuantity',
-            'allowance_charge': './/{*}AllowanceCharge',
-            'allowance_charge_indicator': './{*}ChargeIndicator',
-            'allowance_charge_amount': './{*}Amount',
-            'allowance_charge_reason': './{*}AllowanceChargeReason',
-            'allowance_charge_reason_code': './{*}AllowanceChargeReasonCode',
-            'line_total_amount': './{*}LineExtensionAmount',
-        }
-
-        # Taxes
-        inv_line_vals = self._import_fill_invoice_line_values(tree, xpath_dict, invoice_line, qty_factor)
-        # retrieve tax nodes
         tax_nodes = tree.findall('.//{*}Item/{*}ClassifiedTaxCategory/{*}Percent')
-        return self._import_fill_invoice_line_taxes(tax_nodes, invoice_line, inv_line_vals, logs)
+        return self._import_fill_invoice_line_values(tax_nodes, invoice_line, line_values)
 
     def _correct_invoice_tax_amount(self, tree, invoice):
         """ The tax total may have been modified for rounding purpose, if so we should use the imported tax and not

@@ -346,28 +346,15 @@ class AccountEdiXmlCII(models.AbstractModel):
 
         for line_tree in tree.findall('./{*}SupplyChainTradeTransaction/{*}IncludedSupplyChainTradeLineItem'):
             invoice_line = invoice.invoice_line_ids.create({'move_id': invoice.id})
-            logs += self._import_fill_invoice_line_form(line_tree, invoice_line, qty_factor)
+            logs += self._import_fill_invoice_line(line_tree, invoice_line, qty_factor)
 
         return logs
 
-    def _import_fill_invoice_line_form(self, tree, invoice_line, qty_factor):
-        logs = []
-
-        # Product.
-        name = self._find_value('.//ram:SpecifiedTradeProduct/ram:Name', tree)
-        invoice_line.product_id = self.env['product.product']._retrieve_product(
-            default_code=self._find_value('.//ram:SpecifiedTradeProduct/ram:SellerAssignedID', tree),
-            name=name,
-            barcode=self._find_value('.//ram:SpecifiedTradeProduct/ram:GlobalID', tree)
-        )
-        # force original line description instead of the one copied from product's Sales Description
-        if name:
-            invoice_line.name = name
-
+    def _import_fill_invoice_line(self, tree, invoice_line, qty_factor):
         xpath_dict = {
             'basis_qty': [
                 './{*}SpecifiedLineTradeAgreement/{*}GrossPriceProductTradePrice/{*}BasisQuantity',
-                './{*}SpecifiedLineTradeAgreement/{*}NetPriceProductTradePrice/{*}BasisQuantity'
+                './{*}SpecifiedLineTradeAgreement/{*}NetPriceProductTradePrice/{*}BasisQuantity',
             ],
             'gross_price_unit': './{*}SpecifiedLineTradeAgreement/{*}GrossPriceProductTradePrice/{*}ChargeAmount',
             'rebate': './{*}SpecifiedLineTradeAgreement/{*}GrossPriceProductTradePrice/{*}AppliedTradeAllowanceCharge/{*}ActualAmount',
@@ -380,10 +367,21 @@ class AccountEdiXmlCII(models.AbstractModel):
             'allowance_charge_reason_code': './{*}ReasonCode',
             'line_total_amount': './{*}SpecifiedLineTradeSettlement/{*}SpecifiedTradeSettlementLineMonetarySummation/{*}LineTotalAmount',
         }
-        inv_line_vals = self._import_fill_invoice_line_values(tree, xpath_dict, invoice_line, qty_factor)
-        # retrieve tax nodes
+        line_values = self._import_decode_invoice_line_values(tree, xpath_dict, qty_factor)
+
+        # Product
+        name = self._find_value('.//ram:SpecifiedTradeProduct/ram:Name', tree)
+        line_values['product_id'] = self.env['product.product']._retrieve_product(
+            default_code=self._find_value('.//ram:SpecifiedTradeProduct/ram:SellerAssignedID', tree),
+            name=name,
+            barcode=self._find_value('.//ram:SpecifiedTradeProduct/ram:GlobalID', tree)
+        )
+        # force original line description instead of the one copied from product's Sales Description
+        if name:
+            invoice_line.name = name
+
         tax_nodes = tree.findall('.//{*}ApplicableTradeTax/{*}RateApplicablePercent')
-        return self._import_fill_invoice_line_taxes(tax_nodes, invoice_line, inv_line_vals, logs)
+        return self._import_fill_invoice_line_values(tax_nodes, invoice_line, line_values)
 
     # -------------------------------------------------------------------------
     # IMPORT : helpers

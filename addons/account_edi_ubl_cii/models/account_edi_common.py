@@ -480,12 +480,10 @@ class AccountEdiCommon(models.AbstractModel):
         if not invoice_form.currency_id.is_zero(prepaid_amount):
             amount = prepaid_amount * qty_factor
             formatted_amount = formatLang(self.env, amount, currency_obj=invoice_form.currency_id)
-            return [
-                _("A payment of %s was detected.", formatted_amount)
-            ]
+            return [_("A payment of %s was detected.", formatted_amount)]
         return []
 
-    def _import_fill_invoice_line_values(self, tree, xpath_dict, invoice_line, qty_factor):
+    def _import_decode_invoice_line_values(self, tree, xpath_dict, qty_factor):
         """
         Read the xml invoice, extract the invoice line values, compute the odoo values
         to fill an invoice line form: quantity, price_unit, discount, product_uom_id.
@@ -613,7 +611,7 @@ class AccountEdiCommon(models.AbstractModel):
 
         # discount
         discount = 0
-        allow_charge_amount = sum(d['tax_amount'] * billed_qty for d in allow_charges)
+        allow_charge_amount = sum(d['amount'] * billed_qty for d in allow_charges)
         if billed_qty * price_unit != 0 and price_subtotal is not None:
             discount = 100 * (1 - (price_subtotal - allow_charge_amount) / (billed_qty * price_unit))
 
@@ -640,20 +638,28 @@ class AccountEdiCommon(models.AbstractModel):
             'allow_charges_list': allow_charges,
         }
 
-    def _import_retrieve_fixed_tax(self, invoice_line, fixed_tax_vals):
+    def _import_retrieve_tax(self, invoice_line, amount, amount_type, name=False):
         """ Retrieve the fixed tax at import, iteratively search for a tax:
         1. not price_include matching the name and the amount
         2. not price_include matching the amount
         3. price_include matching the name and the amount
         4. price_include matching the amount
         """
+        journal = invoice_line.move_id.journal_id
+        if hasattr(invoice_line, '_predict_specific_tax'):
+            # company check is already done in the prediction query
+            predicted_tax_id = invoice_line._predict_specific_tax('percent', amount, journal.type)
+            tax = self.env['account.tax'].browse(predicted_tax_id)
+            if tax:
+                return tax
         base_domain = [
             *self.env['account.journal']._check_company_domain(invoice_line.company_id),
-            ('amount_type', '=', 'fixed'),
-            ('amount', '=', fixed_tax_vals['amount']),
+            ('amount_type', '=', amount_type),
+            ('type_tax_use', '=', journal.type),
+            ('amount', '=', amount),
         ]
         for price_include in (False, True):
-            for name in (fixed_tax_vals['reason'], False):
+            for name in (name, False):
                 domain = base_domain + [('price_include', '=', price_include)]
                 if name:
                     domain.append(('name', '=', name))
@@ -662,67 +668,52 @@ class AccountEdiCommon(models.AbstractModel):
                     return tax
         return self.env['account.tax']
 
-    def _import_fill_invoice_line_taxes(self, tax_nodes, invoice_line, inv_line_vals, logs):
-        # Taxes: all amounts are tax excluded, so first try to fetch price_include=False taxes,
-        # if no results, try to fetch the price_include=True taxes. If results, need to adapt the price_unit.
-        inv_line_vals['taxes'] = []
+    def _import_fill_invoice_line_values(self, tax_nodes, invoice_line, line_values):
+        logs = []
+        # Taxes
+        line_values['taxes'] = []
         for tax_node in tax_nodes:
-            amount = float(tax_node.text)
-            domain = [
-                *self.env['account.journal']._check_company_domain(invoice_line.company_id),
-                ('amount_type', '=', 'percent'),
-                ('type_tax_use', '=', invoice_line.move_id.journal_id.type),
-                ('amount', '=', amount),
-            ]
-
-            tax = False
-            if hasattr(invoice_line, '_predict_specific_tax'):
-                # company check is already done in the prediction query
-                predicted_tax_id = invoice_line\
-                    ._predict_specific_tax('percent', amount, invoice_line.move_id.journal_id.type)
-                tax = self.env['account.tax'].browse(predicted_tax_id)
+            tax = self._import_retrieve_tax(invoice_line, float(tax_node.text), 'percent')
             if not tax:
-                tax = self.env['account.tax'].search(domain + [('price_include', '=', False)], limit=1)
-            if not tax:
-                tax = self.env['account.tax'].search(domain + [('price_include', '=', True)], limit=1)
-
-            if not tax:
-                logs.append(_("Could not retrieve the tax: %s %% for line '%s'.", amount, invoice_line.name))
+                logs.append(_("Could not retrieve the tax: %s %% for line '%s'.", tax_node.text, invoice_line.name))
             else:
-                inv_line_vals['taxes'].append(tax.id)
+                line_values['taxes'].append(tax.id)
                 if tax.price_include:
-                    inv_line_vals['price_unit'] *= (1 + tax.amount / 100)
+                    line_values['price_unit'] *= (1 + tax.amount / 100)
 
-        # Set the values on the line_form
-        invoice_line.quantity = inv_line_vals['quantity']
-        if not inv_line_vals.get('product_uom_id'):
+        # UoM
+        uom = line_values.get('product_uom_id')
+        if not uom:
             logs.append(
                 _("Could not retrieve the unit of measure for line with label '%s'.", invoice_line.name))
-        elif not invoice_line.product_id:
-            # no product set on the line, no need to check uom compatibility
-            invoice_line.product_uom_id = inv_line_vals['product_uom_id']
-        elif inv_line_vals['product_uom_id'].category_id == invoice_line.product_id.product_tmpl_id.uom_id.category_id:
-            # needed to check that the uom is compatible with the category of the product
-            invoice_line.product_uom_id = inv_line_vals['product_uom_id']
+        elif invoice_line.product_id and uom.category_id != invoice_line.product_id.product_tmpl_id.uom_id.category_id:
+            # uom is not compatible with the category of the product
+            line_values['product_uom_id'] = False,
 
-        for allw_chrg in inv_line_vals['allow_charges_list']:
+        # Allowance/Charges
+        for allw_chrg in line_values['allow_charges_list']:
             if allw_chrg['reason_code'] == 'AEO':
-                tax = self._import_retrieve_fixed_tax(invoice_line, allw_chrg)
+                tax = self._import_retrieve_tax(invoice_line, float(tax_node.text), 'fixed', allw_chrg['reason'])
                 if tax:
                     if tax.price_include:
-                        inv_line_vals['price_unit'] += tax.amount
-                    inv_line_vals['taxes'].append(tax.id)
+                        line_values['price_unit'] += tax.amount
+                    line_values['taxes'].append(tax.id)
                     continue
             invoice_line.create({
                 'move_id': invoice_line.move_id.id,
                 'price_unit': allw_chrg['amount'],
                 'name': allw_chrg['reason_code'] + " " + allw_chrg['reason'],
-                'tax_ids': inv_line_vals['taxes'],
+                'tax_ids': line_values['taxes'],
             })
 
-        invoice_line.price_unit = inv_line_vals['price_unit']
-        invoice_line.discount = inv_line_vals['discount']
-        invoice_line.tax_ids = inv_line_vals['taxes']
+        invoice_line.write({
+            'product_id': line_values['product_id'] and line_values['product_id'].id,
+            'quantity': line_values['quantity'],
+            'product_uom_id': line_values['product_uom_id'] and line_values['product_uom_id'].id,
+            'price_unit': line_values['price_unit'],
+            'discount': line_values['discount'],
+            'tax_ids': [Command.set(line_values['taxes'])],
+        })
         return logs
 
     def _correct_invoice_tax_amount(self, tree, invoice):
