@@ -5,6 +5,7 @@ import calendar
 
 from odoo import fields, models, api, _
 from odoo.exceptions import ValidationError, UserError, RedirectWarning
+from odoo.tools import SQL
 from odoo.tools.mail import is_html_empty
 from odoo.tools.misc import format_date
 from odoo.tools.float_utils import float_round, float_is_zero
@@ -388,53 +389,45 @@ class ResCompany(models.Model):
             ('company_ids', 'in', self.id),
             ('date', '>=', accounting_date),
             '|',
-                '&', '&', ('closing_type_id.lock_type', '=', 'taxes'), ('locked_company_ids', 'in', self.id), ('closing_type_id', 'in', tax_closing_types.ids),
-                '&', '&',
-                    ('closing_type_id.lock_type', '=', 'entries'),
-                    ('locked_journal_ids', 'in', journal.id),
-                    # For branches, locked_company_ids and locked_journal_ids will both be set; else, only locked_journal_ids
-                    #TODO OCO ça ^
-                    '|', ('locked_company_ids', '=', False), ('locked_company_ids', 'in', self.id),
+                '&', ('closing_type_id.lock_type', '=', 'taxes'), ('closing_type_id', 'in', tax_closing_types.ids),
+                ('closing_type_id.lock_type', '=', 'entries'),
         ]
 
-
-
         if self.user_has_groups('account.group_account_manager'):
-            # Top-level accounting users are only limited by 'closed' closings, if they have access to its main company. Else, they behave like any other users with lesser rights.
+            # Top-level accounting users are only limited by 'closed' closings, if they have access to its main company.
+            # Else, they behave like any other users with lesser rights.
             violated_closing_domain += [
                 '|',
                 ('state', '=', 'closed'),
                 ('main_company_id', 'not in', self.env.user.company_ids.ids),
             ]
 
-        #TODO OCO WIP => pas 100% sûr pour le select distinct, mais me semble ok
+        domain_query = self.env['account.report.closing']._where_calc(violated_closing_domain)
         violated_closings_query = SQL("""
-            SELECT DISTINCT ON (closing.closing_type_id)
-                closing.closing_type_id,
-                closing.date,
-            FROM account_report_closing closing
-            JOIN accout_report_closing_journal_lock journal_lock
-            ON journal_lock.closing_ud
+            SELECT DISTINCT ON (account_report_closing.closing_type_id)
+                account_report_closing.closing_type_id,
+                account_report_closing.date
+            FROM %(table_references)s
+            JOIN account_report_closing_journal_lock journal_lock
+                ON journal_lock.closing_id = account_report_closing.id
             WHERE
+                %(search_condition)s
+                AND journal_lock.company_id = %(company_id)s
+                AND journal_lock.journal_id = %(journal_id)s
+            ORDER BY account_report_closing.closing_type_id, account_report_closing.date
+        """,
+            table_references=domain_query.from_clause,
+            search_condition=domain_query.where_clause,
+            company_id=self.id,
+            journal_id=journal.id,
+        )
 
-            ORDER BY closing.iclosing_type_id, closing.date
-        """)
-
-
-
-
-
-
-
-        violated_closings = self.env['account.report.closing'].search(violated_closing_domain, order='date DESC')
-        violated_tax_closings = violated_closings.filtered(lambda x: x.closing_type_id in tax_closing_types)
-
-        if violated_tax_closings:
-            locks.append((violated_tax_closings[0].date, _('tax'))) #TODO OCO pourquoi on met les string traduits là-dedans ? C'est louche
-
-        violated_journal_closings = violated_closings - violated_tax_closings
-        if violated_journal_closings:
-            locks.append((violated_journal_closings[0].date, _('user'))) #TODO OCO pourquoi on met les string traduits là-dedans ? C'est louche
+        self._cr.execute(violated_closings_query)
+        for closing_type_id, lock_date in self._cr.fetchall():
+            if tax_closing_types and closing_type_id in tax_closing_types.ids:
+                locks.append((lock_date, _('tax'))) #TODO OCO pourquoi on met les string traduits là-dedans ? C'est louche
+            else:
+                locks.append((lock_date, _('user'))) #TODO OCO pourquoi on met les string traduits là-dedans ? C'est louche
 
         locks.sort()
         return locks
