@@ -152,7 +152,7 @@ export class HistoryPlugin extends Plugin {
      */
     resetFromSteps(steps) {
         this.disableObserver();
-        for (const node of [...this.editable.childNodes]) {
+        for (const node of this.editable.childNodes) {
             node.remove();
         }
         this.clean();
