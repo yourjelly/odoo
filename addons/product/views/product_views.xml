@@ -69,7 +69,7 @@
                             <group>
                                 <group name="group_general">
                                     <field name="active" invisible="1"/>
-                                    <field name="detailed_type"/>
+                                    <field name="detailed_type" widget="radio" options="{'horizontal': True}"/>
                                     <field name="product_tooltip" string="" class="fst-italic text-muted" invisible="type == 'service' and not sale_ok"/>
                                     <field name="uom_id" groups="uom.group_uom" options="{'no_create': True}"/>
                                     <field name="uom_po_id" groups="uom.group_uom" options="{'no_create': True}"/>
@@ -103,6 +103,10 @@
                         <page string="Sales" name="sales" invisible="1 or not sale_ok">
                             <group name="sale">
                                 <group string="Upsell &amp; Cross-Sell" name="upsell" invisible="1"/>
+                                <!-- To Check: where to put -->
+                                <group name="tags" string="Extra Info">
+                                    <field name="product_tag_ids" widget="many2many_tags" context="{'product_template_id': id}"/>
+                                </group>
                             </group>
                             <group>
                                 <group string="Sales Description" name="description">
@@ -113,6 +117,10 @@
                         <page string="Purchase" name="purchase" invisible="1 or not purchase_ok">
                             <group name="purchase">
                                 <group string="Vendor Bills" name="bill"/>
+                                <!-- To Check: where to put -->
+                                <group string ="UOM">
+                                    <field name="uom_po_id" groups="uom.group_uom" options="{'no_create': True}"/>
+                                </group>
                             </group>
                         </page>
                         <page string="Inventory" name="inventory" groups="product.group_stock_packaging" invisible="type == 'service'">

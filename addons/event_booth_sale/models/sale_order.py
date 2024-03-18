@@ -24,13 +24,10 @@ class SaleOrder(models.Model):
     def action_confirm(self):
         res = super(SaleOrder, self).action_confirm()
         for so in self:
-            if not any(line.product_type == 'event_booth' for line in so.order_line):
+            event_booth_so_lines = so.order_line.filtered('event_booth_pending_ids')
+            if not event_booth_so_lines:
                 continue
-            so_lines_missing_booth = so.order_line.filtered(lambda line: line.product_type == 'event_booth' and not line.event_booth_pending_ids)
-            if so_lines_missing_booth:
-                so_lines_descriptions = "".join(f"\n- {so_line_description.name}" for so_line_description in so_lines_missing_booth)
-                raise ValidationError(_("Please make sure all your event-booth related lines are configured before confirming this order:%s", so_lines_descriptions))
-            so.order_line._update_event_booths()
+            event_booth_so_lines._update_event_booths()
         return res
 
     def action_view_booth_list(self):

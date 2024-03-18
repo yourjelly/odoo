@@ -1,27 +1,47 @@
 /** @odoo-module **/
 
 import { patch } from "@web/core/utils/patch";
+import { today, serializeDate } from "@web/core/l10n/dates";
 import { SaleOrderLineProductField } from '@sale/js/sale_product_field';
 
 
 patch(SaleOrderLineProductField.prototype, {
 
+    async _fetchEventTicket(productId) {
+        return await this.orm.searchRead(
+            "event.event.ticket",
+            [
+                ['product_id', '=', productId],
+                ['event_id.date_end', '>=', serializeDate(today())]
+            ],
+            ['event_id'],
+        );
+    },
+
     async _onProductUpdate() {
+        const productId = this.props.record.data.product_id[0];
         super._onProductUpdate(...arguments);
-        if (this.props.record.data.product_type === 'event') {
-            this._openEventConfigurator();
+        if (this.props.record.data.product_type === 'service') {
+            const eventTicketExists = await this._fetchEventTicket(productId);
+            if (eventTicketExists.length) {
+                this._openEventConfigurator();
+            }
         }
     },
 
-    _editLineConfiguration() {
+    async _editLineConfiguration() {
+        const productId = this.props.record.data.product_id[0];
         super._editLineConfiguration(...arguments);
-        if (this.props.record.data.product_type === 'event') {
-            this._openEventConfigurator();
-        }
+        if (this.props.record.data.product_type === 'service') {
+            const eventTicketExists = await this._fetchEventTicket(productId);
+            if (eventTicketExists.length) {
+                this._openEventConfigurator();
+            }
+        };
     },
 
     get isConfigurableLine() {
-        return super.isConfigurableLine || this.props.record.data.product_type === 'event';
+        return super.isConfigurableLine || this.props.record.data.product_type === 'service';
     },
 
     async _openEventConfigurator() {

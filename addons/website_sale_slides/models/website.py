@@ -11,5 +11,5 @@ class Website(models.Model):
     def sale_product_domain(self):
         return expression.AND([
             super(Website, self).sale_product_domain(),
-            [('detailed_type', '!=', 'course')],
+            [('detailed_type', '!=', 'service')],
         ])

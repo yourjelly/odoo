@@ -16,6 +16,3 @@ class ProductTemplate(models.Model):
         type_mapping['course'] = 'service'
         return type_mapping
 
-    @api.model
-    def _get_product_types_allow_zero_price(self):
-        return super()._get_product_types_allow_zero_price() + ["course"]
