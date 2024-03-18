@@ -397,6 +397,8 @@ class ResCompany(models.Model):
                     '|', ('locked_company_ids', '=', False), ('locked_company_ids', 'in', self.id),
         ]
 
+
+
         if self.user_has_groups('account.group_account_manager'):
             # Top-level accounting users are only limited by 'closed' closings, if they have access to its main company. Else, they behave like any other users with lesser rights.
             violated_closing_domain += [
@@ -404,6 +406,25 @@ class ResCompany(models.Model):
                 ('state', '=', 'closed'),
                 ('main_company_id', 'not in', self.env.user.company_ids.ids),
             ]
+
+        #TODO OCO WIP => pas 100% sûr pour le select distinct, mais me semble ok
+        violated_closings_query = SQL("""
+            SELECT DISTINCT ON (closing.closing_type_id)
+                closing.closing_type_id,
+                closing.date,
+            FROM account_report_closing closing
+            JOIN accout_report_closing_journal_lock journal_lock
+            ON journal_lock.closing_ud
+            WHERE
+
+            ORDER BY closing.iclosing_type_id, closing.date
+        """)
+
+
+
+
+
+
 
         violated_closings = self.env['account.report.closing'].search(violated_closing_domain, order='date DESC')
         violated_tax_closings = violated_closings.filtered(lambda x: x.closing_type_id in tax_closing_types)
