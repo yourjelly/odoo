@@ -131,10 +131,15 @@ class MailActivityType(models.Model):
         model data in various apps and plans e.g. fleet """
         if 'res_model' in values:
             todo_activity = self.env.ref('mail.mail_activity_data_todo', raise_if_not_found=False)
-            if todo_activity and todo_activity in self:
+            meeting_activity = self.env.ref('mail.mail_activity_data_meeting', raise_if_not_found=False)
+            modifed = (
+                (todo_activity or self.env['mail.activity.type']) +
+                (meeting_activity or self.env['mail.activity.type'])
+            ) & self
+            if modifed:
                 raise exceptions.UserError(
-                    _('You cannot modify %(activity_name)s target model as it is required in various apps.',
-                      activity_name=todo_activity.name,
+                    _('You cannot modify %(activities_name)s target model as it is required in various apps.',
+                      activities_name=', '.join(act.name for act in modifed),
                 ))
         return super().write(values)
 

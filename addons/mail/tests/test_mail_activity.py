@@ -177,6 +177,8 @@ class TestMailActivityIntegrity(ActivityScheduleCase):
         meeting = self.env.ref('mail.mail_activity_data_meeting')
         with self.assertRaises(exceptions.UserError):
             todo.write({'res_model': 'res.partner'})
+        with self.assertRaises(exceptions.UserError):
+            meeting.write({'res_model': 'res.partner'})
 
         with self.assertRaises(exceptions.UserError):
             todo.unlink()
