@@ -16546,14 +16546,19 @@
         children: [allFunctionListMenuBuilder],
     };
     function allFunctionListMenuBuilder() {
-        const fnNames = functionRegistry.getKeys();
+        const fnNames = functionRegistry.getKeys().filter((key) => !functionRegistry.get(key).hidden);
         return createFormulaFunctions(fnNames);
     }
     const categoriesFunctionListMenuBuilder = () => {
         const functions = functionRegistry.content;
-        const categories = [...new Set(functionRegistry.getAll().map((fn) => fn.category))].filter(isDefined$1);
+        const categories = [
+            ...new Set(functionRegistry
+                .getAll()
+                .filter((fn) => !fn.hidden)
+                .map((fn) => fn.category)),
+        ].filter(isDefined$1);
         return categories.sort().map((category, i) => {
-            const functionsInCategory = Object.keys(functions).filter((key) => functions[key].category === category);
+            const functionsInCategory = Object.keys(functions).filter((key) => functions[key].category === category && !functions[key].hidden);
             return {
                 name: category,
                 children: createFormulaFunctions(functionsInCategory),
@@ -48049,8 +48054,8 @@
 
 
     __info__.version = '16.3.29';
-    __info__.date = '2024-03-15T12:11:02.769Z';
-    __info__.hash = 'd86234a';
+    __info__.date = '2024-03-18T09:29:02.084Z';
+    __info__.hash = '6edec77';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
