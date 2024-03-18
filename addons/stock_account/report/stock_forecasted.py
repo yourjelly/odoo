@@ -11,7 +11,7 @@ class ReplenishmentReport(models.AbstractModel):
     def _compute_draft_quantity_count(self, product_template_ids, product_variant_ids, wh_location_ids):
         """ Overrides to computes the valuations of the stock. """
         res = super()._compute_draft_quantity_count(product_template_ids, product_variant_ids, wh_location_ids)
-        if not self.user_has_groups('stock.group_stock_manager'):
+        if not self.user_has_groups('stock.group_stock_manager') or not wh_location_ids:
             return res
         domain = self._product_domain(product_template_ids, product_variant_ids)
         company = self.env['stock.location'].browse(wh_location_ids[0]).company_id
