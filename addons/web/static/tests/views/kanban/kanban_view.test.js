@@ -242,7 +242,7 @@ test("kanban arch with aside", async () => {
     assertHTMLEquality(
         queryFirst(".o_kanban_record").innerHTML,
         `<div class="w-100 d-flex flew-row">
-            <div class="o_kanban_aside d-block">
+            <div class="o_kanban_aside">
                 <div name="image" class="o_field_widget o_field_empty o_field_kanban_image"/>
             </div>
             <div class="o_kanban_section_container d-flex flex-column justify-content-between gap-2 w-100 h-100">
@@ -296,7 +296,7 @@ test("kanban arch with aside (full)", async () => {
     assertHTMLEquality(
         queryFirst(".o_kanban_record").innerHTML,
         `<div class="w-100 d-flex flew-row">
-            <div class="o_kanban_aside d-block o_kanban_aside_full">
+            <div class="o_kanban_aside o_kanban_aside_full">
                 <div name="image" class="o_field_widget o_field_empty o_field_kanban_image"/>
             </div>
             <div class="o_kanban_section_container d-flex flex-column justify-content-between gap-2 w-100 h-100">

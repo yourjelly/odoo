@@ -3,12 +3,13 @@
 
     .o_kanban_image_main {
         object-fit: contain;
-        object-position: center;
+        object-position: top center;
         width: 100%;
         height: 100%;
     }
     &.o_kanban_image_with_inner .o_kanban_image_main {
         object-fit: cover;
+        object-position: center;
     }
 
     .o_kanban_image_inner_pic {
