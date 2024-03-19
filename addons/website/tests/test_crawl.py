@@ -69,6 +69,7 @@ class Crawler(HttpCaseWithUserDemo):
             current_url = r.url
             if urls.url_parse(new_url).netloc != urls.url_parse(current_url).netloc:
                 return seen
+            _logger.info("RDERDE %s", url)
             r = self.url_open(new_url)
 
         code = r.status_code
