@@ -175,6 +175,7 @@ class SaleOrder(models.Model):
         compute='_compute_currency_id',
         store=True,
         precompute=True,
+        tracking=True,
         ondelete='restrict'
     )
     currency_rate = fields.Float(
