@@ -717,16 +717,16 @@
 
     // Kanban UN-grouped Layout
     &.o_kanban_ungrouped {
-        min-height: 100%;
+        grid-template-columns: var(--Kanban__ungroupedColumnsInMobile, var(--KanbanRecord__container-gap));
+        grid-auto-rows: auto;
 
         @include media-breakpoint-up(md) {
-            --Kanban-padding:  var(--KanbanRecord-margin-v) var(--KanbanRecord-margin-h);
+            --Kanban-gap: var(--KanbanRecord-margin-v);
+            --Kanban__ungroupedColumnsInMobile: repeat(auto-fit, minmax(var(--KanbanRecord-width), 1fr));
+            --Kanban-padding: #{map-get($spacers, 3)};
         }
 
         .o_kanban_record {
-            width: var(--KanbanRecord-width);
-            margin: calc(var(--KanbanRecord-margin-v) * 0.5) var(--KanbanRecord-margin-h);
-
             @include media-breakpoint-down(md) {
                 margin: 0 0 #{-$border-width};
                 flex-basis: 100%;
