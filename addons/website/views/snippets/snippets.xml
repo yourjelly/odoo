@@ -68,6 +68,7 @@
                     </t>
                     <t t-snippet="website.s_media_list" string="Media List" t-thumbnail="/website/static/src/img/snippets_thumbs/s_media_list.svg"/>
                     <t t-snippet="website.s_parallax" string="Parallax" t-thumbnail="/website/static/src/img/snippets_thumbs/s_parallax.svg"/>
+                    <t t-snippet="website.s_new_website_team" string="New website" t-thumbnail="/website/static/src/img/snippets_thumbs/s_media_list.svg"/>
                 </div>
             </div>
 

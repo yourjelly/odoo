@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<template id="s_new_website_team" name="website">
+    <section class="s_new_website_team parallax s_parallax_is_fixed pt96 pb96" data-scroll-background-ratio="1">
+        <span class="s_parallax_bg oe_img_bg"/>
+        <div class="container">
+            <div class="row s_nb_column_fixed">
+                <div class="col-lg-6 jumbotron rounded o_cc o_cc1 pt32 pb32" data-name="Box">
+                    <h1><font style="font-size: 62px;">MSH</font></h1>
+                    <h1><font style="font-size: 62px;">SHSA</font></h1>
+                    <h1><font style="font-size: 62px;">VISP</font></h1>
+                    <h1><font style="font-size: 62px;">PRRA</font></h1>
+                    <h1><font style="font-size: 62px;">DIVY</font></h1>
+                    <a t-att-href="cta_btn_href" class="btn btn-primary mb-2"><t t-esc="cta_btn_text">Contact Us</t></a>
+                </div>
+            </div>
+        </div>
+    </section>
+</template>
+
+</odoo>
