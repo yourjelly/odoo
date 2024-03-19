@@ -1,0 +1,362 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="website.ssection.modal">
+        <div class="ssection_modal modal o_technical_modal fade" id="snippetsLib" tabindex="-1" aria-labelledby="snippetsLibLabel" aria-hidden="true">
+            <style>
+                .ssection_modal .modal-dialog {
+                    width: 90vw;
+                    max-width: 1200px;
+                    max-height: 90vh;
+                }
+                .ssection_modal .nav-link.active {
+                    color: black;
+                    background-color: #00968817;
+                }
+                .ssection_modal .s-preview {
+                    transition: all 150ms;
+                }
+                .ssection_modal .s-preview:hover {
+                    transform: translateY(-0.1rem);
+                    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175) !important;
+                }
+
+                .ssection_modal .s-preview img {
+                    cursor:pointer;
+                }
+
+                .ssection_modal .s-preview .o-tooltip {
+                    cursor: help;
+                }
+            </style>
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header border-bottom">
+                        <h5 class="modal-title" id="snippetsLibLabel" t-out="title"/>
+                        <button t-if="hasContent" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button t-else="" type="button" class="btn btn-light border rounded" data-bs-dismiss="modal" aria-label="Close">
+                            Design from scratch <i class="oi oi-chevron-right"></i>
+                        </button>
+                    </div>
+
+                    <div class="modal-body p-0">
+                         <!-- Banners -->
+                        <div t-if="templateSet == 'sections' " class="d-flex">
+                            <ul class="list-group list-group-flush nav-tabs border-end" id="myTab" role="tablist">
+                                <li class="nav-item list-group-item p-0" role="presentation">
+                                    <a href="#" data-bs-toggle="tab" data-bs-target="#tab_1" class="p-0 fs-4 py-4 ps-4 pe-5 border-0 nav-link active">Banners</a>
+                                </li>
+                                <li class="nav-item list-group-item p-0" role="presentation">
+                                    <a href="#" data-bs-toggle="tab" data-bs-target="#tab_2" class="p-0 fs-4 py-4 ps-4 pe-5 border-0 nav-link">Basic</a>
+                                </li>
+                                <li class="nav-item list-group-item p-0" role="presentation">
+                                    <a href="#" data-bs-toggle="tab" data-bs-target="#tab_3" class="p-0 fs-4 py-4 ps-4 pe-5 border-0 nav-link">Forms</a>
+                                </li>
+                                <li class="nav-item list-group-item p-0" role="presentation">
+                                    <a href="#" data-bs-toggle="tab" data-bs-target="#tab_5" class="p-0 fs-4 py-4 ps-4 pe-5 border-0 nav-link">Maps</a>
+                                </li>
+                                <li class="nav-item list-group-item p-0" role="presentation">
+                                    <a href="#" data-bs-toggle="tab" data-bs-target="#tab_4" class="p-0 fs-4 py-4 ps-4 pe-5 border-0 nav-link">Engagement</a>
+                                </li>
+                            </ul>
+                            <div class="tab-content flex-grow-1 bg-100">
+                                <div class="tab-pane show active" id="tab_1" role="tabpanel" aria-labelledby="banners-tab">
+
+                                    <div class="grid p-4">
+                                        <div class="g-col-6">
+                                            <div class="s-preview position-relative mb-4 shadow">
+                                                <img src="/website/static/src/snippets/s_section/snippets/s_banner.jpg" class="img img-fluid w-100" alt=""/>
+                                                <span type="button" class="o-tooltip btn btn-dark position-absolute top-0 end-0 rounded-0" data-bs-toggle="tooltip" data-bs-placement="top"
+                                                        title="Provides some useful guidance about this template/snippet">
+                                                    <i class="fa fa-question"></i>
+                                                </span>
+                                            </div>
+                                            <div class="s-preview position-relative mb-4 shadow" data-call="website.s_cover">
+                                                <img src="/website/static/src/snippets/s_section/snippets/s_cover.jpg" class="img img-fluid w-100" alt=""/>
+                                            </div>
+                                        </div>
+                                        <div class="g-col-6">
+                                            <div class="s-preview position-relative mb-4 shadow" data-call="website.s_text_cover">
+                                                <img src="/website/static/src/snippets/s_section/snippets/s_text_cover.jpg" class="img img-fluid w-100" alt=""/>
+                                            </div>
+                                            <div class="s-preview position-relative mb-4 shadow">
+                                                <img src="/website/static/src/snippets/s_section/snippets/banners_1.jpg" class="img img-fluid w-100" alt=""/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane" id="tab_2" role="tabpanel" aria-labelledby="basic-tab">
+                                    <div class="grid p-4">
+                                        <div class="g-col-6">
+                                            <div class="s-preview position-relative mb-4 shadow">
+                                                <img src="/website/static/src/snippets/s_section/snippets/basic_1.jpg" class="img img-fluid w-100" alt=""/>
+                                            </div>
+                                             <div class="s-preview position-relative mb-4 shadow">
+                                                <img src="/website/static/src/snippets/s_section/snippets/s_masonry.jpg" class="img img-fluid w-100" alt=""/>
+                                            </div>
+                                        </div>
+                                        <div class="g-col-6">
+                                            <div class="s-preview position-relative mb-4 shadow" data-call="website.s_text_cover">
+                                                <img src="/website/static/src/snippets/s_section/snippets/basic_2.jpg" class="img img-fluid w-100" alt=""/>
+                                            </div>
+                                            <div class="s-preview position-relative mb-4 shadow">
+                                                <img src="/website/static/src/snippets/s_section/snippets/basic_3.jpg" class="img img-fluid w-100" alt=""/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane" id="tab_3" role="tabpanel" aria-labelledby="basic-tab">
+                                    <div class="grid p-4">
+                                        <div class="g-col-6">
+                                            <div class="s-preview position-relative mb-4 shadow">
+                                                <img src="/website/static/src/snippets/s_section/snippets/form_1.jpg" class="img img-fluid w-100" alt=""/>
+                                            </div>
+                                        </div>
+                                        <div class="g-col-6">
+                                            <div class="s-preview position-relative mb-4 shadow">
+                                                <img src="/website/static/src/snippets/s_section/snippets/form_2.jpg" class="img img-fluid w-100" alt=""/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane" id="tab_4" role="tabpanel" aria-labelledby="basic-tab">
+                                    <div class="grid p-4">
+                                        <div class="g-col-6">
+                                            <div class="s-preview position-relative bg-white mb-4 shadow text-center py-5">
+                                                WIP
+                                            </div>
+                                        </div>
+                                        <div class="g-col-6">
+                                            <div class="s-preview position-relative bg-white mb-4 shadow text-center py-5">
+                                                WIP
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane" id="tab_5" role="tabpanel" aria-labelledby="maps-tab">
+                                    <div class="grid p-4">
+                                        <div class="g-col-6">
+                                            <div class="s-preview position-relative bg-white mb-4 shadow text-center">
+                                                <img src="/website/static/src/snippets/s_section/snippets/map_3.jpg" class="img img-fluid w-100" alt=""/>
+                                            </div>
+                                            <div class="s-preview position-relative bg-white mb-4 shadow text-center">
+                                                <img src="/website/static/src/snippets/s_section/snippets/map_2.jpg" class="img img-fluid w-100" alt=""/>
+                                            </div>
+                                        </div>
+                                        <div class="g-col-6">
+                                            <div class="s-preview position-relative bg-white mb-4 shadow text-center">
+                                                <img src="/website/static/src/snippets/s_section/snippets/map_1.jpg" class="img img-fluid w-100" alt=""/>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Carousels -->
+                        <div t-if="templateSet == 'carousels'" class="d-flex">
+                            <ul class="list-group list-group-flush nav-tabs border-end" id="myTab" role="tablist">
+                                <li class="nav-item list-group-item p-0" role="presentation">
+                                    <a href="#" data-bs-toggle="tab" data-bs-target="#tab_1" class="p-0 fs-4 py-4 ps-4 pe-5 border-0 nav-link active">Showcase</a>
+                                </li>
+                                <li class="nav-item list-group-item p-0" role="presentation">
+                                    <a href="#" data-bs-toggle="tab" data-bs-target="#tab_2" class="p-0 fs-4 py-4 ps-4 pe-5 border-0 nav-link">eCommerce</a>
+                                </li>
+                                <li class="nav-item list-group-item p-0" role="presentation">
+                                    <a href="#" data-bs-toggle="tab" data-bs-target="#tab_3" class="p-0 fs-4 py-4 ps-4 pe-5 border-0 nav-link">Blog</a>
+                                </li>
+                            </ul>
+                            <div class="tab-content flex-grow-1 bg-100">
+                                <div class="tab-pane show active" id="tab_1" role="tabpanel" aria-labelledby="1-tab">
+
+                                    <div class="grid p-4">
+                                        <div class="g-col-6">
+                                            <div class="s-preview position-relative mb-4 shadow" data-call="website.s_banner">
+                                                <img src="/website/static/src/snippets/s_section/snippets/s_carousel.jpg" class="img img-fluid w-100" alt=""/>
+                                            </div>
+                                            <div class="s-preview position-relative mb-4 shadow" data-call="website.s_cover">
+                                                <img src="/website/static/src/snippets/s_section/snippets/s_image_gallery.jpg" class="img img-fluid w-100" alt=""/>
+                                            </div>
+                                        </div>
+                                        <div class="g-col-6">
+                                            <div class="s-preview position-relative mb-4 shadow" data-call="website.s_text_cover">
+                                                <img src="/website/static/src/snippets/s_section/snippets/s_quotes_carousel.jpg" class="img img-fluid w-100" alt=""/>
+                                            </div>
+                                            <div class="s-preview position-relative mb-4 shadow">
+                                                <img src="/website/static/src/snippets/s_section/snippets/s_carousel_video.jpg" class="img img-fluid w-100" alt=""/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane" id="tab_2" role="tabpanel" aria-labelledby="2-tab">
+                                    <div class="grid p-4">
+                                        <div class="g-col-6">
+                                            <div class="s-preview position-relative bg-white mb-4 shadow text-center py-5">
+                                                WIP
+                                            </div>
+                                        </div>
+                                        <div class="g-col-6">
+                                            <div class="s-preview position-relative bg-white mb-4 shadow text-center py-5">
+                                                WIP
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane" id="tab_3" role="tabpanel" aria-labelledby="3-tab">
+                                    <div class="grid p-4">
+                                        <div class="g-col-6">
+                                            <div class="s-preview position-relative bg-white mb-4 shadow text-center py-5">
+                                                WIP
+                                            </div>
+                                        </div>
+                                        <div class="g-col-6">
+                                            <div class="s-preview position-relative bg-white mb-4 shadow text-center py-5">
+                                                WIP
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                         <!-- Galleries -->
+                        <div t-if="templateSet == 'galleries'" class="d-flex">
+                            <ul class="list-group list-group-flush nav-tabs border-end" id="myTab" role="tablist">
+                                <li class="nav-item list-group-item p-0" role="presentation">
+                                    <a href="#" data-bs-toggle="tab" data-bs-target="#tab_1" class="p-0 fs-4 py-4 ps-4 pe-5 border-0 nav-link active">Showcase</a>
+                                </li>
+                                <li class="nav-item list-group-item p-0" role="presentation">
+                                    <a href="#" data-bs-toggle="tab" data-bs-target="#tab_2" class="p-0 fs-4 py-4 ps-4 pe-5 border-0 nav-link">eCommerce</a>
+                                </li>
+                                <li class="nav-item list-group-item p-0" role="presentation">
+                                    <a href="#" data-bs-toggle="tab" data-bs-target="#tab_3" class="p-0 fs-4 py-4 ps-4 pe-5 border-0 nav-link">Blog</a>
+                                </li>
+                            </ul>
+                            <div class="tab-content flex-grow-1 bg-100">
+                                <div class="tab-pane show active" id="tab_1" role="tabpanel" aria-labelledby="1-tab">
+
+                                    <div class="grid p-4">
+                                        <div class="g-col-6">
+                                            <div class="s-preview position-relative mb-4 shadow" data-call="website.s_banner">
+                                                <img src="/website/static/src/snippets/s_section/snippets/s_images_wall.jpg" class="img img-fluid w-100" alt=""/>
+                                                <span type="button" class="o-tooltip btn btn-dark position-absolute top-0 end-0 rounded-0" data-bs-toggle="tooltip" data-bs-placement="top"
+                                                        title="Provides some useful guidance about this template/snippet">
+                                                    <i class="fa fa-question"></i>
+                                                </span>
+                                            </div>
+                                            <div class="s-preview position-relative mb-4 shadow">
+                                                <img src="/website/static/src/snippets/s_section/snippets/s_galleries_three.jpg" class="img img-fluid w-100" alt=""/>
+                                            </div>
+                                        </div>
+                                        <div class="g-col-6">
+                                            <div class="s-preview position-relative mb-4 shadow" data-call="website.s_text_cover">
+                                                <img src="/website/static/src/snippets/s_section/snippets/s_galleries_two.jpg" class="img img-fluid w-100" alt=""/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane" id="tab_2" role="tabpanel" aria-labelledby="2-tab">
+                                    <div class="grid p-4">
+                                        <div class="g-col-6">
+                                            <div class="s-preview position-relative mb-4 shadow" data-call="website.s_cover">
+                                                <img src="/website/static/src/snippets/s_section/snippets/s_galleries_one.jpg" class="img img-fluid w-100" alt=""/>
+                                            </div>
+
+                                        </div>
+                                        <div class="g-col-6">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane" id="tab_3" role="tabpanel" aria-labelledby="3-tab">
+                                    <div class="grid p-4">
+                                        <div class="g-col-6">
+                                            <div class="s-preview position-relative bg-white mb-4 shadow text-center py-5">
+                                                WIP
+                                            </div>
+                                        </div>
+                                        <div class="g-col-6">
+                                            <div class="s-preview position-relative bg-white mb-4 shadow text-center py-5">
+                                                WIP
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                         <!-- Overlays -->
+                        <div t-if="templateSet == 'overlays'" class="d-flex">
+                            <ul class="list-group list-group-flush nav-tabs border-end" id="myTab" role="tablist">
+                                <li class="nav-item list-group-item p-0" role="presentation">
+                                    <a href="#" data-bs-toggle="tab" data-bs-target="#tab_1" class="p-0 fs-4 py-4 ps-4 pe-5 border-0 nav-link active">Engagment</a>
+                                </li>
+                                <li class="nav-item list-group-item p-0" role="presentation">
+                                    <a href="#" data-bs-toggle="tab" data-bs-target="#tab_2" class="p-0 fs-4 py-4 ps-4 pe-5 border-0 nav-link">Surveys</a>
+                                </li>
+                                <li class="nav-item list-group-item p-0" role="presentation">
+                                    <a href="#" data-bs-toggle="tab" data-bs-target="#tab_3" class="p-0 fs-4 py-4 ps-4 pe-5 border-0 nav-link">Privacy</a>
+                                </li>
+                            </ul>
+                            <div class="tab-content flex-grow-1 bg-100">
+                                <div class="tab-pane show active" id="tab_1" role="tabpanel" aria-labelledby="1-tab">
+                                    <div class="grid p-4">
+                                        <div class="g-col-6">
+                                            <div class="s-preview position-relative mb-4 shadow" data-call="website.s_banner">
+                                                <img src="/website/static/src/snippets/s_section/snippets/popup.jpg" class="img img-fluid w-100" alt=""/>
+                                                <span type="button" class="o-tooltip btn btn-dark position-absolute top-0 end-0 rounded-0" data-bs-toggle="tooltip" data-bs-placement="top"
+                                                        title="Provides some useful guidance about this template/snippet">
+                                                    <i class="fa fa-question"></i>
+                                                </span>
+                                            </div>
+                                            <div class="s-preview position-relative mb-4 shadow">
+                                                <img src="/website/static/src/snippets/s_section/snippets/popup_3.jpg" class="img img-fluid w-100" alt=""/>
+                                            </div>
+                                        </div>
+                                        <div class="g-col-6">
+                                            <div class="s-preview position-relative mb-4 shadow" data-call="website.s_text_cover">
+                                                <img src="/website/static/src/snippets/s_section/snippets/popup_2.jpg" class="img img-fluid w-100" alt=""/>
+                                            </div>
+                                            <div class="s-preview position-relative mb-4 shadow" data-call="website.s_cover">
+                                                <img src="/website/static/src/snippets/s_section/snippets/popup_4.jpg" class="img img-fluid w-100" alt=""/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane" id="tab_2" role="tabpanel" aria-labelledby="2-tab">
+                                     <div class="grid p-4">
+                                        <div class="g-col-6">
+                                            <div class="s-preview position-relative mb-4 shadow" data-call="website.s_banner">
+                                                <img src="/website/static/src/snippets/s_section/snippets/survey_1.jpg" class="img img-fluid w-100" alt=""/>
+                                            </div>
+                                            <div class="s-preview position-relative mb-4 shadow">
+                                                <img src="/website/static/src/snippets/s_section/snippets/survey_2.jpg" class="img img-fluid w-100" alt=""/>
+                                            </div>
+                                        </div>
+                                        <div class="g-col-6">
+                                            <div class="s-preview position-relative mb-4 shadow" data-call="website.s_text_cover">
+                                                <img src="/website/static/src/snippets/s_section/snippets/survey_3.jpg" class="img img-fluid w-100" alt=""/>
+                                            </div>
+                                            <div class="s-preview position-relative mb-4 shadow" data-call="website.s_cover">
+                                                <img src="/website/static/src/snippets/s_section/snippets/survey_4.jpg" class="img img-fluid w-100" alt=""/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane" id="tab_3" role="tabpanel" aria-labelledby="3-tab">
+                                     <div class="grid p-4">
+                                        <div class="g-col-6">
+                                            <div class="s-preview position-relative mb-4 shadow" data-call="website.s_banner">
+                                                <img src="/website/static/src/snippets/s_section/snippets/privacy_1.jpg" class="img img-fluid w-100" alt=""/>
+                                            </div>
+                                        </div>
+                                        <div class="g-col-6">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+
+</templates>

@@ -100,6 +100,9 @@
         'views/snippets/s_button.xml',
         'views/snippets/s_image.xml',
         'views/snippets/s_video.xml',
+
+        'views/snippets/s_section.xml',
+
         'views/new_page_template_templates.xml',
         'views/website_views.xml',
         'views/website_pages_views.xml',
@@ -267,6 +270,10 @@
             'website/static/src/snippets/s_searchbar/options.js',
             'website/static/src/snippets/s_social_media/options.js',
             'website/static/src/snippets/s_process_steps/options.js',
+
+            'website/static/src/snippets/s_section/options.js',
+            'website/static/src/snippets/s_section/000.xml',
+
             'website/static/src/js/editor/widget_link.js',
             'website/static/src/js/widgets/link_popover_widget.js',
             'website/static/src/xml/website.cookies_bar.xml',

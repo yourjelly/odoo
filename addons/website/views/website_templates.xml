@@ -1644,6 +1644,16 @@
                 </div>
             </section>
         </div>
+
+        <div id="snippets_library" class="d-none">
+            <!-- <div data-source="website.s_banner"><t t-call="website.s_banner"/></div>
+            <div data-source="website.s_cover"><t t-call="website.s_cover"/></div>
+            <div data-source="website.s_text_cover"><t t-call="website.s_text_cover"/></div>
+            <div data-source="website.s_masonry_block"><t t-call="website.s_masonry_block"/></div>
+
+            <div data-source="website.s_carousel"><t t-call="website.s_carousel"/></div>
+            <div data-source="website.s_image_gallery"><t t-call="website.s_image_gallery"/></div> -->
+        </div>
     </xpath>
 </template>
 

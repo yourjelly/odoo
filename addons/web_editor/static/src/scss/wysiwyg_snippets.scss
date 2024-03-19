@@ -22,9 +22,24 @@
     background-color: $o-we-sidebar-blocks-content-snippet-bg;
 
     &.o_draggable_dragging {
-        transform: rotate(-3deg) scale(1.2);
-        box-shadow: 0 5px 25px -10px black;
-        transition: transform 0.3s, box-shadow 0.3s;
+        background-color: transparent !important;
+
+        &:after {
+            content: "\254B";
+            color: black;
+            -webkit-text-stroke-width: 1px;
+            -webkit-text-stroke-color: white;
+            @include o-position-absolute(0, $left: 0);
+            font-size: 22px;
+        }
+        .oe_snippet_thumbnail {
+            transform: rotate(-3deg) scale(0.6);
+            box-shadow: 0 5px 25px -10px black;
+            transition: transform 0.3s, box-shadow 0.3s;
+            transform-origin: 70% center;
+            cursor: none;
+            background-color: $o-we-sidebar-blocks-content-snippet-bg;
+        }
     }
 
     > .oe_snippet_body {
@@ -401,6 +416,27 @@
                     .oe_snippet_thumbnail_img {
                         opacity: .4;
                         filter: saturate(0) blur(1px);
+                    }
+                }
+            }
+        }
+
+        #snippet_structure_new {
+            .oe_snippet {
+                width: 48%;
+
+                .oe_snippet_thumbnail {
+                    outline: 1px solid #cffaff6e;
+
+                    &:after {
+                        content: "\f013";
+                        font-family: fontAwesome;
+                        @include o-position-absolute(0, 3px);
+                        color: #3ee1f5;
+                    }
+
+                    .oe_snippet_thumbnail_img {
+                        padding-top: 36%;
                     }
                 }
             }

@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<!-- Standard Section -->
+<template id="s_section" name="Section">
+    <section class="s_section o-wrapper ui-blocked pt24 pb24">
+        <div class="container">
+            <div class="row o_grid_mode" data-row-count="2"></div>
+        </div>
+        <div class="fakeOverlay">
+            <em>Drag &amp; Drop content or</em>
+            <span class="link user-select-none">choose a template.</span>
+        </div>
+    </section>
+</template>
+
+<!-- Carousel -->
+<template id="s_carousel_new" name="Carousel">
+    <section class="s_carousel_new o-wrapper ui-blocked pt24 pb24">
+        <div class="container">
+            <div class="row o_grid_mode" data-row-count="2"></div>
+        </div>
+        <div class="fakeOverlay">
+            <em>Customize this Slide or</em>
+            <span class="link user-select-none">choose a template.</span>
+            <i class="oi oi-chevron-left"></i>
+            <i class="oi oi-chevron-right"></i>
+        </div>
+    </section>
+</template>
+
+<!-- Galleries -->
+<template id="s_galleries_new" name="Carousel">
+    <section class="s_galleries_new o-wrapper ui-blocked pt24 pb24">
+        <div class="container">
+            <div class="row o_grid_mode" data-row-count="2"></div>
+        </div>
+        <div class="fakeOverlay position-relative">
+            <div class="position-absolute top-0 start-0 end-0 bottom-0 d-flex gap-2 px-5 py-3 text-900">
+                <div class="border px-3 bg-white-50 rounded h-100 opacity-75 flex-grow-1"></div>
+                <div class="border px-3 bg-white-50 rounded h-100 opacity-75 flex-grow-1"></div>
+                <div class="border px-3 bg-white-50 rounded h-100 opacity-75 flex-grow-1"></div>
+                <div class="border px-3 bg-white-50 rounded h-100 opacity-75 flex-grow-1"></div>
+                <div class="border px-3 bg-white-50 rounded h-100 opacity-75 flex-grow-1"></div>
+            </div>
+            <em class="z-index-1">Add pictures or</em>
+            <span class="link user-select-none z-index-1">choose a template.</span>
+        </div>
+    </section>
+</template>
+
+<!-- Overlays -->
+<template id="s_overlays_new" name="Overlays">
+    <section class="s_overlays_new o-wrapper ui-blocked pt24 pb24">
+        <div class="container">
+            <div class="row o_grid_mode" data-row-count="2"></div>
+        </div>
+        <div class="fakeOverlay position-relative" style="min-height: 300px">
+            <div class="position-absolute top-0 start-0 end-0 bottom-0 d-flex justify-content-center gap-2 px-5 py-3 text-900">
+               <div class="card shadow-lg w-50" style="min-width: 450px">
+                <div class="d-flex border-bottom px-3 py-2">
+                    Modal Title
+                    <button type="button" class="btn-close ms-auto" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">Lorem ipsum dolor sit amet.</p>
+                </div>
+                <div class="border-top d-flex gap-2 px-3 py-2">
+                    <div class="btn btn-light">Discard</div>
+                    <div class="btn btn-light">Action</div>
+                </div>
+                </div>
+            </div>
+            <em class="z-index-1">Edit this modal or</em>
+            <span class="link user-select-none z-index-1">choose a template.</span>
+        </div>
+    </section>
+</template>
+
+
+<template id="s_title_new" name="s_title_new">
+    <div class="s_title_new s_content_new s_content_new_animate o_grid_item o_draggable o_colored_level g-col-lg-12 g-height-1 col-lg-12" style="z-index: 1; grid-area: 1 / 1 / 2 / 13;">
+        <h3>An awesome title</h3>
+    </div>
+</template>
+
+<template id="s_picture_new" name="s_picture_new">
+    <div class="s_picture_new s_content_new s_content_new_animate o_grid_item o_grid_item_image o_colored_level o_draggable g-height-7 g-col-lg-6 col-lg-6" style="z-index: 1; grid-area: 2 / 1 / 8 / 7;">
+        <img src="/web/image/website.s_text_image_default_image" class="img rounded shadow" width="200" alt=""/>
+    </div>
+</template>
+
+<template id="s_text_new" name="s_text_new">
+    <div class="s_text_new s_content_new s_content_new_animate  o_grid_item o_grid_item_image o_colored_level o_draggable g-height-7 g-col-lg-6 col-lg-6" style="z-index: 1; grid-area: 2 / 7 / 5 / 13;">
+        <p>We are a team of passionate people whose goal is to improve everyone's life through disruptive products. We build great products to solve your business problems. Our products are designed for small to medium size companies willing to optimize their performance.</p>
+    </div>
+</template>
+
+<template id="s_button_new" name="s_button_new">
+    <div class="s_button_new s_content_new s_content_new_animate o_grid_item col-lg-2 g-col-lg-2 g-height-1 o_colored_level o_draggable" style="z-index: 1; grid-area: 6 / 7 / 7 / 9;">
+        <a class="btn btn-primary" href="#">Button</a>
+    </div>
+</template>
+
+<template id="s_hr_new" name="Separator">
+    <div class="s_hr_new text-start pt32 pb32 s_content_new s_content_new_animate o_grid_item col-lg-6 g-col-lg-6 g-height-1 o_colored_level o_draggable"  style="z-index: 1; grid-area: 5 / 7 / 6 / 13;">
+        <hr class="w-100 mx-auto" style="border-top-width: 1px; border-top-style: solid;"/>
+    </div>
+</template>
+
+<template id="s_card_new" name="s_card_new">
+    <div class="s_card_new s_content_new s_content_new_animate o_grid_item g-height-1 o_colored_level o_draggable g-col-lg-3 col-lg-3" style="z-index: 1; grid-area: 1 / 5 / 8 / 8;">
+        <div class="card shadow-lg">
+            <img src="/web/image/website.s_media_list_default_image_1" class="card-img-top" alt="..."/>
+            <div class="card-body">
+                <h5 class="card-title">Card title</h5>
+                <h6 class="card-subtitle mb-2 text-muted">Card subtitle</h6>
+                <p class="card-text">Some quick example text to build on the card title and make-up.</p>
+            </div>
+        </div>
+    </div>
+</template>
+
+
+
+<record id="website.s_section_000_scss" model="ir.asset">
+    <field name="name">Section 000 SCSS</field>
+    <field name="bundle">web.assets_frontend</field>
+    <field name="path">website/static/src/snippets/s_section/000.scss</field>
+</record>
+
+<record id="website.s_section_000_js" model="ir.asset">
+    <field name="name">Section 000 JS</field>
+    <field name="bundle">web.assets_frontend</field>
+    <field name="path">website/static/src/snippets/s_section/000.js</field>
+</record>
+
+
+<template id="s_section_options" inherit_id="website.snippet_options">
+    <xpath expr="." position="inside">
+        <div data-js="Ssection" data-selector=".s_section, .o_was_ssection"/>
+        <div data-js="ScarouselNew" data-selector=".s_carousel_new, .o_was_carousel_new"/>
+        <div data-js="SgalleriesNew" data-selector=".s_galleries_new, .o_was_galleries_new"/>
+        <div data-js="SoverlaysNew" data-selector=".s_overlays_new, .o_was_overlays_new"/>
+
+        <div data-js="contentNew"
+            data-selector=".s_content_new"
+            data-drop-in=".s_section:not(.o-has-picture-preview) .row.o_grid_mode"/>
+
+    </xpath>
+</template>
+</odoo>

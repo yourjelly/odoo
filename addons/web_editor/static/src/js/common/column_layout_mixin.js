@@ -17,6 +17,7 @@ export const ColumnLayoutMixin = {
         if (this._areColsCustomized(columnEls, isMobile)) {
             return "custom";
         }
+        if (columnEls.length == 0) {return 0;}
 
         const resolutionModifier = isMobile ? "" : "lg-";
         const colRegex = new RegExp(`(?:^|\\s+)col-${resolutionModifier}(\\d{1,2})(?!\\S)`);
@@ -70,6 +71,7 @@ export const ColumnLayoutMixin = {
      * @returns {boolean}
      */
     _areColsCustomized(columnEls, isMobile) {
+        if (columnEls.length == 0) {return;}
         const resolutionModifier = isMobile ? "" : "lg-";
         const colRegex = new RegExp(`(?:^|\\s+)col-${resolutionModifier}(\\d{1,2})(?!\\S)`);
         const colSize = parseInt(columnEls[0].className.match(colRegex)?.[1] || 12);

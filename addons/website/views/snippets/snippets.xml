@@ -17,7 +17,40 @@
             <t t-set="cta_btn_text" t-value="False"/>
             <t t-set="cta_btn_href">/contactus</t>
 
-            <div id="snippet_structure" class="o_panel">
+            <div id="snippet_structure_new" class="o_panel">
+                <div class="o_panel_header">Structure</div>
+                <div class="o_panel_body d-flex" style="gap: 4px">
+                    <t t-snippet="website.s_section" string="Sections" t-thumbnail="/website/static/src/img/snippets_thumbs/s_banner.svg">
+                        <keywords>section</keywords>
+                    </t>
+                    <t t-snippet="website.s_carousel_new" string="Carousels" t-thumbnail="/website/static/src/img/snippets_thumbs/s_carousel.svg">
+                        <keywords>carousels</keywords>
+                    </t>
+                    <t t-snippet="website.s_galleries_new" string="Galleries" t-thumbnail="/website/static/src/img/snippets_thumbs/s_images_wall.svg">
+                        <keywords>galleries</keywords>
+                    </t>
+                    <t t-snippet="website.s_overlays_new" string="Overlays" t-thumbnail="/website/static/src/img/snippets_thumbs/s_popup.svg">
+                        <keywords>overlays</keywords>
+                    </t>
+                </div>
+            </div>
+
+            <div id="snippet_content_new" class="o_panel">
+                <div class="o_panel_header">Content</div>
+                <div class="o_panel_body">
+                    <t t-snippet="website.s_title_new" string="Title" t-thumbnail="/website/static/src/img/snippets_thumbs/s_title.svg">
+                        <keywords>title</keywords>
+                    </t>
+                    <t t-snippet="website.s_picture_new" string="Picture" t-thumbnail="/website/static/src/img/snippets_thumbs/s_image.svg"/>
+                    <t t-snippet="website.s_text_new" string="Text" t-thumbnail="/website/static/src/img/snippets_thumbs/s_text_block.svg"/>
+                    <t t-snippet="website.s_hr_new" string="Separator" t-thumbnail="/website/static/src/img/snippets_thumbs/s_hr.svg"/>
+                    <t t-snippet="website.s_button_new" string="Button" t-thumbnail="/website/static/src/img/snippets_thumbs/s_button.svg"></t>
+                    <t t-snippet="website.s_card_new" string="Card" t-thumbnail="/website/static/src/img/snippets_thumbs/s_card.svg"></t>
+
+                </div>
+            </div>
+
+            <div id="snippet_structure" class="o_panel d-none">
                 <div class="o_panel_header">Structure</div>
                 <div class="o_panel_body">
                     <t t-snippet="website.s_banner" string="Banner" t-thumbnail="/website/static/src/img/snippets_thumbs/s_banner.svg">
@@ -71,7 +104,7 @@
                 </div>
             </div>
 
-            <div id="snippet_feature" class="o_panel">
+            <div id="snippet_feature" class="o_panel d-none">
                 <div class="o_panel_header">Features</div>
                 <div class="o_panel_body">
                     <t t-snippet="website.s_showcase" string="Showcase" t-thumbnail="/website/static/src/img/snippets_thumbs/s_showcase.svg"/>
@@ -106,7 +139,7 @@
                 </div>
             </div>
 
-            <div id="snippet_effect" class="o_panel">
+            <div id="snippet_effect" class="o_panel d-none">
                 <div class="o_panel_header">Dynamic Content</div>
                 <div class="o_panel_body">
                     <t t-snippet="website.s_website_form" string="Form" t-thumbnail="/website/static/src/img/snippets_thumbs/s_website_form.svg" t-forbid-sanitize="form"/>
@@ -137,7 +170,7 @@
                 </div>
             </div>
 
-            <div id="snippet_content" class="o_panel">
+            <div id="snippet_content" class="o_panel d-none">
                 <div class="o_panel_header">Inner content</div>
                 <div class="o_panel_body">
                     <t t-snippet="website.s_button" string="Button" t-thumbnail="/website/static/src/img/snippets_thumbs/s_button.svg">
