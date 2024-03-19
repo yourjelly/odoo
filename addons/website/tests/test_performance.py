@@ -9,6 +9,10 @@ from contextlib import nullcontext
 from odoo.tools import mute_logger
 from odoo.tests.common import HttpCase, tagged
 
+
+import logging
+_logger = logging.getLogger(__name__)
+
 EXTRA_REQUEST = 2 - 1
 """ During tests, the query on 'base_registry_signaling, base_cache_signaling'
 won't be executed on hot state, but new queries related to the test cursor will
@@ -55,25 +59,29 @@ class UtilPerf(HttpCaseWithUserPortal, HttpCaseWithUserDemo):
         self.url_open(url)
         sql_count_before = self.cr.sql_log_count
 
-        with (self.cr._enable_table_tracking() if table_count else nullcontext()):
-            if table_count:
-                sql_from_log_before = copy.deepcopy(self.cr.sql_from_log)
-                sql_into_log_before = copy.deepcopy(self.cr.sql_into_log)
+        with (self.cr._enable_table_tracking() if True else nullcontext()):
+            # if table_count:
+            sql_from_log_before = copy.deepcopy(self.cr.sql_from_log)
+            sql_into_log_before = copy.deepcopy(self.cr.sql_into_log)
 
             self.url_open(url)
 
             sql_count = self.cr.sql_log_count - sql_count_before - EXTRA_REQUEST
+            # if table_count:
+            sql_from_tables = {'base_registry_signaling': 1}  # see EXTRA_REQUEST
+            sql_into_tables = {}
+            for table, stats in self.cr.sql_from_log.items():
+                query_count = stats[0] - sql_from_log_before.get(table, [0])[0]
+                if query_count:
+                    sql_from_tables[table] = query_count
+            for table, stats in self.cr.sql_into_log.items():
+                query_count = stats[0] - sql_into_log_before.get(table, [0])[0]
+                if query_count:
+                    sql_into_tables[table] = query_count
+            _logger.info(sql_from_tables)
+            _logger.info(sql_into_tables)
+
             if table_count:
-                sql_from_tables = {'base_registry_signaling': 1}  # see EXTRA_REQUEST
-                sql_into_tables = {}
-                for table, stats in self.cr.sql_from_log.items():
-                    query_count = stats[0] - sql_from_log_before.get(table, [0])[0]
-                    if query_count:
-                        sql_from_tables[table] = query_count
-                for table, stats in self.cr.sql_into_log.items():
-                    query_count = stats[0] - sql_into_log_before.get(table, [0])[0]
-                    if query_count:
-                        sql_into_tables[table] = query_count
                 return sql_count, sql_from_tables, sql_into_tables
 
             return sql_count
