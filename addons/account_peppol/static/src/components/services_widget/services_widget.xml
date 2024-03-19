@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates>
+
+    <t t-name="account_peppol.ServiceSelection">
+        <div class="row mt-0 pt-0" t-on-focusout="_save">
+
+            <t t-foreach="Object.keys(state.services)" t-as="identifier" t-key="identifier">
+
+                <div class="mb-2 form-check my-2">
+                    <input type="checkbox"
+                           class="form-check-input"
+                           t-att-id="identifier"
+                           t-att-checked="state.services[identifier].enabled"/>
+                    <label class="form-check-label"
+                           t-att-for="identifier">
+                        <b t-esc="state.services[identifier].name"/>
+                    </label>
+
+                </div>
+
+
+            </t>
+        </div>
+    </t>
+
+</templates>

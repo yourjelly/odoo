@@ -87,3 +87,20 @@ class AccountEdiXmlUBLPINTJP(models.AbstractModel):
             # see https://docs.peppol.eu/poac/jp/pint-jp/bis/#_tax_in_accounting_currency
             vals['vals']['tax_currency_code'] = invoice.company_id.currency_id.name  # accounting currency
         return vals
+
+
+class AccountEdiXmlUBL20(models.AbstractModel):
+    _inherit = "account.edi.xml.ubl_20"
+
+    # -------------------------------------------------------------------------
+    # PEPPOL PARTICIPANT MANAGEMENT
+    # -------------------------------------------------------------------------
+
+    def _peppol_get_supported_document_types(self):
+        # EXTENDS account_edi_ubl_cii
+        return {
+            **super()._peppol_get_supported_document_types(),
+            'l10n_jp_ubl_pint': [
+                ('urn:oasis:names:specification:ubl:schema:xsd:Invoice-2::Invoice##urn:fdc:peppol:jp:billing:3.0::2.1', 'JP PINT invoice'),
+            ]
+        }

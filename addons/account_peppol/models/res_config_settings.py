@@ -322,3 +322,21 @@ class ResConfigSettings(models.TransientModel):
         self._call_peppol_proxy(endpoint='/api/peppol/1/cancel_peppol_registration')
         self.account_peppol_proxy_state = 'not_registered'
         self.account_peppol_edi_user.unlink()
+
+    def button_account_peppol_configure_services(self):
+        wizard = self.env['account_peppol.service.wizard'].create({
+            'edi_user_id': self.account_peppol_edi_user.id,
+            'service_json': self.account_peppol_edi_user._peppol_get_services().get('services'),
+        })
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Configure your peppol services',
+            'res_model': 'account_peppol.service.wizard',
+            'res_id': wizard.id,
+            'view_mode': 'form',
+            'target': 'new',
+        }
+
+    def button_auto_register(self):
+        self.account_peppol_edi_user._peppol_auto_register_services('default')
+        return

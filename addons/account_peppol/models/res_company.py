@@ -52,7 +52,7 @@ class ResCompany(models.Model):
             ('not_verified', 'Not verified'),
             ('sent_verification', 'Verification code sent'),
             ('pending', 'Pending'),
-            ('active', 'Active'),
+            ('receiver', 'Receiver'),
             ('rejected', 'Rejected'),
             ('canceled', 'Cancelled'),
         ],

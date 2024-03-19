@@ -3,10 +3,12 @@
 
 import logging
 
-from odoo import _, fields, models, modules, tools
+from odoo import _, api, fields, models, modules, tools
 from odoo.addons.account_edi_proxy_client.models.account_edi_proxy_user import AccountEdiProxyError
 from odoo.addons.account_peppol.tools.demo_utils import handle_demo
 from odoo.exceptions import UserError
+
+from ..consts import DEFAULT_DOCUMENT_IDENTIFIERS
 
 _logger = logging.getLogger(__name__)
 
@@ -63,6 +65,10 @@ class AccountEdiProxyClientUser(models.Model):
     def _cron_peppol_get_message_status(self):
         edi_users = self.search([('company_id.account_peppol_proxy_state', '=', 'active')])
         edi_users._peppol_get_message_status()
+
+    def _cron_peppol_get_participant_status(self):
+        edi_users = self.search([('company_id.account_peppol_proxy_state', '=', 'pending')])
+        edi_users._peppol_get_participant_status()
 
     # -------------------------------------------------------------------------
     # BUSINESS ACTIONS
@@ -215,18 +221,116 @@ class AccountEdiProxyClientUser(models.Model):
                     {'message_uuids': list(message_uuids.keys())},
                 )
 
-    def _cron_peppol_get_participant_status(self):
-        edi_users = self.search([('company_id.account_peppol_proxy_state', '=', 'pending')])
-        edi_users._peppol_get_participant_status()
+    # -------------------------------------------------------------------------
+    # PARTICIPANT MANAGEMENT
+    # -------------------------------------------------------------------------
 
     def _peppol_get_participant_status(self):
         for edi_user in self:
             try:
                 proxy_user = edi_user._make_request(
-                    f"{edi_user._get_server_url()}/api/peppol/1/participant_status")
+                    f"{edi_user._get_server_url()}/api/peppol/2/participant_status")
             except AccountEdiProxyError as e:
                 _logger.error('Error while updating Peppol participant status: %s', e)
                 continue
 
-            if proxy_user['peppol_state'] in {'active', 'rejected', 'canceled'}:
+            if proxy_user['peppol_state'] in {'receiver', 'rejected', 'canceled'}:
                 edi_user.company_id.account_peppol_proxy_state = proxy_user['peppol_state']
+
+    def _peppol_get_supported_document_types(self):
+        """Override this function to add supported document types as modules are installed.
+
+        :returns: dictionary of the form: {module_name: [(document identifier, document_name)]}
+        """
+        return {'default': DEFAULT_DOCUMENT_IDENTIFIERS}
+
+    @api.model
+    def _peppol_auto_register_services(self, module):
+        """Register new document types for all recipient users.
+
+        This function should be run in the post init hook of any module that extends the supported
+        document types.
+
+        :param module: module name, as a string, from which support for the new document types is added.
+        """
+        receivers = self.search([
+            ('proxy_type', '=', 'peppol'),
+            ('company_id.account_peppol_proxy_state', '=', 'receiver')
+        ])
+        for receiver in receivers:
+            additional_doctypes = self.env['account.edi.xml.ubl_20']._peppol_get_supported_document_types().get(module, [])
+            try:
+                receiver._peppol_create_services({
+                    document_identifier: {'enabled': True}
+                    for document_identifier, _document_name in additional_doctypes
+                })
+            except Exception as exception: # Broad exception case, so as not to block execution of the rest of the _post_init hook.
+                _logger.error(
+                    'Auto registration of peppol services for module: %s failed on the user: %s, with exception: %s',
+                    module, receiver.edi_identification, exception,
+                )
+        return
+
+    @api.model
+    def _peppol_auto_deregister_services(self, unsupported_identifiers):
+        """Unregister a set of document types for all recipient users.
+
+        This function should be run in the uninstall hook of any module that extends the supported
+        document types.
+
+        :param unsupported_identifiers: list of document identifiers as strings, from which the
+            support for the document types that we are unregistering was provided.
+        """
+        receivers = self.search([
+            ('proxy_type', '=', 'peppol'),
+            ('company_id.account_peppol_proxy_state', '=', 'receiver')
+        ])
+        for receiver in receivers:
+
+            try:
+                receiver._peppol_delete_services(unsupported_identifiers)
+            except Exception as exception: # Broad exception case, so as not to block execution of the rest of the _post_init hook.
+                _logger.error(
+                    'Auto deregistration of peppol services for module: %s failed on the user: %s, with exception: %s',
+                    module, receiver.edi_identification, exception,
+                )
+        return
+
+    def _peppol_create_services(self, services=None):
+        """Register services on a particular user on the IAP."""
+        self.ensure_one()
+        if services is None:
+            return
+        return self._make_request(
+            f"{self._get_server_url()}/api/peppol/2/create_services",
+            {'services': services},
+        )
+
+    def _peppol_get_services(self):
+        """Get information from the IAP regarding the Peppol services."""
+        self.ensure_one()
+        return self._make_request(f"{self._get_server_url()}/api/peppol/2/get_services")
+
+    def _peppol_update_services(self, services=None):
+        """Update the IAP with information representing the available services on a user."""
+        self.ensure_one()
+        if services is None:
+            return
+        if self.company_id.account_peppol_proxy_state == 'receiver':
+            return self._make_request(
+                f"{self._get_server_url()}/api/peppol/2/update_services",
+                {'services': services}
+            )
+        return {}
+
+    def _peppol_delete_services(self, services=None):
+        """Delete services from a user on the IAP"""
+        self.ensure_one()
+        if services is None:
+            return
+        if self.company_id.account_peppol_proxy_state == 'receiver':
+            return self._make_request(
+                f"{self._get_server_url()}/api/peppol/2/delete_services",
+                {'services': services}
+            )
+        return {}

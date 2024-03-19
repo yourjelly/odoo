@@ -122,6 +122,13 @@
                                         Please do not hesitate to contact our support if you need further assistance.
                                     </p>
                                 </div>
+                                <div>
+                                      <button string="Configure Peppol Services"
+                                              name="button_account_peppol_configure_services"
+                                              type="object"
+                                              class="btn-link"
+                                              icon="oi-arrow-right"/>
+                                </div>
                                 <div invisible="account_peppol_proxy_state != 'active' or not account_peppol_migration_key">
                                     Your migration key is:
                                     <field name="account_peppol_migration_key"

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="peppol_service_configuration">
+            <field name="name">account.peppol.service.configuration.form</field>
+            <field name="model">account_peppol.service.wizard</field>
+            <field name="arch" type="xml">
+                <form string="">
+                    <group>
+                        <div colspan="2">
+                            <field name="service_ids"
+                                   nolabel="1"
+                                   widget="one2many"
+                                   columns="2">
+                                <tree editable="bottom" create="0" delete="0" edit="1">
+                                    <field name="wizard_id" column_invisible="1"/>
+                                    <field name="document_name" readonly="1"/>
+                                    <field name="document_identifier" groups="base.group_no_one" readonly="1"/>
+                                    <field name="enabled" widget="boolean_toggle"/>
+                                </tree>
+                            </field>
+                        </div>
+                    </group>
+                </form>
+            </field>
+        </record>
+    </data>
+</odoo>
