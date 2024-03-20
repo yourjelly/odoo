@@ -152,7 +152,7 @@ class Project(models.Model):
 
     def _get_stat_buttons(self):
         buttons = super()._get_stat_buttons()
-        if self.user_has_groups('mrp.group_mrp_user'):
+        if self.env.user.has_group('mrp.group_mrp_user'):
             self_sudo = self.sudo()
             buttons.append({
                 'icon': 'dollar',
