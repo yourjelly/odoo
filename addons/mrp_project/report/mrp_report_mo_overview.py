@@ -1,9 +1,6 @@
 #  Part of Odoo. See LICENSE file for full copyright and licensing details.
-from collections import defaultdict
 
 from odoo import models
-from odoo.tools import float_is_zero
-
 
 class ReportMoOverview(models.AbstractModel):
     _name = 'report.mrp.report_mo_overview'
@@ -42,7 +39,7 @@ class ReportMoOverview(models.AbstractModel):
             services.append({
                 'level': level,
                 'index': f"{current_index}S{count}",
-                'id' : product.id,
+                'id': product.id,
                 'model': product._name,
                 'name': product.display_name,
                 'product_model': product._name,

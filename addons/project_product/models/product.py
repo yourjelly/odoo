@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, fields, models, _
@@ -63,7 +62,7 @@ class ProductTemplate(models.Model):
 
     @api.onchange('type')
     def _onchange_type(self):
-        res = super(ProductTemplate, self)._onchange_type()
+        res = super()._onchange_type()
         if self.type != 'service':
             self.service_tracking = 'no'
         return res
@@ -74,7 +73,7 @@ class ProductTemplate(models.Model):
                 'service_tracking': 'no',
                 'project_id': False
             })
-        return super(ProductTemplate, self).write(vals)
+        return super().write(vals)
 
 
 class ProductProduct(models.Model):
@@ -96,4 +95,4 @@ class ProductProduct(models.Model):
                 'service_tracking': 'no',
                 'project_id': False
             })
-        return super(ProductProduct, self).write(vals)
+        return super().write(vals)

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import ast
 from collections import defaultdict
@@ -178,7 +177,7 @@ class MrpProduction(models.Model):
     def _onchange_project_id(self):
         """ Set the MO analytic distribution to the selected project's analytic account """
         if self.project_id.analytic_account_id:
-            self.analytic_distribution = {self.project_id.analytic_account_id.id : 100}
+            self.analytic_distribution = {self.project_id.analytic_account_id.id: 100}
 
     def action_view_task(self):
         self.ensure_one()

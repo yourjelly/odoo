@@ -94,7 +94,7 @@ class ReportMoOverview(models.AbstractModel):
         }
 
     def _get_services_data(self, production, level=0, current_index=False):
-        return [] # To override
+        return []  # To override
 
     def _get_report_extra_lines(self, summary, components, operations, production_done=False, services=False):
         currency = summary.get('currency', self.env.company.currency_id)
