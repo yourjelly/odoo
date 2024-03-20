@@ -4,6 +4,7 @@ from collections import defaultdict
 
 from odoo import models, fields, api, Command, _
 from odoo.osv.expression import AND
+from odoo.tools import float_round
 
 
 class MrpProduction(models.Model):
@@ -79,6 +80,11 @@ class MrpProduction(models.Model):
             for order in self:
                 order.service_ids.sudo().with_company(order.company_id)._timesheet_service_generation()
         return result
+
+    def _update_raw_moves(self, factor):
+        for service in self.service_ids:
+            service.product_qty = float_round(service.product_qty * factor, precision_rounding=service.product_uom_id.rounding, rounding_method='UP')
+        return super()._update_raw_moves(factor)
 
     def _compute_milestone_count(self):
         read_group = self.env['project.milestone']._read_group(
