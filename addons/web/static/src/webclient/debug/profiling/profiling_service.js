@@ -17,7 +17,7 @@ const profilingService = {
 
         function notify() {
             if (systrayRegistry.contains("web.profiling") && state.isEnabled === false) {
-                systrayRegistry.remove("web.profiling", profilingSystrayItem);
+                systrayRegistry.remove("web.profiling");
             }
             if (!systrayRegistry.contains("web.profiling") && state.isEnabled === true) {
                 systrayRegistry.add("web.profiling", profilingSystrayItem, { sequence: 99 });

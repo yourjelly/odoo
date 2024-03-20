@@ -35,7 +35,10 @@ export function getFieldFromRegistry(fieldType, widget, viewType, jsClass) {
         }
         console.warn(`Missing widget: ${widget} for field of type ${fieldType}`);
     }
-    return findInRegistry(fieldType) || { component: DefaultField };
+    return (
+        findInRegistry(fieldType) ||
+        /** @type {import("registries").ItemTypes["fields"]} */ ({ component: DefaultField })
+    );
 }
 
 export function fieldVisualFeedback(field, record, fieldName, fieldInfo) {

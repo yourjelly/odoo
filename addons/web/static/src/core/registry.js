@@ -1,5 +1,9 @@
 import { EventBus } from "@odoo/owl";
 
+/**
+ * @typedef {import("registries").ItemTypes} ItemTypes
+ */
+
 // -----------------------------------------------------------------------------
 // Errors
 // -----------------------------------------------------------------------------
@@ -19,16 +23,17 @@ export class DuplicatedKeyError extends Error {}
  * 2. it throws an error when the get operation fails
  * 3. it provides a chained API to add items to the registry.
  *
- * @template [K=string] keys type
- * @template [V=any] values type
+ * @template {keyof ItemTypes} Name the name of the registry
  */
 export class Registry extends EventBus {
     /**
-     * @param {string} [name]
+     * @param {Name} [name]
      */
     constructor(name) {
         super();
+        /** @type {{[key: string]: [number, ItemTypes[Name]]}} */
         this.content = {};
+        /** @type {{[key in keyof ItemTypes]?: Registry}} */
         this.subRegistries = {};
         this.elements = null;
         this.entries = null;
@@ -47,10 +52,10 @@ export class Registry extends EventBus {
      * Note that this also returns the registry, so another add method call can
      * be chained
      *
-     * @param {K} key
-     * @param {{test: boolean, steps: (function(): [{run: *, trigger: string, content: string}]), url: string}} value
+     * @param {string} key
+     * @param {ItemTypes[Name]} value
      * @param {{ force?: boolean; sequence?: number }} [options]
-     * @returns {Registry<K, V>}
+     * @returns {Registry<Name>}
      */
     add(key, value, { force, sequence } = {}) {
         if (!force && key in this.content) {
@@ -73,8 +78,8 @@ export class Registry extends EventBus {
     /**
      * Get an item from the registry
      *
-     * @param {K} key
-     * @returns {V}
+     * @param {string} key
+     * @returns {ItemTypes[Name]}
      */
     get(key, defaultValue) {
         if (arguments.length < 2 && !(key in this.content)) {
@@ -87,7 +92,7 @@ export class Registry extends EventBus {
     /**
      * Check the presence of a key in the registry
      *
-     * @param {K} key
+     * @param {string} key
      * @returns {boolean}
      */
     contains(key) {
@@ -98,7 +103,7 @@ export class Registry extends EventBus {
      * Get a list of all elements in the registry. Note that it is ordered
      * according to the sequence numbers.
      *
-     * @returns {V[]}
+     * @returns {ItemTypes[Name][]}
      */
     getAll() {
         if (!this.elements) {
@@ -111,12 +116,14 @@ export class Registry extends EventBus {
     /**
      * Return a list of all entries, ordered by sequence numbers.
      *
-     * @returns {[K, V][]}
+     * @returns {[string, ItemTypes[Name]][]}
      */
     getEntries() {
         if (!this.entries) {
             const entries = Object.entries(this.content).sort((el1, el2) => el1[1][0] - el2[1][0]);
-            this.entries = entries.map(([str, elem]) => [str, elem[1]]);
+            this.entries = entries.map(
+                ([str, elem]) => /** @type {[string, ItemTypes[Name]]} */ ([str, elem[1]])
+            );
         }
         return this.entries.slice();
     }
@@ -124,7 +131,7 @@ export class Registry extends EventBus {
     /**
      * Remove an item from the registry
      *
-     * @param {K} key
+     * @param {string} key
      */
     remove(key) {
         const value = this.content[key];
@@ -136,16 +143,15 @@ export class Registry extends EventBus {
     /**
      * Open a sub registry (and create it if necessary)
      *
-     * @template [SK=string]
-     * @template [SV=any]
-     * @param {string} subcategory
-     * @returns {Registry<SK, SV>}
+     * @template {keyof ItemTypes} T
+     * @param {T} subcategory
      */
     category(subcategory) {
         if (!(subcategory in this.subRegistries)) {
             this.subRegistries[subcategory] = new Registry(subcategory);
         }
-        return this.subRegistries[subcategory];
+
+        return /** @type {Registry<T>} */ (this.subRegistries[subcategory]);
     }
 }
 
