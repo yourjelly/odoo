@@ -16,7 +16,8 @@ class TestVirtualAvailable(TestStockCommon):
 
         # Make `product3` a storable product for this test. Indeed, creating quants
         # and playing with owners is not possible for consumables.
-        cls.product_3.type = 'product'
+        cls.product_3.type = 'consu'
+        cls.product_3.is_tracable = True
         cls.env['stock.picking.type'].browse(cls.env.ref('stock.picking_type_out').id).reservation_method = 'manual'
 
         cls.env['stock.quant'].create({
@@ -114,7 +115,8 @@ class TestVirtualAvailable(TestStockCommon):
         company2 = self.env['res.company'].create({'name': 'Second Company'})
         product = self.env['product.product'].create({
             'name': 'Product [TEST - Change Company]',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
         })
         # Creates a quant for productA in the first company.
         self.env['stock.quant'].create({
@@ -173,7 +175,8 @@ class TestVirtualAvailable(TestStockCommon):
         supplier_location = self.env.ref('stock.stock_location_suppliers')
         product = self.env['product.product'].create({
             'name': 'Product Single Company',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
         })
         # Creates a quant for company 1.
         self.env['stock.quant'].create({
@@ -209,7 +212,8 @@ class TestVirtualAvailable(TestStockCommon):
     def test_search_qty_available(self):
         product = self.env['product.product'].create({
             'name': 'Brand new product',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
         })
         result = self.env['product.product'].search([
             ('qty_available', '=', 0),
@@ -324,7 +328,8 @@ class TestVirtualAvailable(TestStockCommon):
     def test_change_type_tracked_product(self):
         product = self.env['product.template'].create({
             'name': 'Brand new product',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'tracking': 'serial',
         })
         product_form = Form(product)

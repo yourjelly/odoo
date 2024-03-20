@@ -35,11 +35,13 @@ class StockQuant(TransactionCase):
 
         cls.product = cls.env['product.product'].create({
             'name': 'Product A',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
         })
         cls.product_lot = cls.env['product.product'].create({
             'name': 'Product A',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'tracking': 'lot',
         })
         cls.product_consu = cls.env['product.product'].create({
@@ -48,7 +50,8 @@ class StockQuant(TransactionCase):
         })
         cls.product_serial = cls.env['product.product'].create({
             'name': 'Product A',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'tracking': 'serial',
         })
         cls.stock_location = cls.env['stock.location'].create({
@@ -236,7 +239,8 @@ class StockQuant(TransactionCase):
         stock_sub_location = self.stock_location.child_ids[0]
         product2 = self.env['product.product'].create({
             'name': 'Product B',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
         })
         self.env['stock.quant']._update_available_quantity(self.product, self.stock_location, 1.0)
         self.env['stock.quant']._update_available_quantity(self.product, stock_sub_location, 1.0)
@@ -884,7 +888,8 @@ class StockQuant(TransactionCase):
         """
         product = self.env['product.product'].create({
             'name': 'Product',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'tracking': 'serial',
         })
         sn1 = self.env['stock.lot'].create({
@@ -948,12 +953,14 @@ class StockQuant(TransactionCase):
         # testing moving multiple packed quants to a new location with incomplete package
         product_b = self.env['product.product'].create({
             'name': 'product B',
-            'type': 'product'
+            'type': 'consu',
+            'is_trackable': True
         })
         self.env['stock.quant']._update_available_quantity(product_b, self.stock_location, 10, package_id=package_01)
         product_c = self.env['product.product'].create({
             'name': 'product C',
-            'type': 'product'
+            'type': 'consu',
+            'is_trackable': True
         })
         self.env['stock.quant']._update_available_quantity(product_c, self.stock_location, 10, package_id=package_01)
 
@@ -990,12 +997,14 @@ class StockQuant(TransactionCase):
         })
         product_a_company_B = self.env['product.product'].create({
             'name': 'product A company B',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'company_id': company_B.id
         })
         product_b_company_B = self.env['product.product'].create({
             'name': 'product b company B',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'company_id': company_B.id
         })
         self.env['stock.quant']._update_available_quantity(product_a_company_B, location_company_B, 10, package_id=package_03)
@@ -1024,7 +1033,7 @@ class StockQuant(TransactionCase):
         """ With the changes implemented in _get_inventory_move_values(), we want to make sure that it correctly
         writes the package and destination package for inventory adjustments in _apply_inventory(). """
 
-        dummy_product = self.env['product.product'].create({'name': 'dummy product', 'type': 'product'})
+        dummy_product = self.env['product.product'].create({'name': 'dummy product', 'type': 'consu', 'is_trackable': True})
         dummy_package = self.env['stock.quant.package'].create({'name': 'dummy package'})
         dummy_quant = self.env['stock.quant'].create({
             'product_id': dummy_product.id,
@@ -1056,7 +1065,8 @@ class StockQuantRemovalStrategy(TransactionCase):
             [('method', '=', 'least_packages')])
         self.product = self.env['product.product'].create({
             'name': 'Product',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
         })
         self.product.categ_id.removal_strategy_id = self.least_package_strategy.id
         self.stock_location = self.env['stock.location'].create({

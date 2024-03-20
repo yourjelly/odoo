@@ -14,7 +14,8 @@ class TestWarehouse(TestStockCommon):
         cls.partner = cls.env['res.partner'].create({'name': 'Deco Addict'})
 
     def test_inventory_product(self):
-        self.product_1.type = 'product'
+        self.product_1.type = 'consu'
+        self.product_1.is_trackable = True
         product_1_quant = self.env['stock.quant'].with_context(inventory_mode=True).create({
             'product_id': self.product_1.id,
             'inventory_quantity': 50.0,
@@ -159,7 +160,7 @@ class TestWarehouse(TestStockCommon):
 
     def test_inventory_adjustment_and_negative_quants_1(self):
         """Make sure negative quants from returns get wiped out with an inventory adjustment"""
-        productA = self.env['product.product'].create({'name': 'Product A', 'type': 'product'})
+        productA = self.env['product.product'].create({'name': 'Product A', 'type': 'consu', 'is_trackable': True})
         stock_location = self.env.ref('stock.stock_location_stock')
         customer_location = self.env.ref('stock.stock_location_customers')
 
@@ -203,7 +204,7 @@ class TestWarehouse(TestStockCommon):
 
     def test_inventory_adjustment_and_negative_quants_2(self):
         """Make sure negative quants get wiped out with an inventory adjustment"""
-        productA = self.env['product.product'].create({'name': 'Product A', 'type': 'product'})
+        productA = self.env['product.product'].create({'name': 'Product A', 'type': 'consu', 'is_trackable': True})
         stock_location = self.env.ref('stock.stock_location_stock')
         customer_location = self.env.ref('stock.stock_location_customers')
         location_loss = productA.property_stock_inventory
@@ -289,7 +290,8 @@ class TestWarehouse(TestStockCommon):
 
         product = self.env['product.product'].create({
             'name': 'Fakir',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'route_ids': [(4, route_id) for route_id in [route_stock_to_dist.id, route_dist_to_shop.id, self.env.ref('stock.route_warehouse0_mto').id]],
         })
 
@@ -366,7 +368,8 @@ class TestWarehouse(TestStockCommon):
         # The product contains the 2 resupply routes.
         product = self.env['product.product'].create({
             'name': 'Fakir',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'route_ids': [(4, route_id) for route_id in [route_shop_namur.id, route_shop_wavre.id, self.env.ref('stock.route_warehouse0_mto').id]],
         })
 

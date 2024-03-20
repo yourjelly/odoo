@@ -21,7 +21,8 @@ class TestStockPickingTour(HttpCase):
         """validate a receipt with some move without any save except the last one"""
         product_lot = self.env['product.product'].create({
             'name': 'Product Lot',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'tracking': 'lot',
         })
         url = self._get_picking_url(self.receipt.id)
@@ -41,7 +42,8 @@ class TestStockPickingTour(HttpCase):
         """generate some serial numbers in the detailed operation modal"""
         product_serial = self.env['product.product'].create({
             'name': 'Product Serial',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'tracking': 'serial',
         })
         url = self._get_picking_url(self.receipt.id)
@@ -62,7 +64,8 @@ class TestStockPickingTour(HttpCase):
         """ Generate lot numbers in the detailed operation modal """
         product_lot_1 = self.env['product.product'].create({
             'name': 'Product Lot 1',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'tracking': 'lot',
         })
         url = self._get_picking_url(self.receipt.id)
@@ -92,8 +95,8 @@ class TestStockPickingTour(HttpCase):
         (without clicking on anything else)
         """
         self.env['product.product'].create([
-            {'name': 'Product 1', 'type': 'product'},
-            {'name': 'Product 2', 'type': 'product'},
+            {'name': 'Product 1', 'type': 'consu',  'is_trackable': True},
+            {'name': 'Product 2', 'type': 'consu',  'is_trackable': True},
         ])
 
         menu = self.env.ref('stock.menu_action_inventory_tree')

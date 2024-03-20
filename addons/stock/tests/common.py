@@ -100,12 +100,12 @@ class TestStockCommon(common.TransactionCase):
             'rounding': 1.0})
 
         # Product for different unit of measure.
-        cls.DozA = cls.ProductObj.create({'name': 'Dozon-A', 'type': 'product', 'uom_id': cls.uom_dozen.id, 'uom_po_id': cls.uom_dozen.id})
-        cls.SDozA = cls.ProductObj.create({'name': 'SuperDozon-A', 'type': 'product', 'uom_id': cls.uom_sdozen.id, 'uom_po_id': cls.uom_sdozen.id})
-        cls.SDozARound = cls.ProductObj.create({'name': 'SuperDozenRound-A', 'type': 'product', 'uom_id': cls.uom_sdozen_round.id, 'uom_po_id': cls.uom_sdozen_round.id})
+        cls.DozA = cls.ProductObj.create({'name': 'Dozon-A', 'type': 'consu', 'is_trackable': True, 'uom_id': cls.uom_dozen.id, 'uom_po_id': cls.uom_dozen.id})
+        cls.SDozA = cls.ProductObj.create({'name': 'SuperDozon-A', 'type': 'consu', 'is_trackable': True, 'uom_id': cls.uom_sdozen.id, 'uom_po_id': cls.uom_sdozen.id})
+        cls.SDozARound = cls.ProductObj.create({'name': 'SuperDozenRound-A', 'type': 'consu', 'is_trackable': True, 'uom_id': cls.uom_sdozen_round.id, 'uom_po_id': cls.uom_sdozen_round.id})
         cls.UnitA = cls.ProductObj.create({'name': 'Unit-A', 'type': 'product'})
-        cls.kgB = cls.ProductObj.create({'name': 'kg-B', 'type': 'product', 'uom_id': cls.uom_kg.id, 'uom_po_id': cls.uom_kg.id})
-        cls.gB = cls.ProductObj.create({'name': 'g-B', 'type': 'product', 'uom_id': cls.uom_gm.id, 'uom_po_id': cls.uom_gm.id})
+        cls.kgB = cls.ProductObj.create({'name': 'kg-B', 'type': 'consu', 'is_trackable': True, 'uom_id': cls.uom_kg.id, 'uom_po_id': cls.uom_kg.id})
+        cls.gB = cls.ProductObj.create({'name': 'g-B', 'type': 'consu', 'is_trackable': True, 'uom_id': cls.uom_gm.id, 'uom_po_id': cls.uom_gm.id})
 
         cls.env.ref('base.group_user').write({'implied_ids': [
             (4, cls.env.ref('base.group_multi_company').id),

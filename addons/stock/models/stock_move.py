@@ -44,7 +44,7 @@ class StockMove(models.Model):
     product_id = fields.Many2one(
         'product.product', 'Product',
         check_company=True,
-        domain="[('type', 'in', ['product', 'consu'])]", index=True, required=True)
+        domain="[('type', 'in', ['consu']), ('is_trackable', '=', True)]", index=True, required=True)
     description_picking = fields.Text('Description of Picking')
     product_qty = fields.Float(
         'Real Quantity', compute='_compute_product_qty', inverse='_set_product_qty',
@@ -434,7 +434,7 @@ Please change the quantity done or the rounding precision of your unit of measur
         # Prefetch product info to avoid fetching all product fields
         self.product_id.fetch(['type', 'uom_id'])
 
-        not_product_moves = self.filtered(lambda move: move.product_id.type != 'product')
+        not_product_moves = self.filtered(lambda move: not move.product_id.is_trackable)
         for move in not_product_moves:
             move.forecast_availability = move.product_qty
 
@@ -562,7 +562,7 @@ Please change the quantity done or the rounding precision of your unit of measur
     def _compute_show_info(self):
         for move in self:
             move.show_quant = move.picking_code != 'incoming'\
-                           and move.product_id.detailed_type == 'product'
+                           and move.product_id.is_trackable
             move.show_lots_m2o = not move.show_quant\
                 and move.has_tracking != 'none'\
                 and (move.picking_type_id.use_existing_lots or move.state == 'done' or move.origin_returned_move_id.id)
@@ -1556,7 +1556,7 @@ Please change the quantity done or the rounding precision of your unit of measur
     def _should_bypass_reservation(self, forced_location=False):
         self.ensure_one()
         location = forced_location or self.location_id
-        return location.should_bypass_reservation() or self.product_id.type != 'product'
+        return location.should_bypass_reservation() or not self.product_id.is_trackable
 
     def _get_picked_quantity(self):
         self.ensure_one()

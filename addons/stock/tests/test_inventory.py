@@ -18,12 +18,14 @@ class TestInventory(TransactionCase):
         cls.uom_unit = cls.env.ref('uom.product_uom_unit')
         cls.product1 = cls.env['product.product'].create({
             'name': 'Product A',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'categ_id': cls.env.ref('product.product_category_all').id,
         })
         cls.product2 = cls.env['product.product'].create({
             'name': 'Product A',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'tracking': 'serial',
             'categ_id': cls.env.ref('product.product_category_all').id,
         })
@@ -441,7 +443,8 @@ class TestInventory(TransactionCase):
         # Create quant for product3
         product3 = self.env['product.product'].create({
             'name': 'Product C',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'categ_id': self.env.ref('product.product_category_all').id,
         })
         self.env['stock.quant'].create({

@@ -14,7 +14,8 @@ class StockGenerateCommon(TransactionCase):
         Product = cls.env['product.product']
         cls.product_serial = Product.create({
             'name': 'Tracked by SN',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'tracking': 'serial',
         })
         cls.uom_unit = cls.env.ref('uom.product_uom_unit')
@@ -309,7 +310,8 @@ class StockGenerateCommon(TransactionCase):
     def test_import_lots(self):
         product_lot = self.env['product.product'].create({
             'name': 'Tracked by Lots',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'tracking': 'lot',
         })
         lot_id = self.env['stock.lot'].create({

@@ -401,7 +401,7 @@ class Product(models.Model):
 
         if include_zero:
             products_without_quants_in_domain = self.env['product.product'].search([
-                ('type', '=', 'product'),
+                ('is_trackable', '=', True),
                 ('id', 'not in', list(processed_product_ids))],
                 order='id'
             )
@@ -654,12 +654,14 @@ class ProductTemplate(models.Model):
     responsible_id = fields.Many2one(
         'res.users', string='Responsible', default=lambda self: self.env.uid, company_dependent=True, check_company=True,
         help="This user will be responsible of the next activities related to logistic operations for this product.")
-    detailed_type = fields.Selection(selection_add=[
-        ('product', 'Storable Product')
-    ], tracking=True, ondelete={'product': 'set consu'})
-    type = fields.Selection(selection_add=[
-        ('product', 'Storable Product')
-    ], ondelete={'product': 'set consu'})
+    # detailed_type = fields.Selection(selection_add=[
+    #     ('product', 'Storable Product')
+    # ], tracking=True, ondelete={'product': 'set consu'})
+    # type = fields.Selection(selection_add=[
+    #     ('product', 'Storable Product')
+    # ], ondelete={'product': 'set consu'})
+    is_trackable = fields.Boolean(string = "Track inventory")
+    
     property_stock_production = fields.Many2one(
         'stock.location', "Production Location",
         company_dependent=True, check_company=True, domain="[('usage', '=', 'production'), '|', ('company_id', '=', False), ('company_id', '=', allowed_company_ids[0])]",
@@ -721,8 +723,8 @@ class ProductTemplate(models.Model):
     @api.depends('type')
     def _compute_show_qty_status_button(self):
         for template in self:
-            template.show_on_hand_qty_status_button = template.type == 'product'
-            template.show_forecasted_qty_status_button = template.type == 'product'
+            template.show_on_hand_qty_status_button = template.type == 'consu' and template.is_trackable
+            template.show_forecasted_qty_status_button = template.type == 'consu' and template.is_trackable
 
     @api.depends('type')
     def _compute_has_available_route_ids(self):
@@ -840,10 +842,15 @@ class ProductTemplate(models.Model):
     def _compute_product_tooltip(self):
         super()._compute_product_tooltip()
         for record in self:
-            if record.type == 'product':
-                record.product_tooltip += _(
+            if record.type == 'consu' and record.is_trackable:
+                record.product_tooltip = _(
                     "Storable products are physical items for which you manage the inventory level."
                 )
+
+    @api.onchange('detailed_type')
+    def _onchange_detailed_type(self):
+        for record in self:
+            record.is_trackable = False
 
     @api.onchange('tracking')
     def _onchange_tracking(self):
@@ -852,7 +859,7 @@ class ProductTemplate(models.Model):
     @api.depends('type')
     def _compute_tracking(self):
         self.filtered(
-            lambda t: not t.tracking or t.type in ('consu', 'service')  and t.tracking != 'none'
+            lambda t: not t.tracking or (t.type in ('consu', 'service') and not t.is_trackable ) and t.tracking != 'none'
         ).tracking = 'none'
 
     @api.onchange('type')
@@ -899,7 +906,7 @@ class ProductTemplate(models.Model):
             done_moves = self.env['stock.move'].sudo().search([('product_id', 'in', updated.with_context(active_test=False).mapped('product_variant_ids').ids)], limit=1)
             if done_moves:
                 raise UserError(_("You cannot change the unit of measure as there are already stock moves for this product. If you want to change the unit of measure, you should rather archive this product and create a new one."))
-        if 'type' in vals and vals['type'] != 'product' and sum(self.mapped('nbr_reordering_rules')) != 0:
+        if 'is_trackable' in vals and not vals['is_trackable'] and sum(self.mapped('nbr_reordering_rules')) != 0:
             raise UserError(_('You still have some active reordering rules on this product. Please archive or delete them first.'))
         if any('type' in vals and vals['type'] != prod_tmpl.type for prod_tmpl in self):
             existing_done_move_lines = self.env['stock.move.line'].sudo().search([
@@ -914,7 +921,7 @@ class ProductTemplate(models.Model):
             ])
             if existing_reserved_move_lines:
                 raise UserError(_("You can not change the type of a product that is currently reserved on a stock move. If you need to change the type, you should first unreserve the stock move."))
-        if 'type' in vals and vals['type'] != 'product' and any(p.type == 'product' and not float_is_zero(p.qty_available, precision_rounding=p.uom_id.rounding) for p in self):
+        if 'is_trackable' in vals and not vals['is_trackable'] and any(p.is_trackable and not float_is_zero(p.qty_available, precision_rounding=p.uom_id.rounding) for p in self):
             raise UserError(_("Available quantity should be set to zero before changing type"))
         return super(ProductTemplate, self).write(vals)
 

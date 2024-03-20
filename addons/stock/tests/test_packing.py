@@ -21,8 +21,8 @@ class TestPackingCommon(TransactionCase):
         cls.customer_location = cls.env.ref('stock.stock_location_customers')
         cls.picking_type_in = cls.env.ref('stock.picking_type_in')
 
-        cls.productA = cls.env['product.product'].create({'name': 'Product A', 'type': 'product'})
-        cls.productB = cls.env['product.product'].create({'name': 'Product B', 'type': 'product'})
+        cls.productA = cls.env['product.product'].create({'name': 'Product A', 'type': 'consu',  'is_trackable': True})
+        cls.productB = cls.env['product.product'].create({'name': 'Product B', 'type': 'consu',  'is_trackable': True})
         cls.shelf1 = cls.env['stock.location'].create({
             'name': 'shelf1',
             'usage': 'internal',
@@ -1572,7 +1572,8 @@ class TestPacking(TestPackingCommon):
         """
         product = self.env['product.product'].create({
             'name': 'Product',
-            'type': 'product',
+            'type': 'consu', 
+            'is_trackable': True,
         })
 
         # Set the removal strategy to 'least_packages'

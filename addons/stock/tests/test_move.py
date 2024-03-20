@@ -43,18 +43,21 @@ class StockMove(TransactionCase):
         cls.uom_dozen = cls.env.ref('uom.product_uom_dozen')
         cls.product = cls.env['product.product'].create({
             'name': 'Product A',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'categ_id': cls.env.ref('product.product_category_all').id,
         })
         cls.product_serial = cls.env['product.product'].create({
             'name': 'Product A',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'tracking': 'serial',
             'categ_id': cls.env.ref('product.product_category_all').id,
         })
         cls.product_lot = cls.env['product.product'].create({
             'name': 'Product A',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'tracking': 'lot',
             'categ_id': cls.env.ref('product.product_category_all').id,
         })
@@ -1329,7 +1332,8 @@ class StockMove(TransactionCase):
         # create a different product and its quant
         product2 = self.env['product.product'].create({
             'name': 'Product 2',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'categ_id': self.env.ref('product.product_category_all').id,
         })
         self.env['stock.quant'].create({
@@ -1719,7 +1723,8 @@ class StockMove(TransactionCase):
 
         product2 = self.env['product.product'].create({
             'name': 'Product 2',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'categ_id': self.env.ref('product.product_category_all').id,
         })
 
@@ -3233,12 +3238,14 @@ class StockMove(TransactionCase):
     def test_use_unreserved_move_line_4(self):
         product_01 = self.env['product.product'].create({
             'name': 'Product 01',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'categ_id': self.env.ref('product.product_category_all').id,
         })
         product_02 = self.env['product.product'].create({
             'name': 'Product 02',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'categ_id': self.env.ref('product.product_category_all').id,
         })
         self.env['stock.quant']._update_available_quantity(product_01, self.stock_location, 1)
@@ -4317,7 +4324,8 @@ class StockMove(TransactionCase):
         """
         product5 = self.env['product.product'].create({
             'name': 'Product 5',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'categ_id': self.env.ref('product.product_category_all').id,
         })
 
@@ -4890,7 +4898,8 @@ class StockMove(TransactionCase):
         product01 = self.product
         product02 = self.env['product.product'].create({
             'name': 'SuperProduct',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
         })
 
         self.env['stock.quant']._update_available_quantity(product01, self.stock_location, 3)
@@ -5449,7 +5458,8 @@ class StockMove(TransactionCase):
         """
         product1 = self.env['product.product'].create({
             'name': 'Product B',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'categ_id': self.env.ref('product.product_category_all').id,
         })
         self.env['stock.quant']._update_available_quantity(self.product, self.stock_location, 1)
@@ -5497,7 +5507,8 @@ class StockMove(TransactionCase):
         """
         product1 = self.env['product.product'].create({
             'name': 'Product B',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'categ_id': self.env.ref('product.product_category_all').id,
         })
         self.env['stock.quant']._update_available_quantity(self.product, self.stock_location, 1)
@@ -5550,12 +5561,14 @@ class StockMove(TransactionCase):
         # Creates two other products.
         product2 = self.env['product.product'].create({
             'name': 'Product B',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'categ_id': self.env.ref('product.product_category_all').id,
         })
         product3 = self.env['product.product'].create({
             'name': 'Product C',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'categ_id': self.env.ref('product.product_category_all').id,
         })
         # Adds some quantity on stock.
@@ -5987,7 +6000,8 @@ class StockMove(TransactionCase):
         # create product
         product = self.env['product.product'].create({
             'name': 'Product In Units',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'categ_id': self.env.ref('product.product_category_all').id,
         })
         # make some stock
@@ -6083,7 +6097,8 @@ class StockMove(TransactionCase):
         uom_kg = self.env.ref('uom.product_uom_kgm')
         product1 = self.env['product.product'].create({
             'name': 'product1',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'uom_id': uom_kg.id,
             'uom_po_id': uom_kg.id
         })
