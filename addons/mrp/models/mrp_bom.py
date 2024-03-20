@@ -38,8 +38,7 @@ class MrpBom(models.Model):
         check_company=True, index=True,
         domain="['&', ('product_tmpl_id', '=', product_tmpl_id), ('type', 'in', ['product', 'consu'])]",
         help="If a product variant is defined the BOM is available only for this product.")
-    bom_line_ids = fields.One2many('mrp.bom.line', 'bom_id', 'BoM Components', copy=True, domain=[('product_type', '!=', 'service')])
-    all_bom_line_ids = fields.One2many('mrp.bom.line', string='BoM Lines', compute="_compute_all_bom_line_ids")
+    bom_line_ids = fields.One2many('mrp.bom.line', 'bom_id', 'BoM Components', copy=True)
     byproduct_ids = fields.One2many('mrp.bom.byproduct', 'bom_id', 'By-products', copy=True)
     product_qty = fields.Float(
         'Quantity', default=1.0,
@@ -293,11 +292,6 @@ class MrpBom(models.Model):
         for bom in self:
             bom.display_name = f"{bom.code + ': ' if bom.code else ''}{bom.product_tmpl_id.display_name}"
 
-    @api.depends('bom_line_ids')
-    def _compute_all_bom_line_ids(self):
-        for bom in self:
-            bom.all_bom_line_ids = bom.bom_line_ids
-
     def action_compute_bom_days(self):
         company_id = self.env.context.get('default_company_id', self.env.company.id)
         warehouse = self.env['stock.warehouse'].search([('company_id', '=', company_id)], limit=1)
@@ -380,7 +374,7 @@ class MrpBom(models.Model):
         lines_done = []
 
         bom_lines = []
-        for bom_line in self.all_bom_line_ids:
+        for bom_line in self.bom_line_ids:
             product_id = bom_line.product_id
             bom_lines.append((bom_line, product, quantity, False))
             product_ids.add(product_id.id)
@@ -400,8 +394,8 @@ class MrpBom(models.Model):
             bom = product_boms.get(current_line.product_id)
             if bom:
                 converted_line_quantity = current_line.product_uom_id._compute_quantity(line_quantity / bom.product_qty, bom.product_uom_id)
-                bom_lines += [(line, current_line.product_id, converted_line_quantity, current_line) for line in bom.all_bom_line_ids]
-                for bom_line in bom.all_bom_line_ids:
+                bom_lines += [(line, current_line.product_id, converted_line_quantity, current_line) for line in bom.bom_line_ids]
+                for bom_line in bom.bom_line_ids:
                     if not bom_line.product_id in product_boms:
                         product_ids.add(bom_line.product_id.id)
                 boms_done.append((bom, {'qty': converted_line_quantity, 'product': current_product, 'original_qty': quantity, 'parent_line': current_line}))

@@ -15,6 +15,7 @@
                             <field name="product_id"/>
                             <field name="product_tmpl_id" column_invisible="True"/>
                             <field name="product_qty"/>
+                            <field name="bom_line_id" column_invisible="True"/>
                             <field name="qty_delivered_method" column_invisible="True"/>
                             <field name="qty_delivered" readonly="qty_delivered_method != 'manual'"/>
                             <field name="product_uom_category_id" column_invisible="True"/>

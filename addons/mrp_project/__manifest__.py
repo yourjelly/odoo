@@ -14,7 +14,6 @@ Technical module.
         'report/mrp_report_bom_structure.xml',
         'report/mrp_report_mo_overview.xml',
         'security/ir.model.access.csv',
-        'views/mrp_bom_views.xml',
         'views/mrp_production_views.xml',
         'views/project_task_views.xml',
     ],

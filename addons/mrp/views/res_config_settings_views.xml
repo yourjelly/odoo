@@ -56,7 +56,7 @@
                             <setting id="mrp_reception_report" help="View and allocate manufactured quantities">
                                 <field name="group_mrp_reception_report"/>
                             </setting>
-                            <setting id="mrp_project" help="Manage tasks from the bill of materials to the manufacturing and repair order">
+                            <setting id="mrp_project" help="Manage tasks from the manufacturing order">
                                 <field name="module_mrp_project" widget="upgrade_boolean"/>
                             </setting>
                         </block>

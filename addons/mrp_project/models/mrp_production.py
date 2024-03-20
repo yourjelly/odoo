@@ -11,7 +11,7 @@ class MrpProduction(models.Model):
     _name = 'mrp.production'
     _inherit = 'mrp.production'
 
-    service_ids = fields.One2many('mrp.production.service', 'production_id', 'Services', copy=False, store=True, readonly=False)
+    service_ids = fields.One2many('mrp.production.service', 'production_id', 'Services', copy=True, store=True, readonly=False, compute='_compute_service_ids')
     tasks_ids = fields.Many2many('project.task', compute='_compute_tasks_ids', search='_search_tasks_ids', string='Tasks associated with this production')
     tasks_count = fields.Integer(string='Tasks', compute='_compute_tasks_ids', groups="project.group_project_user")
 
@@ -33,9 +33,20 @@ class MrpProduction(models.Model):
             list_service_raw = [Command.link(service.id) for service in production.service_ids.filtered(lambda s: not s.bom_line_id)]
             if not production.bom_id and not production._origin.product_id:
                 production.service_ids = list_service_raw
+            if any(service.bom_line_id.bom_id != production.bom_id or service.bom_line_id._skip_bom_line(production.product_id)\
+                for service in production.service_ids if service.bom_line_id):
+                production.service_ids = [Command.clear()]
             if production.bom_id and production.product_id and production.product_qty > 0:
                 # keep manual entries
-                list_service_raw += [Command.create(vals_dict) for vals_dict in production._get_services_raw_values()]
+                services_raw_values = production._get_services_raw_values()
+                service_raw_dict = {service.bom_line_id.id: service for service in production.service_ids.filtered(lambda s: s.bom_line_id)}
+                for service_raw_values in services_raw_values:
+                    if service_raw_values['bom_line_id'] in service_raw_dict:
+                        # update existing entries
+                        list_service_raw += [Command.update(service_raw_dict[service_raw_values['bom_line_id']].id, service_raw_values)]
+                    else:
+                        # add new entries
+                        list_service_raw += [Command.create(service_raw_values)]
                 production.service_ids = list_service_raw
             else:
                 production.service_ids = [Command.delete(service.id) for service in production.service_ids.filtered(lambda s: s.bom_line_id)]

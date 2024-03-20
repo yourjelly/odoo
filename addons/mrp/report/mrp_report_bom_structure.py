@@ -274,7 +274,7 @@ class ReportBomStructure(models.AbstractModel):
         components = []
         no_bom_lines = self.env['mrp.bom.line']
         line_quantities = {}
-        for line in bom.bom_line_ids:
+        for line in bom.bom_line_ids.filtered(lambda l: l.product_type != 'service'):
             if product and line._skip_bom_line(product):
                 continue
             line_quantity = (current_quantity / (bom.product_qty or 1.0)) * line.product_qty
@@ -284,7 +284,7 @@ class ReportBomStructure(models.AbstractModel):
                 # Update product_info for all the components before computing closest forecasted.
                 self._update_product_info(line.product_id, bom.id, product_info, warehouse, line_quantity, bom=False, parent_bom=bom, parent_product=product)
         components_closest_forecasted = self._get_components_closest_forecasted(no_bom_lines, line_quantities, bom, product_info, product, ignore_stock)
-        for component_index, line in enumerate(bom.bom_line_ids):
+        for component_index, line in enumerate(bom.bom_line_ids.filtered(lambda l: l.product_type != 'service')):
             new_index = f"{index}{component_index}"
             if product and line._skip_bom_line(product):
                 continue
