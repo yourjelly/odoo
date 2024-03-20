@@ -37,14 +37,14 @@ class PaymentToken(models.Model):
     )
     active = fields.Boolean(string="Active", default=True)
 
-    #=== COMPUTE METHODS ===#
+    # === COMPUTE METHODS ===#
 
     @api.depends('payment_details', 'create_date')
     def _compute_display_name(self):
         for token in self:
             token.display_name = token._build_display_name()
 
-    #=== CRUD METHODS ===#
+    # === CRUD METHODS ===#
 
     @api.model_create_multi
     def create(self, values_list):
@@ -75,7 +75,7 @@ class PaymentToken(models.Model):
         return dict()
 
     def write(self, values):
-        """ Prevent unarchiving tokens and handle their archiving.
+        """Prevent unarchiving tokens and handle their archiving.
 
         :return: The result of the call to the parent method.
         :rtype: bool
@@ -83,8 +83,10 @@ class PaymentToken(models.Model):
         """
         if 'active' in values:
             if values['active']:
-                if any(not token.active for token in self):
-                    raise UserError(_("A token cannot be unarchived once it has been archived."))
+                inactive_tokens = self.filtered(lambda t: not t.active)
+                for token in inactive_tokens:
+                    if not (token.payment_method_id.active and not token.provider_id.state == "disabled"):
+                        raise UserError(_("Cannot unarchive token because the linked payment method or provider is not active."))
             else:
                 # Call the handlers in sudo mode because this method might have been called by RPC.
                 self.filtered('active').sudo()._handle_archiving()
@@ -108,7 +110,7 @@ class PaymentToken(models.Model):
         """
         return
 
-    #=== BUSINESS METHODS ===#
+    # === BUSINESS METHODS ===#
 
     def _get_available_tokens(self, providers_ids, partner_id, is_validation=False, **kwargs):
         """ Return the available tokens linked to the given providers and partner.

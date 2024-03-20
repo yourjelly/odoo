@@ -31,6 +31,8 @@ class TestPaymentToken(PaymentCommon):
     def test_token_cannot_be_unarchived(self):
         """ Test that unarchiving disabled tokens is forbidden. """
         token = self._create_token(active=False)
+        token.payment_method_id.active = False
+        token.provider_id.state = 'disabled'
         with self.assertRaises(UserError):
             token.active = True
 
