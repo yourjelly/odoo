@@ -1,0 +1,77 @@
+<odoo>
+    <template id="report_mrp_mo_overview_inherit_mrp_project" inherit_id="mrp.mo_overview_content">
+        <xpath expr="//t[@t-set='operations']" position="after">
+            <t t-set="services" t-value="data['services']"/>
+        </xpath>
+        <xpath expr="//tr[@name='total_cost']" position="before">
+            <tr t-if="len(data.get('services', {}).get('details', []))">
+                <td class="text-end" t-att-colspan="data['footer_colspan']">Total Cost of Services</td>
+                <td class="text-end" t-if="data['show_mo_costs']">
+                    <t t-out="data['extras'].get('total_mo_cost_services')" t-options="{'widget': 'monetary', 'display_currency': currency}"/>
+                </td>
+                <td class="text-end" t-if="data['show_real_costs']">
+                    <t t-out="data['extras'].get('total_real_cost_services')" t-options="{'widget': 'monetary', 'display_currency': currency}"/>
+                </td>
+            </tr>
+            <tr t-if="len(data.get('services', {}).get('details', [])) and data['summary'].get('quantity') != 1">
+                <td class="text-end" t-att-colspan="data['footer_colspan']">
+                    Cost of Services per unit
+                    <t t-if="data['show_uom']">(in <t t-out="data['summary'].get('uom_name')"/>)</t>
+                </td>
+                <td class="text-end" t-if="data['show_mo_costs']">
+                    <t t-out="data['extras'].get('unit_mo_cost_services')" t-options="{'widget': 'monetary', 'display_currency': currency}"/>
+                </td>
+                <td class="text-end" t-if="data['show_real_costs']">
+                    <t t-out="data['extras'].get('unit_real_cost_services')" t-options="{'widget': 'monetary', 'display_currency': currency}"/>
+                </td>
+            </tr>
+        </xpath>
+        <xpath expr="//tr[@name='total_cost']" position="attributes">
+            <attribute name="t-if">
+                len(data.get('cost_breakdown', [])) and (len(data.get('operations', {}).get('details', [])) or len(data.get('services', {}).get('details', [])))
+            </attribute>
+        </xpath>
+        <xpath expr="//th[@name='total_cost_per_unit_header']" position="before">
+            <th t-if="len(data.get('services', {}).get('details', []))" class="text-end">Avg Cost of Services per Unit</th>
+        </xpath>
+        <xpath expr="//td[@name='total_cost_per_unit']" position="before">
+            <td t-if="len(data.get('services', {}).get('details', []))" class="text-end" t-out="line['unit_avg_cost_service']" t-options="{'widget': 'monetary', 'display_currency': currency}"/>
+        </xpath>
+    </template>
+    <template id="report_mrp_mo_overview_components_inherit_mrp_project" inherit_id="mrp.mo_overview_components">
+        <xpath expr="//t[@t-call='mrp.mo_overview_operations']" position="after">
+            <t t-call="mrp_project.mo_overview_services">
+                <t t-set="summary" t-value="services.get('summary', {})"/>
+                <t t-set="services" t-value="services.get('details', [])"/>
+            </t>
+        </xpath>
+    </template>
+    <template id="mo_overview_services">
+        <t t-if="services">
+            <tr>
+                <td class="text-start">
+                    <span t-attf-style="margin-left: {{ (services[0]['level'] - 1 if len(services) else 0) * 20 }}px"/>
+                    Services
+                </td>
+                <td t-if="data['show_replenishments']" class="text-center"/>
+                <td></td>
+                <td t-if="data['show_uom']" class="text-start" t-out="summary['uom_name']"/>
+                <td t-if="data['show_availabilities']" class="text-end"/>
+                <td t-if="data['show_availabilities']" class="text-end"/>
+                <td t-if="data['show_receipts']" class="text-end"/>
+                <td t-if="data['show_unit_costs']"/>
+                <td t-if="data['show_mo_costs']" t-attf-class="text-end {{ data['get_color'](summary.get('mo_cost_decorator')) }}">
+                    <t t-out="summary['mo_cost']" t-options="{'widget': 'monetary', 'display_currency': summary['currency']}"/>
+                </td>
+                <td t-if="data['show_real_costs']" class="text-end">
+                    <t t-out="summary['real_cost']" t-options="{'widget': 'monetary', 'display_currency': summary['currency']}"/>
+                </td>
+            </tr>
+        </t>
+        <t t-if="summary['index'] in data['unfolded_ids']" t-foreach="services" t-as="service">
+            <t t-call="mrp.mo_overview_line">
+                <t t-set="line" t-value="service"/>
+            </t>
+        </t>
+    </template>
+</odoo>

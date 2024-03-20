@@ -90,7 +90,7 @@
                             <t t-out="data['extras'].get('unit_real_cost_operations')" t-options="{'widget': 'monetary', 'display_currency': currency}"/>
                         </td>
                     </tr>
-                    <tr t-if="len(data.get('cost_breakdown', [])) and len(data.get('operations', {}).get('details', []))">
+                    <tr name="total_cost" t-if="len(data.get('cost_breakdown', [])) and len(data.get('operations', {}).get('details', []))">
                         <td class="text-end" t-att-colspan="data['footer_colspan']">Total Cost of Production</td>
                         <td t-attf-class="text-end {{ data['get_color'](data['extras'].get('total_mo_cost_decorator')) }}" t-if="data['show_mo_costs']">
                             <t t-out="data['extras'].get('total_mo_cost')" t-options="{'widget': 'monetary', 'display_currency': currency}"/>
@@ -109,7 +109,7 @@
                             <th class="text-start">Product</th>
                             <th class="text-end">Avg Cost of Components per Unit</th>
                             <th t-if="len(data.get('operations', {}).get('details', []))" class="text-end">Avg Cost of Operations per Unit</th>
-                            <th class="text-end">Avg Total Cost per Unit</th>
+                            <th class="text-end" name="total_cost_per_unit_header">Avg Total Cost per Unit</th>
                             <th t-if="data['show_uom']" class="text-end">Unit of Measure</th>
                         </tr>
                     </thead>
@@ -118,7 +118,7 @@
                             <td class="text-start" t-out="line['name']"/>
                             <td class="text-end" t-out="line['unit_avg_cost_component']" t-options="{'widget': 'monetary', 'display_currency': currency}"/>
                             <td t-if="len(data.get('operations', {}).get('details', []))" class="text-end" t-out="line['unit_avg_cost_operation']" t-options="{'widget': 'monetary', 'display_currency': currency}"/>
-                            <td class="text-end" t-out="line['unit_avg_total_cost']" t-options="{'widget': 'monetary', 'display_currency': currency}"/>
+                            <td name="total_cost_per_unit" class="text-end" t-out="line['unit_avg_total_cost']" t-options="{'widget': 'monetary', 'display_currency': currency}"/>
                             <td t-if="data['show_uom']" class="text-end" t-out="line['uom_name']"/>
                         </tr>
                     </tbody>

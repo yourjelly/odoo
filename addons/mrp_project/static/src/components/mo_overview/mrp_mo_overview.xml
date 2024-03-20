@@ -4,5 +4,29 @@
         <xpath expr="//MoOverviewComponentsBlock" position="attributes">
             <attribute name="services">state.data.services</attribute>
         </xpath>
+        <xpath expr="//tr[@t-if='hasBreakdown and hasOperations']" position="before">
+            <tr t-if="hasServices">
+                <td class="text-end" t-att-colspan="totalColspan">Total Cost of Services</td>
+                <td class="text-end" t-if="showMoCosts" t-out="formatCost(state.data.extras.total_mo_cost_services)"/>
+                <td class="text-end" t-if="showRealCosts" t-out="formatCost(state.data.extras.total_real_cost_services)"/>
+            </tr>
+            <tr t-if="hasServices and state.data.summary.quantity != 1">
+                <td class="text-end" t-att-colspan="totalColspan">
+                    Cost of Services per unit
+                    <t t-if="showUom">(in <t t-out='state.data.summary.uom_name'/>)</t>
+                </td>
+                <td class="text-end" t-if="showMoCosts" t-out="formatCost(state.data.extras.unit_mo_cost_services)"/>
+                <td class="text-end" t-if="showRealCosts" t-out="formatCost(state.data.extras.unit_real_cost_services)"/>
+            </tr>
+        </xpath>
+        <xpath expr="//tr[@t-if='hasBreakdown and hasOperations']" position="attributes">
+            <attribute name="t-if">hasBreakdown and (hasOperations or hasServices)</attribute>
+        </xpath>
+        <xpath expr="//table[@name='breakdown']//th[@t-if='hasOperations']" position="after">
+            <th t-if="hasServices" class="text-end">Avg Cost of Services per Unit</th>
+        </xpath>
+        <xpath expr="//table[@name='breakdown']//td[@t-if='hasOperations']" position="after">
+            <td t-if="hasServices" class="text-end" t-out="formatCost(line.unit_avg_cost_service)"/>
+        </xpath>
     </t>
 </templates>

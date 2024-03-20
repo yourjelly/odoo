@@ -76,22 +76,27 @@ class ReportMoOverview(models.AbstractModel):
 
         components = self._get_components_data(production, level=1, current_index='')
         operations = self._get_operations_data(production, level=1, current_index='')
-        initial_mo_cost, initial_real_cost = self._compute_cost_sums(components, operations)
+        services = self._get_services_data(production, level=1, current_index='')
+        initial_mo_cost, initial_real_cost = self._compute_cost_sums(components, operations, services)
         remaining_cost_share, byproducts = self._get_byproducts_data(production, initial_mo_cost, initial_real_cost, level=1, current_index='')
         summary = self._get_mo_summary(production, components, initial_mo_cost, initial_real_cost, remaining_cost_share)
-        extra_lines = self._get_report_extra_lines(summary, components, operations, production.state == 'done')
+        extra_lines = self._get_report_extra_lines(summary, components, operations, production.state == 'done', services)
         return {
             'id': production.id,
             'name': production.display_name,
             'summary': summary,
             'components': components,
             'operations': operations,
+            'services': services,
             'byproducts': byproducts,
             'extras': extra_lines,
             'cost_breakdown': self._get_cost_breakdown_data(production, extra_lines, remaining_cost_share),
         }
 
-    def _get_report_extra_lines(self, summary, components, operations, production_done=False):
+    def _get_services_data(self, production, level=0, current_index=False):
+        return [] # To override
+
+    def _get_report_extra_lines(self, summary, components, operations, production_done=False, services=False):
         currency = summary.get('currency', self.env.company.currency_id)
         unit_mo_cost = currency.round(summary.get('mo_cost', 0) / (summary.get('quantity') or 1))
         unit_real_cost = currency.round(summary.get('real_cost', 0) / (summary.get('quantity') or 1))
@@ -126,6 +131,7 @@ class ReportMoOverview(models.AbstractModel):
         total_cost_by_product = defaultdict(float)
         component_cost_by_product = defaultdict(float)
         operation_cost_by_product = defaultdict(float)
+        service_cost_by_product = defaultdict(float)
         for bp_move in production.move_byproduct_ids:
             # Byproducts without cost share are irrelevant in a cost breakdrown.
             if bp_move.state == 'cancel' or float_is_zero(bp_move.cost_share, precision_digits=2):
@@ -136,25 +142,29 @@ class ReportMoOverview(models.AbstractModel):
             total_cost_by_product[bp_move.product_id] += extras['total_real_cost'] * cost_share
             component_cost_by_product[bp_move.product_id] += extras['total_real_cost_components'] * cost_share
             operation_cost_by_product[bp_move.product_id] += extras['total_real_cost_operations'] * cost_share
+            service_cost_by_product[bp_move.product_id] += extras['total_real_cost_services'] * cost_share
 
         # Add finished product to its own default UoM (not the production UoM)
         breakdown_lines = [self._format_cost_breakdown_lines(0, production.product_id.display_name, production.product_id.uom_id.display_name,
                                                              (extras['total_real_cost_components'] * remaining_cost_share) / production.product_uom_qty,
                                                              (extras['total_real_cost_operations'] * remaining_cost_share) / production.product_uom_qty,
-                                                             (extras['total_real_cost'] * remaining_cost_share) / production.product_uom_qty)]
+                                                             (extras['total_real_cost'] * remaining_cost_share) / production.product_uom_qty,
+                                                             (extras['total_real_cost_services'] * remaining_cost_share) / production.product_uom_qty)]
         for index, product in enumerate(quantities_by_product.keys()):
             breakdown_lines.append(self._format_cost_breakdown_lines(index + 1, product.display_name, product.uom_id.display_name,
                                                                      component_cost_by_product[product] / quantities_by_product[product],
                                                                      operation_cost_by_product[product] / quantities_by_product[product],
-                                                                     total_cost_by_product[product] / quantities_by_product[product]))
+                                                                     total_cost_by_product[product] / quantities_by_product[product],
+                                                                     service_cost_by_product[product] / quantities_by_product[product]))
         return breakdown_lines
 
-    def _format_cost_breakdown_lines(self, index, product_name, uom_name, component_cost, operation_cost, total_cost):
+    def _format_cost_breakdown_lines(self, index, product_name, uom_name, component_cost, operation_cost, total_cost, service_cost=0.0):
         return {
             'index': f"BR{index}",
             'name': product_name,
             'unit_avg_cost_component': component_cost,
             'unit_avg_cost_operation': operation_cost,
+            'unit_avg_cost_service': service_cost,
             'unit_avg_total_cost': total_cost,
             'uom_name': uom_name,
         }
@@ -391,7 +401,7 @@ class ReportMoOverview(models.AbstractModel):
             'details': byproducts,
         }
 
-    def _compute_cost_sums(self, components, operations=False):
+    def _compute_cost_sums(self, components, operations=False, services=False):
         total_mo_cost = total_real_cost = 0
         if operations:
             total_mo_cost = operations.get('summary', {}).get('mo_cost', 0.0)
