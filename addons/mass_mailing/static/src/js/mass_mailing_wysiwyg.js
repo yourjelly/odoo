@@ -31,9 +31,9 @@ export class MassMailingWysiwyg extends Wysiwyg {
         super.toggleLinkTools({
             ...options,
             // Always open the dialog when the sidebar is folded.
-            forceDialog: options.forceDialog || this.snippetsMenu.folded
+            forceDialog: options.forceDialog || this.state.snippetsMenuFolded,
         });
-        if (this.snippetsMenu.folded) {
+        if (this.state.snippetsMenuFolded) {
             // Hide toolbar and avoid it being re-displayed after getDeepRange.
             this.odooEditor.document.getSelection().collapseToEnd();
         }
@@ -46,7 +46,7 @@ export class MassMailingWysiwyg extends Wysiwyg {
      * @param {Boolean} fold
      */
     setSnippetsMenuFolded(fold = true) {
-        this.snippetsMenu.setFolded(fold);
+        this.state.snippetsMenuFolded = fold;
         this.toolbarEl = fold ? this.mainToolbarEl : this.snippetsMenuToolbarEl;
         // At startup, the `SnippetMenu` set its toolbar before the
         // `mainToolbarEl` had the chance to be configured. So we configure it
@@ -77,7 +77,7 @@ export class MassMailingWysiwyg extends Wysiwyg {
         super.openMediaDialog(...arguments);
         // Opening the dialog in the outer document does not trigger the selectionChange
         // (that would normally hide the toolbar) in the iframe.
-        if (this.snippetsMenu.folded) {
+        if (this.state.snippetsMenuFolded) {
             this.odooEditor.toolbarHide();
         }
     }
@@ -89,13 +89,10 @@ export class MassMailingWysiwyg extends Wysiwyg {
     /**
      * @override
      */
-    async _createSnippetsMenuInstance(options={}) {
-        await loadBundle("mass_mailing.assets_snippets_menu");
-        const { MassMailingSnippetsMenu }  = await odoo.loader.modules.get('@mass_mailing/js/snippets.editor');
-        return new MassMailingSnippetsMenu(this, Object.assign({
-            wysiwyg: this,
-            selectorEditableArea: '.o_editable',
-        }, options));
+    async getSnippetsMenuClass() {
+        await loadBundle('mass_mailing.assets_snippets_menu');
+        const { MassMailingSnippetsMenu } = await odoo.loader.modules.get('@mass_mailing/js/snippets.editor');
+        return MassMailingSnippetsMenu;
     }
     /**
      * @override
@@ -104,7 +101,7 @@ export class MassMailingWysiwyg extends Wysiwyg {
         const res = await super._insertSnippetMenu();
         // Hide the snippetsMenu at first, other code will handle
         // if it should be shown or not.
-        this.snippetsMenu.setFolded(true);
+        this.state.snippetsMenuFolded = false;
         return res;
     }
     /**

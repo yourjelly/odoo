@@ -3,23 +3,12 @@
 
 <!-- Snippets menu -->
 <template id="snippets" inherit_id="web_editor.snippets" primary="True" groups="base.group_user">
-    <xpath expr="//button[@data-action='cancel']" position="before">
-        <button type="button" class="btn btn-secondary" data-action="mobile" title="Mobile Preview" accesskey="v"><span class="fa fa-mobile"/></button>
-    </xpath>
-    <xpath expr="//div[@id='snippets_menu']" position="inside">
-        <button type="button" tabindex="3" class="o_we_customize_theme_btn text-uppercase"
-                groups="website.group_website_designer" accesskey="2">
-            <span>Theme</span>
-        </button>
-    </xpath>
     <xpath expr="//t[@id='default_snippets']" position="replace">
         <t id="default_snippets">
             <t t-set="cta_btn_text" t-value="False"/>
             <t t-set="cta_btn_href">/contactus</t>
 
-            <div id="snippet_structure" class="o_panel">
-                <div class="o_panel_header">Structure</div>
-                <div class="o_panel_body">
+                <snippets id="snippet_structure" string="Structure">
                     <t t-snippet="website.s_banner" string="Banner" t-thumbnail="/website/static/src/img/snippets_thumbs/s_banner.svg">
                         <keywords>hero, jumbotron</keywords>
                     </t>
@@ -68,12 +57,9 @@
                     </t>
                     <t t-snippet="website.s_media_list" string="Media List" t-thumbnail="/website/static/src/img/snippets_thumbs/s_media_list.svg"/>
                     <t t-snippet="website.s_parallax" string="Parallax" t-thumbnail="/website/static/src/img/snippets_thumbs/s_parallax.svg"/>
-                </div>
-            </div>
+                </snippets>
 
-            <div id="snippet_feature" class="o_panel">
-                <div class="o_panel_header">Features</div>
-                <div class="o_panel_body">
+                <snippets id="snippet_feature" string="Features">
                     <t t-snippet="website.s_showcase" string="Showcase" t-thumbnail="/website/static/src/img/snippets_thumbs/s_showcase.svg"/>
                     <t t-snippet="website.s_comparisons" string="Comparisons" t-thumbnail="/website/static/src/img/snippets_thumbs/s_comparisons.svg">
                         <keywords>pricing</keywords>
@@ -103,12 +89,9 @@
                     <t t-snippet="website.s_quotes_carousel" string="Quotes" t-thumbnail="/website/static/src/img/snippets_thumbs/s_quotes_carousel.svg">
                         <keywords>testimonials</keywords>
                     </t>
-                </div>
-            </div>
+                </snippets>
 
-            <div id="snippet_effect" class="o_panel">
-                <div class="o_panel_header">Dynamic Content</div>
-                <div class="o_panel_body">
+                <snippets id="snippet_effect" string="Dynamic Content">
                     <t t-snippet="website.s_website_form" string="Form" t-thumbnail="/website/static/src/img/snippets_thumbs/s_website_form.svg" t-forbid-sanitize="form"/>
                     <t t-set="google_maps_api_key" t-value="request.env['website'].get_current_website().google_maps_api_key"/>
                     <t t-if="debug or not google_maps_api_key" t-snippet="website.s_map" string="Map" t-thumbnail="/website/static/src/img/snippets_thumbs/s_map.svg"/>
@@ -134,12 +117,9 @@
                     <t id="twitter_favorite_tweets_hook"/>
                     <t t-snippet="website.s_embed_code" string="Embed Code" t-thumbnail="/website/static/src/img/snippets_thumbs/s_embed_code.svg" t-forbid-sanitize="true"/>
                     <t id="snippet_donation_hook"/>
-                </div>
-            </div>
+                </snippets>
 
-            <div id="snippet_content" class="o_panel">
-                <div class="o_panel_header">Inner content</div>
-                <div class="o_panel_body">
+                <snippets id="snippet_content" string="Inner content">
                     <t t-snippet="website.s_button" string="Button" t-thumbnail="/website/static/src/img/snippets_thumbs/s_button.svg">
                         <keywords>button, action</keywords>
                     </t>
@@ -176,8 +156,7 @@
                     <t id="snippet_donation_button_hook"/>
                     <t id="snippet_add_to_cart_hook"/>
                     <t id="snippet_rental_search_hook"/>
-                </div>
-            </div>
+                </snippets>
         </t>
     </xpath>
 
@@ -187,14 +166,14 @@
 </template>
 
 <template id="external_snippets" inherit_id="website.snippets" priority="8">
-    <xpath expr="//div[@id='snippet_effect']/div[hasclass('o_panel_body')]" position="inside">
+    <xpath expr="//snippets[@id='snippet_effect']" position="inside">
         <t t-install="website_event" string="Events" t-thumbnail="/website/static/src/img/snippets_thumbs/s_event_upcoming_snippet.svg"/>
         <t id="newsletter_popup_snippet" t-install="mass_mailing" string="Newsletter Popup" t-thumbnail="/website/static/src/img/snippets_thumbs/newsletter_subscribe_popup.svg"/>
         <t t-install="website_mail_group" string="Discussion Group" t-thumbnail="/website/static/src/img/snippets_thumbs/s_group.svg"/>
         <t t-install="website_twitter" string="Twitter Scroller" t-thumbnail="/website/static/src/img/snippets_thumbs/s_twitter_scroll.svg"/>
         <t t-install="website_payment" string="Donation" t-thumbnail="/website/static/src/img/snippets_thumbs/s_donation.svg"/>
     </xpath>
-    <xpath expr="//div[@id='snippet_content']/div[hasclass('o_panel_body')]" position="inside">
+    <xpath expr="//snippets[@id='snippet_content']" position="inside">
         <t id="newsletter_snippet" t-install="mass_mailing" string="Newsletter" t-thumbnail="/website/static/src/img/snippets_thumbs/s_newsletter_subscribe_form.svg"/>
         <t t-install="website_payment" string="Donation Button" t-thumbnail="/website/static/src/img/snippets_thumbs/s_donation_button.svg"/>
         <t t-install="website_sale" string="Add to Cart Button" t-thumbnail="/website/static/src/img/snippets_thumbs/s_donation_button.svg"/>
