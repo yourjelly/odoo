@@ -4,7 +4,19 @@
     <t t-name="account.ClosingJournalLockField">
         <span>
             dudu
-            <input t-on-input="onChange"/>
+            <input t-on-input="this.onChange"/>
+
+            <table>
+                <!--TODO OCO WIP ce serait mieux que le serveur retourne des listes ; comme ça l'ordre est garanti et on le calcule côté serveur (grouper par compagnie ou quoi serait pas mal)-->
+                <t t-foreach="Object.keys(this.axes_data['journals_data'])" t-as="journal_id">
+                    <t t-set="journal_data" t-value="this.axes_data['journals_data'][journal_id]"/>
+                    <t t-foreach="Object.keys(this.axes_data['companies_data'])" t-as="company_id" t-key="company_id">
+                        <t t-set="company_data" t-value="this.axes_data['companies_data'][company_id]"/>
+
+
+                    </t>
+                </t>
+            </table>
         </span>
     </t>
 

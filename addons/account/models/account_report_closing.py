@@ -71,6 +71,32 @@ class AccountReportClosing(models.Model):
         for record in self:
             record.move_count = len(record.move_ids)
 
+    def _get_journals_lock_grid_axes_data(self, company_ids):
+        journals_data = {
+            journal.id: {
+                'name': journal.name,
+                'company_id': journal.company_id.id,
+            }
+            for journal in self.env['account.journal'].search(self.env['account.journal']._check_company_domain(company_ids))
+        }
+
+        companies_data = {
+            company.id: {
+                'name': company.name,
+                'parent_ids': company.parent_ids.ids, # parents include the company itself
+            }
+            for company in self.env['res.company'].browse(company_ids)
+        }
+
+        return {
+            'companies_data': companies_data,
+            'journals_data': journals_data,
+        }
+
+
+
+
+
 
 class AccountReportClosingJournalLock(models.Model):
     _name = "account.report.closing.journal.lock"
