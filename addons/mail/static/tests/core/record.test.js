@@ -825,3 +825,29 @@ test("datetime type record", async () => {
     await assertSteps(["DATE_UPDATED"]);
     expect(general.date.day).toBe(22);
 });
+
+test("onUpdate called once when the value changes", async () => {
+    (class Message extends Record {
+        static id = "id";
+        id;
+        thread = Record.one("Thread", {
+            onUpdate() {
+                step(`thread update`);
+            },
+        });
+    }).register(localRegistry);
+    (class Thread extends Record {
+        static id = "id";
+        id;
+    }).register(localRegistry);
+    const store = await start();
+    await assertSteps([]);
+    const thread = store.Thread.insert({ id: 1 });
+    const message = store.Message.insert({ id: 1 });
+    message.thread = thread;
+    await assertSteps(["thread update"]);
+    message.thread = thread;
+    await assertSteps([]);
+    message.thread = undefined;
+    await assertSteps(["thread update"]);
+});

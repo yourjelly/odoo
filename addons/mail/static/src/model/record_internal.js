@@ -150,7 +150,7 @@ export class RecordInternal {
                 if (store._.UPDATE !== 0) {
                     store._.ADD_QUEUE("onUpdate", record, fieldName);
                 } else {
-                    this.onUpdate(record, fieldName);
+                    this.fieldsOnUpdateObserves.get(fieldName)?.();
                 }
             });
         }
