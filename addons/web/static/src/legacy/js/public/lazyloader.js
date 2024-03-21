@@ -6,6 +6,13 @@ var blockFunction = function (ev) {
     ev.stopImmediatePropagation();
 };
 
+// Track when all JS files have been lazy loaded. Unblock the related DOM
+// sections when all of the JS have been loaded and executed.
+let allScriptsLoadedResolve = null;
+const _allScriptsLoaded = new Promise(resolve => {
+    allScriptsLoadedResolve = resolve;
+}).then(stopWaitingLazy);
+
 var waitingLazy = false;
 
 /**
@@ -61,19 +68,7 @@ if (document.readyState !== 'loading') {
     });
 }
 
-// As soon as everything is fully loaded, start loading all the remaining JS
-// and unblock the related DOM section when all of it have been loaded and
-// executed
-var doResolve = null;
-var _allScriptsLoaded = new Promise(function (resolve) {
-    if (doResolve) {
-        resolve();
-    } else {
-        doResolve = resolve;
-    }
-}).then(function () {
-    stopWaitingLazy();
-});
+// As soon as the document is fully loaded, start loading all the remaining JS
 if (document.readyState === 'complete') {
     setTimeout(_loadScripts, 0);
 } else {
@@ -94,11 +89,7 @@ function _loadScripts(scripts, index) {
         index = 0;
     }
     if (index >= scripts.length) {
-        if (typeof doResolve === 'function') {
-            doResolve();
-        } else {
-            doResolve = true;
-        }
+        allScriptsLoadedResolve();
         return;
     }
     var script = scripts[index];
