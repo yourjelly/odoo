@@ -20213,6 +20213,9 @@
                     el?.focus({ preventScroll: true });
                 }
             }, () => [this.env.model.getters.getSelectedFigureId(), this.props.figure.id, this.figureRef.el]);
+            owl.onWillUnmount(() => {
+                this.props.onFigureDeleted();
+            });
         }
         clickAnchor(dirX, dirY, ev) {
             this.props.onClickAnchor(dirX, dirY, ev);
@@ -20231,6 +20234,7 @@
                     this.props.onFigureDeleted();
                     ev.stopPropagation();
                     ev.preventDefault();
+                    ev.stopPropagation();
                     break;
                 case "ArrowDown":
                 case "ArrowLeft":
@@ -20251,6 +20255,7 @@
                     });
                     ev.stopPropagation();
                     ev.preventDefault();
+                    ev.stopPropagation();
                     break;
             }
         }
@@ -21058,6 +21063,10 @@
             owl.onPatched(() => {
                 if (!this.isKeyStillDown) {
                     this.processContent();
+                }
+                // Required because typing '=SUM' and double-clicking another cell leaves ShowProvider and ShowDescription true
+                if (this.env.model.getters.getEditionMode() === "inactive") {
+                    this.processTokenAtCursor();
                 }
             });
         }
@@ -41680,6 +41689,7 @@
                     this.gridSelection.zones = this.gridSelection.zones.map((z) => this.getters.expandZone(sheetId, z));
                     this.gridSelection.anchor.zone = this.getters.expandZone(sheetId, this.gridSelection.anchor.zone);
                     this.setSelectionMixin(this.gridSelection.anchor, this.gridSelection.zones);
+                    this.selectedFigureId = null;
                     break;
             }
             /** Any change to the selection has to be  reflected in the selection processor. */
@@ -42951,7 +42961,7 @@
             this.sheetListRef.el.scrollTo({ top: 0, left: scroll, behavior: "smooth" });
         }
         onSheetMouseDown(sheetId, event) {
-            if (event.button !== 0)
+            if (event.button !== 0 || this.env.model.getters.isReadonly())
                 return;
             this.closeMenu();
             const mouseX = event.clientX;
@@ -48049,8 +48059,8 @@
 
 
     __info__.version = '16.3.29';
-    __info__.date = '2024-03-15T12:11:02.769Z';
-    __info__.hash = 'd86234a';
+    __info__.date = '2024-03-21T13:58:46.701Z';
+    __info__.hash = 'd5068ab';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
