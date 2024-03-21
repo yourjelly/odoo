@@ -157,7 +157,7 @@
                                     </div>
                                 </div>
                             </setting>
-                            <setting id="use_own_routes" help="Use your own routes" documentation="/applications/inventory_and_mrp/inventory/routes/concepts/use_routes.html" title="Add and customize route operations to process product moves in your warehouse(s): e.g. unload &gt; quality control &gt; stock for incoming products, pick &gt; pack &gt; ship for outgoing products. You can also set putaway strategies on warehouse locations in order to send incoming products into specific child locations straight away (e.g. specific bins, racks).">
+                            <setting id="use_own_routes" help="Use your own rsssoutes" documentation="/applications/inventory_and_mrp/inventory/routes/concepts/use_routes.html" title="Add and customize route operations to process product moves in your warehouse(s): e.g. unload &gt; quality control &gt; stock for incoming products, pick &gt; pack &gt; ship for outgoing products. You can also set putaway strategies on warehouse locations in order to send incoming products into specific child locations straight away (e.g. specific bins, racks).">
                                 <field name="group_stock_adv_location"/>
                                 <div class="content-group">
                                     <div class="mt8" invisible="not group_stock_adv_location">

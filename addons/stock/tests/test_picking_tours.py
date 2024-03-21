@@ -102,3 +102,14 @@ class TestStockPickingTour(HttpCase):
         # We need a bigger window, so the "Apply All" button is immediately visible
         self.browser_size = '1920,1080'
         self.start_tour(url, 'test_inventory_adjustment_apply_all', login='admin', timeout=60)
+
+            
+    def test_sm_to_sml_synchronization(self):
+        """ synchronization between stock.move and stock.move.line in the detailed operation modal """
+        self.env['res.config.settings'].write({
+            'group_stock_adv_location': True,
+        })
+        url = self._get_picking_url(self.receipt.id)
+        self.start_tour(url, 'test_sm_to_sml_synchronization', login='admin', timeout=60)
+        self.assertEqual(self.receipt.move_ids.quantity, 5)
+        self.assertEqual(self.receipt.move_line_ids.quantity, 5)
