@@ -157,7 +157,8 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
     def _create_product(cls, name, uom_id, routes=()):
         p = Form(cls.env['product.product'])
         p.name = name
-        p.detailed_type = 'product'
+        p.detailed_type = 'consu'
+        p.is_trackable = True
         p.uom_id = uom_id
         p.uom_po_id = uom_id
         p.route_ids.clear()

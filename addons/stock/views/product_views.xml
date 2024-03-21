@@ -248,7 +248,7 @@
                     <field name="detailed_type" invisible="1"/>
                 </field>
                 <div name="o_kanban_price" position="after">
-                    <div t-if="record.detailed_type.raw_value == 'product'"
+                    <div t-if="record.detailed_type.raw_value == 'consu' and record.is_trackable"
                          name="o_kanban_qty_available">
                         <span>On Hand: </span>
                         <field name="qty_available"/>

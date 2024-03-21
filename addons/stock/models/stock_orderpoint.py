@@ -612,7 +612,7 @@ class StockWarehouseOrderpoint(models.Model):
         return timezone(self.company_id.partner_id.tz or 'UTC').localize(datetime.combine(self.lead_days_date, time(12))).astimezone(UTC).replace(tzinfo=None)
 
     def _get_orderpoint_products(self):
-        return self.env['product.product'].search([('is_trackable', '=', True), ('type', '=', 'consu') ('stock_move_ids', '!=', False)])
+        return self.env['product.product'].search([('is_trackable', '=', True), ('type', '=', 'consu') ,('stock_move_ids', '!=', False)])
 
     def _get_orderpoint_locations(self):
         return self.env['stock.location'].search([('replenish_location', '=', True)])

@@ -1646,7 +1646,7 @@ class TestSubcontractingSerialMassReceipt(TransactionCase):
         product_template = self.env['product.template'].create({
             'name': 'Cake',
             'uom_id': self.env.ref('uom.product_uom_unit').id,
-            'detailed_type': 'cons',
+            'detailed_type': 'consu',
             'is_trackable': True,
         })
         self.env['product.template.attribute.line'].create({

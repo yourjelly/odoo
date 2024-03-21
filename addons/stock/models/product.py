@@ -654,12 +654,6 @@ class ProductTemplate(models.Model):
     responsible_id = fields.Many2one(
         'res.users', string='Responsible', default=lambda self: self.env.uid, company_dependent=True, check_company=True,
         help="This user will be responsible of the next activities related to logistic operations for this product.")
-    # detailed_type = fields.Selection(selection_add=[
-    #     ('product', 'Storable Product')
-    # ], tracking=True, ondelete={'product': 'set consu'})
-    # type = fields.Selection(selection_add=[
-    #     ('product', 'Storable Product')
-    # ], ondelete={'product': 'set consu'})
     is_trackable = fields.Boolean(string = "Track inventory")
     
     property_stock_production = fields.Many2one(

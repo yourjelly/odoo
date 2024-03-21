@@ -1761,7 +1761,8 @@ class TestSaleStock(TestSaleStockCommon, ValuationReconciliationTestCommon):
     #         'name': 'Super product',
     #         'uom_id': self.env.ref('uom.product_uom_unit').id,
     #         'lst_price': 100.0,
-    #         'detailed_type': 'product',
+    #         'detailed_type': 'consu',
+    #         'is_trackable': True,
     #         'invoice_policy': 'delivery',
     #     })
     #     sale_order = self.env['sale.order'].create({
