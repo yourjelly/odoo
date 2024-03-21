@@ -2,7 +2,11 @@
 
 import { download } from "@web/core/network/download";
 import { registry } from "@web/core/registry";
-import { createSpreadsheetModel, waitForDataLoaded } from "@spreadsheet/helpers/model";
+import {
+    createSpreadsheetModel,
+    waitForDataLoaded,
+    getModelXlsxExport,
+} from "@spreadsheet/helpers/model";
 
 /**
  * @param {import("@web/env").OdooEnv} env
@@ -13,7 +17,10 @@ async function downloadSpreadsheet(env, action) {
     if (!xlsxData) {
         const model = await createSpreadsheetModel({ env, data, revisions: stateUpdateMessages });
         await waitForDataLoaded(model);
-        xlsxData = model.exportXLSX();
+        xlsxData = getModelXlsxExport(env, model);
+        if (!xlsxData) {
+            return;
+        }
     }
     await download({
         url: "/spreadsheet/xlsx",

@@ -7,7 +7,11 @@ import { _t } from "@web/core/l10n/translation";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { CopyButton } from "@web/core/copy_button/copy_button";
-import { waitForDataLoaded, freezeOdooData } from "@spreadsheet/helpers/model";
+import {
+    waitForDataLoaded,
+    freezeOdooData,
+    getModelXlsxExportForSharing,
+} from "@spreadsheet/helpers/model";
 import { Model } from "@odoo/o-spreadsheet";
 
 /**
@@ -38,11 +42,12 @@ export class SpreadsheetShareButton extends Component {
         if (!this.isChanged(data)) {
             return;
         }
-        const url = await this.props.onSpreadsheetShared(data, model.exportXLSX());
+        const xlsxData = getModelXlsxExportForSharing(this.env, model);
+        const url = await this.props.onSpreadsheetShared(data, xlsxData);
         this.state.url = url;
         setTimeout(async () => {
             await browser.navigator.clipboard.writeText(url);
-        })
+        });
     }
 
     /**

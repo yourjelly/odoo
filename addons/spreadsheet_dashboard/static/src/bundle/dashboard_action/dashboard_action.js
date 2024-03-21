@@ -133,7 +133,7 @@ export class SpreadsheetDashboardAction extends Component {
             {
                 dashboard_id: this.activeDashboardId,
                 spreadsheet_data: JSON.stringify(data),
-                excel_files: excelExport.files,
+                excel_files: excelExport?.files,
             },
         ]);
         return url;

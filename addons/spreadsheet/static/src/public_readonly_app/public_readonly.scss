@@ -49,3 +49,8 @@ $filter-panel-width: 300px;
     display: none !important;
   }
 }
+
+.o-public-spreadsheet .o_download_btn.o-disabled {
+  cursor: default;
+  opacity: 0.5;
+}

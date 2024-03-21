@@ -17,6 +17,7 @@ registries.topbarMenuRegistry.addChild("download_public_excel", ["file"], {
     execute: (env) => env.downloadExcel(),
     isReadonlyAllowed: true,
     icon: "o-spreadsheet-Icon.DOWNLOAD",
+    isEnabled: (env) => !!env.downloadExcel,
 });
 
 export class PublicReadonlySpreadsheet extends Component {
@@ -24,7 +25,7 @@ export class PublicReadonlySpreadsheet extends Component {
     static components = { Spreadsheet };
     static props = {
         dataUrl: String,
-        downloadExcelUrl: String,
+        downloadExcelUrl: { type: String, optional: true },
         mode: { type: String, optional: true },
     };
 
@@ -35,11 +36,13 @@ export class PublicReadonlySpreadsheet extends Component {
             isFilterShown: false,
         });
         useChildSubEnv({
-            downloadExcel: () =>
-                download({
-                    url: this.props.downloadExcelUrl,
-                    data: {},
-                }),
+            downloadExcel: this.props.downloadExcelUrl
+                ? () =>
+                      download({
+                          url: this.props.downloadExcelUrl,
+                          data: {},
+                      })
+                : undefined,
         });
         useSpreadsheetPrint(() => this.model);
         onWillStart(this.createModel.bind(this));

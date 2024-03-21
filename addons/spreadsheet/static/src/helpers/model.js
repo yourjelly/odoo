@@ -1,12 +1,13 @@
 /** @odoo-module */
 // @ts-check
 
-import { parse, helpers, iterateAstNodes } from "@odoo/o-spreadsheet";
+import { parse, helpers, iterateAstNodes, XlsxExportError } from "@odoo/o-spreadsheet";
 import { migrate } from "@spreadsheet/o_spreadsheet/migration";
 import { isLoadingError } from "@spreadsheet/o_spreadsheet/errors";
 import { loadBundle } from "@web/core/assets";
 import { OdooSpreadsheetModel } from "@spreadsheet/model";
 import { OdooDataProvider } from "@spreadsheet/data_sources/odoo_data_provider";
+import { _t } from "@web/core/l10n/translation";
 
 const { formatValue, isDefined, toCartesian } = helpers;
 
@@ -246,3 +247,23 @@ const backgroundColorPlugin = {
         ctx.restore();
     },
 };
+
+export function getModelXlsxExport(env, model, errorPrefix = "") {
+    try {
+        return model.exportXLSX();
+    } catch (e) {
+        if (e instanceof XlsxExportError) {
+            env.services.notification.add(errorPrefix + e.message, { type: "danger" });
+        } else {
+            throw e;
+        }
+    }
+    return undefined;
+}
+
+export function getModelXlsxExportForSharing(env, model) {
+    const shareErrorMessage = _t(
+        "The spreadsheet was shared but won't be able to be downloaded for the following reason: "
+    );
+    return getModelXlsxExport(env, model, shareErrorMessage);
+}
