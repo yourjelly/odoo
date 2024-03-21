@@ -179,12 +179,6 @@ class MrpProduction(models.Model):
             production.project_ids = projects
             production.project_count = len(projects)
 
-    @api.onchange('project_id')
-    def _onchange_project_id(self):
-        """ Set the MO analytic distribution to the selected project's analytic account """
-        if self.project_id.analytic_account_id:
-            self.analytic_distribution = {self.project_id.analytic_account_id.id: 100}
-
     def action_view_task(self):
         self.ensure_one()
         if not self.service_ids:
@@ -272,7 +266,7 @@ class MrpProduction(models.Model):
             'name': _('Milestones'),
             'domain': [('production_service_id', 'in', self.service_ids.ids)],
             'res_model': 'project.milestone',
-            'views': [(self.env.ref('sale_project.sale_project_milestone_view_tree').id, 'tree')],
+            'views': [(self.env.ref('mrp_project.project_milestone_view_tree').id, 'tree')],
             'view_mode': 'tree',
             'help': _("""
                 <p class="o_view_nocontent_smiling_face">

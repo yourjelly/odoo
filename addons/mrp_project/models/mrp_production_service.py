@@ -124,28 +124,25 @@ class MrpProductionService(models.Model):
         return self.product_qty
 
     def _timesheet_create_project_prepare_values(self):
-        """Generate project values"""  # TODO clpi - how do we want to handle this for productions...
-        if len(self.production_id.analytic_account_ids) == 1:
-            account = self.production_id.analytic_account_ids[0]
-        else:
-            service_products = self.production_id.service_ids.product_id.filtered(
-                lambda p: p.type == 'service' and p.default_code)
-            default_code = service_products.default_code if len(service_products) == 1 else None
+        """Generate project values"""
+        service_products = self.production_id.service_ids.product_id.filtered(
+            lambda p: p.type == 'service' and p.default_code)
+        default_code = service_products.default_code if len(service_products) == 1 else None
 
-            name = self.production_id.name
-            if default_code:
-                name = default_code + ": " + name
-            plan = self.env['account.analytic.plan'].sudo().search([], limit=1)
-            if not plan:
-                plan = self.env['account.analytic.plan'].sudo().create({
-                    'name': 'Default',
-                })
-            account = self.env['account.analytic.account'].create({
-                'name': name,
-                'company_id': self.company_id.id,
-                'plan_id': plan.id,
+        name = self.production_id.name
+        if default_code:
+            name = default_code + ": " + name
+        plan = self.env['account.analytic.plan'].sudo().search([], limit=1)
+        if not plan:
+            plan = self.env['account.analytic.plan'].sudo().create({
+                'name': 'Default',
             })
-            self.production_id.analytic_distribution = {account.id: 100}
+        account = self.env['account.analytic.account'].create({
+            'name': name,
+            'company_id': self.company_id.id,
+            'plan_id': plan.id,
+        })
+        self.production_id.analytic_distribution = {account.id: 100}
         # create the project or duplicate one
         return {
             'name': self.production_id.name,

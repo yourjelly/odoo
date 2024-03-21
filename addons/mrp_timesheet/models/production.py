@@ -58,9 +58,8 @@ class Production(models.Model):
         action = self.env["ir.actions.actions"]._for_xml_id("mrp_timesheet.timesheet_action_from_manufacturing_order")
         default_service_line = next((service for service in self.service_ids if service.product_id.service_type in ['timesheet', 'manual']), self.env['mrp.production.service'])
         context = {
-            'search_default_billable_timesheet': True,
-            'default_is_so_line_edited': True,
-            'default_so_line': default_service_line.id,
+            'default_is_mo_service_edited': True,
+            'default_mo_service': default_service_line.id,
         }  # erase default filters
 
         tasks = self.service_ids.task_id._filter_access_rules_python('write')
