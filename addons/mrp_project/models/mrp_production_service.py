@@ -68,11 +68,31 @@ class MrpProductionService(models.Model):
             mos_id = line.id or line._origin.id
             line.qty_delivered = reached_milestones_per_service.get(mos_id, 0.0) * line.product_qty
 
+    @api.model_create_multi
+    def create(self, vals_list):
+        services = super().create(vals_list)
+        for service in services:
+            if service.production_id.state != 'draft':
+                has_task = bool(service.task_id)
+                service.sudo()._timesheet_service_generation()
+                # if the MO service created a task, post a message on the order
+                if service.task_id and not has_task:
+                    msg_body = _("Task Created (%s): %s", service.product_id.name, service.task_id._get_html_link())
+                    service.production_id.message_post(body=msg_body)
+
+        # Set a production service on the project, if any is given
+        if project_id := self.env.context.get('link_to_project'):
+            assert (service_line := next((line for line in services), False))
+            project = self.env['project.project'].browse(project_id)
+            if not project.production_service_id:
+                project.production_service_id = service_line
+        return services
+
     def write(self, values):
         result = super().write(values)
         # changing the ordered quantity should change the allocated hours on the
-        # task, whatever the SO state. It will be blocked by the super in case
-        # of a locked sale order.
+        # task, whatever the MO state. It will be blocked by the super in case
+        # of a locked manufacturing order.
         if 'product_qty' in values and not self.env.context.get('no_update_allocated_hours', False):
             for line in self:
                 if line.task_id:
