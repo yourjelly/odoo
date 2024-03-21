@@ -82,7 +82,8 @@ class MrpProductionService(models.Model):
 
         # Set a production service on the project, if any is given
         if project_id := self.env.context.get('link_to_project'):
-            assert (service_line := next((line for line in services), False))
+            service_line = next((line for line in services), False)
+            assert service_line
             project = self.env['project.project'].browse(project_id)
             if not project.production_service_id:
                 project.production_service_id = service_line

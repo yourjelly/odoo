@@ -62,9 +62,9 @@ class MrpProduction(models.Model):
                 if bom_line.child_bom_id and bom_line.child_bom_id.type == 'phantom' or bom_line.product_id.type != 'service':
                     continue
                 services.append({
-                    'product_id': bom_line.product_id,
+                    'product_id': bom_line.product_id.id,
                     'product_qty': line_data['qty'],
-                    'product_uom_id': bom_line.product_uom_id,
+                    'product_uom_id': bom_line.product_uom_id.id,
                     'bom_line_id': bom_line.id,
                 })
         return services
