@@ -28,6 +28,7 @@ player_regexes = {
     'instagram': r'(?:(.*)instagram.com|instagr\.am)/p/(.[a-zA-Z0-9-_\.]*)',
     'youku': r'(?:(https?:\/\/)?(v\.youku\.com/v_show/id_|player\.youku\.com/player\.php/sid/|player\.youku\.com/embed/|cloud\.youku\.com/services/sharev\?vid=|video\.tudou\.com/v/)|youku:)(?P<id>[A-Za-z0-9]+)(?:\.html|/v\.swf|)',
     'google_drive': r'(https?://drive.google.com/file/d/)([^/]+)/.*',
+    'google_cloud_storage': r'https?://storage\.googleapis\.com/glide-prod\.appspot\.com/uploads-v2/([^/]+)/pub/([^/]+)/([^/]+\.mp4)',
 }
 
 
@@ -57,6 +58,9 @@ def get_video_source_data(video_url):
         google_drive_match = re.search(player_regexes['google_drive'], video_url)
         if google_drive_match:
             return ('google_drive', google_drive_match[2], google_drive_match)
+        google_cloud_storage_match = re.search(player_regexes['google_cloud_storage'], video_url)
+        if google_cloud_storage_match:
+            return ('google_cloud_storage', google_cloud_storage_match[2], google_cloud_storage_match)
     return None
 
 
@@ -123,6 +127,10 @@ def get_video_url_data(video_url, autoplay=False, loop=False, hide_controls=Fals
     elif platform == 'google_drive':
         video_id = video_url.split('/')[-2]
         embed_url = f'https://drive.google.com/file/d/{video_id}/preview'
+    elif platform == 'google_cloud_storage':
+        split_url = video_url.split('/uploads-v2/')
+        video_id = split_url[1] if len(split_url) > 1 else None
+        embed_url = f'https://storage.googleapis.com/glide-prod.appspot.com/uploads-v2/{video_id}'
 
     if params:
         embed_url = f'{embed_url}?{url_encode(params)}'
