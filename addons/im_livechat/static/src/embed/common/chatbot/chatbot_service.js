@@ -1,11 +1,12 @@
 import { SESSION_STATE } from "@im_livechat/embed/common/livechat_service";
+import { FEATURES } from "@im_livechat/embed/common/features";
+import { feature } from "@mail/core/common/features";
 
 import { EventBus, reactive } from "@odoo/owl";
 
 import { browser } from "@web/core/browser/browser";
 import { _t } from "@web/core/l10n/translation";
 import { rpc } from "@web/core/network/rpc";
-import { registry } from "@web/core/registry";
 
 const STEP_DELAY = 500;
 export class ChatBotService {
@@ -166,4 +167,4 @@ export const chatBotService = {
         return new ChatBotService(env, services);
     },
 };
-registry.category("services").add("im_livechat.chatbot", chatBotService);
+feature(FEATURES.EMBED_LIVECHAT).registerService("im_livechat.chatbot", chatBotService);

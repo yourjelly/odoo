@@ -1,9 +1,10 @@
+import { FEATURES } from "@im_livechat/embed/common/features";
+
+import { feature } from "@mail/core/common/features";
 import { Record } from "@mail/core/common/record";
 import { Thread } from "@mail/core/common/thread_model";
 
-import { patch } from "@web/core/utils/patch";
-
-patch(Thread.prototype, {
+feature(FEATURES.EMBED_LIVECHAT).registerPatch(Thread.prototype, {
     setup() {
         super.setup();
         this.chatbotTypingMessage = Record.one("Message", {

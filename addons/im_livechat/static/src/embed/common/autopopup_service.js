@@ -1,7 +1,8 @@
+import { FEATURES } from "@im_livechat/embed/common/features";
 import { SESSION_STATE } from "@im_livechat/embed/common/livechat_service";
+import { feature } from "@mail/core/common/features";
 import { browser } from "@web/core/browser/browser";
 import { cookie } from "@web/core/browser/cookie";
-import { registry } from "@web/core/registry";
 
 export class AutopopupService {
     static COOKIE = "im_livechat_auto_popup";
@@ -67,4 +68,4 @@ export const autoPopupService = {
         return new AutopopupService(env, services);
     },
 };
-registry.category("services").add("im_livechat.autopopup", autoPopupService);
+feature(FEATURES.EMBED_LIVECHAT).registerService("im_livechat.autopopup", autoPopupService);

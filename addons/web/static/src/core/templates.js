@@ -24,7 +24,7 @@ let blockId = 0;
 
 const templates = {};
 const parsedTemplates = {};
-const info = {};
+export const info = {};
 export function registerTemplate(name, url, templateString) {
     if (blockType !== "templates") {
         blockType = "templates";

@@ -1,7 +1,9 @@
+import { FEATURES } from "@im_livechat/embed/common/features";
+
+import { feature } from "@mail/core/common/features";
 import { browser } from "@web/core/browser/browser";
 import { cookie as cookieManager } from "@web/core/browser/cookie";
 import { rpc } from "@web/core/network/rpc";
-import { registry } from "@web/core/registry";
 
 export class HistoryService {
     static HISTORY_COOKIE = "im_livechat_history";
@@ -56,5 +58,4 @@ export const historyService = {
         history.setup();
     },
 };
-
-registry.category("services").add("im_livechat.history_service", historyService);
+feature(FEATURES).registerService("im_livechat.history_service", historyService);

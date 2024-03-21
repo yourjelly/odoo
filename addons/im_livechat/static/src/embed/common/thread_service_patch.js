@@ -1,8 +1,9 @@
+import { FEATURES } from "@im_livechat/embed/common/features";
+import { feature } from "@mail/core/common/features";
+
 import { ThreadService } from "@mail/core/common/thread_service";
 
-import { patch } from "@web/core/utils/patch";
-
-patch(ThreadService.prototype, {
+feature(FEATURES.EMBED_LIVECHAT).registerPatch(ThreadService.prototype, {
     /**
      * @returns {Promise<import("models").Message}
      */

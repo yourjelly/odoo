@@ -1,3 +1,6 @@
+import { FEATURES } from "@im_livechat/embed/common/features";
+
+import { feature } from "@mail/core/common/features";
 import { reactive } from "@odoo/owl";
 import { browser } from "@web/core/browser/browser";
 
@@ -5,7 +8,6 @@ import { cookie } from "@web/core/browser/cookie";
 import { parseDateTime } from "@web/core/l10n/dates";
 import { _t } from "@web/core/l10n/translation";
 import { rpc } from "@web/core/network/rpc";
-import { registry } from "@web/core/registry";
 import { Deferred } from "@web/core/utils/concurrency";
 import { session } from "@web/session";
 
@@ -275,4 +277,4 @@ export const livechatService = {
         return livechat;
     },
 };
-registry.category("services").add("im_livechat.livechat", livechatService);
+feature(FEATURES.EMBED_LIVECHAT).registerService("im_livechat.livechat", livechatService);
