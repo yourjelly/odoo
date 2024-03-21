@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="animal_action" model="ir.actions.act_window">
+        <field name="name">Animal</field>
+        <field name="res_model">zoo.animal</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem
+        id="menu_animal_root"
+        action="animal_action"/>
+
+    <!-- Top menu item -->
+    <menuitem
+        id="menu_animal_parent"
+        parent="menu_animal_root"
+        name="Animal"
+        sequence="50"/>
+
+    <menuitem id="menu_animal_animal"
+        name="Animal"
+        parent="menu_animal_parent"
+        action="animal_action"
+        sequence="50"/>
+</odoo>
