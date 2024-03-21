@@ -590,6 +590,7 @@ class TestPurchaseToInvoice(AccountTestInvoicingCommon):
         supplierinfo.write({'min_qty': 2, 'price': 20.0})
         po_line.write({'product_qty': 2})
         po_line._onchange_quantity()
+        po_line._onchange_price_unit()
         self.assertEqual(20.0, po_line.price_unit, "Unit price should be set to 20.0 for 2 quantity")
 
         po.button_confirm()
@@ -598,6 +599,7 @@ class TestPurchaseToInvoice(AccountTestInvoicingCommon):
         supplierinfo.write({'min_qty': 3, 'price': 30.0})
         po_line.write({'product_qty': 3})
         po_line._onchange_quantity()
+        po_line._onchange_price_unit()
         self.assertEqual(30.0, po_line.price_unit, "Unit price should be set to 30.0 for 3 quantity")
 
         po.action_create_invoice()
@@ -606,6 +608,7 @@ class TestPurchaseToInvoice(AccountTestInvoicingCommon):
         supplierinfo.write({'min_qty': 4, 'price': 40.0})
         po_line.write({'product_qty': 4})
         po_line._onchange_quantity()
+        po_line._onchange_price_unit()
         self.assertEqual(30.0, po_line.price_unit, "Unit price should be set to 30.0 for 3 quantity")
 
         with po_form.order_line.new() as po_line_form:
@@ -619,6 +622,7 @@ class TestPurchaseToInvoice(AccountTestInvoicingCommon):
         # Ensure price unit is updated when changing quantity on PO confirmed and line NOT linked to an invoice line
         po_line.write({'product_qty': 4})
         po_line._onchange_quantity()
+        po_line._onchange_price_unit()
         self.assertEqual(40.0, po_line.price_unit, "Unit price should be set to 40.0 for 4 quantity")
 
     def test_onchange_partner_currency(self):
