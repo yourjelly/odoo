@@ -270,7 +270,10 @@ export class RecordList extends Array {
         return store.MAKE_UPDATE(function recordListPush() {
             for (const val of records) {
                 const record = recordList._insert(val, function recordListPushInsert(record) {
-                    recordList._proxy.data.push(record.localId);
+                    const target = recordList.owner._.proxyUsed.has(recordList.name)
+                        ? recordList
+                        : recordList._proxy;
+                    target.data.push(record.localId);
                     record._.uses.add(recordList);
                 });
                 store._.ADD_QUEUE("onAdd", recordList.owner, recordList.name, record);

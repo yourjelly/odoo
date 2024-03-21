@@ -825,3 +825,90 @@ test("datetime type record", async () => {
     await assertSteps(["DATE_UPDATED"]);
     expect(general.date.day).toBe(22);
 });
+
+test("onUpdate: called once on relation one", async () => {
+    (class Message extends Record {
+        static id = "id";
+        id;
+        thread = Record.one("Thread", {
+            onUpdate() {
+                console.warn("== update");
+                step(`thread update - ${this.id}`);
+            },
+        });
+    }).register(localRegistry);
+    (class Thread extends Record {
+        static id = "id";
+        id;
+    }).register(localRegistry);
+    const store = await start();
+    const thread = store.Thread.insert({ id: 1 });
+    const message = store.Message.insert({ id: 1 });
+    message.thread = thread;
+    await assertSteps(["thread update - 1"]);
+});
+
+test("onUpdate: called once on relation one via insert", async () => {
+    (class Message extends Record {
+        static id = "id";
+        id;
+        thread = Record.one("Thread", {
+            onUpdate() {
+                step(`thread update - ${this.id}`);
+            },
+        });
+    }).register(localRegistry);
+    (class Thread extends Record {
+        static id = "id";
+        id;
+    }).register(localRegistry);
+    const store = await start();
+    const thread = store.Thread.insert({ id: 1 });
+    store.Message.insert({ id: 1, thread });
+    await assertSteps(["thread update - 1"]);
+});
+
+test("onUpdate: called once on relation many", async () => {
+    (class Message extends Record {
+        static id = "body";
+        body;
+    }).register(localRegistry);
+    (class Thread extends Record {
+        static id = "id";
+        id;
+        messages = Record.many("Message", {
+            onUpdate() {
+                console.warn(this.messages.map(({ body }) => body));
+                step(`onUpdate - ${this.messages.map(({ body }) => body).join(", ")}`);
+            },
+        });
+    }).register(localRegistry);
+    const store = await start();
+    const thread = store.Thread.insert({ id: 1 });
+    thread.messages.push({ body: "Hello!" });
+    await assertSteps(["onUpdate - Hello!"]);
+    thread.messages.push({ body: "How are you?" });
+    await assertSteps(["onUpdate - Hello!, How are you?"]);
+});
+
+test("onUpdate - called once when updated via inverse", async () => {
+    (class Message extends Record {
+        static id = "body";
+        body;
+        thread = Record.one("Thread", {
+            inverse: "messages",
+            onUpdate() {
+                step(`onUpdate - ${this.thread.id}`);
+            },
+        });
+    }).register(localRegistry);
+    (class Thread extends Record {
+        static id = "id";
+        id;
+        messages = Record.many("Message");
+    }).register(localRegistry);
+    const store = await start();
+    const thread = store.Thread.insert({ id: 1 });
+    thread.messages.push({ body: "Hello" });
+    await assertSteps([`onUpdate - ${thread.id}`]);
+});
