@@ -3,7 +3,7 @@
 import { Model, Spreadsheet } from "@odoo/o-spreadsheet";
 import { registerCleanup } from "@web/../tests/helpers/cleanup";
 import { makeTestEnv } from "@web/../tests/helpers/mock_env";
-import { getFixture, nextTick } from "@web/../tests/helpers/utils";
+import { getFixture, nextTick, patchWithCleanup } from "@web/../tests/helpers/utils";
 import { loadBundle } from "@web/core/assets";
 import { getTemplate } from "@web/core/templates";
 import { PublicReadonlySpreadsheet } from "@spreadsheet/public_readonly_app/public_readonly";
@@ -108,4 +108,12 @@ export async function keyDown(eventArgs) {
     const ev = new KeyboardEvent("keydown", { bubbles: true, cancelable: true, ...eventArgs });
     document.activeElement.dispatchEvent(ev);
     return await nextTick();
+}
+
+export function mockNotificationService(env, mockAddNotification) {
+    patchWithCleanup(env.services.notification, {
+        add(notification) {
+            mockAddNotification(notification);
+        },
+    });
 }
