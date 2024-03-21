@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 export const DEBOUNCE = 400;
+export const BUTTON_HANDLER_SELECTOR = 'a, button, input[type="submit"], input[type="button"], .btn';
 
 /**
  * Protects a function which is to be used as a handler by preventing its
@@ -20,6 +21,9 @@ export const DEBOUNCE = 400;
  * @param {function|boolean} stopPropagation
  */
 export function makeAsyncHandler(fct, preventDefault, stopPropagation) {
+    // TODO in master, add those as arguments.
+    const stopImmediatePropagation = this?.__makeAsyncHandler_stopImmediatePropagation;
+
     let pending = false;
     function _isLocked() {
         return pending;
@@ -36,6 +40,9 @@ export function makeAsyncHandler(fct, preventDefault, stopPropagation) {
         }
         if (stopPropagation === true || stopPropagation && stopPropagation()) {
             ev.stopPropagation();
+        }
+        if (stopImmediatePropagation === true || stopImmediatePropagation && stopImmediatePropagation()) {
+            ev.stopImmediatePropagation();
         }
 
         if (_isLocked()) {
@@ -66,15 +73,22 @@ export function makeAsyncHandler(fct, preventDefault, stopPropagation) {
  *      re-enabled. Otherwise, the return is used as jQuery uses it.
  */
 export function makeButtonHandler(fct) {
+    // TODO in master, add those as arguments.
+    const preventDefault = this?.__makeButtonHandler_preventDefault;
+    const stopPropagation = this?.__makeButtonHandler_stopPropagation;
+    const stopImmediatePropagation = this?.__makeButtonHandler_stopImmediatePropagation;
+
     // Fallback: if the final handler is not bound to a button, at least
     // make it an async handler (also handles the case where some events
     // might ignore the disabled state of the button).
-    fct = makeAsyncHandler(fct);
+    fct = makeAsyncHandler.call({
+        '__makeAsyncHandler_stopImmediatePropagation': stopImmediatePropagation,
+    }, fct, preventDefault, stopPropagation);
 
     return function (ev) {
         const result = fct.apply(this, arguments);
 
-        const buttonEl = ev.target?.closest?.('.btn');
+        const buttonEl = ev.target?.closest?.(BUTTON_HANDLER_SELECTOR);
         if (!buttonEl) {
             return result;
         }
