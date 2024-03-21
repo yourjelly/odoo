@@ -374,12 +374,14 @@ class TestBoM(TestMrpCommon):
         uom_unit = self.env.ref('uom.product_uom_unit')
         product_unit = self.env['product.product'].create({
             'name': 'Test units',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'uom_id': uom_unit.id,
         })
         product_dozens = self.env['product.product'].create({
             'name': 'Test dozens',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'uom_id': uom_dozens.id,
         })
 
@@ -440,12 +442,14 @@ class TestBoM(TestMrpCommon):
         uom_unit = self.env.ref('uom.product_uom_unit')
         product_unit = self.env['product.product'].create({
             'name': 'Test units',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'uom_id': uom_unit.id,
         })
         product_dozens = self.env['product.product'].create({
             'name': 'Test dozens',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'uom_id': uom_dozens.id,
         })
 
@@ -474,20 +478,23 @@ class TestBoM(TestMrpCommon):
         uom_litre = self.env.ref('uom.product_uom_litre')
         crumble = self.env['product.product'].create({
             'name': 'Crumble',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'uom_id': uom_kg.id,
             'uom_po_id': uom_kg.id,
         })
         butter = self.env['product.product'].create({
             'name': 'Butter',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'uom_id': uom_kg.id,
             'uom_po_id': uom_kg.id,
             'standard_price': 7.01
         })
         biscuit = self.env['product.product'].create({
             'name': 'Biscuit',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'uom_id': uom_kg.id,
             'uom_po_id': uom_kg.id,
             'standard_price': 1.5
@@ -575,11 +582,13 @@ class TestBoM(TestMrpCommon):
         # Create a more complex BoM with a sub product
         cheese_cake = self.env['product.product'].create({
             'name': 'Cheese Cake 300g',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
         })
         cream = self.env['product.product'].create({
             'name': 'cream',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'uom_id': uom_litre.id,
             'uom_po_id': uom_litre.id,
             'standard_price': 5.17,
@@ -648,13 +657,15 @@ class TestBoM(TestMrpCommon):
         uom_unit = self.env.ref('uom.product_uom_unit')
         drawer = self.env['product.product'].create({
             'name': 'drawer',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'uom_id': uom_unit.id,
             'uom_po_id': uom_unit.id,
         })
         screw = self.env['product.product'].create({
             'name': 'screw',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'uom_id': uom_unit.id,
             'uom_po_id': uom_unit.id,
             'standard_price': 7.01
@@ -922,28 +933,32 @@ class TestBoM(TestMrpCommon):
 
         finished = self.env['product.product'].create({
             'name': 'Finished',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'uom_id': uom_unit.id,
             'uom_po_id': uom_unit.id,
         })
 
         semi_finished = self.env['product.product'].create({
             'name': 'Semi-Finished',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'uom_id': uom_kg.id,
             'uom_po_id': uom_kg.id,
         })
 
         assembly = self.env['product.product'].create({
             'name': 'Assembly',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'uom_id': uom_dozen.id,
             'uom_po_id': uom_dozen.id,
         })
 
         raw_material = self.env['product.product'].create({
             'name': 'Raw Material',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'uom_id': uom_litre.id,
             'uom_po_id': uom_litre.id,
             'standard_price': 5,
@@ -987,18 +1002,21 @@ class TestBoM(TestMrpCommon):
 
         target = self.env['product.product'].create({
             'name': 'Target',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
         })
 
         product_one = self.env['product.product'].create({
             'name': 'Component one',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
         })
         self.env['stock.quant']._update_available_quantity(product_one, location, 3.0)
 
         product_two = self.env['product.product'].create({
             'name': 'Component two',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
         })
         self.env['stock.quant']._update_available_quantity(product_two, location, 4.0)
 
@@ -1102,7 +1120,8 @@ class TestBoM(TestMrpCommon):
         uom_unit = self.env.ref('uom.product_uom_unit')
         finished = self.env['product.product'].create({
             'name': 'Finished',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'uom_id': uom_unit.id,
             'uom_po_id': uom_unit.id,
         })
@@ -1176,7 +1195,8 @@ class TestBoM(TestMrpCommon):
 
         product_gram = self.env['product.product'].create({
             'name': 'Product sold in grams',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'uom_id': uom_gram.id,
             'uom_po_id': uom_gram.id,
             'route_ids': [(4, manufacturing_route_id)],
@@ -2062,12 +2082,14 @@ class TestBoM(TestMrpCommon):
         location = self.env.ref('stock.stock_location_stock')
         product_one = self.env['product.product'].create({
             'name': 'Product',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'uom_id': uom_unit.id,
         })
         product_two = self.env['product.product'].create({
             'name': 'Component',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'uom_id': uom_unit.id,
         })
         self.env['stock.quant']._update_available_quantity(product_two, location, 4.0)
@@ -2110,7 +2132,8 @@ class TestTourBoM(HttpCase):
     def test_mrp_bom_product_catalog(self):
         product = self.env['product.product'].create({
             'name': 'test1',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
         })
         bom = self.env['mrp.bom'].create({
             'product_id': product.id,

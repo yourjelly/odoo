@@ -16,19 +16,22 @@ class TestSaleExpectedDate(ValuationReconciliationTestCommon):
 
         product_A = Product.create({
             'name': 'Product A',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'sale_delay': 5,
             'uom_id': 1,
         })
         product_B = Product.create({
             'name': 'Product B',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'sale_delay': 10,
             'uom_id': 1,
         })
         product_C = Product.create({
             'name': 'Product C',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'sale_delay': 15,
             'uom_id': 1,
         })
@@ -97,7 +100,8 @@ class TestSaleExpectedDate(ValuationReconciliationTestCommon):
                 'name': "A product",
                 'product_id': self.env['product.product'].create({
                     'name': 'A product',
-                    'type': 'product',
+                    'type': 'consu',
+            'is_trackable': True,
                 }).id,
                 'product_uom_qty': 1,
                 'price_unit': 750,

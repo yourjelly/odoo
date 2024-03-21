@@ -30,12 +30,14 @@ class TestSubcontractingPortalUi(HttpCase):
         # 2. Create a BOM of subcontracting type
         cls.comp = cls.env['product.product'].create({
             'name': 'Component',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
         })
 
         cls.finished_product = cls.env['product.product'].create({
             'name': 'Finished',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
         })
         bom_form = Form(cls.env['mrp.bom'])
         bom_form.type = 'subcontract'

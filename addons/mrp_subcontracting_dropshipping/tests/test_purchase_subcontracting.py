@@ -153,7 +153,8 @@ class TestSubcontractingDropshippingFlows(TestMrpSubcontractingCommon):
 
         p_finished, p_compo = self.env['product.product'].create([{
             'name': 'Finished Product',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'seller_ids': [(0, 0, {'partner_id': subcontractor.id})],
         }, {
             'name': 'Component',
@@ -202,7 +203,8 @@ class TestSubcontractingDropshippingFlows(TestMrpSubcontractingCommon):
 
         p_finished, p_compo = self.env['product.product'].create([{
             'name': 'Finished Product',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'seller_ids': [(0, 0, {'partner_id': subcontractor.id})],
         }, {
             'name': 'Component',
@@ -298,11 +300,13 @@ class TestSubcontractingDropshippingFlows(TestMrpSubcontractingCommon):
 
         super_product, product, component = self.env['product.product'].create([{
             'name': 'Super Product',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'seller_ids': [(0, 0, {'partner_id': super_subcontractor.id})],
         }, {
             'name': 'Product',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'seller_ids': [(0, 0, {'partner_id': subcontractor.id})],
         }, {
             'name': 'Component',
@@ -370,7 +374,8 @@ class TestSubcontractingDropshippingFlows(TestMrpSubcontractingCommon):
 
         product01, product02, component = self.env['product.product'].create([{
             'name': name,
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'seller_ids': [(0, 0, {'partner_id': vendor.id})],
             'route_ids': [(6, 0, routes)],
         } for name, vendor, routes in [

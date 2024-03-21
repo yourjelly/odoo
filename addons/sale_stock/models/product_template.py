@@ -10,9 +10,9 @@ class ProductTemplate(models.Model):
     @api.depends('type')
     def _compute_expense_policy(self):
         super()._compute_expense_policy()
-        self.filtered(lambda t: t.type == 'product').expense_policy = 'no'
+        self.filtered(lambda t: t.type == 'consu' and t.is_trackable).expense_policy = 'no'
 
     @api.depends('type')
     def _compute_service_type(self):
         super()._compute_service_type()
-        self.filtered(lambda t: t.type == 'product').service_type = 'manual'
+        self.filtered(lambda t: t.type == 'consu' and t.is_trackable).service_type = 'manual'

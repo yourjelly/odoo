@@ -31,14 +31,16 @@ class TestWebsiteSaleStockProductWarehouse(TestSaleProductAttributeValueCommon):
         cls.product_A = cls.env['product.product'].create({
             'name': 'Product A',
             'allow_out_of_stock_order': False,
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'default_code': 'E-COM1',
         })
 
         cls.product_B = cls.env['product.product'].create({
             'name': 'Product B',
             'allow_out_of_stock_order': False,
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'default_code': 'E-COM2',
         })
 

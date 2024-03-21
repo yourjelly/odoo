@@ -207,7 +207,7 @@ class ReportMoOverview(models.AbstractModel):
         for component in components:
             component = component["summary"]
             product = component["product"]
-            if product.type != 'product':
+            if product.type != 'consu' and not product.is_trackable:
                 continue
             uom = component["uom"]
             components_qty_to_produce[product] += uom._compute_quantity(component["quantity"], product.uom_id)
@@ -460,7 +460,7 @@ class ReportMoOverview(models.AbstractModel):
             'currency': currency,
         }
         component['mo_cost_decorator'] = self._get_comparison_decorator(component['real_cost'], component['mo_cost'], currency.rounding)
-        if product.type != 'product':
+        if product.type != 'consu' and not product.is_trackable:
             return component
         if any(rep.get('summary', {}).get('model') == 'to_order' for rep in replenishments):
             # Means that there's an extra "To Order" line summing up what's left to order.
@@ -488,7 +488,7 @@ class ReportMoOverview(models.AbstractModel):
 
         if any(get(rep, 'type', True) == 'unavailable' for rep in replenishments):
             return self._format_receipt_date('unavailable')
-        if product.type != 'product' or move.state == 'done':
+        if product.type != 'consu' and not product.is_trackable or move.state == 'done':
             return self._format_receipt_date('available')
 
         has_to_order_line = any(rep.get('summary', {}).get('model') == 'to_order' for rep in replenishments)
@@ -571,7 +571,7 @@ class ReportMoOverview(models.AbstractModel):
         # Avoid creating a "to_order" line to compensate for missing stock (i.e. negative free_qty).
         free_qty = max(0, product.uom_id._compute_quantity(product.free_qty, move_raw.product_uom))
         missing_quantity = quantity - (reserved_quantity + free_qty + total_ordered)
-        if product.type == 'product' and production.state not in ('done', 'cancel')\
+        if product.type == 'consu' and product.is_trackable and production.state not in ('done', 'cancel')\
            and float_compare(missing_quantity, 0, precision_rounding=move_raw.product_uom.rounding) > 0:
             # Need to order more products to fulfill the need
             resupply_rules = self._get_resupply_rules(production, product, replenish_data)

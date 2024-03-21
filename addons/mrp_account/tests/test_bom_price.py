@@ -12,7 +12,8 @@ class TestBomPriceCommon(common.TransactionCase):
     def _create_product(cls, name, price):
         return cls.Product.create({
             'name': name,
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'standard_price': price,
         })
 

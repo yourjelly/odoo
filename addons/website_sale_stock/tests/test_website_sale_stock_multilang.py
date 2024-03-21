@@ -17,7 +17,8 @@ class TestWebsiteSaleStockMultilang(HttpCase):
         # Configure product: out-of-stock message in EN and FR
         unavailable_product = self.env['product.product'].create({
             'name': 'unavailable_product',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'allow_out_of_stock_order': False,
             'sale_ok': True,
             'website_published': True,

@@ -19,7 +19,8 @@ class TestFifoReturns(ValuationReconciliationTestCommon):
         product_fiforet_icecream = self.env['product.product'].create({
             'default_code': 'FIFORET',
             'name': 'FIFO Ice Cream',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'categ_id': self.stock_account_product_categ.id,
             'standard_price': 0.0,
             'uom_id': self.env.ref('uom.product_uom_kgm').id,

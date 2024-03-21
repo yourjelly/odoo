@@ -1349,7 +1349,7 @@ class PosOrderLine(models.Model):
         procurements = []
         for line in self:
             line = line.with_company(line.company_id)
-            if not line.product_id.type in ('consu','product'):
+            if not line.product_id.type == 'consu':
                 continue
 
             group_id = line._get_procurement_group()
@@ -1387,7 +1387,7 @@ class PosOrderLine(models.Model):
 
     def _is_product_storable_fifo_avco(self):
         self.ensure_one()
-        return self.product_id.type == 'product' and self.product_id.cost_method in ['fifo', 'average']
+        return self.product_id.type == 'consu' and self.product_id.is_trackable and self.product_id.cost_method in ['fifo', 'average']
 
     def _compute_total_cost(self, stock_moves):
         """

@@ -45,26 +45,31 @@ class TestMrpAccount(TestMrpCommon):
             ]})
         cls.dining_table = cls.env['product.product'].create({
             'name': 'Table (MTO)',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'tracking': 'serial',
         })
         cls.product_table_sheet = cls.env['product.product'].create({
             'name': 'Table Top',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'tracking': 'serial',
         })
         cls.product_table_leg = cls.env['product.product'].create({
             'name': 'Table Leg',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'tracking': 'lot',
         })
         cls.product_bolt = cls.env['product.product'].create({
             'name': 'Bolt',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
         })
         cls.product_screw = cls.env['product.product'].create({
             'name': 'Screw',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
         })
 
         cls.mrp_workcenter = cls.env['mrp.workcenter'].create({

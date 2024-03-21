@@ -287,7 +287,8 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
         ])
         new_product = self.env['product.product'].create({
             'name': 'New product',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
         })
         bom.consumption = 'flexible'
         production_form = Form(self.env['mrp.production'])
@@ -333,11 +334,13 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
         finished_product = self.env['product.product'].create({
             'name': 'Super Product',
             'route_ids': [(4, self.ref('mrp.route_warehouse0_manufacture'))],
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
         })
         secondary_product = self.env['product.product'].create({
             'name': 'Secondary',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
         })
         component = self.env['product.product'].create({
             'name': 'Component',
@@ -555,7 +558,8 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
             warehouse.manufacture_steps = 'pbm_sam'
         finished_product = self.env['product.product'].create({
             'name': 'Product',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'route_ids': manufacturing_route,
         })
         self.env['mrp.bom'].create({

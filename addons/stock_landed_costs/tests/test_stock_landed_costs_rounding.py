@@ -168,7 +168,8 @@ class TestStockLandedCostsRounding(TestStockLandedCostsCommon):
         products = self.Product.create([{
             'name': 'Super Product %s' % price,
             'categ_id': fifo_pc.id,
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'standard_price': price,
         } for price in [0.91, 0.93, 75.17, 20.54]])
 

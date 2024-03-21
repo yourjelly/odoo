@@ -1026,7 +1026,8 @@ class TestUi(TestPointOfSaleHttpCommon):
 
         self.product_test = self.env['product.product'].create({
             'name': 'Product Test',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'available_in_pos': True,
             'list_price': 100,
             'taxes_id': [(6, 0, self.tax1.ids)],
@@ -1046,7 +1047,8 @@ class TestUi(TestPointOfSaleHttpCommon):
 
         self.product1 = self.env['product.product'].create({
             'name': 'Product A',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'tracking': 'serial',
             'categ_id': self.env.ref('product.product_category_all').id,
             'available_in_pos': True,
@@ -1058,7 +1060,8 @@ class TestUi(TestPointOfSaleHttpCommon):
     def test_receipt_tracking_method(self):
         self.product_a = self.env['product.product'].create({
             'name': 'Product A',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'tracking': 'lot',
             'categ_id': self.env.ref('product.product_category_all').id,
             'available_in_pos': True,

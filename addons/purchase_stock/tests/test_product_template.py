@@ -16,7 +16,8 @@ class TestProductTemplate(TransactionCase):
 
       product_tmpl = self.env['product.template'].create({
         'name': 'Rubber Duck',
-        'type': 'product',
+        'type': 'consu',
+            'is_trackable': True,
         'default_code': 'VOB2A',
         'seller_ids': [seller.id],
         'purchase_ok': True,

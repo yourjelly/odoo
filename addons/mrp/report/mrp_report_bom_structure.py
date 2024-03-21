@@ -27,7 +27,7 @@ class ReportBomStructure(models.AbstractModel):
         components_qty_to_produce = defaultdict(lambda: 0)
         components_qty_available = {}
         for comp in bom_data.get('components', []):
-            if comp['product'].type != 'product' or float_is_zero(comp['base_bom_line_qty'], precision_digits=comp['uom'].rounding):
+            if comp['product'].type != 'consu' and not comp['product'].is_trackable or float_is_zero(comp['base_bom_line_qty'], precision_digits=comp['uom'].rounding):
                 continue
             components_qty_to_produce[comp['product_id']] += comp['base_bom_line_qty']
             components_qty_available[comp['product_id']] = comp['free_to_manufacture_qty']
@@ -153,7 +153,7 @@ class ReportBomStructure(models.AbstractModel):
             stock_loc = quantities_info['stock_loc']
             product_info[product.id]['consumptions'][stock_loc] += line_quantities.get(line.id, 0.0)
             product_quantities_info[product.id][line.id] = product_info[product.id]['consumptions'][stock_loc]
-            if (product.detailed_type != 'product' or
+            if (product.detailed_type != 'consu' and not product.is_trackable or
                     float_compare(product_info[product.id]['consumptions'][stock_loc], quantities_info['free_qty'], precision_rounding=product.uom_id.rounding) <= 0):
                 # Use date.min as a sentinel value for _get_stock_availability
                 closest_forecasted[product.id][line.id] = date.min
@@ -618,7 +618,7 @@ class ReportBomStructure(models.AbstractModel):
         components = components or []
         route_info = product_info[product.id].get(bom_key)
         resupply_state, resupply_delay = ('unavailable', False)
-        if product.detailed_type != 'product':
+        if product.detailed_type != 'consu' and not product.is_trackable:
             resupply_state, resupply_delay = ('available', 0)
         elif route_info:
             resupply_state, resupply_delay = self._get_resupply_availability(route_info, components)
@@ -653,7 +653,7 @@ class ReportBomStructure(models.AbstractModel):
         if closest_forecasted == date.max:
             return ('unavailable', False)
         date_today = self.env.context.get('from_date', fields.date.today())
-        if product.detailed_type != 'product':
+        if product.detailed_type != 'consu' and not product.is_trackable:
             return ('available', 0)
 
         stock_loc = quantities_info['stock_loc']

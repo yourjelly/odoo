@@ -104,10 +104,12 @@ class TestRepairTraceability(TestMrpCommon):
 
         finished, component = self.env['product.product'].create([{
             'name': 'Finished Product',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
         }, {
             'name': 'SN Componentt',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'tracking': 'serial',
         }])
 

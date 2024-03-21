@@ -215,7 +215,7 @@ class DeliveryCarrier(models.Model):
     def _get_commodities_from_stock_move_lines(self, move_lines):
         commodities = []
 
-        product_lines = move_lines.filtered(lambda line: line.product_id.type in ['product', 'consu'])
+        product_lines = move_lines.filtered(lambda line: line.product_id.type == 'consu')
         for product, lines in groupby(product_lines, lambda x: x.product_id):
             unit_quantity = sum(
                 line.product_uom_id._compute_quantity(

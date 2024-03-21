@@ -31,12 +31,14 @@ class TestMrpSerialMassProducePerformance(common.TransactionCase):
         for i in range(raw_materials_count):
             raw_materials.append(self.env['product.product'].create({
                 'name': '@raw_material#' + str(i + 1),
-                'type': 'product',
+                'type': 'consu',
+                'is_trackable': True,
                 'tracking': trackings[i % len(trackings)]
             }))
         finished = self.env['product.product'].create({
             'name': '@finished',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'tracking': 'serial',
         })
         bom = self.env['mrp.bom'].create({

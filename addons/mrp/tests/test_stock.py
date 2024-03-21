@@ -232,7 +232,8 @@ class TestKitPicking(common.TestMrpCommon):
         def create_product(name):
             p = Form(cls.env['product.product'])
             p.name = name
-            p.detailed_type = 'product'
+            p.detailed_type = 'consu'
+            p.is_trackable = True
             return p.save()
 
         # Create a kit 'kit_parent' :
@@ -404,7 +405,7 @@ class TestKitPicking(common.TestMrpCommon):
         self.bom_4.type = 'phantom'
         kit = self.bom_4.product_id
         compo = self.bom_4.bom_line_ids.product_id
-        product = self.env['product.product'].create({'name': 'Super Product', 'type': 'product'})
+        product = self.env['product.product'].create({'name': 'Super Product', 'type': 'consu', 'is_trackable': True,})
 
         receipt = self.env['stock.picking'].create({
             'picking_type_id': in_type.id,

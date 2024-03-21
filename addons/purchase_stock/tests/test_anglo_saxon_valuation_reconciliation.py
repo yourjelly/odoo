@@ -407,11 +407,13 @@ class TestValuationReconciliation(ValuationReconciliationTestCommon):
         date_po_and_delivery = '2022-03-02'
         self.product_a.write({
             'categ_id': self.stock_account_product_categ,
-            'detailed_type': 'product',
+            'detailed_type': 'consu',
+            'is_trackable': True,
         })
         self.product_b.write({
             'categ_id': self.stock_account_product_categ,
-            'detailed_type': 'product',
+            'detailed_type': 'consu',
+            'is_trackable': True,
         })
         purchase_order = self.env['purchase.order'].create({
                 'currency_id': self.currency_data['currency'].id,
@@ -451,7 +453,8 @@ class TestValuationReconciliation(ValuationReconciliationTestCommon):
         self.product_a.write({
             'standard_price': 27.0,
             'categ_id': self.stock_account_product_categ,
-            'detailed_type': 'product',
+            'detailed_type': 'consu',
+            'is_trackable': True,
         })
 
         self.stock_account_product_categ['property_cost_method'] = 'average'

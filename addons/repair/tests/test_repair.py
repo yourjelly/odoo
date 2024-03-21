@@ -32,17 +32,20 @@ class TestRepair(common.TransactionCase):
         # Storable products
         cls.product_storable_no = cls.env['product.product'].create({
             'name': 'Product Storable No Tracking',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'tracking': 'none',
         })
         cls.product_storable_serial = cls.env['product.product'].create({
             'name': 'Product Storable Serial',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'tracking': 'serial',
         })
         cls.product_storable_lot = cls.env['product.product'].create({
             'name': 'Product Storable Lot',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'tracking': 'lot',
         })
 
@@ -54,7 +57,8 @@ class TestRepair(common.TransactionCase):
         })
         cls.product_storable_order_repair = cls.env['product.product'].create({
             'name': 'Repair Storable',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'create_repair': True,
         })
         cls.product_service_order_repair = cls.env['product.product'].create({
@@ -544,7 +548,8 @@ class TestRepair(common.TransactionCase):
 
         product = self.env['product.product'].create({
             'name': 'Test Product',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
         })
         self.env['stock.quant']._update_available_quantity(product, self.stock_location_14, 1)
         picking_form = Form(self.env['stock.picking'])
@@ -586,8 +591,9 @@ class TestRepair(common.TransactionCase):
         Test That a repair order can be validated when the repaired product is tracked and in a package
         """
         self.product_product_3.tracking = 'serial'
-        self.product_product_3.type = 'product'
-        # Create two serial numbers
+        self.product_product_3.type = 'consu'
+        self.product_product_3.is_trackable = True
+        #  Create two serial numbers
         sn_1 = self.env['stock.lot'].create({'name': 'sn_1', 'product_id': self.product_product_3.id})
         sn_2 = self.env['stock.lot'].create({'name': 'sn_2', 'product_id': self.product_product_3.id})
 
@@ -632,7 +638,8 @@ class TestRepair(common.TransactionCase):
         """
         product_a = self.env['product.product'].create({
             'name': 'productA',
-            'detailed_type': 'product',
+            'detailed_type': 'consu',
+            'is_tracked': True,
             'tracking': 'serial',
             'create_repair': True,
         })

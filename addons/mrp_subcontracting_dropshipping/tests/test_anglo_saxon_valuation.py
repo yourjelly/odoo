@@ -19,7 +19,8 @@ class TestSubcontractingDropshippingValuation(ValuationReconciliationTestCommon)
         categ_form.property_valuation = 'real_time'
         cls.categ_fifo_auto = categ_form.save()
 
-        (cls.product_a | cls.product_b).type = 'product'
+        (cls.product_a | cls.product_b).type = 'consu' 
+        (cls.product_a | cls.product_b).is_trackable 
 
         cls.bom_a = cls.env['mrp.bom'].create({
             'product_tmpl_id': cls.product_a.product_tmpl_id.id,

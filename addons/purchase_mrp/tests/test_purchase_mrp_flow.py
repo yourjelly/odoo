@@ -510,13 +510,15 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
 
         component = self.env['product.product'].create({
             'name': 'component',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'route_ids': [(4, buy_route.id)],
             'seller_ids': [(6, 0, [supplier_info1.id])],
         })
         finished = self.env['product.product'].create({
             'name': 'finished',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'route_ids': [(4, manufacture_route.id)],
         })
         self.env['stock.warehouse.orderpoint'].create({
@@ -610,7 +612,8 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
 
         product = self.env['product.product'].create({
             'name': 'super product',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'seller_ids': [(0, 0, {'partner_id': vendor.id})],
             'route_ids': [(4, manu_route.id), (4, buy_route.id)],
         })
@@ -642,7 +645,8 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
 
         product = self.env['product.product'].create({
             'name': 'super product',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'seller_ids': [(0, 0, {'partner_id': vendor.id})],
             'route_ids': buy_route,
         })
@@ -750,7 +754,8 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
         self.env.company.manufacturing_lead = 25
         product = self.env['product.product'].create({
             'name': 'super product',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             #set route to manufacture + buy
             'route_ids': [
                 (4, self.env.ref('mrp.route_warehouse0_manufacture').id),
@@ -784,7 +789,8 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
     def test_mo_overview(self):
         component = self.env['product.product'].create({
             'name': 'component',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'standard_price': 80,
             'seller_ids': [(0, 0, {
                 'partner_id': self.env['res.partner'].create({'name': 'super vendor'}).id,
@@ -794,7 +800,8 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
         })
         finished_product = self.env['product.product'].create({
             'name': 'finished_product',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
         })
         self.env['mrp.bom'].create({
             'product_tmpl_id': finished_product.product_tmpl_id.id,

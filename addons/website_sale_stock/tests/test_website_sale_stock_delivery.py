@@ -24,7 +24,8 @@ class TestWebsiteSaleStockDeliveryController(PaymentCommon, SaleCommon):
         storable_product = self.env['product.product'].create({
             'name': 'Storable Product',
             'sale_ok': True,
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'website_published': True,
         })
         carriers = self.env['delivery.carrier'].search([])

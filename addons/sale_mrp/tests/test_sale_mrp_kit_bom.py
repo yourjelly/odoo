@@ -7,12 +7,18 @@ from odoo.tests import Form, TransactionCase, tagged
 @tagged('post_install', '-at_install')
 class TestSaleMrpKitBom(TransactionCase):
 
-    def _create_product(self, name, product_type, price):
-        return self.env['product.product'].create({
+    def _create_product(self, name, product_type, price, is_trackable = False):
+        val = {
             'name': name,
             'type': product_type,
             'standard_price': price,
-        })
+        } if not is_trackable else {
+            'name': name,
+            'type': product_type,
+            'standard_price': price,
+            'is_trackable': True,
+        } 
+        return self.env['product.product'].create(val)
 
     def test_reset_avco_kit(self):
         """
@@ -92,11 +98,11 @@ class TestSaleMrpKitBom(TransactionCase):
             'name': 'customer'
         })
 
-        self.kit_product = self._create_product('Kit Product', 'product', 1.00)
+        self.kit_product = self._create_product('Kit Product', 'consu', 1.00, True)
         # Creating components
-        self.component_a = self._create_product('Component A', 'product', 1.00)
+        self.component_a = self._create_product('Component A', 'consu', 1.00, True)
         self.component_a.product_tmpl_id.standard_price = 6
-        self.component_b = self._create_product('Component B', 'product', 1.00)
+        self.component_b = self._create_product('Component B', 'consu', 1.00, True)
         self.component_b.product_tmpl_id.standard_price = 10
 
         cat = self.env['product.category'].create({
@@ -147,8 +153,8 @@ class TestSaleMrpKitBom(TransactionCase):
 
         self.env.ref('product.decimal_product_uom').digits = 5
 
-        self.kit = self._create_product('Kit', 'product', 0.00)
-        self.comp = self._create_product('Component', 'product', 0.00)
+        self.kit = self._create_product('Kit', 'consu', 0.00, True)
+        self.comp = self._create_product('Component', 'consu', 0.00, True)
 
         # Create BoM for Kit
         bom_product_form = Form(self.env['mrp.bom'])
@@ -263,9 +269,9 @@ class TestSaleMrpKitBom(TransactionCase):
         wh = self.env['stock.warehouse'].search([('company_id', '=', self.env.user.id)], limit=1)
         wh.write({'delivery_steps': 'pick_ship'})
 
-        kitA = self._create_product('Kit Product', 'product', 0.00)
-        compA = self._create_product('ComponentA', 'product', 0.00)
-        compB = self._create_product('ComponentB', 'product', 0.00)
+        kitA = self._create_product('Kit Product', 'consu', 0.00, True)
+        compA = self._create_product('ComponentA', 'consu', 0.00, True)
+        compB = self._create_product('ComponentB', 'consu', 0.00, True)
 
         # Create BoM for KitB
         bom_product_formA = Form(self.env['mrp.bom'])
@@ -319,11 +325,11 @@ class TestSaleMrpKitBom(TransactionCase):
         wh = self.env['stock.warehouse'].search([('company_id', '=', self.env.user.id)], limit=1)
         wh.write({'delivery_steps': 'pick_ship'})
 
-        kitAB = self._create_product('Kit AB', 'product', 0.00)
-        kitABC = self._create_product('Kit ABC', 'product', 0.00)
-        compA = self._create_product('ComponentA', 'product', 0.00)
-        compB = self._create_product('ComponentB', 'product', 0.00)
-        compC = self._create_product('ComponentC', 'product', 0.00)
+        kitAB = self._create_product('Kit AB', 'consu', 0.00, True)
+        kitABC = self._create_product('Kit ABC', 'consu', 0.00, True)
+        compA = self._create_product('ComponentA', 'consu', 0.00, True)
+        compB = self._create_product('ComponentB', 'consu', 0.00, True)
+        compC = self._create_product('ComponentC', 'consu', 0.00, True)
 
         # Create BoM for KitB
         bom_product_formA = Form(self.env['mrp.bom'])
@@ -419,7 +425,8 @@ class TestSaleMrpKitBom(TransactionCase):
         """
         kit_1, component_1, product_1, kit_3, kit_4 = self.env['product.product'].create([{
             'name': n,
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
         } for n in ['Kit 1', 'Compo 1', 'Product 1', 'Kit 3', 'Kit 4']])
         kit_1.description_sale = "test"
 

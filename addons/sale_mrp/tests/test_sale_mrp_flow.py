@@ -162,7 +162,8 @@ class TestSaleMrpFlowCommon(ValuationReconciliationTestCommon):
     def _cls_create_product(cls, name, uom_id, routes=()):
         p = Form(cls.env['product.product'])
         p.name = name
-        p.detailed_type = 'product'
+        p.detailed_type = 'consu'
+        p.is_trackable = True
         p.uom_id = uom_id
         p.uom_po_id = uom_id
         p.route_ids.clear()
@@ -173,7 +174,8 @@ class TestSaleMrpFlowCommon(ValuationReconciliationTestCommon):
     def _create_product(self, name, uom_id, routes=()):
         p = Form(self.env['product.product'])
         p.name = name
-        p.detailed_type = 'product'
+        p.detailed_type = 'consu'
+        p.is_trackable = True
         p.uom_id = uom_id
         p.uom_po_id = uom_id
         p.route_ids.clear()
@@ -505,11 +507,13 @@ class TestSaleMrpFlow(TestSaleMrpFlowCommon):
 
         product_wood_panel = self.env['product.product'].create({
             'name': 'Wood Panel',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
         })
         product_desk_bolt = self.env['product.product'].create({
             'name': 'Bolt',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
         })
         self.env['mrp.bom'].create({
             'product_tmpl_id': product.product_tmpl_id.id,
@@ -611,19 +615,22 @@ class TestSaleMrpFlow(TestSaleMrpFlowCommon):
         Product = self.env['product.product']
         self.finished_product = Product.create({
                 'name': 'Finished product',
-                'type': 'product',
+                'type': 'consu',
+            'is_trackable': True,
                 'uom_id': self.uom_unit.id,
                 'invoice_policy': 'delivery',
                 'categ_id': self.category.id})
         self.component1 = Product.create({
                 'name': 'Component 1',
-                'type': 'product',
+                'type': 'consu',
+            'is_trackable': True,
                 'uom_id': self.uom_unit.id,
                 'categ_id': self.category.id,
                 'standard_price': 20})
         self.component2 = Product.create({
                 'name': 'Component 2',
-                'type': 'product',
+                'type': 'consu',
+            'is_trackable': True,
                 'uom_id': self.uom_unit.id,
                 'categ_id': self.category.id,
                 'standard_price': 10})
@@ -1495,7 +1502,8 @@ class TestSaleMrpFlow(TestSaleMrpFlowCommon):
         # Create finished product
         finished_product = self.env['product.product'].create({
             'name': 'Geyser',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'route_ids': [(4, route_mto), (4, route_manufacture)],
         })
 
@@ -1544,13 +1552,15 @@ class TestSaleMrpFlow(TestSaleMrpFlowCommon):
         # Create finished product
         finished_product = self.env['product.product'].create({
             'name': 'Geyser',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'route_ids': [(4, route_mto), (4, route_manufacture)],
         })
 
         product_raw = self.env['product.product'].create({
             'name': 'raw Geyser',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
         })
 
         # Create bom for finish product
@@ -1598,13 +1608,15 @@ class TestSaleMrpFlow(TestSaleMrpFlowCommon):
         # Create finished product
         finished_product = self.env['product.product'].create({
             'name': 'Geyser',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'route_ids': [(4, route_mto), (4, route_manufacture)],
         })
 
         product_raw = self.env['product.product'].create({
             'name': 'raw Geyser',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
         })
 
         # Create bom for finish product
@@ -1662,17 +1674,20 @@ class TestSaleMrpFlow(TestSaleMrpFlowCommon):
         """
         main_kit_product = self.env['product.product'].create({
             'name': 'Main Kit',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
         })
 
         nested_kit_product = self.env['product.product'].create({
             'name': 'Nested Kit',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
         })
 
         product = self.env['product.product'].create({
             'name': 'Screw',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
         })
 
         self.env['mrp.bom'].create({
@@ -1819,7 +1834,8 @@ class TestSaleMrpFlow(TestSaleMrpFlowCommon):
         # Create the template
         self.product_template = self.env['product.template'].create({
             'name': 'Template A',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'uom_id': self.uom_unit.id,
             'invoice_policy': 'delivery',
             'categ_id': self.category.id,
@@ -1840,14 +1856,16 @@ class TestSaleMrpFlow(TestSaleMrpFlowCommon):
         # Create the components
         self.comp_kit_a = self.env['product.product'].create({
             'name': 'Component Kit A',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'uom_id': self.uom_unit.id,
             'categ_id': self.category.id,
             'standard_price': 20
         })
         self.comp_kit_b = self.env['product.product'].create({
             'name': 'Component Kit B',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'uom_id': self.uom_unit.id,
             'categ_id': self.category.id,
             'standard_price': 10
@@ -1960,7 +1978,8 @@ class TestSaleMrpFlow(TestSaleMrpFlowCommon):
         # Create the template
         self.product_template = self.env['product.template'].create({
             'name': 'Template A',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'uom_id': self.uom_unit.id,
             'invoice_policy': 'delivery',
             'categ_id': self.category.id,
@@ -1979,14 +1998,16 @@ class TestSaleMrpFlow(TestSaleMrpFlowCommon):
         # Create the components
         self.comp_kit_a = self.env['product.product'].create({
             'name': 'Component Kit A',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'uom_id': self.uom_unit.id,
             'categ_id': self.category.id,
             'standard_price': 20
         })
         self.comp_kit_b = self.env['product.product'].create({
             'name': 'Component Kit B',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'uom_id': self.uom_unit.id,
             'categ_id': self.category.id,
             'standard_price': 10
@@ -2373,7 +2394,8 @@ class TestSaleMrpFlow(TestSaleMrpFlowCommon):
 
         compo01, compo02, kit = self.env['product.product'].create([{
             'name': name,
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'standard_price': price,
             'categ_id': self.stock_account_product_categ.id,
             'invoice_policy': 'delivery',

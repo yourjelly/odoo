@@ -489,15 +489,18 @@ class TestUnbuild(TestMrpCommon):
         # Create a stockable product and its components
         finshed_product = ProductObj.create({
             'name': 'Table',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
         })
         component1 = ProductObj.create({
             'name': 'Table head',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
         })
         component2 = ProductObj.create({
             'name': 'Table stand',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
         })
 
         # Create bom and add components
@@ -614,11 +617,13 @@ class TestUnbuild(TestMrpCommon):
         """
         compo, finished = self.env['product.product'].create([{
             'name': 'compo',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'tracking': 'serial',
         }, {
             'name': 'finished',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
         }])
 
         lot01, lot02 = self.env['stock.lot'].create([{
@@ -733,7 +738,8 @@ class TestUnbuild(TestMrpCommon):
         """
         product_1 = self.env['product.product'].create({
             'name': 'Product tracked by sn',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'tracking': 'serial',
         })
         product_1_sn = self.env['stock.lot'].create({
@@ -742,7 +748,8 @@ class TestUnbuild(TestMrpCommon):
         })
         component = self.env['product.product'].create({
             'name': 'Product component',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
         })
         bom_1 = self.env['mrp.bom'].create({
             'product_id': product_1.id,
@@ -756,7 +763,8 @@ class TestUnbuild(TestMrpCommon):
         })
         product_2 = self.env['product.product'].create({
             'name': 'finished Product',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
         })
         self.env['mrp.bom'].create({
             'product_id': product_2.id,
@@ -812,7 +820,8 @@ class TestUnbuild(TestMrpCommon):
         """
         finished_product = self.env['product.product'].create({
             'name': 'Product tracked by sn',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'tracking': 'serial',
         })
         finished_product_sn = self.env['stock.lot'].create({
@@ -821,7 +830,8 @@ class TestUnbuild(TestMrpCommon):
         })
         component = self.env['product.product'].create({
             'name': 'Product component',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
         })
         bom_1 = self.env['mrp.bom'].create({
             'product_id': finished_product.id,

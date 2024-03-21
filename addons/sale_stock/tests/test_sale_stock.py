@@ -74,7 +74,7 @@ class TestSaleStock(TestSaleStockCommon, ValuationReconciliationTestCommon):
         wiz.process()
         self.assertEqual(self.so.invoice_status, 'to invoice', 'Sale Stock: so invoice_status should be "to invoice" after partial delivery')
         del_qties = [sol.qty_delivered for sol in self.so.order_line]
-        del_qties_truth = [1.0 if sol.product_id.type in ['product', 'consu'] else 0.0 for sol in self.so.order_line]
+        del_qties_truth = [1.0 if sol.product_id.type == 'consu' else 0.0 for sol in self.so.order_line]
         self.assertEqual(del_qties, del_qties_truth, 'Sale Stock: delivered quantities are wrong after partial delivery')
         # invoice on delivery: only storable products
         inv_1 = self.so._create_invoices()
@@ -90,7 +90,7 @@ class TestSaleStock(TestSaleStockCommon, ValuationReconciliationTestCommon):
         self.assertTrue(pick_2.button_validate(), 'Sale Stock: second picking should be final without need for a backorder')
         self.assertEqual(self.so.invoice_status, 'to invoice', 'Sale Stock: so invoice_status should be "to invoice" after complete delivery')
         del_qties = [sol.qty_delivered for sol in self.so.order_line]
-        del_qties_truth = [2.0 if sol.product_id.type in ['product', 'consu'] else 0.0 for sol in self.so.order_line]
+        del_qties_truth = [2.0 if sol.product_id.type == 'consu' else 0.0 for sol in self.so.order_line]
         self.assertEqual(del_qties, del_qties_truth, 'Sale Stock: delivered quantities are wrong after complete delivery')
         # Without timesheet, we manually set the delivered qty for the product serv_del
         self.so.order_line.sorted()[1]['qty_delivered'] = 2.0
@@ -162,7 +162,7 @@ class TestSaleStock(TestSaleStockCommon, ValuationReconciliationTestCommon):
         pick.move_ids.write({'quantity': 2, 'picked': True})
         self.assertTrue(pick.button_validate(), 'Sale Stock: complete delivery should not need a backorder')
         del_qties = [sol.qty_delivered for sol in self.so.order_line]
-        del_qties_truth = [2.0 if sol.product_id.type in ['product', 'consu'] else 0.0 for sol in self.so.order_line]
+        del_qties_truth = [2.0 if sol.product_id.type == 'consu' else 0.0 for sol in self.so.order_line]
         self.assertEqual(del_qties, del_qties_truth, 'Sale Stock: delivered quantities are wrong after partial delivery')
         # invoice on delivery: nothing to invoice
         with self.assertRaises(UserError):
@@ -248,7 +248,8 @@ class TestSaleStock(TestSaleStockCommon, ValuationReconciliationTestCommon):
         item1 = self.company_data['product_order_no']  # consumable
         item1.type = 'consu'
         item2 = self.company_data['product_delivery_no']    # storable
-        item2.type = 'product'    # storable
+        item2.type = 'consu'    # storable
+        item2.is_trackable = True
 
         self.so = self.env['sale.order'].create({
             'partner_id': self.partner_a.id,
@@ -314,7 +315,8 @@ class TestSaleStock(TestSaleStockCommon, ValuationReconciliationTestCommon):
         item1 = self.company_data['product_order_no']  # consumable
         item1.type = 'consu'  # consumable
         item2 = self.company_data['product_delivery_no']    # storable
-        item2.type = 'product'    # storable
+        item2.type = 'consu'    # storable
+        item2.is_trackable = True
 
         self.env['stock.quant']._update_available_quantity(item2, self.company_data['default_warehouse'].lot_stock_id, 2)
         self.so = self.env['sale.order'].create({
@@ -562,7 +564,8 @@ class TestSaleStock(TestSaleStockCommon, ValuationReconciliationTestCommon):
         available quantities on sale order lines are well updated """
         # sell two products
         item1 = self.company_data['product_order_no']
-        item1.type = 'product'
+        item1.type = 'consu'
+        item1.is_trackable = True
 
         warehouse1 = self.company_data['default_warehouse']
         self.env['stock.quant']._update_available_quantity(item1, warehouse1.lot_stock_id, 10)
