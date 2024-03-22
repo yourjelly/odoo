@@ -34,6 +34,9 @@ class PaymentTransaction(models.Model):
         if self.provider_code != 'razorpay':
             return res
 
+        if self.operation in ['online_token', 'offline']:
+            return {}
+
         customer_id = self._razorpay_create_customer()['id']
         order_id = self._razorpay_create_order(customer_id)['id']
         return {
