@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <template id="im_livechat.qunit_embed_suite">
+    <template id="im_livechat.unit_embed_suite">
         <t t-call="web.layout">
             <t t-set="html_data" t-value="{'style': 'height: 100%;'}"/>
             <t t-set="title">Livechat External Tests</t>
@@ -11,11 +11,9 @@
                         <t t-set="info" t-value="{ 'available': True, 'server_url': server_url }"/>
                     </t>
                 </script>
-                <t t-call-assets="im_livechat.embed_test_assets"/>
-                <t t-call-assets="im_livechat.qunit_embed_suite"/>
+                <t t-call-assets="im_livechat.embed_assets_unit_tests_setup"/>
+                <t t-call-assets="im_livechat.embed_assets_unit_tests"/>
             </t>
-            <div id="qunit"/>
-            <div id="qunit-fixture"/>
         </t>
     </template>
 </odoo>

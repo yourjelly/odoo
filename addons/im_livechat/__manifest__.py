@@ -81,9 +81,6 @@ Help your customers with this chat, and analyse their feedback.
             ('remove', 'im_livechat/static/tests/embed/**/*'),
             ('remove', 'im_livechat/static/tests/tours/**/*'),
         ],
-        'im_livechat.qunit_embed_suite': [
-            'im_livechat/static/tests/embed/**/*',
-        ],
         'web.tests_assets': [
             'im_livechat/static/tests/legacy/helpers/**/*',
         ],
@@ -132,16 +129,14 @@ Help your customers with this chat, and analyse their feedback.
             ('include', 'im_livechat.assets_embed_core'),
             'im_livechat/static/src/embed/external/**/*',
         ],
-        'im_livechat.assets_embed_cors': [
-            ('include', 'im_livechat.assets_embed_external'),
-            'im_livechat/static/src/embed/cors/**/*',
+        "im_livechat.embed_assets_unit_tests_setup": [
+            ("include", "web.assets_unit_tests_setup"),
+            ("remove", "im_livechat/static/**"),
+            "im_livechat/static/tests/legacy/helpers/**",
+            ("include", "im_livechat.assets_embed_core"),
         ],
-        'im_livechat.embed_test_assets': [
-            ('include', 'web.tests_assets'),
-            ('remove', 'web/static/tests/legacy/mock_server_tests.js'),
-            ('remove', 'im_livechat/static/**'),
-            'im_livechat/static/tests/legacy/helpers/**',
-            ('include', 'im_livechat.assets_embed_core'),
+        "im_livechat.embed_assets_unit_tests": [
+            "im_livechat/static/tests/embed/**/*",
         ],
     },
     'license': 'LGPL-3',
