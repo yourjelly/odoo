@@ -3191,6 +3191,7 @@ class BaseModel(metaclass=MetaModel):
                 continue
 
             if current_definition:
+                _logger.warning("Dropping and recreating constraint %s. Old %r. New %r.", conname, current_definition, definition)
                 # constraint exists but its definition may have changed
                 tools.drop_constraint(cr, self._table, conname)
 
