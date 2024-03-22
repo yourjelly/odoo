@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from collections import defaultdict
+
 from odoo import api, fields, models, _
 
 
@@ -10,7 +12,7 @@ class AccountAnalyticAccount(models.Model):
 
     production_ids = fields.Many2many('mrp.production')
     production_count = fields.Integer("Manufacturing Orders Count", compute='_compute_production_count')
-    bom_ids = fields.Many2many('mrp.bom')
+    bom_ids = fields.Many2many('mrp.bom', compute='_compute_bom_ids')
     bom_count = fields.Integer("BoM Count", compute='_compute_bom_count')
     workcenter_ids = fields.Many2many('mrp.workcenter')
     workorder_count = fields.Integer("Work Order Count", compute='_compute_workorder_count')
@@ -19,6 +21,15 @@ class AccountAnalyticAccount(models.Model):
     def _compute_production_count(self):
         for account in self:
             account.production_count = len(account.production_ids)
+
+    def _compute_bom_ids(self):
+        boms = self.env['mrp.bom'].search([])
+        bom_by_account = defaultdict(lambda: self.env['mrp.bom'])
+        for bom in boms:
+            for account in bom.analytic_account_ids:
+                bom_by_account[account] |= bom
+        for account in self:
+            account.bom_ids = bom_by_account[account].ids
 
     @api.depends('bom_ids')
     def _compute_bom_count(self):
