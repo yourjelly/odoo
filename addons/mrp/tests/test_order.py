@@ -1344,7 +1344,8 @@ class TestMrpOrder(TestMrpCommon):
         subassembly_product = self.env["product.product"].create(
             {
                 "name": "Subassembly",
-                "type": "product",
+                "type": "consu",
+                "is_trackable": True,
                 "tracking": "serial",
             }
         )
@@ -1368,7 +1369,8 @@ class TestMrpOrder(TestMrpCommon):
         finished_good_product = self.env["product.product"].create(
             {
                 "name": "Finished Good",
-                "type": "product",
+                "type": "consu",
+                "is_trackable": True,
                 "tracking": "serial",
             }
         )
@@ -1426,7 +1428,8 @@ class TestMrpOrder(TestMrpCommon):
         product = self.env["product.product"].create(
             {
                 "name": "Product",
-                "type": "product",
+                "type": "consu",
+                "is_trackable": True,
                 "tracking": "serial",
             }
         )
@@ -2669,9 +2672,9 @@ class TestMrpOrder(TestMrpCommon):
         work_center_3 = self.env['mrp.workcenter'].create({"name": "WorkCenter 3", "time_start": 13})
 
         product = self.env['product.template'].create({"name": "Finished Product"})
-        component_1 = self.env['product.template'].create({"name": "Component 1", "type": "product"})
-        component_2 = self.env['product.template'].create({"name": "Component 2", "type": "product"})
-        component_3 = self.env['product.template'].create({"name": "Component 3", "type": "product"})
+        component_1 = self.env['product.template'].create({"name": "Component 1", "type": "consu", "is_trackable": True})
+        component_2 = self.env['product.template'].create({"name": "Component 2", "type": "consu", "is_trackable": True})
+        component_3 = self.env['product.template'].create({"name": "Component 3", "type": "consu", "is_trackable": True})
 
         self.env['stock.quant'].create({
             "product_id": component_1.product_variant_id.id,
@@ -2931,6 +2934,7 @@ class TestMrpOrder(TestMrpCommon):
         for product in self.product_1 + self.product_2:
             product.type = 'consu'
             product.is_trackable = True
+            product.type = 'consu'
             self.env['stock.quant']._update_available_quantity(product, warehouse.lot_stock_id, 10)
 
         mo_form = Form(self.env['mrp.production'])

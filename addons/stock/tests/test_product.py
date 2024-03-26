@@ -17,7 +17,7 @@ class TestVirtualAvailable(TestStockCommon):
         # Make `product3` a storable product for this test. Indeed, creating quants
         # and playing with owners is not possible for consumables.
         cls.product_3.type = 'consu'
-        cls.product_3.is_tracable = True
+        cls.product_3.is_trackable = True
         cls.env['stock.picking.type'].browse(cls.env.ref('stock.picking_type_out').id).reservation_method = 'manual'
 
         cls.env['stock.quant'].create({

@@ -1231,7 +1231,7 @@ class TestBoM(TestMrpCommon):
         Checks the generated BoM has the expected BoM lines, by-products and operations.
         """
         # Creates some products.
-        common_vals = {'type': "product"}
+        common_vals = {'type': "consu", 'is_trackable': True}
         finished_product = self.env['product.product'].create(dict(common_vals, name="Monster in Jar"))
         component_1 = self.env['product.product'].create(dict(common_vals, name="Monster"))
         component_2 = self.env['product.product'].create(dict(common_vals, name="Jar"))
@@ -1342,7 +1342,7 @@ class TestBoM(TestMrpCommon):
         uom_unit = self.env.ref('uom.product_uom_unit')
         uom_dozen = self.env.ref('uom.product_uom_dozen')
         # Creates some products.
-        common_vals = {'type': "product"}
+        common_vals = {'type': "consu", 'is_trackable': True}
         finished_product = self.env['product.product'].create(dict(common_vals, name="CO² Molecule"))
         component_1 = self.env['product.product'].create(dict(common_vals, name="Carbon Molecule"))
         component_2 = self.env['product.product'].create(dict(common_vals, name="Oxygen Molecule"))
@@ -1378,7 +1378,7 @@ class TestBoM(TestMrpCommon):
         """
         self.env.user.groups_id += self.env.ref('mrp.group_mrp_byproducts')  # Enables by-products.
         # Creates some products.
-        common_vals = {'type': "product"}
+        common_vals = {'type': "consu", 'is_trackable': True}
         finished_product = self.env['product.product'].create(dict(common_vals, name="Banana Bread"))
         component_1 = self.env['product.product'].create(dict(common_vals, name="Banana"))
         component_2 = self.env['product.product'].create(dict(common_vals, name="Sugar, Spice and Everything Nice"))
@@ -1434,7 +1434,7 @@ class TestBoM(TestMrpCommon):
         """
         self.env.user.groups_id += self.env.ref('mrp.group_mrp_byproducts')
         # Creates a BoM.
-        common_vals = {'type': "product"}
+        common_vals = {'type': "consu", 'is_trackable': True}
         finished_product = self.env['product.product'].create(dict(common_vals, name="Monster in Jar"))
         component_1 = self.env['product.product'].create(dict(common_vals, name="Monster"))
         component_2 = self.env['product.product'].create(dict(common_vals, name="Jar"))
@@ -1553,7 +1553,7 @@ class TestBoM(TestMrpCommon):
         uom_unit = self.env.ref('uom.product_uom_unit')
         uom_dozen = self.env.ref('uom.product_uom_dozen')
         # Creates a BoM.
-        common_vals = {'type': "product"}
+        common_vals = {'type': "consu", 'is_trackable': True}
         finished_product = self.env['product.product'].create(dict(common_vals, name="Monster in Jar"))
         component_1 = self.env['product.product'].create(dict(common_vals, name="Monster"))
         component_2 = self.env['product.product'].create(dict(common_vals, name="Jar"))
@@ -1653,7 +1653,7 @@ class TestBoM(TestMrpCommon):
         and checks the moves' operation/workorder are correctly updated too.
         """
         # Creates a BoM.
-        common_vals = {'type': "product"}
+        common_vals = {'type': "consu", 'is_trackable': True}
         finished_product = self.env['product.product'].create(dict(common_vals, name="Monster in Jar"))
         component_1 = self.env['product.product'].create(dict(common_vals, name="Monster"))
         component_2 = self.env['product.product'].create(dict(common_vals, name="Jar"))

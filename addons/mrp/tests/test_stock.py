@@ -405,7 +405,7 @@ class TestKitPicking(common.TestMrpCommon):
         self.bom_4.type = 'phantom'
         kit = self.bom_4.product_id
         compo = self.bom_4.bom_line_ids.product_id
-        product = self.env['product.product'].create({'name': 'Super Product', 'type': 'consu', 'is_trackable': True,})
+        product = self.env['product.product'].create({'name': 'Super Product', 'type': 'consu', 'is_trackable': True})
 
         receipt = self.env['stock.picking'].create({
             'picking_type_id': in_type.id,

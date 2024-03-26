@@ -337,7 +337,7 @@ class StockMoveLine(models.Model):
             if move:
                 reservation = not move._should_bypass_reservation()
             else:
-                reservation = product.is_trackable and not location.should_bypass_reservation()
+                reservation = product.type == 'consu' and product.is_trackable and not location.should_bypass_reservation()
             if move_line.quantity and reservation:
                 self.env.context.get('reserved_quant', self.env['stock.quant'])._update_reserved_quantity(
                     product, location, move_line.quantity_product_uom, lot_id=move_line.lot_id, package_id=move_line.package_id, owner_id=move_line.owner_id)
@@ -348,7 +348,7 @@ class StockMoveLine(models.Model):
 
         for ml, vals in zip(mls, vals_list):
             if ml.state == 'done':
-                if ml.product_id.is_trackable:
+                if ml.product_id.type == 'consu' and ml.product_id.is_trackable:
                     Quant = self.env['stock.quant']
                     quantity = ml.product_uom_id._compute_quantity(ml.quantity, ml.move_id.product_id.uom_id, rounding_method='HALF-UP')
                     in_date = None
@@ -435,7 +435,7 @@ class StockMoveLine(models.Model):
         mls = self.env['stock.move.line']
         if updates or 'quantity' in vals:
             next_moves = self.env['stock.move']
-            mls = self.filtered(lambda ml: ml.move_id.state == 'done' and ml.product_id.is_trackable)
+            mls = self.filtered(lambda ml: ml.move_id.state == 'done' and ml.product_id.type == 'consu' and ml.product_id.is_trackable)
             if not updates:  # we can skip those where quantity is already good up to UoM rounding
                 mls = mls.filtered(lambda ml: not float_is_zero(ml.quantity - vals['quantity'], precision_rounding=ml.product_uom_id.rounding))
             for ml in mls:

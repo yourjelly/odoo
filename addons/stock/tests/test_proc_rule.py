@@ -39,7 +39,9 @@ class TestProcRule(TransactionCase):
         rule but finds nothing else than itself and so get stuck in a recursion error."""
         warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
         reception_route = warehouse.reception_route_id
-        self.product.type = 'consu' and self.product.is_trackable
+        self.product.detailed_type = 'consu'
+        self.product.type = 'consu'
+        self.product.is_trackable = True
 
         # Creates a delivery for this product, that way, this product will be to resupply.
         picking_form = Form(self.env['stock.picking'])
@@ -466,7 +468,7 @@ class TestProcRule(TransactionCase):
 
     def test_replenishment_order_to_max(self):
         warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.user.id)], limit=1)
-        self.product.detailed_type = 'consu'
+        self.product.detailed_type = 'consu' 
         self.product.is_trackable = True
         self.env['stock.quant']._update_available_quantity(self.product, warehouse.lot_stock_id, 10)
         orderpoint = self.env['stock.warehouse.orderpoint'].create({

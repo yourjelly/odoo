@@ -46,11 +46,11 @@ class TestStockCommon(common.TransactionCase):
         cls.categ_kgm = cls.ModelDataObj._xmlid_to_res_id('uom.product_uom_categ_kgm')
 
         # Product Created A, B, C, D
-        cls.productA = cls.ProductObj.create({'name': 'Product A', 'type': 'product'})
-        cls.productB = cls.ProductObj.create({'name': 'Product B', 'type': 'product'})
-        cls.productC = cls.ProductObj.create({'name': 'Product C', 'type': 'product'})
-        cls.productD = cls.ProductObj.create({'name': 'Product D', 'type': 'product'})
-        cls.productE = cls.ProductObj.create({'name': 'Product E', 'type': 'product'})
+        cls.productA = cls.ProductObj.create({'name': 'Product A', 'type': 'consu', 'is_trackable':True})
+        cls.productB = cls.ProductObj.create({'name': 'Product B', 'type': 'consu', 'is_trackable':True})
+        cls.productC = cls.ProductObj.create({'name': 'Product C', 'type': 'consu', 'is_trackable':True})
+        cls.productD = cls.ProductObj.create({'name': 'Product D', 'type': 'consu', 'is_trackable':True})
+        cls.productE = cls.ProductObj.create({'name': 'Product E', 'type': 'consu', 'is_trackable':True})
 
         # Configure unit of measure.
         cls.uom_kg = cls.env['uom.uom'].search([('category_id', '=', cls.categ_kgm), ('uom_type', '=', 'reference')], limit=1)
@@ -100,12 +100,12 @@ class TestStockCommon(common.TransactionCase):
             'rounding': 1.0})
 
         # Product for different unit of measure.
-        cls.DozA = cls.ProductObj.create({'name': 'Dozon-A', 'type': 'consu', 'is_trackable': True, 'uom_id': cls.uom_dozen.id, 'uom_po_id': cls.uom_dozen.id})
-        cls.SDozA = cls.ProductObj.create({'name': 'SuperDozon-A', 'type': 'consu', 'is_trackable': True, 'uom_id': cls.uom_sdozen.id, 'uom_po_id': cls.uom_sdozen.id})
-        cls.SDozARound = cls.ProductObj.create({'name': 'SuperDozenRound-A', 'type': 'consu', 'is_trackable': True, 'uom_id': cls.uom_sdozen_round.id, 'uom_po_id': cls.uom_sdozen_round.id})
-        cls.UnitA = cls.ProductObj.create({'name': 'Unit-A', 'type': 'product'})
-        cls.kgB = cls.ProductObj.create({'name': 'kg-B', 'type': 'consu', 'is_trackable': True, 'uom_id': cls.uom_kg.id, 'uom_po_id': cls.uom_kg.id})
-        cls.gB = cls.ProductObj.create({'name': 'g-B', 'type': 'consu', 'is_trackable': True, 'uom_id': cls.uom_gm.id, 'uom_po_id': cls.uom_gm.id})
+        cls.DozA = cls.ProductObj.create({'name': 'Dozon-A', 'type': 'consu', 'is_trackable':True, 'uom_id': cls.uom_dozen.id, 'uom_po_id': cls.uom_dozen.id})
+        cls.SDozA = cls.ProductObj.create({'name': 'SuperDozon-A', 'type': 'consu', 'is_trackable':True, 'uom_id': cls.uom_sdozen.id, 'uom_po_id': cls.uom_sdozen.id})
+        cls.SDozARound = cls.ProductObj.create({'name': 'SuperDozenRound-A', 'type': 'consu', 'is_trackable':True, 'uom_id': cls.uom_sdozen_round.id, 'uom_po_id': cls.uom_sdozen_round.id})
+        cls.UnitA = cls.ProductObj.create({'name': 'Unit-A', 'type': 'consu', 'is_trackable':True})
+        cls.kgB = cls.ProductObj.create({'name': 'kg-B', 'type': 'consu', 'is_trackable':True, 'uom_id': cls.uom_kg.id, 'uom_po_id': cls.uom_kg.id})
+        cls.gB = cls.ProductObj.create({'name': 'g-B', 'type': 'consu', 'is_trackable':True, 'uom_id': cls.uom_gm.id, 'uom_po_id': cls.uom_gm.id})
 
         cls.env.ref('base.group_user').write({'implied_ids': [
             (4, cls.env.ref('base.group_multi_company').id),

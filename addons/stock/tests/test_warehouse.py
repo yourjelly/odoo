@@ -82,7 +82,8 @@ class TestWarehouse(TestStockCommon):
     def test_inventory_wizard_as_user(self):
         """ Using the "Update Quantity" wizard as stock user.
         """
-        self.product_1.type = 'product'
+        self.product_1.type = 'consu'
+        self.product_1.is_trackable = True
         InventoryWizard = self.env['stock.change.product.qty'].with_user(self.user_stock_user)
         inventory_wizard = InventoryWizard.create({
             'product_id': self.product_1.id,
@@ -100,7 +101,8 @@ class TestWarehouse(TestStockCommon):
 
     def test_basic_move(self):
         product = self.product_3.with_user(self.user_stock_manager)
-        product.type = 'product'
+        product.type = 'consu'
+        product.is_trackable = True
         picking_out = self.env['stock.picking'].create({
             'partner_id': self.partner.id,
             'picking_type_id': self.env.ref('stock.picking_type_out').id,
@@ -160,7 +162,7 @@ class TestWarehouse(TestStockCommon):
 
     def test_inventory_adjustment_and_negative_quants_1(self):
         """Make sure negative quants from returns get wiped out with an inventory adjustment"""
-        productA = self.env['product.product'].create({'name': 'Product A', 'type': 'consu', 'is_trackable': True})
+        productA = self.env['product.product'].create({'name': 'Product A', 'type': 'consu', 'is_trackable': True,})
         stock_location = self.env.ref('stock.stock_location_stock')
         customer_location = self.env.ref('stock.stock_location_customers')
 
@@ -204,7 +206,7 @@ class TestWarehouse(TestStockCommon):
 
     def test_inventory_adjustment_and_negative_quants_2(self):
         """Make sure negative quants get wiped out with an inventory adjustment"""
-        productA = self.env['product.product'].create({'name': 'Product A', 'type': 'consu', 'is_trackable': True})
+        productA = self.env['product.product'].create({'name': 'Product A', 'type': 'consu', 'is_trackable': True,})
         stock_location = self.env.ref('stock.stock_location_stock')
         customer_location = self.env.ref('stock.stock_location_customers')
         location_loss = productA.property_stock_inventory
