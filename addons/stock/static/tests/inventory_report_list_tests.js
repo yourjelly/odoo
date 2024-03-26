@@ -79,9 +79,6 @@ QUnit.module(
             serverData,
             arch: arch,
             mockRPC: mockRPC,
-            context: {
-                inventory_mode: true,
-            },
         });
 
         // Check we have initially 3 records
@@ -107,9 +104,6 @@ QUnit.module(
             serverData,
             arch: arch,
             mockRPC: mockRPC,
-            context: {
-                inventory_mode: true,
-            },
         });
 
         // Check we have initially 3 records
@@ -140,9 +134,6 @@ QUnit.module(
             serverData,
             arch: arch,
             mockRPC: mockRPC,
-            context: {
-                inventory_mode: true,
-            },
             groupBy: ['job'], // Groups are Emperor, Professor, Soldier
         });
 

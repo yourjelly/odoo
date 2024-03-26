@@ -53,7 +53,7 @@ class TestStockNotificationWishlist(HttpCase):
         self.assertEqual(len(emails), 0)
 
         # Replenish Product
-        quants = self.env['stock.quant'].with_context(inventory_mode=True).create({
+        quants = self.env['stock.quant'].create({
             'product_id': self.product.id,
             'inventory_quantity': 10.0,
             'location_id': self.warehouse.lot_stock_id.id,

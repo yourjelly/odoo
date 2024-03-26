@@ -161,13 +161,13 @@ class TestPointOfSaleFlow(TestPointOfSaleCommon):
             'product_id': self.product2.id,
         })
 
-        self.env['stock.quant'].with_context(inventory_mode=True).create({
+        self.env['stock.quant'].create({
             'product_id': self.product2.id,
             'inventory_quantity': 1,
             'location_id': self.stock_location.id,
             'lot_id': lot1.id
         }).action_apply_inventory()
-        self.env['stock.quant'].with_context(inventory_mode=True).create({
+        self.env['stock.quant'].create({
             'product_id': self.product2.id,
             'inventory_quantity': 1,
             'location_id': self.stock_location.id,
@@ -1040,7 +1040,7 @@ class TestPointOfSaleFlow(TestPointOfSaleCommon):
             'product_id': tracked_product_2.id,
         })
         stock_location = self.company_data['default_warehouse'].lot_stock_id
-        self.env['stock.quant'].with_context(inventory_mode=True).create({
+        self.env['stock.quant'].create({
             'product_id': tracked_product_2.id,
             'inventory_quantity': 1,
             'location_id': stock_location.id,
@@ -1348,7 +1348,7 @@ class TestPointOfSaleFlow(TestPointOfSaleCommon):
             'categ_id': self.env.ref('product.product_category_all').id,
         })
 
-        self.env['stock.quant'].with_context(inventory_mode=True).create({
+        self.env['stock.quant'].create({
             'product_id': self.product2.id,
             'inventory_quantity': 1,
             'location_id': self.stock_location.id,
@@ -1865,14 +1865,14 @@ class TestPointOfSaleFlow(TestPointOfSaleCommon):
             'product_id': self.product2.id,
         })
 
-        quant1 = self.env['stock.quant'].with_context(inventory_mode=True).create({
+        quant1 = self.env['stock.quant'].create({
             'product_id': self.product2.id,
             'inventory_quantity': 5,
             'location_id': self.stock_location.id,
             'lot_id': lot1.id
         })
         quant1.action_apply_inventory()
-        quant2 = self.env['stock.quant'].with_context(inventory_mode=True).create({
+        quant2 = self.env['stock.quant'].create({
             'product_id': self.product2.id,
             'inventory_quantity': 5,
             'location_id': self.stock_location.id,

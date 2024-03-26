@@ -56,7 +56,7 @@ class TestProcurement(TestMrpCommon):
         #    Product2 48 Unit
         # ---------------------
         # Update Inventory
-        self.env['stock.quant'].with_context(inventory_mode=True).create({
+        self.env['stock.quant'].create({
             'product_id': self.product_2.id,
             'inventory_quantity': 48,
             'location_id': self.warehouse.lot_stock_id.id,
@@ -80,7 +80,7 @@ class TestProcurement(TestMrpCommon):
         # ------------------
 
         # Update Inventory
-        self.env['stock.quant'].with_context(inventory_mode=True).create({
+        self.env['stock.quant'].create({
             'product_id': self.product_2.id,
             'inventory_quantity': 12,
             'location_id': self.warehouse.lot_stock_id.id,

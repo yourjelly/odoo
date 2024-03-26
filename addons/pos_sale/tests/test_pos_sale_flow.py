@@ -226,12 +226,12 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
             'location_id': self.warehouse.lot_stock_id.id,
         })
 
-        quants = self.env['stock.quant'].with_context(inventory_mode=True).create({
+        quants = self.env['stock.quant'].create({
             'product_id': self.product.id,
             'inventory_quantity': 2,
             'location_id': self.shelf_1.id,
         })
-        quants |= self.env['stock.quant'].with_context(inventory_mode=True).create({
+        quants |= self.env['stock.quant'].create({
             'product_id': self.product.id,
             'inventory_quantity': 5,
             'location_id': self.shelf_2.id,

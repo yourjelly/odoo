@@ -43,14 +43,14 @@ class TestWebsiteSaleStockProductWarehouse(TestSaleProductAttributeValueCommon):
         })
 
         # Add 10 Product A in WH1 and 15 Product 1 in WH2
-        quants = cls.env['stock.quant'].with_context(inventory_mode=True).create([{
+        quants = cls.env['stock.quant'].create([{
             'product_id': cls.product_A.id,
             'inventory_quantity': qty,
             'location_id': wh.lot_stock_id.id,
         } for wh, qty in [(cls.warehouse_1, 10.0), (cls.warehouse_2, 15.0)]])
 
         # Add 10 Product 2 in WH2
-        quants |= cls.env['stock.quant'].with_context(inventory_mode=True).create({
+        quants |= cls.env['stock.quant'].create({
             'product_id': cls.product_B.id,
             'inventory_quantity': 10.0,
             'location_id': cls.warehouse_2.lot_stock_id.id,

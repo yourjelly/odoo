@@ -36,7 +36,7 @@ class ProductChangeQuantity(models.TransientModel):
         # Before creating a new quant, the quand `create` method will check if
         # it exists already. If it does, it'll edit its `inventory_quantity`
         # instead of create a new one.
-        self.env['stock.quant'].with_context(inventory_mode=True).create({
+        self.env['stock.quant'].create({
             'product_id': self.product_id.id,
             'location_id': warehouse.lot_stock_id.id,
             'inventory_quantity': self.new_quantity,

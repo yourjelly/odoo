@@ -116,7 +116,7 @@
                   sample="1">
                 <header>
                     <button name="action_inventory_at_date" string="Inventory at Date" type="object"
-                            invisible="((context.get('inventory_mode') and not context.get('inventory_report_mode')) or context.get('no_at_date'))"
+                            invisible="((not context.get('inventory_report_mode')) or context.get('no_at_date'))"
                             class="btn-primary ms-1"
                             display="always"/>
                     <button name="action_stock_quant_relocate" string="Relocate" type="object" groups="stock.group_stock_manager" invisible="context.get('hide_location', False)" context="{'action_ref': 'stock.action_view_quants'}"/>
@@ -192,7 +192,7 @@
             <xpath expr="//field[@name='product_id']" position="before">
                 <header>
                     <button name="action_inventory_at_date" string="Inventory at Date" type="object"
-                        invisible="((context.get('inventory_mode') and not context.get('inventory_report_mode')) or context.get('no_at_date'))"
+                        invisible="((not context.get('inventory_report_mode')) or context.get('no_at_date'))"
                         class="btn-primary ms-1"
                         display="always"/>
                 </header>
@@ -238,7 +238,7 @@
 
     <record model="ir.actions.act_window" id="dashboard_open_quants"> <!-- Used in dashboard -->
         <field name="name">Update Quantity</field>
-        <field name="context">{'search_default_internal_loc': 1, 'search_default_productgroup':1, 'search_default_locationgroup':1, 'inventory_mode':True}</field>
+        <field name="context">{'search_default_internal_loc': 1, 'search_default_productgroup':1, 'search_default_locationgroup':1}</field>
         <field name="res_model">stock.quant</field>
         <field name="view_id" ref="view_stock_quant_tree_editable"/>
     </record>
@@ -448,11 +448,11 @@ in this location. That leads to a negative stock.
                 <header>
                     <button name="action_apply_all" string="Apply All" type="object"
                             class="btn btn-secondary"
-                            invisible="not context.get('inventory_mode') or context.get('inventory_report_mode')"
+                            invisible="context.get('inventory_report_mode')"
                             display="always"
                         />
                     <button name="action_inventory_at_date" string="Inventory at Date" type="object"
-                            invisible="((context.get('inventory_mode') and not context.get('inventory_report_mode')) or context.get('no_at_date'))"
+                            invisible="((not context.get('inventory_report_mode')) or context.get('no_at_date'))"
                             class="btn-primary ms-1"
                             display="always"/>
                     <button name="stock.action_stock_inventory_adjustement_name" type="action" string="Apply"/>

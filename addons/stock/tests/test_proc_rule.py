@@ -298,7 +298,7 @@ class TestProcRule(TransactionCase):
             'name': 'Desk Combination',
             'type': 'product',
         })
-        self.env['stock.quant'].with_context(inventory_mode=True).create({
+        self.env['stock.quant'].create({
             'product_id': self.productA.id,
             'location_id': stock_location.id,
             'inventory_quantity': 14.5,

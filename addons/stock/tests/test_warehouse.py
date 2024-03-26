@@ -15,7 +15,7 @@ class TestWarehouse(TestStockCommon):
 
     def test_inventory_product(self):
         self.product_1.type = 'product'
-        product_1_quant = self.env['stock.quant'].with_context(inventory_mode=True).create({
+        product_1_quant = self.env['stock.quant'].create({
             'product_id': self.product_1.id,
             'inventory_quantity': 50.0,
             'location_id': self.warehouse_1.lot_stock_id.id,

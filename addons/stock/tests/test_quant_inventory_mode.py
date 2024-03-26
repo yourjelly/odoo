@@ -12,7 +12,7 @@ class TestEditableQuant(TransactionCase):
         super(TestEditableQuant, cls).setUpClass()
 
         # Shortcut to call `stock.quant` with `inventory mode` set in the context
-        cls.Quant = cls.env['stock.quant'].with_context(inventory_mode=True)
+        cls.Quant = cls.env['stock.quant']
 
         Product = cls.env['product.product']
         Location = cls.env['stock.location']
@@ -137,25 +137,24 @@ class TestEditableQuant(TransactionCase):
     def test_create_quant_4(self):
         """ Try to create tree quants in inventory mode with `quantity` and/or `inventory_quantity`.
         Creates two quants not in inventory mode:
-          - One with `quantity` (this one must be OK, but `inventory_mode` is useless here as it
-            doesn't enter in the inventory mode case and create quant as usual)
+          - One with `quantity` (this one must be OK)
           - One with `inventory_quantity` (this one must be OK)
           - One with the two values (this one must raises an error as it enters in the inventory
             mode but user can't edit directly `quantity` in inventory mode)
         """
-        valid_quant = self.env['stock.quant'].with_context(inventory_mode=True).create({
+        valid_quant = self.env['stock.quant'].create({
             'product_id': self.product.id,
             'location_id': self.room1.id,
             'quantity': 10,
         })
-        inventoried_quant = self.env['stock.quant'].with_context(inventory_mode=True).create({
+        inventoried_quant = self.env['stock.quant'].create({
             'product_id': self.product2.id,
             'location_id': self.room1.id,
             'inventory_quantity': 20,
         })
         inventoried_quant.action_apply_inventory()
         with self.assertRaises(UserError):
-            invalid_quant = self.env['stock.quant'].with_context(inventory_mode=True).create({
+            invalid_quant = self.env['stock.quant'].create({
                 'product_id': self.product.id,
                 'location_id': self.room2.id,
                 'quantity': 10,

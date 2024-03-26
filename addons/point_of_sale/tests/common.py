@@ -599,7 +599,7 @@ class TestPoSCommon(ValuationReconciliationTestCommon):
         """ Adjust inventory of the given products
         """
         for product, qty in zip(products, quantities):
-            cls.env['stock.quant'].with_context(inventory_mode=True).create({
+            cls.env['stock.quant'].create({
                 'product_id': product.id,
                 'inventory_quantity': qty,
                 'location_id': cls.stock_location_components.id,

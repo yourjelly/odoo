@@ -119,7 +119,7 @@ class TestReports(TestReportsCommon):
         })
 
         # Inventory Adjustement of 50.0 today.
-        self.env['stock.quant'].with_context(inventory_mode=True).create({
+        self.env['stock.quant'].create({
             'product_id': product.id,
             'location_id': stock.id,
             'inventory_quantity': 50
@@ -241,12 +241,12 @@ class TestReports(TestReportsCommon):
             'usage': 'internal',
             'location_id': self.env.ref('stock.stock_location_locations').id,
         })
-        self.env['stock.quant'].with_context(inventory_mode=True).create({
+        self.env['stock.quant'].create({
             'product_id': product.id,
             'location_id': stock.id,
             'inventory_quantity': 50
         }).action_apply_inventory()
-        self.env['stock.quant'].with_context(inventory_mode=True).create({
+        self.env['stock.quant'].create({
             'product_id': product.id,
             'location_id': stock_without_wh.id,
             'inventory_quantity': 50
@@ -1511,7 +1511,7 @@ class TestReports(TestReportsCommon):
         # create clean delivery since moves are split in original delivery + new delivery will auto merge the moves
         delivery.action_cancel()
         delivery2 = delivery.copy()
-        self.env['stock.quant'].with_context(inventory_mode=True).create({
+        self.env['stock.quant'].create({
             'product_id': self.product.id,
             'location_id': self.stock_location.id,
             'inventory_quantity': outgoing_qty
@@ -1584,7 +1584,7 @@ class TestReports(TestReportsCommon):
         incoming_qty = 4
         outgoing_qty = 10
         qty_in_stock = outgoing_qty - incoming_qty
-        self.env['stock.quant'].with_context(inventory_mode=True).create({
+        self.env['stock.quant'].create({
             'product_id': self.product.id,
             'location_id': self.stock_location.id,
             'inventory_quantity': qty_in_stock
@@ -1723,7 +1723,7 @@ class TestReports(TestReportsCommon):
 
         incoming_qty = 4
         outgoing_qty = 10
-        self.env['stock.quant'].with_context(inventory_mode=True).create({
+        self.env['stock.quant'].create({
             'product_id': self.product.id,
             'location_id': self.stock_location.id,
             'inventory_quantity': outgoing_qty

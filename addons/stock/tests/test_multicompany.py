@@ -129,7 +129,7 @@ class TestMultiCompany(TransactionCase):
             'company_id': self.company_a.id,
             'name': 'Product limited to company A',
         })
-        inventory_quant = self.env['stock.quant'].with_user(self.user_a).with_context(inventory_mode=True).create({
+        inventory_quant = self.env['stock.quant'].with_user(self.user_a).create({
             'location_id': self.stock_location_a.id,
             'product_id': product.id,
             'inventory_quantity': 0
@@ -154,7 +154,7 @@ class TestMultiCompany(TransactionCase):
         })
 
         with self.assertRaises(UserError):
-            self.env['stock.quant'].with_user(self.user_a).with_context(inventory_mode=True).create({
+            self.env['stock.quant'].with_user(self.user_a).create({
                 'location_id': self.stock_location_a.id,
                 'product_id': product.id,
                 'inventory_quantity': 10

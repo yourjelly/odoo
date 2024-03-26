@@ -229,7 +229,7 @@ class StockLot(models.Model):
     def action_lot_open_quants(self):
         self = self.with_context(search_default_lot_id=self.id, create=False)
         if self.env.user.has_group('stock.group_stock_manager'):
-            self = self.with_context(inventory_mode=True)
+            self = self
         return self.env['stock.quant'].action_view_quants()
 
     def action_lot_open_transfers(self):

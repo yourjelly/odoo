@@ -50,7 +50,7 @@ class TestMrpProductionBackorder(TestMrpCommon):
 
         # Make some stock and reserve
         for product in production.move_raw_ids.product_id:
-            self.env['stock.quant'].with_context(inventory_mode=True).create({
+            self.env['stock.quant'].create({
                 'product_id': product.id,
                 'inventory_quantity': 100,
                 'location_id': production.location_src_id.id,
@@ -557,7 +557,7 @@ class TestMrpProductionBackorder(TestMrpCommon):
         # Make some stock and reserve
         for product in self.bom_1.bom_line_ids.product_id:
             product.type = 'product'
-            self.env['stock.quant'].with_context(inventory_mode=True).create({
+            self.env['stock.quant'].create({
                 'product_id': product.id,
                 'inventory_quantity': 100,
                 'location_id': self.stock_location.id,

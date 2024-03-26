@@ -544,7 +544,7 @@ class Product(models.Model):
 
         # If user have rights to write on quant, we define the view as editable.
         if self.env.user.has_group('stock.group_stock_manager'):
-            self = self.with_context(inventory_mode=True)
+            self = self
             # Set default location id if multilocations is inactive
             if not self.env.user.has_group('stock.group_stock_multi_locations'):
                 user_company = self.env.company

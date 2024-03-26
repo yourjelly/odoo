@@ -22,7 +22,7 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
         })
 
     def _inv_adj_two_units(self):
-        self.env['stock.quant'].with_context(inventory_mode=True).create({
+        self.env['stock.quant'].create({
             'product_id': self.product.id,  # tracking serial
             'inventory_quantity': 2,
             'location_id': self.company_data['default_warehouse'].lot_stock_id.id,

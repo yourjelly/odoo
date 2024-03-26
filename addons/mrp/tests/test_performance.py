@@ -60,7 +60,7 @@ class TestMrpSerialMassProducePerformance(common.TransactionCase):
 
         for i in range(raw_materials_count):
             if raw_materials[i].tracking == 'none':
-                self.env['stock.quant'].with_context(inventory_mode=True).create({
+                self.env['stock.quant'].create({
                     'product_id': raw_materials[i].id,
                     'inventory_quantity': total_quantity,
                     'location_id': mo.location_src_id.id,
@@ -71,7 +71,7 @@ class TestMrpSerialMassProducePerformance(common.TransactionCase):
                     lot = self.env['stock.lot'].create({
                         'product_id': raw_materials[i].id,
                     })
-                    self.env['stock.quant'].with_context(inventory_mode=True).create({
+                    self.env['stock.quant'].create({
                         'product_id': raw_materials[i].id,
                         'inventory_quantity': 10,
                         'location_id': mo.location_src_id.id,
@@ -83,7 +83,7 @@ class TestMrpSerialMassProducePerformance(common.TransactionCase):
                     lot = self.env['stock.lot'].create({
                         'product_id': raw_materials[i].id,
                     })
-                    self.env['stock.quant'].with_context(inventory_mode=True).create({
+                    self.env['stock.quant'].create({
                         'product_id': raw_materials[i].id,
                         'inventory_quantity': 1,
                         'location_id': mo.location_src_id.id,

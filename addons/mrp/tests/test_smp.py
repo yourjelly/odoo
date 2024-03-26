@@ -25,7 +25,7 @@ class TestMrpSerialMassProduce(TestMrpCommon):
         count = mo.product_qty
         # Make some stock and reserve
         for product in mo.move_raw_ids.product_id:
-            self.env['stock.quant'].with_context(inventory_mode=True).create({
+            self.env['stock.quant'].create({
                 'product_id': product.id,
                 'inventory_quantity': 100,
                 'location_id': mo.location_src_id.id,
@@ -56,7 +56,7 @@ class TestMrpSerialMassProduce(TestMrpCommon):
         count = mo.product_qty
         # Make some stock and reserve
         for product in mo.move_raw_ids.product_id:
-            self.env['stock.quant'].with_context(inventory_mode=True).create({
+            self.env['stock.quant'].create({
                 'product_id': product.id,
                 'inventory_quantity': 100,
                 'location_id': mo.location_src_id.id,
@@ -88,7 +88,7 @@ class TestMrpSerialMassProduce(TestMrpCommon):
             lot = self.env['stock.lot'].create({
                 'product_id': product_to_use_1.id,
             })
-            self.env['stock.quant'].with_context(inventory_mode=True).create({
+            self.env['stock.quant'].create({
                 'product_id': product_to_use_1.id,
                 'inventory_quantity': 3,
                 'location_id': mo.location_src_id.id,
@@ -98,7 +98,7 @@ class TestMrpSerialMassProduce(TestMrpCommon):
             lot = self.env['stock.lot'].create({
                 'product_id': product_to_use_2.id,
             })
-            self.env['stock.quant'].with_context(inventory_mode=True).create({
+            self.env['stock.quant'].create({
                 'product_id': product_to_use_2.id,
                 'inventory_quantity': 1,
                 'location_id': mo.location_src_id.id,
@@ -267,7 +267,7 @@ class TestMrpSerialMassProduce(TestMrpCommon):
         mo.move_raw_ids[1].product_uom_qty = 100
 
         # Make some stock and reserve for storable component
-        self.env['stock.quant'].with_context(inventory_mode=True).create({
+        self.env['stock.quant'].create({
                 'product_id': mo.move_raw_ids[0].product_id.id,
                 'inventory_quantity': 24,
                 'location_id': mo.location_src_id.id,

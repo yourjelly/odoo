@@ -54,12 +54,12 @@ class TestWebsiteSaleStockReorderFromPortal(HttpCase):
         })
         order.message_subscribe(user_admin.partner_id.ids)
 
-        cls.env['stock.quant'].with_context(inventory_mode=True).create({
+        cls.env['stock.quant'].create({
             'product_id': cls.available_product.id,
             'inventory_quantity': 10.0,
             'location_id': 8,
         }).action_apply_inventory()
-        cls.env['stock.quant'].with_context(inventory_mode=True).create({
+        cls.env['stock.quant'].create({
             'product_id': cls.partially_available_product.id,
             'inventory_quantity': 1.0,
             'location_id': 8,

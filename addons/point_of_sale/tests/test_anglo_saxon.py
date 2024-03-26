@@ -138,13 +138,13 @@ class TestAngloSaxonFlow(TestAngloSaxonCommon):
         # check fifo Costing Method of product.category
         self.product.categ_id.property_cost_method = 'fifo'
         self.product.standard_price = 5.0
-        self.env['stock.quant'].with_context(inventory_mode=True).create({
+        self.env['stock.quant'].create({
             'product_id': self.product.id,
             'inventory_quantity': 5.0,
             'location_id': self.warehouse.lot_stock_id.id,
         }).action_apply_inventory()
         self.product.standard_price = 1.0
-        self.env['stock.quant'].with_context(inventory_mode=True).create({
+        self.env['stock.quant'].create({
             'product_id': self.product.id,
             'inventory_quantity': 10.0,
             'location_id': self.warehouse.lot_stock_id.id,

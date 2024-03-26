@@ -78,7 +78,7 @@ class StockQuant(models.Model):
 
     @api.model
     def _get_inventory_fields_write(self):
-        """ Returns a list of fields user can edit when editing a quant in `inventory_mode`."""
+        """ Returns a list of fields user can edit when editing a quant."""
         res = super()._get_inventory_fields_write()
         res += ['accounting_date']
         return res

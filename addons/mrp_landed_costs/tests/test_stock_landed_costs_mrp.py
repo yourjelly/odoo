@@ -81,12 +81,12 @@ class TestStockLandedCostsMrp(ValuationReconciliationTestCommon):
 
     def test_landed_cost_on_mrp(self):
         # Initial inventory
-        quants = self.env['stock.quant'].with_context(inventory_mode=True).create({
+        quants = self.env['stock.quant'].create({
             'product_id': self.product_component1.id,
             'inventory_quantity': 500,
             'location_id': self.warehouse_1.lot_stock_id.id,
         })
-        quants |= self.env['stock.quant'].with_context(inventory_mode=True).create({
+        quants |= self.env['stock.quant'].create({
             'product_id': self.product_component2.id,
             'inventory_quantity': 500,
             'location_id': self.warehouse_1.lot_stock_id.id,

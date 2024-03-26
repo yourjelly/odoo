@@ -421,7 +421,7 @@ class TestSaleMrpFlow(TestSaleMrpFlowCommon):
         # Need 20 kg product c to produce 20 unit product D.
         # --------------------------------------------------
 
-        self.Quant.with_context(inventory_mode=True).create({
+        self.Quant.create({
             'product_id': product_c.id, # uom = uom_kg
             'inventory_quantity': 20,
             'location_id': self.company_data['default_warehouse'].lot_stock_id.id,
@@ -462,7 +462,7 @@ class TestSaleMrpFlow(TestSaleMrpFlowCommon):
         # Need product C ( 20 kg + 6 kg + 1500.0 gm = 27.500 kg)
         # -------------------------------------------------------
 
-        self.Quant.with_context(inventory_mode=True).create({
+        self.Quant.create({
             'product_id': product_c.id, # uom = uom_kg
             'inventory_quantity': 27.51, # round up due to kg.rounding = 0.01
             'location_id': self.company_data['default_warehouse'].lot_stock_id.id,

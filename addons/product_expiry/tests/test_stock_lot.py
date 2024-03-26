@@ -502,7 +502,7 @@ class TestStockLot(TestStockCommon):
         lot_form.product_id = self.apple_product
         apple_lot = lot_form.save()
 
-        quant = self.StockQuantObj.with_context(inventory_mode=True).create({
+        quant = self.StockQuantObj.create({
             'product_id': self.apple_product.id,
             'location_id': self.stock_location,
             'quantity': 10,
@@ -510,7 +510,7 @@ class TestStockLot(TestStockCommon):
         })
         # Try to write on quant with inventory mode
         new_date = datetime.today() + timedelta(days=15)
-        quant.with_user(self.demo_user).with_context(inventory_mode=True).write({'removal_date': new_date})
+        quant.with_user(self.demo_user).write({'removal_date': new_date})
         self.assertEqual(quant.removal_date, new_date)
 
     def test_apply_lot_date_on_sml(self):
@@ -576,7 +576,7 @@ class TestStockLot(TestStockCommon):
         lot_form.alert_date = False
         apple_lot = lot_form.save()
 
-        self.StockQuantObj.with_context(inventory_mode=True).create({
+        self.StockQuantObj.create({
             'product_id': self.apple_product.id,
             'location_id': self.stock_location,
             'quantity': 100,
@@ -621,7 +621,7 @@ class TestStockLot(TestStockCommon):
             'product_id': self.apple_product.id,
         })
 
-        self.StockQuantObj.with_context(inventory_mode=True).create([{
+        self.StockQuantObj.create([{
             'product_id': self.apple_product.id,
             'location_id': self.stock_location,
             'quantity': 100,

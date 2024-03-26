@@ -44,7 +44,7 @@ class TestWebsiteSaleStockAbandonedCartEmail(TestWebsiteSaleCartAbandonedCommon)
         sale_order.cart_recovery_email_sent = False
 
         # Replenish the stock of the product
-        self.env['stock.quant'].with_context(inventory_mode=True).create({
+        self.env['stock.quant'].create({
             'product_id': storable_product_product.id,
             'inventory_quantity': 10.0,
             'location_id': self.env.user._get_default_warehouse_id().lot_stock_id.id,

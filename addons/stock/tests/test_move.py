@@ -5559,7 +5559,7 @@ class StockMove(TransactionCase):
             'categ_id': self.env.ref('product.product_category_all').id,
         })
         # Adds some quantity on stock.
-        self.env['stock.quant'].with_context(inventory_mode=True).create([{
+        self.env['stock.quant'].create([{
             'product_id': self.product.id,
             'inventory_quantity': 100,
             'location_id': self.stock_location.id,

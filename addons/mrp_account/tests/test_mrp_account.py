@@ -145,17 +145,17 @@ class TestMrpAccount(TestMrpCommon):
         self.product_table_leg.tracking = 'none'
         self.product_table_sheet.tracking = 'none'
         # Inventory Product Table
-        quants = self.env['stock.quant'].with_context(inventory_mode=True).create({
+        quants = self.env['stock.quant'].create({
             'product_id': self.product_table_sheet.id,  # tracking serial
             'inventory_quantity': 20,
             'location_id': self.source_location_id,
         })
-        quants |= self.env['stock.quant'].with_context(inventory_mode=True).create({
+        quants |= self.env['stock.quant'].create({
             'product_id': self.product_table_leg.id,  # tracking lot
             'inventory_quantity': 20,
             'location_id': self.source_location_id,
         })
-        quants |= self.env['stock.quant'].with_context(inventory_mode=True).create({
+        quants |= self.env['stock.quant'].create({
             'product_id': self.product_bolt.id,
             'inventory_quantity': 20,
             'location_id': self.source_location_id,

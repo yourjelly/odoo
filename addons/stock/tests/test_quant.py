@@ -500,7 +500,7 @@ class StockQuant(TransactionCase):
             'location_id': self.stock_location.id,
             'quantity': 1.0,
         })
-        quant.with_user(self.stock_user).with_context(inventory_mode=True).write({'quantity': 3.0})
+        quant.with_user(self.stock_user).write({'quantity': 3.0})
         with self.assertRaises(AccessError):
             quant.with_user(self.stock_user).unlink()
 
@@ -896,9 +896,9 @@ class StockQuant(TransactionCase):
         self.env['stock.quant']._update_available_quantity(product, self.stock_subloc3, 1.0, lot_id=sn1)
         self.assertEqual(len(product.stock_quant_ids), 2)
         quant_2 = product.stock_quant_ids[1]
-        self.assertEqual(quant_2.with_context(inventory_mode=True).sn_duplicated, True)
+        self.assertEqual(quant_2.sn_duplicated, True)
         with self.assertRaises(UserError):
-            quant_2.with_context(inventory_mode=True).write({'location_id': self.stock_subloc2})
+            quant_2.write({'location_id': self.stock_subloc2})
 
     def test_update_quant_with_forbidden_field_02(self):
         """
@@ -912,8 +912,8 @@ class StockQuant(TransactionCase):
         quant = self.product.stock_quant_ids
         self.assertEqual(len(self.product.stock_quant_ids), 1)
         with self.assertRaises(UserError):
-            quant.with_context(inventory_mode=True).write({'package_id': False})
-        package.with_context(inventory_mode=True).unpack()
+            quant.write({'package_id': False})
+        package.unpack()
         self.assertFalse(quant.exists())
         self.assertFalse(self.product.stock_quant_ids.package_id)
 

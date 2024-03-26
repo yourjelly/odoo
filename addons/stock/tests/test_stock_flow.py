@@ -1065,7 +1065,7 @@ class TestStockFlow(TestStockCommon):
 
         packproduct = self.ProductObj.create({'name': 'Pack Product', 'uom_id': self.uom_unit.id, 'uom_po_id': self.uom_unit.id, 'type': 'product'})
         lotproduct = self.ProductObj.create({'name': 'Lot Product', 'uom_id': self.uom_unit.id, 'uom_po_id': self.uom_unit.id, 'type': 'product'})
-        quant_obj = self.env['stock.quant'].with_context(inventory_mode=True)
+        quant_obj = self.env['stock.quant']
         pack_obj = self.env['stock.quant.package']
         lot_obj = self.env['stock.lot']
         pack1 = pack_obj.create({'name': 'PACK00TEST1'})
