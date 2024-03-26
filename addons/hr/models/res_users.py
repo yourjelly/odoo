@@ -296,12 +296,18 @@ class User(models.Model):
     @api.depends('employee_ids')
     @api.depends_context('company')
     def _compute_company_employee(self):
-        employee_per_user = {
-            employee.user_id: employee
-            for employee in self.env['hr.employee'].search([('user_id', 'in', self.ids), ('company_id', '=', self.env.company.id)])
-        }
+        query = """
+            SELECT "hr_employee"."id" FROM "hr_employee"
+            WHERE ((("hr_employee"."active" = %s) AND ("hr_employee"."user_id" IN %s)) AND ("hr_employee"."company_id" = %s))
+            ORDER BY "hr_employee"."name"
+        """
+        self.env.cr.execute(query, [True, tuple(self.ids), self.env.company.id])
+        employees = self.env.cr.fetchall()
+
+        employee_per_user = {employee: employee for employee in employees}
+
         for user in self:
-            user.employee_id = employee_per_user.get(user)
+            user.employee_id = employee_per_user.get(user.id)
 
     def _search_company_employee(self, operator, value):
         return [('employee_ids', operator, value)]
