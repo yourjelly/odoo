@@ -57,7 +57,7 @@ class StockQuant(models.Model):
     company_id = fields.Many2one(related='location_id.company_id', string='Company', store=True, readonly=True)
     location_id = fields.Many2one(
         'stock.location', 'Location',
-        domain=lambda self: self._domain_location_id(), default=lambda self: self._default_location_id(),
+        domain="[('usage', 'in', ['internal', 'transit'])]", default=lambda self: self._default_location_id(),
         auto_join=True, ondelete='restrict', required=True, index=True, check_company=True)
     warehouse_id = fields.Many2one('stock.warehouse', related='location_id.warehouse_id')
     storage_category_id = fields.Many2one(related='location_id.storage_category_id', store=True)
@@ -67,7 +67,9 @@ class StockQuant(models.Model):
         ondelete='restrict', check_company=True,
         domain=lambda self: self._domain_lot_id())
     lot_properties = fields.Properties(related='lot_id.lot_properties', definition='product_id.lot_properties_definition', readonly=True)
-    sn_duplicated = fields.Boolean(string="Duplicated Serial Number", compute='_compute_sn_duplicated', help="If the same SN is in another Quant")
+    sn_duplicated = fields.Boolean(
+        string="Duplicated Serial Number", compute='_compute_sn_duplicated',
+        help="If the same SN is in another Quant", exportable=False)
     package_id = fields.Many2one(
         'stock.quant.package', 'Package',
         domain="[('location_id', '=', location_id)]",
@@ -111,7 +113,9 @@ class StockQuant(models.Model):
         'Scheduled Date', compute='_compute_inventory_date', store=True, readonly=False,
         help="Next date the On Hand Quantity should be counted.")
     last_count_date = fields.Date(compute='_compute_last_count_date', help='Last time the Quantity was Updated')
-    inventory_quantity_set = fields.Boolean(store=True, compute='_compute_inventory_quantity_set', readonly=False, default=False)
+    inventory_quantity_set = fields.Boolean(
+        store=True, compute='_compute_inventory_quantity_set', readonly=False,
+        default=False, exportable=False)
     is_outdated = fields.Boolean('Quantity has been moved since last count', compute='_compute_is_outdated', search='_search_is_outdated')
     user_id = fields.Many2one(
         'res.users', 'Assigned To', help="User assigned to do product count.")
@@ -263,10 +267,7 @@ class StockQuant(models.Model):
                 lot_id = self.env['stock.lot'].browse(vals.get('lot_id'))
                 package_id = self.env['stock.quant.package'].browse(vals.get('package_id'))
                 owner_id = self.env['res.partner'].browse(vals.get('owner_id'))
-                quant = self.env['stock.quant']
-                if not self.env.context.get('import_file'):
-                    # Merge quants later, to make sure one line = one record during batch import
-                    quant = self._gather(product, location, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=True)
+                quant = self._gather(product, location, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=True)
                 if lot_id:
                     quant = quant.filtered(lambda q: q.lot_id)
                 if quant:
