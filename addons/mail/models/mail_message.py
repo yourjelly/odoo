@@ -252,6 +252,24 @@ class Message(models.Model):
         for message in self:
             message.starred = message in starred
 
+    # ------------------------------------------------------
+    # Redirect API
+    # ------------------------------------------------------
+
+    def open_mentioned_persona(self, mentioned_id=None, fieldNames=None, partnerFieldNames=None):
+        requiredFieldInfo = {}
+        if mentioned_id:
+            redirectToUser = self.env['res.users'].search([('partner_id', '=', mentioned_id)], limit=1)
+            if redirectToUser:
+                fields_to_read = fieldNames
+                user_data = redirectToUser.read(fields_to_read)[0]
+                requiredFieldInfo.update(user_data)
+            else:
+                partner_data = self.env['res.partner'].browse(mentioned_id).read(partnerFieldNames)[0]
+                requiredFieldInfo.update(partner_data)
+
+        return requiredFieldInfo
+
     @api.model
     def _search_starred(self, operator, operand):
         if operator == '=' and operand:

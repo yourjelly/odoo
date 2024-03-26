@@ -421,7 +421,10 @@ export class Message extends Component {
             ev.preventDefault();
             const partnerId = Number(ev.target.dataset.oeId);
             if (user.partnerId !== partnerId) {
-                this.threadService.openChat({ partnerId });
+                this.avatarCard.open(ev.target, {
+                    id: partnerId,
+                    model: "res.partner",
+                });
             }
             return;
         }
