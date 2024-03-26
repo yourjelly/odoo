@@ -49,9 +49,10 @@ class TdsEntryWizard(models.TransientModel):
         if self.amount_untaxed <= 0:
             raise UserError(_("Base amount should be greater than 0."))
         move_lines = []
-        tax_data = self.env['account.tax']._compute_taxes([
-            self._convert_to_tax_base_line_dict(price_unit=self.amount_untaxed)
-        ])
+        tax_data = self.env['account.tax']._compute_taxes(
+            [self._convert_to_tax_base_line_dict(price_unit=self.amount_untaxed)],
+            company=self.env.company
+        )
         tax_total = tax_total_balance = 0.00
         rate = self.currency_id._get_conversion_rate(self.currency_id, self.move_id.company_currency_id, self.date)
         for tax_line_data in tax_data['tax_lines_to_add']:
