@@ -23,14 +23,9 @@ class StockQuant(models.Model):
     _rec_name = 'product_id'
     _rec_names_search = ['location_id', 'lot_id', 'package_id', 'owner_id']
 
-    def _domain_location_id(self):
-        if self.env.user.has_group('stock.group_stock_user'):
-            return "[('usage', 'in', ['internal', 'transit'])] if context.get('inventory_mode') else []"
-        return "[]"
-
     def _domain_lot_id(self):
         if self.env.user.has_group('stock.group_stock_user'):
-            return ("[] if not context.get('inventory_mode') else"
+            return (
                 " [('product_id', '=', context.get('active_id', False))] if context.get('active_model') == 'product.product' else"
                 " [('product_id.product_tmpl_id', '=', context.get('active_id', False))] if context.get('active_model') == 'product.template' else"
                 " [('product_id', '=', product_id)]")
@@ -38,10 +33,15 @@ class StockQuant(models.Model):
 
     def _domain_product_id(self):
         if self.env.user.has_group('stock.group_stock_user'):
-            return ("[] if not context.get('inventory_mode') else"
+            return (
                 " [('type', '=', 'product'), ('product_tmpl_id', 'in', context.get('product_tmpl_ids', []) + [context.get('product_tmpl_id', 0)])] if context.get('product_tmpl_ids') or context.get('product_tmpl_id') else"
                 " [('type', '=', 'product')]")
         return "[]"
+
+    def _default_location_id(self):
+        company_user = self.env.company
+        warehouse = self.env['stock.warehouse'].search([('company_id', '=', company_user.id)], limit=1)
+        return warehouse.lot_stock_id.id
 
     product_id = fields.Many2one(
         'product.product', 'Product',
@@ -57,7 +57,7 @@ class StockQuant(models.Model):
     company_id = fields.Many2one(related='location_id.company_id', string='Company', store=True, readonly=True)
     location_id = fields.Many2one(
         'stock.location', 'Location',
-        domain=lambda self: self._domain_location_id(),
+        domain=lambda self: self._domain_location_id(), default=lambda self: self._default_location_id(),
         auto_join=True, ondelete='restrict', required=True, index=True, check_company=True)
     warehouse_id = fields.Many2one('stock.warehouse', related='location_id.warehouse_id')
     storage_category_id = fields.Many2one(related='location_id.storage_category_id', store=True)
@@ -223,8 +223,6 @@ class StockQuant(models.Model):
         """ Inverse method to create stock move when `inventory_quantity` is set
         (`inventory_quantity` is only accessible in inventory mode).
         """
-        if not self._is_inventory_mode():
-            return
         quant_to_inventory = self.env['stock.quant']
         for quant in self:
             if quant.quantity == quant.inventory_quantity_auto_apply:
@@ -251,10 +249,9 @@ class StockQuant(models.Model):
         superuser the conditions are met.
         """
         quants = self.env['stock.quant']
-        is_inventory_mode = self._is_inventory_mode()
         allowed_fields = self._get_inventory_fields_create()
         for vals in vals_list:
-            if is_inventory_mode and any(f in vals for f in ['inventory_quantity', 'inventory_quantity_auto_apply']):
+            if any(f in vals for f in ['inventory_quantity', 'inventory_quantity_auto_apply']):
                 if any(field for field in vals.keys() if field not in allowed_fields):
                     raise UserError(_("Quant's creation is restricted, you can't do this operation."))
                 auto_apply = 'inventory_quantity_auto_apply' in vals
@@ -287,22 +284,8 @@ class StockQuant(models.Model):
             else:
                 quant = super().create(vals)
                 quants |= quant
-                if self._is_inventory_mode():
-                    quant._check_company()
+                quant._check_company()
         return quants
-
-    def _load_records_create(self, values):
-        """ Add default location if import file did not fill it"""
-        company_user = self.env.company
-        warehouse = self.env['stock.warehouse'].search([('company_id', '=', company_user.id)], limit=1)
-        for value in values:
-            if 'location_id' not in value:
-                value['location_id'] = warehouse.lot_stock_id.id
-        return super(StockQuant, self.with_context(inventory_mode=True))._load_records_create(values)
-
-    def _load_records_write(self, values):
-        """ Only allowed fields should be modified """
-        return super(StockQuant, self.with_context(inventory_mode=True))._load_records_write(values)
 
     def _read_group_select(self, aggregate_spec, query):
         if aggregate_spec == 'inventory_quantity:sum' and self.env.context.get('inventory_report_mode'):
@@ -324,13 +307,13 @@ class StockQuant(models.Model):
 
     @api.model
     def _get_forbidden_fields_write(self):
-        """ Returns a list of fields user can't edit when he want to edit a quant in `inventory_mode`."""
+        """ Returns a list of fields user can't edit when he want to edit a quant."""
         return ['product_id', 'location_id', 'lot_id', 'package_id', 'owner_id']
 
     def write(self, vals):
         """ Override to handle the "inventory mode" and create the inventory move. """
         forbidden_fields = self._get_forbidden_fields_write()
-        if self._is_inventory_mode() and any(field for field in forbidden_fields if field in vals.keys()):
+        if any(field for field in forbidden_fields if field in vals.keys()):
             if any(quant.location_id.usage == 'inventory' for quant in self):
                 # Do nothing when user tries to modify manually a inventory loss
                 return
@@ -343,7 +326,6 @@ class StockQuant(models.Model):
         if not self.env.is_superuser():
             if not self.env.user.has_group('stock.group_stock_manager'):
                 raise UserError(_("Quants are auto-deleted when appropriate. If you must manually delete them, please ask a stock manager to do it."))
-            self = self.with_context(inventory_mode=True)
             self.inventory_quantity = 0
             self._apply_inventory()
 
@@ -997,7 +979,7 @@ class StockQuant(models.Model):
                                                      quant.location_id,
                                                      quant.product_id.with_company(quant.company_id).property_stock_inventory,
                                                      package_id=quant.package_id))
-        moves = self.env['stock.move'].with_context(inventory_mode=False).create(move_vals)
+        moves = self.env['stock.move'].create(move_vals)
         moves._action_done()
         self.location_id.write({'last_inventory_date': fields.Date.today()})
         date_by_location = {loc: loc._get_next_inventory_date() for loc in self.mapped('location_id')}
@@ -1173,22 +1155,14 @@ class StockQuant(models.Model):
         self._unlink_zero_quants()
 
     @api.model
-    def _is_inventory_mode(self):
-        """ Used to control whether a quant was written on or created during an
-        "inventory session", meaning a mode where we need to create the stock.move
-        record necessary to be consistent with the `inventory_quantity` field.
-        """
-        return self.env.context.get('inventory_mode') and self.env.user.has_group('stock.group_stock_user')
-
-    @api.model
     def _get_inventory_fields_create(self):
-        """ Returns a list of fields user can edit when he want to create a quant in `inventory_mode`.
+        """ Returns a list of fields user can edit when he want to create a quant.
         """
         return ['product_id', 'owner_id'] + self._get_inventory_fields_write()
 
     @api.model
     def _get_inventory_fields_write(self):
-        """ Returns a list of fields user can edit when he want to edit a quant in `inventory_mode`.
+        """ Returns a list of fields user can edit when he want to edit a quant.
         """
         fields = ['inventory_quantity', 'inventory_quantity_auto_apply', 'inventory_diff_quantity',
                   'inventory_date', 'user_id', 'inventory_quantity_set', 'is_outdated', 'lot_id',
@@ -1248,10 +1222,6 @@ class StockQuant(models.Model):
             warehouse = self.env['stock.warehouse'].search([('company_id', '=', company_user.id)], limit=1)
             if warehouse:
                 self = self.with_context(default_location_id=warehouse.lot_stock_id.id, hide_location=not self.env.context.get('always_show_loc', False))
-
-        # If user have rights to write on quant, we set quants in inventory mode.
-        if self.env.user.has_group('stock.group_stock_user'):
-            self = self.with_context(inventory_mode=True)
         return self
 
     @api.model
@@ -1287,7 +1257,7 @@ class StockQuant(models.Model):
             action['id'] = target_action.id
 
         form_view = self.env.ref('stock.view_stock_quant_form_editable').id
-        if self.env.context.get('inventory_mode') and self.env.user.has_group('stock.group_stock_manager'):
+        if self.env.user.has_group('stock.group_stock_user'):
             action['view_id'] = self.env.ref('stock.view_stock_quant_tree_editable').id
         else:
             action['view_id'] = self.env.ref('stock.view_stock_quant_tree').id
