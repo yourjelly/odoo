@@ -763,6 +763,8 @@ class ProjectTask(models.Model):
     task_to_invoice = fields.Boolean("To invoice", compute='_compute_task_to_invoice', search='_search_task_to_invoice', groups='sales_team.group_sale_salesman_all_leads')
     allow_billable = fields.Boolean(related="project_id.allow_billable")
     partner_id = fields.Many2one(inverse='_inverse_partner_id')
+    display_create_invoice_primary = fields.Boolean(compute='_compute_display_create_invoice_buttons')
+    display_create_invoice_secondary = fields.Boolean(compute='_compute_display_create_invoice_buttons')
 
     # Project sharing  fields
     display_sale_order_button = fields.Boolean(string='Display Sales Order', compute='_compute_display_sale_order_button')
@@ -841,6 +843,22 @@ class ProjectTask(models.Model):
                 task.display_sale_order_button = task.sale_order_id in sale_orders
         except AccessError:
             self.display_sale_order_button = False
+
+    @api.depends('allow_billable', 'task_to_invoice', 'sale_order_id.invoice_status')
+    def _compute_display_create_invoice_buttons(self):
+        for task in self:
+            primary, secondary = True, True
+            if not task.allow_billable or not task.sale_order_id or task.sale_order_id.invoice_status == 'invoiced' or task.sale_order_id.state == 'cancel':
+                primary, secondary = False, False
+            else:
+                if task.sale_order_id.invoice_status in ['upselling', 'to invoice']:
+                    secondary = False
+                else:  # Means invoice status is 'Nothing to Invoice'
+                    primary = False
+            task.update({
+                'display_create_invoice_primary': primary,
+                'display_create_invoice_secondary': secondary,
+            })
 
     @api.constrains('sale_line_id')
     def _check_sale_line_type(self):
@@ -925,6 +943,18 @@ class ProjectTask(models.Model):
                 ('project_id', '!=', False),
             ],
         ])
+
+    def action_create_invoice(self):
+        action = self.env['ir.actions.actions']._for_xml_id('sale.action_view_sale_advance_payment_inv')
+        context = literal_eval(action.get('context', '{}'))
+        context.update({
+            'active_id': self.sale_order_id.id if len(self) == 1 else False,
+            'active_ids': self.mapped('sale_order_id').ids,
+        })
+        if not self.sale_order_id._get_invoiceable_lines(False):
+            context['default_advance_payment_method'] = 'percentage'
+        action['context'] = context
+        return action
 
 class ProjectTaskRecurrence(models.Model):
     _inherit = 'project.task.recurrence'

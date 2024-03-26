@@ -129,4 +129,8 @@ class ProjectProductEmployeeMap(models.Model):
         return res
 
     def _update_project_timesheet(self):
-        self.filtered(lambda l: l.sale_line_id).project_id._update_timesheets_sale_line_id()
+        sale_line_per_employee_id_per_project = defaultdict(dict)
+        for mapping in self:
+            sale_line_per_employee_id_per_project[mapping.project_id][mapping.employee_id.id] = mapping.sale_line_id
+        for project, sale_line_per_employee_id in sale_line_per_employee_id_per_project.items():
+            project._update_timesheets_sale_line_id(sale_line_per_employee_id)

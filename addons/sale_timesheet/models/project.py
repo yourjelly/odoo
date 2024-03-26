@@ -193,6 +193,15 @@ class Project(models.Model):
     def _compute_billing_type(self):
         self.filtered(lambda project: (not project.allow_billable or not project.allow_timesheets) and project.billing_type == 'manually').billing_type = 'not_billable'
 
+    @api.depends('allow_billable')
+    def _compute_display_create_invoice_buttons(self):
+        billable_tasks = self.filtered('allow_billable')
+        (self - billable_tasks).update({
+            'display_create_invoice_primary': False,
+            'display_create_invoice_secondary': False,
+        })
+        super(ProjectTask, billable_tasks)._compute_display_create_invoice_buttons()
+
     @api.constrains('sale_line_id')
     def _check_sale_line_type(self):
         for project in self.filtered(lambda project: project.sale_line_id):
@@ -209,14 +218,24 @@ class Project(models.Model):
             })
         return res
 
-    def _update_timesheets_sale_line_id(self):
-        for project in self.filtered(lambda p: p.allow_billable and p.allow_timesheets):
-            timesheet_ids = project.sudo(False).mapped('timesheet_ids').filtered(lambda t: not t.is_so_line_edited and t._is_not_billed())
-            if not timesheet_ids:
-                continue
-            for employee_id in project.sale_line_employee_ids.filtered(lambda l: l.project_id == project).employee_id:
-                sale_line_id = project.sale_line_employee_ids.filtered(lambda l: l.project_id == project and l.employee_id == employee_id).sale_line_id
-                timesheet_ids.filtered(lambda t: t.employee_id == employee_id).sudo().so_line = sale_line_id
+    def _update_timesheets_sale_line_id(self, sale_line_per_employee_id=None):
+        if not (self.allow_timesheets and self.allow_billable):
+            return  # then nothing to update
+        if not sale_line_per_employee_id:
+            sale_line_per_employee_id = {mapping.employee_id.id: mapping.sale_line_id for mapping in self.sale_line_employee_ids}
+        employee_ids = list(sale_line_per_employee_id)
+        Timesheet = self.env['account.analytic.line']
+        timesheet_read_group = Timesheet.sudo()._read_group(
+            expression.AND([
+                [('project_id', '=', self.id), ('is_so_line_edited', '=', False), ('employee_id', 'in', employee_ids)],
+                Timesheet._is_not_billed(True),
+            ]),
+            ['employee_id', 'ids:array_agg(id)'],
+            ['employee_id'],
+        )
+        timesheets_per_employee_id = {res['employee_id'][0]: Timesheet.browse(res['ids']) for res in timesheet_read_group}
+        for employee_id, timesheets in timesheets_per_employee_id.items():
+            timesheets.sudo().so_line = sale_line_per_employee_id[employee_id]
 
     def action_view_timesheet(self):
         self.ensure_one()
