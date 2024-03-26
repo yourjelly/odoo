@@ -1,6 +1,15 @@
 from odoo import api, fields, models
 
 
+PERIODICITY_SELECTION_VALS = [
+    ('year', 'Annually'),
+    ('semester', 'Semi-annually'),
+    ('4_months', 'Every 4 months'),
+    ('trimester', 'Quarterly'),
+    ('2_months', 'Every 2 months'),
+    ('monthly', 'Monthly'),
+]
+
 class AccountReportClosingType(models.Model):
     _name = "account.report.closing.type"
     _description = "Closing Type"
@@ -13,24 +22,12 @@ class AccountReportClosingType(models.Model):
 
     # TODO OCO problème pour les droits d'accès: si l'advisor et l'accountant doivent pouvoir faire la tax closing, c'est pas le cas  de  la générale, si ? => un champ sur le closing type pour dire advisor_only ?
 
-    #TODO OCO pour le cas de l'EC Sales List à rendre avec le tax report belge ; on pourrait peut-être plutôt s'en sortir avec une section optionnelle sur le rapport de taxes, et une closing liée juste à ce rapport
-    periodicity = fields.Selection(
-        string="Periodicity",
-        selection=[
-            ('year', 'Annually'),
-            ('semester', 'Semi-annually'),
-            ('4_months', 'Every 4 months'),
-            ('trimester', 'Quarterly'),
-            ('2_months', 'Every 2 months'),
-            ('monthly', 'Monthly'),
-        ], #TODO OCO renommer les labels techniques, ce serait pas mal, je pense... c'est super incohérent
-        company_dependent=True,
-        required=True,
-    )
+    default_periodicity = fields.Selection(string="Default Periodicity", selection=PERIODICITY_SELECTION_VALS, required=True)
+    periodicity = fields.Selection(string="Periodicity", selection=PERIODICITY_SELECTION_VALS, company_dependent=True, required=True)
 
     tax_closing_payable_account_id = fields.Many2one(string="Tax Payable Account", comodel_name='account.account', company_dependent=True, required=True)
     tax_closing_receivable_account_id = fields.Many2one(string="Tax Receivable Account", comodel_name='account.account', company_dependent=True, required=True)
-    tax_closing_journal_id = fields.Many2one(string="Tax Closing Journal", comodel_name='account.journal', company_dependent=True, required=True)
+    tax_closing_journal_id = fields.Many2one(string="Tax Closing Journal", comodel_name='account.journal', company_dependent=True, required=True)#TODO OCO quid des valeurs par défaut de ces champs ?
 
 
 
@@ -42,7 +39,12 @@ class AccountReportClosingType(models.Model):
     def create(self, vals_list):
         rslt = super().create(vals_list)
         for closing_type in rslt:
-            self.env['ir.property']._set_default('periodicity', 'account.report.closing.type', closing_type.periodicity, res_id=closing_type.id) #TODO OCO à tester, mais ça devrait le faire
+            self.env['ir.property']._set_default(
+                'periodicity',
+                'account.report.closing.type',
+                closing_type.default_periodicity,
+                res_id=f'{self._name},{closing_type.id}',
+            )
         return rslt
 
 
@@ -75,7 +77,7 @@ class AccountReportClosing(models.Model):
         journals_data = [
             {
                 'id': journal.id,
-                'name': f"{journal.name}{f' ({journal.company_id.name})' if len(company_ids) > 1 else ''}",
+                'name': journal.name,
                 'company_id': journal.company_id.id,
             }
             for journal in self.env['account.journal'].search(self.env['account.journal']._check_company_domain(company_ids))
@@ -87,7 +89,8 @@ class AccountReportClosing(models.Model):
                 'name': company.name,
                 'parent_ids': company.parent_ids.ids, # parents include the company itself
             }
-            for company in self.env['res.company'].browse(company_ids)
+            # Only show the columns of currently active companies, for usability
+            for company in self.env['res.company'].browse([company_id for company_id in company_ids if company_id in self.env.companies.ids])
         ]
 
         return {

@@ -4572,7 +4572,7 @@ class AccountMove(models.Model):
         #TODO OCO DOC
         self.ensure_one()
         # Calling invoice_line_ids is necessart for new records of invoices ; they won't have line_ids until saved.
-        return (
+        closing_types_from_taxes = (
             self.line_ids.tax_ids
             + self.line_ids.tax_line_id
 
@@ -4580,6 +4580,15 @@ class AccountMove(models.Model):
             + self.invoice_line_ids.tax_ids
             + self.invoice_line_ids.tax_ids.children_tax_ids
         ).closing_type_id
+
+        closing_types_from_tags = (
+            self.line_ids.tax_tag_ids
+
+            # Necessary for invoice new records; no line_ids while not saved
+            + self.invoice_line_ids.tax_ids.repartition_line_ids.tag_ids
+        ).report_id.closing_type_id
+
+        return closing_types_from_taxes | closing_types_from_tags
 
     def _get_lock_date_message(self, invoice_date):
         """Get a message describing the latest lock date affecting the specified date.

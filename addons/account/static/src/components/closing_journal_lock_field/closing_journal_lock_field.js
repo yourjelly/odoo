@@ -12,6 +12,7 @@ class ClosingJournalLockCheckBox extends Component {
     static template = "account.ClosingJournalLockCheckBox";
     static props = { companyId: Number, journalId: Number, disabled: Boolean}
 
+    //TODO OCO quand on fait un discard changes, il garde la case cochée => comment on gère ça ? => un useState, c'est pas ouf, si ? On recalculerait tout je pense :/ (n²)
     setup() {
         onWillStart(async () => {
             this.locked = Boolean(this.getLockRecord());
@@ -40,7 +41,7 @@ class ClosingJournalLockCheckBox extends Component {
 
 }
 
-export class ClosingJournalLockField extends X2ManyField { //TODO OCO pas sûr qu'on ait besoin d'hériter de X2ManyField
+export class ClosingJournalLockField extends X2ManyField {
 
     //TODO OCO là, c'est community, mais ça devrait peut-être être en enterprise ?
 
@@ -48,29 +49,42 @@ export class ClosingJournalLockField extends X2ManyField { //TODO OCO pas sûr q
     static props = { ...standardFieldProps };
     static components = { ClosingJournalLockCheckBox };
 
-    async onChange(newValue) {
-        await this.onAdd({context: {default_company_id:1, default_journal_id:2}, editable: true});
-        //TODO OCO WIP; juste du test, mais c'est ça qu'il faut appeler pour ajouter un élément !
-    }
-
     setup() {
         super.setup();
         this.orm = useService("orm");
 
         onWillStart(async () => {
-          this.axes_data = await this.orm.call(
-              "account.report.closing",
-              "get_journals_lock_grid_axes_data",
-              [
-                  null,
-                  this.props.record.data.company_ids.currentIds,
-              ],
-          );
+            await this.initialize_widget_data();
         });
 
         useSubEnv({
             lock_x2many_widget: this,
         });
+    }
+
+    async initialize_widget_data() {
+        this.axes_data = await this.orm.call(
+            "account.report.closing",
+            "get_journals_lock_grid_axes_data",
+            [
+                null,
+                this.props.record.data.company_ids.currentIds,
+            ],
+        );
+
+        this.company_name_map = {}
+        for (const company_data of this.axes_data['companies']) {
+            this.company_name_map[company_data['id']] = company_data['name'];
+        }
+
+        this.axes_data['journals'].sort((a, b) => {
+            let comparator = this.company_name_map[a['company_id']].localeCompare(this.company_name_map[b['company_id']]);
+            if (comparator !== 0)
+                return comparator;
+            return a['name'].localeCompare(b['name']);
+        });
+
+        this.axes_data['companies'].sort((a, b) => a['name'].localeCompare(b['name']));
     }
 
     get lockRecords() {
@@ -94,16 +108,3 @@ export const closingJournalLockField = {
 
 
 registry.category("fields").add("closing_journal_lock", closingJournalLockField);
-
-/**
-TODO OCO
-
-pour l'inspiration, tu peux regarder
-  async _addNewRecord(atFirstPosition) {
-    ===> ici dedans, on crée un nouveau record depuis le js
-
-    ====> en fait, this.list.addNewRecord
-
-===> pour la suppression, le widget de rugo impacte directement this.list, semble-t-il (ou this.props.list ?)
-
-**/

@@ -408,12 +408,13 @@ class ResCompany(models.Model):
                 account_report_closing.closing_type_id,
                 account_report_closing.date
             FROM %(table_references)s
-            JOIN account_report_closing_journal_lock journal_lock
+            LEFT JOIN account_report_closing_journal_lock journal_lock
                 ON journal_lock.closing_id = account_report_closing.id
+                    AND journal_lock.company_id = %(company_id)s
+                    AND journal_lock.journal_id = %(journal_id)s
             WHERE
                 %(search_condition)s
-                AND journal_lock.company_id = %(company_id)s
-                AND journal_lock.journal_id = %(journal_id)s
+                AND (account_report_closing.state = 'closed' OR journal_lock.id IS NOT NULL)
             ORDER BY account_report_closing.closing_type_id, account_report_closing.date
         """,
             table_references=domain_query.from_clause,
