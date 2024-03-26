@@ -68,6 +68,9 @@ export class MassMailingWysiwyg extends Wysiwyg {
         this.odooEditor.autohideToolbar = !!fold;
         this.odooEditor.toolbarHide();
         this.mainToolbarEl.classList.toggle('d-none', !fold);
+        // Update the toolbar props as some elements might now need to be
+        // visible.
+        this._setToolbarProps();
     }
 
     /**

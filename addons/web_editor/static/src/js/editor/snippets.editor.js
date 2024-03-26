@@ -1869,8 +1869,6 @@ class SnippetsMenu extends Component {
         onMounted(async () => {
             await this.start();
             this.props.setCSSVariables(this.snippetsMenuRef.el);
-            // Remove the toolbar's remove format button as the Sidebar has its own
-            this.toolbarWrapperRef.el.querySelector("#removeFormat")?.remove();
 
             // Bind removeFormat button
             const titleButtons = this.customizePanel.querySelector("#o_we_editor_toolbar_container > we-title");

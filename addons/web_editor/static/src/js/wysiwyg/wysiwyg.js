@@ -1821,7 +1821,8 @@ export class Wysiwyg extends Component {
             onColorpaletteDropdownHide: this.onColorpaletteDropdownHide.bind(this),
             textColorPaletteProps: this.colorPalettesProps.text,
             backgroundColorPaletteProps: this.colorPalettesProps.background,
-        }
+            showRemoveFormat: !!(this.state.snippetsMenuFolded || !this.options.snippets),
+        };
     }
     _configureToolbar(options) {
         const $toolbar = $(this.toolbarEl);
