@@ -20573,6 +20573,9 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 const el = this.composerRef.el;
                 content = el.childNodes.length ? el.textContent : "";
             }
+            if (!content && this.props.focus === "inactive") {
+                return;
+            }
             if (this.props.focus === "inactive") {
                 return (_b = (_a = this.props).onComposerCellFocused) === null || _b === void 0 ? void 0 : _b.call(_a, content);
             }
@@ -43295,8 +43298,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
 
 
     __info__.version = '16.0.36';
-    __info__.date = '2024-03-25T10:54:14.110Z';
-    __info__.hash = '2c2117b';
+    __info__.date = '2024-03-26T11:44:41.396Z';
+    __info__.hash = '23ea594';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
