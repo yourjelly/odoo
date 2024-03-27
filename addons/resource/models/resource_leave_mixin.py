@@ -1,13 +1,8 @@
-# -*- coding: utf-8 -*-
-# Part of Odoo. See LICENSE file for full copyright and licensing details.
-
 from datetime import datetime, time
 from dateutil.relativedelta import relativedelta
 from pytz import timezone, UTC
 
 from odoo import api, fields, models, _
-from odoo.addons.base.models.res_partner import _tz_get
-from odoo.addons.resource.models.utils import float_to_time
 from odoo.exceptions import ValidationError
 
 
@@ -36,37 +31,24 @@ class ResourceLeaveMixin(models.AbstractModel):
         return res
 
     description = fields.Char(string='Reason')
-    date_from = fields.Datetime(string='Start Date', required=True)
-    date_to = fields.Datetime(string='End Date', required=True,
+    resource_leave_id = fields.Many2one(comodel_name='resource.resource.leave',
+        auto_join=True, index=True, ondelete='restrict', required=True,
+        export_string_translation=False)
+    date_from = fields.Datetime(related='resource_leave_id.date_from',
+        string='Start Date', required=True)
+    date_to = fields.Datetime(related='resource_leave_id.date_to',
+        string='End Date', required=True,
         compute='_compute_date_to', readonly=False, store=True)
-    resource_id = fields.Many2one(comodel_name='resource.resource', string='Resource', index=True, required=True)
+    resource_id = fields.Many2one(related='resource_leave_id.resource_id',
+        string='Resource', index=True, required=True)
     company_id = fields.Many2one(comodel_name='res.company', related='resource_id.company_id', store=True)
-    time_type = fields.Selection(
-        selection=[
-            ('leave', 'Time Off'),
-            ('other', 'Other')],
-        default='leave')
-    # res_model = fields.Char('', required=True, index=True)
+    time_type = fields.Selection(related='resource_leave_id.time_type', default='leave')
     tz_mismatch = fields.Boolean(compute='_compute_tz_mismatch')
-    tz = fields.Selection(selection=_tz_get, compute='_compute_tz')
+    tz = fields.Selection(related='resource_leave_id.tz', compute='_compute_tz', store=True)
 
     _sql_constraints = [
         ('date_check', "CHECK(date_from <= date_to)", "The start date must be anterior to the end date."),
     ]
-
-    @api.constrains('date_from', 'date_to')
-    def check_no_overlap(self):
-        overlapping_leaves = self.search([
-            ('resource_id', 'in', self.resource_id.ids),
-            ('date_from', '<', max(self.mapped('date_to'))),
-            ('date_to', '>', min(self.mapped('date_from'))),
-        ])
-        for leave in self:
-            for overlap in overlapping_leaves:
-                if overlap.resource_id == leave.resource_id or overlap.id == leave.id:
-                    continue
-                if overlap.date_from < leave.date_to and overlap.date_to > leave.date_from:
-                    raise ValidationError(_('Two leaves for the same resource cannot overlap.'))
 
     @api.depends('date_from')
     def _compute_date_to(self):
@@ -88,6 +70,21 @@ class ResourceLeaveMixin(models.AbstractModel):
         for leave in self:
             leave.tz_mismatch = leave.tz != self.env.user.tz
 
-    def _get_leave_models(self):
-        # To be overridden
-        return []
+    def _get_resource_leave_vals(self, vals_list):
+        return [{
+            'date_from': vals.get('date_from'),
+            'date_to': vals.get('date_to'),
+            'resource_id': vals.get('resource_id'),
+            'time_type': vals.get('time_type'),
+            'tz': vals.get('tz'),
+        } for vals in vals_list if 'resource_leave_id' not in vals]
+
+    def create(self, vals_list):
+        resource_leave_vals = self._get_resource_leave_vals(vals_list)
+        if resource_leave_vals:
+            leaves = self.env['resource.resource.leave'].create(resource_leave_vals)
+            resources_iter = iter(leaves.ids)
+            for vals in vals_list:
+                if not vals.get('resource_leave_id'):
+                    vals['resource_leave_id'] = next(resources_iter)
+        return super().create(vals_list)

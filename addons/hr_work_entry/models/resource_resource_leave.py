@@ -1,8 +1,8 @@
 from odoo import models, fields
 
 
-class ResourcePublicLeave(models.Model):
-    _inherit = 'resource.public.leave'
+class ResourceResourceLeave(models.Model):
+    _inherit = 'resource.resource.leave'
 
     work_entry_type_id = fields.Many2one(
         'hr.work.entry.type', 'Work Entry Type',

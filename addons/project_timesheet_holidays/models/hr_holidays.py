@@ -118,12 +118,11 @@ class Holidays(models.Model):
         min_date = min([leave.date_from for leave in self])
         max_date = max([leave.date_to for leave in self])
 
-        global_leaves = self.env['resource.calendar.leaves'].search([
-            ("resource_id", "=", False),
-            ("date_to", ">=", min_date),
-            ("date_from", "<=", max_date),
-            ("company_id.internal_project_id", "!=", False),
-            ("company_id.leave_timesheet_task_id", "!=", False),
+        global_leaves = self.env['resource.public.leave'].search([
+            ("datetime_to", ">=", min_date),
+            ("datetime_from", "<=", max_date),
+            ("company_ids.internal_project_id", "!=", False),  # TODO BEDO
+            ("company_ids.leave_timesheet_task_id", "!=", False),
         ])
         if global_leaves:
             global_leaves._generate_public_time_off_timesheets(self.employee_ids)

@@ -8,4 +8,5 @@ from . import resource_leave_mixin
 from . import resource_mixin
 from . import resource_public_leave
 from . import resource_resource
+from . import resource_resource_leave
 from . import utils

@@ -383,7 +383,7 @@ class ResourceCalendar(models.Model):
         if resources:
             resources_list += list(resources)
         tz_dates = {}
-        result = defaultdict(lambda: [])
+        result = defaultdict(list)
 
         def get_timezoned_date(target_date, tz):
             if (tz, target_date) not in tz_dates:
@@ -391,13 +391,10 @@ class ResourceCalendar(models.Model):
             return tz_dates[(tz, target_date)]
 
         if resources:
-            leave_models = self.env['resource.leave.mixin']._get_leave_models()
-            resource_leaves = []
-            for leave_model in leave_models:
-                resource_leaves |= list(self.env[leave_model].search([
-                    ('resource_id', 'in', resources.ids),
-                    ('time_type', '=', 'leave'),
-                ]))
+            resource_leaves = self.env['resource.resource.leave'].search([
+                ('resource_id', 'in', resources.ids),
+                ('time_type', '=', 'leave'),
+            ])
 
             # retrieve leave intervals in (start_dt, end_dt) TODO BEDO
             for leave in resource_leaves:

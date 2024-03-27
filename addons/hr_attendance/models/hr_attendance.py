@@ -266,7 +266,10 @@ class HrAttendance(models.Model):
             leave_intervals = calendar._leave_intervals_batch(
                 start, stop, emp.resource_id, domain=AND([
                     self._get_overtime_leave_domain(),
-                    [('company_id', 'in', [False, emp.company_id.id])],
+                    ['|',
+                        ('company_ids', 'in', emp.company_id.id),
+                        ('company_ids', '=', False),
+                    ],
                 ])
             )
             expected_attendances -= leave_intervals[False] | leave_intervals[emp.resource_id.id]

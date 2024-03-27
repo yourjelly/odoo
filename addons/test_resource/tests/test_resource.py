@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-# Part of Odoo. See LICENSE file for full copyright and licensing details.
-
+# TODO BEDO
 from datetime import date, datetime
 from freezegun import freeze_time
 from pytz import timezone, utc
@@ -102,17 +100,17 @@ class TestErrors(TestResourceCommon):
         with self.assertRaises(ValidationError):
             self.env['resource.public.leave'].create({
                 'name': 'error cannot return in the past',
-                'resource_calendar_ids': self.calendar_jean.id,
-                'date_from': datetime_str(2018, 4, 3, 20, 0, 0, tzinfo=self.jean.tz),
-                'date_to': datetime_str(2018, 4, 3, 0, 0, 0, tzinfo=self.jean.tz),
+                'resource_calendar_ids': self.calendar_jean.ids,
+                'date_from': date(2018, 4, 3),
+                'date_to': date(2018, 4, 3),
             })
 
         with self.assertRaises(ValidationError):
             self.env['resource.public.leave'].create({
                 'name': 'error caused by timezones',
-                'resource_calendar_ids': self.calendar_jean.id,
-                'date_from': datetime_str(2018, 4, 3, 10, 0, 0, tzinfo='UTC'),
-                'date_to': datetime_str(2018, 4, 3, 12, 0, 0, tzinfo='Etc/GMT-6')
+                'resource_calendar_ids': self.calendar_jean.ids,
+                'date_from': date(2018, 4, 3),
+                'date_to': date(2018, 4, 3),
             })
 
 
@@ -124,16 +122,16 @@ class TestCalendar(TestResourceCommon):
         self.env['resource.public.leave'].create({
             'name': 'Global Time Off',
             'calendar_ids': self.calendar_jean.ids,
-            'date_from': datetime_str(2018, 4, 3),
-            'date_to': datetime_str(2018, 4, 3),
+            'date_from': date(2018, 4, 3),
+            'date_to': date(2018, 4, 3),
         })
 
         self.env['resource.calendar.leaves'].create({
             'name': 'leave for Jean',
             'calendar_id': self.calendar_jean.id,
             'resource_id': self.jean.resource_id.id,
-            'date_from': datetime_str(2018, 4, 5, 0, 0, 0, tzinfo=self.jean.tz),
-            'date_to': datetime_str(2018, 4, 5, 23, 59, 59, tzinfo=self.jean.tz),
+            'date_from': date(2018, 4, 5),
+            'date_to': date(2018, 4, 5),
         })
 
         hours = self.calendar_jean.get_work_hours_count(
@@ -154,8 +152,8 @@ class TestCalendar(TestResourceCommon):
             'name': 'zero_length',
             'calendar_id': self.calendar_patel.id,
             'resource_id': False,
-            'date_from': datetime_str(2018, 4, 3, 0, 0, 0, tzinfo=self.patel.tz),
-            'date_to': datetime_str(2018, 4, 3, 0, 0, 0, tzinfo=self.patel.tz),
+            'date_from': date(2018, 4, 3),
+            'date_to': date(2018, 4, 3),
         })
 
         hours = self.calendar_patel.get_work_hours_count(
@@ -169,8 +167,8 @@ class TestCalendar(TestResourceCommon):
             'name': 'zero_length',
             'calendar_id': self.calendar_patel.id,
             'resource_id': False,
-            'date_from': datetime_str(2018, 4, 3, 9, 0, 0, tzinfo=self.patel.tz),
-            'date_to': datetime_str(2018, 4, 3, 12, 0, 0, tzinfo=self.patel.tz),
+            'date_from': date(2018, 4, 3),
+            'date_to': date(2018, 4, 3),
         })
 
         hours = self.calendar_patel.get_work_hours_count(
@@ -186,8 +184,8 @@ class TestCalendar(TestResourceCommon):
             'name': 'zero_length',
             'calendar_id': self.calendar_patel.id,
             'resource_id': False,
-            'date_from': datetime_str(2018, 4, 3, 0, 0, 0, tzinfo=self.patel.tz),
-            'date_to': datetime_str(2018, 4, 3, 0, 0, 10, tzinfo=self.patel.tz),
+            'date_from': date(2018, 4, 3),
+            'date_to': date(2018, 4, 3),
         })
 
         hours = self.calendar_patel.get_work_hours_count(
@@ -204,8 +202,8 @@ class TestCalendar(TestResourceCommon):
             'name': 'no timezone',
             'calendar_id': self.calendar_patel.id,
             'resource_id': False,
-            'date_from': datetime_str(2018, 4, 3, 4, 0, 0),
-            'date_to': datetime_str(2018, 4, 4, 4, 0, 0),
+            'date_from': date(2018, 4, 3, 4, 0, 0),
+            'date_to': date(2018, 4, 4, 4, 0, 0),
         })
 
         hours = self.calendar_patel.get_work_hours_count(
@@ -248,8 +246,8 @@ class TestCalendar(TestResourceCommon):
             'name': 'Time Off Jules week 2',
             'calendar_id': self.calendar_jules.id,
             'resource_id': False,
-            'date_from': datetime_str(2018, 4, 11, 4, 0, 0, tzinfo=self.jules.tz),
-            'date_to': datetime_str(2018, 4, 13, 4, 0, 0, tzinfo=self.jules.tz),
+            'date_from': date(2018, 4, 11, 4, 0, 0, tzinfo=self.jules.tz),
+            'date_to': date(2018, 4, 13, 4, 0, 0, tzinfo=self.jules.tz),
         })
 
         hours = self.calendar_jules.get_work_hours_count(
@@ -265,8 +263,8 @@ class TestCalendar(TestResourceCommon):
             'name': 'Time Off Jules week 2',
             'calendar_id': self.calendar_jules.id,
             'resource_id': False,
-            'date_from': datetime_str(2018, 4, 9, 0, 0, 0, tzinfo=self.jules.tz),
-            'date_to': datetime_str(2018, 4, 9, 23, 59, 0, tzinfo=self.jules.tz),
+            'date_from': date(2018, 4, 9, 0, 0, 0, tzinfo=self.jules.tz),
+            'date_to': date(2018, 4, 9, 23, 59, 0, tzinfo=self.jules.tz),
         })
 
         hours = self.calendar_jules.get_work_hours_count(
@@ -281,8 +279,8 @@ class TestCalendar(TestResourceCommon):
         leave = self.env['resource.calendar.leaves'].create({
             'name': 'small leave',
             'resource_id': False,
-            'date_from': datetime_str(2018, 4, 3, 9, 0, 0, tzinfo=self.patel.tz),
-            'date_to': datetime_str(2018, 4, 3, 12, 0, 0, tzinfo=self.patel.tz),
+            'date_from': date(2018, 4, 3, 9, 0, 0, tzinfo=self.patel.tz),
+            'date_to': date(2018, 4, 3, 12, 0, 0, tzinfo=self.patel.tz),
         })
 
         hours = self.calendar_patel.get_work_hours_count(
@@ -413,8 +411,8 @@ class TestCalendar(TestResourceCommon):
             'name': 'global',
             'calendar_id': self.calendar_jean.id,
             'resource_id': False,
-            'date_from': datetime_str(2018, 4, 11, 0, 0, 0, tzinfo=self.jean.tz),
-            'date_to': datetime_str(2018, 4, 11, 23, 59, 59, tzinfo=self.jean.tz),
+            'date_from': date(2018, 4, 11, 0, 0, 0, tzinfo=self.jean.tz),
+            'date_to': date(2018, 4, 11, 23, 59, 59, tzinfo=self.jean.tz),
         })
 
         time = self.calendar_jean.plan_hours(2, datetime_tz(2018, 4, 10, 0, 0, 0, tzinfo=self.jean.tz), compute_leaves=False)
@@ -449,8 +447,8 @@ class TestCalendar(TestResourceCommon):
             'name': 'global',
             'calendar_id': self.calendar_jean.id,
             'resource_id': False,
-            'date_from': datetime_str(2018, 4, 11, 0, 0, 0, tzinfo=self.jean.tz),
-            'date_to': datetime_str(2018, 4, 11, 23, 59, 59, tzinfo=self.jean.tz),
+            'date_from': date(2018, 4, 11, 0, 0, 0, tzinfo=self.jean.tz),
+            'date_to': date(2018, 4, 11, 23, 59, 59, tzinfo=self.jean.tz),
         })
 
         time = self.calendar_jean.plan_days(1, datetime_tz(2018, 4, 10, 0, 0, 0, tzinfo=self.jean.tz), compute_leaves=False)
@@ -748,8 +746,8 @@ class TestResMixin(TestResourceCommon):
             'name': 'half',
             'calendar_id': self.calendar_jean.id,
             'resource_id': self.jean.resource_id.id,
-            'date_from': datetime_str(2018, 4, 2, 10, 0, 0, tzinfo=self.jean.tz),
-            'date_to': datetime_str(2018, 4, 2, 14, 0, 0, tzinfo=self.jean.tz),
+            'date_from': date(2018, 4, 2, 10, 0, 0, tzinfo=self.jean.tz),
+            'date_to': date(2018, 4, 2, 14, 0, 0, tzinfo=self.jean.tz),
         })
 
         data = self.jean._get_work_days_data_batch(
@@ -773,8 +771,8 @@ class TestResMixin(TestResourceCommon):
             'name': 'zero',
             'calendar_id': self.calendar_jean.id,
             'resource_id': False,
-            'date_from': datetime_str(2018, 4, 2, 10, 0, 0, tzinfo=self.jean.tz),
-            'date_to': datetime_str(2018, 4, 2, 10, 0, 0, tzinfo=self.jean.tz),
+            'date_from': date(2018, 4, 2, 10, 0, 0, tzinfo=self.jean.tz),
+            'date_to': date(2018, 4, 2, 10, 0, 0, tzinfo=self.jean.tz),
         })
 
         data = self.jean._get_work_days_data_batch(
@@ -790,8 +788,8 @@ class TestResMixin(TestResourceCommon):
             'name': 'small',
             'calendar_id': self.calendar_jean.id,
             'resource_id': False,
-            'date_from': datetime_str(2018, 4, 2, 10, 0, 0, tzinfo=self.jean.tz),
-            'date_to': datetime_str(2018, 4, 2, 10, 0, 1, tzinfo=self.jean.tz),
+            'date_from': date(2018, 4, 2, 10, 0, 0, tzinfo=self.jean.tz),
+            'date_to': date(2018, 4, 2, 10, 0, 1, tzinfo=self.jean.tz),
         })
 
         data = self.jean._get_work_days_data_batch(
@@ -807,8 +805,8 @@ class TestResMixin(TestResourceCommon):
             'name': 'Jean is visiting India',
             'calendar_id': self.jean.resource_calendar_id.id,
             'resource_id': self.jean.resource_id.id,
-            'date_from': datetime_str(2018, 4, 10, 8, 0, 0, tzinfo=self.jean.tz),
-            'date_to': datetime_str(2018, 4, 10, 16, 0, 0, tzinfo=self.jean.tz),
+            'date_from': date(2018, 4, 10, 8, 0, 0, tzinfo=self.jean.tz),
+            'date_to': date(2018, 4, 10, 16, 0, 0, tzinfo=self.jean.tz),
         })
 
         # John takes a leave for Jean
@@ -816,8 +814,8 @@ class TestResMixin(TestResourceCommon):
             'name': 'Jean is comming in USA',
             'calendar_id': self.jean.resource_calendar_id.id,
             'resource_id': self.jean.resource_id.id,
-            'date_from': datetime_str(2018, 4, 12, 8, 0, 0, tzinfo=self.john.tz),
-            'date_to': datetime_str(2018, 4, 12, 16, 0, 0, tzinfo=self.john.tz),
+            'date_from': date(2018, 4, 12, 8, 0, 0, tzinfo=self.john.tz),
+            'date_to': date(2018, 4, 12, 16, 0, 0, tzinfo=self.john.tz),
         })
 
         # Jean asks to see how much leave he has taken
@@ -852,8 +850,8 @@ class TestResMixin(TestResourceCommon):
             'name': 'John is sick',
             'calendar_id': self.john.resource_calendar_id.id,
             'resource_id': self.john.resource_id.id,
-            'date_from': datetime_str(2018, 4, 10, 0, 0, 0, tzinfo=self.jean.tz),
-            'date_to': datetime_str(2018, 4, 10, 20, 0, 0, tzinfo=self.jean.tz),
+            'date_from': date(2018, 4, 10, 0, 0, 0, tzinfo=self.jean.tz),
+            'date_to': date(2018, 4, 10, 20, 0, 0, tzinfo=self.jean.tz),
         })
 
         # John takes a leave
@@ -862,8 +860,8 @@ class TestResMixin(TestResourceCommon):
             'name': 'John goes to holywood',
             'calendar_id': self.john.resource_calendar_id.id,
             'resource_id': self.john.resource_id.id,
-            'date_from': datetime_str(2018, 4, 13, 7, 0, 0, tzinfo=self.john.tz),
-            'date_to': datetime_str(2018, 4, 13, 18, 0, 0, tzinfo=self.john.tz),
+            'date_from': date(2018, 4, 13, 7, 0, 0, tzinfo=self.john.tz),
+            'date_to': date(2018, 4, 13, 18, 0, 0, tzinfo=self.john.tz),
         })
 
         # John asks how much leaves he has
@@ -879,8 +877,8 @@ class TestResMixin(TestResourceCommon):
             'name': 'half',
             'calendar_id': self.calendar_jean.id,
             'resource_id': self.jean.resource_id.id,
-            'date_from': datetime_str(2018, 4, 2, 10, 0, 0, tzinfo=self.jean.tz),
-            'date_to': datetime_str(2018, 4, 2, 14, 0, 0, tzinfo=self.jean.tz),
+            'date_from': date(2018, 4, 2, 10, 0, 0, tzinfo=self.jean.tz),
+            'date_to': date(2018, 4, 2, 14, 0, 0, tzinfo=self.jean.tz),
         })
 
         data = self.jean._get_leave_days_data_batch(
@@ -896,8 +894,8 @@ class TestResMixin(TestResourceCommon):
             'name': 'zero',
             'calendar_id': self.calendar_jean.id,
             'resource_id': False,
-            'date_from': datetime_str(2018, 4, 2, 10, 0, 0, tzinfo=self.jean.tz),
-            'date_to': datetime_str(2018, 4, 2, 10, 0, 0, tzinfo=self.jean.tz),
+            'date_from': date(2018, 4, 2, 10, 0, 0, tzinfo=self.jean.tz),
+            'date_to': date(2018, 4, 2, 10, 0, 0, tzinfo=self.jean.tz),
         })
 
         data = self.jean._get_leave_days_data_batch(
@@ -913,8 +911,8 @@ class TestResMixin(TestResourceCommon):
             'name': 'small',
             'calendar_id': self.calendar_jean.id,
             'resource_id': False,
-            'date_from': datetime_str(2018, 4, 2, 10, 0, 0, tzinfo=self.jean.tz),
-            'date_to': datetime_str(2018, 4, 2, 10, 0, 1, tzinfo=self.jean.tz),
+            'date_from': date(2018, 4, 2, 10, 0, 0, tzinfo=self.jean.tz),
+            'date_to': date(2018, 4, 2, 10, 0, 1, tzinfo=self.jean.tz),
         })
 
         data = self.jean._get_leave_days_data_batch(
@@ -931,8 +929,8 @@ class TestResMixin(TestResourceCommon):
             'name': "Jean's son is sick",
             'calendar_id': self.jean.resource_calendar_id.id,
             'resource_id': False,
-            'date_from': datetime_str(2018, 4, 10, 0, 0, 0, tzinfo=self.jean.tz),
-            'date_to': datetime_str(2018, 4, 10, 23, 59, 59, tzinfo=self.jean.tz),
+            'date_from': date(2018, 4, 10, 0, 0, 0, tzinfo=self.jean.tz),
+            'date_to': date(2018, 4, 10, 23, 59, 59, tzinfo=self.jean.tz),
         })
 
         leaves = self.jean.list_leaves(
@@ -946,8 +944,8 @@ class TestResMixin(TestResourceCommon):
             'name': 'half',
             'calendar_id': self.jean.resource_calendar_id.id,
             'resource_id': self.jean.resource_id.id,
-            'date_from': datetime_str(2018, 4, 2, 10, 0, 0, tzinfo=self.jean.tz),
-            'date_to': datetime_str(2018, 4, 2, 14, 0, 0, tzinfo=self.jean.tz),
+            'date_from': date(2018, 4, 2, 10, 0, 0, tzinfo=self.jean.tz),
+            'date_to': date(2018, 4, 2, 14, 0, 0, tzinfo=self.jean.tz),
         })
 
         leaves = self.jean.list_leaves(
@@ -963,8 +961,8 @@ class TestResMixin(TestResourceCommon):
             'name': 'small',
             'calendar_id': self.jean.resource_calendar_id.id,
             'resource_id': self.jean.resource_id.id,
-            'date_from': datetime_str(2018, 4, 2, 10, 0, 0, tzinfo=self.jean.tz),
-            'date_to': datetime_str(2018, 4, 2, 10, 0, 1, tzinfo=self.jean.tz),
+            'date_from': date(2018, 4, 2, 10, 0, 0, tzinfo=self.jean.tz),
+            'date_to': date(2018, 4, 2, 10, 0, 1, tzinfo=self.jean.tz),
         })
 
         leaves = self.jean.list_leaves(
@@ -983,8 +981,8 @@ class TestResMixin(TestResourceCommon):
             'name': 'zero',
             'calendar_id': self.jean.resource_calendar_id.id,
             'resource_id': self.jean.resource_id.id,
-            'date_from': datetime_str(2018, 4, 2, 10, 0, 0, tzinfo=self.jean.tz),
-            'date_to': datetime_str(2018, 4, 2, 10, 0, 0, tzinfo=self.jean.tz),
+            'date_from': date(2018, 4, 2, 10, 0, 0, tzinfo=self.jean.tz),
+            'date_to': date(2018, 4, 2, 10, 0, 0, tzinfo=self.jean.tz),
         })
 
         leaves = self.jean.list_leaves(
@@ -1023,8 +1021,8 @@ class TestResMixin(TestResourceCommon):
             'name': 'small',
             'calendar_id': self.jean.resource_calendar_id.id,
             'resource_id': self.jean.resource_id.id,
-            'date_from': datetime_str(2018, 4, 2, 10, 0, 0, tzinfo=self.jean.tz),
-            'date_to': datetime_str(2018, 4, 2, 14, 0, 0, tzinfo=self.jean.tz),
+            'date_from': date(2018, 4, 2, 10, 0, 0, tzinfo=self.jean.tz),
+            'date_to': date(2018, 4, 2, 14, 0, 0, tzinfo=self.jean.tz),
         })
 
         working_time = self.jean._list_work_time_per_day(
@@ -1046,8 +1044,8 @@ class TestResMixin(TestResourceCommon):
             'name': 'small',
             'calendar_id': self.jean.resource_calendar_id.id,
             'resource_id': self.jean.resource_id.id,
-            'date_from': datetime_str(2018, 4, 2, 10, 0, 0, tzinfo=self.jean.tz),
-            'date_to': datetime_str(2018, 4, 2, 10, 0, 1, tzinfo=self.jean.tz),
+            'date_from': date(2018, 4, 2, 10, 0, 0, tzinfo=self.jean.tz),
+            'date_to': date(2018, 4, 2, 10, 0, 1, tzinfo=self.jean.tz),
         })
 
         working_time = self.jean._list_work_time_per_day(
@@ -1065,8 +1063,8 @@ class TestResMixin(TestResourceCommon):
             'name': 'zero',
             'calendar_id': self.jean.resource_calendar_id.id,
             'resource_id': self.jean.resource_id.id,
-            'date_from': datetime_str(2018, 4, 2, 10, 0, 0, tzinfo=self.jean.tz),
-            'date_to': datetime_str(2018, 4, 2, 10, 0, 0, tzinfo=self.jean.tz),
+            'date_from': date(2018, 4, 2, 10, 0, 0, tzinfo=self.jean.tz),
+            'date_to': date(2018, 4, 2, 10, 0, 0, tzinfo=self.jean.tz),
         })
 
         working_time = self.jean._list_work_time_per_day(
@@ -1192,8 +1190,8 @@ class TestTimezones(TestResourceCommon):
             'name': '',
             'calendar_id': self.jean.resource_calendar_id.id,
             'resource_id': self.jean.resource_id.id,
-            'date_from': datetime_str(2018, 4, 9, 8, 0, 0, tzinfo=self.tz2),
-            'date_to': datetime_str(2018, 4, 9, 14, 0, 0, tzinfo=self.tz2),
+            'date_from': date(2018, 4, 9, 8, 0, 0, tzinfo=self.tz2),
+            'date_to': date(2018, 4, 9, 14, 0, 0, tzinfo=self.tz2),
         })
 
         # 09-04-2018 10:00:00 - 13-04-2018 18:00:00
@@ -1222,8 +1220,8 @@ class TestTimezones(TestResourceCommon):
             'name': '',
             'calendar_id': self.jean.resource_calendar_id.id,
             'resource_id': self.jean.resource_id.id,
-            'date_from': datetime_str(2018, 4, 9, 8, 0, 0, tzinfo=self.tz2),
-            'date_to': datetime_str(2018, 4, 9, 14, 0, 0, tzinfo=self.tz2),
+            'date_from': date(2018, 4, 9, 8, 0, 0, tzinfo=self.tz2),
+            'date_to': date(2018, 4, 9, 14, 0, 0, tzinfo=self.tz2),
         })
 
         # 09-04-2018 10:00:00 - 13-04-2018 18:00:00

@@ -134,11 +134,11 @@ class TestGlobalLeaves(TestHrHolidaysCommon):
             Check that leaves stored in memory (and not in the database)
             take into account global leaves.
         """
-        global_leave = self.env['resource.calendar.leaves'].create({
+        global_leave = self.env['resource.public.leave'].create({
             'name': 'Global Time Off',
-            'date_from': datetime(2024, 1, 3, 6, 0, 0),
-            'date_to': datetime(2024, 1, 3, 19, 0, 0),
-            'calendar_id': self.calendar_1.id,
+            'date_from': datetime(2024, 1, 3),
+            'date_to': datetime(2024, 1, 3),
+            'resource_calendar_ids': self.calendar_1.ids,
         })
         leave_type = self.env['hr.leave.type'].create({
             'name': 'Paid Time Off',

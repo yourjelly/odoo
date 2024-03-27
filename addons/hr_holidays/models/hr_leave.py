@@ -802,9 +802,6 @@ Attempting to double-book your time off won't magically make your vacation 2x be
     def _get_mail_redirect_suggested_company(self):
         return self.holiday_status_id.company_id
 
-    def _get_leave_models(self):
-        return super()._get_leave_models() + ['hr.leave']
-
     ####################################################
     # Business methods
     ####################################################

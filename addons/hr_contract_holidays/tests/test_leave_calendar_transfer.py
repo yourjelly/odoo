@@ -1,5 +1,3 @@
-# Part of Odoo. See LICENSE file for full copyright and licensing details.
-
 from freezegun import freeze_time
 
 from odoo.fields import Datetime, Date
@@ -10,7 +8,7 @@ class TestLeaveContractTransfer(TestContractCommon):
 
     @classmethod
     def setUpClass(cls):
-        super(TestLeaveContractTransfer, cls).setUpClass()
+        super().setUpClass()
 
         cls.calendar_1 = cls.env['resource.calendar'].create({'name': 'calendar 1'})
         cls.calendar_2 = cls.env['resource.calendar'].create({'name': 'calendar 2'})
@@ -34,8 +32,8 @@ class TestLeaveContractTransfer(TestContractCommon):
     def test_contract_transfer_leaves(self):
 
         def create_leave(start, end, employee):
-            return self.env['employee.calendar.leaves'].create({
-                'name': 'leave name',
+            return self.env['leave'].create({
+                'name': 'Leave',
                 'holiday_status_id': self.leave_type,
                 'date_from': start,
                 'date_to': end,

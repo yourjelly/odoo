@@ -246,10 +246,10 @@ class TestHolidaysOvertime(TransactionCase):
         self.assertFalse(leave.overtime_id.exists())
 
     def test_public_leave_overtime(self):
-        leave = self.env['resource.calendar.leaves'].create([{
+        leave = self.env['resource.public.leave'].create([{
             'name': 'Public Holiday',
-            'date_from': datetime(2022, 5, 5, 6),
-            'date_to': datetime(2022, 5, 5, 18),
+            'date_from': datetime(2022, 5, 5),
+            'date_to': datetime(2022, 5, 5),
         }])
 
         leave.company_id.write({

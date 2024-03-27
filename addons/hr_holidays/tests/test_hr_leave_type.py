@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-# Part of Odoo. See LICENSE file for full copyright and licensing details.
-
 from datetime import date
 from dateutil.relativedelta import relativedelta
 
@@ -30,7 +27,11 @@ class TestHrLeaveType(TestHrHolidaysCommon):
         leave_1.action_approve()
 
         self.assertEqual(
-            self.env['resource.calendar.leaves'].search([('holiday_id', '=', leave_1.id)]).time_type,
+            self.env['resource.resource.leave'].search([
+                ('resource_id', '=', leave_1.resource_id),
+                ('date_from', '=', leave_1.date_from),
+                ('date_to', '=', leave_1.date_to),
+            ]).time_type,
             'leave'
         )
 

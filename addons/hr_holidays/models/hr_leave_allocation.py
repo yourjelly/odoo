@@ -570,13 +570,13 @@ class HolidaysAllocation(models.Model):
     # ORM Overrides methods
     ####################################################
 
-    def get_employee_from_context(values, context, user_employee_id):
+    def get_employee_from_context(self, values, context, user_emp_id):
         employee_ids_list = [value[2]
             for value in values.get('employee_ids', [])
             if len(value) == 3 and value[0] == Command.SET]
         employee_ids = employee_ids_list[-1] if employee_ids_list else []
         employee_id_value = employee_ids[0] if employee_ids else False
-        return employee_id_value or context.get('default_employee_id', context.get('employee_id', user_employee_id))
+        return employee_id_value or context.get('default_employee_id', context.get('employee_id', user_emp_id))
 
     def onchange(self, values, field_names, fields_spec):
         # Try to force the leave_type display_name when creating new records
