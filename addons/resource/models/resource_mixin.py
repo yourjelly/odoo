@@ -17,33 +17,15 @@ class ResourceMixin(models.AbstractModel):
         auto_join=True, index=True, ondelete='restrict', required=True)
     company_id = fields.Many2one(
         'res.company', 'Company',
-        compute='_compute_company_id', inverse='_inverse_company_id', precompute=True, store=True,
-        index=True)
+        default=lambda self: self.env.company,
+        index=True, related='resource_id.company_id', precompute=True, store=True, readonly=False)
     resource_calendar_id = fields.Many2one(
         'resource.calendar', 'Working Hours',
-        compute='_compute_resource_calendar_id', inverse='_inverse_resource_calendar_id', precompute=True, store=True,
-        index=True)
+        default=lambda self: self.env.company.resource_calendar_id,
+        index=True, related='resource_id.calendar_id', store=True, readonly=False)
     tz = fields.Selection(
         string='Timezone', related='resource_id.tz', readonly=False,
         help="This field is used in order to define in which timezone the resources will work.")
-
-    @api.depends('resource_id', 'resource_id.company_id')
-    def _compute_company_id(self):
-        for record in self:
-            record.company_id = record.resource_id.company_id or self.env.company
-
-    def _inverse_company_id(self):
-        for record in self:
-            record.resource_id.company_id = record.company_id
-
-    @api.depends('resource_id', 'resource_id.calendar_id')
-    def _compute_resource_calendar_id(self):
-        for record in self:
-            record.resource_calendar_id = record.resource_id.calendar_id or record.company_id.resource_calendar_id
-
-    def _inverse_resource_calendar_id(self):
-        for record in self:
-            record.resource_id.calendar_id = record.resource_calendar_id
 
     @api.model_create_multi
     def create(self, vals_list):

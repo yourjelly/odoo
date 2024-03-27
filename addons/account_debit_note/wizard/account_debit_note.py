@@ -30,8 +30,6 @@ class AccountDebitNote(models.TransientModel):
     @api.model
     def default_get(self, fields):
         res = super(AccountDebitNote, self).default_get(fields)
-        if 'move_ids' not in fields or 'move_ids' in res:
-            return res
         move_ids = self.env['account.move'].browse(self.env.context['active_ids']) if self.env.context.get('active_model') == 'account.move' else self.env['account.move']
         if any(move.state != "posted" for move in move_ids):
             raise UserError(_('You can only debit posted moves.'))

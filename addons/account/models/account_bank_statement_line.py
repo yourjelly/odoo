@@ -188,7 +188,6 @@ class AccountBankStatementLine(models.Model):
         self.flush_model(['internal_index', 'date', 'journal_id', 'statement_id', 'amount', 'state'])
         record_by_id = {x.id: x for x in self}
 
-        self.running_balance = 0
         for journal in self.journal_id:
             journal_lines_indexes = self.filtered(lambda line: line.journal_id == journal)\
                 .sorted('internal_index')\
@@ -263,10 +262,10 @@ class AccountBankStatementLine(models.Model):
         # NOTE: assert self._fields['sequence'].column_type[1] == 'int4'
         # if for any reason it changes (how unlikely), we need to update this code
 
-        for st_line in self:
+        for st_line in self.filtered(lambda line: line._origin.id):
             st_line.internal_index = f'{st_line.date.strftime("%Y%m%d")}' \
                                       f'{MAXINT - st_line.sequence:0>10}' \
-                                      f'{st_line._origin.id or MAXINT:0>10}'
+                                      f'{st_line._origin.id:0>10}'
 
     @api.depends('journal_id', 'currency_id', 'amount', 'foreign_currency_id', 'amount_currency',
                  'move_id.to_check',

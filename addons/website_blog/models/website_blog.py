@@ -160,8 +160,7 @@ class BlogPost(models.Model):
     def _compute_website_url(self):
         super(BlogPost, self)._compute_website_url()
         for blog_post in self:
-            if blog_post.blog_id.id and blog_post.id:
-                blog_post.website_url = "/blog/%s/%s" % (slug(blog_post.blog_id), slug(blog_post))
+            blog_post.website_url = "/blog/%s/%s" % (slug(blog_post.blog_id), slug(blog_post))
 
     def _default_content(self):
         return '''

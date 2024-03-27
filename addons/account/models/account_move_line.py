@@ -609,9 +609,7 @@ class AccountMoveLine(models.Model):
 
         product_lines = self.filtered(lambda line: line.display_type == 'product' and line.move_id.is_invoice(True))
         for line in product_lines:
-            if self.env.context.get('quick_encoding_vals'):
-                line.account_id = self.env.context['quick_encoding_vals']['account_id']
-            elif line.product_id:
+            if line.product_id:
                 fiscal_position = line.move_id.fiscal_position_id
                 accounts = line.with_company(line.company_id).product_id\
                     .product_tmpl_id.get_product_accounts(fiscal_pos=fiscal_position)
@@ -811,10 +809,8 @@ class AccountMoveLine(models.Model):
     @api.depends('display_type')
     def _compute_quantity(self):
         for line in self:
-            cached = self.env.cache.contains(line, self._fields['quantity'])
             if line.display_type == 'product':
-                if not line.id and not cached:
-                    line.quantity = 1
+                line.quantity = line.quantity if line.quantity else 1
             else:
                 line.quantity = False
 
@@ -855,9 +851,6 @@ class AccountMoveLine(models.Model):
     @api.depends('product_id', 'product_uom_id')
     def _compute_price_unit(self):
         for line in self:
-            if self.env.context.get('quick_encoding_vals'):
-                line.price_unit = self.env.context['quick_encoding_vals']['price_unit']
-                continue
             if not line.product_id or line.display_type in ('line_section', 'line_note'):
                 continue
             if line.move_id.is_sale_document(include_receipts=True):
@@ -881,9 +874,7 @@ class AccountMoveLine(models.Model):
             if line.display_type in ('line_section', 'line_note', 'payment_term'):
                 continue
             # /!\ Don't remove existing taxes if there is no explicit taxes set on the account.
-            if not line.tax_ids and self.env.context.get('quick_encoding_vals'):
-                line.tax_ids = self.env.context['quick_encoding_vals']['tax_ids']
-            elif line.product_id or line.account_id.tax_ids or not line.tax_ids:
+            if line.product_id or line.account_id.tax_ids or not line.tax_ids:
                 line.tax_ids = line._get_computed_taxes()
 
     def _get_computed_taxes(self):
@@ -1442,6 +1433,15 @@ class AccountMoveLine(models.Model):
         create_index(self._cr, 'account_move_line__unreconciled_index', 'account_move_line', ['account_id', 'partner_id'],
                      where="(reconciled IS NULL OR reconciled = false OR reconciled IS NOT true) AND parent_state = 'posted'")
         super().init()
+
+    def default_get(self, fields_list):
+        defaults = super().default_get(fields_list)
+        quick_encode_suggestion = self.env.context.get('quick_encoding_vals')
+        if quick_encode_suggestion:
+            defaults['account_id'] = quick_encode_suggestion['account_id']
+            defaults['price_unit'] = quick_encode_suggestion['price_unit']
+            defaults['tax_ids'] = [Command.set(quick_encode_suggestion['tax_ids'])]
+        return defaults
 
     def _sanitize_vals(self, vals):
         if 'debit' in vals or 'credit' in vals:

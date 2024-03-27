@@ -45,19 +45,19 @@ class MailTrackingDurationMixin(models.AbstractModel):
         self.env['mail.tracking.value'].flush_model()
         self.env['mail.message'].flush_model()
         query = """
-            SELECT m.res_id,
-                    v.create_date,
-                    v.old_value_integer
-                FROM mail_tracking_value v
+               SELECT m.res_id,
+                      v.create_date,
+                      v.old_value_integer
+                 FROM mail_tracking_value v
             LEFT JOIN mail_message m
-                ON m.id = v.mail_message_id
-                AND v.field_id = %(field_id)s
+                   ON m.id = v.mail_message_id
+                  AND v.field_id = %(field_id)s
                 WHERE m.model = %(model_name)s
-                AND m.res_id = ANY(%(record_ids)s)
-            ORDER BY v.id
+                  AND m.res_id IN %(record_ids)s
+             ORDER BY v.id
         """
-        self.env.cr.execute(query, {"field_id": field.id, "model_name": self._name, "record_ids": self.ids})
-        trackings = self.env.cr.dictfetchall() or []
+        self.env.cr.execute(query, {"field_id": field.id, "model_name": self._name, "record_ids": tuple(self.ids)})
+        trackings = self.env.cr.dictfetchall()
 
         for record in self:
             record_trackings = [tracking for tracking in trackings if tracking['res_id'] == record._origin.id]
@@ -78,7 +78,7 @@ class MailTrackingDurationMixin(models.AbstractModel):
         """
         self.ensure_one()
         json = defaultdict(lambda: 0)
-        previous_date = self.create_date or self.env.cr.now()
+        previous_date = self.create_date
 
         # add "fake" tracking for time spent in the current value
         trackings.append({

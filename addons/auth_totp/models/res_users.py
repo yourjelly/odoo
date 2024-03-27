@@ -175,10 +175,9 @@ class Users(models.Model):
         return super().change_password(old_passwd, new_passwd)
 
     def _compute_totp_secret(self):
-        self.env.cr.execute('SELECT id, totp_secret FROM res_users WHERE id = ANY(%s)', (self.ids,))
-        user2secret = dict(self.env.cr.fetchall())
         for user in self:
-            user.totp_secret = user2secret.get(user._origin.id)
+            self.env.cr.execute('SELECT totp_secret FROM res_users WHERE id=%s', (user.id,))
+            user.totp_secret = self.env.cr.fetchone()[0]
 
     def _inverse_token(self):
         for user in self:
