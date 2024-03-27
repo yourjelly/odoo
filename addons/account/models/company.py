@@ -42,11 +42,6 @@ class ResCompany(models.Model):
     fiscalyear_last_month = fields.Selection(MONTH_SELECTION, default='12', required=True)
 
     #TODO OCO virer tous ces champs lock dates
-    period_lock_date = fields.Date(
-        string="Journals Entries Lock Date",
-        tracking=True,
-        help="Only users with the 'Adviser' role can edit accounts prior to and inclusive of this"
-             " date. Use it for period locking inside an open fiscal year, for example.")
     fiscalyear_lock_date = fields.Date(
         string="All Users Lock Date",
         tracking=True,
@@ -354,7 +349,7 @@ class ResCompany(models.Model):
                 action_error = self._get_fiscalyear_lock_statement_lines_redirect_action(unreconciled_statement_lines)
                 raise RedirectWarning(error_msg, action_error, _('Show Unreconciled Bank Statement Line'))
 
-    def _get_user_fiscal_lock_date(self):
+    def _get_user_fiscal_lock_date(self): #TODO OCO virer ? Réécrire ?
         """Get the fiscal lock date for this company depending on the user"""
         lock_date = max(self.period_lock_date or date.min, self.fiscalyear_lock_date or date.min)
         if self.user_has_groups('account.group_account_manager'):
@@ -363,18 +358,6 @@ class ResCompany(models.Model):
             # We need to use sudo, since we might not have access to a parent company.
             lock_date = max(lock_date, self.sudo().parent_id._get_user_fiscal_lock_date())
         return lock_date
-
-    def _get_tax_lock_date(self):
-        #TODO OCO refaire
-        self.ensure_one()
-        """most_restrictive_closing = self.env['account.move'].search([
-            ('company_id', '=', self.id),
-            ('tax_closing_report_id', '!=', False),
-            ('state', '=', 'posted'),
-        ], order='date DESC', limit=1)
-
-        return most_restrictive_closing.date or date.min"""
-        return date.min
 
     def _get_violated_lock_dates(self, accounting_date, journal, tax_closing_types=None):
         """Get all the lock dates affecting the current accounting_date.

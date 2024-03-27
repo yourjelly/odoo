@@ -470,11 +470,9 @@ class AccountPartialReconcile(models.Model):
                 partial = partial_values['partial']
 
                 # Init the journal entry.
-                lock_date = move.company_id._get_user_fiscal_lock_date()
-                move_date = partial.max_date if partial.max_date > (lock_date or date.min) else today
                 move_vals = {
                     'move_type': 'entry',
-                    'date': move_date,
+                    'date': partial.max_date, # Will be moved in the future automatically at posting if it violates a closing
                     'ref': move.name,
                     'journal_id': partial.company_id.tax_cash_basis_journal_id.id,
                     'company_id': partial.company_id.id,

@@ -41,6 +41,7 @@ class TestAccountMoveDateAlgorithm(AccountTestInvoicingCommon):
         })
 
     def _set_lock_date(self, lock_date, period_lock_date=None):
+        #TODO OCO adapter
         self.env.company.fiscalyear_lock_date = fields.Date.from_string(lock_date)
         self.env.company.period_lock_date = fields.Date.from_string(period_lock_date)
 

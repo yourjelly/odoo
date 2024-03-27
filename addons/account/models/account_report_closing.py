@@ -16,7 +16,7 @@ class AccountReportClosingType(models.Model):
 
     name = fields.Char(string="Name", required=True)
     tax_ids = fields.One2many(string="Taxes", comodel_name='account.tax', inverse_name='closing_type_id')
-    report_ids = fields.Many2many(string="Reports", comodel_name='account.report')
+    report_id = fields.Many2one(string="Report", comodel_name='account.report')
     move_generator_code = fields.Char(string="Entry Generator")
     lock_type = fields.Selection(string="Lock", selection=[('none', "None"), ('entries', "Entries"), ('taxes', "Taxes")], required=True)
 
@@ -46,6 +46,8 @@ class AccountReportClosingType(models.Model):
                 res_id=f'{self._name},{closing_type.id}',
             )
         return rslt
+
+    #TODO OCO contrainte pour nécessiter de mettre un report_id quand on porte sur les taxes
 
 
 class AccountReportClosing(models.Model):
