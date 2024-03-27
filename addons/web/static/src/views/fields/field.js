@@ -50,10 +50,12 @@ export function fieldVisualFeedback(field, record, fieldName, fieldInfo) {
         empty = empty && !record.data[fieldName];
     }
     empty = inEdit ? empty && readonly : empty;
+    let datetime_data = fieldInfo.options?.end_date_field || fieldInfo.options?.start_date_field
+
     return {
         readonly,
         required,
-        invalid: record.isFieldInvalid(fieldName),
+        invalid: record.isFieldInvalid(fieldName) || (record.isFieldInvalid(datetime_data) && fieldInfo.type == 'date')|| (fieldInfo.type === 'datetime' && record.isFieldInvalid(datetime_data)),
         empty,
     };
 }
