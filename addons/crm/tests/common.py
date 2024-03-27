@@ -143,6 +143,7 @@ class TestCrmCommon(TestSalesCommon, MailCase):
             'phone': '+1 202 555 9999',
             'country_id': cls.env.ref('base.us').id,
             'probability': 20,
+            'stage_id': cls.stage_team1_1.id,
         })
         # update lead_1: stage_id is not computed anymore by default for leads
         cls.lead_1.write({
@@ -335,6 +336,7 @@ class TestCrmCommon(TestSalesCommon, MailCase):
             'name': f'TestLead{suffix}_{x:04d}',
             'type': lead_type if lead_type else types[x % 2],
             'priority': '%s' % (x % 3),
+            'stage_id': self.stage_team1_1.id
         } for x in range(count)]
 
         # generate customer information
@@ -421,6 +423,7 @@ class TestCrmCommon(TestSalesCommon, MailCase):
             'name': 'Duplicate: same email_from',
             'type': 'lead',
             'team_id': lead.team_id.id,
+            'stage_id': self.stage_team1_1.id,
             'email_from': lead.email_from,
             'probability': lead.probability,
         })
@@ -438,6 +441,7 @@ class TestCrmCommon(TestSalesCommon, MailCase):
             'team_id': lead.team_id.id,
             'partner_id': customer.id,
             'probability': lead.probability,
+            'stage_id': self.stage_team1_1.id
         })
         if create_opp:
             opp_lost = self.env['crm.lead'].create({

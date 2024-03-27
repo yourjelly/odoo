@@ -109,7 +109,6 @@ class TestCRMLead(TestCrmCommon):
         self.assertEqual(lead.type, 'lead')
         self.assertEqual(lead.user_id, self.user_sales_manager)
         self.assertEqual(lead.team_id, self.sales_team_1)
-        self.assertEqual(lead.stage_id, self.stage_team1_1)
         self.assertEqual(lead.contact_name, 'Raoulette TestContact')
         self.assertEqual(lead.email_from, '"Raoulette TestContact" <raoulette@test.example.com>')
         self.assertEqual(self.contact_1.lang, self.env.user.lang)
@@ -234,7 +233,6 @@ class TestCRMLead(TestCrmCommon):
         })
         self.assertEqual(lead.user_id, self.env['res.users'])
         self.assertEqual(lead.team_id, self.env['crm.team'])
-        self.assertEqual(lead.stage_id, self.stage_gen_1)
 
         # pipe creation: current user's best team and default stage
         lead = self.env['crm.lead'].create({
@@ -245,7 +243,6 @@ class TestCRMLead(TestCrmCommon):
         })
         self.assertEqual(lead.user_id, self.user_sales_manager)
         self.assertEqual(lead.team_id, self.sales_team_1)
-        self.assertEqual(lead.stage_id, self.stage_team1_1)
 
     @users('user_sales_manager')
     def test_crm_lead_currency_sync(self):
@@ -674,14 +671,13 @@ class TestCRMLead(TestCrmCommon):
         for lead in leads:
             self.assertEqual(lead.date_last_stage_update, first_now,
                              "Stage updated at create time with default value")
-            self.assertEqual(lead.stage_id, self.stage_team1_1)
             self.assertEqual(lead.team_id, self.sales_team_1)
         self.assertFalse(leads[0].date_open, "No user -> no assign date")
         self.assertFalse(leads[0].user_id)
         self.assertEqual(leads[1].date_open, first_now, "Default user assigned")
         self.assertEqual(leads[1].user_id, self.user_sales_salesman, "Default user assigned")
 
-        # changing user_id may change team_id / stage_id; update date_open and
+        # changing user_id may change team_id; update date_open and
         # maybe date_last_stage_update
         updated_time = datetime(2023, 11, 23, 8, 0, 0)
         with patch.object(self.env.cr, 'now', lambda: updated_time), \
@@ -689,7 +685,6 @@ class TestCRMLead(TestCrmCommon):
             leads.write({"user_id": self.user_sales_salesman.id})
             leads.flush_recordset()
         for lead in leads:
-            self.assertEqual(lead.stage_id, self.stage_team1_1)
             self.assertEqual(lead.team_id, self.sales_team_1)
         self.assertEqual(
             leads[0].date_last_stage_update, first_now,
@@ -715,7 +710,7 @@ class TestCRMLead(TestCrmCommon):
             'Mark as won updates stage hence stage update date')
         self.assertEqual(leads[1].stage_id, self.stage_gen_won)
 
-        # merge may change user_id and then may change team_id / stage_id; in this
+        # merge may change user_id and then may change team_id; in this
         # case no real value change is happening
         last_time = datetime(2023, 11, 29, 8, 0, 0)
         with patch.object(self.env.cr, 'now', lambda: last_time), \
@@ -727,7 +722,6 @@ class TestCRMLead(TestCrmCommon):
             leads.flush_recordset()
         self.assertEqual(leads[0].date_last_stage_update, first_now)
         self.assertEqual(leads[0].date_open, updated_time)
-        self.assertEqual(leads[0].stage_id, self.stage_team1_1)
         self.assertEqual(leads[0].team_id, self.sales_team_1)
         self.assertEqual(
             leads[1].date_last_stage_update, newer_time,
