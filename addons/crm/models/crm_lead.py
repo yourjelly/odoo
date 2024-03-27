@@ -320,7 +320,7 @@ class Lead(models.Model):
     @api.depends('team_id', 'type')
     def _compute_stage_id(self):
         for lead in self:
-            if not lead.stage_id:
+            if lead.type != 'lead' and not lead.stage_id:
                 lead.stage_id = lead._stage_find(domain=[('fold', '=', False)]).id
 
     @api.depends('user_id')
