@@ -3769,7 +3769,7 @@ test("no filling color for period of comparison", async () => {
         `,
         searchViewArch: /* xml */ `
             <search>
-                <filter name="date_filter" domain="[]" date="date" default_period="this_year" />
+                <filter name="date_filter" domain="[]" date="date" default_period="year_0" />
             </search>
         `,
     });

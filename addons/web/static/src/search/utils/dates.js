@@ -2,8 +2,10 @@ import { _t } from "@web/core/l10n/translation";
 import { Domain } from "@web/core/domain";
 import { serializeDate, serializeDateTime } from "@web/core/l10n/dates";
 import { localization } from "@web/core/l10n/localization";
+import { clamp } from "@web/core/utils/numbers";
+import { pick } from "@web/core/utils/objects";
 
-export const DEFAULT_PERIOD = "this_month";
+export const DEFAULT_PERIOD = "month_0";
 
 export const QUARTERS = {
     1: { description: _t("Q1"), coveredMonths: [1, 2, 3] },
@@ -137,8 +139,7 @@ export const PER_YEAR = {
  */
 export function constructDateDomain(
     referenceMoment,
-    fieldName,
-    fieldType,
+    searchItem,
     selectedOptionIds,
     comparisonOptionId
 ) {
@@ -147,17 +148,22 @@ export function constructDateDomain(
     if (comparisonOptionId) {
         [plusParam, selectedOptions] = getComparisonParams(
             referenceMoment,
+            searchItem,
             selectedOptionIds,
             comparisonOptionId
         );
     } else {
-        selectedOptions = getSelectedOptions(referenceMoment, selectedOptionIds);
+        selectedOptions = getSelectedOptions(referenceMoment, searchItem, selectedOptionIds);
+    }
+    if ("withDomain" in selectedOptions) {
+        return selectedOptions.withDomain[0];
     }
     const yearOptions = selectedOptions.year;
     const otherOptions = [...(selectedOptions.quarter || []), ...(selectedOptions.month || [])];
     sortPeriodOptions(yearOptions);
     sortPeriodOptions(otherOptions);
     const ranges = [];
+    const { fieldName, fieldType } = searchItem;
     for (const yearOption of yearOptions) {
         const constructRangeParams = {
             referenceMoment,
@@ -247,9 +253,14 @@ export function getComparisonOptions() {
  * Returns the params plusParam and selectedOptions necessary for the computation
  * of a comparison domain.
  */
-export function getComparisonParams(referenceMoment, selectedOptionIds, comparisonOptionId) {
+export function getComparisonParams(
+    referenceMoment,
+    searchItem,
+    selectedOptionIds,
+    comparisonOptionId
+) {
     const comparisonOption = COMPARISON_OPTIONS[comparisonOptionId];
-    const selectedOptions = getSelectedOptions(referenceMoment, selectedOptionIds);
+    const selectedOptions = getSelectedOptions(referenceMoment, searchItem, selectedOptionIds);
     if (comparisonOption.plusParam) {
         return [comparisonOption.plusParam, selectedOptions];
     }
@@ -313,48 +324,6 @@ export function getIntervalOptions() {
 }
 
 /**
- * Returns a version of the options in PERIOD_OPTIONS with translated descriptions
- * and a key defautlYearId used in the control panel model when toggling a period option.
- */
-export function getPeriodOptions(referenceMoment) {
-    // adapt when solution for moment is found...
-    const options = [];
-    const originalOptions = Object.values(PERIOD_OPTIONS);
-    for (const option of originalOptions) {
-        const { id, groupNumber } = option;
-        let description;
-        let defaultYear;
-        switch (option.granularity) {
-            case "quarter":
-                description = option.description.toString();
-                defaultYear = referenceMoment.set(option.setParam).year;
-                break;
-            case "month":
-            case "year": {
-                const date = referenceMoment.plus(option.plusParam);
-                description = date.toFormat(option.format);
-                defaultYear = date.year;
-                break;
-            }
-        }
-        const setParam = getSetParam(option, referenceMoment);
-        options.push({ id, groupNumber, description, defaultYear, setParam });
-    }
-    const periodOptions = [];
-    for (const option of options) {
-        const { id, groupNumber, description, defaultYear } = option;
-        const yearOption = options.find((o) => o.setParam && o.setParam.year === defaultYear);
-        periodOptions.push({
-            id,
-            groupNumber,
-            description,
-            defaultYearId: yearOption.id,
-        });
-    }
-    return periodOptions;
-}
-
-/**
  * Returns a version of the options in OPTIONS with translated descriptions (if any).
  * @param {Object{}} OPTIONS
  * @returns {Object[]}
@@ -368,19 +337,96 @@ export function getOptionsWithDescriptions(OPTIONS) {
 }
 
 /**
+ * Returns a version of the options in PERIOD_OPTIONS with translated descriptions
+ * and a key defautlYearId used in the control panel model when toggling a period option.
+ */
+export function getPeriodOptions(referenceMoment, optionsParams) {
+    return [
+        ...getMonthPeriodOptions(referenceMoment, optionsParams),
+        ...getQuarterPeriodOptions(optionsParams),
+        ...getYearPeriodOptions(referenceMoment, optionsParams),
+        ...getCustomPeriodOptions(optionsParams),
+    ];
+}
+
+function getMonthPeriodOptions(referenceMoment, optionsParams) {
+    const { startYear, endYear, startMonth, endMonth } = optionsParams;
+    return [...Array(endMonth - startMonth + 1).keys()]
+        .map((i) => {
+            const monthOffset = startMonth + i;
+            const date = referenceMoment.plus({
+                months: monthOffset,
+                years: clamp(0, startYear, endYear),
+            });
+            const yearOffset = date.year - referenceMoment.year;
+            return {
+                id: `month_${monthOffset}`,
+                defaultYearId: `year_${clamp(yearOffset, startYear, endYear)}`,
+                description: date.toFormat("MMMM"),
+                granularity: "month",
+                groupNumber: 1,
+                plusParam: { months: monthOffset },
+            };
+        })
+        .reverse();
+}
+
+function getQuarterPeriodOptions(optionsParams) {
+    const { startYear, endYear } = optionsParams;
+    const defaultYearId = `year_${clamp(0, startYear, endYear)}`;
+    return Object.values(QUARTER_OPTIONS).map((quarter) => ({
+        ...quarter,
+        defaultYearId,
+    }));
+}
+
+function getYearPeriodOptions(referenceMoment, optionsParams) {
+    const { startYear, endYear } = optionsParams;
+    return [...Array(endYear - startYear + 1).keys()]
+        .map((i) => {
+            const offset = startYear + i;
+            const date = referenceMoment.plus({ years: offset });
+            return {
+                id: `year_${offset}`,
+                description: date.toFormat("yyyy"),
+                granularity: "year",
+                groupNumber: 2,
+                plusParam: { years: offset },
+            };
+        })
+        .reverse();
+}
+
+function getCustomPeriodOptions(optionsParams) {
+    const { customOptions } = optionsParams;
+    return customOptions.map((option) => ({
+        id: option.id,
+        description: option.description,
+        granularity: "withDomain",
+        groupNumber: 3,
+        domain: option.domain,
+    }));
+}
+
+/**
  * Returns a partial version of the period options whose ids are in selectedOptionIds
  * partitioned by granularity.
  */
-export function getSelectedOptions(referenceMoment, selectedOptionIds) {
+export function getSelectedOptions(referenceMoment, searchItem, selectedOptionIds) {
     const selectedOptions = { year: [] };
+    const periodOptions = getPeriodOptions(referenceMoment, searchItem.optionsParams);
     for (const optionId of selectedOptionIds) {
-        const option = PERIOD_OPTIONS[optionId];
-        const setParam = getSetParam(option, referenceMoment);
+        const option = periodOptions.find((option) => option.id === optionId);
         const granularity = option.granularity;
         if (!selectedOptions[granularity]) {
             selectedOptions[granularity] = [];
         }
-        selectedOptions[granularity].push({ granularity, setParam });
+        if (option.domain) {
+            selectedOptions[granularity].push(pick(option, "domain", "description"));
+        } else {
+            const setParam = getSetParam(option, referenceMoment);
+            selectedOptions[granularity].push({ granularity, setParam });
+        }
     }
     return selectedOptions;
 }
@@ -425,5 +471,5 @@ export function sortPeriodOptions(options) {
  * Checks if a year id is among the given array of period option ids.
  */
 export function yearSelected(selectedOptionIds) {
-    return selectedOptionIds.some((optionId) => Object.keys(YEAR_OPTIONS).includes(optionId));
+    return selectedOptionIds.some((optionId) => optionId.startsWith("year"));
 }

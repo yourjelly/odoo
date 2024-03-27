@@ -56,6 +56,8 @@ export class SearchArchParser {
         this.currentTag = null;
         this.groupNumber = 0;
         this.pregroupOfGroupBys = [];
+
+        this.optionsParams = null;
     }
 
     parse() {
@@ -76,7 +78,11 @@ export class SearchArchParser {
                     this.visitField(node);
                     break;
                 case "filter":
-                    this.visitFilter(node);
+                    if (this.optionsParams) {
+                        this.visitDateOption(node);
+                    } else {
+                        this.visitFilter(node, visitChildren);
+                    }
                     break;
             }
         });
@@ -179,7 +185,7 @@ export class SearchArchParser {
         this.currentGroup.push(preField);
     }
 
-    visitFilter(node) {
+    visitFilter(node, visitChildren) {
         const preSearchItem = { type: "filter" };
         if (node.hasAttribute("context")) {
             const context = node.getAttribute("context");
@@ -206,12 +212,23 @@ export class SearchArchParser {
                 preSearchItem.type = "dateFilter";
                 preSearchItem.fieldName = fieldName;
                 preSearchItem.fieldType = this.fields[fieldName].type;
+                const optionsParams = {
+                    startYear: Number(node.getAttribute("start_year") || -2),
+                    endYear: Number(node.getAttribute("end_year") || 0),
+                    startMonth: Number(node.getAttribute("start_month") || -2),
+                    endMonth: Number(node.getAttribute("end_month") || 0),
+                    customOptions: [],
+                };
                 preSearchItem.defaultGeneratorIds = [DEFAULT_PERIOD];
                 if (node.hasAttribute("default_period")) {
                     preSearchItem.defaultGeneratorIds = node
                         .getAttribute("default_period")
                         .split(",");
                 }
+                this.optionsParams = optionsParams;
+                visitChildren();
+                preSearchItem.optionsParams = optionsParams;
+                this.optionsParams = null;
             } else {
                 let stringRepr = "[]";
                 if (node.hasAttribute("domain")) {
@@ -256,6 +273,19 @@ export class SearchArchParser {
             preSearchItem.description = "Ω";
         }
         this.currentGroup.push(preSearchItem);
+    }
+
+    visitDateOption(node) {
+        const preDateOption = { type: "dateOption" };
+        for (const attribute of ["name", "string", "domain"]) {
+            if (!node.getAttribute(attribute)) {
+                throw new Error(`Attribute "${attribute}" is missing.`);
+            }
+        }
+        preDateOption.id = `custom_${node.getAttribute("name")}`;
+        preDateOption.description = node.getAttribute("string");
+        preDateOption.domain = node.getAttribute("domain");
+        this.optionsParams.customOptions.push(preDateOption);
     }
 
     visitGroup(node, visitChildren) {
