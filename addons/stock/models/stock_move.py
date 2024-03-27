@@ -5,8 +5,6 @@
 from collections import defaultdict
 from datetime import timedelta
 from itertools import groupby
-
-from odoo.osv.expression import OR, AND
 from odoo.tools import groupby as groupbyelem
 from operator import itemgetter
 
@@ -2209,13 +2207,10 @@ class StockMove(models.Model):
             This allows us to only recompute the qty_to_order for the orderpoints in the relevant warehouse(s),
             instead of all the orderpoints linked to the product.
         """
-        orderpoint_domain = []
-        for move in self:
-            domain_for_move = [('product_id', '=', move.product_id.id)]
-            wh_ids = move.location_id.warehouse_id.ids + move.location_dest_id.warehouse_id.ids
-            if wh_ids:
-                domain_for_move = AND([domain_for_move, [('warehouse_id', 'in', wh_ids)]])
-            orderpoint_domain = OR([orderpoint_domain, domain_for_move])
+        orderpoint_domain = [('product_id', 'in', self.product_id.ids)]
+        no_wh_moves = self.filtered_domain([('location_id.warehouse_id', '=', False), ('location_dest_id.warehouse_id', '=', False)])
+        if not no_wh_moves:
+            orderpoint_domain.append(('warehouse_id', 'in', self.location_id.warehouse_id.ids + self.location_dest_id.warehouse_id.ids))
         self.env.add_to_compute(
             self.env['stock.warehouse.orderpoint']._fields['qty_to_order'],
             self.env['stock.warehouse.orderpoint'].sudo().search(orderpoint_domain, order='id')
