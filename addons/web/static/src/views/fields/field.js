@@ -38,6 +38,18 @@ export function getFieldFromRegistry(fieldType, widget, viewType, jsClass) {
     return findInRegistry(fieldType) || { component: DefaultField };
 }
 
+
+function isDatetimeFieldInvalid(record,fieldInfo) {
+    let datetimeData = fieldInfo.options?.end_date_field || fieldInfo.options?.start_date_field;
+
+    if ((fieldInfo.type === 'date' || fieldInfo.type === 'datetime') && record.isFieldInvalid(datetimeData)) {
+        return true;
+    }
+
+    return false;
+}
+
+
 export function fieldVisualFeedback(field, record, fieldName, fieldInfo) {
     const readonly = evaluateBooleanExpr(fieldInfo.readonly, record.evalContextWithVirtualIds);
     const required = evaluateBooleanExpr(fieldInfo.required, record.evalContextWithVirtualIds);
@@ -53,7 +65,7 @@ export function fieldVisualFeedback(field, record, fieldName, fieldInfo) {
     return {
         readonly,
         required,
-        invalid: record.isFieldInvalid(fieldName),
+        invalid: record.isFieldInvalid(fieldName) || isDatetimeFieldInvalid(record, fieldInfo),
         empty,
     };
 }
