@@ -1,8 +1,7 @@
-import { browser } from "@web/core/browser/browser";
-
 export class VideoComposer {
     canvas = document.createElement("canvas");
-    audioNode;
+    audioContext;
+    audioDestination;
     stream;
     mainVideoTrack;
     secondaryVideoTrack;
@@ -10,11 +9,15 @@ export class VideoComposer {
 
     constructor() {
         this.stream = this.canvas.captureStream(30);
-        this.stream.addTrack(this.audioNode);
+        this.audioContext = new AudioContext();
+        this.audioDestination = this.audioContext.createMediaStreamDestination();
+        const baseSource = this.audioContext.createBufferSource();
+        baseSource.connect(this.audioDestination);
+        this.stream.addTrack(this.audioDestination.stream.getAudioTracks()[0]);
     }
 
     async start() {
-        // start clock
+        // start clock (for video? or just move audio destination creation here).
     }
     stop() {
         // stop clock
@@ -29,7 +32,11 @@ export class VideoComposer {
 
     pause() {}
 
-    addAudioTrack() {}
+    addAudioTrack(track) {
+        // TODO handle unique (track id?), track existing,...
+        const source = this.audioContext.createMediaStreamSource(new MediaStream([track]));
+        source.connect(this.audioDestination);
+    }
     removeAudioTrack() {}
     setMainVideoTrack() {}
     setSecondaryVideoTrack() {}
