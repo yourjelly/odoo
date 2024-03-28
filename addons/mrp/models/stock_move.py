@@ -543,7 +543,7 @@ class StockMove(models.Model):
         :return: The quantity delivered or received
         """
         qty_ratios = []
-        boms, bom_sub_lines = kit_bom.explode(product_id, kit_qty)
+        boms, bom_sub_lines = kit_bom.explode(product_id, kit_qty / kit_bom.product_qty)
         for bom_line, bom_line_data in bom_sub_lines:
             # skip service since we never deliver them
             if bom_line.product_id.type == 'service':
@@ -557,7 +557,7 @@ class StockMove(models.Model):
                 # We compute the quantities needed of each components to make one kit.
                 # Then, we collect every relevant moves related to a specific component
                 # to know how many are considered delivered.
-                uom_qty_per_kit = bom_line_data['qty'] / bom_line_data['original_qty']
+                uom_qty_per_kit = bom_line_data['qty'] / kit_bom.product_qty
                 qty_per_kit = bom_line.product_uom_id._compute_quantity(uom_qty_per_kit, bom_line.product_id.uom_id, round=False)
                 if not qty_per_kit:
                     continue
