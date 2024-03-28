@@ -259,6 +259,12 @@ export const tourService = {
                     pointer.stop();
                     // Used to signal the python test runner that the tour finished without error.
                     browser.console.log("tour succeeded");
+                    // Used to see easily in the python console and to know which tour has been succeded in suite tours case.
+                    const succeeded = `║ TOUR ${name} SUCCEDED ║`;
+                    const msg = [succeeded];
+                    msg.unshift("╔"+Array(succeeded.length-2).fill("═").join("")+"╗");
+                    msg.push("╚"+Array(succeeded.length-2).fill("═").join("")+"╝");
+                    browser.console.log(`\n\n${msg.join("\n")}\n`);
                     runningTours.delete(name);
                 },
             });
