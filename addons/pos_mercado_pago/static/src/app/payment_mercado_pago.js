@@ -73,12 +73,11 @@ export class PaymentMercadoPago extends PaymentInterface {
             // Call Mercado Pago to create a payment intent
             const payment_intent = await this.create_payment_intent();
 
-            if ("id" in payment_intent) {
-                this.payment_intent = payment_intent;
-            } else {
+            if (!("id" in payment_intent)) {
                 this._showMsg(payment_intent.message, "error");
                 return false;
             }
+            this.payment_intent = payment_intent;
 
             // After payment creation, make the payment intent canceling possible
             line.set_payment_status("waitingCard");
@@ -107,64 +106,52 @@ export class PaymentMercadoPago extends PaymentInterface {
                         // or it is an old webhook -> trash
                         if ("id" in this.payment_intent) {
                             // Call Mercado Pago to get the status of the payment intent
-                            var last_status_payment_intent =
-                                await this.last_status_payment_intent();
+                            var last_status_payment_intent = await this.last_status_payment_intent();
                             // Check if the payment id is the same as the one
                             // we received on the payment intend creation
                             if (this.payment_intent.id == last_status_payment_intent.id) {
-                                switch (last_status_payment_intent.state) {
-                                    case "FINISHED":
-                                        line.set_payment_status("done");
-                                        this._showMsg(_t("Payment accepted"), "info");
-                                        return true;
-                                    case "OPEN":
-                                    case "ON_TERMINAL":
-                                        // BUG Sometimes the Mercado Pago webhook return ON_TERMINAL
-                                        // instead of CANCELED/FINISHED when we requested a payment status
-                                        // that was actually canceled/finished by the user on the terminal.
-                                        // Then the strategy here is to ask Mercado Pago MAX_RETRY times the
-                                        // payment intent status, hoping going out of this status
+                                if (last_status_payment_intent.state == "FINISHED") {
+                                    line.set_payment_status("done");
+                                    this._showMsg(_t("Payment accepted"), "info");
+                                    return true;
+                                }
+                                if (last_status_payment_intent.state in ["open"]) {
+                                    // BUG Sometimes the Mercado Pago webhook return ON_TERMINAL
+                                    // instead of CANCELED/FINISHED when we requested a payment status
+                                    // that was actually canceled/finished by the user on the terminal.
+                                    // Then the strategy here is to ask Mercado Pago MAX_RETRY times the
+                                    // payment intent status, hoping going out of this status
 
-                                        // Loop until MAX_RETRY is reached
-                                        var retryCount = 0;
-                                        while (retryCount < MAX_RETRY) {
-                                            last_status_payment_intent =
-                                                await this.last_status_payment_intent();
-                                            if (last_status_payment_intent.state === "FINISHED") {
-                                                line.set_payment_status("done");
-                                                this._showMsg(_t("Payment accepted"), "info");
-                                                return true;
-                                            }
-                                            if (last_status_payment_intent.state === "CANCELED") {
-                                                this._showMsg(
-                                                    _t("Payment has been canceled"),
-                                                    "info"
-                                                );
-                                                return false;
-                                            }
-                                            console.log(
-                                                `Attempt ${
-                                                    retryCount + 1
-                                                }: Received ON_TERMINAL, retrying...`
-                                            );
-                                            await new Promise((resolve) =>
-                                                setTimeout(resolve, RETRY_DELAY)
-                                            );
-                                            retryCount++;
+                                    // Loop until MAX_RETRY is reached
+                                    var retryCount = 0;
+                                    while (retryCount < MAX_RETRY) {
+                                        last_status_payment_intent =
+                                            await this.last_status_payment_intent();
+                                        if (last_status_payment_intent.state === "FINISHED") {
+                                            line.set_payment_status("done");
+                                            this._showMsg(_t("Payment accepted"), "info");
+                                            return true;
                                         }
-                                        this._showMsg(
-                                            "Payment status could not be confirmed",
-                                            "error"
+                                        if (last_status_payment_intent.state === "CANCELED") {
+                                            this._showMsg(
+                                                _t("Payment has been canceled"),
+                                                "info"
+                                            );
+                                            return false;
+                                        }
+                                        await new Promise((resolve) =>
+                                            setTimeout(resolve, RETRY_DELAY)
                                         );
-                                        return false;
-
-                                    case "ABANDONED":
-                                    case "CANCELED":
-                                        this._showMsg(_t("Payment has been canceled"), "info");
-                                        return false;
-                                    default:
-                                        this._showMsg(_t("Unknown response: "), "error");
-                                        return false;
+                                        retryCount++;
+                                    }
+                                    this._showMsg(
+                                        "Payment status could not be confirmed",
+                                        "error"
+                                    );
+                                    return false;
+                                }
+                                this._showMsg(last_status_payment_intent.result.get('message', ''), "info");
+                                return false;
                                 }
                             } else {
                                 throw _t("Payment unrecognized");
