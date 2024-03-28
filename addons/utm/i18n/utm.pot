@@ -366,7 +366,10 @@ msgstr ""
 
 #. module: utm
 #: model_terms:ir.ui.view,arch_db:utm.view_utm_campaign_view_search
-msgid "My Campaigns"
+#. odoo-python
+#: code:addons/utm/models/utm_source.py:0
+#, python-format
+msgid "Multiple records with the same name. The name should be unique!"
 msgstr ""
 
 #. module: utm
