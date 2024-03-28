@@ -491,3 +491,16 @@ class AccountEdiXmlUBLBIS3(models.AbstractModel):
             })
 
         return constraints
+
+    def _import_retrieve_partner_vals(self, tree, role):
+        # EXTENDS account.edi.xml.ubl_20
+        partner_vals = super()._import_retrieve_partner_vals(tree, role)
+        nsmap = {k: v for k, v in tree.nsmap.items() if k is not None}
+        endpoint_node = tree.find(f'.//cac:Accounting{role}Party/cac:Party/cbc:EndpointID', nsmap)
+        if endpoint_node is not None:
+            peppol_eas = endpoint_node.attrib.get('schemeID')
+            peppol_endpoint = endpoint_node.text
+            if peppol_eas and peppol_endpoint:
+                # include the EAS and endpoint in the search domain when retrieving the partner
+                partner_vals['domain'] = [('peppol_eas', '=', peppol_eas), ('peppol_endpoint', '=', peppol_endpoint)]
+        return partner_vals
