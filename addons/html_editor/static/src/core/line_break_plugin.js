@@ -17,6 +17,9 @@ export class LineBreakPlugin extends Plugin {
             case "INSERT_LINEBREAK":
                 this.insertLineBreak();
                 break;
+            case "INSERT_LINEBREAK_ELEMENT":
+                this.insertLineBreakElement(payload);
+                break;
         }
     }
 
