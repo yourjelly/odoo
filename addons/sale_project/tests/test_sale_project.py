@@ -96,7 +96,8 @@ class TestSaleProject(HttpCase, TestSaleProjectCommon):
         project = cls.env['project.project'].create({
             'name': 'Test History Project',
             'type_ids': [Command.create({'name': 'To Do'})],
-            'allow_billable': True
+            'allow_billable': True,
+            'partner_id': cls.partner.id,
         })
 
         cls.env['project.task'].create({

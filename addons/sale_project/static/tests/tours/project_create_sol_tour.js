@@ -15,25 +15,17 @@ registry.category("web_tour.tours").add('project_create_sol_tour', {
         trigger: ".o_kanban_card_manage_settings a:contains('Settings')",
         content: 'Start editing the project.',
     }, {
-        trigger: ".o_field_widget[name='partner_id'] input",
-        content: "Add the customer for this project"
-    }, {
-        trigger: ".ui-autocomplete > li > a:not(:has(i.fa))",
-        content: "Select the customer in the autocomplete dropdown",
-        auto: true,
-    }, {
-        id: "project_sale_timesheet_start",
         trigger: 'a.nav-link[name="settings"]',
         extra_trigger: 'div.o_notebook_headers',
         content: 'Click on Settings tab to configure this project.',
     }, {
-        id: "project_sale_timesheet_start",
         trigger: "div[name='sale_line_id'] input",
         content: 'Add the Sales Order Item',
         run: "text New Sale order line",
     }, {
         trigger: ".o_field_widget[name=sale_line_id] .o-autocomplete--dropdown-menu .o_m2o_dropdown_option_create a",
         content: "Create an Sales Order Item in the autocomplete dropdown.",
+        id: "project_sale_timesheet_start",
     }, {
         trigger: ".o_form_button_save",
         content: "Save project",

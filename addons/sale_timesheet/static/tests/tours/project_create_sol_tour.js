@@ -20,12 +20,8 @@ patch(registry.category("web_tour.tours").get("project_create_sol_tour"), {
            content: "Create the customer in the autocomplete dropdown.",
            trigger: ".o_field_widget[name=employee_id] .o-autocomplete--dropdown-menu .o_m2o_dropdown_option_create a",
         }, {
-            trigger: "div[name='sale_line_id'] input",
-            content: "Add the Sales Order Item to link to the timesheets of this employee.",
-            run: "text New Sale order line",
-        }, {
-            trigger: ".o_field_widget[name=sale_line_id] .o-autocomplete--dropdown-menu .o_m2o_dropdown_option_create_edit a",
-            content: "Create an Sales Order Item in the autocomplete dropdown.",
+            trigger: 'a.nav-link[name="settings"]',
+            content: 'Click on Settings tab to configure this project.',
         });
         return originalSteps;
     }
