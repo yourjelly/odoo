@@ -130,7 +130,7 @@ class account_journal(models.Model):
         queries = []
         for company, journals in groupby(self, lambda x: x.company_id):
             lock_date = company._get_lock_date_for_all_entries()
-            #TODO OCO à voir: avec les branches ça a ses limites, ce truc, de toute façon : la lock date pourrait être différent entre le parent et ses enfants ... '(en cas de closing faite à la mainà
+            #TODO OCO à voir: avec les branches ça a ses limites, ce truc, de toute façon : la lock date pourrait être différent entre le parent et ses enfants ... '(en cas de closing faite à la main
             # ====> Après bon, pour l'usage de ce truc-ci, je pense que ça devrait aller ...
             queries.append(SQL(
                 """
@@ -140,11 +140,11 @@ class account_journal(models.Model):
                       JOIN res_company company ON company.id = move.company_id
                      WHERE move.journal_id = ANY(%(journal_ids)s)
                        AND move.state = 'posted'
-                       %(lock_date_query)
+                       %(lock_date_query)s
                   GROUP BY move.journal_id, move.sequence_prefix
                     HAVING COUNT(*) != MAX(move.sequence_number) - MIN(move.sequence_number) + 1
                 """,
-                journal_ids=journals.ids,
+                journal_ids=[journal.id for journal in journals],
                 lock_date_query=SQL("AND move.date > %(lock_date)s", lock_date=lock_date) if lock_date else SQL(),
             ))
 

@@ -9,7 +9,6 @@
             <field name="filter_fiscal_position" eval="1"/>
             <field name="default_opening_date_filter">last_closing_period</field>
             <field name="only_tax_exigible" eval="True"/>
-            <field name="closing_type_id" ref="account.closing_type_vat"/><!--TODO OCO c'est du test; virer => plus de closing ici, donc-->
             <field name="column_ids">
                 <record id="generic_tax_report_column_net" model="account.report.column">
                     <field name="name">Net</field>

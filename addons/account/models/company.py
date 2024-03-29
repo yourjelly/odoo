@@ -41,13 +41,6 @@ class ResCompany(models.Model):
     fiscalyear_last_day = fields.Integer(default=31, required=True)
     fiscalyear_last_month = fields.Selection(MONTH_SELECTION, default='12', required=True)
 
-    #TODO OCO virer tous ces champs lock dates
-    tax_lock_date = fields.Date(
-        string="Tax Return Lock Date",
-        tracking=True,
-        help="No users can edit journal entries related to a tax prior and inclusive of this date.")
-    max_tax_lock_date = fields.Date(compute='_compute_max_tax_lock_date', recursive=True)  # TODO maybe store
-
     transfer_account_id = fields.Many2one('account.account',
         check_company=True,
         domain="[('reconcile', '=', True), ('account_type', '=', 'asset_current'), ('deprecated', '=', False)]", string="Inter-Banks Transfer Account", help="Intermediary account used when moving money from a liqity account to another")
@@ -252,11 +245,6 @@ class ResCompany(models.Model):
             if html:
                 company.invoice_terms_html = html
 
-    @api.depends('parent_id.max_tax_lock_date')
-    def _compute_max_tax_lock_date(self):
-        for company in self:
-            company.max_tax_lock_date = max(company.tax_lock_date or date.min, company.parent_id.max_tax_lock_date or date.min)
-
     @api.model_create_multi
     def create(self, vals_list):
         companies = super().create(vals_list)
@@ -312,23 +300,6 @@ class ResCompany(models.Model):
             })
         return action
 
-    def _get_user_fiscal_lock_date(self): #TODO OCO virer ? Réécrire ?
-        """Get the fiscal lock date for this company depending on the user"""
-        lock_date = max(self.period_lock_date or date.min, self.fiscalyear_lock_date or date.min)
-        if self.user_has_groups('account.group_account_manager'):
-            lock_date = self.fiscalyear_lock_date or date.min
-        if self.parent_id:
-            # We need to use sudo, since we might not have access to a parent company.
-            lock_date = max(lock_date, self.sudo().parent_id._get_user_fiscal_lock_date())
-        return lock_date
-
-    def _get_lock_date_for_all_entries(self):
-        self.ensure_one()
-        return self.env['account.report.closing'].search_read(
-            [('state', '=', 'closed', ('company_id', 'in', self.id)],
-            fields=['date'], order='date DESC', limit=1,
-        ).date
-
     def _get_violated_lock_dates(self, accounting_date, journal, tax_closing_types=None):
         """Get all the lock dates affecting the current accounting_date.
         :param accoutiaccounting_dateng_date: The accounting date
@@ -336,62 +307,72 @@ class ResCompany(models.Model):
         :return: a list of tuples containing the lock dates ordered chronologically.
         """ #TODO OCO REDOC
         self.ensure_one()
-        locks = []
 
-        violated_closing_domain = [
+        if not tax_closing_types:
+            tax_closing_types = self.env['account.report.closing.type']
+
+        violated_closing_dates = self.env['account.report.closing']._read_group(
+            [
+                ('date', '>=', accounting_date),
+                *self._get_closing_lock_domain(journal, tax_closing_types)
+            ],
+            groupby=['closing_type_id'],
+            aggregates=['date:min']
+
+        )
+
+        locks = {}
+        for closing_type, lock_date in violated_closing_dates:
+            if closing_type in tax_closing_types and locks.get('tax', date.max) > lock_date:
+                locks['tax'] = lock_date
+            elif locks.get('user', date.max) > lock_date:
+                locks['tax'] = lock_date
+
+        return locks
+
+    def _get_closing_lock_domain(self, journal, tax_closing_types):
+        self.ensure_one()
+        closing_domain = [
             ('company_ids', 'in', self.id),
-            ('date', '>=', accounting_date),
             '|',
                 '&', ('closing_type_id.lock_type', '=', 'taxes'), ('closing_type_id', 'in', tax_closing_types.ids),
                 ('closing_type_id.lock_type', '=', 'entries'),
+            '|',
+                ('state', '=', 'closed'),
+                ('journal_lock_ids', 'any', [
+                    ('company_id', '=', self.id),
+                    ('journal_id', '=', journal.id),
+                ]),
         ]
 
         if self.user_has_groups('account.group_account_manager'):
             # Top-level accounting users are only limited by 'closed' closings, if they have access to its main company.
             # Else, they behave like any other users with lesser rights.
-            violated_closing_domain += [
+            closing_domain += [
                 '|',
                 ('state', '=', 'closed'),
                 ('main_company_id', 'not in', self.env.user.company_ids.ids),
             ]
 
-        domain_query = self.env['account.report.closing']._where_calc(violated_closing_domain)
-        violated_closings_query = SQL("""
-            SELECT DISTINCT ON (account_report_closing.closing_type_id)
-                account_report_closing.closing_type_id,
-                account_report_closing.date
-            FROM %(table_references)s
-            LEFT JOIN account_report_closing_journal_lock journal_lock
-                ON journal_lock.closing_id = account_report_closing.id
-                    AND journal_lock.company_id = %(company_id)s
-                    AND journal_lock.journal_id = %(journal_id)s
-            WHERE
-                %(search_condition)s
-                AND (account_report_closing.state = 'closed' OR journal_lock.id IS NOT NULL)
-            ORDER BY account_report_closing.closing_type_id, account_report_closing.date
-        """,
-            table_references=domain_query.from_clause,
-            search_condition=domain_query.where_clause,
-            company_id=self.id,
-            journal_id=journal.id,
+        return closing_domain
+
+    def _get_user_lock_date(self, journal):
+        """Get the fiscal lock date for this company depending on the user"""
+        closing_data = self.env['account.report.closing'].search_read(
+            self._get_closing_lock_domain(journal, self.env['account.report.closing.type']),
+            fields=['date'], order='date DESC', limit=1,
         )
-        #TODO OCO ceci, tu pourrais sans doute le réécrire en utilisant _search, pour éviter le SQL explicite ===> ou même encore mieux, avec un 'any' dans un domaine :o (pas sûr avec le distinct on ... read_group ? Mais il y a l'order by)
-        # TODO OCO si ongarde un query ici, il faut flush
+        return closing_data['date'] if closing_data else date.min
 
-        self._cr.execute(violated_closings_query)
-        for closing_type_id, lock_date in self._cr.fetchall():
-            if tax_closing_types and closing_type_id in tax_closing_types.ids:
-                locks.append((lock_date, 'tax'))
-            else:
-                locks.append((lock_date, 'user'))
-
-        locks.sort()
-        return locks #TODO OCO changer pour retourner un dict d'un seul élément
+    def _get_lock_date_for_all_entries(self):
+        self.ensure_one()
+        closing_data = self.env['account.report.closing'].search_read(
+            [('state', '=', 'closed'), ('company_ids', 'in', self.id)],
+            fields=['date'], order='date DESC', limit=1,
+        )
+        return closing_data['date'] if closing_data else date.min
 
     def write(self, values):
-        #restrict the closing of FY if there are still unposted entries
-        self._validate_fiscalyear_lock(values)
-
         # Reflect the change on accounts
         for company in self:
             if values.get('bank_account_code_prefix'):

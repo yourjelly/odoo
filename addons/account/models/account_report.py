@@ -751,8 +751,8 @@ class AccountReportExpression(models.Model):
           'name': '-' + tag_name,
           'applicability': 'taxes',
           'tax_negate': True,
-          'country_id': country_id, #TODO OCO (imp pour après) on pourrait sans doute le récupérer depuis le rapport aussi
-          'report_id': self.report_id.id,
+          'country_id': country_id,
+          'report_id': self.report_line_id.report_id.id,
         }
         plus_tag_vals = {
           'name': '+' + tag_name,

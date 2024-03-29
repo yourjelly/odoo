@@ -27,7 +27,7 @@ class AccountReportClosingType(models.Model):
 
     tax_closing_payable_account_id = fields.Many2one(string="Tax Payable Account", comodel_name='account.account', company_dependent=True, required=True)
     tax_closing_receivable_account_id = fields.Many2one(string="Tax Receivable Account", comodel_name='account.account', company_dependent=True, required=True)
-    tax_closing_journal_id = fields.Many2one(string="Tax Closing Journal", comodel_name='account.journal', company_dependent=True, required=True)#TODO OCO quid des valeurs par défaut de ces champs ?
+    tax_closing_journal_id = fields.Many2one(string="Tax Closing Journal", comodel_name='account.journal', company_dependent=True, required=True)
 
 
 
