@@ -382,6 +382,8 @@ export class PosStore extends Reactive {
         const values = {
             price_extra: 0,
             price_unit: 0,
+            price_subtotal: 0,
+            price_subtotal_incl: 0,
             order_id: this.get_order(),
             qty: 1,
             tax_ids: product.taxes_id[0] ? [["link", product.taxes_id[0]]] : [],
@@ -558,6 +560,8 @@ export class PosStore extends Reactive {
         }
 
         const line = this.data.models["pos.order.line"].create({ ...values, order_id: order });
+        line.price_subtotal = line.get_price_without_tax();
+        line.price_subtotal_incl = line.get_price_with_tax();
         line.setOptions(options);
         this.selectOrderLine(order, line);
         this.numberBuffer.reset();
@@ -581,6 +585,8 @@ export class PosStore extends Reactive {
 
         if (to_merge_orderline) {
             to_merge_orderline.merge(line);
+            to_merge_orderline.price_subtotal = to_merge_orderline.get_price_without_tax();
+            to_merge_orderline.price_subtotal_incl = to_merge_orderline.get_price_with_tax();
             line.delete();
             this.selectOrderLine(order, to_merge_orderline);
         } else if (!selectedOrderline) {
