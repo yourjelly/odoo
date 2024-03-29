@@ -42,11 +42,6 @@ class ResCompany(models.Model):
     fiscalyear_last_month = fields.Selection(MONTH_SELECTION, default='12', required=True)
 
     #TODO OCO virer tous ces champs lock dates
-    fiscalyear_lock_date = fields.Date(
-        string="All Users Lock Date",
-        tracking=True,
-        help="No users, including Advisers, can edit accounts prior to and inclusive of this date."
-             " Use it for fiscal year locking for example.")
     tax_lock_date = fields.Date(
         string="Tax Return Lock Date",
         tracking=True,
@@ -291,11 +286,11 @@ class ResCompany(models.Model):
         for account in accounts:
             account.write({'code': self.get_new_account_code(account.code, old_code, new_code)})
 
-    def _get_fiscalyear_lock_statement_lines_redirect_action(self, unreconciled_statement_lines):
+    def _get_fiscalyear_lock_statement_lines_redirect_action(self, domain):
         """ Get the action redirecting to the statement lines that are not already reconciled when setting a fiscal
         year lock date.
 
-        :param unreconciled_statement_lines: The statement lines.
+        :param domain: Domain to select the statement lines to open.
         :return: A dictionary representing a window action.
         """
 
@@ -313,41 +308,9 @@ class ResCompany(models.Model):
         else:
             action.update({
                 'view_mode': 'list,form',
-                'domain': [('id', 'in', unreconciled_statement_lines.ids)],
+                'domain': domain,
             })
         return action
-
-    def _validate_fiscalyear_lock(self, values):
-        if values.get('fiscalyear_lock_date'):
-
-            draft_entries = self.env['account.move'].search([
-                ('company_id', 'child_of', self.ids),
-                ('state', '=', 'draft'),
-                ('date', '<=', values['fiscalyear_lock_date'])])
-            if draft_entries:
-                error_msg = _('There are still draft entries in the period you want to lock. You should either post or delete them.')
-                action_error = {
-                    'view_mode': 'tree',
-                    'name': _('Draft Entries'),
-                    'res_model': 'account.move',
-                    'type': 'ir.actions.act_window',
-                    'domain': [('id', 'in', draft_entries.ids)],
-                    'search_view_id': [self.env.ref('account.view_account_move_filter').id, 'search'],
-                    'views': [[self.env.ref('account.view_move_tree').id, 'list'], [self.env.ref('account.view_move_form').id, 'form']],
-                }
-                raise RedirectWarning(error_msg, action_error, _('Show draft entries'))
-
-            unreconciled_statement_lines = self.env['account.bank.statement.line'].search([
-                ('company_id', 'child_of', self.ids),
-                ('is_reconciled', '=', False),
-                ('date', '<=', values['fiscalyear_lock_date']),
-                ('move_id.state', 'in', ('draft', 'posted')),
-            ])
-            if unreconciled_statement_lines:
-                error_msg = _("There are still unreconciled bank statement lines in the period you want to lock."
-                            "You should either reconcile or delete them.")
-                action_error = self._get_fiscalyear_lock_statement_lines_redirect_action(unreconciled_statement_lines)
-                raise RedirectWarning(error_msg, action_error, _('Show Unreconciled Bank Statement Line'))
 
     def _get_user_fiscal_lock_date(self): #TODO OCO virer ? Réécrire ?
         """Get the fiscal lock date for this company depending on the user"""
@@ -358,6 +321,13 @@ class ResCompany(models.Model):
             # We need to use sudo, since we might not have access to a parent company.
             lock_date = max(lock_date, self.sudo().parent_id._get_user_fiscal_lock_date())
         return lock_date
+
+    def _get_lock_date_for_all_entries(self):
+        self.ensure_one()
+        return self.env['account.report.closing'].search_read(
+            [('state', '=', 'closed', ('company_id', 'in', self.id)],
+            fields=['date'], order='date DESC', limit=1,
+        ).date
 
     def _get_violated_lock_dates(self, accounting_date, journal, tax_closing_types=None):
         """Get all the lock dates affecting the current accounting_date.
@@ -405,16 +375,18 @@ class ResCompany(models.Model):
             company_id=self.id,
             journal_id=journal.id,
         )
+        #TODO OCO ceci, tu pourrais sans doute le réécrire en utilisant _search, pour éviter le SQL explicite ===> ou même encore mieux, avec un 'any' dans un domaine :o (pas sûr avec le distinct on ... read_group ? Mais il y a l'order by)
+        # TODO OCO si ongarde un query ici, il faut flush
 
         self._cr.execute(violated_closings_query)
         for closing_type_id, lock_date in self._cr.fetchall():
             if tax_closing_types and closing_type_id in tax_closing_types.ids:
-                locks.append((lock_date, _('tax'))) #TODO OCO pourquoi on met les string traduits là-dedans ? C'est louche
+                locks.append((lock_date, 'tax'))
             else:
-                locks.append((lock_date, _('user'))) #TODO OCO pourquoi on met les string traduits là-dedans ? C'est louche
+                locks.append((lock_date, 'user'))
 
         locks.sort()
-        return locks
+        return locks #TODO OCO changer pour retourner un dict d'un seul élément
 
     def write(self, values):
         #restrict the closing of FY if there are still unposted entries

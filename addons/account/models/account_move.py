@@ -568,7 +568,7 @@ class AccountMove(models.Model):
         help='Technical field to get the domain on the bank',
     )
     # used to display a message when the invoice's accounting date is prior of the tax lock date
-    tax_lock_date_message = fields.Char(compute='_compute_tax_lock_date_message')
+    tax_lock_date_message = fields.Char(compute='_compute_tax_lock_date_message') #TODO OCO c'est pas juste pour la tax lock date, je pense ; renommer ?
     # used for tracking the status of the currency
     display_inactive_currency_warning = fields.Boolean(compute="_compute_display_inactive_currency_warning")
     tax_country_id = fields.Many2one(  # used to filter the available taxes depending on the fiscal country and fiscal position.
@@ -4570,7 +4570,6 @@ class AccountMove(models.Model):
 
     def _get_impacted_tax_closing_types(self):
         #TODO OCO DOC
-        self.ensure_one()
         # Calling invoice_line_ids is necessart for new records of invoices ; they won't have line_ids until saved.
         closing_types_from_taxes = (
             self.line_ids.tax_ids
@@ -4604,9 +4603,9 @@ class AccountMove(models.Model):
             invoice_date = self._get_accounting_date(invoice_date, self.journal_id, tax_closing_types=tax_closing_types)
             lock_date, lock_type = lock_dates[-1]
             tax_lock_date_message = _(
-                "The date is being set prior to the %(lock_type)s lock date %(lock_date)s. "
+                "The date is being set prior to the %(lock_date_name)s %(lock_date)s. "
                 "The Journal Entry will be accounted on %(invoice_date)s upon posting.",
-                lock_type=lock_type,
+                lock_date_name=_("tax lock date") if lock_type == 'tax' else _("user lock date"),
                 lock_date=format_date(self.env, lock_date),
                 invoice_date=format_date(self.env, invoice_date))
             return tax_lock_date_message
