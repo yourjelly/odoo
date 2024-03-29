@@ -9443,6 +9443,7 @@
     // Filters action
     //------------------------------------------------------------------------------
     const FILTERS_CREATE_FILTER_TABLE = (env) => {
+        env.model.selection.selectTableAroundSelection();
         const sheetId = env.model.getters.getActiveSheetId();
         const selection = env.model.getters.getSelection().zones;
         interactiveAddFilter(env, sheetId, selection);
@@ -42500,12 +42501,14 @@
             this.editionState = "initializing";
         }
         stopEdition() {
-            if (!this.state.isEditing)
+            const input = this.sheetNameRef.el;
+            if (!this.state.isEditing || !input)
                 return;
             this.state.isEditing = false;
             this.editionState = "initializing";
-            this.sheetNameRef.el?.blur();
+            input.blur();
             const inputValue = this.getInputContent() || "";
+            input.innerText = inputValue;
             interactiveRenameSheet(this.env, this.props.sheetId, inputValue, () => this.startEdition());
         }
         cancelEdition() {
@@ -42966,7 +42969,7 @@
             this.sheetListRef.el.scrollTo({ top: 0, left: scroll, behavior: "smooth" });
         }
         onSheetMouseDown(sheetId, event) {
-            if (event.button !== 0)
+            if (event.button !== 0 || this.env.model.getters.isReadonly())
                 return;
             this.closeMenu();
             const mouseX = event.clientX;
@@ -48064,8 +48067,8 @@
 
 
     __info__.version = '16.3.30';
-    __info__.date = '2024-03-25T11:03:02.925Z';
-    __info__.hash = '0d2ee33';
+    __info__.date = '2024-03-29T16:12:29.519Z';
+    __info__.hash = '140dcfc';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
