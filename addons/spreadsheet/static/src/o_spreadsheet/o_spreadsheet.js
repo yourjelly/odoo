@@ -29223,7 +29223,17 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             }
         }
         exportForExcel(data) {
-            this.export(data);
+            for (const sheet of data.sheets) {
+                for (const filterTable of this.getFilterTables(sheet.id)) {
+                    if (zoneToDimension(filterTable.zone).height === 1) {
+                        continue;
+                    }
+                    sheet.filterTables.push({
+                        range: zoneToXc(filterTable.zone),
+                        filters: [],
+                    });
+                }
+            }
         }
     }
     FiltersPlugin.getters = [
@@ -43295,8 +43305,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
 
 
     __info__.version = '16.0.36';
-    __info__.date = '2024-03-25T10:54:14.110Z';
-    __info__.hash = '2c2117b';
+    __info__.date = '2024-03-29T14:56:45.343Z';
+    __info__.hash = '8ba513e';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
