@@ -370,7 +370,7 @@ class ResCompany(models.Model):
             [('state', '=', 'closed'), ('company_ids', 'in', self.id)],
             fields=['date'], order='date DESC', limit=1,
         )
-        return closing_data['date'] if closing_data else date.min
+        return closing_data[0]['date'] if closing_data else date.min
 
     def write(self, values):
         # Reflect the change on accounts
