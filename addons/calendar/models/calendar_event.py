@@ -573,6 +573,12 @@ class Meeting(models.Model):
                 detached_events = event._apply_recurrence_values(recurrence_values)
                 detached_events.active = False
 
+        occurring_vals = []
+        for event in events:
+            for alarm_id in event.alarm_ids:
+                occurring_vals.append({'event_id': event.id, 'alarm_id': alarm_id.id }) 
+        self.env['calendar.occurrence'].create(occurring_vals)
+
         events.filtered(lambda event: event.start > fields.Datetime.now()).attendee_ids._send_invitation_emails()
 
         events._sync_activities(fields={f for vals in vals_list for f in vals.keys()})
