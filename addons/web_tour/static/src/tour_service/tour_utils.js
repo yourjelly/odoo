@@ -171,7 +171,7 @@ export class RunningTourActionHelper {
 
     click = (selector) => {
         const element = this._get_action_element(selector);
-        this._click(element);
+        hoot.click(element);
     }
 
     dblclick = (selector) => {
@@ -197,7 +197,7 @@ export class RunningTourActionHelper {
      */
     editor = (text, selector) => {
         const element = this._get_action_element(selector);
-        this._click(element);
+        this.click(element);
         this._set_range(element, "start");
         element.dispatchEvent(new KeyboardEvent("keydown", { key: "_" }));
         element.textContent = text;
@@ -278,14 +278,15 @@ export class RunningTourActionHelper {
     }
    
     _click(target) {
-        triggerPointerEvent(target, "pointerover", true);
-        triggerPointerEvent(target, "pointerenter", false);
-        triggerPointerEvent(target, "pointermove", true);
-        triggerPointerEvent(target, "pointerdown", true);
-        triggerPointerEvent(target, "pointerup", true);
-        triggerPointerEvent(target, "click", true);
-        triggerPointerEvent(target, "pointerout", true);
-        triggerPointerEvent(target, "pointerleave", false);
+        hoot.click(target);
+        // triggerPointerEvent(target, "pointerover", true);
+        // triggerPointerEvent(target, "pointerenter", false);
+        // triggerPointerEvent(target, "pointermove", true);
+        // triggerPointerEvent(target, "pointerdown", true);
+        // triggerPointerEvent(target, "pointerup", true);
+        // triggerPointerEvent(target, "click", true);
+        // triggerPointerEvent(target, "pointerout", true);
+        // triggerPointerEvent(target, "pointerleave", false);
     }
 
     // Useful for wysiwyg editor.
