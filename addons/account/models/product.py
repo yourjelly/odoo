@@ -34,7 +34,7 @@ class ProductTemplate(models.Model):
         default=lambda self: self.env.companies.account_sale_tax_id or self.env.companies.root_id.sudo().account_sale_tax_id,
     )
     tax_string = fields.Char(compute='_compute_tax_string')
-    supplier_taxes_id = fields.Many2many('account.tax', 'product_supplier_taxes_rel', 'prod_id', 'tax_id', string='Vendor Taxes', help='Default taxes used when buying the product.',
+    supplier_taxes_id = fields.Many2many('account.tax', 'product_supplier_taxes_rel', 'prod_id', 'tax_id', string='Purchase Taxes', help='Default taxes used when buying the product.',
         domain=[('type_tax_use', '=', 'purchase')],
         default=lambda self: self.env.companies.account_purchase_tax_id or self.env.companies.root_id.sudo().account_purchase_tax_id,
     )
@@ -77,6 +77,30 @@ class ProductTemplate(models.Model):
         for record in self:
             allowed_companies = record.company_id or self.env.companies
             record.fiscal_country_codes = ",".join(allowed_companies.mapped('account_fiscal_country_id.code'))
+
+    @api.onchange('taxes_id')
+    def _onchange_taxes_id(self):
+        # On the change of sales tax, purchase tax should be set if the same amount is present else remain as it is
+        for product in self:
+            sales_taxes = product.taxes_id.filtered(lambda x: x.type_tax_use == 'sale')
+            # Get existing purchase taxes
+            existing_purchase_taxes = product.supplier_taxes_id.ids
+            purchase_taxes_ids = []
+
+            for tax in sales_taxes:
+                # Find purchase tax with the same amount as sales tax
+                matching_purchase_tax = self.env['account.tax'].search([('type_tax_use', '=', 'purchase'),
+                                                                        ('amount', '=', tax.amount)])
+                if matching_purchase_tax:
+                    purchase_taxes_ids.extend(matching_purchase_tax.ids)
+
+            # Update supplier_taxes_id only if there are new purchase taxes
+            if purchase_taxes_ids:
+                updated_purchase_taxes = list(set(existing_purchase_taxes) | set(purchase_taxes_ids))
+                product.supplier_taxes_id = [(6, 0, updated_purchase_taxes)]
+            else:
+                # If no matching purchase tax is found, retain the existing purchase taxes
+                product.supplier_taxes_id = [(6, 0, existing_purchase_taxes)]
 
     @api.depends('taxes_id', 'list_price')
     def _compute_tax_string(self):

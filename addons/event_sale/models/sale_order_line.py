@@ -17,13 +17,6 @@ class SaleOrderLine(models.Model):
         help="Choose an event ticket and it will automatically create a registration for this event ticket.")
     registration_ids = fields.One2many('event.registration', 'sale_order_line_id', string="Registrations")
 
-    @api.constrains('event_id', 'event_ticket_id', 'product_id')
-    def _check_event_registration_ticket(self):
-        for so_line in self:
-            if not so_line.event_id or not so_line.event_ticket_id:
-                raise ValidationError(
-                    _("The sale order line with the product %(product_name)s needs an event and a ticket.", product_name=so_line.product_id.name))
-
     @api.depends('state', 'event_id')
     def _compute_product_uom_readonly(self):
         event_lines = self.filtered(lambda line: line.event_id)
@@ -36,7 +29,7 @@ class SaleOrderLine(models.Model):
         registrations linked to this line. """
         registrations_vals = []
         for so_line in self:
-            if not so_line.product_type == 'event':
+            if so_line.product_type != 'service':
                 continue
 
             for _count in range(int(so_line.product_uom_qty) - len(so_line.registration_ids)):

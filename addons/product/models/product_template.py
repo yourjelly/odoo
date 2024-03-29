@@ -50,7 +50,7 @@ class ProductTemplate(models.Model):
              "This description will be copied to every Sales Order, Delivery Order and Customer Invoice/Credit Note")
     detailed_type = fields.Selection([
         ('consu', 'Goods'),
-        ('service', 'Service')], string='Product Type', default='consu', required=True,
+        ('service', 'Service')], string='Type', default='consu', required=True,
         help='A storable product is a product for which you manage stock. The Inventory app has to be installed.\n'
              'A consumable product is a product for which stock is not managed.\n'
              'A service is a non-material product you provide.')

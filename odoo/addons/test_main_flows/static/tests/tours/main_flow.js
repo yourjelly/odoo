@@ -36,7 +36,7 @@ stepUtils.openBurgerMenu(".o_breadcrumb .active:contains('Quotations')"),
     position: 'left',
     run: "edit the_flow.product",
 }, {
-    trigger: ".o_field_widget[name=detailed_type] select",
+    trigger: ".o_field_widget[name=detailed_type] div",
     content: _t("Let's enter the product type"),
     position: 'left',
     run: `select "product"`,
@@ -212,7 +212,7 @@ stepUtils.autoExpandMoreButtons('.o_form_saved'),
     // click somewhere else to exit cell focus
 }, {
     mobile: false,
-    trigger: 'label:contains("Vendor Taxes")',
+    trigger: 'label:contains("Purchase Taxes")',
     // click somewhere else to exit cell focus
 }, {
     mobile: false,
@@ -325,7 +325,7 @@ stepUtils.autoExpandMoreButtons('.o_form_saved'),
     // click somewhere else to exit cell focus
 }, {
     mobile: false,
-    trigger: 'label:contains("Vendor Taxes")',
+    trigger: 'label:contains("Purchase Taxes")',
     // click somewhere else to exit cell focus
 }, {
     trigger: '.o_back_button',
@@ -361,7 +361,7 @@ stepUtils.autoExpandMoreButtons('.o_form_saved'),
     position: 'left',
     run: "edit the_flow.service",
 }, {
-    trigger: '.o_field_widget[name=detailed_type] select',
+    trigger: '.o_field_widget[name=detailed_type] div',
     content: _t('Set to service'),
     position: 'left',
     run: `select "service"`,

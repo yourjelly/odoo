@@ -52,7 +52,6 @@ class TestEventCrm(TestEventFullCommon):
             for customer_data in self.website_customer_data[:self.TICKET1_COUNT]
         ]
         t1_registrations = self.env['event.registration'].create(t1_reg_vals)
-
         # check effect: registrations, leads
         self.assertEqual(self.test_event.registration_ids, t1_registrations)
         self.assertEqual(len(self.test_rule_order.lead_ids), 1)

@@ -15,7 +15,7 @@ class SaleOrder(models.Model):
         in website_sale controller shop/address that updates customer, but not
         only. """
         result = super(SaleOrder, self).write(vals)
-        if any(line.product_type == 'event' for line in self.order_line) and vals.get('partner_id'):
+        if any(line.product_type == 'service' for line in self.order_line) and vals.get('partner_id'):
             registrations_toupdate = self.env['event.registration'].sudo().search([('sale_order_id', 'in', self.ids)])
             registrations_toupdate.write({'partner_id': vals['partner_id']})
         return result
@@ -23,14 +23,11 @@ class SaleOrder(models.Model):
     def action_confirm(self):
         res = super(SaleOrder, self).action_confirm()
         for so in self:
-            if not any(line.product_type == 'event' for line in so.order_line):
+            event_so_lines = so.order_line.filtered('event_id')
+            if not event_so_lines:
                 continue
-            so_lines_missing_events = so.order_line.filtered(lambda line: line.product_type == 'event' and not line.event_id)
-            if so_lines_missing_events:
-                so_lines_descriptions = "".join(f"\n- {so_line_description.name}" for so_line_description in so_lines_missing_events)
-                raise ValidationError(_("Please make sure all your event related lines are configured before confirming this order:%s", so_lines_descriptions))
             # Initialize registrations
-            so.order_line._init_registrations()
+            event_so_lines._init_registrations()
             if len(self) == 1:
                 return self.env['ir.actions.act_window'].with_context(
                     default_sale_order_id=so.id
