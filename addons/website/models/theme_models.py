@@ -178,18 +178,14 @@ class ThemeMenu(models.Model):
 class ThemePage(models.Model):
     _name = 'theme.website.page'
     _description = 'Website Theme Page'
+    _inherit = [
+        'website.pageoptions.mixin',
+    ]
 
     url = fields.Char()
     view_id = fields.Many2one('theme.ir.ui.view', required=True, ondelete="cascade")
     website_indexed = fields.Boolean('Page Indexed', default=True)
     is_published = fields.Boolean()
-
-    # Page options
-    header_overlay = fields.Boolean()
-    header_color = fields.Char()
-    header_text_color = fields.Char()
-    header_visible = fields.Boolean(default=True)
-    footer_visible = fields.Boolean(default=True)
 
     copy_ids = fields.One2many('website.page', 'theme_template_id', 'Page using a copy of me', copy=False, readonly=True)
 
