@@ -6820,10 +6820,10 @@
             }
         }
         return {
-            labels: Object.keys(labelMap),
+            labels: Array.from(labelSet),
             dataSetsValues: datasets.map((dataset, indexOfDataset) => ({
                 ...dataset,
-                data: Object.values(labelMap).map((dataOfLabel) => dataOfLabel[indexOfDataset]),
+                data: Array.from(labelSet).map((label) => labelMap[label][indexOfDataset]),
             })),
         };
     }
@@ -42500,12 +42500,14 @@
             this.editionState = "initializing";
         }
         stopEdition() {
-            if (!this.state.isEditing)
+            const input = this.sheetNameRef.el;
+            if (!this.state.isEditing || !input)
                 return;
             this.state.isEditing = false;
             this.editionState = "initializing";
-            this.sheetNameRef.el?.blur();
+            input.blur();
             const inputValue = this.getInputContent() || "";
+            input.innerText = inputValue;
             interactiveRenameSheet(this.env, this.props.sheetId, inputValue, () => this.startEdition());
         }
         cancelEdition() {
@@ -42966,7 +42968,7 @@
             this.sheetListRef.el.scrollTo({ top: 0, left: scroll, behavior: "smooth" });
         }
         onSheetMouseDown(sheetId, event) {
-            if (event.button !== 0)
+            if (event.button !== 0 || this.env.model.getters.isReadonly())
                 return;
             this.closeMenu();
             const mouseX = event.clientX;
@@ -48064,8 +48066,8 @@
 
 
     __info__.version = '16.3.30';
-    __info__.date = '2024-03-25T11:03:02.925Z';
-    __info__.hash = '0d2ee33';
+    __info__.date = '2024-04-01T07:26:15.365Z';
+    __info__.hash = 'c73e1ae';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
