@@ -47,8 +47,8 @@ export class MassMailingHtmlField extends HtmlField {
             resizable: false,
             defaultDataForLinkTools: { isNewWindow: true },
             toolbarTemplate: 'mass_mailing.web_editor_toolbar',
-            onWysiwygBlur: () => {
-                this.commitChanges();
+            onWysiwygBlur: (action) => {
+                this.commitChanges(action);
                 this.wysiwyg.odooEditor.toolbarHide();
             },
             ...this.props.wysiwygOptions,
@@ -78,7 +78,8 @@ export class MassMailingHtmlField extends HtmlField {
         popover.style.left = leftPosition + 'px';
     }
 
-    async commitChanges() {
+    async commitChanges(action) {
+        await super.commitChanges();
         if (this.props.readonly || !this.isRendered) {
             return super.commitChanges();
         }
@@ -104,7 +105,9 @@ export class MassMailingHtmlField extends HtmlField {
             this.wysiwyg.odooEditor.historyPauseSteps();
             await this.wysiwyg.cleanForSave();
 
-            await super.commitChanges();
+            if (action !== "Discard changes") {
+                await super.commitChanges();
+            }
 
             const $editorEnable = $editable.closest('.editor_enable');
             $editorEnable.removeClass('editor_enable');
@@ -139,7 +142,10 @@ export class MassMailingHtmlField extends HtmlField {
             this.wysiwyg.odooEditor.historyRevertCurrentStep();
 
             const fieldName = this.props.inlineField;
-            await this.props.record.update({[fieldName]: this._unWrap(inlineHtml)});
+            
+            if (action !== "Discard changes") {
+                await this.props.record.update({[fieldName]: this._unWrap(inlineHtml)});
+            }
         })();
         return this._pendingCommitChanges;
     }
