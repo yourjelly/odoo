@@ -527,7 +527,7 @@ class AccountReportExpression(models.Model):
             ('to_beginning_of_period', 'At the beginning of the period'),
             ('normal', 'According to each type of account'),
             ('strict_range', 'Strictly on the given dates'),
-            ('previous_tax_period', "From previous tax period") #TODO OCO adapter ça
+            ('previous_tax_period', "From previous tax period")
         ],
         required=True,
         default='strict_range',
