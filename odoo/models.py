@@ -36,6 +36,7 @@ import pytz
 import re
 import uuid
 import warnings
+from werkzeug.exceptions import NotFound
 from collections import defaultdict, deque
 from collections.abc import MutableMapping, Iterable
 from contextlib import closing
@@ -3979,7 +3980,10 @@ class BaseModel(metaclass=MetaModel):
             if field_name in field_names_done:
                 continue
             field_names_done.add(field_name)
-            field = self._fields.get(field_name)
+            try:
+                field = self._fields[field_name]
+            except KeyError as e:
+                raise NotFound() from e
             if not field:
                 raise ValueError(f"Invalid field {field_name!r} on model {self._name!r}")
             if ignore_when_in_cache and not any(cache.get_missing_ids(self, field)):
