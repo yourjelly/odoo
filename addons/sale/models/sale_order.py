@@ -103,7 +103,8 @@ class SaleOrder(models.Model):
         string="Online payment",
         compute='_compute_require_payment',
         store=True, readonly=False, precompute=True,
-        help="Request a online payment from the customer to confirm the order.")
+        help="""Request a online payment from the customer to confirm the order.
+                For a subscription, a payment will be require also before each renewal.""")
     prepayment_percent = fields.Float(
         string="Prepayment percentage",
         compute='_compute_prepayment_percent',
