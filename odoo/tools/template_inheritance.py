@@ -15,6 +15,7 @@ RSTRIP_REGEXP = re.compile(r'\n[ \t]*$')
 
 def add_stripped_items_before(node, spec, extract):
     text = spec.text or ''
+    keep_text = not int(spec.get("replace_text", "0"))
 
     before_text = ''
     prev = node.getprevious()
@@ -22,11 +23,21 @@ def add_stripped_items_before(node, spec, extract):
         parent = node.getparent()
         result = parent.text and RSTRIP_REGEXP.search(parent.text)
         before_text = result.group(0) if result else ''
-        parent.text = (parent.text or '').rstrip() + text
+        if keep_text:
+            parent.text = (parent.text or '').rstrip() + text
+        else:
+            parent.text = text
     else:
         result = prev.tail and RSTRIP_REGEXP.search(prev.tail)
         before_text = result.group(0) if result else ''
-        prev.tail = (prev.tail or '').rstrip() + text
+        if keep_text:
+            prev.tail = (prev.tail or '').rstrip() + text
+        else:
+            prev.tail = text
+
+    if not keep_text and spec.get("position") == "after":
+        after_text = node.tail and RSTRIP_REGEXP.search(node.tail)
+        node.tail = after_text and after_text.group(0) or ""
 
     if len(spec) > 0:
         spec[-1].tail = (spec[-1].tail or "").rstrip() + before_text
