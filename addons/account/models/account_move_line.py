@@ -1528,7 +1528,7 @@ class AccountMoveLine(models.Model):
         for line in lines:
             if line.move_id.state == 'posted':
                 impacted_tax_closings = line._get_impacted_tax_closing_types()
-                line._check_lock_dates(check_user_lock=False, forced_tax_closing_types=impacted_tax_closings)
+                line.move_id._check_lock_dates(check_user_lock=False, forced_tax_closing_types=impacted_tax_closings)
 
         lines.move_id._synchronize_business_models(['line_ids'])
         lines._check_constrains_account_id_journal_id()

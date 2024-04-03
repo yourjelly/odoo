@@ -18,12 +18,13 @@ class AccountReportClosingType(models.Model):
     tax_ids = fields.One2many(string="Taxes", comodel_name='account.tax', inverse_name='closing_type_id')
     report_id = fields.Many2one(string="Report", comodel_name='account.report')
     move_generator_code = fields.Char(string="Entry Generator")
-    lock_type = fields.Selection(string="Lock", selection=[('none', "None"), ('entries', "Entries"), ('taxes', "Taxes")], required=True)
+    lock_type = fields.Selection(string="Lock", selection=[('none', "None"), ('entries', "Entries"), ('taxes', "Taxes")], required=True) #TODO OCO est-ce qu'on garde ce 'none' ?
 
     # TODO OCO problème pour les droits d'accès: si l'advisor et l'accountant doivent pouvoir faire la tax closing, c'est pas le cas  de  la générale, si ? => un champ sur le closing type pour dire advisor_only ?
 
     default_periodicity = fields.Selection(string="Default Periodicity", selection=PERIODICITY_SELECTION_VALS, required=True)
     periodicity = fields.Selection(string="Periodicity", selection=PERIODICITY_SELECTION_VALS, company_dependent=True, required=True)
+    enabled_company_ids = fields.Many2many(string="Enabled Companies", comodel_name='res.company')
 
     tax_closing_payable_account_id = fields.Many2one(string="Tax Payable Account", comodel_name='account.account', company_dependent=True, required=True)
     tax_closing_receivable_account_id = fields.Many2one(string="Tax Receivable Account", comodel_name='account.account', company_dependent=True, required=True)

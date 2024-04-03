@@ -274,6 +274,7 @@ class ResCompany(models.Model):
         for account in accounts:
             account.write({'code': self.get_new_account_code(account.code, old_code, new_code)})
 
+    @api.model
     def _get_fiscalyear_lock_statement_lines_redirect_action(self, domain):
         """ Get the action redirecting to the statement lines that are not already reconciled when setting a fiscal
         year lock date.
