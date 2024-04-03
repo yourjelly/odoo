@@ -207,7 +207,7 @@ describe("Simple text", () => {
                 // @phoenix content adapted to make it valid html
                 contentBefore: "<p>[]<br></p>",
                 stepFunction: async (editor) => {
-                    await pasteText(editor, "a\nb\nc\nd");
+                    pasteText(editor, "a\nb\nc\nd");
                 },
                 contentAfter:
                     '<p style="margin-bottom: 0px;">a</p>' +
@@ -312,7 +312,7 @@ describe("Simple text", () => {
             });
         });
 
-        test("should paste a text when selection across two p", async () => {
+        test("should paste a text when selection across two p (1)", async () => {
             await testEditor({
                 contentBefore: "<div>a<p>b[c</p><p>d]e</p>f</div>",
                 stepFunction: async (editor) => {
@@ -329,7 +329,7 @@ describe("Simple text", () => {
             });
         });
 
-        test("should paste a text when selection leave a span", async () => {
+        test("should paste a text when selection leave a span (1)", async () => {
             await testEditor({
                 contentBefore: '<div>ab<span class="a">c[d</span>e]f</div>',
                 stepFunction: async (editor) => {
@@ -346,7 +346,7 @@ describe("Simple text", () => {
             });
         });
 
-        test("should paste a text when selection across two element", async () => {
+        test("should paste a text when selection across two element (1)", async () => {
             await testEditor({
                 contentBefore: '<div>1a<p>b[c</p><span class="a">d]e</span>f</div>',
                 stepFunction: async (editor) => {
@@ -439,7 +439,7 @@ describe("Simple html span", () => {
             });
         });
 
-        test("should paste a text when selection across two p", async () => {
+        test("should paste a text when selection across two p (2)", async () => {
             await testEditor({
                 contentBefore: "<div>1a<p>b[c</p><p>d]e</p>f</div>",
                 stepFunction: async (editor) => {
@@ -456,7 +456,7 @@ describe("Simple html span", () => {
             });
         });
 
-        test("should paste a text when selection leave a span", async () => {
+        test("should paste a text when selection leave a span (2)", async () => {
             await testEditor({
                 contentBefore: '<div>ab<span class="a">c[d</span>e]f</div>',
                 stepFunction: async (editor) => {
@@ -473,7 +473,7 @@ describe("Simple html span", () => {
             });
         });
 
-        test("should paste a text when selection across two element", async () => {
+        test("should paste a text when selection across two element (2)", async () => {
             await testEditor({
                 contentBefore: '<div>1a<p>b[c</p><span class="a">d]e</span>f</div>',
                 stepFunction: async (editor) => {
@@ -572,7 +572,7 @@ describe("Simple html p", () => {
             });
         });
 
-        test("should paste a text when selection across two p", async () => {
+        test("should paste a text when selection across two p (3)", async () => {
             await testEditor({
                 contentBefore: "<div>1a<p>b[c</p><p>d]e</p>f</div>",
                 stepFunction: async (editor) => {
@@ -589,7 +589,7 @@ describe("Simple html p", () => {
             });
         });
 
-        test("should paste a text when selection leave a span", async () => {
+        test("should paste a text when selection leave a span (3)", async () => {
             await testEditor({
                 contentBefore: '<div>ab<span class="a">c[d</span>e]f</div>',
                 stepFunction: async (editor) => {
@@ -606,7 +606,7 @@ describe("Simple html p", () => {
             });
         });
 
-        test("should paste a text when selection across two element", async () => {
+        test("should paste a text when selection across two element (3)", async () => {
             await testEditor({
                 contentBefore: '<div>1a<p>b[c</p><span class="a">d]e</span>f</div>',
                 stepFunction: async (editor) => {
@@ -706,7 +706,7 @@ describe("Complex html span", () => {
             });
         });
 
-        test("should paste a text when selection across two p", async () => {
+        test("should paste a text when selection across two p (4)", async () => {
             await testEditor({
                 contentBefore: "<div>a<p>b[c</p><p>d]e</p>f</div>",
                 stepFunction: async (editor) => {
@@ -723,7 +723,7 @@ describe("Complex html span", () => {
             });
         });
 
-        test("should paste a text when selection leave a span", async () => {
+        test("should paste a text when selection leave a span (4)", async () => {
             await testEditor({
                 contentBefore: '<div>ab<span class="a">c[d</span>e]f</div>',
                 stepFunction: async (editor) => {
@@ -740,7 +740,7 @@ describe("Complex html span", () => {
             });
         });
 
-        test("should paste a text when selection across two element", async () => {
+        test("should paste a text when selection across two element (4)", async () => {
             await testEditor({
                 contentBefore: '<div>1a<p>b[c</p><span class="a">d]e</span>f</div>',
                 stepFunction: async (editor) => {
@@ -847,7 +847,7 @@ describe("Complex html p", () => {
             });
         });
 
-        test("should paste a text when selection across two p", async () => {
+        test("should paste a text when selection across two p (5)", async () => {
             await testEditor({
                 contentBefore: "<div>a<p>b[c</p><p>d]e</p>f</div>",
                 stepFunction: async (editor) => {
@@ -864,7 +864,7 @@ describe("Complex html p", () => {
             });
         });
 
-        test.todo("should paste a text when selection leave a span (1)", async () => {
+        test("should paste a text when selection leave a span (5)", async () => {
             await testEditor({
                 contentBefore: '<div>1ab<span class="a">c[d</span>e]f</div>',
                 stepFunction: async (editor) => {
@@ -881,7 +881,7 @@ describe("Complex html p", () => {
             });
         });
 
-        test("should paste a text when selection leave a span (2)", async () => {
+        test("should paste a text when selection leave a span (6)", async () => {
             await testEditor({
                 contentBefore: '<p>1ab<span class="a">c[d</span>e]f</p>',
                 stepFunction: async (editor) => {
@@ -899,7 +899,7 @@ describe("Complex html p", () => {
             });
         });
 
-        test("should paste a text when selection across two element (1)", async () => {
+        test("should paste a text when selection across two element (5)", async () => {
             await testEditor({
                 contentBefore: '<div>1a<p>b[c</p><span class="a">d]e</span>f</div>',
                 stepFunction: async (editor) => {
@@ -912,7 +912,7 @@ describe("Complex html p", () => {
             });
         });
 
-        test.todo("should paste a text when selection across two element (2)", async () => {
+        test("should paste a text when selection across two element (6)", async () => {
             await testEditor({
                 contentBefore: '<div>2a<span class="a">b[c</span><p>d]e</p>f</div>',
                 stepFunction: async (editor) => {
@@ -1004,7 +1004,7 @@ describe("Complex html 3 p", () => {
             });
         });
 
-        test("should paste a text when selection across two p", async () => {
+        test("should paste a text when selection across two p (6)", async () => {
             await testEditor({
                 contentBefore: "<div>a<p>b[c</p><p>d]e</p>f</div>",
                 stepFunction: async (editor) => {
@@ -1023,7 +1023,7 @@ describe("Complex html 3 p", () => {
             });
         });
 
-        test("should paste a text when selection leave a span (1)", async () => {
+        test("should paste a text when selection leave a span (7)", async () => {
             await testEditor({
                 contentBefore: '<div>1ab<span class="a">c[d</span>e]f</div>',
                 stepFunction: async (editor) => {
@@ -1042,7 +1042,7 @@ describe("Complex html 3 p", () => {
             });
         });
 
-        test("should paste a text when selection leave a span (2)", async () => {
+        test("should paste a text when selection leave a span (8)", async () => {
             await testEditor({
                 contentBefore: '<p>1ab<span class="a">c[d</span>e]f</p>',
                 stepFunction: async (editor) => {
@@ -1061,7 +1061,7 @@ describe("Complex html 3 p", () => {
             });
         });
 
-        test("should paste a text when selection across two element (1)", async () => {
+        test("should paste a text when selection across two element (7)", async () => {
             await testEditor({
                 contentBefore: '<div>1a<p>b[c</p><span class="a">d]e</span>f</div>',
                 stepFunction: async (editor) => {
@@ -1072,7 +1072,7 @@ describe("Complex html 3 p", () => {
             });
         });
 
-        test("should paste a text when selection across two element (2)", async () => {
+        test("should paste a text when selection across two element (8)", async () => {
             await testEditor({
                 contentBefore: '<div>2a<span class="a">b[c</span><p>d]e</p>f</div>',
                 stepFunction: async (editor) => {
@@ -1163,7 +1163,7 @@ describe("Complex html p+i", () => {
             });
         });
 
-        test("should paste a text when selection across two p", async () => {
+        test("should paste a text when selection across two p (7)", async () => {
             await testEditor({
                 contentBefore: "<div>a<p>b[c</p><p>d]e</p>f</div>",
                 stepFunction: async (editor) => {
@@ -1180,7 +1180,7 @@ describe("Complex html p+i", () => {
             });
         });
 
-        test.todo("should paste a text when selection leave a span (1)", async () => {
+        test.todo("should paste a text when selection leave a span (9)", async () => {
             await testEditor({
                 contentBefore: '<div>1ab<span class="a">c[d</span>e]f</div>',
                 stepFunction: async (editor) => {
@@ -1197,7 +1197,7 @@ describe("Complex html p+i", () => {
             });
         });
 
-        test("should paste a text when selection leave a span (2)", async () => {
+        test("should paste a text when selection leave a span (10)", async () => {
             await testEditor({
                 contentBefore: '<p>1ab<span class="a">c[d</span>e]f</p>',
                 stepFunction: async (editor) => {
@@ -1215,7 +1215,7 @@ describe("Complex html p+i", () => {
             });
         });
 
-        test("should paste a text when selection across two element (1)", async () => {
+        test("should paste a text when selection across two element (9)", async () => {
             await testEditor({
                 contentBefore: '<div>1a<p>b[c</p><span class="a">d]e</span>f</div>',
                 stepFunction: async (editor) => {
@@ -1225,7 +1225,7 @@ describe("Complex html p+i", () => {
             });
         });
 
-        test.todo("should paste a text when selection across two element (2)", async () => {
+        test.todo("should paste a text when selection across two element (10)", async () => {
             await testEditor({
                 contentBefore: '<div>2a<span class="a">b[c</span><p>d]e</p>f</div>',
                 stepFunction: async (editor) => {
@@ -1314,7 +1314,7 @@ describe("Complex html 3p+b", () => {
             });
         });
 
-        test("should paste a text when selection across two p", async () => {
+        test("should paste a text when selection across two p (8)", async () => {
             await testEditor({
                 contentBefore: "<div>a<p>b[c</p><p>d]e</p>f</div>",
                 stepFunction: async (editor) => {
@@ -1331,7 +1331,7 @@ describe("Complex html 3p+b", () => {
             });
         });
 
-        test("should paste a text when selection leave a span (1)", async () => {
+        test("should paste a text when selection leave a span (11)", async () => {
             await testEditor({
                 contentBefore: '<div>1ab<span class="a">c[d</span>e]f</div>',
                 stepFunction: async (editor) => {
@@ -1350,7 +1350,7 @@ describe("Complex html 3p+b", () => {
             });
         });
 
-        test("should paste a text when selection across two element (1)", async () => {
+        test("should paste a text when selection across two element (11)", async () => {
             await testEditor({
                 contentBefore: '<div>1a<p>b[c</p><span class="a">d]e</span>f</div>',
                 stepFunction: async (editor) => {
@@ -1361,7 +1361,7 @@ describe("Complex html 3p+b", () => {
             });
         });
 
-        test("should paste a text when selection across two element (2)", async () => {
+        test("should paste a text when selection across two element (12)", async () => {
             await testEditor({
                 contentBefore: '<div>2a<span class="a">b[c</span><p>d]e</p>f</div>',
                 stepFunction: async (editor) => {

@@ -195,7 +195,7 @@ export class DomPlugin extends Plugin {
         // to have the need new line in the final result
         if (!container.hasChildNodes()) {
             if (isUnbreakable(closestBlock(currentNode.nextSibling))) {
-                this.dispatch("INSERT_LINEBREAK_ELEMENT", {
+                this.dispatch("INSERT_LINEBREAK_NODE", {
                     targetNode: currentNode.nextSibling,
                     targetOffset: 0,
                 });

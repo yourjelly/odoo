@@ -377,9 +377,9 @@ export class ClipboardPlugin extends Plugin {
                     });
                     this.shared.domInsert(modifiedTextFragment);
                     if (textIndex < textFragments.length) {
+                        // todo: to implement
                         // Break line by inserting new paragraph and
                         // remove current paragraph's bottom margin.
-                        console.warn("Not implemented");
                         // const p = closestElement(selection.anchorNode, "p");
                         // if (isUnbreakable(closestBlock(selection.anchorNode))) {
                         //     this._applyCommand("oShiftEnter");
