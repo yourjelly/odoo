@@ -479,59 +479,6 @@ class TestApplyInheritanceSpecs(ViewCase):
         self.View.apply_inheritance_specs(self.adv_arch, spec)
         self.assertEqual(self.adv_arch, expected)
 
-    def test_replace_inner_with_moves(self):
-        spec = E.xpath(
-            "TEXT 4",
-            etree.Element("xpath", { "position": "move", "expr": "//field[@name='target']" }),
-            "TEXT 5",
-            expr="//form", position="replace", mode="inner")
-
-        expected = E.form(
-            "TEXT 4",
-            E.field(name="target"),
-            "TEXT 5",
-            string="Title")
-
-        # applying spec to both base_arch and adv_arch is expected to give the same result
-        self.View.apply_inheritance_specs(self.base_arch, spec)
-        self.assertEqual(self.base_arch, expected)
-
-    def test_replace_inner_with_moves2(self):
-        base = """
-            <form>
-                <div><field name="target" /></div>
-                <div>TEXT 0<field name="target1"/></div>
-            </form>
-        """
-        spec = """
-            <xpath expr="//form" position="replace" mode="inner">
-                TEXT 1
-                <field name="target" position="move"/>
-                TEXT 2
-                <div>new node</div>
-                <field name="target1" position="move"/>
-                TEXT 3
-                <field name="target1" position="move"/>
-                TEXT 4
-                <field name="target" position="move"/>
-            </xpath>
-        """
-        base_tree = etree.fromstring(base)
-        self.View.apply_inheritance_specs(base_tree, etree.fromstring(spec))
-        self.assertXMLEqual(etree.tostring(base_tree), """
-            <form>
-                TEXT 1
-                
-                TEXT 2
-                <div>new node</div>
-                
-                TEXT 3
-                <field name="target1"/>
-                TEXT 4
-                <field name="target"/>
-            </form>
-        """)
-
     def test_unpack_data(self):
         spec = E.data(
                 E.field(E.field(name="inserted 0"), name="target"),

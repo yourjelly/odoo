@@ -192,46 +192,15 @@ def apply_inheritance_specs(source, specs_tree, inherit_branding=False, pre_loca
                             node.addprevious(child)
                         node.getparent().remove(node)
                 elif mode == "inner":
-                    temp = []
-                    to_remove = set()
-                    index = len(spec) - 1
-                    # Iterate from the end: this way the *last* xpath position=move has priority
-                    previous_tail = None
-                    while index >= 0:
-                        real_node = spec[index]
-                        tail = real_node.tail
-                        index -= 1
-                        if real_node.get("position") == "move":
-                            real_node = locate_node(source, real_node)
-                            if real_node in to_remove:
-                                previous_tail = (tail or "") + (previous_tail or "")
-                                continue
-                            to_remove.add(real_node)
-                        elif previous_tail:
-                            tail = (tail or "") + (previous_tail or "")
-                            previous_tail = None
-
-                        real_node.tail = tail
-                        temp.append(real_node)
-
                     # Replace the entire content of an element
                     for child in node:
                         node.remove(child)
                     node.text = None
 
-                    # temp has been built in opposite order: so iterate
-                    # in its opposite order to append to the node
-                    index = len(temp) - 1
-                    while index >= 0:
-                        real_node = temp[index]
-                        if real_node in to_remove and real_node.getparent() is not None:
-                            real_node.getparent().remove(real_node)
-                        node.append(copy.deepcopy(real_node))
-                        index -= 1
+                    for child in spec:
+                        node.append(copy.deepcopy(child))
+                    node.text = spec.text
 
-                    text = (spec.text or "") + (previous_tail or "")
-                    if text:
-                        node.text = text
                 else:
                     raise ValueError(_("Invalid mode attribute:") + " '%s'" % mode)
             elif pos == 'attributes':
