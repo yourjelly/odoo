@@ -552,9 +552,9 @@ class ThreadedServer(CommonServer):
         The first SIGINT or SIGTERM signal will initiate a graceful shutdown while
         a second one if any will force an immediate exit.
         """
-        self.start(stop=stop)
-
         rc = preload_registries(preload)
+
+        self.start(stop=stop)
 
         if stop:
             if config['test_enable']:
@@ -904,9 +904,9 @@ class PreforkServer(CommonServer):
             self.worker_kill(pid, signal.SIGTERM)
 
     def run(self, preload, stop):
-        self.start()
-
         rc = preload_registries(preload)
+
+        self.start()
 
         if stop:
             self.stop()
