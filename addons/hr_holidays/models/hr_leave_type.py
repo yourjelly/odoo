@@ -478,11 +478,12 @@ class HolidaysType(models.Model):
                 }, self.requires_allocation, self.id)
 
     def _get_contextual_employee_id(self):
+        employee_id = False
         if 'employee_id' in self._context:
             employee_id = self._context['employee_id']
         elif 'default_employee_id' in self._context:
             employee_id = self._context['default_employee_id']
-        else:
+        if not employee_id:
             employee_id = self.env.user.employee_id.id
         return employee_id
 
