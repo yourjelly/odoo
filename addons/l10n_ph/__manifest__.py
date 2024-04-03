@@ -16,6 +16,7 @@
         'data/account_account_tag_data.xml',
         'data/account_tax_report_data.xml',
         'wizard/generate_2307_wizard_views.xml',
+        'views/account_menuitem.xml',
         'views/account_move_views.xml',
         'views/account_payment_views.xml',
         'views/account_tax_views.xml',
