@@ -14,11 +14,18 @@ patch(PosOrderline.prototype, {
             this.order_id.setShippingDate(this.sale_order_origin_id.shipping_date);
         }
     },
+    setDownPaymentDetails(downpPaymentDetails) {
+        if (typeof downpPaymentDetails === "string" && downpPaymentDetails.length > 0) {
+            return JSON.parse(downpPaymentDetails);
+        }
+        return downpPaymentDetails;
+    },
     get_sale_order() {
         if (this.sale_order_origin_id) {
+            const down_payment_details = this.setDownPaymentDetails(this.down_payment_details);
             const value = {
                 name: this.sale_order_origin_id.name,
-                details: this.down_payment_details || false,
+                details: down_payment_details || false,
             };
 
             return value;
@@ -26,14 +33,7 @@ patch(PosOrderline.prototype, {
         return false;
     },
     getDisplayData() {
-        let down_payment_details = [];
-
-        // FIXME: This is a hack to handle the case where the down_payment_details is a stringified JSON.
-        try {
-            down_payment_details = JSON.parse(this.down_payment_details);
-        } catch {
-            down_payment_details = this.down_payment_details;
-        }
+        const down_payment_details = this.setDownPaymentDetails(this.down_payment_details);
 
         return {
             ...super.getDisplayData(),
