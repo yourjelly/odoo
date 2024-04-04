@@ -99,12 +99,6 @@ class TestSqlLint(TransactionCase):
         """)
         self.assertFalse(r, f"unnecessary fstring should be innocuous\n{errs}")
 
-        #r, errs = self.check("""
-        #def do_the_thing(cr, name, value):
-        #    cr.execute(f'select {name} from thing where field = %s', [value])
-        #""")
-        #self.assertFalse(r, f"probably has a good reason for the extra arg\n{errs}")
-
         r, errs = self.check("""
         def do_the_thing(self):
             self.env.cr.execute(f'select name from {self._table}')
@@ -130,7 +124,7 @@ class TestSqlLint(TransactionCase):
         checker = _odoo_checker_sql_injection.OdooBaseChecker(self.linter)
 
         node = _odoo_checker_sql_injection.astroid.extract_node("""
-        def test(): 
+        def test():
             arg = "test"
             arg = arg + arg
             self.env.cr.execute(arg) #@
@@ -141,7 +135,7 @@ class TestSqlLint(TransactionCase):
 
         node = _odoo_checker_sql_injection.astroid.extract_node("""
         def test_function9(self,arg):
-            my_injection_variable= "aaa" % arg #Uninferable
+            my_injection_variable= "aaa %s" % arg #Uninferable
             self.env.cr.execute('select * from hello where id = %s' % my_injection_variable) #@
         """)
 
@@ -259,7 +253,7 @@ class TestSqlLint(TransactionCase):
 
         node = _odoo_checker_sql_injection.astroid.extract_node("""
         def test_function9(self,arg):
-            my_injection_variable= "aaa" % arg
+            my_injection_variable= "aaa%s" % arg
             self.env.cr.execute('select * from hello where id = %s' % my_injection_variable) #@
         """)
 
@@ -277,7 +271,6 @@ class TestSqlLint(TransactionCase):
 
         node = _odoo_checker_sql_injection.astroid.extract_node("""
         def _search_phone_mobile_search(self, operator, value):
-  
             condition = 'IS NULL' if operator == '=' else 'IS NOT NULL'
             query = '''
                 SELECT model.id
@@ -292,7 +285,7 @@ class TestSqlLint(TransactionCase):
 
         node = _odoo_checker_sql_injection.astroid.extract_node("""
         def test1(self):
-            operator = 'aaa' 
+            operator = 'aaa'
             value = 'bbb'
             op1 , val1 = (operator,value)
             self.env.cr.execute('query' + op1) #@
@@ -302,7 +295,7 @@ class TestSqlLint(TransactionCase):
 
         node = _odoo_checker_sql_injection.astroid.extract_node("""
         def test2(self):
-            operator = 'aaa' 
+            operator = 'aaa'
             operator += 'bbb'
             self.env.cr.execute('query' + operator) #@
         """)
@@ -345,10 +338,10 @@ class TestSqlLint(TransactionCase):
 
             # apply rules
             dashboard_graph_model = self._graph_get_model()
-            GraphModel = self.env[dashboard_graph_model] 
+            GraphModel = self.env[dashboard_graph_model]
             graph_table = self._graph_get_table(GraphModel)
-            extra_conditions = self._extra_sql_conditions() 
-            where_query = GraphModel._where_calc([])  
+            extra_conditions = self._extra_sql_conditions()
+            where_query = GraphModel._where_calc([])
             GraphModel._apply_ir_rules(where_query, 'read')
             from_clause, where_clause, where_clause_params = where_query.get_sql()
             if where_clause:
@@ -362,7 +355,7 @@ class TestSqlLint(TransactionCase):
                 'date_column': self._graph_date_column(),
                 'start_date': "%s",
                 'end_date': "%s",
-                'extra_conditions': extra_conditions 
+                'extra_conditions': extra_conditions
             }
 
             self._cr.execute(query, [self.id, start_date, end_date] + where_clause_params) #@
@@ -389,13 +382,13 @@ class TestSqlLint(TransactionCase):
         def injectable():
             cr.execute(first_fun())#@
         """)
-        with self.assertMessages():
+        with self.assertMessages("sql-injection"):
             checker.visit_call(node)
         node = _odoo_checker_sql_injection.astroid.extract_node("""
         def injectable1():
             cr.execute(second_fun('aaaaa'))#@
         """)
-        with self.assertMessages():
+        with self.assertMessages("sql-injection"):
             checker.visit_call(node)
 
         node = _odoo_checker_sql_injection.astroid.extract_node("""
@@ -413,13 +406,6 @@ class TestSqlLint(TransactionCase):
         with self.assertMessages():
             checker.visit_functiondef(node)
 
-        node = _odoo_checker_sql_injection.astroid.extract_node("""
-        def injectable4(var):
-            a, _ =  return_tuple(var)
-            cr.execute(a) #@
-        """)
-        with self.assertMessages():
-            checker.visit_call(node)
         node = _odoo_checker_sql_injection.astroid.extract_node("""
         def not_injectable5(var):
             star = ('defined','constant','string')
