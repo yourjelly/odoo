@@ -6,9 +6,10 @@ import threading
 import uuid
 import werkzeug.urls
 
-from odoo import api, fields, models
+from odoo import api, fields, models, _
 from odoo.addons.iap.tools import iap_tools
-from odoo.exceptions import AccessError
+from odoo.exceptions import AccessError, UserError
+from odoo.tools import get_lang
 
 _logger = logging.getLogger(__name__)
 
@@ -17,103 +18,102 @@ DEFAULT_ENDPOINT = 'https://iap.odoo.com'
 
 class IapAccount(models.Model):
     _name = 'iap.account'
-    _rec_name = 'service_name'
     _description = 'IAP Account'
+    _inherit = 'mail.thread'
 
     name = fields.Char()
-    service_name = fields.Char(readonly=True)
+    service_id = fields.Many2one('iap.service', required=True)
+    service_name = fields.Char(related='service_id.technical_name')
+    service_locked = fields.Boolean(default=False)  # If True, the service can't be edited anymore
+    description = fields.Char(related='service_id.description')
     account_token = fields.Char(
         default=lambda s: uuid.uuid4().hex,
         help="Account token is your authentication key for this service. Do not share it.",
         size=43)
-    company_ids = fields.Many2many('res.company')
-    account_info_id = fields.Many2one(
-        'iap.account.info', compute='_compute_info', inverse='_inverse_info', search='_search_info')
-    account_info_ids = fields.One2many(
-        'iap.account.info', 'account_id',
-        string="Accounts from IAP")
-    balance = fields.Char(compute='_compute_balance')
-    description = fields.Char(related='account_info_id.description')
-    warn_me = fields.Boolean(
-        related='account_info_id.warn_me',
-        help="We will send you an email when your balance gets below that threshold",
-        readonly=False)
-    warning_threshold = fields.Float(related='account_info_id.warning_threshold', readonly=False)
-    warning_email = fields.Char(related='account_info_id.warning_email', readonly=False)
-    show_token = fields.Boolean()
+    company_ids = fields.Many2many('res.company', tracking=True)
 
-    @api.model
-    def get_view(self, view_id=None, view_type='form', **kwargs):
-        res = super().get_view(view_id, view_type, **kwargs)
-        if view_type == 'tree':
-            self.env['iap.account'].get_services()
-        return res
+    # Dynamic fields set when loading the view
+    balance = fields.Char(readonly=True)
+    warning_threshold = fields.Float("Email Alert Threshold", tracking=True)
+    warning_user_ids = fields.Many2many('res.users', string="Email Alert Recipients", tracking=True)
+    registered = fields.Boolean(readonly=True)
 
-    @api.depends('account_info_ids')
-    def _compute_info(self):
+    @api.constrains('warning_threshold', 'warning_user_ids')
+    def validate_warning_alerts(self):
         for account in self:
-            if account.account_info_ids:
-                account.account_info_id = account.account_info_ids[-1]
+            if account.warning_threshold < 0:
+                raise UserError(_("Please set a positive email alert threshold."))
+            if any(not user.email for user in self.warning_user_ids):
+                raise UserError(_("One of the email alert recipients doesn't have an email address set."))
 
-    @api.depends('account_info_id')
-    def _compute_balance(self):
-        for account in self:
-            account.balance = f'{account.account_info_id.balance} {account.account_info_id.unit_name}' if account.account_info_id else "0 Credits"
+    def web_read(self, *args, **kwargs):
+        if not self.env.context.get('disable_iap_fetch'):
+            self._get_account_information_from_iap()
+        return super().web_read(*args, **kwargs)
 
-    def _inverse_info(self):
-        for account in self:
-            if account.account_info_ids:
-                # delete previous reference
-                account_info = account.env['iap.account.info'].browse(account.account_info_ids[0].id)
-                account_info.account_id = False
-            # set new reference
-            account.account_info_id.account_id = account
-
-    def _search_info(self, operator, value):
-        return []
+    def web_save(self, *args, **kwargs):
+        return super(IapAccount, self.with_context(disable_iap_fetch=True)).web_save(*args, **kwargs)
 
     def write(self, values):
         res = super(IapAccount, self).write(values)
-        iap_edits = ['warn_me', 'warning_threshold', 'warning_email']
-        if any(edited_attribute in values for edited_attribute in iap_edits):
-            try:
-                route = '/iap/update-warning-odoo'
-                endpoint = iap_tools.iap_get_endpoint(self.env)
-                url = endpoint + route
+        if (
+            not self.env.context.get('disable_iap_update')
+            and any(warning_attribute in values for warning_attribute in ('warning_threshold', 'warning_user_ids'))
+        ):
+            route = '/iap/1/update-warning-email-alerts'
+            endpoint = iap_tools.iap_get_endpoint(self.env)
+            url = werkzeug.urls.url_join(endpoint, route)
+            for account in self:
                 data = {
-                    'account_token': self.mapped('account_token')[0],
-                    'dbuuid': self.env['ir.config_parameter'].sudo().get_param('database.uuid'),
-                    'warn_me': values.get('warn_me'),
-                    'warning_threshold': values.get('warning_threshold'),
-                    'warning_email': values.get('warning_email'),
+                    'account_token': account.account_token,
+                    'warning_threshold': account.warning_threshold,
+                    'warning_emails': [{
+                        'email': user.email,
+                        'lang_code': user.lang or get_lang(self.env).code,
+                    } for user in account.warning_user_ids],
                 }
-                iap_tools.iap_jsonrpc(url=url, params=data)
-            except AccessError as e:
-                _logger.warning('Save service error : %s', str(e))
+                try:
+                    iap_tools.iap_jsonrpc(url=url, params=data)
+                except AccessError as e:
+                    _logger.warning("Update of the warning email configuration has failed: %s", str(e))
         return res
 
-    def get_services(self):
+    def _get_account_information_from_iap(self):
+        route = '/iap/1/get-accounts-information'
+        endpoint = iap_tools.iap_get_endpoint(self.env)
+        url = werkzeug.urls.url_join(endpoint, route)
+        params = {
+            'iap_accounts': [{
+                'token': account.account_token,
+                'service': account.service_id.technical_name,
+            } for account in self],
+            'dbuuid': self.env['ir.config_parameter'].sudo().get_param('database.uuid'),
+        }
         try:
-            route = '/iap/services-token'
-            endpoint = iap_tools.iap_get_endpoint(self.env)
-            url = endpoint + route
-            account_tokens = self.env['iap.account'].sudo().search([]).mapped('account_token')
-            params = {
-                'dbuuid': self.env['ir.config_parameter'].sudo().get_param('database.uuid'),
-                'iap_accounts': account_tokens,
-            }
-            services = iap_tools.iap_jsonrpc(url=url, params=params)
-            for service in services:
-                account_id = self.env['iap.account'].sudo().search(
-                    [('account_token', '=', service['account_token'])]).ids[0]
-                service['account_id'] = account_id
-                self.env['iap.account.info'].create(service)
+            accounts_information = iap_tools.iap_jsonrpc(url=url, params=params)
+            for token, information in accounts_information.items():
+                account_id = self.filtered(lambda acc: acc.account_token == token)
+
+                balance_amount = round(information['balance']) if account_id.service_id.integer_balance else information['balance']
+                balance = f"{balance_amount} {account_id.service_id.unit_name}"
+
+                account_id.with_context(disable_iap_update=True, tracking_disable=True).write({
+                    'balance': balance,
+                    'warning_threshold': information['warning_threshold'],
+                    'registered': information['registered'],
+                    'service_locked': True,  # The account exist on IAP, prevent the edition of the service
+                })
+                # TODO: for SMS accounts, fetch the sender name and registration status from IAP services (?)
         except AccessError as e:
-            _logger.warning('Get services error : %s', str(e))
+            _logger.warning("Fetch of the IAP accounts information has failed: %s", str(e))
 
     @api.model_create_multi
     def create(self, vals_list):
         accounts = super().create(vals_list)
+        for account in accounts:
+            if not account.name:
+                account.name = account.service_id.name
+
         if self.env['ir.config_parameter'].sudo().get_param('database.is_neutralized'):
             # Disable new accounts on a neutralized database
             for account in accounts:
@@ -142,9 +142,10 @@ class IapAccount(models.Model):
                 IapAccount.search(domain + [('account_token', '=', False)]).sudo().unlink()
                 accounts = accounts - accounts_without_token
         if not accounts:
+            service = self.env['iap.service'].search([('technical_name', '=', service_name)])
             if hasattr(threading.current_thread(), 'testing') and threading.current_thread().testing:
                 # During testing, we don't want to commit the creation of a new IAP account to the database
-                return self.create({'service_name': service_name})
+                return self.create({'service_id': service.id})
 
             with self.pool.cursor() as cr:
                 # Since the account did not exist yet, we will encounter a NoCreditError,
@@ -158,7 +159,7 @@ class IapAccount(models.Model):
                 if not account:
                     if not force_create:
                         return account
-                    account = IapAccount.create({'service_name': service_name})
+                    account = IapAccount.create({'service_id': service.id})
                 # fetch 'account_token' into cache with this cursor,
                 # as self's cursor cannot see this account
                 account_token = account.account_token
@@ -171,13 +172,17 @@ class IapAccount(models.Model):
         return accounts[0]
 
     @api.model
+    def get_account_id(self, service_name):
+        return self.get(service_name).id
+
+    @api.model
     def get_credits_url(self, service_name, base_url='', credit=0, trial=False, account_token=False):
         """ Called notably by ajax crash manager, buy more widget, partner_autocomplete, sanilmail. """
         dbuuid = self.env['ir.config_parameter'].sudo().get_param('database.uuid')
         if not base_url:
             endpoint = iap_tools.iap_get_endpoint(self.env)
             route = '/iap/1/credit'
-            base_url = endpoint + route
+            base_url = werkzeug.urls.url_join(endpoint, route)
         if not account_token:
             account_token = self.get(service_name).account_token
         d = {
@@ -191,18 +196,13 @@ class IapAccount(models.Model):
         return '%s?%s' % (base_url, werkzeug.urls.url_encode(d))
 
     def action_buy_credits(self):
-        for account in self:
-            return {
-                'type': 'ir.actions.act_url',
-                'url': self.env['iap.account'].get_credits_url(
-                    account_token=account.account_token,
-                    service_name=account.service_name,
-                ),
-            }
-
-    def action_toggle_show_token(self):
-        for account in self:
-            account.show_token = not account.show_token
+        return {
+            'type': 'ir.actions.act_url',
+            'url': self.env['iap.account'].get_credits_url(
+                account_token=self.account_token,
+                service_name=self.service_name,
+            ),
+        }
 
     @api.model
     def get_config_account_url(self):
@@ -226,7 +226,7 @@ class IapAccount(models.Model):
         if account:
             route = '/iap/1/balance'
             endpoint = iap_tools.iap_get_endpoint(self.env)
-            url = endpoint + route
+            url = werkzeug.urls.url_join(endpoint, route)
             params = {
                 'dbuuid': self.env['ir.config_parameter'].sudo().get_param('database.uuid'),
                 'account_token': account.account_token,
@@ -239,20 +239,3 @@ class IapAccount(models.Model):
                 credit = -1
 
         return credit
-
-
-class IAPAccountInfo(models.TransientModel):
-    _name = 'iap.account.info'
-    _description = 'IAP Account Info'
-    _transient_max_hours = 1
-
-    account_id = fields.Many2one('iap.account', string='IAP Account')
-    account_token = fields.Char()
-    balance = fields.Float(string='Balance', digits=(16, 4), default=0)
-    account_uuid_hashed = fields.Char(string='Account UUID')
-    service_name = fields.Char(string='Related Service')
-    description = fields.Char()
-    warn_me = fields.Boolean('Warn me', default=False)
-    warning_threshold = fields.Float('Threshold')
-    warning_email = fields.Char()
-    unit_name = fields.Char(default='Credits')

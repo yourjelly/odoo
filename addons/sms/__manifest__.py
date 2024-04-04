@@ -28,6 +28,7 @@ The service is provided by the In App Purchase Odoo platform.
         'views/mail_notification_views.xml',
         'views/res_config_settings_views.xml',
         'views/res_partner_views.xml',
+        'views/sms_registration_views.xml',
         'views/sms_sms_views.xml',
         'views/sms_template_views.xml',
         'security/ir.model.access.csv',

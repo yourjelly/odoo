@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <record id="sms_account_registration_phone_number_wizard_form" model="ir.ui.view">
+            <field name="name">sms_account_registration_phone_number_wizard</field>
+            <field name="model">sms.account.registration.phone.number.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Register your SMS account">
+                    <sheet>
+                        <h5>Enter a phone number to get an SMS with a verification code.</h5>
+                        <group>
+                            <field name="phone_number"/>
+                        </group>
+                        <footer>
+                            <button string="Send verification code" name="action_send_verification_code" type="object" class="btn btn-primary"/>
+                            <button string="Cancel" class="btn-secondary" special="cancel"/>
+                        </footer>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="sms_account_verification_code_wizard_form" model="ir.ui.view">
+            <field name="name">sms_account_verification_code_wizard</field>
+            <field name="model">sms.account.verification.code.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Register your SMS account">
+                    <sheet>
+                        <group>
+                            <field name="verification_code" required="1"/>
+                        </group>
+                        <footer>
+                            <button string="Register" name="action_register" type="object" class="btn btn-primary"/>
+                            <button string="Cancel" class="btn-secondary" special="cancel"/>
+                        </footer>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="sms_account_sender_name_wizard_form" model="ir.ui.view">
+            <field name="name">sms_account_sender_name_wizard</field>
+            <field name="model">sms.account.sender.name.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Choose your sender name">
+                    <sheet>
+                        <p>
+                            Your sender name must be between 3 and 11 characters long and only contain alphanumeric characters.
+                            It must fit your company name, and you aren't allowed to modify it once you registered one, choose it carefully.
+                        </p>
+                        <p>
+                            Note that this is not required, if you don't set a sender name, your SMS will be sent from a short code.
+                        </p>
+                        <group>
+                            <field name="sender_name" required="1"/>
+                        </group>
+                        <footer>
+                            <button string="Set sender name" name="action_set_sender_name" type="object" class="btn btn-primary"/>
+                            <button string="Skip for now" class="btn-secondary" special="cancel"/>
+                        </footer>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="iap_account_view_form" model="ir.ui.view">
+            <field name="name">iap.account.form</field>
+            <field name="model">iap.account</field>
+            <field name="inherit_id" ref="iap.iap_account_view_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//group[@name='account']" position="before">
+                    <div role="status" class="alert alert-danger mb-0" invisible="service_name != 'sms' or registered">
+                        <i class="fa fa-warning"/> You cannot send SMS while your account is not registered.
+                        <button type="object"
+                            name="action_open_registration_wizard" class="btn-link p-0">
+                            <i class="oi oi-arrow-right"/>
+                            Register
+                        </button>
+                    </div>
+                </xpath>
+                <xpath expr="//button[@name='action_buy_credits']" position="attributes">
+                    <attribute name="invisible">service_name == 'sms' and not registered</attribute>
+                </xpath>
+                <field name="warning_threshold" position="before">
+                    <label for="sms_sender_name" class="oe_inline" invisible="service_name != 'sms' or not registered"/>
+                    <div invisible="service_name != 'sms' or not registered">
+                        <field name="sms_sender_name" class="oe_inline" invisible="not sms_sender_name"/>
+                        <button type="object" invisible="sms_sender_name"
+                            name="action_open_sender_name_wizard" class="btn-link p-0">
+                            <i class="oi oi-arrow-right"/>
+                            Set Sender Name
+                        </button>
+                    </div>
+                </field>
+            </field>
+        </record>
+    </data>
+</odoo>

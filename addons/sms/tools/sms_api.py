@@ -12,8 +12,9 @@ class SmsApi:
         self.env = env
 
     def _contact_iap(self, local_endpoint, params, timeout=15):
-        account = self.env['iap.account'].get('sms')
-        params['account_token'] = account.account_token
+        if 'account_token' not in params:
+            account = self.env['iap.account'].get('sms')
+            params['account_token'] = account.account_token
         endpoint = self.env['ir.config_parameter'].sudo().get_param('sms.endpoint', self.DEFAULT_ENDPOINT)
         return iap_tools.iap_jsonrpc(endpoint + local_endpoint, params=params, timeout=timeout)
 
@@ -69,3 +70,15 @@ class SmsApi:
             'incompatible_content': _("The content of the message violates rules applied by our providers."),
             'registration_needed': ' '.join([_("Country-specific registration required."), register_now]),
         }
+
+    def _send_verification_sms(self, account_token, phone_number):
+        return self._contact_iap('/api/sms/1/account/create', {
+            'account_token': account_token,
+            'phone_number': phone_number,
+        })
+
+    def _register_account(self, account_token, verification_code):
+        return self._contact_iap('/api/sms/2/account/verify', {
+            'account_token': account_token,
+            'code': verification_code,
+        })

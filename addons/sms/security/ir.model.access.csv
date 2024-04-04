@@ -11,3 +11,9 @@ access_sms_resend_recipient,access.sms.resend.recipient,model_sms_resend_recipie
 access_sms_resend,access.sms.resend,model_sms_resend,base.group_user,1,1,1,0
 access_sms_template_preview,access.sms.template.preview,model_sms_template_preview,base.group_user,1,1,1,0
 access_sms_template_reset,access.sms.template.reset,model_sms_template_reset,mail.group_mail_template_editor,1,1,1,1
+access_sms_account_registration_phone_number_wizard_all,access.sms.account.registration.phone.number.wizard.all,model_sms_account_registration_phone_number_wizard,,0,0,0,0
+access_sms_account_registration_phone_number_wizard_system,access.sms.account.registration.phone.number.wizard.system,model_sms_account_registration_phone_number_wizard,base.group_system,1,1,1,1
+access_sms_account_verification_code_wizard_all,access.sms.account.verification.code.wizard.all,model_sms_account_verification_code_wizard,,0,0,0,0
+access_sms_account_verification_code_wizard_system,access.sms.account.verification.code.wizard.system,model_sms_account_verification_code_wizard,base.group_system,1,1,1,1
+access_sms_account_sender_name_wizard_all,access.sms.account.sender.name.wizard.all,model_sms_account_sender_name_wizard,,0,0,0,0
+access_sms_account_sender_name_wizard_system,access.sms.account.sender.name.wizard.system,model_sms_account_sender_name_wizard,base.group_system,1,1,1,1
