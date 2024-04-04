@@ -1,10 +1,8 @@
-/** @odoo-module */
-
+import { HistoryDialog } from "@web/core/history_dialog/history_dialog";
 import { FormController } from '@web/views/form/form_controller';
 import { DeleteSubtasksConfirmationDialog } from "@project/components/delete_subtasks_confirmation_dialog/delete_subtasks_confirmation_dialog";
 import { _t } from "@web/core/l10n/translation";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
-import HistoryDialog from '@web_editor/components/history_dialog/history_dialog';
 import { useService } from '@web/core/utils/hooks';
 import { markup } from '@odoo/owl';
 import { escape } from '@web/core/utils/strings';
