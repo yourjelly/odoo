@@ -1,10 +1,8 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, fields, models
 from odoo.exceptions import ValidationError
-
-from .diff_utils import apply_patch, generate_comparison, generate_patch
+from odoo.tools.diff_utils import apply_patch, generate_comparison, generate_patch
 
 
 class HtmlFieldHistory(models.AbstractModel):
@@ -48,7 +46,7 @@ class HtmlFieldHistory(models.AbstractModel):
 
         if vals_contain_versioned_fields:
             self.ensure_one()
-            db_contents = dict([(f, self[f]) for f in versioned_fields])
+            db_contents = {f: self[f] for f in versioned_fields}
             fields_data = self.env[self._name]._fields
 
             if any(f in vals and not fields_data[f].sanitize for f in versioned_fields):

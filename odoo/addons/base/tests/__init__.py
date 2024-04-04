@@ -10,6 +10,7 @@ from . import test_cache
 from . import test_date_utils
 from . import test_deprecation
 from . import test_db_cursor
+from . import test_diff_utils
 from . import test_display_name
 from . import test_expression
 from . import test_float
