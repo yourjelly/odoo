@@ -1,9 +1,7 @@
 import { Record } from "@mail/core/common/record";
 import { EMOJI_REGEX, htmlToTextContentInline } from "@mail/utils/common/format";
 
-import { deserializeDateTime } from "@web/core/l10n/dates";
 import { _t } from "@web/core/l10n/translation";
-import { omit } from "@web/core/utils/objects";
 import { url } from "@web/core/utils/urls";
 
 const { DateTime } = luxon;
@@ -49,6 +47,7 @@ export class Message extends Record {
             return Boolean(div.querySelector("a:not([data-oe-model])"));
         },
     });
+    html_field_history_metadata = "";
     /** @type {number|string} */
     id;
     /** @type {boolean} */
@@ -201,12 +200,8 @@ export class Message extends Record {
         return `${url("/web")}#model=${this.thread.model}&id=${this.thread.id}`;
     }
 
-    get editDate() {
-        return this.write_date !== this.create_date ? this.write_date : false;
-    }
-
     get hasTextContent() {
-        return /*(this.editDate && this.attachments.length) || */ !this.isBodyEmpty;
+        return (this.html_field_history_metadata && this.attachments.length) || !this.isBodyEmpty;
     }
 
     isEmpty = Record.attr(false, {
@@ -272,12 +267,6 @@ export class Message extends Record {
 
     get failureNotifications() {
         return this.notifications.filter((notification) => notification.isFailure);
-    }
-
-    get editDatetimeHuge() {
-        return deserializeDateTime(this.editDate).toLocaleString(
-            omit(DateTime.DATETIME_HUGE, "timeZoneName")
-        );
     }
 }
 

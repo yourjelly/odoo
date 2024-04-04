@@ -97,6 +97,13 @@ messageActionsRegistry
         title: (component) => (component.state.showTranslation ? _t("Revert") : _t("Translate")),
         onClick: (component) => component.onClickToggleTranslation(),
         sequence: 100,
+    })
+    .add("edit-history", {
+        condition: (component) => component.message.html_field_history_metadata,
+        icon: () => "fa-history",
+        title: () => _t("History"),
+        onClick: (component) => component.onClickHistory(),
+        sequence: 100,
     });
 
 function transformAction(component, id, action) {

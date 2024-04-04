@@ -28,6 +28,7 @@ import { hasTouch } from "@web/core/browser/feature_detection";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { useDropdownState } from "@web/core/dropdown/dropdown_hooks";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
+import { HistoryDialog } from "@web/core/history_dialog/history_dialog";
 import { _t } from "@web/core/l10n/translation";
 import { usePopover } from "@web/core/popover/popover_hook";
 /** @type {ReturnType<import("@mail/utils/common/misc").rpcWithEnv>} */
@@ -383,6 +384,30 @@ export class Message extends Component {
             },
             { context: this }
         );
+    }
+
+    onClickHistory() {
+        const historyMetadata = this.props.message.html_field_history_metadata?.body;
+        if (historyMetadata) {
+            this.dialog.add(HistoryDialog, {
+                recordId: this.message.id,
+                recordModel: "mail.message",
+                versionedFieldName: "body",
+                historyMetadata,
+                restoreRequested: (html, close) => {
+                    this.store.env.services["mail.message"].edit(
+                        this.props.message,
+                        html
+                        // this.props.attachments,
+                        // {
+                        //     mentionedChannels: this.props.composer.mentionedChannels,
+                        //     mentionedPartners: this.props.composer.mentionedPartners,
+                        // }
+                    );
+                    close();
+                },
+            });
+        }
     }
 
     onClickReplyTo(ev) {

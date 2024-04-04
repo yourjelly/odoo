@@ -64,9 +64,13 @@ class Message(models.Model):
     information.
     """
     _name = 'mail.message'
+    _inherit = ["html.field.history.mixin"]
     _description = 'Message'
     _order = 'id desc'
     _rec_name = 'record_name'
+
+    def _get_versioned_fields(self):
+        return [Message.body.name]
 
     @api.model
     def default_get(self, fields):
@@ -927,6 +931,7 @@ class Message(models.Model):
             vals.update({
                 'author': author,
                 'default_subject': default_subject,
+                "html_field_history_metadata": message_sudo.html_field_history_metadata,
                 'notifications': message_sudo.notification_ids._filtered_for_web_client()._notification_format(),
                 'attachments': sorted(message_sudo.attachment_ids._attachment_format(), key=lambda a: a["id"]),
                 'trackingValues': displayed_tracking_ids._tracking_value_format(),
