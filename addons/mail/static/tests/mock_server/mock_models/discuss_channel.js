@@ -1,6 +1,6 @@
 import { assignDefined } from "@mail/utils/common/misc";
 import { Command, fields, models, serverState } from "@web/../tests/web_test_helpers";
-import { serializeDateTime, today } from "@web/core/l10n/dates";
+import { serializeDateTime } from "@web/core/l10n/dates";
 import { ensureArray } from "@web/core/utils/arrays";
 import { uniqueId } from "@web/core/utils/functions";
 import { DEFAULT_MAIL_SEARCH_ID, DEFAULT_MAIL_VIEW_ID } from "./constants";
@@ -484,7 +484,7 @@ export class DiscussChannel extends models.ServerModel {
         const memberOfCurrentUser = this._find_or_create_member_for_self(channel.id);
         if (memberOfCurrentUser && memberOfCurrentUser.is_pinned !== pinned) {
             DiscussChannelMember.write([memberOfCurrentUser.id], {
-                unpin_dt: pinned ? false : serializeDateTime(today()),
+                unpin_dt: pinned ? false : serializeDateTime(DateTime.now()),
             });
         }
         const [partner] = ResPartner.read(this.env.user.partner_id);
@@ -785,7 +785,7 @@ export class DiscussChannel extends models.ServerModel {
         kwargs.message_type ||= "notification";
         const channel = this._filter([["id", "=", id]])[0];
         this.write([id], {
-            last_interest_dt: serializeDateTime(today()),
+            last_interest_dt: serializeDateTime(DateTime.now()),
         });
         const messageData = MailThread.message_post.call(this, [id], kwargs);
         if (kwargs.author_id === this.env.user?.partner_id) {

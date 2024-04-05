@@ -1,6 +1,8 @@
 import { fields, models } from "@web/../tests/web_test_helpers";
-import { serializeDateTime, today } from "@web/core/l10n/dates";
+import { serializeDateTime } from "@web/core/l10n/dates";
 import { parseModelParams } from "../mail_mock_server";
+
+const { DateTime } = luxon;
 
 export class DiscussChannelMember extends models.ServerModel {
     _name = "discuss.channel.member";
@@ -9,7 +11,7 @@ export class DiscussChannelMember extends models.ServerModel {
     is_pinned = fields.Generic({ compute: "_compute_is_pinned" });
     unpin_dt = fields.Datetime({ string: "Unpin date" });
     message_unread_counter = fields.Generic({ default: 0 });
-    last_interest_dt = fields.Datetime({ default: () => serializeDateTime(today()) });
+    last_interest_dt = fields.Datetime({ default: () => serializeDateTime(DateTime.now()) });
 
     /**
      * @param {number[]} ids
