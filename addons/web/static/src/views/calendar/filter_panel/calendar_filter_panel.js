@@ -8,6 +8,7 @@ import { sprintf } from "@web/core/utils/strings";
 import { SelectCreateDialog } from "@web/views/view_dialogs/select_create_dialog";
 import { getColor } from "../colors";
 import { Component, useState } from "@odoo/owl";
+import { useSetupView } from "@web/views/view_hook";
 
 let nextId = 1;
 
@@ -19,6 +20,15 @@ export class CalendarFilterPanel extends Component {
         });
         this.addDialog = useOwnedDialogs();
         this.orm = useService("orm");
+
+        // Setup the view to get the local state for the all filter
+        useSetupView({
+            getLocalState: () => {
+                const sections = this.props.model.filterSections;
+                const allFilter = sections.length > 0 ? sections[0].filters?.find((f) => f.type === "all") : false;
+                return allFilter ? { allFilterState: allFilter.active } : {};
+            },
+        });
     }
 
     getFilterColor(filter) {
@@ -177,6 +187,7 @@ export class CalendarFilterPanel extends Component {
         this.state.fieldRev += 1;
         this.props.model.createFilter(fieldName, filterValue);
     }
+
 }
 
 CalendarFilterPanel.components = {

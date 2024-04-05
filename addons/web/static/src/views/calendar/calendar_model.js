@@ -818,7 +818,7 @@ export class CalendarModel extends Model {
             label: isUserOrPartner
                 ? this.env._t("Everybody's calendars")
                 : this.env._t("Everything"),
-            active: previousAllFilter ? previousAllFilter.active : false,
+            active: previousAllFilter ? previousAllFilter.active : this.meta.allFilterLocalState,
             canRemove: false,
             colorIndex: null,
             hasAvatar: false,

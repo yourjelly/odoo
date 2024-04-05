@@ -48,6 +48,7 @@ export class CalendarController extends Component {
             resModel: this.props.resModel,
             domain: this.props.domain,
             fields: this.props.fields,
+            allFilterLocalState: this.props.state?.allFilterState,
         });
 
         useSetupView({
