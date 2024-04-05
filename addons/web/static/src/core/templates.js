@@ -40,6 +40,9 @@ export function registerTemplate(name, url, templateString) {
 const templateExtensions = {};
 const parsedTemplateExtensions = {};
 export function registerTemplateExtension(inheritFrom, url, templateString) {
+    if (!templates[inheritFrom]) {
+        throw new Error(`Unknown template to extend from ${inheritFrom}`);
+    }
     if (blockType !== "extensions") {
         blockType = "extensions";
         blockId++;
