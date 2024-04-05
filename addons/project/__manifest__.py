@@ -78,6 +78,7 @@
         'web.assets_frontend': [
             'project/static/src/scss/portal_rating.scss',
             'project/static/src/scss/project_sharing_frontend.scss',
+            'project/static/src/scss/project_portal.scss',
             'project/static/src/js/portal_rating.js',
         ],
         'web.qunit_suite_tests': [

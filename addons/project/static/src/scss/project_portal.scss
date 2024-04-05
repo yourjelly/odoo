@@ -1,0 +1,8 @@
+.o_portal_wrap .o_portal_my_doc_table {
+    div[aria-expanded="true"] i.fa-caret-right{
+        display: none;
+    }
+    div[aria-expanded="false"] i.fa-caret-down{
+        display: none;
+    }
+}

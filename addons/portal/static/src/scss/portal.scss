@@ -273,6 +273,13 @@ img, .media_iframe_video, .o_image {
             max-width: 500px;
         }
 
+        tr[aria-expanded="true"] i.fa-caret-right{
+            display: none;
+        }
+        tr[aria-expanded="false"] i.fa-caret-down{
+            display: none;
+        }
+
         td {
             padding-top: $o-portal-table-td-pt;
             padding-bottom: $o-portal-table-td-pb;
