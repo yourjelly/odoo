@@ -72,11 +72,24 @@ var _allScriptsLoaded = new Promise(function (resolve) {
 }).then(function () {
     stopWaitingLazy();
 });
+
+let loadScriptsTimeout = null;
+
 if (document.readyState === 'complete') {
     setTimeout(_loadScripts, 0);
 } else {
-    window.addEventListener('load', function () {
-        setTimeout(_loadScripts, 0);
+    let scriptLoaded = false;
+    document.addEventListener('DOMContentLoaded', function () {
+        loadScriptsTimeout = setTimeout(() =>{
+            setTimeout(_loadScripts, 0);
+            scriptLoaded = true;
+        }, 500);
+    });
+    window.addEventListener('load', function() {
+        if (!scriptLoaded) {
+            clearTimeout(loadScriptsTimeout);
+            setTimeout(_loadScripts, 0);
+        }
     });
 }
 
