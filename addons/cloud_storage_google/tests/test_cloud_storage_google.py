@@ -68,7 +68,7 @@ class TestCloudStorageGoogle(TransactionCase):
             response.status_code = 204
             return response
 
-        with patch('odoo.addons.cloud_storage.models.cloud_storage_google.requests.delete', delete):
+        with patch('odoo.addons.cloud_storage_google.models.cloud_storage_google.requests.delete', delete):
             self.env['cloud.storage.blob.to.delete'].delete_blobs()
 
         self.assertEqual(delete_num, 2, '2 requests should be sent to the google api')
@@ -90,7 +90,7 @@ class TestCloudStorageGoogle(TransactionCase):
             response.status_code = 404
             return response
 
-        with patch('odoo.addons.cloud_storage.models.cloud_storage_google.requests.delete', delete):
+        with patch('odoo.addons.cloud_storage_google.models.cloud_storage_google.requests.delete', delete):
             self.env['cloud.storage.blob.to.delete'].delete_blobs()
 
         self.assertEqual(delete_num, 2, '2 requests should be sent to the google api')
@@ -115,7 +115,7 @@ class TestCloudStorageGoogle(TransactionCase):
                 response._content = bytes('forbidden', 'utf-8')
             return response
 
-        with patch('odoo.addons.cloud_storage.models.cloud_storage_google.requests.delete', delete):
+        with patch('odoo.addons.cloud_storage_google.models.cloud_storage_google.requests.delete', delete):
             self.env['cloud.storage.blob.to.delete'].delete_blobs()
 
         self.assertEqual(delete_num, 2, '2 requests should be sent to the google api')
@@ -143,7 +143,7 @@ class TestCloudStorageGoogle(TransactionCase):
                 response._content = bytes('unknown', 'utf-8')
             return response
 
-        with patch('odoo.addons.cloud_storage.models.cloud_storage_google.requests.delete', delete):
+        with patch('odoo.addons.cloud_storage_google.models.cloud_storage_google.requests.delete', delete):
             self.env['cloud.storage.blob.to.delete'].delete_blobs()
 
         self.assertEqual(delete_num, 2, '2 requests should be sent to the google api')
@@ -168,7 +168,7 @@ class TestCloudStorageGoogle(TransactionCase):
             response.status_code = 204
             return response
 
-        with patch('odoo.addons.cloud_storage.models.cloud_storage_google.requests.delete', delete):
+        with patch('odoo.addons.cloud_storage_google.models.cloud_storage_google.requests.delete', delete):
             self.env['cloud.storage.blob.to.delete'].delete_blobs()
 
         self.assertEqual(delete_num, 1, "shared cloud storage blob shouldn't be deleted")

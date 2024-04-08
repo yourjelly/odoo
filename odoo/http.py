@@ -542,6 +542,13 @@ class Stream:
             self.last_modified = attachment.write_date
             self.size = len(self.data)
 
+        elif attachment.type.startswith('cloud_storage_'):
+            self.type = 'url'
+            info = attachment.env['cloud.storage.provider']._generate_download_info(attachment)
+            self.url = info['url']
+            # cache the redirection until 10 seconds before the expiry
+            self.max_age = max(info['time_to_expiry'] - 10, 0)
+
         elif attachment.url:
             # When the URL targets a file located in an addon, assume it
             # is a path to the resource. It saves an indirection and
@@ -552,12 +559,6 @@ class Stream:
             )
             if static_path:
                 self = cls.from_path(static_path)
-            elif 'cloud_storage_model' in attachment and attachment.cloud_storage_model:
-                self.type = 'url'
-                info = attachment.env[attachment.cloud_storage_model]._generate_download_info(attachment)
-                self.url = info['url']
-                # cache the redirection until 10 seconds before the expiry
-                self.max_age = max(info['time_to_expiry'] - 10, 0)
             else:
                 self.type = 'url'
                 self.url = attachment.url

@@ -8,26 +8,11 @@
         <field name="arch" type="xml">
             <xpath expr="//setting[@id='cloud_storage']" position="replace">
                 <setting id="cloud_storage" string="Cloud Storage" help="Select the cloud storage provider to store attachments.">
-                    <field name="module_cloud_storage"/>
-                    <div id='cloud_storage_providers' invisible="not module_cloud_storage">
-                        <field name="cloud_storage_provider"/>
-                        <div class="content-group mt16" invisible="not cloud_storage_provider">
+                    <field name="cloud_storage"/>
+                    <div id='cloud_storage_provider' invisible="not cloud_storage">
+                        <div class="content-group mt16" invisible="not cloud_storage">
                             <label for="cloud_storage_min_file_size" class="o_light_label mr8"/>
                             <field name="cloud_storage_min_file_size"/>
-                        </div>
-                        <div class="content-group mt16" invisible="cloud_storage_provider != 'cloud.storage.google'">
-                            <label for="cloud_storage_google_bucket_name" class="o_light_label mr8"/>
-                            <field name="cloud_storage_google_bucket_name"/>
-                            <br/>
-                            <label for="cloud_storage_google_account_info" class="o_light_label mr8"/>
-                            <field name="cloud_storage_google_account_info"/>
-                        </div>
-                        <div class="content-group mt16" invisible="cloud_storage_provider != 'cloud.storage.azure'">
-                            <label for="cloud_storage_azure_container_name" class="o_light_label mr8"/>
-                            <field name="cloud_storage_azure_container_name"/>
-                            <br/>
-                            <label for="cloud_storage_azure_connection_string" class="o_light_label mr8"/>
-                            <field name="cloud_storage_azure_connection_string"/>
                         </div>
                     </div>
                     <div class="mt8">

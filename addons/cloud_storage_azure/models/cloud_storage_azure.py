@@ -5,26 +5,17 @@ import requests
 from datetime import datetime, timedelta
 from urllib.parse import unquote, quote
 
-from odoo import models, _
+from odoo import models, fields, _
 from odoo.exceptions import ValidationError
 
 from .cloud_storage_azure_utils import generate_blob_sas
 
-class CloudStorageProvider(models.AbstractModel):
-    _inherit = 'cloud.storage.provider'
-
-    def _get_all_providers(self):
-        """ register the azure cloud storage provider """
-        res = super()._get_all_providers()
-        res.append(('cloud.storage.azure', 'Azure Cloud Storage'))
-        return res
-
 
 class CloudStorageAzure(models.AbstractModel):
-    _name = 'cloud.storage.azure'
     _inherit = 'cloud.storage.provider'
     _description = 'Azure Cloud Storage'
 
+    _cloud_storage_type = 'cloud_storage_azure'
     _url_pattern = re.compile(r"[^/]+//(?P<account_name>[\w]+).[^/]+/(?P<container_name>[\w]+)/(?P<blob_name>[^?]+)")
 
     def _get_info_from_url(self, url):
@@ -144,3 +135,12 @@ class CloudStorageAzure(models.AbstractModel):
             else:
                 to_unlink_ids.append(blob.id)
         self.env['cloud.storage.blob.to.delete'].browse(to_unlink_ids).unlink()
+
+
+class CloudStorageAttachment(models.Model):
+    _inherit = 'ir.attachment'
+
+    type = fields.Selection(
+        selection_add=[(CloudStorageAzure._cloud_storage_type, CloudStorageAzure._description)],
+        ondelete={CloudStorageAzure._cloud_storage_type: lambda recs: recs.write({'type': 'url'})}
+    )

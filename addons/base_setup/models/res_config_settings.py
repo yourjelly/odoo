@@ -32,7 +32,14 @@ class ResConfigSettings(models.TransientModel):
     module_base_geolocalize = fields.Boolean("GeoLocalize")
     module_google_recaptcha = fields.Boolean("reCAPTCHA")
     module_website_cf_turnstile = fields.Boolean("Cloudflare Turnstile")
+    cloud_storage = fields.Selection(
+        selection=[('azure', 'Azure'), ('google', 'Google')],
+        string='Cloud Storage Provider',
+        inverse='_inverse_cloud_storage',
+    )
     module_cloud_storage = fields.Boolean("Cloud Storage")
+    module_cloud_storage_google = fields.Boolean("Cloud Storage Google")
+    module_cloud_storage_azure = fields.Boolean("Cloud Storage Azure")
     report_footer = fields.Html(related="company_id.report_footer", string='Custom Report Footer', help="Footer text displayed at the bottom of all reports.", readonly=False)
     group_multi_currency = fields.Boolean(string='Multi-Currencies',
             implied_group='base.group_multi_currency',
@@ -123,3 +130,23 @@ class ResConfigSettings(models.TransientModel):
     def _compute_is_root_company(self):
         for record in self:
             record.is_root_company = not record.company_id.parent_id
+
+    def get_values(self):
+        res = super().get_values()
+        installed_modules = self.env['ir.module.module']._installed()
+        res['cloud_storage'] = False
+        if 'cloud_storage_google' in installed_modules:
+            res['cloud_storage'] = 'google'
+        elif 'cloud_storage_azure' in installed_modules:
+            res['cloud_storage'] = 'azure'
+        return res
+
+    def _inverse_cloud_storage(self):
+        if self.cloud_storage == 'google':
+            self.module_cloud_storage_azure = False
+            self.module_cloud_storage_google = True
+        elif self.cloud_storage == 'azure':
+            self.module_cloud_storage_google = False
+            self.module_cloud_storage_azure = True
+        else:
+            self.module_cloud_storage = False

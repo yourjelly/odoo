@@ -13,24 +13,9 @@ class CloudStorageProvider(models.AbstractModel):
     _name = 'cloud.storage.provider'
     _description = 'Cloud Storage Provider'
 
-    # The following methods are used to get info about all providers
-    def _get_all_providers(self):
-        """
-        Get all the cloud storage provider models
-        :return: [(provider_model_name, provider_model_description), ...]
-        :rtype: list[tuple[str, str]]
-        """
-        return []
-
-    def _get_all_configured_provider_models(self):
-        """
-        Get all the configured cloud storage provider models
-        :return: OrderedSet[set] A set of cloud storage provider models' names
-        """
-        return OrderedSet(provider for provider, _ in self._get_all_providers() if self.env[provider]._is_configured())
-
     # Implement the following methods for each cloud storage provider.
-    # And use env['provider_name'].method_name to call their implementations
+    _cloud_storage_type = None
+
     def _setup(self):
         """
         Setup the cloud storage provider and check the validity of the account
@@ -44,7 +29,7 @@ class CloudStorageProvider(models.AbstractModel):
         Check if the cloud storage provider is configured
         :return: True if the cloud storage provider is configured else False
         """
-        raise NotImplementedError()
+        return False
 
     def _generate_url(self, attachment):
         """
@@ -101,12 +86,10 @@ class CloudStorageProvider(models.AbstractModel):
 class CloudStorageAttachment(models.Model):
     _inherit = 'ir.attachment'
 
-    cloud_storage_model = fields.Char('Cloud Storage Model', readonly=True)
-
     @property
     def CLOUD_STORAGE(self):
-        """ Get the currently used cloud storage provider's model name """
-        return self.env['ir.config_parameter'].sudo().get_param('ir_attachment.cloud_storage')
+        """ check if current used cloud storage provider is configured """
+        return self.env['cloud.storage.provider'].sudo()._is_configured()
 
     def unlink(self):
         # logically delete the cloud storage blobs before unlinking the
@@ -114,8 +97,7 @@ class CloudStorageAttachment(models.Model):
         # ``ir_cron_cloud_storage_blobs_delete_action``
         self.env['cloud.storage.blob.to.delete'].sudo().create([{
             'url': attach.url,
-            'provider_model': attach.cloud_storage_model,
-        } for attach in self if attach.cloud_storage_model])
+        } for attach in self if attach.type.startswith('cloud_storage_')])
         return super().unlink()
 
     def _post_add_create(self, **kwargs):
@@ -126,9 +108,8 @@ class CloudStorageAttachment(models.Model):
             for record in self:
                 record.write({
                     'raw': False,
-                    'cloud_storage_model': self.CLOUD_STORAGE,
-                    'type': 'url',
-                    'url': self.env[self.CLOUD_STORAGE]._generate_url(record)
+                    'type': self.env['cloud.storage.provider']._cloud_storage_type,
+                    'url': self.env['cloud.storage.provider']._generate_url(record)
                 })
 
 
@@ -137,7 +118,6 @@ class CloudStorageBlobToDelete(models.Model):
     _description = "Cloud Storage blobs to delete"
 
     url = fields.Char('URL', required=True)
-    provider_model = fields.Char(string='Cloud Storage Provider', required=True, index=True)
     state = fields.Selection([
         ('to_delete', 'To be deleted'),
         ('failed', 'Failed'),
@@ -160,12 +140,10 @@ class CloudStorageBlobToDelete(models.Model):
         if len(self) > 100:
             raise UserError(_('Too many blobs to delete at once'))
 
-        configured_providers = self.env['cloud.storage.provider']._get_all_configured_provider_models()
         self.invalidate_model()
         self.env['ir.attachment'].flush_model()
 
         to_delete_condition = SQL('blob.id IN %s', tuple(self.ids)) if self.ids else SQL('1 = 1')
-        provider_condition = SQL('blob.provider_model NOT IN %s', tuple(configured_providers)) if configured_providers else SQL('1 = 1')
 
         # don't delete blobs if they are still used by ir.attachment records
         self.env.cr.execute(SQL(
@@ -179,27 +157,17 @@ class CloudStorageBlobToDelete(models.Model):
         ))
 
         # remove blobs for not configured providers
-        self.env.cr.execute(SQL(
-            """
-            UPDATE cloud_storage_blob_to_delete blob
-            SET state = 'failed',
-                error_message = 'Cloud Storage Provider not found'
-            WHERE %(provider_condition)s
-            AND %(to_delete_condition)s
-            """,
-            provider_condition=provider_condition,
-            to_delete_condition=to_delete_condition,
-        ))
-
-        if self.ids:
-            for provider_model, blobs in self.exists().grouped('provider_model').items():
-                self.env[provider_model]._delete_blobs(blobs)
+        if not self.env['cloud.storage.provider'].sudo()._is_configured():
+            self.env.cr.execute(SQL(
+                """
+                UPDATE cloud_storage_blob_to_delete blob
+                SET state = 'failed',
+                    error_message = 'Cloud Storage Provider not found'
+                WHERE %(to_delete_condition)s
+                """,
+                to_delete_condition=to_delete_condition,
+            ))
             return
 
-        for provider_model in configured_providers:
-            # get at most 100 blobs to delete to avoid too many requests
-            to_delete = self.search([
-                ('provider_model', '=', provider_model),
-                ('state', '=', 'to_delete')
-            ], limit=100)
-            self.env[provider_model]._delete_blobs(to_delete)
+        to_delete = self or self.search([('state', '=', 'to_delete')], limit=100)
+        self.env['cloud.storage.provider']._delete_blobs(to_delete)

@@ -27,5 +27,5 @@ class CloudAttachmentController(AttachmentController):
         # append upload url to the response to allow the client to directly
         # upload files to the cloud storage
         attachment = request.env['ir.attachment'].browse(attachmentData['id']).sudo()
-        attachmentData['upload_info'] = request.env[attachment.CLOUD_STORAGE]._generate_upload_info(attachment)
+        attachmentData['upload_info'] = request.env['cloud.storage.provider']._generate_upload_info(attachment)
         return request.make_json_response(attachmentData)

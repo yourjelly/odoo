@@ -178,7 +178,7 @@
                                 </div>
                             </setting>
                             <setting help="Store attachments to the cloud storage" id="cloud_storage">
-                                <field name="module_cloud_storage"/>
+                                <field name="cloud_storage"/>
                             </setting>
 
                         </block>

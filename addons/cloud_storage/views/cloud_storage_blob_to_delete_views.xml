@@ -9,7 +9,6 @@
                     <button string="Delete Cloud Storage Blobs" name="delete_blobs" type="object"/>
                 </header>
                 <field name="url"/>
-                <field name="provider_model"/>
                 <field name="state"/>
                 <field name="error_message"/>
             </tree>

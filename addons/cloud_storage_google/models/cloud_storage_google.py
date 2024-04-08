@@ -11,7 +11,7 @@ try:
 except ImportError:
     service_account = Request = None
 
-from odoo import models, _
+from odoo import models, fields, _
 from odoo.exceptions import ValidationError
 from odoo.tools import ormcache
 
@@ -20,22 +20,11 @@ from .cloud_storage_google_utils import generate_signed_url_v4
 GOOGLE_CLOUD_STORAGE_ENDPOINT = 'https://storage.googleapis.com'
 
 
-class CloudStorageProvider(models.AbstractModel):
-    _inherit = 'cloud.storage.provider'
-
-    def _get_all_providers(self):
-        """ register the google cloud storage provider """
-        res = super()._get_all_providers()
-        if service_account and Request:
-            res.append(('cloud.storage.google', 'Google Cloud Storage'))
-        return res
-
-
 class CloudStorageGoogle(models.AbstractModel):
-    _name = 'cloud.storage.google'
     _inherit = 'cloud.storage.provider'
     _description = 'Google Cloud Storage'
 
+    _cloud_storage_type = 'cloud_storage_google'
     _url_pattern = re.compile(rf'{GOOGLE_CLOUD_STORAGE_ENDPOINT}/(?P<bucket_name>[\w\-.]+)/(?P<blob_name>[^?]+)')
 
     def _get_info_from_url(self, url):
@@ -150,3 +139,12 @@ class CloudStorageGoogle(models.AbstractModel):
             else:
                 deleted_blob_ids.append(blob.id)
         blobs.browse(deleted_blob_ids).unlink()
+
+
+class CloudStorageAttachment(models.Model):
+    _inherit = 'ir.attachment'
+
+    type = fields.Selection(
+        selection_add=[(CloudStorageGoogle._cloud_storage_type, CloudStorageGoogle._description)],
+        ondelete={CloudStorageGoogle._cloud_storage_type: lambda recs: recs.write({'type': 'url'})}
+    )
