@@ -17,6 +17,7 @@ echo "export LANGUAGE=en_US.UTF-8" >> ~/.bashrc
 echo "export LANG=en_US.UTF-8" >> ~/.bashrc
 echo "export LC_ALL=en_US.UTF-8" >> ~/.bashrc
 locale-gen
+
 source ~/.bashrc
 
 apt-get update
@@ -36,6 +37,7 @@ PKGS_TO_INSTALL="
     firefox-esr \
     fswebcam \
     git \
+    gldriver-test \
     hostapd \
     iw \
     kpartx \
@@ -79,6 +81,7 @@ PKGS_TO_INSTALL="
     unclutter \
     vim \
     x11-utils \
+    x11-xserver-utils \
     xdotool \
     xserver-xorg-input-evdev \
     xserver-xorg-video-dummy \
@@ -179,6 +182,9 @@ create_ramdisk_dir "/var"
 create_ramdisk_dir "/etc"
 create_ramdisk_dir "/tmp"
 mkdir -v /root_bypass_ramdisks
+
+# set default display
+echo "export DISPLAY=:0" >> ~/.bashrc
 
 echo "password"
 echo ${password}

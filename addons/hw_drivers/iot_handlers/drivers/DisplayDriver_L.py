@@ -42,9 +42,8 @@ class DisplayDriver(Driver):
         self.event_data = threading.Event()
         self.owner = False
         self.rendered_html = ''
-        if self.device_identifier != 'distant_display':
-            self._x_screen = device.get('x_screen', '0')
-            self.load_url()
+        self._x_screen = device.get('x_screen', '0')
+        self.load_url()
 
         self._actions.update({
             'update_url': self._action_update_url,
@@ -76,10 +75,13 @@ class DisplayDriver(Driver):
         firefox_env = os.environ.copy()
         firefox_env['HOME'] = '/tmp/' + self._x_screen
         self.url = url or 'http://localhost:8069/point_of_sale/display/' + self.device_identifier
-        new_window = subprocess.call(['xdotool', 'search', '--onlyvisible', '--screen', self._x_screen, '--class', 'Firefox'])
-        subprocess.Popen(['firefox', self.url], env=firefox_env)
-        if new_window:
-            self.call_xdotools('F11')
+        try:
+            new_window = subprocess.run(['xdotool', 'search', '--onlyvisible', '--screen', self._x_screen, '--class', 'Firefox'])
+            subprocess.Popen(['firefox', self.url], env=firefox_env)
+            if new_window:
+                self.call_xdotools('F11')
+        except subprocess.CalledProcessError:
+            _logger.exception('Failed to start Firefox')
 
     def load_url(self):
         url = None
