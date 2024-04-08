@@ -3157,26 +3157,30 @@ class AccountMove(models.Model):
                 close_file(file_data)
                 continue
 
-            decoder = self._get_edi_decoder(file_data, new=new)
-            if decoder:
-                try:
-                    with self.env.cr.savepoint():
-                        with current_invoice._get_edi_creation() as invoice:
+            try:
+                with self.env.cr.savepoint() as savepoint:
+                    with current_invoice._get_edi_creation() as invoice:
+                        decoder = invoice._get_edi_decoder(file_data, new=new)
+                        if decoder:
                             # pylint: disable=not-callable
                             success = decoder(invoice, file_data, new)
-                        if success or file_data['type'] == 'pdf':
-                            invoice._link_bill_origin_to_purchase_orders(timeout=4)
+                        else:
+                            success = False
+                            # delete 'invoice'
+                            savepoint.rollback()
+                    if success or file_data['type'] == 'pdf':
+                        invoice._link_bill_origin_to_purchase_orders(timeout=4)
 
-                            invoices |= invoice
-                            current_invoice = self.env['account.move']
-                            add_file_data_results(file_data, invoice)
+                        invoices |= invoice
+                        current_invoice = self.env['account.move']
+                        add_file_data_results(file_data, invoice)
 
-                except RedirectWarning:
-                    raise
-                except Exception:
-                    message = _("Error importing attachment '%s' as invoice (decoder=%s)", file_data['filename'], decoder.__name__)
-                    invoice.sudo().message_post(body=message)
-                    _logger.exception(message)
+            except RedirectWarning:
+                raise
+            except Exception:
+                message = _("Error importing attachment '%s' as invoice (decoder=%s)", file_data['filename'], decoder.__name__)
+                invoice.sudo().message_post(body=message)
+                _logger.exception(message)
 
             passed_file_data_list.append(file_data)
             close_file(file_data)
