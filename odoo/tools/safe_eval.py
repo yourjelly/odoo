@@ -54,7 +54,7 @@ _UNSAFE_ATTRIBUTES = [
     # Frames
     'f_builtins', 'f_code', 'f_globals', 'f_locals',
     # Python 2 functions
-    'func_code', 'func_globals',
+    'func_code', 'func_globals', 'mro',
     # Code object
     'co_code', '_co_code_adaptive',
     # Method resolution order,
@@ -124,6 +124,7 @@ _EXPR_OPCODES = _CONST_OPCODES.union(to_opcodes([
     'GEN_START',  # added in 3.10 but already removed from 3.11.
     # Added in 3.11, replacing all BINARY_* and INPLACE_*
     'BINARY_OP',
+    'RETURN_CONST',
 ])) - _BLACKLIST
 
 _SAFE_OPCODES = _EXPR_OPCODES.union(to_opcodes([
@@ -167,7 +168,9 @@ _SAFE_OPCODES = _EXPR_OPCODES.union(to_opcodes([
     'PUSH_EXC_INFO',
     'NOP',
     'FORMAT_VALUE', 'BUILD_STRING',
-
+    # 3.12
+    'LOAD_FAST_AND_CLEAR', 'END_FOR', 'POP_JUMP_IF_NOT_NONE', 'BINARY_SLICE', 'RERAISE',
+    'CALL_INTRINSIC_1',
 ])) - _BLACKLIST
 
 _logger = logging.getLogger(__name__)
