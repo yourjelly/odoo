@@ -164,7 +164,9 @@ publicWidget.registry.portalSearchPanel = publicWidget.Widget.extend({
     _onDropdownItemClick: function (ev) {
         ev.preventDefault();
         const item = ev.currentTarget;
-        item.closest('.dropdown-menu').querySelector('.dropdown-item').classList.remove('active');
+        // TODO: MSH: We need to use querySelectorAll, check other places
+        const dropdownItems = item.closest('.dropdown-menu').querySelectorAll('.dropdown-item');
+        dropdownItems.forEach(elem => elem.classList.remove('active'));
         item.classList.add('active');
 
         this._adaptSearchLabel(ev.currentTarget);

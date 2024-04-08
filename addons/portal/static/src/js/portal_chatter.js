@@ -330,7 +330,9 @@ publicWidget.registry.portalChatter = publicWidget.Widget.extend({
      */
     async start() {
         const proms = [this._super.apply(this, arguments)];
-        const chatter = new PortalChatter(this, this.$el.data());
+        const data = Object.assign({}, this.el.dataset);
+        const chatter = new PortalChatter(this, data);
+        // TODO: MSH: We need to keep following jquery code as it is as appendTo method do not support HTML Element or we need to make appendTo method handle HTML Element
         proms.push(chatter.appendTo(this.$el));
         await Promise.all(proms);
         // scroll to the right place after chatter loaded
