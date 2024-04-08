@@ -1621,17 +1621,19 @@ class BaseModel(metaclass=MetaModel):
         :returns: at most ``limit`` records matching the search criteria
         :raise AccessError: if user is not allowed to access requested information
         """
-        # first determine a query that satisfies the domain and access rules
+        return next(self._search_fetch_many(domain, field_names, offset=offset, limit=limit, order=order, many=None), self.browse())
+
+    def _search_fetch_many(self, domain, field_names=(), offset=0, limit=None, order=None, many=1000):
         query = self._search(domain, offset=offset, limit=limit, order=order or self._order)
 
         if query.is_empty():
             # optimization: don't execute the query at all
-            return self.browse()
+            yield self.browse()
+            return
 
         fields_to_fetch = self._determine_fields_to_fetch(field_names)
 
-        return self._fetch_query(query, fields_to_fetch)
-
+        yield from self._fetch_query_many(query, fields_to_fetch, many)
     #
     # display_name, name_create, name_search
     #
@@ -3929,6 +3931,9 @@ class BaseModel(metaclass=MetaModel):
         return fields_to_fetch
 
     def _fetch_query(self, query, fields):
+        return next(self._fetch_query_many(query, fields), self.browse())
+
+    def _fetch_query_many(self, query, fields, size=None):
         """ Fetch the given fields (iterable of :class:`Field` instances) from
         the given query, put them in cache, and return the fetched records.
 
@@ -3946,6 +3951,7 @@ class BaseModel(metaclass=MetaModel):
             (column_fields if field.column_type else other_fields).add(field)
 
         context = self.env.context
+        fetched = self.browse()
 
         if column_fields:
             # the query may involve several tables: we need fully-qualified names
@@ -3960,33 +3966,42 @@ class BaseModel(metaclass=MetaModel):
                 sql_terms.append(sql)
 
             # select the given columns from the rows in the query
-            rows = self.env.execute_query(query.select(*sql_terms))
+            for rows in self.env.execute_query_many(query.select(*sql_terms), size):
+                if not rows:
+                    return
+                if fetched:
+                    fetched.invalidate_recordset()
 
-            if not rows:
-                return self.browse()
+                # rows = [(id1, a1, b1), (id2, a2, b2), ...]
+                # column_values = [(id1, id2, ...), (a1, a2, ...), (b1, b2, ...)]
+                column_values = zip(*rows)
+                ids = next(column_values)
+                fetched = self.browse(ids)
 
-            # rows = [(id1, a1, b1), (id2, a2, b2), ...]
-            # column_values = [(id1, id2, ...), (a1, a2, ...), (b1, b2, ...)]
-            column_values = zip(*rows)
-            ids = next(column_values)
-            fetched = self.browse(ids)
+                # If we assume that the value of a pending update is in cache, we
+                # can avoid flushing pending updates if the fetched values do not
+                # overwrite values in cache.
+                for field in column_fields:
+                    values = next(column_values)
+                    # store values in cache, but without overwriting
+                    self.env.cache.insert_missing(fetched, field, values)
 
-            # If we assume that the value of a pending update is in cache, we
-            # can avoid flushing pending updates if the fetched values do not
-            # overwrite values in cache.
-            for field in column_fields:
-                values = next(column_values)
-                # store values in cache, but without overwriting
-                self.env.cache.insert_missing(fetched, field, values)
+                # process non-column fields
+                if fetched:
+                    for field in other_fields:
+                        field.read(fetched)
+
+                yield fetched
         else:
-            fetched = self.browse(query)
-
-        # process non-column fields
-        if fetched:
-            for field in other_fields:
-                field.read(fetched)
-
-        return fetched
+            for rows in self.env.execute_query_many(query.select(SQL.identifier(self._table, 'id')), size):
+                if fetched:
+                    fetched.invalidate_recordset()
+                fetched = self.browse([row[0] for row in rows])
+                # process non-column fields
+                if fetched:
+                    for field in other_fields:
+                        field.read(fetched)
+                yield fetched
 
     def get_metadata(self):
         """Return some metadata about the given records.

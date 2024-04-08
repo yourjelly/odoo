@@ -23,6 +23,7 @@ from inspect import signature
 from pprint import pformat
 from weakref import WeakSet
 from typing import TYPE_CHECKING
+from uuid import uuid4
 
 try:
     from decorator import decoratorx as decorator
@@ -860,10 +861,20 @@ class Environment(Mapping):
         (or an empty list if no result to fetch).  The method automatically
         flushes all the fields in the metadata of the query.
         """
+        return next(self.execute_query_many(query))
+
+    def execute_query_many(self, query: SQL, size: int = 0):
         assert isinstance(query, SQL)
         self.flush_query(query)
-        self.cr.execute(query)
-        return [] if self.cr.description is None else self.cr.fetchall()
+        if size:
+            name = SQL('cursor' + uuid4().hex)
+            self.cr.execute(SQL("DECLARE %s CURSOR FOR %s", name, query))
+            while rows := self.execute_query(SQL("FETCH %s FROM %s", size or 1000, name)):
+                yield rows
+            self.cr.execute(SQL("CLOSE %s", name))
+        else:
+            self.cr.execute(query)
+            yield self.cr.fetchall() if self.cr.description is not None else []
 
 
 class Transaction:
