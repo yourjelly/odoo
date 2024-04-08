@@ -2,6 +2,7 @@ import { registry } from "@web/core/registry";
 import { imageUrl } from "@web/core/utils/urls";
 import { fileTypeMagicWordMap } from "@web/views/fields/image/image_field";
 import { standardWidgetProps } from "../standard_widget_props";
+import { _t } from "@web/core/l10n/translation";
 
 import { Component } from "@odoo/owl";
 
@@ -78,6 +79,23 @@ export const kanbanImageWidget = {
             // todo: placeholder
         };
     },
+    supportedOptions: [
+        {
+            label: _t("Field"),
+            name: "field",
+            type: "field",
+        },
+        {
+            label: _t("Inner"),
+            name: "inner",
+            type: "string",
+        },
+        {
+            label: _t("Placeholder"),
+            name: "placeholder",
+            type: "string",
+        },
+    ],
 };
 
 registry.category("view_widgets").add("kanban_image", kanbanImageWidget);

@@ -1,6 +1,6 @@
 import { registry } from "@web/core/registry";
 import { standardWidgetProps } from "../standard_widget_props";
-
+import { _t } from "@web/core/l10n/translation";
 import { Component } from "@odoo/owl";
 
 /**
@@ -49,6 +49,23 @@ export const ribbonWidget = {
             bgClass: attrs.bg_color,
         };
     },
+    supportedAttributes: [
+        {
+            label: _t("Title"),
+            name: "title",
+            type: "string",
+        },
+        {
+            label: _t("Background color"),
+            name: "bg_color",
+            type: "string",
+        },
+        {
+            label: _t("Tooltip"),
+            name: "tooltip",
+            type: "string",
+        },
+    ],
 };
 
 registry.category("view_widgets").add("web_ribbon", ribbonWidget);
