@@ -1,81 +1,52 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <templates xml:space="preserve">
     <t t-name="website_sale.locationSelector.dialog">
-        <Dialog size="size" title="title" footer="false">
-            <div class="container">
-                <!-- Address -->
-                <input t-model.lazy="this.state.zipCode"/>
-                <!-- Nav tabs -->
-                <ul class="nav nav-tabs d-md-none mb-2" role="tablist">
-                    <li class="nav-item" role="presentation">
-                        <button
-                            class="nav-link active"
-                            data-bs-toggle="tab"
-                            data-bs-target="#o_location_selector_list_view"
-                            type="button"
-                            role="tab"
-                        >
-                            List view
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button
-                            class="nav-link"
-                            data-bs-toggle="tab"
-                            data-bs-target="#o_location_selector_map_view"
-                            type="button"
-                            role="tab"
-                        >
-                            Map view
-                        </button>
-                    </li>
-                </ul>
-
-                <!-- Tab panes -->
-                <t t-if="this.state.error">
-                    <t t-out="this.state.error"/>
-                </t>
-                <div t-else="" class="tab-content d-md-flex">
-                    <div
-                        id="o_location_selector_list_view"
-                        class="tab-pane active d-md-flex flex-md-shrink-1 justify-content-md-center"
-                        role="tabpanel"
-                    >
-                        <div class="d-flex flex-column align-items-center">
-                            <t t-if="this.state.locations.length">
-
-                                <t
-                                    t-foreach="this.state.locations"
-                                    t-as="location"
-                                    t-key="location.id"
-                                >
-                                    <Location
-                                        id="location.id.toString()"
-                                        name="location.pick_up_point_name"
-                                        address="location.pick_up_point_address"
-                                        number="location_index + 1"
-                                        isSelected="this.state.selectedLocationId === location.id.toString()"
-                                        setSelectedLocation.bind="setSelectedLocation"
-                                    />
-                                </t>
-                                <button
-                                    type="button"
-                                    class="btn btn-primary"
-                                    name="o_location_selector_validate_selection"
-                                    t-att-disabled="!this.state.selectedLocationId"
-                                    t-on-click="validateSelection"
-                                >
-                                    Choose this location
-                                </button>
-                            </t>
-                            <t t-else="">
-                                SPINNER
-                            </t>
+        <Dialog size="size" title="title" footer="false" bodyClass="'p-0 py-md-0 px-md-3'">
+                <div class="row d-none d-md-flex">
+                <section class="overflow-x-auto col-md-4 p-0" style="height: 80vh;">
+                    <!-- Address input -->
+                    <div class="sticky-top border-bottom border-top bg-body p-3">
+                        <div role="search" class="input-group me-sm-2">
+                            <input class="search-query form-control oe_search_box border-0 bg-light border-0 text-bg-light" t-model.lazy="this.state.zipCode"/>
+                            <button type="submit" aria-label="Search" title="Search" class="btn oe_search_button btn btn-light">
+                                    <i class="oi oi-search" data-oe-model="ir.ui.view" data-oe-id="951" data-oe-field="arch" data-oe-xpath="/data/xpath[3]/form/t[1]/div[1]/button[1]/i[1]"></i>
+                            </button>
                         </div>
                     </div>
+                    <!-- result list group -->
+                    <div
+                        id="o_location_selector_list_view"
+                        class="list-group list-group-flush"
+                    >
+                        <t t-if="this.state.locations.length">
+                            <t
+                                t-foreach="this.state.locations"
+                                t-as="location"
+                                t-key="location.id"
+                            >
+                            <Location
+                                id="location.id.toString()"
+                                name="location.pick_up_point_name"
+                                address="location.pick_up_point_address"
+                                number="location_index + 1"
+                                isSelected="this.state.selectedLocationId === location.id.toString()"
+                                setSelectedLocation.bind="setSelectedLocation"
+                            />
+                            </t>
+                        </t>
+                        <t t-else="">
+                            <div class="d-flex align-items-center justify-content-center p-2">
+                                <div class="spinner-border" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                        </t>
+                    </div>
+                </section>
+                <section class="position-relative col-md-8 p-0">
                     <div
                         id="o_location_selector_map_view"
-                        class="tab-pane d-md-flex flex-md-grow-1 justify-content-md-center"
+                        class="tab-pane index-0 d-md-flex flex-md-grow-1 justify-content-md-center"
                         role="tabpanel"
                     >
                         <Map
@@ -84,9 +55,144 @@
                             selectedLocationId="this.state.selectedLocationId.toString()"
                             setSelectedLocation.bind="setSelectedLocation"
                         />
+                        <div class="collapse collapse-horizontal position-absolute z-index-1 bottom-0 w-100 bg-body" t-attf-id="collapseLocationInfos_{{this.state.selectedLocationId.toString()}}">
+                            <div class="row g-0 p-4">
+                                <div class="col-md-7">
+                                    <div class="row justify-content-between align-items-start flex-nowrap p-0">
+                                        <h5 class="col-2">NB</h5>
+                                        <div class="col-10 p-0 pb-4">
+                                            <h5 class="mb-1">Address title here</h5>
+                                            <span>Address here</span>
+                                        </div>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        class="btn btn-primary offset-md-1 ms-5"
+                                        name="o_location_selector_validate_selection"
+                                        t-att-disabled="!this.state.selectedLocationId"
+                                        t-on-click="validateSelection"
+                                    >
+                                        Choose this location
+                                    </button>
+                                </div>
+                                <div class="col-md-5 row">
+                                    <!-- foreach day of the week -->
+                                    <div class="col-5">
+                                        <p>Monday</p>
+                                    </div>
+                                    <div class="col-7 text-end">
+                                        <p>06:30 - 12:00 13:00 - 19:30</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
+                </section>
                 </div>
-            </div>
+                <!-- Mobile only Nav tabs -->
+                <!-- Address input -->
+                <div class="sticky-top d-md-none border-top bg-body">
+                    <div role="search" class="input-group border-bottom me-sm-2 p-3">
+                        <input class="search-query form-control oe_search_box border-0 bg-light border-0 text-bg-light" t-model.lazy="this.state.zipCode"/>
+                        <button type="submit" aria-label="Search" title="Search" class="btn oe_search_button btn btn-light">
+                                <i class="oi oi-search" data-oe-model="ir.ui.view" data-oe-id="951" data-oe-field="arch" data-oe-xpath="/data/xpath[3]/form/t[1]/div[1]/button[1]/i[1]"></i>
+                        </button>
+                    </div>
+                    <ul class="nav nav-tabs d-md-none sticky-top justify-content-center py-2" id="myTab" role="tablist">
+                        <li class="nav-item w-50 text-center" role="presentation">
+                            <a
+                                id="list-tab"
+                                class="nav-link active border-0 border-end"
+                                data-bs-toggle="tab"
+                                data-bs-target="#list_view"
+                                type="button"
+                                role="tab"
+                                aria-controls="list_view"
+                                aria-selected="true">
+                                List view
+                            </a>
+                        </li>
+                        <li class="nav-item w-50 text-center" role="presentation">
+                            <a 
+                                id="map-tab"
+                                class="nav-link border-0"
+                                data-bs-toggle="tab"
+                                data-bs-target="#map_view"
+                                type="button"
+                                role="tab"
+                                aria-controls="map_view" 
+                                aria-selected="false">
+                                Map view
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- mobile only Tab panes -->
+                <t t-if="this.state.error">
+                    <t t-out="this.state.error"/>
+                </t>
+                <div t-else="" class="d-md-none pb-5 mb-3">
+                    <div class="tab-content" id="myTabContent">
+                        <div
+                            id="list_view"
+                            class="tab-pane fade show active"
+                            role="tabpanel"
+                            aria-labelledby="list-tab"
+                        >
+                            <div class="list-group list-group-flush">
+                                <t t-if="this.state.locations.length">
+
+                                    <t
+                                        t-foreach="this.state.locations"
+                                        t-as="location"
+                                        t-key="location.id"
+                                    >
+                                        <Location
+                                            id="location.id.toString()"
+                                            name="location.pick_up_point_name"
+                                            address="location.pick_up_point_address"
+                                            number="location_index + 1"
+                                            isSelected="this.state.selectedLocationId === location.id.toString()"
+                                            setSelectedLocation.bind="setSelectedLocation"
+                                        />
+                                    </t>
+                                </t>
+                                <t t-else="">
+                                    <div class="d-flex align-items-center justify-content-center p-2">
+                                        <div class="spinner-border" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+                    <div
+                        id="map_view"
+                        class="tab-pane fade d-md-flex flex-md-grow-1 justify-content-md-center"
+                        role="tabpanel"
+                        aria-labelledby="map-tab">
+                        <Map
+                            t-if="this.state.loadMap"
+                            locations="this.state.locations"
+                            selectedLocationId="this.state.selectedLocationId.toString()"
+                            setSelectedLocation.bind="setSelectedLocation"
+                        />
+                    </div>
+                    </div>
+                    
+                </div>
+                <div class="modal-footer fixed-bottom d-md-none bg-body">
+                    <button
+                        type="button"
+                        class="btn btn-primary w-100"
+                        name="o_location_selector_validate_selection"
+                        t-att-disabled="!this.state.selectedLocationId"
+                        t-on-click="validateSelection"
+                    >
+                        Choose this location
+                    </button>
+                </div>
         </Dialog>
     </t>
 </templates>

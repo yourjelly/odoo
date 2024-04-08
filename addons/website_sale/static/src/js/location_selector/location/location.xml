@@ -1,14 +1,39 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <templates xml:space="preserve">
     <t t-name="website_sale.locationSelector.location">
-        <div
-            class="border border-light"
-            t-att-class="{'o_location_selector_location_selected': props.isSelected}"
+        <button 
+            class="list-group-item ps-0"
+            t-att-class="{'o_location_selector_location_selected list-group-item-primary': props.isSelected}"
             t-on-click="() => props.setSelectedLocation(props.id)"
-        >
-            <span t-out="props.number"/>
-            <span t-out="props.name"/>
-            <span t-out="props.address"/>
-        </div>
+            type="button" data-bs-toggle="collapse" t-attf-data-bs-target="#collapseLocationInfos_{{props.id}}" aria-expanded="false" t-attf-aria-controls="collapseLocationInfos_{{props.id}}">
+            <div class="row justify-content-between align-items-start flex-nowrap g-0">
+                <h5 class="col-2" t-out="props.number"/>
+                <div class="col-10 p-0 text-start">
+                    <h5 class="mb-1" t-out="props.name"/>
+                    <div class="d-md-none mb-3">
+                        <div class="d-flex align-items-center justify-content-between w-100" type="button" data-bs-toggle="collapse" t-attf-data-bs-target="#collapseHours_{{props.id}}" aria-expanded="false" t-attf-aria-controls="collapseHours_{{props.id}}">
+                            <div class="d-flex align-items-center">
+                                <i class="fa fa-clock-o" aria-hidden="true"></i>
+                                <p class="ms-2 mb-0">Opening hours</p>
+                            </div>
+                            <i class="fa fa-chevron-down" aria-hidden="true"></i>
+                        </div>
+
+                        <div class="collapse" t-attf-id="collapseHours_{{props.id}}">
+                        <!-- foreach day of the week -->
+                            <div class="row">
+                                    <div class="col-7">
+                                        <p>Monday</p>
+                                    </div>
+                                    <div class="col-5 text-end">
+                                        <p>06:30 - 12:00 13:00 - 19:30</p>
+                                    </div>
+                            </div>
+                        </div>
+                    </div>
+                    <span class="text-muted" t-out="props.address"/>
+                </div>
+            </div>
+        </button>
     </t>
 </templates>

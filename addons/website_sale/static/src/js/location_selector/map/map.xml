@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <templates xml:space="preserve">
     <t t-name="website_sale.locationSelector.map">
-        <div class="w-100 h-100" style="width: 30rem! important; height: 30rem !important;" t-ref="mapContainer"></div>
+        <div class="w-100 h-100 z-index-0" style="height: 80vh !important;" t-ref="mapContainer"></div>
     </t>
 
     <t t-name="website_sale.locationSelector.map.marker">
         <div style="color: var(--primary);">
-            <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 61 78.9" style="enable-background:new 0 0 61 78.9;" xml:space="preserve">
+            <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 61 78.9" style="enable-background:new 0 0 61 78.9; height:32px;" xml:space="preserve">
                 <style type="text/css">
                     .st0{opacity:0.3;enable-background:new;}
                     .st1{fill:currentColor;stroke:#1A1919;stroke-width:3;stroke-miterlimit:10;}
@@ -22,7 +22,7 @@
                     </g>
                 </g>
             </svg>
-            <p class="position-relative text-center">
+            <p class="position-absolute w-100 text-bg-primary text-center fw-bold">
                 <t t-out="number"/>
             </p>
         </div>

@@ -57,6 +57,7 @@ export class Map extends Component {
         for (const loc of locations) {
             // Icon creation
             const iconInfo = {
+                className: "",
                 html: renderToString(
                     "website_sale.locationSelector.map.marker",
                     { number: locations.indexOf(loc) + 1 },
