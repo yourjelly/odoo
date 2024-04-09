@@ -30,6 +30,7 @@ export class SelectionPlugin extends Plugin {
         "setCursorStart",
         "setCursorEnd",
         "extractContent",
+        "preserveCursor",
     ];
 
     setup() {
@@ -209,5 +210,36 @@ export class SelectionPlugin extends Plugin {
      */
     setCursorEnd(node) {
         return this.setSelection({ anchorNode: node, anchorOffset: nodeSize(node) });
+    }
+
+    /**
+     * @returns {Object} An object with two methods: restore and adjust.
+     * - restore: Restores the preserved cursor position.
+     * - adjust: allows mapping a node to a new one and offset.
+     * @memberof Core.SelectionPlugin
+     */
+    preserveCursor() {
+        const selection = { ...this.getEditableSelection() };
+        return {
+            restore: () => {
+                if (selection.inEditable) {
+                    this.setSelection(selection, { normalize: false });
+                }
+            },
+            adjust(oldNode, { newNode, newOffset, shiftOffset }) {
+                for (const node of ["anchor", "focus"]) {
+                    if (selection[node + "Node"] === oldNode) {
+                        if (newNode) {
+                            selection[node + "Node"] = newNode;
+                        }
+                        if (newOffset !== undefined) {
+                            selection[node + "Offset"] = newOffset;
+                        } else if (shiftOffset) {
+                            selection[node + "Offset"] += shiftOffset;
+                        }
+                    }
+                }
+            },
+        };
     }
 }
