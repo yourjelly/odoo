@@ -140,6 +140,7 @@ class Registry(Mapping):
         return registry
 
     def init(self, db_name):
+        self._models_stats = {}
         self.models: dict[str, type[BaseModel]] = {}    # model name/model instance mapping
         self._sql_constraints = set()
         self._init = True

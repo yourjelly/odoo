@@ -4216,6 +4216,9 @@ class BaseModel(metaclass=MetaModel):
         if not self:
             return True
 
+        model_stats = self.env.registry._models_stats.setdefault(self._name, {})
+        model_stats['unlink'] = model_stats.get('unlink', 0) + len(self)
+
         self.check_access_rights('unlink')
         self.check_access_rule('unlink')
 
@@ -4351,6 +4354,9 @@ class BaseModel(metaclass=MetaModel):
         """
         if not self:
             return True
+
+        model_stats = self.env.registry._models_stats.setdefault(self._name, {})
+        model_stats['write'] = model_stats.get('write', 0) + len(self)
 
         self.check_access_rights('write')
         self.check_field_access_rights('write', vals.keys())
@@ -4601,6 +4607,8 @@ class BaseModel(metaclass=MetaModel):
         """
         if not vals_list:
             return self.browse()
+        model_stats = self.env.registry._models_stats.setdefault(self._name, {})
+        model_stats['create'] = model_stats.get('create', 0) + len(vals_list)
 
         self = self.browse()
         self.check_access_rights('create')
