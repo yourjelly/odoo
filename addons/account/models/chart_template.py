@@ -212,6 +212,7 @@ class AccountChartTemplate(models.AbstractModel):
         # Manual sync because disable above (delay_account_group_sync)
         AccountGroup = self.env['account.group'].with_context(delay_account_group_sync=False)
         AccountGroup._adapt_accounts_for_account_groups(self.env['account.account'].search([]))
+        # this looks overkill.... why?
         AccountGroup.search([])._adapt_parent_account_group()
 
         # Install the demo data when the first localization is instanciated on the company

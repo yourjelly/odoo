@@ -7,7 +7,11 @@ from odoo.exceptions import UserError, ValidationError
 from odoo.tools import SQL, Query
 from bisect import bisect_left
 from collections import defaultdict
+import logging
 import re
+import time
+
+_logger = logging.getLogger(__name__)
 
 ACCOUNT_REGEX = re.compile(r'(?:(\S*\d+\S*))?(.*)')
 ACCOUNT_CODE_REGEX = re.compile(r'^[A-Za-z0-9.]+$')
@@ -354,6 +358,7 @@ class AccountAccount(models.Model):
     def _compute_account_group(self):
         if self.ids:
             self.env['account.group']._adapt_accounts_for_account_groups(self)
+            # why _adapt_parent_account_groups is not called here?
         else:
             self.group_id = False
 
@@ -1038,12 +1043,21 @@ class AccountGroup(models.Model):
             UPDATE account_group child
                SET parent_id = relation.parent_id
               FROM relation
-             WHERE child.id = relation.child_id;
+             WHERE child.id = relation.child_id
+               AND (child.parent_id != relation.parent_id OR (child.parent_id IS NULL AND relation.parent_id IS NOT NULL)) -- avoid to update if nothing changed
+         RETURNING child.id;
         """
         self.env.cr.execute(query, {'company_ids': tuple(self.company_id.ids)})
-        self.invalidate_model(['parent_id'])
-        self.search([('company_id', 'in', self.company_id.ids)])._parent_store_update()
-
+        updated_record = self.env.cr.fetchall()
+        _logger.info('Updated parent_id of account groups: %s', updated_record)
+        if updated_record:
+            # if this is an issue one day, please use _parent_store_compute instead of _parent_store_update
+            self.invalidate_model(['parent_id'])
+            start = time.time()
+            self.env.cr.execute('ANALYZE account_group')
+            # since there was potentially many updates, ANALYSING the table should help _parent_store_update and future select when the autovaccum is busy
+            _logger.info('ANALYZE after _adapt_parent_account_group update took %s', time.time() - start)
+            self.browse(r[0] for r in updated_record)._parent_store_update()
 
 class AccountRoot(models.Model):
     _name = 'account.root'
