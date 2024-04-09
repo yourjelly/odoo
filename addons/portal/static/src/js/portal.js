@@ -33,6 +33,7 @@ publicWidget.registry.portalDetails = publicWidget.Widget.extend({
         const country = this.el.querySelector('select[name="country_id"]');
         const countryID = (country.value || 0);
         this.state.removeChild()
+        // TODO: MSH: Need to check this code as this is not as per expectations
         const displayedState = this.stateOptions.filter('[data-country_id=' + countryID + ']');
         this.state.appendChild(displayedState)
         displayedState.show();
