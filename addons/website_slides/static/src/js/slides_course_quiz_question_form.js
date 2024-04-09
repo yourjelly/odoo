@@ -19,6 +19,7 @@ var QuestionFormWidget = publicWidget.Widget.extend({
         'click .o_wslides_js_quiz_add_answer': '_addAnswerLine',
         'click .o_wslides_js_quiz_remove_answer': '_removeAnswerLine',
         'click .o_wslides_js_quiz_remove_answer_comment': '_removeAnswerLineComment',
+        'click .o_wslides_js_quiz_validate_add_question': '_validateAndCreateNewQuestion',
         'change .o_wslides_js_quiz_answer_comment > input[type=text]': '_onCommentChanged'
     },
 
@@ -124,6 +125,18 @@ var QuestionFormWidget = publicWidget.Widget.extend({
     },
 
     /**
+     * Handler when a user clicks on the 'Save & New' button.
+     * @param ev
+     * @private
+     */
+    _validateAndCreateNewQuestion: function () {
+        const parentContext = this.getParent();
+        this._createOrUpdateQuestion().then(
+            (isValid) => isValid && parentContext._onCreateQuizClick()
+        );
+    },
+
+    /**
      * Handler when user click on the 'Cancel' button.
      * Calls a method from slides_course_quiz.js widget
      * which will handle the reset of the question display.
@@ -152,32 +165,33 @@ var QuestionFormWidget = publicWidget.Widget.extend({
         if (this._isValidForm($form)) {
             var values = this._serializeForm($form);
             var renderedQuestion = await rpc('/slides/slide/quiz/question_add_or_update', values);
+            var validationError = this.$('.o_wslides_js_quiz_validation_error');
+            var isUpdate = options && options.update ? options.update : false;
 
             if (typeof renderedQuestion === 'object' && renderedQuestion.error) {
-                this.$('.o_wslides_js_quiz_validation_error')
+                validationError
                     .removeClass('d-none')
                     .find('.o_wslides_js_quiz_validation_error_text')
                     .text(renderedQuestion.error);
-            } else if (options.update) {
-                this.$('.o_wslides_js_quiz_validation_error').addClass('d-none');
-                this.trigger_up('display_updated_question', {
-                    newQuestionRenderedTemplate: renderedQuestion,
-                    $editedQuestion: this.$editedQuestion,
-                    questionFormWidget: this,
-                });
-            } else {
-                this.$('.o_wslides_js_quiz_validation_error').addClass('d-none');
-                this.trigger_up('display_created_question', {
-                    newQuestionRenderedTemplate: renderedQuestion,
-                    questionFormWidget: this
-                });
+                return false;
             }
+
+            validationError.addClass('d-none');
+            var event = isUpdate ? 'display_updated_question' : 'display_created_question';
+            this.trigger_up(event, {
+                newQuestionRenderedTemplate: renderedQuestion,
+                $editedQuestion: isUpdate ? this.$editedQuestion : undefined,
+                questionFormWidget: this,
+            });
+
+            return true;
         } else {
-            this.$('.o_wslides_js_quiz_validation_error')
+            validationError
                 .removeClass('d-none')
                 .find('.o_wslides_js_quiz_validation_error_text')
                 .text(_t('Please fill in the question'));
             this.$('.o_wslides_quiz_question input').focus();
+            return false;
         }
     },
 

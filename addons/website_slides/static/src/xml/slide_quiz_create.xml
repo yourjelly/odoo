@@ -70,11 +70,14 @@
     </t>
 
     <t t-name="slide.quiz.create.buttons">
-        <a class="o_wslides_js_quiz_validate_question btn btn-primary text-white border" role="button">
-            <span>Save</span>
+        <a class="o_wslides_js_quiz_validate_question btn btn-primary text-white border me-1" role="button">
+            <span>Save &amp; Close </span>
         </a>
-        <a class="o_wslides_js_quiz_cancel_question btn btn-light border" role="button">
-            <span>Cancel</span>
+        <a class="o_wslides_js_quiz_validate_add_question btn btn-primary text-white border me-1" role="button">
+            <span>Save &amp; New </span>
+        </a>
+        <a class="o_wslides_js_quiz_cancel_question btn" role="button">
+            <span>Discard</span>
         </a>
     </t>
 
