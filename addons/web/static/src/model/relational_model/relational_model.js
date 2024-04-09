@@ -12,6 +12,7 @@ import { DynamicGroupList } from "./dynamic_group_list";
 import { DynamicRecordList } from "./dynamic_record_list";
 import { Group } from "./group";
 import { Record } from "./record";
+import { RecordListElem } from "./record_list_elem";
 import { StaticList } from "./static_list";
 import {
     extractInfoFromGroupData,
@@ -92,6 +93,7 @@ const DEFAULT_HOOKS = {
 export class RelationalModel extends Model {
     static services = ["action", "company", "dialog", "notification", "orm"];
     static Record = Record;
+    static RecordListElem = RecordListElem;
     static Group = Group;
     static DynamicRecordList = DynamicRecordList;
     static DynamicGroupList = DynamicGroupList;
@@ -134,6 +136,7 @@ export class RelationalModel extends Model {
         this.defaultGroupBy = params.defaultGroupBy;
         this.maxGroupByDepth = params.maxGroupByDepth;
         this.groupByInfo = params.groupByInfo || {};
+        this.parentField = params.parentField,
         this.multiEdit = params.multiEdit;
         this.activeIdsLimit = params.activeIdsLimit || Number.MAX_SAFE_INTEGER;
         this.specialDataCaches = markRaw(params.state?.specialDataCaches || {});
@@ -319,6 +322,9 @@ export class RelationalModel extends Model {
         }
         if (config.groupBy.length) {
             return this._loadGroupedList(config);
+        }
+        if (this.parentField && !config.groupBy.includes(this.parentField)) {
+            config.domain.push([this.parentField, '=', false]);
         }
         Object.assign(config, {
             limit: config.limit || this.initialLimit,

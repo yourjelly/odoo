@@ -182,6 +182,7 @@ export class ListArchParser {
 
                 treeAttr.className = xmlDoc.getAttribute("class") || null;
                 treeAttr.editable = xmlDoc.getAttribute("editable");
+                treeAttr.parentField = xmlDoc.getAttribute("parent_field");
                 treeAttr.multiEdit = activeActions.edit
                     ? archParseBoolean(node.getAttribute("multi_edit") || "")
                     : false;

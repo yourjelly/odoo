@@ -8,6 +8,7 @@ export class DynamicRecordList extends DynamicList {
      * @param {Object} data
      */
     setup(config, data) {
+
         super.setup(config);
         this._setData(data);
     }
@@ -112,7 +113,7 @@ export class DynamicRecordList extends DynamicList {
     }
 
     _createRecordDatapoint(data, mode = "readonly") {
-        return new this.model.constructor.Record(
+        return new this.model.constructor.RecordListElem(
             this.model,
             {
                 context: this.context,

@@ -75,6 +75,7 @@ export class ListRenderer extends Component {
     static rowsTemplate = "web.ListRenderer.Rows";
     static recordRowTemplate = "web.ListRenderer.RecordRow";
     static groupRowTemplate = "web.ListRenderer.GroupRow";
+    static hierarchyRowTemplate = "web.ListRenderer.HierarchyRow";
     static LONG_TOUCH_THRESHOLD = 400;
     static components = { DropdownItem, Field, ViewButton, CheckBox, Dropdown, Pager, Widget };
     static defaultProps = { hasSelectors: false, cycleOnTab: true };
@@ -121,6 +122,7 @@ export class ListRenderer extends Component {
             ? this.props.archInfo.creates
             : [{ type: "create", string: _t("Add a line") }];
 
+        this.isFolded = false;
         this.cellToFocus = null;
         this.activeRowId = null;
         onMounted(async () => {
@@ -233,6 +235,7 @@ export class ListRenderer extends Component {
             this.lastEditedCell = null;
         });
         this.isRTL = localization.direction === "rtl";
+        debugger;
     }
 
     displaySaveNotification() {
@@ -1782,6 +1785,10 @@ export class ListRenderer extends Component {
         );
     }
 
+    toggleChildren(record){
+        record.toggleChildren();
+    }
+
     toggleGroup(group) {
         group.toggle();
     }
@@ -1912,6 +1919,24 @@ export class ListRenderer extends Component {
         if (this.resizing) {
             this.preventReorder = true;
         }
+    }
+    _getFirstRequiredColumn() {
+        for (const col_id in this.columns) {
+            if (this.columns[col_id].required) {
+                return this.columns[col_id];
+            }
+        }
+    }
+    displayHierarchyToggle(column) {
+        // first check if the parent_field attr is present. If not, then always return false.
+        if (this.props.archInfo.parentField === 'undefined'){
+            return false;
+        }
+        debugger;
+        // for a generic use case, we should use the 1st required column.
+        // for testing purpose, we currently use the 'name' column to have the result we need in tasks.
+        return column.name === 'name';
+        // return column.id === this._getFirstRequiredColumn().id;
     }
 
     /**

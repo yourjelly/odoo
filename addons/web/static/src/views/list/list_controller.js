@@ -82,7 +82,6 @@ export class ListController extends Component {
         this.editable =
             this.activeActions.edit && this.props.editable ? this.archInfo.editable : false;
         this.model = useState(useModelWithSampleData(this.props.Model, this.modelParams));
-
         // In multi edition, we save or notify invalidity directly when a field is updated, which
         // occurs on the change event for input fields. But we don't want to do it when clicking on
         // "Discard". So we set a flag on mousedown (which triggers the update) to block the multi
@@ -218,6 +217,7 @@ export class ListController extends Component {
             defaultGroupBy: this.props.searchMenuTypes.includes("groupBy") ? defaultGroupBy : false,
             groupsLimit: this.archInfo.groupsLimit,
             multiEdit: this.archInfo.multiEdit,
+            parentField: this.archInfo.parentField,
             activeIdsLimit: session.active_ids_limit,
             hooks: {
                 onRecordSaved: this.onRecordSaved.bind(this),
