@@ -24,7 +24,7 @@ registry.category("web_tour.tours").add("ControlButtonsTour", {
             FloorScreen.clickTable("4"),
             FloorScreen.backToFloor(),
             FloorScreen.clickTable("2"),
-            ProductScreen.orderIsEmpty(),
+            ProductScreen.isOrderEmpty(),
             FloorScreen.backToFloor(),
             FloorScreen.clickTable("4"),
 
@@ -57,12 +57,12 @@ registry.category("web_tour.tours").add("ControlButtonsTour", {
             NumberPopup.enterValue("15"),
             NumberPopup.isShown("15"),
             Dialog.confirm(),
-            ProductScreen.guestNumberIs("15"),
+            ProductScreen.isGuestNumberIs("15"),
 
             ProductScreen.clickControlButton("Guests"),
             NumberPopup.enterValue("5"),
             NumberPopup.isShown("5"),
             Dialog.confirm(),
-            ProductScreen.guestNumberIs("5"),
+            ProductScreen.isGuestNumberIs("5"),
         ].flat(),
 });

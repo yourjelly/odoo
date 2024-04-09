@@ -54,7 +54,7 @@ export function isShown() {
         },
     ];
 }
-export function receiptIsThere() {
+export function isReceiptDisplayed() {
     return [
         {
             content: "there should be the receipt",
@@ -77,7 +77,7 @@ export function totalAmountContains(value) {
         },
     ];
 }
-export function emailIsSuccessful() {
+export function isEmailSuccessful() {
     return [
         {
             trigger: `.receipt-screen .notice .successful`,
@@ -85,7 +85,7 @@ export function emailIsSuccessful() {
         },
     ];
 }
-export function trackingMethodIsLot() {
+export function isTrackingMethodIsLot() {
     return [
         {
             content: `tracking method is Lot`,

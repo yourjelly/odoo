@@ -300,7 +300,7 @@ registry.category("web_tour.tours").add("PosLoyaltyTour10", {
             PosLoyalty.customerIs("AAA Partner"),
             ProductScreen.clickDisplayedProduct("Product Test"),
             ProductScreen.totalAmountIs("1.00"),
-            ProductScreen.selectedOrderlineHas("Product Test", "1.00"),
+            ProductScreen.isSelectedOrderlineHas("Product Test", "1.00"),
             PosLoyalty.isRewardButtonHighlighted(true),
             PosLoyalty.claimReward("Free Product B"),
             {

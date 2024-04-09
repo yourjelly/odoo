@@ -65,7 +65,7 @@ export function clickDisplayedProduct(
     ];
 
     if (isCheckNeed) {
-        step.push(...selectedOrderlineHas(name, nextQuantity, nextPrice));
+        step.push(...isSelectedOrderlineHas(name, nextQuantity, nextPrice));
     }
 
     return step;
@@ -348,7 +348,7 @@ export function isShown() {
         },
     ];
 }
-export function selectedOrderlineHas(productName, quantity, price) {
+export function isSelectedOrderlineHas(productName, quantity, price) {
     return inLeftSide(
         Order.hasLine({
             withClass: ".selected",
@@ -358,10 +358,10 @@ export function selectedOrderlineHas(productName, quantity, price) {
         })
     );
 }
-export function orderIsEmpty() {
+export function isOrderEmpty() {
     return inLeftSide(Order.doesNotHaveLine());
 }
-export function productIsDisplayed(name) {
+export function isProductDisplayed(name) {
     return [
         {
             content: `'${name}' should be displayed`,
@@ -373,7 +373,7 @@ export function productIsDisplayed(name) {
 export function totalAmountIs(amount) {
     return inLeftSide(Order.hasTotal(amount));
 }
-export function modeIsActive(mode) {
+export function isModeActiveIs(mode) {
     return inLeftSide(Numpad.isActive(mode));
 }
 export function checkSecondCashClosingDetailsLineAmount(amount, sign) {
@@ -398,13 +398,13 @@ export function checkSecondCashClosingDetailsLineAmount(amount, sign) {
         },
     ];
 }
-export function noDiscountApplied(originalPrice) {
+export function isNoDiscountApplied(originalPrice) {
     return inLeftSide({
         content: "no discount is applied",
         trigger: `.orderline .info-list:not(:contains(${originalPrice}))`,
     });
 }
-export function cashDifferenceIs(val) {
+export function isCashDifferenceValueIs(val) {
     return [
         {
             trigger: `.payment-methods-overview tr td:nth-child(4):contains(${val})`,
@@ -413,7 +413,7 @@ export function cashDifferenceIs(val) {
     ];
 }
 // Temporarily put it here. It should be in the utility methods for the backend views.
-export function lastClosingCashIs(val) {
+export function isLastClosingCashValueIs(val) {
     return [
         {
             trigger: `[name=last_session_closing_cash]:contains(${val})`,
@@ -457,22 +457,22 @@ export function addOrderline(productName, quantity = 1, unitPrice, expectedTotal
             .toString()
             .split("")
             .flatMap((key) => clickNumpad(mapKey(key)));
-    res.push(...selectedOrderlineHas(productName, "1.00"));
+    res.push(...isSelectedOrderlineHas(productName, "1.00"));
     if (unitPrice) {
         res.push(
             ...[
                 clickNumpad("Price"),
-                modeIsActive("Price"),
+                isModeActiveIs("Price"),
                 numpadWrite(unitPrice),
                 clickNumpad("Qty"),
-                modeIsActive("Qty"),
+                isModeActiveIs("Qty"),
             ].flat()
         );
     }
     if (quantity.toString() !== "1") {
         res.push(...numpadWrite(quantity));
     }
-    res.push(...selectedOrderlineHas(productName, quantity, expectedTotal));
+    res.push(...isSelectedOrderlineHas(productName, quantity, expectedTotal));
     return res;
 }
 export function addCustomerNote(note) {
@@ -518,7 +518,7 @@ export function closePos() {
     ];
 }
 
-export function finishOrder() {
+export function clickFinishOrder() {
     return [
         {
             content: "validate the order",

@@ -11,22 +11,22 @@ export function clickOrderButton() {
         },
     ];
 }
-export function orderlinesHaveNoChange() {
+export function isOrderlinesHaveNoChange() {
     return Order.doesNotHaveLine({ withClass: ".has-change" });
 }
-export function orderlineIsToOrder(name) {
+export function isOrderlineIsToOrder(name) {
     return Order.hasLine({
         productName: name,
         withClass: ".has-change.text-success.border-start.border-success.border-4",
     });
 }
-export function orderlineIsToSkip(name) {
+export function isOrderlineIsToSkip(name) {
     return Order.hasLine({
         withClass: ".skip-change.text-primary.border-start.border-primary.border-4",
         productName: name,
     });
 }
-export function guestNumberIs(num) {
+export function isGuestNumberIs(num) {
     return [
         {
             content: `guest number is ${num}`,
@@ -35,7 +35,7 @@ export function guestNumberIs(num) {
         },
     ];
 }
-export function orderBtnIsPresent() {
+export function isOrderBtnPresent() {
     return [
         {
             content: "Order button is here",

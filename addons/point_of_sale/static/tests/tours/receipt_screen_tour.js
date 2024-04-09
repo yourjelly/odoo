@@ -17,7 +17,7 @@ registry.category("web_tour.tours").add("ReceiptScreenTour", {
             ProductScreen.clickShowProductsMobile(),
             // press close button in receipt screen
             ProductScreen.addOrderline("Letter Tray", "10", "5"),
-            ProductScreen.selectedOrderlineHas("Letter Tray", "10"),
+            ProductScreen.isSelectedOrderlineHas("Letter Tray", "10"),
             ProductScreen.clickPartnerButton(),
             ProductScreen.clickCustomer("Addison Olson"),
             ProductScreen.clickPayButton(),
@@ -26,7 +26,7 @@ registry.category("web_tour.tours").add("ReceiptScreenTour", {
             PaymentScreen.clickShipLaterButton(),
             PaymentScreen.shippingLaterHighlighted(),
             PaymentScreen.clickValidate(),
-            ReceiptScreen.receiptIsThere(),
+            ReceiptScreen.isReceiptDisplayed(),
             //receipt had expected delivery printed
             ReceiptScreen.shippingDateExists(),
             // letter tray has 10% tax (search SRC)
@@ -42,14 +42,14 @@ registry.category("web_tour.tours").add("ReceiptScreenTour", {
             PaymentScreen.enterPaymentLineAmount("Cash", "70", true, { remaining: "2.0" }),
             PaymentScreen.clickNumpad("0"),
             PaymentScreen.fillPaymentLineAmountMobile("Cash", "700"),
-            PaymentScreen.remainingIs("0.00"),
-            PaymentScreen.changeIs("628.0"),
+            PaymentScreen.isRemainingValueIs("0.00"),
+            PaymentScreen.isChangeValueIs("628.0"),
             PaymentScreen.clickValidate(),
-            ReceiptScreen.receiptIsThere(),
+            ReceiptScreen.isReceiptDisplayed(),
             ReceiptScreen.totalAmountContains("72.0"),
             ReceiptScreen.setEmail("test@receiptscreen.com"),
             ReceiptScreen.clickSend(),
-            ReceiptScreen.emailIsSuccessful(),
+            ReceiptScreen.isEmailSuccessful(),
             ReceiptScreen.clickNextOrder(),
 
             // order with tip
@@ -63,7 +63,7 @@ registry.category("web_tour.tours").add("ReceiptScreenTour", {
             PaymentScreen.emptyPaymentlines("31.0"),
             PaymentScreen.clickPaymentMethod("Cash"),
             PaymentScreen.clickValidate(),
-            ReceiptScreen.receiptIsThere(),
+            ReceiptScreen.isReceiptDisplayed(),
             ReceiptScreen.totalAmountContains(`$ 30.00 + $ 1.00 tip`),
             ReceiptScreen.clickNextOrder(),
 
@@ -100,20 +100,20 @@ registry.category("web_tour.tours").add("OrderPaidInCash", {
             Dialog.confirm("Open session"),
             ProductScreen.clickShowProductsMobile(),
             ProductScreen.addOrderline("Desk Pad", "5", "5"),
-            ProductScreen.selectedOrderlineHas("Desk Pad", "5"),
+            ProductScreen.isSelectedOrderlineHas("Desk Pad", "5"),
             ProductScreen.clickPayButton(),
             PaymentScreen.clickPaymentMethod("Cash"),
             PaymentScreen.validateButtonIsHighlighted(true),
             PaymentScreen.clickValidate(),
-            ReceiptScreen.receiptIsThere(),
+            ReceiptScreen.isReceiptDisplayed(),
             ReceiptScreen.clickNextOrder(),
             ProductScreen.isShown(),
             // Close the session
             Chrome.clickMenuOption("Close Register"),
             ProductScreen.closeWithCashAmount("25"),
-            ProductScreen.cashDifferenceIs("0.00"),
+            ProductScreen.isCashDifferenceValueIs("0.00"),
             Dialog.confirm("Close Register"),
-            ProductScreen.lastClosingCashIs("25.00"),
+            ProductScreen.isLastClosingCashValueIs("25.00"),
         ].flat(),
 });
 
@@ -128,6 +128,6 @@ registry.category("web_tour.tours").add("ReceiptTrackingMethodTour", {
             ProductScreen.clickPayButton(),
             PaymentScreen.clickPaymentMethod("Cash"),
             PaymentScreen.clickValidate(),
-            ReceiptScreen.trackingMethodIsLot(),
+            ReceiptScreen.isTrackingMethodIsLot(),
         ].flat(),
 });

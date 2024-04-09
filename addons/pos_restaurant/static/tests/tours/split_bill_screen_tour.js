@@ -122,7 +122,7 @@ registry.category("web_tour.tours").add("SplitBillScreenTour3", {
 
             // Check if there is still water in the order
             ProductScreen.isShown(),
-            ProductScreen.selectedOrderlineHas("Water", "1.0"),
+            ProductScreen.isSelectedOrderlineHas("Water", "1.0"),
             ProductScreen.clickPayButton(true),
             PaymentScreen.clickPaymentMethod("Bank"),
             PaymentScreen.clickValidate(),
@@ -178,19 +178,24 @@ registry.category("web_tour.tours").add("SplitBillScreenTour4PosCombo", {
             // Check if there is still water in the order
             ...ProductScreen.isShown(),
             // now we check that all the lines that remained in the order are correct
-            ...ProductScreen.selectedOrderlineHas("Minute Maid", "1.0"),
+            ...ProductScreen.isSelectedOrderlineHas("Minute Maid", "1.0"),
             ...ProductScreen.clickOrderline("Office Combo"),
             ...ProductScreen.clickOrderline("Combo Product 2"),
-            ...ProductScreen.selectedOrderlineHas("Combo Product 2", "1.0", "6.67", "Office Combo"),
+            ...ProductScreen.isSelectedOrderlineHas(
+                "Combo Product 2",
+                "1.0",
+                "6.67",
+                "Office Combo"
+            ),
             ...ProductScreen.clickOrderline("Combo Product 4"),
-            ...ProductScreen.selectedOrderlineHas(
+            ...ProductScreen.isSelectedOrderlineHas(
                 "Combo Product 4",
                 "1.0",
                 "14.66",
                 "Office Combo"
             ),
             ...ProductScreen.clickOrderline("Combo Product 7"),
-            ...ProductScreen.selectedOrderlineHas(
+            ...ProductScreen.isSelectedOrderlineHas(
                 "Combo Product 7",
                 "1.0",
                 "22.00",

@@ -48,8 +48,8 @@ registry.category("web_tour.tours").add("ChromeTour", {
             // Select order 1, should be at Product Screen
             TicketScreen.selectOrder("-0001"),
             TicketScreen.loadSelectedOrder(),
-            ProductScreen.productIsDisplayed("Desk Pad"),
-            ProductScreen.selectedOrderlineHas("Desk Pad", "1.0", "2.0"),
+            ProductScreen.isProductDisplayed("Desk Pad"),
+            ProductScreen.isSelectedOrderlineHas("Desk Pad", "1.0", "2.0"),
 
             // Select order 2, should be at Payment Screen
             Chrome.clickMenuButton(),
@@ -93,7 +93,7 @@ registry.category("web_tour.tours").add("ChromeTour", {
             // click next screen on order 3
             // then delete the new empty order
             ReceiptScreen.clickNextOrder(),
-            ProductScreen.orderIsEmpty(),
+            ProductScreen.isOrderEmpty(),
             Chrome.clickMenuButton(),
             Chrome.clickTicketButton(),
             TicketScreen.deleteOrder("-0004"),

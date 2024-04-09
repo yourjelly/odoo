@@ -5,7 +5,7 @@ import * as ProductScreenResto from "@pos_restaurant/../tests/tours/utils/produc
 
 const ProductScreen = { ...ProductScreenPos, ...ProductScreenResto };
 
-export function mergeTableHelpers(childName, parentName) {
+export function clickMergeTable(childName, parentName) {
     return [
         FloorScreen.clickTable(childName),
         ProductScreen.clickControlButtonMore(),
@@ -29,7 +29,7 @@ export function mergeTableHelpers(childName, parentName) {
     ];
 }
 
-export function checkMergeTableIsCancelHelpers() {
+export function isMergeTableIsCancel() {
     return [
         {
             content: `Verify table 4 and 5 isn't merge anymore`,

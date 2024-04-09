@@ -34,19 +34,19 @@ registry.category("web_tour.tours").add("pos_restaurant_sync", {
 
             // Create first order
             FloorScreen.clickTable("5"),
-            ProductScreen.orderBtnIsPresent(),
+            ProductScreen.isOrderBtnPresent(),
             ProductScreen.clickDisplayedProduct("Coca-Cola", true),
             inLeftSide(Order.hasLine({ productName: "Coca-Cola", run: "dblclick" })),
             ProductScreen.clickDisplayedProduct("Water", true),
-            ProductScreen.orderlineIsToOrder("Water"),
-            ProductScreen.orderlineIsToSkip("Coca-Cola"),
+            ProductScreen.isOrderlineIsToOrder("Water"),
+            ProductScreen.isOrderlineIsToSkip("Coca-Cola"),
             ProductScreen.clickOrderButton(),
             {
                 ...Dialog.confirm(),
                 content:
                     "acknowledge printing error ( because we don't have printer in the test. )",
             },
-            ProductScreen.orderlinesHaveNoChange(),
+            ProductScreen.isOrderlinesHaveNoChange(),
             ProductScreen.totalAmountIs("4.40"),
 
             // Create 2nd order (paid)
@@ -68,7 +68,7 @@ registry.category("web_tour.tours").add("pos_restaurant_sync", {
 
             // After clicking next order, floor screen is shown.
             // It should have 1 as number of draft synced order.
-            FloorScreen.orderCountSyncedInTableIs("5", "1"),
+            FloorScreen.isOrderCountSyncedInTable("5", "1"),
             FloorScreen.clickTable("5"),
             ProductScreen.totalAmountIs("4.40"),
 
@@ -81,7 +81,7 @@ registry.category("web_tour.tours").add("pos_restaurant_sync", {
             FloorScreen.backToFloor(),
 
             // At floor screen, there should be 2 synced draft orders
-            FloorScreen.orderCountSyncedInTableIs("5", "2"),
+            FloorScreen.isOrderCountSyncedInTable("5", "2"),
 
             // Delete the first order then go back to floor
             FloorScreen.clickTable("5"),
@@ -102,7 +102,7 @@ registry.category("web_tour.tours").add("pos_restaurant_sync", {
             FloorScreen.backToFloor(),
 
             // There should be 1 synced draft order.
-            FloorScreen.orderCountSyncedInTableIs("5", "2"),
+            FloorScreen.isOrderCountSyncedInTable("5", "2"),
         ].flat(),
 });
 
@@ -141,14 +141,14 @@ registry.category("web_tour.tours").add("pos_restaurant_sync_second_login", {
 
             FloorScreen.clickTable("2"),
             ProductScreen.isShown(),
-            ProductScreen.orderIsEmpty(),
+            ProductScreen.isOrderEmpty(),
             ProductScreen.clickControlButtonMore(),
             ProductScreen.clickControlButton("Transfer"),
             FloorScreen.clickTable("4"),
             ProductScreen.clickDisplayedProduct("Coca-Cola"),
             ProductScreen.totalAmountIs("2.20"),
             FloorScreen.backToFloor(),
-            FloorScreen.orderCountSyncedInTableIs("4", "1"),
+            FloorScreen.isOrderCountSyncedInTable("4", "1"),
         ].flat(),
 });
 
@@ -160,7 +160,7 @@ registry.category("web_tour.tours").add("SaveLastPreparationChangesTour", {
             FloorScreen.clickTable("5"),
             ProductScreen.clickDisplayedProduct("Coca-Cola", true, "1.0"),
             ProductScreen.clickOrderButton(),
-            ProductScreen.orderlinesHaveNoChange(),
+            ProductScreen.isOrderlinesHaveNoChange(),
             FloorScreen.backToFloor(),
         ].flat(),
 });
@@ -194,7 +194,7 @@ registry.category("web_tour.tours").add("MergeTableTour", {
     steps: () =>
         [
             Dialog.confirm("Open session"),
-            ...MergeTable.mergeTableHelpers("5", "4"),
+            ...MergeTable.clickMergeTable("5", "4"),
             FloorScreen.clickTable("4"),
             ProductScreen.clickDisplayedProduct("Coca-Cola"),
             ProductScreen.clickPayButton(),
@@ -206,8 +206,8 @@ registry.category("web_tour.tours").add("MergeTableTour", {
                     "acknowledge printing error ( because we don't have printer in the test. )",
             },
             ReceiptScreen.clickNextOrder(),
-            ...MergeTable.checkMergeTableIsCancelHelpers(),
-            ...MergeTable.mergeTableHelpers("5", "4"),
+            ...MergeTable.isMergeTableIsCancel(),
+            ...MergeTable.clickMergeTable("5", "4"),
             Chrome.clickMenuOption("Edit Plan"),
             {
                 content: `select linked table`,
@@ -218,8 +218,8 @@ registry.category("web_tour.tours").add("MergeTableTour", {
                 trigger: '.edit-buttons button:contains("Unlink")',
             },
             Chrome.clickMenuOption("Edit Plan"),
-            ...MergeTable.checkMergeTableIsCancelHelpers(),
-            ...MergeTable.mergeTableHelpers("5", "4"),
+            ...MergeTable.isMergeTableIsCancel(),
+            ...MergeTable.clickMergeTable("5", "4"),
             {
                 content: `refresh page`,
                 trigger: 'div.table div.label:contains("4")',
@@ -248,7 +248,7 @@ registry.category("web_tour.tours").add("MergeTableTour", {
                 trigger: '.edit-buttons button:contains("Unlink")',
             },
             Chrome.clickMenuOption("Edit Plan"),
-            ...MergeTable.checkMergeTableIsCancelHelpers(),
+            ...MergeTable.isMergeTableIsCancel(),
             Chrome.clickMenuOption("Edit Plan"),
             FloorScreen.clickTable("4"),
             FloorScreen.ctrlClickTable("5"),

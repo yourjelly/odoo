@@ -23,7 +23,7 @@ function isQRDisplayedinDialog() {
 function addProductandPay() {
     return [
         ProductScreen.addOrderline("Hand Bag", "10"),
-        ProductScreen.selectedOrderlineHas("Hand Bag", "10.0"),
+        ProductScreen.isSelectedOrderlineHas("Hand Bag", "10.0"),
         ProductScreen.clickPayButton(),
 
         PaymentScreen.totalIs("48"),
@@ -75,7 +75,7 @@ registry.category("web_tour.tours").add("PaymentScreenWithQRPaymentSwiss", {
     steps: () =>
         [
             ProductScreen.addOrderline("Hand Bag", "10"),
-            ProductScreen.selectedOrderlineHas("Hand Bag", "10.0"),
+            ProductScreen.isSelectedOrderlineHas("Hand Bag", "10.0"),
             ProductScreen.clickPartnerButton(),
             ProductScreen.clickCustomer("AAA Partner Swiss"),
             ProductScreen.clickPayButton(),

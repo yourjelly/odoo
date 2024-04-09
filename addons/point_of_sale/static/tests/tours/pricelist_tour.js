@@ -27,7 +27,7 @@ registry.category("web_tour.tours").add("pos_pricelist", {
             ProductScreen.clickReview(),
             Numpad.click("2"),
             ProductScreen.goBackToMainScreen(),
-            ProductScreen.selectedOrderlineHas("Wall Shelf", "2.0"),
+            ProductScreen.isSelectedOrderlineHas("Wall Shelf", "2.0"),
             Order.hasTotal(`$ 2.00`),
             ProductScreen.clickDisplayedProduct("Small Shelf", true, "1.0"),
             ProductScreen.clickReview(),

@@ -39,7 +39,7 @@ export function totalAmountIs(amount) {
         },
     ];
 }
-export function percentAmountIs(percent, amount) {
+export function isPercentAmountValueIs(percent, amount) {
     return [
         {
             trigger: `.tip-screen .percentage:contains("${percent}") ~ .amount:contains("${amount}")`,
@@ -47,7 +47,7 @@ export function percentAmountIs(percent, amount) {
         },
     ];
 }
-export function inputAmountIs(amount) {
+export function isInputAmountValueIs(amount) {
     return [
         {
             trigger: `.tip-screen .custom-amount-form input[data-amount="${amount}"]`,

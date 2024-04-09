@@ -35,13 +35,13 @@ registry.category("web_tour.tours").add("PosComboPriceTaxIncludedTour", {
             combo.isSelected("Combo Product 8"),
             combo.isNotSelected("Combo Product 7"),
             Dialog.confirm(),
-            ...ProductScreen.selectedOrderlineHas("Office Combo"),
+            ...ProductScreen.isSelectedOrderlineHas("Office Combo"),
             ...ProductScreen.clickOrderline("Combo Product 3"),
-            ...ProductScreen.selectedOrderlineHas("Combo Product 3", "1.0", "13.43"),
+            ...ProductScreen.isSelectedOrderlineHas("Combo Product 3", "1.0", "13.43"),
             ...ProductScreen.clickOrderline("Combo Product 5"),
-            ...ProductScreen.selectedOrderlineHas("Combo Product 5", "1.0", "18.67"),
+            ...ProductScreen.isSelectedOrderlineHas("Combo Product 5", "1.0", "18.67"),
             ...ProductScreen.clickOrderline("Combo Product 8"),
-            ...ProductScreen.selectedOrderlineHas("Combo Product 8", "1.0", "30.00"),
+            ...ProductScreen.isSelectedOrderlineHas("Combo Product 8", "1.0", "30.00"),
 
             // check that you can select a customer which triggers a recomputation of the price
             ...ProductScreen.clickPartnerButton(),
@@ -53,7 +53,7 @@ registry.category("web_tour.tours").add("PosComboPriceTaxIncludedTour", {
 
             // check that removing a combo product removes all the combo products
             ...ProductScreen.clickNumpad("⌫"),
-            ...ProductScreen.orderIsEmpty(),
+            ...ProductScreen.isOrderEmpty(),
 
             ...ProductScreen.clickDisplayedProduct("Office Combo"),
             combo.select("Combo Product 3"),

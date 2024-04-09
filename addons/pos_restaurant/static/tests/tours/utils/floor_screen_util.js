@@ -65,7 +65,7 @@ export function selectedFloorIs(name) {
         },
     ];
 }
-export function orderCountSyncedInTableIs(table, count) {
+export function isOrderCountSyncedInTable(table, count) {
     return [
         {
             trigger: `.floor-map .table .label:contains("${table}") ~ .order-count:contains("${count}")`,

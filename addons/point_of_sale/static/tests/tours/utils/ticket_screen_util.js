@@ -109,7 +109,7 @@ export function clickBackToMainTicketScreen() {
         },
     ];
 }
-export function confirmRefund() {
+export function clickConfirmRefund() {
     return [
         ProductScreen.clickReview(),
         {
@@ -161,7 +161,7 @@ export function noNewTicketButton() {
         },
     ];
 }
-export function filterIs(name) {
+export function isFilterIs(name) {
     return [
         {
             trigger: `.ticket-screen .pos-search-bar .filter span:contains("${name}")`,
@@ -177,19 +177,19 @@ export function invoicePrinted() {
         },
     ];
 }
-export function toRefundTextContains(text) {
+export function isToRefundTextIs(text) {
     return inLeftSide({
         trigger: `.ticket-screen .to-refund-highlight:contains("${text}")`,
         run: () => {},
     });
 }
-export function refundedNoteContains(text) {
+export function isRefundedNoteContains(text) {
     return inLeftSide({
         trigger: `.ticket-screen .refund-note:contains("${text}")`,
         run: () => {},
     });
 }
-export function tipContains(amount) {
+export function isTipValueIs(amount) {
     return [
         {
             trigger: `.ticket-screen .tip-cell:contains("${amount}")`,
@@ -197,7 +197,7 @@ export function tipContains(amount) {
         },
     ];
 }
-export function receiptTotalIs(amount) {
+export function isReceiptTotalValueIs(amount) {
     return [
         {
             trigger: `.receipt-screen .pos-receipt-amount:contains("${amount}")`,
