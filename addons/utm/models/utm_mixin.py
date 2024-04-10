@@ -109,7 +109,10 @@ class UtmMixin(models.AbstractModel):
 
         # Retrieve existing similar names
         seach_domain = expression.OR([[('name', 'ilike', name)] for name in names_without_counter])
-        existing_names = {vals['name'] for vals in self.env['utm.source'].search_read(seach_domain, ['name'])}
+        if model_name == 'mailing.mailing':
+            existing_names = {vals['name'] for vals in self.env['utm.source'].search_read(seach_domain, ['name'])}
+        else:
+            existing_names = {vals['name'] for vals in self.env[model_name].search_read(seach_domain, ['name'])}
 
         # Count for each names, based on the names list given in argument
         # and the record names in database
