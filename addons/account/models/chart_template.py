@@ -211,9 +211,10 @@ class AccountChartTemplate(models.AbstractModel):
 
         # Manual sync because disable above (delay_account_group_sync)
         AccountGroup = self.env['account.group'].with_context(delay_account_group_sync=False)
-        AccountGroup._adapt_accounts_for_account_groups(self.env['account.account'].search([]))
-        # this looks overkill.... why?
-        AccountGroup.search([])._adapt_parent_account_group()
+        AccountGroup._adapt_accounts_for_account_groups(check_all=True)
+        AccountGroup._adapt_parent_account_group(check_all=True)
+        # not proud of this check_all=True, this could be addapted by selecting a fewer number of record if possible, the one that got modified when delay_account_group_sync was False.
+        # this could maybe be done using orm, adding the parent as to_compute and using a computed field to postpone computation on flush or first access
 
         # Install the demo data when the first localization is instanciated on the company
         if install_demo and self.ref('base.module_account').demo and not reload_template:
