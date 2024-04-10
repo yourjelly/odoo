@@ -494,10 +494,14 @@ function parseDate(value, field, options) {
     if (smartDate) {
         date = smartDate;
     } else {
-        if (options && options.isUTC) {
+        const val = options && options.isUTC
+        if (val === true) {
             value = value.padStart(10, "0"); // server may send "932-10-10" for "0932-10-10" on some OS
             date = moment.utc(value);
-        } else {
+        } else if (val === false) {
+            date = moment.utc(value, [datePattern, datePatternWoZero, moment.ISO_8601], options.isUTC);
+        }
+         else {
             date = moment.utc(value, [datePattern, datePatternWoZero, moment.ISO_8601]);
         }
     }

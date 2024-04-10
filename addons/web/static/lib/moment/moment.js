@@ -88,8 +88,14 @@ function extend(a, b) {
     return a;
 }
 
-function createUTC (input, format, locale, strict) {
-    return createLocalOrUTC(input, format, locale, strict, true).utc();
+function createUTC (input, format, isUTC, locale, strict) {
+    const dateMoment = createLocalOrUTC(input, format, locale, strict, isUTC);
+    if (isUTC){
+        return dateMoment.utc();
+    }
+    else{
+        return dateMoment
+    }
 }
 
 function defaultParsingFlags() {
