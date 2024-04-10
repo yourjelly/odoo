@@ -166,6 +166,17 @@
                                     </div>
                                 </t>
                             </div>
+                            <div class="modal-footer fixed-bottom d-md-none shadow-none border-top bg-body">
+                            <button
+                                type="button"
+                                class="btn btn-primary w-100"
+                                name="o_location_selector_validate_selection"
+                                t-att-disabled="!this.state.selectedLocationId"
+                                t-on-click="validateSelection"
+                            >
+                                Choose this location
+                            </button>
+                        </div>
                         </div>
                     <div
                         id="map_view"
@@ -180,7 +191,7 @@
                         />
 
                         <!-- pin must be the button for this collapse -->
-                        <div class="collapse show fixed-bottom bg-body mb-5" t-attf-id="collapseLocationInfosMobile_{{this.state.selectedLocationId.toString()}}">
+                        <div class="collapse show z-index-0 fixed-bottom bg-body mb-5 pb-3" t-attf-id="collapseLocationInfosMobile_{{this.state.selectedLocationId.toString()}}">
                             <div class="row g-0 p-4 pb-0">
                                 <div class="col-md-7">
                                     <div class="row g-0 justify-content-between align-items-start flex-nowrap p-0">
@@ -212,7 +223,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="modal-footer fixed-bottom d-md-none bg-body">
+                        <div class="modal-footer z-index-1 fixed-bottom d-md-none shadow-none border-top bg-body">
                             <button
                                 type="button"
                                 class="btn btn-primary w-100"
