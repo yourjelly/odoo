@@ -1225,7 +1225,7 @@
                                                attrs="{'readonly': [('state', '!=', 'draft')]}"/>
                                         <field name="qr_code_method"
                                                attrs="{'invisible': [('display_qr_code', '=', False)]}"/>
-                                        <field name="delivery_date"/>
+                                        <field name="delivery_date" attrs="{'invisible': [('show_delivery_date', '=', True)]}"/><!-- hide if already displayed in header -->
                                     </group>
                                     <group string="Accounting"
                                            name="accounting_info_group"
