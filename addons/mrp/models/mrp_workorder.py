@@ -152,13 +152,13 @@ class MrpWorkorder(models.Model):
         # cyclic depends with the mo.state, mo.reservation_state and wo.state and avoid recursion error
         self.mapped('production_availability')
         for workorder in self:
-            if workorder.state == 'pending':
-                if all([wo.state in ('done', 'cancel') for wo in workorder.blocked_by_workorder_ids]):
-                    workorder.state = 'ready' if workorder.production_availability == 'assigned' else 'waiting'
-                    continue
+            if workorder.state == 'pending' and\
+               all(wo.state in ('done', 'cancel') for wo in workorder.blocked_by_workorder_ids):
+                workorder.state = 'ready' if workorder.production_availability == 'assigned' else 'waiting'
+                continue
             if workorder.state not in ('waiting', 'ready'):
                 continue
-            if not all([wo.state in ('done', 'cancel') for wo in workorder.blocked_by_workorder_ids]):
+            if not all(wo.state in ('done', 'cancel') for wo in workorder.blocked_by_workorder_ids):
                 workorder.state = 'pending'
                 continue
             if workorder.production_availability not in ('waiting', 'confirmed', 'assigned'):
@@ -370,14 +370,18 @@ class MrpWorkorder(models.Model):
     def _compute_working_users(self):
         """ Checks whether the current user is working, all the users currently working and the last user that worked. """
         for order in self:
-            order.working_user_ids = [(4, order.id) for order in order.time_ids.filtered(lambda time: not time.date_end).sorted('date_start').mapped('user_id')]
+            time_logs = order.time_ids.filtered(lambda time: not time.date_end).sorted('date_start')
+            order.working_user_ids = [(4, user_id) for user_id in time_logs.user_id.ids]
             if order.working_user_ids:
                 order.last_working_user_id = order.working_user_ids[-1]
             elif order.time_ids:
-                order.last_working_user_id = order.time_ids.filtered('date_end').sorted('date_end')[-1].user_id if order.time_ids.filtered('date_end') else order.time_ids[-1].user_id
+                ended_time_logs = order.time_ids.filtered('date_end').sorted('date_end')
+                order.last_working_user_id = (ended_time_logs or order.time_ids)[-1].user_id
             else:
                 order.last_working_user_id = False
-            if order.time_ids.filtered(lambda x: (x.user_id.id == self.env.user.id) and (not x.date_end) and (x.loss_type in ('productive', 'performance'))):
+            if any(
+                (time.user_id.id == self.env.user.id and not time.date_end and time.loss_type in ('productive', 'performance'))
+                for time in order.time_ids):
                 order.is_user_working = True
             else:
                 order.is_user_working = False
@@ -451,17 +455,17 @@ class MrpWorkorder(models.Model):
                         values['duration_expected'] = computed_duration
                 # Update MO dates if the start date of the first WO or the
                 # finished date of the last WO is update.
-                if workorder == workorder.production_id.workorder_ids[0] and 'date_start' in values:
-                    if values['date_start']:
-                        workorder.production_id.with_context(force_date=True).write({
-                            'date_start': fields.Datetime.to_datetime(values['date_start'])
-                        })
-                if workorder == workorder.production_id.workorder_ids[-1] and 'date_finished' in values:
-                    if values['date_finished']:
-                        workorder.production_id.with_context(force_date=True).write({
-                            'date_finished': fields.Datetime.to_datetime(values['date_finished'])
-                        })
-        return super(MrpWorkorder, self).write(values)
+                if workorder == workorder.production_id.workorder_ids[0] and\
+                   'date_start' in values and values['date_start']:
+                    workorder.production_id.with_context(force_date=True).write({
+                        'date_start': fields.Datetime.to_datetime(values['date_start'])
+                    })
+                if workorder == workorder.production_id.workorder_ids[-1] and\
+                   'date_finished' in values and values['date_finished']:
+                    workorder.production_id.with_context(force_date=True).write({
+                        'date_finished': fields.Datetime.to_datetime(values['date_finished'])
+                    })
+        return super().write(values)
 
     @api.model_create_multi
     def create(self, values):
@@ -653,8 +657,8 @@ class MrpWorkorder(models.Model):
 
     def end_previous(self, doall=False):
         """
-        @param: doall:  This will close all open time lines on the open work orders when doall = True, otherwise
-        only the one of the current user
+        @param: doall: This will close all open time lines on the open work
+        orders when doall = True, otherwise only the one of the current user.
         """
         # TDE CLEANME
         domain = [('workorder_id', 'in', self.ids), ('date_end', '=', False)]
@@ -703,6 +707,9 @@ class MrpWorkorder(models.Model):
 
     def button_scrap(self):
         self.ensure_one()
+        relevant_moves = (
+            self.production_id.move_raw_ids.filtered(lambda x: x.state not in ('done', 'cancel')) |
+            self.production_id.move_finished_ids.filtered(lambda x: x.state == 'done'))
         return {
             'name': _('Scrap Products'),
             'view_mode': 'form',
@@ -712,7 +719,7 @@ class MrpWorkorder(models.Model):
             'context': {'default_company_id': self.production_id.company_id.id,
                         'default_workorder_id': self.id,
                         'default_production_id': self.production_id.id,
-                        'product_ids': (self.production_id.move_raw_ids.filtered(lambda x: x.state not in ('done', 'cancel')) | self.production_id.move_finished_ids.filtered(lambda x: x.state == 'done')).mapped('product_id').ids},
+                        'product_ids': relevant_moves.product_id.ids},
             'target': 'new',
         }
 
