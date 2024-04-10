@@ -181,7 +181,7 @@ class AccountChartTemplate(models.AbstractModel):
             default_company_id=company.id,
             allowed_company_ids=[company.id],
             tracking_disable=True,
-            delay_account_group_sync=True,
+            #delay_account_group_sync=True,
             lang='en_US',
         )
         company = company.with_env(self.env)
@@ -210,9 +210,9 @@ class AccountChartTemplate(models.AbstractModel):
         self._load_translations(companies=company)
 
         # Manual sync because disable above (delay_account_group_sync)
-        AccountGroup = self.env['account.group'].with_context(delay_account_group_sync=False)
-        AccountGroup._adapt_accounts_for_account_groups(check_all=True)
-        AccountGroup._adapt_parent_account_group(check_all=True)
+        #AccountGroup = self.env['account.group'].with_context(delay_account_group_sync=False)
+        #AccountGroup._adapt_accounts_for_account_groups(check_all=True)
+        #AccountGroup._adapt_parent_account_group(check_all=True)
         # not proud of this check_all=True, this could be addapted by selecting a fewer number of record if possible, the one that got modified when delay_account_group_sync was False.
         # this could maybe be done using orm, adding the parent as to_compute and using a computed field to postpone computation on flush or first access
 
