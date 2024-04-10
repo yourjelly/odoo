@@ -542,10 +542,7 @@ class Challenge(models.Model):
 
             line_data['own_goal_id'] = False,
             line_data['goals'] = []
-            if line.condition=='higher':
-                goals = Goals.search(domain, order="completeness desc, current desc")
-            else:
-                goals = Goals.search(domain, order="completeness desc, current asc")
+            goals = Goals.search(domain, order=f"current {'desc' if line.condition == 'higher' else 'asc'}")
             if not goals:
                 continue
 
