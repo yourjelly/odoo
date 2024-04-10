@@ -16,30 +16,8 @@ const FacebookPageWidget = publicWidget.Widget.extend({
 
         this.options.wysiwyg && this.options.wysiwyg.odooEditor.observerUnactive();
 
-        const params = _.pick(this.$el[0].dataset, 'href', 'id', 'height', 'tabs', 'small_header', 'hide_cover');
-        if (!params.href) {
-            return def;
-        }
-        if (params.id) {
-            params.href = `https://www.facebook.com/${params.id}`;
-        }
-        delete params.id;
-        params.width = utils.confine(Math.floor(this.$el.width()), 180, 500);
-
-        var src = $.param.querystring('https://www.facebook.com/plugins/page.php', params);
-        this.$iframe = $('<iframe/>', {
-            src: src,
-            width: params.width,
-            height: params.height,
-            css: {
-                border: 'none',
-                overflow: 'hidden',
-            },
-            scrolling: 'no',
-            frameborder: '0',
-            allowTransparency: 'true',
-        });
-        this.$el.append(this.$iframe);
+        this._render();
+        window.addEventListener('resize', this._render.bind(this));
 
         this.options.wysiwyg && this.options.wysiwyg.odooEditor.observerActive();
         return def;
@@ -55,6 +33,32 @@ const FacebookPageWidget = publicWidget.Widget.extend({
             this.$iframe.remove();
         }
         this.options.wysiwyg && this.options.wysiwyg.odooEditor.observerActive();
+    },
+    //
+    _render: function () {
+        const params = _.pick(this.$el[0].dataset, 'href', 'id', 'height', 'tabs', 'small_header', 'hide_cover');
+        if (!params.href) {
+            return;
+        }
+        if (params.id) {
+            params.href = `https://www.facebook.com/${params.id}`;
+        }
+        delete params.id;
+        params.width = utils.confine(Math.floor(this.$el.width()), 180, 500);
+        const src = $.param.querystring('https://www.facebook.com/plugins/page.php', params);
+        const iframeEl = Object.assign(document.createElement('iframe'), {
+            src: src,
+            width: params.width,
+            height: params.height,
+            css: {
+                border: 'none',
+                overflow: 'hidden',
+            },
+            scrolling: 'no',
+            frameborder: '0',
+            allowTransparency: 'true',
+        });
+        this.el.replaceChildren(iframeEl);
     },
 });
 
