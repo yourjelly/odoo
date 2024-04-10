@@ -20,3 +20,9 @@ class TestUi(HttpCaseWithUserDemo):
             'password': 'testuser',
         })
         self.start_tour("/web", 'discuss_channel_tour', login='testuser')
+
+    def test_03_channel_kept_after_reload(self):
+        user = odoo.tests.new_test_user(self.env, "el_lector")
+        self.env["discuss.channel"].channel_create(name="Sales", group_id=None).add_members(user.partner_id.id)
+        self.env["discuss.channel"].channel_create(name="Recruitment", group_id=None).add_members(user.partner_id.id)
+        self.start_tour("/odoo/discuss", "discuss_channel_kept_after_reload", login="el_lector")

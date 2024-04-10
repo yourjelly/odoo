@@ -1,6 +1,8 @@
 import { Discuss } from "@mail/core/common/discuss";
+import { DiscussApp } from "@mail/core/common/discuss_app_model";
 
 import { Component, onWillStart, onWillUpdateProps, useState } from "@odoo/owl";
+import { router } from "@web/core/browser/router";
 
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
@@ -55,6 +57,7 @@ export class DiscussClientAction extends Component {
         const rawActiveId =
             props.action.context.active_id ??
             props.action.params?.active_id ??
+            router.current[DiscussApp.ACTIVE_CHANNEL_ROUTER_KEY] ??
             this.store.Thread.localIdToActiveId(this.store.discuss.thread?.localId) ??
             "mail.box_inbox";
         const [model, id] = this.parseActiveId(rawActiveId);
@@ -67,3 +70,6 @@ export class DiscussClientAction extends Component {
 }
 
 registry.category("actions").add("mail.action_discuss", DiscussClientAction);
+// Prevent discuss active id from being discarded when replace is called
+// on the router.
+router.addLockedKey(DiscussApp.ACTIVE_CHANNEL_ROUTER_KEY);

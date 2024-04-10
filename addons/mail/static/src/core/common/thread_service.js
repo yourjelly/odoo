@@ -1,3 +1,4 @@
+import { DiscussApp } from "@mail/core/common/discuss_app_model";
 import { prettifyMessageContent } from "@mail/utils/common/format";
 import { rpcWithEnv } from "@mail/utils/common/misc";
 
@@ -557,7 +558,7 @@ export class ThreadService {
                 ? "chat"
                 : "channel";
         if (pushState) {
-            router.pushState({ active_id: activeId });
+            router.pushState({ [DiscussApp.ACTIVE_CHANNEL_ROUTER_KEY]: activeId });
         }
     }
 
