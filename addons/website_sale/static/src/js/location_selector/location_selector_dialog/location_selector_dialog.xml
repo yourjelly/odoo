@@ -178,21 +178,56 @@
                             selectedLocationId="this.state.selectedLocationId.toString()"
                             setSelectedLocation.bind="setSelectedLocation"
                         />
+
+                        <!-- pin must be the button for this collapse -->
+                        <div class="collapse show fixed-bottom bg-body mb-5" t-attf-id="collapseLocationInfosMobile_{{this.state.selectedLocationId.toString()}}">
+                            <div class="row g-0 p-4 pb-0">
+                                <div class="col-md-7">
+                                    <div class="row g-0 justify-content-between align-items-start flex-nowrap p-0">
+                                        <h5 class="col-2">NB</h5>
+                                        <div class="col-10 p-0 pb-4">
+                                            <h5 class="mb-1">Address title here</h5>
+                                            <span>Address here</span>
+                                            <div class="d-flex align-items-center justify-content-between w-100" type="button" data-bs-toggle="collapse" t-attf-data-bs-target="#collapseHours_{{props.id}}" aria-expanded="false" t-attf-aria-controls="collapseHours_{{props.id}}">
+                                                <div class="d-flex align-items-center">
+                                                    <i class="fa fa-clock-o" aria-hidden="true"></i>
+                                                    <p class="ms-2 mb-0">Opening hours</p>
+                                                </div>
+                                                <i class="fa fa-chevron-down" aria-hidden="true"></i>
+                                            </div>
+
+                                            <div class="collapse" t-attf-id="collapseHours_{{props.id}}">
+                                            <!-- foreach day of the week -->
+                                                <div class="row">
+                                                        <div class="col-7">
+                                                            <p>Monday</p>
+                                                        </div>
+                                                        <div class="col-5 text-end">
+                                                            <p>06:30 - 12:00 13:00 - 19:30</p>
+                                                        </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer fixed-bottom d-md-none bg-body">
+                            <button
+                                type="button"
+                                class="btn btn-primary w-100"
+                                name="o_location_selector_validate_selection"
+                                t-att-disabled="!this.state.selectedLocationId"
+                                t-on-click="validateSelection"
+                            >
+                                Choose this location
+                            </button>
+                        </div>
                     </div>
                     </div>
                     
                 </div>
-                <div class="modal-footer fixed-bottom d-md-none bg-body">
-                    <button
-                        type="button"
-                        class="btn btn-primary w-100"
-                        name="o_location_selector_validate_selection"
-                        t-att-disabled="!this.state.selectedLocationId"
-                        t-on-click="validateSelection"
-                    >
-                        Choose this location
-                    </button>
-                </div>
+                
         </Dialog>
     </t>
 </templates>
