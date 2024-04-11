@@ -5,7 +5,7 @@
     </t>
 
     <t t-name="website_sale.locationSelector.map.marker">
-        <div style="color: var(--primary);">
+        <div style="color: var(--light);"> <!-- todo vcr change var to primary on click -->
             <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 61 78.9" style="enable-background:new 0 0 61 78.9; height:32px;" xml:space="preserve">
                 <style type="text/css">
                     .st0{opacity:0.3;enable-background:new;}
@@ -22,7 +22,7 @@
                     </g>
                 </g>
             </svg>
-            <p class="position-absolute w-100 text-bg-primary text-center fw-bold">
+            <p class="position-absolute w-100 text-bg-light text-center fw-bold"> <!-- todo vcr change text-bg-light to text-bg-primary on click -->
                 <t t-out="number"/>
             </p>
         </div>
