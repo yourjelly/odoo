@@ -28,7 +28,7 @@
                         </div>
 
                         <div class="collapse" t-attf-id="collapseHours_{{props.id}}">
-                        <!-- foreach day of the week -->
+                        <!-- todo vcr foreach day of the week -->
                             <div class="row justify-content-between g-0 px-1">
                                 <div class="col-8">
                                     <small class="text-muted">Monday</small>
@@ -39,6 +39,7 @@
                             </div>
                         </div>
                         <p class="mb-0 text-success">Open Now</p>
+                        <!-- todo vcr Add closed now with text-warning when outside of opening hours too -->
                     </div>
                     <span class="text-muted" t-out="props.address"/>
                 </div>

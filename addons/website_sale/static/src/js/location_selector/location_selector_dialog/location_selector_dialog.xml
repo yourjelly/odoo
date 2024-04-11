@@ -13,7 +13,7 @@
                             </button>
                         </div>
                     </div>
-                    <!-- result list group -->
+                    <!-- Results list group -->
                     <div
                         id="o_location_selector_list_view"
                         class="list-group list-group-flush overflow-x-auto"
@@ -79,7 +79,7 @@
                                     </button>
                                 </div>
                                 <div class="col-md-4">
-                                <!-- foreach day of the week -->
+                                <!-- todo vcr foreach day of the week -->
                                     <div class="row g-0">
                                         <div class="col-6">
                                             <small class="text-muted">Monday</small>
@@ -103,11 +103,11 @@
                         <i class="oi oi-search" data-oe-model="ir.ui.view" data-oe-id="951" data-oe-field="arch" data-oe-xpath="/data/xpath[3]/form/t[1]/div[1]/button[1]/i[1]"></i>
                     </button>
                 </div>
-                <ul class="nav nav-tabs d-md-none sticky-top justify-content-center py-2" id="myTab" role="tablist">
-                    <li class="nav-item w-50 text-center" role="presentation">
+                <ul class="nav nav-tabs d-md-none sticky-top justify-content-center" id="myTab" role="tablist">
+                    <li class="nav-item w-50 border-bottom border-dark text-center" role="presentation"> <!-- todo vcr switch border color when active or not -->
                         <a
                             id="list-tab"
-                            class="nav-link active border-0 border-end"
+                            class="nav-link active border-0 py-3 mb-0 fw-bold text-dark"
                             data-bs-toggle="tab"
                             data-bs-target="#list_view"
                             type="button"
@@ -121,7 +121,7 @@
                     <li class="nav-item w-50 text-center" role="presentation">
                         <a 
                             id="map-tab"
-                            class="nav-link border-0"
+                            class="nav-link border-0 py-3 mb-0 text-dark"
                             data-bs-toggle="tab"
                             data-bs-target="#map_view"
                             type="button"
@@ -134,7 +134,7 @@
                     </li>
                 </ul>
             </div>
-            <!-- mobile only Tab panes -->
+            <!-- Mobile only Tab panes -->
             <div class="d-md-none pb-5 mb-3">
                 <div class="tab-content" id="myTabContent">
                     <div
@@ -197,7 +197,7 @@
                             selectedLocationId="this.state.selectedLocationId.toString()"
                             setSelectedLocation.bind="setSelectedLocation"
                         />
-                        <!-- pin must be the button for this collapse -->
+                        <!-- todo vcr pin must be the button for this collapse -->
                         <div class="collapse show z-index-0 fixed-bottom bg-body mb-5 pb-3" t-attf-id="collapseLocationInfosMobile_{{this.state.selectedLocationId.toString()}}">
                             <div class="row g-0 p-4 pb-0">
                                 <div class="col-md-7">
