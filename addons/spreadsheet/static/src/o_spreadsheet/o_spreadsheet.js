@@ -2296,10 +2296,14 @@
         return range.clone({ sheetId });
     }
     /**
-     * Create a range from a xc. If the xc is empty, this function returns undefined.
+     * Create a range from a xc. If the xc is empty or is invalid, this function returns undefined.
      */
-    function createRange(getters, sheetId, range) {
-        return range ? getters.getRangeFromSheetXC(sheetId, range) : undefined;
+    function createRange(getters, sheetId, rangeXC) {
+        if (!rangeXC) {
+            return undefined;
+        }
+        const range = getters.getRangeFromSheetXC(sheetId, rangeXC);
+        return range.invalidSheetName ? undefined : range;
     }
 
     /** Methods from Odoo Web Utils  */
@@ -40636,6 +40640,9 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 if (rangeImpl.invalidSheetName) {
                     sheetName = rangeImpl.invalidSheetName;
                 }
+                else if (!this.getters.tryGetSheet(rangeImpl.sheetId)) {
+                    sheetName = INCORRECT_RANGE_STRING;
+                }
                 else {
                     sheetName = getComposerSheetName(this.getters.getSheetName(rangeImpl.sheetId));
                 }
@@ -43322,8 +43329,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
 
 
     __info__.version = '16.0.38';
-    __info__.date = '2024-04-10T12:32:46.699Z';
-    __info__.hash = '6c7d510';
+    __info__.date = '2024-04-11T09:34:46.834Z';
+    __info__.hash = 'd4ca18a';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
