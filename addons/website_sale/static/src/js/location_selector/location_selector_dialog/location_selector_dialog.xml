@@ -46,8 +46,6 @@
                     <section class="position-relative col-md-8 p-0">
                         <div
                             id="o_location_selector_map_view"
-                            class="tab-pane index-0 d-md-flex flex-md-grow-1 justify-content-md-center"
-                            role="tabpanel"
                         >
                             <Map
                                 t-if="this.state.loadMap"
@@ -55,7 +53,7 @@
                                 selectedLocationId="this.state.selectedLocationId.toString()"
                                 setSelectedLocation.bind="setSelectedLocation"
                             />
-                            <div class="collapse collapse-horizontal position-absolute z-index-1 bottom-0 w-100 bg-body" t-attf-id="collapseLocationInfos_{{this.state.selectedLocationId.toString()}}">
+                            <div class="position-absolute z-index-1 bottom-0 w-100 bg-body">
                                 <div class="row justify-content-between g-0 p-4">
                                     <div class="col-md-7">
                                         <div class="row justify-content-between align-items-start flex-nowrap p-0">

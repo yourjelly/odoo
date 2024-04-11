@@ -5,7 +5,7 @@
             class="list-group-item ps-0"
             t-att-class="{'o_location_selector_location_selected list-group-item-primary': props.isSelected}"
             t-on-click="() => props.setSelectedLocation(props.id)"
-            type="button" data-bs-toggle="collapse" t-attf-data-bs-target="#collapseLocationInfos_{{props.id}}" aria-expanded="false" t-attf-aria-controls="collapseLocationInfos_{{props.id}}">
+            type="button">
             <div class="row justify-content-between align-items-start flex-nowrap g-0">
                 <h5 class="col-2" t-out="props.number"/>
                 <div class="col-10 p-0 text-start">
