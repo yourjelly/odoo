@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <!-- <t t-name="point_of_sale.ListRenderer" t-inherit="web.ListRenderer" t-inherit-mode="primary"> -->
+    <t t-name="point_of_sale.ListRenderer" t-inherit="web.ListRenderer.RecordRow" t-inherit-mode="extension">
+        <xpath expr="//t[@t-foreach='getColumns(record)']" position="after">
+            salut
+            <t t-log="props"/>
+        </xpath>
+    </t>
+
+</templates>

@@ -23,7 +23,6 @@ import {
     makeActionAwaitable,
 } from "@point_of_sale/app/store/make_awaitable_dialog";
 import { deserializeDate } from "@web/core/l10n/dates";
-import { PartnerList } from "../screens/partner_list/partner_list";
 import { ScaleScreen } from "../screens/scale_screen/scale_screen";
 import { computeComboLines } from "../models/utils/compute_combo_lines";
 import { changesToOrder, getOrderChanges } from "../models/utils/order_change";
@@ -31,6 +30,7 @@ import { getTaxesAfterFiscalPosition, getTaxesValues } from "../models/utils/tax
 import { QRPopup } from "@point_of_sale/app/utils/qr_code_popup/qr_code_popup";
 import { ReceiptScreen } from "../screens/receipt_screen/receipt_screen";
 import { PaymentScreen } from "../screens/payment_screen/payment_screen";
+import { SelectCreateDialog } from "@web/views/view_dialogs/select_create_dialog";
 
 const { DateTime } = luxon;
 
@@ -50,6 +50,7 @@ export class PosStore extends Reactive {
         "printer",
         "action",
         "alert",
+        "renderer",
     ];
     constructor() {
         super();
@@ -70,6 +71,7 @@ export class PosStore extends Reactive {
             pos_data,
             action,
             alert,
+            renderer,
         }
     ) {
         this.env = env;
@@ -83,6 +85,7 @@ export class PosStore extends Reactive {
         this.action = action;
         this.alert = alert;
         this.notification = notification;
+        this.renderer = renderer;
         this.unwatched = markRaw({});
         this.pushOrderMutex = new Mutex();
 
@@ -1443,18 +1446,34 @@ export class PosStore extends Reactive {
             });
             return;
         }
-        const payload = await makeAwaitable(this.dialog, PartnerList, {
-            partner: currentPartner,
-            getPayload: (newPartner) => currentOrder.set_partner(newPartner),
+        // const payload = await makeAwaitable(this.dialog, PartnerList, {
+        //     partner: currentPartner,
+        //     getPayload: (newPartner) => currentOrder.set_partner(newPartner),
+        // });
+        // const partner = await new Promise((resolve) => {
+        this.dialog.add(SelectCreateDialog, {
+            resModel: "res.partner",
+            noCreate: true,
+            multiSelect: false,
+            // dropDownOptions : [
+            //     {
+            //         name: "name",
+            //         callback:
+            //     }
+            // ]
+            onSelected: (resIds) => {
+                // this.pos.onClickSaleOrder(resIds[0]);
+                console.log(resIds);
+            },
         });
+        // });
+        // if (payload) {
+        //     currentOrder.set_partner(payload);
+        // } else {
+        //     currentOrder.set_partner(false);
+        // }
 
-        if (payload) {
-            currentOrder.set_partner(payload);
-        } else {
-            currentOrder.set_partner(false);
-        }
-
-        return currentPartner;
+        // return currentPartner;
     }
     async editLots(product, packLotLinesToEdit) {
         const isAllowOnlyOneLot = product.isAllowOnlyOneLot();
