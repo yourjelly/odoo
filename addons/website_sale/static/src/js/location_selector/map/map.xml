@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <templates xml:space="preserve">
     <t t-name="website_sale.locationSelector.map">
-        <div class="w-100 h-100 z-index-0" style="height: 85vh !important;" t-ref="mapContainer"></div>
+        <div class="w-100 h-100 z-index-0" style="height: 84vh !important;" t-ref="mapContainer"></div>
     </t>
 
     <t t-name="website_sale.locationSelector.map.marker">

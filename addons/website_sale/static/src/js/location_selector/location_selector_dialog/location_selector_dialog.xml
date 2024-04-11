@@ -53,10 +53,10 @@
                                 selectedLocationId="this.state.selectedLocationId.toString()"
                                 setSelectedLocation.bind="setSelectedLocation"
                             />
-                            <div class="position-absolute z-index-1 bottom-0 w-100 bg-body">
+                            <div class="position-absolute z-index-1 bottom-0 w-100 bg-body mb-n1">
                                 <div class="row justify-content-between g-0 p-4">
-                                    <div class="col-md-7">
-                                        <div class="row justify-content-between align-items-start flex-nowrap p-0">
+                                    <div class="col-md-8">
+                                        <div class="row justify-content-between align-items-start flex-nowrap g-0">
                                             <h5 class="col-2">NB</h5>
                                             <div class="col-10 p-0 pb-4">
                                                 <h5 class="mb-1">Address title here</h5>
@@ -65,7 +65,7 @@
                                         </div>
                                         <button
                                             type="button"
-                                            class="btn btn-primary offset-md-1 ms-5"
+                                            class="btn btn-primary offset-md-2"
                                             name="o_location_selector_validate_selection"
                                             t-att-disabled="!this.state.selectedLocationId"
                                             t-on-click="validateSelection"
@@ -73,13 +73,15 @@
                                             Choose this location
                                         </button>
                                     </div>
-                                    <div class="col-md-5 row">
-                                        <!-- foreach day of the week -->
-                                        <div class="col-5">
-                                            <p class="text-muted">Monday</p>
-                                        </div>
-                                        <div class="col-7 px-0 text-end">
-                                            <p>06:30 - 12:00 13:00 - 19:30</p>
+                                    <div class="col-md-4">
+                                        <div class="row g-0">
+                                            <!-- foreach day of the week -->
+                                            <div class="col-6">
+                                                <small class="text-muted">Monday</small>
+                                            </div>
+                                            <div class="col-6 px-0 text-end">
+                                                <small>06:30 - 12:00 13:00 - 19:30</small>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
