@@ -3,91 +3,91 @@
     <t t-name="website_sale.locationSelector.dialog">
         <Dialog size="size" title="title" footer="false" bodyClass="'p-0 py-md-0 px-md-3'">
                 <div class="row d-none d-md-flex">
-                <section class="overflow-x-auto col-md-4 p-0" style="height: 80vh;">
-                    <!-- Address input -->
-                    <div class="sticky-top border-bottom border-top bg-body p-3">
-                        <div role="search" class="input-group me-sm-2">
-                            <input class="search-query form-control oe_search_box border-0 bg-light border-0 text-bg-light" t-model.lazy="this.state.zipCode"/>
-                            <button type="submit" aria-label="Search" title="Search" class="btn oe_search_button btn btn-light">
-                                    <i class="oi oi-search" data-oe-model="ir.ui.view" data-oe-id="951" data-oe-field="arch" data-oe-xpath="/data/xpath[3]/form/t[1]/div[1]/button[1]/i[1]"></i>
-                            </button>
+                    <section class="col-md-4 p-0" >
+                        <!-- Address input -->
+                        <div class="sticky-top border-bottom border-top bg-body p-3">
+                            <div role="search" class="input-group me-sm-2">
+                                <input class="search-query form-control oe_search_box border-0 bg-light border-0 text-bg-light" t-model.lazy="this.state.zipCode"/>
+                                <button type="submit" aria-label="Search" title="Search" class="btn oe_search_button btn btn-light">
+                                        <i class="oi oi-search" data-oe-model="ir.ui.view" data-oe-id="951" data-oe-field="arch" data-oe-xpath="/data/xpath[3]/form/t[1]/div[1]/button[1]/i[1]"></i>
+                                </button>
+                            </div>
                         </div>
-                    </div>
-                    <!-- result list group -->
-                    <div
-                        id="o_location_selector_list_view"
-                        class="list-group list-group-flush"
-                    >
-                        <t t-if="this.state.locations.length">
-                            <t
-                                t-foreach="this.state.locations"
-                                t-as="location"
-                                t-key="location.id"
-                            >
-                            <Location
-                                id="location.id.toString()"
-                                name="location.pick_up_point_name"
-                                address="location.pick_up_point_address"
-                                number="location_index + 1"
-                                isSelected="this.state.selectedLocationId === location.id.toString()"
+                        <!-- result list group -->
+                        <div
+                            id="o_location_selector_list_view"
+                            class="list-group list-group-flush overflow-x-auto"
+                        >
+                            <t t-if="this.state.locations.length">
+                                <t
+                                    t-foreach="this.state.locations"
+                                    t-as="location"
+                                    t-key="location.id"
+                                >
+                                <Location
+                                    id="location.id.toString()"
+                                    name="location.pick_up_point_name"
+                                    address="location.pick_up_point_address"
+                                    number="location_index + 1"
+                                    isSelected="this.state.selectedLocationId === location.id.toString()"
+                                    setSelectedLocation.bind="setSelectedLocation"
+                                />
+                                </t>
+                            </t>
+                            <t t-else="">
+                                <div class="d-flex align-items-center justify-content-center p-2">
+                                    <div class="spinner-border" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </div>
+                            </t>
+                        </div>
+                    </section>
+                    <section class="position-relative col-md-8 p-0">
+                        <div
+                            id="o_location_selector_map_view"
+                            class="tab-pane index-0 d-md-flex flex-md-grow-1 justify-content-md-center"
+                            role="tabpanel"
+                        >
+                            <Map
+                                t-if="this.state.loadMap"
+                                locations="this.state.locations"
+                                selectedLocationId="this.state.selectedLocationId.toString()"
                                 setSelectedLocation.bind="setSelectedLocation"
                             />
-                            </t>
-                        </t>
-                        <t t-else="">
-                            <div class="d-flex align-items-center justify-content-center p-2">
-                                <div class="spinner-border" role="status">
-                                    <span class="visually-hidden">Loading...</span>
-                                </div>
-                            </div>
-                        </t>
-                    </div>
-                </section>
-                <section class="position-relative col-md-8 p-0">
-                    <div
-                        id="o_location_selector_map_view"
-                        class="tab-pane index-0 d-md-flex flex-md-grow-1 justify-content-md-center"
-                        role="tabpanel"
-                    >
-                        <Map
-                            t-if="this.state.loadMap"
-                            locations="this.state.locations"
-                            selectedLocationId="this.state.selectedLocationId.toString()"
-                            setSelectedLocation.bind="setSelectedLocation"
-                        />
-                        <div class="collapse collapse-horizontal position-absolute z-index-1 bottom-0 w-100 bg-body" t-attf-id="collapseLocationInfos_{{this.state.selectedLocationId.toString()}}">
-                            <div class="row g-0 p-4">
-                                <div class="col-md-7">
-                                    <div class="row justify-content-between align-items-start flex-nowrap p-0">
-                                        <h5 class="col-2">NB</h5>
-                                        <div class="col-10 p-0 pb-4">
-                                            <h5 class="mb-1">Address title here</h5>
-                                            <span>Address here</span>
+                            <div class="collapse collapse-horizontal position-absolute z-index-1 bottom-0 w-100 bg-body" t-attf-id="collapseLocationInfos_{{this.state.selectedLocationId.toString()}}">
+                                <div class="row justify-content-between g-0 p-4">
+                                    <div class="col-md-7">
+                                        <div class="row justify-content-between align-items-start flex-nowrap p-0">
+                                            <h5 class="col-2">NB</h5>
+                                            <div class="col-10 p-0 pb-4">
+                                                <h5 class="mb-1">Address title here</h5>
+                                                <span>Address here</span>
+                                            </div>
                                         </div>
+                                        <button
+                                            type="button"
+                                            class="btn btn-primary offset-md-1 ms-5"
+                                            name="o_location_selector_validate_selection"
+                                            t-att-disabled="!this.state.selectedLocationId"
+                                            t-on-click="validateSelection"
+                                        >
+                                            Choose this location
+                                        </button>
                                     </div>
-                                    <button
-                                        type="button"
-                                        class="btn btn-primary offset-md-1 ms-5"
-                                        name="o_location_selector_validate_selection"
-                                        t-att-disabled="!this.state.selectedLocationId"
-                                        t-on-click="validateSelection"
-                                    >
-                                        Choose this location
-                                    </button>
-                                </div>
-                                <div class="col-md-5 row">
-                                    <!-- foreach day of the week -->
-                                    <div class="col-5">
-                                        <p>Monday</p>
-                                    </div>
-                                    <div class="col-7 text-end">
-                                        <p>06:30 - 12:00 13:00 - 19:30</p>
+                                    <div class="col-md-5 row">
+                                        <!-- foreach day of the week -->
+                                        <div class="col-5">
+                                            <p class="text-muted">Monday</p>
+                                        </div>
+                                        <div class="col-7 px-0 text-end">
+                                            <p>06:30 - 12:00 13:00 - 19:30</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </section>
+                    </section>
                 </div>
                 <!-- Mobile only Nav tabs -->
                 <!-- Address input -->
