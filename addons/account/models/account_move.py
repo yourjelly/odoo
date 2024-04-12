@@ -612,6 +612,7 @@ class AccountMove(models.Model):
     payment_term_details = fields.Binary(compute="_compute_payment_term_details", exportable=False)
     show_payment_term_details = fields.Boolean(compute="_compute_show_payment_term_details")
     show_discount_details = fields.Boolean(compute="_compute_show_payment_term_details")
+    show_late_payment_charges_details = fields.Boolean(compute="_compute_show_payment_term_details")
 
     abnormal_amount_warning = fields.Text(compute='_compute_abnormal_warnings')
     abnormal_date_warning = fields.Text(compute='_compute_abnormal_warnings')
@@ -1396,15 +1397,17 @@ class AccountMove(models.Model):
         '''
         Determines :
         - whether or not an additional table should be added at the end of the invoice to display the various
-        - whether or not there is an early pay discount in this invoice that should be displayed
+        - whether or not there is an early pay discount or late payment charges in this invoice that should be displayed
         '''
         for invoice in self:
             if invoice.move_type in ('out_invoice', 'out_receipt', 'in_invoice', 'in_receipt') and invoice.payment_state in ('not_paid', 'partial'):
                 payment_term_lines = invoice.line_ids.filtered(lambda l: l.display_type == 'payment_term')
                 invoice.show_discount_details = invoice.invoice_payment_term_id.early_discount
-                invoice.show_payment_term_details = len(payment_term_lines) > 1 or invoice.show_discount_details
+                invoice.show_late_payment_charges_details = invoice.invoice_payment_term_id.late_payment_charges
+                invoice.show_payment_term_details = len(payment_term_lines) > 1 or invoice.show_discount_details or invoice.show_late_payment_charges_details
             else:
                 invoice.show_discount_details = False
+                invoice.show_late_payment_charges_details = False
                 invoice.show_payment_term_details = False
 
     def _need_cancel_request(self):
@@ -2255,6 +2258,17 @@ class AccountMove(models.Model):
             and self.move_type in ('out_invoice', 'out_receipt', 'in_invoice', 'in_receipt') \
             and self.invoice_payment_term_id.early_discount \
             and (not reference_date or reference_date <= self.invoice_payment_term_id._get_last_discount_date(self.invoice_date)) \
+            and self.payment_state == 'not_paid'
+
+    # -------------------------------------------------------------------------
+    # LATE PAYMENT CHARGES
+    # -------------------------------------------------------------------------
+    def _is_eligible_for_late_payment_charges(self, currency, reference_date):
+        self.ensure_one()
+        return self.currency_id == currency \
+            and self.move_type in ('out_invoice', 'out_receipt', 'in_invoice', 'in_receipt') \
+            and self.invoice_payment_term_id.late_payment_charges \
+            and (not reference_date or reference_date >= self.invoice_payment_term_id._get_latest_late_charges_date(self.invoice_date)) \
             and self.payment_state == 'not_paid'
 
     # -------------------------------------------------------------------------

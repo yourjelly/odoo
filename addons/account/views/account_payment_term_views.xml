@@ -41,24 +41,46 @@
                             <h1><field name="name" nolabel="1" placeholder="e.g. 30 days"/></h1>
                         </div>
                         <group>
-                            <field name="company_id" options="{'no_create': True}" class="w-25" groups="base.group_multi_company"/>
-                            <label for="early_discount"/>
-                            <div class="o_field_highlight">
-                                <field name="early_discount"/>
-                                <field name="discount_percentage"
-                                       class="text-end o_field_highlight o_input oe_inline"
-                                       invisible="not early_discount"/>
-                                <span invisible="not early_discount"> % if paid within </span>
-                                <field name="discount_days"
-                                       class="text-end o_field_highlight o_input oe_inline"
-                                       invisible="not early_discount"/>
-                                <span invisible="not early_discount"> days</span>
-                                <div invisible="not early_discount">
-                                    <span> Reduced tax:
-                                        <field name="early_pay_discount_computation" class="w-auto"/>
-                                    </span>
+                            <group>
+                                <field name="company_id" options="{'no_create': True}" class="w-25" groups="base.group_multi_company"/>
+                                <label for="early_discount"/>
+                                <div class="o_field_highlight">
+                                    <field name="early_discount"/>
+                                    <field name="discount_percentage"
+                                        class="text-end o_field_highlight o_input oe_inline"
+                                        invisible="not early_discount"/>
+                                    <span invisible="not early_discount"> % if paid within </span>
+                                    <field name="discount_days"
+                                        class="text-end o_field_highlight o_input oe_inline"
+                                        invisible="not early_discount"/>
+                                    <span invisible="not early_discount"> days</span>
+                                    <div invisible="not early_discount">
+                                        <span> Reduced tax:
+                                            <field name="early_pay_discount_computation" class="w-auto"/>
+                                        </span>
+                                    </div>
                                 </div>
-                            </div>
+                            </group>
+                            <group>
+                                <field name="company_id" options="{'no_create': True}" class="w-25" groups="base.group_multi_company"/>
+                                <label for="late_payment_charges"/>
+                                <div class="o_field_highlight">
+                                    <field name="late_payment_charges"/>
+                                    <field name="late_payment_charges_percentage"
+                                        class="text-end o_field_highlight o_input oe_inline"
+                                        invisible="not late_payment_charges"/>
+                                    <span invisible="not late_payment_charges"> % if paid after </span>
+                                    <field name="late_payment_charges_days"
+                                        class="text-end o_field_highlight o_input oe_inline"
+                                        invisible="not late_payment_charges"/>
+                                    <span invisible="not late_payment_charges"> days</span>
+                                    <div invisible="not late_payment_charges">
+                                        <span> Reduced tax:
+                                            <field name="late_payment_charges_computation" class="w-auto"/>
+                                        </span>
+                                    </div>
+                                </div>
+                            </group>
                         </group>
                         <group>
                             <group string="Due Terms">
@@ -85,6 +107,8 @@
                                     <field name="note" placeholder="e.g. Payment terms: 30 days after invoice date" class="border-bottom o_example_note"/>
                                     <field name="example_preview_discount" class="ps-2"
                                            invisible="not early_discount or not display_on_invoice"/>
+                                    <field name="example_preview_late_payment_charges" class="ps-2"
+                                           invisible="not late_payment_charges or not display_on_invoice"/>
                                     <field name="example_preview" class="ps-2"
                                            invisible="not display_on_invoice"/>
                                 </div>

@@ -56,6 +56,17 @@ class AccountPaymentRegister(models.TransientModel):
         compute="_compute_qr_code",
     )
 
+    # == Fields for Late Payment Charges ==
+    late_payment_charges_mode = fields.Boolean(compute='_compute_late_payment_charges_mode')
+    total_due_lpc = fields.Monetary(currency_field='currency_id', store=True, compute='_compute_total_due_lpc')
+    lpc_penalty = fields.Monetary(currency_field='currency_id', readonly=True,
+                                        compute='_compute_lpc_penalty')
+    total_amount_after_lpc = fields.Monetary(currency_field='currency_id', readonly=False,
+                                        compute='_compute_total_amount_after_lpc')
+    coa_for_lpc_id = fields.Many2one('account.account', check_company=True, string='Post Charges in',
+                                  help='Late Payment Charges will be posted in this account')
+    lpc_product_id = fields.Many2one('product.product')
+
     # == Fields given through the context ==
     line_ids = fields.Many2many('account.move.line', 'account_payment_register_move_line_rel', 'wizard_id', 'line_id',
         string="Journal items", readonly=True, copy=False,)
@@ -503,6 +514,83 @@ class AccountPaymentRegister(models.TransientModel):
             else:
                 wizard.show_partner_bank_account = wizard.payment_method_line_id.code in self.env['account.payment']._get_method_codes_using_bank_account()
             wizard.require_partner_bank_account = wizard.payment_method_line_id.code in self.env['account.payment']._get_method_codes_needing_bank_account()
+
+    @api.depends('payment_date')
+    def _compute_late_payment_charges_mode(self):
+        for wizard in self:
+            wizard.late_payment_charges_mode = False
+            batch_result = wizard._get_batches()[0]
+            moves = batch_result['lines'].mapped('move_id')
+            for move in moves:
+                if move._is_eligible_for_late_payment_charges(move.currency_id, wizard.payment_date):
+                    wizard.late_payment_charges_mode = True
+        product = self.env['product.product'].search([('name', '=', "Late Payment Charges")], limit=1)
+        self.lpc_product_id = product.id
+
+    @api.depends('late_payment_charges_mode')
+    def _compute_total_due_lpc(self):
+        for wizard in self:
+            if wizard.late_payment_charges_mode:
+                batch_result = wizard._get_batches()[0]
+                moves = batch_result['lines'].mapped('move_id')
+                amt = 0
+                bill_amount = wizard._get_total_amount_in_wizard_currency_to_full_reconcile(batch_result, early_payment_discount=False)[0]
+                for move in moves:
+                    if move._is_eligible_for_late_payment_charges(move.currency_id, wizard.payment_date):
+                        amt += move.invoice_payment_term_id._get_amount_due_after_charges(move.amount_total, move.amount_tax)
+                wizard.total_due_lpc = amt - bill_amount if amt > 0 else 0.0
+
+    @api.depends('can_edit_wizard', 'amount', 'late_payment_charges_mode', 'lpc_penalty')
+    def _compute_total_amount_after_lpc(self):
+        for wizard in self:
+            if wizard.can_edit_wizard and wizard.late_payment_charges_mode:
+                wizard.total_amount_after_lpc = wizard.lpc_penalty + wizard.amount
+            else:
+                wizard.total_amount_after_lpc = 0
+
+    @api.depends('can_edit_wizard', 'amount', 'late_payment_charges_mode', 'total_due_lpc')
+    def _compute_lpc_penalty(self):
+        for wizard in self:
+            percentage_paid = 0.0
+            if wizard.can_edit_wizard and wizard.late_payment_charges_mode:
+                batch_result = wizard._get_batches()[0]
+                bill_amount = wizard._get_total_amount_in_wizard_currency_to_full_reconcile(batch_result, early_payment_discount=False)[0]
+                percentage_paid = wizard.amount / bill_amount
+            wizard.lpc_penalty = percentage_paid * wizard.total_due_lpc if percentage_paid > 0 else 0.0
+
+    @api.onchange('total_amount_after_lpc', 'late_payment_charges_mode')
+    def _inverse_total_amount_after_lpc(self):
+        for wizard in self:
+            if wizard.late_payment_charges_mode:
+                percentage_of_lpc = wizard.lpc_penalty / (wizard.amount + wizard.lpc_penalty)
+                wizard.amount = (1 - percentage_of_lpc) * wizard.total_amount_after_lpc
+
+    def _create_lpc_product(self):
+        self.ensure_one()
+        self.lpc_product_id = self.env['product.product'].create({
+            "name": 'Late Payment Charges',
+            "property_account_income_id": self.coa_for_lpc_id,
+            "taxes_id": []
+        })
+
+    def _create_lpc_invoice_or_bill(self):
+        self.ensure_one()
+        batch_result = self._get_batches()[0]
+        moves = batch_result['lines'].mapped('move_id')
+        partner = None
+        inbound = False
+        move_type = False
+        for move in moves:
+            partner = move.partner_id.id
+            inbound = move.is_inbound(include_receipts=True)
+        move_type = "out_invoice" if inbound else "in_invoice"
+        self.env['account.move'].create({
+            "partner_id": partner,
+            "invoice_date": fields.Date.today(),
+            "move_type": move_type,
+            "amount_residual": self.total_due_lpc - self.lpc_penalty,
+            "invoice_line_ids": [Command.create({"product_id": self.lpc_product_id.id, "quantity": 1, "price_unit": self.total_due_lpc})]
+        })
 
     def _get_total_amount_using_same_currency(self, batch_result, early_payment_discount=True):
         self.ensure_one()
@@ -994,6 +1082,9 @@ class AccountPaymentRegister(models.TransientModel):
         return payments
 
     def action_create_payments(self):
+        if not self.lpc_product_id:
+            self._create_lpc_product()
+        self._create_lpc_invoice_or_bill()
         payments = self._create_payments()
 
         if self._context.get('dont_redirect_to_payments'):

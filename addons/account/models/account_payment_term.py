@@ -34,6 +34,7 @@ class AccountPaymentTerm(models.Model):
     example_invalid = fields.Boolean(compute='_compute_example_invalid')
     example_preview = fields.Html(compute='_compute_example_preview')
     example_preview_discount = fields.Html(compute='_compute_example_preview')
+    example_preview_late_payment_charges = fields.Html(compute='_compute_example_preview')
 
     discount_percentage = fields.Float(string='Discount %', help='Early Payment Discount granted for this payment term', default=2.0)
     discount_days = fields.Integer(string='Discount Days', help='Number of days before the early payment proposition expires', default=10)
@@ -43,6 +44,14 @@ class AccountPaymentTerm(models.Model):
         ('mixed', 'Always (upon invoice)'),
     ], string='Cash Discount Tax Reduction', readonly=False, store=True, compute='_compute_discount_computation')
     early_discount = fields.Boolean(string='Early Discount')
+
+    late_payment_charges = fields.Boolean(string='Late Payment Charges')
+    late_payment_charges_percentage = fields.Float(string='Charges %', help='Late charges applied for this payment term', default=2.0)
+    late_payment_charges_days = fields.Integer(string='Late Charges Day', help='Number of days after which late charges will apply', default=7)
+    late_payment_charges_computation = fields.Selection([
+        ('on_total', 'on Total'),
+        ('on_taxable', 'on Taxable')
+    ], string='Late Payment Charges Tax Reduction', readonly=False, default='on_total')
 
     @api.depends('company_id')
     @api.depends_context('allowed_company_ids')
@@ -68,6 +77,17 @@ class AccountPaymentTerm(models.Model):
             return total_amount - discount_amount_currency
         return total_amount
 
+    def _get_amount_due_after_charges(self, total_amount, taxed_amount):
+        self.ensure_one()
+        if self.late_payment_charges:
+            percentage = self.late_payment_charges_percentage / 100.0
+            if self.late_payment_charges_computation in ('on_taxable'):
+                late_payment_charges_amount_currency = self.currency_id.round((total_amount - taxed_amount) * percentage)
+            else:
+                late_payment_charges_amount_currency = self.currency_id.round(total_amount * percentage)
+            return total_amount + late_payment_charges_amount_currency
+        return total_amount
+
     @api.depends('company_id')
     def _compute_discount_computation(self):
         for pay_term in self:
@@ -89,6 +109,7 @@ class AccountPaymentTerm(models.Model):
         for record in self:
             example_preview = ""
             record.example_preview_discount = ""
+            record.example_preview_late_payment_charges = ""
             currency = record.currency_id
             if record.early_discount:
                 date = record._get_last_discount_date_formatted(record.example_date or fields.Date.context_today(record))
@@ -99,6 +120,14 @@ class AccountPaymentTerm(models.Model):
                     date=date,
                 )
 
+            if record.late_payment_charges:
+                date = record._get_latest_late_charges_date_formatted(record.example_date or fields.Date.context_today(record))
+                late_payment_charges_amount = record._get_amount_due_after_charges(record.example_amount, 0.0)
+                record.example_preview_late_payment_charges = _(
+                    "Late Payment Charges: <b>%(amount)s</b> if paid after <b>%(date)s</b>",
+                    amount=formatLang(self.env, late_payment_charges_amount, monetary=True, currency_obj=currency),
+                    date=date,
+                )
             if not record.example_invalid:
                 terms = record._compute_terms(
                     date_ref=record.example_date or fields.Date.context_today(record),
@@ -157,6 +186,13 @@ class AccountPaymentTerm(models.Model):
                 raise ValidationError(_("The Early Payment Discount must be strictly positive."))
             if terms.early_discount and terms.discount_days <= 0:
                 raise ValidationError(_("The Early Payment Discount days must be strictly positive."))
+            if len(terms.line_ids) >1 and terms.late_payment_charges:
+                raise ValidationError(
+                    _("The Late Payment Charges functionality can only be used with payment terms using a single 100% line. "))
+            if terms.late_payment_charges and terms.late_payment_charges_percentage <= 0.0:
+                raise ValidationError(_("The Late Payment Charges must be strictly positive."))
+            if terms.late_payment_charges and terms.late_payment_charges_days < 0:
+                raise ValidationError(_("The Late Payment Charges days must be positive."))
 
     def _compute_terms(self, date_ref, currency, company, tax_amount, tax_amount_currency, sign, untaxed_amount, untaxed_amount_currency):
         """Get the distribution of this payment term.
@@ -247,6 +283,16 @@ class AccountPaymentTerm(models.Model):
         if not date_ref:
             return None
         return format_date(self.env, self._get_last_discount_date(date_ref))
+
+    def _get_latest_late_charges_date(self, date_ref):
+        self.ensure_one()
+        return self.line_ids._get_due_date(date_ref) + relativedelta(days=self.late_payment_charges_days or 0) if self.late_payment_charges and not len(self.line_ids) > 1 else False
+
+    def _get_latest_late_charges_date_formatted(self, date_ref):
+        self.ensure_one()
+        if not date_ref:
+            return None
+        return format_date(self.env, self._get_latest_late_charges_date(date_ref))
 
 class AccountPaymentTermLine(models.Model):
     _name = "account.payment.term.line"

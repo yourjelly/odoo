@@ -244,6 +244,13 @@
                                                         <span t-out="o.invoice_payment_term_id._get_last_discount_date_formatted(o.invoice_date)">2024-01-01</span>
                                                     </td>
                                                 </t>
+                                                <t t-if="o.show_late_payment_charges_details">
+                                                    <td>
+                                                        <span t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                                              t-out="o.invoice_payment_term_id._get_amount_due_after_charges(o.amount_total, o.amount_tax)">30.00</span> due if paid after
+                                                        <span t-out="o.invoice_payment_term_id._get_latest_late_charges_date_formatted(o.invoice_date)">2024-01-01</span>
+                                                    </td>
+                                                </t>
                                                 <t t-if="len(payment_term_details) > 1" t-foreach="payment_term_details" t-as="term">
                                                     <div>
                                                         <span t-out="term_index + 1">1</span> - Installment of
@@ -319,7 +326,7 @@
                     <span t-out="tax_totals['formatted_rounding_amount']">0</span>
                 </td>
             </tr>
-            
+
             <!--Total amount with all taxes-->
             <tr class="border-black o_total">
                 <td><strong>Total</strong></td>
