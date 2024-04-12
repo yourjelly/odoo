@@ -6,6 +6,11 @@ from odoo import _, api, fields, models
 class AccountMove(models.Model):
     _inherit = 'account.move'
 
+    l10n_it_declaration_of_intent_date = fields.Date(
+        string="Date on which Declaration of Intent is applied",
+        compute='_compute_l10n_it_declaration_of_intent_date',
+    )
+
     l10n_it_use_declaration_of_intent = fields.Boolean(
         string="Use Declaration of Intent",
         compute='_compute_l10n_it_use_declaration_of_intent',
@@ -23,6 +28,11 @@ class AccountMove(models.Model):
         compute='_compute_l10n_it_intent_threshold_warning',
     )
 
+    @api.depends('invoice_date')
+    def _compute_l10n_it_declaration_of_intent_date(self):
+        for move in self:
+            move.l10n_it_declaration_of_intent_date = move.invoice_date or fields.Date.context_today(self)
+
     @api.depends('l10n_it_declaration_of_intent_id', 'commercial_partner_id')
     def _compute_l10n_it_use_declaration_of_intent(self):
         for move in self:
@@ -31,13 +41,13 @@ class AccountMove(models.Model):
 
     @api.constrains('l10n_it_declaration_of_intent_id')
     def _check_l10n_it_declaration_of_intent_id(self):
-        for record in self:
-            declaration = record.l10n_it_declaration_of_intent_id
+        for move in self:
+            declaration = move.l10n_it_declaration_of_intent_id
             if not declaration:
                 return
-            partner = record.commercial_partner_id
-            date = record.invoice_date or fields.Date.context_today(self)
-            declaration._check_valid(record.company_id, partner, date, record.currency_id)
+            partner = move.commercial_partner_id
+            date = move.l10n_it_declaration_of_intent_date
+            declaration._check_valid(move.company_id, partner, date, move.currency_id)
 
     def action_open_declaration_of_intent(self):
         self.ensure_one()
@@ -49,17 +59,17 @@ class AccountMove(models.Model):
             'res_id': self.l10n_it_declaration_of_intent_id.id,
         }
 
-    @api.depends('company_id', 'partner_id', 'invoice_date', 'currency_id')
+    @api.depends('company_id', 'partner_id', 'l10n_it_declaration_of_intent_date', 'currency_id')
     def _compute_l10n_it_declaration_of_intent_id(self):
         for move in self:
             if not move.l10n_it_use_declaration_of_intent:
                 move.l10n_it_declaration_of_intent_id = False
                 continue
 
-            partner = move.partner_id.commercial_partner_id
-            date = move.invoice_date or fields.Date.context_today(self)
-            currency = move.currency_id
             company = move.company_id
+            partner = move.partner_id.commercial_partner_id
+            date = move.l10n_it_declaration_of_intent_date
+            currency = move.currency_id
 
             # Avoid a query or changing a manually set declaration of intent
             # (if the declaration is still valid).
@@ -69,19 +79,20 @@ class AccountMove(models.Model):
 
             declaration = self.env['l10n_it.declaration_of_intent']\
                 ._fetch_valid_declaration_of_intent(company, partner, date, currency)
-            if declaration:
-                move.l10n_it_declaration_of_intent_id = declaration
+            move.l10n_it_declaration_of_intent_id = declaration
 
     @api.depends('l10n_it_declaration_of_intent_id', 'move_type', 'state', 'tax_totals')
     def _compute_l10n_it_intent_threshold_warning(self):
         for move in self:
             move.l10n_it_intent_threshold_warning = ''
             declaration = move.l10n_it_declaration_of_intent_id
+
             show_warning = declaration \
                 and move.is_sale_document() \
                 and move.state != 'cancel'
             if not show_warning:
                 continue
+
             updated_remaining = declaration.remaining_amount - move.tax_totals['amount_total']
             move.l10n_it_intent_threshold_warning = declaration._build_threshold_warning_message(move, updated_remaining)
 

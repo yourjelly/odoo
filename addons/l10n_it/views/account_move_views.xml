@@ -45,6 +45,7 @@
             </xpath>
             <xpath expr="//field[@name='fiscal_position_id']" position="before">
                 <field name="l10n_it_use_declaration_of_intent" invisible="True"/>
+                <field name="l10n_it_declaration_of_intent_date" invisible="True"/>
                 <field name="l10n_it_declaration_of_intent_id"
                        invisible="not l10n_it_use_declaration_of_intent"
                        readonly="state != 'draft'"
@@ -53,8 +54,8 @@
                                 ('company_id', '=', company_id),
                                 ('currency_id', '=', currency_id),
                                 ('partner_id', '=', commercial_partner_id),
-                                ('start_date', '&lt;=', invoice_date or today),
-                                ('end_date', '&gt;=', invoice_date or today),
+                                ('start_date', '&lt;=', l10n_it_declaration_of_intent_date),
+                                ('end_date', '&gt;=', l10n_it_declaration_of_intent_date),
                                ]"/>
             </xpath>
         </field>

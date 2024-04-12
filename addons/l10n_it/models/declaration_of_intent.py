@@ -182,13 +182,13 @@ class L10nItDeclarationOfIntent(models.Model):
         self.ensure_one()
         if self.state != 'active':
             raise ValidationError(_("The Declaration of Intent is not active."))
-        if self.company_id != company:
+        if not company or self.company_id != company:
             raise ValidationError(_("The Declaration of Intent belongs to company %s, not %s.", self.company_id.name, company.name))
-        if self.currency_id != currency:
+        if not currency or self.currency_id != currency:
             raise ValidationError(_("The Declaration of Intent uses currency %s, not %s.", self.currency_id.name, currency.name))
-        if self.partner_id != partner:
+        if not partner or self.partner_id != partner:
             raise ValidationError(_("The Declaration of Intent belongs to partner %s, not %s.", self.partner_id.name, partner.name))
-        if self.start_date > date or self.end_date < date:
+        if not date or self.start_date > date or self.end_date < date:
             raise ValidationError(_("The Declaration of Intent is valid from %s to %s, not on %s.", self.start_date, self.end_date, date))
 
     def _is_valid(self, company, partner, date, currency):

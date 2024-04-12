@@ -6,6 +6,11 @@ from odoo import api, fields, models, _
 class SaleOrder(models.Model):
     _inherit = 'sale.order'
 
+    l10n_it_declaration_of_intent_date = fields.Date(
+        string="Date on which Declaration of Intent is applied",
+        compute='_compute_l10n_it_declaration_of_intent_date',
+    )
+
     l10n_it_use_declaration_of_intent = fields.Boolean(
         string="Use Declaration of Intent",
         compute='_compute_l10n_it_use_declaration_of_intent',
@@ -36,13 +41,13 @@ class SaleOrder(models.Model):
 
     @api.constrains('l10n_it_declaration_of_intent_id')
     def _check_l10n_it_declaration_of_intent_id(self):
-        for record in self:
-            declaration = record.l10n_it_declaration_of_intent_id
+        for order in self:
+            declaration = order.l10n_it_declaration_of_intent_id
             if not declaration:
                 return
-            partner = record.partner_id.commercial_partner_id
-            date = record.commitment_date or fields.Date.context_today(self)
-            declaration._check_valid(record.company_id, partner, date, record.currency_id)
+            partner = order.partner_id.commercial_partner_id
+            date = order.l10n_it_declaration_of_intent_date
+            declaration._check_valid(order.company_id, partner, date, order.currency_id)
 
     def action_open_declaration_of_intent(self):
         self.ensure_one()
@@ -54,23 +59,28 @@ class SaleOrder(models.Model):
             'res_id': self.l10n_it_declaration_of_intent_id.id,
         }
 
+    @api.depends('commitment_date')
+    def _compute_l10n_it_declaration_of_intent_date(self):
+        for order in self:
+            order.l10n_it_declaration_of_intent_date = order.commitment_date or fields.Date.context_today(self)
+
     @api.depends('l10n_it_declaration_of_intent_id', 'partner_id.commercial_partner_id')
     def _compute_l10n_it_use_declaration_of_intent(self):
         for order in self:
             order.l10n_it_use_declaration_of_intent = order.l10n_it_declaration_of_intent_id \
                 or order.partner_id.commercial_partner_id.l10n_it_use_declaration_of_intent
 
-    @api.depends('company_id', 'partner_id.commercial_partner_id', 'commitment_date', 'currency_id')
+    @api.depends('company_id', 'partner_id.commercial_partner_id', 'l10n_it_declaration_of_intent_date', 'currency_id')
     def _compute_l10n_it_declaration_of_intent_id(self):
         for order in self:
             if not order.l10n_it_use_declaration_of_intent:
                 order.l10n_it_declaration_of_intent_id = False
                 continue
 
-            partner = order.partner_id.commercial_partner_id
-            date = order.commitment_date or fields.Date.context_today(self)
-            currency = order.currency_id
             company = order.company_id
+            partner = order.partner_id.commercial_partner_id
+            date = order.l10n_it_declaration_of_intent_date
+            currency = order.currency_id
 
             # Avoid a query or changing a manually set declaration of intent
             # (if the declaration is still valid).
@@ -80,17 +90,18 @@ class SaleOrder(models.Model):
 
             declaration = self.env['l10n_it.declaration_of_intent']\
                 ._fetch_valid_declaration_of_intent(company, partner, date, currency)
-            if declaration:
-                order.l10n_it_declaration_of_intent_id = declaration
+            order.l10n_it_declaration_of_intent_id = declaration
 
     @api.depends('l10n_it_declaration_of_intent_id', 'l10n_it_declaration_of_intent_id.remaining_amount', 'state', 'amount_to_invoice')
     def _compute_l10n_it_intent_threshold_warning(self):
         for order in self:
             order.l10n_it_intent_threshold_warning = ''
             declaration = order.l10n_it_declaration_of_intent_id
+
             show_warning = declaration and order.state != 'cancelled'
             if not show_warning:
                 continue
+
             updated_remaining = declaration.remaining_amount - order.amount_to_invoice
             order.l10n_it_intent_threshold_warning = declaration._build_threshold_warning_message(order, updated_remaining)
 
