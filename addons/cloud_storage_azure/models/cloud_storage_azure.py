@@ -2,13 +2,14 @@
 
 import re
 import requests
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from urllib.parse import unquote, quote
 
 from odoo import models, fields, _
 from odoo.exceptions import ValidationError
+from odoo.tools import ormcache
 
-from .cloud_storage_azure_utils import generate_blob_sas
+from .cloud_storage_azure_utils import generate_blob_sas, get_user_delegation_key
 
 
 class CloudStorageAzure(models.AbstractModel):
@@ -26,38 +27,39 @@ class CloudStorageAzure(models.AbstractModel):
             'blob_name': unquote(match.group('blob_name')),
         }
 
-    def _get_connection_string(self):
-        return self.env['ir.config_parameter'].sudo().get_param('cloud_storage_azure_connection_string')
+    def _get_user_delegation_key(self):
+        """ re-generate user_delegation_key every week which won't expire before regeneration """
+        today = date.today()
+        return self._generate_user_delegation_key(today - timedelta(days=today.weekday()))
 
-    def _get_connection_settings(self):
-        conn_str = self._get_connection_string()
-        # code copied from azure.storage.blob._shared.base_client.parse_connection_str
-        conn_str.rstrip(";")
-        conn_settings = [s.split("=", 1) for s in conn_str.split(";")]
-        if any(len(tup) != 2 for tup in conn_settings):
-            raise ValueError("Connection string is either blank or malformed.")
-        conn_settings = {key.upper(): val for key, val in conn_settings}
-        return conn_settings
+    @ormcache('unique_key')
+    def _generate_user_delegation_key(self, unique_key):
+        key_start_time = datetime.utcnow()
+        key_expiry_time = key_start_time + timedelta(days=7)
+        return get_user_delegation_key(
+            tenant_id=self.env['ir.config_parameter'].sudo().get_param('cloud_storage_azure_tenant_id'),
+            client_id=self.env['ir.config_parameter'].sudo().get_param('cloud_storage_azure_client_id'),
+            client_secret=self.env['ir.config_parameter'].sudo().get_param('cloud_storage_azure_client_secret'),
+            account_name=self.env['ir.config_parameter'].sudo().get_param('cloud_storage_azure_account_name'),
+            key_start_time=key_start_time,
+            key_expiry_time=key_expiry_time,
+        )
 
     def _generate_sas_url(self, container_name, blob_name, **kwargs):
-        connection_settings = self._get_connection_settings()
+        account_name = self.env['ir.config_parameter'].sudo().get_param('cloud_storage_azure_account_name')
         if 'expiry' not in kwargs:
             kwargs['expiry'] = datetime.utcnow() + timedelta(seconds=300)
         if 'permission' not in kwargs:
             kwargs['permission'] = 'r'
         token = generate_blob_sas(
-            account_name=connection_settings['ACCOUNTNAME'],
-            account_key=connection_settings['ACCOUNTKEY'],
+            account_name=account_name,
+            user_delegation_key=self._get_user_delegation_key(),
             container_name=container_name,
             blob_name=blob_name,
             **kwargs
         )
 
-        return (
-            f"{connection_settings['DEFAULTENDPOINTSPROTOCOL']}://"
-            f"{connection_settings['ACCOUNTNAME']}.blob.{connection_settings['ENDPOINTSUFFIX']}/"
-            f"{container_name}/{quote(blob_name)}?{token}"
-        )
+        return f"https://{account_name}.blob.core.windows.net/{container_name}/{quote(blob_name)}?{token}"
 
     # OVERRIDES
     def _setup(self):
@@ -77,27 +79,28 @@ class CloudStorageAzure(models.AbstractModel):
 
         # promise the sas url can be matched correctly
         url = self._generate_sas_url(container_name, blob_name)
-        connection_settings = self._get_connection_settings()
         try:
             info = self._get_info_from_url(url)
-            assert info['account_name'] == connection_settings['ACCOUNTNAME']
+            assert info['account_name'] == self.env['ir.config_parameter'].sudo().get_param('cloud_storage_azure_account_name')
             assert info['container_name'] == container_name
             assert info['blob_name'] == blob_name
         except Exception as e:
             raise ValidationError(_('The sas url cannot be matched correctly. %s', str(e)))
 
     def _is_configured(self):
-        return bool(self.env['ir.config_parameter'].sudo().get_param('cloud_storage_azure_connection_string'))
+        return all((
+            self.env['ir.config_parameter'].sudo().get_param('cloud_storage_azure_container_name'),
+            self.env['ir.config_parameter'].sudo().get_param('cloud_storage_azure_account_name'),
+            self.env['ir.config_parameter'].sudo().get_param('cloud_storage_azure_tenant_id'),
+            self.env['ir.config_parameter'].sudo().get_param('cloud_storage_azure_client_id'),
+            self.env['ir.config_parameter'].sudo().get_param('cloud_storage_azure_client_secret'),
+        ))
 
     def _generate_url(self, attachment):
+        account_name = self.env['ir.config_parameter'].sudo().get_param('cloud_storage_azure_account_name')
         container_name = self.env['ir.config_parameter'].sudo().get_param('cloud_storage_azure_container_name')
         blob_name = self._generate_blob_name(attachment)
-        connection_settings = self._get_connection_settings()
-        return (
-            f"{connection_settings['DEFAULTENDPOINTSPROTOCOL']}://"
-            f"{connection_settings['ACCOUNTNAME']}.blob.{connection_settings['ENDPOINTSUFFIX']}/"
-            f"{container_name}/{quote(blob_name)}"
-        )
+        return f"https://{account_name}.blob.core.windows.net/{container_name}/{quote(blob_name)}"
 
     def _generate_download_info(self, attachment):
         info = self._get_info_from_url(attachment.url)

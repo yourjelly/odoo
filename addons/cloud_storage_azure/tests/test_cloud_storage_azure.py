@@ -5,8 +5,21 @@ from unittest.mock import patch
 
 from odoo.tests.common import TransactionCase
 
+from ..models.cloud_storage_azure_utils import UserDelegationKey
 
-DUMMY_AZURE_CONNECTION_STRING = r'''DefaultEndpointsProtocol=https;AccountName=accountname;AccountKey=1234;EndpointSuffix=core.windows.net'''
+DUMMY_AZURE_ACCOUNT_NAME = 'accountname'
+DUMMY_AZURE_TENANT_ID = 'tenantid'
+DUMMY_AZURE_CLIENT_ID = 'clientid'
+DUMMY_AZURE_CLIENT_SECRET = 'secret'
+
+DUMMY_USER_DELEGATION_KEY = UserDelegationKey()
+DUMMY_USER_DELEGATION_KEY.signed_oid = 'signed_oid'
+DUMMY_USER_DELEGATION_KEY.signed_tid = 'signed_tid'
+DUMMY_USER_DELEGATION_KEY.signed_start = '2024-04-12T08:57:35Z'
+DUMMY_USER_DELEGATION_KEY.signed_expiry = '2024-04-13T09:57:35Z'
+DUMMY_USER_DELEGATION_KEY.signed_service = 'b'
+DUMMY_USER_DELEGATION_KEY.signed_version = '2023-11-03'
+DUMMY_USER_DELEGATION_KEY.value = 'KEHG9q+1y6XGLHkDNv3pR2DhmbOfxeTf5KAJ5/ssNpU='
 
 
 class TestCloudStorageAzure(TransactionCase):
@@ -15,9 +28,11 @@ class TestCloudStorageAzure(TransactionCase):
         super().setUp()
         self.container_name = 'container_name'
         self.env['ir.config_parameter'].set_param('ir_attachment.cloud_storage', 'cloud.storage.azure')
-        self.env['ir.config_parameter'].set_param(
-            'cloud_storage_azure_connection_string', DUMMY_AZURE_CONNECTION_STRING
-        )
+        self.env['ir.config_parameter'].set_param('cloud_storage_azure_account_name', DUMMY_AZURE_ACCOUNT_NAME)
+        self.env['ir.config_parameter'].set_param('cloud_storage_azure_tenant_id', DUMMY_AZURE_TENANT_ID)
+        self.env['ir.config_parameter'].set_param('cloud_storage_azure_client_id', DUMMY_AZURE_CLIENT_ID)
+        self.env['ir.config_parameter'].set_param('cloud_storage_azure_client_secret', DUMMY_AZURE_CLIENT_SECRET)
+
         self.env['ir.config_parameter'].set_param('cloud_storage_azure_container_name', self.container_name)
 
         # create test cloud attachment like route "/mail/attachment/upload"
@@ -33,7 +48,8 @@ class TestCloudStorageAzure(TransactionCase):
         }])
         self.attachments._post_add_create(cloud_storage=True)
 
-    def test_cloud_storage_azure_unlink_success(self):
+    @patch('odoo.addons.cloud_storage_azure.models.cloud_storage_azure.CloudStorageAzure._generate_user_delegation_key', return_value=DUMMY_USER_DELEGATION_KEY)
+    def test_cloud_storage_azure_unlink_success(self, _generate_user_delegation_key):
         self.assertFalse(self.env['cloud.storage.blob.to.delete'].search_count([]))
         self.attachments.unlink()
         self.assertFalse(self.attachments.exists())
@@ -53,7 +69,8 @@ class TestCloudStorageAzure(TransactionCase):
         self.assertEqual(delete_num, 2, '2 requests should be sent to the azure api')
         self.assertFalse(self.env['cloud.storage.blob.to.delete'].search_count([]), 'all blobs should be deleted')
 
-    def test_cloud_storage_azure_unlink_notfound(self):
+    @patch('odoo.addons.cloud_storage_azure.models.cloud_storage_azure.CloudStorageAzure._generate_user_delegation_key', return_value=DUMMY_USER_DELEGATION_KEY)
+    def test_cloud_storage_azure_unlink_notfound(self, _generate_user_delegation_key):
         # the attachment has been deleted in the cloud storage
         # or the attachment has never been uploaded to the cloud storage
         self.assertFalse(self.env['cloud.storage.blob.to.delete'].search([]))
@@ -76,7 +93,8 @@ class TestCloudStorageAzure(TransactionCase):
         # Not Found exception should be ignored and all cloud.storage.blob.to.delete should be deleted
         self.assertFalse(self.env['cloud.storage.blob.to.delete'].search_count([]), 'all blobs should be deleted')
 
-    def test_cloud_storage_azure_unlink_forbidden_blob(self):
+    @patch('odoo.addons.cloud_storage_azure.models.cloud_storage_azure.CloudStorageAzure._generate_user_delegation_key', return_value=DUMMY_USER_DELEGATION_KEY)
+    def test_cloud_storage_azure_unlink_forbidden_blob(self, _generate_user_delegation_key):
         # current azure connection string cannot delete blobs in the container
         self.assertFalse(self.env['cloud.storage.blob.to.delete'].search([]))
         self.attachments.unlink()
@@ -104,7 +122,8 @@ class TestCloudStorageAzure(TransactionCase):
         self.assertEqual(blob.state, 'failed')
         self.assertEqual(blob.error_message, "Error: forbidden")
 
-    def test_cloud_storage_azure_unlink_unknown_exception(self):
+    @patch('odoo.addons.cloud_storage_azure.models.cloud_storage_azure.CloudStorageAzure._generate_user_delegation_key', return_value=DUMMY_USER_DELEGATION_KEY)
+    def test_cloud_storage_azure_unlink_unknown_exception(self, _generate_user_delegation_key):
         # current azure connection string cannot delete blobs for unknown reason
         self.assertFalse(self.env['cloud.storage.blob.to.delete'].search([]))
         self.attachments.unlink()
@@ -132,7 +151,8 @@ class TestCloudStorageAzure(TransactionCase):
         self.assertEqual(blob.state, 'failed')
         self.assertEqual(blob.error_message, "Error: unknown")
 
-    def test_cloud_storage_azure_unlink_url_shared_attachments(self):
+    @patch('odoo.addons.cloud_storage_azure.models.cloud_storage_azure.CloudStorageAzure._generate_user_delegation_key', return_value=DUMMY_USER_DELEGATION_KEY)
+    def test_cloud_storage_azure_unlink_url_shared_attachments(self, _generate_user_delegation_key):
         self.attachments[0].copy()
         self.assertFalse(self.env['cloud.storage.blob.to.delete'].search_count([]))
         self.attachments.unlink()

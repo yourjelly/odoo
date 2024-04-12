@@ -11,8 +11,14 @@
                     <label for="cloud_storage_azure_container_name" class="o_light_label mr8"/>
                     <field name="cloud_storage_azure_container_name"/>
                     <br/>
-                    <label for="cloud_storage_azure_connection_string" class="o_light_label mr8"/>
-                    <field name="cloud_storage_azure_connection_string"/>
+                    <label for="cloud_storage_azure_account_name" class="o_light_label mr8"/>
+                    <field name="cloud_storage_azure_account_name"/>
+                    <label for="cloud_storage_azure_tenant_id" class="o_light_label mr8"/>
+                    <field name="cloud_storage_azure_tenant_id"/>
+                    <label for="cloud_storage_azure_client_id" class="o_light_label mr8"/>
+                    <field name="cloud_storage_azure_client_id"/>
+                    <label for="cloud_storage_azure_client_secret" class="o_light_label mr8"/>
+                    <field name="cloud_storage_azure_client_secret"/>
                 </div>
             </xpath>
         </field>
