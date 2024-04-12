@@ -89,6 +89,7 @@ options.registry.StepsConnector = options.Class.extend({
      * @private
      */
     _reloadConnectors() {
+
         const possibleTypes = this._requestUserValueWidgets('connector_type')[0].getMethodsParams().optionsPossibleValues.selectClass;
         const type = possibleTypes.find(possibleType => possibleType && this.$target[0].classList.contains(possibleType)) || '';
         // As the connectors are only visible in desktop, we can ignore the
@@ -109,14 +110,19 @@ options.registry.StepsConnector = options.Class.extend({
             const nextStepPaddingTop = this._getClassSuffixedInteger(stepsEls[i + 1], 'pt');
 
             connectorEl.style.left = `calc(50% + ${stepMainElementRect.width / 2}px)`;
-            connectorEl.style.height = `${stepMainElementRect.height}px`;
+            const diff = stepMainElementRect.top - nextStepMainElementRect.top;
+            connectorEl.style.height = `${stepMainElementRect.height+Math.abs(diff)}px`;
             connectorEl.style.width = `calc(${100 * (stepSize / 2 + nextStepOffset + nextStepSize / 2) / stepSize}% - ${stepMainElementRect.width / 2}px - ${nextStepMainElementRect.width / 2}px)`;
+
+            if(diff<0){
+                connectorEl.style.marginBottom = (-diff)+30 +'px';
+            }else{
+                connectorEl.style.marginTop = (-diff)+30 +'px';
+            }
 
             const isTheLastColOfRow = nbBootstrapCols <
                 colsInRow + stepSize + stepOffset + nextStepSize + nextStepOffset;
-            const isNextStepTooLow = stepMainElementRect.height + stepPaddingTop <
-                nextStepPaddingTop;
-            connectorEl.classList.toggle('d-none', isTheLastColOfRow || isNextStepTooLow);
+            connectorEl.classList.toggle('d-none', isTheLastColOfRow)
             colsInRow = isTheLastColOfRow ? 0 : colsInRow + stepSize + stepOffset;
             // When we are mobile view, the connector is not visible, here we
             // display it quickly just to have its size.
@@ -124,7 +130,7 @@ options.registry.StepsConnector = options.Class.extend({
             const {height, width} = connectorEl.getBoundingClientRect();
             connectorEl.style.removeProperty('display');
             connectorEl.setAttribute('viewBox', `0 0 ${width} ${height}`);
-            connectorEl.querySelector('path').setAttribute('d', this._getPath(type, width, height));
+            connectorEl.querySelector('path').setAttribute('d', this._getPath(type, width, height,diff));
         }
     },
     /**
@@ -175,18 +181,35 @@ options.registry.StepsConnector = options.Class.extend({
      * @param {integer} height
      * @returns {string}
      */
-    _getPath(type, width, height) {
+    _getPath(type, width, height,diff) {
         const hHeight = height / 2;
+        const count = Math.abs(diff)/8;
         switch (type) {
             case 's_process_steps_connector_line': {
-                return `M 0 ${hHeight} L ${width} ${hHeight}`;
+                if(diff >= 0){
+                    return `M 0 ${diff+40} L ${width} ${40}`;
+                }else{
+                    return `M 0 ${40} L ${width} ${40-diff}`;
+                }
             }
             case 's_process_steps_connector_arrow': {
-                return `M ${0.05 * width} ${hHeight} L ${0.95 * width - 6} ${hHeight}`;
+                if(diff >= 0){
+                    return `M ${0.05 * width} ${diff+40-count*1.5} L ${0.95 * width - 6} ${40+count*1.5}`;
+                }else{
+                    return `M ${0.05 * width} ${40+count*1.5} L ${0.95 * width - 6} ${-diff+40-count*1.5}`;
+                }
             }
             case 's_process_steps_connector_curved_arrow': {
-                return `M ${0.05 * width} ${hHeight * 1.2} Q ${width / 2} ${hHeight * 1.8}, ${0.95 * width - 6} ${hHeight * 1.2}`;
+                if(diff > 0){
+                    return `M ${0.05 * width} ${diff+40} Q ${width*0.75} ${height*0.75},  ${(0.5 * width - 6)} ${hHeight} T ${0.95 * width - 6} ${40}`;
+                }else{
+                    return `M ${0.05 * width} ${40} Q ${width*0.75} ${height*0.005},  ${(0.5 * width - 6)} ${hHeight} T ${0.95 * width - 6} ${-diff+40}`;
+                }
             }
+            //  T ${0.95 * width - 6} ${-diff+40}
+            // case 's_process_steps_connector_curved_arrow': {
+            //     return `M ${0.05 * width} ${hHeight * 1.2} Q ${width / 2} ${hHeight * 1.8}, ${0.95 * width - 6} ${hHeight * 1.2}`;
+            // }
         }
         return '';
     },
