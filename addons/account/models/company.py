@@ -96,6 +96,7 @@ class ResCompany(models.Model):
     bank_journal_ids = fields.One2many('account.journal', 'company_id', domain=[('type', '=', 'bank')], string='Bank Journals')
     incoterm_id = fields.Many2one('account.incoterms', string='Default incoterm',
         help='International Commercial Terms are a series of predefined commercial terms used in international transactions.')
+    account_lpc_product_id = fields.Many2one('product.product', store=True)
 
     qr_code = fields.Boolean(string='Display QR-code on invoices')
 

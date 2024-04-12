@@ -59,6 +59,8 @@
                                    invisible="not can_group_payments"/>
                         </group>
                         <group name="group2">
+                            <field name="total_amount_before_lpc" string='Amount w/o penalty' invisible='not late_payment_charges_mode'/>
+                            <field name="lpc_penalty" string='Penalty' invisible='not late_payment_charges_mode'/>
                             <label for="amount"
                                    invisible="not can_edit_wizard or can_group_payments and not group_payment"/>
                             <div name="amount_div" class="o_row"
@@ -69,8 +71,6 @@
                                        options="{'no_create': True, 'no_open': True}"
                                        groups="base.group_multi_currency"/>
                             </div>
-                            <field name="lpc_penalty" string='Penalty' invisible='not late_payment_charges_mode'/>
-                            <field name="total_amount_after_lpc" string='Total' invisible='not late_payment_charges_mode'/>
                             <field name="coa_for_lpc_id" invisible='lpc_product_id or not late_payment_charges_mode'/>
                             <field name="payment_date"/>
                             <field name="communication"

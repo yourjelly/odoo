@@ -186,7 +186,7 @@ class AccountPaymentTerm(models.Model):
                 raise ValidationError(_("The Early Payment Discount must be strictly positive."))
             if terms.early_discount and terms.discount_days <= 0:
                 raise ValidationError(_("The Early Payment Discount days must be strictly positive."))
-            if len(terms.line_ids) >1 and terms.late_payment_charges:
+            if len(terms.line_ids) > 1 and terms.late_payment_charges:
                 raise ValidationError(
                     _("The Late Payment Charges functionality can only be used with payment terms using a single 100% line. "))
             if terms.late_payment_charges and terms.late_payment_charges_percentage <= 0.0:
