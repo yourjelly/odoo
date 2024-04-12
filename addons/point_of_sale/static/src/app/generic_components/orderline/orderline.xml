@@ -9,16 +9,18 @@
                     <t t-slot="product-name"/>
                 </div>
                 <div class="product-price d-inline-block text-end price fw-bolder">
-                    <t t-if="line.price === 'free'">
-                        Free
+                    <t t-if="!line.is_combo">
+                        <t t-if="line.price === 'free'">
+                            Free
+                        </t>
+                        <t t-else="" t-esc="line.price"/>
                     </t>
-                    <t t-else="" t-esc="line.price"/>
                 </div>
             </div>
             <ul class="info-list ms-2">
                 <li class="price-per-unit">
                     <em t-esc="line.qty" class="qty fst-normal fw-bolder me-1" /> <t t-if="line.unit" t-esc="line.unit" /> 
-                    <t t-if="line.price !== 0">
+                    <t t-if="line.price !== 0 and !line.is_combo">
                         x <s t-esc="line.oldUnitPrice" t-if="line.oldUnitPrice" /> 
                         <t t-esc="line.unitPrice" /> <span t-if="line.unit"> / <t t-esc="line.unit" /></span>
                     </t>

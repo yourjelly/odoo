@@ -181,7 +181,17 @@ export class Product extends PosModel {
                 return;
             }
         }
-        if (this.combo_ids.length) {
+        if (this.combo_ids.length && this.is_combo_with_only_one_option) {
+            for (const combo_id of this.combo_ids) {
+                const combo = this.pos.db.combo_by_id[combo_id];
+                for (const combo_line_id of combo.combo_line_ids) {
+                    const combo_line = this.pos.db.combo_line_by_id[combo_line_id];
+                    comboLines.push(combo_line);
+                }
+            }
+        }
+
+        if (this.combo_ids.length && !this.is_combo_with_only_one_option) {
             const { confirmed, payload } = await this.env.services.popup.add(
                 ComboConfiguratorPopup,
                 { product: this, keepBehind: true }
@@ -1138,6 +1148,7 @@ export class Orderline extends PosModel {
             price_without_discount: this.env.utils.formatCurrency(
                 this.getUnitDisplayPriceBeforeDiscount()
             ),
+            is_combo: this.product.combo_ids.length > 0,
             attributes: this.attribute_value_ids
                 ? this.findAttribute(this.attribute_value_ids, this.custom_attribute_value_ids)
                 : [],
@@ -2185,6 +2196,7 @@ export class Order extends PosModel {
                     comboParent,
                     comboLine: line.comboLine,
                     attribute_value_ids: line.attribute_value_ids,
+                    quantity: line.comboLine.quantity,
                 }
             );
         }

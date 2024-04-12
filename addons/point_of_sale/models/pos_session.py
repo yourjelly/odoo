@@ -2018,12 +2018,13 @@ class PosSession(models.Model):
         return {'search_params': {'fields': ['id', 'name', 'combo_line_ids', 'base_price']}, 'ids': combo_ids}
 
     def _get_pos_ui_pos_combo(self, params):
-        return self.env['pos.combo'].browse(params['ids']).read(**params['search_params'])
+        # TODO: something smarter
+        return self.env['pos.combo'].search([]).read(**params['search_params'])
 
     def _loader_params_pos_combo_line(self):
         combo_ids = self._context.get('loaded_data')['pos.combo']
         combo_line_ids = set().union(*[combo.get('combo_line_ids') for combo in combo_ids])
-        return {'search_params': {'fields': ['id', 'product_id', 'combo_price', 'combo_id']}, 'ids': combo_line_ids}
+        return {'search_params': {'fields': ['id', 'product_id', 'combo_price', 'combo_id', 'quantity']}, 'ids': combo_line_ids}
 
     def _get_pos_ui_pos_combo_line(self, params):
         return self.env['pos.combo.line'].browse(params['ids']).read(**params['search_params'])
@@ -2036,6 +2037,7 @@ class PosSession(models.Model):
                     'display_name', 'lst_price', 'standard_price', 'categ_id', 'pos_categ_ids', 'taxes_id', 'barcode',
                     'default_code', 'to_weight', 'uom_id', 'description_sale', 'description', 'product_tmpl_id', 'tracking',
                     'write_date', 'available_in_pos', 'attribute_line_ids', 'active', 'image_128', 'combo_ids',
+                    'is_combo_with_only_one_option',
                 ],
                 'order': 'sequence,default_code,name',
             },

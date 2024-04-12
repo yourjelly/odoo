@@ -22,6 +22,16 @@ class ProductTemplate(models.Model):
     type = fields.Selection(selection_add=[
         ('combo', 'Combo')
     ], ondelete={'combo': 'set consu'})
+    is_combo_with_only_one_option = fields.Boolean(string='Combo with only one option', compute='_compute_is_combo_with_only_one_option')
+
+    @api.depends('combo_ids.combo_line_ids')
+    def _compute_is_combo_with_only_one_option(self):
+        # TODO: check if it works properly
+        for template in self:
+            if template.detailed_type == 'combo':
+                template.is_combo_with_only_one_option = all(len(combo.combo_line_ids) == 1 for combo in template.combo_ids)
+            else:
+                template.is_combo_with_only_one_option = False
 
     @api.ondelete(at_uninstall=False)
     def _unlink_except_open_session(self):
