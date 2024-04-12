@@ -41,16 +41,34 @@ export class DiscussClientAction extends Component {
      * @param {Props} props
      */
     async restoreDiscussThread(props) {
+        const { context, params } = props.action;
+        const resId = context.resId || params.resId;
         const id =
-            props.action.context.active_id ??
-            props.action.params?.active_id ??
-            this.store.discuss.thread?.localId ??
-            this.store.discuss.inbox.id;
-        const model = id < 0 ? "mail.box" : "discuss.channel";
+            resId ??
+            props.action.active_id ??
+            this.store.discuss.thread?.id ??
+            this.store.discuss.inbox.localId;
+        const model = resId
+            ? "mail.box"
+            : props.action.active_id
+            ? "discuss.channel"
+            : this.store.discuss.thread?.model ?? "mail.box";
         const activeThread = await this.store.Thread.getOrFetch({ model, id });
         if (activeThread && activeThread.notEq(this.store.discuss.thread)) {
             this.threadService.setDiscussThread(activeThread, false);
         }
+        // let model = this.store.discuss.thread?.model ??
+        // console.warn(props);
+        // let id =
+        //     props.action.context.active_id ??
+        //     props.action.params?.active_id;
+        //     // this.store.discuss.thread?.localId ??
+        //     // this.store.discuss.inbox.id;
+        // const model = id < 0 ? "mail.box" : "discuss.channel";
+        // const activeThread = await this.store.Thread.getOrFetch({ model, id });
+        // if (activeThread && activeThread.notEq(this.store.discuss.thread)) {
+        //     this.threadService.setDiscussThread(activeThread, false);
+        // }
         this.store.discuss.hasRestoredThread = true;
     }
 }

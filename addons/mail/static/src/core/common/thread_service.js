@@ -558,7 +558,10 @@ export class ThreadService {
                 ? "chat"
                 : "channel";
         if (pushState) {
-            router.pushState({ active_id: thread.id });
+            router.pushState({
+                active_id: thread.model === "discuss.channel" ? thread.id : null,
+                resId: thread.model === "discuss.channel" ? null : thread.id,
+            });
         }
     }
 

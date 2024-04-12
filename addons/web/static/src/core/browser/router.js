@@ -169,7 +169,6 @@ export function urlToState(urlObj) {
     }
 
     const [prefix, ...splitPath] = urlObj.pathname.split("/").filter(Boolean);
-
     if (prefix === "odoo") {
         const actionParts = [...splitPath.entries()].filter(
             ([_, part]) => !isNumeric(part) && part !== "new"
