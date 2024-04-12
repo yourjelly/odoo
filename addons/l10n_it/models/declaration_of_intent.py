@@ -218,6 +218,11 @@ class L10nItDeclarationOfIntent(models.Model):
             ('remaining_amount', '>', 0),
         ], limit=1)
 
+    @api.ondelete(at_uninstall=False)
+    def _unlink_except_linked_to_invoice(self):
+        if self.env['account.move'].search_count([('l10n_it_declaration_of_intent_id', 'in', self.ids)], limit=1):
+            raise UserError(_('You cannot delete the Declarations of Intent "%s". At least one of them is used on an Invoice already.', ', '.join(d.display_name for d in self)))
+
     def action_validate(self):
         """ Move a 'draft' Declaration of Intent to 'active'.
         """
@@ -244,8 +249,3 @@ class L10nItDeclarationOfIntent(models.Model):
         for record in self:
             if record.state != 'revoked':
                 record.state = 'closed'
-
-    @api.ondelete(at_uninstall=False)
-    def _unlink_except_linked_to_invoice(self):
-        if self.env['account.move'].search_count([('l10n_it_declaration_of_intent_id', 'in', self.ids)], limit=1):
-            raise UserError(_('You cannot delete the Declarations of Intent "%s". At least one of them is used on an Invoice already.', ', '.join(d.display_name for d in self)))

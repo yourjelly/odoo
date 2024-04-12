@@ -1,6 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import _, api, fields, models
+from odoo.exceptions import UserError
 
 
 class AccountMove(models.Model):
@@ -38,26 +39,6 @@ class AccountMove(models.Model):
         for move in self:
             move.l10n_it_use_declaration_of_intent = move.l10n_it_declaration_of_intent_id \
                 or move.commercial_partner_id.l10n_it_use_declaration_of_intent
-
-    @api.constrains('l10n_it_declaration_of_intent_id')
-    def _check_l10n_it_declaration_of_intent_id(self):
-        for move in self:
-            declaration = move.l10n_it_declaration_of_intent_id
-            if not declaration:
-                return
-            partner = move.commercial_partner_id
-            date = move.l10n_it_declaration_of_intent_date
-            declaration._check_valid(move.company_id, partner, date, move.currency_id)
-
-    def action_open_declaration_of_intent(self):
-        self.ensure_one()
-        return {
-            'name': _("Declaration of Intent for %s", self.display_name),
-            'type': 'ir.actions.act_window',
-            'view_mode': 'form',
-            'res_model': 'l10n_it.declaration_of_intent',
-            'res_id': self.l10n_it_declaration_of_intent_id.id,
-        }
 
     @api.depends('company_id', 'partner_id', 'l10n_it_declaration_of_intent_date', 'currency_id')
     def _compute_l10n_it_declaration_of_intent_id(self):
@@ -104,3 +85,29 @@ class AccountMove(models.Model):
                 declaration_fiscal_position = move.company_id._l10n_it_get_declaration_of_intent_fiscal_position()
                 if declaration_fiscal_position:
                     move.fiscal_position_id = declaration_fiscal_position
+
+    def _post(self, soft=True):
+        for record in self.filtered(lambda record: record.l10n_it_declaration_of_intent_id):
+            if not record.currency_id.is_zero(record.amount_tax):
+                raise UserError(_('Invoices using a Declaration of Intent should have a 0 tax amount.'))
+        return super()._post(soft)
+
+    @api.constrains('l10n_it_declaration_of_intent_id')
+    def _check_l10n_it_declaration_of_intent_id(self):
+        for move in self:
+            declaration = move.l10n_it_declaration_of_intent_id
+            if not declaration:
+                return
+            partner = move.commercial_partner_id
+            date = move.l10n_it_declaration_of_intent_date
+            declaration._check_valid(move.company_id, partner, date, move.currency_id)
+
+    def action_open_declaration_of_intent(self):
+        self.ensure_one()
+        return {
+            'name': _("Declaration of Intent for %s", self.display_name),
+            'type': 'ir.actions.act_window',
+            'view_mode': 'form',
+            'res_model': 'l10n_it.declaration_of_intent',
+            'res_id': self.l10n_it_declaration_of_intent_id.id,
+        }
