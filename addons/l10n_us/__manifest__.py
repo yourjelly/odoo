@@ -11,6 +11,7 @@
     'description': """
     """,
     'depends': ['base'],
+    'auto_install': True,
     'data': [
         'data/res_company_data.xml',
         'views/res_partner_bank_views.xml'
