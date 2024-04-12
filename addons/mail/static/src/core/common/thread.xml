@@ -59,7 +59,7 @@
             <div class="o-mail-Thread-empty d-flex flex-column align-items-center justify-content-center text-muted fst-italic h-100" t-att-class="{'p-4': props.showEmptyMessage}">
                 <t t-if="props.thread.isLoaded">
                     <t t-if="props.thread.isEmpty and props.thread.model === 'mail.box'">
-                    <t t-if="props.thread.id === 'inbox' and state.mountedAndLoaded">
+                    <t t-if="props.thread.eq(this.store.discuss.inbox) and state.mountedAndLoaded">
                         <div t-if="store.self.notification_preference !== 'inbox'" class="align-items-center text-center">
                             <h4 class="mb-3 fw-bolder">
                                 Your inbox is empty
@@ -73,13 +73,13 @@
                             New messages appear here.
                         </div>
                     </t>
-                    <t t-if="props.thread.id === 'starred'">
+                    <t t-if="props.thread.eq(store.discuss.starred)">
                         <h4 class="mb-3 fw-bolder">
                             No starred messages
                         </h4>
                         You can mark any message as 'starred', and it shows up in this mailbox.
                     </t>
-                    <t t-if="props.thread.id === 'history'">
+                    <t t-if="props.thread.eq(store.discuss.history)">
                         <img src="/web/static/img/neutral_face.svg" alt="History"/>
                         <h4 class="mb-3 fw-bolder">
                             No history messages

@@ -334,7 +334,7 @@ export class Message extends Component {
         if (!this.props.thread) {
             return false;
         }
-        return this.props.thread.id === "inbox";
+        return this.props.thread.eq(this.store.discuss.inbox);
     }
 
     get translatable() {

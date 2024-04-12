@@ -75,7 +75,7 @@ export class Discuss extends Component {
         useEffect(
             () => {
                 if (
-                    this.thread?.id === "inbox" &&
+                    this.thread?.eq(this.store.discuss.inbox) &&
                     this.prevInboxCounter !== this.store.discuss.inbox.counter &&
                     this.store.discuss.inbox.counter === 0
                 ) {

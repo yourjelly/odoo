@@ -145,7 +145,12 @@ export class ThreadService {
             return "/discuss/channel/messages";
         }
         if (thread.model === "mail.box") {
-            return `/mail/${thread.id}/messages`;
+            const target = thread.eq(this.store.discuss.inbox)
+                ? "inbox"
+                : thread.eq(this.store.discuss.starred)
+                ? "starred"
+                : "history";
+            return `/mail/${target}/messages`;
         }
         return "/mail/thread/messages";
     }
@@ -546,10 +551,6 @@ export class ThreadService {
             pushState = thread.localId !== this.store.discuss.thread?.localId;
         }
         this.store.discuss.thread = thread;
-        const activeId =
-            typeof thread.id === "string"
-                ? `mail.box_${thread.id}`
-                : `discuss.channel_${thread.id}`;
         this.store.discuss.activeTab =
             !this.ui.isSmall || thread.model === "mail.box"
                 ? "main"
@@ -557,7 +558,7 @@ export class ThreadService {
                 ? "chat"
                 : "channel";
         if (pushState) {
-            router.pushState({ active_id: activeId });
+            router.pushState({ active_id: thread.id });
         }
     }
 

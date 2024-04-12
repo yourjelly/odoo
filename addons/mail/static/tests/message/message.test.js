@@ -1583,7 +1583,8 @@ test("Can reply to chatter messages from history", async () => {
         res_partner_id: serverState.partnerId,
     });
     await start();
-    await openDiscuss("mail.box_history");
+    const env = await start();
+    await openDiscuss(env.services["mail.store"].discuss.history.id);
     await contains(".o-mail-Message [title='Reply']");
     await click(".o-mail-Message [title='Reply']");
     await contains("button[title='Full composer']");

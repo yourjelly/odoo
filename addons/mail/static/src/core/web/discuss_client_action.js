@@ -35,29 +35,18 @@ export class DiscussClientAction extends Component {
     }
 
     /**
-     * @param {string} rawActiveId
-     */
-    parseActiveId(rawActiveId) {
-        const [model, id] = rawActiveId.split("_");
-        if (model === "mail.box") {
-            return ["mail.box", id];
-        }
-        return [model, parseInt(id)];
-    }
-
-    /**
      * Restore the discuss thread according to the active_id in the action if
      * necessary.
      *
      * @param {Props} props
      */
     async restoreDiscussThread(props) {
-        const rawActiveId =
+        const id =
             props.action.context.active_id ??
             props.action.params?.active_id ??
-            this.store.Thread.localIdToActiveId(this.store.discuss.thread?.localId) ??
-            "mail.box_inbox";
-        const [model, id] = this.parseActiveId(rawActiveId);
+            this.store.discuss.thread?.localId ??
+            this.store.discuss.inbox.id;
+        const model = id < 0 ? "mail.box" : "discuss.channel";
         const activeThread = await this.store.Thread.getOrFetch({ model, id });
         if (activeThread && activeThread.notEq(this.store.discuss.thread)) {
             this.threadService.setDiscussThread(activeThread, false);

@@ -421,8 +421,8 @@ test("Can reply to history message", async () => {
         res_partner_id: serverState.partnerId,
         is_read: true,
     });
-    await start();
-    await openDiscuss("mail.box_history");
+    const env = await start();
+    await openDiscuss(env.services["mail.store"].discuss.history.id);
     await click("[title='Reply']");
     await contains(".o-mail-Composer-coreHeader", { text: "RandomName" });
     await insertText(".o-mail-Composer-input", "abc");
@@ -778,7 +778,8 @@ test('messages marked as read move to "History" mailbox', async () => {
         },
     ]);
     await start();
-    await openDiscuss("mail.box_history");
+    const env = await start();
+    await openDiscuss(env.services["mail.store"].discuss.history.id);
     await contains("button.o-active", { text: "History" });
     await contains(".o-mail-Thread h4", { text: "No history messages" });
     await click("button", { text: "Inbox" });
@@ -820,8 +821,8 @@ test('mark a single message as read should only move this message to "History" m
             res_partner_id: serverState.partnerId,
         },
     ]);
-    await start();
-    await openDiscuss("mail.box_history");
+    const env = await start();
+    await openDiscuss(env.services["mail.store"].discuss.history.id);
     await contains("button.o-active", { text: "History" });
     await contains(".o-mail-Thread h4", { text: "No history messages" });
     await click("button", { text: "Inbox" });

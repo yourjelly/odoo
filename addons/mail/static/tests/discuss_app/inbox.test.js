@@ -193,7 +193,8 @@ test("show subject of message in history", async () => {
         res_partner_id: serverState.partnerId,
     });
     await start();
-    await openDiscuss("mail.box_history");
+    const env = await start();
+    await openDiscuss(env.services["mail.store"].discuss.history.id);
     await contains(".o-mail-Message", { text: "Subject: Salutations, voyageurnot empty" });
 });
 

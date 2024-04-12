@@ -68,7 +68,7 @@ patch(MockServer.prototype, {
                     inbox: {
                         counter: this._mockResPartner_GetNeedactionCount(user.partner_id),
                         counter_bus_id: bus_last_id,
-                        id: "inbox",
+                        id: 1,
                         model: "mail.box",
                     },
                     starred: {
@@ -76,7 +76,7 @@ patch(MockServer.prototype, {
                             ["starred_partner_ids", "in", user.partner_id],
                         ]).length,
                         counter_bus_id: bus_last_id,
-                        id: "starred",
+                        id: 2,
                         model: "mail.box",
                     },
                 },

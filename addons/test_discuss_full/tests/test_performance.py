@@ -233,14 +233,14 @@ class TestDiscussFullPerformance(HttpCase):
                     "inbox": {
                         "counter": 1,
                         "counter_bus_id": bus_last_id,
-                        "id": "inbox",
+                        "id": -1,
                         "model": "mail.box",
                     },
                     "starred":
                     {
                         "counter": 1,
                         "counter_bus_id": bus_last_id,
-                        "id": "starred",
+                        "id": -2,
                         "model": "mail.box",
                     },
                 },

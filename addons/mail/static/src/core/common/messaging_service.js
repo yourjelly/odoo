@@ -19,18 +19,18 @@ export class Messaging {
         this.orm = services.orm;
         this.isReady = new Deferred();
         this.store.discuss.inbox = {
-            id: "inbox",
+            id: -1,
             model: "mail.box",
             name: _t("Inbox"),
         };
         this.store.discuss.starred = {
-            id: "starred",
+            id: -2,
             model: "mail.box",
             name: _t("Starred"),
             counter: 0,
         };
         this.store.discuss.history = {
-            id: "history",
+            id: -3,
             model: "mail.box",
             name: _t("History"),
             counter: 0,

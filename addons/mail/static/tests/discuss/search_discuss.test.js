@@ -135,8 +135,8 @@ test("Search a message in history", async () => {
         notification_type: "inbox",
         res_partner_id: serverState.partnerId,
     });
-    await start();
-    await openDiscuss("mail.box_history");
+    const env = await start();
+    await openDiscuss(env.services["mail.store"].discuss.history.id);
     await click("[title='Search Messages']");
     await insertText(".o_searchview_input", "message");
     triggerHotkey("Enter");

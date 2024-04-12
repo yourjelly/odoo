@@ -306,7 +306,7 @@ class Users(models.Model):
                     "inbox": {
                         "counter": self.partner_id._get_needaction_count(),
                         "counter_bus_id": bus_last_id,
-                        "id": "inbox",
+                        "id": -1,
                         "model": "mail.box",
                     },
                     "starred": {
@@ -314,7 +314,7 @@ class Users(models.Model):
                             [("starred_partner_ids", "in", self.partner_id.ids)]
                         ),
                         "counter_bus_id": bus_last_id,
-                        "id": "starred",
+                        "id": -2,
                         "model": "mail.box",
                     },
                 },

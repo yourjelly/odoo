@@ -340,5 +340,5 @@ export function isEmail(value) {
  */
 
 export function isNumeric(value) {
-    return Boolean(value?.match(/^\d+$/));
+    return Boolean(value?.match(/^-?\d+$/));
 }

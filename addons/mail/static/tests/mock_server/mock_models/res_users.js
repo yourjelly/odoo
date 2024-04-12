@@ -121,7 +121,7 @@ export class ResUsers extends webModels.ResUsers {
                     inbox: {
                         counter: ResPartner._get_needaction_count(user.partner_id),
                         counter_bus_id: bus_last_id,
-                        id: "inbox",
+                        id: -1,
                         model: "mail.box",
                     },
                     starred: {
@@ -129,7 +129,7 @@ export class ResUsers extends webModels.ResUsers {
                             ["starred_partner_ids", "in", user.partner_id],
                         ]).length,
                         counter_bus_id: bus_last_id,
-                        id: "starred",
+                        id: -2,
                         model: "mail.box",
                     },
                 },

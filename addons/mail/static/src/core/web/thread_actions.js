@@ -7,7 +7,7 @@ import { useService } from "@web/core/utils/hooks";
 threadActionsRegistry
     .add("mark-all-read", {
         condition(component) {
-            return component.thread?.id === "inbox";
+            return component.thread?.eq(component.store.discuss.inbox);
         },
         disabledCondition(component) {
             return component.thread.isEmpty;
@@ -20,7 +20,7 @@ threadActionsRegistry
     })
     .add("unstar-all", {
         condition(component) {
-            return component.thread?.id === "starred";
+            return component.thread?.eq(component.store.discuss.starred);
         },
         disabledCondition(component) {
             return component.thread.isEmpty;

@@ -631,8 +631,8 @@ test("composer: add an attachment in reply to message in history", async () => {
         res_partner_id: serverState.partnerId,
         is_read: true,
     });
-    await start();
-    await openDiscuss("mail.box_history");
+    const env = await start();
+    await openDiscuss(env.services["mail.store"].discuss.history.id);
     await click("[title='Reply']");
     await inputFiles(".o-mail-Composer-coreMain .o_input_file", [
         await createFile({
