@@ -271,9 +271,9 @@ class StockQuant(models.Model):
                 if lot_id:
                     quant = quant.filtered(lambda q: q.lot_id)
                 if quant:
-                    quant = quant[0].sudo()
+                    quant = quant[0]
                 else:
-                    quant = self.sudo().create(vals)
+                    quant = self.create(vals)
                 if auto_apply:
                     quant.write({'inventory_quantity_auto_apply': inventory_quantity})
                 else:
@@ -287,6 +287,17 @@ class StockQuant(models.Model):
                 quants |= quant
                 quant._check_company()
         return quants
+
+    def write(self, vals):
+        """ Override to handle the "inventory mode" and create the inventory move. """
+        allowed_fields = self._get_forbidden_fields_write()
+        if any(field for field in allowed_fields if field in vals.keys()):
+            if any(quant.location_id.usage == 'inventory' for quant in self):
+                # Do nothing when user tries to modify manually a inventory loss
+                return
+            self = self.sudo()
+            raise UserError(_("Quant's editing is restricted, you can't do this operation."))
+        return super().write(vals)
 
     def _read_group_select(self, aggregate_spec, query):
         if aggregate_spec == 'inventory_quantity:sum' and self.env.context.get('inventory_report_mode'):
@@ -310,17 +321,6 @@ class StockQuant(models.Model):
     def _get_forbidden_fields_write(self):
         """ Returns a list of fields user can't edit when he want to edit a quant."""
         return ['product_id', 'location_id', 'lot_id', 'package_id', 'owner_id']
-
-    def write(self, vals):
-        """ Override to handle the "inventory mode" and create the inventory move. """
-        forbidden_fields = self._get_forbidden_fields_write()
-        if any(field for field in forbidden_fields if field in vals.keys()):
-            if any(quant.location_id.usage == 'inventory' for quant in self):
-                # Do nothing when user tries to modify manually a inventory loss
-                return
-            self = self.sudo()
-            raise UserError(_("Quant's editing is restricted, you can't do this operation."))
-        return super(StockQuant, self).write(vals)
 
     @api.ondelete(at_uninstall=False)
     def _unlink_except_wrong_permission(self):
