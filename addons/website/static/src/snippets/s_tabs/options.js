@@ -96,18 +96,16 @@ options.registry.NavTabsStyle = options.Class.extend({
     //--------------------------------------------------------------------------
 
     /**
-     * Set the style of the tabs.
+     * Set card layout to "tabs" style
      *
      * @see this.selectClass for parameters
      */
     setStyle: function (previewMode, widgetValue, params) {
-        const $nav = this.$target.find('.s_tabs_nav:first .nav');
-        const isPills = widgetValue === 'pills';
-        $nav.toggleClass('nav-tabs card-header-tabs', !isPills);
-        $nav.toggleClass('nav-pills', isPills);
-        this.$target.find('.s_tabs_nav:first').toggleClass('card-header', !isPills).toggleClass('mb-3', isPills);
-        this.$target.toggleClass('card', !isPills);
-        this.$target.find('.s_tabs_content:first').toggleClass('card-body', !isPills);
+        const isTabs = widgetValue === 'tabs';
+        this.$target.parents('.s_tabs_main').toggleClass('card', isTabs);
+        this.$target.parent().toggleClass('card-header', isTabs).toggleClass('mb-3', !isTabs);
+        this.$target.toggleClass('card-header-tabs', isTabs);
+        this.$target.parent().siblings('.s_tabs_content').toggleClass('p-3', isTabs);
     },
     /**
      * Horizontal/vertical nav.
@@ -132,11 +130,24 @@ options.registry.NavTabsStyle = options.Class.extend({
      */
     _computeWidgetState: function (methodName, params) {
         switch (methodName) {
-            case 'setStyle':
-                return this.$target.find('.s_tabs_nav:first .nav').hasClass('nav-pills') ? 'pills' : 'tabs';
             case 'setDirection':
                 return this.$target.find('.s_tabs_nav:first .nav').hasClass('flex-column') ? 'vertical' : 'horizontal';
         }
+        return this._super(...arguments);
+    },
+    _computeWidgetVisibility(widgetName, params) {
+        const isFill = !!this.$target[0].querySelector(".nav-fill");
+        const isJustified = this.$target[0].querySelector(".nav-justified");
+        const isVertical = !!this.$target[0].querySelector(".flex-column");
+
+        console.log(isJustified);
+
+        if (widgetName === "alignment_opt") {
+            console.log(!(isFill || isJustified || isVertical));
+            console.log(isFill, isJustified, isVertical);
+            return !(isFill || isJustified || isVertical);
+        }
+
         return this._super(...arguments);
     },
 });
