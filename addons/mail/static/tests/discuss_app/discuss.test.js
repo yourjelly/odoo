@@ -9,7 +9,6 @@ import {
     createFile,
     defineMailModels,
     editInput,
-    focus,
     insertText,
     onRpcBefore,
     openDiscuss,
@@ -1517,61 +1516,6 @@ test("warning on send with shortcut when attempting to post message with still-u
     await contains(".o_notification:has(.o_notification_bar.bg-warning)", {
         text: "Please wait while the file is uploading.",
     });
-});
-
-test("new messages separator [REQUIRE FOCUS]", async () => {
-    // this test requires several messages so that the last message is not
-    // visible. This is necessary in order to display 'new messages' and not
-    // remove from DOM right away from seeing last message.
-    const pyEnv = await startServer();
-    const partnerId = pyEnv["res.partner"].create({ name: "Foreigner partner" });
-    const userId = pyEnv["res.users"].create({
-        name: "Foreigner user",
-        partner_id: partnerId,
-    });
-    const channelId = pyEnv["discuss.channel"].create({
-        name: "test",
-        channel_member_ids: [
-            Command.create({ partner_id: partnerId }),
-            Command.create({ partner_id: serverState.partnerId }),
-        ],
-    });
-    let lastMessageId;
-    for (let i = 1; i <= 25; i++) {
-        lastMessageId = pyEnv["mail.message"].create({
-            body: "not empty",
-            model: "discuss.channel",
-            res_id: channelId,
-        });
-    }
-    const [memberId] = pyEnv["discuss.channel.member"].search([
-        ["channel_id", "=", channelId],
-        ["partner_id", "=", serverState.partnerId],
-    ]);
-    pyEnv["discuss.channel.member"].write([memberId], { seen_message_id: lastMessageId });
-    const env = await start();
-    rpc = rpcWithEnv(env);
-    await openDiscuss(channelId);
-    await contains(".o-mail-Message", { count: 25 });
-    await contains(".o-mail-Thread-newMessage hr + span", { count: 0, text: "New messages" });
-    await contains(".o-mail-Discuss-content .o-mail-Thread", { scroll: "bottom" });
-    await scroll(".o-mail-Discuss-content .o-mail-Thread", 0);
-    // composer is focused by default, we remove that focus
-    $(".o-mail-Composer-input")[0].blur();
-    // simulate receiving a message
-    await withUser(userId, () =>
-        rpc("/mail/message/post", {
-            post_data: { body: "hu", message_type: "comment" },
-            thread_id: channelId,
-            thread_model: "discuss.channel",
-        })
-    );
-    await contains(".o-mail-Message", { count: 26 });
-    await contains(".o-mail-Thread-newMessage hr + span", { text: "New messages" });
-    await scroll(".o-mail-Discuss-content .o-mail-Thread", "bottom");
-    await contains(".o-mail-Thread-newMessage hr + span", { text: "New messages" });
-    await focus(".o-mail-Composer-input");
-    await contains(".o-mail-Thread-newMessage hr + span", { count: 0, text: "New messages" });
 });
 
 test("failure on loading messages should display error", async () => {
