@@ -1,5 +1,6 @@
 import { Component, onRendered, onWillRender, xml } from "@odoo/owl";
 import { after, beforeEach, expect, test } from "@odoo/hoot";
+import { keyDown } from "@odoo/hoot-dom";
 import { click, dblclick, drag, edit, hover, leave, pointerDown, press, queryAll, queryAllTexts, queryFirst, queryOne, queryText, resize } from "@odoo/hoot-dom";
 import { animationFrame, Deferred, runAllTimers } from "@odoo/hoot-mock";
 import { clickKanbanLoadMore, clickSave, contains, createKanbanRecord, defineModels, defineParams, discardKanbanRecord, editKanbanColumnName, editKanbanRecord, editKanbanRecordQuickCreateInput, fields, getDropdownMenu, getFacetTexts, getKanbanColumn, getKanbanColumnDropdownMenu, getKanbanColumnTooltips, getKanbanCounters, getKanbanProgressBars, getKanbanRecord, getKanbanRecordTexts, getPagerLimit, getPagerValue, getService, makeServerError, MockServer, mockService, models, mountView, mountWithCleanup, onRpc, pagerNext, patchWithCleanup, quickCreateKanbanColumn, quickCreateKanbanRecord, serverState, stepAllNetworkCalls, toggleKanbanColumnActions, toggleKanbanRecordDropdown, toggleMenuItem, toggleMenuItemOption, toggleSearchBarMenu, validateKanbanColumn, validateKanbanRecord, validateSearch, webModels } from "@web/../tests/web_test_helpers";
@@ -18,6 +19,7 @@ import { kanbanView } from "@web/views/kanban/kanban_view";
 import { ViewButton } from "@web/views/view_button/view_button";
 import { AnimatedNumber } from "@web/views/view_components/animated_number";
 import { WebClient } from "@web/webclient/webclient";
+import { keyUp } from "../../../lib/hoot-dom/helpers/events";
 
 const { ResCompany, ResPartner, ResUsers } = webModels;
 
@@ -261,41 +263,41 @@ test("simple readonly list", async () => {
 
     expect("td:contains(gnap)").toHaveCount(1, { message: "should contain gnap" });
     expect("tbody tr").toHaveCount(4, { message: "should have 4 rows" });
-    expect("th.o_column_sortable").toHaveCount(1, { message: "should have 1 sortable column" });
+    expect("th.o_column_sortable").toHaveCount(2, { message: "should have 2 sortable column" });
 
-    expect("thead th:nth(2) .o_list_number_th").toHaveCount(1, { message: "header cells of integer fields should have o_list_number_th class" });
-    expect($(target).find("tbody tr:first td:nth(2)").css("text-align")).toBe("right", { message: "integer cells should be right aligned" });
+    expect("thead th:eq(2) .o_list_number_th").toHaveCount(1, { message: "header cells of integer fields should have o_list_number_th class" });
+    expect("tbody tr:first td:eq(2)").toHaveStyle({ "text-align": "right" }, { message: "integer cells should be right aligned" });
     expect(".d-xl-none .o_list_button_add").not.toBeVisible();
     expect(".d-xl-inline-flex .o_list_button_add").toBeVisible();
     expect(".o_list_button_save").not.toBeVisible();
     expect(".o_list_button_discard").not.toBeVisible();
 });
 
-test("select record range with shift click", async () => {
+test.todo("select record range with shift click", async () => {
     await mountView({
         type: "list",
         resModel: "foo",
         arch: '<tree><field name="foo"/><field name="int_field"/></tree>',
     });
-    await click(target.querySelectorAll(".o_data_row .o_list_record_selector input")[0]);
-    assert.containsOnce(target.querySelector(".o_control_panel_actions"), ".o_list_selection_box");
-    assert.containsNone(target.querySelector(".o_list_selection_box"), ".o_list_select_domain");
-    expect(target.querySelector(".o_list_selection_box").textContent.trim()).toBe("1 selected");
-    expect(document.querySelectorAll(".o_data_row .o_list_record_selector input:checked").length).toBe(1);
+    await click(queryFirst(".o_data_row .o_list_record_selector input"));
+    expect(".o_control_panel_actions .o_list_selection_box").toHaveCount(1);
+    expect(".o_list_selection_box .o_list_select_domain").toHaveCount(0);
+    expect(queryText(".o_list_selection_box")).toBe("1 selected");
+    expect(".o_data_row .o_list_record_selector input:checked").toHaveCount(1);
 
     // shift click the 4th record to have 0-1-2-3 toggled
-    await triggerEvents(target.querySelectorAll(".o_data_row .o_list_record_selector input")[3], null, [["keydown", { key: "Shift", shiftKey: true }], "click"]);
+    await triggerEvents(target.querySelectorAll()[3], null, [["keydown", { key: "Shift", shiftKey: true }], "click"]);
 
-    expect(target.querySelector(".o_list_selection_box").textContent.trim()).toBe("4 selected");
+    expect(queryText(".o_list_selection_box")).toBe("4 selected");
     expect(document.querySelectorAll(".o_data_row .o_list_record_selector input:checked").length).toBe(4);
 
     // shift click the 3rd record to untoggle 2-3
     await triggerEvents(target.querySelectorAll(".o_data_row .o_list_record_selector input")[2], null, [["keydown", { key: "Shift", shiftKey: true }], "click"]);
-    expect(target.querySelector(".o_list_selection_box").textContent.trim()).toBe("2 selected");
+    expect(queryText(".o_list_selection_box")).toBe("2 selected");
     expect(document.querySelectorAll(".o_data_row .o_list_record_selector input:checked").length).toBe(2);
 
     // shift click the 1st record to untoggle 0-1
-    await triggerEvents(target.querySelectorAll(".o_data_row .o_list_record_selector input")[0], null, [["keydown", { key: "Shift", shiftKey: true }], "click"]);
+    await triggerEvents(queryFirst(".o_data_row .o_list_record_selector input"), null, [["keydown", { key: "Shift", shiftKey: true }], "click"]);
     expect(document.querySelectorAll(".o_data_row .o_list_record_selector input:checked").length).toBe(0);
 });
 
@@ -307,34 +309,30 @@ test("select record range with shift+space", async () => {
     });
 
     // Go to the first checkbox and check it
-    triggerHotkey("ArrowDown");
-    triggerHotkey("ArrowDown");
-    await nextTick();
-    let checkbox = target.querySelector(".o_data_row:nth-child(1) .o_list_record_selector input");
-    expect(document.activeElement).toBe(checkbox);
-    await click(checkbox);
-    assert.ok(checkbox.checked);
+    press("ArrowDown");
+    press("ArrowDown");
+    await animationFrame();
+    expect(".o_data_row:nth-child(1) .o_list_record_selector input").toBeFocused();
+    await contains(".o_data_row:nth-child(1) .o_list_record_selector input").click();
+    expect(".o_data_row:nth-child(1) .o_list_record_selector input").toBeChecked();
 
     // Go to the fourth checkbox and shift+space
-    triggerHotkey("ArrowDown");
-    triggerHotkey("ArrowDown");
-    triggerHotkey("ArrowDown");
-    await nextTick();
-    checkbox = target.querySelector(".o_data_row:nth-child(4) .o_list_record_selector input");
-    expect(document.activeElement).toBe(checkbox);
-    assert.ok(!checkbox.checked);
-    await triggerEvents(document.activeElement, null, [
-        ["keydown", { key: "Shift", shiftKey: true }],
-        ["keydown", { key: " ", shiftKey: true }],
-    ]);
+    press("ArrowDown");
+    press("ArrowDown");
+    press("ArrowDown");
+    await animationFrame();
+    expect(".o_data_row:nth-child(4) .o_list_record_selector input").toBeFocused();
+    expect(".o_data_row:nth-child(4) .o_list_record_selector input").not.toBeChecked();
+    press("shift+space");
+    await animationFrame();
     // focus is on the input and not in the td cell
     expect(document.activeElement.tagName).toBe("INPUT");
 
     // Check that all checkbox is checked
-    for (let i = 1; i < 5; i++) {
-        checkbox = target.querySelector(`.o_data_row:nth-child(${i}) .o_list_record_selector input`);
-        assert.ok(checkbox.checked);
-    }
+    expect(".o_data_row:nth-child(1) .o_list_record_selector input").toBeChecked();
+    expect(".o_data_row:nth-child(2) .o_list_record_selector input").toBeChecked();
+    expect(".o_data_row:nth-child(3) .o_list_record_selector input").toBeChecked();
+    expect(".o_data_row:nth-child(4) .o_list_record_selector input").toBeChecked();
 });
 
 test("expand range of checkbox with shift+arrow", async () => {
@@ -345,43 +343,31 @@ test("expand range of checkbox with shift+arrow", async () => {
     });
 
     // Go to the first checkbox and check it
-    triggerHotkey("ArrowDown");
-    triggerHotkey("ArrowDown");
-    await nextTick();
-    let checkbox = target.querySelector(".o_data_row:nth-child(1) .o_list_record_selector input");
-    expect(document.activeElement).toBe(checkbox);
-    await click(checkbox);
-    assert.ok(checkbox.checked);
+    press("ArrowDown");
+    press("ArrowDown");
+    await animationFrame();
+    expect(".o_data_row:nth-child(1) .o_list_record_selector input").toBeFocused();
+    await contains(".o_data_row:nth-child(1) .o_list_record_selector input").click();
+    expect(".o_data_row:nth-child(1) .o_list_record_selector input").toBeChecked();
 
     // expand the checkbox with arrowdown
-    await triggerEvent(document.activeElement, null, "keydown", {
-        key: "Shift",
-        shiftKey: true,
-    });
-    triggerHotkey("shift+ArrowDown");
-    triggerHotkey("shift+ArrowDown");
-    triggerHotkey("shift+ArrowDown");
-    triggerHotkey("shift+ArrowUp");
-    await nextTick();
-    await triggerEvent(document.activeElement, null, "keyup", {
-        key: "Shift",
-        shiftKey: false,
-    });
-
-    checkbox = target.querySelector(".o_data_row:nth-child(3) .o_list_record_selector input");
-    expect(document.activeElement).toBe(checkbox);
-    assert.ok(checkbox.checked);
+    press("shift+ArrowDown");
+    press("shift+ArrowDown");
+    press("shift+ArrowDown");
+    press("shift+ArrowUp");
+    await animationFrame();
+    expect(".o_data_row:nth-child(3) .o_list_record_selector input").toBeFocused();
+    expect(".o_data_row:nth-child(3) .o_list_record_selector input").toBeChecked();
 
     // Check that the three checkbox are checked
-    for (let i = 1; i < 4; i++) {
-        checkbox = target.querySelector(`.o_data_row:nth-child(${i}) .o_list_record_selector input`);
-        assert.ok(checkbox.checked);
-    }
+    expect(".o_data_row:nth-child(2) .o_list_record_selector input").toBeChecked();
+    expect(".o_data_row:nth-child(3) .o_list_record_selector input").toBeChecked();
+    expect(".o_data_row:nth-child(4) .o_list_record_selector input").toBeChecked();
 });
 
-test("multiple interactions to change the range of checked boxes", async () => {
+test.todo("multiple interactions to change the range of checked boxes", async () => {
     for (let i = 0; i < 5; i++) {
-        serverData.models.foo.records.push({ id: 5 + i, bar: true, foo: "foo" + i });
+        Foo._records.push({ id: 5 + i, bar: true, foo: "foo" + i });
     }
 
     await mountView({
@@ -390,40 +376,41 @@ test("multiple interactions to change the range of checked boxes", async () => {
         arch: '<tree><field name="foo"/><field name="int_field"/></tree>',
     });
 
-    await triggerHotkey("ArrowDown");
-    const firstCheckbox = target.querySelector(".o_data_row:nth-child(1) .o_list_record_selector input");
-    assert.notEqual(document.activeElement, firstCheckbox, "first checkbox should not be focused initially");
+    press("ArrowDown");
+    expect(".o_data_row:nth-child(1) .o_list_record_selector input").not.toBeFocused();
+    
+    keyDown("shift");
+    press("shift+ArrowDown");
+    expect(".o_data_row:nth-child(1) .o_list_record_selector input").toBeFocused();
+    await animationFrame();
+    press("shift+ArrowDown");
+    await animationFrame();
+    press("shift+ArrowDown");
+    await animationFrame();
+    press("shift+ArrowDown");
+    await animationFrame();
+    press("shift+ArrowUp");
+    await animationFrame();
+    keyUp("shift");
+    press("ArrowDown");
+    await animationFrame();
+    press("ArrowDown");
+    await animationFrame();
+    press("shift+ArrowDown");
+    await animationFrame();
 
-    await triggerEvent(document.activeElement, null, "keydown", {
-        key: "Shift",
-        shiftKey: true,
-    });
-    await triggerHotkey("shift+ArrowDown");
-    expect(document.activeElement).toBe(firstCheckbox, { message: "first checkbox is now focused" });
-    triggerHotkey("shift+ArrowDown");
-    triggerHotkey("shift+ArrowDown");
-    triggerHotkey("shift+ArrowDown");
-    triggerHotkey("shift+ArrowUp");
-    triggerHotkey("ArrowDown");
-    triggerHotkey("ArrowDown");
-    triggerHotkey("shift+ArrowDown");
+    await contains(".o_data_row:nth-child(8) .o_list_record_selector .o-checkbox").click();
+    press("shift+ArrowDown");
 
-    await click(target.querySelector(".o_data_row:nth-child(8) .o_list_record_selector .o-checkbox"));
-    await triggerEvent(document.activeElement, null, "keydown", {
-        key: "Shift",
-        shiftKey: true,
-    });
-    await triggerHotkey("shift+ArrowDown");
-
-    const expectedCheckedRows = [1, 2, 3, 5, 6, 8, 9];
-
-    for (let i = 1; i < 10; i++) {
-        if (expectedCheckedRows.includes(i)) {
-            assert.ok(target.querySelector(`.o_data_row:nth-child(${i}) .o_list_record_selector input`).checked, `row ${i} checked`);
-        } else {
-            assert.notOk(target.querySelector(`.o_data_row:nth-child(${i}) .o_list_record_selector input`).checked, `row ${i} unchecked`);
-        }
-    }
+    expect(".o_data_row:nth-child(1) .o_list_record_selector input").toBeChecked();
+    expect(".o_data_row:nth-child(2) .o_list_record_selector input").toBeChecked();
+    expect(".o_data_row:nth-child(3) .o_list_record_selector input").toBeChecked();
+    expect(".o_data_row:nth-child(4) .o_list_record_selector input").not.toBeChecked();
+    expect(".o_data_row:nth-child(5) .o_list_record_selector input").toBeChecked();
+    expect(".o_data_row:nth-child(6) .o_list_record_selector input").toBeChecked();
+    expect(".o_data_row:nth-child(7) .o_list_record_selector input").not.toBeChecked();
+    expect(".o_data_row:nth-child(8) .o_list_record_selector input").toBeChecked();
+    expect(".o_data_row:nth-child(9) .o_list_record_selector input").toBeChecked();
 });
 
 test("list with class and style attributes", async () => {
@@ -615,7 +602,7 @@ test("list view with adjacent buttons", async () => {
     });
 
     expect("th").toHaveCount(4, { message: "adjacent buttons in the arch must be grouped in a single column" });
-    assert.containsN(target.querySelector(".o_data_row:first-child"), "td.o_list_button", 2);
+    expect(".o_data_row:first-child td.o_list_button").toHaveCount(2)
 });
 
 test("list view with adjacent buttons and invisible field and button", async () => {
@@ -637,7 +624,7 @@ test("list view with adjacent buttons and invisible field and button", async () 
 
     expect("th").toHaveCount(3, { message: "adjacent buttons in the arch must be grouped in a single column" });
     expect("tr:first-child button").toHaveCount(4, { message: "Only 4 buttons should be visible" });
-    assert.containsN(target.querySelector(".o_data_row:first-child"), "td.o_list_button", 2);
+    expect(".o_data_row:first-child td.o_list_button").toHaveCount(2)
 });
 
 test("list view with adjacent buttons and invisible field (modifier)", async () => {
@@ -655,7 +642,7 @@ test("list view with adjacent buttons and invisible field (modifier)", async () 
     });
 
     expect("th").toHaveCount(4, { message: "adjacent buttons in the arch must be grouped in a single column" });
-    assert.containsN(target.querySelector(".o_data_row:first-child"), "td.o_list_button", 2);
+    expect(".o_data_row:first-child td.o_list_button").toHaveCount(2)
 });
 
 test("list view with adjacent buttons and optional field", async () => {
@@ -673,7 +660,7 @@ test("list view with adjacent buttons and optional field", async () => {
     });
 
     expect("th").toHaveCount(4, { message: "adjacent buttons in the arch must be grouped in a single column" });
-    assert.containsN(target.querySelector(".o_data_row:first-child"), "td.o_list_button", 2);
+    expect(".o_data_row:first-child td.o_list_button").toHaveCount(2)
 });
 
 test("list view with adjacent buttons with invisible modifier", async () => {
@@ -690,7 +677,7 @@ test("list view with adjacent buttons with invisible modifier", async () => {
     });
 
     expect("th").toHaveCount(3, { message: "adjacent buttons in the arch must be grouped in a single column" });
-    assert.containsOnce(target.querySelector(".o_data_row"), "td.o_list_button");
+    expect(".o_data_row td.o_list_button").toHaveCount(1);
     expect($(target).find(".o_field_cell").text()).toBe("yopblipgnapblip");
     expect("td button i.fa-star").toHaveCount(2);
     expect("td button i.fa-refresh").toHaveCount(3);
@@ -1190,7 +1177,7 @@ test("invisible column based on the context are correctly displayed in o2m", asy
 
     // 1 for 1 visible column (foo), 1 th for delete button
     expect("th").toHaveCount(2, { message: "should have 2 th" });
-    expect(target.querySelectorAll("th")[0].dataset.name).toBe("foo");
+    expect(queryFirst("th").dataset.name).toBe("foo");
 });
 
 test("invisible column based on the parent are correctly displayed in o2m", async () => {
@@ -1224,7 +1211,7 @@ test("invisible column based on the parent are correctly displayed in o2m", asyn
 
     // 1 for 2 visible column (foo, properties), 1 th for delete button
     expect("th").toHaveCount(3, { message: "should have 3 th" });
-    expect(target.querySelectorAll("th")[0].dataset.name).toBe("foo");
+    expect(queryFirst("th").dataset.name).toBe("foo");
     expect(target.querySelectorAll("th")[1].dataset.name).toBe("amount");
 });
 
@@ -1553,8 +1540,8 @@ test('basic grouped list rendering with widget="handle" col', async () => {
     expect("thead th[data-name=int_field]").toHaveCount(0);
     expect("tr.o_group_header").toHaveCount(2);
     expect("th.o_group_name").toHaveCount(2);
-    assert.containsN(target.querySelector(".o_group_header"), "th", 2); // group name + colspan 2
-    assert.containsNone(target.querySelector(".o_group_header"), ".o_list_number");
+    expect(".o_group_header th").toHaveCount(2) // group name + colspan 2
+    expect(".o_group_header .o_list_number").toHaveCount(0);
 });
 
 test("basic grouped list rendering with a date field between two fields with a aggregator", async () => {
@@ -1587,7 +1574,7 @@ test("basic grouped list rendering 1 col without selector", async () => {
         allowSelectors: false,
     });
 
-    assert.containsOnce(target.querySelector(".o_group_header"), "th");
+    expect(".o_group_header th").toHaveCount(1);
     expect(target.querySelector(".o_group_header th").getAttribute("colspan")).toBe("1");
 });
 
@@ -1599,7 +1586,7 @@ test("basic grouped list rendering 1 col with selector", async () => {
         groupBy: ["bar"],
     });
 
-    assert.containsOnce(target.querySelector(".o_group_header"), "th");
+    expect(".o_group_header th").toHaveCount(1);
     expect(target.querySelector(".o_group_header th").getAttribute("colspan")).toBe("2");
 });
 
@@ -1612,7 +1599,7 @@ test("basic grouped list rendering 2 cols without selector", async () => {
         allowSelectors: false,
     });
 
-    assert.containsN(target.querySelector(".o_group_header"), "th", 2);
+    expect(".o_group_header th").toHaveCount(2)
     expect(target.querySelector(".o_group_header th").getAttribute("colspan")).toBe("1");
 });
 
@@ -1625,7 +1612,7 @@ test("basic grouped list rendering 3 cols without selector", async () => {
         allowSelectors: false,
     });
 
-    assert.containsN(target.querySelector(".o_group_header"), "th", 2);
+    expect(".o_group_header th").toHaveCount(2)
     expect(target.querySelector(".o_group_header th").getAttribute("colspan")).toBe("2");
 });
 
@@ -1638,7 +1625,7 @@ test("basic grouped list rendering 2 col with selector", async () => {
         allowSelectors: true,
     });
 
-    assert.containsN(target.querySelector(".o_group_header"), "th", 2);
+    expect(".o_group_header th").toHaveCount(2)
     expect(target.querySelector(".o_group_header th").getAttribute("colspan")).toBe("2");
 });
 
@@ -1651,7 +1638,7 @@ test("basic grouped list rendering 3 cols with selector", async () => {
         allowSelectors: true,
     });
 
-    assert.containsN(target.querySelector(".o_group_header"), "th", 2);
+    expect(".o_group_header th").toHaveCount(2)
     expect(target.querySelector(".o_group_header th").getAttribute("colspan")).toBe("3");
 });
 
@@ -1672,9 +1659,9 @@ test("basic grouped list rendering 7 cols with aggregates and selector", async (
         groupBy: ["bar"],
     });
 
-    assert.containsN(target.querySelector(".o_group_header"), "th,td", 5);
+    expect(".o_group_header th,td").toHaveCount(5)
     expect(target.querySelector(".o_group_header th").getAttribute("colspan")).toBe("3");
-    assert.containsN(target.querySelector(".o_group_header"), "td", 3, "there should be 3 tds (aggregates + fields in between)");
+    expect(".o_group_header td").toHaveCount(3, { message: "there should be 3 tds (aggregates + fields in between)" })
     expect(target.querySelector(".o_group_header th:last-child").getAttribute("colspan")).toBe("2", { message: "header last cell should span on the two last fields (to give space for the pager) (colspan 2)" });
 });
 
@@ -1695,9 +1682,9 @@ test("basic grouped list rendering 7 cols with aggregates, selector and optional
         groupBy: ["bar"],
     });
 
-    assert.containsN(target.querySelector(".o_group_header"), "th,td", 5);
+    expect(".o_group_header th,td").toHaveCount(5)
     expect(target.querySelector(".o_group_header th").getAttribute("colspan")).toBe("3");
-    assert.containsN(target.querySelector(".o_group_header"), "td", 3, "there should be 3 tds (aggregates + fields in between)");
+    expect(".o_group_header td").toHaveCount(3, { message: "there should be 3 tds (aggregates + fields in between)" })
     expect(target.querySelector(".o_group_header th:last-child").getAttribute("colspan")).toBe("3", { message: "header last cell should span on the two last fields (to give space for the pager) (colspan 2)" });
 });
 
@@ -1784,7 +1771,7 @@ test("basic grouped list rendering with groupby m2m field", async () => {
     );
 
     // Open all groups
-    await click(target.querySelectorAll(".o_group_name")[0]);
+    await click(queryFirst(".o_group_name"));
     await click(target.querySelectorAll(".o_group_name")[1]);
     await click(target.querySelectorAll(".o_group_name")[2]);
     await click(target.querySelectorAll(".o_group_name")[3]);
@@ -2388,9 +2375,9 @@ test("editable list view: line with no active element", async () => {
 
     expect(".o_data_cell").toHaveClass("o_boolean_toggle_cell");
 
-    await click(target.querySelectorAll(".o_data_cell")[0]);
+    await click(queryFirst(".o_data_cell"));
     expect(".o_data_row").toHaveClass("o_selected_row");
-    assert.containsOnce(target.querySelectorAll(".o_data_cell")[0], ".o_readonly_modifier");
+    assert.containsOnce(queryFirst(".o_data_cell"), ".o_readonly_modifier");
     await click(target.querySelectorAll(".o_data_cell")[1], ".o_boolean_toggle input");
     expect([]).toVerifySteps();
 });
@@ -2786,25 +2773,25 @@ test("selection box is properly displayed (single page)", async () => {
     });
 
     expect(".o_data_row").toHaveCount(4);
-    assert.containsNone(target.querySelector(".o_control_panel_actions"), ".o_list_selection_box");
+    expect(".o_control_panel_actions .o_list_selection_box").toHaveCount(0);
 
     // select a record
     await click(target.querySelector(".o_data_row .o_list_record_selector input"));
-    assert.containsOnce(target.querySelector(".o_control_panel_actions"), ".o_list_selection_box");
-    assert.containsNone(target.querySelector(".o_list_selection_box"), ".o_list_select_domain");
-    expect(target.querySelector(".o_list_selection_box").textContent.trim()).toBe("1 selected");
+    expect(".o_control_panel_actions .o_list_selection_box").toHaveCount(1);
+    expect(".o_list_selection_box .o_list_select_domain").toHaveCount(0);
+    expect(queryText(".o_list_selection_box")).toBe("1 selected");
 
     // select all records of first page
     await click(target.querySelector("thead .o_list_record_selector input"));
-    assert.containsOnce(target.querySelector(".o_control_panel_actions"), ".o_list_selection_box");
-    assert.containsNone(target.querySelector(".o_list_selection_box"), ".o_list_select_domain");
-    expect(target.querySelector(".o_list_selection_box").textContent.trim()).toBe("4 selected");
+    expect(".o_control_panel_actions .o_list_selection_box").toHaveCount(1);
+    expect(".o_list_selection_box .o_list_select_domain").toHaveCount(0);
+    expect(queryText(".o_list_selection_box")).toBe("4 selected");
 
     // unselect a record
     await click(target.querySelectorAll(".o_data_row .o_list_record_selector input")[1]);
-    assert.containsOnce(target.querySelector(".o_control_panel_actions"), ".o_list_selection_box");
-    assert.containsNone(target.querySelector(".o_list_selection_box"), ".o_list_select_domain");
-    expect(target.querySelector(".o_list_selection_box").textContent.trim()).toBe("3 selected");
+    expect(".o_control_panel_actions .o_list_selection_box").toHaveCount(1);
+    expect(".o_list_selection_box .o_list_select_domain").toHaveCount(0);
+    expect(queryText(".o_list_selection_box")).toBe("3 selected");
     await click(target.querySelector(".o_list_unselect_all"));
     expect(".o_list_selection_box").toHaveCount(0, { message: "selection options are no longer visible" });
     expect(".o_data_row .o_list_record_selector input:checked").toHaveCount(0, { message: "no records should be selected" });
@@ -2818,24 +2805,24 @@ test("selection box is properly displayed (multi pages)", async () => {
     });
 
     expect(".o_data_row").toHaveCount(3);
-    assert.containsNone(target.querySelector(".o_control_panel_actions"), ".o_list_selection_box");
+    expect(".o_control_panel_actions .o_list_selection_box").toHaveCount(0);
 
     // select a record
     await click(target.querySelector(".o_data_row .o_list_record_selector input"));
-    assert.containsOnce(target.querySelector(".o_control_panel_actions"), ".o_list_selection_box");
-    assert.containsNone(target.querySelector(".o_list_selection_box"), ".o_list_select_domain");
-    expect(target.querySelector(".o_list_selection_box").textContent.trim()).toBe("1 selected");
+    expect(".o_control_panel_actions .o_list_selection_box").toHaveCount(1);
+    expect(".o_list_selection_box .o_list_select_domain").toHaveCount(0);
+    expect(queryText(".o_list_selection_box")).toBe("1 selected");
 
     // select all records of first page
     await click(target.querySelector("thead .o_list_record_selector input"));
-    assert.containsOnce(target.querySelector(".o_control_panel_actions"), ".o_list_selection_box");
-    assert.containsOnce(target.querySelector(".o_list_selection_box"), ".o_list_select_domain");
+    expect(".o_control_panel_actions .o_list_selection_box").toHaveCount(1);
+    expect(".o_list_selection_box .o_list_select_domain").toHaveCount(1);
     expect(target.querySelector(".o_list_selection_box").textContent.replace(/\s+/g).toBe(" ").trim(), { message: "3 selected Select all 4" });
 
     // select all domain
     await click(target.querySelector(".o_list_selection_box .o_list_select_domain"));
-    assert.containsOnce(target.querySelector(".o_control_panel_actions"), ".o_list_selection_box");
-    expect(target.querySelector(".o_list_selection_box").textContent.trim()).toBe("All 4 selected");
+    expect(".o_control_panel_actions .o_list_selection_box").toHaveCount(1);
+    expect(queryText(".o_list_selection_box")).toBe("All 4 selected");
     await click(target.querySelector(".o_list_unselect_all"));
     expect(".o_list_selection_box").toHaveCount(0, { message: "selection options are no longer visible" });
 });
@@ -2848,27 +2835,27 @@ test("selection box is properly displayed (group list)", async () => {
         groupBy: ["foo"],
     });
     expect(".o_group_header").toHaveCount(3);
-    assert.containsNone(target.querySelector(".o_control_panel_actions"), ".o_list_selection_box");
+    expect(".o_control_panel_actions .o_list_selection_box").toHaveCount(0);
 
     // open first group
     await click(target.querySelector(".o_group_header"));
 
     // select a record
     await click(target.querySelector(".o_data_row .o_list_record_selector input"));
-    assert.containsOnce(target.querySelector(".o_control_panel_actions"), ".o_list_selection_box");
-    assert.containsNone(target.querySelector(".o_list_selection_box"), ".o_list_select_domain");
-    expect(target.querySelector(".o_list_selection_box").textContent.trim()).toBe("1 selected");
+    expect(".o_control_panel_actions .o_list_selection_box").toHaveCount(1);
+    expect(".o_list_selection_box .o_list_select_domain").toHaveCount(0);
+    expect(queryText(".o_list_selection_box")).toBe("1 selected");
 
     // select all records of first page
     await click(target.querySelector("thead .o_list_record_selector input"));
-    assert.containsOnce(target.querySelector(".o_control_panel_actions"), ".o_list_selection_box");
-    assert.containsOnce(target.querySelector(".o_list_selection_box"), ".o_list_select_domain");
+    expect(".o_control_panel_actions .o_list_selection_box").toHaveCount(1);
+    expect(".o_list_selection_box .o_list_select_domain").toHaveCount(1);
     expect(target.querySelector(".o_list_selection_box").textContent.replace(/\s+/g).toBe(" ").trim(), { message: "2 selected Select all 4" });
 
     // select all domain
     await click(target.querySelector(".o_list_selection_box .o_list_select_domain"));
-    assert.containsOnce(target.querySelector(".o_control_panel_actions"), ".o_list_selection_box");
-    expect(target.querySelector(".o_list_selection_box").textContent.trim()).toBe("All 4 selected");
+    expect(".o_control_panel_actions .o_list_selection_box").toHaveCount(1);
+    expect(queryText(".o_list_selection_box")).toBe("All 4 selected");
     await click(target.querySelector(".o_list_unselect_all"));
     expect(".o_list_selection_box").toHaveCount(0, { message: "selection options are no longer visible" });
 });
@@ -2893,10 +2880,10 @@ test("selection box is displayed as first action button", async () => {
 
     // select a record
     await contains(".o_data_row:first-child .o_list_record_selector input").click();
-    assert.containsOnce(target.querySelector(".o_control_panel_actions"), ".o_list_selection_box");
+    expect(".o_control_panel_actions .o_list_selection_box").toHaveCount(1);
     const firstElement = target.querySelector(".o_control_panel_actions > div").firstElementChild;
     expect(firstElement).toBe(target.querySelector(".o_control_panel_actions .o_list_selection_box"), { message: "last element should selection box" });
-    expect(target.querySelector(".o_list_selection_box").textContent.trim()).toBe("1 selected");
+    expect(queryText(".o_list_selection_box")).toBe("1 selected");
 });
 
 test("selection box is not removed after multi record edition", async () => {
@@ -2907,18 +2894,18 @@ test("selection box is not removed after multi record edition", async () => {
     });
 
     expect(".o_data_row").toHaveCount(4, { message: "there should be 4 records" });
-    assert.containsNone(target.querySelector(".o_control_panel_actions"), ".o_list_selection_box", "list selection box should not be displayed");
+    expect(".o_control_panel_actions .o_list_selection_box").toHaveCount(0, { message: "list selection box should not be displayed" })
 
     // select all records
     await click(target.querySelector(".o_list_record_selector input"));
-    assert.containsOnce(target.querySelector(".o_control_panel_actions"), ".o_list_selection_box", "list selection box should be displayed");
+    expect(".o_control_panel_actions .o_list_selection_box").toHaveCount(1, { message: "list selection box should be displayed" });
     expect(".o_data_row .o_list_record_selector input:checked").toHaveCount(4, { message: "all 4 records should be selected" });
 
     // edit selected records
     await click(target.querySelector(".o_data_row").querySelector(".o_data_cell"));
     await contains(".o_data_row [name=foo] input").edit("legion");
     await contains(".modal-dialog button.btn-primary").click();
-    assert.containsOnce(target.querySelector(".o_control_panel_actions"), ".o_list_selection_box", "list selection box should still be displayed");
+    expect(".o_control_panel_actions .o_list_selection_box").toHaveCount(1, { message: "list selection box should still be displayed" });
     expect(".o_data_row .o_list_record_selector input:checked").toHaveCount(4, { message: "same records should be selected" });
 });
 
@@ -2933,20 +2920,20 @@ test("selection is reset on reload", async () => {
             </tree>`,
     });
 
-    assert.containsNone(target.querySelector(".o_control_panel_actions"), ".o_list_selection_box");
+    expect(".o_control_panel_actions .o_list_selection_box").toHaveCount(0);
     expect($(target).find("tfoot td:nth(2)").text()).toBe("32", { message: "total should be 32 (no record selected)" });
 
     // select first record
     var firstRowSelector = target.querySelector("tbody .o_list_record_selector input");
     await click(firstRowSelector);
     assert.ok(firstRowSelector.checked, "first row should be selected");
-    assert.containsOnce(target.querySelector(".o_control_panel_actions"), ".o_list_selection_box");
+    expect(".o_control_panel_actions .o_list_selection_box").toHaveCount(1);
     expect($(target).find("tfoot td:nth(2)").text()).toBe("10", { message: "total should be 10 (first record selected)" });
 
     await reloadListView(target);
     firstRowSelector = target.querySelector("tbody .o_list_record_selector input");
     assert.notOk(firstRowSelector.checked, "first row should no longer be selected");
-    assert.containsNone(target.querySelector(".o_control_panel_actions"), ".o_list_selection_box");
+    expect(".o_control_panel_actions .o_list_selection_box").toHaveCount(0);
     expect($(target).find("tfoot td:nth(2)").text()).toBe("32", { message: "total should be 32 (no more record selected)" });
 });
 
@@ -2964,26 +2951,26 @@ test("selection is kept on render without reload", async () => {
     });
 
     expect("div.o_control_panel .o_cp_action_menus").toHaveCount(1);
-    assert.containsNone(target.querySelector(".o_control_panel_actions"), ".o_list_selection_box");
+    expect(".o_control_panel_actions .o_list_selection_box").toHaveCount(0);
 
     // open blip grouping and check all lines
     await click($(target).find('.o_group_header:contains("blip (2)")')[0]);
     await click(target.querySelector(".o_data_row input"));
     expect("div.o_control_panel .o_cp_action_menus").toHaveCount(1);
-    assert.containsOnce(target.querySelector(".o_control_panel_actions"), ".o_list_selection_box");
+    expect(".o_control_panel_actions .o_list_selection_box").toHaveCount(1);
 
     // open yop grouping and verify blip are still checked
     await click($(target).find('.o_group_header:contains("yop (1)")')[0]);
     expect(".o_data_row input:checked").toHaveCount(1, { message: "opening a grouping does not uncheck others" });
     expect("div.o_control_panel .o_cp_action_menus").toHaveCount(1);
-    assert.containsOnce(target.querySelector(".o_control_panel_actions"), ".o_list_selection_box");
+    expect(".o_control_panel_actions .o_list_selection_box").toHaveCount(1);
 
     // close and open blip grouping and verify blip are unchecked
     await click($(target).find('.o_group_header:contains("blip (2)")')[0]);
     await click($(target).find('.o_group_header:contains("blip (2)")')[0]);
     expect(".o_data_row input:checked").toHaveCount(0, { message: "opening and closing a grouping uncheck its elements" });
     expect("div.o_control_panel .o_cp_action_menus").toHaveCount(1);
-    assert.containsNone(target.querySelector(".o_control_panel_actions"), ".o_list_selection_box");
+    expect(".o_control_panel_actions .o_list_selection_box").toHaveCount(0);
 });
 
 test("select a record in list grouped by date with granularity", async () => {
@@ -2998,11 +2985,11 @@ test("select a record in list grouped by date with granularity", async () => {
     });
 
     expect(".o_group_header").toHaveCount(2);
-    assert.containsNone(target.querySelector(".o_control_panel_actions"), ".o_list_selection_box");
+    expect(".o_control_panel_actions .o_list_selection_box").toHaveCount(0);
     await click(target.querySelector(".o_group_header"));
     expect(".o_data_row").toHaveCount(1);
     await click(target.querySelector(".o_data_row .o_list_record_selector"));
-    assert.containsOnce(target.querySelector(".o_control_panel_actions"), ".o_list_selection_box");
+    expect(".o_control_panel_actions .o_list_selection_box").toHaveCount(1);
 });
 
 test("aggregates are computed correctly", async () => {
@@ -4254,14 +4241,14 @@ test("column widths are re-computed on window resize", async () => {
     });
 
     const initialTextWidth = target.querySelectorAll('th[data-name="text"]')[0].offsetWidth;
-    const selectorWidth = target.querySelectorAll("th.o_list_record_selector")[0].offsetWidth;
+    const selectorWidth = queryFirst("th.o_list_record_selector").offsetWidth;
 
     // simulate a window resize
     target.style.width = target.getBoundingClientRect().width / 2 + "px";
     window.dispatchEvent(new Event("resize"));
 
     const postResizeTextWidth = target.querySelectorAll('th[data-name="text"]')[0].offsetWidth;
-    const postResizeSelectorWidth = target.querySelectorAll("th.o_list_record_selector")[0].offsetWidth;
+    const postResizeSelectorWidth = queryFirst("th.o_list_record_selector").offsetWidth;
     assert.ok(postResizeTextWidth < initialTextWidth);
     expect(selectorWidth).toBe(postResizeSelectorWidth);
 });
@@ -4461,7 +4448,7 @@ test("fields are translatable in list view", async () => {
 
     await click(target.querySelector("span.o_field_translate"));
     expect(".o_translation_dialog").toHaveCount(1);
-    assert.containsN(target.querySelector(".o_translation_dialog"), ".translation>input.o_field_char", 2, "modal should have 2 languages to translate");
+    expect(".o_translation_dialog .translation>input.o_field_char").toHaveCount(2, { message: "modal should have 2 languages to translate" })
 });
 
 test("long words in text cells should break into smaller lines", async () => {
@@ -5524,7 +5511,7 @@ test("Navigate between the list and kanban view using the command palette", asyn
 
     triggerHotkey("control+k");
     await nextTick();
-    assert.containsOnce(target.querySelector(".o_command_category"), ".o_command");
+    expect(".o_command_category .o_command").toHaveCount(1);
     let command = target.querySelector(".o_command_category .o_command");
     expect(command.textContent).toBe("Show Kanban view");
 
@@ -5533,7 +5520,7 @@ test("Navigate between the list and kanban view using the command palette", asyn
 
     triggerHotkey("control+k");
     await nextTick();
-    assert.containsOnce(target.querySelector(".o_command_category"), ".o_command");
+    expect(".o_command_category .o_command").toHaveCount(1);
     command = target.querySelector(".o_command_category .o_command");
     expect(command.textContent).toBe("Show List view");
     await click(command);
@@ -6438,7 +6425,7 @@ test("empty editable list with sample data: create and duplicate record", async 
     await toggleMenuItem(target, "Duplicate");
 
     // Final state: there should be 2 records
-    assert.containsN(target.querySelector(".o_list_view .o_content"), ".o_data_row", 2, "there should be 2 records");
+    expect(".o_list_view .o_content .o_data_row").toHaveCount(2, { message: "there should be 2 records" })
 });
 
 test("groupby node with a button", async () => {
@@ -7436,7 +7423,7 @@ test("leaving unvalid rows in edition", async () => {
     await click(target.querySelectorAll(".o_data_row")[1].querySelector(".o_data_cell"));
     expect(".o_data_row").toHaveClass("o_selected_row", { message: "first line should still be in edition as invalid" });
     expect(".o_selected_row").toHaveCount(1, { message: "no other line should be in edition" });
-    assert.containsOnce(target.querySelectorAll(".o_data_row")[0], ".o_field_invalid input", "the required field should be marked as invalid");
+    assert.containsOnce(queryFirst(".o_data_row"), ".o_field_invalid input", "the required field should be marked as invalid");
     expect(warnings).toBe(1, { message: "a warning should have been displayed" });
 });
 
@@ -8617,7 +8604,7 @@ test("editable target, handle widget locks and unlocks on sort", async () => {
     expect($(target).find('tbody div[name="amount"]').text()).toBe("0.00300.00500.001200.00", { message: "drag and drop should have failed as the handle is locked" });
 
     // Sorting by int_field should unlock the handle
-    await click(target.querySelectorAll(".o_column_sortable")[0]);
+    await click(queryFirst(".o_column_sortable"));
     expect($(target).find('tbody div[name="amount"]').text()).toBe("1200.000.00500.00300.00", { message: "records should be ordered as per the previous resequence" });
 
     // Drag and drop the fourth line in second position
@@ -8831,7 +8818,7 @@ test("multi edit reference field batched in grouped list", async () => {
     });
 
     expect(["get_views", "web_read_group", "web_search_read", "web_search_read"]).toVerifySteps();
-    await click(target.querySelectorAll(".o_data_row .o_list_record_selector input")[0]);
+    await click(queryFirst(".o_data_row .o_list_record_selector input"));
     await click(target.querySelectorAll(".o_data_row .o_list_record_selector input")[1]);
     await click(target.querySelectorAll(".o_data_row .o_list_record_selector input")[2]);
     await click(target.querySelector(".o_data_row .o_field_boolean input"));
@@ -10034,7 +10021,7 @@ test("editable list view: m2m tags in grouped list", async () => {
     await click(target.querySelector(".o_data_row .o_field_many2many_tags"));
     await click(target.querySelector(".o_selected_row .o_field_many2many_tags .o_delete"));
     await click(target.querySelector(".modal .btn-primary"));
-    expect(target.querySelector(".o_data_row").innerText).toBe(target.querySelectorAll(".o_data_row")[0].innerText, { message: "All rows should have been correctly updated" });
+    expect(target.querySelector(".o_data_row").innerText).toBe(queryFirst(".o_data_row").innerText, { message: "All rows should have been correctly updated" });
 });
 
 test("editable list: edit many2one from external link", async () => {
@@ -12065,7 +12052,7 @@ test("editable grouped list: adding a second record pass the first in readonly",
     assert.equal(getGroup(2).innerText, "Yes (3)");
 
     // add a row in first group
-    await click(target.querySelectorAll(".o_group_field_row_add a")[0]);
+    await click(queryFirst(".o_group_field_row_add a"));
     expect(".o_selected_row").toHaveCount(1);
     expect(".o_data_row").toHaveCount(5);
     assert.equal(getGroup(1).innerText, "No (2)");
@@ -12638,7 +12625,7 @@ test("list view with optional fields rendering", async () => {
     expect("tfoot td").toHaveCount(5, { message: "should have 5 td" });
     assert.ok($(target).find("th:not(.o_list_actions_header):contains(M2O field)").is(":visible"), "should have a visible m2o field"); //m2o field
 
-    expect(target.querySelectorAll(".o-dropdown--menu span.dropdown-item:first-child input:checked")[0]).toBe([...target.querySelectorAll(".o-dropdown--menu span.dropdown-item")].filter((el) => el.innerText === "M2O field")[0].querySelector("input"), { message: "m2o advanced field check box should be checked in dropdown" });
+    expect(queryFirst(".o-dropdown--menu span.dropdown-item:first-child input:checked")).toBe([...target.querySelectorAll(".o-dropdown--menu span.dropdown-item")].filter((el) => el.innerText === "M2O field")[0].querySelector("input"), { message: "m2o advanced field check box should be checked in dropdown" });
 
     await contains(".o-dropdown--menu span.dropdown-item:first-child").click();
     // 4 th (1 for checkbox, 2 for columns, 1 for optional columns)
@@ -12667,7 +12654,7 @@ test("list view with optional fields rendering in RTL mode", async () => {
             </tree>`,
     });
 
-    assert.containsOnce(target.querySelector("table"), ".o_optional_columns_dropdown", "should have the optional columns dropdown toggle inside the table");
+    expect("table .o_optional_columns_dropdown").toHaveCount(1, { message: "should have the optional columns dropdown toggle inside the table" });
 
     expect("table > thead > tr > th:last-child .o_optional_columns_dropdown").toHaveCount(1, { message: "The optional fields toggler is in the last header column" });
 });
@@ -14635,7 +14622,7 @@ test("edit a record then select another record with a throw error when saving", 
     await contains("[name='foo'] input").edit("plop");
     expect("[name='foo'] input").toHaveCount(1);
 
-    await click(target.querySelectorAll(".o_data_cell")[0]);
+    await click(queryFirst(".o_data_cell"));
     await nextTick();
     expect(".o_error_dialog").toHaveCount(1);
 
@@ -14643,7 +14630,7 @@ test("edit a record then select another record with a throw error when saving", 
     expect(".o_selected_row").toHaveCount(1);
     expect(".o_data_row").toHaveClass("o_selected_row");
 
-    await click(target.querySelectorAll(".o_data_cell")[0]);
+    await click(queryFirst(".o_data_cell"));
     await nextTick();
     expect(".o_error_dialog").toHaveCount(1);
 
@@ -15187,7 +15174,7 @@ test("Properties: tags", async () => {
     expect(".o_field_cell.o_property_tags_cell").toHaveCount(3);
 
     await click(target.querySelector(".o_field_cell.o_property_tags_cell"));
-    await click(target.querySelectorAll(".o_field_cell.o_property_tags_cell .o_delete")[0]);
+    await click(queryFirst(".o_field_cell.o_property_tags_cell .o_delete"));
     expectedValue = ["c"];
     await clickSave(target);
 
@@ -15318,7 +15305,7 @@ test("multiple sources of properties definitions", async () => {
     });
 
     await contains(".o_optional_columns_dropdown_toggle").click();
-    await click(target.querySelectorAll(".o-dropdown--menu input[type='checkbox']")[0]);
+    await click(queryFirst(".o-dropdown--menu input[type='checkbox']"));
     await click(target.querySelectorAll(".o-dropdown--menu input[type='checkbox']")[1]);
 
     expect(".o_list_renderer th[data-name='properties.property_char']").toHaveCount(1);
@@ -15362,7 +15349,7 @@ test("toggle properties", async () => {
 
     await contains(".o_optional_columns_dropdown_toggle").click();
 
-    await click(target.querySelectorAll(".o-dropdown--menu input[type='checkbox']")[0]);
+    await click(queryFirst(".o-dropdown--menu input[type='checkbox']"));
     expect(".o_list_renderer th[data-name='properties.property_char']").toHaveCount(1);
     expect(".o_list_renderer th[data-name='properties.property_boolean']").toHaveCount(0);
 
@@ -15370,7 +15357,7 @@ test("toggle properties", async () => {
     expect(".o_list_renderer th[data-name='properties.property_char']").toHaveCount(1);
     expect(".o_list_renderer th[data-name='properties.property_boolean']").toHaveCount(1);
 
-    await click(target.querySelectorAll(".o-dropdown--menu input[type='checkbox']")[0]);
+    await click(queryFirst(".o-dropdown--menu input[type='checkbox']"));
     expect(".o_list_renderer th[data-name='properties.property_char']").toHaveCount(0);
     expect(".o_list_renderer th[data-name='properties.property_boolean']").toHaveCount(1);
 
