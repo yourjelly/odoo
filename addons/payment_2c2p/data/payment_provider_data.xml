@@ -3,6 +3,7 @@
 
     <record id="payment.payment_provider_2c2p" model="payment.provider">
         <field name="code">2c2p</field>
+        <field name="redirect_form_view_id" ref="redirect_form"/>
     </record>
 
 </odoo>

@@ -7,11 +7,17 @@
         <field name="inherit_id" ref="payment.payment_provider_form"/>
         <field name="arch" type="xml">
             <group name="provider_credentials" position='inside'>
-                <group name="2c2p_credentials" invisible="code != '2c2p'">
+                <group invisible="code != '2c2p'">
                     <field name="tctp_secret_key"
-                           required="code == '2c2p' and state != 'disabled'"/>
+                           string="Secret Key"
+                           required="code == '2c2p' and state != 'disabled'"
+                           password="True"
+                    />
                     <field name="tctp_merchant_id"
-                           required="code == '2c2p' and state != 'disabled'"/>
+                           string="Merchant ID"
+                           required="code == '2c2p' and state != 'disabled'"
+                           password="True"
+                    />
                 </group>
             </group>
         </field>

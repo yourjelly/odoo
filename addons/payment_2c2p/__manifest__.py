@@ -4,18 +4,16 @@
     'name': 'Payment Provider: 2C2P',
     'version': '1.0',
     'category': 'Accounting/Payment Providers',
+    'sequence': 350,
     'summary': "A payment provider for Asia",
     'depends': ['payment'],
     'data': [
-        "data/payment_provider_data.xml",
         "views/payment_provider_views.xml",
+        "views/payment_2c2p_templates.xml",
+
+        "data/payment_provider_data.xml",  # Depends on payment_2c2p_templates.xml
     ],
-    'license': 'LGPL-3',
-    'assets': {
-        'web.assets_frontend': [
-            'payment_2c2p/static/src/js/payment_form.js',
-        ],
-    },
     'post_init_hook': 'post_init_hook',
     'uninstall_hook': 'uninstall_hook',
+    'license': 'LGPL-3',
 }
