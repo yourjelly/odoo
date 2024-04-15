@@ -126,7 +126,6 @@ export class Message extends Record {
     is_transient;
     linkPreviews = Record.many("LinkPreview", { inverse: "message", onDelete: (r) => r.delete() });
     /** @type {number[]} */
-    needaction_partner_ids = [];
     parentMessage = Record.one("Message");
     reactions = Record.many("MessageReactions", { inverse: "message" });
     notifications = Record.many("Notification", { inverse: "message" });
@@ -134,7 +133,7 @@ export class Message extends Record {
     thread = Record.one("Thread");
     threadAsNeedaction = Record.one("Thread", {
         compute() {
-            if (this.isNeedaction) {
+            if (this.needaction) {
                 return this.thread;
             }
         },
@@ -175,6 +174,7 @@ export class Message extends Record {
     create_date = Record.attr(undefined, { type: "datetime" });
     /** @type {luxon.DateTime} */
     write_date = Record.attr(undefined, { type: "datetime" });
+    needaction = undefined;
 
     /**
      * We exclude the milliseconds because datetime string from the server don't
@@ -241,13 +241,6 @@ export class Message extends Record {
 
     get isStarred() {
         return this.store.self.in(this.starredPersonas);
-    }
-
-    get isNeedaction() {
-        return (
-            this.store.self.type === "partner" &&
-            this.needaction_partner_ids.includes(this.store.self.id)
-        );
     }
 
     get hasActions() {
@@ -427,7 +420,7 @@ export class Message extends Record {
     }
 
     async unfollow() {
-        if (this.isNeedaction) {
+        if (this.needaction) {
             await this.setDone();
         }
         const thread = this.thread;

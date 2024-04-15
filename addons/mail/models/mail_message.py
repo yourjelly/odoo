@@ -1022,12 +1022,12 @@ class Message(models.Model):
                     thread["module_icon"] = modules.module.get_module_icon(self.env[message_sudo.model]._original_module)
                 vals["thread"] = thread
             if for_current_user:
-                notifs = message_sudo.notification_ids.filtered("res_partner_id")
                 allowed_tracking_ids = message_sudo.tracking_value_ids._filter_tracked_field_access(self.env)
                 displayed_tracking_ids = allowed_tracking_ids
                 if record and hasattr(record, '_track_filter_for_display'):
                     displayed_tracking_ids = record._track_filter_for_display(displayed_tracking_ids)
-                vals["needaction_partner_ids"] = notifs.filtered(lambda n: not n.is_read).res_partner_id.ids
+                needaction_partner_ids = message_sudo.notification_ids.filtered(lambda n: not n.is_read).res_partner_id
+                vals["needaction"] = self.env.user.partner_id in needaction_partner_ids and not self.env.user._is_public()
                 vals["starredPersonas"] = [{"id": partner_id, "type": "partner"} for partner_id in message_sudo.starred_partner_ids.ids]
                 vals["trackingValues"] = displayed_tracking_ids._tracking_value_format()
         return vals_list
