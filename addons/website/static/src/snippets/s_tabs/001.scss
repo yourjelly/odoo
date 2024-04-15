@@ -22,4 +22,50 @@
             transform: translateX(1rem);
         }
     }
+
+    .s_tabs_main {
+        .nav-tabs{
+            --nav-link-color: inherit;
+            --nav-tabs-link-hover-border-color: transparent;
+        }
+
+        .nav-underline {
+            border-bottom: 1px solid $border-color;
+
+            .nav-link {
+                margin-bottom: -1px;
+
+                &.active {
+                    color: $primary;
+                }
+
+                &:not(.active) {
+                    border: 0;
+                }
+            }
+        }
+
+        &.row .nav-underline {
+            border-bottom: 0;
+            border-left: 1px solid $border-color;
+
+            .nav-link {
+                margin-left: -1px;
+                padding: map-get($spacers, 1) map-get($spacers, 3);
+
+                &.active {
+                    border-left: 2px solid $primary;
+                    border-bottom: 0;
+                }
+            }
+        }
+
+        .nav-buttons {
+            .nav-item .nav-link.active {
+                color: color-contrast($white);
+                background-color: $white;
+                box-shadow: $box-shadow-sm;
+            }
+        }
+    }
 }

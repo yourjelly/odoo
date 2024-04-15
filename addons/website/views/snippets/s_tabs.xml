@@ -3,10 +3,10 @@
 
 <template id="s_tabs" name="Tabs">
     <section class="s_tabs pt48 pb48" data-vcss="001">
-        <div class="container">
+        <div class="o_container_small">
             <div class="s_tabs_main">
                 <div class="s_tabs_nav mb-3">
-                    <ul class="nav nav-pills" role="tablist">
+                    <ul class="nav nav-underline" role="tablist">
                         <li class="nav-item" role="presentation">
                             <a class="nav-link active" id="nav_tabs_link_1" data-bs-toggle="tab" href="#nav_tabs_content_1" role="tab" aria-controls="nav_tabs_content_1" aria-selected="true">Home</a>
                         </li>
@@ -63,14 +63,16 @@
             </we-button>
         </div>
         <div data-js="NavTabsStyle" data-selector="section" data-target=".s_tabs_main">
-            <we-select string="Style">
-                <we-button data-set-style="tabs" data-name="tabs_opt" data-trigger="horizontal_opt">Tabs</we-button>
-                <we-button data-set-style="pills" data-name="pills_opt" data-trigger="tabs_color_opt" data-trigger-value="">Buttons</we-button>
+            <we-select string="Style" data-apply-to=".s_tabs_nav:first .nav">
+                <we-button data-set-style="" data-select-class="nav-underline" data-name="underline_opt">Underline</we-button>
+                <we-button data-set-style="tabs" data-select-class="nav-tabs" data-name="tabs_opt" data-trigger="horizontal_opt">Tabs</we-button>
+                <we-button data-set-style="" data-select-class="nav-pills" data-name="pills_opt">Pills</we-button>
+                <we-button data-set-style="" data-select-class="nav-buttons nav-pills bg-100 p-2 rounded" data-name="buttons_opt" data-trigger="horizontal_opt">Buttons</we-button>
             </we-select>
-            <we-colorpicker string="Tabs Color" data-dependencies="tabs_opt" data-name="tabs_color_opt" data-select-style="true" data-css-property="background-color" data-color-prefix="bg-"/>
-            <we-select string="Direction" data-dependencies="pills_opt">
+            <we-colorpicker string="Tabs Color" data-apply-to=".s_tabs_nav:first" data-dependencies="tabs_opt" data-name="tabs_color_opt" data-select-style="true" data-css-property="background-color" data-color-prefix="bg-"/>
+            <we-select string="Direction" data-dependencies="pills_opt, underline_opt">
                 <we-button data-set-direction="horizontal" data-name="horizontal_opt">Horizontal</we-button>
-                <we-button data-set-direction="vertical" data-trigger="left_alignment_opt">Vertical</we-button>
+                <we-button data-set-direction="vertical" data-trigger="left_alignment_opt,regular_width_opt">Vertical</we-button>
             </we-select>
             <we-select string="Alignment" data-apply-to=".s_tabs_nav:first .nav" data-dependencies="horizontal_opt">
                 <we-button data-select-class="" data-name="left_alignment_opt">Left</we-button>
@@ -78,7 +80,7 @@
                 <we-button data-select-class="justify-content-end">Right</we-button>
             </we-select>
             <we-select string="Fill and Justify" data-apply-to=".s_tabs_nav:first .nav" data-dependencies="horizontal_opt">
-                <we-button data-select-class="">Regular</we-button>
+                <we-button data-select-class="" data-name="regular_width_opt">Regular</we-button>
                 <we-button data-select-class="nav-fill">Full Width</we-button>
                 <we-button data-select-class="nav-justified">Equal Widths</we-button>
             </we-select>
