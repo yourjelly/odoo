@@ -809,3 +809,9 @@ class ProductProduct(models.Model):
         if lst_price:
             return (lst_price - self._get_contextual_price()) / lst_price
         return 0.0
+
+    def check_stock_quants(self):
+        '''
+        Inherit in stock and return True or False based on the stock_quant.
+        '''
+        return

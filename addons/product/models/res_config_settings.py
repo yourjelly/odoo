@@ -30,6 +30,9 @@ class ResConfigSettings(models.TransientModel):
         ('0', 'Cubic Meters'),
         ('1', 'Cubic Feet'),
     ], 'Volume unit of measure', config_parameter='product.volume_in_cubic_feet', default='0')
+    module_product_barcodelookup = fields.Boolean("Barcode Database")
+    barcodelookup_api_key = fields.Char(string='API key', config_parameter='product_barcodelookup.api_key',
+                                        help='Barcode Lookup API Key for create product from barcode.')
 
     @api.onchange('group_product_pricelist')
     def _onchange_group_sale_pricelist(self):

@@ -230,6 +230,6 @@
         <field name="res_model">product.product</field>
         <field name="view_mode">form</field>
         <field name="target">new</field>
-        <field name="view_id" ref="product.product_template_form_view"/>
+        <field name="view_id" ref="point_of_sale.product_product_view_form_add_pos"/>
     </record>
 </odoo>

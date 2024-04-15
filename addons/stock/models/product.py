@@ -650,6 +650,10 @@ class Product(models.Model):
         or_domains = expression.OR(or_domains)
         return expression.AND([base_domain, or_domains])
 
+    def check_stock_quants(self):
+        super().check_stock_quants()
+        stock_quant = self.env['stock.quant'].search([('product_id', '=', self.id)])
+        return bool(stock_quant)
 
 class ProductTemplate(models.Model):
     _inherit = 'product.template'
