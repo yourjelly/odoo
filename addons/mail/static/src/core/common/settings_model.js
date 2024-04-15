@@ -176,8 +176,12 @@ export class Settings extends Record {
             key: key || false,
         };
     }
-    togglePushToTalk() {
-        this.use_push_to_talk = !this.use_push_to_talk;
+    setBlur(value) {
+        this.useBlur = value;
+        this._saveSettings();
+    }
+    setPushToTalk(value) {
+        this.use_push_to_talk = value;
         this._saveSettings();
     }
     /**
@@ -193,17 +197,6 @@ export class Settings extends Record {
         this.audioInputDeviceId = browser.localStorage.getItem(
             "mail_user_setting_audio_input_device_id"
         );
-    }
-    /**
-     * @private
-     * @param {Event} ev
-     *
-     * Syncs the setting across tabs.
-     */
-    _onStorage(ev) {
-        if (ev.key === "mail_user_setting_voice_threshold") {
-            this.voiceActivationThreshold = ev.newValue;
-        }
     }
     /**
      * @private

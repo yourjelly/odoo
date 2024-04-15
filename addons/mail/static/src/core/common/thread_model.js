@@ -262,7 +262,6 @@ export class Thread extends Record {
             return ["mail.box", "discuss.channel"].includes(this.model) ? "bottom" : 0;
         },
     });
-    showOnlyVideo = false;
     transientMessages = Record.many("Message");
     discussAppCategory = Record.one("DiscussAppCategory", {
         compute() {
