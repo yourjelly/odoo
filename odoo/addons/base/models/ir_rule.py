@@ -44,9 +44,9 @@ class IrRule(models.Model):
         # independent from the context
         return {
             'user': self.env.user.with_context({}),
-            'time': time,
+            'time': time,  # TODO: remove ?
             'company_ids': self.env.companies.ids,
-            'company_id': self.env.company.id,
+            'company_id': self.env.company.id,  # TODO: remove ?
         }
 
     @api.depends('groups')
@@ -179,6 +179,7 @@ class IrRule(models.Model):
     def unlink(self):
         res = super(IrRule, self).unlink()
         self.env.registry.clear_cache()
+        self.env.all.clear_record_access()
         return res
 
     @api.model_create_multi
@@ -187,6 +188,7 @@ class IrRule(models.Model):
         # DLE P33: tests
         self.env.flush_all()
         self.env.registry.clear_cache()
+        self.env.all.clear_record_access()
         return res
 
     def write(self, vals):
@@ -197,6 +199,7 @@ class IrRule(models.Model):
         # - odoo/addons/base/tests/test_orm.py (/home/dle/src/odoo/master-nochange-fp/odoo/addons/base/tests/test_orm.py)
         self.env.flush_all()
         self.env.registry.clear_cache()
+        self.env.all.clear_record_access()
         return res
 
     def _make_access_error(self, operation, records):
@@ -219,7 +222,6 @@ class IrRule(models.Model):
         resolution_info = _("If you really, really need access, perhaps you can win over your friendly administrator with a batch of freshly baked cookies.")
 
         if not self.env.user.has_group('base.group_no_one') or not self.env.user._is_internal():
-            records.invalidate_recordset()
             return AccessError(f"{operation_error}\n{failing_model}\n\n{resolution_info}")
 
         # This extended AccessError is only displayed in debug mode.
@@ -245,9 +247,6 @@ class IrRule(models.Model):
 
         if company_related:
             failing_rules += "\n\n" + _('Note: this might be a multi-company issue. Switching company may help - in Odoo, not in real life!')
-
-        # clean up the cache of records prefetched with display_name above
-        records_sudo.invalidate_recordset()
 
         msg = f"{operation_error}\n{failing_records}\n\n{failing_rules}\n\n{resolution_info}"
         return AccessError(msg)

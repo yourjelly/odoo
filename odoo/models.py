@@ -1630,7 +1630,12 @@ class BaseModel(metaclass=MetaModel):
 
         fields_to_fetch = self._determine_fields_to_fetch(field_names)
 
-        return self._fetch_query(query, fields_to_fetch)
+        records = self._fetch_query(query, fields_to_fetch)
+
+        if not self.env.su:
+            self.env.mark_accessible(records)
+
+        return records
 
     #
     # display_name, name_create, name_search
@@ -3812,7 +3817,6 @@ class BaseModel(metaclass=MetaModel):
         """ Read from the database in order to fetch ``field`` (:class:`Field`
             instance) for ``self`` in cache.
         """
-        self.check_field_access_rights('read', [field.name])
         # determine which fields can be prefetched
         if self._context.get('prefetch_fields', True) and field.prefetch:
             fnames = [
@@ -3821,13 +3825,14 @@ class BaseModel(metaclass=MetaModel):
                 # select fields with the same prefetch group
                 if f.prefetch == field.prefetch
                 # discard fields with groups that the user may not access
+                # TODO: to remove ?
                 if f.is_accessible(self.env)
             ]
             if field.name not in fnames:
                 fnames.append(field.name)
         else:
             fnames = [field.name]
-        self.fetch(fnames)
+        self.sudo().fetch(fnames)
 
     def fetch(self, field_names):
         """ Make sure the given fields are in memory for the records in ``self``,
@@ -3847,43 +3852,26 @@ class BaseModel(metaclass=MetaModel):
         fields_to_fetch = self._determine_fields_to_fetch(field_names, ignore_when_in_cache=True)
 
         if not fields_to_fetch:
-            # there is nothing to fetch, but we expect an error anyway in case
-            # self is not accessible
-            self.check_access_rights('read')
-            try:
-                self.check_access_rule('read')
-            except MissingError:
-                # Method fetch() should never raise a MissingError, but method
-                # check_access_rule() can, because it must read fields on self.
-                # So we restrict 'self' to existing records (to avoid an extra
-                # exists() at the end of the method).
-                self.exists().check_access_rule('read')
             return
 
         # first determine a query that satisfies the domain and access rules
-        if any(field.column_type for field in fields_to_fetch):
+        field_to_fetch = any(field.column_type for field in fields_to_fetch)
+        if field_to_fetch:
             query = self.with_context(active_test=False)._search([('id', 'in', self.ids)])
         else:
-            self.check_access_rights('read')
-            try:
-                self.check_access_rule('read')
-            except MissingError:
-                # Method fetch() should never raise a MissingError, but method
-                # check_access_rule() can, because it must read fields on self.
-                # So we restrict 'self' to existing records (to avoid an extra
-                # exists() at the end of the method).
-                self = self.exists()
-                self.check_access_rule('read')
             query = self._as_query(ordered=False)
 
         # fetch the fields
         fetched = self._fetch_query(query, fields_to_fetch)
 
         # possibly raise exception for the records that could not be read
-        if fetched != self:
+        if fetched != self and not self.env.su:  # In case of sudo, we know that is due to inexistant record
             forbidden = (self - fetched).exists()
             if forbidden:
                 raise self.env['ir.rule']._make_access_error('read', forbidden)
+
+        if field_to_fetch and not self.env.su:
+            self.env.mark_accessible(fetched)
 
     def _determine_fields_to_fetch(self, field_names, ignore_when_in_cache=False) -> list[Field]:
         """
@@ -3901,7 +3889,8 @@ class BaseModel(metaclass=MetaModel):
         cache = self.env.cache
 
         fields_to_fetch = []
-        field_names_todo = deque(self.check_field_access_rights('read', field_names))
+        # field_names_todo = deque(self.check_field_access_rights('read', field_names))
+        field_names_todo = deque(field_names)
         field_names_done = {'id'}  # trick: ignore 'id'
 
         while field_names_todo:
@@ -4203,6 +4192,7 @@ class BaseModel(metaclass=MetaModel):
 
     def _filter_access_rules_python(self, operation):
         dom = self.env['ir.rule']._compute_domain(self._name, operation)
+        # TODO, automatically add record passing this (but need to check ACL too if necessary)
         return self.sudo().filtered_domain(dom or [])
 
     def unlink(self):
@@ -4703,6 +4693,9 @@ class BaseModel(metaclass=MetaModel):
         # check Python constraints for non-stored inversed fields
         for data in data_list:
             data['record']._validate_fields(data['inversed'], data['stored'])
+
+        if not self.env.su:  # Make sense ?
+            self.env.mark_accessible(records)
 
         if self._check_company_auto:
             records._check_company()

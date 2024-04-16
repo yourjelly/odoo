@@ -288,7 +288,6 @@ class TestPermissions(TransactionCaseWithUserDemo):
         self.attachment.datas
         # prevent read access on record
         self.rule.perm_read = True
-        self.attachment.invalidate_recordset()
         with self.assertRaises(AccessError):
             self.attachment.datas
 

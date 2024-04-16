@@ -809,6 +809,14 @@ class Environment(Mapping):
         if not ids:
             del self.all.tocompute[field]
 
+    @lazy_property
+    def access_info(self):
+        return self.transaction.record_access[self.uid, self.companies]
+
+    def mark_accessible(self, records):
+        assert not self.su, "Sanity check"  # To remove if used by outsiders
+        self.access_info[records._name].update(records._ids)
+
     def cache_key(self, field):
         """ Return the cache key of the given ``field``. """
         try:
@@ -879,6 +887,8 @@ class Transaction:
         self.protected = StackMap()
         # pending computations {field: ids}
         self.tocompute = defaultdict(OrderedSet)
+        # record access mapping {(uid, company_ids): {model_name: set(ids)}}
+        self.record_access = defaultdict(lambda: defaultdict(set))
 
     def flush(self):
         """ Flush pending computations and updates in the transaction. """
@@ -891,10 +901,17 @@ class Transaction:
         if env_to_flush is not None:
             env_to_flush.flush_all()
 
+    def clear_record_access(self):
+        # clear the first level manually in order to invalidate data of Environment.access_info
+        # TODO: that's crappy, find a better solution
+        for key in self.record_access:
+            self.record_access[key].clear()
+
     def clear(self):
         """ Clear the caches and pending computations and updates in the translations. """
         self.cache.clear()
         self.tocompute.clear()
+        self.clear_record_access()
 
     def reset(self):
         """ Reset the transaction.  This clears the transaction, and reassigns

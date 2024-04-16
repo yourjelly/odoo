@@ -73,13 +73,12 @@ class Category(models.Model):
             # assign name of last category, and reassign display_name (to normalize it)
             cat.name = names[-1].strip()
 
-    def _fetch_query(self, query, fields):
+    def _filter_access_rules_python(self, operation):
         # DLE P45: `test_31_prefetch`,
         # with self.assertRaises(AccessError):
         #     cat1.name
-        if self.search_count([('id', 'in', self._ids), ('name', '=', 'NOACCESS')]):
-            raise AccessError('Sorry')
-        return super()._fetch_query(query, fields)
+        records = super()._filter_access_rules_python(operation)
+        return records.filtered(lambda rec: rec.name != 'NOACCESS')
 
 
 class Discussion(models.Model):

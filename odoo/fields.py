@@ -1197,15 +1197,15 @@ class Field(MetaField('DummyField', (object,), {})):
             value = self.convert_to_cache(False, record, validate=False)
             return self.convert_to_record(value, record)
 
-        env = record.env
-
         # only a single record may be accessed
         record.ensure_one()
-
+        # check read access
+        self.check_read_access(record)
         if self.compute and self.store:
             # process pending computations
             self.recompute(record)
 
+        env = record.env
         try:
             value = env.cache.get(record, self)
             return self.convert_to_record(value, record)
@@ -1233,12 +1233,7 @@ class Field(MetaField('DummyField', (object,), {})):
         if self.store and record.id:
             # real record: fetch from database
             recs = record._in_cache_without(self)
-            try:
-                recs._fetch_field(self)
-            except AccessError:
-                if len(recs) == 1:
-                    raise
-                record._fetch_field(self)
+            recs._fetch_field(self)  # Don't raise error for records because fetch in sudo <- to remove
             if not env.cache.contains(record, self):
                 raise MissingError("\n".join([
                     _("Record does not exist or has been deleted."),
@@ -1456,6 +1451,44 @@ class Field(MetaField('DummyField', (object,), {})):
         """ Return a domain representing a condition on ``self``. """
         return determine(self.search, records, operator, value)
 
+    def check_read_access(self, record):
+        if record.env.su:
+            return
+
+        id_ = record._ids[0]
+        if not id_:
+            return
+
+        if self.groups:
+            # TODO: Check the performance of that
+            record.check_field_access_rights('read', [self.name])
+
+        access_data = record.env.access_info[record._name]
+        if id_ in access_data:
+            return
+        if not access_data:  # Check ACL if needed
+            record.check_access_rights('read')
+
+        ids = [id_]
+        for prefetch_id in record._prefetch_ids:
+            if prefetch_id in access_data or prefetch_id == id_:
+                continue
+            ids.append(prefetch_id)
+            if len(ids) == PREFETCH_MAX:
+                break
+
+        records = record.browse(ids)
+        try:
+            accessible_records_ids = records._filter_access_rules_python('read')._ids
+        except MissingError as exc:
+            existing_records = records.exists()
+            if id_ not in existing_records._ids:
+                raise exc from None
+            accessible_records_ids = existing_records._filter_access_rules_python('read')._ids
+
+        access_data.update(accessible_records_ids)
+        if id_ not in access_data:
+            raise record.env['ir.rule']._make_access_error('read', record)
 
 class Boolean(Field):
     """ Encapsulates a :class:`bool`. """
@@ -4269,10 +4302,13 @@ class _RelationalMulti(_Relational):
         # use registry to avoid creating a recordset for the model
         prefetch_ids = PrefetchX2many(record, self)
         Comodel = record.pool[self.comodel_name]
-        corecords = Comodel(record.env, value, prefetch_ids)
+        env = record.env
+        corecords = Comodel(env, value, prefetch_ids)
+        # filter out unaccessible records (multi-company by example)
+        corecords = self._filter_read_access(corecords)
         if (
             Comodel._active_name
-            and self.context.get('active_test', record.env.context.get('active_test', True))
+            and self.context.get('active_test', env.context.get('active_test', True))
         ):
             corecords = corecords.filtered(Comodel._active_name).with_prefetch(prefetch_ids)
         return corecords
@@ -4282,13 +4318,44 @@ class _RelationalMulti(_Relational):
         prefetch_ids = PrefetchX2many(records, self)
         Comodel = records.pool[self.comodel_name]
         ids = tuple(unique(id_ for ids in values for id_ in ids))
-        corecords = Comodel(records.env, ids, prefetch_ids)
+        env = records.env
+        corecords = Comodel(env, ids, prefetch_ids)
+        # filter out unaccessible records (multi-company by example)
+        # TODO: what about the check_access_right ???? it was done for one2many but not many2many
+        corecords = self._filter_read_access(corecords)
         if (
             Comodel._active_name
-            and self.context.get('active_test', records.env.context.get('active_test', True))
+            and self.context.get('active_test', env.context.get('active_test', True))
         ):
             corecords = corecords.filtered(Comodel._active_name).with_prefetch(prefetch_ids)
         return corecords
+
+    def _filter_read_access(self, records):
+        """ """
+        env = records.env
+        if env.su:
+            return records
+
+        access_data = env.access_info[records._name]
+        ids_to_check = tuple(id_ for id_ in records._ids if id_ not in access_data)
+        if not ids_to_check:
+            return records
+
+        # If at least one record has check ACL, don't recheck it (even if it is cache)
+        if not access_data:
+            records.check_access_rights('read')
+
+        Comodel = records.__class__
+        records_to_check = Comodel(env, ids_to_check, records._prefetch_ids)
+        # TODO: In this not optimal, if some records are filtered out, we
+        # will always need recheck it every time.
+        access_data.update(records_to_check._filter_access_rules_python('read')._ids)
+
+        return Comodel(
+            env,
+            tuple(id_ for id_ in records._ids if id_ in access_data),
+            records._prefetch_ids,
+        )
 
     def convert_to_read(self, value, record, use_display_name=True):
         return value.ids
@@ -4463,6 +4530,7 @@ class One2many(_RelationalMulti):
 
     def __get__(self, records, owner):
         if records is not None and self.inverse_name is not None:
+            # TODO: is it still necessary with https://github.com/odoo/odoo/pull/101038
             # force the computation of the inverse field to ensure that the
             # cache value of self is consistent
             inverse_field = records.pool[self.comodel_name]._fields[self.inverse_name]
@@ -4481,9 +4549,18 @@ class One2many(_RelationalMulti):
         # optimization: fetch the inverse and active fields with search()
         domain = self.get_domain_list(records) + [(inverse, 'in', records.ids)]
         field_names = [inverse]
-        if comodel._active_name:
+        if comodel._active_name:  # TODO, do it only if the context
             field_names.append(comodel._active_name)
-        lines = comodel.search_fetch(domain, field_names)
+        # fetch fields used in future security check done by convert_to_record
+        if ir_rule_domain := records.env['ir.rule']._compute_domain(comodel._name):
+            for leaf in ir_rule_domain:
+                if len(leaf) != 3:
+                    continue
+                # TODO: filterout X2Many ? avoid trigger read too soon ?
+                # Or move the read of X2Many from fetch ?
+                field_names.append(leaf[0].split('.', 1)[0])
+
+        lines = comodel.sudo().search_fetch(domain, field_names)
 
         # group lines by inverse field (without prefetching other fields)
         get_id = (lambda rec: rec.id) if inverse_field.type == 'many2one' else int
@@ -4853,7 +4930,6 @@ class Many2many(_RelationalMulti):
         # make the query for the lines
         domain = self.get_domain_list(records)
         query = comodel._where_calc(domain)
-        comodel._apply_ir_rules(query, 'read')
         query.order = comodel._order_to_sql(comodel._order, query)
 
         # join with many2many relation table
@@ -4898,7 +4974,8 @@ class Many2many(_RelationalMulti):
                 self.read(records.browse(missing_ids))
 
         # determine new relation {x: ys}
-        old_relation = {record.id: set(record[self.name]._ids) for record in records}
+        # Add sudo for `test_13_m2o_order_loop_multi`, it seems logical ? TODO
+        old_relation = {record.id: set(record[self.name]._ids) for record in records.sudo()}
         new_relation = {x: set(ys) for x, ys in old_relation.items()}
 
         # operations on new relation

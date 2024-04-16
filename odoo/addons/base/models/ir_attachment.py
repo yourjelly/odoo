@@ -438,6 +438,9 @@ class IrAttachment(models.Model):
                 if not any(has_group(g) for g in attachment.get_serving_groups()):
                     raise ValidationError(_("Sorry, you are not allowed to write on this document"))
 
+    def _filter_access_rules_python(self, operation):
+        return super(IrAttachment, self._filter_attachment_access(self._ids))._filter_access_rules_python(operation)
+
     @api.model
     def check(self, mode, values=None):
         """ Restricts the access to an ir.attachment, according to referred mode """

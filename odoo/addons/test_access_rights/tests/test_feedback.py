@@ -388,15 +388,13 @@ Blame the following rules:
 Note: this might be a multi-company issue. Switching company may help - in Odoo, not in real life!
 
 If you really, really need access, perhaps you can win over your friendly administrator with a batch of freshly baked cookies."""
-        % (self.user.name, self.user.id, self.record._description, self.record.display_name, self.record._name, self.record.id, self.record.sudo().company_id.display_name))
-        p = self.env['test_access_right.inherits'].create({'some_id': self.record.id})
-        self.env.flush_all()
-        self.env.invalidate_all()
+        % (self.user.name, self.user.id, self.record._description, self.record.sudo().display_name, self.record._name, self.record.id, self.record.sudo().company_id.display_name))
+        p = self.env['test_access_right.inherits'].with_user(self.user).create({'some_id': self.record.id})
         with self.assertRaisesRegex(
             AccessError,
             r"Implicitly accessed through 'Object for testing related access rights' \(test_access_right.inherits\)\.",
         ):
-            p.with_user(self.user).val
+            p.val
 
 class TestFieldGroupFeedback(Feedback):
 

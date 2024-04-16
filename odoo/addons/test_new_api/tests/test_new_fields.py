@@ -402,12 +402,7 @@ class TestFields(TransactionCaseWithUserDemo):
             'model_id': self.env['ir.model'].search([('model', '=', 'res.users')]).id,
             'domain_force': "[('id', '!=', %d)]" % user2.id,
         })
-        # DLE P72: Since we decided that we do not raise security access errors for data to which we had the occassion
-        # to put the value in the cache, we need to invalidate the cache for user1, user2 and user3 in order
-        # to test the below access error. Otherwise the above create calls set in the cache the information needed
-        # to compute `company_type` ('is_company'), and doesn't need to trigger a read.
-        # We need to force the read in order to test the security access
-        self.env.invalidate_all()
+        self.env.access_info.clear()
         # group users as a recordset, and read them as user demo
         users = (user1 + user2 + user3).with_user(self.user_demo)
         user1, user2, user3 = users
@@ -1806,6 +1801,7 @@ class TestFields(TransactionCaseWithUserDemo):
 
     def test_31_prefetch(self):
         """ test prefetch of records handle AccessError """
+        user = self.env.ref('base.user_admin')
         Category = self.env['test_new_api.category']
         cat1 = Category.create({'name': 'NOACCESS'})
         cat2 = Category.create({'name': 'ACCESS', 'parent': cat1.id})
@@ -1813,11 +1809,12 @@ class TestFields(TransactionCaseWithUserDemo):
 
         self.env.clear()
 
-        cat1, cat2 = cats
+        cat1, cat2 = cats.with_user(user)  # remove sudo in order to activate security check
         self.assertEqual(cat2.name, 'ACCESS')
         # both categories should be ready for prefetching
         self.assertItemsEqual(cat2._prefetch_ids, cats.ids)
-        # but due to our (lame) overwrite of `read`, it should not forbid us to read records we have access to
+        # but due to our (lame) overwrite of `_filter_access_rules_python`, 
+        # it should not forbid us to read records we have access to
         self.assertFalse(cat2.discussions)
         self.assertEqual(cat2.parent, cat1)
         with self.assertRaises(AccessError):
@@ -1851,20 +1848,7 @@ class TestFields(TransactionCaseWithUserDemo):
 
         # invalidate 'categories' for the assertQueryCount
         records.invalidate_model(['categories'])
-        with self.assertQueryCount(4):
-            # <categories>.__get__(existing)
-            #  -> records._fetch_field(['categories'])
-            #      -> records._read(['categories'])
-            #          -> records.check_access_rule('read')
-            #              -> records._filter_access_rules_python('read')
-            #                  -> records.filtered_domain(...)
-            #                      -> <name>.__get__(existing)
-            #                          -> records._fetch_field(['name'])
-            #                              -> records._read(['name', ...])
-            #                                  -> ONE QUERY to read ['name', ...] of records
-            #                                  -> ONE QUERY for deleted.exists() / code: forbidden = missing.exists()
-            #          -> ONE QUERY for records.exists() / code: self = self.exists()
-            #          -> ONE QUERY to read the many2many of existing
+        with self.assertQueryCount(1):  # 
             existing.categories
 
         # this one must trigger a MissingError
