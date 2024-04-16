@@ -5,7 +5,7 @@
             <t t-set="editButtonClass" t-value="'text-center d-flex flex-column align-items-center btn btn-light text-uppercase'" />
             <div t-if="pos.orderToTransfer" class="d-flex align-items-center justify-content-between px-3 border-bottom bg-view overflow-x-auto w-100">
                 <button t-attf-class="ms-auto {{editButtonClass}}" t-att-class="{active: !pos.isTableToMerge}" t-on-click="() => this.pos.isTableToMerge = false">
-                    <i class="fa fa-arrow-right" role="img" aria-label="Transfer" title="Transfer" />Transfer</button>
+                    <i class="fa fa-arrow-right" role="img" aria-label="Transfersss" title="Transfersss" />Transfersss</button>
                 <button t-attf-class="{{editButtonClass}}" t-att-class="{active: pos.isTableToMerge}" t-on-click="() => this.pos.isTableToMerge = true">
                     <i class="fa fa-link" role="img" aria-label="Merge" title="Merge" />Merge</button>
                 <button t-attf-class="ms-auto {{editButtonClass}}" t-on-click.stop="stopOrderTransfer">

@@ -283,7 +283,7 @@ patch(PosStore.prototype, {
             this.tableHasOrders(originalTable)
         ) {
             const confirm = await ask(this.dialog, {
-                title: _t("Multiple open orders"),
+                title: _t("Multiple open orderssssss"),
                 body: _t(
                     "Both tables have an open order. If you proceed, both orders will live on the same table. You can access them anytime from the Orders menu."
                 ),
