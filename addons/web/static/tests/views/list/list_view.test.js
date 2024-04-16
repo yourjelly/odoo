@@ -1440,8 +1440,8 @@ test("editable list datepicker destroy widget (edition)", async () => {
     await contains(".o_field_date input").click();
     expect(".o_datetime_picker").toHaveCount(1);
 
-    triggerHotkey("Escape");
-    await nextTick();
+    press("Escape");
+    await animationFrame();
 
     expect(".o_selected_row").toHaveCount(0);
     expect(".o_data_row").toHaveCount(4);
@@ -2103,7 +2103,7 @@ test("grouped list view, with 1 open group", async () => {
     expect("tr.o_data_row").toHaveCount(0);
 
     await contains("th.o_group_name").click();
-    await nextTick();
+    await animationFrame();
     expect("tr.o_group_header").toHaveCount(3);
     expect("tr.o_data_row").toHaveCount(2);
     expect("td:contains(9)").toHaveCount(1, { message: "should contain 9" });
@@ -4325,7 +4325,7 @@ test("button columns in a list view don't have a max width", async () => {
     // simulate a window resize (buttons column width should not be squeezed)
     target.style.width = "300px";
     window.dispatchEvent(new Event("resize"));
-    await nextTick();
+    await animationFrame();
 
     expect(window.getComputedStyle(queryAll("th")[1]).maxWidth).toBe("92px", { message: "max-width should be set on column foo to the minimum column width (92px)" });
     expect(window.getComputedStyle(queryAll("th")[2]).maxWidth).toBe("none", { message: "no max-width should be harcoded on the buttons column" });
@@ -5252,7 +5252,7 @@ test("pager, ungrouped, reload while fetching count", async () => {
     expect(["web_search_read"]).toVerifySteps();
 
     def.resolve();
-    await nextTick();
+    await animationFrame();
     expect(target.querySelector(".o_pager_value").innerText).toBe("1-2");
     expect(target.querySelector(".o_pager_limit").innerText).toBe("3+");
     expect([]).toVerifySteps();
@@ -5292,7 +5292,7 @@ test("pager, ungrouped, next and fetch count simultaneously", async () => {
     expect(["web_search_read"]).toVerifySteps();
 
     def.resolve();
-    await nextTick();
+    await animationFrame();
     expect(".o_pager_limit").not.toHaveClass("disabled");
 });
 
@@ -5516,8 +5516,8 @@ test("Navigate between the list and kanban view using the command palette", asyn
     expect(".o_switch_view").toHaveCount(2);
     expect(".o_list_view").toHaveCount(1);
 
-    triggerHotkey("control+k");
-    await nextTick();
+    press("control+k");
+    await animationFrame();
     expect(".o_command_category .o_command").toHaveCount(1);
     let command = target.querySelector(".o_command_category .o_command");
     expect(command.textContent).toBe("Show Kanban view");
@@ -5525,8 +5525,8 @@ test("Navigate between the list and kanban view using the command palette", asyn
     await click(command);
     expect(".o_kanban_view").toHaveCount(1);
 
-    triggerHotkey("control+k");
-    await nextTick();
+    press("control+k");
+    await animationFrame();
     expect(".o_command_category .o_command").toHaveCount(1);
     command = target.querySelector(".o_command_category .o_command");
     expect(command.textContent).toBe("Show List view");
@@ -5808,7 +5808,7 @@ test("display a tooltip on a field", async () => {
     });
 
     await mouseEnter(target.querySelector("th[data-name=foo]"));
-    await nextTick(); // GES: see next nextTick comment
+    await animationFrame(); // GES: see next nextTick comment
     expect(queryAll(".o-tooltip .o-tooltip--technical").length).toBe(0, { message: "should not have rendered a tooltip" });
 
     patchWithCleanup(odoo, {
@@ -5818,7 +5818,7 @@ test("display a tooltip on a field", async () => {
     // it is necessary to rerender the list so tooltips can be properly created
     await reloadListView(target);
     await mouseEnter(target.querySelector("th[data-name=bar]"));
-    await nextTick(); // GES: I had once an indetermist failure because of no tooltip, so for safety I add a nextTick.
+    await animationFrame(); // GES: I had once an indetermist failure because of no tooltip, so for safety I add a nextTick.
 
     expect(queryAll(".o-tooltip .o-tooltip--technical").length).toBe(1, { message: "should have rendered a tooltip" });
 
@@ -6177,8 +6177,8 @@ test("empty list with sample data: keyboard navigation", async () => {
     // From search bar
     assert.hasClass(document.activeElement, "o_searchview_input");
 
-    triggerHotkey("arrowdown");
-    await nextTick();
+    press("arrowdown");
+    await animationFrame();
 
     assert.hasClass(document.activeElement, "o_searchview_input");
 
@@ -6187,13 +6187,13 @@ test("empty list with sample data: keyboard navigation", async () => {
 
     assert.hasClass(document.activeElement, "o_list_button_add");
 
-    triggerHotkey("arrowdown");
-    await nextTick();
+    press("arrowdown");
+    await animationFrame();
 
     assert.hasClass(document.activeElement, "o_list_button_add");
 
-    triggerHotkey("tab");
-    await nextTick();
+    press("tab");
+    await animationFrame();
 
     expect(".o-tooltip--string").toHaveCount(0);
 
@@ -6202,8 +6202,8 @@ test("empty list with sample data: keyboard navigation", async () => {
 
     assert.ok(document.activeElement.dataset.name === "foo");
 
-    triggerHotkey("arrowdown");
-    await nextTick();
+    press("arrowdown");
+    await animationFrame();
 
     assert.ok(document.activeElement.dataset.name === "foo");
 });
@@ -7485,14 +7485,14 @@ test("pressing enter on last line of editable list view", async () => {
     expect(document.activeElement).toBe(target.querySelector(".o_selected_row [name=foo] input"));
 
     // press enter in input
-    triggerHotkey("Enter");
-    await nextTick();
+    press("Enter");
+    await animationFrame();
     expect("tr.o_data_row:nth-child(4)").toHaveClass("o_selected_row");
     expect(document.activeElement).toBe(target.querySelector(".o_selected_row [name=foo] input"));
 
     // press enter on last row
-    triggerHotkey("Enter");
-    await nextTick();
+    press("Enter");
+    await animationFrame();
     expect("tr.o_data_row").toHaveCount(5);
     expect("tr.o_data_row:nth-child(5)").toHaveClass("o_selected_row");
 
@@ -7514,12 +7514,12 @@ test("pressing tab on last cell of editable list view", async () => {
 
     //it will not create a new line unless a modification is made
     await editInput(document.activeElement, null, "blip-changed");
-    triggerHotkey("Tab");
-    await nextTick();
+    press("Tab");
+    await animationFrame();
     expect(document.activeElement.parentNode.getAttribute("name")).toBe("int_field", { message: "focus should be on an input with name = int_field" });
 
-    triggerHotkey("Tab");
-    await nextTick();
+    press("Tab");
+    await animationFrame();
     expect("tr.o_data_row:eq(4)").toHaveClass("o_selected_row", { message: "5th row should be selected" });
     expect(document.activeElement.parentNode.getAttribute("name")).toBe("foo", { message: "focus should be on an input with name = foo" });
 
@@ -7555,22 +7555,22 @@ test("navigation with tab and read completes after default_get", async () => {
     await click(rows[3].querySelectorAll(".o_data_cell")[1]);
 
     await contains(".o_selected_row [name='int_field'] input").edit("1234");
-    triggerHotkey("Tab");
-    await nextTick();
+    press("Tab");
+    await animationFrame();
 
     onchangeGetPromise.resolve();
     expect("tbody tr.o_data_row").toHaveCount(4, { message: "should have 4 data rows" });
 
     readPromise.resolve();
-    await nextTick();
+    await animationFrame();
     expect("tbody tr.o_data_row").toHaveCount(5, { message: "should have 5 data rows" });
     expect("td:contains(1234)").toHaveCount(1, { message: "should have a cell with new value" });
 
     // we trigger a tab to move to the second cell in the current row. this
     // operation requires that this.currentRow is properly set in the
     // list editable renderer.
-    triggerHotkey("Tab");
-    await nextTick();
+    press("Tab");
+    await animationFrame();
     expect("tr.o_data_row:eq(4)").toHaveClass("o_selected_row", { message: "5th row should be selected" });
 
     expect(["/web/webclient/translations",
@@ -7836,15 +7836,15 @@ test("pressing TAB in editable list with several fields [REQUIRE FOCUS]", async 
     expect(document.activeElement).toBe(target.querySelector(".o_data_row .o_data_cell input"));
 
     // Press 'Tab' -> should go to next cell (still in first row)
-    triggerHotkey("Tab");
-    await nextTick();
+    press("Tab");
+    await animationFrame();
 
     expect(".o_data_row").toHaveClass("o_selected_row");
     expect(document.activeElement).toBe(target.querySelector(".o_data_row .o_data_cell:nth-child(3) input"));
 
     // Press 'Tab' -> should go to next line (first cell)
-    triggerHotkey("Tab");
-    await nextTick();
+    press("Tab");
+    await animationFrame();
 
     expect(".o_data_row:nth-child(2)").toHaveClass("o_selected_row");
     expect(document.activeElement).toBe(target.querySelector(".o_data_row:nth-child(2) .o_data_cell input"));
@@ -7865,14 +7865,14 @@ test("pressing SHIFT-TAB in editable list with several fields [REQUIRE FOCUS]", 
     expect(".o_data_row:nth-child(2)").toHaveClass("o_selected_row");
     expect(document.activeElement).toBe(target.querySelector(".o_data_row:nth-child(2) .o_data_cell input"));
 
-    triggerHotkey("shift+Tab");
-    await nextTick();
+    press("shift+Tab");
+    await animationFrame();
 
     expect(".o_data_row").toHaveClass("o_selected_row");
     expect(document.activeElement).toBe(target.querySelector(".o_data_row .o_data_cell:nth-child(3) input"));
 
-    triggerHotkey("shift+Tab");
-    await nextTick();
+    press("shift+Tab");
+    await animationFrame();
 
     expect(".o_data_row").toHaveClass("o_selected_row");
     expect(document.activeElement).toBe(target.querySelector(".o_data_row .o_data_cell input"));
@@ -7900,15 +7900,15 @@ test("navigation with tab and readonly field (no modification)", async () => {
     expect(document.activeElement).toBe(target.querySelector(".o_data_row:nth-child(1) [name=foo] input"));
 
     // Pressing Tab should skip the readonly field and directly go to the next row.
-    triggerHotkey("Tab");
-    await nextTick();
+    press("Tab");
+    await animationFrame();
     expect(".o_selected_row").toHaveCount(1);
     expect(".o_data_row:nth-child(2)").toHaveClass("o_selected_row");
     expect(document.activeElement).toBe(target.querySelector(".o_data_row:nth-child(2) [name=foo] input"));
 
     // We do it again.
-    triggerHotkey("Tab");
-    await nextTick();
+    press("Tab");
+    await animationFrame();
     expect(".o_selected_row").toHaveCount(1);
     expect(".o_data_row:nth-child(3)").toHaveClass("o_selected_row");
     expect(document.activeElement).toBe(target.querySelector(".o_data_row:nth-child(3) [name=foo] input"));
@@ -7939,15 +7939,15 @@ test("navigation with tab and readonly field (with modification)", async () => {
     await editInput(document.activeElement, null, "blip-changed");
 
     // Pressing Tab should skip the readonly field and directly go to the next row.
-    triggerHotkey("Tab");
-    await nextTick();
+    press("Tab");
+    await animationFrame();
     expect(".o_selected_row").toHaveCount(1);
     expect(".o_data_row:nth-child(2)").toHaveClass("o_selected_row");
     expect(document.activeElement).toBe(target.querySelector(".o_data_row:nth-child(2) [name=foo] input"));
 
     // We do it again.
-    triggerHotkey("Tab");
-    await nextTick();
+    press("Tab");
+    await animationFrame();
     expect(".o_selected_row").toHaveCount(1);
     expect(".o_data_row:nth-child(3)").toHaveClass("o_selected_row");
     expect(document.activeElement).toBe(target.querySelector(".o_data_row:nth-child(3) [name=foo] input"));
@@ -7972,14 +7972,14 @@ test('navigation with tab on a list with create="0"', async () => {
     // Press 'Tab' -> should go to next line
     // add a value in the cell because the Tab on an empty first cell would activate the next widget in the view
     await editInput(target, ".o_selected_row .o_data_cell input", 11);
-    triggerHotkey("Tab");
-    await nextTick();
+    press("Tab");
+    await animationFrame();
     expect(".o_data_row:nth(3)").toHaveClass("o_selected_row", { message: "fourth row should be in edition" });
 
     // Press 'Tab' -> should go back to first line as the create action isn't available
     await editInput(target, ".o_selected_row .o_data_cell input", 11);
-    triggerHotkey("Tab");
-    await nextTick();
+    press("Tab");
+    await animationFrame();
     expect(".o_data_row:first").toHaveClass("o_selected_row", { message: "first row should be in edition" });
 });
 
@@ -8011,8 +8011,8 @@ test('navigation with tab on a one2many list with create="0"', async () => {
     expect(document.activeElement).toBe(target.querySelector(".o_selected_row [name=display_name] input"));
 
     // Press 'Tab' -> should go to next line
-    triggerHotkey("Tab");
-    await nextTick();
+    press("Tab");
+    await animationFrame();
     expect(".o_field_widget[name=o2m] .o_data_row:nth-child(2)").toHaveClass("o_selected_row");
     expect(".o_selected_row").toHaveCount(1);
     expect(document.activeElement).toBe(target.querySelector(".o_selected_row [name=display_name] input"));
@@ -8024,7 +8024,7 @@ test('navigation with tab on a one2many list with create="0"', async () => {
     expect(getNextTabableElement(target)).toBe(nextInput);
     assert.ok(!event.defaultPrevented);
     nextInput.focus();
-    await nextTick();
+    await animationFrame();
     expect(document.activeElement).toBe(nextInput);
 });
 
@@ -8050,8 +8050,8 @@ test("edition, then navigation with tab (with a readonly field)", async () => {
     // click on first dataRow and press TAB
     await contains(".o_data_row .o_data_cell").click();
     await contains(".o_selected_row [name='foo'] input").edit("new value");
-    triggerHotkey("Tab");
-    await nextTick();
+    press("Tab");
+    await animationFrame();
 
     expect("tbody tr:first td:contains(new value)").toHaveCount(1, { message: "should have the new value visible in dom" });
     expect(["/web/webclient/translations",
@@ -8101,8 +8101,8 @@ test("edition, then navigation with tab (with a readonly field and onchange)", a
     expect(document.activeElement).toBe(target.querySelector(".o_data_cell[name=foo] input"));
     await contains(".o_data_cell[name=foo] input").edit("new value");
 
-    triggerHotkey("Tab");
-    await nextTick();
+    press("Tab");
+    await animationFrame();
 
     expect(document.activeElement).toBe(target.querySelector(".o_data_cell[name=int_field] input"));
 
@@ -8126,8 +8126,8 @@ test("pressing SHIFT-TAB in editable list with a readonly field [REQUIRE FOCUS]"
     expect(".o_data_row:nth-child(2)").toHaveClass("o_selected_row");
     expect(document.activeElement).toBe(target.querySelector(".o_data_row:nth-child(2) [name=qux] input"));
 
-    await triggerHotkey("shift+Tab");
-    await nextTick();
+    await press("shift+Tab");
+    await animationFrame();
 
     expect(".o_data_row:nth-child(2)").toHaveClass("o_selected_row");
     expect(document.activeElement).toBe(target.querySelector(".o_data_row:nth-child(2) [name=foo] input"));
@@ -8150,8 +8150,8 @@ test("pressing SHIFT-TAB in editable list with a readonly field in first column 
     expect(".o_data_row:nth-child(2)").toHaveClass("o_selected_row");
     expect(document.activeElement).toBe(target.querySelector(".o_data_row:nth-child(2) [name=foo] input"));
 
-    triggerHotkey("shift+Tab");
-    await nextTick();
+    press("shift+Tab");
+    await animationFrame();
 
     expect(".o_data_row").toHaveClass("o_selected_row");
     expect(document.activeElement).toBe(target.querySelector(".o_data_row [name=qux] input"));
@@ -8174,8 +8174,8 @@ test("pressing SHIFT-TAB in editable list with a readonly field in last column [
     expect(".o_data_row:nth-child(2)").toHaveClass("o_selected_row");
     expect(document.activeElement).toBe(target.querySelector(".o_data_row:nth-child(2) [name=int_field] input"));
 
-    triggerHotkey("shift+Tab");
-    await nextTick();
+    press("shift+Tab");
+    await animationFrame();
 
     expect(".o_data_row").toHaveClass("o_selected_row");
     expect(document.activeElement).toBe(target.querySelector(".o_data_row [name=foo] input"));
@@ -8196,8 +8196,8 @@ test("skip invisible fields when navigating list view with TAB", async () => {
 
     await contains(".o_data_row:nth-child(1) .o_field_cell[name=foo]").click();
     expect(document.activeElement).toBe(target.querySelector(".o_data_row:nth-child(1) .o_field_cell[name=foo] input"));
-    triggerHotkey("Tab");
-    await nextTick();
+    press("Tab");
+    await animationFrame();
     expect(document.activeElement).toBe(target.querySelector(".o_data_row:nth-child(1) .o_field_cell[name=int_field] input"));
 });
 
@@ -8215,8 +8215,8 @@ test("skip buttons when navigating list view with TAB (end)", async () => {
 
     await contains(".o_data_row:nth-child(3) [name=foo]").click();
     expect(document.activeElement).toBe(target.querySelector(".o_data_row:nth-child(3) [name=foo] input"));
-    triggerHotkey("Tab");
-    await nextTick();
+    press("Tab");
+    await animationFrame();
     expect(document.activeElement).toBe(target.querySelector(".o_data_row:nth-child(4) [name=foo] input"));
 });
 
@@ -8236,8 +8236,8 @@ test("skip buttons when navigating list view with TAB (middle)", async () => {
 
     await contains(".o_data_row:nth-child(3) [name=foo]").click();
     expect(document.activeElement).toBe(target.querySelector(".o_data_row:nth-child(3) [name=foo] input"));
-    triggerHotkey("Tab");
-    await nextTick();
+    press("Tab");
+    await animationFrame();
     expect(document.activeElement).toBe(target.querySelector(".o_data_row:nth-child(3) [name=int_field] input"));
 });
 
@@ -8250,8 +8250,8 @@ test("navigation: not moving down with keydown", async () => {
 
     await contains(".o_field_cell[name=foo]").click();
     expect(".o_data_row").toHaveClass("o_selected_row");
-    triggerHotkey("arrowdown");
-    await nextTick();
+    press("arrowdown");
+    await animationFrame();
     expect(".o_data_row").toHaveClass("o_selected_row");
 });
 
@@ -8278,8 +8278,8 @@ test("navigation: moving right with keydown from text field does not move the fo
     expect(document.activeElement).toBe(textarea);
     assert.ok(textarea.selectionStart === 3 && textarea.selectionEnd === 3);
 
-    triggerHotkey("arrowright");
-    await nextTick();
+    press("arrowright");
+    await animationFrame();
 
     expect(document.activeElement).toBe(textarea);
 });
@@ -8677,12 +8677,12 @@ test("editable list with handle widget with slow network", async () => {
 
     // edit moved row before the end of resequence
     await contains("tbody tr:nth-child(4) .o_field_widget[name='amount']").click();
-    await nextTick();
+    await animationFrame();
 
     expect("tbody tr:nth-child(4) td:nth-child(3) input").toHaveCount(0, { message: "shouldn't edit the line before resequence" });
 
     prom.resolve();
-    await nextTick();
+    await animationFrame();
 
     expect("tbody tr:nth-child(4) td:nth-child(3) input").toHaveCount(1, { message: "should edit the line after resequence" });
 
@@ -8728,7 +8728,7 @@ test("multiple clicks on Add do not create invalid rows", async () => {
     assert.ok($(".o_list_button_add:visible").get(0).disabled);
 
     prom.resolve();
-    await nextTick();
+    await animationFrame();
 
     expect(".o_data_row").toHaveCount(5, { message: "only one record should have been created" });
 });
@@ -8965,8 +8965,8 @@ test("multi edit field with daterange widget (edition without using the picker)"
 
     // Change the date in the first datetime
     await contains(".o_data_row .o_data_cell .o_field_daterange[name='date_start'] input[data-field='date_start']").edit("2021-04-01 11:00:00");
-    triggerHotkey("Enter");
-    await nextTick();
+    press("Enter");
+    await animationFrame();
     expect(".modal").toHaveCount(1, { message: "The confirm dialog should appear to confirm the multi edition." });
 
     const changesTable = target.querySelector(".modal-body .o_modal_changes");
@@ -9150,8 +9150,8 @@ test("editable list view: non dirty record with required fields", async () => {
     expect(".o_selected_row").toHaveCount(1);
 
     // do not change anything and press Enter key should not allow to discard record
-    triggerHotkey("Enter");
-    await nextTick();
+    press("Enter");
+    await animationFrame();
     expect(".o_selected_row").toHaveCount(1);
 
     // discard row and create new record and keep required field empty and click anywhere
@@ -9777,21 +9777,21 @@ test("editable readonly list view: navigation", async () => {
     expect(document.activeElement).toBe(target.querySelector(".o_searchview_input"));
 
     // ArrowDown two times must get to the checkbox selector of first data row
-    triggerHotkey("ArrowDown");
-    triggerHotkey("ArrowDown");
-    await nextTick();
+    press("ArrowDown");
+    press("ArrowDown");
+    await animationFrame();
     expect(document.activeElement).toBe(target.querySelector(".o_data_row:first-child .o_list_record_selector input"));
 
     // select the second record
-    triggerHotkey("ArrowDown");
-    await nextTick();
+    press("ArrowDown");
+    await animationFrame();
     let checkbox = target.querySelector(".o_data_row:nth-child(2) .o_list_record_selector input");
     expect(document.activeElement).toBe(checkbox);
     assert.ok(!checkbox.checked);
     let event = triggerEvent(checkbox, null, "keydown", { key: "Space" }, { sync: true });
     assert.ok(!event.defaultPrevented);
     checkbox.checked = true;
-    await nextTick();
+    await animationFrame();
     expect(document.activeElement).toBe(checkbox);
     assert.ok(checkbox.checked);
 
@@ -9801,16 +9801,16 @@ test("editable readonly list view: navigation", async () => {
     assert.ok(checkbox.checked);
 
     // select the fourth record
-    triggerHotkey("ArrowDown");
-    triggerHotkey("ArrowDown");
-    await nextTick();
+    press("ArrowDown");
+    press("ArrowDown");
+    await animationFrame();
     checkbox = target.querySelector(".o_data_row:nth-child(4) .o_list_record_selector input");
     expect(document.activeElement).toBe(checkbox);
     assert.ok(!checkbox.checked);
     event = triggerEvent(checkbox, null, "keydown", { key: "Space" }, { sync: true });
     assert.ok(!event.defaultPrevented);
     checkbox.checked = true;
-    await nextTick();
+    await animationFrame();
     expect(document.activeElement).toBe(checkbox);
     assert.ok(checkbox.checked);
 
@@ -9820,47 +9820,47 @@ test("editable readonly list view: navigation", async () => {
     assert.ok(checkbox.checked);
 
     // toggle a row mode
-    triggerHotkey("ArrowUp");
-    triggerHotkey("ArrowUp");
-    triggerHotkey("ArrowRight");
-    await nextTick();
+    press("ArrowUp");
+    press("ArrowUp");
+    press("ArrowRight");
+    await animationFrame();
     expect(document.activeElement).toBe(target.querySelector(".o_data_row:nth-child(2) [name=foo]"));
-    triggerHotkey("Enter");
-    await nextTick();
+    press("Enter");
+    await animationFrame();
     expect(".o_selected_row").toHaveCount(1);
     expect(".o_data_row:nth-child(2)").toHaveClass("o_selected_row");
     expect(document.activeElement).toBe(target.querySelector(".o_data_row:nth-child(2) [name=foo] input"));
 
     // Keyboard navigation only interracts with selected elements
-    triggerHotkey("Enter");
-    await nextTick();
+    press("Enter");
+    await animationFrame();
     expect(".o_selected_row").toHaveCount(1);
     expect(".o_data_row:nth-child(4)").toHaveClass("o_selected_row");
     expect(document.activeElement).toBe(target.querySelector(".o_data_row:nth-child(4) [name=foo] input"));
 
-    triggerHotkey("Tab"); // go to 4th row int_field
-    triggerHotkey("Tab"); // go to 2nd row foo field
-    await nextTick();
+    press("Tab"); // go to 4th row int_field
+    press("Tab"); // go to 2nd row foo field
+    await animationFrame();
     expect(".o_selected_row").toHaveCount(1);
     expect(".o_data_row:nth-child(2)").toHaveClass("o_selected_row");
     expect(document.activeElement).toBe(target.querySelector(".o_data_row:nth-child(2) [name=foo] input"));
 
-    triggerHotkey("Tab"); // go to 2nd row int_field
-    triggerHotkey("Tab"); // go to 4th row foo field
-    await nextTick();
+    press("Tab"); // go to 2nd row int_field
+    press("Tab"); // go to 4th row foo field
+    await animationFrame();
     expect(".o_selected_row").toHaveCount(1);
     expect(".o_data_row:nth-child(4)").toHaveClass("o_selected_row");
     expect(document.activeElement).toBe(target.querySelector(".o_data_row:nth-child(4) [name=foo] input"));
 
-    triggerHotkey("Shift+Tab"); // go to 2nd row int_field
-    await nextTick();
+    press("Shift+Tab"); // go to 2nd row int_field
+    await animationFrame();
     expect(".o_selected_row").toHaveCount(1);
     expect(".o_data_row:nth-child(2)").toHaveClass("o_selected_row");
     expect(document.activeElement).toBe(target.querySelector(".o_data_row:nth-child(2) [name=int_field] input"));
 
-    triggerHotkey("Shift+Tab"); // go to 2nd row foo field
-    triggerHotkey("Shift+Tab"); // go to 4th row int_field field
-    await nextTick();
+    press("Shift+Tab"); // go to 2nd row foo field
+    press("Shift+Tab"); // go to 4th row int_field field
+    await animationFrame();
     expect(".o_selected_row").toHaveCount(1);
     expect(".o_data_row:nth-child(4)").toHaveClass("o_selected_row");
     expect(document.activeElement).toBe(target.querySelector(".o_data_row:nth-child(4) [name=int_field] input"));
@@ -9893,8 +9893,8 @@ test("editable list view: multi edition: edit and validate last row", async () =
     input.value = 7;
     await triggerEvent(input, null, "input");
     expect(document.activeElement).toBe(target.querySelector(".o_data_row:last-child [name=int_field] input"));
-    triggerHotkey("Enter");
-    await nextTick();
+    press("Enter");
+    await animationFrame();
     expect(".modal").toHaveCount(1);
     await contains(".modal .btn-primary").click();
     expect(".o_data_row").toHaveCount(4);
@@ -9930,20 +9930,20 @@ test("editable readonly list view: navigation in grouped list", async () => {
     expect(document.activeElement).toBe(rows[0].querySelector("[name=foo] input"));
 
     // Keyboard navigation only interracts with selected elements
-    triggerHotkey("Enter");
-    await nextTick();
+    press("Enter");
+    await animationFrame();
     expect(".o_selected_row").toHaveCount(1);
     assert.hasClass(rows[2], "o_selected_row");
     expect(document.activeElement).toBe(rows[2].querySelector("[name=foo] input"));
 
-    triggerHotkey("Tab");
-    await nextTick();
+    press("Tab");
+    await animationFrame();
     expect(".o_selected_row").toHaveCount(1);
     assert.hasClass(rows[0], "o_selected_row");
     expect(document.activeElement).toBe(rows[0].querySelector("[name=foo] input"));
 
-    triggerHotkey("Tab");
-    await nextTick();
+    press("Tab");
+    await animationFrame();
     expect(".o_selected_row").toHaveCount(1);
     assert.hasClass(rows[2], "o_selected_row");
     expect(document.activeElement).toBe(rows[2].querySelector("[name=foo] input"));
@@ -10161,7 +10161,7 @@ test("editable form with many2one: click out does not discard the row", async ()
 
     // focus and write something in the m2o
     await contains(".o_field_many2one input").edit("abcdef");
-    await nextTick();
+    await animationFrame();
 
     // simulate focus out
     await triggerEvent(target, ".o_field_many2one input", "blur");
@@ -10350,7 +10350,7 @@ test("concurrent reloads finishing in inverse order", async () => {
 
     // unblock the RPC
     def.resolve();
-    await nextTick();
+    await animationFrame();
     expect(".o_list_view .o_data_row").toHaveCount(4, { message: "list view should still contain 4 records" });
 });
 
@@ -10535,7 +10535,7 @@ test("list should ask to scroll to top on page changes", async () => {
     // change the limit (should not ask to scroll)
     await contains(".o_pager_value").click();
     await contains(".o_pager_value").edit("1-2");
-    await nextTick();
+    await animationFrame();
     expect(target.querySelector(".o_pager_value").textContent).toBe("1-2");
     expect([]).toVerifySteps({ message: "should not ask to scroll when changing the limit" });
 
@@ -11131,8 +11131,8 @@ test("pressing ESC in editable grouped list should discard the current line chan
     await contains(".o_data_cell [name=foo] input").edit("new_value");
     expect(document.activeElement).toBe(target.querySelector(".o_data_cell [name=foo] input"));
     // discard by pressing ESC
-    triggerHotkey("Escape");
-    await nextTick();
+    press("Escape");
+    await animationFrame();
     expect(".modal").toHaveCount(0);
 
     expect("tbody tr td:contains(yop)").toHaveCount(1);
@@ -11160,23 +11160,23 @@ test('pressing TAB in editable="bottom" grouped list', async () => {
     expect(".o_data_row:first").toHaveClass("o_selected_row");
 
     // Press 'Tab' -> should go to first line of second group
-    triggerHotkey("Tab");
-    await nextTick();
+    press("Tab");
+    await animationFrame();
     expect(".o_data_row:nth(1)").toHaveClass("o_selected_row");
 
     // Press 'Tab' -> should go to next line (still in second group)
-    triggerHotkey("Tab");
-    await nextTick();
+    press("Tab");
+    await animationFrame();
     expect(".o_data_row:nth(2)").toHaveClass("o_selected_row");
 
     // Press 'Tab' -> should go to next line (still in second group)
-    triggerHotkey("Tab");
-    await nextTick();
+    press("Tab");
+    await animationFrame();
     expect(".o_data_row:nth(3)").toHaveClass("o_selected_row");
 
     // Press 'Tab' -> should go back to first line of first group
-    triggerHotkey("Tab");
-    await nextTick();
+    press("Tab");
+    await animationFrame();
     expect(".o_data_row:first").toHaveClass("o_selected_row");
 });
 
@@ -11204,8 +11204,8 @@ test('pressing TAB in editable="top" grouped list', async () => {
     const dataRows = [...queryAll(".o_data_row")];
     dataRows.push(dataRows.shift());
     for (const row of dataRows) {
-        triggerHotkey("Tab");
-        await nextTick();
+        press("Tab");
+        await animationFrame();
         assert.hasClass(row, "o_selected_row");
     }
 });
@@ -11228,23 +11228,23 @@ test("pressing TAB in editable grouped list with create=0", async () => {
     expect(".o_data_row:first").toHaveClass("o_selected_row");
 
     // Press 'Tab' -> should go to the second group
-    triggerHotkey("Tab");
-    await nextTick();
+    press("Tab");
+    await animationFrame();
     expect(".o_data_row:nth(1)").toHaveClass("o_selected_row");
 
     // Press 'Tab' -> should go to next line (still in second group)
-    triggerHotkey("Tab");
-    await nextTick();
+    press("Tab");
+    await animationFrame();
     expect(".o_data_row:nth(2)").toHaveClass("o_selected_row");
 
     // Press 'Tab' -> should go to next line (still in second group)
-    triggerHotkey("Tab");
-    await nextTick();
+    press("Tab");
+    await animationFrame();
     expect(".o_data_row:nth(3)").toHaveClass("o_selected_row");
 
     // Press 'Tab' -> should go back to first line of first group
-    triggerHotkey("Tab");
-    await nextTick();
+    press("Tab");
+    await animationFrame();
     expect(".o_data_row:first").toHaveClass("o_selected_row");
 });
 
@@ -11270,8 +11270,8 @@ test('pressing SHIFT-TAB in editable="bottom" grouped list', async () => {
     await click(secondRow, ".o_data_cell");
     assert.hasClass(secondRow, "o_selected_row");
 
-    triggerHotkey("shift+Tab");
-    await nextTick();
+    press("shift+Tab");
+    await animationFrame();
 
     const firstRow = target.querySelector(".o_data_row");
     assert.hasClass(firstRow, "o_selected_row");
@@ -11283,8 +11283,8 @@ test('pressing SHIFT-TAB in editable="bottom" grouped list', async () => {
 
     assert.hasClass(thirdRow, "o_selected_row");
 
-    triggerHotkey("shift+Tab");
-    await nextTick();
+    press("shift+Tab");
+    await animationFrame();
 
     assert.hasClass(secondRow, "o_selected_row");
 });
@@ -11311,8 +11311,8 @@ test('pressing SHIFT-TAB in editable="top" grouped list', async () => {
     await click(secondRow, ".o_data_cell");
     assert.hasClass(secondRow, "o_selected_row");
 
-    triggerHotkey("shift+Tab");
-    await nextTick();
+    press("shift+Tab");
+    await animationFrame();
 
     const firstRow = target.querySelector(".o_data_row");
     assert.hasClass(firstRow, "o_selected_row");
@@ -11324,8 +11324,8 @@ test('pressing SHIFT-TAB in editable="top" grouped list', async () => {
 
     assert.hasClass(thirdRow, "o_selected_row");
 
-    triggerHotkey("shift+Tab");
-    await nextTick();
+    press("shift+Tab");
+    await animationFrame();
 
     assert.hasClass(secondRow, "o_selected_row");
 });
@@ -11352,8 +11352,8 @@ test('pressing SHIFT-TAB in editable grouped list with create="0"', async () => 
     await click(secondRow, ".o_data_cell");
     assert.hasClass(secondRow, "o_selected_row");
 
-    triggerHotkey("shift+Tab");
-    await nextTick();
+    press("shift+Tab");
+    await animationFrame();
 
     const firstRow = target.querySelector(".o_data_row");
     assert.hasClass(firstRow, "o_selected_row");
@@ -11365,8 +11365,8 @@ test('pressing SHIFT-TAB in editable grouped list with create="0"', async () => 
 
     assert.hasClass(thirdRow, "o_selected_row");
 
-    triggerHotkey("shift+Tab");
-    await nextTick();
+    press("shift+Tab");
+    await animationFrame();
 
     assert.hasClass(secondRow, "o_selected_row");
 });
@@ -11394,23 +11394,23 @@ test("editing then pressing TAB in editable grouped list", async () => {
     await editInput(target, '.o_selected_row [name="foo"] input', "new value");
 
     // Press 'Tab' -> should create a new record as we edited the previous one
-    triggerHotkey("Tab");
-    await nextTick();
+    press("Tab");
+    await animationFrame();
     expect(".o_data_row").toHaveCount(5);
     expect(".o_data_row:nth(1)").toHaveClass("o_selected_row");
 
     // fill foo field for the new record and press 'tab' -> should create another record
     await editInput(target, '.o_selected_row [name="foo"] input', "new record");
-    triggerHotkey("Tab");
-    await nextTick();
+    press("Tab");
+    await animationFrame();
 
     expect(".o_data_row").toHaveCount(6);
     expect(".o_data_row:nth(2)").toHaveClass("o_selected_row");
 
     // leave this new row empty and press tab -> should discard the new record and move to the
     // next group
-    triggerHotkey("Tab");
-    await nextTick();
+    press("Tab");
+    await animationFrame();
     expect(".o_data_row").toHaveCount(5);
     expect(".o_data_row:nth(2)").toHaveClass("o_selected_row");
 
@@ -11439,8 +11439,8 @@ test("editing then pressing TAB (with a readonly field) in grouped list", async 
 
     await contains(".o_selected_row [name=foo] input").edit("new value");
 
-    triggerHotkey("Tab");
-    await nextTick();
+    press("Tab");
+    await animationFrame();
 
     expect(target.querySelector(".o_data_row [name=foo]").innerText).toBe("new value");
 
@@ -11471,15 +11471,15 @@ test('pressing ENTER in editable="bottom" grouped list view', async () => {
     expect("tr.o_data_row:eq(2)").toHaveClass("o_selected_row");
 
     // press enter in input should move to next record
-    triggerHotkey("Enter");
-    await nextTick();
+    press("Enter");
+    await animationFrame();
 
     expect("tr.o_data_row:eq(3)").toHaveClass("o_selected_row");
     expect("tr.o_data_row:eq(2)").not.toHaveClass("o_selected_row");
 
     // press enter on last row should create a new record
-    triggerHotkey("Enter");
-    await nextTick();
+    press("Enter");
+    await animationFrame();
 
     expect("tr.o_data_row").toHaveCount(5);
     expect("tr.o_data_row:eq(4)").toHaveClass("o_selected_row");
@@ -11510,13 +11510,13 @@ test('pressing ENTER in editable="top" grouped list view', async () => {
     await contains(".o_data_row .o_data_cell").click();
     expect(".o_data_row").toHaveClass("o_selected_row");
 
-    triggerHotkey("Enter");
-    await nextTick();
+    press("Enter");
+    await animationFrame();
 
     expect(".o_data_row").toHaveClass("o_selected_row");
 
-    triggerHotkey("Enter");
-    await nextTick();
+    press("Enter");
+    await animationFrame();
 
     expect(".o_data_row").toHaveClass("o_selected_row");
 
@@ -11556,32 +11556,32 @@ test("pressing ENTER in editable grouped list view with create=0", async () => {
     expect(dataRows[0]).toBe(target.querySelector("tbody tr:nth-child(2)"));
 
     // Press enter in input should move to next record, even if record is in another group
-    triggerHotkey("Enter");
-    await nextTick();
+    press("Enter");
+    await animationFrame();
     expect(".o_selected_row").toHaveCount(1);
     assert.hasClass(dataRows[1], "o_selected_row");
     expect(document.activeElement).toBe(dataRows[1].querySelector("[name=foo] input"));
     expect(dataRows[1]).toBe(target.querySelector("tbody tr:nth-child(4)"));
 
     // Press enter in input should move to next record
-    triggerHotkey("Enter");
-    await nextTick();
+    press("Enter");
+    await animationFrame();
     expect(".o_selected_row").toHaveCount(1);
     assert.hasClass(dataRows[2], "o_selected_row");
     expect(document.activeElement).toBe(dataRows[2].querySelector("[name=foo] input"));
     expect(dataRows[2]).toBe(target.querySelector("tbody tr:nth-child(5)"));
 
     // Once again
-    triggerHotkey("Enter");
-    await nextTick();
+    press("Enter");
+    await animationFrame();
     expect(".o_selected_row").toHaveCount(1);
     assert.hasClass(dataRows[3], "o_selected_row");
     expect(document.activeElement).toBe(dataRows[3].querySelector("[name=foo] input"));
     expect(dataRows[3]).toBe(target.querySelector("tbody tr:nth-child(6)"));
 
     // Once again on the last data row should cycle to the first data row
-    triggerHotkey("Enter");
-    await nextTick();
+    press("Enter");
+    await animationFrame();
     expect(".o_selected_row").toHaveCount(1);
     assert.hasClass(dataRows[0], "o_selected_row");
     expect(document.activeElement).toBe(dataRows[0].querySelector("[name=foo] input"));
@@ -11602,69 +11602,69 @@ test("cell-level keyboard navigation in non-editable list", async () => {
 
     expect(document.activeElement).toBe(target.querySelector(".o_searchview_input"));
 
-    triggerHotkey("ArrowDown");
-    await nextTick();
+    press("ArrowDown");
+    await animationFrame();
     expect(document.activeElement).toBe(target.querySelector("thead .o_list_record_selector input"));
 
-    triggerHotkey("ArrowUp");
-    await nextTick();
+    press("ArrowUp");
+    await animationFrame();
     expect(document.activeElement).toBe(target.querySelector(".o_searchview_input"));
 
-    triggerHotkey("ArrowDown");
-    triggerHotkey("ArrowDown");
-    await nextTick();
+    press("ArrowDown");
+    press("ArrowDown");
+    await animationFrame();
     expect(document.activeElement).toBe(target.querySelector("tbody tr:first-child .o_list_record_selector input"));
 
-    triggerHotkey("ArrowRight");
-    await nextTick();
+    press("ArrowRight");
+    await animationFrame();
     expect(document.activeElement).toBe(target.querySelector("tbody tr:first-child .o_field_cell[name=foo]"));
     expect(document.activeElement.textContent).toBe("yop");
 
-    triggerHotkey("ArrowRight");
-    await nextTick();
+    press("ArrowRight");
+    await animationFrame();
     expect(document.activeElement).toBe(target.querySelector("tbody tr:first-child .o_field_cell[name=foo]"));
 
-    triggerHotkey("ArrowDown");
-    await nextTick();
+    press("ArrowDown");
+    await animationFrame();
     expect(document.activeElement).toBe(target.querySelector("tbody tr:nth-child(2) .o_field_cell[name=foo]"));
     expect(document.activeElement.textContent).toBe("blip");
 
-    triggerHotkey("ArrowDown");
-    await nextTick();
+    press("ArrowDown");
+    await animationFrame();
     expect(document.activeElement).toBe(target.querySelector("tbody tr:nth-child(3) .o_field_cell[name=foo]"));
     expect(document.activeElement.textContent).toBe("gnap");
 
-    triggerHotkey("ArrowDown");
-    await nextTick();
+    press("ArrowDown");
+    await animationFrame();
     expect(document.activeElement).toBe(target.querySelector("tbody tr:nth-child(4) .o_field_cell[name=foo]"));
     expect(document.activeElement.textContent).toBe("blip");
 
-    triggerHotkey("ArrowDown");
-    await nextTick();
+    press("ArrowDown");
+    await animationFrame();
     expect(document.activeElement).toBe(target.querySelector("tbody tr:nth-child(4) .o_field_cell[name=foo]"));
     expect(document.activeElement.textContent).toBe("blip");
 
-    triggerHotkey("ArrowRight");
-    await nextTick();
+    press("ArrowRight");
+    await animationFrame();
     expect(document.activeElement).toBe(target.querySelector("tbody tr:nth-child(4) .o_field_cell[name=foo]"));
     expect(document.activeElement.textContent).toBe("blip");
 
-    triggerHotkey("ArrowLeft");
-    await nextTick();
+    press("ArrowLeft");
+    await animationFrame();
     expect(document.activeElement).toBe(target.querySelector("tbody tr:nth-child(4) .o_list_record_selector input"));
 
-    triggerHotkey("ArrowLeft");
-    await nextTick();
+    press("ArrowLeft");
+    await animationFrame();
     expect(document.activeElement).toBe(target.querySelector("tbody tr:nth-child(4) .o_list_record_selector input"));
 
-    triggerHotkey("ArrowUp");
-    triggerHotkey("ArrowRight");
-    await nextTick();
+    press("ArrowUp");
+    press("ArrowRight");
+    await animationFrame();
     expect(document.activeElement).toBe(target.querySelector("tbody tr:nth-child(3) .o_field_cell[name=foo]"));
     expect(document.activeElement.textContent).toBe("gnap");
 
-    triggerHotkey("Enter");
-    await nextTick();
+    press("Enter");
+    await animationFrame();
     expect(["resId: 3"]).toVerifySteps();
 });
 
@@ -11685,25 +11685,25 @@ test("keyboard navigation from last cell in editable list", async () => {
     expect(document.activeElement).toBe(target.querySelector(".o_data_row:last-child [name=int_field] input"));
 
     // Tab should focus the first field of first row
-    triggerHotkey("Tab");
-    await nextTick();
+    press("Tab");
+    await animationFrame();
     expect(document.activeElement).toBe(target.querySelector(".o_data_row:first-child [name=foo] input"));
 
     // Shift+Tab should focus back the last field of last row
-    triggerHotkey("Shift+Tab");
-    await nextTick();
+    press("Shift+Tab");
+    await animationFrame();
     expect(document.activeElement).toBe(target.querySelector(".o_data_row:last-child [name=int_field] input"));
 
     // Enter should add a new row at the bottom
     expect(".o_data_row").toHaveCount(4);
-    triggerHotkey("Enter");
-    await nextTick();
+    press("Enter");
+    await animationFrame();
     expect(".o_data_row").toHaveCount(5);
     expect(document.activeElement).toBe(target.querySelector(".o_data_row:last-child [name=foo] input"));
 
     // Enter should discard the edited row as it is pristine + get to first row
-    triggerHotkey("Enter");
-    await nextTick();
+    press("Enter");
+    await animationFrame();
     expect(".o_data_row").toHaveCount(4);
     expect(document.activeElement).toBe(target.querySelector(".o_data_row:first-child [name=foo] input"));
 
@@ -11712,8 +11712,8 @@ test("keyboard navigation from last cell in editable list", async () => {
     expect(document.activeElement).toBe(target.querySelector(".o_data_row:last-child [name=int_field] input"));
 
     // Enter should add a new row at the bottom
-    triggerHotkey("Enter");
-    await nextTick();
+    press("Enter");
+    await animationFrame();
     expect(".o_data_row").toHaveCount(5);
 
     // Edit the row and press enter: should add a new row
@@ -11721,14 +11721,14 @@ test("keyboard navigation from last cell in editable list", async () => {
     expect(document.activeElement).toBe(input);
     input.value = "blork";
     await triggerEvent(input, null, "input");
-    triggerHotkey("Enter");
+    press("Enter");
     await triggerEvent(input, null, "change");
     expect(".o_data_row").toHaveCount(6);
     expect(document.activeElement).toBe(target.querySelector(".o_data_row:last-child [name=foo] input"));
 
     // Escape should discard the added row as it is pristine + view should go into readonly mode
-    triggerHotkey("Escape");
-    await nextTick();
+    press("Escape");
+    await animationFrame();
     expect(".o_data_row").toHaveCount(5);
     expect(".o_selected_row").toHaveCount(0);
 });
@@ -11759,24 +11759,24 @@ test("keyboard navigation from last cell in editable grouped list", async () => 
     expect(document.activeElement).toBe(getDataRow(4).querySelector("[name=int_field] input"));
 
     // Tab should focus the first field of first data row
-    triggerHotkey("Tab");
-    await nextTick();
+    press("Tab");
+    await animationFrame();
     expect(document.activeElement).toBe(getDataRow(1).querySelector("[name=foo] input"));
 
     // Shift+Tab should focus back the last field of last row
-    triggerHotkey("Shift+Tab");
-    await nextTick();
+    press("Shift+Tab");
+    await animationFrame();
     expect(document.activeElement).toBe(getDataRow(4).querySelector("[name=int_field] input"));
 
     // Enter should add a new row at the bottom
-    triggerHotkey("Enter");
-    await nextTick();
+    press("Enter");
+    await animationFrame();
     expect(".o_data_row").toHaveCount(5);
     expect(document.activeElement).toBe(getDataRow(5).querySelector("[name=foo] input"));
 
     // Enter should discard the edited row as it is pristine + get to first row
-    triggerHotkey("Enter");
-    await nextTick();
+    press("Enter");
+    await animationFrame();
     expect(".o_data_row").toHaveCount(4);
     expect(document.activeElement).toBe(getDataRow(1).querySelector("[name=foo] input"));
 
@@ -11785,8 +11785,8 @@ test("keyboard navigation from last cell in editable grouped list", async () => 
     expect(document.activeElement).toBe(getDataRow(4).querySelector("[name=int_field] input"));
 
     // Enter should add a new row at the bottom
-    triggerHotkey("Enter");
-    await nextTick();
+    press("Enter");
+    await animationFrame();
     expect(".o_data_row").toHaveCount(5);
 
     // Edit the row and press enter: should add a new row
@@ -11794,14 +11794,14 @@ test("keyboard navigation from last cell in editable grouped list", async () => 
     expect(document.activeElement).toBe(input);
     input.value = "blork";
     await triggerEvent(input, null, "input");
-    triggerHotkey("Enter");
+    press("Enter");
     await triggerEvent(input, null, "change");
     expect(".o_data_row").toHaveCount(6);
     expect(document.activeElement).toBe(getDataRow(6).querySelector("[name=foo] input"));
 
     // Escape should discard the added row as it is pristine + view should go into readonly mode
-    triggerHotkey("Escape");
-    await nextTick();
+    press("Escape");
+    await animationFrame();
     expect(".o_data_row").toHaveCount(5);
     expect(".o_selected_row").toHaveCount(0);
 
@@ -11811,26 +11811,26 @@ test("keyboard navigation from last cell in editable grouped list", async () => 
     expect(document.activeElement).toBe(getDataRow(1).querySelector("[name=foo] input"));
 
     // Enter should add a new row in the first group
-    triggerHotkey("Enter");
-    await nextTick();
+    press("Enter");
+    await animationFrame();
     expect(".o_data_row").toHaveCount(6);
     assert.equal(getGroup(1).innerText.replace(/[\s\n]+/g, " "), "No (2) -4");
 
     // Enter should discard the edited row as it is pristine + get to next data row
-    triggerHotkey("Enter");
-    await nextTick();
+    press("Enter");
+    await animationFrame();
     expect(".o_data_row").toHaveCount(5);
     assert.equal(getGroup(1).innerText.replace(/[\s\n]+/g, " "), "No (1) -4");
     expect(document.activeElement).toBe(getDataRow(2).querySelector("[name=foo] input"));
 
     // Shift+Tab should focus back the last field of first row
-    triggerHotkey("Shift+Tab");
-    await nextTick();
+    press("Shift+Tab");
+    await animationFrame();
     expect(document.activeElement).toBe(getDataRow(1).querySelector("[name=int_field] input"));
 
     // Enter should add a new row in the first group
-    triggerHotkey("Enter");
-    await nextTick();
+    press("Enter");
+    await animationFrame();
     expect(".o_data_row").toHaveCount(6);
     assert.equal(getGroup(1).innerText.replace(/[\s\n]+/g, " "), "No (2) -4");
 
@@ -11839,7 +11839,7 @@ test("keyboard navigation from last cell in editable grouped list", async () => 
     expect(document.activeElement).toBe(input);
     input.value = "zzapp";
     await triggerEvent(input, null, "input");
-    triggerHotkey("Enter");
+    press("Enter");
     await triggerEvent(input, null, "change");
     expect(".o_data_row").toHaveCount(7);
     assert.equal(getGroup(1).innerText.replace(/[\s\n]+/g, " "), "No (3) -4");
@@ -11872,24 +11872,24 @@ test("keyboard navigation from last cell in multi-edit list", async () => {
     expect(document.activeElement).toBe(getDataRow(4).querySelector("[name=int_field] input"));
 
     // Tab should focus the first field of first data row
-    triggerHotkey("Tab");
-    await nextTick();
+    press("Tab");
+    await animationFrame();
     expect(document.activeElement).toBe(getDataRow(1).querySelector("[name=foo] input"));
 
     // Shift+Tab should focus back the last field of last row
-    triggerHotkey("Shift+Tab");
-    await nextTick();
+    press("Shift+Tab");
+    await animationFrame();
     expect(document.activeElement).toBe(getDataRow(4).querySelector("[name=int_field] input"));
 
     // Enter should add a new row at the bottom
-    triggerHotkey("Enter");
-    await nextTick();
+    press("Enter");
+    await animationFrame();
     expect(".o_data_row").toHaveCount(5);
     expect(document.activeElement).toBe(getDataRow(5).querySelector("[name=foo] input"));
 
     // Enter should discard the edited row as it is pristine + get to first row
-    triggerHotkey("Enter");
-    await nextTick();
+    press("Enter");
+    await animationFrame();
     expect(".o_data_row").toHaveCount(4);
     expect(document.activeElement).toBe(getDataRow(1).querySelector("[name=foo] input"));
 
@@ -11898,8 +11898,8 @@ test("keyboard navigation from last cell in multi-edit list", async () => {
     expect(document.activeElement).toBe(getDataRow(4).querySelector("[name=int_field] input"));
 
     // Enter should add a new row at the bottom
-    triggerHotkey("Enter");
-    await nextTick();
+    press("Enter");
+    await animationFrame();
     expect(".o_data_row").toHaveCount(5);
 
     // Edit the row and press enter: should add a new row
@@ -11907,14 +11907,14 @@ test("keyboard navigation from last cell in multi-edit list", async () => {
     expect(document.activeElement).toBe(input);
     input.value = "blork";
     await triggerEvent(input, null, "input");
-    triggerHotkey("Enter");
+    press("Enter");
     await triggerEvent(input, null, "change");
     expect(".o_data_row").toHaveCount(6);
     expect(document.activeElement).toBe(getDataRow(6).querySelector("[name=foo] input"));
 
     // Escape should discard the added row as it is pristine + view should go into readonly mode
-    triggerHotkey("Escape");
-    await nextTick();
+    press("Escape");
+    await animationFrame();
     expect(".o_data_row").toHaveCount(5);
     expect(".o_selected_row").toHaveCount(0);
 
@@ -11924,26 +11924,26 @@ test("keyboard navigation from last cell in multi-edit list", async () => {
     expect(document.activeElement).toBe(getDataRow(1).querySelector("[name=foo] input"));
 
     // Enter should add a new row in the first group
-    triggerHotkey("Enter");
-    await nextTick();
+    press("Enter");
+    await animationFrame();
     expect(".o_data_row").toHaveCount(6);
     assert.equal(getGroup(1).innerText.replace(/[\s\n]+/g, " "), "No (2) -4");
 
     // Enter should discard the edited row as it is pristine + get to next data row
-    triggerHotkey("Enter");
-    await nextTick();
+    press("Enter");
+    await animationFrame();
     expect(".o_data_row").toHaveCount(5);
     assert.equal(getGroup(1).innerText.replace(/[\s\n]+/g, " "), "No (1) -4");
     expect(document.activeElement).toBe(getDataRow(2).querySelector("[name=foo] input"));
 
     // Shift+Tab should focus back the last field of first row
-    triggerHotkey("Shift+Tab");
-    await nextTick();
+    press("Shift+Tab");
+    await animationFrame();
     expect(document.activeElement).toBe(getDataRow(1).querySelector("[name=int_field] input"));
 
     // Enter should add a new row in the first group
-    triggerHotkey("Enter");
-    await nextTick();
+    press("Enter");
+    await animationFrame();
     expect(".o_data_row").toHaveCount(6);
     assert.equal(getGroup(1).innerText.replace(/[\s\n]+/g, " "), "No (2) -4");
 
@@ -11952,7 +11952,7 @@ test("keyboard navigation from last cell in multi-edit list", async () => {
     expect(document.activeElement).toBe(input);
     input.value = "zzapp";
     await triggerEvent(input, null, "input");
-    triggerHotkey("Enter");
+    press("Enter");
     await triggerEvent(input, null, "change");
     expect(".o_data_row").toHaveCount(7);
     assert.equal(getGroup(1).innerText.replace(/[\s\n]+/g, " "), "No (3) -4");
@@ -11979,15 +11979,15 @@ test("keyboard navigation with date range", async () => {
 
     expect(document.activeElement).toBe(target.querySelector(".o_data_row:first-child [name=foo] input"));
 
-    triggerHotkey("Tab");
-    await nextTick();
+    press("Tab");
+    await animationFrame();
 
     const [startDateInput, endDateInput] = queryAll(".o_data_row:first-child [name=date] input");
 
     expect(document.activeElement).toBe(startDateInput);
 
-    triggerHotkey("Tab");
-    await nextTick();
+    press("Tab");
+    await animationFrame();
 
     expect(document.activeElement).toBe(startDateInput, { message: "programmatic tab shouldn't toggle focus" });
 
@@ -11995,8 +11995,8 @@ test("keyboard navigation with date range", async () => {
 
     expect(document.activeElement).toBe(endDateInput);
 
-    triggerHotkey("Tab");
-    await nextTick();
+    press("Tab");
+    await animationFrame();
 
     expect(document.activeElement).toBe(target.querySelector(".o_data_row:first-child [name=int_field] input"));
 });
@@ -12018,13 +12018,13 @@ test("keyboard navigation with Many2One field", async () => {
 
     expect(document.activeElement).toBe(target.querySelector(".o_data_row:first-child [name=foo] input"));
 
-    triggerHotkey("Tab");
-    await nextTick();
+    press("Tab");
+    await animationFrame();
 
     expect(document.activeElement).toBe(target.querySelector(".o_data_row:first-child [name=m2o] input"));
 
-    triggerHotkey("Tab");
-    await nextTick();
+    press("Tab");
+    await animationFrame();
 
     expect(document.activeElement).toBe(target.querySelector(".o_data_row:first-child [name=int_field] input"));
 });
@@ -12058,14 +12058,14 @@ test("multi-edit records with ENTER does not crash", async () => {
     expect(document.activeElement).toBe(input);
     input.value = "234";
     await triggerEvent(input, null, "input");
-    triggerHotkey("Enter");
+    press("Enter");
     await triggerEvent(input, null, "change");
 
     expect(".o_dialog").toHaveCount(1); // confirmation dialog
     await contains(".o_dialog .modal-footer .btn-primary").click();
     await new Promise((r) => setTimeout(r, 20)); // delay a bit the save s.t. there's a rendering
     def.resolve();
-    await nextTick();
+    await animationFrame();
     expect(queryAllTexts(".o_data_cell.o_list_number")).toEqual(["10", "234", "234", "-4"]);
     expect(".o_dialog").toHaveCount(0); // no more confirmation dialog, no error dialog
 });
@@ -12161,8 +12161,8 @@ test("cell-level keyboard navigation in editable grouped list", async () => {
 
     await editInput(secondDataRow, "[name=foo] input", "blipbloup");
 
-    triggerHotkey("Escape");
-    await nextTick();
+    press("Escape");
+    await animationFrame();
 
     expect(".modal").toHaveCount(0);
 
@@ -12172,24 +12172,24 @@ test("cell-level keyboard navigation in editable grouped list", async () => {
 
     expect(document.activeElement.textContent).toBe("blip");
 
-    triggerHotkey("ArrowLeft");
+    press("ArrowLeft");
 
     expect(document.activeElement).toBe(secondDataRow.querySelector("input[type=checkbox]"));
 
-    triggerHotkey("ArrowUp");
-    triggerHotkey("ArrowRight");
+    press("ArrowUp");
+    press("ArrowRight");
 
     const firstDataRow = target.querySelector(".o_data_row");
     expect(document.activeElement).toBe(firstDataRow.querySelector("[name=foo]"));
 
-    triggerHotkey("Enter");
-    await nextTick();
+    press("Enter");
+    await animationFrame();
 
     assert.hasClass(firstDataRow, "o_selected_row");
     await editInput(firstDataRow, "[name=foo] input", "Zipadeedoodah");
 
-    triggerHotkey("Enter");
-    await nextTick();
+    press("Enter");
+    await animationFrame();
 
     expect(firstDataRow.querySelector("[name=foo]").innerText).toBe("Zipadeedoodah");
     assert.doesNotHaveClass(firstDataRow, "o_selected_row");
@@ -12197,56 +12197,56 @@ test("cell-level keyboard navigation in editable grouped list", async () => {
     expect(document.activeElement).toBe(secondDataRow.querySelector("[name=foo] input"));
     expect(document.activeElement.value).toBe("blip");
 
-    triggerHotkey("ArrowUp");
-    triggerHotkey("ArrowRight");
-    await nextTick();
+    press("ArrowUp");
+    press("ArrowRight");
+    await animationFrame();
 
     expect(document.activeElement).toBe(secondDataRow.querySelector("[name=foo] input"));
     expect(document.activeElement.value).toBe("blip");
 
-    triggerHotkey("ArrowDown");
-    triggerHotkey("ArrowLeft");
-    await nextTick();
+    press("ArrowDown");
+    press("ArrowLeft");
+    await animationFrame();
 
     expect(document.activeElement).toBe(secondDataRow.querySelector("td[name=foo] input"));
     expect(document.activeElement.value).toBe("blip");
 
-    triggerHotkey("Escape");
-    await nextTick();
+    press("Escape");
+    await animationFrame();
 
     assert.doesNotHaveClass(secondDataRow, "o_selected_row");
 
     expect(document.activeElement).toBe(secondDataRow.querySelector("td[name=foo]"));
 
-    triggerHotkey("ArrowDown");
-    triggerHotkey("ArrowDown");
+    press("ArrowDown");
+    press("ArrowDown");
 
     expect(document.activeElement).toBe(target.querySelector(".o_group_field_row_add a"));
 
-    triggerHotkey("ArrowDown");
+    press("ArrowDown");
 
     const secondGroupHeader = queryAll(".o_group_name")[1];
     expect(document.activeElement).toBe(secondGroupHeader);
 
     expect(".o_data_row").toHaveCount(3);
 
-    triggerHotkey("Enter");
-    await nextTick();
+    press("Enter");
+    await animationFrame();
 
     expect(".o_data_row").toHaveCount(4);
 
     expect(document.activeElement).toBe(secondGroupHeader);
 
-    triggerHotkey("ArrowDown");
+    press("ArrowDown");
 
     const fourthDataRow = queryAll(".o_data_row")[3];
     expect(document.activeElement).toBe(fourthDataRow.querySelector("[name=foo]"));
 
-    triggerHotkey("ArrowDown");
+    press("ArrowDown");
 
     expect(document.activeElement).toBe(queryAll(".o_group_field_row_add a")[1]);
 
-    triggerHotkey("ArrowDown");
+    press("ArrowDown");
 
     expect(document.activeElement).toBe(queryAll(".o_group_field_row_add a")[1]);
 
@@ -12260,96 +12260,96 @@ test("cell-level keyboard navigation in editable grouped list", async () => {
 
     await editInput(fifthDataRow.querySelector("[name=foo] input"), null, "cheateur arrete de cheater");
 
-    triggerHotkey("Enter");
-    await nextTick();
+    press("Enter");
+    await animationFrame();
 
     expect(".o_data_row").toHaveCount(6);
 
-    triggerHotkey("Escape");
-    await nextTick();
+    press("Escape");
+    await animationFrame();
 
     expect(document.activeElement).toBe(queryAll(".o_group_field_row_add a")[1]);
 
     // come back to the top
     for (let i = 0; i < 9; i++) {
-        triggerHotkey("ArrowUp");
+        press("ArrowUp");
     }
 
     expect(document.activeElement).toBe(target.querySelector("thead th:nth-child(2)"));
 
-    triggerHotkey("ArrowLeft");
+    press("ArrowLeft");
 
     expect(document.activeElement).toBe(target.querySelector("thead th.o_list_record_selector input"));
 
-    triggerHotkey("ArrowDown");
-    triggerHotkey("ArrowDown");
-    triggerHotkey("ArrowRight");
+    press("ArrowDown");
+    press("ArrowDown");
+    press("ArrowRight");
 
     expect(document.activeElement).toBe(firstDataRow.querySelector("td[name=foo]"));
 
-    triggerHotkey("ArrowUp");
+    press("ArrowUp");
 
     expect(document.activeElement).toBe(target.querySelector(".o_group_header:nth-child(1) .o_group_name"));
 
     expect(".o_data_row").toHaveCount(5);
 
-    triggerHotkey("Enter");
-    await nextTick();
+    press("Enter");
+    await animationFrame();
 
     expect(".o_data_row").toHaveCount(2);
 
     expect(document.activeElement).toBe(target.querySelector(".o_group_header:nth-child(1) .o_group_name"));
 
-    triggerHotkey("ArrowRight");
-    await nextTick();
+    press("ArrowRight");
+    await animationFrame();
 
     expect(".o_data_row").toHaveCount(5);
 
     expect(document.activeElement).toBe(target.querySelector(".o_group_header:nth-child(1) .o_group_name"));
 
-    triggerHotkey("ArrowRight");
-    await nextTick();
+    press("ArrowRight");
+    await animationFrame();
 
     expect(".o_data_row").toHaveCount(5);
 
     expect(document.activeElement).toBe(target.querySelector(".o_group_header:nth-child(1) .o_group_name"));
 
-    triggerHotkey("ArrowLeft");
-    await nextTick();
+    press("ArrowLeft");
+    await animationFrame();
 
     expect(".o_data_row").toHaveCount(2);
 
     expect(document.activeElement).toBe(target.querySelector(".o_group_header:nth-child(1) .o_group_name"));
 
-    triggerHotkey("ArrowLeft");
-    await nextTick();
+    press("ArrowLeft");
+    await animationFrame();
 
     expect(".o_data_row").toHaveCount(2);
     expect(document.activeElement).toBe(target.querySelector(".o_group_header:nth-child(1) .o_group_name"));
 
-    triggerHotkey("ArrowDown");
+    press("ArrowDown");
 
     expect(document.activeElement).toBe(target.querySelector(".o_group_header:nth-child(2) .o_group_name"));
 
-    triggerHotkey("ArrowDown");
+    press("ArrowDown");
 
     const firstVisibleDataRow = target.querySelector(".o_data_row");
     expect(document.activeElement).toBe(firstVisibleDataRow.querySelector("[name=foo]"));
 
-    triggerHotkey("ArrowDown");
+    press("ArrowDown");
 
     const secondVisibleDataRow = queryAll(".o_data_row")[1];
     expect(document.activeElement).toBe(secondVisibleDataRow.querySelector("[name=foo]"));
 
-    triggerHotkey("ArrowDown");
+    press("ArrowDown");
 
     expect(document.activeElement).toBe(target.querySelector(".o_group_field_row_add a"));
 
-    triggerHotkey("ArrowUp");
+    press("ArrowUp");
 
     expect(document.activeElement).toBe(secondVisibleDataRow.querySelector("[name=foo]"));
 
-    triggerHotkey("ArrowUp");
+    press("ArrowUp");
     expect(document.activeElement).toBe(firstVisibleDataRow.querySelector("[name=foo]"));
 });
 
@@ -12382,52 +12382,52 @@ test("execute group header button with keyboard navigation", async () => {
     $(".o_list_button_add:visible").get(0).focus();
     expect(document.activeElement).toBe($(".o_list_button_add:visible").get(0));
 
-    triggerHotkey("ArrowDown");
-    await nextTick();
+    press("ArrowDown");
+    await animationFrame();
 
     expect(document.activeElement).toBe(target.querySelector("thead th.o_list_record_selector input"));
 
-    triggerHotkey("ArrowDown");
-    await nextTick();
+    press("ArrowDown");
+    await animationFrame();
     expect(document.activeElement).toBe(target.querySelector(".o_group_header:nth-child(1) .o_group_name"));
 
     // unfold first group
-    triggerHotkey("Enter");
-    await nextTick();
+    press("Enter");
+    await animationFrame();
     expect(".o_data_row").toHaveCount(3);
     expect(document.activeElement).toBe(target.querySelector(".o_group_header:nth-child(1) .o_group_name"));
 
     // move to first record of opened group
-    triggerHotkey("ArrowDown");
-    await nextTick();
+    press("ArrowDown");
+    await animationFrame();
     expect(document.activeElement).toBe(target.querySelector("tbody .o_data_row td[name=foo]"));
 
     // move back to the group header
-    triggerHotkey("ArrowUp");
-    await nextTick();
+    press("ArrowUp");
+    await animationFrame();
     expect(document.activeElement).toBe(target.querySelector(".o_group_header:nth-child(1) .o_group_name"));
 
     // fold the group
-    triggerHotkey("Enter");
-    await nextTick();
+    press("Enter");
+    await animationFrame();
     expect(".o_data_row").toHaveCount(0);
     expect(document.activeElement).toBe(target.querySelector(".o_group_header:nth-child(1) .o_group_name"));
 
     // unfold the group
-    triggerHotkey("Enter");
-    await nextTick();
+    press("Enter");
+    await animationFrame();
     expect(".o_data_row").toHaveCount(3);
     expect(document.activeElement).toBe(target.querySelector(".o_group_header:nth-child(1) .o_group_name"));
 
     // tab to the group header button
-    triggerHotkey("Tab");
-    await nextTick();
+    press("Tab");
+    await animationFrame();
     expect(document.activeElement).toBe(target.querySelector(".o_group_header .o_group_buttons button:first-child"));
 
     // click on the button by pressing enter
     expect([]).toVerifySteps();
-    triggerHotkey("Enter");
-    await nextTick();
+    press("Enter");
+    await animationFrame();
     expect(".o_data_row").toHaveCount(3);
     expect(["some_method"]).toVerifySteps();
 });
@@ -12845,7 +12845,7 @@ test("list view with optional fields and async rendering", async () => {
     expect(".o-dropdown--menu input:checked").toHaveCount(1);
 
     def.resolve();
-    await nextTick();
+    await animationFrame();
     expect("th").toHaveCount(4);
     expect(".o_optional_columns_dropdown .show").toHaveCount(1);
     expect(".o-dropdown--menu input:checked").toHaveCount(1);
@@ -13067,7 +13067,7 @@ test("quickcreate in a many2one in a list", async () => {
     await editInput(input, null, "aaa");
     await triggerEvents(input, null, ["keyup", "blur"]);
     document.body.click();
-    await nextTick();
+    await animationFrame();
     expect(".modal").toHaveCount(1, { message: "the quick_create modal should appear" });
 
     await contains(".modal .btn-primary").click();
@@ -13368,12 +13368,12 @@ test("continue creating new lines in editable=top on keyboard nav", async () => 
     await contains(".o_list_button_add:visible").click();
 
     await contains(".o_data_cell[name=int_field] input").edit("1");
-    triggerHotkey("Tab");
-    await nextTick();
+    press("Tab");
+    await animationFrame();
 
     await contains(".o_data_cell[name=int_field] input").edit("2");
-    triggerHotkey("Enter");
-    await nextTick();
+    press("Enter");
+    await animationFrame();
 
     // 3 new rows: the two created ("1" and "2", and a new still in edit mode)
     expect($(".o_data_cell[name=int_field]").length).toBe(initialRowCount + 3);
@@ -13610,7 +13610,7 @@ test("Auto save: modify a record and leave action (reject)", async () => {
     await contains(".o_data_cell").click();
     await editInput(target, '.o_data_cell [name="foo"] input', "");
     doAction(webClient, 2);
-    await nextTick();
+    await animationFrame();
     assert.deepEqual(
         [...queryAll(".o_data_cell")].map((el) => el.textContent),
         ["", "blip", "gnap", "blip"]
@@ -13726,7 +13726,7 @@ test("Auto save: save on closing tab/browser", async () => {
     const evnt = new Event("beforeunload");
     expect.preventDefault = () => assert.step("prevented");
     window.dispatchEvent(evnt);
-    await nextTick();
+    await animationFrame();
     expect(["save"]).toVerifySteps();
 });
 
@@ -13752,7 +13752,7 @@ test("Auto save: save on closing tab/browser (pending changes)", async () => {
     await triggerEvent(input, null, "input");
 
     window.dispatchEvent(new Event("beforeunload"));
-    await nextTick();
+    await animationFrame();
 });
 
 test("Auto save: save on closing tab/browser (invalid field)", async () => {
@@ -13778,7 +13778,7 @@ test("Auto save: save on closing tab/browser (invalid field)", async () => {
     const evnt = new Event("beforeunload");
     expect.preventDefault = () => assert.step("prevented");
     window.dispatchEvent(evnt);
-    await nextTick();
+    await animationFrame();
 
     expect(["prevented"]).toVerifySteps({ message: "should not save because of invalid field" });
 });
@@ -13814,7 +13814,7 @@ test("Auto save: save on closing tab/browser (onchanges + pending changes)", asy
     await editInput(target, '.o_data_cell [name="int_field"] input', "2021");
 
     window.dispatchEvent(new Event("beforeunload"));
-    await nextTick();
+    await animationFrame();
 });
 
 test("Auto save: save on closing tab/browser (onchanges)", async () => {
@@ -13851,7 +13851,7 @@ test("Auto save: save on closing tab/browser (onchanges)", async () => {
     await triggerEvent(input, null, "input");
 
     window.dispatchEvent(new Event("beforeunload"));
-    await nextTick();
+    await animationFrame();
 });
 
 test("edition, then navigation with tab (with a readonly re-evaluated field and onchange)", async () => {
@@ -13898,8 +13898,8 @@ test("edition, then navigation with tab (with a readonly re-evaluated field and 
     expect(document.activeElement).toBe(target.querySelector(".o_data_cell[name=foo] input"));
     await contains(".o_data_cell[name=foo] input").edit("new value");
 
-    triggerHotkey("Tab");
-    await nextTick();
+    press("Tab");
+    await animationFrame();
 
     expect(document.activeElement).toBe(target.querySelector(".o_data_cell[name=int_field] input"));
 
@@ -14252,8 +14252,8 @@ test("editable list correctly saves dirty fields ", async () => {
     const input = target.querySelector(".o_data_cell input");
     input.value = "test";
     await triggerEvent(input, null, "input");
-    triggerHotkey("Tab");
-    await nextTick();
+    press("Tab");
+    await animationFrame();
 
     expect(["web_save"]).toVerifySteps();
 });
@@ -14304,7 +14304,7 @@ test("edit a field with a slow onchange in a new row", async () => {
 
     // unlock onchange
     def.resolve();
-    await nextTick();
+    await animationFrame();
 
     // check the current line is added with the correct content
     expect(target.querySelector(".o_data_row [name=int_field]").innerText).toBe(value);
@@ -14668,7 +14668,7 @@ test("edit a record then select another record with a throw error when saving", 
     expect("[name='foo'] input").toHaveCount(1);
 
     await click(queryFirst(".o_data_cell"));
-    await nextTick();
+    await animationFrame();
     expect(".o_error_dialog").toHaveCount(1);
 
     await contains(".o_error_dialog .btn-primary.o-default-button").click();
@@ -14676,7 +14676,7 @@ test("edit a record then select another record with a throw error when saving", 
     expect(".o_data_row").toHaveClass("o_selected_row");
 
     await click(queryFirst(".o_data_cell"));
-    await nextTick();
+    await animationFrame();
     expect(".o_error_dialog").toHaveCount(1);
 
     await contains(".o_error_dialog .btn-primary.o-default-button").click();
@@ -15776,7 +15776,7 @@ test("x2many onchange, check result", async () => {
     expect(["onchange"]).toVerifySteps();
     await contains(".o_list_button_save:not(.btn-link)").click();
     def.resolve();
-    await nextTick();
+    await animationFrame();
 
     expect(target.querySelector(".o_data_cell.o_many2many_tags_cell").textContent).toBe("Value 1Value 2Value 3");
     expect(target.querySelector(".o_data_cell.o_list_many2one").textContent).toBe("Value 3", { message: "onchange result should be applied" });
@@ -15852,7 +15852,7 @@ test("context keys not passed down the stack and not to fields", async () => {
     const input = target.querySelector(".o_selected_row .o_field_many2many_tags input");
     await triggerEvent(input, null, "focus");
     await click(input);
-    await nextTick();
+    await animationFrame();
     assert.verifySteps([`bar: name_search: {"lang":"en","tz":"taht","uid":7}`]);
 
     const items = Array.from(queryAll(".o_selected_row .o_field_many2many_tags .dropdown-item"));
@@ -15892,15 +15892,15 @@ test("search nested many2one field with early option selection", async () => {
     const input = document.activeElement;
     input.value = "alu";
     triggerEvent(document.activeElement, null, "input");
-    await nextTick();
+    await animationFrame();
 
     input.value = "alue";
     triggerEvent(document.activeElement, null, "input");
-    triggerHotkey("Enter");
-    await nextTick();
+    press("Enter");
+    await animationFrame();
 
     deferred.resolve();
-    await nextTick();
+    await animationFrame();
 
     expect(input).toBe(document.activeElement);
     expect(input.value).toBe("Value 1");
@@ -15952,7 +15952,7 @@ test("add record in editable list view with sample data", async () => {
     expect(".o_data_row").toHaveCount(10);
 
     def.resolve();
-    await nextTick();
+    await animationFrame();
 
     expect(".o_view_sample_data").toHaveCount(0);
     expect(".o_view_nocontent").toHaveCount(0);
@@ -16003,7 +16003,7 @@ test("onchange should only be called once after pressing enter on a field", asyn
     await contains(".o_data_cell").click();
     target.querySelector(".o_field_widget[name=foo] input").value = "1";
     await triggerEvents(target, ".o_field_widget[name=foo] input", [["keydown", { key: "Enter" }], ["change"]]);
-    await nextTick();
+    await animationFrame();
     expect(["onchange"]).toVerifySteps({ message: "There should only be one onchange call" });
 });
 
