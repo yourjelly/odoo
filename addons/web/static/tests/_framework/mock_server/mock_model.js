@@ -1617,7 +1617,7 @@ export class Model extends Array {
         for (const [modelName, value] of Object.entries(modelFields)) {
             models[modelName] = { fields: MockServer.env[modelName].fields_get(value.fields) };
         }
-
+        debugger
         if (kwargs.options.load_filters && "search" in views) {
             views["search"].filters = this._filters;
         }

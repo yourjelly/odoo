@@ -3,7 +3,7 @@ import { after, beforeEach, expect, test } from "@odoo/hoot";
 import { keyDown } from "@odoo/hoot-dom";
 import { click, dblclick, drag, edit, hover, leave, pointerDown, press, queryAll, queryAllTexts, queryFirst, queryOne, queryText, resize } from "@odoo/hoot-dom";
 import { animationFrame, Deferred, runAllTimers } from "@odoo/hoot-mock";
-import { clickKanbanLoadMore, clickSave, contains, createKanbanRecord, defineModels, defineParams, discardKanbanRecord, editKanbanColumnName, editKanbanRecord, editKanbanRecordQuickCreateInput, fields, getDropdownMenu, getFacetTexts, getKanbanColumn, getKanbanColumnDropdownMenu, getKanbanColumnTooltips, getKanbanCounters, getKanbanProgressBars, getKanbanRecord, getKanbanRecordTexts, getPagerLimit, getPagerValue, getService, makeServerError, MockServer, mockService, models, mountView, mountWithCleanup, onRpc, pagerNext, patchWithCleanup, quickCreateKanbanColumn, quickCreateKanbanRecord, serverState, stepAllNetworkCalls, toggleKanbanColumnActions, toggleKanbanRecordDropdown, toggleMenuItem, toggleMenuItemOption, toggleSearchBarMenu, validateKanbanColumn, validateKanbanRecord, validateSearch, webModels } from "@web/../tests/web_test_helpers";
+import { clickKanbanLoadMore, clickSave, contains, createKanbanRecord, defineModels, defineParams, discardKanbanRecord, editFavoriteName, editKanbanColumnName, editKanbanRecord, editKanbanRecordQuickCreateInput, fields, getDropdownMenu, getFacetTexts, getKanbanColumn, getKanbanColumnDropdownMenu, getKanbanColumnTooltips, getKanbanCounters, getKanbanProgressBars, getKanbanRecord, getKanbanRecordTexts, getPagerLimit, getPagerValue, getService, makeServerError, MockServer, mockService, models, mountView, mountWithCleanup, onRpc, pagerNext, patchWithCleanup, quickCreateKanbanColumn, quickCreateKanbanRecord, saveFavorite, selectGroup, serverState, stepAllNetworkCalls, toggleGroupByMenu, toggleKanbanColumnActions, toggleKanbanRecordDropdown, toggleMenuItem, toggleMenuItemOption, toggleSaveFavorite, toggleSearchBarMenu, validateKanbanColumn, validateKanbanRecord, validateSearch, webModels } from "@web/../tests/web_test_helpers";
 
 import { currencies } from "@web/core/currency";
 import { registry } from "@web/core/registry";
@@ -149,13 +149,13 @@ class Foo extends models.Model {
     bar = fields.Boolean();
     date = fields.Date();
     datetime = fields.Datetime();
-    int_field = fields.Integer({ aggregator: "sum", sortable: true });
-    qux = fields.Float({ aggregator: "sum" });
+    int_field = fields.Integer({ sortable: true });
+    qux = fields.Float();
     m2o = fields.Many2one({ relation: "bar" });
     o2m = fields.One2many({ relation: "bar" });
     m2m = fields.Many2many({ relation: "bar" });
     text = fields.Text();
-    amount = fields.Monetary({ aggregator: "sum", currency_field: "currency_id" });
+    amount = fields.Monetary({ currency_field: "currency_id" });
     currency_id = fields.Many2one({ relation: "res.currency", default: 1 });
     reference = fields.Reference({
         selection: [
@@ -221,6 +221,8 @@ class Foo extends models.Model {
 }
 
 class Bar extends models.Model {
+    _rec_name = "display_name";
+
     definitions = fields.PropertiesDefinition();
 
     _records = [
@@ -1461,8 +1463,9 @@ test("editable list datepicker destroy widget (new line)", async () => {
 
     await contains(".o_field_date input").click();
     expect(".o_datetime_picker").toHaveCount(1, { message: "datepicker should be opened" });
-    await triggerEvent(document.activeElement, null, "keydown", { key: "Escape" });
 
+    press("escape");
+    await animationFrame();
     expect(".o_selected_row").toHaveCount(0, { message: "the row is no longer in edition" });
     expect(".o_data_row").toHaveCount(4, { message: "There should still be 4 rows" });
 });
@@ -1490,12 +1493,12 @@ test('discard a new record in editable="top" list with less than 4 records', asy
 
     await contains(".o_list_button_add:visible").click();
     expect(".o_data_row").toHaveCount(4);
-    expect("tbody tr").toHaveClass("o_selected_row");
+    expect("tbody tr:first").toHaveClass("o_selected_row");
 
     await contains(".o_list_button_discard:not(.dropdown-item)").click();
     expect(".o_data_row").toHaveCount(3);
     expect("tbody tr").toHaveCount(4);
-    expect("tbody tr").toHaveClass("o_data_row");
+    expect("tbody tr:first").toHaveClass("o_data_row");
 });
 
 test("basic grouped list rendering", async () => {
@@ -1532,8 +1535,8 @@ test('basic grouped list rendering with widget="handle" col', async () => {
     expect("thead th[data-name=int_field]").toHaveCount(0);
     expect("tr.o_group_header").toHaveCount(2);
     expect("th.o_group_name").toHaveCount(2);
-    expect(".o_group_header th").toHaveCount(2); // group name + colspan 2
-    expect(".o_group_header .o_list_number").toHaveCount(0);
+    expect(".o_group_header:first th").toHaveCount(2); // group name + colspan 2
+    expect(".o_group_header:first .o_list_number").toHaveCount(0);
 });
 
 test("basic grouped list rendering with a date field between two fields with a aggregator", async () => {
@@ -1551,10 +1554,12 @@ test("basic grouped list rendering with a date field between two fields with a a
 
     expect("thead th").toHaveCount(4); // record selector + Foo + Int + Date + Int
     expect("thead th.o_list_record_selector").toHaveCount(1);
-    expect(queryAllTexts("thead th")).toEqual(["", "int_field", "Some Date", "int_field"]);
+    expect(queryAllTexts("thead th")).toEqual(["", "Int field",
+    "Date",
+    "Int field"]);
     expect("tr.o_group_header").toHaveCount(2);
     expect("th.o_group_name").toHaveCount(2);
-    expect(getNodesTextContent(target.querySelector(".o_group_header").querySelectorAll("td"))).toEqual(["-4", "", "-4"]);
+    expect(queryAllTexts(".o_group_header:first td")).toEqual(["-4", "", "-4"]);
 });
 
 test("basic grouped list rendering 1 col without selector", async () => {
@@ -1566,8 +1571,8 @@ test("basic grouped list rendering 1 col without selector", async () => {
         allowSelectors: false,
     });
 
-    expect(".o_group_header th").toHaveCount(1);
-    expect(target.querySelector(".o_group_header th").getAttribute("colspan")).toBe("1");
+    expect(".o_group_header:first th").toHaveCount(1);
+    expect(".o_group_header th:first").toHaveAttribute("colspan", "1");
 });
 
 test("basic grouped list rendering 1 col with selector", async () => {
@@ -1578,8 +1583,8 @@ test("basic grouped list rendering 1 col with selector", async () => {
         groupBy: ["bar"],
     });
 
-    expect(".o_group_header th").toHaveCount(1);
-    expect(target.querySelector(".o_group_header th").getAttribute("colspan")).toBe("2");
+    expect(".o_group_header:first th").toHaveCount(1);
+    expect(".o_group_header th:first").toHaveAttribute("colspan", "2");
 });
 
 test("basic grouped list rendering 2 cols without selector", async () => {
@@ -1591,8 +1596,8 @@ test("basic grouped list rendering 2 cols without selector", async () => {
         allowSelectors: false,
     });
 
-    expect(".o_group_header th").toHaveCount(2);
-    expect(target.querySelector(".o_group_header th").getAttribute("colspan")).toBe("1");
+    expect(".o_group_header:first th").toHaveCount(2);
+    expect(".o_group_header th:first").toHaveAttribute("colspan", "1");
 });
 
 test("basic grouped list rendering 3 cols without selector", async () => {
@@ -1604,8 +1609,8 @@ test("basic grouped list rendering 3 cols without selector", async () => {
         allowSelectors: false,
     });
 
-    expect(".o_group_header th").toHaveCount(2);
-    expect(target.querySelector(".o_group_header th").getAttribute("colspan")).toBe("2");
+    expect(".o_group_header:first th").toHaveCount(2);
+    expect(".o_group_header th:first").toHaveAttribute("colspan", "2");
 });
 
 test("basic grouped list rendering 2 col with selector", async () => {
@@ -1617,8 +1622,8 @@ test("basic grouped list rendering 2 col with selector", async () => {
         allowSelectors: true,
     });
 
-    expect(".o_group_header th").toHaveCount(2);
-    expect(target.querySelector(".o_group_header th").getAttribute("colspan")).toBe("2");
+    expect(".o_group_header:first th").toHaveCount(2);
+    expect(".o_group_header th:first").toHaveAttribute("colspan", "2");
 });
 
 test("basic grouped list rendering 3 cols with selector", async () => {
@@ -1630,8 +1635,8 @@ test("basic grouped list rendering 3 cols with selector", async () => {
         allowSelectors: true,
     });
 
-    expect(".o_group_header th").toHaveCount(2);
-    expect(target.querySelector(".o_group_header th").getAttribute("colspan")).toBe("3");
+    expect(".o_group_header:first th").toHaveCount(2);
+    expect(".o_group_header th:first").toHaveAttribute("colspan", "3");
 });
 
 test("basic grouped list rendering 7 cols with aggregates and selector", async () => {
@@ -1651,10 +1656,10 @@ test("basic grouped list rendering 7 cols with aggregates and selector", async (
         groupBy: ["bar"],
     });
 
-    expect(".o_group_header th,td").toHaveCount(5);
-    expect(target.querySelector(".o_group_header th").getAttribute("colspan")).toBe("3");
-    expect(".o_group_header td").toHaveCount(3, { message: "there should be 3 tds (aggregates + fields in between)" });
-    expect(target.querySelector(".o_group_header th:last-child").getAttribute("colspan")).toBe("2", { message: "header last cell should span on the two last fields (to give space for the pager) (colspan 2)" });
+    expect(".o_group_header:first th, .o_group_header:first td").toHaveCount(5);
+    expect(".o_group_header th:first").toHaveAttribute("colspan", "3");
+    expect(".o_group_header:first td").toHaveCount(3, { message: "there should be 3 tds (aggregates + fields in between)" });
+    expect(".o_group_header th:last-child").toHaveAttribute("colspan", "2", { message: "header last cell should span on the two last fields (to give space for the pager) (colspan 2)" });
 });
 
 test("basic grouped list rendering 7 cols with aggregates, selector and optional", async () => {
@@ -1674,10 +1679,10 @@ test("basic grouped list rendering 7 cols with aggregates, selector and optional
         groupBy: ["bar"],
     });
 
-    expect(".o_group_header th,td").toHaveCount(5);
-    expect(target.querySelector(".o_group_header th").getAttribute("colspan")).toBe("3");
-    expect(".o_group_header td").toHaveCount(3, { message: "there should be 3 tds (aggregates + fields in between)" });
-    expect(target.querySelector(".o_group_header th:last-child").getAttribute("colspan")).toBe("3", { message: "header last cell should span on the two last fields (to give space for the pager) (colspan 2)" });
+    expect(".o_group_header:first th, .o_group_header:first td").toHaveCount(5);
+    expect(".o_group_header th:first").toHaveAttribute("colspan", "3");
+    expect(".o_group_header:first td").toHaveCount(3, { message: "there should be 3 tds (aggregates + fields in between)" });
+    expect(".o_group_header th:last-child").toHaveAttribute("colspan", "3", { message: "header last cell should span on the two last fields (to give space for the pager) (colspan 2)" });
 });
 
 test("basic grouped list rendering 4 cols with aggregates, selector and openFormView", async () => {
@@ -1694,8 +1699,8 @@ test("basic grouped list rendering 4 cols with aggregates, selector and openForm
         groupBy: ["bar"],
     });
 
-    expect(target.querySelector(".o_group_header th").getAttribute("colspan")).toBe("2");
-    expect(target.querySelector(".o_group_header th:last-child").getAttribute("colspan")).toBe("2");
+    expect(".o_group_header th:first").toHaveAttribute("colspan", "2");
+    expect(".o_group_header th:last-child").toHaveAttribute("colspan", "2");
 });
 
 test("basic grouped list rendering 4 cols with aggregates, selector, optional and openFormView", async () => {
@@ -1712,33 +1717,29 @@ test("basic grouped list rendering 4 cols with aggregates, selector, optional an
         groupBy: ["bar"],
     });
 
-    expect(target.querySelector(".o_group_header th").getAttribute("colspan")).toBe("2");
-    expect(target.querySelector(".o_group_header th:last-child").getAttribute("colspan")).toBe("1");
+    expect(".o_group_header th:first").toHaveAttribute("colspan", "2");
+    expect(".o_group_header th:last-child").toHaveAttribute("colspan", "1");
 });
 
 test("group a list view with the aggregable field 'value'", async () => {
-    serverData.models.foo.fields.value = {
-        string: "Value",
-        type: "integer",
-        aggregator: "sum",
-    };
-    for (const record of serverData.models.foo.records) {
+    Foo._fields.value = fields.Integer();
+
+    for (const record of Foo._records) {
         record.value = 1;
     }
     await mountView({
         type: "list",
         resModel: "foo",
         arch: `
-                <tree>
-                    <field name="bar"/>
-                    <field name="value" sum="Sum1"/>
-                </tree>`,
+            <tree>
+                <field name="bar"/>
+                <field name="value" sum="Sum1"/>
+            </tree>`,
         groupBy: ["bar"],
     });
     expect(".o_group_header").toHaveCount(2);
-    assert.deepEqual(
-        [...queryAll(".o_group_header")].map((el) => el.textContent),
-        ["No (1) 1", "Yes (3) 3"]
+    expect(queryAllTexts(".o_group_header")).toEqual(
+        ["No (1)\n 1", "Yes (3)\n 3"]
     );
 });
 
@@ -1756,24 +1757,20 @@ test("basic grouped list rendering with groupby m2m field", async () => {
 
     expect(".o_group_header").toHaveCount(4, { message: "should contain 4 open groups" });
     expect(".o_group_open").toHaveCount(0, { message: "no group is open" });
-    assert.deepEqual(
-        [...queryAll(".o_group_header .o_group_name")].map((el) => el.innerText),
-        ["None (1)", "Value 1 (3)", "Value 2 (2)", "Value 3 (1)"],
-        "should have those group headers"
+    expect(queryAllTexts(".o_group_header .o_group_name")).toEqual(
+        ["Value 1 (3)", "Value 2 (2)", "Value 3 (1)", "None (1)"],
     );
 
     // Open all groups
-    await click(queryFirst(".o_group_name"));
-    await click(queryAll(".o_group_name")[1]);
-    await click(queryAll(".o_group_name")[2]);
-    await click(queryAll(".o_group_name")[3]);
+    await contains(".o_group_name").click();
+    await contains(queryAll(".o_group_name")[1]).click();
+    await contains(queryAll(".o_group_name")[2]).click();
+    await contains(queryAll(".o_group_name")[3]).click();
     expect(".o_group_open").toHaveCount(4, { message: "all groups are open" });
 
     const rows = queryAll(".o_list_view tbody > tr");
-    assert.deepEqual(
-        [...rows].map((el) => el.innerText.replace(/\s/g, "")),
-        ["None(1)", "gnap", "Value1(3)", "yopValue1Value2", "blipValue1Value2Value3", "blipValue1", "Value2(2)", "yopValue1Value2", "blipValue1Value2Value3", "Value3(1)", "blipValue1Value2Value3"],
-        "should have these row contents"
+    expect(queryAllTexts(".o_list_view tbody > tr")).toEqual(
+        ["Value 1 (3)", "yop \nValue 1\nValue 2", "blip \nValue 1\nValue 2\nValue 3", "blip \nValue 1", "Value 2 (2)", "yop \nValue 1\nValue 2", "blip \nValue 1\nValue 2\nValue 3", "Value 3 (1)", "blip \nValue 1\nValue 2\nValue 3", "None (1)", "gnap", ],
     );
 });
 
@@ -1790,31 +1787,13 @@ test("grouped list rendering with groupby m2o and m2m field", async () => {
         groupBy: ["m2o", "m2m"],
     });
 
-    let rows = queryAll("tbody > tr");
-    assert.deepEqual(
-        [...rows].map((el) => el.innerText.replace(/\s/g, "")),
-
-        ["Value1(3)", "Value2(1)"],
-        "should have these row contents"
-    );
-
+    expect(queryAllTexts("tbody > tr")).toEqual(["Value 1 (3)", "Value 2 (1)"]);
+    
     await contains("th.o_group_name").click();
-
-    rows = queryAll("tbody > tr");
-    assert.deepEqual(
-        [...rows].map((el) => el.innerText.replace(/\s/g, "")),
-        ["Value1(3)", "None(1)", "Value1(2)", "Value2(1)", "Value2(1)"],
-        "should have these row contents"
-    );
-
-    await click(queryAll("tbody th.o_group_name")[4]);
-    rows = queryAll(".o_list_view tbody > tr");
-
-    assert.deepEqual(
-        [...rows].map((el) => el.innerText.replace(/\s/g, "")),
-        ["Value1(3)", "None(1)", "Value1(2)", "Value2(1)", "Value2(1)", "Value1(1)", "Value2(1)", "Value3(1)"],
-        "should have these row contents"
-    );
+    expect(queryAllTexts("tbody > tr")).toEqual(["Value 1 (3)", "None (1)", "Value 1 (2)", "Value 2 (1)", "Value 2 (1)"]);
+    
+    await contains(queryAll("tbody th.o_group_name")[4]).click();
+    expect(queryAllTexts(".o_list_view tbody > tr")).toEqual(["Value 1 (3)", "None (1)", "Value 1 (2)", "Value 2 (1)", "Value 2 (1)", "Value 1 (1)", "Value 2 (1)", "Value 3 (1)"]);
 });
 
 test("list view with multiple groupbys", async () => {
@@ -1828,13 +1807,13 @@ test("list view with multiple groupbys", async () => {
 
     expect(".o_view_nocontent").toHaveCount(0);
     expect(".o_group_has_content").toHaveCount(2);
-    expect(queryAllTexts(".o_group_has_content")).toEqual(["No (1) ", "Yes (3) "]);
+    expect(queryAllTexts(".o_group_has_content")).toEqual(["No (1)", "Yes (3)"]);
 });
 
 test("deletion of record is disabled when groupby m2m field", async () => {
-    patchUserWithCleanup({ hasGroup: () => Promise.resolve(false) });
+    onRpc("has_group", () => false);
 
-    serverData.models.foo.fields.m2m.groupable = true;
+    // serverData.models.foo.fields.m2m.groupable = true;
 
     await mountView({
         type: "list",
@@ -1846,7 +1825,8 @@ test("deletion of record is disabled when groupby m2m field", async () => {
             </tree>`,
         actionMenus: {},
     });
-    await groupByMenu(target, "m2m");
+
+    await selectGroup("m2m");
 
     await contains(".o_group_header:first-child").click(); // open first group
     await contains(".o_data_row .o_list_record_selector input").click();
@@ -1861,14 +1841,18 @@ test("deletion of record is disabled when groupby m2m field", async () => {
     expect("div.o_control_panel .o_cp_action_menus").toHaveCount(1);
     expect("div.o_control_panel .o_cp_action_menus .dropdown-toggle").toHaveCount(1);
     await contains("div.o_control_panel .o_cp_action_menus .dropdown-toggle").click();
-    assert.deepEqual(
-        [...queryAll(".o-dropdown--menu .o_menu_item")].map((el) => el.innerText),
+    expect(queryAllTexts(".o-dropdown--menu .o_menu_item")).toEqual(
         ["Duplicate", "Delete"]
     );
 });
 
 test("add record in list grouped by m2m", async () => {
     expect.assertions(7);
+
+    onRpc("onchange", ({ kwargs }) => {
+        expect(kwargs.context.default_m2m).toEqual([1]);
+
+    })
 
     await mountView({
         type: "list",
@@ -1879,23 +1863,18 @@ test("add record in list grouped by m2m", async () => {
                 <field name="m2m" widget="many2many_tags"/>
             </tree>`,
         groupBy: ["m2m"],
-        mockRPC(route, args) {
-            if (args.method === "onchange") {
-                expect(args.kwargs.context.default_m2m).toEqual([1]);
-            }
-        },
     });
 
     expect(".o_group_header").toHaveCount(4);
-    expect(queryAllTexts(".o_group_header")).toEqual(["None (1) ", "Value 1 (3) ", "Value 2 (2) ", "Value 3 (1) "]);
+    expect(queryAllTexts(".o_group_header")).toEqual([ "Value 1 (3)", "Value 2 (2)", "Value 3 (1)", "None (1)"]);
 
-    await click(queryAll(".o_group_header")[1]);
+    await contains(".o_group_header").click();
     expect(".o_data_row").toHaveCount(3);
 
     await contains(".o_group_field_row_add a").click();
     expect(".o_selected_row").toHaveCount(1);
     expect(".o_selected_row .o_field_tags .o_tag").toHaveCount(1);
-    expect(target.querySelector(".o_selected_row .o_field_tags .o_tag").innerText).toBe("Value 1");
+    expect(".o_selected_row .o_field_tags .o_tag").toHaveText("Value 1");
 });
 
 test("editing a record should change same record in other groups when grouped by m2m field", async () => {
@@ -1909,32 +1888,41 @@ test("editing a record should change same record in other groups when grouped by
                 </tree>`,
         groupBy: ["m2m"],
     });
-    await click(queryAll(".o_group_header")[1]); // open Value 1 group
-    await click(queryAll(".o_group_header")[2]); // open Value 2 group
-    const rows = queryAll(".o_data_row");
-    expect(rows[0].querySelector(".o_list_char").textContent).toBe("yop");
-    expect(rows[3].querySelector(".o_list_char").textContent).toBe("yop");
-
+    await contains(".o_group_header").click(); // open Value 1 group
+    await contains(queryAll(".o_group_header")[1]).click(); // open Value 2 group
+    expect(queryAllTexts(".o_list_char")).toEqual(["yop",
+    "blip",
+    "blip",
+    "yop",
+    "blip",]);
+    
     await contains(".o_data_row .o_list_record_selector input").click();
     await contains(".o_data_row .o_data_cell").click();
-    await editInput(rows[0], ".o_data_row .o_list_char input", "xyz");
+    await contains(".o_data_row .o_list_char input").edit("xyz");
     await contains(".o_list_view").click();
-    expect(rows[0].querySelector(".o_list_char").textContent).toBe("xyz");
-    expect(rows[3].querySelector(".o_list_char").textContent).toBe("xyz");
+    expect(queryAllTexts(".o_list_char")).toEqual(["xyz",
+    "blip",
+    "blip",
+    "xyz",
+    "blip"]);
 });
 
 test("change a record field in readonly should change same record in other groups when grouped by m2m field", async () => {
-    expect.assertions(6);
+    expect.assertions(5);
 
-    serverData.models.foo.fields.priority = {
-        string: "Priority",
-        type: "selection",
-        selection: [
+    Foo._fields.priority = fields.Selection({ selection: [
             [0, "Not Prioritary"],
             [1, "Prioritary"],
         ],
         default: 0,
-    };
+    });
+
+    onRpc("web_save", ({ args }) => {
+        expect(args[0]).toEqual([1], { message: "should write on the correct record" });
+        expect(args[1]).toEqual({
+                priority: 1,
+            });
+    });
 
     await mountView({
         type: "list",
@@ -1947,46 +1935,33 @@ test("change a record field in readonly should change same record in other group
                 </tree>`,
         groupBy: ["m2m"],
         domain: [["m2o", "=", 1]],
-        mockRPC(route, args) {
-            if (args.method === "web_save") {
-                expect(args.args[0]).toEqual([1], { message: "should write on the correct record" });
-                assert.deepEqual(
-                    args.args[1],
-                    {
-                        priority: 1,
-                    },
-                    "should write these changes"
-                );
-            }
-        },
     });
 
-    await click(queryAll(".o_group_header")[1]); // open Value 1 group
-    await click(queryAll(".o_group_header")[2]); // open Value 2 group
-    const rows = queryAll(".o_data_row");
-    expect(rows[0].querySelector(".o_list_char").textContent).toBe("yop");
-    expect(rows[2].querySelector(".o_list_char").textContent).toBe("yop");
+    await contains(".o_group_header").click(); // open Value 1 group
+    await contains(queryAll(".o_group_header")[1]).click(); // open Value 2 group
+    expect(queryAllTexts(".o_list_char")).toEqual(["yop",
+    "blip",
+    "yop"]);
     expect(".o_priority_star.fa-star").toHaveCount(0, { message: "should not have any starred records" });
 
-    await click(rows[0].querySelector(".o_priority_star"));
+    await contains(".o_priority_star").click();
     expect(".o_priority_star.fa-star").toHaveCount(2, { message: "both 'yop' records should have been starred" });
 });
 
 test("ordered target, sort attribute in context", async () => {
-    serverData.models.foo.fields.foo.sortable = true;
-    serverData.models.foo.fields.date.sortable = true;
+    // serverData.models.foo.fields.foo.sortable = true;
+    // serverData.models.foo.fields.date.sortable = true;
+
+    onRpc("create_or_replace", ({ args }) => {
+        const favorite = args[0];
+        expect.step(favorite.sort);
+        return 7;
+    });
 
     await mountView({
         type: "list",
         resModel: "foo",
         arch: '<tree><field name="foo"/><field name="date"/></tree>',
-        mockRPC: (route, args) => {
-            if (args.method === "create_or_replace") {
-                const favorite = args.args[0];
-                expect.step(favorite.sort);
-                return 7;
-            }
-        },
     });
 
     // Descending order on Foo
@@ -1996,63 +1971,54 @@ test("ordered target, sort attribute in context", async () => {
     // Ascending order on Date
     await contains("th.o_column_sortable[data-name=date]").click();
 
-    await toggleSearchBarMenu(target);
-    await toggleSaveFavorite(target);
-    await editFavoriteName(target, "My favorite");
-    await saveFavorite(target);
+    await toggleSearchBarMenu();
+    await toggleSaveFavorite();
+    await editFavoriteName("My favorite");
+    await saveFavorite();
 
-    assert.verifySteps(['["date","foo desc"]']);
+    expect(['["date","foo desc"]']).toVerifySteps();
 });
 
 test("Loading a filter with a sort attribute", async () => {
-    expect.assertions(2);
+    Foo._filters = [
+        {
+            context: "{}",
+            domain: "[]",
+            id: 7,
+            is_default: true,
+            name: "My favorite",
+            sort: '["date asc", "foo desc"]',
+            user_id: [2, "Mitchell Admin"],
+        },
+        {
+            context: "{}",
+            domain: "[]",
+            id: 8,
+            is_default: false,
+            name: "My second favorite",
+            sort: '["date desc", "foo asc"]',
+            user_id: [2, "Mitchell Admin"],
+        },
+    ];
 
-    serverData.models.foo.fields.foo.sortable = true;
-    serverData.models.foo.fields.date.sortable = true;
+    onRpc("web_search_read", ({ kwargs }) => {
+        expect.step(kwargs.order);
+    });
 
-    let searchReads = 0;
     await mountView({
         type: "list",
         resModel: "foo",
+        loadIrFilters: true,
         arch: `
             <tree>
                 <field name="foo"/>
                 <field name="date"/>
             </tree>`,
-        mockRPC(route, args) {
-            if (args.method === "web_search_read") {
-                if (searchReads === 0) {
-                    expect(args.kwargs.order).toBe("date ASC, foo DESC", { message: "The sort attribute of the filter should be used by the initial search_read" });
-                } else if (searchReads === 1) {
-                    expect(args.kwargs.order).toBe("date DESC, foo ASC", { message: "The sort attribute of the filter should be used by the next search_read" });
-                }
-                searchReads += 1;
-            }
-        },
-        irFilters: [
-            {
-                context: "{}",
-                domain: "[]",
-                id: 7,
-                is_default: true,
-                name: "My favorite",
-                sort: '["date asc", "foo desc"]',
-                user_id: [2, "Mitchell Admin"],
-            },
-            {
-                context: "{}",
-                domain: "[]",
-                id: 8,
-                is_default: false,
-                name: "My second favorite",
-                sort: '["date desc", "foo asc"]',
-                user_id: [2, "Mitchell Admin"],
-            },
-        ],
     });
 
-    await toggleSearchBarMenu(target);
-    await toggleMenuItem(target, "My second favorite");
+    await toggleSearchBarMenu();
+    await toggleMenuItem("My second favorite");
+    expect(["date ASC, foo DESC", "date DESC, foo ASC"]).toVerifySteps();
 });
 
 test("many2one field rendering", async () => {
@@ -2582,8 +2548,8 @@ test("editable list view: check that controlpanel buttons are updating when grou
     expect(".o_list_button_add").toHaveCount(0);
     expect(".o_list_button_save").toHaveCount(2, { message: "Should have 2 save button (small and xl screens)" });
 
-    await toggleSearchBarMenu(target);
-    await toggleMenuItem(target, "candle");
+    await toggleSearchBarMenu();
+    await toggleMenuItem("candle");
 
     expect(".o_list_button_add:visible").toHaveCount(1, { message: "Create available as list is grouped" });
     expect(".o_list_button_save").toHaveCount(0, { message: "Save not available as no row in edition" });
@@ -3031,8 +2997,8 @@ test("aggregates are computed correctly", async () => {
 
     // Let's update the view to dislay NO records
     await contains(".o_list_unselect_all").click();
-    await toggleSearchBarMenu(target);
-    await toggleMenuItem(target, "My Filter");
+    await toggleSearchBarMenu();
+    await toggleMenuItem("My Filter");
     expect(getFooterTextArray()).toEqual(["", "", "", ""]);
 });
 
@@ -4496,7 +4462,7 @@ test("deleting one record and verify context key", async () => {
     expect("div.o_control_panel .o_cp_action_menus").toHaveCount(1);
 
     await contains(".o_cp_action_menus .dropdown-toggle").click();
-    await toggleMenuItem(target, "Delete");
+    await toggleMenuItem("Delete");
     expect("body").toHaveClass("modal-open", { message: "body should have modal-open class" });
 
     await click(document, "body .modal footer button.btn-primary");
@@ -4535,7 +4501,7 @@ test("custom delete confirmation dialog", async () => {
     expect("div.o_control_panel .o_cp_action_menus").toHaveCount(1);
 
     await contains(".o_cp_action_menus .dropdown-toggle").click();
-    await toggleMenuItem(target, "Delete");
+    await toggleMenuItem("Delete");
     expect(".modal:contains('you sure') .text-danger:contains('consequences')").toHaveCount(1, { message: "confirmation dialog should have markup and more" });
 
     await click(document, "body .modal footer button.btn-secondary");
@@ -4560,7 +4526,7 @@ test("deleting record which throws UserError should close confirmation dialog", 
     expect("div.o_control_panel .o_cp_action_menus").toHaveCount(1);
 
     await contains(".o_cp_action_menus .dropdown-toggle").click();
-    await toggleMenuItem(target, "Delete");
+    await toggleMenuItem("Delete");
     expect(".modal").toHaveCount(1, { message: "should have open the confirmation dialog" });
 
     await click(document, "body .modal footer button.btn-primary");
@@ -4600,7 +4566,7 @@ test("delete all records matching the domain", async () => {
 
     await contains(".o_list_selection_box .o_list_select_domain").click();
     await contains(".o_cp_action_menus .dropdown-toggle").click();
-    await toggleMenuItem(target, "Delete");
+    await toggleMenuItem("Delete");
 
     expect(document.querySelectorAll(".modal").length).toBe(1, { message: "a confirm modal should be displayed" });
     await click(document, "body .modal footer button.btn-primary");
@@ -4643,7 +4609,7 @@ test("delete all records matching the domain (limit reached)", async () => {
 
     await contains(".o_list_selection_box .o_list_select_domain").click();
     await contains(".o_cp_action_menus .dropdown-toggle").click();
-    await toggleMenuItem(target, "Delete");
+    await toggleMenuItem("Delete");
 
     expect(document.querySelectorAll(".modal").length).toBe(1, { message: "a confirm modal should be displayed" });
     await click(document, "body .modal footer button.btn-primary");
@@ -4665,7 +4631,7 @@ test("duplicate one record", async () => {
     // Duplicate one record
     await contains(".o_data_row input").click();
     await contains(".o_cp_action_menus .dropdown-toggle").click();
-    await toggleMenuItem(target, "Duplicate");
+    await toggleMenuItem("Duplicate");
 
     // Final state: there should be 5 records
     expect("tbody tr").toHaveCount(5, { message: "should have 5 rows" });
@@ -4685,7 +4651,7 @@ test("duplicate all records", async () => {
     // Duplicate all records
     await contains(".o_list_record_selector input").click();
     await contains(".o_cp_action_menus .dropdown-toggle").click();
-    await toggleMenuItem(target, "Duplicate");
+    await toggleMenuItem("Duplicate");
 
     // Final state: there should be 8 records
     expect("tbody tr").toHaveCount(8, { message: "should have 8 rows" });
@@ -4714,14 +4680,14 @@ test("archiving one record", async () => {
 
     expect(["/web/dataset/call_kw/foo/get_views", "/web/dataset/call_kw/foo/web_search_read"]).toVerifySteps();
     await contains(".o_cp_action_menus .dropdown-toggle").click();
-    await toggleMenuItem(target, "Archive");
+    await toggleMenuItem("Archive");
 
     expect(document.querySelectorAll(".modal").length).toBe(1, { message: "a confirm modal should be displayed" });
     await click(document, ".modal-footer .btn-secondary");
     expect("tbody td.o_list_record_selector").toHaveCount(4, { message: "still should have 4 records" });
 
     await contains(".o_cp_action_menus .dropdown-toggle").click();
-    await toggleMenuItem(target, "Archive");
+    await toggleMenuItem("Archive");
     expect(document.querySelectorAll(".modal").length).toBe(1, { message: "a confirm modal should be displayed" });
     await click(document, ".modal-footer .btn-primary");
     expect("tbody td.o_list_record_selector").toHaveCount(3, { message: "should have 3 records" });
@@ -4763,7 +4729,7 @@ test("archive all records matching the domain", async () => {
 
     await contains(".o_list_selection_box .o_list_select_domain").click();
     await contains(".o_cp_action_menus .dropdown-toggle").click();
-    await toggleMenuItem(target, "Archive");
+    await toggleMenuItem("Archive");
 
     expect(document.querySelectorAll(".modal").length).toBe(1, { message: "a confirm modal should be displayed" });
     await click(document, ".modal-footer .btn-primary");
@@ -4809,7 +4775,7 @@ test("archive all records matching the domain (limit reached)", async () => {
 
     await contains(".o_list_selection_box .o_list_select_domain").click();
     await contains(".o_cp_action_menus .dropdown-toggle").click();
-    await toggleMenuItem(target, "Archive");
+    await toggleMenuItem("Archive");
 
     expect($(".modal").length).toBe(1, { message: "a confirm modal should be displayed" });
     await click(document.querySelector(".modal-footer .btn-primary"));
@@ -4905,7 +4871,7 @@ test("apply custom static action menu (archive)", async () => {
     expect("div.o_control_panel .o_cp_action_menus").toHaveCount(1);
 
     await contains(".o_cp_action_menus .dropdown-toggle").click();
-    await toggleMenuItem(target, "Archive");
+    await toggleMenuItem("Archive");
     expect(["customArchive"]).toVerifySteps();
 });
 
@@ -4960,11 +4926,11 @@ test("add custom static action menu", async () => {
     await contains(".o_cp_action_menus .dropdown-toggle").click();
     expect(queryAllTexts(".o-dropdown--menu .dropdown-item")).toEqual(["Custom Default Available", "Export", "Duplicate", "Custom Available", "Delete"]);
 
-    await toggleMenuItem(target, "Custom Available");
+    await toggleMenuItem("Custom Available");
     expect(["Custom Available"]).toVerifySteps();
 
     await contains(".o_cp_action_menus .dropdown-toggle").click();
-    await toggleMenuItem(target, "Custom Default Available");
+    await toggleMenuItem("Custom Default Available");
     expect(["Custom Default Available"]).toVerifySteps();
 });
 
@@ -4997,7 +4963,7 @@ test("grouped, update the count of the group (and ancestors) when a record is de
 
     await contains(".o_data_row input").click();
     await contains(".o_cp_action_menus .dropdown-toggle").click();
-    await toggleMenuItem(target, "Delete");
+    await toggleMenuItem("Delete");
     await contains(".modal .btn-primary").click();
     expect(target.querySelector(".o_group_header:first-child").textContent.trim()).toBe("blip (5)");
     expect(target.querySelector(".o_group_header:nth-child(3)").textContent.trim()).toBe("Yes (3)");
@@ -5023,8 +4989,8 @@ test("pager (ungrouped and grouped mode), default limit", async () => {
 
     expect("div.o_control_panel .o_cp_pager .o_pager").toHaveCount(1);
     expect(target.querySelector(".o_pager_limit").innerText).toBe("4");
-    await toggleSearchBarMenu(target);
-    await toggleMenuItem(target, "Bar");
+    await toggleSearchBarMenu();
+    await toggleMenuItem("Bar");
     expect(target.querySelector(".o_pager_limit").innerText).toBe("2");
 });
 
@@ -5420,9 +5386,9 @@ test("pager, grouped, group pager should update after removing a filter", async 
                 </search>`,
     });
 
-    await toggleSearchBarMenu(target);
-    await toggleMenuItem(target, "Foo");
-    await toggleMenuItem(target, "Bar");
+    await toggleSearchBarMenu();
+    await toggleMenuItem("Foo");
+    await toggleMenuItem("Bar");
 
     // expand group
     await contains("th.o_group_name").click();
@@ -5984,8 +5950,8 @@ test("bounce create button when no data and click on empty area", async () => {
     await contains(".o_list_view").click();
     expect(".o_list_button_add").not.toHaveClass("o_catch_attention");
 
-    await toggleSearchBarMenu(target);
-    await toggleMenuItem(target, "Empty List");
+    await toggleSearchBarMenu();
+    await toggleMenuItem("Empty List");
     expect(".o_view_nocontent").toHaveCount(1);
 
     await contains(".o_nocontent_help").click();
@@ -6073,15 +6039,15 @@ test("empty list with sample data", async () => {
     assert.ok(/\d{2}\/\d{2}\/\d{4}/.test(cells[5].innerText.trim()), "Date field should have the right format");
     assert.ok(/\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}:\d{2}/.test(cells[6].innerText.trim()), "Datetime field should have the right format");
 
-    await toggleSearchBarMenu(target);
-    await toggleMenuItem(target, "empty");
-    await toggleMenuItem(target, "False Domain");
+    await toggleSearchBarMenu();
+    await toggleMenuItem("empty");
+    await toggleMenuItem("False Domain");
     expect(".o_list_view .o_content").not.toHaveClass("o_view_sample_data");
     expect(".o_list_table").toHaveCount(1);
     expect(".o_nocontent_help").toHaveCount(1);
 
-    await toggleMenuItem(target, "False Domain");
-    await toggleMenuItem(target, "True Domain");
+    await toggleMenuItem("False Domain");
+    await toggleMenuItem("True Domain");
     expect(".o_list_view .o_content").not.toHaveClass("o_view_sample_data");
     expect(".o_list_table").toHaveCount(1);
     expect(".o_data_row").toHaveCount(4);
@@ -6251,9 +6217,9 @@ test("non empty list with sample data", async () => {
     expect(".o_data_row").toHaveCount(4);
     expect(".o_list_view .o_content").not.toHaveClass("o_view_sample_data");
 
-    await toggleSearchBarMenu(target);
-    await toggleMenuItem(target, "true_domain");
-    await toggleMenuItem(target, "false_domain");
+    await toggleSearchBarMenu();
+    await toggleMenuItem("true_domain");
+    await toggleMenuItem("false_domain");
     expect(".o_list_table").toHaveCount(1);
     expect(".o_data_row").toHaveCount(0);
     expect(".o_list_view .o_content").not.toHaveClass("o_view_sample_data");
@@ -6306,7 +6272,7 @@ test("non empty editable list with sample data: delete all records", async () =>
     // Delete all records
     await contains("thead .o_list_record_selector input").click();
     await contains(".o_cp_action_menus .dropdown-toggle").click();
-    await toggleMenuItem(target, "Delete");
+    await toggleMenuItem("Delete");
     await contains(".modal-footer .btn-primary").click();
 
     // Final state: no more sample data, but nocontent helper displayed
@@ -6385,7 +6351,7 @@ test("empty editable list with sample data: create and delete record", async () 
     // Delete newly created record
     await contains(".o_data_row input").click();
     await contains(".o_cp_action_menus .dropdown-toggle").click();
-    await toggleMenuItem(target, "Delete");
+    await toggleMenuItem("Delete");
     await contains(".modal-footer .btn-primary").click();
 
     // Final state: there should be no table, but the no content helper
@@ -6430,7 +6396,7 @@ test("empty editable list with sample data: create and duplicate record", async 
     // Duplicate newly created record
     await contains(".o_data_row input").click();
     await contains(".o_cp_action_menus .dropdown-toggle").click();
-    await toggleMenuItem(target, "Duplicate");
+    await toggleMenuItem("Duplicate");
 
     // Final state: there should be 2 records
     expect(".o_list_view .o_content .o_data_row").toHaveCount(2, { message: "there should be 2 records" });
@@ -7644,7 +7610,7 @@ test("execute ActionMenus actions", async () => {
     expect("div.o_control_panel .o_cp_action_menus").toHaveCount(1);
 
     await contains(".o_cp_action_menus .dropdown-toggle").click();
-    await toggleMenuItem(target, "Custom Action");
+    await toggleMenuItem("Custom Action");
 
     assert.verifySteps(["get_views", "web_search_read", "has_group", `{"action_id":44,"context":{"lang":"en","tz":"taht","uid":7,"active_id":1,"active_ids":[1,2,3,4],"active_model":"foo","active_domain":[]}}`, "web_search_read"]);
 });
@@ -7696,20 +7662,20 @@ test("execute ActionMenus actions with correct params (single page)", async () =
     expect("div.o_control_panel .o_cp_action_menus").toHaveCount(1);
 
     await contains(".o_cp_action_menus .dropdown-toggle").click();
-    await toggleMenuItem(target, "Custom Action");
+    await toggleMenuItem("Custom Action");
 
     // unselect first record (will unselect the thead checkbox as well)
     await contains(".o_data_row .o_list_record_selector input").click();
     expect(".o_list_record_selector input:checked").toHaveCount(3);
 
     await contains(".o_cp_action_menus .dropdown-toggle").click();
-    await toggleMenuItem(target, "Custom Action");
+    await toggleMenuItem("Custom Action");
 
     // add a domain and select first two records (need to unselect records first)
     await contains("thead .o_list_record_selector input").click(); // select all
     await contains("thead .o_list_record_selector input").click(); // unselect all
-    await toggleSearchBarMenu(target);
-    await toggleMenuItem(target, "bar");
+    await toggleSearchBarMenu();
+    await toggleMenuItem("bar");
     expect(".o_data_row").toHaveCount(3);
     expect(".o_list_record_selector input:checked").toHaveCount(0);
 
@@ -7719,7 +7685,7 @@ test("execute ActionMenus actions with correct params (single page)", async () =
     expect(".o_list_record_selector input:checked").toHaveCount(2);
 
     await contains(".o_cp_action_menus .dropdown-toggle").click();
-    await toggleMenuItem(target, "Custom Action");
+    await toggleMenuItem("Custom Action");
 
     assert.verifySteps(['{"action_id":44,"context":{"lang":"en","tz":"taht","uid":7,"active_id":1,"active_ids":[1,2,3,4],"active_model":"foo","active_domain":[]}}', '{"action_id":44,"context":{"lang":"en","tz":"taht","uid":7,"active_id":2,"active_ids":[2,3,4],"active_model":"foo","active_domain":[]}}', '{"action_id":44,"context":{"lang":"en","tz":"taht","uid":7,"active_id":1,"active_ids":[1,2],"active_model":"foo","active_domain":[["bar","=",true]]}}']);
 });
@@ -7770,19 +7736,19 @@ test("execute ActionMenus actions with correct params (multi pages)", async () =
     expect("div.o_control_panel .o_cp_action_menus").toHaveCount(1);
 
     await contains(".o_cp_action_menus .dropdown-toggle").click();
-    await toggleMenuItem(target, "Custom Action");
+    await toggleMenuItem("Custom Action");
 
     // select all domain
     await contains(".o_list_selection_box .o_list_select_domain").click();
     expect(".o_list_record_selector input:checked").toHaveCount(3);
 
     await contains(".o_cp_action_menus .dropdown-toggle").click();
-    await toggleMenuItem(target, "Custom Action");
+    await toggleMenuItem("Custom Action");
 
     // add a domain (need to unselect records first)
     await contains("thead .o_list_record_selector input").click();
-    await toggleSearchBarMenu(target);
-    await toggleMenuItem(target, "bar");
+    await toggleSearchBarMenu();
+    await toggleMenuItem("bar");
     expect(".o_list_selection_box .o_list_select_domain").toHaveCount(0);
 
     // select all domain
@@ -7792,7 +7758,7 @@ test("execute ActionMenus actions with correct params (multi pages)", async () =
     expect(".o_list_selection_box .o_list_select_domain").toHaveCount(0);
 
     await contains(".o_cp_action_menus .dropdown-toggle").click();
-    await toggleMenuItem(target, "Custom Action");
+    await toggleMenuItem("Custom Action");
 
     assert.verifySteps(['{"action_id":44,"context":{"lang":"en","tz":"taht","uid":7,"active_id":1,"active_ids":[1,2],"active_model":"foo","active_domain":[]}}', '{"action_id":44,"context":{"lang":"en","tz":"taht","uid":7,"active_id":1,"active_ids":[1,2,3,4],"active_model":"foo","active_domain":[]}}', '{"action_id":44,"context":{"lang":"en","tz":"taht","uid":7,"active_id":1,"active_ids":[1,2,3],"active_model":"foo","active_domain":[["bar","=",true]]}}']);
 });
@@ -8355,9 +8321,9 @@ test("grouped list with another grouped list parent, click unfold", async () => 
                     <filter name="bar" string="bar" context="{'group_by': 'bar'}"/>
                 </search>`,
     });
-    await toggleSearchBarMenu(target);
-    await toggleMenuItem(target, "bar");
-    await toggleMenuItem(target, "bar");
+    await toggleSearchBarMenu();
+    await toggleMenuItem("bar");
+    await toggleMenuItem("bar");
 
     await contains(".o_data_cell").click();
     await clickOpenM2ODropdown(target, "m2o");
@@ -8367,7 +8333,7 @@ test("grouped list with another grouped list parent, click unfold", async () => 
 
     const modal = target.querySelector(".modal");
     await toggleSearchBarMenu(modal);
-    await toggleMenuItem(target, "cornichon");
+    await toggleMenuItem("cornichon");
     await contains(".o_group_header").click();
     expect(".modal-content .o_group_open").toHaveCount(1);
 });
@@ -10337,15 +10303,15 @@ test("concurrent reloads finishing in inverse order", async () => {
     // reload with a domain (this request is blocked)
     blockSearchRead = true;
     // list.reload({ domain: [["foo", "=", "yop"]] });
-    await toggleSearchBarMenu(target);
-    await toggleMenuItem(target, "yop");
+    await toggleSearchBarMenu();
+    await toggleMenuItem("yop");
     expect(".o_list_view .o_data_row").toHaveCount(4, { message: "list view should still contain 4 records (search_read being blocked)" });
 
     // reload without the domain
     blockSearchRead = false;
     // list.reload({ domain: [] });
-    // await toggleSearchBarMenu(target);
-    await toggleMenuItem(target, "yop");
+    // await toggleSearchBarMenu();
+    await toggleMenuItem("yop");
     expect(".o_list_view .o_data_row").toHaveCount(4, { message: "list view should still contain 4 records" });
 
     // unblock the RPC
@@ -10505,7 +10471,7 @@ test("list view move to previous page when all records from last page archive/un
 
     // archive all records of current page
     await contains(".o_cp_action_menus .dropdown-toggle").click();
-    await toggleMenuItem(target, "Archive");
+    await toggleMenuItem("Archive");
     expect(document.querySelectorAll(".modal").length).toBe(1, { message: "a confirm modal should be displayed" });
 
     await click(document, ".modal-footer .btn-primary");
@@ -10683,8 +10649,8 @@ test("ungrouped list with groups_limit attribute, then group", async () => {
     expect(".o_data_row").toHaveCount(4);
 
     // add a custom group in searchview groupby
-    await toggleSearchBarMenu(target);
-    await toggleMenuItem(target, "GroupBy IntField");
+    await toggleSearchBarMenu();
+    await toggleMenuItem("GroupBy IntField");
 
     expect(".o_group_header").toHaveCount(3);
     expect(target.querySelector(".o_pager_value").innerText).toBe("1-3", { message: "pager should be correct" });
@@ -10895,8 +10861,8 @@ test("add filter in a grouped list with a pager", async () => {
     expect(".o_group_header").toHaveCount(1); // page 2
 
     // toggle a filter -> there should be only one group left (on page 1)
-    await toggleSearchBarMenu(target);
-    await toggleMenuItem(target, 0);
+    await toggleSearchBarMenu();
+    await toggleMenuItem(0);
     expect(getPagerValue(target)).toEqual([1, 1]);
     expect(".o_group_header").toHaveCount(1); // page 1
 
@@ -10926,8 +10892,8 @@ test("grouped list: have a group with pager, then apply filter", async () => {
     expect(".o_data_row").toHaveCount(1);
     expect(target.querySelector(".o_group_header .o_pager").innerText).toBe("3-3 / 3");
 
-    await toggleSearchBarMenu(target);
-    await toggleMenuItem(target, "Some Filter");
+    await toggleSearchBarMenu();
+    await toggleMenuItem("Some Filter");
 
     expect(".o_data_row").toHaveCount(1);
     expect(".o_group_header").toHaveCount(1);
@@ -10944,8 +10910,8 @@ test("editable grouped lists", async () => {
                 <filter name="bar" string="bar" context="{'group_by': 'bar'}"/>
             </search>`,
     });
-    await toggleSearchBarMenu(target);
-    await toggleMenuItem(target, "bar");
+    await toggleSearchBarMenu();
+    await toggleMenuItem("bar");
     await contains(".o_group_header").click();
 
     // enter edition (grouped case)
@@ -10957,8 +10923,8 @@ test("editable grouped lists", async () => {
     expect(".o_selected_row").toHaveCount(0);
 
     // reload without groupBy
-    await toggleSearchBarMenu(target);
-    await toggleMenuItem(target, "bar");
+    await toggleSearchBarMenu();
+    await toggleMenuItem("bar");
 
     // enter edition (ungrouped case)
     await contains(".o_data_cell").click();
@@ -10985,8 +10951,8 @@ test("grouped lists are editable (ungrouped first)", async () => {
     expect(".o_selected_row").toHaveCount(1);
 
     // reload with a groupby
-    await toggleSearchBarMenu(target);
-    await toggleMenuItem(target, "bar");
+    await toggleSearchBarMenu();
+    await toggleMenuItem("bar");
 
     // open first group
     await contains(".o_group_header").click();
@@ -11025,13 +10991,13 @@ test("control panel buttons in editable grouped list views", async () => {
     expect(".o_list_button_add").toHaveCount(2, { message: "Should have 2 add button (small and xl screens)" });
 
     // reload with a groupby
-    await toggleSearchBarMenu(target);
-    await toggleMenuItem(target, "bar");
+    await toggleSearchBarMenu();
+    await toggleMenuItem("bar");
 
     expect(".o_list_button_add:visible").toHaveCount(1);
 
     // reload without groupby
-    await toggleMenuItem(target, "bar");
+    await toggleMenuItem("bar");
 
     expect(".o_list_button_add").toHaveCount(2, { message: "Should have 2 add button (small and xl screens)" });
 });
@@ -12126,8 +12092,8 @@ test("removing a groupby while adding a line from list", async () => {
             </search>`,
     });
 
-    await toggleSearchBarMenu(target);
-    await toggleMenuItem(target, "Foo");
+    await toggleSearchBarMenu();
+    await toggleMenuItem("Foo");
 
     // expand group
     await contains("th.o_group_name").click();
@@ -14105,15 +14071,15 @@ test("keep order after grouping", async () => {
         ["yop", "gnap", "blip", "blip"]
     );
 
-    await toggleSearchBarMenu(target);
-    await toggleMenuItem(target, "Foo");
+    await toggleSearchBarMenu();
+    await toggleMenuItem("Foo");
 
     assert.deepEqual(
         [...queryAll(".o_group_name")].map((r) => r.innerText),
         ["yop (1)", "gnap (1)", "blip (2)"]
     );
 
-    await toggleMenuItem(target, "Foo");
+    await toggleMenuItem("Foo");
 
     assert.deepEqual(
         [...queryAll(".o_data_row td[name=foo]")].map((r) => r.innerText),
@@ -14553,8 +14519,8 @@ test("have some records, then go to next page in pager then group by some field:
         ["yop", "blip"]
     );
 
-    await toggleSearchBarMenu(target);
-    await toggleMenuItem(target, "Bar");
+    await toggleSearchBarMenu();
+    await toggleMenuItem("Bar");
     expect("tbody .o_group_header").toHaveCount(2);
     assert.deepEqual(
         [...queryAll("tbody .o_group_header")].map((el) => el.innerText.trim()),
@@ -14575,8 +14541,8 @@ test("have some records, then go to next page in pager then group by some field:
         ["gnap", "blip"]
     );
 
-    await toggleSearchBarMenu(target);
-    await toggleMenuItem(target, "Bar");
+    await toggleSearchBarMenu();
+    await toggleMenuItem("Bar");
     expect("tbody .o_group_header").toHaveCount(2);
     assert.deepEqual(
         [...queryAll("tbody .o_group_header")].map((el) => el.innerText.trim()),
@@ -14829,7 +14795,7 @@ test("list view with default_group_by", async () => {
     await groupByMenu(target, "m2m");
     expect(".o_group_header").toHaveCount(4);
 
-    await toggleMenuItem(target, "M2M field");
+    await toggleMenuItem("M2M field");
     expect(".o_group_header").toHaveCount(2);
 });
 
@@ -14847,8 +14813,8 @@ test("ungrouped list, apply filter, decrease limit", async () => {
     expect(".o_data_row").toHaveCount(4);
 
     // apply the filter to trigger a reload of datapoints
-    await toggleSearchBarMenu(target);
-    await toggleMenuItem(target, "My Filter");
+    await toggleSearchBarMenu();
+    await toggleMenuItem("My Filter");
 
     expect(".o_data_row").toHaveCount(3);
 
@@ -15563,8 +15529,8 @@ test("reload properties definitions when domain change", async () => {
 
     expect(["/web/dataset/call_kw/foo/get_views", "/web/dataset/call_kw/foo/web_search_read"]).toVerifySteps();
 
-    await toggleSearchBarMenu(target);
-    await toggleMenuItem(target, "only one");
+    await toggleSearchBarMenu();
+    await toggleMenuItem("only one");
 
     expect(["/web/dataset/call_kw/foo/web_search_read"]).toVerifySteps();
 });
