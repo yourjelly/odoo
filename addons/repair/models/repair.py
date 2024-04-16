@@ -71,7 +71,7 @@ class Repair(models.Model):
         copy=False, readonly=True, tracking=True, check_company=True)
     product_id = fields.Many2one(
         'product.product', string='Product to Repair',
-        domain="[('type', 'in', ['product', 'consu']), '|', ('company_id', '=', company_id), ('company_id', '=', False), '|', ('id', 'in', picking_product_ids), ('id', '=?', picking_product_id)]",
+        domain="[('type', '=', 'consu'), '|', ('company_id', '=', company_id), ('company_id', '=', False), '|', ('id', 'in', picking_product_ids), ('id', '=?', picking_product_id)]",
         check_company=True)
     product_qty = fields.Float(
         'Product Quantity',

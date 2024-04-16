@@ -32,7 +32,8 @@ class TestStockValuation(TransactionCase):
             'list_price': 1799.0,
             # Ignore tax calculations for these tests.
             'supplier_taxes_id': False,
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
         })
         Account = cls.env['account.account']
         cls.stock_input_account = Account.create({
@@ -311,12 +312,14 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
         })
         cls.product1 = cls.env['product.product'].create({
             'name': 'product1',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'categ_id': cls.cat.id,
         })
         cls.product1_copy = cls.env['product.product'].create({
             'name': 'product1',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'categ_id': cls.cat.id,
         })
 
@@ -3034,7 +3037,8 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
         })
         analytic_product = self.env['product.product'].create({
             'name': 'Analytic Product',
-            'detailed_type': 'product',
+            'detailed_type': 'consu',
+            'is_trackable': True,
             'categ_id': analytic_product_category.id,
             'lst_price': 100.0,
             'standard_price': 25.0,

@@ -33,21 +33,24 @@ class TestConsumeComponentCommon(common.TransactionCase):
         # Create Products & Components
         cls.produced_lot = cls.env['product.product'].create({
             'name': 'Produced Lot',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'categ_id': cls.env.ref('product.product_category_all').id,
             'tracking': 'lot',
             'route_ids': [(4, cls.manufacture_route.id, 0)],
         })
         cls.produced_serial = cls.env['product.product'].create({
             'name': 'Produced Serial',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'categ_id': cls.env.ref('product.product_category_all').id,
             'tracking': 'serial',
             'route_ids': [(4, cls.manufacture_route.id, 0)],
         })
         cls.produced_none = cls.env['product.product'].create({
             'name': 'Produced None',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'categ_id': cls.env.ref('product.product_category_all').id,
             'tracking': 'none',
             'route_ids': [(4, cls.manufacture_route.id, 0)],
@@ -55,19 +58,22 @@ class TestConsumeComponentCommon(common.TransactionCase):
 
         cls.raw_lot = cls.env['product.product'].create({
             'name': 'Raw Lot',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'categ_id': cls.env.ref('product.product_category_all').id,
             'tracking': 'lot',
         })
         cls.raw_serial = cls.env['product.product'].create({
             'name': 'Raw Serial',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'categ_id': cls.env.ref('product.product_category_all').id,
             'tracking': 'serial',
         })
         cls.raw_none = cls.env['product.product'].create({
             'name': 'Raw None',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'categ_id': cls.env.ref('product.product_category_all').id,
             'tracking': 'none',
         })

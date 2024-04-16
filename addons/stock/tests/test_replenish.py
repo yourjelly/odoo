@@ -70,7 +70,8 @@ class TestStockReplenish(TestStockCommon):
     def test_replenish_no_routes(self):
         product = self.env['product.template'].create({
         'name': 'Brand new product',
-        'type': 'product',
+        'type': 'consu',
+            'is_trackable': True,
     })
         self.assertEqual(len(product.route_ids), 0)
         wizard = Form(self.env['product.replenish'].with_context(default_product_tmpl_id=product.id))

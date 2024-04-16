@@ -1678,7 +1678,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
         values = {**checkout_page_values, **payment_form_values}
         if request.website.enabled_delivery:
             has_storable_products = any(
-                line.product_id.type in ['consu', 'product'] for line in order.order_line
+                line.product_id.type == 'consu' for line in order.order_line
             )
             if has_storable_products:
                 if order.carrier_id and not order.delivery_rating_success:

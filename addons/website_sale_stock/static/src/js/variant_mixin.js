@@ -45,7 +45,7 @@ VariantMixin._onChangeCombinationStock = function (ev, $parent, combination) {
     ctaWrapper.classList.replace('d-none', 'd-flex');
     ctaWrapper.classList.remove('out_of_stock');
 
-    if (combination.product_type === 'product' && !combination.allow_out_of_stock_order) {
+    if (combination.is_trackable && !combination.allow_out_of_stock_order) {
         combination.free_qty -= parseInt(combination.cart_qty);
         $addQtyInput.data('max', combination.free_qty || 1);
         if (combination.free_qty < 0) {

@@ -112,7 +112,8 @@ class TestPickShip(TestStockCommon):
     def test_unreserve_only_required_quantity(self):
         product_unreserve = self.env['product.product'].create({
             'name': 'product unreserve',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'categ_id': self.env.ref('product.product_category_all').id,
         })
         stock_location = self.env['stock.location'].browse(self.stock_location)
@@ -2398,7 +2399,8 @@ class TestStockUOM(TestStockCommon):
         })
         T_TEST = self.env['product.product'].create({
             'name': 'T_TEST',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'uom_id': T_LBS.id,
             'uom_po_id': T_LBS.id,
             'tracking': 'lot',
@@ -2460,7 +2462,8 @@ class TestStockUOM(TestStockCommon):
 
         product_G = self.env['product.product'].create({
             'name': 'Product G',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'categ_id': self.env.ref('product.product_category_all').id,
             'uom_id': self.uom_gm.id,
             'uom_po_id': self.uom_gm.id,
@@ -2521,7 +2524,8 @@ class TestStockUOM(TestStockCommon):
 
         product_LtDA = self.env['product.product'].create({
             'name': 'Product Less than DA',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'categ_id': self.env.ref('product.product_category_all').id,
             'uom_id': self.uom_gm.id,
             'uom_po_id': self.uom_gm.id,
@@ -2529,7 +2533,8 @@ class TestStockUOM(TestStockCommon):
 
         product_GtDA = self.env['product.product'].create({
             'name': 'Product Greater than DA',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'categ_id': self.env.ref('product.product_category_all').id,
             'uom_id': self.uom_gm.id,
             'uom_po_id': self.uom_gm.id,
@@ -2630,7 +2635,8 @@ class TestRoutes(TestStockCommon):
         super().setUpClass()
         cls.product1 = cls.env['product.product'].create({
             'name': 'product a',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'categ_id': cls.env.ref('product.product_category_all').id,
         })
         cls.uom_unit = cls.env.ref('uom.product_uom_unit')
@@ -2758,7 +2764,8 @@ class TestRoutes(TestStockCommon):
         })
         product = self.env['product.product'].create({
             'name': 'new_product',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'route_ids': [(4, route.id)]
         })
         move1 = self.env['stock.move'].create({
@@ -2795,11 +2802,13 @@ class TestRoutes(TestStockCommon):
         final_location = self.partner.property_stock_customer
         product_A = self.env['product.product'].create({
             'name': 'Product A',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
         })
         product_B = self.env['product.product'].create({
             'name': 'Product B',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
         })
 
         # We alter one rule and we set it to 'mts_else_mto'
@@ -2848,11 +2857,13 @@ class TestRoutes(TestStockCommon):
         final_location = self.partner.property_stock_customer
         product_A = self.env['product.product'].create({
             'name': 'Product A',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
         })
         product_B = self.env['product.product'].create({
             'name': 'Product B',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
         })
 
         # We alter one rule and we set it to 'mts_else_mto'
@@ -2915,7 +2926,8 @@ class TestRoutes(TestStockCommon):
         final_location = self.partner.property_stock_customer
         product_A = self.env['product.product'].create({
             'name': 'Product A',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
         })
 
         # We alter one rule and we set it to 'mts_else_mto'
@@ -2997,7 +3009,8 @@ class TestRoutes(TestStockCommon):
 
         product = self.env['product.product'].create({
             'name': 'Product with packaging',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'route_ids': [(4, route_on_product.id, 0)]
         })
 
@@ -3286,7 +3299,8 @@ class TestAutoAssign(TestStockCommon):
         self.uom_unit = self.env.ref('uom.product_uom_unit')
         self.product_serial = self.env['product.product'].create({
             'name': 'PSerial',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'tracking': 'serial',
             'categ_id': self.env.ref('product.product_category_all').id,
         })

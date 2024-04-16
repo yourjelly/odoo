@@ -24,7 +24,8 @@ class TestReplenishWizard(TestStockCommon):
         # the 'supplierinfo' prevously created
         cls.product1 = cls.env['product.product'].create({
             'name': 'product a',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'categ_id': cls.env.ref('product.product_category_all').id,
             'seller_ids': [(4, cls.supplierinfo.id, 0)],
             'route_ids': [(4, cls.env.ref('purchase_stock.route_warehouse0_buy').id, 0)],
@@ -72,7 +73,8 @@ class TestReplenishWizard(TestStockCommon):
         """
         product_to_buy = self.env['product.product'].create({
             'name': "Furniture Service",
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'categ_id': self.env.ref('product.product_category_all').id,
             'route_ids': [(4, self.env.ref('purchase_stock.route_warehouse0_buy').id, 0)],
         })
@@ -123,7 +125,8 @@ class TestReplenishWizard(TestStockCommon):
         """
         product_to_buy = self.env['product.product'].create({
             'name': "Furniture Service",
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'categ_id': self.env.ref('product.product_category_all').id,
             'route_ids': [(4, self.env.ref('purchase_stock.route_warehouse0_buy').id, 0)],
         })
@@ -181,7 +184,8 @@ class TestReplenishWizard(TestStockCommon):
         """
         product_to_buy = self.env['product.product'].create({
             'name': "Furniture Service",
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'categ_id': self.env.ref('product.product_category_all').id,
             'route_ids': [(4, self.env.ref('purchase_stock.route_warehouse0_buy').id, 0)],
         })
@@ -231,7 +235,8 @@ class TestReplenishWizard(TestStockCommon):
         """
         product_to_buy = self.env['product.product'].create({
             'name': "Furniture Service",
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'categ_id': self.env.ref('product.product_category_all').id,
             'route_ids': [(4, self.env.ref('purchase_stock.route_warehouse0_buy').id, 0)],
         })
@@ -314,7 +319,8 @@ class TestReplenishWizard(TestStockCommon):
     def test_supplier_delay(self):
         product_to_buy = self.env['product.product'].create({
             'name': "Furniture Service",
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'categ_id': self.env.ref('product.product_category_all').id,
             'route_ids': [(4, self.env.ref('purchase_stock.route_warehouse0_buy').id, 0)],
         })
@@ -350,7 +356,8 @@ class TestReplenishWizard(TestStockCommon):
     def test_purchase_delay(self):
         product_to_buy = self.env['product.product'].create({
             'name': "Furniture Service",
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'categ_id': self.env.ref('product.product_category_all').id,
             'route_ids': [(4, self.env.ref('purchase_stock.route_warehouse0_buy').id, 0)],
         })
@@ -391,7 +398,8 @@ class TestReplenishWizard(TestStockCommon):
     def test_purchase_supplier_route_delay(self):
         product_to_buy = self.env['product.product'].create({
             'name': "Furniture Service",
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'categ_id': self.env.ref('product.product_category_all').id,
             'route_ids': [(4, self.env.ref('purchase_stock.route_warehouse0_buy').id, 0)],
         })

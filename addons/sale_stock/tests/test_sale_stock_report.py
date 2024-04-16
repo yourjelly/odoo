@@ -94,12 +94,14 @@ class TestSaleStockInvoices(TestSaleCommon):
         self.env.ref('base.group_user').write({'implied_ids': [(4, self.env.ref('stock.group_production_lot').id)]})
         self.product_by_lot = self.env['product.product'].create({
             'name': 'Product By Lot',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'tracking': 'lot',
         })
         self.product_by_usn = self.env['product.product'].create({
             'name': 'Product By USN',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'tracking': 'serial',
         })
         self.warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)

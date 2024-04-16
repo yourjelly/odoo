@@ -9,7 +9,7 @@
         <field name="arch" type="xml">
             <form string="Product">
                 <header>
-                    <button string="Print Labels" type="object" name="action_open_label_layout" invisible="detailed_type not in ['consu', 'product', 'combo']"/>
+                    <button string="Print Labels" type="object" name="action_open_label_layout" invisible="detailed_type not in ['consu', 'combo']"/>
                 </header>
                 <sheet name="product_form">
                     <field name='product_variant_count' invisible='1'/>
@@ -122,7 +122,7 @@
                         </page>
                         <page string="Inventory" name="inventory" groups="product.group_stock_packaging" invisible="type == 'service'">
                             <group name="inventory">
-                                <group name="group_lots_and_weight" string="Logistics" invisible="type not in ['product', 'consu']">
+                                <group name="group_lots_and_weight" string="Logistics" invisible="type != 'consu'">
                                     <label for="weight" invisible="product_variant_count &gt; 1 and not is_product_variant"/>
                                     <div class="o_row" name="weight" invisible="product_variant_count &gt; 1 and not is_product_variant">
                                         <field name="weight" class="oe_inline"/>
@@ -137,7 +137,7 @@
                             </group>
                             <group name="packaging" string="Packaging"
                                 colspan="4"
-                                invisible="(type not in ['product', 'consu'] or product_variant_count &gt; 1) and not is_product_variant"
+                                invisible="(type != 'consu' or product_variant_count &gt; 1) and not is_product_variant"
                                 groups="product.group_stock_packaging">
                                 <field colspan="2" name="packaging_ids" nolabel="1" context="{'tree_view_ref':'product.product_packaging_tree_view2', 'default_company_id': company_id}"/>
                             </group>
@@ -159,7 +159,7 @@
                 <field name="product_tag_ids" string="Tags"/>
                 <separator/>
                 <filter string="Services" name="services" domain="[('type','=','service')]"/>
-                <filter string="Products" name="consumable" domain="[('type', 'in', ['consu', 'product'])]"/>
+                <filter string="Products" name="consumable" domain="[('type', '=', 'consu')]"/>
                 <separator/>
                 <filter string="Sales" name="filter_to_sell" domain="[('sale_ok','=',True)]"/>
                 <filter string="Purchase" name="filter_to_purchase" domain="[('purchase_ok', '=', True)]"/>
@@ -246,7 +246,7 @@
                 <form string="Variant Information" duplicate="false">
                     <header>
                         <field name="detailed_type" invisible="1"/>
-                        <button string="Print Labels" type="object" name="action_open_label_layout" invisible="detailed_type not in ['consu', 'product', 'combo']"/>
+                        <button string="Print Labels" type="object" name="action_open_label_layout" invisible="detailed_type not in ['consu', 'combo']"/>
                     </header>
                     <sheet>
                         <div class="oe_button_box" name="button_box"/>
@@ -285,7 +285,7 @@
                             </group>
                         </group>
                         <group>
-                            <group name="weight" string="Logistics" invisible="type not in ['product', 'consu']">
+                            <group name="weight" string="Logistics" invisible="type != 'consu'">
                                 <label for="volume"/>
                                 <div class="o_row">
                                     <field name="volume" class="oe_inline"/>
@@ -617,7 +617,7 @@ action = {
                 <filter string="Services" name="services" domain="[('type', '=', 'service')]"/>
                 <filter string="Products"
                         name="products"
-                        domain="[('type', 'in', ['consu', 'product'])]"/>
+                        domain="[('type', '=', 'consu')]"/>
                 <!-- Group By -->
                 <group expand="1" string="Group By">
                     <filter string="Product Type" name="type" context="{'group_by':'type'}"/>

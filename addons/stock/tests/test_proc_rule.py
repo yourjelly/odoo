@@ -39,7 +39,8 @@ class TestProcRule(TransactionCase):
         rule but finds nothing else than itself and so get stuck in a recursion error."""
         warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
         reception_route = warehouse.reception_route_id
-        self.product.type = 'product'
+        self.product.type = 'consu'
+        self.product.is_trackable = True
 
         # Creates a delivery for this product, that way, this product will be to resupply.
         picking_form = Form(self.env['stock.picking'])
@@ -212,12 +213,14 @@ class TestProcRule(TransactionCase):
 
         self.productA = self.env['product.product'].create({
             'name': 'Desk Combination',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
         })
 
         self.productB = self.env['product.product'].create({
             'name': 'Desk Decoration',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
         })
 
         warehouse = self.env['stock.warehouse'].search([], limit=1)
@@ -296,7 +299,8 @@ class TestProcRule(TransactionCase):
         stock_location = self.stock_location = self.env.ref('stock.stock_location_stock')
         self.productA = self.env['product.product'].create({
             'name': 'Desk Combination',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
         })
         self.env['stock.quant'].with_context(inventory_mode=True).create({
             'product_id': self.productA.id,
@@ -343,7 +347,8 @@ class TestProcRule(TransactionCase):
         ])
         product = self.env['product.product'].create({
             'name': 'Super Product',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'route_ids': [route_2.id, route_3.id]
         })
         moves = self.env['stock.move'].create([{
@@ -389,7 +394,8 @@ class TestProcRule(TransactionCase):
         })
         product = self.env['product.product'].create({
             'name': 'Rep Product',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
         })
         move = self.env['stock.move'].create({
             'name': 'Move WH2',
@@ -458,7 +464,8 @@ class TestProcRule(TransactionCase):
 
     def test_replenishment_order_to_max(self):
         warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.user.id)], limit=1)
-        self.product.detailed_type = 'product'
+        self.product.detailed_type = 'consu'
+        self.product.is_trackable = True
         self.env['stock.quant']._update_available_quantity(self.product, warehouse.lot_stock_id, 10)
         orderpoint = self.env['stock.warehouse.orderpoint'].create({
             'name': 'ProductB RR',
@@ -484,7 +491,7 @@ class TestProcRule(TransactionCase):
             'usage': 'internal',
             'name': 'shelf1'
         })
-        product = self.env['product.product'].create({'name': 'Test Product', 'type': 'product'})
+        product = self.env['product.product'].create({'name': 'Test Product', 'type': 'consu', 'is_trackable': True})
         stock_move = self.env['stock.move'].create({
             'name': 'Test Move',
             'product_id': product.id,
@@ -526,7 +533,7 @@ class TestProcRuleLoad(TransactionCase):
             'name': 'shelf2'
         })
 
-        products = self.env['product.product'].create([{'name': i, 'type': 'product'} for i in range(500)])
+        products = self.env['product.product'].create([{'name': i, 'type': 'consu', 'is_trackable': True} for i in range(500)])
         self.env['stock.warehouse.orderpoint'].create([{
             'product_id': products[i // 2].id,
             'location_id': (i % 2 == 0) and shelf1.id or shelf2.id,

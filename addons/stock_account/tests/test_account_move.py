@@ -216,7 +216,8 @@ class TestAccountMove(TestAccountMoveStockCommon):
         self.env.user.company_ids |= first_company
         basic_product = self.env['product.product'].create({
             'name': 'SuperProduct',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'categ_id': self.all_categ.id,
         })
 

@@ -412,7 +412,8 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.productA = self.env["product.product"].create(
             {
                 "name": "Product A",
-                "type": "product",
+                "type": "consu",
+                "is_trackable": True,
                 "list_price": 15,
                 "available_in_pos": True,
                 "taxes_id": [(6, 0, [tax01.id])],
@@ -423,7 +424,8 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.productB = self.env["product.product"].create(
             {
                 "name": "Product B",
-                "type": "product",
+                "type": "consu",
+                "is_trackable": True,
                 "list_price": 25,
                 "available_in_pos": True,
                 "taxes_id": [(6, 0, [tax02.id])]
@@ -618,7 +620,8 @@ class TestUi(TestPointOfSaleHttpCommon):
         product_1 = self.env["product.product"].create(
             {
                 "name": "Test Product 1",
-                "type": "product",
+                "type": "consu",
+                "is_trackable": True,
                 "list_price": 25,
                 "available_in_pos": True,
             }
@@ -632,7 +635,8 @@ class TestUi(TestPointOfSaleHttpCommon):
         product_2 = self.env["product.product"].create(
             {
                 "name": "Test Product 2",
-                "type": "product",
+                "type": "consu",
+                "is_trackable": True,
                 "list_price": 25,
                 "available_in_pos": True,
                 "taxes_id": [(6, 0, [tax01.id])],
@@ -787,7 +791,8 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.product = self.env["product.product"].create(
             {
                 "name": "Test Product 1",
-                "type": "product",
+                "type": "consu",
+                "is_trackable": True,
                 "list_price": 100,
                 "available_in_pos": True,
             }
@@ -806,7 +811,8 @@ class TestUi(TestPointOfSaleHttpCommon):
         (LoyaltyProgram.search([])).write({'pos_ok': False})
         self.product_a = self.env["product.product"].create({
             "name": "Test Product A",
-            "type": "product",
+            "type": "consu",
+                "is_trackable": True,
             "list_price": 10,
             "available_in_pos": True,
         })
@@ -863,14 +869,16 @@ class TestUi(TestPointOfSaleHttpCommon):
         (LoyaltyProgram.search([])).write({'pos_ok': False})
         self.product_a = self.env["product.product"].create({
             "name": "Test Product A",
-            "type": "product",
+            "type": "consu",
+                "is_trackable": True,
             "list_price": 40,
             "available_in_pos": True,
             "taxes_id": False,
         })
         self.product_b = self.env["product.product"].create({
             "name": "Test Product B",
-            "type": "product",
+            "type": "consu",
+                "is_trackable": True,
             "list_price": 40,
             "available_in_pos": True,
             "taxes_id": False,
@@ -903,21 +911,24 @@ class TestUi(TestPointOfSaleHttpCommon):
         (LoyaltyProgram.search([])).write({'pos_ok': False})
         self.product_a = self.env['product.product'].create({
             'name': 'Test Product A',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'list_price': 40,
             'available_in_pos': True,
             'taxes_id': False,
         })
         self.product_b = self.env['product.product'].create({
             'name': 'Test Product B',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'list_price': 80,
             'available_in_pos': True,
             'taxes_id': False,
         })
         self.product_c = self.env['product.product'].create({
             'name': 'Test Product C',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'list_price': 100,
             'available_in_pos': True,
             'taxes_id': False,
@@ -991,7 +1002,8 @@ class TestUi(TestPointOfSaleHttpCommon):
 
         self.product_a = self.env["product.product"].create({
             "name": "Test Product A",
-            "type": "product",
+            "type": "consu",
+                "is_trackable": True,
             "list_price": 265,
             "available_in_pos": True,
             "taxes_id": False,
@@ -1013,7 +1025,8 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.env["product.product"].create(
             {
                 "name": "Test Product",
-                "type": "product",
+                "type": "consu",
+                "is_trackable": True,
                 "list_price": 100,
                 "available_in_pos": True,
                 "taxes_id": False,
@@ -1057,7 +1070,8 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.productA = self.env['product.product'].create(
             {
                 'name': 'Product A',
-                'type': 'product',
+                'type': 'consu',
+            'is_trackable': True,
                 'list_price': 15,
                 'available_in_pos': True,
                 'taxes_id': False,
@@ -1068,7 +1082,8 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.productB = self.env['product.product'].create(
             {
                 'name': 'Product B',
-                'type': 'product',
+                'type': 'consu',
+            'is_trackable': True,
                 'list_price': 50,
                 'available_in_pos': True,
                 'taxes_id': False,
@@ -1136,7 +1151,8 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.test_product = self.env["product.product"].create(
             {
                 "name": "Test Product 1",
-                "type": "product",
+                "type": "consu",
+                "is_trackable": True,
                 "list_price": 100,
                 "available_in_pos": True,
                 "taxes_id": False,
@@ -1183,7 +1199,8 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.product_a = self.env["product.product"].create(
             {
                 "name": "Product A",
-                "type": "product",
+                "type": "consu",
+                "is_trackable": True,
                 "list_price": 100,
                 "available_in_pos": True,
                 "taxes_id": [(6, 0, self.tax01.ids)],
@@ -1192,7 +1209,8 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.product_b = self.env["product.product"].create(
             {
                 "name": "Product B",
-                "type": "product",
+                "type": "consu",
+                "is_trackable": True,
                 "list_price": 100,
                 "available_in_pos": True,
                 "taxes_id": False,
@@ -1245,7 +1263,8 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.productA = self.env['product.product'].create(
             {
                 'name': 'Product A',
-                'type': 'product',
+                'type': 'consu',
+            'is_trackable': True,
                 'list_price': 15,
                 'available_in_pos': True,
                 'taxes_id': False,
@@ -1256,7 +1275,8 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.productB = self.env['product.product'].create(
             {
                 'name': 'Product B',
-                'type': 'product',
+                'type': 'consu',
+            'is_trackable': True,
                 'list_price': 50,
                 'available_in_pos': True,
                 'taxes_id': False,
@@ -1296,7 +1316,8 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.product_a = self.env["product.product"].create(
             {
                 "name": "Product A",
-                "type": "product",
+                "type": "consu",
+                "is_trackable": True,
                 "list_price": 100,
                 "available_in_pos": True,
                 "taxes_id": [(6, 0, self.tax01.ids)],
@@ -1305,7 +1326,8 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.product_b = self.env["product.product"].create(
             {
                 "name": "Product B",
-                "type": "product",
+                "type": "consu",
+                "is_trackable": True,
                 "list_price": 100,
                 "available_in_pos": True,
                 "taxes_id": False,
@@ -1359,7 +1381,8 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.env['product.product'].create([
             {
                 'name': 'Free Product A',
-                'type': 'product',
+                'type': 'consu',
+            'is_trackable': True,
                 'list_price': 1,
                 'available_in_pos': True,
                 'taxes_id': False,
@@ -1367,7 +1390,8 @@ class TestUi(TestPointOfSaleHttpCommon):
             },
             {
                 'name': 'Free Product B',
-                'type': 'product',
+                'type': 'consu',
+            'is_trackable': True,
                 'list_price': 1,
                 'available_in_pos': True,
                 'taxes_id': False,
@@ -1375,7 +1399,8 @@ class TestUi(TestPointOfSaleHttpCommon):
             },
             {
                 'name': 'Product Test',
-                'type': 'product',
+                'type': 'consu',
+            'is_trackable': True,
                 'list_price': 1,
                 'available_in_pos': True,
                 'taxes_id': False,
@@ -1409,14 +1434,16 @@ class TestUi(TestPointOfSaleHttpCommon):
 
         free_product = self.env['product.product'].create({
                 'name': 'Free Product',
-                'type': 'product',
+                'type': 'consu',
+            'is_trackable': True,
                 'list_price': 1,
                 'available_in_pos': True,
                 'taxes_id': False,
             })
         self.env['product.product'].create({
                 'name': 'Product Test',
-                'type': 'product',
+                'type': 'consu',
+            'is_trackable': True,
                 'list_price': 50,
                 'available_in_pos': True,
                 'taxes_id': False,

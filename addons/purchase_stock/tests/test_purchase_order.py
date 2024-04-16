@@ -391,7 +391,8 @@ class TestPurchaseOrder(ValuationReconciliationTestCommon):
 
         super_product = self.env['product.product'].create({
             'name': 'Super Product',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'categ_id': self.stock_account_product_categ.id,
             'standard_price': 9.876543,
         })
@@ -605,7 +606,8 @@ class TestPurchaseOrder(ValuationReconciliationTestCommon):
         """ check that the quant created by a PO can be applied in an inventory adjustment correctly """
         product = self.env['product.product'].create({
             'name': 'Product A',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
         })
         po_form = Form(self.env['purchase.order'])
         po_form.partner_id = self.partner_a
@@ -669,7 +671,8 @@ class TestPurchaseOrder(ValuationReconciliationTestCommon):
         Create a purchase order, confirm it, invoice it, but don't post the invoice.
         Receive the products.
         """
-        self.product_id_1.type = 'product'
+        self.product_id_1.type = 'consu'
+        self.product_id_1.is_trackable = True
         self.product_id_1.categ_id.property_cost_method = 'average'
         po = self.env['purchase.order'].create(self.po_vals)
         po.button_confirm()

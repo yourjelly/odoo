@@ -18,7 +18,8 @@ class TestMrpValuationCommon(TestStockValuationCommon):
         )
         cls.component = cls.env['product.product'].create({
             'name': 'component1',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'categ_id': cls.component_category.id,
         })
         cls.bom = cls.env['mrp.bom'].create({
@@ -100,7 +101,8 @@ class TestMrpValuationStandard(TestMrpValuationCommon):
         byproduct_cost_share = 10
         byproduct = self.env['product.product'].create({
             'name': 'byproduct',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'categ_id': self.product1.product_tmpl_id.categ_id.id,
         })
         self.bom.write({

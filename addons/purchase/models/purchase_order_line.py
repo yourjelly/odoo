@@ -35,6 +35,7 @@ class PurchaseOrderLine(models.Model):
     product_uom_category_id = fields.Many2one(related='product_id.uom_id.category_id')
     product_id = fields.Many2one('product.product', string='Product', domain=[('purchase_ok', '=', True)], change_default=True, index='btree_not_null')
     product_type = fields.Selection(related='product_id.detailed_type', readonly=True)
+    is_trackable = fields.Boolean(related='product_id.is_trackable', readonly=True)
     price_unit = fields.Float(
         string='Unit Price', required=True, digits='Product Price',
         compute="_compute_price_unit_and_date_planned_and_name", readonly=False, store=True)

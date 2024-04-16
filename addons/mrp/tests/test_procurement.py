@@ -297,12 +297,14 @@ class TestProcurement(TestMrpCommon):
 
         product_1 = self.env['product.product'].create({
             'name': 'Cake',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'route_ids': [(6, 0, [route_manufacture.id])]
         })
         product_2 = self.env['product.product'].create({
             'name': 'Cake Mix',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'route_ids': [(6, 0, [route_manufacture.id])]
         })
         product_3 = self.env['product.product'].create({
@@ -334,7 +336,8 @@ class TestProcurement(TestMrpCommon):
         # extra manufactured component added to 1st MO after it is already confirmed
         product_4 = self.env['product.product'].create({
             'name': 'Flavor Enchancer',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'route_ids': [(6, 0, [route_manufacture.id])]
         })
         product_5 = self.env['product.product'].create({
@@ -483,13 +486,15 @@ class TestProcurement(TestMrpCommon):
         # Define products requested for this BoM.
         product = self.env['product.product'].create({
             'name': 'product',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'route_ids': [(4, self.ref('stock.route_warehouse0_mto')), (4, self.ref('mrp.route_warehouse0_manufacture'))],
             'categ_id': self.env.ref('product.product_category_all').id
         })
         component = self.env['product.product'].create({
             'name': 'component',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'categ_id': self.env.ref('product.product_category_all').id
         })
         self.env['mrp.bom'].create({
@@ -540,17 +545,20 @@ class TestProcurement(TestMrpCommon):
         route_manufacture = self.warehouse.manufacture_pull_id.route_id
         product_1 = self.env['product.product'].create({
             'name': 'Product A',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'route_ids': [(6, 0, [route_manufacture.id])]
         })
         product_2 = self.env['product.product'].create({
             'name': 'Product B',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'route_ids': [(6, 0, [route_manufacture.id, route_mto.id])]
         })
         product_3 = self.env['product.product'].create({
             'name': 'Product B',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'route_ids': [(6, 0, [route_manufacture.id])]
         })
         product_4 = self.env['product.product'].create({
@@ -648,7 +656,8 @@ class TestProcurement(TestMrpCommon):
             'type': 'consu',
         }, {
             'name': 'finished',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'route_ids': [(6, 0, manu_route.ids)],
         }])
 
@@ -709,7 +718,8 @@ class TestProcurement(TestMrpCommon):
         # add a third component, should reflect in picking
         comp3 = self.env['product.product'].create({
             'name': 'Comp3',
-            'type': 'product'
+            'type': 'consu',
+            'is_trackable': True
         })
         mo.write({
             'move_raw_ids': [(0, 0, {
@@ -743,15 +753,18 @@ class TestProcurement(TestMrpCommon):
 
         super_product = self.env['product.product'].create({
             'name': 'Super Product',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
         })
         comp1 = self.env['product.product'].create({
             'name': 'Comp1',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
         })
         comp2 = self.env['product.product'].create({
             'name': 'Comp2',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
         })
         bom = self.env['mrp.bom'].create({
             'product_id': super_product.id,
@@ -795,7 +808,8 @@ class TestProcurement(TestMrpCommon):
         # add new comp3
         comp3 = self.env['product.product'].create({
             'name': 'Comp3',
-            'type': 'product'
+            'type': 'consu',
+            'is_trackable': True
         })
         mo.write({
             'move_raw_ids': [(0, 0, {

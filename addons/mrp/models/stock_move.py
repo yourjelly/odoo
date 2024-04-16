@@ -489,7 +489,7 @@ class StockMove(models.Model):
 
     def _generate_move_phantom(self, bom_line, product_qty, quantity_done):
         vals = []
-        if bom_line.product_id.type in ['product', 'consu']:
+        if bom_line.product_id.type == 'product':
             vals = self.copy_data(default=self._prepare_phantom_move_values(bom_line, product_qty, quantity_done))
             if self.state == 'assigned':
                 for v in vals:

@@ -349,7 +349,8 @@ class TestSubcontractingFlows(TestMrpSubcontractingCommon):
         # We create a different BoM for the same product
         comp3 = self.env['product.product'].create({
             'name': 'Component1',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'categ_id': self.env.ref('product.product_category_all').id,
         })
 
@@ -410,7 +411,8 @@ class TestSubcontractingFlows(TestMrpSubcontractingCommon):
         # We create a different BoM for the same product
         comp3 = self.env['product.product'].create({
             'name': 'Component3',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'categ_id': self.env.ref('product.product_category_all').id,
         })
 
@@ -679,10 +681,12 @@ class TestSubcontractingFlows(TestMrpSubcontractingCommon):
         resupply_route = self.env['stock.route'].search([('name', '=', 'Resupply Subcontractor on Order')])
         finished, component = self.env['product.product'].create([{
             'name': 'Finished Product',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
         }, {
             'name': 'Component',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'route_ids': [(4, resupply_route.id)],
         }])
 
@@ -1057,20 +1061,23 @@ class TestSubcontractingTracking(TransactionCase):
         # 2.1. Comp1 has tracking by lot
         cls.comp1_sn = cls.env['product.product'].create({
             'name': 'Component1',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'categ_id': cls.env.ref('product.product_category_all').id,
             'tracking': 'serial'
         })
         cls.comp2 = cls.env['product.product'].create({
             'name': 'Component2',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'categ_id': cls.env.ref('product.product_category_all').id,
         })
 
         # 2.2. Finished prodcut has tracking by serial number
         cls.finished_product = cls.env['product.product'].create({
             'name': 'finished',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'categ_id': cls.env.ref('product.product_category_all').id,
             'tracking': 'lot'
         })
@@ -1290,11 +1297,13 @@ class TestSubcontractingTracking(TransactionCase):
         resupply_sub_on_order_route = self.env['stock.route'].search([('name', '=', 'Resupply Subcontractor on Order')])
         finished_product, component = self.env['product.product'].create([{
             'name': 'SuperProduct',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'tracking': 'lot',
         }, {
             'name': 'Component',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'tracking': 'lot',
             'route_ids': [(4, resupply_sub_on_order_route.id)],
         }])
@@ -1362,11 +1371,13 @@ class TestSubcontractingTracking(TransactionCase):
         resupply_sub_on_order_route = self.env['stock.route'].search([('name', '=', 'Resupply Subcontractor on Order')])
         finished_product, component = self.env['product.product'].create([{
             'name': 'Pepper Spray',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'tracking': 'serial',
         }, {
             'name': 'Pepper',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'route_ids': [(4, resupply_sub_on_order_route.id)],
         }])
 
@@ -1448,24 +1459,28 @@ class TestSubcontractingPortal(TransactionCase):
         # 2.1. Comp1 has tracking by lot
         cls.comp1_sn = cls.env['product.product'].create({
             'name': 'Component1',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'categ_id': cls.env.ref('product.product_category_all').id,
             'tracking': 'serial'
         })
         cls.comp2 = cls.env['product.product'].create({
             'name': 'Component2',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'categ_id': cls.env.ref('product.product_category_all').id,
         })
         cls.product_not_in_bom = cls.env['product.product'].create({
             'name': 'Product not in the BoM',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
         })
 
         # 2.2. Finished prodcut has tracking by serial number
         cls.finished_product = cls.env['product.product'].create({
             'name': 'finished',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'categ_id': cls.env.ref('product.product_category_all').id,
             'tracking': 'lot'
         })
@@ -1570,12 +1585,14 @@ class TestSubcontractingSerialMassReceipt(TransactionCase):
         self.resupply_route = self.env['stock.route'].search([('name', '=', 'Resupply Subcontractor on Order')])
         self.raw_material = self.env['product.product'].create({
             'name': 'Component',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'route_ids': [Command.link(self.resupply_route.id)],
         })
         self.finished = self.env['product.product'].create({
             'name': 'Finished',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'tracking': 'serial'
         })
         self.bom = self.env['mrp.bom'].create({
@@ -1667,7 +1684,8 @@ class TestSubcontractingSerialMassReceipt(TransactionCase):
         product_template = self.env['product.template'].create({
             'name': 'Cake',
             'uom_id': self.env.ref('uom.product_uom_unit').id,
-            'detailed_type': 'product',
+            'detailed_type': 'consu',
+            'is_trackable': True,
         })
         self.env['product.template.attribute.line'].create({
             'product_tmpl_id': product_template.id,

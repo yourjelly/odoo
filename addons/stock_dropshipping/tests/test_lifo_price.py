@@ -26,7 +26,8 @@ class TestLifoPrice(ValuationReconciliationTestCommon):
         product_form = Form(self.env['product.product'])
         product_form.default_code = 'LIFO'
         product_form.name = 'LIFO Ice Cream'
-        product_form.detailed_type = 'product'
+        product_form.detailed_type = 'consu'
+        product_form.is_trackable = True
         product_form.categ_id = product_category_001
         # <field name="list_price" position="attributes">
         #     <attribute name="readonly">product_variant_count &gt; 1</attribute>

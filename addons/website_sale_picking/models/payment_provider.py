@@ -48,7 +48,7 @@ class PaymentProvider(models.Model):
         # Show onsite providers only if onsite carriers exists
         # and the order contains physical products
         if not onsite_carriers or not any(
-            product.type in ('consu', 'product')
+            product.type == 'consu'
             for product in order.order_line.product_id
         ):
             unfiltered_providers = compatible_providers

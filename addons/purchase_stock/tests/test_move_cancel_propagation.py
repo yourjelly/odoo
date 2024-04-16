@@ -19,7 +19,8 @@ class TestMoveCancelPropagation(PurchaseTestCommon):
         })
         product = cls.env['product.product'].create({
             'name': 'Geyser',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'route_ids': [(4, cls.route_mto), (4, cls.route_buy)],
             'seller_ids': [(6, 0, [seller.id])],
         })
@@ -247,7 +248,8 @@ class TestMoveCancelPropagation(PurchaseTestCommon):
         })
         product_car = self.env['product.product'].create({
             'name': 'Car',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'route_ids': [(4, self.ref('stock.route_warehouse0_mto')), (4, self.ref('purchase_stock.route_warehouse0_buy'))],
             'seller_ids': [(6, 0, [seller.id])],
             'categ_id': self.env.ref('product.product_category_all').id,

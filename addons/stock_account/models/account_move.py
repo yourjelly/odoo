@@ -257,7 +257,7 @@ class AccountMoveLine(models.Model):
 
     def _eligible_for_cogs(self):
         self.ensure_one()
-        return self.product_id.type == 'product' and self.product_id.valuation == 'real_time'
+        return self.product_id.is_trackable and self.product_id.valuation == 'real_time'
 
     def _get_gross_unit_price(self):
         price_unit = self.price_subtotal / self.quantity

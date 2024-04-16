@@ -30,7 +30,8 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
         product_form.name = 'Stick'
         product_form.uom_id = cls.uom_unit
         product_form.uom_po_id = cls.uom_unit
-        product_form.detailed_type = 'product'
+        product_form.detailed_type = 'consu'
+        product_form.is_trackable = True
         product_form.route_ids.clear()
         product_form.route_ids.add(cls.warehouse.manufacture_pull_id.route_id)
         product_form.route_ids.add(cls.warehouse.mto_pull_id.route_id)
@@ -39,7 +40,8 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
         # Create raw product for manufactured product
         product_form = Form(cls.env['product.product'])
         product_form.name = 'Raw Stick'
-        product_form.detailed_type = 'product'
+        product_form.detailed_type = 'consu'
+        product_form.is_trackable = True
         product_form.uom_id = cls.uom_unit
         product_form.uom_po_id = cls.uom_unit
         cls.raw_product = product_form.save()
@@ -287,7 +289,8 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
         ])
         new_product = self.env['product.product'].create({
             'name': 'New product',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
         })
         bom.consumption = 'flexible'
         production_form = Form(self.env['mrp.production'])
@@ -333,11 +336,13 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
         finished_product = self.env['product.product'].create({
             'name': 'Super Product',
             'route_ids': [(4, self.ref('mrp.route_warehouse0_manufacture'))],
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
         })
         secondary_product = self.env['product.product'].create({
             'name': 'Secondary',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
         })
         component = self.env['product.product'].create({
             'name': 'Component',
@@ -403,7 +408,8 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
         # Create an additional BoM for component
         product_form = Form(self.env['product.product'])
         product_form.name = 'Wood'
-        product_form.detailed_type = 'product'
+        product_form.detailed_type = 'consu'
+        product_form.is_trackable = True
         product_form.uom_id = self.uom_unit
         product_form.uom_po_id = self.uom_unit
         self.wood_product = product_form.save()
@@ -555,7 +561,8 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
             warehouse.manufacture_steps = 'pbm_sam'
         finished_product = self.env['product.product'].create({
             'name': 'Product',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'route_ids': manufacturing_route,
         })
         self.env['mrp.bom'].create({
@@ -601,27 +608,32 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
         products = self.env['product.product'].create([
             {
             'name': 'FP',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'route_ids': manufacturing_route,
             },
             {
             'name': 'P1',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'route_ids': manufacturing_route,
             },
             {
             'name': 'P2',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'route_ids': manufacturing_route,
             },
             {
             'name': 'P3',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'route_ids': manufacturing_route,
             },
             {
             'name': 'P4',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'route_ids': manufacturing_route,
             },
 

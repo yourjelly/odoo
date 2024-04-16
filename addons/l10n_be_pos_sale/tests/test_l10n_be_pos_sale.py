@@ -18,7 +18,8 @@ class TestPoSSaleL10NBe(TestPointOfSaleHttpCommon):
 
         self.product_a = self.env['product.product'].create({
             'name': 'Product A',
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'list_price': 10,
             'taxes_id': False,
             'available_in_pos': True,

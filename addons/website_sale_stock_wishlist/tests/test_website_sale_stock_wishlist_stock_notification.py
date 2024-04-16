@@ -22,7 +22,8 @@ class TestStockNotificationWishlist(HttpCase):
         cls.product = cls.env['product.product'].create({
             'name': 'Macbook Pro',
             'website_published': True,
-            'type': 'product',
+            'type': 'consu',
+            'is_trackable': True,
             'allow_out_of_stock_order': False,
 
         })

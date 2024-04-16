@@ -57,7 +57,7 @@ export class BarcodeReader {
             parseBarcode = this.parser.parse_barcode(code);
             if (
                 Array.isArray(parseBarcode) &&
-                !parseBarcode.some((element) => element.type === "product")
+                !parseBarcode.some((element) => element.is_trackable)
             ) {
                 throw new GS1BarcodeError("The GS1 barcode must contain a product.");
             }
