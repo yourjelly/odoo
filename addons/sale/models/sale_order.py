@@ -607,16 +607,9 @@ class SaleOrder(models.Model):
     @api.depends('invoice_ids.state', 'currency_id', 'amount_total')
     def _compute_amount_to_invoice(self):
         for order in self:
-            order.amount_to_invoice = order.amount_total
-            for invoice in order.invoice_ids.filtered(lambda x: x.state == 'posted'):
-                prices = sum(invoice.line_ids.filtered(lambda x: order in x.sale_line_ids.order_id).mapped('price_total'))
-                invoice_amount_currency = invoice.currency_id._convert(
-                    prices * -invoice.direction_sign,
-                    order.currency_id,
-                    invoice.company_id,
-                    invoice.date,
-                )
-                order.amount_to_invoice -= invoice_amount_currency
+            invoices = order.invoice_ids.filtered(lambda x: x.state == 'posted')
+            # TODO: amount_to_invoice is stored ; avoid? necessary?
+            order.amount_to_invoice = max(order.amount_total - invoices._get_amount_from_sales_order(order), 0)
 
     @api.depends('amount_total', 'amount_to_invoice')
     def _compute_amount_invoiced(self):
