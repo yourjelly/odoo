@@ -279,6 +279,7 @@ export class DynamicList extends DataPoint {
             return false;
         }
         if (validSelection.length === 0) {
+            debugger
             this.model.dialog.add(AlertDialog, {
                 body: _t("No valid record to save"),
                 confirm: () => this.leaveEditMode({ discard: true }),
