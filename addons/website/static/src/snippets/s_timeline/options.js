@@ -27,6 +27,6 @@ options.registry.Timeline = options.Class.extend({
      */
     timelineCard: function (previewMode, widgetValue, params) {
         const $timelineRow = this.$target.closest('.s_timeline_row');
-        $timelineRow.toggleClass('flex-row-reverse flex-row');
+        $timelineRow.toggleClass('flex-md-row-reverse flex-md-row').find('.s_timeline_card').toggleClass('align-items-start text-start align-items-end text-end');
     },
 });

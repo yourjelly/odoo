@@ -1,66 +1,65 @@
 .s_timeline {
-    --spacing: #{$grid-gutter-width * .5};
-
-    .s_timeline_line {
-        position: relative;
-        border-color: map-get($grays, '800'); // For inheritance, not actual border
-
-        &:before {
-            content: '';
-            display: block !important; // override portal '#wrap .container' value
-            position: absolute;
-            width: 1px;
-            top: 0px;
-            bottom: 0px;
+    .s_timeline_line{
+        border-left: 1px solid map-get($grays, '300');
+        @include media-breakpoint-up(md) {
             left: 50%;
-            border-left: 1px solid;
-            border-color: inherit;
         }
     }
+
     .s_timeline_row {
+        flex-direction: column;
         align-items: center;
 
         .s_timeline_content {
-            align-items: center;
-            justify-content: flex-end;
-            width: 100%;
+            margin-left: 10%;
 
             ~ .s_timeline_content {
                 justify-content: flex-start;
             }
+
+            @include media-breakpoint-up(md) {
+                width: 100%;
+                margin-left: 0;
+            }
         }
-        &.flex-row-reverse .s_timeline_content {
-            flex-direction: row-reverse;
-        }
+
         @include media-breakpoint-up(md) {
-            &.flex-row-reverse .s_timeline_content {
+            flex-direction: row;
+
+            &.flex-md-row-reverse .s_timeline_content {
                 flex-direction: row-reverse;
 
                 &:not(:last-child) {
                     margin-left: 10%;
                 }
             }
-            &:not(.flex-row-reverse) .s_timeline_content:last-child {
+            &:not(.flex-md-row-reverse) .s_timeline_content:last-child {
                 margin-left: 10%;
             }
         }
     }
-    .s_timeline_date {
-        position: relative;
-        margin: var(--spacing) 0;
-        padding: map-get($spacers, 1);
-        background-color: var(--o-cc-bg, #{$body-bg});
-        text-align: center;
+    .s_timeline_dot {
+        div::before {
+            content:"";
+            display: block;
+            padding: map-get($spacers, 1);
+            background-color: $primary;
+            border-radius: $border-radius-pill;
+        }
+
+        div::after {
+            content:"";
+            display: block;
+            position: absolute;
+            top: -4px;
+            padding: map-get($spacers, 3) map-get($spacers, 1);
+            background-color: var(--o-cc-bg, #{$body-bg});
+            z-index: -1;
+        }
 
         @include media-breakpoint-up(md) {
-            position: absolute;
             left: 50%;
-            transform: translateX(-50%);
+            z-index: 1;
         }
-    }
-    .s_timeline_icon {
-        z-index: 1;
-        flex: 0 0 auto;
-        margin: var(--spacing);
     }
 }
