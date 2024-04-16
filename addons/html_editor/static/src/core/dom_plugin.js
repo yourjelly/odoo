@@ -18,7 +18,7 @@ import { DIRECTIONS, childNodeIndex, rightPos, startPos } from "../utils/positio
 
 export class DomPlugin extends Plugin {
     static name = "dom";
-    static dependencies = ["selection", "split"];
+    static dependencies = ["selection", "split", "format"];
     static shared = ["domInsert", "copyAttributes"];
     static resources = () => ({
         powerboxCommands: {
@@ -33,6 +33,13 @@ export class DomPlugin extends Plugin {
     });
     contentEditableToRemove = new Set();
 
+    setup() {
+        if (typeof this.config.direction !== "undefined") {
+            this.editable.setAttribute("dir", this.config.direction);
+        }
+        this.config.direction = this.config.direction || "ltr";
+    }
+
     handleCommand(command, payload) {
         switch (command) {
             case "SET_TAG":
@@ -40,6 +47,9 @@ export class DomPlugin extends Plugin {
                 break;
             case "INSERT_FONT_AWESOME":
                 this.insertFontAwesome(payload.faClass);
+                break;
+            case "SWITCH_DIRECTION":
+                this.switchDirection();
                 break;
             case "INSERT_SEPARATOR":
                 this.insertSeparator();
@@ -370,6 +380,48 @@ export class DomPlugin extends Plugin {
             focusNode: endContainer,
             focusOffset: endOffset,
         });
+        this.dispatch("ADD_STEP");
+    }
+
+    switchDirection() {
+        this.shared.splitSelection();
+        const selection = this.shared.getEditableSelection();
+        const selectedTextNodes = [selection.anchorNode, ...this.shared.getSelectedNodes()].filter(
+            (n) =>
+                n.nodeType === Node.TEXT_NODE &&
+                closestElement(n).isContentEditable &&
+                n.nodeValue.trim().length
+        );
+        const blocks = new Set(
+            selectedTextNodes.map(
+                (textNode) => closestElement(textNode, "ul,ol") || closestBlock(textNode)
+            )
+        );
+
+        const direction = this.config.direction;
+        const shouldApplyStyle = !this.shared.isSelectionFormat("switchDirection");
+
+        for (const block of blocks) {
+            for (const node of block.querySelectorAll("ul,ol")) {
+                blocks.add(node);
+            }
+        }
+        for (const block of blocks) {
+            if (!shouldApplyStyle) {
+                block.removeAttribute("dir");
+            } else {
+                block.setAttribute("dir", direction === "ltr" ? "rtl" : "ltr");
+            }
+        }
+
+        for (const element of blocks) {
+            const style = getComputedStyle(element);
+            if (style.direction === "ltr" && style.textAlign === "right") {
+                element.style.setProperty("text-align", "left");
+            } else if (style.direction === "rtl" && style.textAlign === "left") {
+                element.style.setProperty("text-align", "right");
+            }
+        }
         this.dispatch("ADD_STEP");
     }
 
