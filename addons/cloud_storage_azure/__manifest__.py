@@ -9,7 +9,7 @@
     "data": [
         "views/settings.xml",
     ],
-    "excludes": ["cloud_storage_google"],
+    # "excludes": ["cloud_storage_google"],
     "uninstall_hook": "uninstall_hook",
     'license': 'LGPL-3',
 }

@@ -9,7 +9,7 @@
     "data": [
         "views/settings.xml",
     ],
-    "excludes": ["cloud_storage_azure"],
+    # "excludes": ["cloud_storage_azure"],
     "uninstall_hook": "uninstall_hook",
     'license': 'LGPL-3',
 }
