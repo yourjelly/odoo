@@ -51,7 +51,6 @@ export const busService = {
                 worker.postMessage(message);
             }
         }
-
         /**
          * Handle messages received from the shared worker and fires an
          * event according to the message type.

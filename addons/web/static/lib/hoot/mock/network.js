@@ -13,6 +13,7 @@ const {
     AbortController,
     document,
     EventTarget,
+    fetch: realFetch,
     Headers,
     Math: { max: $max, min: $min },
     Object: { assign: $assign, entries: $entries, fromEntries: $fromEntries },
@@ -42,7 +43,7 @@ const makeWorkerScope = (worker) => {
         mockWorkerConnection(worker);
 
         if (typeof globalThis.onconnect === "function") {
-            globalThis.onconnect();
+            globalThis.onconnect({ ports: [worker.port] });
         }
 
         $assign(globalThis, values);
@@ -51,7 +52,8 @@ const makeWorkerScope = (worker) => {
     const load = async () => {
         await Promise.resolve();
 
-        const response = await globalThis.fetch(worker.url);
+        // Real fetch must be used to the retrieve worker script.
+        const response = await realFetch(worker.url);
         const content = await response.text();
         script = new Function("self", content);
     };
@@ -225,9 +227,9 @@ export function mockWorker(onWorkerConnected) {
     mockWorkerConnection = onWorkerConnected;
 
     return function restoreWorker() {
-        for (const worker of openWorkers) {
-            if ("port" in worker) {
-                worker.port.close();
+        for (const worker of openWorkers.keys()) {
+            if (worker.close) {
+                worker.close();
             } else {
                 worker.terminate();
             }
@@ -280,8 +282,10 @@ export class MockDedicatedWorkerGlobalScope {
             },
             worker
         );
-        if (!("close" in this)) {
-            this.close = worker.terminate.bind(worker);
+        if ("close" in worker) {
+            this.close = worker.close.bind(worker);
+        } else {
+            this.terminate = worker.terminate.bind(worker);
         }
     }
 }
@@ -590,6 +594,11 @@ export class MockSharedWorker extends EventTarget {
 
         openWorkers.set(this, load());
     }
+
+    close() {
+        this.port.close();
+        openWorkers.delete(this);
+    }
 }
 
 export class MockWebSocket extends EventTarget {
@@ -622,7 +631,10 @@ export class MockWebSocket extends EventTarget {
         makePublicListeners(this, ["close", "error", "message", "open"]);
 
         this.addEventListener("close", () => openClientWebsockets.delete(this));
-        this.#readyState = WebSocket.OPEN;
+        queueMicrotask(() => {
+            this.#readyState = WebSocket.OPEN;
+            this.dispatchEvent(new Event("open"));
+        });
     }
 
     /** @type {typeof WebSocket["prototype"]["close"]} */
@@ -641,8 +653,13 @@ export class MockWebSocket extends EventTarget {
         if (this.readyState !== WebSocket.OPEN) {
             return;
         }
-        this.#logger.logRequest(() => data);
         this.#serverWs.dispatchEvent(new MessageEvent("message", { data }));
+        try {
+            data = JSON.parse(data);
+        } catch {
+            // Ignore, parsing the data is just done to ease debugging.
+        }
+        this.#logger.logRequest(() => data);
     }
 }
 
@@ -800,8 +817,13 @@ export class ServerWebSocket extends EventTarget {
         if (this.readyState !== WebSocket.OPEN) {
             return;
         }
-        this.#logger.logResponse(() => data);
         this.#clientWs.dispatchEvent(new MessageEvent("message", { data }));
+        try {
+            data = JSON.parse(data);
+        } catch {
+            // Ignore, parsing the data is just done to ease debugging.
+        }
+        this.#logger.logResponse(() => data);
     }
 }
 

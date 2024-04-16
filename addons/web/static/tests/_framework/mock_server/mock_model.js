@@ -2907,6 +2907,7 @@ export class Model extends Array {
  */
 export class ServerModel extends Model {
     _fetch = true;
+    __model = fields.Char({ default: () => this._name, readonly: true });
 }
 
 export const Command = {

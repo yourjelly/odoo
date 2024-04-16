@@ -3,7 +3,6 @@
 /* eslint-disable no-restricted-globals */
 
 import { WebsocketWorker } from "./websocket_worker";
-
 (function () {
     const websocketWorker = new WebsocketWorker();
 
