@@ -124,15 +124,15 @@ export class DiscussCoreCommon {
             }
         });
         this.env.bus.addEventListener("mail.message/delete", ({ detail: { message, notifId } }) => {
-            if (message.thread) {
-                if (
-                    (!message.thread.selfMember?.seen_message_id ||
-                        message.id > message.thread.selfMember.seen_message_id.id) &&
-                    notifId > message.thread.message_unread_counter_bus_id
-                ) {
-                    message.thread.message_unread_counter--;
-                }
-            }
+            // if (message.thread) {
+            //     if (
+            //         (!message.thread.selfMember?.seen_message_id ||
+            //             message.id > message.thread.selfMember.seen_message_id.id) &&
+            //         notifId > message.thread.message_unread_counter_bus_id
+            //     ) {
+            //         message.thread.message_unread_counter--;
+            //     }
+            // }
         });
     }
 

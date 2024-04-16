@@ -592,6 +592,7 @@ class Channel(models.Model):
         message_format = message._message_format()[0]
         if "temporary_id" in self.env.context:
             message_format["temporary_id"] = self.env.context["temporary_id"]
+        member = self._find_or_create_member_for_self()
         bus_notifications = [
             ((self, "members"), "mail.record/insert", {
                 "Thread": {"id": self.id, "is_pinned": True, "model": "discuss.channel"}
@@ -886,8 +887,11 @@ class Channel(models.Model):
                 if member:
                     info['channelMembers'] = [('ADD', list(member._discuss_channel_member_format(extra_fields={"last_interest_dt": True}).values()))]
                     info['state'] = member.fold_state or 'closed'
-                    info['message_unread_counter'] = member.message_unread_counter
-                    info["message_unread_counter_bus_id"] = bus_last_id
+                    info['message_unread_counter'] = {
+                        'serverValue': member.message_unread_counter,
+                        'serverLastMessageId': member.channel_id.message_ids[0].id,
+                        'thread': { 'id': member.channel_id.id, 'model': 'discuss.channel' }
+                    },
                     info['custom_notifications'] = member.custom_notifications
                     info['mute_until_dt'] = fields.Datetime.to_string(member.mute_until_dt)
                     info['custom_channel_name'] = member.custom_channel_name
@@ -1068,9 +1072,10 @@ class Channel(models.Model):
                 'channel': {
                     'id': self.id,
                     'model': 'discuss.channel',
-                    'message_unread_counter': member.message_unread_counter,
-                    # sudo - bus.bus: reading non sensitive last id
-                    'message_unread_counter_bus_id': self.env["bus.bus"].sudo()._bus_last_id()
+                    'message_unread_counter': {
+                        'thread': {'id': self.id, 'model': 'discuss.channel'},
+                        'serverValue': member.message_unread_counter,
+                        'serverLastMessageId': member.channel_id.message_ids[0].id,                    },
                 },
                 'id': member.id,
                 'last_message_id': last_message.id,

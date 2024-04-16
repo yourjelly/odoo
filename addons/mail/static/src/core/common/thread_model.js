@@ -183,7 +183,7 @@ export class Thread extends Record {
             return this.counter;
         }
         if (this.isChatChannel) {
-            return this.message_unread_counter || this.message_needaction_counter;
+            return this.message_unread_counter.value || this.message_needaction_counter;
         }
         return this.message_needaction_counter;
     }
@@ -216,7 +216,11 @@ export class Thread extends Record {
     memberCount = 0;
     message_needaction_counter = 0;
     message_needaction_counter_bus_id = 0;
-    message_unread_counter = 0;
+    message_unread_counter = Record.one("UnreadMessageCounter", {
+        compute() {
+            return { thread: this };
+        },
+    });
     message_unread_counter_bus_id = 0;
     /**
      * Contains continuous sequence of messages to show in message list.
@@ -357,7 +361,7 @@ export class Thread extends Record {
     }
 
     get isUnread() {
-        return this.message_unread_counter > 0 || this.needactionMessages.length > 0;
+        return this.message_unread_counter.value > 0 || this.needactionMessages.length > 0;
     }
 
     get typesAllowingCalls() {
@@ -449,7 +453,9 @@ export class Thread extends Record {
     }
 
     get needactionCounter() {
-        return this.isChatChannel ? this.message_unread_counter : this.message_needaction_counter;
+        return this.isChatChannel
+            ? this.message_unread_counter.value
+            : this.message_needaction_counter;
     }
 
     newestMessage = Record.one("Message", {
@@ -825,10 +831,6 @@ export class Thread extends Record {
         if (this.selfMember) {
             this.selfMember.seen_message_id = this.newestPersistentNotEmptyOfAllMessage;
         }
-        Object.assign(this, {
-            message_unread_counter: 0,
-            message_needaction_counter: 0,
-        });
     }
 
     async markAsFetched() {
@@ -846,7 +848,7 @@ export class Thread extends Record {
             this.selfMember.seen_message_id = newestPersistentMessage;
         }
         if (
-            this.message_unread_counter > 0 &&
+            this.message_unread_counter.value > 0 &&
             this.model === "discuss.channel" &&
             newestPersistentMessage
         ) {
