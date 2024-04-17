@@ -3,7 +3,7 @@ import { after, beforeEach, expect, test } from "@odoo/hoot";
 import { keyDown } from "@odoo/hoot-dom";
 import { click, dblclick, drag, edit, hover, leave, pointerDown, press, queryAll, queryAllTexts, queryFirst, queryOne, queryText, resize } from "@odoo/hoot-dom";
 import { animationFrame, Deferred, runAllTimers } from "@odoo/hoot-mock";
-import { clickKanbanLoadMore, clickSave, contains, createKanbanRecord, defineActions, defineModels, defineParams, discardKanbanRecord, editFavoriteName, editKanbanColumnName, editKanbanRecord, editKanbanRecordQuickCreateInput, fields, getDropdownMenu, getFacetTexts, getKanbanColumn, getKanbanColumnDropdownMenu, getKanbanColumnTooltips, getKanbanCounters, getKanbanProgressBars, getKanbanRecord, getKanbanRecordTexts, getPagerLimit, getPagerValue, getService, makeServerError, MockServer, mockService, models, mountView, mountWithCleanup, onRpc, pagerNext, patchWithCleanup, quickCreateKanbanColumn, quickCreateKanbanRecord, saveFavorite, selectGroup, serverState, stepAllNetworkCalls, toggleGroupByMenu, toggleKanbanColumnActions, toggleKanbanRecordDropdown, toggleMenuItem, toggleMenuItemOption, toggleSaveFavorite, toggleSearchBarMenu, validateKanbanColumn, validateKanbanRecord, validateSearch, webModels } from "@web/../tests/web_test_helpers";
+import { clickKanbanLoadMore, clickSave, contains, createKanbanRecord, defineActions, defineModels, defineParams, discardKanbanRecord, editFavoriteName, editKanbanColumnName, editKanbanRecord, editKanbanRecordQuickCreateInput, editPager, fields, getDropdownMenu, getFacetTexts, getKanbanColumn, getKanbanColumnDropdownMenu, getKanbanColumnTooltips, getKanbanCounters, getKanbanProgressBars, getKanbanRecord, getKanbanRecordTexts, getPagerLimit, getPagerValue, getService, makeServerError, MockServer, mockService, models, mountView, mountWithCleanup, onRpc, pagerNext, patchWithCleanup, quickCreateKanbanColumn, quickCreateKanbanRecord, saveFavorite, selectGroup, serverState, stepAllNetworkCalls, toggleGroupByMenu, toggleKanbanColumnActions, toggleKanbanRecordDropdown, toggleMenuItem, toggleMenuItemOption, toggleSaveFavorite, toggleSearchBarMenu, validateKanbanColumn, validateKanbanRecord, validateSearch, webModels } from "@web/../tests/web_test_helpers";
 
 import { currencies } from "@web/core/currency";
 import { registry } from "@web/core/registry";
@@ -2833,7 +2833,7 @@ test("selection box is not removed after multi record edition", async () => {
     expect(".o_data_row .o_list_record_selector input:checked").toHaveCount(4, { message: "all 4 records should be selected" });
 
     // edit selected records
-    await click(target.querySelector(".o_data_row").querySelector(".o_data_cell"));
+    await contains(".o_data_row .o_data_cell").click();
     await contains(".o_data_row [name=foo] input").edit("legion");
     await contains(".modal-dialog button.btn-primary").click();
     expect(".o_control_panel_actions .o_list_selection_box").toHaveCount(1, { message: "list selection box should still be displayed" });
@@ -2852,20 +2852,19 @@ test("selection is reset on reload", async () => {
     });
 
     expect(".o_control_panel_actions .o_list_selection_box").toHaveCount(0);
-    expect($(target).find("tfoot td:nth(2)").text()).toBe("32", { message: "total should be 32 (no record selected)" });
+    expect("tfoot .o_list_number").toHaveText("32", { message: "total should be 32 (no record selected)" });
 
     // select first record
-    var firstRowSelector = target.querySelector("tbody .o_list_record_selector input");
-    await click(firstRowSelector);
-    assert.ok(firstRowSelector.checked, "first row should be selected");
+    await contains("tbody .o_list_record_selector input").click();
+    expect("tbody .o_list_record_selector input:first").toBeChecked({ message: "first row should be selected" });
     expect(".o_control_panel_actions .o_list_selection_box").toHaveCount(1);
-    expect($(target).find("tfoot td:nth(2)").text()).toBe("10", { message: "total should be 10 (first record selected)" });
-
-    await reloadListView(target);
-    firstRowSelector = target.querySelector("tbody .o_list_record_selector input");
-    assert.notOk(firstRowSelector.checked, "first row should no longer be selected");
+    expect("tfoot .o_list_number").toHaveText("10", { message: "total should be 10 (first record selected)" });
+    
+    await contains(".o_pager_value").click();
+    await contains("input.o_pager_value").edit("1-4");
+    expect("tbody .o_list_record_selector input:first").not.toBeChecked({ message: "first row should be selected" });
     expect(".o_control_panel_actions .o_list_selection_box").toHaveCount(0);
-    expect($(target).find("tfoot td:nth(2)").text()).toBe("32", { message: "total should be 32 (no more record selected)" });
+    expect("tfoot .o_list_number").toHaveText("32", { message: "total should be 10 (first record selected)" });
 });
 
 test("selection is kept on render without reload", async () => {
