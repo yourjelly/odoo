@@ -14,6 +14,9 @@ import {
     switchView,
     toggleSearchBarMenu,
     toggleMenuItem,
+    pagerNext,
+    getPagerValue,
+    getPagerLimit,
 } from "@web/../tests/search/helpers";
 import { createWebClient, doAction } from "@web/../tests/webclient/helpers";
 import { registry } from "@web/core/registry";
@@ -2265,6 +2268,44 @@ QUnit.module("Search", (hooks) => {
 
             await switchView(target, "kanban");
             assert.verifySteps([]);
+        }
+    );
+
+    QUnit.test(
+        "should remain on the same page even after switching views",
+        async (assert) => {
+
+            serverData.views["partner,false,kanban"] = /* xml */ `<kanban limit="3">
+            <templates>
+                <t t-name="kanban-box">
+                    <div>
+                        <field name="foo"/>
+                    </div>
+                </t>
+            </templates>
+        </kanban>`
+
+            // set the kanban view as the default view
+            serverData.actions[1].views = [
+                [true, "kanban"],
+                [false, "list"],
+            ];
+
+            const webclient = await createWebClient({ serverData });
+
+            await doAction(webclient, 1);
+
+            assert.deepEqual(getPagerValue(target), [1, 3]);
+            assert.strictEqual(getPagerLimit(target), 4);
+            assert.containsN(target, 'div[role=article].o_kanban_record', 3);
+
+            await pagerNext(target);
+            assert.deepEqual(getPagerValue(target), [4, 4]);
+            assert.containsN(target, 'div[role=article].o_kanban_record', 1);
+
+            await switchView(target, "list");
+            assert.deepEqual(getPagerValue(target), [4, 4]);
+            assert.containsN(target, '.o_data_row', 1);
         }
     );
 

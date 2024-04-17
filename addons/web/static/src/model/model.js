@@ -143,7 +143,12 @@ export function useModelWithSampleData(ModelClass, params, options = {}) {
     let started = false;
 
     async function load(props) {
-        const searchParams = getSearchParams(props);
+        const searchParams = {
+            ...getSearchParams(props),
+            offset: props.offset,
+            limit: props.limit,
+            total: props.total
+        };
         await model.load(searchParams);
         if (useSampleModel && !model.hasData()) {
             sampleORM =
