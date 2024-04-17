@@ -174,7 +174,7 @@ export class ControlPanel extends Component {
      */
     onViewClicked(viewType) {
         this.resetSearchState();
-        this.actionService.switchView(viewType);
+        this.actionService.switchView(viewType, { limit: this.pagerProps.limit, offset: this.pagerProps.offset, total: this.pagerProps.total  });
     }
 
     /**

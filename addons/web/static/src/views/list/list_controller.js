@@ -640,6 +640,9 @@ ListController.components = {
 };
 ListController.props = {
     ...standardViewProps,
+    offset: { type: Number, optional: true },
+    limit: { type: Number, optional: true },
+    total: { type: Number, optional: true },
     allowSelectors: { type: Boolean, optional: true },
     editable: { type: Boolean, optional: true },
     onSelectionChanged: { type: Function, optional: true },

@@ -44,5 +44,8 @@ PivotController.props = {
     Model: Function,
     modelParams: Object,
     Renderer: Function,
+    offset: { type: Number, optional: true },
+    limit: { type: Number, optional: true },
+    total: { type: Number, optional: true },
     buttonTemplate: { type: String, optional: true },
 };

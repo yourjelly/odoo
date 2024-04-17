@@ -520,6 +520,9 @@ function makeActionManager(env) {
                 if (key === "help") {
                     viewProps.noContentHelp = action.help;
                 } else {
+                    if(key === "limit" && viewProps[key] != action[key]){
+                        continue;
+                    }
                     viewProps[key] = action[key];
                 }
             }

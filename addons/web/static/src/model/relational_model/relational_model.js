@@ -300,6 +300,11 @@ export class RelationalModel extends Model {
             }
         }
 
+        Object.assign(config, {
+            offset: params.offset || config.offset,
+            limit: params.limit || config.limit,
+            total: params.total || config.total,
+        });
         return config;
     }
 
