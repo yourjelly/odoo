@@ -36,6 +36,9 @@
             'project_todo/static/tests/helpers/**/*',
             'project_todo/static/tests/**/*',
         ],
+        'web_editor.assets_wysiwyg': [
+            'project_todo/static/src/js/wysiwyg.js',
+        ]
     },
     'license': 'LGPL-3',
 }
