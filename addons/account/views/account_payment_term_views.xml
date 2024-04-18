@@ -66,18 +66,20 @@
                                 <label for="late_payment_charges"/>
                                 <div class="o_field_highlight">
                                     <field name="late_payment_charges"/>
-                                    <field name="late_payment_charges_percentage"
+                                    <field name="late_payment_charges_value"
                                         class="text-end o_field_highlight o_input oe_inline"
                                         invisible="not late_payment_charges"/>
-                                    <span invisible="not late_payment_charges"> % if paid after </span>
+                                    <span invisible="not late_payment_charges or late_payment_charges_type == 'fixed'"> % </span>
+                                    <field name="late_payment_charges_type" class="w-auto"
+                                        invisible="not late_payment_charges"/>
+                                    <span invisible="not late_payment_charges"> if paid after </span>
                                     <field name="late_payment_charges_days"
                                         class="text-end o_field_highlight o_input oe_inline"
                                         invisible="not late_payment_charges"/>
                                     <span invisible="not late_payment_charges"> days</span>
                                     <div invisible="not late_payment_charges">
-                                        <span> Reduced tax:
+                                            <span> Increase tax: </span>
                                             <field name="late_payment_charges_computation" class="w-auto"/>
-                                        </span>
                                     </div>
                                 </div>
                             </group>

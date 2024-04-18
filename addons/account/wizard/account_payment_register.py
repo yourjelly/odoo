@@ -58,15 +58,16 @@ class AccountPaymentRegister(models.TransientModel):
 
     # == Fields for Late Payment Charges ==
     late_payment_charges_mode = fields.Boolean(compute='_compute_late_payment_charges_mode')
-    total_due_lpc = fields.Monetary(currency_field='currency_id', store=True, compute='_compute_total_due_lpc')
     lpc_penalty = fields.Monetary(currency_field='currency_id', readonly=True,
                                         compute='_compute_lpc_penalty')
     total_amount_before_lpc = fields.Monetary(currency_field='currency_id', readonly=False,
                                         compute='_compute_total_amount_before_lpc')
-    coa_for_lpc_id = fields.Many2one('account.account', check_company=True, string='Post Charges in',
+    account_lpc_income_id = fields.Many2one('account.account', check_company=True, string='Post Late Pay Income in',
                                   help='Late Payment Charges will be posted in this account')
-    lpc_product_id = fields.Many2one('product.product', store=True, compute='_compute_lpc_product_id')
-    lpc_invoice_id = fields.Many2one('account.move', compute='_compute_lpc_invoice_id')
+    account_lpc_expense_id = fields.Many2one('account.account', check_company=True, string='Post Late Pay Expense in',
+                                  help='Late Payment Charges will be posted in this account')
+    # lpc_product_id = fields.Many2one('product.product', store=True, compute='_compute_lpc_product_id')
+    lpc_invoice_id = fields.Many2one('account.move')
     lpc_journal_name = fields.Text(default='')
 
     # == Fields given through the context ==
@@ -527,16 +528,6 @@ class AccountPaymentRegister(models.TransientModel):
                 if move._is_eligible_for_late_payment_charges(move.currency_id, wizard.payment_date):
                     wizard.late_payment_charges_mode = True
 
-    @api.depends('late_payment_charges_mode')
-    def _compute_total_due_lpc(self):
-        for wizard in self:
-            if wizard.late_payment_charges_mode:
-                batch_result = wizard._get_batches()[0]
-                amt = 0
-                bill_amount = wizard._get_total_amount_in_wizard_currency_to_full_reconcile(batch_result, early_payment_discount=False, late_payment_charges=False)[0]
-                amt = wizard._get_total_amount_in_wizard_currency_to_full_reconcile(batch_result, early_payment_discount=False, late_payment_charges=True)[0]
-                wizard.total_due_lpc = amt - bill_amount if amt > 0 else 0.0
-
     @api.depends('can_edit_wizard', 'amount', 'late_payment_charges_mode', 'lpc_penalty')
     def _compute_total_amount_before_lpc(self):
         for wizard in self:
@@ -545,66 +536,54 @@ class AccountPaymentRegister(models.TransientModel):
             else:
                 wizard.total_amount_before_lpc = 0
 
-    @api.depends('can_edit_wizard', 'amount', 'late_payment_charges_mode', 'total_due_lpc')
+    @api.depends('can_edit_wizard', 'amount', 'late_payment_charges_mode')
     def _compute_lpc_penalty(self):
         for wizard in self:
             percentage_paid = 0.0
+            batch_result = wizard._get_batches()[0]
             if wizard.can_edit_wizard and wizard.late_payment_charges_mode:
-                batch_result = wizard._get_batches()[0]
                 bill_amount = wizard._get_total_amount_in_wizard_currency_to_full_reconcile(batch_result, early_payment_discount=False, late_payment_charges=True)[0]
-                percentage_paid = wizard.amount / bill_amount
-            wizard.lpc_penalty = percentage_paid * wizard.total_due_lpc if percentage_paid > 0 else 0.0
+                amt = wizard._get_total_amount_in_wizard_currency_to_full_reconcile(batch_result, early_payment_discount=False, late_payment_charges=False)[0]
+                percentage_paid = wizard.amount / bill_amount if wizard.amount / bill_amount < 1 else 1
+            wizard.lpc_penalty = (percentage_paid * (bill_amount - amt)) if percentage_paid > 0 else 0.0
 
-    @api.depends('company_id')
-    def _compute_lpc_product_id(self):
-        self.lpc_product_id = False
-        for wizard in self:
-            wizard.lpc_product_id = wizard.company_id.account_lpc_product_id
-
-    @api.depends('company_id')
-    def _compute_lpc_invoice_id(self):
-        self.lpc_invoice_id = False
-        for wizard in self:
-            wizard.lpc_invoice_id = wizard.company_id.account_lpc_invoice_id
+    # @api.depends('company_id')
+    # def _compute_lpc_product_id(self):
+    #     self.lpc_product_id = False
+    #     for wizard in self:
+    #         wizard.lpc_product_id = wizard.company_id.account_lpc_product_id
 
     @api.onchange('total_amount_before_lpc', 'late_payment_charges_mode')
     def _inverse_total_amount_before_lpc(self):
         for wizard in self:
             if wizard.late_payment_charges_mode:
-                percentage_of_lpc = wizard.lpc_penalty / (wizard.amount - wizard.lpc_penalty)
+                percentage_of_lpc = wizard.lpc_penalty / abs(wizard.amount - wizard.lpc_penalty) if (wizard.amount - wizard.lpc_penalty) != 0 else 0.0
                 wizard.amount = (1 + percentage_of_lpc) * wizard.total_amount_before_lpc
 
     def _create_lpc_product(self):
         self.ensure_one()
         self.company_id.account_lpc_product_id = self.env['product.product'].create({
             "name": 'Late Payment Charges',
-            "property_account_income_id": self.coa_for_lpc_id,
-            "property_account_expense_id": self.coa_for_lpc_id,
+            "property_account_income_id": self.account_lpc_income_id,
+            "property_account_expense_id": self.account_lpc_expense_id,
             "taxes_id": [],
             "supplier_taxes_id": []
         })
-        self._compute_lpc_product_id()
+        # self._compute_lpc_product_id()
 
     def _create_lpc_invoice_or_bill(self):
         self.ensure_one()
         batch_result = self._get_batches()[0]
         moves = batch_result['lines'].mapped('move_id')
-        partner = None
-        inbound = False
-        move_type = False
         for move in moves:
-            partner = move.partner_id.id
-            inbound = move.is_inbound(include_receipts=True)
             self.lpc_journal_name = move.name
-        move_type = "out_invoice" if inbound else "in_invoice"
-        self.company_id.account_lpc_invoice_id = self.env['account.move'].create({
-            "partner_id": partner,
-            "invoice_date": fields.Date.today(),
-            "move_type": move_type,
-            "invoice_line_ids": [Command.create({"product_id": self.lpc_product_id.id, "quantity": 1, "price_unit": self.total_due_lpc})]
-        })
-        self.lpc_invoice_id.action_post()
-        self._compute_lpc_invoice_id()
+            self.lpc_invoice_id = self.env['account.move'].create({
+                "partner_id": move.partner_id.id,
+                "invoice_date": self.payment_date,
+                "move_type": "out_invoice" if move.is_inbound(include_receipts=True) else "in_invoice",
+                "invoice_line_ids": [Command.create({"product_id": self.company_id.account_lpc_product_id.id, "quantity": 1, "price_unit": self.lpc_penalty})]
+            })
+            self.lpc_invoice_id.action_post()
 
     def _get_total_amount_using_same_currency(self, batch_result, early_payment_discount=True, late_payment_charges=True):
         self.ensure_one()
@@ -616,7 +595,7 @@ class AccountPaymentRegister(models.TransientModel):
                 amount += move.invoice_payment_term_id._get_amount_due_after_discount(move.amount_total, move.amount_tax)#todo currencies
                 mode = 'early_payment'
             elif late_payment_charges and move._is_eligible_for_late_payment_charges(move.currency_id, self.payment_date):
-                amount += move.invoice_payment_term_id._get_amount_due_after_charges(move.amount_residual, move.amount_tax)
+                amount += move.invoice_payment_term_id._get_amount_due_after_charges(move.amount_residual, move.amount_tax, move.invoice_date, self.payment_date)
                 mode = 'late_payment'
             else:
                 for aml in batch_result['lines'].filtered(lambda l: l.move_id.id == move.id):
@@ -699,8 +678,8 @@ class AccountPaymentRegister(models.TransientModel):
         for wizard in self:
             batch_result = wizard._get_batches()[0]
             if wizard.late_payment_charges_mode:
-                total_amount_residual_in_wizard_currency = wizard._get_total_amount_in_wizard_currency_to_full_reconcile(batch_result, early_payment_discount=False, late_payment_charges=True)[0]
-                wizard.payment_difference = total_amount_residual_in_wizard_currency - wizard.amount
+                total_amount_residual_in_wizard_currency = wizard._get_total_amount_in_wizard_currency_to_full_reconcile(batch_result, early_payment_discount=False, late_payment_charges=False)[0]
+                wizard.payment_difference = total_amount_residual_in_wizard_currency - wizard.total_amount_before_lpc
             elif wizard.can_edit_wizard and wizard.payment_date:
                 total_amount_residual_in_wizard_currency = wizard\
                     ._get_total_amount_in_wizard_currency_to_full_reconcile(batch_result, early_payment_discount=False, late_payment_charges=False)[0]
@@ -937,6 +916,13 @@ class AccountPaymentRegister(models.TransientModel):
 
         return payment_vals
 
+    # for reconciling late payment charges invoice
+    def _create_late_payment_lines(self, to_process, edit_mode):
+        if edit_mode:
+            for vals in to_process:
+                vals['late_payment_lines'] = self.lpc_invoice_id.line_ids[1]
+        return to_process
+
     def _init_payments(self, to_process, edit_mode=False):
         """ Create the payments.
 
@@ -1030,12 +1016,17 @@ class AccountPaymentRegister(models.TransientModel):
         ]
         for vals in to_process:
             payment_lines = vals['payment'].line_ids.filtered_domain(domain)
-            if self.late_payment_charges_mode:
-                payment_lines.amount_residual = -self.total_amount_before_lpc
             lines = vals['to_reconcile']
+            late_payment_lines = vals['late_payment_lines'] if self.late_payment_charges_mode else False
             extra_context = {'forced_rate_from_register_payment': vals['rate']} if 'rate' in vals else {}
 
             for account in payment_lines.account_id:
+                # to reconcile late payment charges before reconciling invoice
+                if self.late_payment_charges_mode:
+                    (payment_lines + late_payment_lines)\
+                        .with_context(**extra_context)\
+                        .filtered_domain([('account_id', '=', account.id), ('reconciled', '=', False)])\
+                        .reconcile()
                 (payment_lines + lines)\
                     .with_context(**extra_context)\
                     .filtered_domain([('account_id', '=', account.id), ('reconciled', '=', False)])\
@@ -1098,22 +1089,20 @@ class AccountPaymentRegister(models.TransientModel):
                 })
 
         payments = self._init_payments(to_process, edit_mode=edit_mode)
+        if self.late_payment_charges_mode:
+            if not self.company_id.account_lpc_product_id:
+                self._create_lpc_product()
+            if not self.lpc_invoice_id:
+                self._create_lpc_invoice_or_bill()
+            to_process = self._create_late_payment_lines(to_process=to_process, edit_mode=edit_mode)
         self._post_payments(to_process, edit_mode=edit_mode)
         self._reconcile_payments(to_process, edit_mode=edit_mode)
         return payments
 
     def action_create_payments(self):
-        if not self.lpc_product_id:
-            self._create_lpc_product()
-        if not self.lpc_invoice_id:
-            self._create_lpc_invoice_or_bill()
         payments = self._create_payments()
 
         if self._context.get('dont_redirect_to_payments'):
-            if self.lpc_invoice_id.invoice_has_outstanding:
-                for journal in self.lpc_invoice_id.invoice_outstanding_credits_debits_widget['content']:
-                    if journal['journal_name'] == self.lpc_journal_name:
-                        self.lpc_invoice_id.js_assign_outstanding_line(journal['id'])
             return True
 
         action = {

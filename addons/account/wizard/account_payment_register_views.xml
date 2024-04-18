@@ -13,7 +13,7 @@
                     <field name="can_group_payments" invisible="1" force_save="1"/>
                     <field name="early_payment_discount_mode" invisible="1" force_save="1"/>
                     <field name="late_payment_charges_mode" invisible="1" force_save="1"/>
-                    <field name="lpc_product_id" invisible="1" force_save="1"/>
+                    <!-- <field name="lpc_product_id" invisible="1" force_save="1"/> -->
                     <field name="payment_type" invisible="1" force_save="1"/>
                     <field name="partner_type" invisible="1" force_save="1"/>
                     <field name="source_amount" invisible="1" force_save="1"/>
@@ -71,7 +71,8 @@
                                        options="{'no_create': True, 'no_open': True}"
                                        groups="base.group_multi_currency"/>
                             </div>
-                            <field name="coa_for_lpc_id" invisible='lpc_product_id or not late_payment_charges_mode'/>
+                            <field name="account_lpc_income_id" invisible='company_id.account_lpc_product_id or not late_payment_charges_mode'/>
+                            <field name="account_lpc_expense_id" invisible='company_id.account_lpc_product_id or not late_payment_charges_mode'/>
                             <field name="payment_date"/>
                             <field name="communication"
                                    invisible="not can_edit_wizard or (can_group_payments and not group_payment)"/>

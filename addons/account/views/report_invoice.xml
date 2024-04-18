@@ -326,7 +326,7 @@
                     <span t-out="tax_totals['formatted_rounding_amount']">0</span>
                 </td>
             </tr>
-
+            
             <!--Total amount with all taxes-->
             <tr class="border-black o_total">
                 <td><strong>Total</strong></td>

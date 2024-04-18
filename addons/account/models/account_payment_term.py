@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import calendar
+from datetime import datetime, timedelta
 from odoo import api, fields, models, _, Command
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools import format_date, formatLang, frozendict, date_utils
@@ -46,11 +48,18 @@ class AccountPaymentTerm(models.Model):
     early_discount = fields.Boolean(string='Early Discount')
 
     late_payment_charges = fields.Boolean(string='Late Payment Charges')
-    late_payment_charges_percentage = fields.Float(string='Charges %', help='Late charges applied for this payment term', default=2.0)
+    late_payment_charges_value = fields.Float(string='Charges %', help='Late charges applied for this payment term', default=2.0)
     late_payment_charges_days = fields.Integer(string='Late Charges Day', help='Number of days after which late charges will apply', default=7)
+    late_payment_charges_type = fields.Selection([
+        ('monthly', 'Monthly'),
+        ('quarterly', 'Quarterly'),
+        ('half_yearly', 'Half-Yearly'),
+        ('yearly', 'Yearly'),
+        ('fixed', 'Fixed')
+    ], default='yearly')
     late_payment_charges_computation = fields.Selection([
-        ('on_total', 'on Total'),
-        ('on_taxable', 'on Taxable')
+        ('on_taxable', 'At the rate of Product'),
+        ('on_total', 'At the rate of Invoice')
     ], string='Late Payment Charges Tax Reduction', readonly=False, default='on_total')
 
     @api.depends('company_id')
@@ -77,16 +86,39 @@ class AccountPaymentTerm(models.Model):
             return total_amount - discount_amount_currency
         return total_amount
 
-    def _get_amount_due_after_charges(self, total_amount, taxed_amount):
+    def _get_amount_due_after_charges(self, total_amount, taxed_amount, invoice_date=None, payment_date=None):
         self.ensure_one()
+        amount_after_given_period = 0.0
+        due_date = self._get_latest_late_charges_date(invoice_date)
         if self.late_payment_charges:
-            percentage = self.late_payment_charges_percentage / 100.0
-            if self.late_payment_charges_computation in ('on_taxable'):
-                late_payment_charges_amount_currency = self.currency_id.round((total_amount - taxed_amount) * percentage)
+            if self.late_payment_charges_type == 'fixed':
+                amount_after_given_period = self.late_payment_charges_value + total_amount
             else:
-                late_payment_charges_amount_currency = self.currency_id.round(total_amount * percentage)
-            return total_amount + late_payment_charges_amount_currency
-        return total_amount
+                percentage = self.late_payment_charges_value / 100.0
+                if self.late_payment_charges_computation in ('on_taxable'):
+                    late_payment_charges_amount_currency = self.currency_id.round((total_amount - taxed_amount) * percentage)
+                else:
+                    late_payment_charges_amount_currency = self.currency_id.round(total_amount * percentage)
+                if payment_date and due_date:
+                    amount_after_given_period = self._compute_interest(due_date, payment_date, late_payment_charges_amount_currency, self.late_payment_charges_type) + total_amount
+        return amount_after_given_period
+
+    def _compute_interest(self, due_date, payment_date, periodic_interest, lpc_type):
+        amount = 0.0
+        current_date = due_date
+        last_date_of_current_month = total_days_in_month = i = 0
+        while current_date <= payment_date:
+            total_days_in_month = calendar.monthrange(current_date.year, current_date.month)[1]
+            last_date_of_current_month = datetime(current_date.year, current_date.month, total_days_in_month).date()
+            days_to_include = (last_date_of_current_month - current_date).days + 1
+            days_to_include -= 1 if i==0 else 0
+            if total_days_in_month != 0:
+                amount += (days_to_include / total_days_in_month) * periodic_interest
+            current_date = (last_date_of_current_month + timedelta(days=1)).replace(day=1)
+            i += 1
+        if total_days_in_month != 0:
+            amount -= ((last_date_of_current_month - payment_date).days / total_days_in_month) * periodic_interest
+        return amount
 
     @api.depends('company_id')
     def _compute_discount_computation(self):
@@ -104,7 +136,7 @@ class AccountPaymentTerm(models.Model):
         for payment_term in self:
             payment_term.example_invalid = len(payment_term.line_ids) <= 1
 
-    @api.depends('currency_id', 'example_amount', 'example_date', 'line_ids.value', 'line_ids.value_amount', 'line_ids.nb_days', 'early_discount', 'discount_percentage', 'discount_days')
+    @api.depends('currency_id', 'example_amount', 'example_date', 'line_ids.value', 'line_ids.value_amount', 'line_ids.nb_days', 'early_discount', 'discount_percentage', 'discount_days', 'late_payment_charges', 'late_payment_charges_value', 'late_payment_charges_days')
     def _compute_example_preview(self):
         for record in self:
             example_preview = ""
@@ -189,7 +221,7 @@ class AccountPaymentTerm(models.Model):
             if len(terms.line_ids) > 1 and terms.late_payment_charges:
                 raise ValidationError(
                     _("The Late Payment Charges functionality can only be used with payment terms using a single 100% line. "))
-            if terms.late_payment_charges and terms.late_payment_charges_percentage <= 0.0:
+            if terms.late_payment_charges and terms.late_payment_charges_value <= 0.0:
                 raise ValidationError(_("The Late Payment Charges must be strictly positive."))
             if terms.late_payment_charges and terms.late_payment_charges_days < 0:
                 raise ValidationError(_("The Late Payment Charges days must be positive."))

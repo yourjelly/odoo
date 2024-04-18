@@ -46,6 +46,12 @@ class TestAccountPaymentRegister(AccountTestInvoicingCommon):
             'acc_type': 'bank',
         })
 
+        # Customer payment terms
+        cls.payment_term_1 = cls.env['account.payment.term'].create({
+            'name': 'My Custom',
+            'late_payment_charges': False,
+        })
+
         # Customer invoices sharing the same batch.
         cls.out_invoice_1 = cls.env['account.move'].create({
             'move_type': 'out_invoice',
@@ -79,7 +85,25 @@ class TestAccountPaymentRegister(AccountTestInvoicingCommon):
             'currency_id': cls.currency_data['currency'].id,
             'invoice_line_ids': [(0, 0, {'product_id': cls.product_a.id, 'price_unit': 23.98, 'tax_ids': []})],
         })
-        (cls.out_invoice_1 + cls.out_invoice_2 + cls.out_invoice_3 + cls.out_invoice_4).action_post()
+        cls.out_invoice_5 = cls.env['account.move'].create({
+            'move_type': 'out_invoice',
+            'date': '2024-04-22',
+            'invoice_date': '2024-04-22',
+            'partner_id': cls.partner_a.id,
+            'currency_id': cls.currency_data['currency'].id,
+            'invoice_line_ids': [(0, 0, {'product_id': cls.product_a.id, 'price_unit': 50.00, 'tax_ids': []})],
+            'invoice_payment_term_id': cls.payment_term_1.id,
+        })
+        cls.out_invoice_6 = cls.env['account.move'].create({
+            'move_type': 'out_invoice',
+            'date': '2024-04-22',
+            'invoice_date': '2024-04-15',
+            'partner_id': cls.partner_a.id,
+            'currency_id': cls.currency_data['currency'].id,
+            'invoice_line_ids': [(0, 0, {'product_id': cls.product_a.id, 'price_unit': 1000.00})],
+            'invoice_payment_term_id': cls.payment_term_1.id,
+        })
+        (cls.out_invoice_1 + cls.out_invoice_2 + cls.out_invoice_3 + cls.out_invoice_4 + cls.out_invoice_5 + cls.out_invoice_6).action_post()
 
         # Vendor bills, in_invoice_1 + in_invoice_2 are sharing the same batch but not in_invoice_3.
         cls.in_invoice_1 = cls.env['account.move'].create({
@@ -116,6 +140,232 @@ class TestAccountPaymentRegister(AccountTestInvoicingCommon):
             'invoice_line_ids': [(0, 0, {'product_id': cls.product_a.id, 'price_unit': 1600.0, 'tax_ids': []})],
         })
         cls.in_refund_1.action_post()
+
+    def test_before_lpc_enabled(self):
+        active_id = self.out_invoice_4
+        active_id.invoice_payment_term_id = self.payment_term_1.id
+        initial_invoices = len(self.env['account.move'].search([('move_type', '=', active_id.move_type)]))
+        payments = self.env['account.payment.register'].with_context(active_model='account.move', active_ids=active_id.id).create({
+            'payment_difference_handling': 'reconcile',
+            'currency_id': self.currency_data['currency'].id,
+            'payment_method_line_id': self.inbound_payment_method_line.id,
+        })._create_payments()
+        # test if no extra late payment charges are paid
+        self.assertRecordValues(payments, [{
+            'ref': 'INV/2017/00004',
+            'amount': active_id.amount_total,
+            'payment_method_line_id': self.inbound_payment_method_line.id,
+        }])
+        # test if no extra invoice is generated
+        self.assertEqual(initial_invoices, len(self.env['account.move'].search([('move_type', '=', active_id.move_type)])))
+
+    def test_fixed_lpc(self):
+        # Adding late payment functionality in payment terms
+        self.payment_term_1.write({
+            'late_payment_charges': True,
+            'late_payment_charges_value': 100,
+            'late_payment_charges_days': 2,
+            'late_payment_charges_type': 'fixed',
+            'late_payment_charges_computation': 'on_total'
+        })
+        active_id = self.out_invoice_5
+        initial_invoices = len(self.env['account.move'].search([('move_type', '=', active_id.move_type)]))
+        register_payment = self.env['account.payment.register'].with_context(active_model='account.move', active_ids=active_id.id).create({
+            'payment_method_line_id': self.inbound_payment_method_line.id,
+            'payment_date': '2024-04-27'
+        })
+        payments = register_payment._create_payments()
+        # test if late payment charges are calculated correctly
+        self.assertEqual(100, self.payment_term_1._get_amount_due_after_charges(active_id.amount_residual, active_id.amount_tax, active_id.invoice_date, payments.date) - active_id.amount_residual)
+        # test for late payment charges have been added to payments
+        self.assertRecordValues(payments, [{
+            'ref': 'INV/2024/00001',
+            'amount': register_payment.total_amount_before_lpc + register_payment.lpc_penalty,
+            'payment_method_line_id': self.inbound_payment_method_line.id,
+        }])
+        # test to check if new invoice for late payment has been created or not
+        self.assertEqual(initial_invoices + 1, len(self.env['account.move'].search([('move_type', '=', active_id.move_type)])))
+        register_payment.action_create_payments()
+        # test to check if new invoice has been correctly made or not
+        self.assertRecordValues(register_payment.lpc_invoice_id, [{
+            'invoice_date': register_payment.payment_date,
+            'partner_id': active_id.partner_id.id,
+            'move_type': active_id.move_type,
+        }])
+        self.assertTrue(register_payment.lpc_invoice_id.payment_state in ['in_payment','paid'])
+        # testing if invoice line has been created correctly or not in new invoice
+        self.assertRecordValues(register_payment.lpc_invoice_id.invoice_line_ids, [{
+            "product_id": register_payment.company_id.account_lpc_product_id.id,
+            "quantity": 1,
+            "price_unit": register_payment.lpc_penalty
+        }])
+        active_id.invoice_payment_term_id = None
+
+    def test_monthly_lpc(self):
+        # update payment terms
+        self.payment_term_1.write({
+            'late_payment_charges': True,
+            'late_payment_charges_type': 'monthly',
+            'late_payment_charges_value': 10.00,
+            'late_payment_charges_days': 2,
+            'late_payment_charges_computation': 'on_total'
+        })
+        # test for full payment in monthly mode
+        active_id = self.out_invoice_3
+        active_id.invoice_payment_term_id = self.payment_term_1.id
+        initial_invoices = len(self.env['account.move'].search([('move_type', '=', active_id.move_type)]))
+        register_payment = self.env['account.payment.register'].with_context(active_model='account.move', active_ids=active_id.id).create({
+            'payment_method_line_id': self.inbound_payment_method_line.id,
+            'payment_date': '2017-01-31'
+        })
+        amount = [active_id.amount_residual, active_id.amount_tax]
+        payments = register_payment._create_payments()
+        # test if late payment charges are calculated correctly
+        self.assertEqual(2.167741935483871, self.payment_term_1._get_amount_due_after_charges(amount[0], amount[1], active_id.invoice_date, payments.date) - amount[0])
+        # test for late payment charges have been added to payments
+        self.assertRecordValues(payments, [{
+            'ref': 'INV/2017/00003',
+            'amount': register_payment.total_amount_before_lpc + register_payment.lpc_penalty,
+            'payment_method_line_id': self.inbound_payment_method_line.id,
+        }])
+        # test to check if new invoice for late payment has been created or not
+        self.assertEqual(initial_invoices + 1, len(self.env['account.move'].search([('move_type', '=', active_id.move_type)])))
+        register_payment.action_create_payments()
+        # test to check if new invoice has been correctly made or not
+        self.assertRecordValues(register_payment.lpc_invoice_id, [{
+            'invoice_date': register_payment.payment_date,
+            'partner_id': active_id.partner_id.id,
+            'move_type': active_id.move_type,
+        }])
+        self.assertTrue(register_payment.lpc_invoice_id.payment_state in ['in_payment','paid'])
+        # testing if invoice line has been created correctly or not in new invoice
+        self.assertRecordValues(register_payment.lpc_invoice_id.invoice_line_ids, [{
+            "product_id": register_payment.company_id.account_lpc_product_id.id,
+            "quantity": 1,
+            "price_unit": register_payment.lpc_penalty
+        }])
+        active_id.invoice_payment_term_id = None
+
+    def test_partial_payment_in_monthly_lpc(self):
+        # update payment terms
+        self.payment_term_1.write({
+            'late_payment_charges': True,
+            'late_payment_charges_type': 'monthly',
+            'late_payment_charges_value': 10.00,
+            'late_payment_charges_days': 2,
+            'late_payment_charges_computation': 'on_total'
+        })
+        # Partial Payment
+        active_id = self.out_invoice_2
+        active_id.invoice_payment_term_id = self.payment_term_1.id
+        initial_invoices = len(self.env['account.move'].search([('move_type', '=', active_id.move_type)]))
+        register_payment = self.env['account.payment.register'].with_context(active_model='account.move', active_ids=active_id.id).create({
+            'payment_method_line_id': self.inbound_payment_method_line.id,
+            'payment_date': '2017-02-06',
+            'amount': 1000
+        })
+        payments = register_payment._create_payments()
+        # test for late payment charges have been added to payments
+        self.assertRecordValues(payments, [{
+            'ref': 'INV/2017/00002',
+            'amount': register_payment.total_amount_before_lpc + register_payment.lpc_penalty,
+            'payment_method_line_id': self.inbound_payment_method_line.id,
+        }])
+        # test to check if new invoice for late payment has been created or not
+        self.assertEqual(initial_invoices + 1, len(self.env['account.move'].search([('move_type', '=', active_id.move_type)])))
+        register_payment.action_create_payments()
+        # test to check if new invoice has been correctly made or not
+        self.assertRecordValues(register_payment.lpc_invoice_id, [{
+            'invoice_date': register_payment.payment_date,
+            'partner_id': active_id.partner_id.id,
+            'move_type': active_id.move_type,
+        }])
+        self.assertTrue(register_payment.lpc_invoice_id.payment_state in ['in_payment','paid'])
+        # testing if invoice line has been created correctly or not in new invoice
+        self.assertRecordValues(register_payment.lpc_invoice_id.invoice_line_ids, [{
+            "product_id": register_payment.company_id.account_lpc_product_id.id,
+            "quantity": 1,
+            "price_unit": register_payment.lpc_penalty
+        }])
+        late_invoice_1_id = register_payment.lpc_invoice_id.id
+
+        # Final Payment
+        initial_invoices = len(self.env['account.move'].search([('move_type', '=', active_id.move_type)]))
+        register_payment = self.env['account.payment.register'].with_context(active_model='account.move', active_ids=active_id.id).create({
+            'payment_method_line_id': self.inbound_payment_method_line.id,
+            'payment_date': '2017-02-15',
+        })
+        payments = register_payment._create_payments()
+        # test for late payment charges have been added to payments
+        self.assertRecordValues(payments, [{
+            'ref': 'INV/2017/00002',
+            'amount': register_payment.total_amount_before_lpc + register_payment.lpc_penalty,
+            'payment_method_line_id': self.inbound_payment_method_line.id,
+        }])
+        # test to check if new invoice for late payment has been created or not
+        self.assertEqual(initial_invoices + 1, len(self.env['account.move'].search([('move_type', '=', active_id.move_type)])))
+        register_payment.action_create_payments()
+        # test to check if new invoice has been correctly made or not
+        self.assertRecordValues(register_payment.lpc_invoice_id, [{
+            'invoice_date': register_payment.payment_date,
+            'partner_id': active_id.partner_id.id,
+            'move_type': active_id.move_type,
+        }])
+        self.assertTrue(register_payment.lpc_invoice_id.payment_state in ['in_payment','paid'])
+        # testing if invoice line has been created correctly or not in new invoice
+        self.assertRecordValues(register_payment.lpc_invoice_id.invoice_line_ids, [{
+            "product_id": register_payment.company_id.account_lpc_product_id.id,
+            "quantity": 1,
+            "price_unit": register_payment.lpc_penalty
+        }])
+        # test if both late invoices are not same
+        self.assertNotEqual(late_invoice_1_id, register_payment.lpc_invoice_id.id)
+        active_id.invoice_payment_term_id = None
+
+    def test_lpc_on_taxable(self):
+        # update payment terms
+        self.payment_term_1.write({
+            'late_payment_charges': True,
+            'late_payment_charges_type': 'monthly',
+            'late_payment_charges_value': 10.00,
+            'late_payment_charges_days': 2,
+            'late_payment_charges_computation': 'on_taxable'
+        })
+        # test for full payment in monthly mode
+        active_id = self.out_invoice_6
+        active_id.invoice_payment_term_id = self.payment_term_1.id
+        initial_invoices = len(self.env['account.move'].search([('move_type', '=', active_id.move_type)]))
+        register_payment = self.env['account.payment.register'].with_context(active_model='account.move', active_ids=active_id.id).create({
+            'payment_method_line_id': self.inbound_payment_method_line.id,
+            'payment_date': '2024-04-22'
+        })
+        amount = [active_id.amount_residual, active_id.amount_tax]
+        payments = register_payment._create_payments()
+        # test if late payment charges are calculated correctly
+        self.assertEqual(16.666666666666742, self.payment_term_1._get_amount_due_after_charges(amount[0], amount[1], active_id.invoice_date, payments.date) - amount[0])
+        # test for late payment charges have been added to payments
+        self.assertRecordValues(payments, [{
+            'ref': 'INV/2024/00002',
+            'amount': register_payment.total_amount_before_lpc + register_payment.lpc_penalty,
+            'payment_method_line_id': self.inbound_payment_method_line.id,
+        }])
+        # test to check if new invoice for late payment has been created or not
+        self.assertEqual(initial_invoices + 1, len(self.env['account.move'].search([('move_type', '=', active_id.move_type)])))
+        register_payment.action_create_payments()
+        # test to check if new invoice has been correctly made or not
+        self.assertRecordValues(register_payment.lpc_invoice_id, [{
+            'invoice_date': register_payment.payment_date,
+            'partner_id': active_id.partner_id.id,
+            'move_type': active_id.move_type,
+        }])
+        self.assertTrue(register_payment.lpc_invoice_id.payment_state in ['in_payment','paid'])
+        # testing if invoice line has been created correctly or not in new invoice
+        self.assertRecordValues(register_payment.lpc_invoice_id.invoice_line_ids, [{
+            "product_id": register_payment.company_id.account_lpc_product_id.id,
+            "quantity": 1,
+            "price_unit": register_payment.lpc_penalty
+        }])
+        active_id.invoice_payment_term_id = None
 
     def test_register_payment_single_batch_grouped_keep_open_lower_amount(self):
         ''' Pay 800.0 with 'open' as payment difference handling on two customer invoices (1000 + 2000). '''

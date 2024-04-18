@@ -2413,9 +2413,7 @@ class AccountMoveLine(models.Model):
                     exchange_diff_values_list.append(results['exchange_values'])
                     exchange_diff_partial_index.append(partial_index)
                     partial_index += 1
-        if self.move_id.invoice_payment_term_id.late_payment_charges:
-            exchange_diff_values_list = []
-            exchange_diff_partial_index = []
+
         # ==== Create the partials ====
         # Link the newly created partials to the plan. There are needed later for caba exchange entries.
         partials = self.env['account.partial.reconcile'].create(partials_values_list)
