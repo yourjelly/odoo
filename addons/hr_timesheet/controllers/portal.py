@@ -71,7 +71,7 @@ class TimesheetCustomerPortal(CustomerPortal):
             'date': {'label': _('Newest'), 'order': 'date desc'},
             'employee': {'label': _('Employee'), 'order': 'employee_id'},
             'project': {'label': _('Project'), 'order': 'project_id'},
-            'task': {'label': _('Task'), 'order': 'task_id'},
+            'task': {'label': _('Task'), 'order': 'task_name'},
             'name': {'label': _('Description'), 'order': 'name'},
         }
 

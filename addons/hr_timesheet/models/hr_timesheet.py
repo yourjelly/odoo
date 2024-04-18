@@ -55,6 +55,12 @@ class AccountAnalyticLine(models.Model):
     department_id = fields.Many2one('hr.department', "Department", compute='_compute_department_id', store=True, compute_sudo=True)
     encoding_uom_id = fields.Many2one('uom.uom', compute='_compute_encoding_uom_id')
     partner_id = fields.Many2one(compute='_compute_partner_id', store=True, readonly=False)
+    task_name = fields.Char(string='Task Name', compute='_compute_task_name', store=True)
+    
+    @api.depends('task_id')
+    def _compute_task_name(self):
+        for record in self:
+            record.task_name = record.task_id.name
 
     def name_get(self):
         result = super().name_get()
