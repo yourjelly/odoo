@@ -43,6 +43,7 @@ export class ChannelMember extends Record {
     });
     fetched_message_id = Record.one("Message");
     seen_message_id = Record.one("Message");
+    isSeenMessageMarkedAsUnread = false;
     threadAsTyping = Record.one("Thread", {
         onAdd() {
             browser.clearTimeout(this.typingTimeoutId);

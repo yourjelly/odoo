@@ -114,7 +114,7 @@ const threadPatch = {
         }
     },
     incrementUnreadCounter() {
-        this.message_unread_counter++;
+        // this.message_unread_counter++;
     },
     async mute({ minutes = false } = {}) {
         await rpc("/discuss/channel/mute", { channel_id: this.id, minutes });

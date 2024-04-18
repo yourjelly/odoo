@@ -185,6 +185,13 @@ class ChannelMember(models.Model):
         self.sudo().rtc_session_ids.unlink()  # ensure unlink overrides are applied
         return super().unlink()
 
+    def _format_unread_counter(self):
+        return {
+            "thread": {"id": self.channel_id.id, "model": "discuss.channel"},
+            "serverValue": self.message_unread_counter,
+            "serverLastMessageId": self.channel_id.message_ids[0].id if self.channel_id.message_ids else 0,
+        }
+
     def _notify_typing(self, is_typing):
         """ Broadcast the typing notification to channel members
             :param is_typing: (boolean) tells whether the members are typing or not

@@ -16,7 +16,7 @@ patch(MessagingMenu.prototype, {
             this.store.channels.status !== "fetched"
                 ? this.store.initChannelsUnreadCounter
                 : Object.values(this.store.Thread.records).filter(
-                      (thread) => thread.displayToSelf && thread.message_unread_counter > 0
+                      (thread) => thread.displayToSelf && thread.message_unread_counter.value > 0
                   ).length;
         return count + channelsContribution;
     },

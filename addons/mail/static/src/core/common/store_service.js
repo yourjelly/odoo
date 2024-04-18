@@ -154,8 +154,8 @@ export class Store extends BaseStore {
             if (bNeedaction > 0 && aNeedaction === 0) {
                 return 1;
             }
-            const aUnread = a.message_unread_counter;
-            const bUnread = b.message_unread_counter;
+            const aUnread = a.message_unread_counter.value;
+            const bUnread = b.message_unread_counter.value;
             if (aUnread > 0 && bUnread === 0) {
                 return -1;
             }
@@ -401,7 +401,7 @@ export class Store extends BaseStore {
             if (categoryId === "channels") {
                 return channel.message_needaction_counter > 0 ? acc + 1 : acc;
             } else {
-                return channel.message_unread_counter > 0 ? acc + 1 : acc;
+                return channel.message_unread_counter.value > 0 ? acc + 1 : acc;
             }
         }, 0);
     }

@@ -110,31 +110,21 @@ export class DiscussCoreCommon {
             });
         });
         this.busService.subscribe("discuss.channel.member/seen", (payload) => {
-            const { channel_id, guest_id, id, last_message_id, partner_id } = payload;
-            const member = this.store.ChannelMember.insert({
-                id,
-                seen_message_id: last_message_id ? { id: last_message_id } : null,
-                persona: { type: partner_id ? "partner" : "guest", id: partner_id ?? guest_id },
-                thread: { id: channel_id, model: "discuss.channel" },
-            });
+            const member = this.store.ChannelMember.insert(payload);
             if (member?.persona.eq(this.store.self)) {
-                if ("force_local_seen_message" in payload) {
-                    member.localSeenMessage =
-                        this.store.Message.get(payload.force_local_seen_message) ?? null;
-                }
-                member.thread.updateSeen(this.store.Message.get(last_message_id) ?? null);
+                member.thread.updateSeen(member.seen_message_id ?? null);
             }
         });
         this.env.bus.addEventListener("mail.message/delete", ({ detail: { message, notifId } }) => {
-            if (message.thread) {
-                if (
-                    (!message.thread.selfMember?.seen_message_id ||
-                        message.id > message.thread.selfMember.seen_message_id.id) &&
-                    notifId > message.thread.message_unread_counter_bus_id
-                ) {
-                    message.thread.message_unread_counter--;
-                }
-            }
+            // if (message.thread) {
+            //     if (
+            //         (!message.thread.selfMember?.seen_message_id ||
+            //             message.id > message.thread.selfMember.seen_message_id.id) &&
+            //         notifId > message.thread.message_unread_counter_bus_id
+            //     ) {
+            //         message.thread.message_unread_counter--;
+            //     }
+            // }
         });
     }
 
@@ -208,6 +198,7 @@ export class DiscussCoreCommon {
             }
             if (message.isSelfAuthored) {
                 channel.selfMember.seen_message_id = message;
+                channel.selfMember.isSeenMessageMarkedAsUnread = false;
             } else {
                 if (notifId > channel.message_unread_counter_bus_id && !isActiveDiscussThread) {
                     channel.incrementUnreadCounter();

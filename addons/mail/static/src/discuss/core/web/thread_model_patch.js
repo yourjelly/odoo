@@ -47,6 +47,7 @@ patch(Thread.prototype, {
     incrementUnreadCounter() {
         super.incrementUnreadCounter();
         if (this.model === "discuss.channel") {
+            // TODO -TSM: transform to update
             // initChannelsUnreadCounter becomes unreliable
             this.store.channels.fetch();
         }

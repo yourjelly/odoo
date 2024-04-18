@@ -44,7 +44,7 @@
             t-att-class="{
                 'bg-inherit': thread.notEq(store.discuss.thread),
                 'o-active': thread.eq(store.discuss.thread),
-                'o-unread': thread.message_unread_counter > 0 and !thread.mute_until_dt,
+                'o-unread': thread.message_unread_counter.value > 0 and !thread.mute_until_dt,
                 'opacity-50': thread.mute_until_dt,
             }"
             t-on-click="(ev) => this.openThread(ev, thread)"
@@ -53,7 +53,7 @@
                 <img class="w-100 h-100 rounded" t-att-src="thread.avatarUrl" alt="Thread Image"/>
                 <ThreadIcon t-if="thread.channel_type === 'chat' or (thread.channel_type === 'channel' and !thread.authorizedGroupFullName)" thread="thread" size="'small'" className="'o-mail-DiscussSidebarChannel-threadIcon position-absolute bottom-0 end-0 p-1 me-n1 mb-n1 d-flex align-items-center justify-content-center rounded-circle bg-inherit'"/>
             </div>
-            <span class="ms-3 me-2 text-truncate" t-att-class="{ 'o-item-unread fw-bolder': thread.message_unread_counter > 0 and !thread.mute_until_dt }">
+            <span class="ms-3 me-2 text-truncate" t-att-class="{ 'o-item-unread fw-bolder': thread.message_unread_counter.value > 0 and !thread.mute_until_dt }">
                 <t t-esc="thread.displayName"/>
             </span>
             <div class="flex-grow-1"/>
