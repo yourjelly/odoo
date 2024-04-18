@@ -181,10 +181,10 @@ class AccountMove(models.Model):
         # (see _compute_credit_to_invoice and _compute_amount_to_invoice from 'sale.order' )
         exclude_amount = super()._get_partner_credit_warning_exclude_amount()
         for order in self.line_ids.sale_line_ids.order_id:
-            # TODO: ?: floor at 0 instead of flooring amount_to_invoice
             order_amount = min(self._get_amount_from_sales_order(order), order.amount_to_invoice)
             order_amount_company = order.currency_id._convert(
-                order_amount,
+                # TODO: master (17.3); `max` not necessary after changes to _compute_amount_to_invoice
+                max(order_amount, 0),
                 self.company_id.currency_id,
                 self.company_id,
                 fields.Date.context_today(self)
