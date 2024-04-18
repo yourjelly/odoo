@@ -1060,3 +1060,39 @@ test("hiding/swapping hidden chat windows does not update server state", async (
     await contains(".o-mail-ChatWindow", { text: "Sales" });
     await assertSteps([]);
 });
+
+test("mark as read when opening chat window", async () => {
+    const pyEnv = await startServer();
+    const bobPartnerId = pyEnv["res.partner"].create({ name: "bob" });
+    const bobUserId = pyEnv["res.users"].create({ name: "bob", partner_id: bobPartnerId });
+    const channelId = pyEnv["discuss.channel"].create({
+        channel_type: "chat",
+        channel_member_ids: [
+            Command.create({ partner_id: serverState.partnerId }),
+            Command.create({ partner_id: bobPartnerId }),
+        ],
+    });
+    const env = await start();
+    rpc = rpcWithEnv(env);
+    await click(".o_menu_systray i[aria-label='Messages']");
+    await click(".o-mail-NotificationItem", { text: "bob" });
+    await contains(".o-mail-ChatWindow .o-mail-ChatWindow-header", { text: "bob" });
+    await withUser(bobUserId, () =>
+        rpc("/mail/message/post", {
+            post_data: {
+                body: "Hello, how are you?",
+                message_type: "comment",
+                subtype_xmlid: "mail.mt_comment",
+            },
+            thread_id: channelId,
+            thread_model: "discuss.channel",
+        })
+    );
+    await contains(".o-mail-ChatWindow-counter", { text: "1" });
+    await click(".o-mail-ChatWindow-command[title='Close Chat Window']");
+    await contains(".o-mail-ChatWindow", { count: 0 });
+    await click(".o_menu_systray i[aria-label='Messages']");
+    await click(".o-mail-NotificationItem", { text: "bob" });
+    await contains(".o-mail-ChatWindow .o-mail-ChatWindow-header", { text: "bob" });
+    await contains(".o-mail-ChatWindow-counter", { count: 0 });
+});

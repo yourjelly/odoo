@@ -1,4 +1,3 @@
-import { waitUntilSubscribe } from "@bus/../tests/bus_test_helpers";
 import { LivechatButton } from "@im_livechat/embed/common/livechat_button";
 import {
     defineLivechatModels,
@@ -15,12 +14,7 @@ import {
     startServer,
     triggerHotkey,
 } from "@mail/../tests/mail_test_helpers";
-import { rpcWithEnv } from "@mail/utils/common/misc";
-import { withUser } from "@web/../tests/_framework/mock_server/mock_server";
-import { mountWithCleanup, serverState } from "@web/../tests/web_test_helpers";
-
-/** @type {ReturnType<import("@mail/utils/common/misc").rpcWithEnv>} */
-let rpc;
+import { mountWithCleanup } from "@web/../tests/web_test_helpers";
 
 describe.current.tags("desktop");
 defineLivechatModels();
@@ -71,45 +65,4 @@ test("Fold state is saved on the server", async () => {
     ]);
     expect(member.fold_state).toBe("folded");
     await click(".o-mail-ChatWindow-header");
-});
-
-test("Seen message is saved on the server", async () => {
-    const pyEnv = await startServer();
-    await loadDefaultEmbedConfig();
-    const userId = serverState.userId;
-    const env = await start({ authenticateAs: false });
-    await mountWithCleanup(LivechatButton);
-    rpc = rpcWithEnv(env);
-    await click(".o-livechat-LivechatButton");
-    await contains(".o-mail-Thread");
-    await insertText(".o-mail-Composer-input", "Hello, I need help!");
-    triggerHotkey("Enter");
-    await contains(".o-mail-Message", { text: "Hello, I need help!" });
-    await waitUntilSubscribe();
-    const initialSeenMessageId =
-        env.services["im_livechat.livechat"].thread.selfMember.seen_message_id?.id;
-    $(".o-mail-Composer-input").blur();
-    await withUser(userId, () =>
-        rpc("/mail/message/post", {
-            post_data: {
-                body: "Hello World!",
-                message_type: "comment",
-                subtype_xmlid: "mail.mt_comment",
-            },
-            thread_id: env.services["im_livechat.livechat"].thread.id,
-            thread_model: "discuss.channel",
-        })
-    );
-    await contains(".o-mail-Thread-newMessage");
-    await contains(".o-mail-Composer-input", { setFocus: true });
-    await contains(".o-mail-Thread-newMessage", { count: 0 });
-    const guestId = pyEnv.cookie.get("dgid");
-    const [member] = pyEnv["discuss.channel.member"].search_read([
-        ["guest_id", "=", guestId],
-        ["channel_id", "=", env.services["im_livechat.livechat"].thread.id],
-    ]);
-    expect(initialSeenMessageId).not.toBe(member.seen_message_id[0]);
-    expect(env.services["im_livechat.livechat"].thread.selfMember.seen_message_id.id).toBe(
-        member.seen_message_id[0]
-    );
 });

@@ -1071,12 +1071,8 @@ test("no out-of-focus notif on non-needaction message in channel", async () => {
         channel_type: "channel",
     });
     mockService("presence", () => ({
-        start() {
-            return {
-                ...super.start(),
-                isOdooFocused: () => false,
-            };
-        },
+        ...presenceService.start(),
+        isOdooFocused: () => false,
     }));
     mockService("title", () => ({
         setParts(parts) {
@@ -1474,6 +1470,9 @@ test("mark channel as seen if last message is visible when switching channels wh
             name: "Blu",
         },
     ]);
+    onRpcBefore("/discuss/channel/set_last_seen_message", (args) => {
+        step(`rpc:set_last_seen_message - ${args.channel_id}`);
+    });
     pyEnv["mail.message"].create([
         {
             body: "oldest message",
@@ -1488,8 +1487,9 @@ test("mark channel as seen if last message is visible when switching channels wh
     ]);
     await start();
     await openDiscuss(channelId_2);
+    await assertSteps([`rpc:set_last_seen_message - ${channelId_2}`]);
     await click("button", { text: "Bla" });
-    await contains(".o-unread", { count: 0 });
+    await assertSteps([`rpc:set_last_seen_message - ${channelId_1}`]);
 });
 
 test("warning on send with shortcut when attempting to post message with still-uploading attachments", async () => {

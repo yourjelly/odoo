@@ -792,7 +792,7 @@ export class DiscussChannel extends models.ServerModel {
         });
         const messageData = MailThread.message_post.call(this, [id], kwargs);
         if (kwargs.author_id === this.env.user?.partner_id) {
-            this._set_last_seen_message([channel.id], messageData.id, false);
+            this._set_last_seen_message([channel.id], messageData.id, false, false);
         }
         // simulate compute of message_unread_counter
         const memberOfCurrentUser = this._find_or_create_member_for_self(channel.id);
@@ -951,9 +951,10 @@ export class DiscussChannel extends models.ServerModel {
     /**
      * @param {number[]} ids
      * @param {number} last_message_id
+     * @param {boolean} [allow_older=false]
      */
-    _channel_seen(ids, last_message_id) {
-        const kwargs = parseModelParams(arguments, "ids", "last_message_id");
+    _channel_seen(ids, last_message_id, allow_older = false) {
+        const kwargs = parseModelParams(arguments, "ids", "last_message_id", "allow_older");
         ids = kwargs.ids;
         delete kwargs.ids;
         last_message_id = kwargs.last_message_id;
@@ -974,20 +975,22 @@ export class DiscussChannel extends models.ServerModel {
         if (!messages || messages.length === 0 || !channel) {
             return;
         }
-        this._set_last_seen_message([channel.id], last_message_id);
+        this._set_last_seen_message([channel.id], last_message_id, allow_older);
     }
 
     /**
      * @param {number[]} ids
      * @param {number} message_id
+     * @param {boolean} [allow_older=false]
      * @param {boolean} [notify=true]
      */
-    _set_last_seen_message(ids, message_id, notify) {
-        const kwargs = parseModelParams(arguments, "ids", "message_id", "notify");
+    _set_last_seen_message(ids, message_id, allow_older, notify) {
+        const kwargs = parseModelParams(arguments, "ids", "message_id", "allow_older", "notify");
         ids = kwargs.ids;
         delete kwargs.ids;
         message_id = kwargs.message_id;
         notify = kwargs.notify ?? true;
+        allow_older = kwargs.allow_older;
         /** @type {import("mock_models").BusBus} */
         const BusBus = this.env["bus.bus"];
         /** @type {import("mock_models").DiscussChannelMember} */
@@ -1009,12 +1012,16 @@ export class DiscussChannel extends models.ServerModel {
             if (this._types_allowing_seen_infos().includes(channel.channel_type)) {
                 target = channel;
             }
-            BusBus._sendone(target, "discuss.channel.member/seen", {
+            const data = {
                 channel_id: channel.id,
                 id: memberOfCurrentUser?.id,
                 last_message_id: message_id,
                 [guest ? "guest_id" : "partner_id"]: guest?.id ?? partner?.id,
-            });
+            };
+            if (allow_older) {
+                data.force_local_seen_message = message_id;
+            }
+            BusBus._sendone(target, "discuss.channel.member/seen", data);
         }
     }
 

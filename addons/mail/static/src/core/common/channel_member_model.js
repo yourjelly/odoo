@@ -16,12 +16,21 @@ export class ChannelMember extends Record {
         return super.insert(...arguments);
     }
 
+    update() {
+        super.update(...arguments);
+        if (!this.localSeenAssigned) {
+            this.localSeenMessage = this.seen_message_id;
+            this.localSeenAssigned = true;
+        }
+    }
+
     /** @type {string} */
     create_date;
     /** @type {number} */
     id;
     /** @type {luxon.DateTime} */
     last_interest_dt = Record.attr(undefined, { type: "datetime" });
+    localSeenMessage = Record.one("Message");
     persona = Record.one("Persona", { inverse: "channelMembers" });
     rtcSession = Record.one("RtcSession");
     thread = Record.one("Thread", { inverse: "channelMembers" });

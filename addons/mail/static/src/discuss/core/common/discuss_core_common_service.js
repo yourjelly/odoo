@@ -118,9 +118,11 @@ export class DiscussCoreCommon {
                 thread: { id: channel_id, model: "discuss.channel" },
             });
             if (member?.persona.eq(this.store.self)) {
-                member.thread.updateSeen(
-                    last_message_id ? this.store.Message.get(last_message_id) : null
-                );
+                if ("force_local_seen_message" in payload) {
+                    member.localSeenMessage =
+                        this.store.Message.get(payload.force_local_seen_message) ?? null;
+                }
+                member.thread.updateSeen(this.store.Message.get(last_message_id) ?? null);
             }
         });
         this.env.bus.addEventListener("mail.message/delete", ({ detail: { message, notifId } }) => {
@@ -195,6 +197,8 @@ export class DiscussCoreCommon {
         messageData.temporary_id = null;
         let message = this.store.Message.get(messageData.id);
         const alreadyInNeedaction = message?.in(message.thread?.needactionMessages);
+        const isActiveDiscussThread =
+            this.store.discuss.isActive && this.store.discuss.thread?.eq(channel);
         message = this.store.Message.insert(messageData, { html: true });
         if (message.notIn(channel.messages)) {
             if (!channel.loadNewer) {
@@ -205,7 +209,7 @@ export class DiscussCoreCommon {
             if (message.isSelfAuthored) {
                 channel.selfMember.seen_message_id = message;
             } else {
-                if (notifId > channel.message_unread_counter_bus_id) {
+                if (notifId > channel.message_unread_counter_bus_id && !isActiveDiscussThread) {
                     channel.incrementUnreadCounter();
                 }
                 if (message.isNeedaction) {
@@ -239,12 +243,17 @@ export class DiscussCoreCommon {
         }
         if (
             !channel.loadNewer &&
-            !message.isSelfAuthored &&
-            channel.composer.isFocused &&
+            isActiveDiscussThread &&
             this.store.self.type === "partner" &&
             channel.newestPersistentMessage?.eq(channel.newestMessage)
         ) {
             channel.markAsRead();
+            if (
+                !this.env.services.presence.isOdooFocused() &&
+                channel.newestPersistentMessage?.eq(channel.selfMember.localSeenMessage)
+            ) {
+                channel.selfMember.localSeenMessage = message;
+            }
         }
         this.env.bus.trigger("discuss.channel/new_message", { channel, message });
         const authorMember = channel.channelMembers.find(({ persona }) =>
@@ -254,7 +263,7 @@ export class DiscussCoreCommon {
             authorMember.seen_message_id = message;
         }
         if (authorMember?.eq(channel.selfMember)) {
-            authorMember.thread.updateSeen(message.id);
+            authorMember.thread.updateSeen(message);
         }
     }
 }

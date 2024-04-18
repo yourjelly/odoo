@@ -59,6 +59,10 @@ export class DiscussClientAction extends Component {
         const activeThread = await this.store.Thread.getOrFetch({ model, id });
         if (activeThread && activeThread.notEq(this.store.discuss.thread)) {
             activeThread.setAsDiscussThread(false);
+            if (activeThread.selfMember) {
+                activeThread.selfMember.localSeenMessage = activeThread.selfMember.seen_message_id;
+            }
+            activeThread.markAsRead();
         }
         this.store.discuss.hasRestoredThread = true;
     }

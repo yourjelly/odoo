@@ -28,17 +28,7 @@ patch(Store.prototype, {
         if (!oldestUnreadThread) {
             return false;
         }
-        if (this.discuss.isActive) {
-            oldestUnreadThread.setAsDiscussThread();
-            return true;
-        }
-        const chatWindow = this.ChatWindow.insert({ thread: oldestUnreadThread });
-        if (chatWindow.hidden) {
-            chatWindow.makeVisible();
-        } else if (chatWindow.folded) {
-            chatWindow.toggleFold();
-        }
-        chatWindow.focus();
+        oldestUnreadThread.open();
         return true;
     },
     /**

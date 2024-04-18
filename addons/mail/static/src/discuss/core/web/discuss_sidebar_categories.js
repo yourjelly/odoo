@@ -134,7 +134,7 @@ export class DiscussSidebarCategories extends Component {
      */
     openThread(ev, thread) {
         markEventHandled(ev, "sidebar.openThread");
-        thread.setAsDiscussThread();
+        thread.open();
     }
 
     stopEditing() {

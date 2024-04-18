@@ -10,7 +10,6 @@ import {
     createFile,
     defineMailModels,
     dragenterFiles,
-    focus,
     insertText,
     onRpcBefore,
     openDiscuss,
@@ -265,7 +264,7 @@ test('mention a channel with "&" in the name', async () => {
     await contains(".o-mail-Message-body .o_channel_redirect", { text: "#General & good" });
 });
 
-test("mark channel as fetched when a new message is loaded and as seen when focusing composer [REQUIRE FOCUS]", async () => {
+test("mark channel as fetched when a new message is loaded", async () => {
     const pyEnv = await startServer();
     const partnerId = pyEnv["res.partner"].create({
         email: "fred@example.com",
@@ -314,13 +313,9 @@ test("mark channel as fetched when a new message is loaded and as seen when focu
     );
     await contains(".o-mail-Message");
     await assertSteps(["rpc:channel_fetch"]);
-    await contains(".o-mail-Thread-newMessage hr + span", { text: "New messages" });
-    await focus(".o-mail-Composer-input");
-    await contains(".o-mail-Thread-newMessage hr + span", { count: 0, text: "New messages" });
-    await assertSteps(["rpc:set_last_seen_message"]);
 });
 
-test("mark channel as fetched and seen when a new message is loaded if composer is focused [REQUIRE FOCUS]", async () => {
+test("mark channel as fetched when a new message is loaded and thread is focused [REQUIRE FOCUS]", async () => {
     const pyEnv = await startServer();
     const partnerId = pyEnv["res.partner"].create({});
     const userId = pyEnv["res.users"].create({ partner_id: partnerId });
@@ -345,7 +340,6 @@ test("mark channel as fetched and seen when a new message is loaded if composer 
     const env = await start();
     rpc = rpcWithEnv(env);
     await openDiscuss(channelId);
-    await focus(".o-mail-Composer-input");
     // simulate receiving a message
     await withUser(userId, () =>
         rpc("/mail/message/post", {

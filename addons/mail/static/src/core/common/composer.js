@@ -657,9 +657,7 @@ export class Composer extends Component {
     }
 
     onFocusin() {
-        const composer = toRaw(this.props.composer);
-        composer.isFocused = true;
-        composer.thread?.markAsRead();
+        toRaw(this.props.composer).isFocused = true;
     }
 
     saveContent() {

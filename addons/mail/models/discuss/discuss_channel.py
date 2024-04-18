@@ -1069,6 +1069,8 @@ class Channel(models.Model):
                 'id': member.id,
                 'last_message_id': last_message.id,
             }
+            if allow_older:
+                data['force_local_seen_message'] = last_message.id
             data['partner_id' if current_partner else 'guest_id'] = current_partner.id if current_partner else current_guest.id
             target = current_partner or current_guest
             if self.channel_type in self._types_allowing_seen_infos():

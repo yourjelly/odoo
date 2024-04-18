@@ -90,6 +90,10 @@ patch(Thread.prototype, {
         super.unpin(...arguments);
     },
     _openChatWindow(replaceNewMessageChatWindow, { openMessagingMenuOnClose } = {}) {
+        if (this.selfMember) {
+            this.selfMember.localSeenMessage = this.selfMember.seen_message_id;
+            this.markAsRead();
+        }
         const chatWindow = this.store.ChatWindow.insert(
             assignDefined(
                 {

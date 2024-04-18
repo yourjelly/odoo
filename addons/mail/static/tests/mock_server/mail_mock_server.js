@@ -418,8 +418,8 @@ async function discuss_channel_mark_as_seen(request) {
     /** @type {import("mock_models").DiscussChannel} */
     const DiscussChannel = this.env["discuss.channel"];
 
-    const { channel_id, last_message_id } = await parseRequestParams(request);
-    return DiscussChannel._channel_seen([channel_id], last_message_id);
+    const { allow_older, channel_id, last_message_id } = await parseRequestParams(request);
+    return DiscussChannel._channel_seen([channel_id], last_message_id, allow_older);
 }
 
 registerRoute("/discuss/gif/favorites", get_favorites);
