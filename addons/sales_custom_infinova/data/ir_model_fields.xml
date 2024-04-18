@@ -1,0 +1,144 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+  <record id="field_x_regions__x_name" model="ir.model.fields">
+    <field name="model_id" ref="sales_custom_infinova.model_x_regions"/>
+    <field name="name">x_name</field>
+    <field name="field_description">Name</field>
+    <field name="selectable" eval="True"/>
+    <field name="state">manual</field>
+    <field name="ttype">char</field>
+  </record>
+
+  <record id="field_x_sale_person__x_person" model="ir.model.fields">
+    <field name="model_id" ref="sales_custom_infinova.model_x_sale_person"/>
+    <field name="name">x_person</field>
+    <field name="field_description">Sale Person</field>
+    <field name="state">manual</field>
+    <field name="ttype">many2one</field>
+    <field name="relation">hr.employee</field>
+  </record>
+
+  <record id="field_sale_order__x_project_name" model="ir.model.fields">
+    <field name="name">x_project_name</field>
+    <field name="field_description">Project Name</field>
+    <field name="ttype">char</field>
+    <field name="model_id" ref="sale.model_sale_order"/>
+  </record>
+  <record id="field_sale_order__x_region_id" model="ir.model.fields">
+      <field name="name">x_region_id</field>
+      <field name="field_description">Region</field>
+      <field name="ttype">many2one</field>
+      <field name="model_id" ref="sale.model_sale_order"/>
+      <field name="relation">x_regions</field>
+  </record>
+
+  <!--sale person fields-->
+  <record id="field_sale_order__x_sale_person_id" model="ir.model.fields">
+      <field name="name">x_sale_person_id</field>
+      <field name="field_description">Sales Person</field>
+      <field name="ttype">many2one</field>
+      <field name="model_id" ref="sales_custom_infinova.model_x_sale_person"/>
+      <field name="relation">sale.order</field>
+  </record>
+  <record id="field_sale_order__x_sale_person_id_invoice" model="ir.model.fields">
+      <field name="name">x_sale_person_id_invoice</field>
+      <field name="field_description">Sales Person</field>
+      <field name="ttype">many2one</field>
+      <field name="model_id" ref="sales_custom_infinova.model_x_sale_person"/>
+      <field name="relation">account.move</field>
+  </record>
+  <record id="field_sale_order__x_sale_person_line_ids" model="ir.model.fields">
+      <field name="name">x_sale_person_line_ids</field>
+      <field name="field_description">Person Lines</field>
+      <field name="ttype">one2many</field>
+      <field name="model_id" ref="sale.model_sale_order"/>
+      <field name="relation">x_sale_person</field>
+      <field name="relation_field">x_sale_person_id</field>
+  </record>
+  <record id="field_sale_order__x_person_id" model="ir.model.fields">
+      <field name="name">x_person_id</field>
+      <field name="field_description">Sales Person</field>
+      <field name="ttype">many2one</field>
+      <field name="model_id" ref="sales_custom_infinova.model_x_sale_person"/>
+      <field name="relation">hr.employee</field>
+  </record>
+  <record id="field_sale_person__x_ratio" model="ir.model.fields">
+      <field name="name">x_ratio</field>
+      <field name="field_description">Ratio %</field>
+      <field name="ttype">float</field>
+      <field name="model_id" ref="sales_custom_infinova.model_x_sale_person"/>
+  </record>
+  <record id="field_sale_person__x_amount" model="ir.model.fields">
+      <field name="name">x_amount</field>
+      <field name="field_description">Amount</field>
+      <field name="ttype">float</field>
+      <field name="model_id" ref="sales_custom_infinova.model_x_sale_person"/>
+  </record>
+
+  <record id="field_sale_order_line__x_warranty_terms" model="ir.model.fields">
+      <field name="name">x_warranty_terms</field>
+      <field name="field_description">Warranty Terms (months)</field>
+      <field name="ttype">integer</field>
+      <field name="model_id" ref="sale.model_sale_order_line"/>
+  </record>
+  <!--Invoice fields-->
+  <record id="field_model_account_move_line_x_warranty_terms_invoice" model="ir.model.fields">
+      <field name="name">x_warranty_terms_invoice</field>
+      <field name="field_description">Warranty Terms (months)</field>
+      <field name="ttype">integer</field>
+      <field name="model_id" ref="sale.model_account_move_line"/>
+      <field name="related">sale_line_ids.x_warranty_terms</field>
+      <field name="readonly" eval="True"/>
+  </record>
+  <record id="field_model_account_move_x_project_name_invoice" model="ir.model.fields">
+      <field name="name">x_project_name_invoice</field>
+      <field name="field_description">Project Name</field>
+      <field name="ttype">char</field>
+      <field name="model_id" ref="sale.model_account_move"/>
+      <field name="related">invoice_line_ids.sale_line_ids.order_id.x_project_name</field>
+      <field name="readonly" eval="True"/>
+  </record>
+  <record id="field_model_account_move_x_region_id_invoice" model="ir.model.fields">
+      <field name="name">x_region_id_invoice</field>
+      <field name="field_description">Region</field>
+      <field name="ttype">many2one</field>
+      <field name="model_id" ref="sale.model_account_move"/>
+      <field name="related">invoice_line_ids.sale_line_ids.order_id.x_region_id</field>
+      <field name="readonly" eval="True"/>
+      <field name="relation">x_regions</field>
+  </record>
+  <record id="field_account_move__x_sale_person_line_ids_invoice" model="ir.model.fields">
+      <field name="name">x_sale_person_line_ids_invoice</field>
+      <field name="field_description">Person Lines</field>
+      <field name="ttype">one2many</field>
+      <field name="model_id" ref="sale.model_account_move"/>
+      <field name="related">invoice_line_ids.sale_line_ids.order_id.x_sale_person_line_ids</field>
+      <field name="relation">x_sale_person</field>
+      <field name="relation_field">x_sale_person_id_invoice</field>
+  </record>
+
+  <!--Stock move line fields-->
+  <record id="field_model_stock_move_line_x_warranty_terms_stock" model="ir.model.fields">
+      <field name="name">x_warranty_terms_stock</field>
+      <field name="field_description">Warranty Terms (months)</field>
+      <field name="ttype">integer</field>
+      <field name="model_id" ref="stock.model_stock_move_line"/>
+      <field name="related">move_id.picking_id.sale_id.order_line.x_warranty_terms</field>
+      <field name="readonly" eval="True"/>
+  </record>
+
+  <record id="field_model_stock_move_line_x_warranty_expiry" model="ir.model.fields">
+      <field name="name">x_warranty_expire</field>
+      <field name="field_description">Warranty Expiry</field>
+      <field name="ttype">date</field>
+      <field name="model_id" ref="stock.model_stock_move_line"/>
+  </record>
+
+  <!--stock.lot fields-->
+  <record id="field_stock_lot_x_warranty_expiry_lot" model="ir.model.fields">
+    <field name="name">x_warranty_expiry_lot</field>
+    <field name="field_description">Warranty Expiry</field>
+    <field name="ttype">date</field>
+    <field name="model_id" ref="stock.model_stock_lot"/>
+</record>
+</odoo>

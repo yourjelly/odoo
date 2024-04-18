@@ -1,0 +1,37 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+    <record id="automation_check_sum_of_ratio" model="base.automation">
+        <field name="name">Check sum of ratio</field>
+        <field name="model_id" ref="sale.model_sale_order"/>
+        <field name="action_server_ids" eval="[(6, 0, [ref('sales_custom_infinova.ir_action_check_ratio')])]"/>
+        <field name="active" eval="True"/>
+        <field name="trigger">on_create_or_write</field>
+        <field name="trigger_field_ids" eval="[(6, 0, [ref('sales_custom_infinova.field_sale_order__x_sale_person_line_ids')])]"/>
+    </record>
+    <record id="automation_calculate_amount" model="base.automation">
+        <field name="name">Calculate amount</field>
+        <field name="model_id" ref="sales_custom_infinova.model_x_sale_person"/>
+        <field name="action_server_ids" eval="[(6, 0, [ref('sales_custom_infinova.ir_action_calculate_amount')])]"/>
+        <field name="active" eval="True"/>
+        <field name="trigger">on_create_or_write</field>
+        <field name="trigger_field_ids" eval="[(6, 0, [ref('sales_custom_infinova.field_sale_person__x_ratio')])]"/>
+    </record>
+    <record id="automation_calculate_amount_sale_order" model="base.automation">
+        <field name="name">Calculate amount from (Untaxed amount)</field>
+        <field name="model_id" ref="sale.model_sale_order"/>
+        <field name="action_server_ids" eval="[(6, 0, [ref('sales_custom_infinova.ir_action_calculate_amount_sale_order')])]"/>
+        <field name="active" eval="True"/>
+        <field name="trigger">on_create_or_write</field>
+        <field name="trigger_field_ids" eval="[(6, 0, [ref('sale.field_sale_order__amount_untaxed')])]"/>
+    </record>
+    <record id="set_warranty_dates" model="base.automation">
+        <field name="name">Set Warranty Expiration dates</field>
+        <field name="model_id" ref="stock.model_stock_picking"/>
+        <field name="action_server_ids" eval="[(6, 0, [ref('sales_custom_infinova.ir_action_set_warranty_dates')])]"/>
+        <field name="active" eval="True"/>
+        <field name="filter_pre_domain">[('state', '!=', 'done')]</field>
+        <field name="filter_domain">[('state', '=', 'done')]</field>
+        <field name="trigger">on_create_or_write</field>
+        <field name="trigger_field_ids" eval="[(6, 0, [ref('stock.field_stock_picking__date_done')])]"/>
+    </record>
+</odoo>

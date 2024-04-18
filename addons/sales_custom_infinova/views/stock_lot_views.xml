@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="stock_lot_tree_inherited" model="ir.ui.view">
+        <field name="name">stock.lot.tree.inherited</field>
+        <field name="model">stock.lot</field>
+        <field name="inherit_id" ref="product_expiry.view_move_form_expiry"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='expiration_date']" position="before">
+                <field name="x_warranty_expiry_lot"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

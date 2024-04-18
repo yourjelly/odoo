@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <template id="extended_report_invoice_document" inherit_id="l10n_in.l10n_in_report_invoice_document_inherit">
+            <xpath expr="//td[@name='account_invoice_line_name']/span" position="after">
+                <br/><strong>Warranty Terms: </strong><span t-if="line.x_warranty_terms_invoice" t-field="line.x_warranty_terms_invoice"/> <span t-if="line.x_warranty_terms_invoice">months</span>
+            </xpath>
+            <xpath expr="//div[@id='informations']" position="before">
+                <strong>Project Name:</strong> 
+                <span t-if="o.x_project_name_invoice">
+                    <span t-field="o.x_project_name_invoice"/>
+                </span><br/>
+                <strong>Region:</strong> 
+                <span t-if="o.x_region_id_invoice">
+                    <span t-field="o.x_region_id_invoice"/>
+                </span>
+            </xpath>
+            <xpath expr="//h2/span[2]" position="replace">
+                <span t-elif="o.move_type == 'out_invoice' and o.state == 'draft'">Pro-forma Customer Invoices</span>
+            </xpath>
+        </template>
+    </data>
+</odoo>

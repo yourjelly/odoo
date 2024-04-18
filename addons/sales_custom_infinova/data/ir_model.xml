@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+  <record id="model_x_regions" model="ir.model">
+    <field name="model">x_regions</field>
+    <field name="name">x.regions</field>
+    <field name="state">manual</field>
+    <field name="transient" eval="False"/>
+  </record>
+  <record id="model_x_sale_person" model="ir.model">
+    <field name="model">x_sale_person</field>
+    <field name="name">x.sale.person</field>
+    <field name="state">manual</field>
+    <field name="transient" eval="False"/>
+  </record>
+</odoo>

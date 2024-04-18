@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_x_regions_list" model="ir.ui.view">
+        <field name="name">x.regions.tree</field>
+        <field name="model">x_regions</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="x_name"/>
+            </tree>
+        </field>
+    </record>
+    <record id="view_x_regions_form" model="ir.ui.view">
+        <field name="name">x.regions.form</field>
+        <field name="model">x_regions</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <field name="x_name"/>
+                </group>
+            </form>
+        </field>
+    </record>
+    <record id="action_regions_views" model="ir.actions.act_window">
+        <field name="name">Regions</field>
+        <field name="res_model">x_regions</field>
+        <field name="view_mode">tree,form</field>
+        <field name="target">new</field>
+        <field name="view_id" ref="view_x_regions_list"/>
+    </record>
+    <record id="model_region_menuitem" model="ir.ui.menu">
+        <field name="action" ref="sales_custom_infinova.action_regions_views"/>
+        <field name="name">Regions</field>
+        <field name="parent_id" ref="sale.sale_menu_root"/>
+        <field name="sequence">10</field>
+    </record>
+</odoo>

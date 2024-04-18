@@ -1,0 +1,57 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+    <record id="ir_action_check_ratio" model="ir.actions.server">
+        <field name="binding_type">action</field>
+        <field name="binding_view_types">list,form</field>
+        <field name="code"><![CDATA[
+if record:
+    total = sum(record.x_sale_person_line_ids.mapped('x_ratio'))
+    if total > 100:
+        raise UserError("Sum of ratios cannot be greater than 100%")
+]]></field>
+        <field name="model_id" ref="sale.model_sale_order"/>
+        <field name="name">Quotation Sequence</field>
+        <field name="sequence">5</field>
+        <field name="state">code</field>
+    </record>
+    <record id="ir_action_calculate_amount" model="ir.actions.server">
+        <field name="binding_type">action</field>
+        <field name="binding_view_types">list,form</field>
+        <field name="code"><![CDATA[
+if record:
+    record['x_amount'] = (record.x_ratio * record.x_sale_person_id.amount_untaxed) / 100
+]]></field>
+        <field name="model_id" ref="sales_custom_infinova.model_x_sale_person"/>
+        <field name="name">Sequence</field>
+        <field name="sequence">5</field>
+        <field name="state">code</field>
+    </record>
+    <record id="ir_action_calculate_amount_sale_order" model="ir.actions.server">
+        <field name="binding_type">action</field>
+        <field name="binding_view_types">list,form</field>
+        <field name="code"><![CDATA[
+if record:
+    for rec in record.x_sale_person_line_ids:
+        rec['x_amount'] = (rec.x_ratio * record.amount_untaxed) / 100
+]]></field>
+        <field name="model_id" ref="sale.model_sale_order"/>
+        <field name="name">Sequence</field>
+        <field name="sequence">5</field>
+        <field name="state">code</field>
+    </record>
+    <record id="ir_action_set_warranty_dates" model="ir.actions.server">
+        <field name="binding_type">action</field>
+        <field name="binding_view_types">list,form</field>
+        <field name="code"><![CDATA[
+if record:
+    for line in record.move_line_ids:
+        if line.x_warranty_terms_stock:
+            line['x_warranty_expire'] = datetime.datetime.now() + dateutil.relativedelta.relativedelta(months=line.x_warranty_terms_stock)
+            line.lot_id['x_warranty_expiry_lot'] = datetime.datetime.now() + dateutil.relativedelta.relativedelta(months=line.x_warranty_terms_stock)    
+]]></field>
+        <field name="model_id" ref="stock.model_stock_picking"/>
+        <field name="name">Sequence</field>
+        <field name="sequence">5</field>
+        <field name="state">code</field>
+    </record>
+</odoo>
