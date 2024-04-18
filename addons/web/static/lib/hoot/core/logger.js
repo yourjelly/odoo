@@ -108,7 +108,7 @@ export const logLevels = {
 
 export const logger = {
     ignoreErrors: false,
-    level: urlParams.loglevel ?? logLevels.RUNNER,
+    level: Math.max(window.gc ? logLevels.SUITES : 0, urlParams.loglevel ?? logLevels.RUNNER),
 
     // Standard console methods
 
@@ -193,6 +193,12 @@ export const logger = {
         }
         if (withArgs.length) {
             args.push("(", ...withArgs, ")");
+        }
+        if (window.gc) {
+            window.gc();
+            args.push(
+                `MEMINFO - after gc: ${window.performance.memory.usedJSHeapSize} - tests: ${suite.reporting.tests}`
+            );
         }
         $log(...styledArguments(args));
     },
