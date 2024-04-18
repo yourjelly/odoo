@@ -66,6 +66,7 @@ class QUnitSuiteCheck(odoo.tests.TransactionCase):
 
 @odoo.tests.tagged('post_install', '-at_install')
 class QUnitSuite(odoo.tests.HttpCase):
+    skip_clear_all_caches = True
 
     @odoo.tests.no_retry
     def test_unit_desktop(self):
@@ -74,7 +75,6 @@ class QUnitSuite(odoo.tests.HttpCase):
 
     @odoo.tests.no_retry
     def test_hoot(self):
-        # HOOT tests suite
         self.browser_js('/web/static/lib/hoot/tests/index.html?headless&loglevel=2', "", "", login='admin', timeout=1800, success_signal="[HOOT] test suite succeeded", error_checker=unit_test_error_checker)
 
     @odoo.tests.cross_module
@@ -84,7 +84,7 @@ class QUnitSuite(odoo.tests.HttpCase):
             return
         module_hash = generate_qunit_hash(module)
         _logger.info('Starting qunit for module %s (%s)', module, module_hash)
-        self.browser_js('/web/tests?moduleId=%s ' % module_hash, "", "", login='admin', timeout=1800, success_signal="QUnit test suite done.", error_checker=qunit_error_checker)
+        self.browser_js('/web/tests?moduleId=%s ' % module_hash, "", "", login='admin', timeout=1800, success_signal="QUnit test suite done.", error_checker=qunit_error_checker, stop_browser=False)
 
 
 @odoo.tests.tagged('post_install', '-at_install')

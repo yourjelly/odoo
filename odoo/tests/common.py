@@ -826,8 +826,8 @@ class TransactionCase(BaseCase):
         # restore the set of known environments as it was at setUp
         self.addCleanup(envs.update, list(envs))
         self.addCleanup(envs.clear)
-
-        self.addCleanup(self.muted_registry_logger(self.registry.clear_all_caches))
+        if not hasattr(self, 'skip_clear_all_caches'):
+            self.addCleanup(self.muted_registry_logger(self.registry.clear_all_caches))
 
         # This prevents precommit functions and data from piling up
         # until cr.flush is called in 'assertRaises' clauses
@@ -950,7 +950,6 @@ class ChromeBrowser:
         )
         self.ws = self._open_websocket()
         self._request_id = itertools.count()
-        self._result = Future()
         self.error_checker = None
         self.had_failure = False
         # maps request_id to Futures
@@ -1551,6 +1550,7 @@ which leads to stray network requests and inconsistencies."""
         raise ChromeBrowserException("Unknown error") from err
 
     def navigate_to(self, url, wait_stop=False):
+        self._result = Future()
         self._logger.info('Navigating to: "%s"', url)
         nav_result = self._websocket_request('Page.navigate', params={'url': url}, timeout=20.0)
         self._logger.info("Navigation result: %s", nav_result)
@@ -1820,7 +1820,7 @@ class HttpCase(TransactionCase):
 
         return session
 
-    def browser_js(self, url_path, code, ready='', login=None, timeout=60, cookies=None, error_checker=None, watch=False, success_signal=DEFAULT_SUCCESS_SIGNAL, debug=False, **kw):
+    def browser_js(self, url_path, code, ready='', login=None, timeout=60, cookies=None, error_checker=None, watch=False, success_signal=DEFAULT_SUCCESS_SIGNAL, debug=False, stop_browser=False, **kw):
         """ Test js code running in the browser
         - optionnally log as 'login'
         - load page given by url_path
@@ -1844,13 +1844,16 @@ class HttpCase(TransactionCase):
             timeout = 1e6
         if watch:
             self._logger.warning('watch mode is only suitable for local testing')
-
-        browser = ChromeBrowser(self, headless=not watch, success_signal=success_signal, debug=debug)
         try:
-            self.authenticate(login, login, browser=browser)
-            # Flush and clear the current transaction.  This is useful in case
-            # we make requests to the server, as these requests are made with
-            # test cursors, which uses different caches than this transaction.
+            if not type(self).browser:
+                type(self).browser = browser = ChromeBrowser(self, headless=not watch, success_signal=success_signal, debug=debug)
+                if not stop_browser:
+                    self.addClassCleanup(browser.stop)
+                self.authenticate(login, login, browser=browser)
+                # Flush and clear the current transaction.  This is useful in case
+                # we make requests to the server, as these requests are made with
+                # test cursors, which uses different caches than this transaction.
+            browser = self.browser
             self.cr.flush()
             self.cr.clear()
             url = werkzeug.urls.url_join(self.base_url(), url_path)
@@ -1870,13 +1873,14 @@ class HttpCase(TransactionCase):
                 for name, value in cookies.items():
                     browser.set_cookie(name, value, '/', HOST)
 
-            browser.navigate_to(url, wait_stop=not bool(ready))
 
+            browser.navigate_to(url, wait_stop=not bool(ready))
             # Needed because tests like test01.js (qunit tests) are passing a ready
             # code = ""
             self.assertTrue(browser._wait_ready(ready), 'The ready "%s" code was always falsy' % ready)
 
             error = False
+
             try:
                 browser._wait_code_ok(code, timeout, error_checker=error_checker)
             except ChromeBrowserException as chrome_browser_exception:
@@ -1889,7 +1893,9 @@ class HttpCase(TransactionCase):
                 self.fail('%s\n\n%s' % (message, error))
 
         finally:
-            browser.stop()
+            if stop_browser and self.browser:
+                self.browser.stop()
+                type(self).browser = None
             self._wait_remaining_requests()
 
     @classmethod

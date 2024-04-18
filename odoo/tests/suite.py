@@ -34,6 +34,8 @@ class TestSuite(BaseTestSuite):
     """
 
     def run(self, result, debug=False):
+      import odoo.tools
+      with odoo.tools.profiler.Profiler(db='61400384-master-all'):
         for test in self:
             assert isinstance(test, (TestCase))
             self._tearDownPreviousClass(test, result)
@@ -90,6 +92,7 @@ class TestSuite(BaseTestSuite):
     def _tearDownPreviousClass(self, test, result):
         previousClass = result._previousTestClass
         currentClass = test.__class__
+
         if currentClass == previousClass:
             return
         if not previousClass:
