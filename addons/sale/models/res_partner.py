@@ -65,12 +65,20 @@ class ResPartner(models.Model):
             ('partner_id', 'in', self.ids),
             ('state', 'in', ['sale', 'done']),
         ]
-        group = self.env['sale.order'].read_group(domain, ['amount_to_invoice'], ['partner_id', 'currency_id'], lazy=False)
+        # TODO: in master (17.3) simplify to 'amount_to_invoice:sum'
+        #       see comment in _compute_amount_to_invoice
+        group = self.env['sale.order'].read_group(
+            domain,
+            ['amount_to_invoice:array_agg'],
+            ['partner_id', 'currency_id'],
+            lazy=False
+        )
         for res in group:
             partner = self.browse(res['partner_id'][0])
             currency = self.env['res.currency'].browse(res['currency_id'][0])
+            amount_to_invoice = sum(max(float(amount), 0) for amount in res['amount_to_invoice'])
             credit_company_currency = currency._convert(
-                res['amount_to_invoice'],
+                amount_to_invoice,
                 company.currency_id,
                 company,
                 fields.Date.context_today(self)

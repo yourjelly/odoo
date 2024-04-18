@@ -599,8 +599,13 @@ class SaleOrder(models.Model):
     def _compute_amount_to_invoice(self):
         for order in self:
             invoices = order.invoice_ids.filtered(lambda x: x.state == 'posted')
-            # TODO: amount_to_invoice is stored ; avoid? necessary?
-            order.amount_to_invoice = max(order.amount_total - invoices._get_amount_from_sales_order(order), 0)
+            # TODO: in master (17.3):
+            # `max(order.amount_total - invoices._get_amount_from_sales_order(order), 0)`
+            # A negative amount can e.g. happen if we invoice more than the sales order amount.
+            # A negative amount is confusing and leads to errors when summing the amount_to_invoice
+            # of multiple orders: e.g. one invoiced order with -100 and one uninvoiced order of 100
+            # would leave us with "nothing to invoice" (100 + -100 = 0).
+            order.amount_to_invoice = order.amount_total - invoices._get_amount_from_sales_order(order)
 
     @api.depends('amount_total', 'amount_to_invoice')
     def _compute_amount_invoiced(self):
