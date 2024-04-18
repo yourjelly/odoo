@@ -109,6 +109,12 @@ class ResCompany(models.Model):
     account_use_credit_limit = fields.Boolean(
         string='Sales Credit Limit', help='Enable the use of credit limit on partners.')
 
+    batch_payment_sequence_id = fields.Many2one(
+        comodel_name='ir.sequence',
+        readonly=True,
+        copy=False,
+    )
+
     #Fields of the setup step for opening move
     account_opening_move_id = fields.Many2one(string='Opening Journal Entry', comodel_name='account.move', help="The journal entry containing the initial balance of all this company's accounts.")
     account_opening_journal_id = fields.Many2one(string='Opening Journal', comodel_name='account.journal', related='account_opening_move_id.journal_id', help="Journal where the opening entry of this company's accounting has been posted.", readonly=False)
@@ -193,6 +199,50 @@ class ResCompany(models.Model):
     # Separate account for allocation of discounts
     account_discount_income_allocation_id = fields.Many2one(comodel_name='account.account', string='Separate account for income discount')
     account_discount_expense_allocation_id = fields.Many2one(comodel_name='account.account', string='Separate account for expense discount')
+
+    def get_next_batch_payment_communication(self, payment_date, moves):
+        '''
+        Generates next batch payment communication reference
+        The communication reference is = move name if the batch contains only a single move
+        If the batch contains multiple moves, the reference = BATCH/{payment year}/{payment sequence number}
+        e.g., BATCH/2024/00001
+        Note that the batch sequence number is only incremented on demand (upon payment confirmation) using 'increment_batch_payment_sequence'
+        :param payment_date:    batch payment date.
+        :param moves:           batch moves (cannot be empty list).
+        :return:                batch communication reference.
+        '''
+        self.ensure_one()
+        if not moves or not payment_date:
+            raise ValidationError(_("Cannot generate batch payment communication"))
+
+        if len(moves) == 1:
+            return moves[0].name
+
+        if not self.batch_payment_sequence_id:
+            self.batch_payment_sequence_id = self.env['ir.sequence'].sudo().create({
+                'name': _(": Batch Payment Number Sequence"),
+                'implementation': 'no_gap',
+                'padding': 5,
+                'number_increment': 0,
+                'use_date_range': True,
+                'company_id': self.id,
+            })
+
+        sequence_number = self.batch_payment_sequence_id.next_by_id(sequence_date=payment_date)
+        return f'BATCH/{payment_date.year}/{sequence_number}'
+
+    def increment_batch_payment_sequence(self, payment_date, moves):
+        '''
+        Increment batch payment sequence if the payment had more than one move
+        '''
+        self.ensure_one()
+        if not moves or not payment_date:
+            raise ValidationError(_("Cannot increment batch payment sequence number"))
+
+        if len(moves) > 1:
+            self.batch_payment_sequence_id.number_increment = 1
+            self.batch_payment_sequence_id.next_by_id(sequence_date=payment_date)
+            self.batch_payment_sequence_id.number_increment = 0
 
     def _get_company_root_delegated_field_names(self):
         return super()._get_company_root_delegated_field_names() + [
