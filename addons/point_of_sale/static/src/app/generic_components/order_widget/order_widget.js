@@ -1,6 +1,7 @@
 import { Component, useEffect, useRef } from "@odoo/owl";
 import { CenteredIcon } from "@point_of_sale/app/generic_components/centered_icon/centered_icon";
 import { _t } from "@web/core/l10n/translation";
+import { TagsList } from "@web/core/tags_list/tags_list";
 import { Orderline } from "@point_of_sale/app/generic_components/orderline/orderline";
 
 export class OrderWidget extends Component {
@@ -20,7 +21,7 @@ export class OrderWidget extends Component {
         style: "",
         class: "",
     };
-    static components = { CenteredIcon, Orderline };
+    static components = { CenteredIcon, Orderline, TagsList };
     setup() {
         this.scrollableRef = useRef("scrollable");
         useEffect(() => {
@@ -31,5 +32,8 @@ export class OrderWidget extends Component {
     }
     emptyCartText() {
         return _t("Start adding products");
+    }
+    getInternalNotes() {
+        return JSON.parse(this.props.internalNote);
     }
 }
