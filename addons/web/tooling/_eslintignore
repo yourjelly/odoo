@@ -313,3 +313,7 @@ addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js
 
 !sign_itsme
 !sign_itsme/**
+
+# Whitelist t9n
+!addons/t9n
+!addons/t9n/**/*
