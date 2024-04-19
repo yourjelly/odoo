@@ -498,7 +498,7 @@ class Field(MetaField('DummyField', (object,), {})):
 
         if not self.string and not self.related:
             # related fields get their string from their parent field
-            self.string = (
+            self.string = 'Implicit! ' + (
                 name[:-4] if name.endswith('_ids') else
                 name[:-3] if name.endswith('_id') else name
             ).replace('_', ' ').title()
