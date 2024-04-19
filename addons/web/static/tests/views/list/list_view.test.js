@@ -21,6 +21,7 @@ import { AnimatedNumber } from "@web/views/view_components/animated_number";
 import { WebClient } from "@web/webclient/webclient";
 import { keyUp } from "../../../lib/hoot-dom/helpers/events";
 import { ListController } from "@web/views/list/list_controller";
+import { FloatField, floatField } from "@web/views/fields/float/float_field";
 
 const { ResCompany, ResPartner, ResUsers } = webModels;
 
@@ -2884,20 +2885,20 @@ test("selection is kept on render without reload", async () => {
     expect(".o_control_panel_actions .o_list_selection_box").toHaveCount(0);
 
     // open blip grouping and check all lines
-    await click($(target).find('.o_group_header:contains("blip (2)")')[0]);
+    await contains('.o_group_header:contains("blip (2)")').click();
     await contains(".o_data_row input").click();
     expect("div.o_control_panel .o_cp_action_menus").toHaveCount(1);
     expect(".o_control_panel_actions .o_list_selection_box").toHaveCount(1);
 
     // open yop grouping and verify blip are still checked
-    await click($(target).find('.o_group_header:contains("yop (1)")')[0]);
+    await contains('.o_group_header:contains("yop (1)")').click();
     expect(".o_data_row input:checked").toHaveCount(1, { message: "opening a grouping does not uncheck others" });
     expect("div.o_control_panel .o_cp_action_menus").toHaveCount(1);
     expect(".o_control_panel_actions .o_list_selection_box").toHaveCount(1);
 
     // close and open blip grouping and verify blip are unchecked
-    await click($(target).find('.o_group_header:contains("blip (2)")')[0]);
-    await click($(target).find('.o_group_header:contains("blip (2)")')[0]);
+    await contains('.o_group_header:contains("blip (2)")').click();
+    await contains('.o_group_header:contains("blip (2)")').click();
     expect(".o_data_row input:checked").toHaveCount(0, { message: "opening and closing a grouping uncheck its elements" });
     expect("div.o_control_panel .o_cp_action_menus").toHaveCount(1);
     expect(".o_control_panel_actions .o_list_selection_box").toHaveCount(0);
@@ -2945,27 +2946,21 @@ test("aggregates are computed correctly", async () => {
                 <filter name="my_filter" string="My Filter" domain="[('id', '=', 0)]"/>
             </search>`,
     });
-    const tbodySelectors = queryAll("tbody .o_list_record_selector input");
-    const theadSelector = target.querySelector("thead .o_list_record_selector input");
 
-    const getFooterTextArray = () => {
-        return [...queryAll("tfoot td")].map((td) => td.innerText);
-    };
+    expect(queryAllTexts("tfoot td")).toEqual(["", "", "32", "1.50"]);
 
-    expect(getFooterTextArray()).toEqual(["", "", "32", "1.50"]);
+    await contains(queryAll("tbody .o_list_record_selector input")[0]).click();
+    await contains(queryAll("tbody .o_list_record_selector input")[3]).click();
+    expect(queryAllTexts("tfoot td")).toEqual(["", "", "6", "0.50"]);
 
-    await click(tbodySelectors[0]);
-    await click(tbodySelectors[3]);
-    expect(getFooterTextArray()).toEqual(["", "", "6", "0.50"]);
-
-    await click(theadSelector);
-    expect(getFooterTextArray()).toEqual(["", "", "32", "1.50"]);
+    await contains("thead .o_list_record_selector input").click();
+    expect(queryAllTexts("tfoot td")).toEqual(["", "", "32", "1.50"]);
 
     // Let's update the view to dislay NO records
     await contains(".o_list_unselect_all").click();
     await toggleSearchBarMenu();
     await toggleMenuItem("My Filter");
-    expect(getFooterTextArray()).toEqual(["", "", "", ""]);
+    expect(queryAllTexts("tfoot td")).toEqual(["", "", "", ""]);
 });
 
 test("aggregates are computed correctly in grouped lists", async () => {
@@ -2975,20 +2970,20 @@ test("aggregates are computed correctly in grouped lists", async () => {
         groupBy: ["m2o"],
         arch: '<tree editable="bottom"><field name="foo" /><field name="int_field" sum="Sum"/></tree>',
     });
-    const groupHeaders = queryAll(".o_group_header");
-    expect(groupHeaders[0].querySelector("td:last-child").textContent).toBe("23", { message: "first group total should be 23" });
-    expect(groupHeaders[1].querySelector("td:last-child").textContent).toBe("9", { message: "second group total should be 9" });
-    expect(target.querySelector("tfoot td:last-child").textContent).toBe("32", { message: "total should be 32" });
-    await click(groupHeaders[0]);
+    expect(".o_group_header:eq(0) td:last-child").toHaveText("23", { message: "first group total should be 23" });
+    expect(".o_group_header:eq(1) td:last-child").toHaveText("9", { message: "second group total should be 9" });
+    expect("tfoot td:last-child").toHaveText("32", { message: "total should be 32" });
+    await contains(".o_group_header:eq(0)").click();
     await contains("tbody .o_list_record_selector input:first-child").click();
-    expect(target.querySelector("tfoot td:last-child").textContent).toBe("10", { message: "total should be 10 as first record of first group is selected" });
+    expect("tfoot td:last-child").toHaveText("10", { message: "total should be 10 as first record of first group is selected" });
 });
 
 test("aggregates are formatted correctly in grouped lists", async () => {
     // in this scenario, there is a widget on an aggregated field, and this widget has no
     // associated formatter, so we fallback on the formatter corresponding to the field type
-    fieldRegistry.add("my_float", FloatField);
+    fieldRegistry.add("my_float", floatField);
     Foo._records[0].qux = 5.1654846456;
+
     await mountView({
         type: "list",
         resModel: "foo",
@@ -3017,13 +3012,20 @@ test("aggregates in grouped lists with buttons", async () => {
             </tree>`,
     });
 
-    const cellVals = ["23", "6.40", "9", "13.00", "32", "19.40"];
-    expect(queryAllTexts(".o_list_number")).toEqual(cellVals);
+    expect(queryAllTexts(".o_list_number")).toEqual(["23", "6.40", "9", "13.00", "32", "19.40"]);
 });
 
 test("date field aggregates in grouped lists", async () => {
     // this test simulates a scenario where a date field has a aggregator
     // and the web_read_group thus return a value for that field for each group
+
+    onRpc("web_read_group", async ({ parent }) => {
+        const res = await parent();
+        res.groups[0].date = "2021-03-15";
+        res.groups[1].date = "2021-02-11";
+        return res;
+    });
+
     await mountView({
         type: "list",
         resModel: "foo",
@@ -3033,42 +3035,33 @@ test("date field aggregates in grouped lists", async () => {
                 <field name="foo"/>
                 <field name="date"/>
             </tree>`,
-        async mockRPC(route, args, performRPC) {
-            if (args.method === "web_read_group") {
-                const res = await performRPC(...arguments);
-                res.groups[0].date = "2021-03-15";
-                res.groups[1].date = "2021-02-11";
-                return res;
-            }
-        },
     });
 
     expect(".o_group_header").toHaveCount(2);
-    expect(queryAllTexts(".o_group_header")).toEqual([`Value 1 (3) `, `Value 2 (1) `]);
+    expect(queryAllTexts(".o_group_header")).toEqual([`Value 1 (3)`, `Value 2 (1)`]);
 });
 
 test("hide aggregated value in grouped lists when no data provided by RPC call", async () => {
+    onRpc("web_read_group", async ({ parent }) => {
+        const res = await parent();
+        res.groups.forEach((group) => {
+            delete group.qux;
+        });
+        return res;
+    });
+
     await mountView({
         type: "list",
         resModel: "foo",
         groupBy: ["bar"],
         arch: `
-                <tree editable="bottom">
-                    <field name="foo"/>
-                    <field name="qux" widget="float_time" sum="Sum"/>
-                </tree>`,
-        mockRPC: async function (route, args, performRPC) {
-            if (args.method === "web_read_group") {
-                const result = await performRPC(route, args);
-                result.groups.forEach((group) => {
-                    delete group.qux;
-                });
-                return Promise.resolve(result);
-            }
-        },
+            <tree editable="bottom">
+                <field name="foo"/>
+                <field name="qux" widget="float_time" sum="Sum"/>
+            </tree>`,
     });
 
-    expect(queryAll("tfoot td")[2].textContent).toBe("", { message: "There isn't any aggregated value" });
+    expect("tfoot td:eq(2)").toHaveText("", { message: "There isn't any aggregated value" });
 });
 
 test("aggregates are updated when a line is edited", async () => {
@@ -3078,12 +3071,12 @@ test("aggregates are updated when a line is edited", async () => {
         arch: '<tree editable="bottom"><field name="int_field" sum="Sum"/></tree>',
     });
 
-    expect(target.querySelector('span[data-tooltip="Sum"]').innerText).toBe("32", { message: "current total should be 32" });
+    expect('span[data-tooltip="Sum"]').toHaveText("32", { message: "current total should be 32" });
 
     await contains("tr.o_data_row td.o_data_cell").click();
     await contains("td.o_data_cell input").edit("15");
 
-    expect(target.querySelector('span[data-tooltip="Sum"]').innerText).toBe("37", { message: "current total should be 37" });
+    expect('span[data-tooltip="Sum"]').toHaveText("37", { message: "current total should be 37" });
 });
 
 test("aggregates are formatted according to field widget", async () => {
@@ -3097,25 +3090,31 @@ test("aggregates are formatted according to field widget", async () => {
             </tree>`,
     });
 
-    expect(queryAll("tfoot td")[2].textContent).toBe("19:24", { message: "total should be formatted as a float_time" });
+    expect("tfoot td:eq(2)").toHaveText("19:24", { message: "total should be formatted as a float_time" });
 });
 
-test("aggregates digits can be set with digits field attribute", async () => {
+test("aggregates of monetary field with no currency field", async () => {
     await mountView({
         type: "list",
         resModel: "foo",
         arch: `
             <tree>
-                <field name="amount" widget="monetary" sum="Sum" digits="[69,3]"/>
+                <field name="amount" widget="monetary" sum="Sum"/>
             </tree>`,
     });
 
-    expect(queryAll(".o_data_row td")[1].textContent).toBe("1200.00", { message: "field should still be formatted based on currency" });
-    expect(queryAll("tfoot td")[1].textContent).toBe("—", { message: "aggregates monetary should never work if no currency field is present" });
+    expect(".o_data_row td:eq(1)").toHaveText("1,200.00", { message: "field should still be formatted based on currency" });
+    expect("tfoot td:eq(1)").toHaveText("—", { message: "aggregates monetary should never work if no currency field is present" });
 });
 
 test("aggregates monetary (same currency)", async () => {
     Foo._records[0].currency_id = 1;
+    const mockedCurrencies = {};
+    for (const record of Currency._records) {
+        mockedCurrencies[record.id] = record;
+    }
+    patchWithCleanup(currencies, mockedCurrencies);
+
     await mountView({
         type: "list",
         resModel: "foo",
@@ -3126,12 +3125,18 @@ test("aggregates monetary (same currency)", async () => {
             </tree>`,
     });
 
-    expect(queryAllTexts("tbody .o_monetary_cell")).toEqual(["$\u00a01200.00", "$\u00a0500.00", "$\u00a0300.00", "$\u00a00.00"]);
+    expect(queryAllTexts("tbody .o_monetary_cell")).toEqual(["$ 1,200.00", "$ 500.00", "$ 300.00", "$ 0.00"]);
 
-    expect(queryAll("tfoot td")[1].textContent).toBe("$\u00a02000.00");
+    expect("tfoot td:eq(1)").toHaveText("$ 2,000.00");
 });
 
 test("aggregates monetary (different currencies)", async () => {
+    const mockedCurrencies = {};
+    for (const record of Currency._records) {
+        mockedCurrencies[record.id] = record;
+    }
+    patchWithCleanup(currencies, mockedCurrencies);
+
     await mountView({
         type: "list",
         resModel: "foo",
@@ -3142,12 +3147,19 @@ test("aggregates monetary (different currencies)", async () => {
             </tree>`,
     });
 
-    expect(queryAllTexts("tbody .o_monetary_cell")).toEqual(["1200.00\u00a0€", "$\u00a0500.00", "$\u00a0300.00", "$\u00a00.00"]);
+    expect(queryAllTexts("tbody .o_monetary_cell")).toEqual(["1,200.00 €", "$ 500.00", "$ 300.00", "$ 0.00"]);
 
-    expect(queryAll("tfoot td")[1].textContent).toBe("—");
+    expect("tfoot td:eq(1)").toHaveText("—");
 });
 
 test("aggregates monetary (currency field not in view)", async () => {
+    Foo._fields.currency_test = fields.Many2one({ relation: "res.currency", default: 1 });
+    const mockedCurrencies = {};
+    for (const record of Currency._records) {
+        mockedCurrencies[record.id] = record;
+    }
+    patchWithCleanup(currencies, mockedCurrencies);
+
     await mountView({
         type: "list",
         resModel: "foo",
@@ -3158,13 +3170,20 @@ test("aggregates monetary (currency field not in view)", async () => {
             </tree>`,
     });
 
-    expect(queryAllTexts("tbody .o_monetary_cell")).toEqual(["1200.00", "500.00", "300.00", "0.00"]);
+    expect(queryAllTexts("tbody .o_monetary_cell")).toEqual(["1,200.00", "500.00", "300.00", "0.00"]);
 
-    expect(queryAll("tfoot td")[1].textContent).toBe("—");
+    expect("tfoot td:eq(1)").toHaveText("—");
 });
 
 test("aggregates monetary (currency field in view)", async () => {
-    serverData.models.foo.fields.amount.currency_field = "currency_test";
+    Foo._fields.amount = fields.Monetary({ currency_field: "currency_test" });
+    Foo._fields.currency_test = fields.Many2one({ relation: "res.currency", default: 1 });
+    const mockedCurrencies = {};
+    for (const record of Currency._records) {
+        mockedCurrencies[record.id] = record;
+    }
+    patchWithCleanup(currencies, mockedCurrencies);
+
     await mountView({
         type: "list",
         resModel: "foo",
@@ -3175,9 +3194,8 @@ test("aggregates monetary (currency field in view)", async () => {
             </tree>`,
     });
 
-    expect(queryAllTexts("tbody .o_monetary_cell")).toEqual(["$\u00a01200.00", "$\u00a0500.00", "$\u00a0300.00", "$\u00a00.00"]);
-
-    expect(queryAll("tfoot td")[1].textContent).toBe("$\u00a02000.00");
+    expect(queryAllTexts("tbody .o_monetary_cell")).toEqual(["$ 1,200.00", "$ 500.00", "$ 300.00", "$ 0.00"]);
+    expect("tfoot td:eq(1)").toHaveText("$ 2,000.00");
 });
 
 test("aggregates monetary with custom digits (same currency)", async () => {
@@ -3185,6 +3203,11 @@ test("aggregates monetary with custom digits (same currency)", async () => {
         ...record,
         currency_id: 1,
     }));
+    const mockedCurrencies = {};
+    for (const record of Currency._records) {
+        mockedCurrencies[record.id] = record;
+    }
+    patchWithCleanup(currencies, mockedCurrencies);
     patchWithCleanup(currencies, {
         1: { ...currencies[1], digits: [42, 4] },
     });
@@ -3199,9 +3222,8 @@ test("aggregates monetary with custom digits (same currency)", async () => {
             </tree>`,
     });
 
-    expect(queryAllTexts("tbody [name='amount']")).toEqual(["$\u00a01200.0000", "$\u00a0500.0000", "$\u00a0300.0000", "$\u00a00.0000"]);
-
-    expect(queryAll("tfoot td")[1].textContent).toBe("$\u00a02000.0000");
+    expect(queryAllTexts("tbody [name='amount']")).toEqual(["$ 1,200.0000", "$ 500.0000", "$ 300.0000", "$ 0.0000"]);
+    expect("tfoot td:eq(1)").toHaveText("$ 2,000.0000");
 });
 
 test("aggregates float with monetary widget and custom digits (same currency)", async () => {
@@ -3209,6 +3231,11 @@ test("aggregates float with monetary widget and custom digits (same currency)", 
         ...record,
         currency_id: 1,
     }));
+    const mockedCurrencies = {};
+    for (const record of Currency._records) {
+        mockedCurrencies[record.id] = record;
+    }
+    patchWithCleanup(currencies, mockedCurrencies);
     patchWithCleanup(currencies, {
         1: { ...currencies[1], digits: [42, 4] },
     });
@@ -3223,12 +3250,21 @@ test("aggregates float with monetary widget and custom digits (same currency)", 
             </tree>`,
     });
 
-    expect(queryAllTexts("tbody .o_monetary_cell")).toEqual(["$\u00a00.4000", "$\u00a013.0000", "$\u00a0-3.0000", "$\u00a09.0000"]);
-
-    expect(queryAll("tfoot td")[1].textContent).toBe("$\u00a019.4000");
+    expect(queryAllTexts("tbody .o_monetary_cell")).toEqual(["$ 0.4000", "$ 13.0000", "$ -3.0000", "$ 9.0000"]);
+    expect("tfoot td:eq(1)").toHaveText("$ 19.4000");
 });
 
 test("currency_field is taken into account when formatting monetary values", async () => {
+    Foo._fields.company_currency_id = fields.Many2one({ relation: "res.currency", default: 2 });
+    Foo._fields.amount_currency = fields.Monetary({ currency_field: "company_currency_id" });
+    Foo._records[0].amount_currency = 1100;
+    Foo._records[0].company_currency_id = 1;
+    const mockedCurrencies = {};
+    for (const record of Currency._records) {
+        mockedCurrencies[record.id] = record;
+    }
+    patchWithCleanup(currencies, mockedCurrencies);
+
     await mountView({
         type: "list",
         resModel: "foo",
@@ -3241,23 +3277,22 @@ test("currency_field is taken into account when formatting monetary values", asy
             </tree>`,
     });
 
-    expect(queryAll('.o_data_row td[name="amount"]')[0].textContent).toBe("1200.00\u00a0€", { message: "field should be formatted based on currency_id" });
-    expect(queryAll('.o_data_row td[name="amount_currency"]')[0].textContent).toBe("$\u00a01100.00", { message: "field should be formatted based on company_currency_id" });
-    expect(queryAll("tfoot td")[1].textContent).toBe("—", { message: "aggregates monetary should never work if different currencies are used" });
+    expect(".o_data_row:first td[name=amount]").toHaveText("1,200.00 €", { message: "field should be formatted based on currency_id" });
+    expect(".o_data_row:first td[name=amount_currency]").toHaveText("$ 1,100.00", { message: "field should be formatted based on company_currency_id" });
+    expect("tfoot td:eq(1)").toHaveText("—", { message: "aggregates monetary should never work if different currencies are used" });
 });
 
 test("groups can not be sorted on a different field than the first field of the groupBy - 1", async () => {
     expect.assertions(1);
 
+    onRpc("web_read_group", ({ kwargs }) => {
+        expect(kwargs.orderby).toBe("", { message: "should not have an orderBy" });
+    });
+
     await mountView({
         type: "list",
         resModel: "foo",
         arch: '<tree default_order="foo"><field name="foo"/><field name="bar"/></tree>',
-        mockRPC(route, args) {
-            if (args.method === "web_read_group") {
-                expect(args.kwargs.orderby).toBe("", { message: "should not have an orderBy" });
-            }
-        },
         groupBy: ["bar"],
     });
 });
@@ -3265,15 +3300,18 @@ test("groups can not be sorted on a different field than the first field of the 
 test("groups can not be sorted on a different field than the first field of the groupBy - 2", async () => {
     expect.assertions(1);
 
+    onRpc("web_read_group", ({ kwargs }) => {
+        expect(kwargs.orderby).toBe("", { message: "should not have an orderBy" });
+    });
+
     await mountView({
         type: "list",
         resModel: "foo",
-        arch: '<tree default_order="foo"><field name="foo"/><field name="bar"/></tree>',
-        mockRPC(route, args) {
-            if (args.method === "web_read_group") {
-                expect(args.kwargs.orderby).toBe("", { message: "should not have an orderBy" });
-            }
-        },
+        arch: `
+            <tree default_order="foo">
+                <field name="foo"/>
+                <field name="bar"/>
+            </tree>`,
         groupBy: ["bar", "foo"],
     });
 });
@@ -3281,24 +3319,27 @@ test("groups can not be sorted on a different field than the first field of the 
 test("groups can be sorted on the first field of the groupBy", async () => {
     expect.assertions(3);
 
+    onRpc("web_read_group", ({ kwargs }) => {
+        expect(kwargs.orderby).toBe("bar DESC", { message: "should have an orderBy" });
+    });
+
     await mountView({
         type: "list",
         resModel: "foo",
         arch: '<tree default_order="bar desc"><field name="foo"/><field name="bar"/></tree>',
-        mockRPC(route, args) {
-            if (args.method === "web_read_group") {
-                expect(args.kwargs.orderby).toBe("bar DESC", { message: "should have an orderBy" });
-            }
-        },
         groupBy: ["bar"],
     });
 
-    expect(document.querySelector(".o_group_header:first-child").textContent.trim()).toBe("Yes (3)");
-    expect(document.querySelector(".o_group_header:last-child").textContent.trim()).toBe("No (1)");
+    expect(".o_group_header:first-child").toHaveText("Yes (3)");
+    expect(".o_group_header:last-child").toHaveText("No (1)");
 });
 
 test("groups can't be sorted on aggregates if there is no record", async () => {
     Foo._records = [];
+
+    onRpc("web_read_group", ({ kwargs }) => {
+        expect.step(kwargs.orderby || "default order");
+    });
 
     await mountView({
         type: "list",
@@ -3309,11 +3350,6 @@ test("groups can't be sorted on aggregates if there is no record", async () => {
                 <field name="foo"/>
                 <field name="int_field" sum="Sum"/>
             </tree>`,
-        mockRPC(route, args) {
-            if (args.method === "web_read_group") {
-                expect.step(args.kwargs.orderby || "default order");
-            }
-        },
     });
 
     await contains(".o_column_sortable").click();
@@ -3321,6 +3357,10 @@ test("groups can't be sorted on aggregates if there is no record", async () => {
 });
 
 test("groups can be sorted on aggregates", async () => {
+    onRpc("web_read_group", ({ kwargs }) => {
+        expect.step(kwargs.orderby || "default order");
+    });
+
     await mountView({
         type: "list",
         resModel: "foo",
@@ -3330,37 +3370,32 @@ test("groups can be sorted on aggregates", async () => {
                 <field name="foo"/>
                 <field name="int_field" sum="Sum"/>
             </tree>`,
-        mockRPC(route, args) {
-            if (args.method === "web_read_group") {
-                expect.step(args.kwargs.orderby || "default order");
-            }
-        },
     });
 
-    expect($(target).find("tbody .o_list_number").text()).toBe("51710", { message: "initial order should be 5, 17, 17" });
-    expect($(target).find("tfoot td:last()").text()).toBe("32", { message: "total should be 32" });
+    expect(queryAllTexts("tbody .o_list_number")).toEqual(["5", "17", "10"], { message: "initial order should be 5, 17, 10" });
+    expect("tfoot td:last()").toHaveText("32", { message: "total should be 32" });
 
-    await contains(".o_column_sortable").click();
-    expect($(target).find("tfoot td:last()").text()).toBe("32", { message: "total should still be 32" });
-    expect($(target).find("tbody .o_list_number").text()).toBe("51017", { message: "order should be 5, 10, 17" });
+    await contains(".o_column_sortable[data-name=int_field]").click();
+    expect(queryAllTexts("tbody .o_list_number")).toEqual(["5", "10", "17"], { message: "order should be 5, 10, 17" });
+    expect("tfoot td:last()").toHaveText("32", { message: "total should still be 32" });
 
-    await contains(".o_column_sortable").click();
-    expect($(target).find("tbody .o_list_number").text()).toBe("17105", { message: "initial order should be 17, 10, 5" });
-    expect($(target).find("tfoot td:last()").text()).toBe("32", { message: "total should still be 32" });
+    await contains(".o_column_sortable[data-name=int_field]").click();
+    expect(queryAllTexts("tbody .o_list_number")).toEqual(["17", "10", "5"], { message: "initial order should be 17, 10, 5" });
+    expect("tfoot td:last()").toHaveText("32", { message: "total should still be 32" });
 
     expect(["default order", "int_field ASC", "int_field DESC"]).toVerifySteps();
 });
 
 test("groups cannot be sorted on non-aggregable fields if every group is folded", async () => {
-    serverData.models.foo.fields.sort_field = {
-        string: "sortable_field",
-        type: "sting",
-        sortable: true,
-        default: "value",
-    };
+    Foo._fields.sort_field = fields.Char({ default: "value" });
     Foo._records.forEach((elem) => {
         elem.sort_field = "value" + elem.id;
     });
+
+    onRpc("web_read_group", ({ kwargs }) => {
+        expect.step(kwargs.orderby || "default order");
+    });
+
     await mountView({
         type: "list",
         resModel: "foo",
@@ -3371,11 +3406,6 @@ test("groups cannot be sorted on non-aggregable fields if every group is folded"
                 <field name="int_field"/>
                 <field name="sort_field"/>
             </tree>`,
-        mockRPC(route, args) {
-            if (args.method === "web_read_group") {
-                expect.step(args.kwargs.orderby || "default order");
-            }
-        },
     });
     expect(["default order"]).toVerifySteps();
 
@@ -3397,6 +3427,13 @@ test("groups cannot be sorted on non-aggregable fields if every group is folded"
 });
 
 test("groups can be sorted on non-aggregable fields if a group isn't folded", async () => {
+    onRpc("web_read_group", ({ kwargs }) => {
+        expect.step(`web_read_group.orderby: ${kwargs.orderby || "default order"}`);
+    });
+    onRpc("web_search_read", ({ kwargs }) => {
+        expect.step(`web_search_read.order: ${kwargs.order || "default order"}`);
+    });
+
     await mountView({
         type: "list",
         resModel: "foo",
@@ -3405,26 +3442,24 @@ test("groups can be sorted on non-aggregable fields if a group isn't folded", as
             <tree editable="bottom">
                 <field name="foo"/>
             </tree>`,
-        mockRPC(route, args) {
-            const { method } = args;
-            if (method === "web_read_group") {
-                expect.step(`web_read_group.orderby: ${args.kwargs.orderby || "default order"}`);
-            }
-            if (method === "web_search_read") {
-                expect.step(`web_search_read.order: ${args.kwargs.order || "default order"}`);
-            }
-        },
     });
-    await click(queryAll(".o_group_header")[1]);
+    await contains(".o_group_header:eq(1)").click();
     expect(queryAllTexts(".o_data_cell[name='foo']")).toEqual(["yop", "blip", "gnap"]);
-    assert.verifySteps(["web_read_group.orderby: default order", "web_search_read.order: default order"]);
+    expect(["web_read_group.orderby: default order", "web_search_read.order: default order"]).toVerifySteps();
 
     await contains(".o_column_sortable[data-name='foo']").click();
     expect(queryAllTexts(".o_data_cell[name='foo']")).toEqual(["blip", "gnap", "yop"]);
-    assert.verifySteps(["web_read_group.orderby: default order", "web_search_read.order: foo ASC"]);
+    expect(["web_read_group.orderby: default order", "web_search_read.order: foo ASC"]).toVerifySteps();
 });
 
 test("groups can be sorted on non-aggregable fields if a group isn't folded with expand='1'", async () => {
+    onRpc("web_read_group", ({ kwargs }) => {
+        expect.step(`web_read_group.orderby: ${kwargs.orderby || "default order"}`);
+    });
+    onRpc("web_search_read", ({ kwargs }) => {
+        expect.step(`web_search_read.orderby: ${kwargs.order || "default order"}`);
+    });
+
     await mountView({
         type: "list",
         resModel: "foo",
@@ -3433,27 +3468,18 @@ test("groups can be sorted on non-aggregable fields if a group isn't folded with
             <tree editable="bottom" expand="1">
                 <field name="foo"/>
             </tree>`,
-        mockRPC(route, args) {
-            const { method } = args;
-            if (method === "web_read_group") {
-                expect.step(`web_read_group.orderby: ${args.kwargs.orderby || "default order"}`);
-            }
-            if (method === "web_search_read") {
-                expect.step(`web_search_read.orderby: ${args.kwargs.order || "default order"}`);
-            }
-        },
     });
     expect(queryAllTexts(".o_data_cell[name='foo']")).toEqual(["blip", "yop", "blip", "gnap"]);
-    assert.verifySteps(["web_read_group.orderby: default order", "web_search_read.orderby: default order", "web_search_read.orderby: default order"]);
+    expect(["web_read_group.orderby: default order", "web_search_read.orderby: default order", "web_search_read.orderby: default order"]).toVerifySteps();
 
     await contains(".o_column_sortable[data-name='foo']").click();
     expect(queryAllTexts(".o_data_cell[name='foo']")).toEqual(["blip", "blip", "gnap", "yop"]);
-    assert.verifySteps(["web_read_group.orderby: default order", "web_search_read.orderby: foo ASC", "web_search_read.orderby: foo ASC"]);
+    expect(["web_read_group.orderby: default order", "web_search_read.orderby: foo ASC", "web_search_read.orderby: foo ASC"]).toVerifySteps();
 });
 
 test("properly apply onchange in simple case", async () => {
-    serverData.models.foo.onchanges = {
-        foo: function (obj) {
+    Foo._onChanges = {
+        foo: (obj) => {
             obj.int_field = obj.foo.length + 1000;
         },
     };
@@ -3464,12 +3490,10 @@ test("properly apply onchange in simple case", async () => {
     });
 
     await contains(".o_field_cell").click();
+    expect(".o_field_widget[name=int_field] input").toHaveValue("10", { message: "should contain initial value" });
 
-    expect(target.querySelector(".o_field_widget[name=int_field] input").value).toBe("10", { message: "should contain initial value" });
-
-    await contains(".o_field_widget[name=foo] input").edit("tralala");
-
-    expect(target.querySelector(".o_field_widget[name=int_field] input").value).toBe("1007", { message: "should contain input with onchange applied" });
+    await contains(".o_field_widget[name=foo] input").edit("tralala", { confirm: "tab" });
+    expect(".o_field_widget[name=int_field] input").toHaveValue("1,007", { message: "should contain input with onchange applied" });
 });
 
 test("column width should not change when switching mode", async () => {
@@ -6925,7 +6949,7 @@ test("monetary fields are properly rendered", async () => {
     });
 
     expect("tbody tr:first td").toHaveCount(3, { message: "currency_id column should not be in the table" });
-    expect(target.querySelector("tbody .o_data_row:first-child .o_data_cell:nth-child(3)").textContent.replace(/\s/g).toBe(" "), "1200.00 €", { message: "currency_id column should not be in the table" });
+    expect(target.querySelector("tbody .o_data_row:first-child .o_data_cell:nth-child(3)").textContent.replace(/\s/g).toBe(" "), "1,200.00 €", { message: "currency_id column should not be in the table" });
     expect(target.querySelector("tbody .o_data_row:nth-child(2) .o_data_cell:nth-child(3)").textContent.replace(/\s/g).toBe(" "), "$ 500.00", { message: "currency_id column should not be in the table" });
 });
 
