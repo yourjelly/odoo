@@ -15,29 +15,21 @@ options.registry.Blockquote = options.Class.extend({
      */
     display: function (previewMode, widgetValue, params) {
 
-        // Classic
-        this.$target.find('.s_blockquote_avatar').toggleClass('d-none', widgetValue !== 'classic');
-
         // Cover
-        const $blockquote = this.$target.find('.s_blockquote_content');
+        const $blockquoteInfos = this.$target.find('.s_blockquote_infos');
         if (widgetValue === 'cover') {
-            $blockquote.css({"background-image": "url('/web/image/website.s_blockquote_cover_default_image')"});
-            $blockquote.addClass('oe_img_bg o_bg_img_center');
-            if (!$blockquote.find('.o_we_bg_filter').length) {
-                const bgFilterEl = document.createElement('div');
-                bgFilterEl.classList.add('o_we_bg_filter', 'bg-white-50');
-                $blockquote.prepend(bgFilterEl);
-            }
+            $blockquoteInfos.css({"background-image": "url('/web/image/website.s_blockquote_default_image')"});
+            $blockquoteInfos.find('.s_blockquote_author').addClass('o_cc o_cc5')
+            $blockquoteInfos.addClass('oe_img_bg o_bg_img_center');
+            $blockquoteInfos.find('.s_blockquote_avatar').addClass('d-none');
         } else {
-            $blockquote.css({"background-image": ""});
-            $blockquote.css({"background-position": ""});
-            $blockquote.removeClass('oe_img_bg o_bg_img_center');
-            $blockquote.find('.o_we_bg_filter').remove();
-            $blockquote.find('.s_blockquote_filter').contents().unwrap(); // Compatibility
+            $blockquoteInfos.css({"background-image": ""});
+            $blockquoteInfos.css({"background-position": ""});
+            $blockquoteInfos.removeClass('oe_img_bg o_bg_img_center');
+            $blockquoteInfos.find('.o_we_bg_filter').remove();
+            $blockquoteInfos.find('.s_blockquote_filter').contents().unwrap(); // Compatibility
+            $blockquoteInfos.find('.s_blockquote_author').removeClass('o_cc o_cc5');
+            $blockquoteInfos.find('.s_blockquote_avatar').removeClass('d-none');
         }
-
-        // Minimalist
-        this.$target.find('.s_blockquote_icon').toggleClass('d-none', widgetValue === 'minimalist');
-        this.$target.find('footer').toggleClass('d-none', widgetValue === 'minimalist');
     },
 });
