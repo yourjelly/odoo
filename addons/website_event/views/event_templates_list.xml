@@ -4,6 +4,9 @@
 <!-- Index -->
 <template id="index" name="Events" track="1">
     <t t-call="website.layout">
+        <!-- Qweb variable defining the class suffix for navbar items. Change accordingly to the derired visual result (eg. `primary`, `dark`...)-->
+        <t t-set="navClass" t-valuef="light"/>
+
         <t t-set="head">
             <meta t-if="search_tags" name="robots" content="none"/>
         </t>
