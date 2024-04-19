@@ -66,4 +66,5 @@ PAYMENT_METHODS_MAPPING = {
     'bank_transfer': 'banktransfer',
     'p24': 'przelewy24',
     'sepa_direct_debit': 'directdebit',
+    'kbc_cbc': 'kbc',
 }
