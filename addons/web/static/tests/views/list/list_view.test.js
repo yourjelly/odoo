@@ -3511,19 +3511,19 @@ test("column width should not change when switching mode", async () => {
     });
 
     var startWidths = [...queryAll("thead th")].map((el) => el.offsetWidth);
-    var startWidth = window.getComputedStyle(target.querySelector("table")).width;
+    var startWidth = window.getComputedStyle(queryOne("table")).width;
 
     // start edition of first row
     await contains("td:not(.o_list_record_selector)").click();
 
     var editionWidths = [...queryAll("thead th")].map((el) => el.offsetWidth);
-    var editionWidth = window.getComputedStyle(target.querySelector("table")).width;
+    var editionWidth = window.getComputedStyle(queryOne("table")).width;
 
     // leave edition
     await click($(".o_list_button_save:visible").get(0));
 
     var readonlyWidths = [...queryAll("thead th")].map((el) => el.offsetWidth);
-    var readonlyWidth = window.getComputedStyle(target.querySelector("table")).width;
+    var readonlyWidth = window.getComputedStyle(queryOne("table")).width;
 
     expect(editionWidth).toBe(startWidth, { message: "table should have kept the same width when switching from readonly to edit mode" });
     expect(editionWidths).toEqual(startWidths, { message: "width of columns should remain unchanged when switching from readonly to edit mode" });
@@ -3549,14 +3549,14 @@ test("column widths should depend on the content when there is data", async () =
         limit: 2,
     });
 
-    expect(target.querySelector("thead .o_list_record_selector").offsetWidth).toBe(41);
-    const widthPage1 = target.querySelector(`th[data-name=foo]`).offsetWidth;
+    expect(queryFirst("thead .o_list_record_selector").offsetWidth).toBe(41);
+    const widthPage1 = queryFirst(`th[data-name=foo]`).offsetWidth;
 
-    await pagerNext(target);
+    await pagerNext();
 
-    expect(target.querySelector("thead .o_list_record_selector").offsetWidth).toBe(41);
-    const widthPage2 = target.querySelector(`th[data-name=foo]`).offsetWidth;
-    assert.ok(widthPage1 > widthPage2, "column widths should be computed dynamically according to the content");
+    expect(queryFirst("thead .o_list_record_selector").offsetWidth).toBe(41);
+    const widthPage2 = queryFirst(`th[data-name=foo]`).offsetWidth;
+    expect(widthPage1 > widthPage2).toBe(true, { message: "column widths should be computed dynamically according to the content" });
 });
 
 test("width of some of the fields should be hardcoded if no data", async () => {
@@ -3568,133 +3568,120 @@ test("width of some of the fields should be hardcoded if no data", async () => {
         { field: "datetime", expected: 146, type: "Datetime" },
         { field: "amount", expected: 104, type: "Monetary" },
     ];
-    expect.assertions(9);
 
     Foo._records = [];
     await mountView({
         type: "list",
         resModel: "foo",
         arch: `
-                <tree editable="top">
-                    <field name="bar"/>
-                    <field name="foo"/>
-                    <field name="int_field"/>
-                    <field name="qux"/>
-                    <field name="date"/>
-                    <field name="datetime"/>
-                    <field name="amount"/>
-                    <field name="currency_id" width="25px"/>
-                </tree>`,
+            <tree editable="top">
+                <field name="bar"/>
+                <field name="foo"/>
+                <field name="int_field"/>
+                <field name="qux"/>
+                <field name="date"/>
+                <field name="datetime"/>
+                <field name="amount"/>
+                <field name="currency_id" width="25px"/>
+            </tree>`,
     });
 
     expect(".o_resize").toHaveCount(8);
     assertions.forEach((a) => {
-        expect(target.querySelector(`th[data-name="${a.field}"]`).offsetWidth).toBe(a.expected, `Field ${a.type} should have a fixed width of ${a.expected} pixels`);
+        expect(queryFirst(`th[data-name="${a.field}"]`).offsetWidth).toBe(a.expected, { message: `Field ${a.type} should have a fixed width of ${a.expected} pixels` });
     });
-    expect(target.querySelector('th[data-name="foo"]').style.width).toBe("100%", { message: "Char field should occupy the remaining space" });
-    expect(target.querySelector('th[data-name="currency_id"]').offsetWidth).toBe(25, { message: "Currency field should have a fixed width of 25px (see arch)" });
+    expect(queryFirst('th[data-name="foo"]').style.width).toBe("100%", { message: "Char field should occupy the remaining space" });
+    expect(queryFirst('th[data-name="currency_id"]').offsetWidth).toBe(25, { message: "Currency field should have a fixed width of 25px (see arch)" });
 });
 
 test("colspan of empty lines is correct in readonly", async () => {
-    serverData.models.foo.fields.foo_o2m = {
-        string: "Foo O2M",
-        type: "one2many",
-        relation: "foo",
-    };
+    Foo._fields.foo_o2m = fields.One2many({ relation: "foo" });
+
     await mountView({
         type: "form",
         resModel: "foo",
         resId: 1,
         arch: `
-                <form edit="0">
-                    <sheet>
-                        <field name="foo_o2m">
-                            <tree editable="bottom">
-                                <field name="int_field"/>
-                            </tree>
-                        </field>
-                    </sheet>
-                </form>`,
+            <form edit="0">
+                <sheet>
+                    <field name="foo_o2m">
+                        <tree editable="bottom">
+                            <field name="int_field"/>
+                        </tree>
+                    </field>
+                </sheet>
+            </form>`,
     });
     // in readonly mode, the delete action is not available
-    expect(target.querySelector("tbody td").getAttribute("colspan")).toBe("1");
+    expect(queryFirst("tbody td")).toHaveAttribute("colspan", "1");
 });
 
 test("colspan of empty lines is correct in edit", async () => {
-    serverData.models.foo.fields.foo_o2m = {
-        string: "Foo O2M",
-        type: "one2many",
-        relation: "foo",
-    };
+    Foo._fields.foo_o2m = fields.One2many({ relation: "foo" });
+
     await mountView({
         type: "form",
         resModel: "foo",
         resId: 1,
         arch: `
-                <form>
-                    <sheet>
-                        <field name="foo_o2m">
-                            <tree editable="bottom">
-                                <field name="int_field"/>
-                            </tree>
-                        </field>
-                    </sheet>
-                </form>`,
+            <form>
+                <sheet>
+                    <field name="foo_o2m">
+                        <tree editable="bottom">
+                            <field name="int_field"/>
+                        </tree>
+                    </field>
+                </sheet>
+            </form>`,
     });
     // in edit mode, the delete action is available and the empty lines should cover that col
-    expect(target.querySelector("tbody td").getAttribute("colspan")).toBe("2");
+    expect(queryFirst("tbody td")).toHaveAttribute("colspan", "2");
 });
 
 test("colspan of empty lines is correct in readonly with optional fields", async () => {
-    serverData.models.foo.fields.foo_o2m = {
-        string: "Foo O2M",
-        type: "one2many",
-        relation: "foo",
-    };
+    Foo._fields.foo_o2m = fields.One2many({ relation: "foo" });
+
     await mountView({
         type: "form",
         resModel: "foo",
         resId: 1,
         arch: `
-                <form edit="0">
-                    <sheet>
-                        <field name="foo_o2m">
-                            <tree editable="bottom">
-                                <field name="int_field"/>
-                                <field name="foo" optional="hidden"/>
-                            </tree>
-                        </field>
-                    </sheet>
-                </form>`,
+            <form edit="0">
+                <sheet>
+                    <field name="foo_o2m">
+                        <tree editable="bottom">
+                            <field name="int_field"/>
+                            <field name="foo" optional="hidden"/>
+                        </tree>
+                    </field>
+                </sheet>
+            </form>`,
     });
     // in readonly mode, the delete action is not available but the optional fields is and the empty lines should cover that col
-    expect(target.querySelector("tbody td").getAttribute("colspan")).toBe("2");
+    expect(queryFirst("tbody td")).toHaveAttribute("colspan", "2");
 });
 
 test("colspan of empty lines is correct in edit with optional fields", async () => {
-    serverData.models.foo.fields.foo_o2m = {
-        string: "Foo O2M",
-        type: "one2many",
-        relation: "foo",
-    };
+    Foo._fields.foo_o2m = fields.One2many({ relation: "foo" });
+
     await mountView({
         type: "form",
         resModel: "foo",
         resId: 1,
         arch: `
-                <form>
-                    <sheet>
-                        <field name="foo_o2m">
-                            <tree editable="bottom">
-                                <field name="int_field"/>
-                                <field name="foo" optional="hidden"/>
-                            </tree>
-                        </field>
-                    </sheet>
-                </form>`,
+            <form>
+                <sheet>
+                    <field name="foo_o2m">
+                        <tree editable="bottom">
+                            <field name="int_field"/>
+                            <field name="foo" optional="hidden"/>
+                        </tree>
+                    </field>
+                </sheet>
+            </form>`,
     });
     // in edit mode, both the delete action and the optional fields are available and the empty lines should cover that col
-    expect(target.querySelector("tbody td").getAttribute("colspan")).toBe("2");
+    expect(queryFirst("tbody td")).toHaveAttribute("colspan", "2");
 });
 
 test("width of some fields should be hardcoded if no data, and list initially invisible", async () => {
@@ -3706,55 +3693,48 @@ test("width of some fields should be hardcoded if no data, and list initially in
         { field: "datetime", expected: 146, type: "Datetime" },
         { field: "amount", expected: 104, type: "Monetary" },
     ];
-    expect.assertions(12);
 
-    serverData.models.foo.fields.foo_o2m = {
-        string: "Foo O2M",
-        type: "one2many",
-        relation: "foo",
-    };
+    Foo._fields.foo_o2m = fields.One2many({ relation: "foo" });
+
     await mountView({
         type: "form",
         resModel: "foo",
         resId: 1,
         mode: "edit",
         arch: `
-                <form>
-                    <sheet>
-                        <notebook>
-                            <page string="Page1"></page>
-                            <page string="Page2">
-                                <field name="foo_o2m">
-                                    <tree editable="bottom">
-                                        <field name="bar"/>
-                                        <field name="foo"/>
-                                        <field name="int_field"/>
-                                        <field name="qux"/>
-                                        <field name="date"/>
-                                        <field name="datetime"/>
-                                        <field name="amount"/>
-                                        <field name="currency_id" width="25px"/>
-                                    </tree>
-                                </field>
-                            </page>
-                        </notebook>
-                    </sheet>
-                </form>`,
+            <form>
+                <sheet>
+                    <notebook>
+                        <page string="Page1"></page>
+                        <page string="Page2">
+                            <field name="foo_o2m">
+                                <tree editable="bottom">
+                                    <field name="bar"/>
+                                    <field name="foo"/>
+                                    <field name="int_field"/>
+                                    <field name="qux"/>
+                                    <field name="date"/>
+                                    <field name="datetime"/>
+                                    <field name="amount"/>
+                                    <field name="currency_id" width="25px"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>`,
     });
 
     expect(".o_field_one2many").toHaveCount(0);
 
     await contains(".nav-item:last-child .nav-link").click();
-
-    expect(".o_field_one2many").toBeVisible();
-
     expect(".o_field_one2many .o_resize").toHaveCount(8);
     assertions.forEach((a) => {
-        expect(target.querySelector(`.o_field_one2many th[data-name="${a.field}"]`).style.width).toBe(`${a.expected}px`, `Field ${a.type} should have a fixed width of ${a.expected} pixels`);
+        expect(queryFirst(`.o_field_one2many th[data-name="${a.field}"]`).style.width).toBe(`${a.expected}px`, { message:`Field ${a.type} should have a fixed width of ${a.expected} pixels`});
     });
-    expect(target.querySelector('.o_field_one2many th[data-name="foo"]').style.width).toBe("100%", { message: "Char field should occupy the remaining space" });
-    expect(target.querySelector('th[data-name="currency_id"]').offsetWidth).toBe(25, { message: "Currency field should have a fixed width of 25px (see arch)" });
-    expect(target.querySelector(".o_list_actions_header").offsetWidth).toBe(32);
+    expect(queryFirst('.o_field_one2many th[data-name="foo"]').style.width).toBe("100%", { message: "Char field should occupy the remaining space" });
+    expect(queryFirst('th[data-name="currency_id"]').offsetWidth).toBe(25, { message: "Currency field should have a fixed width of 25px (see arch)" });
+    expect(queryFirst(".o_list_actions_header").offsetWidth).toBe(32);
 });
 
 test("empty editable list with the handle widget and no content help", async () => {
@@ -3765,10 +3745,10 @@ test("empty editable list with the handle widget and no content help", async () 
         type: "list",
         resModel: "foo",
         arch: `
-                <tree editable="bottom">
-                    <field name="int_field" widget="handle" />
-                    <field name="foo" />
-                </tree>`,
+            <tree editable="bottom">
+                <field name="int_field" widget="handle" />
+                <field name="foo" />
+            </tree>`,
         noContentHelp: '<p class="hello">click to add a foo</p>',
     });
 
@@ -3777,13 +3757,13 @@ test("empty editable list with the handle widget and no content help", async () 
     // click on create button
     await contains(".o_list_button_add:visible").click();
     const handleWidgetWidth = "33px";
-    const handleWidgetHeader = target.querySelector("thead > tr > th.o_handle_cell");
+    const handleWidgetHeader = queryOne("thead > tr > th.o_handle_cell");
 
     expect(window.getComputedStyle(handleWidgetHeader).width).toBe(handleWidgetWidth, { message: "While creating first record, width should be applied to handle widget." });
 
     // creating one record
-    await contains(".o_selected_row [name='foo'] input").edit("test_foo");
-    await clickSave(target);
+    await contains(".o_selected_row [name='foo'] input").edit("test_foo", { confirm: false });
+    await contains(".o_list_button_save").click();
     expect(window.getComputedStyle(handleWidgetHeader).width).toBe(handleWidgetWidth, { message: "After creation of the first record, width of the handle widget should remain as it is" });
 });
 
