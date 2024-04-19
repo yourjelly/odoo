@@ -114,6 +114,7 @@ class TestLeadAssign(TestLeadAssignCommon):
             lead_type='lead',
             user_ids=[False],
             partner_ids=[False, False, False, self.contact_1.id],
+            stage_id=self.stage_team1_1.id,
             probabilities=[30],
             count=8,
             suffix='Initial',
@@ -138,6 +139,7 @@ class TestLeadAssign(TestLeadAssignCommon):
         # create exiting leads for user_sales_salesman (sales_team_1_m3, sales_team_convert_m1)
         existing_leads = self._create_leads_batch(
             lead_type='lead', user_ids=[self.user_sales_salesman.id],
+            stage_id=self.stage_team1_1.id,
             probabilities=[10],
             count=14,
             suffix='Existing')
@@ -208,6 +210,7 @@ class TestLeadAssign(TestLeadAssignCommon):
             lead_type='lead',
             user_ids=[False],
             partner_ids=[self.contact_1.id, self.contact_2.id, False, False, False],
+            stage_id=self.stage_team1_1.id,
             count=200
         )
         # commit probability and related fields
@@ -265,6 +268,7 @@ class TestLeadAssign(TestLeadAssignCommon):
             lead_type='lead',
             user_ids=[False],
             partner_ids=[False],
+            stage_id=self.stage_team1_1.id,
             count=150
         )
         # commit probability and related fields
@@ -317,6 +321,7 @@ class TestLeadAssign(TestLeadAssignCommon):
             partner_count=_partner_count,
             country_ids=[self.env.ref('base.be').id, self.env.ref('base.fr').id, False],
             count=_lead_count,
+            stage_id=self.stage_team1_1.id,
             email_dup_count=_email_dup_count)
         # commit probability and related fields
         leads.flush_recordset()
@@ -429,7 +434,8 @@ class TestLeadAssign(TestLeadAssignCommon):
         existing_leads = self._create_leads_batch(
             lead_type='lead', user_ids=[self.user_sales_leads.id],
             probabilities=[10],
-            count=30)
+            count=30,
+            stage_id=self.stage_team1_1.id)
         self.assertEqual(existing_leads.team_id, self.sales_team_1, "Team should have lower sequence")
         existing_leads.flush_recordset()
 
@@ -468,7 +474,8 @@ class TestLeadAssign(TestLeadAssignCommon):
             user_ids=[False],
             partner_ids=[False, False, False, self.contact_1.id],
             probabilities=[30],
-            count=6
+            count=6,
+            stage_id=self.stage_team1_1.id
         )
         leads[0].stage_id = self.stage_gen_won.id  # is won -> should not be taken into account
         leads[1].stage_id = False
@@ -541,7 +548,8 @@ class TestLeadAssign(TestLeadAssignCommon):
         leads = self._create_leads_batch(
             lead_type='lead',
             user_ids=[False],
-            count=1
+            count=1,
+            stage_id=self.stage_team1_1.id
         )
 
         sales_team_4 = self.env['crm.team'].create({

@@ -17,7 +17,7 @@ class TestLeadConvertMass(crm_common.TestLeadConvertMassCommon):
 
     @users('user_sales_manager')
     def test_assignment_salesmen(self):
-        test_leads = self._create_leads_batch(count=50, user_ids=[False])
+        test_leads = self._create_leads_batch(count=50, stage_id=self.stage_team1_1.id, user_ids=[False])
         user_ids = self.assign_users.ids
         self.assertEqual(test_leads.user_id, self.env['res.users'])
 
@@ -34,7 +34,7 @@ class TestLeadConvertMass(crm_common.TestLeadConvertMassCommon):
 
     @users('user_sales_manager')
     def test_assignment_salesmen_wteam(self):
-        test_leads = self._create_leads_batch(count=50, user_ids=[False])
+        test_leads = self._create_leads_batch(count=50, user_ids=[False], stage_id=self.stage_team1_1.id)
         user_ids = self.assign_users.ids
         team_id = self.sales_team_convert.id
         self.assertEqual(test_leads.user_id, self.env['res.users'])
@@ -163,7 +163,7 @@ class TestLeadConvertMass(crm_common.TestLeadConvertMassCommon):
 
     @users('user_sales_manager')
     def test_mass_convert_performances(self):
-        test_leads = self._create_leads_batch(count=50, user_ids=[False])
+        test_leads = self._create_leads_batch(count=50, user_ids=[False], stage_id=self.stage_team1_1.id)
         user_ids = self.assign_users.ids
 
         # randomness: at least 1 query

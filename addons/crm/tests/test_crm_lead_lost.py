@@ -71,7 +71,7 @@ class TestLeadConvert(crm_common.TestCrmCommon):
     def test_lead_lost_batch_wfeedback(self):
         """ Test setting leads as lost in batch using the wizard, including a log
         message. """
-        leads = self._create_leads_batch(lead_type='lead', count=10, probabilities=[10, 20, 30])
+        leads = self._create_leads_batch(lead_type='lead', count=10, stage_id=self.stage_team1_1.id, probabilities=[10, 20, 30])
         self.assertEqual(len(leads), 10)
         self.flush_tracking()
 

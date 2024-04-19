@@ -42,7 +42,7 @@ class TestCrmMailActivity(TestCrmCommon):
         # Initialize some batch data
         default_order = self.env['crm.lead']._order
         self.assertEqual(default_order, "priority desc, id desc")  # force updating this test is order changes
-        test_leads = self._create_leads_batch(count=10, partner_ids=[self.contact_1.id, self.contact_2.id, False]).sorted('id')
+        test_leads = self._create_leads_batch(count=10, partner_ids=[self.contact_1.id, self.contact_2.id, False], stage_id=self.stage_team1_1.id).sorted('id')
 
         # assert initial data, ensure we did not break base behavior
         for lead in test_leads:

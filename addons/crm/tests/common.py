@@ -317,7 +317,7 @@ class TestCrmCommon(TestSalesCommon, MailCase):
         })
 
     def _create_leads_batch(self, lead_type='lead', count=10, email_dup_count=0,
-                            partner_count=0, partner_ids=None, user_ids=None,
+                            partner_count=0, stage_id=False, partner_ids=None, user_ids=None,
                             country_ids=None, probabilities=None, suffix=''):
         """ Helper tool method creating a batch of leads, useful when dealing
         with batch processes. Please update me.
@@ -336,7 +336,7 @@ class TestCrmCommon(TestSalesCommon, MailCase):
             'name': f'TestLead{suffix}_{x:04d}',
             'type': lead_type if lead_type else types[x % 2],
             'priority': '%s' % (x % 3),
-            'stage_id': self.stage_team1_1.id
+            'stage_id': stage_id,
         } for x in range(count)]
 
         # generate customer information

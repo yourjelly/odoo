@@ -32,7 +32,8 @@ class TestLeadAssignPerf(TestLeadAssignCommon):
             lead_type='lead',
             user_ids=[False],
             partner_ids=[self.contact_1.id, self.contact_2.id, False, False, False],
-            count=200
+            count=200,
+            stage_id=self.stage_team1_1.id
         )
         # commit probability and related fields
         leads.flush_recordset()
@@ -78,7 +79,8 @@ class TestLeadAssignPerf(TestLeadAssignCommon):
             lead_type='lead',
             user_ids=[False],
             partner_ids=[False],
-            count=100
+            count=100,
+            stage_id=self.stage_team1_1.id
         )
         # commit probability and related fields
         leads.flush_recordset()
@@ -127,6 +129,7 @@ class TestLeadAssignPerf(TestLeadAssignCommon):
             partner_count=_partner_count,
             country_ids=[self.env.ref('base.be').id, self.env.ref('base.fr').id, False],
             count=_lead_count,
+            stage_id=self.stage_team1_1.id,
             email_dup_count=_email_dup_count)
         # commit probability and related fields
         leads.flush_recordset()
