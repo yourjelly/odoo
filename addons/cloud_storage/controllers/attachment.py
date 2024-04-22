@@ -10,7 +10,8 @@ class CloudAttachmentController(AttachmentController):
     @route()
     @add_guest_to_context
     def mail_attachment_upload(self, ufile, thread_id, thread_model, is_pending=False, **kwargs):
-        if (is_cloud_storage := kwargs.get('cloud_storage')) and not request.env['ir.attachment'].CLOUD_STORAGE:
+        if ((is_cloud_storage := kwargs.get('cloud_storage'))
+                and not request.env['ir.config_parameter'].sudo().get_param('cloud_storage_provider')):
             return request.make_json_response({
                 'error': _('Cloud storage configuration has been changed. Please refresh the page.')
             })

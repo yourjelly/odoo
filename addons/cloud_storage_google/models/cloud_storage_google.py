@@ -3,6 +3,7 @@
 import json
 import re
 import requests
+from datetime import datetime
 from urllib.parse import unquote, quote
 
 try:
@@ -15,7 +16,7 @@ from odoo import models, fields, _
 from odoo.exceptions import ValidationError
 from odoo.tools import ormcache
 
-from .cloud_storage_google_utils import generate_signed_url_v4
+from ..utils.cloud_storage_google_utils import generate_signed_url_v4
 
 GOOGLE_CLOUD_STORAGE_ENDPOINT = 'https://storage.googleapis.com'
 
@@ -59,18 +60,21 @@ class CloudStorageGoogle(models.AbstractModel):
     def _setup(self):
         # check bucket access
         bucket_name = self.env['ir.config_parameter'].sudo().get_param('cloud_storage_google_bucket_name')
-        blob_name = '0/abc~_ *@ ¥®°²Æçéðπ⁉€∇⓵▲☑♂♥✓➔『にㄅ㊀中한︸🌈🌍👌😀-3.txt'
+        # use different blob names in case the credentials are allowed to overwrite an exsiting blob
+        blob_name = f'0/{datetime.utcnow()}.txt'
 
+        # check blob create permission
         upload_url = self._generate_signed_url(bucket_name, blob_name, method='PUT')
         upload_response = requests.put(upload_url, data=b'', timeout=5)
         if upload_response.status_code != 200:
             raise ValidationError(_('The account info is not allowed to access the bucket.\n%s', str(upload_response.text)))
 
-        # check blob create and delete permission
-        delete_url = self._generate_signed_url(bucket_name, blob_name, method='DELETE')
-        delete_response = requests.delete(delete_url, timeout=5)
-        if delete_response.status_code != 204:
-            raise ValidationError(_('The account info is not allowed to delete a blob from the bucket.\n%s', str(delete_response.text)))
+        # check blob delete permission
+        if self.env['ir.config_parameter'].sudo().get_param('cloud_storage_auto_delete'):
+            delete_url = self._generate_signed_url(bucket_name, blob_name, method='DELETE')
+            delete_response = requests.delete(delete_url, timeout=5)
+            if delete_response.status_code != 204:
+                raise ValidationError(_('The account info is not allowed to delete a blob from the bucket.\n%s', str(delete_response.text)))
 
         # CORS management is not allowed in the Google Cloud console.
         # configure CORS on bucket to allow .pdf preview and direct upload
@@ -101,8 +105,12 @@ class CloudStorageGoogle(models.AbstractModel):
         except Exception as e:
             raise ValidationError(_('The signed url cannot be matched correctly.\n%s', str(e)))
 
-    def _is_configured(self):
-        return bool(self.env['ir.config_parameter'].sudo().get_param('cloud_storage_google_account_info'))
+    def _get_configuration(self):
+        configuration = {
+            'bucket_name': self.env['ir.config_parameter'].get_param('cloud_storage_google_bucket_name'),
+            'account_info': self.env['ir.config_parameter'].get_param('cloud_storage_google_account_info'),
+        }
+        return configuration if all(configuration.values()) else {}
 
     def _generate_url(self, attachment):
         blob_name = self._generate_blob_name(attachment)

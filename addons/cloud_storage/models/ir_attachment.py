@@ -19,17 +19,18 @@ class CloudStorageProvider(models.AbstractModel):
     def _setup(self):
         """
         Setup the cloud storage provider and check the validity of the account
-        info after saving the config in settings
+        info after saving the config in settings.
         return: None
         """
-        raise NotImplementedError()
+        pass
 
-    def _is_configured(self):
+    def _get_configuration(self):
         """
-        Check if the cloud storage provider is configured
-        :return: True if the cloud storage provider is configured else False
+        Return the configuration for the cloud storage provider. If the cloud
+        storage provider is not fully configured, return an empty dict.
+        :return: A configuration dict
         """
-        return False
+        return {}
 
     def _generate_url(self, attachment):
         """
@@ -86,25 +87,21 @@ class CloudStorageProvider(models.AbstractModel):
 class CloudStorageAttachment(models.Model):
     _inherit = 'ir.attachment'
 
-    @property
-    def CLOUD_STORAGE(self):
-        """ check if current used cloud storage provider is configured """
-        return self.env['cloud.storage.provider'].sudo()._is_configured()
-
     def unlink(self):
-        # logically delete the cloud storage blobs before unlinking the
-        # attachments. The cloud storage blobs will be deleted by cron job
-        # ``ir_cron_cloud_storage_blobs_delete_action``
-        self.env['cloud.storage.blob.to.delete'].sudo().create([{
-            'url': attach.url,
-        } for attach in self if attach.type.startswith('cloud_storage_')])
+        if self.env['ir.config_parameter'].sudo().get_param('cloud_storage_auto_delete', True):
+            # logically delete the cloud storage blobs before unlinking the
+            # attachments. The cloud storage blobs will be deleted by cron job
+            # ``ir_cron_cloud_storage_blobs_delete_action``
+            self.env['cloud.storage.blob.to.delete'].sudo().create([{
+                'url': attach.url,
+            } for attach in self if attach.type.startswith('cloud_storage_')])
         return super().unlink()
 
     def _post_add_create(self, **kwargs):
         super()._post_add_create(**kwargs)
         if kwargs.get('cloud_storage'):
-            if not self.CLOUD_STORAGE:
-                raise UserError(_('Cloud Storage is not configured'))
+            if not self.env['ir.config_parameter'].sudo().get_param('cloud_storage_provider'):
+                raise UserError(_('Cloud Storage is not enabled'))
             for record in self:
                 record.write({
                     'raw': False,
@@ -157,7 +154,7 @@ class CloudStorageBlobToDelete(models.Model):
         ))
 
         # remove blobs for not configured providers
-        if not self.env['cloud.storage.provider'].sudo()._is_configured():
+        if not self.env['cloud.storage.provider'].sudo()._get_configuration():
             self.env.cr.execute(SQL(
                 """
                 UPDATE cloud_storage_blob_to_delete blob

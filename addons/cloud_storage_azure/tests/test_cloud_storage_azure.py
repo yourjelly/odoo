@@ -5,7 +5,7 @@ from unittest.mock import patch
 
 from odoo.tests.common import TransactionCase
 
-from ..models.cloud_storage_azure_utils import UserDelegationKey
+from ..utils.cloud_storage_azure_utils import UserDelegationKey
 
 DUMMY_AZURE_ACCOUNT_NAME = 'accountname'
 DUMMY_AZURE_TENANT_ID = 'tenantid'
@@ -27,12 +27,11 @@ class TestCloudStorageAzure(TransactionCase):
     def setUp(self):
         super().setUp()
         self.container_name = 'container_name'
-        self.env['ir.config_parameter'].set_param('ir_attachment.cloud_storage', 'cloud.storage.azure')
+        self.env['ir.config_parameter'].set_param('cloud_storage_provider', 'azure')
         self.env['ir.config_parameter'].set_param('cloud_storage_azure_account_name', DUMMY_AZURE_ACCOUNT_NAME)
         self.env['ir.config_parameter'].set_param('cloud_storage_azure_tenant_id', DUMMY_AZURE_TENANT_ID)
         self.env['ir.config_parameter'].set_param('cloud_storage_azure_client_id', DUMMY_AZURE_CLIENT_ID)
         self.env['ir.config_parameter'].set_param('cloud_storage_azure_client_secret', DUMMY_AZURE_CLIENT_SECRET)
-
         self.env['ir.config_parameter'].set_param('cloud_storage_azure_container_name', self.container_name)
 
         # create test cloud attachment like route "/mail/attachment/upload"

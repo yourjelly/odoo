@@ -9,18 +9,11 @@ from odoo.addons.cloud_storage.models.ir_attachment import DEFAULT_CLOUD_STORAGE
 class CloudStorageSettings(models.TransientModel):
     _inherit = 'res.config.settings'
 
+    cloud_storage_provider = fields.Selection(selection_add=[('google', 'Google Cloud Storage')])
+
     cloud_storage_google_bucket_name = fields.Char(
         string='Google Bucket Name',
         config_parameter='cloud_storage_google_bucket_name')
     cloud_storage_google_account_info = fields.Char(
         string='Google Account Info',
         config_parameter='cloud_storage_google_account_info')
-
-    def set_values(self):
-        google_bucket_name_before = self.env['ir.config_parameter'].get_param('cloud_storage_google_bucket_name')
-        google_account_info_before = self.env['ir.config_parameter'].get_param('cloud_storage_google_account_info')
-        super().set_values()
-        if self.cloud_storage_google_account_info and (
-                self.cloud_storage_google_account_info != google_account_info_before or
-                self.cloud_storage_google_bucket_name != google_bucket_name_before):
-            self.env['cloud.storage.provider']._setup()

@@ -9,7 +9,7 @@ from odoo import models, fields, _
 from odoo.exceptions import ValidationError
 from odoo.tools import ormcache
 
-from .cloud_storage_azure_utils import generate_blob_sas, get_user_delegation_key
+from ..utils.cloud_storage_azure_utils import generate_blob_sas, get_user_delegation_key
 
 
 class CloudStorageAzure(models.AbstractModel):
@@ -17,7 +17,7 @@ class CloudStorageAzure(models.AbstractModel):
     _description = 'Azure Cloud Storage'
 
     _cloud_storage_type = 'cloud_storage_azure'
-    _url_pattern = re.compile(r"[^/]+//(?P<account_name>[\w]+).[^/]+/(?P<container_name>[\w]+)/(?P<blob_name>[^?]+)")
+    _url_pattern = re.compile(r'https://(?P<account_name>[\w]+).blob.core.windows.net/(?P<container_name>[\w]+)/(?P<blob_name>[^?]+)')
 
     def _get_info_from_url(self, url):
         match = self._url_pattern.match(url)
@@ -65,17 +65,19 @@ class CloudStorageAzure(models.AbstractModel):
     def _setup(self):
         # check blob create and delete permission
         container_name = self.env['ir.config_parameter'].sudo().get_param('cloud_storage_azure_container_name')
-        blob_name = '0/abc~_ *@ ¥®°²Æçéðπ⁉€∇⓵▲☑♂♥✓➔『にㄅ㊀中한︸🌈🌍👌😀-3.txt'
+        # use different blob names in case the credentials are allowed to overwrite an exsiting blob
+        blob_name = f'0/{datetime.utcnow()}.txt'
 
         upload_url = self._generate_sas_url(container_name, blob_name, permission='c')
         upload_response = requests.put(upload_url, data=b'', headers={'x-ms-blob-type': 'BlockBlob'}, timeout=5)
         if upload_response.status_code != 201:
             raise ValidationError(_('The connection string is not allowed to upload a file to the container.\n%s', str(upload_response.text)))
 
-        delete_url = self._generate_sas_url(container_name, blob_name, permission='d')
-        delete_response = requests.delete(delete_url, timeout=5)
-        if delete_response.status_code != 202:
-            raise ValidationError(_('The connection string is not allowed to delete a blob from the container.\n%s', str(delete_response.text)))
+        if self.env['ir.config_parameter'].sudo().get_param('cloud_storage_auto_delete'):
+            delete_url = self._generate_sas_url(container_name, blob_name, permission='d')
+            delete_response = requests.delete(delete_url, timeout=5)
+            if delete_response.status_code != 202:
+                raise ValidationError(_('The connection string is not allowed to delete a blob from the container.\n%s', str(delete_response.text)))
 
         # promise the sas url can be matched correctly
         url = self._generate_sas_url(container_name, blob_name)
@@ -87,14 +89,15 @@ class CloudStorageAzure(models.AbstractModel):
         except Exception as e:
             raise ValidationError(_('The sas url cannot be matched correctly. %s', str(e)))
 
-    def _is_configured(self):
-        return all((
-            self.env['ir.config_parameter'].sudo().get_param('cloud_storage_azure_container_name'),
-            self.env['ir.config_parameter'].sudo().get_param('cloud_storage_azure_account_name'),
-            self.env['ir.config_parameter'].sudo().get_param('cloud_storage_azure_tenant_id'),
-            self.env['ir.config_parameter'].sudo().get_param('cloud_storage_azure_client_id'),
-            self.env['ir.config_parameter'].sudo().get_param('cloud_storage_azure_client_secret'),
-        ))
+    def _get_configuration(self):
+        configuration = {
+            'container_name': self.env['ir.config_parameter'].get_param('cloud_storage_azure_container_name'),
+            'account_name': self.env['ir.config_parameter'].get_param('cloud_storage_azure_account_name'),
+            'tenant_id': self.env['ir.config_parameter'].get_param('cloud_storage_azure_tenant_id'),
+            'client_id': self.env['ir.config_parameter'].get_param('cloud_storage_azure_client_id'),
+            'client_secret': self.env['ir.config_parameter'].get_param('cloud_storage_azure_client_secret'),
+        }
+        return configuration if all(configuration.values()) else {}
 
     def _generate_url(self, attachment):
         account_name = self.env['ir.config_parameter'].sudo().get_param('cloud_storage_azure_account_name')

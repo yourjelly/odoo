@@ -21,3 +21,12 @@ def uninstall_hook(env):
     """)
     if cr.fetchone():
         raise UserError("Some deleted cloud_storage attachments' blobs are not deleted please manually clean them")
+
+    env['ir.config_parameter'].sudo().set_param('cloud_storage_provider', False)
+    env['ir.config_parameter'].sudo().search_fetch([('key', 'in', (
+        'cloud_storage_azure_container_name',
+        'cloud_storage_azure_account_name',
+        'cloud_storage_azure_tenant_id',
+        'cloud_storage_azure_client_id',
+        'cloud_storage_azure_client_secret',
+    ))], []).unlink()

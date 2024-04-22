@@ -9,6 +9,6 @@ class IrHttp(models.AbstractModel):
 
     def session_info(self):
         res = super().session_info()
-        if self.env['ir.attachment'].CLOUD_STORAGE:
+        if self.env['ir.config_parameter'].sudo().get_param('cloud_storage_provider'):
             res['cloud_storage_min_file_size'] = self.env['ir.config_parameter'].sudo().get_param('cloud_storage_min_file_size', DEFAULT_CLOUD_STORAGE_MIN_FILE_SIZE)
         return res

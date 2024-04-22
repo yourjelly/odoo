@@ -35,11 +35,9 @@ class TestCloudStorageGoogle(TransactionCase):
             self.skipTest('google.oauth2 is not installed')
         super().setUp()
         self.bucket_name = 'bucket_name'
-        self.env['ir.config_parameter'].set_param('ir_attachment.cloud_storage', 'cloud.storage.google')
-        self.env['ir.config_parameter'].set_param(
-            'cloud_storage_google_account_info', DUMMY_GOOGLE_ACCOUNT_INFO
-        )
+        self.env['ir.config_parameter'].set_param('cloud_storage_provider', 'google')
         self.env['ir.config_parameter'].set_param('cloud_storage_google_bucket_name', self.bucket_name)
+        self.env['ir.config_parameter'].set_param('cloud_storage_google_account_info', DUMMY_GOOGLE_ACCOUNT_INFO)
 
         # create test cloud attachment like route "/mail/attachment/upload"
         # with dummy binary
