@@ -6,5 +6,10 @@
             <field name="partner_id" ref="main_partner"/>
             <field name="currency_id" ref="base.USD"/>
         </record>
+
+        <record id="mmeg_company" model="res.company">
+            <field name="name">Mmeg</field>
+            <field name="currency_id" ref="base.USD"/>
+        </record>
     </data> 
 </odoo>
