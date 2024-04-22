@@ -27387,7 +27387,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                     this.clearBorders(cmd.sheetId, cmd.target);
                     break;
                 case "REMOVE_COLUMNS_ROWS":
-                    for (let el of cmd.elements) {
+                    for (let el of [...cmd.elements].sort((a, b) => b - a)) {
                         if (cmd.dimension === "COL") {
                             this.shiftBordersHorizontally(cmd.sheetId, el + 1, -1);
                         }
@@ -43322,8 +43322,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
 
 
     __info__.version = '16.0.39';
-    __info__.date = '2024-04-18T16:53:40.591Z';
-    __info__.hash = 'ea5a526';
+    __info__.date = '2024-04-22T10:27:25.567Z';
+    __info__.hash = '4ed0fe2';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
