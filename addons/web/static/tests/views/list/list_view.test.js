@@ -1,5 +1,5 @@
 import { Component, onRendered, onWillRender, xml } from "@odoo/owl";
-import { after, beforeEach, expect, test } from "@odoo/hoot";
+import { after, beforeEach, expect, getFixture, test } from "@odoo/hoot";
 import { keyDown } from "@odoo/hoot-dom";
 import { click, dblclick, drag, edit, hover, leave, pointerDown, press, queryAll, queryAllTexts, queryFirst, queryOne, queryText, resize } from "@odoo/hoot-dom";
 import { animationFrame, Deferred, runAllTimers } from "@odoo/hoot-mock";
@@ -3768,12 +3768,11 @@ test("empty editable list with the handle widget and no content help", async () 
 });
 
 test("editable list: overflowing table", async () => {
-    serverData.models.bar = {
-        fields: {
-            titi: { string: "Small char", type: "char", sortable: true },
-            grosminet: { string: "Beeg char", type: "char", sortable: true },
-        },
-        records: [
+    class Abc extends models.Model {
+        titi = fields.Char();
+        grosminet = fields.Char();
+        
+        _records = [
             {
                 id: 1,
                 titi: "Tiny text",
@@ -3790,11 +3789,13 @@ test("editable list: overflowing table", async () => {
                     nunc, ut aliquet enim. Suspendisse malesuada felis non metus
                     efficitur aliquet.`,
             },
-        ],
+        ];
     };
+    defineModels([Abc]);
+
     await mountView({
         type: "list",
-        resModel: "bar",
+        resModel: "abc",
         arch: `
             <tree editable="top">
                 <field name="titi"/>
@@ -3802,7 +3803,7 @@ test("editable list: overflowing table", async () => {
             </tree>`,
     });
 
-    expect(target.querySelector("table").offsetWidth).toBe(target.querySelector(".o_list_renderer").offsetWidth, { message: "Table should not be stretched by its content" });
+    expect(queryOne("table").offsetWidth).toBe(queryOne(".o_list_renderer").offsetWidth, { message: "Table should not be stretched by its content" });
 });
 
 test("editable list: overflowing table (3 columns)", async () => {
@@ -3817,14 +3818,13 @@ test("editable list: overflowing table (3 columns)", async () => {
                     nunc, ut aliquet enim. Suspendisse malesuada felis non metus
                     efficitur aliquet.`;
 
-    serverData.models.bar = {
-        fields: {
-            titi: { string: "Small char", type: "char", sortable: true },
-            grosminet1: { string: "Beeg char 1", type: "char", sortable: true },
-            grosminet2: { string: "Beeg char 2", type: "char", sortable: true },
-            grosminet3: { string: "Beeg char 3", type: "char", sortable: true },
-        },
-        records: [
+    class Abc extends models.Model {
+        titi = fields.Char();
+        grosminet1 = fields.Char();
+        grosminet2 = fields.Char();
+        grosminet3 = fields.Char();
+        
+        _records = [
             {
                 id: 1,
                 titi: "Tiny text",
@@ -3832,8 +3832,10 @@ test("editable list: overflowing table (3 columns)", async () => {
                 grosminet2: longText + longText,
                 grosminet3: longText + longText + longText,
             },
-        ],
+        ];
     };
+    defineModels([Abc]);
+
     await mountView({
         arch: `
             <tree editable="top">
@@ -3842,52 +3844,54 @@ test("editable list: overflowing table (3 columns)", async () => {
                 <field name="grosminet3" class="large"/>
                 <field name="grosminet2" class="large"/>
             </tree>`,
-        resModel: "bar",
+        resModel: "abc",
         type: "list",
     });
 
-    expect(target.querySelector("table").offsetWidth).toBe(target.querySelector(".o_list_view").offsetWidth);
+    expect(queryOne("table").offsetWidth).toBe(queryOne(".o_list_view").offsetWidth);
     const largeCells = queryAll(".o_data_cell.large");
-    assert.ok(Math.abs(largeCells[0].offsetWidth - largeCells[1].offsetWidth) <= 1);
-    assert.ok(Math.abs(largeCells[1].offsetWidth - largeCells[2].offsetWidth) <= 1);
-    assert.ok(target.querySelector(".o_data_cell:not(.large)").offsetWidth < largeCells[0].offsetWidth);
+    expect(Math.abs(largeCells[0].offsetWidth - largeCells[1].offsetWidth) <= 1).toBe(true);
+    expect(Math.abs(largeCells[1].offsetWidth - largeCells[2].offsetWidth) <= 1).toBe(true);
+    expect(queryFirst(".o_data_cell:not(.large)").offsetWidth < largeCells[0].offsetWidth).toBe(true);
 });
 
 test("editable list: list view in an initially unselected notebook page", async () => {
+    Foo._fields.o2m = fields.One2many({ relation: "abc"});
     Foo._records = [{ id: 1, o2m: [1] }];
-    serverData.models.bar = {
-        fields: {
-            titi: { string: "Small char", type: "char", sortable: true },
-            grosminet: { string: "Beeg char", type: "char", sortable: true },
-        },
-        records: [
+    class Abc extends models.Model {
+        titi = fields.Char();
+        grosminet = fields.Char();
+        
+        _records = [
             {
                 id: 1,
                 titi: "Tiny text",
                 grosminet: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. " + "Ut at nisi congue, facilisis neque nec, pulvinar nunc. " + "Vivamus ac lectus velit.",
             },
-        ],
+        ];
     };
+    defineModels([Abc]);
+
     await mountView({
         type: "form",
         resModel: "foo",
         resId: 1,
         arch: `
-                <form>
-                    <sheet>
-                        <notebook>
-                            <page string="Page1"></page>
-                            <page string="Page2">
-                                <field name="o2m">
-                                    <tree editable="bottom">
-                                        <field name="titi"/>
-                                        <field name="grosminet"/>
-                                    </tree>
-                                </field>
-                            </page>
-                        </notebook>
-                    </sheet>
-                </form>`,
+            <form>
+                <sheet>
+                    <notebook>
+                        <page string="Page1"></page>
+                        <page string="Page2">
+                            <field name="o2m">
+                                <tree editable="bottom">
+                                    <field name="titi"/>
+                                    <field name="grosminet"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>`,
     });
     expect(".o_field_one2many").toHaveCount(0);
 
@@ -3895,24 +3899,26 @@ test("editable list: list view in an initially unselected notebook page", async 
     expect(".o_field_one2many").toHaveCount(1);
 
     const [titi, grosminet] = queryAll(".tab-pane:last-child th");
-    assert.ok(titi.style.width.split("px")[0] > 80 && grosminet.style.width.split("px")[0] > 500, "list has been correctly frozen after being visible");
+    expect(titi.style.width.split("px")[0] > 80 && grosminet.style.width.split("px")[0] > 500).toBe(true, { message: "list has been correctly frozen after being visible" });
 });
 
 test("editable list: list view hidden by an invisible modifier", async () => {
+    Foo._fields.o2m = fields.One2many({ relation: "abc"});
     Foo._records = [{ id: 1, bar: true, o2m: [1] }];
-    serverData.models.bar = {
-        fields: {
-            titi: { string: "Small char", type: "char", sortable: true },
-            grosminet: { string: "Beeg char", type: "char", sortable: true },
-        },
-        records: [
+    class Abc extends models.Model {
+        titi = fields.Char();
+        grosminet = fields.Char();
+        
+        _records = [
             {
                 id: 1,
                 titi: "Tiny text",
                 grosminet: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. " + "Ut at nisi congue, facilisis neque nec, pulvinar nunc. " + "Vivamus ac lectus velit.",
             },
-        ],
+        ];
     };
+    defineModels([Abc]);
+
     await mountView({
         type: "form",
         resModel: "foo",
@@ -3936,11 +3942,11 @@ test("editable list: list view hidden by an invisible modifier", async () => {
     expect(".o_field_one2many").toHaveCount(1);
 
     const [titi, grosminet] = queryAll("th");
-    assert.ok(titi.style.width.split("px")[0] > 80 && grosminet.style.width.split("px")[0] > 700, "list has been correctly frozen after being visible");
+    expect(titi.style.width.split("px")[0] > 80 && grosminet.style.width.split("px")[0] > 700).toBe(true, { message: "list has been correctly frozen after being visible" });
 });
 
 test("editable list: updating list state while invisible", async () => {
-    serverData.models.foo.onchanges = {
+    Foo._onChanges = {
         bar: function (obj) {
             obj.o2m = [[5], [0, null, { display_name: "Whatever" }]];
         },
@@ -3973,8 +3979,8 @@ test("editable list: updating list state while invisible", async () => {
 
     await contains(".nav-item:last-child .nav-link").click();
     expect(".o_field_one2many").toHaveCount(1);
-    expect(target.querySelector(".o_field_one2many .o_data_row").textContent).toBe("Whatever");
-    assert.notEqual(target.querySelector("th").style.width, "", "Column header should have been frozen");
+    expect(".o_field_one2many .o_data_row:first").toHaveText("Whatever");
+    expect(queryFirst("th").style.width).not.toBe("", { message: "Column header should have been frozen"});
 });
 
 test("empty list: state with nameless and stringless buttons", async () => {
@@ -3991,12 +3997,12 @@ test("empty list: state with nameless and stringless buttons", async () => {
     });
 
     expect([...queryAll("th")].find((el) => el.textContent === "Foo").style.width).toBe("50%", { message: "Field column should be frozen" });
-    expect(target.querySelector("th:last-child").style.width).toBe("50%", { message: "Buttons column should be frozen" });
+    expect(queryOne("th:last-child").style.width).toBe("50%", { message: "Buttons column should be frozen" });
 });
 
 test("editable list: unnamed columns cannot be resized", async () => {
     Foo._records = [{ id: 1, o2m: [1] }];
-    serverData.models.bar.records = [{ id: 1, display_name: "Oui" }];
+    Bar._records = [{ id: 1, display_name: "Oui" }];
     await mountView({
         type: "form",
         resModel: "foo",
@@ -4015,12 +4021,12 @@ test("editable list: unnamed columns cannot be resized", async () => {
             </form>`,
     });
 
-    const [charTh, buttonTh] = queryAll(".o_field_one2many th");
+    const charTh = queryOne(".o_field_one2many th:eq(0)");
     const thRect = charTh.getBoundingClientRect();
     const resizeRect = charTh.querySelector(".o_resize").getBoundingClientRect();
 
-    assert.ok(resizeRect.right - thRect.right <= 1, "First resize handle should be attached at the end of the first header");
-    assert.containsNone(buttonTh, ".o_resize", "Columns without name should not have a resize handle");
+    expect(resizeRect.right - thRect.right <= 1).toBe(true, { message: "First resize handle should be attached at the end of the first header" });
+    expect(".o_field_one2many th:eq(1) .o_resize").toHaveCount(0, { message: "Columns without name should not have a resize handle" });
 });
 
 test("editable list view, click on m2o dropdown does not close editable row", async () => {
@@ -4031,12 +4037,12 @@ test("editable list view, click on m2o dropdown does not close editable row", as
     });
 
     await contains(".o_list_button_add:visible").click();
-    expect(target.querySelector(".o_selected_row .o_field_many2one input").value).toBe("");
+    expect(".o_selected_row .o_field_many2one input").toHaveValue("");
     await contains(".o_selected_row .o_field_many2one input").click();
     expect(".o_field_many2one .o-autocomplete--dropdown-menu").toHaveCount(1);
 
     await contains(".o_field_many2one .o-autocomplete--dropdown-menu .dropdown-item").click();
-    expect(target.querySelector(".o_selected_row .o_field_many2one input").value).toBe("Value 1");
+    expect(".o_selected_row .o_field_many2one input").toHaveValue("Value 1");
     expect(".o_selected_row").toHaveCount(1, { message: "should still have editable row" });
 });
 
@@ -4049,31 +4055,30 @@ test("width of some of the fields should be hardcoded if no data (grouped case)"
         { field: "datetime", expected: 146, type: "Datetime" },
         { field: "amount", expected: 104, type: "Monetary" },
     ];
-    expect.assertions(9);
 
     await mountView({
         type: "list",
         resModel: "foo",
         arch: `
-                <tree editable="top">
-                    <field name="bar"/>
-                    <field name="foo"/>
-                    <field name="int_field"/>
-                    <field name="qux"/>
-                    <field name="date"/>
-                    <field name="datetime"/>
-                    <field name="amount"/>
-                    <field name="currency_id" width="25px"/>
-                </tree>`,
+            <tree editable="top">
+                <field name="bar"/>
+                <field name="foo"/>
+                <field name="int_field"/>
+                <field name="qux"/>
+                <field name="date"/>
+                <field name="datetime"/>
+                <field name="amount"/>
+                <field name="currency_id" width="25px"/>
+            </tree>`,
         groupBy: ["int_field"],
     });
 
     expect(".o_resize").toHaveCount(8);
     assertions.forEach((a) => {
-        expect(a.expected).toBe(queryAll(`th[data-name="${a.field}"]`)[0].offsetWidth, `Field ${a.type} should have a fixed width of ${a.expected} pixels`);
+        expect(queryFirst(`th[data-name="${a.field}"]`).offsetWidth).toBe(a.expected, { message: `Field ${a.type} should have a fixed width of ${a.expected} pixels` });
     });
-    expect(queryAll('th[data-name="foo"]')[0].style.width).toBe("100%", { message: "Char field should occupy the remaining space" });
-    expect(queryAll('th[data-name="currency_id"]')[0].offsetWidth).toBe(25, { message: "Currency field should have a fixed width of 25px (see arch)" });
+    expect(queryFirst('th[data-name="foo"]').style.width).toBe("100%", { message: "Char field should occupy the remaining space" });
+    expect(queryFirst('th[data-name="currency_id"]').offsetWidth).toBe(25, { message: "Currency field should have a fixed width of 25px (see arch)" });
 });
 
 test("column width should depend on the widget", async () => {
@@ -4087,7 +4092,7 @@ test("column width should depend on the widget", async () => {
                 <field name="text"/>
             </tree>`,
     });
-    expect(target.querySelector('th[data-name="datetime"]').offsetWidth).toBe(92, { message: "should be the optimal width to display a date, not a datetime" });
+    expect(queryOne('th[data-name="datetime"]').offsetWidth).toBe(92, { message: "should be the optimal width to display a date, not a datetime" });
 });
 
 test("column widths are kept when adding first record", async () => {
@@ -4127,8 +4132,8 @@ test("column widths are kept when editing a record", async () => {
     expect(".o_selected_row").toHaveCount(1);
 
     var longVal = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed blandit, " + "justo nec tincidunt feugiat, mi justo suscipit libero, sit amet tempus ipsum purus " + "bibendum est.";
-    await editInput(target.querySelector(".o_field_widget[name=text] .o_input"), null, longVal);
-    await clickSave(target);
+    await contains(".o_field_widget[name=text] .o_input").edit(longVal,{ confirm: false });
+    await contains(".o_list_button_save").click();
 
     expect(".o_selected_row").toHaveCount(0);
     expect(queryAll('th[data-name="datetime"]')[0].offsetWidth).toBe(width);
@@ -4175,12 +4180,13 @@ test("column widths are re-computed on window resize", async () => {
     const selectorWidth = queryFirst("th.o_list_record_selector").offsetWidth;
 
     // simulate a window resize
-    target.style.width = target.getBoundingClientRect().width / 2 + "px";
+    const fixture = getFixture();
+    fixture.style.width = fixture.getBoundingClientRect().width / 2 + "px";
     window.dispatchEvent(new Event("resize"));
 
     const postResizeTextWidth = queryAll('th[data-name="text"]')[0].offsetWidth;
     const postResizeSelectorWidth = queryFirst("th.o_list_record_selector").offsetWidth;
-    assert.ok(postResizeTextWidth < initialTextWidth);
+    expect(postResizeTextWidth < initialTextWidth).toBe(true);
     expect(selectorWidth).toBe(postResizeSelectorWidth);
 });
 
@@ -4196,7 +4202,7 @@ test("columns with an absolute width are never narrower than that width", async 
                     <field name="text"/>
                 </tree>`,
     });
-    const pixelsWidth = getComputedStyle(target.querySelector('th[data-name="int_field"]')).width;
+    const pixelsWidth = getComputedStyle(queryOne('th[data-name="int_field"]')).width;
     const width = Math.floor(parseFloat(pixelsWidth));
     expect(width).toBe(200);
 });
@@ -4213,17 +4219,13 @@ test("list view with data: text columns are not crushed", async () => {
         arch: '<tree><field name="foo"/><field name="text"/></tree>',
     });
 
-    const foo = [...queryAll("th")].find((el) => el.textContent === "Foo");
-    const fooWidth = Math.ceil(foo.getBoundingClientRect().width);
+    const fooWidth = Math.ceil( queryFirst("th[data-name=foo").getBoundingClientRect().width);
+    const textWidth = Math.ceil( queryFirst("th[data-name=text").getBoundingClientRect().width);
+    expect(Math.abs(fooWidth - textWidth) <= 1).toBe(true, { message: "both columns should have been given the same width" });
 
-    const text = [...queryAll("th")].find((el) => el.textContent === "text field");
-    const textWidth = Math.ceil(text.getBoundingClientRect().width);
-
-    assert.ok(Math.abs(fooWidth - textWidth) <= 1, "both columns should have been given the same width");
-
-    const firstRowHeight = $(target).find(".o_data_row:nth(0)")[0].offsetHeight;
-    const secondRowHeight = $(target).find(".o_data_row:nth(1)")[0].offsetHeight;
-    assert.ok(firstRowHeight > secondRowHeight, "in the first row, the (long) text field should be properly displayed on several lines");
+    const firstRowHeight = queryOne(".o_data_row:eq(0)").offsetHeight;
+    const secondRowHeight = queryOne(".o_data_row:eq(1)").offsetHeight;
+    expect(firstRowHeight > secondRowHeight).toBe(true, { message: "in the first row, the (long) text field should be properly displayed on several lines" });
 });
 
 test("button in a list view with a default relative width", async () => {
@@ -4237,7 +4239,7 @@ test("button in a list view with a default relative width", async () => {
         resModel: "foo",
     });
 
-    expect(target.querySelector(".o_data_cell button").style.width).toBe("", { message: "width attribute should not change the CSS style" });
+    expect(queryFirst(".o_data_cell button").style.width).toBe("", { message: "width attribute should not change the CSS style" });
 });
 
 test("button columns in a list view don't have a max width", async () => {
@@ -4256,7 +4258,8 @@ test("button columns in a list view don't have a max width", async () => {
     });
 
     // simulate a window resize (buttons column width should not be squeezed)
-    target.style.width = "300px";
+    const fixture = getFixture();
+    fixture.style.width = "300px";
     window.dispatchEvent(new Event("resize"));
     await animationFrame();
 
@@ -4275,22 +4278,21 @@ test("column widths are kept when editing multiple records", async () => {
             </tree>`,
     });
 
-    var width = target.querySelector('th[data-name="datetime"]').offsetWidth;
+    const width = queryOne('th[data-name="datetime"]').offsetWidth;
 
     // select two records and edit
-    const rows = queryAll(".o_data_row");
-    await click(rows[0], ".o_list_record_selector input");
-    await click(rows[1], ".o_list_record_selector input");
-    await click(rows[0].querySelectorAll(".o_data_cell")[1]);
+    await contains(".o_data_row:eq(0) .o_list_record_selector input").click();
+    await contains(".o_data_row:eq(1) .o_list_record_selector input").click();
+    await contains(".o_data_row:eq(0) .o_data_cell:eq(1)").click();
 
     expect(".o_selected_row").toHaveCount(1);
-    var longVal = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed blandit, " + "justo nec tincidunt feugiat, mi justo suscipit libero, sit amet tempus ipsum purus " + "bibendum est.";
-    await editInput(target, ".o_field_widget[name=text] textarea", longVal);
+    const longVal = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed blandit, " + "justo nec tincidunt feugiat, mi justo suscipit libero, sit amet tempus ipsum purus " + "bibendum est.";
+    await contains(".o_field_widget[name=text] textarea").edit(longVal);
     expect(".modal").toHaveCount(1);
     await contains(".modal .btn-primary").click();
 
     expect(".o_selected_row").toHaveCount(0);
-    expect(target.querySelector('th[data-name="datetime"]').offsetWidth).toBe(width);
+    expect(queryOne('th[data-name="datetime"]').offsetWidth).toBe(width);
 });
 
 test("row height and width should not change when switching mode", async () => {
