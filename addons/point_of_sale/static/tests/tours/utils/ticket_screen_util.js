@@ -21,6 +21,10 @@ export function selectOrder(orderName) {
         {
             trigger: `.ticket-screen .order-row > .col:contains("${orderName}")`,
         },
+        {
+            trigger: `.ticket-screen .order-row.highlight > .col:contains("${orderName}")`,
+            isCheck: true,
+        },
     ];
 }
 export function doubleClickOrder(orderName) {
