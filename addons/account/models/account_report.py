@@ -759,7 +759,7 @@ class AccountReportExpression(models.Model):
           'applicability': 'taxes',
           'tax_negate': False,
           'country_id': country_id,
-          'report_id': self.report_id.id,
+          'report_id': self.report_line_id.report_id.id,
         }
         res = []
         if not existing_tag or not existing_tag.tax_negate:
