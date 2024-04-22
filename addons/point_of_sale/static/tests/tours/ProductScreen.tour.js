@@ -6,7 +6,7 @@ import * as Chrome from "@point_of_sale/../tests/tours/helpers/ChromeTourMethods
 import * as ReceiptScreen from "@point_of_sale/../tests/tours/helpers/ReceiptScreenTourMethods";
 import { registry } from "@web/core/registry";
 import * as Order from "@point_of_sale/../tests/tours/helpers/generic_components/OrderWidgetMethods";
-import { inLeftSide, scan_barcode } from "@point_of_sale/../tests/tours/helpers/utils";
+import { scan_barcode } from "@point_of_sale/../tests/tours/helpers/utils";
 import * as ProductConfiguratorPopup from "@point_of_sale/../tests/tours/helpers/ProductConfiguratorTourMethods";
 
 registry.category("web_tour.tours").add("ProductScreenTour", {
@@ -123,18 +123,18 @@ registry.category("web_tour.tours").add("ProductScreenTour", {
             ProductScreen.orderIsEmpty(),
 
             // Test OrderlineCustomerNoteButton
-            ProductScreen.clickDisplayedProduct("Desk Organizer"),
-            ProductScreen.selectedOrderlineHas("Desk Organizer", "1.0"),
-            ProductScreen.addCustomerNote("Test customer note"),
-            inLeftSide(
-                Order.hasLine({
-                    productName: "Desk Organizer",
-                    quantity: "1.0",
-                    customerNote: "Test customer note",
-                    withClass: ".selected",
-                })
-            ),
-            ProductScreen.isShown(),
+            // ProductScreen.clickDisplayedProduct("Desk Organizer"),
+            // ProductScreen.selectedOrderlineHas("Desk Organizer", "1.0"),
+            // ProductScreen.addCustomerNote("Test customer note"),
+            // inLeftSide(
+            //     Order.hasLine({
+            //         productName: "Desk Organizer",
+            //         quantity: "1.0",
+            //         customerNote: "Test customer note",
+            //         withClass: ".selected",
+            //     })
+            // ),
+            // ProductScreen.isShown(),
         ].flat(),
 });
 

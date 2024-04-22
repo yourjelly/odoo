@@ -26,7 +26,7 @@ export class OrderlineCustomerNoteButton extends Component {
         });
 
         if (confirmed) {
-            selectedOrderline.set_customer_note(inputNote);
+            selectedOrderline.setNote(inputNote);
         }
     }
 }
