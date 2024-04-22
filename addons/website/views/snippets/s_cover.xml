@@ -2,15 +2,19 @@
 <odoo>
 
 <template id="s_cover" name="Cover">
-    <section class="s_cover parallax s_parallax_is_fixed bg-black-50 pt96 pb96" data-scroll-background-ratio="1">
-        <span class="s_parallax_bg oe_img_bg" style="background-image: url('/web/image/website.s_cover_default_image'); background-position: 50% 0;"/>
-        <div class="o_we_bg_filter bg-black-50"/>
-        <div class="container s_allow_columns">
-            <h1 class="display-3" style="text-align: center; font-weight: bold;">Catchy Headline</h1>
-            <p class="lead" style="text-align: center;">Write one or two paragraphs describing your product, services or a specific feature.<br/> To be successful your content needs to be useful to your readers.</p>
-            <p style="text-align: center;">
-                <a t-att-href="cta_btn_href" class="btn btn-primary"><t t-esc="cta_btn_text">Contact us</t></a>
-            </p>
+    <section class="s_cover pt136 pb136" data-scroll-background-ratio="1">
+        <div class="container s_allow_columns text-center">
+            <div class="s_cta_badge o_animable d-inline-flex align-items-center mb-2 border rounded-pill px-2 py-1" data-name="Badge">
+                <i class="fa fa-fw fa-info-circle o_not-animable me-1"/> What do you want to promote ? <a class="ms-3" href="/contactus">See more <i class="fa fa-fw fa-long-arrow-right"/></a>
+            </div>
+            <div class="mt-3 mb-4">
+                <h1 class="display-3 fw-bold">Catchy Headline</h1>
+                <p class="lead">Write one or two paragraphs describing your product, services or a specific feature.<br/> To be successful your content needs to be useful to your readers.</p>
+            </div>
+            <div class="d-flex justify-content-center gap-3">
+                <a href="/shop" class="btn btn-primary"><t t-esc="cta_btn_text">Our store</t></a>
+                <a t-att-href="cta_btn_href" class="btn btn-outline-primary"><t t-esc="cta_btn_text">Contact us</t></a>
+            </div>
         </div>
     </section>
 </template>
