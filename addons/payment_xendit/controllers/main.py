@@ -18,6 +18,18 @@ class XenditController(http.Controller):
 
     _webhook_url = '/payment/xendit/webhook'
 
+    @http.route('/payment/xendit/payment', type='json', auth='public')
+    def xendit_payment(self, reference, partner_id, token_ref):
+        """ Make a payment by token request and handle the response.
+
+        :param str reference: The reference of the transaction.
+        :param int partner_id: The partner making the transaction, as a `res.partner` id.
+        :param str token_ref: The reference of the Xendit token to use to make the payment.
+        :return: None
+        """
+        tx_sudo = request.env['payment.transaction'].sudo().search([('reference', '=', reference)])
+        tx_sudo._xendit_create_charge(token_ref)
+
     @http.route(_webhook_url, type='http', methods=['POST'], auth='public', csrf=False)
     def xendit_webhook(self):
         """ Process the notification data sent by Xendit to the webhook.
@@ -58,12 +70,3 @@ class XenditController(http.Controller):
         if not consteq(tx_sudo.provider_id.xendit_webhook_token, received_token):
             _logger.warning("Received notification with invalid callback token %r.", received_token)
             raise Forbidden()
-
-    @http.route('/payment/xendit/payment', type='json', auth='public')
-    def xendit_payment(self, reference, partner_id, token_id):
-        """ Take newly created token, do a charge request and handle the response
-
-        :param str reference: The reference of the transation
-        """
-        tx_sudo = request.env['payment.transaction'].sudo().search([('reference', '=', reference)])
-        tx_sudo._xendit_create_charge(token_id)

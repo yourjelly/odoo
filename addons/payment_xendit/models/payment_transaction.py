@@ -85,6 +85,40 @@ class PaymentTransaction(models.Model):
 
         return payload
 
+    def _send_payment_request(self):
+        """ Override of `payment` to send a payment request to Xendit.
+
+        Note: self.ensure_one()
+
+        :return: None
+        :raise UserError: If the transaction is not linked to a token.
+        """
+        super()._send_payment_request()
+        if self.provider_code != 'xendit':
+            return
+
+        if not self.token_id:
+            raise ValidationError("Xendit: " + _("The transaction is not linked to a token."))
+
+        self._xendit_create_charge(self.token_id.provider_ref)
+
+    def _xendit_create_charge(self, token_ref):
+        """ Create a charge on Xendit using the `credit_card_charges` endpoint.
+
+        :param str token_ref: The reference of the Xendit token to use to make the payment.
+        :return: None
+        """
+        payload = {
+            'token_id': token_ref,
+            'external_id': self.reference,
+            'amount': self.amount,
+            'currency': self.currency_id.name,
+        }
+        charge_notification_data = self.provider_id._xendit_make_request(
+            'credit_card_charges', payload=payload
+        )
+        self._handle_notification_data('xendit', charge_notification_data)
+
     def _get_tx_from_notification_data(self, provider_code, notification_data):
         """ Override of `payment` to find the transaction based on the notification data.
 
@@ -148,43 +182,9 @@ class PaymentTransaction(models.Model):
         elif payment_status in const.PAYMENT_STATUS_MAPPING['error']:
             failure_reason = notification_data.get('failure_reason')
             self._set_error(_(
-                "An error occurred during the processing of your payment (%s). Please try "
-                "again.", failure_reason
+                "An error occurred during the processing of your payment (%s). Please try again.",
+                failure_reason,
             ))
-
-    def _send_payment_request(self):
-        """ Override of `payment` to send a payment request to Xendit.
-
-        Note: self.ensure_one()
-
-        :return: None
-        :raise: UserError if the transaction is not linked to a token
-        """
-        super()._send_payment_request()
-        if self.provider_code != 'xendit':
-            return
-
-        if not self.token_id:
-            raise ValidationError("Xendit: " + _("The transaction is not linked to a token."))
-
-        self._xendit_create_charge(self.token_id.provider_ref)
-
-    def _xendit_create_charge(self, token):
-        """ Create a charge on Xendit using `credit_card_charges` endpoint.
-
-        :param str token_id: The token ID used to charge the card.
-        """
-        payload = {
-            'token_id': token,
-            'external_id': self.reference,
-            'amount': self.amount,
-            'currency': self.currency_id.name,
-        }
-        charge_notification_data = self.provider_id._xendit_make_request(
-            'credit_card_charges',
-            payload=payload,
-        )
-        self._handle_notification_data('xendit', charge_notification_data)
 
     def _xendit_tokenize_from_notification_data(self, notification_data):
         """ Create a new token based on the notification data.

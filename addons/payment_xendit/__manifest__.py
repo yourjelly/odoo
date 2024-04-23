@@ -18,7 +18,7 @@
     'uninstall_hook': 'uninstall_hook',
     'assets': {
         'web.assets_frontend': [
-            'payment_xendit/static/src/js/payment_form.js'
+            'payment_xendit/static/src/**/*'
         ]
     },
     'license': 'LGPL-3',
