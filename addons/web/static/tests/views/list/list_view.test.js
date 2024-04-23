@@ -53,6 +53,7 @@ import {
     mountWithCleanup,
     onRpc,
     pagerNext,
+    patchDate,
     patchWithCleanup,
     quickCreateKanbanColumn,
     quickCreateKanbanRecord,
@@ -73,6 +74,7 @@ import {
     validateSearch,
     webModels,
 } from "@web/../tests/web_test_helpers";
+import { getPickerCell } from "@web/../tests/core/datetime/datetime_test_helpers";
 
 import { currencies } from "@web/core/currency";
 import { registry } from "@web/core/registry";
@@ -7242,7 +7244,11 @@ test("groupby node with subfields, and onchange", async () => {
 
 test("list view, editable, without data", async () => {
     Foo._records = [];
-    serverData.models.foo.fields.date.default = "2017-02-10";
+    Foo._fields.date = fields.Date({ default: "2017-02-10" });
+
+    onRpc("web_save", () => {
+        expect.step("web_save");
+    });
 
     await mountView({
         type: "list",
@@ -7255,11 +7261,6 @@ test("list view, editable, without data", async () => {
                 <button type="object" icon="fa-plus-square" name="method"/>
             </tree>`,
         noContentHelp: "click to add a partner",
-        mockRPC(route, args) {
-            if (args.method === "web_save") {
-                expect.step("web_save");
-            }
-        },
     });
 
     expect(".o_view_nocontent").toHaveCount(1, {
@@ -7274,28 +7275,24 @@ test("list view, editable, without data", async () => {
     expect(".o_view_nocontent").toHaveCount(0, {
         message: "should not have a no content helper displayed",
     });
-    expect("tbody tr").toHaveClass("o_selected_row", {
+    expect("tbody tr:eq(0)").toHaveClass("o_selected_row", {
         message: "the date field td should be in edit mode",
     });
-    expect(target.querySelector("tbody tr").querySelectorAll("td")[1].textContent).toBe("", {
+    expect("tbody tr:eq(0) td:eq(1)").toHaveText("", {
         message: "the date field td should not have any content",
     });
-    expect(target.querySelector("tr.o_selected_row .o_list_record_selector input").disabled).toBe(
-        true,
-        {
-            message:
-                "record selector checkbox should be disabled while the record is not yet created",
-        }
-    );
-    expect(target.querySelector(".o_list_button button").disabled).toBe(false, {
+    expect("tr.o_selected_row .o_list_record_selector input").toHaveProperty("disabled", true, {
+        message: "record selector checkbox should be disabled while the record is not yet created",
+    });
+    expect(".o_list_button button:eq(0)").toHaveProperty("disabled", false, {
         message: "buttons should not be disabled while the record is not yet created",
     });
 
     await contains(".o_list_button_save:visible").click();
-    expect(target.querySelector("tbody tr .o_list_record_selector input").disabled).toBe(false, {
+    expect("tbody tr .o_list_record_selector input").toHaveProperty("disabled", false, {
         message: "record selector checkbox should not be disabled once the record is created",
     });
-    expect(target.querySelector(".o_list_button button").disabled).toBe(false, {
+    expect(".o_list_button button:eq(0)").toHaveProperty("disabled", false, {
         message: "buttons should not be disabled once the record is created",
     });
     expect(["web_save"]).toVerifySteps();
@@ -7303,6 +7300,15 @@ test("list view, editable, without data", async () => {
 
 test("list view, editable, with a button", async () => {
     Foo._records = [];
+
+    onRpc("web_save", () => {
+        expect.step("web_save");
+    });
+    onRpc("/web/dataset/call_button", () => {
+        expect.step("call_button");
+        return true;
+    });
+
     await mountView({
         type: "list",
         resModel: "foo",
@@ -7311,14 +7317,6 @@ test("list view, editable, with a button", async () => {
                 <field name="foo"/>
                 <button string="abc" icon="fa-phone" type="object" name="schedule_another_phonecall"/>
             </tree>`,
-        mockRPC(route, { method }) {
-            if (method === "web_save") {
-                expect.step("web_save");
-            } else if (route.startsWith("/web/dataset/call_button")) {
-                expect.step("call_button");
-                return true;
-            }
-        },
     });
 
     await contains(".o_list_button_add:visible").click();
@@ -7326,9 +7324,8 @@ test("list view, editable, with a button", async () => {
     expect("table button i.o_button_icon.fa-phone").toHaveCount(1, {
         message: "should have rendered a button",
     });
-    assert.notOk(
-        target.querySelector("table button").disabled,
-        "button should not be disabled when creating the record"
+    expect("table button:eq(0)").toHaveProperty("disabled", false,
+        { message: "button should not be disabled when creating the record" }
     );
 
     await contains("table button").click();
@@ -7348,7 +7345,7 @@ test("list view with a button without icon", async () => {
             </tree>`,
     });
 
-    expect(target.querySelector("table button").innerText).toBe("abc", {
+    expect("table button:eq(0)").toHaveText("abc", {
         message: "should have rendered a button with string attribute as label",
     });
 });
@@ -7382,8 +7379,12 @@ test("list view, editable, can discard", async () => {
 });
 
 test("editable list view, click on the list to save", async () => {
-    serverData.models.foo.fields.date.default = "2017-02-10";
     Foo._records = [];
+    Foo._fields.date = fields.Date({ default: "2017-02-10" });
+
+    onRpc("web_save", () => {
+        expect.step("web_save");
+    });
 
     await mountView({
         type: "list",
@@ -7393,11 +7394,6 @@ test("editable list view, click on the list to save", async () => {
                 <field name="foo"/>
                 <field name="int_field" sum="Sum"/>
             </tree>`,
-        mockRPC(route, args) {
-            if (args.method === "web_save") {
-                expect.step("web_save");
-            }
-        },
     });
 
     await contains(".o_list_button_add:visible").click();
@@ -7417,8 +7413,10 @@ test("editable list view, click on the list to save", async () => {
 });
 
 test("editable list view, should refocus date field", async () => {
-    patchDate(2017, 1, 10, 0, 0, 0);
+    patchDate({ year: 2017, month: 2, day: 10 });
+
     Foo._records = [];
+
     await mountView({
         type: "list",
         resModel: "foo",
@@ -7429,19 +7427,16 @@ test("editable list view, should refocus date field", async () => {
             </tree>`,
     });
     await contains(".o_list_button_add:visible").click();
-    expect(document.activeElement).toBe(target.querySelector(".o_field_widget[name=foo] input"));
+    expect(".o_field_widget[name=foo] input").toBeFocused();
 
     await contains(".o_field_widget[name=date] input").click();
-    expect(document.activeElement).toBe(target.querySelector(".o_field_widget[name=date] input"));
+    expect(".o_field_widget[name=date] input").toBeFocused();
     expect(".o_datetime_picker").toHaveCount(1);
 
-    const clickPromise = click(getPickerCell("15"));
-    getPickerCell("15").focus();
-    await clickPromise;
-
+    await contains(getPickerCell("15")).click();
     expect(".o_datetime_picker").toHaveCount(0);
-    expect(target.querySelector(".o_field_widget[name=date] input").value).toBe("02/15/2017");
-    expect(document.activeElement).toBe(target.querySelector(".o_field_widget[name=date] input"));
+    expect(".o_field_widget[name=date] input").toHaveValue("02/15/2017");
+    expect(".o_field_widget[name=date] input").toBeFocused();
 });
 
 test("text field should keep it's selection when clicking on it", async () => {
