@@ -94,6 +94,7 @@
                         <t t-out="question_content"/>
                     </textarea>
                     <span class="form-text d-inline small text-muted"><i class="fa fa-lightbulb-o"></i> Tip: consider adding an example. </span>
+                    <span class="form-text d-block small text-muted"><i class="fa fa-lightbulb-o"></i> Tips: Use '/' to insert images. Select text to format it. </span>
                 </div>
             </div>
             <div class="row mb-2">
@@ -168,6 +169,7 @@
                 <div class="col">
                     <textarea name="content" id="content" required="required" class="form-control o_wysiwyg_loader" t-att-data-karma="forum.karma_editor" t-out="post.content"/>
                     <span t-if="not is_answer" class="form-text d-inline small text-muted"><i class="fa fa-lightbulb-o"/> Tip: consider adding an example. </span>
+                    <span class="form-text d-block small text-muted mb-2"><i class="fa fa-lightbulb-o"></i> Tips: Use '/' to insert images. Select text to format it. </span>
                 </div>
             </div>
             <input type="hidden" name="karma" t-att-value="user.karma" id="karma"/>
@@ -235,7 +237,7 @@
                         <t t-set="div_class" t-value="'d-inline'"/>
                         <t t-set="btn_classes" t-value="'px-2'"/>
                     </t>
-                    <a t-attf-class="#{ 'disabled' if len(tag.post_ids) == 0  else '' } btn-link #{ 'text-dark fw-bold' if tag.message_is_follower else '' }"
+                    <a t-attf-class="#{ 'disabled' if len(tag.post_ids) == 0  else '' } o_js_forum_tag_link btn-link #{ 'text-dark fw-bold' if tag.message_is_follower else '' }"
                        t-attf-href="/forum/#{ slug(forum) }/tag/#{ slug(tag) }/questions?#{ keep_query(filters='tag') }">
                         <t t-out="tag.name"/>&amp;nbsp;
                         <span class="small">(<t t-out="tag.posts_count"/>)</span>

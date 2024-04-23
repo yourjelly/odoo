@@ -31,6 +31,7 @@ publicWidget.registry.websiteForum = publicWidget.Widget.extend({
         'click .comment_delete': '_onDeleteCommentClick',
         'click .js_close_intro': '_onCloseIntroClick',
         'click .answer_collapse': '_onExpandAnswerClick',
+        "click .o_js_forum_tag_follow": "_onClickTagFollow",
         'submit .js_wforum_submit_form:has(:not(.karma_required).o_wforum_submit_post)': '_onSubmitForm',
     },
 
@@ -78,6 +79,7 @@ publicWidget.registry.websiteForum = publicWidget.Widget.extend({
                     }
                 }
             },
+            createSearchChoicePosition: "bottom",
             formatResult: function (term) {
                 if (term.isNew) {
                     return '<span class="badge bg-primary">New</span> ' + escape(term.text);
@@ -302,6 +304,22 @@ publicWidget.registry.websiteForum = publicWidget.Widget.extend({
      */
     _onTagFollowBoxMouseLeave: function (ev) {
         $(ev.currentTarget).find('.o_forum_tag_follow_box').stop().fadeOut().css('display', 'none');
+    },
+    /**
+     * @private
+     * @param {Event} ev
+     */
+    _onClickTagFollow: function (ev) {
+        const closestBtn = ev.target.closest("button");
+        if (
+            closestBtn &&
+            (closestBtn.classList.contains("js_follow_btn") ||
+                closestBtn.classList.contains("js_unfollow_btn"))
+        ) {
+            ["text-dark", "fw-bold"].forEach((token) => {
+                ev.currentTarget.querySelector(".o_js_forum_tag_link").classList.toggle(token);
+            });
+        }
     },
     /**
      * @private
