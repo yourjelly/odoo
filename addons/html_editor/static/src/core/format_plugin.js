@@ -9,6 +9,20 @@ import { DIRECTIONS } from "../utils/position";
 function isFormatted(formatPlugin, format) {
     return () => formatPlugin.isSelectionFormat(format);
 }
+function hasFormat(formatPlugin) {
+    return () => {
+        console.log("has format");
+        for (let format of Object.keys(formatsSpecs)) {
+            console.log('format', format);
+            if (formatPlugin.isSelectionFormat(format)) {
+                console.log('> true')
+                return true;
+            }
+        }
+        console.log('> false')
+        return false;
+    }
+}
 
 export class FormatPlugin extends Plugin {
     static name = "format";
@@ -51,6 +65,13 @@ export class FormatPlugin extends Plugin {
                     icon: "fa-strikethrough",
                     name: "Toggle strikethrough",
                     isFormatApplied: isFormatted(p, "strikeThrough"),
+                },
+                {
+                    id: "remove_format",
+                    cmd: "FORMAT_REMOVE_FORMAT",
+                    icon: "fa-eraser",
+                    name: "Remove Format",
+                    isFormatApplied: hasFormat(p),
                 },
             ],
         },

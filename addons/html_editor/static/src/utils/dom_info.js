@@ -101,12 +101,18 @@ export function hasClass(node, props) {
  * Note: The direction of the editable is set on its "dir" attribute, to the
  * value of the "direction" option on instantiation of the editor.
  *
+ * We asume the direction is 'ltr' by default if the editable dir attribhute is
+ * not set.
+ *
  * @param {Node} node
  * @param {Element} editable
  * @returns {boolean}
  */
 export function isDirectionSwitched(node, editable) {
-    const defaultDirection = editable.getAttribute("dir");
+    const defaultDirection = editable.getAttribute("dir") || 'ltr';
+    console.log("    > isDirectionSwitched : ", getComputedStyle(closestElement(node)).direction !== defaultDirection)
+    console.log("    >  : ", getComputedStyle(closestElement(node)).direction )
+    console.log("    >  : ", defaultDirection)
     return getComputedStyle(closestElement(node)).direction !== defaultDirection;
 }
 
