@@ -12,6 +12,7 @@ import requests
 from urllib.parse import quote
 from datetime import date
 from lxml import etree
+from odoo.exceptions import ValidationError
 
 X_MS_VERSION = '2023-11-03'
 
@@ -190,7 +191,7 @@ class _BlobSharedAccessHelper:
         return '&'.join([f'{n}={quote(v)}' for n, v in self.query_dict.items() if v is not None and n not in exclude])
 
 
-class UserDelegationKey(object):
+class UserDelegationKey:
     """
     Represents a user delegation key, provided to the user by Azure Storage
     based on their Azure Active Directory access token.
@@ -369,7 +370,7 @@ def get_user_delegation_key(
     }
     token_response = requests.post(token_url, data=token_data, timeout=5)
     if token_response.status_code != 200:
-        raise Exception(f"Failed to get access token: {token_response.content}")
+        raise ValidationError(f"Failed to get access token: {token_response.content}")
     access_token = token_response.json()['access_token']
 
     # Generate User Delegation Key using Azure Storage Blob Service REST API
@@ -382,9 +383,12 @@ def get_user_delegation_key(
         'Content-Type': 'application/xml'
     }
 
-    key_response = requests.post(key_request_url, data=key_data, headers=headers, timeout=5)
+    try:
+        key_response = requests.post(key_request_url, data=key_data, headers=headers, timeout=5)
+    except requests.exceptions.ConnectionError:
+        raise ValidationError("Failed to get user delegation key: the account name may be incorrect")
     if key_response.status_code != 200:
-        raise Exception(f"Failed to get user delegation key: {key_response.content}")
+        raise ValidationError(f"Failed to get user delegation key: {key_response.content}")
 
     # Parse the user delegation key from the response
     key_response_xml = etree.fromstring(key_response.content)

@@ -7,6 +7,19 @@ from odoo.addons.cloud_storage.models.ir_attachment import DEFAULT_CLOUD_STORAGE
 
 
 class CloudStorageSettings(models.TransientModel):
+    """
+    Instructions:
+    cloud_storage_provider: Once set, new attachments from the web client can
+        be created as cloud storage attachments. Once unset, new attachments
+        from the web client cannot be uploaded as cloud storage attachments.
+        but existing cloud storage attachments can still be downloaded/deleted.
+    cloud_storage_mim_file_size: a soft limit for the file size that can be
+        uploaded as the cloud storage attachments for web client.
+    cloud_storage_auto_delete: if enabled, the cloud storage blob will be
+        deleted when the attachment is deleted from the server. And the account
+        provided should have the blob deletion permission. If disabled, the
+        administrator needs to manually delete them with scripts.
+    """
     _inherit = 'res.config.settings'
 
     cloud_storage_provider = fields.Selection(

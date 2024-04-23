@@ -8,11 +8,10 @@
         <field name="arch" type="xml">
             <xpath expr="//setting[@id='cloud_storage_provider']" position="inside">
                 <div class="content-group mt16">
-                    <label for="cloud_storage_azure_container_name" class="o_light_label mr8"/>
-                    <field name="cloud_storage_azure_container_name"/>
-                    <br/>
                     <label for="cloud_storage_azure_account_name" class="o_light_label mr8"/>
                     <field name="cloud_storage_azure_account_name"/>
+                    <label for="cloud_storage_azure_container_name" class="o_light_label mr8"/>
+                    <field name="cloud_storage_azure_container_name"/>
                     <label for="cloud_storage_azure_tenant_id" class="o_light_label mr8"/>
                     <field name="cloud_storage_azure_tenant_id"/>
                     <label for="cloud_storage_azure_client_id" class="o_light_label mr8"/>

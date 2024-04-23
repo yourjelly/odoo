@@ -2,10 +2,9 @@
 
 from odoo import models, fields, _
 from odoo.exceptions import UserError
-from odoo.tools import SQL, OrderedSet
+from odoo.tools import SQL
 
 
-# maximum attachment size: 20MB for Outlook, 25MB for Gmail and Yahoo
 DEFAULT_CLOUD_STORAGE_MIN_FILE_SIZE = 20 * (10 ** 6)
 
 
@@ -13,9 +12,15 @@ class CloudStorageProvider(models.AbstractModel):
     _name = 'cloud.storage.provider'
     _description = 'Cloud Storage Provider'
 
-    # Implement the following methods for each cloud storage provider.
-    _cloud_storage_type = None
+    def _generate_blob_name(self, attachment):
+        """
+        Generate a unique blob name for the attachment
+        :param attachment: an ir.attachment record
+        :return: A unique blob name str
+        """
+        return f'{attachment.id}/{attachment.name}'
 
+    # Implement the following methods for each cloud storage provider.
     def _setup(self):
         """
         Setup the cloud storage provider and check the validity of the account
@@ -75,17 +80,14 @@ class CloudStorageProvider(models.AbstractModel):
         """
         raise NotImplementedError()
 
-    def _generate_blob_name(self, attachment):
-        """
-        Generate a unique blob name for the attachment
-        :param attachment: an ir.attachment record
-        :return: A unique blob name str
-        """
-        return f'{attachment.id}/{attachment.name}'
-
 
 class CloudStorageAttachment(models.Model):
     _inherit = 'ir.attachment'
+
+    type = fields.Selection(
+        selection_add=[('cloud_storage', 'Cloud Storage')],
+        ondelete={'cloud_storage': lambda recs: recs.write({'type': 'url'})}
+    )
 
     def unlink(self):
         if self.env['ir.config_parameter'].sudo().get_param('cloud_storage_auto_delete', True):
@@ -94,7 +96,7 @@ class CloudStorageAttachment(models.Model):
             # ``ir_cron_cloud_storage_blobs_delete_action``
             self.env['cloud.storage.blob.to.delete'].sudo().create([{
                 'url': attach.url,
-            } for attach in self if attach.type.startswith('cloud_storage_')])
+            } for attach in self if attach.type == 'cloud_storage'])
         return super().unlink()
 
     def _post_add_create(self, **kwargs):
@@ -105,7 +107,7 @@ class CloudStorageAttachment(models.Model):
             for record in self:
                 record.write({
                     'raw': False,
-                    'type': self.env['cloud.storage.provider']._cloud_storage_type,
+                    'type': 'cloud_storage',
                     'url': self.env['cloud.storage.provider']._generate_url(record)
                 })
 

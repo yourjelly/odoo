@@ -2,16 +2,21 @@
 
 from . import models
 from odoo.exceptions import UserError
+from odoo.tools import SQL
+from .models.cloud_storage_google import GOOGLE_CLOUD_STORAGE_ENDPOINT
 
 def uninstall_hook(env):
     cr = env.cr
-    cr.execute(
+    cr.execute(SQL(
         """
             SELECT type
             FROM ir_attachment
-            WHERE type = 'cloud_storage_google'
+            WHERE type = 'cloud_storage'
+            AND url LIKE %s
             LIMIT 1
-        """)
+        """,
+        GOOGLE_CLOUD_STORAGE_ENDPOINT + '/%%'
+    ))
     if cr.fetchone():
         raise UserError('Some Google attachments are in use, please migrate cloud storages before uninstall this module')
     cr.execute("""

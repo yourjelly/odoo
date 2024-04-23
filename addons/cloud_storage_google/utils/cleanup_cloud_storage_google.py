@@ -77,14 +77,14 @@ def list_blob_urls(bucket_name, batch_size=1000):
 
 
 def get_blobs_to_be_deleted(blob_urls):
-    common = xmlrpc.client.ServerProxy('{}/xmlrpc/2/common'.format(odoo_url))
+    common = xmlrpc.client.ServerProxy(f'{odoo_url}/xmlrpc/2/common')
     uid = common.authenticate(odoo_db, odoo_username, odoo_password, {})
-    models = xmlrpc.client.ServerProxy('{}/xmlrpc/2/object'.format(odoo_url))
+    models = xmlrpc.client.ServerProxy(f'{odoo_url}/xmlrpc/2/object')
     attachments = models.execute_kw(odoo_db, uid, odoo_password, 'ir.attachment', 'search_read', [
         [('type', '=', 'cloud_storage_google'), ('url', 'in', blob_urls)],
         ['url']
     ])
-    used_urls = set(attachment['url'] for attachment in attachments)
+    used_urls = {attachment['url'] for attachment in attachments}
     return [blob_url for blob_url in blob_urls if blob_url not in used_urls]
 
 

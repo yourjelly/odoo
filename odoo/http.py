@@ -542,7 +542,7 @@ class Stream:
             self.last_modified = attachment.write_date
             self.size = len(self.data)
 
-        elif attachment.type.startswith('cloud_storage_'):
+        elif attachment.type == 'cloud_storage':
             self.type = 'url'
             info = attachment.env['cloud.storage.provider']._generate_download_info(attachment)
             self.url = info['url']

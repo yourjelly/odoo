@@ -12,7 +12,7 @@ try:
 except ImportError:
     service_account = Request = None
 
-from odoo import models, fields, _
+from odoo import models, _
 from odoo.exceptions import ValidationError
 from odoo.tools import ormcache
 
@@ -25,7 +25,6 @@ class CloudStorageGoogle(models.AbstractModel):
     _inherit = 'cloud.storage.provider'
     _description = 'Google Cloud Storage'
 
-    _cloud_storage_type = 'cloud_storage_google'
     _url_pattern = re.compile(rf'{GOOGLE_CLOUD_STORAGE_ENDPOINT}/(?P<bucket_name>[\w\-.]+)/(?P<blob_name>[^?]+)')
 
     def _get_info_from_url(self, url):
@@ -96,15 +95,6 @@ class CloudStorageGoogle(models.AbstractModel):
         if patch_response.status_code != 200:
             raise ValidationError(_('The account info is not allowed to set the bucket CORS.\n%s', str(patch_response.text)))
 
-        # promise the signed url can be matched correctly
-        signed_url = self._generate_signed_url(bucket_name, blob_name)
-        try:
-            info = self._get_info_from_url(signed_url)
-            assert info['bucket_name'] == bucket_name
-            assert info['blob_name'] == blob_name
-        except Exception as e:
-            raise ValidationError(_('The signed url cannot be matched correctly.\n%s', str(e)))
-
     def _get_configuration(self):
         configuration = {
             'bucket_name': self.env['ir.config_parameter'].get_param('cloud_storage_google_bucket_name'),
@@ -147,12 +137,3 @@ class CloudStorageGoogle(models.AbstractModel):
             else:
                 deleted_blob_ids.append(blob.id)
         blobs.browse(deleted_blob_ids).unlink()
-
-
-class CloudStorageAttachment(models.Model):
-    _inherit = 'ir.attachment'
-
-    type = fields.Selection(
-        selection_add=[(CloudStorageGoogle._cloud_storage_type, CloudStorageGoogle._description)],
-        ondelete={CloudStorageGoogle._cloud_storage_type: lambda recs: recs.write({'type': 'url'})}
-    )
