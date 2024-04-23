@@ -130,9 +130,12 @@
                 <div class="leftpane d-flex flex-column flex-grow-1 w-100 h-100 h-lg-100 bg-200" t-if="!ui.isSmall || pos.ticket_screen_mobile_pane === 'right'">
                     <t t-set="_selectedSyncedOrder" t-value="getSelectedOrder()" />
                     <t t-set="_selectedOrderlineId" t-value="getSelectedOrderlineId()" />
-                    <t t-if="_selectedSyncedOrder?.get_orderlines()?.length" > 
+                    <t t-if="_selectedSyncedOrder">
                         <div t-if="isOrderSynced" t-att-class="{ 'highlight text-danger': state.highlightHeaderNote }" class="text-bg-view py-2 px-3 border-bottom" >
                             Select the product(s) to refund and set the quantity
+                        </div>
+                        <div t-if="_selectedSyncedOrder.lines.length === 0">
+                            <t t-esc="_selectedSyncedOrder.pos_reference" /> has no lines
                         </div>
                         <OrderWidget lines="_selectedSyncedOrder.lines" t-slot-scope="scope"
                             total="env.utils.formatCurrency(_selectedSyncedOrder.get_total_with_tax())"

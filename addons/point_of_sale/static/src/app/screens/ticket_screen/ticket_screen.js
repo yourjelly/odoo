@@ -100,6 +100,12 @@ export class TicketScreen extends Component {
         this.state.page = 1;
     }
     onClickOrder(clickedOrder) {
+        console.log(
+            "CLICKED ORDER:",
+            clickedOrder.pos_reference,
+            "NLINES:",
+            clickedOrder.lines.length
+        );
         this.state.selectedOrder = clickedOrder;
         this.numberBuffer.reset();
         if ((!clickedOrder || clickedOrder.uiState.locked) && !this.getSelectedOrderlineId()) {
