@@ -14,11 +14,12 @@ import { CenteredIcon } from "@point_of_sale/app/generic_components/centered_ico
 import { ReprintReceiptButton } from "@point_of_sale/app/screens/ticket_screen/reprint_receipt_button/reprint_receipt_button";
 import { SearchBar } from "@point_of_sale/app/screens/ticket_screen/search_bar/search_bar";
 import { usePos } from "@point_of_sale/app/store/pos_hook";
-import { Component, onMounted, useState } from "@odoo/owl";
+import { Component, onWillStart, useState } from "@odoo/owl";
 import { Numpad, getButtons } from "@point_of_sale/app/generic_components/numpad/numpad";
 import { ask } from "@point_of_sale/app/store/make_awaitable_dialog";
 import { PosOrderLineRefund } from "@point_of_sale/app/models/pos_order_line_refund";
 import { fuzzyLookup } from "@web/core/utils/search";
+import { ConnectionLostError } from "@web/core/network/rpc";
 
 const { DateTime } = luxon;
 const NBR_BY_PAGE = 30;
@@ -72,12 +73,16 @@ export class TicketScreen extends Component {
         });
         Object.assign(this.state, this.props.stateOverride || {});
 
-        onMounted(this.onMounted);
-    }
-    onMounted() {
-        setTimeout(() => {
-            // Show updated list of synced orders when going back to the screen.
-            this.onFilterSelected(this.state.filter);
+        onWillStart(async () => {
+            try {
+                await this.onFilterSelected(this.state.filter);
+            } catch (error) {
+                if (error instanceof ConnectionLostError) {
+                    this.dialog.add(AlertDialog, {
+                        title: "Failed to connect",
+                    });
+                }
+            }
         });
     }
     async onFilterSelected(selectedFilter) {
@@ -382,11 +387,6 @@ export class TicketScreen extends Component {
         }
 
         if (this.state.filter === "SYNCED") {
-            console.log(
-                "PAID ORDER RANGE:",
-                (this.state.page - 1) * NBR_BY_PAGE,
-                this.state.page * NBR_BY_PAGE
-            );
             return orders
                 .sort((a, b) => {
                     const dateA = DateTime.fromFormat(a.date_order, "yyyy-MM-dd HH:mm:ss");
