@@ -11,7 +11,7 @@ from odoo.addons.rating.models import rating_data
 from odoo.addons.web_editor.tools import handle_history_divergence
 from odoo.exceptions import UserError, ValidationError, AccessError
 from odoo.osv import expression
-from odoo.tools import format_list
+from odoo.tools import format_list, Query, SQL, create_index
 from odoo.addons.resource.models.utils import filter_domain_leaf
 
 
@@ -296,6 +296,12 @@ class Task(models.Model):
         ('private_task_has_no_parent', 'CHECK (NOT (project_id IS NULL AND parent_id IS NOT NULL))', "A private task cannot have a parent."),
     ]
 
+    def init(self):
+        create_index(self.env.cr, 'open_tasks', self._table, [
+            "project_id",
+            self.env.cr._format(self._field_to_sql(self._table, 'closed')),
+        ])
+
     @api.constrains('company_id', 'partner_id')
     def _ensure_company_consistency_with_partner(self):
         """ Ensures that the company of the task is valid for the partner. """
@@ -339,15 +345,14 @@ class Task(models.Model):
     def _search_is_closed(self, operator, value):
         if operator not in ('=', '!=') or not isinstance(value, bool):
             raise NotImplementedError(_('The search does not support the %s operator or %s value.', operator, value))
-        if (operator == '!=' and value) or (operator == '=' and not value):
-            searched_states = self.OPEN_STATES
-        else:
-            searched_states = list(CLOSED_STATES.keys())
-        domain = [
-            ('state', 'in', searched_states)
-        ]
-        return domain
-
+        target = 'false'
+        if (operator == '!=') ^ value:
+            target = 'true'
+        return SQL(
+            "(%s = %s)",
+            self._field_to_sql(self._table, 'is_closed'),
+            target
+        )
 
     @property
     def OPEN_STATES(self):
@@ -833,6 +838,24 @@ class Task(models.Model):
     # ------------------------------------------------
     # CRUD overrides
     # ------------------------------------------------
+
+    def _field_to_sql(self, alias: str, fname: str, query: (Query | None) = None, flush: bool = True) -> SQL:
+        if fname != 'is_closed':
+            return super()._field_to_sql(alias, fname, query, flush)
+        # cast as text to avoid postgres trying to be smart about array comparison
+        return SQL("CAST(%s = ANY(%s) AS text)", SQL.identifier(self._table, 'state'), list(CLOSED_STATES))
+
+    def _order_field_to_sql(self, alias: str, field_name: str, direction: SQL, nulls: SQL, query: Query) -> SQL:
+        if field_name != 'is_closed':
+            return super()._order_field_to_sql(alias, field_name, direction, nulls, query)
+        return self._field_to_sql(alias, field_name, query)  # avoid COALESCE(*, FALSE)
+
+    def _read_group_groupby(self, groupby_spec: str, query: Query) -> SQL:
+        fname, _property_name, _granularity = models.parse_read_group_spec(groupby_spec)
+        if fname != 'is_closed':
+            return super()._read_group_groupby(groupby_spec, query)
+        return self._field_to_sql(self._table, fname, query)  # avoid COALESCE(*, FALSE)
+
     @api.model
     def fields_get(self, allfields=None, attributes=None):
         fields = super().fields_get(allfields=allfields, attributes=attributes)

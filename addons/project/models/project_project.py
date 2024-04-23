@@ -22,25 +22,6 @@ class Project(models.Model):
     _rating_satisfaction_days = 30  # takes 30 days by default
     _systray_view = 'activity'
 
-    def _compute_task_count(self):
-        project_and_state_counts = self.env['project.task'].with_context(
-            active_test=any(project.active for project in self)
-        )._read_group(
-            [('project_id', 'in', self.ids)],
-            ['project_id', 'state'],
-            ['__count'],
-        )
-        task_counts_per_project_id = defaultdict(lambda: {
-            'open_task_count': 0,
-            'closed_task_count': 0,
-        })
-        for project, state, count in project_and_state_counts:
-            task_counts_per_project_id[project.id]['closed_task_count' if state in CLOSED_STATES else 'open_task_count'] += count
-        for project in self:
-            open_task_count, closed_task_count = task_counts_per_project_id[project.id].values()
-            project.open_task_count = open_task_count
-            project.task_count = open_task_count + closed_task_count
-
     def _default_stage_id(self):
         # Since project stages are order by sequence first, this should fetch the one with the lowest sequence number.
         return self.env['project.project.stage'].search([], limit=1)
@@ -90,7 +71,7 @@ class Project(models.Model):
         'resource.calendar', string='Working Time', compute='_compute_resource_calendar_id')
     type_ids = fields.Many2many('project.task.type', 'project_task_type_rel', 'project_id', 'type_id', string='Tasks Stages')
     task_count = fields.Integer(compute='_compute_task_count', string="Task Count")
-    open_task_count = fields.Integer(compute='_compute_task_count', string="Open Task Count")
+    open_task_count = fields.Integer(compute='_compute_open_task_count', string="Open Task Count")
     task_ids = fields.One2many('project.task', 'project_id', string='Tasks',
                                domain=lambda self: [('is_closed', '=', False)])
     color = fields.Integer(string='Color Index')
@@ -185,6 +166,24 @@ class Project(models.Model):
                 order=f"sequence asc, {self.env['project.project.stage']._order}",
                 limit=1,
             ).id
+
+    def _compute_open_task_count(self):
+        project2count = dict(self.env['project.task']._read_group(
+            domain=[('project_id', 'in', self.ids), ('is_closed', '=', False)],
+            groupby=['project_id'],
+            aggregates=['__count'],
+        ))
+        for project in self:
+            project.open_task_count = project2count.get(project, 0)
+
+    def _compute_task_count(self):
+        project2count = dict(self.env['project.task']._read_group(
+            domain=[('project_id', 'in', self.ids)],
+            groupby=['project_id'],
+            aggregates=['__count'],
+        ))
+        for project in self:
+            project.task_count = project2count.get(project, 0)
 
     @api.depends('milestone_ids', 'milestone_ids.is_reached', 'milestone_ids.deadline')
     def _compute_next_milestone_id(self):
