@@ -104,7 +104,13 @@ export class TicketScreen extends Component {
             "CLICKED ORDER:",
             clickedOrder.pos_reference,
             "NLINES:",
-            clickedOrder.lines.length
+            clickedOrder.lines.length,
+            "CONTENT:",
+            JSON.stringify(
+                clickedOrder.lines.map((l) => l.serialize()),
+                null,
+                2
+            )
         );
         this.state.selectedOrder = clickedOrder;
         this.numberBuffer.reset();

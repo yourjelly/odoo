@@ -903,15 +903,6 @@ export class PosStore extends Reactive {
                 }
             );
 
-            const paidOrder = data["pos.order"].find((o) => o.state != "draft");
-            if (paidOrder) {
-                const paidOrderline = paidOrder.lines[0];
-                console.log(
-                    `------ AAAAAAAAAAA PAID ORDER '${paidOrder.pos_reference}' FIRST LINE:`,
-                    paidOrderline && JSON.stringify(paidOrderline.serialize(), null, 2)
-                );
-            }
-
             const serverOrders = data["pos.order"];
             for (const localO of localOrders) {
                 const serverO = serverOrders.find((o) => o.uuid === localO.uuid);
