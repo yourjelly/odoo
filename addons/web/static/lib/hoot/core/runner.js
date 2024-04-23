@@ -891,6 +891,7 @@ export class TestRunner {
                             for (const callbackRegistry of callbackChain) {
                                 await callbackRegistry.call("after-suite", suite);
                             }
+                            suite.callbacks.clear();
                         });
 
                         suite.parent?.reporting.add({ suites: +1 });
