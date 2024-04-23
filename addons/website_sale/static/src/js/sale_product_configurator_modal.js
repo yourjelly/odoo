@@ -163,7 +163,7 @@ export const OptionalProductsModal = Dialog.extend(VariantMixin, {
         return def.then(function () {
             // This has to be triggered to compute the "out of stock" feature
             self._opened.then(function () {
-                self.triggerVariantChange(self.$el);
+                self.triggerVariantChange(self.el);
             });
         });
     },

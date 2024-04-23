@@ -14,10 +14,11 @@ publicWidget.registry.WebsiteSale.include({
     //--------------------------------------------------------------------------
 
     _onProductReady: function () {
+        debugger;
         if (this.isBuyNow) {
             return this._submitForm();
         }
-        this.optionalProductsModal = new OptionalProductsModal(this.$form, {
+        this.optionalProductsModal = new OptionalProductsModal(this.form, {
             rootProduct: this.rootProduct,
             isWebsite: true,
             okButtonText: _t('Proceed to Checkout'),
@@ -57,19 +58,19 @@ publicWidget.registry.WebsiteSale.include({
      * @param {integer} quantity
      */
     _onOptionsUpdateQuantity: function (quantity) {
-        var $qtyInput = this.$form
-            .find('.js_main_product input[name="add_qty"]')
-            .first();
+        debugger;
+        const qtyInput = this.form.querySelector('.js_main_product input[name="add_qty"]');
 
-        if ($qtyInput.length) {
-            $qtyInput.val(quantity).trigger('change');
+        if (qtyInput) {
+            qtyInput.value = quantity;
+            qtyInput.dispatchEvent(new Event('change'));
         } else {
             // This handles the case when the "Select Quantity" customize show
             // is disabled, and therefore the above selector does not find an
             // element.
             // To avoid duplicating all RPC, only trigger the variant change if
             // it is not already done from the above trigger.
-            this.optionalProductsModal.triggerVariantChange(this.optionalProductsModal.$el);
+            this.optionalProductsModal.triggerVariantChange(this.optionalProductsModal.el);
         }
     },
 
