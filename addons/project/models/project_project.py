@@ -460,6 +460,11 @@ class Project(models.Model):
             for vals in vals_list:
                 if 'label_tasks' in vals and not vals['label_tasks']:
                     vals['label_tasks'] = task_label
+        for vals in vals_list:
+            if 'partner_id' in vals and vals['partner_id'] and ('company_id' in vals and not vals['company_id']):
+                partner_company_id = self.env['res.partner'].browse(vals['partner_id']).company_id
+                if partner_company_id:
+                    vals['company_id'] = partner_company_id.id
         if len(self.env.companies) > 1 and self.env.user.has_group('project.group_project_stages'):
             # Select the stage whether the default_stage_id field is set in context (quick create) or if it is not (normal create)
             stage = self.env['project.project.stage'].browse(self._context['default_stage_id']) if 'default_stage_id' in self._context else self._default_stage_id()
