@@ -762,6 +762,7 @@ export class TicketScreen extends Component {
             .map((info) => info[0]);
 
         if (idsNotInCacheOrOutdated.length > 0) {
+            console.log("SOMETHING NOT IN CACHE:", [...idsNotInCacheOrOutdated]);
             await this.pos.data.read("pos.order", Array.from(new Set(idsNotInCacheOrOutdated)));
         }
     }
