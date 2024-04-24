@@ -16,9 +16,9 @@
                                  id="cloud_storage_min_file_size">
                             <field name="cloud_storage_min_file_size"/>
                         </setting>
-                        <setting help="Automatically delete the blob from the cloud storage when the attachment is deleted from the server."
-                                 id="cloud_storage_auto_delete">
-                            <field name="cloud_storage_auto_delete"/>
+                        <setting help="Manually delete the blob from the cloud storage when the attachment is deleted from the server."
+                                 id="cloud_storage_manual_delete">
+                            <field name="cloud_storage_manual_delete"/>
                         </setting>
                         <div class="mt8">
                             <button type="action" name="%(cloud_storage.action_cloud_storage_blob_to_delete)d" string="Cloud Storage Blobs To Delete" icon="oi-arrow-right" class="btn-link"/>
