@@ -2,17 +2,23 @@
 <odoo>
 
 <template id="s_call_to_action" name="Call to Action">
-    <section class="s_call_to_action o_cc o_cc3 pt48 pb24">
+    <section class="s_call_to_action o_cc o_cc2 pt64 pb64">
         <div class="container">
-            <div class="row">
-                <div class="col-lg-9 pb16">
-                    <h3><b>50,000+ companies</b> run Odoo to grow their businesses.</h3>
-                    <p>Join us and make your company a better place.</p>
+            <div class="row align-items-center">
+                <div class="col-lg-9">
+                    <h2>50,000+ companies run Odoo to <strong class="text-primary">grow their businesses.</strong></h2>
+                    <p class="lead">Use this section to increase engagement and conversion.</p>
                 </div>
-                <div class="col-lg-3 pt8">
-                    <p style="text-align: right;">
-                        <a t-att-href="cta_btn_href" class="btn btn-primary btn-lg"><t t-esc="cta_btn_text">Contact us</t></a>
-                    </p>
+                <div class="col-lg-3 card border-0 p-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <h5 class="card-title">What you will get</h5>
+                        <ul class="list-group list-group-flush pt-3 pb-4">
+                            <li class="list-group-item border-0 px-0"><i class="fa fa-check me-2 rounded-pill p-1 text-primary bg-primary-subtle"/>Wonderful experience</li>
+                            <li class="list-group-item border-0 px-0"><i class="fa fa-check me-2 rounded-pill p-1 text-primary bg-primary-subtle"/>Quick support</li>
+                            <li class="list-group-item border-0 px-0"><i class="fa fa-check me-2 rounded-pill p-1 text-primary bg-primary-subtle"/>Access to our latest content</li>
+                        </ul>
+                        <a t-att-href="cta_btn_href" class="btn btn-primary w-100"><t t-esc="cta_btn_text">Contact us</t></a>
+                    </div>
                 </div>
             </div>
         </div>
