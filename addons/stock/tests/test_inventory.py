@@ -187,7 +187,6 @@ class TestInventory(TransactionCase):
         has been reserved correctly frees the reservation. After that, add products to stock and check
         that they're used if the user encodes more than what's available through the chain
         """
-        breakpoint()
         # add 10 products to stock
         inventory_quant = self.env['stock.quant'].create({
             'location_id': self.stock_location.id,
