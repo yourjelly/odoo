@@ -714,7 +714,7 @@ blockquote {
                 }
             }
             .accordion .accordion-item:has(.collapsed) .accordion-button::after {
-                background-image: str-replace($accordion-button-icon, "inherit", str-replace(#{color-contrast($-bg-color)}, "#", "%23"));
+                filter: if(lightness(color-contrast(map-get($colors, 'o-cc#{$index}-bg'))) > 50%, invert(100%), none);
             }
         }
     }
