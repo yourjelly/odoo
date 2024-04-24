@@ -92,7 +92,7 @@ var SnippetEditor = Widget.extend({
         this.templateOptions = templateOptions;
         this.isTargetParentEditable = false;
         this.isTargetMovable = false;
-        this.$scrollingElement = $().getScrollingElement(this.$editable[0].ownerDocument);
+        this.$scrollingElement = dom.getScrollingElement(this.$editable[0].ownerDocument);
         if (!this.$scrollingElement[0]) {
             this.$scrollingElement = $(this.ownerDocument).find('.o_editable');
         }
@@ -849,7 +849,7 @@ var SnippetEditor = Widget.extend({
         const $scrollable = modalAncestorEl && $(modalAncestorEl)
             || (this.options.$scrollable)
             || (this.$scrollingElement.length && this.$scrollingElement)
-            || $().getScrollingElement(this.ownerDocument);
+            || dom.getScrollingElement(this.ownerDocument);
         const dragAndDropOptions = {
             ref: { el: element },
             elements: elementsSelector,
@@ -2073,7 +2073,7 @@ class SnippetsMenu extends Component {
 
         // Hide the active overlay when scrolling.
         // Show it again and recompute all the overlays after the scroll.
-        this.$scrollingElement = $().getScrollingElement(this.$body[0].ownerDocument);
+        this.$scrollingElement = dom.getScrollingElement(this.$body[0].ownerDocument);
         if (!this.$scrollingElement[0]) {
             this.$scrollingElement = $(this.ownerDocument).find('.o_editable');
         }
@@ -3333,7 +3333,7 @@ class SnippetsMenu extends Component {
         let $dropZones;
 
         let dragAndDropResolve;
-        let $scrollingElement = $().getScrollingElement(this.$body[0].ownerDocument);
+        let $scrollingElement = dom.getScrollingElement(this.$body[0].ownerDocument);
         if (!$scrollingElement[0]) {
             $scrollingElement = $(this.ownerDocument).find('.o_editable');
         }

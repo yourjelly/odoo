@@ -44,6 +44,29 @@ var dom = {
 
         return $results;
     },
+
+    getScrollingElement: function(document = window.document) {
+        const $baseScrollingElement = $(document.scrollingElement);
+        if ($baseScrollingElement.isScrollable()
+                && $baseScrollingElement[0].scrollHeight > $baseScrollingElement[0].clientHeight) {
+            return $baseScrollingElement;
+        }
+        const bodyHeight = document.body.getBoundingClientRect().height;
+        for (const el of document.body.children) {
+            // Search for a body child which is at least as tall as the body
+            // and which has the ability to scroll if enough content in it. If
+            // found, suppose this is the top scrolling element.
+            if (bodyHeight - el.scrollHeight > 1.5) {
+                continue;
+            }
+            const $el = $(el);
+            if ($el.isScrollable()) {
+                return $el;
+            }
+        }
+        return $baseScrollingElement;
+    },
+    
     /**
      * Renders a button with standard odoo template. This does not use any xml
      * template to avoid forcing the frontend part to lazy load a xml file for

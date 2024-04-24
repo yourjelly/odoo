@@ -46,7 +46,7 @@ class TestMailingUi(MassMailCommon, HttpCaseWithUserDemo):
                 (4, self.env.ref('mass_mailing.group_mass_mailing_campaign').id),
             ],
         })
-        self.start_tour("/web", 'mailing_campaign', login="user_marketing")
+        self.start_tour("/web", 'mailing_campaign', login="user_marketing", debug=True)
 
     def test_mailing_editor_tour(self):
         mailing = self.env['mailing.mailing'].search([('subject', '=', 'TestFromTour')], limit=1)
