@@ -77,7 +77,7 @@ export const WebsiteSale = publicWidget.Widget.extend(VariantMixin, cartHandlerM
 
         listenSizeChange(() => {
             if (uiUtils.getSize() === SIZES.XL) {
-                this.el.querySelector('.toggle_summary_div').classList.add('d-none d-xl-block');
+                document.querySelector('.toggle_summary_div').classList.add('d-none d-xl-block');
             }
         })
 

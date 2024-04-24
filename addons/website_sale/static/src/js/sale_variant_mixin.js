@@ -135,7 +135,7 @@ var VariantMixin = {
             customInput = target;
         } else if (target.tagName === 'SELECT') {
             variantContainer = target.closest('li');
-            customInput = target.find('option[value="' + $target.val() + '"]');
+            customInput = target.querySelector('option[value="' + target.value + '"]');
         }
 
         if (variantContainer) {
@@ -165,7 +165,7 @@ var VariantMixin = {
                     }
                 }
             } else {
-                variantContainer.querySelector('.variant_custom_value').remove();
+                variantContainer.querySelector('.variant_custom_value')?.remove();
             }
         }
     },

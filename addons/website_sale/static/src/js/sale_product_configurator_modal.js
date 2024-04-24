@@ -77,9 +77,9 @@ export const OptionalProductsModal = Dialog.extend(VariantMixin, {
      * @override
      */
     willStart: function () {
-        var self = this;
+        let self = this;
 
-        var getModalContent = rpc("/sale_product_configurator/show_advanced_configurator", {
+        let getModalContent = rpc("/sale_product_configurator/show_advanced_configurator", {
             mode: self.mode,
             product_id: self.rootProduct.product_id,
             variant_values: self.rootProduct.variant_values,
@@ -93,9 +93,11 @@ export const OptionalProductsModal = Dialog.extend(VariantMixin, {
         })
         .then(function (modalContent) {
             if (modalContent) {
-                var $modalContent = $(modalContent);
-                $modalContent = self._postProcessContent($modalContent);
-                self.$content = $modalContent;
+                modalContent = new DOMParser().parseFromString(modalContent, 'text/html');
+                modalContent = modalContent.querySelector('main.modal-body');
+                debugger;
+                modalContent = self._postProcessContent(modalContent);
+                self.content = modalContent;
             } else {
                 self.trigger('options_empty');
                 self.preventOpening = true;
@@ -114,13 +116,17 @@ export const OptionalProductsModal = Dialog.extend(VariantMixin, {
      * @override
      */
     open: function (options) {
-        $('.tooltip').remove(); // remove open tooltip if any to prevent them staying when modal is opened
+        // remove open tooltip if any to prevent them staying when modal is opened
+        document.querySelectorAll('.tooltip').forEach(tooltip => tooltip.remove());
 
-        var self = this;
-        this.appendTo($('<div/>')).then(function () {
+        let self = this;
+        const divEl = document.createElement('div');
+        this.appendTo(divEl).then(function () {
+            debugger;
             if (!self.preventOpening) {
-                self.$modal.find(".modal-body").replaceWith(self.$el);
-                self.$modal.attr('open', true);
+                debugger;
+                self.$modal[0].querySelector(".modal-body").replaceWith(self.el);
+                self.$modal[0].setAttribute('open', true);
                 self.$modal.appendTo(self.container);
                 const modal = new Modal(self.$modal[0], {
                     focus: true,
@@ -141,18 +147,19 @@ export const OptionalProductsModal = Dialog.extend(VariantMixin, {
      * @override
      */
     start: function () {
-        var def = this._super.apply(this, arguments);
-        var self = this;
-
-        this.$el.find('input[name="add_qty"]').val(this.rootProduct.quantity);
+        const def = this._super.apply(this, arguments);
+        const self = this;
+        const qtyInputEl = this.el.querySelector('input[name="add_qty"]');
+        if (qtyInputEl) {
+            qtyInputEl.value = this.rootProduct.quantity;
+        }
 
         // set a unique id to each row for options hierarchy
-        var $products = this.$el.find('tr.js_product').toArray();
-        $products.forEach((el) => {
-            var $el = $(el);
-            var uniqueId = self._getUniqueId(el);
+        const products = this.el.querySelectorAll('tr.js_product');
+        [...products].forEach((el) => {
+            const uniqueId = self._getUniqueId(el);
 
-            var productId = parseInt($el.find('input.product_id').val(), 10);
+            const productId = parseInt(el.querySelector('input.product_id').value, 10);
             if (productId === self.rootProduct.product_id) {
                 self.rootProduct.unique_id = uniqueId;
             } else {
@@ -184,6 +191,7 @@ export const OptionalProductsModal = Dialog.extend(VariantMixin, {
      * @public
      */
     getAndCreateSelectedProducts: async function () {
+        debugger;
         var self = this;
         const products = [];
         let productCustomVariantValues;
@@ -225,49 +233,46 @@ export const OptionalProductsModal = Dialog.extend(VariantMixin, {
      * @private
      */
     _postProcessContent: function ($modalContent) {
-        var productId = this.rootProduct.product_id;
-        $modalContent
-            .find('img:first')
-            .attr("src", "/web/image/product.product/" + productId + "/image_128");
+        debugger;
+        const productId = this.rootProduct.product_id;
+        let firstImg = modalContent.querySelector('img:first-child');
+        firstImg.src = "/web/image/product.product/" + productId + "/image_128";
 
         if (this.rootProduct &&
                 (this.rootProduct.product_custom_attribute_values ||
                  this.rootProduct.no_variant_attribute_values)) {
-            var $productDescription = $modalContent
-                .find('.main_product')
-                .find('td.td-product_name div.text-muted.small > div:first');
-            var $updatedDescription = $('<div/>');
-            $updatedDescription.append($('<p>', {
-                text: $productDescription.text()
-            }));
-            $.each(this.rootProduct.product_custom_attribute_values, function () {
+            const productDescription = modalContent.querySelector('.main_product td.td-product_name div.text-muted.small > div:first-child');
+            let updatedDescription = document.createElement('div');
+            let p = document.createElement('p');
+            p.textContent = productDescription.textContent;
+            updatedDescription.append(p);
+            this.rootProduct.product_custom_attribute_values.forEach(() => {
                 if (this.custom_value) {
-                    const $customInput = $modalContent
-                        .find(".main_product [data-is_custom='True']")
-                        .closest(`[data-value_id='${this.custom_product_template_attribute_value_id.res_id}']`);
-                    $customInput.attr('previous_custom_value', this.custom_value);
-                    VariantMixin.handleCustomValues($customInput);
+                    const customInput = modalContent.querySelector(".main_product [data-is_custom='True']")
+                    .closest(`[data-value_id='${this.custom_product_template_attribute_value_id.res_id}']`);
+                customInput.setAttribute('previous_custom_value', this.custom_value);
+                VariantMixin.handleCustomValues(customInput);
                 }
             });
 
-            $.each(this.rootProduct.no_variant_attribute_values, function () {
+            this.rootProduct.no_variant_attribute_values.forEach( () => {
                 if (this.is_custom !== 'True') {
-                    var $currentDescription = $updatedDescription.find(`div[name=ptal-${this.id}]`);
-                    if ($currentDescription?.length > 0) { // one row per multicheckbox
-                        $currentDescription.text($currentDescription.text() + ', ' + this.attribute_value_name);
+                    let currentDescription = updatedDescription.querySelector(`div[name=ptal-${this.id}]`);
+                    if (currentDescription?.length > 0) { // one row per multicheckbox
+                        currentDescription.textContent += ', ' + this.attribute_value_name;
                     } else {
-                        $updatedDescription.append($('<div>', {
-                            text: this.attribute_name + ': ' + this.attribute_value_name,
-                            name: `ptal-${this.id}`,
-                        }));
+                        let newDiv = document.createElement('div');
+                        newDiv.textContent = this.attribute_name + ': ' + this.attribute_value_name;
+                        newDiv.setAttribute('name', `ptal-${this.id}`);
+                        updatedDescription.appendChild(newDiv);
                     }
                 }
             });
 
-            $productDescription.replaceWith($updatedDescription);
+            productDescription.parentNode.replaceChild(updatedDescription, productDescription);
         }
 
-        return $modalContent;
+        return modalContent;
     },
 
     /**
@@ -300,6 +305,7 @@ export const OptionalProductsModal = Dialog.extend(VariantMixin, {
      * @param {MouseEvent} ev
      */
     _onAddOrRemoveOption: function (ev) {
+        debugger;
         ev.preventDefault();
         var self = this;
         var $target = $(ev.currentTarget);
