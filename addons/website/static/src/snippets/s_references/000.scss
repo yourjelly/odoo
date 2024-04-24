@@ -1,4 +1,12 @@
-
-.s_references .img-thumbnail {
-    border: none;
+.s_references_mono {
+    @for $index from 1 through 5 {
+        &.o_cc#{$index} {
+            img {
+                filter: if(lightness(color-contrast(map-get($colors, 'o-cc#{$index}-bg'))) > 50%, brightness(0) invert(1), brightness(0));
+            }
+        }
+    }
+}
+.s_references .img {
+    max-height: 80px;
 }
