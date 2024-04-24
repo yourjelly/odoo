@@ -74,7 +74,7 @@ class CloudStorageAzure(models.AbstractModel):
         if upload_response.status_code != 201:
             raise ValidationError(_('The connection string is not allowed to upload a file to the container.\n%s', str(upload_response.text)))
 
-        if self.env['ir.config_parameter'].sudo().get_param('cloud_storage_manual_delete'):
+        if not self.env['ir.config_parameter'].sudo().get_param('cloud_storage_manual_delete'):
             delete_url = self._generate_sas_url(**blob_info, permission='d')
             delete_response = requests.delete(delete_url, timeout=5)
             if delete_response.status_code != 202:

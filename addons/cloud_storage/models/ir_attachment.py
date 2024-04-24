@@ -90,7 +90,7 @@ class CloudStorageAttachment(models.Model):
     )
 
     def unlink(self):
-        if self.env['ir.config_parameter'].sudo().get_param('cloud_storage_manual_delete'):
+        if not self.env['ir.config_parameter'].sudo().get_param('cloud_storage_manual_delete'):
             # logically delete the cloud storage blobs before unlinking the
             # attachments. The cloud storage blobs will be deleted by cron job
             # ``ir_cron_cloud_storage_blobs_delete_action``

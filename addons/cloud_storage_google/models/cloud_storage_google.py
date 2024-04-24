@@ -69,7 +69,7 @@ class CloudStorageGoogle(models.AbstractModel):
             raise ValidationError(_('The account info is not allowed to access the bucket.\n%s', str(upload_response.text)))
 
         # check blob delete permission
-        if self.env['ir.config_parameter'].sudo().get_param('cloud_storage_manual_delete'):
+        if not self.env['ir.config_parameter'].sudo().get_param('cloud_storage_manual_delete'):
             delete_url = self._generate_signed_url(bucket_name, blob_name, method='DELETE')
             delete_response = requests.delete(delete_url, timeout=5)
             if delete_response.status_code != 204:
