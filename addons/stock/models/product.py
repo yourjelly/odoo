@@ -26,6 +26,7 @@ OPERATORS = {
 class Product(models.Model):
     _inherit = "product.product"
 
+    is_trackable = fields.Boolean(default=False, string="Track inventory")
     stock_quant_ids = fields.One2many('stock.quant', 'product_id') # used to compute quantities
     stock_move_ids = fields.One2many('stock.move', 'product_id') # used to compute quantities
     qty_available = fields.Float(
