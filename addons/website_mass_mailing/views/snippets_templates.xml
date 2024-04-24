@@ -23,11 +23,14 @@ database, without the s_newsletter_list class. See fixNewsletterListClass.
 -->
 <template id="s_newsletter_subscribe_form" name="Newsletter">
     <div class="s_newsletter_subscribe_form s_newsletter_list js_subscribe" data-vxml="001" data-list-id="0" data-name="Newsletter Form">
-        <div class="input-group">
-            <input type="email" name="email" class="js_subscribe_value form-control" placeholder="your email..."/>
+        <div class="input-group mb-2">
+            <input type="email" name="email" class="js_subscribe_value form-control" placeholder="Email address"/>
             <a role="button" href="#" class="btn btn-success js_subscribed_btn d-none o_submit" disabled="disabled">Thanks</a>
             <a role="button" href="#" class="btn btn-primary js_subscribe_btn o_submit">Subscribe</a>
         </div>
+        <small class="text-muted">
+            Sign up with your email address to receive our latest news
+        </small>
     </div>
 </template>
 
@@ -36,7 +39,7 @@ Users upgraded from a version lower than 16.0 may have those blocks in their
 database, without the s_newsletter_list class. See fixNewsletterListClass.
 -->
 <template id="s_newsletter_block" name="Newsletter Block">
-    <section class="s_newsletter_block s_newsletter_list pt32 pb32" data-list-id="0">
+    <section class="s_newsletter_block s_newsletter_list o_cc o_cc2 pt40 pb40" data-list-id="0">
         <div class="container">
             <t t-call="website_mass_mailing.s_newsletter_block_default_template"/>
         </div>
@@ -45,9 +48,11 @@ database, without the s_newsletter_list class. See fixNewsletterListClass.
 
 <template id="s_newsletter_block_default_template" groups="base.group_user">
     <div class="row">
-        <div class="col-lg-8 offset-lg-2 pt24 pb24">
-            <h2>Always First.</h2>
-            <p>Be the first to find out all the latest news, products, and trends.</p>
+        <div class="col-lg-6">
+            <h4>Subscribe to our newsletter</h4>
+            <p>Get all the latest news, blog posts and product updates from our company, delivered directly to your inbox.</p>
+        </div>
+        <div class="col-lg-5 offset-lg-1">
             <t t-snippet-call="website_mass_mailing.s_newsletter_subscribe_form"/>
         </div>
     </div>
