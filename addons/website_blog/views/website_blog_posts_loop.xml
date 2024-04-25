@@ -98,7 +98,7 @@ according to the enabled options.
             <!-- Loop through posts: exclude the first one if already displayed as top banner -->
             <t t-foreach="posts" t-as="blog_post">
                 <!-- Assign 'colWidth': 'col-12' is default for List-View and mobile -->
-                <div t-attf-class="pb-4 col-12 #{colWidth}" t-cache="blog_post,opt_blog_list_view,opt_blog_readable,active_tag_ids">
+                <div t-attf-class="pb-4 col-12 #{colWidth}"  t-cache="blog_post,opt_blog_list_view,opt_blog_readable,active_tag_ids">
                     <article t-attf-class="o_wblog_post position-relative #{'card h-100' if opt_blog_cards_design else ''}" name="blog_post">
                         <!-- List-View Design -->
                         <t t-if="opt_blog_list_view">
@@ -111,7 +111,7 @@ according to the enabled options.
                             <div t-if="opt_posts_loop_show_cover">
                                 <t t-call="website_blog.post_cover_image"/>
                             </div>
-                            <div t-if="is_view_active('website_blog.opt_posts_loop_show_teaser')" t-att-class="opt_blog_cards_design and 'card-body pt-0'">
+                            <div t-nocache="blog_post.tag_ids" t-if="is_view_active('website_blog.opt_posts_loop_show_teaser')" t-att-class="opt_blog_cards_design and 'card-body pt-0'">
                                 <t t-call="website_blog.post_teaser"/>
                             </div>
                             <div t-if="opt_blog_cards_design" t-attf-class="opt_blog_cards_design and 'card-body pt-0 pb-2'}">
@@ -201,22 +201,19 @@ according to the enabled options.
 
 <!-- ======   Sub-Template: Posts list : Posts Teaser + Tags  ============= -->
 <template id="post_teaser">
-    <t t-cache="blog_post,str(active_tag_ids)">
     <a t-attf-href="/blog/#{slug(blog_post.blog_id)}/#{slug(blog_post)}" class="text-reset text-decoration-none">
         <div t-if="opt_blog_list_view" t-field="blog_post.teaser" class="mt-2 o_wblog_read_text"/>
         <div t-else="" t-field="blog_post.teaser" t-attf-class="mt-2 #{opt_blog_readable and 'o_wblog_normalize_font'}"/>
     </a>
-
     <!-- Tags -->
     <div t-if="len(blog_post.tag_ids)" class="o_wblog_post_short_tag_section d-flex align-items-center flex-wrap pt-2">
         <t t-foreach="blog_post.tag_ids" t-as="one_tag">
             <a t-attf-href="#{blog_url(tag=tags_list(active_tag_ids, one_tag.id))}"
-               t-attf-class="badge mb-2 me-1 text-truncate #{one_tag.id in active_tag_ids and 'bg-primary text-light' or 'border text-primary'} post_link"
+               t-attf-class="badge mb-2 me-1 text-truncate post_link o_tag o_tag_color_#{one_tag.color}"
                t-att-rel="len(active_tag_ids) and 'nofollow'"
                t-esc="one_tag.name"/>
         </t>
     </div>
-    </t>
 </template>
 
 
