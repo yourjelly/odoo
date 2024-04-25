@@ -15,5 +15,4 @@ from . import start
 from . import populate
 from . import tsconfig
 from . import neutralize
-from . import genproxytoken
 from . import db

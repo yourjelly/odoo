@@ -112,11 +112,6 @@ Var HWNDPostgreSQLPort
 Var HWNDPostgreSQLUsername
 Var HWNDPostgreSQLPassword
 
-Var ProxyTokenDialog
-Var ProxyTokenLabel
-Var ProxyTokenText
-Var ProxyTokenPwd
-
 !define STATIC_PATH "static"
 !define PIXMAPS_PATH "${STATIC_PATH}\pixmaps"
 
@@ -138,7 +133,6 @@ Var ProxyTokenPwd
 Page Custom ShowPostgreSQL LeavePostgreSQL
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_INSTFILES
-Page Custom ShowProxyTokenDialogPage
 !define MUI_FINISHPAGE_NOAUTOCLOSE
 !define MUI_FINISHPAGE_RUN
 !define MUI_FINISHPAGE_RUN_CHECKED
@@ -304,9 +298,6 @@ Section $(TITLE_IOT) IOT
     WriteIniStr "$INSTDIR\server\odoo.conf" "options" "server_wide_modules" "web,hw_posbox_homepage,hw_drivers"
     WriteIniStr "$INSTDIR\server\odoo.conf" "options" "list_db" "False"
     WriteIniStr "$INSTDIR\server\odoo.conf" "options" "max_cron_threads" "0"
-    nsExec::ExecToStack '"$INSTDIR\python\python.exe" "$INSTDIR\server\odoo-bin" genproxytoken'
-    pop $0
-    pop $ProxyTokenPwd
 SectionEnd
 
 
@@ -534,27 +525,6 @@ Function LeavePostgreSQL
         MessageBox MB_ICONEXCLAMATION|MB_OK $(WARNING_PasswordIsEmpty)
         Abort
     ${EndIf}
-FunctionEnd
-
-Function ShowProxyTokenDialogPage
-    GetCurInstType $R0
-    IntCmp $R0 2 doProxyToken bypassProxyToken
-    doProxyToken:
-        nsDialogs::Create 1018
-        Pop $ProxyTokenDialog
-        ${IF} $ProxyTokenDialog == !error
-            Abort
-        ${EndIf}
-
-        ${NSD_CreateLabel} 0 0 100% 25% "Here is your access token for the Odoo IOT, please write it down in a safe place, you will need it to configure the IOT"
-        Pop $ProxyTokenLabel
-
-        ${NSD_CreateText} 0 30% 100% 13u $ProxyTokenPwd
-        Pop $ProxyTokenText
-        ${NSD_Edit_SetreadOnly} $ProxyTokenText 1
-        ${NSD_AddStyle}  $ProxyTokenText ${SS_CENTER}
-        nsDialogs::Show
-    bypassProxyToken:
 FunctionEnd
 
 Function ComponentLeave
