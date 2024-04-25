@@ -17,6 +17,12 @@ class Post(models.Model):
 
     def _populate_factories(self):
         forum_ids = self.env.registry.populated_models['forum.forum']
+        tag_ids = {
+            tag[0].id: tag[1] for tag in self.env["forum.tag"]._read_group(
+                [('forum_id', 'in', forum_ids)],
+                ['forum_id'],
+                ['id:array_agg'],
+        )}
         hours = [_ for _ in range(1, 49)]
         random = populate.Random('forum_posts')
 
@@ -43,11 +49,17 @@ class Post(models.Model):
                 values.update(last_activity_date=fields.Datetime.subtract(now, days=random.choice(days)))
                 yield values
 
+        def add_tags(values=None, random=None, **kwargs):
+            """Randomly assign 0 to all forum tags to a given post"""
+            tags = tag_ids[values["forum_id"]]
+            return random.choices(tags, k=random.randrange(len(tags)))
+
         return [
             ('forum_id', populate.randomize(forum_ids)),
             ('name', populate.constant('post_{counter}')),
             ('last_activity_date', get_last_activity_date),  # Must be before call to 'create_answers'
             ('child_ids', populate.compute(create_answers)),
+            ('tag_ids', populate.compute(add_tags)),
         ]
 
     def _populate(self, size):

@@ -64,6 +64,22 @@ class WebsiteForum(WebsiteProfile):
         })
         return values
 
+    def _prepare_related_posts(self, post=None, limit=5):
+        if not post or not post.tag_ids:
+            return None
+
+        def _jaccard_similarity(tag_list):
+            set_a = set(post.tag_ids.ids)
+            set_b = set(tag_list.ids)
+            return len(set_a.intersection(set_b)) / len(set_a.union(set_b))
+
+        related_posts = post.search(
+            [('id', '!=', post.id), ('tag_ids', 'in', post.tag_ids.ids)],
+            order='last_activity_date desc, child_count desc, views desc',
+            limit=100,
+        )
+        return related_posts.sorted(lambda p: _jaccard_similarity(p.tag_ids), reverse=True)[:limit]
+
     # Forum
     # --------------------------------------------------
 
@@ -320,6 +336,7 @@ class WebsiteForum(WebsiteProfile):
             'header': {'question_data': True},
             'filters': filters,
             'reversed': reversed,
+            'related_posts': self._prepare_related_posts(post=question)
         })
 
         # increment view counter

@@ -32,6 +32,15 @@ class TestForumController(TestForumCommon):
             'name': 'Post...',
         })
 
+    def forum_tags(self, user, forum, size=10):
+        return self.env['forum.tag'].with_user(user).create([
+            {
+                'name': f'tag_{i}',
+                'forum_id': forum.id,
+            }
+            for i in range(size)
+        ])
+
     def test_prepare_user_values_my_other_forum(self):
         """ Test user other forums values (my_other_forums) in various contexts. """
         employee_2_forum_2_post = self.forum_post(self.user_employee_2, self.forum_2)
@@ -61,3 +70,28 @@ class TestForumController(TestForumCommon):
                     self.assertEqual(self._get_my_other_forums(self.forum_2_website_2), self.forum_1_website_2)
                     employee_2_website_2_forum_2_post.favourite_ids += self.env.user
                     self.assertEqual(self._get_my_other_forums(self.forum_1_website_2), self.forum_2_website_2)
+
+    def test_prepare_related_posts(self):
+        """Test the method returns 5 related posts based on tag similarity"""
+        # Create forum posts and associate them tags
+        forum_tags = self.forum_tags(self.user_admin, self.forum_1)
+        forum_posts = self.env['forum.post'].with_user(self.user_admin).create(
+            [
+                {
+                    'content': 'A post ...',
+                    'forum_id': self.forum_1.id,
+                    'name': 'Post...',
+                    'tag_ids': forum_tags[:i]
+                }
+                for i in range(len(forum_tags) + 1)  # 11 posts with 0 to 10 tags
+            ]
+        )
+        # No post, should return None
+        self.assertEqual(self.controller._prepare_related_posts(), None)
+        # First post (not tags), should return None
+        self.assertEqual(self.controller._prepare_related_posts(post=forum_posts[0]), None)
+        # Second post, most similar posts should be the 5 following posts
+        self.assertEqual(self.controller._prepare_related_posts(post=forum_posts[1]), forum_posts[2:7])
+        # Last post, most similar posts should be the 5 preceding posts in descending order
+        self.assertEqual(self.controller._prepare_related_posts(post=forum_posts[-1]),
+                            forum_posts[len(forum_posts) - 6: -1].sorted(reverse=True))
