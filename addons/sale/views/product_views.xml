@@ -15,8 +15,10 @@
             </field>
             <field name="detailed_type" position="after">
                 <field name="invoice_policy" required="1"/>
-                <field name="expense_policy" widget="radio" invisible="not visible_expense_policy"/>
             </field>
+            <xpath expr="//page[@name='sales']/group[@name='sale']/group[@name='tags']" position="inside">
+                <field name="expense_policy" widget="radio" invisible="not visible_expense_policy"/>
+            </xpath>
             <field name="product_tooltip" position="after">
                 <label for="product_tooltip" string=""
                     invisible="type not in ('product', 'consu') or invoice_policy != 'order'"/>

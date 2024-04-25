@@ -71,7 +71,7 @@ class ProductTemplate(models.Model):
     # list_price: catalog price, user defined
     list_price = fields.Float(
         'Sales Price', default=1.0,
-        digits='Product Price',
+        digits='Product Price', tracking=True,
         help="Price at which the product is sold to customers.",
     )
     standard_price = fields.Float(
@@ -90,8 +90,8 @@ class ProductTemplate(models.Model):
         inverse='_set_weight', store=True)
     weight_uom_name = fields.Char(string='Weight unit of measure label', compute='_compute_weight_uom_name')
 
-    sale_ok = fields.Boolean('Can be Sold', default=True)
-    purchase_ok = fields.Boolean('Can be Purchased', default=True)
+    sale_ok = fields.Boolean('Sales', default=True)
+    purchase_ok = fields.Boolean('Purchase', default=True)
     uom_id = fields.Many2one(
         'uom.uom', 'Unit of Measure',
         default=_get_default_uom_id, required=True,
