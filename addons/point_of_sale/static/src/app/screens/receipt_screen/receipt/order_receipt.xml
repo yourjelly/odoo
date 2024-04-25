@@ -106,7 +106,7 @@
             <!-- Footer -->
            <div t-if="props.data.footer"  class="pos-receipt-center-align" style="white-space:pre-line">
                <br/>
-               <t t-esc="props.data.footer" />
+               <t t-out="props.data.footer" />
                 <br/>
                 <br/>
             </div>

@@ -9,6 +9,7 @@ import { renderToElement } from "@web/core/utils/render";
 import { floatIsZero, roundPrecision } from "@web/core/utils/numbers";
 import { computeComboLines } from "./utils/compute_combo_lines";
 import { changesToOrder } from "./utils/order_change";
+import { markup } from "@odoo/owl";
 
 const { DateTime } = luxon;
 
@@ -107,7 +108,7 @@ export class PosOrder extends Base {
             ticket_code:
                 this.company.point_of_sale_ticket_unique_code && this.finalized && this.ticketCode,
             base_url: baseUrl,
-            footer: this.config.receipt_footer,
+            footer: markup(this.config.receipt_footer),
             // FIXME: isn't there a better way to handle this date?
             shippingDate:
                 this.shipping_date && formatDate(DateTime.fromJSDate(new Date(this.shipping_date))),

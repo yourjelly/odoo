@@ -2,7 +2,7 @@
 /* global waitForWebfonts */
 
 import { Mutex } from "@web/core/utils/concurrency";
-import { markRaw } from "@odoo/owl";
+import { markRaw, markup } from "@odoo/owl";
 import { floatIsZero } from "@web/core/utils/numbers";
 import { registry } from "@web/core/registry";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
@@ -1627,7 +1627,7 @@ export class PosStore extends Reactive {
         return {
             company: this.company,
             cashier: this.get_cashier()?.name,
-            header: this.config.receipt_header,
+            header: markup(this.config.receipt_header),
         };
     }
 
