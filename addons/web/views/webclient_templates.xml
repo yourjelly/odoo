@@ -354,4 +354,191 @@
             </div>
         </t>
     </template>
+
+    <template id="webclient_scoped_app">
+        <t t-call="web.layout">
+            <t t-set="html_data" t-value="{'style': 'height: 100%;'}"/>
+            <t t-set="title" t-value="app_name"/>
+            <t t-set="head">
+                <link rel="apple-touch-icon" href="/web/static/img/odoo-icon-ios.png"/>
+                <link rel="manifest" t-att-href="safe_manifest_url" crossorigin="use-credentials" />
+                <style>
+                    @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&amp;display=swap');
+                </style>
+                <script type="text/javascript">
+                    async function fetchAppManifestData() {
+                        const res = await fetch(document.querySelector("link[rel=manifest").href);
+                        const manifestData = await res.json();
+                        updateUI(manifestData);
+                    }
+                    function updateUI(manifestData) {
+                        const featuresList = [];
+                        if (manifestData.shortcuts.length) {
+                            featuresList.push('Application Shortcuts');
+                        }
+                        if (manifestData.share_target) {
+                            featuresList.push('Share Target');
+                        }
+                        if (featuresList.length) {
+                            const appFeatures = document.querySelector(".appFeatures");
+                            for (const feature of featuresList) {
+                                const el = document.createElement("li");
+                                el.innerText = feature;
+                                appFeatures.querySelector("ul").appendChild(el);
+                            }
+                            appFeatures.classList.remove("d-none");
+                        }
+
+                        if (manifestData.description) {
+                            document.querySelector(".appDescription").innerText = manifestData.description;
+                        }
+                    }
+                    document.addEventListener("DOMContentLoaded", () => {
+                        const cookies = document.cookie.split(';').map(c => c.trim());
+                        if (cookies.includes('color_scheme=dark')) {
+                            document.body.style.backgroundColor = "#262A36";
+                            document.body.style.color = "#FFF";
+                            document.querySelector(".btn-secondary").style.background = "#3C3E4B";
+                            document.querySelector(".btn-secondary").style.color = "#FFF";
+                            document.querySelector(".installBanner").style.background = "#202226";
+                        }
+                        const isBrowserSafari = !/Chrome/i.test(navigator.userAgent) &amp;&amp; navigator.userAgent.includes("Safari");
+                        if (isBrowserSafari) {
+                            // since those platforms don't rely on the beforeinstallprompt event, we handle it ourselves
+                            const isMobileSafari = /(iPad|iPhone|iPod)/i.test(navigator.userAgent);
+                            document.querySelector(".defaultMessage").classList.add("d-none");
+                            document.querySelector(`.safariMessage.${isMobileSafari ? 'mobile' : 'desktop'}`).classList.remove("d-none");
+                        } else if (window.matchMedia("(display-mode: standalone)").matches) {
+                            // we are probably accessing this page from a webview inside the Odoo PWA. Browsers behave differently and not
+                            // all of them allow the user to install the app from a webview. Users might need to open this page from the
+                            // complete browser to get access to installation
+                            document.querySelector(".webviewMessage").classList.remove("d-none");
+                        } else {
+                            document.querySelector(".defaultMessage").classList.remove("d-none");
+                        }
+                        fetchAppManifestData();
+                    });
+                    window.addEventListener("beforeinstallprompt", (ev) => {
+                        if (!window.nativePrompt) {
+                            // first render of the page, show the install UI
+                            document.querySelector(".isInstallable").classList.remove("d-none");
+                            document.querySelector(".webviewMessage").classList.add("d-none");
+                            document.querySelector(".defaultMessage").classList.add("d-none");
+                            window.nativePrompt = ev;
+                            window.callPrompt = async () => {
+                                const res = await window.nativePrompt.prompt();
+                                if (res.outcome === "accepted") {
+                                    document.location.replace("<t t-esc="path"></t>");
+                                }
+                            }
+                        }
+                        ev.preventDefault();
+                    });
+                </script>
+                <style>
+                    body {
+                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Ubuntu, "Noto Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+                    padding:0;
+                    margin:0;
+                    background-color: #fff;
+                    color: rgb(17, 24, 39);
+                    align-items: center;
+                    justify-content: center;
+                    height: 100vh;
+                    width: 100vw;
+                    user-select: none;
+                    }
+                    a {
+                        text-decoration:none;
+                        color:#cf9fc2;
+                    }
+                    button {
+                    background: transparent;
+                    border: none;
+                    border-radius: .25rem;
+                    padding: .5rem 1rem;
+                    cursor: pointer;
+                    font-weight: 500;
+                    }
+                    .btn-primary {
+                    color: #FFF;
+                    background-color: #714B67;
+                    }
+                    .btn-secondary {
+                    background: #E7E9ED;
+                    }
+                    .d-none {
+                        display: none !important;
+                    }
+                    .safariMessage {
+                        width: fit-content;
+                        display: inline-block;
+                        list-style: decimal;
+                    }
+                    .installBanner {
+                        text-align: right;
+                        padding: 20px 5vw;
+                        background:#F3F4F6;
+                    }
+                    .caveat {
+                        font-family: Caveat;
+                    }
+                </style>
+                <meta name="viewport" content="width=device-width, initial-scale=1"/>
+            </t>
+            <div style="display:flex;flex-wrap:wrap;width:100vw;background:#714B67;color:white;padding-bottom:5px;">
+                <button style="width:50px;height:50px;" class="backBtn" onclick="window.close()">
+                    <svg style="transform:rotate(135deg);" xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="-7 -7 24 24" preserveAspectRatio="xMinYMin">
+                        <path fill="#FFF" d="M8 8V1a1 1 0 1 1 2 0v8a1 1 0 0 1-1 1H1a1 1 0 1 1 0-2h7z"></path>
+                    </svg>
+                </button>
+                <img style="width:80px;margin:5vmin;background:white;height:80px;padding:5vmin;border-radius:20px;" t-attf-src="{{app_icon}}"/>
+                <div style="margin:auto 20px;">
+                    <h1 style="margin:0;" t-esc="app_name"></h1>
+                    <a style="display:flex;" href="https://odoo.com" alt="Odoo" target="_blank">Odoo S.A.</a>
+                    <small t-esc="app_category"/>
+                </div>
+            </div>
+            <div class="installBanner">
+                <p class="webviewMessage d-none">Open this page in your main browser to be able to install the shortcut.</p>
+                <p class="defaultMessage d-none">The shortcut cannot be installed with this browser, or is already installed on your device.</p>
+                <ul class="safariMessage mobile d-none">
+                    <b>To install, follow these steps</b>
+                    <li>
+                        Tap on the share icon
+                    </li>
+                    <li>
+                        Select "Add to home screen"
+                    </li>
+                </ul>
+                <ul class="safariMessage desktop d-none">
+                    <b>To install, follow these steps</b>
+                    <li>
+                        Open "File" menu from your browser
+                    </li>
+                    <li>
+                        Select "Add to dock"
+                    </li>
+                </ul>
+                <div class="isInstallable d-none">
+                    <small style="margin-right:10px;">The app is compatible with your device</small>
+                    <button class="btn-primary" style="font-size:1.2em;" onclick="callPrompt()">Install</button>
+                </div>
+            </div>
+            <h2 class="caveat" style="margin:10px 5vw;" t-esc="app_summary"/>
+            <section style="padding:10px 10vw;">
+                <h3>About this app</h3>
+                <div class="appDescription">You can get the full experience of <span t-esc="app_name"/> directly on your device with one click.</div>
+                <a t-if="app_promo_page" t-att-href="app_promo_page" target="_blank">Read more</a>
+                <div class="d-none appFeatures">
+                    <h3 class="caveat">Additionnal features for your device:</h3>
+                    <ul/>
+                </div>
+            </section>
+            <section t-if="app_id != 'odoo'" style="padding:5vh 10vw;">
+                <h3 class="caveat">Get the All in One experience</h3>
+                If you don't have it yet, install the Odoo application to find all your apps in one place, notifications and more! <button class="btn-secondary" style="padding:5px;" onclick="window.location.replace('/scoped_app?app_id=odoo')">Get Odoo app</button>
+            </section>
+        </t>
+    </template>
 </odoo>

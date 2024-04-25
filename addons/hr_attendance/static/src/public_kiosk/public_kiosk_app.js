@@ -12,6 +12,7 @@ import { KioskGreetings } from "@hr_attendance/components/greetings/greetings";
 import { KioskPinCode } from "@hr_attendance/components/pin_code/pin_code";
 import { KioskBarcodeScanner } from "@hr_attendance/components/kiosk_barcode/kiosk_barcode";
 import { browser } from "@web/core/browser/browser";
+import { isDisplayStandalone } from "@web/core/browser/feature_detection";
 
 class kioskAttendanceApp extends Component{
     static template = "hr_attendance.public_kiosk_app";
@@ -28,6 +29,7 @@ class kioskAttendanceApp extends Component{
     setup() {
         this.barcode = useService("barcode");
         this.notification = useService("notification");
+        this.isDisplayStandalone = isDisplayStandalone();
         this.companyImageUrl = url("/web/binary/company_logo", {
             company: this.props.companyId,
         });

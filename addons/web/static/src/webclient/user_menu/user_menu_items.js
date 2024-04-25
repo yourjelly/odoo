@@ -109,18 +109,22 @@ function installPWAItem(env) {
     return {
         type: "item",
         id: "install_pwa",
-        description: _t("Install the app"),
+        description: _t("Install app"),
         callback: () => {
             env.bus.trigger("HOME-MENU:TOGGLED");
             env.services.dialog.add(InstallPWADialog, {});
         },
-        show: () => env.services.installPrompt.isAvailable,
+        show: () =>
+            env.services.installPrompt.isAvailable || !env.services.installPrompt.isScopedApp,
         sequence: 65,
     };
 }
 
 function logOutItem(env) {
-    const route = "/web/session/logout";
+    let route = "/web/session/logout";
+    if (env.services.installPrompt.isScopedApp) {
+        route += `?redirect=${encodeURIComponent(env.services.installPrompt.startUrl)}`;
+    }
     return {
         type: "item",
         id: "logout",

@@ -65,6 +65,7 @@ class PosController(PortalAccount):
             'login_number': pos_session.login(),
             'pos_session_id': pos_session.id,
             'pos_config_id': pos_session.config_id.id,
+            'pos_config_display_name': pos_session.config_id.display_name,
             'access_token': pos_session.config_id.access_token,
         }
         response = request.render('point_of_sale.index', context)

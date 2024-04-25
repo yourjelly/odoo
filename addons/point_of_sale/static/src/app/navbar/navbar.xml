@@ -53,6 +53,9 @@
                         <DropdownItem t-if="this.env.debug" onSelected="() => debug.toggleWidget()">
                             Debug Window
                         </DropdownItem>
+                        <DropdownItem t-if="!isDisplayStandalone" onSelected="() => window.open(this.appUrl)">
+                            <i class="fa fa-download me-1" /> Install App
+                        </DropdownItem>
                     </t>
                 </Dropdown>
             </div>

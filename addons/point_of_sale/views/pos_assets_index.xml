@@ -7,6 +7,8 @@
     <head>
         <title>Odoo POS</title>
 
+        <link rel="manifest" crossorigin="use-credentials" t-attf-href="/web/manifest.scoped_app_manifest?app_id=point_of_sale&amp;app_name={{pos_config_display_name}}&amp;path=/pos/ui%3Fconfig_id%3D4{{pos_config_id}}" />
+
         <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
         <meta http-equiv="content-type" content="text/html, charset=utf-8" />
 

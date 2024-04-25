@@ -115,7 +115,8 @@ class HrAttendance(http.Controller):
                         'from_trial_mode': from_trial_mode,
                         'barcode_source': company.attendance_barcode_source,
                         'lang': company.partner_id.lang,
-                    }
+                    },
+                    'token': token
                 }
             )
 

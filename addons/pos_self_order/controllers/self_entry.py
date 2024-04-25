@@ -12,6 +12,8 @@ class PosSelfKiosk(http.Controller):
         return request.render(
                 'pos_self_order.index',
                 {
+                    'pos_config_id': pos_config.id,
+                    'pos_config_display_name': pos_config.display_name,
                     'session_info': {
                         **request.env["ir.http"].get_frontend_session_info(),
                         'currencies': request.env["ir.http"].get_currencies(),

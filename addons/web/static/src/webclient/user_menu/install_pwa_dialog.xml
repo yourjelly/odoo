@@ -3,20 +3,27 @@
 
     <t t-name="web.InstallPWADialog">
         <Dialog title="'Get the app'">
-            <div>Install the application for fast access from your home screen, notifications and more!</div>
+            <p>Install the application for fast access from your home screen, notifications and more!</p>
             <div t-if="isBrowserSafari" class="p-1">
                 <t t-set="isMobileSafari" t-value="isIOS" />
                 <t t-call="web.InstallStepsSafari"/>
             </div>
-            <div class="homeScreenArea d-flex justify-content-center align-items-center flex-column m-2 rounded-2 border cursor-pointer" t-on-click="() => this.launchInstallProcess()">
-                <img alt="Odoo" src="/web/static/img/odoo-icon-192x192.png" style="height: 5em;"/>
-                <span t-out="appName" />
+            <div>With the Odoo app, you get access to all apps from a single place.</div>
+            <div t-if="scopedAppInfo">You can also install this app as a standalone application on your device.</div>
+            <div class="homeScreenArea d-flex justify-content-center align-items-center m-2 rounded-2 border">
+                <div class="d-flex justify-content-center align-items-center flex-column mx-3 cursor-pointer" t-att-class="{'pe-none opacity-25':!installPrompt.isAvailable}" t-on-click="() => this.launchInstallProcess()">
+                    <img alt="Odoo" src="/web/static/img/odoo-icon-192x192.png" style="height: 5em;"/>
+                    <span class="text-black" t-out="appName" />
+                    <small class="text-muted"><i>All in one</i></small>
+                </div>
+                <a t-if="scopedAppInfo" target="_blank" class="d-flex justify-content-center align-items-center flex-column mx-3 cursor-pointer" t-att-class="{'pe-none opacity-25':installPrompt.isScopedApp}" t-attf-href="/scoped_app?app_id={{scopedAppInfo.app_id}}&amp;path={{scopedAppInfo.path}}">
+                    <img alt="Odoo" t-att-src="scopedAppInfo.icon" style="height: 5em;"/>
+                    <span class="text-black" t-out="scopedAppInfo.name" />
+                    <small class="text-muted"><i>This app only</i></small>
+                </a>
             </div>
-            <t t-if="!isBrowserSafari">
-                One-click install, no download needed
-            </t>
             <t t-set-slot="footer">
-                <button t-if="!isBrowserSafari" class="btn btn-primary o-default-button" t-on-click="() => this.launchInstallProcess()">
+                <button t-if="installPrompt.isAvailable and !isBrowserSafari" class="btn btn-primary o-default-button" t-on-click="() => this.launchInstallProcess()">
                     Install
                 </button>
                 <button class="btn btn-secondary" t-on-click="() => this.props.close()">

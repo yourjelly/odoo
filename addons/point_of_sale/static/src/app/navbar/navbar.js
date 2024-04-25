@@ -15,6 +15,7 @@ import { ClosePosPopup } from "@point_of_sale/app/navbar/closing_popup/closing_p
 import { _t } from "@web/core/l10n/translation";
 import { ProductScreen } from "@point_of_sale/app/screens/product_screen/product_screen";
 import { Input } from "@point_of_sale/app/generic_components/inputs/input/input";
+import { isDisplayStandalone } from "@web/core/browser/feature_detection";
 import { isBarcodeScannerSupported } from "@web/webclient/barcode/barcode_scanner";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
@@ -42,6 +43,7 @@ export class Navbar extends Component {
         this.dialog = useService("dialog");
         this.notification = useService("notification");
         this.hardwareProxy = useService("hardware_proxy");
+        this.isDisplayStandalone = isDisplayStandalone();
         this.isBarcodeScannerSupported = isBarcodeScannerSupported;
         onMounted(async () => {
             this.isSystemUser = await user.hasGroup("base.group_system");
@@ -79,6 +81,12 @@ export class Navbar extends Component {
 
     get orderCount() {
         return this.pos.get_open_orders().length;
+    }
+
+    get appUrl() {
+        return `/scoped_app?app_id=point_of_sale&app_name=${encodeURIComponent(
+            this.pos.config.display_name
+        )}&path=${encodeURIComponent(`pos/ui?config_id=${this.pos.config.id}`)}`;
     }
 
     async closeSession() {

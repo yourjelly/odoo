@@ -7,11 +7,11 @@
             <form>
                 <div class="text-center">
                     <div class="fs-2 mb-2">From your Kiosk, open this URL:</div>
-                    <field name="self_ordering_url" readonly="1" />
+                    <field name="self_ordering_url" widget="url" readonly="1" />
                 </div>
                 <footer class="justify-content-end">
                     <button class="btn btn-secondary" special="cancel">Close</button>
-                    <button class="btn btn-primary" name="action_open_kiosk" type="object">Open in New Tab</button>
+                    <button class="btn btn-primary" name="action_install_app" type="object"><i class="fa fa-download me-1"/>Install App</button>
                 </footer>
             </form>
         </field>

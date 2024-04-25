@@ -21,10 +21,16 @@ const installPromptService = {
         const state = reactive({
             canPromptToInstall: false,
             isAvailable: false,
+            isScopedApp: browser.location.href.includes("/scoped_app"),
+            startUrl: "/odoo",
             decline,
             getAppName,
             show,
         });
+
+        if (state.isScopedApp) {
+            state.startUrl = browser.location.pathname;
+        }
 
         // The PWA can only be installed if the app is not already launched (display-mode standalone)
         // For Apple devices, PWA are supported on any mobile version of Safari, or in desktop since version 17

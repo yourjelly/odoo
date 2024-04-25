@@ -17,6 +17,9 @@
 <t t-name="hr_attendance.public_kiosk_app">
     <MainComponentsContainer/>
     <CardLayout fromTrialMode="this.props.fromTrialMode" kioskReturn.bind="kioskReturn">
+        <a t-if="!isDisplayStandalone" target="_blank" t-att-href="`/scoped_app?app_id=hr_attendance&amp;path=hr_attendance/${this.props.token}`" class="btn position-absolute m-1 end-0 bottom-0">
+            <i class="fa fa-download"/> Install App
+        </a>
         <t t-if="this.state.active_display === 'settings'">
             <div class="align-self-center h2 mt-5">
                 How do you want to record attendances ?

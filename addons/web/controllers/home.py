@@ -34,7 +34,7 @@ class Home(http.Controller):
         return request.redirect_query('/odoo', query=request.params)
 
     # ideally, this route should be `auth="user"` but that don't work in non-monodb mode.
-    @http.route(['/web', '/odoo', '/odoo/<path:subpath>'], type='http', auth="none")
+    @http.route(['/web', '/odoo', '/odoo/<path:subpath>', '/scoped_app/<path:subpath>'], type='http', auth="none")
     def web_client(self, s_action=None, **kw):
 
         # Ensure we have both a database and a user

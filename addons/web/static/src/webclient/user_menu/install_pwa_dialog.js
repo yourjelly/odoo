@@ -12,11 +12,35 @@ export class InstallPWADialog extends Component {
 
     setup() {
         this.installPrompt = useService("installPrompt");
+        this.menu = useService("menu");
         this.isBrowserSafari = isBrowserSafari();
         this.isIOS = isIOS();
         onWillStart(async () => {
             this.appName = await this.installPrompt.getAppName();
         });
+    }
+
+    get scopedAppInfo() {
+        const currentApp = this.menu.getCurrentApp();
+        if (currentApp) {
+            const isAvailable = this.checkAvailability(currentApp);
+            if (isAvailable) {
+                return {
+                    path: "scoped_app/" + currentApp.actionPath,
+                    icon: "/" + currentApp.webIcon.replace(",", "/"),
+                    name: currentApp.name,
+                    app_id: currentApp.webIcon.split(",")[0],
+                };
+            }
+        }
+        return null;
+    }
+
+    checkAvailability(app) {
+        // While the feature could work with all apps, we have decided to only
+        // support the installation of the apps contained in the following list
+        // The list can grow in the future, by simply adding the name of the module
+        return ["barcode", "field-service"].includes(app.actionPath);
     }
 
     launchInstallProcess() {

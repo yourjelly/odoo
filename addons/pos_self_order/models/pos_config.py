@@ -219,6 +219,11 @@ class PosConfig(models.Model):
         self.ensure_one()
         return url_quote(self.get_base_url() + self._get_self_order_route(table_id))
 
+    def _get_install_app_route(self):
+        app_name = url_quote(self.env['pos.config'].search([('id', '=', self.id)], limit=1).name)
+        path = self._get_self_order_route()[1:]
+        return f"/scoped_app?app_id=pos_self_order&path={path}&app_name={app_name}"
+
     def preview_self_order_app(self):
         self.ensure_one()
         return {
@@ -289,13 +294,13 @@ class PosConfig(models.Model):
         for record in self:
             record.status = 'active' if record.has_active_session else 'inactive'
 
-    def action_open_kiosk(self):
+    def action_install_app(self):
         self.ensure_one()
 
         return {
             'name': _('Self Kiosk'),
             'type': 'ir.actions.act_url',
-            'url': self._get_self_order_route(),
+            'url': self._get_install_app_route(),
         }
 
     def action_open_wizard(self):
