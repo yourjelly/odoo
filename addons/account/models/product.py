@@ -29,12 +29,16 @@ class ProductCategory(models.Model):
 class ProductTemplate(models.Model):
     _inherit = "product.template"
 
-    taxes_id = fields.Many2many('account.tax', 'product_taxes_rel', 'prod_id', 'tax_id', help="Default taxes used when selling the product.", string='Customer Taxes',
+    taxes_id = fields.Many2many('account.tax', 'product_taxes_rel', 'prod_id', 'tax_id',
+        string='Sales Taxes',
+        help="Default taxes used when selling the product.",
         domain=[('type_tax_use', '=', 'sale')],
         default=lambda self: self.env.companies.account_sale_tax_id or self.env.companies.root_id.sudo().account_sale_tax_id,
     )
     tax_string = fields.Char(compute='_compute_tax_string')
-    supplier_taxes_id = fields.Many2many('account.tax', 'product_supplier_taxes_rel', 'prod_id', 'tax_id', string='Vendor Taxes', help='Default taxes used when buying the product.',
+    supplier_taxes_id = fields.Many2many('account.tax', 'product_supplier_taxes_rel', 'prod_id', 'tax_id',
+        string='Purchase Taxes',
+        help='Default taxes used when buying the product.',
         domain=[('type_tax_use', '=', 'purchase')],
         default=lambda self: self.env.companies.account_purchase_tax_id or self.env.companies.root_id.sudo().account_purchase_tax_id,
     )
@@ -77,6 +81,21 @@ class ProductTemplate(models.Model):
         for record in self:
             allowed_companies = record.company_id or self.env.companies
             record.fiscal_country_codes = ",".join(allowed_companies.mapped('account_fiscal_country_id.code'))
+
+    @api.onchange('taxes_id')
+    def _onchange_taxes_id(self):
+        # set purchase tax from sales tax if amount is same
+        sales_taxes = self.taxes_id.filtered(lambda x: x.type_tax_use == 'sale')
+        purchase_tax_list = []
+        for tax in sales_taxes:
+            # Find purchase tax with the same amount as sales tax
+            purchase_tax_id = self.env['account.tax'].search(
+                [('type_tax_use', '=', 'purchase'), ('amount', '=', tax.amount)],
+            limit=1).id
+            if purchase_tax_id and purchase_tax_id not in self.supplier_taxes_id.ids:
+                purchase_tax_list.append(purchase_tax_id)
+        if purchase_tax_list:
+            self.supplier_taxes_id = [Command.link(tax) for tax in purchase_tax_list]
 
     @api.depends('taxes_id', 'list_price')
     def _compute_tax_string(self):
