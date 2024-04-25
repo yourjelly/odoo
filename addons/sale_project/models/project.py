@@ -94,7 +94,9 @@ class Project(models.Model):
     def _compute_sale_order_count(self):
         sale_order_items_per_project_id = self._fetch_sale_order_items_per_project_id({'project.task': [('state', 'in', self.env['project.task'].OPEN_STATES)]})
         for project in self:
-            sale_order_lines = sale_order_items_per_project_id.get(project.id, self.env['sale.order.line'])
+            # We use sudo here since sale orders for this project may come from a company to which the current user has
+            # no read access in multi-company setups. Sudo here is benign since this is just a count.
+            sale_order_lines = sale_order_items_per_project_id.get(project.id, self.env['sale.order.line']).sudo()
             project.sale_order_line_count = len(sale_order_lines)
             project.sale_order_count = len(sale_order_lines.order_id)
 
