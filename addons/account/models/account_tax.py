@@ -989,7 +989,7 @@ class AccountTax(models.Model):
             tax_details['tax_amount'] += tax_values['tax_amount']
             tax_details['group_tax_details'].append(tax_values)
 
-        if self.env.company.tax_calculation_rounding_method == 'round_globally':
+        if False and self.env.company.tax_calculation_rounding_method == 'round_globally':
             # Aggregate all amounts according the tax lines grouping key.
             comp_currency = self.env.company.currency_id
             amount_per_tax_repartition_line_id = defaultdict(lambda: {
