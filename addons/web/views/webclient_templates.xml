@@ -354,4 +354,100 @@
             </div>
         </t>
     </template>
+
+    <template id="webclient_appclip">
+        <t t-call="web.layout">
+            <t t-set="html_data" t-value="{'style': 'height: 100%;'}"/>
+            <t t-set="title">Install app shortcut</t>
+            <t t-set="head">
+                <link rel="manifest" t-attf-href="/web/manifest.appclipmanifest?app_id={{app_id}}&amp;path={{path}}" crossorigin="use-credentials" />
+                <script type="text/javascript">
+                    document.addEventListener("DOMContentLoaded", () => {
+                        const cookies = document.cookie.split(';').map(c => c.trim());
+                        if (cookies.includes('color_scheme=dark')) {
+                            document.body.style.backgroundColor = "#262A36";
+                            document.body.style.color = "#FFF";
+                            document.querySelector(".btn-secondary").style.background = "#3C3E4B";
+                            document.querySelector(".btn-secondary").style.color = "#FFF";
+                        }
+                        if (window.matchMedia("(display-mode: standalone)").matches) {
+                            // we are probably accessing this page from a webview inside the Odoo PWA. Browsers behave differently and not
+                            // all of them allow the user to install the app from a webview. Users might need to open this page from the
+                            // complete browser to get access to installation
+                            document.querySelector(".webviewMessage").classList.remove("d-none");
+                        } else {
+                            document.querySelector(".defaultMessage").classList.remove("d-none");
+                        }
+                    });
+                    window.addEventListener("beforeinstallprompt", (ev) => {
+                        if (!window.nativePrompt) {
+                            // first render of the page, show the install UI
+                            [...document.querySelectorAll(".isInstallable")].forEach(e => e.classList.remove("d-none"));
+                            document.querySelector(".webviewMessage").classList.add("d-none");
+                            document.querySelector(".defaultMessage").classList.add("d-none");
+                            window.nativePrompt = ev;
+                            window.callPrompt = async () => {
+                                const res = await window.nativePrompt.prompt();
+                                if (res.outcome === "accepted") {
+                                    document.location.replace("/app_shortcut/<t t-esc="path"></t>");
+                                }
+                            }
+                        }
+                        ev.preventDefault();
+                    });
+                </script>
+                <style>
+                    body {
+                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Ubuntu, "Noto Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+                    padding:0;
+                    margin:0;
+                    background-color: #fff;
+                    color: rgb(17, 24, 39);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    text-align: center;
+                    height: 100vh;
+                    width: 100vw;
+                    user-select: none;
+                    }
+                    .card {
+                    width: 80%;
+                    }
+                    .card img {
+                    width: 96px;
+                    height: auto;
+                    }
+                    .card button {
+                    border: none;
+                    border-radius: .25rem;
+                    padding: .5rem 1rem;
+                    cursor: pointer;
+                    font-size: 1.2rem;
+                    font-weight: 500;
+                    }
+                    .btn-primary {
+                    color: #FFF;
+                    background-color: #714B67;
+                    }
+                    .btn-secondary {
+                    background: #E7E9ED;
+                    }
+                    .d-none {
+                        display: none;
+                    }
+                </style>
+                <meta name="viewport" content="width=device-width, initial-scale=1"/>
+            </t>
+            <div class="card">
+                <img t-attf-src="{{app_icon}}"/>
+                <h1 t-esc="app_name"></h1>
+                <p class="webviewMessage d-none">Open this page in your main browser to be able to install the app.</p>
+                <p class="defaultMessage d-none">The app shortcut cannot be installed from this browser, or is already installed on your device.</p>
+                <p class="isInstallable d-none">Would you like to get the shortcut to this app?</p>
+                <button class="btn-primary isInstallable d-none" onclick="callPrompt()">Install</button>
+                <button class="btn-secondary" onclick="window.close()">Dismiss</button>
+            </div>
+        </t>
+    </template>
 </odoo>

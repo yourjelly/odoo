@@ -29,6 +29,7 @@ export class NavBar extends Component {
         this.currentAppSectionsExtra = [];
         this.actionService = useService("action");
         this.menuService = useService("menu");
+        this.installPrompt = useService("installPrompt");
         this.root = useRef("root");
         this.appSubMenus = useRef("appSubMenus");
         const debouncedAdapt = debounce(this.adapt.bind(this), 250);
@@ -81,6 +82,10 @@ export class NavBar extends Component {
     // This dummy setter is only here to prevent conflicts between the
     // Enterprise NavBar extension and the Website NavBar patch.
     set currentAppSections(_) {}
+
+    get isAppShortcut() {
+        return this.installPrompt.isAppShortcut;
+    }
 
     get systrayItems() {
         return systrayRegistry

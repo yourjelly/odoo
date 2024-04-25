@@ -21,6 +21,7 @@ const installPromptService = {
         const state = reactive({
             canPromptToInstall: false,
             isAvailable: false,
+            isAppShortcut: browser.location.href.includes("/app_shortcut"),
             decline,
             getAppName,
             show,

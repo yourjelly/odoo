@@ -8,15 +8,22 @@
                 <t t-set="isMobileSafari" t-value="isIOS" />
                 <t t-call="web.InstallStepsSafari"/>
             </div>
-            <div class="homeScreenArea d-flex justify-content-center align-items-center flex-column m-2 rounded-2 border cursor-pointer" t-on-click="() => this.launchInstallProcess()">
-                <img alt="Odoo" src="/web/static/img/odoo-icon-192x192.png" style="height: 5em;"/>
-                <span t-out="appName" />
+            <p>You can also pin the shortcut for an instant access to this app only.</p>
+            <div class="homeScreenArea d-flex justify-content-center align-items-center m-2 rounded-2 border">
+                <div class="d-flex justify-content-center align-items-center flex-column mx-3 cursor-pointer" t-att-class="{'pe-none opacity-25':!installPrompt.isAvailable}" t-on-click="() => this.launchInstallProcess()">
+                    <img alt="Odoo" src="/web/static/img/odoo-icon-192x192.png" style="height: 5em;"/>
+                    <span class="text-black" t-out="appName" />
+                </div>
+                <a t-if="appClipInfo" target="_blank" class="d-flex justify-content-center align-items-center flex-column mx-3 cursor-pointer" t-att-class="{'pe-none opacity-25':installPrompt.isAppShortcut}" t-attf-href="/app_shortcut?app_id={{appClipInfo.app_id}}&amp;path={{appClipInfo.path}}">
+                    <img alt="Odoo" t-att-src="appClipInfo.icon" style="height: 5em;"/>
+                    <span class="text-black" t-out="appClipInfo.name" />
+                </a>
             </div>
             <t t-if="!isBrowserSafari">
                 One-click install, no download needed
             </t>
             <t t-set-slot="footer">
-                <button t-if="!isBrowserSafari" class="btn btn-primary o-default-button" t-on-click="() => this.launchInstallProcess()">
+                <button t-if="installPrompt.isAvailable and !isBrowserSafari" class="btn btn-primary o-default-button" t-on-click="() => this.launchInstallProcess()">
                     Install
                 </button>
                 <button class="btn btn-secondary" t-on-click="() => this.props.close()">

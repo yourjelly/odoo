@@ -4,7 +4,7 @@ import base64
 import json
 import mimetypes
 
-from odoo import http
+from odoo import http, modules
 from odoo.exceptions import AccessError
 from odoo.http import request
 from odoo.tools import ustr, file_open
@@ -95,3 +95,42 @@ class WebManifest(http.Controller):
         return request.render('web.webclient_offline', {
             'odoo_icon': base64.b64encode(file_open(self._icon_path(), 'rb').read())
         })
+
+    @http.route('/app_shortcut', type='http', auth='public', methods=['GET'])
+    def app_shortcut(self, app_id='', path=''):
+        """ Returns the app clip page to install the app given in parameters """
+        manifest = modules.module.get_manifest(app_id)
+        return request.render('web.webclient_appclip', {
+            'app_id': app_id,
+            'app_name': manifest['name'],
+            'app_icon': f'/{app_id}/static/description/icon.svg',
+            'path': path
+        })
+
+    @http.route('/web/manifest.appclipmanifest', type='http', auth='public', methods=['GET'])
+    def appclipmanifest(self, app_id='', path=''):
+        """ Returns a WebManifest dedicated to the scope of the given app. A custom scope and start
+            url are set to make sure no other installed PWA can overlap the scope (e.g. /odoo)
+        """
+        main_app_name = request.env['ir.config_parameter'].sudo().get_param('web.web_app_name', 'Odoo')
+        manifest = modules.module.get_manifest(app_id)
+        webmanifest = {
+            'name': manifest['name'] + ' - ' + main_app_name,
+            'scope': f'/app_shortcut/{path}',
+            'start_url': f'/app_shortcut/{path}',
+            'display': 'standalone',
+            'background_color': '#714B67',
+            'theme_color': '#714B67',
+            'prefer_related_applications': False,
+        }
+        icon_sizes = ['144x144']
+        webmanifest['icons'] = [{
+            'src': f'/{app_id}/static/description/icon.svg',
+            'sizes': size,
+            'type': 'image/png',
+        } for size in icon_sizes]
+        body = json.dumps(webmanifest, default=ustr)
+        response = request.make_response(body, [
+            ('Content-Type', 'application/manifest+json'),
+        ])
+        return response
