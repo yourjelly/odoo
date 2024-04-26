@@ -644,6 +644,9 @@ class AccountChartTemplate(models.AbstractModel):
             company.account_purchase_tax_id = self.env['account.tax'].search([
                 *self.env['account.tax']._check_company_domain(company),
                 ('type_tax_use', 'in', ('purchase', 'all'))], limit=1).id
+        # add tax_id to purchase default reconciliation model
+        reconcile_bill_model_lines = self.ref('reconcile_bill').line_ids
+        reconcile_bill_model_lines.tax_ids = [Command.set(company.account_purchase_tax_id.ids)]
         # Display caba fields if there are caba taxes
         if not company.parent_id and self.env['account.tax'].search_count([('tax_exigibility', '=', 'on_payment')], limit=1):
             company.tax_exigibility = True
@@ -1033,7 +1036,20 @@ class AccountChartTemplate(models.AbstractModel):
                 "match_same_currency": True,
                 "allow_payment_tolerance": False,
                 "match_partner": True,
-            }
+            },
+            "reconcile_bill": {
+                "name": 'Create Bill',
+                "sequence": 5,
+                "rule_type": 'writeoff_button',
+                'counterpart_type': 'purchase',
+                'line_ids': [
+                    Command.create({
+                        'amount_type': 'percentage_st_line',
+                        'amount_string': '100',
+                        'tax_ids': [],
+                    })
+                ]
+            },
         }
 
     # --------------------------------------------------------------------------------
