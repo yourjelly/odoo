@@ -13,7 +13,7 @@
                 <field name="service_type" widget="radio" invisible="True"/>
                 <field name="visible_expense_policy" invisible="1"/>
             </field>
-            <field name="detailed_type" position="after">
+            <field name="uom_id" position="after">
                 <field name="invoice_policy" required="1"/>
             </field>
             <xpath expr="//page[@name='sales']/group[@name='sale']/group[@name='tags']" position="inside">
@@ -79,7 +79,7 @@
         <field name="model">product.template</field>
         <field name="inherit_id" ref="product.product_template_only_form_view"/>
         <field name="arch" type="xml">
-            <div name="button_box" position="inside">
+            <button name="action_open_documents" position="after">
                 <button class="oe_stat_button"
                     name="action_view_sales"
                     type="object" icon="fa-signal"
@@ -94,7 +94,7 @@
                         <span class="o_stat_text">Sold</span>
                     </div>
                 </button>
-            </div>
+            </button>
         </field>
     </record>
 

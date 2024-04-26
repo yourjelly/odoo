@@ -84,7 +84,7 @@
                     <label for="available_in_pos" string="Point of Sale"/>
                 </span>
             </xpath>
-            <xpath expr="//page[@name='general_information']" position="inside">
+            <xpath expr="//group[@name='internal_notes']" position="before">
                 <group name="combos" string="Combo Choices" groups="point_of_sale.group_pos_user" invisible="not detailed_type == 'combo'">
                     <field name="combo_ids" widget="one2many" nolabel="1" colspan="2">
                         <tree string="combos">

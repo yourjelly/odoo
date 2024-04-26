@@ -1941,7 +1941,7 @@ class TestMrpOrder(TestMrpCommon):
             'name': 'Product Component',
             'type': 'product',
             'tracking': 'lot',
-            'categ_id': self.env.ref('product.product_category_all').id,
+            'categ_id': self.env.ref('product.cat_services').id,
             'uom_id': uom_L.id,
             'uom_po_id': uom_L.id,
         })
@@ -1950,7 +1950,7 @@ class TestMrpOrder(TestMrpCommon):
             'name': 'Product Final',
             'type': 'product',
             'tracking': 'lot',
-            'categ_id': self.env.ref('product.product_category_all').id,
+            'categ_id': self.env.ref('product.cat_services').id,
             'uom_id': uom_L.id,
             'uom_po_id': uom_L.id,
         })

@@ -166,7 +166,7 @@ class TestFrontend(AccountTestInvoicingCommon, HttpCaseWithUserDemo):
             'name': 'Coca-Cola',
             'weight': 0.01,
             'pos_categ_ids': [(4, drinks_category.id)],
-            'categ_id': cls.env.ref('point_of_sale.product_category_pos').id,
+            'categ_id': cls.env.ref('point_of_sale.cat_food').id,
             'taxes_id': [(6, 0, [])],
         })
 
@@ -176,7 +176,7 @@ class TestFrontend(AccountTestInvoicingCommon, HttpCaseWithUserDemo):
             'name': 'Water',
             'weight': 0.01,
             'pos_categ_ids': [(4, drinks_category.id)],
-            'categ_id': cls.env.ref('point_of_sale.product_category_pos').id,
+            'categ_id': cls.env.ref('point_of_sale.cat_food').id,
             'taxes_id': [(6, 0, [])],
         })
 
@@ -186,7 +186,7 @@ class TestFrontend(AccountTestInvoicingCommon, HttpCaseWithUserDemo):
             'name': 'Minute Maid',
             'weight': 0.01,
             'pos_categ_ids': [(4, drinks_category.id)],
-            'categ_id': cls.env.ref('point_of_sale.product_category_pos').id,
+            'categ_id': cls.env.ref('point_of_sale.cat_food').id,
             'taxes_id': [(6, 0, [])],
         })
 

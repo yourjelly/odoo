@@ -35,6 +35,8 @@
                                     </span>
                                </div>
                         </button>
+                        <!-- Dummy tag for organizing buttons, using position='replace' when inheriting -->
+                        <span id="button_website" invisible="1"/>
                         <button class="oe_stat_button"
                                 name="action_open_documents"
                                 type="object"
@@ -94,7 +96,7 @@
                                     <field name="product_variant_id" invisible="1"/>
                                 </group>
                             </group>
-                            <group string="Internal Notes">
+                            <group name="internal_notes" string="Internal Notes">
                                 <field colspan="2" name="description" nolabel="1" placeholder="This note is only for internal purposes."/>
                             </group>
                         </page>
