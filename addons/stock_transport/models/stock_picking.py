@@ -32,15 +32,14 @@ class StockPicking(models.Model):
     max_weight = fields.Float(string="Max Weight", compute='_compute_total_weight', store=True)
     max_volume = fields.Float(string="Max Volume", compute='_compute_total_volume', store=True)
 
-
     @api.depends('move_ids.product_id.weight')
     def _compute_total_weight(self):
         for picking in self:
-            max_weight = sum(move.product_id.weight if move.product_id.weight else 0.0 for move in picking.move_ids)
+            max_weight = sum(move.product_id.weight or 0.0 for move in picking.move_ids)
             picking.max_weight = max_weight
 
     @api.depends('move_ids.product_id.volume')
     def _compute_total_volume(self):
         for picking in self:
-            max_volume = sum(move.product_id.volume if move.product_id.volume else 0.0 for move in picking.move_ids)
+            max_volume = sum(move.product_id.volume or 0.0 for move in picking.move_ids)
             picking.max_volume = max_volume

@@ -8,8 +8,8 @@ class StockPickingBatch(models.Model):
 
     vehicle_id = fields.Many2one('fleet.vehicle', string="Vehicle")
     vehicle_category_id = fields.Many2one(
-        'fleet.vehicle.model.category', string="Vehicle Category")
-    dock_id = fields.Many2one('stock.batch.dock', string="Dock")
+        'fleet.vehicle.model.category', string="Vehicle Category", compute='_compute_vehicle_category_id', inverse='_inverse_vehicle_category_id', store=True)
+    dock_id = fields.Many2one('stock.batch.dock', string="Dock", domain="[('operation_type_ids', 'in', picking_type_id)]")
     vehicle_details = fields.Char(
         "Vehicle Details", compute='_compute_vehicle_details')
     max_weight = fields.Float(string="Max Weight (Kg)",
@@ -22,10 +22,11 @@ class StockPickingBatch(models.Model):
         string="Weight", compute='_compute_used_weight_percentage', store=True)
     used_volume_percentage = fields.Float(
         string="Volume", compute='_compute_used_volume_percentage', store=True)
-    end_date = fields.Datetime(
-        'End Date', default=lambda self: fields.Datetime.now())
-    dock_info = fields.Char(string="Dock Information",
-                            compute='_compute_dock_info', store=True)
+    max_picking_weight = fields.Float(compute='_compute_used_weight_percentage', store=True)
+    max_picking_volume = fields.Float(compute='_compute_used_volume_percentage', store=True)
+    end_date = fields.Datetime('End Date', required=True)
+    picking_info = fields.Char(string="Dock Information",
+                            compute='_compute_picking_info', store=True)
     batch_properties = fields.Properties(
         'Properties',
         definition='picking_type_id.picking_properties_definition')
@@ -43,32 +44,34 @@ class StockPickingBatch(models.Model):
     @api.depends('picking_ids.max_weight', 'vehicle_category_id.max_weight')
     def _compute_used_weight_percentage(self):
         for batch in self:
-            total_picking_weight = sum(picking.max_weight for picking in batch.picking_ids)
+            batch.max_picking_weight = sum(picking.max_weight for picking in batch.picking_ids)
             batch_vehicle_max_weight = batch.vehicle_category_id.max_weight
-            used_weight_percentage = 100 * (total_picking_weight / batch_vehicle_max_weight) if batch_vehicle_max_weight else 0.0
+            used_weight_percentage = 100 * (batch.max_picking_weight / batch_vehicle_max_weight) if batch_vehicle_max_weight else 0.0
             batch.used_weight_percentage = used_weight_percentage
 
     @api.depends('picking_ids.max_volume', 'vehicle_category_id.max_volume')
     def _compute_used_volume_percentage(self):
         for batch in self:
-            total_picking_volume = sum(picking.max_volume for picking in batch.picking_ids)
+            batch.max_picking_volume = sum(picking.max_volume for picking in batch.picking_ids)
             batch_vehicle_max_volume = batch.vehicle_category_id.max_volume
-            used_volume_percentage = 100 * (total_picking_volume / batch_vehicle_max_volume) if batch_vehicle_max_volume else 0.0
+            used_volume_percentage = 100 * (batch.max_picking_volume / batch_vehicle_max_volume) if batch_vehicle_max_volume else 0.0
             batch.used_volume_percentage = used_volume_percentage
 
-
-    @api.depends('dock_id', 'max_weight', 'max_volume')
-    def _compute_dock_info(self):
+    @api.depends('picking_type_id', 'max_weight', 'max_volume')
+    def _compute_picking_info(self):
         for record in self:
-            dock_name = f"{record.dock_id.name}: " if record.dock_id else ''
+            picking_type = f"{record.picking_type_id.name}: " if record.picking_type_id else ''
             max_weight = f"{record.max_weight}kg" if record.max_weight else '0Kg'
             max_volume = f"{record.max_volume}m³" if record.max_volume else '0m³'
-            dock_info_str = f"{dock_name}{max_weight}, {max_volume}".rstrip(', ')
-            record.dock_info = dock_info_str
+            picking_info_str = f"{picking_type}{max_weight}, {max_volume}".rstrip(', ')
+            record.picking_info = picking_info_str
 
-    @api.onchange('vehicle_id')
-    def _onchange_vehicle_id(self):
+    @api.depends('vehicle_id')
+    def _compute_vehicle_category_id(self):
         self.vehicle_category_id = self.vehicle_id.category_id if self.vehicle_id else False
+
+    def _inverse_vehicle_category_id(self):
+        pass
 
     def action_map_delivery_batch(self):
         action = {

@@ -18,8 +18,6 @@
             <graph string="Graph View" sample="1">
                 <field name="scheduled_date" type="row" interval="day"/>
                 <field name="vehicle_category_id" type="row"/>
-                <field name="max_volume" type="measure"/>
-                <field name="max_weight" type="measure"/>
             </graph>
         </field>
     </record>
@@ -42,10 +40,7 @@
         <field name="arch" type="xml">
             <data>
                 <xpath expr="//header/button[@name='action_cancel']" position="before">
-                    <button name="action_map_delivery_batch" string="Map" type="object" class="oe_highlight" invisible="state != 'in_progress'"/>
-                </xpath>
-                <xpath expr="//header" position="before">
-                    <field name="end_date" invisible="1"/>
+                    <button name="action_map_delivery_batch" string="Map" type="object" class="btn btn-secondary" invisible="state != 'in_progress'"/>
                 </xpath>
                 <xpath expr="//sheet/group" position="replace">
                     <group>
@@ -53,14 +48,30 @@
                             <field name="user_id" readonly="state not in ['draft', 'in_progress']"/>
                             <field name="picking_type_id" readonly="state != 'draft'"/>
                             <field name="scheduled_date" widget="daterange" options="{'end_date_field': 'end_date'}" />
+                            <field name="end_date" invisible="1"/>
+                            <field name="batch_properties"/>
                         </group>
                         <group>
                             <field name="dock_id"/>
                             <field name="vehicle_id" placeholder="Third Party Provider"/>
                             <field name="vehicle_category_id" placeholder="semi-truck"/>
-                            <field name="used_weight_percentage" invisible="not vehicle_category_id" widget="progressbar"/>
-                            <field name="used_volume_percentage" invisible="not vehicle_category_id" widget="progressbar"/>
-                            <field name="batch_properties"/>
+                            <label for='used_weight_percentage' invisible="not vehicle_category_id"/>
+                                <div class='d-flex flex-row gap-4' invisible="not vehicle_category_id">
+                                    <div class='d-flex flex-row gap-1'>
+                                        <field name='max_picking_weight'/>
+                                        <span>kg</span>
+                                    </div>
+                                    <field name='used_weight_percentage' widget='progressbar' />
+                                </div>
+
+                            <label for='used_volume_percentage' invisible="not vehicle_category_id"/>
+                                <div class='d-flex flex-row gap-4' invisible="not vehicle_category_id">
+                                    <div class='d-flex flex-row gap-1'>
+                                        <field name='max_picking_volume'/>
+                                        <span>m³</span>
+                                    </div>
+                                    <field name='used_volume_percentage' widget='progressbar'/>
+                                </div>
                         </group>
                     </group>
                 </xpath>
@@ -82,8 +93,8 @@
                 </xpath>
                 <xpath expr="field[@name='user_id']" position="after">
                     <field name="vehicle_category_id" optional="hide"/>
-                    <field name="max_weight" optional="hide"/>
-                    <field name="max_volume" optional="hide"/>
+                    <field name="max_weight" string="Weight" optional="hide"/>
+                    <field name="max_volume" string="Volume" optional="hide"/>
                     <field name="used_volume_percentage" string="Volume %" optional="hide"/>
                     <field name="used_weight_percentage" string="Weight %" optional="hide"/>
                 </xpath>
@@ -108,7 +119,7 @@
                     <filter name="picking_type_id" string="Operation Type" domain="[]" context="{'group_by':'picking_type_id'}"/>
                 </xpath>
                 <xpath expr="//filter[@name='done']" position="after">
-                    <filter name="vehicle_id" string="Own Fleet" domain="[('vehicle_id', '=', False)]"/>
+                    <filter name="vehicle_id" string="Own Fleet" domain="[('vehicle_id', '!=', False)]"/>
                     <filter name="vehicle_id" string="Third Party Carrier" domain="[('vehicle_id', '=', False), ('vehicle_category_id', '!=', False)]"/>
                 </xpath>
                 <xpath expr="//filter[@name='my_transfers']" position="after">
@@ -132,7 +143,7 @@
                     <div class="o_kanban_record_bottom">
                         <div class="col">
                             <div><field name="dock_id"/></div>
-                            <field name="vehicle_details"/>
+                            <field name="vehicle_details" class="text-muted"/>
                             <div class="col">
                                 <field name="state" widget="state_selection" class="ms-auto float-start" style="padding-top: 4px; margin-right: 6px"/>
                                 <field name="scheduled_date" readonly="state in ['cancel', 'done']"/>
@@ -149,8 +160,9 @@
 
     <record id="stock_picking_batch.stock_picking_batch_action" model="ir.actions.act_window">
         <field name="view_mode">tree,kanban,form,graph,gantt,pivot,calendar</field>
+       <field name="view_id" ref="stock_picking_batch_pivot"/>
         <field name="context">{
-            'pivot_measures': ['__count__', 'max_weight', 'max_volume'],
+            'pivot_measures': ['__count__', 'used_weight_percentage', 'used_volume_percentage'],
          }</field>
     </record>
 
