@@ -7,6 +7,7 @@ import * as PartnerList from "@point_of_sale/../tests/tours/utils/partner_list_u
 import * as TextInputPopup from "@point_of_sale/../tests/tours/utils/text_input_popup_util";
 import * as Dialog from "@point_of_sale/../tests/tours/utils/dialog_util";
 import * as Chrome from "@point_of_sale/../tests/tours/utils/chrome_util";
+import { browser } from "@web/core/browser/browser";
 
 export function clickLine(productName, quantity = "1.0") {
     return inLeftSide([
@@ -358,6 +359,17 @@ export function selectedOrderlineHas(productName, quantity, price) {
             price,
         })
     );
+}
+export function storeLocal(data, productName, quantity = "1.0") {
+    browser.localStorage.setItem("combo order", JSON.stringify(data));
+    return [
+        ...clickLine(productName, quantity),
+        {
+            content: "Check the product page",
+            trigger: ".product-list",
+            isCheck: true,
+        },
+    ];
 }
 export function orderIsEmpty() {
     return inLeftSide(Order.doesNotHaveLine());

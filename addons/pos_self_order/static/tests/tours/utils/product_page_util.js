@@ -1,4 +1,5 @@
 /** @odoo-module */
+import { browser } from "@web/core/browser/browser";
 
 export function clickProduct(productName) {
     return {
@@ -48,6 +49,7 @@ export function setupCombo(products) {
             steps.push(...setupAttribute(product.attributes));
         }
     }
+    browser.localStorage.setItem("Office Combo", JSON.stringify(products));
 
     steps.push({
         content: `Click on 'Add to cart' button`,
