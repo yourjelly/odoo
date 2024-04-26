@@ -4020,6 +4020,7 @@
     }
 
     const macRegex = /Mac/i;
+    const MODIFIER_KEYS = ["Shift", "Control", "Alt", "Meta"];
     /**
      * Return true if the event was triggered from
      * a child element.
@@ -4037,6 +4038,31 @@
     }
     function getOpenedMenus() {
         return Array.from(document.querySelectorAll(".o-spreadsheet .o-menu"));
+    }
+    const letterRegex = /^[a-zA-Z]$/;
+    /**
+     * Transform a keyboard event into a shortcut string that represent this event. The letters keys will be uppercased.
+     *
+     * @argument ev - The keyboard event to transform
+     * @argument mode - Use either ev.key of ev.code to get the string shortcut
+     *
+     * @example
+     * event : { ctrlKey: true, key: "a" } => "Ctrl+A"
+     * event : { shift: true, alt: true, key: "Home" } => "Alt+Shift+Home"
+     */
+    function keyboardEventToShortcutString(ev, mode = "key") {
+        let keyDownString = "";
+        if (!MODIFIER_KEYS.includes(ev.key)) {
+            if (isCtrlKey(ev))
+                keyDownString += "Ctrl+";
+            if (ev.altKey)
+                keyDownString += "Alt+";
+            if (ev.shiftKey)
+                keyDownString += "Shift+";
+        }
+        const key = mode === "key" ? ev.key : ev.code;
+        keyDownString += letterRegex.test(key) ? key.toUpperCase() : key;
+        return keyDownString;
     }
     function isMacOS() {
         return Boolean(macRegex.test(navigator.userAgent));
@@ -7241,7 +7267,7 @@
     /**
      * Get a default chart js configuration
      */
-    function getDefaultChartJsRuntime(chart, labels, fontColor) {
+    function getDefaultChartJsRuntime(chart, labels, fontColor, truncateLabels = true) {
         return {
             type: chart.type,
             options: {
@@ -7280,7 +7306,7 @@
                 },
             },
             data: {
-                labels: labels.map(truncateLabel),
+                labels: truncateLabels ? labels.map(truncateLabel) : labels,
                 datasets: [],
             },
         };
@@ -8140,10 +8166,10 @@
         }
         return true;
     }
-    function getLineConfiguration(chart, labels) {
+    function getLineConfiguration(chart, labels, truncateLabels) {
         var _a;
         const fontColor = chartFontColor(chart.background);
-        const config = getDefaultChartJsRuntime(chart, labels, fontColor);
+        const config = getDefaultChartJsRuntime(chart, labels, fontColor, truncateLabels);
         const legend = {
             labels: {
                 fontColor,
@@ -8205,7 +8231,8 @@
         if (axisType === "time") {
             ({ labels, dataSetsValues } = fixEmptyLabelsForDateCharts(labels, dataSetsValues));
         }
-        const config = getLineConfiguration(chart, labels);
+        const truncateLabels = axisType === "category";
+        const config = getLineConfiguration(chart, labels, truncateLabels);
         const labelFormat = getLabelFormat(getters, chart.labelRange);
         if (axisType === "time") {
             config.options.scales.xAxes[0].type = "time";
@@ -21198,7 +21225,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         }
         onKeyDown(ev) {
             const figure = this.props.figure;
-            switch (ev.key) {
+            switch (keyboardEventToShortcutString(ev)) {
                 case "Delete":
                     this.env.model.dispatch("DELETE_FIGURE", {
                         sheetId: this.env.model.getters.getActiveSheetId(),
@@ -21206,7 +21233,6 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                     });
                     this.props.onFigureDeleted();
                     ev.preventDefault();
-                    ev.stopPropagation();
                     break;
                 case "ArrowDown":
                 case "ArrowLeft":
@@ -21226,9 +21252,17 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                         y: figure.y + delta[1],
                     });
                     ev.preventDefault();
-                    ev.stopPropagation();
                     break;
+                case "Ctrl+A":
+                    ev.preventDefault();
+                    break;
+                case "Ctrl+Y":
+                case "Ctrl+Z":
+                    // Allow the event to bubble to the grid only if Ctrl+Y or Ctrl+Z is pressed
+                    // Let the grid handle the undo/redo operations
+                    return;
             }
+            ev.stopPropagation();
         }
     }
     FigureComponent.template = "o-spreadsheet-FigureComponent";
@@ -27387,7 +27421,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                     this.clearBorders(cmd.sheetId, cmd.target);
                     break;
                 case "REMOVE_COLUMNS_ROWS":
-                    for (let el of cmd.elements) {
+                    for (let el of [...cmd.elements].sort((a, b) => b - a)) {
                         if (cmd.dimension === "COL") {
                             this.shiftBordersHorizontally(cmd.sheetId, el + 1, -1);
                         }
@@ -43321,9 +43355,9 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     Object.defineProperty(exports, '__esModule', { value: true });
 
 
-    __info__.version = '16.0.39';
-    __info__.date = '2024-04-18T16:53:40.591Z';
-    __info__.hash = 'ea5a526';
+    __info__.version = '16.0.40';
+    __info__.date = '2024-04-26T09:53:02.037Z';
+    __info__.hash = '86a50d8';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
