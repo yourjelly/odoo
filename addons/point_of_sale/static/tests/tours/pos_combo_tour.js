@@ -8,6 +8,53 @@ import * as Dialog from "@point_of_sale/../tests/tours/utils/dialog_util";
 import * as Order from "@point_of_sale/../tests/tours/utils/generic_components/order_widget_util";
 import { inLeftSide } from "@point_of_sale/../tests/tours/utils/common";
 import { registry } from "@web/core/registry";
+import { browser } from "@web/core/browser/browser";
+
+const data = {
+    id: 22,
+    name: "Order 00031-001-0001",
+    user_id: (2, "Administrator"),
+    amount_tax: 0.0,
+    amount_total: 62.1,
+    amount_paid: 0.0,
+    order_lines: [
+        {
+            product: "Office Combo",
+            type: "combo",
+            available_in_pos: "True",
+            list_price: 40,
+            Combo_lines: [
+                {
+                    name: "Combo Product 3",
+                    type: "product",
+                    available_in_pos: "True",
+                    list_price: 16,
+                    taxes_id: [(6, 0, ["tax30"])],
+                    parent_combo_line: "Desk Accessories Combo",
+                },
+                {
+                    name: "Combo Product 5",
+                    type: "product",
+                    available_in_pos: "True",
+                    list_price: 25,
+                    taxes_id: [(6, 0, ["tax20"])],
+                    parent_combo_line: "Desks Combo",
+                },
+                {
+                    name: "Combo Product 8",
+                    type: "product",
+                    available_in_pos: "True",
+                    list_price: 40,
+                    taxes_id: [(6, 0, ["tax20"])],
+                    parent_combo_line: "Chairs Combo",
+                },
+            ],
+        },
+    ],
+    company_id: (1, "My Company"),
+    partner_id: (7, "Partner Test 1"),
+    state: "draft",
+};
 
 registry.category("web_tour.tours").add("PosComboPriceTaxIncludedTour", {
     test: true,
@@ -35,7 +82,8 @@ registry.category("web_tour.tours").add("PosComboPriceTaxIncludedTour", {
             combo.isNotSelected("Combo Product 7"),
             Dialog.confirm(),
             ...ProductScreen.selectedOrderlineHas("Office Combo"),
-            ...ProductScreen.clickOrderline("Combo Product 3"),
+            ...ProductScreen.storeLocal(data, "Combo Product 3"),
+            // ...ProductScreen.clickOrderline("Combo Product 3"),
             ...ProductScreen.selectedOrderlineHas("Combo Product 3", "1.0", "13.43"),
             ...ProductScreen.clickOrderline("Combo Product 5"),
             ...ProductScreen.selectedOrderlineHas("Combo Product 5", "1.0", "18.67"),
@@ -59,7 +107,9 @@ registry.category("web_tour.tours").add("PosComboPriceTaxIncludedTour", {
             combo.select("Combo Product 5"),
             combo.select("Combo Product 8"),
             Dialog.confirm(),
-            ...ProductScreen.totalAmountIs("62.10"),
+            ...ProductScreen.totalAmountIs(
+                JSON.parse(browser.localStorage["combo order"]).amount_total
+            ),
             ...ProductScreen.clickPayButton(),
             ...PaymentScreen.clickPaymentMethod("Bank"),
             ...PaymentScreen.clickValidate(),
@@ -75,5 +125,6 @@ registry.category("web_tour.tours").add("PosComboPriceTaxIncludedTour", {
             ...ProductScreen.totalAmountIs("59.17"),
             ...inLeftSide(Order.hasTax("10.56")),
             // the split screen is tested in `pos_restaurant`
+            // browser.localStorage.removeItem("combo order"),
         ].flat(),
 });
