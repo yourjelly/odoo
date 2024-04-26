@@ -78,7 +78,10 @@ class WebsiteForum(WebsiteProfile):
             order='last_activity_date desc, child_count desc, views desc',
             limit=100,
         )
-        return related_posts.sorted(lambda p: _jaccard_similarity(p.tag_ids), reverse=True)[:limit]
+        posts = related_posts.sorted(lambda p: _jaccard_similarity(p.tag_ids), reverse=True)[:limit]
+        print(posts)
+
+        return posts
 
     # Forum
     # --------------------------------------------------

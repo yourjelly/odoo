@@ -10,7 +10,7 @@ from odoo import api, fields, models, tools, _
 from odoo.addons.http_routing.models.ir_http import slug, unslug
 from odoo.exceptions import UserError, ValidationError, AccessError
 from odoo.osv import expression
-from odoo.tools import sql
+from odoo.tools import sql, SQL
 
 _logger = logging.getLogger(__name__)
 
@@ -868,3 +868,52 @@ class Post(models.Model):
             if with_date:
                 data['date'] = self.env['ir.qweb.field.date'].record_to_html(post, 'write_date', {})
         return results_data
+
+    def _get_related_posts(self, limit=5):
+        if not self.tag_ids:
+            return None
+
+        self.flush_model()
+        self.env["forum.tag"].flush_model()
+
+        self.env.cr.execute(SQL("""
+            SELECT forum_post.id,
+              -- Jaccard similarity
+                   (COUNT(DISTINCT commom_rel.forum_tag_id))::DECIMAL
+                   / COUNT(DISTINCT union_rel.forum_tag_id)::DECIMAL AS similarity
+              FROM forum_post
+              -- common tags (intersection)
+         LEFT JOIN forum_tag_rel AS commom_rel
+                ON commom_rel.forum_id = forum_post.id
+               AND commom_rel.forum_tag_id = ANY(%(tag_ids)s)
+              -- union tags
+        RIGHT JOIN forum_tag_rel AS union_rel
+                ON union_rel.forum_id = forum_post.id
+                OR union_rel.forum_id = %(id)s
+             WHERE id != %(id)s
+          GROUP BY forum_post.id
+          ORDER BY similarity DESC,
+                   forum_post.last_activity_date DESC
+             LIMIT %(limit)s
+        """, id=self.id, tag_ids=self.tag_ids.ids, limit=limit))
+
+        result = self.env.cr.dictfetchall()
+
+        # *************************************************
+        # To remove, check with python code
+        def _jaccard_similarity(tag_list):
+            set_a = set(self.tag_ids.ids)
+            set_b = set(tag_list.ids)
+            return len(set_a.intersection(set_b)) / len(set_a.union(set_b))
+
+        related_posts = self.search(
+            [('id', '!=', self.id), ('tag_ids', 'in', self.tag_ids.ids)],
+            order='last_activity_date desc, child_count desc, views desc',
+            limit=100,
+        )
+        posts = related_posts.sorted(lambda p: _jaccard_similarity(p.tag_ids), reverse=True)[:limit]
+        assert [round(_jaccard_similarity(p.tag_ids), 5) for p in posts] == [round(r["similarity"], 5) for r in result]
+        # *************************************************
+
+        return self.browse([r["id"] for r in result])
+

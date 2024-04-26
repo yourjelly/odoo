@@ -86,12 +86,10 @@ class TestForumController(TestForumCommon):
                 for i in range(len(forum_tags) + 1)  # 11 posts with 0 to 10 tags
             ]
         )
-        # No post, should return None
-        self.assertEqual(self.controller._prepare_related_posts(), None)
         # First post (not tags), should return None
-        self.assertEqual(self.controller._prepare_related_posts(post=forum_posts[0]), None)
+        self.assertEqual(forum_posts[0]._get_related_posts(), None)
         # Second post, most similar posts should be the 5 following posts
-        self.assertEqual(self.controller._prepare_related_posts(post=forum_posts[1]), forum_posts[2:7])
+        self.assertEqual(forum_posts[1]._get_related_posts(), forum_posts[2:7])
         # Last post, most similar posts should be the 5 preceding posts in descending order
-        self.assertEqual(self.controller._prepare_related_posts(post=forum_posts[-1]),
+        self.assertEqual(forum_posts[-1]._get_related_posts(),
                             forum_posts[len(forum_posts) - 6: -1].sorted(reverse=True))
