@@ -12,10 +12,6 @@ class PeopleSeniority(models.Model):
     name = fields.Char(string='Name', required=True, translate=True)
     reveal_id = fields.Char(required=True)
 
-    _sql_constraints = [
-        ('name_uniq', 'unique (name)', 'Name already exists!'),
-    ]
-
     @api.depends('name')
     def name_get(self):
         return [(seniority.id, seniority.name.replace('_', ' ').title()) for seniority in self]

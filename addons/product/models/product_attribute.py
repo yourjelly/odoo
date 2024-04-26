@@ -120,10 +120,6 @@ class ProductAttributeValue(models.Model):
     display_type = fields.Selection(related='attribute_id.display_type', readonly=True)
     color = fields.Integer('Color Index', default=_get_default_color)
 
-    _sql_constraints = [
-        ('value_company_uniq', 'unique (name, attribute_id)', "You cannot create two values with the same name for the same attribute.")
-    ]
-
     @api.depends('pav_attribute_line_ids')
     def _compute_is_used_on_products(self):
         for pav in self:

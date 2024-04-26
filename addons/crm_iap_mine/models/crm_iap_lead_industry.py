@@ -14,7 +14,3 @@ class CrmIapLeadIndustry(models.Model):
     reveal_ids = fields.Char(required=True) # The list of reveal_ids for this industry, separated with ','
     color = fields.Integer(string='Color Index')
     sequence = fields.Integer('Sequence')
-
-    _sql_constraints = [
-        ('name_uniq', 'unique (name)', 'Industry name already exists!'),
-    ]

@@ -75,8 +75,6 @@ class Country(models.Model):
     zip_required = fields.Boolean(default=True)
 
     _sql_constraints = [
-        ('name_uniq', 'unique (name)',
-            'The name of the country must be unique !'),
         ('code_uniq', 'unique (code)',
             'The code of the country must be unique !')
     ]

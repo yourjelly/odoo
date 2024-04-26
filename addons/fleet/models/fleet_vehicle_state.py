@@ -11,5 +11,3 @@ class FleetVehicleState(models.Model):
 
     name = fields.Char(required=True, translate=True)
     sequence = fields.Integer()
-
-    _sql_constraints = [('fleet_state_name_unique', 'unique(name)', 'State name already exists')]

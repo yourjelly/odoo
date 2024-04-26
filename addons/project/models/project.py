@@ -2759,10 +2759,6 @@ class ProjectTags(models.Model):
     project_ids = fields.Many2many('project.project', 'project_project_project_tags_rel', string='Projects')
     task_ids = fields.Many2many('project.task', string='Tasks')
 
-    _sql_constraints = [
-        ('name_uniq', 'unique (name)', "A tag with the same name already exists."),
-    ]
-
     def _get_project_tags_domain(self, domain, project_id):
         # TODO: Remove in master
         return domain

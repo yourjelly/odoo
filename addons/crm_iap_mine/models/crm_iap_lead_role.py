@@ -13,10 +13,6 @@ class PeopleRole(models.Model):
     reveal_id = fields.Char(required=True)
     color = fields.Integer(string='Color Index')
 
-    _sql_constraints = [
-        ('name_uniq', 'unique (name)', 'Role name already exists!'),
-    ]
-
     @api.depends('name')
     def name_get(self):
         return [(role.id, role.name.replace('_', ' ').title()) for role in self]
