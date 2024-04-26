@@ -2641,6 +2641,14 @@ class BaseModel(metaclass=MetaModel):
                 # constraint exists but its definition may have changed
                 tools.drop_constraint(cr, self._table, conname)
 
+            if definition and definition.startswith('UNIQUE') or definition.startswith('unique'):
+                fnames = definition[6:].strip()[1:-1].split(',')
+                fnames = [fname.strip() for fname in fnames]
+                for fname in fnames:
+                    if fname in self._fields:
+                        if self._fields[fname].translate:
+                            _logger.runbot('Unique constraint %s, %s for model %s is not supported for the translated field "%s"', key, definition, self._name, fname)
+
             if not definition:
                 # virtual constraint (e.g. implemented by a custom index)
                 self.pool.post_init(tools.check_index_exist, cr, conname)
