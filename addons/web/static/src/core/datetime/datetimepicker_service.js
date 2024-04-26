@@ -355,7 +355,12 @@ export const datetimePickerService = {
                                 pickerProps.focusedDateIndex === 1 ? 0 : 1;
                         }
                     }
-
+                    if (pickerProps.value && previousValue[1]) {
+                        if (pickerProps.value[1] > previousValue[1]) {
+                            pickerProps.value = [pickerProps.value[1], false]
+                            pickerProps.focusedDateIndex = 1;
+                        }
+                    }
                     hookParams.onChange?.(pickerProps.value);
                 };
 
