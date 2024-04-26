@@ -16,6 +16,8 @@ class AccountChartTemplate(models.AbstractModel):
             'property_account_payable_id': 'kp_rrif2200',
             'property_account_expense_categ_id': 'kp_rrif4199',
             'property_account_income_categ_id': 'kp_rrif7500',
+            'property_account_expense_company_id': 'kp_rrif4199',
+            'property_account_income_company_id': 'kp_rrif7500',
         }
 
     @template('hr_kuna', 'res.company')

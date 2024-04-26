@@ -13,6 +13,8 @@ class AccountChartTemplate(models.AbstractModel):
             'property_account_payable_id': 'co_puc_220500',
             'property_account_expense_categ_id': 'co_puc_610000',
             'property_account_income_categ_id': 'co_puc_417500',
+            'property_account_expense_company_id': 'co_puc_610000',
+            'property_account_income_company_id': 'co_puc_417500',
         }
 
     @template('co', 'res.company')

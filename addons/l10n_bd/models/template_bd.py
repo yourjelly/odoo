@@ -12,7 +12,9 @@ class AccountChartTemplate(models.AbstractModel):
             'property_account_receivable_id': 'l10n_bd_100201',
             'property_account_payable_id': 'l10n_bd_200101',
             'property_account_expense_categ_id': 'l10n_bd_500200',
-            'property_account_income_categ_id': 'l10n_bd_400100'
+            'property_account_income_categ_id': 'l10n_bd_400100',
+            'property_account_expense_company_id': 'l10n_bd_500200',
+            'property_account_income_company_id': 'l10n_bd_400100',
         }
 
     @template('bd', 'res.company')

@@ -14,6 +14,8 @@ class AccountChartTemplate(models.AbstractModel):
             'property_account_payable_id': 'egy_account_201002',
             'property_account_expense_categ_id': 'egy_account_400028',
             'property_account_income_categ_id': 'egy_account_500001',
+            'property_account_expense_company_id': 'egy_account_400028',
+            'property_account_income_company_id': 'egy_account_500001',
             }
 
     @template('eg', 'res.company')

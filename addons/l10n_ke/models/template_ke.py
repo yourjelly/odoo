@@ -13,6 +13,8 @@ class AccountChartTemplate(models.AbstractModel):
             'property_account_payable_id': 'ke2100',
             'property_account_expense_categ_id': 'ke5001',
             'property_account_income_categ_id': 'ke4001',
+            'property_account_expense_company_id': 'ke5001',
+            'property_account_income_company_id': 'ke4001',
             'property_stock_valuation_account_id': 'ke1001',
             'property_stock_account_output_categ_id': 'ke100120',
             'property_stock_account_input_categ_id': 'ke100110',

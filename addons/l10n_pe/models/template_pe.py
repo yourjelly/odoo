@@ -13,6 +13,8 @@ class AccountChartTemplate(models.AbstractModel):
             'property_account_payable_id': 'chart4212',
             'property_account_expense_categ_id': 'chart6329',
             'property_account_income_categ_id': 'chart70121',
+            'property_account_expense_company_id': 'chart6329',
+            'property_account_income_company_id': 'chart70121',
             'property_stock_account_input_categ_id': 'chart6111',
             'property_stock_account_output_categ_id': 'chart69111',
             'property_stock_valuation_account_id': 'chart20111',

@@ -13,6 +13,8 @@ class AccountChartTemplate(models.AbstractModel):
             'property_account_payable_id': 'a_pay',
             'property_account_expense_categ_id': 'a_exp_cogs',
             'property_account_income_categ_id': 'a_sales',
+            'property_account_expense_company_id': 'a_exp_cogs',
+            'property_account_income_company_id': 'a_sales',
         }
 
     @template('th', 'res.company')

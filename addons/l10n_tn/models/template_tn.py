@@ -13,6 +13,8 @@ class AccountChartTemplate(models.AbstractModel):
             'property_account_payable_id': 'l10n_tn_4011',
             'property_account_expense_categ_id': 'l10n_tn_607',
             'property_account_income_categ_id': 'l10n_tn_707',
+            'property_account_expense_company_id': 'l10n_tn_607',
+            'property_account_income_company_id': 'l10n_tn_707',
             'code_digits': '6',
         }
 

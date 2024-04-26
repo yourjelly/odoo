@@ -13,6 +13,8 @@ class AccountChartTemplate(models.AbstractModel):
             'property_account_payable_id': 'cy_2100',
             'property_account_expense_categ_id': 'cy_5100',
             'property_account_income_categ_id': 'cy_4000',
+            'property_account_expense_company_id': 'cy_5100',
+            'property_account_income_company_id': 'cy_4000',
         }
 
     @template('cy', 'res.company')

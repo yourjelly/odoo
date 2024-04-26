@@ -14,6 +14,8 @@ class AccountChartTemplate(models.AbstractModel):
             'property_stock_account_production_cost_id': 'au_11350',
             'property_account_payable_id': 'au_21200',
             'property_account_expense_categ_id': 'au_51110',
+            'property_account_income_comapny_id': 'au_41110',
+            'property_account_expense_company_id': 'au_51110',
             'property_account_income_categ_id': 'au_41110',
             'property_stock_account_input_categ_id': 'au_21210',
             'property_stock_account_output_categ_id': 'au_11340',

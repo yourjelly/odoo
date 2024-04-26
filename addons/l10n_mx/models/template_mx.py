@@ -15,6 +15,8 @@ class AccountChartTemplate(models.AbstractModel):
             'property_account_payable_id': 'cuenta201_01',
             'property_account_expense_categ_id': 'cuenta601_84',
             'property_account_income_categ_id': 'cuenta401_01',
+            'property_account_expense_company_id': 'cuenta601_84',
+            'property_account_income_company_id': 'cuenta401_01',
             'property_stock_account_input_categ_id': 'cuenta205_06_01',
             'property_stock_account_output_categ_id': 'cuenta107_05_01',
             'property_stock_valuation_account_id': 'cuenta115_01',

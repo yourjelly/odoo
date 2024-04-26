@@ -15,6 +15,8 @@ class AccountChartTemplate(models.AbstractModel):
             'property_account_payable_id': 'chart_sk_321000',
             'property_account_expense_categ_id': 'chart_sk_504000',
             'property_account_income_categ_id': 'chart_sk_604000',
+            'property_account_expense_company_id': 'chart_sk_504000',
+            'property_account_income_company_id': 'chart_sk_604000',
             'property_stock_account_input_categ_id': 'chart_sk_131000',
             'property_stock_account_output_categ_id': 'chart_sk_504000',
             'property_stock_valuation_account_id': 'chart_sk_132000',

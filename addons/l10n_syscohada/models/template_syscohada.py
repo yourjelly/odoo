@@ -12,6 +12,8 @@ class AccountChartTemplate(models.AbstractModel):
             'property_account_payable_id': 'pcg_4011',
             'property_account_expense_categ_id': 'pcg_6011',
             'property_account_income_categ_id': 'pcg_7011',
+            'property_account_expense_company_id': 'pcg_6011',
+            'property_account_income_company_id': 'pcg_7011',
             'name': 'SYSCOHADA - Revised',
             'code_digits': '6',
         }

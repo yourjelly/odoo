@@ -29,7 +29,6 @@ class TestMrpAnalyticAccount(TransactionCase):
             'standard_price': 233.0,
         })
 
-
 class TestAnalyticAccount(TestMrpAnalyticAccount):
     def test_mandatory_analytic_plan_bom(self):
         """

@@ -13,6 +13,8 @@ class AccountChartTemplate(models.AbstractModel):
             'property_account_payable_id': 'l10n_id_21100010',
             'property_account_expense_categ_id': 'l10n_id_51000010',
             'property_account_income_categ_id': 'l10n_id_41000010',
+            'property_account_expense_company_id': 'l10n_id_51000010',
+            'property_account_income_company_id': 'l10n_id_41000010',
             'property_stock_account_input_categ_id': 'l10n_id_29000000',
             'property_stock_account_output_categ_id': 'l10n_id_29000000',
             'property_stock_valuation_account_id': 'l10n_id_11300180',

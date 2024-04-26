@@ -14,6 +14,8 @@ class AccountChartTemplate(models.AbstractModel):
             'property_account_payable_id': 'account_1610',
             'property_account_expense_categ_id': 'account_3400',
             'property_account_income_categ_id': 'account_8400',
+            'property_account_expense_company_id': 'account_3400',
+            'property_account_income_company_id': 'account_8400',
             'property_stock_account_input_categ_id': 'account_3970',
             'property_stock_account_output_categ_id': 'account_3980',
             'property_stock_valuation_account_id': 'account_3960',

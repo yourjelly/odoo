@@ -13,6 +13,8 @@ class AccountChartTemplate(models.AbstractModel):
             'property_account_payable_id': 'il_account_111100',
             'property_account_expense_categ_id': 'il_account_212200',
             'property_account_income_categ_id': 'il_account_200000',
+            'property_account_expense_company_id': 'il_account_212200',
+            'property_account_income_company_id': 'il_account_200000',
             'property_stock_account_input_categ_id': 'il_account_101120',
             'property_stock_account_output_categ_id': 'il_account_101130',
             'property_stock_valuation_account_id': 'il_account_101110',

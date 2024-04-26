@@ -13,6 +13,8 @@ class AccountChartTemplate(models.AbstractModel):
             'property_account_payable_id': 'mu_payable',
             'property_account_expense_categ_id': 'mu_expense',
             'property_account_income_categ_id': 'mu_income',
+            'property_account_expense_company_id': 'mu_expense',
+            'property_account_income_company_id': 'mu_income',
             'property_stock_valuation_account_id': 'mu_stock_valuation',
             'property_advance_tax_payment_account_id': 'mu_tax_paid',
             'property_tax_payable_account_id': 'mu_tax_payable',

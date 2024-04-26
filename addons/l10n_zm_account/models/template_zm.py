@@ -13,6 +13,8 @@ class AccountChartTemplate(models.AbstractModel):
             'code_digits': 7,
             'property_account_income_categ_id': 'zm_account_1000000',
             'property_account_expense_categ_id': 'zm_account_3800000',
+            'property_account_income_company_id': 'zm_account_1000000',
+            'property_account_expense_company_id': 'zm_account_3800000',
             'property_account_receivable_id': 'zm_account_8000000',
             'property_account_payable_id': 'zm_account_9000000',
         }

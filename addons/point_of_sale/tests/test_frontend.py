@@ -165,6 +165,7 @@ class TestPointOfSaleHttpCommon(AccountTestInvoicingHttpCommon):
             'available_in_pos': True,
             'list_price': 4.80,
             'taxes_id': False,
+            'categ_id': env.ref('product.product_category_services').id,
             'pos_categ_ids': [(4, pos_cat_chair_test.id)],
         })
         cls.desk_organizer = env['product.product'].create({
@@ -368,7 +369,7 @@ class TestPointOfSaleHttpCommon(AccountTestInvoicingHttpCommon):
 
         product_category_3 = env['product.category'].create({
             'name': 'Services',
-            'parent_id': env.ref('product.product_category_1').id,
+            'parent_id': env.ref('product.product_category_services').id,
         })
 
         env['product.pricelist'].create({
@@ -378,7 +379,7 @@ class TestPointOfSaleHttpCommon(AccountTestInvoicingHttpCommon):
                 'compute_price': 'fixed',
                 'fixed_price': 1,
                 'applied_on': '2_product_category',
-                'categ_id': product_category_3.id,  # All / Saleable / Services
+                'categ_id': product_category_3.id,
             }), (0, 0, {
                 'compute_price': 'fixed',
                 'fixed_price': 2,
@@ -391,12 +392,12 @@ class TestPointOfSaleHttpCommon(AccountTestInvoicingHttpCommon):
                 'compute_price': 'fixed',
                 'fixed_price': 2,
                 'applied_on': '2_product_category',
-                'categ_id': env.ref('product.product_category_all').id,
+                'categ_id': env.ref('product.product_category_services').id,
             }), (0, 0, {
                 'compute_price': 'fixed',
                 'fixed_price': 1,
                 'applied_on': '2_product_category',
-                'categ_id': product_category_3.id,  # All / Saleable / Services
+                'categ_id': product_category_3.id,
             })],
         })
 
@@ -642,6 +643,7 @@ class TestUi(TestPointOfSaleHttpCommon):
             'available_in_pos': True,
             'list_price': 0,
             'taxes_id': [(6, 0, [fixed_tax.id])],
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
 
         # Make an order with the zero-amount product from the frontend.
@@ -1134,7 +1136,6 @@ class TestUi(TestPointOfSaleHttpCommon):
             'available_in_pos': True,
             'list_price': 100,
             'taxes_id': [(6, 0, self.tax1.ids)],
-            'categ_id': self.env.ref('product.product_category_all').id,
         })
 
         #add the fiscal position to the PoS
@@ -1152,7 +1153,6 @@ class TestUi(TestPointOfSaleHttpCommon):
             'name': 'Product A',
             'is_storable': True,
             'tracking': 'serial',
-            'categ_id': self.env.ref('product.product_category_all').id,
             'available_in_pos': True,
         })
 
@@ -1164,7 +1164,6 @@ class TestUi(TestPointOfSaleHttpCommon):
             'name': 'Product A',
             'is_storable': True,
             'tracking': 'lot',
-            'categ_id': self.env.ref('product.product_category_all').id,
             'available_in_pos': True,
         })
         self.main_pos_config.with_user(self.pos_user).open_ui()
@@ -1380,7 +1379,6 @@ class TestUi(TestPointOfSaleHttpCommon):
                 "name": "Desk Combo",
                 "type": "combo",
                 "taxes_id": False,
-                "categ_id": self.env.ref("product.product_category_1").id,
                 "combo_ids": [
                     (6, 0, [combo.id for combo in combos])
                 ],

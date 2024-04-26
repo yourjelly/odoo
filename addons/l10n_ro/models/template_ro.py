@@ -13,6 +13,8 @@ class AccountChartTemplate(models.AbstractModel):
             'property_account_payable_id': 'pcg_4011',
             'property_account_expense_categ_id': 'ro_pcg_expense',
             'property_account_income_categ_id': 'ro_pcg_sale',
+            'property_account_expense_company_id': 'ro_pcg_expense',
+            'property_account_income_company_id': 'ro_pcg_sale',
             'code_digits': '6',
             'use_storno_accounting': True,
         }

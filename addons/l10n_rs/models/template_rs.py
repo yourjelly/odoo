@@ -11,6 +11,8 @@ class AccountChartTemplate(models.AbstractModel):
         return {
             'property_account_expense_categ_id': 'rs_501',
             'property_account_income_categ_id': 'rs_604',
+            'property_account_expense_company_id': 'rs_501',
+            'property_account_income_company_id': 'rs_604',
             'property_account_payable_id': 'rs_435',
             'property_account_receivable_id': 'rs_204',
             'code_digits': '4',

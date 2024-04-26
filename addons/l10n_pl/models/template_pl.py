@@ -13,6 +13,8 @@ class AccountChartTemplate(models.AbstractModel):
             'property_account_payable_id': 'chart21000100',
             'property_account_expense_categ_id': 'chart70010100',
             'property_account_income_categ_id': 'chart73000100',
+            'property_account_expense_company_id': 'chart70010100',
+            'property_account_income_ccompany_id': 'chart73000100',
             'code_digits': '8',
             'use_storno_accounting': True,
         }

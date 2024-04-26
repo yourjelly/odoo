@@ -14,6 +14,8 @@ class AccountChartTemplate(models.AbstractModel):
             'property_account_payable_id': 'chart2400',
             'property_account_expense_categ_id': 'chart4000',
             'property_account_income_categ_id': 'chart3000',
+            'property_account_expense_company_id': 'chart4000',
+            'property_account_income_company_id': 'chart3000',
         }
 
     @template('no', 'res.company')

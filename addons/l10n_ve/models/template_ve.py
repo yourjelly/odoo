@@ -14,6 +14,8 @@ class AccountChartTemplate(models.AbstractModel):
             'property_account_payable_id': 'account_activa_account_2122001',
             'property_account_expense_categ_id': 'account_activa_account_7151001',
             'property_account_income_categ_id': 'account_activa_account_5111001',
+            'property_account_expense_company_id': 'account_activa_account_7151001',
+            'property_account_income_company_id': 'account_activa_account_5111001',
         }
 
     @template('ve', 'res.company')

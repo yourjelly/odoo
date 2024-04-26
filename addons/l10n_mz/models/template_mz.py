@@ -14,6 +14,8 @@ class AccountChartTemplate(models.AbstractModel):
             'property_account_payable_id': 'l10n_mz_account_421',
             'property_account_expense_categ_id': 'l10n_mz_account_61161',
             'property_account_income_categ_id': 'l10n_mz_account_711',
+            'property_account_expense_company_id': 'l10n_mz_account_61161',
+            'property_account_income_company_id': 'l10n_mz_account_711',
         }
 
     @template('mz', 'res.company')

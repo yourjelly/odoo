@@ -14,6 +14,8 @@ class AccountChartTemplate(models.AbstractModel):
             'property_account_payable_id': 'rw_311',
             'property_account_expense_categ_id': 'rw_510',
             'property_account_income_categ_id': 'rw_400',
+            'property_account_expense_company_id': 'rw_510',
+            'property_account_income_company_id': 'rw_400',
         }
 
     @template('rw', 'res.company')

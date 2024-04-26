@@ -13,6 +13,8 @@ class AccountChartTemplate(models.AbstractModel):
             'property_account_payable_id': 'base_proveedores',
             'property_account_expense_categ_id': 'base_compra_mercaderia',
             'property_account_income_categ_id': 'base_venta_de_mercaderia',
+            'property_account_expense_company_id': 'base_compra_mercaderia',
+            'property_account_income_company_id': 'base_venta_de_mercaderia',
             'name': _('Generic Chart of Accounts Argentina Single Taxpayer / Basis'),
             'code_digits': '12',
         }
