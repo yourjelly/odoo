@@ -37650,7 +37650,7 @@
                     ? getItemId(newFormat, data.formats)
                     : exportedCellData.format;
                 let content;
-                if (formulaCell instanceof FormulaCellWithDependencies) {
+                if (isExported && formulaCell instanceof FormulaCellWithDependencies) {
                     content = this.getters.buildFormulaContent(exportedSheetData.id, formulaCell, formulaCell.dependencies, true);
                 }
                 else {
@@ -52127,8 +52127,8 @@
 
 
     __info__.version = '16.4.31';
-    __info__.date = '2024-04-26T07:58:17.550Z';
-    __info__.hash = '16d6656';
+    __info__.date = '2024-04-26T15:22:26.337Z';
+    __info__.hash = '50e7c1d';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
