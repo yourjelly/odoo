@@ -14,6 +14,7 @@
                     </a>
                 </div>
                 <group invisible="not has_available_tickets">
+                <group>
                     <field
                         name="event_id"
                         domain="[

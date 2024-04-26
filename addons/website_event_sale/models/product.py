@@ -15,6 +15,7 @@ class Product(models.Model):
         res = super()._is_add_to_cart_allowed()
         return res or any(event.website_published for event in self.event_ticket_ids.event_id)
 
+
 class ProductTemplate(models.Model):
     _inherit = 'product.template'
 

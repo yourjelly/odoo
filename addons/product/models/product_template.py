@@ -23,7 +23,7 @@ class ProductTemplate(models.Model):
     @tools.ormcache()
     def _get_default_category_id(self):
         # Deletion forbidden (at least through unlink)
-        return self.env.ref('product.product_category_all')
+        return self.env.ref('product.product_category_5')
 
     @tools.ormcache()
     def _get_default_uom_id(self):

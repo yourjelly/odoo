@@ -361,9 +361,9 @@ class TestPointOfSaleHttpCommon(AccountTestInvoicingHttpCommon):
             })],
         })
 
-        product_category_3 = env['product.category'].create({
+        cat_services = env['product.category'].create({
             'name': 'Services',
-            'parent_id': env.ref('product.product_category_1').id,
+            'parent_id': env.ref('product.cat_services').id,
         })
 
         env['product.pricelist'].create({
@@ -373,7 +373,7 @@ class TestPointOfSaleHttpCommon(AccountTestInvoicingHttpCommon):
                 'compute_price': 'fixed',
                 'fixed_price': 1,
                 'applied_on': '2_product_category',
-                'categ_id': product_category_3.id,  # All / Saleable / Services
+                'categ_id': cat_services.id,  # All / Saleable / Services
             }), (0, 0, {
                 'compute_price': 'fixed',
                 'fixed_price': 2,
@@ -386,12 +386,12 @@ class TestPointOfSaleHttpCommon(AccountTestInvoicingHttpCommon):
                 'compute_price': 'fixed',
                 'fixed_price': 2,
                 'applied_on': '2_product_category',
-                'categ_id': env.ref('product.product_category_all').id,
+                'categ_id': env.ref('product.cat_services').id,
             }), (0, 0, {
                 'compute_price': 'fixed',
                 'fixed_price': 1,
                 'applied_on': '2_product_category',
-                'categ_id': product_category_3.id,  # All / Saleable / Services
+                'categ_id': cat_services.id,  # All / Saleable / Services
             })],
         })
 
@@ -1028,7 +1028,7 @@ class TestUi(TestPointOfSaleHttpCommon):
             'available_in_pos': True,
             'list_price': 100,
             'taxes_id': [(6, 0, self.tax1.ids)],
-            'categ_id': self.env.ref('product.product_category_all').id,
+            'categ_id': self.env.ref('product.cat_services').id,
         })
 
         #add the fiscal position to the PoS
@@ -1046,7 +1046,7 @@ class TestUi(TestPointOfSaleHttpCommon):
             'name': 'Product A',
             'type': 'product',
             'tracking': 'serial',
-            'categ_id': self.env.ref('product.product_category_all').id,
+            'categ_id': self.env.ref('product.cat_services').id,
             'available_in_pos': True,
         })
 
@@ -1058,7 +1058,7 @@ class TestUi(TestPointOfSaleHttpCommon):
             'name': 'Product A',
             'type': 'product',
             'tracking': 'lot',
-            'categ_id': self.env.ref('product.product_category_all').id,
+            'categ_id': self.env.ref('product.cat_services').id,
             'available_in_pos': True,
         })
         self.main_pos_config.with_user(self.pos_user).open_ui()

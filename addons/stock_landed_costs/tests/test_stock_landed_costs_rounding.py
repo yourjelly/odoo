@@ -160,7 +160,7 @@ class TestStockLandedCostsRounding(TestStockLandedCostsCommon):
 
         fifo_pc = self.env['product.category'].create({
             'name': 'Fifo Category',
-            'parent_id': self.env.ref("product.product_category_all").id,
+            'parent_id': self.env.ref("product.cat_services").id,
             'property_valuation': 'real_time',
             'property_cost_method': 'fifo',
         })
