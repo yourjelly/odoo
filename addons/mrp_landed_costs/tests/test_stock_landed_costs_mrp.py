@@ -18,7 +18,7 @@ class TestStockLandedCostsMrp(ValuationReconciliationTestCommon):
         cls.supplier_location_id = cls.env.ref('stock.stock_location_suppliers')
         cls.stock_location_id = cls.company_data['default_warehouse'].lot_stock_id
         cls.customer_location_id = cls.env.ref('stock.stock_location_customers')
-        cls.categ_all = cls.env.ref('product.product_category_all')
+        cls.categ_all = cls.env.ref('product.product_category_services')
         # Create product refrigerator & oven
         cls.product_component1 = cls.env['product.product'].create({
             'name': 'Component1',
