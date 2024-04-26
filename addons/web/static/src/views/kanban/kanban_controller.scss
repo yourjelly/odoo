@@ -58,6 +58,23 @@
     padding: var(--Kanban-padding);
     gap: var(--Kanban-gap);
 
+    .card {
+        --#{$prefix}card-spacer-y: 0;
+        --#{$prefix}card-spacer-x: #{$o-kanban-inside-hgutter};
+        --#{$prefix}card-bg: #fff;
+        --#{$prefix}card-border-width: 0;
+        --#{$prefix}card-cap-bg: none;
+        --#{$prefix}card-cap-padding-y: #{$o-kanban-inside-vgutter};
+        --#{$prefix}card-cap-padding-x: #{$o-kanban-inside-hgutter};
+        --#{$prefix}card-title-spacer-y: 0;
+
+        flex-direction: row;
+
+        .card-footer {
+            margin-top: auto;
+        }
+    }
+
     @include media-breakpoint-down(md) {
         --KanbanRecord-padding-h: #{$o-kanban-inside-hgutter * 2};
     }
@@ -65,7 +82,7 @@
     .o_kanban_record > div:not(.o_dropdown_kanban),
     .o_kanban_quick_create {
         border: $border-width solid $border-color;
-        background-color: $o-view-background-color;
+        // background-color: $o-view-background-color;
     }
 
     .o_kanban_quick_create {
@@ -84,7 +101,7 @@
         margin: 0 0 (-$border-width);
 
         > div:not(.o_dropdown_kanban) {
-            padding: var(--KanbanRecord-padding-v) var(--KanbanRecord-padding-h);
+            // padding: var(--KanbanRecord-padding-v) var(--KanbanRecord-padding-h);
             width: 100%;
             height: 100%;
         }
@@ -269,20 +286,20 @@
 
             // Images (backgrounds) could accomodate another image inside.
             // (eg. Company logo badge inside a contact picture)
-            .o_kanban_image_fill_left,
-            .o_kanban_image {
-                background-color: var(--KanbanRecord__image-bg-color, none);
+            // .o_kanban_image_fill_left,
+            // .o_kanban_image {
+            //     background-color: var(--KanbanRecord__image-bg-color, none);
 
-                .o_kanban_image_inner_pic {
-                    @include o-position-absolute($right: 0, $bottom: 0);
-                    max: {
-                        height: 25px;
-                        width: 80%;
-                    }
-                    background: white;
-                    box-shadow: -1px -1px 0 1px white;
-                }
-            }
+                // .o_kanban_image_inner_pic {
+                //     @include o-position-absolute($right: 0, $bottom: 0);
+                //     max: {
+                //         height: 25px;
+                //         width: 80%;
+                //     }
+                //     background: white;
+                //     box-shadow: -1px -1px 0 1px white;
+                // }
+            // }
         }
     }
 
@@ -417,16 +434,16 @@
             }
         }
 
-        .o_kanban_image {
-            float: left;
-            width: var(--KanbanRecord__image-width);
+        // .o_kanban_image {
+        //     float: left;
+        //     width: var(--KanbanRecord__image-width);
 
-            + div {
-                padding-left: calc(
-                    var(--KanbanRecord__image-width) + var(--KanbanRecord-padding-h)
-                );
-            }
-        }
+        //     + div {
+        //         padding-left: calc(
+        //             var(--KanbanRecord__image-width) + var(--KanbanRecord-padding-h)
+        //         );
+        //     }
+        // }
 
         .oe_kanban_details {
             width: 100%;
