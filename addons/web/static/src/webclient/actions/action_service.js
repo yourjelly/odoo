@@ -385,7 +385,7 @@ export function makeActionManager(env, router = _router) {
         } catch {
             // do nothing, the action might simply not be serializable
         }
-        action.context = makeContext([context, action.context], user.context);
+        action.context = makeContext([action.context, context], user.context);
         const domain = action.domain || [];
         action.domain =
             typeof domain === "string"
