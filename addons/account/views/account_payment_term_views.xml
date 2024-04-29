@@ -110,8 +110,6 @@
                                     <field name="note" placeholder="e.g. Payment terms: 30 days after invoice date" class="border-bottom o_example_note"/>
                                     <field name="example_preview_discount" class="ps-2"
                                            invisible="not early_discount or not display_on_invoice"/>
-                                    <field name="example_preview_late_payment_charges" class="ps-2"
-                                           invisible="not late_payment_charges or not display_on_invoice"/>
                                     <field name="example_preview" class="ps-2"
                                            invisible="not display_on_invoice"/>
                                 </div>

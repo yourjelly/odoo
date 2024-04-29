@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import calendar
-from datetime import datetime, timedelta
 from odoo import api, fields, models, _, Command
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools import format_date, formatLang, frozendict, date_utils
@@ -37,7 +35,6 @@ class AccountPaymentTerm(models.Model):
     example_invalid = fields.Boolean(compute='_compute_example_invalid')
     example_preview = fields.Html(compute='_compute_example_preview')
     example_preview_discount = fields.Html(compute='_compute_example_preview')
-    example_preview_late_payment_charges = fields.Html(compute='_compute_example_preview')
 
     discount_percentage = fields.Float(string='Discount %', help='Early Payment Discount granted for this payment term', default=2.0)
     discount_days = fields.Integer(string='Discount Days', help='Number of days before the early payment proposition expires', default=10)
@@ -87,39 +84,58 @@ class AccountPaymentTerm(models.Model):
             return self.currency_id.round(total_amount - discount_amount_currency)
         return total_amount
 
-    def _get_amount_due_after_charges(self, total_amount, taxed_amount, invoice_date=None, payment_date=None):
+    def _get_amount_due_after_charges(self, total_amount, taxed_amount, invoice_date, payment_date, company):
         self.ensure_one()
-        amount_after_given_period = 0.0
+        amount_dict = {}
         due_date = self._get_latest_late_charges_date(invoice_date)
         if self.late_payment_charges:
             if self.late_payment_charges_type == 'fixed':
-                amount_after_given_period = self.late_payment_charges_value + total_amount
+                amount_dict.update({'Fixed Late Pay Charges': self.late_payment_charges_value})
             else:
                 percentage = self.late_payment_charges_value / 100.0
                 if self.late_payment_charges_computation in ('on_taxable'):
                     late_payment_charges_amount_currency = self.currency_id.round((total_amount - taxed_amount) * percentage)
                 else:
                     late_payment_charges_amount_currency = self.currency_id.round(total_amount * percentage)
-                if payment_date and due_date:
-                    amount_after_given_period = self._compute_interest(due_date, payment_date, late_payment_charges_amount_currency, self.late_payment_charges_type) + total_amount
-        return amount_after_given_period
+                amount_dict = self._compute_interest(due_date, payment_date, late_payment_charges_amount_currency, self.late_payment_charges_type, company)
+        return amount_dict
 
-    def _compute_interest(self, due_date, payment_date, periodic_interest, lpc_type):
-        amount = 0.0
+    def _compute_interest(self, due_date, payment_date, periodic_interest, lpc_type, company):
+        amount_dict = {}
         current_date = due_date
-        last_date_of_current_month = total_days_in_month = i = 0
-        while current_date <= payment_date:
-            total_days_in_month = calendar.monthrange(current_date.year, current_date.month)[1]
-            last_date_of_current_month = datetime(current_date.year, current_date.month, total_days_in_month).date()
-            days_to_include = (last_date_of_current_month - current_date).days + 1
-            days_to_include -= 1 if i==0 else 0
-            if total_days_in_month != 0:
-                amount += (days_to_include / total_days_in_month) * periodic_interest
-            current_date = (last_date_of_current_month + timedelta(days=1)).replace(day=1)
-            i += 1
-        if total_days_in_month != 0:
-            amount -= ((last_date_of_current_month - payment_date).days / total_days_in_month) * periodic_interest
-        return amount
+        period_start, period_end = self._get_fiscal_dates(current_date, lpc_type, company)
+        while not (period_start <= payment_date and payment_date <= period_end):
+            days_in_period = (period_end - period_start).days + 1
+            if days_in_period != 0:
+                key = 'Late Pay Charges from {} to {}'.format(current_date.strftime('%Y-%m-%d'), period_end.strftime('%Y-%m-%d'))
+                amount_dict[key] = float_round((((period_end - current_date).days + 1) / days_in_period) * periodic_interest, 2)
+            period_start, period_end = self._get_next_dates(period_start, period_end, lpc_type)
+            current_date = period_start
+        days_in_period = (period_end - period_start).days + 1
+        if days_in_period != 0:
+            key = 'Late Pay Charges from {} to {}'.format(current_date.strftime('%Y-%m-%d'), period_end.strftime('%Y-%m-%d'))
+            amount_dict[key] = float_round((((payment_date - current_date).days + 1) / days_in_period) * periodic_interest, 2)
+        return amount_dict
+
+    def _get_fiscal_dates(self, current_date, lpc_type, company):
+        period_start, period_end = date_utils.get_fiscal_year(current_date, day=company.fiscalyear_last_day,
+                                    month=int(company.fiscalyear_last_month))
+        if lpc_type == 'monthly':
+            period_start = current_date.replace(day=1)
+            period_end = period_start + relativedelta(months=1) - relativedelta(days=1)
+        elif lpc_type in ['quarterly', 'half_yearly']:
+            increment_months = 3 if lpc_type == 'quarterly' else 6
+            period_end = period_start + relativedelta(months=increment_months) - relativedelta(days=1)
+            while not (current_date >= period_start and current_date <= period_end):
+                period_start += relativedelta(months=increment_months)
+                period_end = period_start + relativedelta(months=increment_months) - relativedelta(days=1)
+        return period_start, period_end
+
+    def _get_next_dates(self, period_start, period_end, lpc_type):
+        increment_months = {'monthly': 1, 'quarterly': 3, 'half_yearly': 6, 'yearly': 12}
+        period_start = period_end + relativedelta(days=1)
+        period_end = period_start + relativedelta(months=increment_months[lpc_type]) - relativedelta(days=1)
+        return period_start, period_end
 
     @api.depends('company_id')
     def _compute_discount_computation(self):
@@ -137,12 +153,11 @@ class AccountPaymentTerm(models.Model):
         for payment_term in self:
             payment_term.example_invalid = len(payment_term.line_ids) <= 1
 
-    @api.depends('currency_id', 'example_amount', 'example_date', 'line_ids.value', 'line_ids.value_amount', 'line_ids.nb_days', 'early_discount', 'discount_percentage', 'discount_days', 'late_payment_charges', 'late_payment_charges_value', 'late_payment_charges_days')
+    @api.depends('currency_id', 'example_amount', 'example_date', 'line_ids.value', 'line_ids.value_amount', 'line_ids.nb_days', 'early_discount', 'discount_percentage', 'discount_days')
     def _compute_example_preview(self):
         for record in self:
             example_preview = ""
             record.example_preview_discount = ""
-            record.example_preview_late_payment_charges = ""
             currency = record.currency_id
             if record.early_discount:
                 date = record._get_last_discount_date_formatted(record.example_date or fields.Date.context_today(record))
@@ -153,14 +168,6 @@ class AccountPaymentTerm(models.Model):
                     date=date,
                 )
 
-            if record.late_payment_charges:
-                date = record._get_latest_late_charges_date_formatted(record.example_date or fields.Date.context_today(record))
-                late_payment_charges_amount = record._get_amount_due_after_charges(record.example_amount, 0.0)
-                record.example_preview_late_payment_charges = _(
-                    "Late Payment Charges: <b>%(amount)s</b> if paid after <b>%(date)s</b>",
-                    amount=formatLang(self.env, late_payment_charges_amount, monetary=True, currency_obj=currency),
-                    date=date,
-                )
             if not record.example_invalid:
                 terms = record._compute_terms(
                     date_ref=record.example_date or fields.Date.context_today(record),
@@ -319,13 +326,7 @@ class AccountPaymentTerm(models.Model):
 
     def _get_latest_late_charges_date(self, date_ref):
         self.ensure_one()
-        return self.line_ids._get_due_date(date_ref) + relativedelta(days=self.late_payment_charges_days or 0) if self.late_payment_charges and not len(self.line_ids) > 1 else False
-
-    def _get_latest_late_charges_date_formatted(self, date_ref):
-        self.ensure_one()
-        if not date_ref:
-            return None
-        return format_date(self.env, self._get_latest_late_charges_date(date_ref))
+        return self.line_ids._get_due_date(date_ref) + relativedelta(days=(self.late_payment_charges_days + 1) or 0) if self.late_payment_charges and not len(self.line_ids) > 1 else False
 
 class AccountPaymentTermLine(models.Model):
     _name = "account.payment.term.line"
