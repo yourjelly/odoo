@@ -4,6 +4,8 @@ import { registry } from "@web/core/registry";
 import { ListRenderer } from "@web/views/list/list_renderer";
 import { X2ManyField, x2ManyField } from "@web/views/fields/x2many/x2many_field";
 import { useEffect } from "@odoo/owl";
+import { X2ManyFieldDialog } from "@web/views/fields/relational_utils";
+import { patch } from "@web/core/utils/patch";
 
 export class MovesListRenderer extends ListRenderer {
     static recordRowTemplate = "stock.MovesListRenderer.RecordRow";
@@ -32,6 +34,15 @@ export class MovesListRenderer extends ListRenderer {
     }
 }
 
+patch(X2ManyFieldDialog.prototype, {
+    async save({ saveAndNew }) {
+        await super.save({ saveAndNew });
+        if (this.record._config.resModel === 'stock.move') {
+            await this.record.model.root.save({ reload: true });
+        }
+        return true;
+    }
+});
 
 export class StockMoveX2ManyField extends X2ManyField {
     static components = { ...X2ManyField.components, ListRenderer: MovesListRenderer };
@@ -49,9 +60,9 @@ export class StockMoveX2ManyField extends X2ManyField {
     async openRecord(record) {
         if (this.canOpenRecord && !record.isNew) {
             const dirty = await record.isDirty();
-            if (dirty && 'quantity' in record._changes) {
-                await record.model.root.save({ reload: true });
-                record = record.model.root.data[this.props.name].records.find(e => e.resId === record.resId);
+            if (dirty && 'quantity' in record._changes || 'move_line_ids' in record._changes) {
+                await record._parentRecord.save({ reload: true });
+                record = record._parentRecord.data[this.props.name].records.find(e => e.resId === record.resId);
                 if (!record) {
                     return;
                 }

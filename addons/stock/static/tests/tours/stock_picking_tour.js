@@ -279,3 +279,56 @@ registry.category("web_tour.tours").add('test_edit_existing_line', {
         },
     ]
 });
+
+registry.category("web_tour.tours").add('test_sm_to_sml_synchronization', { test: true, steps: () => [
+    {trigger: '.o_field_x2many_list_row_add > a'},
+    {
+        trigger: ".o_field_widget[name=product_id] input",
+        run: "edit product",
+    },
+    {trigger: ".ui-menu-item > a:contains('product')"},
+    {
+        trigger: ".o_field_widget[name=product_uom_qty] input",
+        run: "edit 5",
+    },
+    {trigger: ".btn-primary[name=action_confirm]"},
+    {trigger: ".fa-list"},
+    {trigger: "h4:contains('Stock move')"},
+    {trigger: '.o_field_x2many_list_row_add > a'},
+    {
+        trigger: ".o_field_widget[name=location_dest_id] input",
+        run: "edit WH/Stock",
+    },
+    {
+        trigger: ".o_field_widget[name=quantity] input",
+        run: "edit 5",
+    },
+    {trigger: ".o_form_button_save"},
+    {trigger: ".o_data_row > td:contains('10')"},
+    {
+        trigger: ".o_field_widget[name=quantity] input",
+        run: "edit 5",
+    },
+    {trigger: ".fa-list"},
+    {trigger: "h4:contains('Stock move')"},
+    {trigger: ".o_data_row > td:contains('WH/Stock"},
+    {
+        trigger: ".o_field_widget[name=quantity] input",
+        run: "edit 10",
+    },
+    {trigger: ".o_form_button_save"},
+    {trigger: ".o_data_row > td:contains('10')"},
+    {
+        trigger: ".o_field_widget[name=quantity] input",
+        run: "edit 5",
+    },
+    {trigger: ".fa-list"},
+    {trigger: ".o_data_row > td:contains('5')"},
+    {trigger: ".o_form_button_save"},
+    {trigger: ".o_form_button_save"},
+    {trigger: ".btn-primary[name=button_validate]"},
+    {
+        trigger: ".o_form_renderer.o_form_saved",
+        isCheck: true,
+    },
+]});

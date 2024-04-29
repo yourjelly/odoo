@@ -163,3 +163,14 @@ class TestStockPickingTour(HttpCase):
 
         names = self.receipt.move_ids.move_line_ids.mapped('lot_name')
         self.assertEqual(names, ["one", "two"])
+
+    def test_sm_to_sml_synchronization(self):
+        """synchronization between stock.move and stock.move.line in the detailed operation modal """
+
+        self.env['res.config.settings'].create({'group_stock_multi_locations': True}).execute()
+        self.env['res.config.settings'].create({'group_stock_adv_location': True}).execute()
+
+        url = self._get_picking_url(self.receipt.id)
+        self.start_tour(url, 'test_sm_to_sml_synchronization', login='admin', timeout=60)
+        self.assertEqual(self.receipt.move_ids.quantity, 5)
+        self.assertEqual(self.receipt.move_line_ids.quantity, 5)
