@@ -54,7 +54,7 @@ _UNSAFE_ATTRIBUTES = [
     # Frames
     'f_builtins', 'f_code', 'f_globals', 'f_locals',
     # Python 2 functions
-    'func_code', 'func_globals', 'mro',
+    'func_code', 'func_globals',
     # Code object
     'co_code', '_co_code_adaptive',
     # Method resolution order,
@@ -169,8 +169,8 @@ _SAFE_OPCODES = _EXPR_OPCODES.union(to_opcodes([
     'NOP',
     'FORMAT_VALUE', 'BUILD_STRING',
     # 3.12
-    'LOAD_FAST_AND_CLEAR', 'END_FOR', 'POP_JUMP_IF_NOT_NONE', 'BINARY_SLICE', 'RERAISE',
-    'CALL_INTRINSIC_1',
+    # 'LOAD_FAST_AND_CLEAR', 'END_FOR', 'POP_JUMP_IF_NOT_NONE', 'BINARY_SLICE', 'RERAISE',
+    # 'CALL_INTRINSIC_1',
 ])) - _BLACKLIST
 
 _logger = logging.getLogger(__name__)
