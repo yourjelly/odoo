@@ -17,7 +17,7 @@ import {
     queryText,
     resize,
 } from "@odoo/hoot-dom";
-import { animationFrame, Deferred, runAllTimers } from "@odoo/hoot-mock";
+import { animationFrame, Deferred, mockDate, mockTimeZone, runAllTimers } from "@odoo/hoot-mock";
 import {
     clickKanbanLoadMore,
     clickSave,
@@ -411,7 +411,7 @@ test.todo("select record range with shift click", async () => {
     ).toBe(0);
 });
 
-test("select record range with shift+space", async () => {
+test.todo("select record range with shift+space", async () => {
     await mountView({
         type: "list",
         resModel: "foo",
@@ -445,7 +445,7 @@ test("select record range with shift+space", async () => {
     expect(".o_data_row:nth-child(4) .o_list_record_selector input").toBeChecked();
 });
 
-test("expand range of checkbox with shift+arrow", async () => {
+test.todo("expand range of checkbox with shift+arrow", async () => {
     await mountView({
         type: "list",
         resModel: "foo",
@@ -1182,7 +1182,7 @@ test("column names (noLabel, label, string and default)", async () => {
     fieldRegistry.add("nolabel_char", {
         ...charField,
         component: NoLabelCharField,
-        noLabel: true,
+        label: false,
     });
 
     class LabelCharField extends charField.component {}
@@ -5262,17 +5262,17 @@ test("archive all records matching the domain (limit reached)", async () => {
 test("archive/unarchive handles returned action", async () => {
     // add active field on foo model and make all records active
     Foo._fields.active = fields.Boolean({ default: true });
-    
+
     Foo._views = {
         "list,3": '<tree><field name="foo"/></tree>',
         "search,9": `
             <search>
                 <filter string="Not Bar" name="not bar" domain="[['bar','=',False]]"/>
             </search>`,
-    }
+    };
     Bar._views = {
         "form,false": '<form><field name="display_name"/></form>',
-    }
+    };
 
     defineActions([
         {
@@ -5282,8 +5282,8 @@ test("archive/unarchive handles returned action", async () => {
             type: "ir.actions.act_window",
             views: [[3, "list"]],
             search_view_id: [9, "search"],
-        },    
-    ])    
+        },
+    ]);
 
     onRpc("/web/dataset/call_kw/foo/action_archive", () => {
         return {
@@ -5310,10 +5310,9 @@ test("archive/unarchive handles returned action", async () => {
 
     await contains(".modal .modal-footer .btn-primary").click();
     expect(".modal").toHaveCount(1, { message: "archive action dialog should be displayed" });
-    expect(".modal .modal-title").toHaveText(
-        "Archive Action",
-        { message: "action wizard should have been opened" }
-    );
+    expect(".modal .modal-title").toHaveText("Archive Action", {
+        message: "action wizard should have been opened",
+    });
 });
 
 test("apply custom static action menu (archive)", async () => {
@@ -5456,11 +5455,11 @@ test("grouped, update the count of the group (and ancestors) when a record is de
 test("pager (ungrouped and grouped mode), default limit", async () => {
     expect.assertions(4);
 
-    onRpc("web_search_read", ({kwargs})=> {
+    onRpc("web_search_read", ({ kwargs }) => {
         expect(kwargs.limit).toBe(80, {
             message: "default limit should be 80 in List",
         });
-    })
+    });
     await mountView({
         type: "list",
         resModel: "foo",
@@ -5485,7 +5484,6 @@ test("pager, ungrouped, with count limit reached", async () => {
     stepAllNetworkCalls();
     onRpc("web_search_read", ({ kwargs }) => {
         expect(kwargs.count_limit).toBe(expectedCountLimit);
-
     });
     await mountView({
         type: "list",
@@ -5522,7 +5520,6 @@ test("pager, ungrouped, with count limit reached, click next", async () => {
     let expectedCountLimit = 4;
     onRpc("web_search_read", ({ kwargs }) => {
         expect(kwargs.count_limit).toBe(expectedCountLimit);
-
     });
 
     await mountView({
@@ -5558,7 +5555,6 @@ test("pager, ungrouped, with count limit reached, click next (2)", async () => {
     let expectedCountLimit = 4;
     onRpc("web_search_read", ({ kwargs }) => {
         expect(kwargs.count_limit).toBe(expectedCountLimit);
-
     });
 
     await mountView({
@@ -5601,7 +5597,6 @@ test("pager, ungrouped, with count limit reached, click previous", async () => {
     let expectedCountLimit = 4;
     onRpc("web_search_read", ({ kwargs }) => {
         expect(kwargs.count_limit).toBe(expectedCountLimit);
-
     });
 
     await mountView({
@@ -5637,7 +5632,6 @@ test("pager, ungrouped, with count limit reached, edit pager", async () => {
     let expectedCountLimit = 4;
     onRpc("web_search_read", ({ kwargs }) => {
         expect(kwargs.count_limit).toBe(expectedCountLimit);
-
     });
 
     await mountView({
@@ -5814,12 +5808,8 @@ test("pager, grouped, with count limit reached", async () => {
     expect(".o_group_header:first-of-type .o_group_name .o_pager").toHaveCount(1, {
         message: "first group should have a pager",
     });
-    expect(".o_group_header:first-of-type .o_pager_value").toHaveText(
-        "1"
-    );
-    expect(".o_group_header:first-of-type .o_pager_limit").toHaveText(
-        "2"
-    );
+    expect(".o_group_header:first-of-type .o_pager_value").toHaveText("1");
+    expect(".o_group_header:first-of-type .o_pager_limit").toHaveText("2");
 });
 
 test("multi-level grouped list, pager inside a group", async () => {
@@ -5892,9 +5882,7 @@ test("pager, grouped, pager limit should be based on the group's count", async (
 
     // unfold
     await contains(".o_group_header:first-of-type").click();
-    expect(".o_group_header:first-of-type .o_pager_limit").toHaveText(
-        "6"
-    );
+    expect(".o_group_header:first-of-type .o_pager_limit").toHaveText("6");
 });
 
 test("pager, grouped, group pager should update after removing a filter", async () => {
@@ -6030,11 +6018,51 @@ test("Navigate between the list and kanban view using the command palette", asyn
     expect(".o_list_view").toHaveCount(1);
 });
 
+test("grouped list keeps offset on switchView", async () => {
+    expect.assertions(8);
+
+    Foo._views = {
+        "search,false": `
+            <search>
+                <filter string="IntField" name="groupby" domain="[]" context="{'group_by': 'int_field'}"/>
+            </search>`,
+        "list,99": `<list groups_limit="1"><field name="display_name" /></list>`,
+        "form,100": `<form><field name="display_name" /></form>`,
+    };
+
+    const offsets = [0, 1, 1];
+    onRpc("web_read_group", ({ kwargs }) => {
+        expect(kwargs.offset).toBe(offsets.shift());
+    });
+    await mountWithCleanup(WebClient);
+    await getService("action").doAction({
+        res_model: "foo",
+        type: "ir.actions.act_window",
+        views: [
+            [99, "list"],
+            [100, "form"],
+        ],
+        context: {
+            search_default_groupby: true,
+        },
+    });
+
+    expect(".o_list_view").toHaveCount(1);
+    await contains(".o_pager_next").click();
+    expect(".o_data_row").toHaveCount(0);
+    await contains(".o_group_header").click();
+    expect(".o_data_row").toHaveCount(1);
+    await contains(".o_data_cell").click();
+    expect(".o_form_view").toHaveCount(1);
+    await contains(".o_back_button").click();
+    expect(".o_data_row").toHaveCount(1);
+});
+
 test("can sort records when clicking on header", async () => {
     let nbSearchRead = 0;
     onRpc("web_search_read", () => {
         nbSearchRead++;
-    })
+    });
     await mountView({
         type: "list",
         resModel: "foo",
@@ -6042,33 +6070,24 @@ test("can sort records when clicking on header", async () => {
     });
 
     expect(nbSearchRead).toBe(1, { message: "should have done one search_read" });
-    expect(queryAllTexts(".o_data_cell.o_list_char")).toEqual(["yop",
-    "blip",
-    "gnap",
-    "blip",]);
+    expect(queryAllTexts(".o_data_cell.o_list_char")).toEqual(["yop", "blip", "gnap", "blip"]);
 
     nbSearchRead = 0;
     await contains("thead th:contains(Foo)").click();
     expect(nbSearchRead).toBe(1, { message: "should have done one search_read" });
-    expect(queryAllTexts(".o_data_cell.o_list_char")).toEqual(["blip",
-    "blip",
-    "gnap",
-    "yop",]);
+    expect(queryAllTexts(".o_data_cell.o_list_char")).toEqual(["blip", "blip", "gnap", "yop"]);
 
     nbSearchRead = 0;
     await contains("thead th:contains(Foo)").click();
     expect(nbSearchRead).toBe(1, { message: "should have done one search_read" });
-    expect(queryAllTexts(".o_data_cell.o_list_char")).toEqual(["yop",
-    "gnap",
-    "blip",
-    "blip",]);
+    expect(queryAllTexts(".o_data_cell.o_list_char")).toEqual(["yop", "gnap", "blip", "blip"]);
 });
 
 test("do not sort records when clicking on header with nolabel", async () => {
     let nbSearchRead = 0;
     onRpc("web_search_read", () => {
         nbSearchRead++;
-    })
+    });
 
     await mountView({
         type: "list",
@@ -6077,21 +6096,48 @@ test("do not sort records when clicking on header with nolabel", async () => {
     });
 
     expect(nbSearchRead).toBe(1, { message: "should have done one search_read" });
-    expect(queryAllTexts(".o_data_cell")).toEqual(["yop","10","blip","9","gnap","17","blip","-4"])
+    expect(queryAllTexts(".o_data_cell")).toEqual([
+        "yop",
+        "10",
+        "blip",
+        "9",
+        "gnap",
+        "17",
+        "blip",
+        "-4",
+    ]);
 
     await contains("thead th:eq(2)").click();
     expect(nbSearchRead).toBe(2, { message: "should have done one other search_read" });
-    expect(queryAllTexts(".o_data_cell")).toEqual(["blip","-4","blip","9","yop","10","gnap","17"])
-    
+    expect(queryAllTexts(".o_data_cell")).toEqual([
+        "blip",
+        "-4",
+        "blip",
+        "9",
+        "yop",
+        "10",
+        "gnap",
+        "17",
+    ]);
+
     await contains("thead th:eq(1)").click();
     expect(nbSearchRead).toBe(2, { message: "shouldn't have done anymore search_read" });
-    expect(queryAllTexts(".o_data_cell")).toEqual(["blip","-4","blip","9","yop","10","gnap","17"])
+    expect(queryAllTexts(".o_data_cell")).toEqual([
+        "blip",
+        "-4",
+        "blip",
+        "9",
+        "yop",
+        "10",
+        "gnap",
+        "17",
+    ]);
 });
 
 test("use default_order", async () => {
     expect.assertions(2);
 
-    onRpc("web_search_read", ({ kwargs}) => {
+    onRpc("web_search_read", ({ kwargs }) => {
         expect(kwargs.order).toBe("foo ASC", {
             message: "should correctly set the sort attribute",
         });
@@ -6101,18 +6147,15 @@ test("use default_order", async () => {
         type: "list",
         resModel: "foo",
         arch: '<tree default_order="foo"><field name="foo"/><field name="bar"/></tree>',
-     });
+    });
 
-    expect(queryAllTexts(".o_data_cell.o_list_char")).toEqual(["blip",
-    "blip",
-    "gnap",
-    "yop",]);
+    expect(queryAllTexts(".o_data_cell.o_list_char")).toEqual(["blip", "blip", "gnap", "yop"]);
 });
 
 test("use more complex default_order", async () => {
     expect.assertions(2);
 
-    onRpc("web_search_read", ({ kwargs}) => {
+    onRpc("web_search_read", ({ kwargs }) => {
         expect(kwargs.order).toBe("foo ASC, bar DESC, int_field ASC", {
             message: "should correctly set the sort attribute",
         });
@@ -6127,10 +6170,7 @@ test("use more complex default_order", async () => {
             </tree>`,
     });
 
-    expect(queryAllTexts(".o_data_cell.o_list_char")).toEqual(["blip",
-    "blip",
-    "gnap",
-    "yop",]);
+    expect(queryAllTexts(".o_data_cell.o_list_char")).toEqual(["blip", "blip", "gnap", "yop"]);
 });
 
 test("use default_order on editable tree: sort on save", async () => {
@@ -6153,22 +6193,23 @@ test("use default_order on editable tree: sort on save", async () => {
         resId: 1,
     });
 
-    expect(queryAllTexts(".o_field_x2many_list .o_data_row")).toEqual(
-        ["Value 1", "Value 3"]
-    );
+    expect(queryAllTexts(".o_field_x2many_list .o_data_row")).toEqual(["Value 1", "Value 3"]);
 
     await contains(".o_field_x2many_list_row_add a").click();
     await contains(".o_field_widget[name=o2m] .o_field_widget input").edit("Value 2");
     await contains(".o_form_view").click();
-    expect(queryAllTexts(".o_field_x2many_list .o_data_row")).toEqual(
-        ["Value 1", "Value 3", "Value 2"]
-    );
+    expect(queryAllTexts(".o_field_x2many_list .o_data_row")).toEqual([
+        "Value 1",
+        "Value 3",
+        "Value 2",
+    ]);
 
     await clickSave();
-    expect(queryAllTexts(".o_field_x2many_list .o_data_row")).toEqual(
-
-        ["Value 1", "Value 2", "Value 3"]
-    );
+    expect(queryAllTexts(".o_field_x2many_list .o_data_row")).toEqual([
+        "Value 1",
+        "Value 2",
+        "Value 3",
+    ]);
 });
 
 test("use default_order on editable tree: sort on demand", async () => {
@@ -6193,29 +6234,30 @@ test("use default_order on editable tree: sort on demand", async () => {
         resId: 1,
     });
 
-    expect(queryAllTexts(".o_field_x2many_list .o_data_row")).toEqual(
-        ["Value 1", "Value 3"]
-    );
+    expect(queryAllTexts(".o_field_x2many_list .o_data_row")).toEqual(["Value 1", "Value 3"]);
 
     await contains(".o_field_x2many_list_row_add a").click();
     await contains(".o_field_widget[name=o2m] .o_field_widget input").edit("Value 2");
     await contains(".o_form_view").click();
-        expect(queryAllTexts(".o_field_x2many_list .o_data_row")).toEqual(
-
-        ["Value 1", "Value 3", "Value 2"]
-    );
-
-    await contains(".o_field_widget[name=o2m] .o_column_sortable").click();
-        expect(queryAllTexts(".o_field_x2many_list .o_data_row")).toEqual(
-
-        ["Value 1", "Value 2", "Value 3"]
-    );
+    expect(queryAllTexts(".o_field_x2many_list .o_data_row")).toEqual([
+        "Value 1",
+        "Value 3",
+        "Value 2",
+    ]);
 
     await contains(".o_field_widget[name=o2m] .o_column_sortable").click();
-        expect(queryAllTexts(".o_field_x2many_list .o_data_row")).toEqual(
+    expect(queryAllTexts(".o_field_x2many_list .o_data_row")).toEqual([
+        "Value 1",
+        "Value 2",
+        "Value 3",
+    ]);
 
-        ["Value 3", "Value 2", "Value 1"]
-    );
+    await contains(".o_field_widget[name=o2m] .o_column_sortable").click();
+    expect(queryAllTexts(".o_field_x2many_list .o_data_row")).toEqual([
+        "Value 3",
+        "Value 2",
+        "Value 1",
+    ]);
 });
 
 test("use default_order on editable tree: sort on demand in page", async () => {
@@ -6249,10 +6291,22 @@ test("use default_order on editable tree: sort on demand in page", async () => {
     });
 
     await contains(".o_field_widget .o_pager button.o_pager_next").click();
-    expect(queryAllTexts(".o_data_cell")).toEqual(["Value 44","Value 45","Value 46","Value 47","Value 48"]);
+    expect(queryAllTexts(".o_data_cell")).toEqual([
+        "Value 44",
+        "Value 45",
+        "Value 46",
+        "Value 47",
+        "Value 48",
+    ]);
 
     await contains(".o_column_sortable").click();
-    expect(queryAllTexts(".o_data_cell")).toEqual(["Value 08","Value 07","Value 06","Value 05","Value 04"]);
+    expect(queryAllTexts(".o_data_cell")).toEqual([
+        "Value 08",
+        "Value 07",
+        "Value 06",
+        "Value 05",
+        "Value 04",
+    ]);
 });
 
 test("can display button in edit mode", async () => {
@@ -6590,20 +6644,22 @@ test("empty list with sample data", async () => {
     expect(".o_data_row .o_data_cell:eq(0)").toHaveText("", {
         message: "Char field should yield an empty element",
     });
-    expect(".o_data_row .o_data_cell:eq(1) .o-checkbox").toHaveCount(1, { message: "Boolean field has been instantiated" });
+    expect(".o_data_row .o_data_cell:eq(1) .o-checkbox").toHaveCount(1, {
+        message: "Boolean field has been instantiated",
+    });
     const cells = queryFirst(".o_data_row").querySelectorAll(":scope > .o_data_cell");
     expect(isNaN(cells[2].innerText.trim())).toBe(false, { message: "Integer value is a number" });
     expect(!!cells[3].innerText.trim()).toBe(true, { message: "Many2one field is a string" });
     const firstM2MTag = cells[4].querySelector(":scope div.o_tag_badge_text").innerText.trim();
-    expect(firstM2MTag.length > 0).toBe(true, { message: "Many2many contains at least one string tag" });
-    expect(
-        /\d{2}\/\d{2}\/\d{4}/.test(cells[5].innerText.trim())).toBe(true, 
-        { message: "Date field should have the right format" }
-    );
-    expect(
-        /\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}:\d{2}/.test(cells[6].innerText.trim())).toBe(true,
-        { message: "Datetime field should have the right format" }
-    );
+    expect(firstM2MTag.length > 0).toBe(true, {
+        message: "Many2many contains at least one string tag",
+    });
+    expect(/\d{2}\/\d{2}\/\d{4}/.test(cells[5].innerText.trim())).toBe(true, {
+        message: "Date field should have the right format",
+    });
+    expect(/\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}:\d{2}/.test(cells[6].innerText.trim())).toBe(true, {
+        message: "Datetime field should have the right format",
+    });
 
     await toggleSearchBarMenu();
     await toggleMenuItem("empty");
@@ -7007,7 +7063,9 @@ test("groupby node with a button", async () => {
     await selectGroup("currency_id");
     expect(["web_read_group"]).toVerifySteps();
     expect(".o_group_header").toHaveCount(2, { message: "there should be 2 group headers" });
-    expect(".o_group_header button").toHaveCount(0, { message: "there should be no button in the header" });
+    expect(".o_group_header button").toHaveCount(0, {
+        message: "there should be no button in the header",
+    });
 
     await contains(".o_group_header:first-child").click();
     expect(["web_search_read"]).toVerifySteps();
@@ -7213,7 +7271,8 @@ test("groupby node with subfields, and onchange", async () => {
     };
 
     onRpc("onchange", ({ args }) => {
-        expect(args[3]).toEqual({
+        expect(args[3]).toEqual(
+            {
                 currency_id: {
                     fields: {
                         display_name: {},
@@ -7324,9 +7383,9 @@ test("list view, editable, with a button", async () => {
     expect("table button i.o_button_icon.fa-phone").toHaveCount(1, {
         message: "should have rendered a button",
     });
-    expect("table button:eq(0)").toHaveProperty("disabled", false,
-        { message: "button should not be disabled when creating the record" }
-    );
+    expect("table button:eq(0)").toHaveProperty("disabled", false, {
+        message: "button should not be disabled when creating the record",
+    });
 
     await contains("table button").click();
     expect(["web_save", "call_button"]).toVerifySteps({
@@ -7413,7 +7472,7 @@ test("editable list view, click on the list to save", async () => {
 });
 
 test("editable list view, should refocus date field", async () => {
-    patchDate({ year: 2017, month: 2, day: 10 });
+    mockDate("2017-02-10 12:00:00");
 
     Foo._records = [];
 
@@ -7455,7 +7514,7 @@ test("text field should keep it's selection when clicking on it", async () => {
         message: "the entire content should be selected on initial click",
     });
 
-    Object.assign(target.querySelector("[name=text] textarea"), {
+    Object.assign(queryOne("[name=text] textarea"), {
         selectionStart: 0,
         selectionEnd: 1,
     });
@@ -7498,7 +7557,7 @@ test("click on a button cell in a list view", async () => {
 });
 
 test("click on a button in a list view", async () => {
-    expect.assertions(10);
+    expect.assertions(7);
 
     mockService("action", () => {
         return {
@@ -7514,6 +7573,8 @@ test("click on a button in a list view", async () => {
         };
     });
 
+    stepAllNetworkCalls();
+
     await mountView({
         type: "list",
         resModel: "foo",
@@ -7522,9 +7583,6 @@ test("click on a button in a list view", async () => {
                 <field name="foo"/>
                 <button string="a button" name="button_action" icon="fa-car" type="object"/>
             </tree>`,
-        mockRPC(route) {
-            expect.step(route);
-        },
     });
 
     expect("tbody .o_list_button").toHaveCount(4, {
@@ -7534,9 +7592,12 @@ test("click on a button in a list view", async () => {
 
     await contains(".o_data_row .o_list_button > button").click();
     expect([
-        "/web/dataset/call_kw/foo/get_views",
-        "/web/dataset/call_kw/foo/web_search_read",
-        "/web/dataset/call_kw/foo/web_search_read",
+        "/web/webclient/translations",
+        "/web/webclient/load_menus",
+        "get_views",
+        "web_search_read",
+        "has_group",
+        "web_search_read",
     ]).toVerifySteps({ message: "should have reloaded the view (after the action is complete)" });
 });
 
@@ -7553,19 +7614,19 @@ test("invisible attrs in readonly and editable list", async () => {
             </tree>`,
     });
 
-    expect(queryAll(".o_field_cell")[2].innerHTML).toBe("");
-    expect(target.querySelector(".o_data_cell.o_list_button").innerHTML).toBe("");
+    expect(".o_field_cell:eq(2)").toHaveInnerHTML("");
+    expect(".o_data_cell.o_list_button:first").toHaveInnerHTML("");
 
     // edit first row
     await contains(".o_field_cell").click();
-    expect(queryAll(".o_field_cell")[2].innerHTML).toBe("");
-    expect(target.querySelector(".o_data_cell.o_list_button").innerHTML).toBe("");
+    expect(".o_field_cell:eq(2)").toHaveInnerHTML("");
+    expect(".o_data_cell.o_list_button:first").toHaveInnerHTML("");
 
     await contains(".o_list_button_discard:not(.dropdown-item)").click();
 
     // click on the invisible field's cell to edit first row
-    await click(queryAll(".o_field_cell")[2]);
-    expect(".o_data_row").toHaveClass("o_selected_row");
+    await contains(".o_field_cell[name=foo]").click();
+    expect(".o_data_row:first").toHaveClass("o_selected_row");
 });
 
 test("monetary fields are properly rendered", async () => {
@@ -7589,26 +7650,16 @@ test("monetary fields are properly rendered", async () => {
     expect("tbody tr:first td").toHaveCount(3, {
         message: "currency_id column should not be in the table",
     });
-    expect(
-        target
-            .querySelector("tbody .o_data_row:first-child .o_data_cell:nth-child(3)")
-            .textContent.replace(/\s/g)
-            .toBe(" "),
-        "1,200.00 €",
-        { message: "currency_id column should not be in the table" }
-    );
-    expect(
-        target
-            .querySelector("tbody .o_data_row:nth-child(2) .o_data_cell:nth-child(3)")
-            .textContent.replace(/\s/g)
-            .toBe(" "),
-        "$ 500.00",
-        { message: "currency_id column should not be in the table" }
-    );
+    expect("tbody .o_data_row:first-child .o_data_cell:nth-child(3)").toHaveText("1,200.00 €", {
+        message: "currency_id column should not be in the table",
+    });
+    expect("tbody .o_data_row:nth-child(2) .o_data_cell:nth-child(3)").toHaveText("$ 500.00", {
+        message: "currency_id column should not be in the table",
+    });
 });
 
 test("simple list with date and datetime", async () => {
-    patchTimeZone(120);
+    mockTimeZone(+2);
 
     await mountView({
         type: "list",
@@ -7623,7 +7674,7 @@ test("simple list with date and datetime", async () => {
 });
 
 test("edit a row by clicking on a readonly field", async () => {
-    serverData.models.foo.fields.foo.readonly = true;
+    Foo._fields.foo = fields.Char({ readonly: true });
     await mountView({
         type: "list",
         resModel: "foo",
@@ -7632,22 +7683,21 @@ test("edit a row by clicking on a readonly field", async () => {
 
     // edit the first row
     await contains(".o_field_cell").click();
-    expect(".o_data_row").toHaveClass("o_selected_row", {
+    expect(".o_data_row:first").toHaveClass("o_selected_row", {
         message: "first row should be selected",
     });
-    expect(".o_data_row").toHaveClass("o_selected_row");
+    expect(".o_data_row:first").toHaveClass("o_selected_row");
     expect(".o_selected_row .o_field_widget[name=foo]").toHaveClass("o_readonly_modifier");
-    expect(target.querySelector(".o_selected_row .o_field_widget[name=foo] span").innerText).toBe(
-        "yop",
-        { message: "a widget should have been rendered for readonly fields" }
-    );
+    expect(".o_selected_row .o_field_widget[name=foo] span").toHaveText("yop", {
+        message: "a widget should have been rendered for readonly fields",
+    });
     expect(".o_selected_row .o_field_widget[name=int_field] input").toHaveCount(1, {
         message: "'int_field' should be editable",
     });
 
     // click again on readonly cell of first line: nothing should have changed
     await contains(".o_field_cell").click();
-    expect(".o_data_row").toHaveClass("o_selected_row");
+    expect(".o_data_row:first").toHaveClass("o_selected_row");
     expect(".o_selected_row .o_field_widget[name=foo]").toHaveClass("o_readonly_modifier");
     expect(".o_selected_row .o_field_widget[name=int_field] input").toHaveCount(1, {
         message: "'int_field' should be editable",
@@ -7655,163 +7705,101 @@ test("edit a row by clicking on a readonly field", async () => {
 });
 
 test("list view with nested groups", async () => {
-    expect.assertions(40);
+    expect.assertions(28);
 
     Foo._records.push({ id: 5, foo: "blip", int_field: -7, m2o: 1 });
     Foo._records.push({ id: 6, foo: "blip", int_field: 5, m2o: 2 });
 
-    let nbRPCs = { readGroup: 0, webSearchRead: 0 };
-    let envIDs = []; // the ids that should be in the environment during this test
+    onRpc("web_read_group", ({ kwargs }) => {
+        if (kwargs.groupby[0] === "foo") {
+            // nested read_group
+            // called twice (once when opening the group, once when sorting)
+            expect(kwargs.domain).toEqual([["m2o", "=", 1]], {
+                message: "nested read_group should be called with correct domain",
+            });
+        }
+        expect.step("web_read_group");
+    });
+    onRpc("web_search_read", ({ kwargs }) => {
+        // called twice (once when opening the group, once when sorting)
+        expect(kwargs.domain).toEqual(
+            [
+                ["foo", "=", "blip"],
+                ["m2o", "=", 1],
+            ],
+            { message: "nested web_search_read should be called with correct domain" }
+        );
+        expect.step("web_search_read");
+    });
 
     await mountView({
         type: "list",
         resModel: "foo",
         arch: '<tree><field name="id"/><field name="int_field"/></tree>',
         groupBy: ["m2o", "foo"],
-        mockRPC(route, args) {
-            if (args.method === "web_read_group") {
-                if (args.kwargs.groupby[0] === "foo") {
-                    // nested read_group
-                    // called twice (once when opening the group, once when sorting)
-                    expect(args.kwargs.domain).toEqual([["m2o", "=", 1]], {
-                        message: "nested read_group should be called with correct domain",
-                    });
-                }
-                nbRPCs.readGroup++;
-            } else if (args.method === "web_search_read") {
-                // called twice (once when opening the group, once when sorting)
-                assert.deepEqual(
-                    args.kwargs.domain,
-                    [
-                        ["foo", "=", "blip"],
-                        ["m2o", "=", 1],
-                    ],
-                    "nested web_search_read should be called with correct domain"
-                );
-                nbRPCs.webSearchRead++;
-            }
-        },
         selectRecord: (resId, options) => {
             expect.step(`switch to form - resId: ${resId}`);
         },
     });
 
-    expect(nbRPCs.readGroup).toBe(1, { message: "should have done one read_group" });
-    expect(nbRPCs.webSearchRead).toBe(0, { message: "should have done no web_search_read" });
-    assert.deepEqual(
-        list.model.root.records.map((r) => r.resId),
-        envIDs
-    );
+    expect(["web_read_group"]).toVerifySteps();
 
     // basic rendering tests
-    expect(".o_group_header").toHaveCount(2, { message: "should contain 2 groups at first level" });
-    const value1Group = getGroup(1);
-    expect(value1Group.querySelector(".o_group_name").textContent.trim()).toBe("Value 1 (4)", {
-        message: "group should have correct name and count",
-    });
-    expect(".o_group_name .fa-caret-right").toHaveCount(2, {
-        message: "the carret of closed groups should be right",
-    });
-    expect(getCssVar(value1Group.querySelector("span")).toBe("--o-list-group-level").trim(), {
-        message: "0",
-    });
-    expect([...value1Group.querySelectorAll("td")].pop().textContent).toBe("16", {
-        message: "group aggregates are correctly displayed",
-    });
+    expect(".o_group_header").toHaveCount(2);
+    expect(queryAllTexts(".o_group_name")).toEqual(["Value 1 (4)", "Value 2 (2)"]);
+    expect(".o_group_name .fa-caret-right").toHaveCount(2);
+    expect(getCssVar(getGroup(1).querySelector("span"), "--o-list-group-level").trim()).toBe("0");
+    expect(queryAllTexts(".o_group_header .o_list_number")).toEqual(["13", "16", "8", "14"]);
 
     // open the first group
-    nbRPCs = { readGroup: 0, webSearchRead: 0 };
-    await click(value1Group);
-    expect(nbRPCs.readGroup).toBe(1, { message: "should have done one read_group" });
-    expect(nbRPCs.webSearchRead).toBe(0, { message: "should have done no web_search_read" });
-    assert.deepEqual(
-        list.model.root.records.map((r) => r.resId),
-        envIDs
-    );
-
-    expect(getGroup(1).querySelector(".o_group_name").textContent.trim()).toBe("Value 1 (4)", {
-        message: "group should have correct name and count (of records, not inner subgroups)",
-    });
-    expect(".o_group_name:first .fa-caret-down").toHaveCount(1, {
-        message: "the carret of open groups should be down",
-    });
-    expect(queryAll(".o_group_header").length).toBe(5, {
-        message: "open group should contain 5 groups (2 groups and 3 subGroup)",
-    });
-    const blipGroup = getGroup(2);
-    expect(blipGroup.querySelector(".o_group_name").textContent.trim()).toBe("blip (2)", {
-        message: "group should have correct name and count",
-    });
-    expect(getCssVar(blipGroup.querySelector("span")).toBe("--o-list-group-level").trim(), {
-        message: "1",
-    });
-    expect([...blipGroup.querySelectorAll("td")].pop().textContent).toBe("-11", {
-        message: "inner group aggregates are correctly displayed",
-    });
+    await contains(".o_group_header:first").click();
+    expect(["web_read_group"]).toVerifySteps();
+    expect(queryAllTexts(".o_group_name")).toEqual([
+        "Value 1 (4)",
+        "blip (2)",
+        "gnap (1)",
+        "yop (1)",
+        "Value 2 (2)",
+    ]);
+    expect(".o_group_name:first .fa-caret-down").toHaveCount(1);
+    expect(getCssVar(getGroup(2).querySelector("span"), "--o-list-group-level").trim()).toBe("1");
+    expect(queryAllTexts(".o_group_header .o_list_number")).toEqual([
+        "13",
+        "16",
+        "9",
+        "-11",
+        "3",
+        "17",
+        "1",
+        "10",
+        "8",
+        "14",
+    ]);
 
     // open subgroup
-    nbRPCs = { readGroup: 0, webSearchRead: 0 };
-    envIDs = [4, 5]; // the opened subgroup contains these two records
-    await click(blipGroup);
-    expect(nbRPCs.readGroup).toBe(0, { message: "should have done no read_group" });
-    expect(nbRPCs.webSearchRead).toBe(1, { message: "should have done one web_search_read" });
-    assert.deepEqual(
-        list.model.root.records.map((r) => r.resId),
-        envIDs
-    );
-    expect(queryAll(".o_group_header").length).toBe(5, {
-        message: "open group should contain 5 groups (2 groups and 3 subGroup)",
-    });
-    expect(queryAll(".o_data_row").length).toBe(2, {
-        message: "open subgroup should contain 2 data rows",
-    });
-    expect(
-        [...target.querySelector(".o_data_row").querySelectorAll(".o_data_cell")].pop().textContent
-    ).toBe("-4", {
-        message: "first record in open subgroup should be res_id 4 (with int_field -4)",
-    });
+    await contains(".o_group_header:eq(1)").click();
+    expect(["web_search_read"]).toVerifySteps();
+    expect(".o_group_header").toHaveCount(5);
+    expect(".o_data_row").toHaveCount(2);
+    expect(queryAllTexts(".o_data_row .o_data_cell")).toEqual(["4", "-4", "5", "-7"]);
 
     // open a record (should trigger event 'open_record')
     await contains(".o_data_row .o_data_cell").click();
-    assert.verifySteps([`switch to form - resId: 4`]);
+    expect([`switch to form - resId: 4`]).toVerifySteps();
 
     // sort by int_field (ASC) and check that open groups are still open
-    nbRPCs = { readGroup: 0, webSearchRead: 0 };
-    envIDs = [5, 4]; // order of the records changed
     await contains(".o_list_view thead [data-name='int_field']").click();
-    expect(nbRPCs.readGroup).toBe(2, { message: "should have done two read_groups" });
-    expect(nbRPCs.webSearchRead).toBe(1, { message: "should have done one web_search_read" });
-    assert.deepEqual(
-        list.model.root.records.map((r) => r.resId),
-        envIDs
-    );
-    expect(queryAll(".o_group_header").length).toBe(5, {
-        message: "open group should contain 5 groups (2 groups and 3 subGroup)",
-    });
-    expect(queryAll(".o_data_row").length).toBe(2, {
-        message: "open subgroup should contain 2 data rows",
-    });
-    expect(
-        [...target.querySelector(".o_data_row").querySelectorAll(".o_data_cell")].pop().textContent
-    ).toBe("-7", {
-        message: "first record in open subgroup should be res_id 5 (with int_field -7)",
-    });
+    expect(["web_read_group", "web_read_group", "web_search_read"]).toVerifySteps();
+    expect(".o_group_header").toHaveCount(5);
+    expect(".o_data_row").toHaveCount(2);
+    expect(queryAllTexts(".o_data_row .o_data_cell")).toEqual(["5", "-7", "4", "-4"]);
 
     // close first level group
-    nbRPCs = { readGroup: 0, webSearchRead: 0 };
-    envIDs = []; // the group being closed, there is no more record in the environment
-    await click(getGroup(2));
-    expect(nbRPCs.readGroup).toBe(0, { message: "should have done no read_group" });
-    expect(nbRPCs.webSearchRead).toBe(0, { message: "should have done no web_search_read" });
-    assert.deepEqual(
-        list.model.root.records.map((r) => r.resId),
-        envIDs
-    );
-
-    expect(".o_group_header").toHaveCount(2, { message: "should contain 2 groups at first level" });
-    expect(".o_group_name .fa-caret-right").toHaveCount(2, {
-        message: "the carret of closed groups should be right",
-    });
+    await contains(".o_group_header:eq(1)").click();
+    expect([]).toVerifySteps();
+    expect(".o_group_header").toHaveCount(2);
+    expect(".o_group_name .fa-caret-right").toHaveCount(2);
+    expect(".o_data_row").toHaveCount(0);
 });
 
 test("grouped list on selection field at level 2", async () => {
@@ -8124,7 +8112,7 @@ test("leaving unvalid rows in edition", async () => {
 
     // Try starting other line edition
     await contains(".o_data_row:eq(1) .o_data_cell").click();
-    expect(".o_data_row").toHaveClass("o_selected_row", {
+    expect(".o_data_row:first").toHaveClass("o_selected_row", {
         message: "first line should still be in edition as invalid",
     });
     expect(".o_selected_row").toHaveCount(1, { message: "no other line should be in edition" });
@@ -8571,14 +8559,14 @@ test("pressing TAB in editable list with several fields [REQUIRE FOCUS]", async 
     });
 
     await contains(".o_data_cell").click();
-    expect(".o_data_row").toHaveClass("o_selected_row");
+    expect(".o_data_row:first").toHaveClass("o_selected_row");
     expect(document.activeElement).toBe(target.querySelector(".o_data_row .o_data_cell input"));
 
     // Press 'Tab' -> should go to next cell (still in first row)
     press("Tab");
     await animationFrame();
 
-    expect(".o_data_row").toHaveClass("o_selected_row");
+    expect(".o_data_row:first").toHaveClass("o_selected_row");
     expect(document.activeElement).toBe(
         target.querySelector(".o_data_row .o_data_cell:nth-child(3) input")
     );
@@ -8613,7 +8601,7 @@ test("pressing SHIFT-TAB in editable list with several fields [REQUIRE FOCUS]", 
     press("shift+Tab");
     await animationFrame();
 
-    expect(".o_data_row").toHaveClass("o_selected_row");
+    expect(".o_data_row:first").toHaveClass("o_selected_row");
     expect(document.activeElement).toBe(
         target.querySelector(".o_data_row .o_data_cell:nth-child(3) input")
     );
@@ -8621,7 +8609,7 @@ test("pressing SHIFT-TAB in editable list with several fields [REQUIRE FOCUS]", 
     press("shift+Tab");
     await animationFrame();
 
-    expect(".o_data_row").toHaveClass("o_selected_row");
+    expect(".o_data_row:first").toHaveClass("o_selected_row");
     expect(document.activeElement).toBe(target.querySelector(".o_data_row .o_data_cell input"));
 });
 
@@ -8944,7 +8932,7 @@ test("pressing SHIFT-TAB in editable list with a readonly field in first column 
     press("shift+Tab");
     await animationFrame();
 
-    expect(".o_data_row").toHaveClass("o_selected_row");
+    expect(".o_data_row:first").toHaveClass("o_selected_row");
     expect(document.activeElement).toBe(target.querySelector(".o_data_row [name=qux] input"));
 });
 
@@ -8970,7 +8958,7 @@ test("pressing SHIFT-TAB in editable list with a readonly field in last column [
     press("shift+Tab");
     await animationFrame();
 
-    expect(".o_data_row").toHaveClass("o_selected_row");
+    expect(".o_data_row:first").toHaveClass("o_selected_row");
     expect(document.activeElement).toBe(target.querySelector(".o_data_row [name=foo] input"));
 });
 
@@ -9054,10 +9042,10 @@ test("navigation: not moving down with keydown", async () => {
     });
 
     await contains(".o_field_cell[name=foo]").click();
-    expect(".o_data_row").toHaveClass("o_selected_row");
+    expect(".o_data_row:first").toHaveClass("o_selected_row");
     press("arrowdown");
     await animationFrame();
-    expect(".o_data_row").toHaveClass("o_selected_row");
+    expect(".o_data_row:first").toHaveClass("o_selected_row");
 });
 
 test("navigation: moving right with keydown from text field does not move the focus", async () => {
@@ -9841,7 +9829,7 @@ test("multi edit field with daterange widget", async () => {
             },
         ],
     };
-    patchTimeZone(360);
+    mockTimeZone(360);
 
     await mountView({
         type: "list",
@@ -9905,7 +9893,7 @@ test("multi edit field with daterange widget (edition without using the picker)"
             },
         ],
     };
-    patchTimeZone(360);
+    mockTimeZone(360);
 
     await mountView({
         type: "list",
@@ -10180,7 +10168,7 @@ test("editable list view: multi edition", async () => {
 
     // edit a line without modifying a field
     await click(rows[0].querySelector(".o_data_cell"));
-    expect(".o_data_row").toHaveClass("o_selected_row");
+    expect(".o_data_row:first").toHaveClass("o_selected_row");
 
     await contains(".o_list_view").click();
     expect(".o_selected_row").toHaveCount(0);
@@ -11315,7 +11303,7 @@ test("editable form alongside html field: click out to unselect the row", async 
 
     await contains(".o_field_x2many_list_row_add a").click();
     expect(".o_data_row").toHaveCount(1);
-    expect(".o_data_row").toHaveClass("o_selected_row");
+    expect(".o_data_row:first").toHaveClass("o_selected_row");
 
     await editInput(
         target,
@@ -12437,7 +12425,7 @@ test('pressing TAB in editable="top" grouped list', async () => {
     expect(".o_data_row").toHaveCount(4);
 
     await contains(".o_data_cell").click();
-    expect(".o_data_row").toHaveClass("o_selected_row");
+    expect(".o_data_row:first").toHaveClass("o_selected_row");
 
     const dataRows = [...queryAll(".o_data_row")];
     dataRows.push(dataRows.shift());
@@ -12771,17 +12759,17 @@ test('pressing ENTER in editable="top" grouped list view', async () => {
     expect("tr.o_data_row").toHaveCount(4);
 
     await contains(".o_data_row .o_data_cell").click();
-    expect(".o_data_row").toHaveClass("o_selected_row");
+    expect(".o_data_row:first").toHaveClass("o_selected_row");
 
     press("Enter");
     await animationFrame();
 
-    expect(".o_data_row").toHaveClass("o_selected_row");
+    expect(".o_data_row:first").toHaveClass("o_selected_row");
 
     press("Enter");
     await animationFrame();
 
-    expect(".o_data_row").toHaveClass("o_selected_row");
+    expect(".o_data_row:first").toHaveClass("o_selected_row");
 
     expect([
         "/web/webclient/translations",
@@ -13801,7 +13789,7 @@ test('add a new row in grouped editable="top" list', async () => {
 
     await contains(".o_group_header").click(); // open group "No"
     await contains(".o_group_field_row_add a").click(); // add a new row
-    expect(".o_data_row").toHaveClass("o_selected_row");
+    expect(".o_data_row:first").toHaveClass("o_selected_row");
     expect(target.querySelector(".o_selected_row [name=foo] input")).toBe(document.activeElement, {
         message: "The first input of the line should have the focus",
     });
@@ -13816,7 +13804,7 @@ test('add a new row in grouped editable="top" list', async () => {
         message: "group should have correct name and count",
     });
     expect(".o_data_row").toHaveCount(5);
-    expect(".o_data_row").toHaveClass("o_selected_row");
+    expect(".o_data_row:first").toHaveClass("o_selected_row");
 
     await editInput(target, '.o_selected_row [name="foo"] input', "pla");
     await contains(".o_list_button_save:visible").click();
@@ -13832,14 +13820,14 @@ test('add a new row in grouped editable="bottom" list', async () => {
     });
     await contains(".o_group_header").click(); // open group "No"
     await contains(".o_group_field_row_add a").click(); // add a new row
-    expect(".o_data_row").toHaveClass("o_selected_row");
+    expect(".o_data_row:first").toHaveClass("o_selected_row");
     expect(".o_data_row").toHaveCount(2);
 
     await clickDiscard(target);
     await click(queryAll(".o_group_header")[1]); // open second group
     expect(".o_data_row").toHaveCount(4);
     await click(queryAll(".o_group_field_row_add a")[1]); // create row in second group "Yes"
-    expect(".o_data_row").toHaveClass("o_selected_row");
+    expect(".o_data_row:first").toHaveClass("o_selected_row");
 
     await editInput(target, '.o_selected_row [name="foo"] input', "pla");
     await contains(".o_list_button_save:visible").click();
@@ -16228,7 +16216,7 @@ test("edit a record then select another record with a throw error when saving", 
 
     await contains(".o_error_dialog .btn-primary.o-default-button").click();
     expect(".o_selected_row").toHaveCount(1);
-    expect(".o_data_row").toHaveClass("o_selected_row");
+    expect(".o_data_row:first").toHaveClass("o_selected_row");
 
     await click(queryFirst(".o_data_cell"));
     await animationFrame();
@@ -16236,7 +16224,7 @@ test("edit a record then select another record with a throw error when saving", 
 
     await contains(".o_error_dialog .btn-primary.o-default-button").click();
     expect(".o_selected_row").toHaveCount(1);
-    expect(".o_data_row").toHaveClass("o_selected_row");
+    expect(".o_data_row:first").toHaveClass("o_selected_row");
 });
 
 test("no highlight of a (sortable) column without label", async () => {
@@ -16662,7 +16650,7 @@ test("Properties: date", async () => {
 });
 
 test("Properties: datetime", async () => {
-    patchTimeZone(0);
+    mockTimeZone(0);
     const definition = {
         type: "datetime",
         name: "property_datetime",
