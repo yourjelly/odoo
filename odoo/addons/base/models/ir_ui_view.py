@@ -150,7 +150,7 @@ class View(models.Model):
 
     name = fields.Char(string='View Name', required=True)
     model = fields.Char(index=True)
-    key = fields.Char(index='btree_not_null')
+    key = fields.Char(index='btree_not_null', copy=False)
     priority = fields.Integer(string='Sequence', default=16, required=True)
     type = fields.Selection([('tree', 'Tree'),
                              ('form', 'Form'),
