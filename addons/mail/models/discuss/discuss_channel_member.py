@@ -92,7 +92,7 @@ class ChannelMember(models.Model):
                 ("channel_id.last_interest_dt", "<", self._field_to_sql(self._table, "unpin_dt")),
             ]
 
-    @api.depends("channel_id.message_ids", "seen_message_id")
+    @api.depends("channel_id.mail_message_ids", "seen_message_id")
     def _compute_message_unread(self):
         if self.ids:
             self.env['mail.message'].flush_model()

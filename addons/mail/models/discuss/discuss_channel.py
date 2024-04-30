@@ -5,14 +5,14 @@ import logging
 from collections import defaultdict
 from hashlib import sha512
 from secrets import choice
-from markupsafe import Markup
+from markupsafe import Markup, escape
 from datetime import timedelta
 
 from odoo import _, api, fields, models, tools, Command
 from odoo.addons.base.models.avatar_mixin import get_hsl_from_seed
 from odoo.exceptions import UserError, ValidationError
 from odoo.osv import expression
-from odoo.tools import format_list, get_lang, html_escape
+from odoo.tools import format_list, generate_tracking_message_id, get_lang, html_escape
 
 _logger = logging.getLogger(__name__)
 
@@ -31,7 +31,6 @@ class Channel(models.Model):
     _name = 'discuss.channel'
     _mail_flat_thread = False
     _mail_post_access = 'read'
-    _inherit = ['mail.thread']
 
     MAX_BOUNCE_LIMIT = 10
 
@@ -57,6 +56,14 @@ class Channel(models.Model):
     image_128 = fields.Image("Image", max_width=128, max_height=128)
     avatar_128 = fields.Image("Avatar", max_width=128, max_height=128, compute='_compute_avatar_128')
     avatar_cache_key = fields.Char(compute="_compute_avatar_cache_key")
+    # content
+    mail_message_ids = fields.One2many(
+        'mail.message', 'res_id', string='Messages',
+        domain=lambda self: [('model', '=', 'discuss.channel')])
+    mail_message_needaction_counter = fields.Integer(
+        'Number of Actions', compute='_compute_mail_message_needaction_counter',
+        help="Number of messages requiring action")
+    # members
     channel_partner_ids = fields.Many2many(
         'res.partner', string='Partners',
         compute='_compute_channel_partner_ids', inverse='_inverse_channel_partner_ids',
@@ -140,6 +147,21 @@ class Channel(models.Model):
         bgcolor = get_hsl_from_seed(self.uuid)
         avatar = avatar.replace('fill="#875a7b"', f'fill="{bgcolor}"')
         return base64.b64encode(avatar.encode())
+
+    def _compute_mail_message_needaction_counter(self):
+        res = dict.fromkeys(self.ids, 0)
+        if self.ids:
+            # search for unread messages, directly in SQL to improve performances
+            self._cr.execute(""" SELECT msg.res_id FROM mail_message msg
+                                 RIGHT JOIN mail_notification rel
+                                 ON rel.mail_message_id = msg.id AND rel.res_partner_id = %s AND (rel.is_read = false OR rel.is_read IS NULL)
+                                 WHERE msg.model = %s AND msg.res_id in %s AND msg.message_type != 'user_notification'""",
+                             (self.env.user.partner_id.id, self._name, tuple(self.ids),))
+            for result in self._cr.fetchall():
+                res[result[0]] += 1
+
+        for record in self:
+            record.mail_message_needaction_counter = res.get(record._origin.id, 0)
 
     @api.depends('channel_member_ids.partner_id')
     def _compute_channel_partner_ids(self):
@@ -342,7 +364,6 @@ class Channel(models.Model):
         self._action_unfollow(self.env.user.partner_id)
 
     def _action_unfollow(self, partner):
-        self.message_unsubscribe(partner.ids)
         member = self.env['discuss.channel.member'].search([('channel_id', '=', self.id), ('partner_id', '=', partner.id)])
         if not member:
             return True
@@ -491,31 +512,95 @@ class Channel(models.Model):
     # MAILING
     # ------------------------------------------------------------
 
-    def _notify_get_recipients(self, message, msg_vals, **kwargs):
-        """ Override recipients computation as channel is not a standard
-        mail.thread document. Indeed there are no followers on a channel.
-        Instead of followers it has members that should be notified.
+    @api.returns('mail.message', lambda value: value.id)
+    def message_post(self, body='', subject=None, email_from=None, author_id=None, **kwargs):
+        """ Custom posting process. This model does not inherit from ``mail.thread``
+        but uses a similar process. """
+        self.ensure_one()
 
-        :param message: see ``MailThread._notify_get_recipients()``;
-        :param msg_vals: see ``MailThread._notify_get_recipients()``;
-        :param kwargs: see ``MailThread._notify_get_recipients()``;
+        # sudo: discuss.channel - write to discuss.channel is not accessible for most users
+        self.sudo().last_interest_dt = fields.Datetime.now()
 
-        :return recipients: structured data holding recipients data. See
-          ``MailThread._notify_thread()`` for more details about its content
-          and use;
-        """
-        # get values from msg_vals or from message if msg_vals doen't exists
-        message_type = msg_vals.get('message_type', 'comment') if msg_vals else message.message_type
-        pids = msg_vals.get('partner_ids', []) if msg_vals else message.partner_ids.ids
+        # First create the <mail.message>
+        Mailthread = self.env['mail.thread']
+        author_id, email_from = Mailthread._message_compute_author(
+            author_id, email_from,
+            raise_on_email=False,
+        )
+        msg_values = {
+            key: val
+            for key, val in kwargs.items() if key in self.env['mail.message']._fields
+        }
+        msg_values.update({
+            'author_id': author_id,
+            # make valid Markup, notably for '_process_attachments_for_post'
+            'body': Markup(body),
+            'email_from': email_from,
+            'model': self._name,
+            'res_id': self.id,
+            'subject': subject,
+        })
 
-        # notify only user input (comment or incoming / outgoing emails)
-        if message_type not in ('comment', 'email', 'email_outgoing'):
+        # Force the "reply-to" to make the mail group flow work
+        # values['reply_to'] = self.env['mail.message']._get_reply_to(values)
+
+        # ensure message ID so that replies go to the right thread
+        # if not values.get('message_id'):
+        #     values['message_id'] = generate_tracking_message_id('%s-mail.group' % self.id)
+
+        msg_values.update(Mailthread._process_attachments_for_post(
+            kwargs.get('attachments') or [],
+            kwargs.get('attachment_ids') or [],
+            msg_values
+        ))
+
+        message = Mailthread.sudo()._message_create([msg_values])
+
+        self._notify_members(message)
+        self._set_last_seen_message(message, notify=False)
+
+        return message
+
+    def _notify_members(self, message):
+        if message.message_type == "notification":
             return []
 
-        recipients_data = []
+        members_data = self._notify_get_members(message)
+        if not members_data:
+            return members_data
+
+        message_format = message._message_format()[0]
+        if "temporary_id" in self.env.context:
+            message_format["temporary_id"] = self.env.context["temporary_id"]
+        bus_notifications = [
+            ((self, "members"), "mail.record/insert", {
+                "Thread": {"id": self.id, "is_pinned": True, "model": "discuss.channel"}
+            }),
+            (self, "discuss.channel/new_message", {"id": self.id, "message": message_format}),
+        ]
+        # sudo: bus.bus - sending on safe channel (discuss.channel)
+        self.env["bus.bus"].sudo()._sendmany(bus_notifications)
+        return members_data
+
+    def _notify_get_members(self, message):
+        """ Compute members that should be notified and fetch their information
+        for future processing in an optimized way.
+
+        :param message: see ``MailThread._notify_get_recipients()``;
+
+        :return recipients: structured data holding recipients data. UPDATE ME
+        """
+        message_type = message.message_type
+        pids = message.partner_ids.ids
+
+        # notify only user input (comment or incoming / outgoing emails)
+        if message_type not in ('comment',):
+            raise UserError('cacaprout')
+
+        members_data = []
         if pids:
-            email_from = tools.email_normalize(msg_vals.get('email_from') or message.email_from)
-            author_id = msg_vals.get('author_id') or message.author_id.id
+            email_from = tools.email_normalize(message.email_from)
+            author_id = message.author_id.id
             self.env['res.partner'].flush_model(['active', 'email', 'partner_share'])
             self.env['res.users'].flush_model(['notification_type', 'partner_id'])
             sql_query = """
@@ -535,7 +620,7 @@ class Channel(models.Model):
             )
             for partner_id, lang, partner_share, notif, ushare in self._cr.fetchall():
                 # ocn_client: will add partners to recipient recipient_data. more ocn notifications. We neeed to filter them maybe
-                recipients_data.append({
+                members_data.append({
                     'active': True,
                     'id': partner_id,
                     'is_follower': False,
@@ -549,8 +634,8 @@ class Channel(models.Model):
                 })
 
         if self.is_chat or self.channel_type == "group":
-            already_in_ids = [r['id'] for r in recipients_data]
-            recipients_data += [
+            already_in_ids = [r['id'] for r in members_data]
+            members_data += [
                 {
                     'active': partner.active,
                     'id': partner.id,
@@ -570,36 +655,50 @@ class Channel(models.Model):
                 ).partner_id
             ]
 
-        return recipients_data
+        return members_data
 
-    def _notify_get_recipients_groups(self, message, model_description, msg_vals=None):
-        """ All recipients of a message on a channel are considered as partners.
-        This means they will receive a minimal email, without a link to access
-        in the backend. Mailing lists should indeed send minimal emails to avoid
-        the noise. """
-        groups = super()._notify_get_recipients_groups(
-            message, model_description, msg_vals=msg_vals
-        )
-        for (index, (group_name, _group_func, group_data)) in enumerate(groups):
-            if group_name != 'customer':
-                groups[index] = (group_name, lambda partner: False, group_data)
-        return groups
+    def _notify_members_by_inbox(self, message, members_data):
+        """ Notify recipients inbox of a message. It does two main things :
 
-    def _notify_thread(self, message, msg_vals=False, **kwargs):
-        # link message to channel
-        rdata = super()._notify_thread(message, msg_vals=msg_vals, **kwargs)
-        message_format = message._message_format()[0]
-        if "temporary_id" in self.env.context:
-            message_format["temporary_id"] = self.env.context["temporary_id"]
+          * create inbox notifications for users;
+          * send bus notifications;
+
+        :param record message: <mail.message> record being notified. May be
+          void as 'msg_vals' superseeds it;
+        :param list members_data: list of recipients data based on <res.partner>
+          records formatted like [
+          {
+            'active': partner.active;
+            'id': id of the res.partner being recipient to notify;
+            'is_follower': follows the message related document;
+            'lang': its lang;
+            'groups': res.group IDs if linked to a user;
+            'notif': 'inbox', 'email', 'sms' (SMS App);
+            'share': is partner a customer (partner.partner_share);
+            'type': partner usage ('customer', 'portal', 'user');
+            'ushare': are users shared (if users, all users are shared);
+          }, {...}]. See ``MailThread._notify_get_recipients()``;
+        """
+        inbox_pids = [r['id'] for r in members_data if r['notif'] == 'inbox']
+        if not inbox_pids:
+            return []
+        self.env['mail.notification'].sudo().create([{
+            'author_id': message.author_id.id,
+            'mail_message_id': message.id,
+            'notification_status': 'sent',
+            'notification_type': 'inbox',
+            'res_partner_id': pid,
+        } for pid in inbox_pids])
+
         bus_notifications = [
-            ((self, "members"), "mail.record/insert", {
-                "Thread": {"id": self.id, "is_pinned": True, "model": "discuss.channel"}
-            }),
-            (self, "discuss.channel/new_message", {"id": self.id, "message": message_format}),
+            (
+                (self.env['res.partner'].browse(partner_id),
+                 'mail.message/inbox',
+                 message._message_format(format_reply=True))
+            ) for partner_id in inbox_pids
         ]
-        # sudo: bus.bus - sending on safe channel (discuss.channel)
-        self.env["bus.bus"].sudo()._sendmany(bus_notifications)
-        return rdata
+        self.env['bus.bus'].sudo()._sendmany(bus_notifications)
+        return inbox_pids
 
     def _notify_by_web_push_prepare_payload(self, message, msg_vals=False):
         payload = super()._notify_by_web_push_prepare_payload(message, msg_vals=msg_vals)
@@ -623,53 +722,73 @@ class Channel(models.Model):
                 self._action_unfollow(p)
         return super()._message_receive_bounce(email, partner)
 
-    def _message_compute_author(self, author_id=None, email_from=None, raise_on_email=True):
-        return super()._message_compute_author(author_id=author_id, email_from=email_from, raise_on_email=False)
+    def _message_update_content(self, message, body, attachment_ids=None, partner_ids=None,
+                                **kwargs):
+        """ Update message content. Currently does not support attachments
+        specific code (see ``_process_attachments_for_post``), to be added
+        when necessary.
 
-    def _message_compute_parent_id(self, parent_id):
-        # super() unravels the chain of parents to set parent_id as the first
-        # ancestor. We don't want that in channel.
-        if not parent_id:
-            return parent_id
-        return self.env['mail.message'].search(
-            [('id', '=', parent_id),
-             ('model', '=', self._name),
-             ('res_id', '=', self.id)
-            ]).id
+        Private method to use for tooling, do not expose to interface as editing
+        messages should be avoided at all costs (think of: notifications already
+        sent, ...).
 
-    @api.returns('mail.message', lambda value: value.id)
-    def message_post(self, *, message_type='notification', **kwargs):
-        if (not self.env.user or self.env.user._is_public()) and self.is_member:
-            # sudo: discuss.channel - guests don't have access for creating mail.message
-            self = self.sudo()
-        # sudo: discuss.channel - write to discuss.channel is not accessible for most users
-        self.sudo().last_interest_dt = fields.Datetime.now()
-        # mail_post_autofollow=False is necessary to prevent adding followers
-        # when using mentions in channels. Followers should not be added to
-        # channels, and especially not automatically (because channel membership
-        # should be managed with discuss.channel.member instead).
-        # The current client code might be setting the key to True on sending
-        # message but it is only useful when targeting customers in chatter.
-        # This value should simply be set to False in channels no matter what.
-        return super(Channel, self.with_context(mail_create_nosubscribe=True, mail_post_autofollow=False)).message_post(message_type=message_type, **kwargs)
+        :param <mail.message> message: message to update, should be linked to self through
+          model and res_id;
+        :param str body: new body (None to skip its update);
+        :param list attachment_ids: list of new attachments IDs, replacing old one (None
+          to skip its update);
+        :param list attachment_ids: list of new partner IDs that are mentioned;
+        :param bool strict: whether to check for allowance before updating
+          content. This should be skipped only when really necessary as it
+          creates issues with already-sent notifications, lack of content
+          tracking, ...
 
-    def _message_post_after_hook(self, message, msg_vals):
+        Kwargs are supported, notably to match mail.message fields to update.
+        See content of this method for more details about supported keys.
         """
-        Automatically set the message posted by the current user as seen for themselves.
-        """
-        self._set_last_seen_message(message, notify=False)
-        return super()._message_post_after_hook(message, msg_vals)
-
-    def _check_can_update_message_content(self, message):
-        """ We don't call super in this override as we want to ignore the
-        mail.thread behavior completely """
-        if not message.message_type == 'comment':
+        self.ensure_one()
+        if not message.sudo().message_type == 'comment':
             raise UserError(_("Only messages type comment can have their content updated on model 'discuss.channel'"))
 
-    def _message_subscribe(self, partner_ids=None, subtype_ids=None, customer_ids=None):
-        """ Do not allow follower subscription on channels. Only members are
-        considered. """
-        raise UserError(_('Adding followers on channels is not possible. Consider adding members instead.'))
+        msg_values = {
+            'body': escape(body),  # keep html if already Markup, otherwise escape
+        } if body is not None else {}
+        if attachment_ids:
+            msg_values.update(
+                self.env['mail.thread']._process_attachments_for_post([], attachment_ids, {
+                    'body': body,
+                    'model': self._name,
+                    'res_id': self.id,
+                })
+            )
+        elif attachment_ids is not None:  # None means "no update"
+            message.attachment_ids._delete_and_notify()
+        if partner_ids:
+            msg_values.update({
+                'partner_ids': list(partner_ids or [])
+            })
+        if msg_values:
+            message.write(msg_values)
+
+        # cleanup related message data if the message is empty
+        empty_messages = message.sudo()._filter_empty()
+        empty_messages._cleanup_side_records()
+        empty_messages.write({'pinned_at': None})
+        payload = {
+            'Message': {
+                'id': message.id,
+                'body': message.body,
+                'attachments': message.attachment_ids.sorted("id")._attachment_format(),
+                'pinned_at': message.pinned_at,
+                'recipients': [{'id': p.id, 'name': p.name, 'type': "partner"} for p in message.partner_ids],
+                'write_date': message.write_date,
+            }
+        }
+        if "body" in msg_values:
+            # sudo: mail.message.translation - discarding translations of message after editing it
+            self.env["mail.message.translation"].sudo().search([("message_id", "=", message.id)]).unlink()
+            payload["Message"]["translationValue"] = False
+        self.env["bus.bus"]._sendone(message._bus_notification_target(), "mail.record/insert", payload)
 
     # ------------------------------------------------------------
     # BROADCAST
@@ -879,7 +998,7 @@ class Channel(models.Model):
             info["fetchChannelInfoState"] = "fetched"
             # find the channel member state
             if current_partner or current_guest:
-                info['message_needaction_counter'] = channel.message_needaction_counter
+                info['message_needaction_counter'] = channel.mail_message_needaction_counter
                 info["message_needaction_counter_bus_id"] = bus_last_id
                 member = member_of_current_user_by_channel.get(channel, self.env['discuss.channel.member']).with_prefetch([m.id for m in member_of_current_user_by_channel.values()])
                 if member:

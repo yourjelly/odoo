@@ -45,22 +45,18 @@ class TestChannelInternals(MailCommon, HttpCase):
     @users('employee')
     def test_channel_members(self):
         channel = self.env['discuss.channel'].browse(self.test_channel.ids)
-        self.assertEqual(channel.message_partner_ids, self.env['res.partner'])
         self.assertEqual(channel.channel_partner_ids, self.env['res.partner'])
 
         channel.add_members(self.test_partner.ids)
-        self.assertEqual(channel.message_partner_ids, self.env['res.partner'])
         self.assertEqual(channel.channel_partner_ids, self.test_partner)
 
         self.env['discuss.channel.member'].sudo().search([
             ('partner_id', 'in', self.test_partner.ids),
             ('channel_id', 'in', channel.ids)
         ]).unlink()
-        self.assertEqual(channel.message_partner_ids, self.env['res.partner'])
         self.assertEqual(channel.channel_partner_ids, self.env['res.partner'])
 
         channel.message_post(body='Test', message_type='comment', subtype_xmlid='mail.mt_comment')
-        self.assertEqual(channel.message_partner_ids, self.env['res.partner'])
         self.assertEqual(channel.channel_partner_ids, self.env['res.partner'])
 
     @users('employee')
