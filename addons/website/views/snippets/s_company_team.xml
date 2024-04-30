@@ -4,31 +4,31 @@
 <template id="s_company_team" name="Team">
     <section class="s_company_team pt48 pb48">
         <div class="container">
-            <h3 class="text-center mb-4">Our awesome team</h3>
+            <h3 class="text-center mb-4">Team members</h3>
             <div class="row s_nb_column_fixed">
                 <div class="col-lg-3 pb24 text-center">
-                    <div class="h-100 p-4 bg-100 rounded">
+                    <div class="s_company_team_member card h-100 p-4 bg-100 rounded border-0" data-name="Team member">
                         <img alt="" src="/web/image/website.s_company_team_image_1" class="img-fluid rounded-circle mx-auto mb-3"/>
                         <h5>Tony Fred</h5>
                         <p class="mb-0">Chief Executive Officer</p>
                     </div>
                 </div>
                 <div class="col-lg-3 pb24 text-center">
-                    <div class="h-100 p-4 bg-100 rounded">
+                    <div class="s_company_team_member card h-100 p-4 bg-100 rounded border-0" data-name="Team member">
                         <img alt="" src="/web/image/website.s_company_team_image_2" class="img-fluid rounded-circle mx-auto mb-3"/>
                         <h5>Mich Stark</h5>
                         <p class="mb-0">Chief Operational Officer</p>
                     </div>
                 </div>
                 <div class="col-lg-3 pb24 text-center">
-                    <div class="h-100 p-4 bg-100 rounded">
+                    <div class="s_company_team_member card h-100 p-4 bg-100 rounded border-0" data-name="Team member">
                         <img alt="" src="/web/image/website.s_company_team_image_3" class="img-fluid rounded-circle mx-auto mb-3"/>
                         <h5>Aline Turner</h5>
                         <p class="mb-0">Chief Technical Officer</p>
                     </div>
                 </div>
                 <div class="col-lg-3 pb24 text-center">
-                    <div class="h-100 p-4 bg-100 rounded">
+                    <div class="s_company_team_member card h-100 p-4 bg-100 rounded border-0" data-name="Team member">
                         <img alt="" src="/web/image/website.s_company_team_image_4" class="img-fluid rounded-circle mx-auto mb-3"/>
                         <h5>Iris Joe</h5>
                         <p class="mb-0">Chief Financial Officer</p>
@@ -37,6 +37,17 @@
             </div>
         </div>
     </section>
+</template>
+
+<template id="s_company_team_options" inherit_id="website.snippet_options">
+    <xpath expr="//div[@data-js='Box']" position="inside">
+        <div data-selector=".s_company_team_member">
+            <we-colorpicker string="Card background" data-name="team_card_bg_opt"
+                data-select-style="true"
+                data-css-property="background-color"
+                data-color-prefix="bg-"/>
+        </div>
+    </xpath>
 </template>
 
 <record id="website.s_company_team_000_scss" model="ir.asset">
