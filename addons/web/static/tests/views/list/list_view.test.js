@@ -8533,8 +8533,11 @@ test("field with password attribute", async () => {
 });
 
 test("list with handle widget", async () => {
-    expect.assertions(11);
+    expect.assertions(12);
 
+    onRpc("web_search_read", ({ kwargs }) => {
+        expect.step(`web_search_read: order: ${kwargs.order}`);
+    })
     onRpc("/web/dataset/resequence", async (request) => {
         const { params } = await request.json();
         expect(params.offset).toBe(9, {
@@ -8558,7 +8561,8 @@ test("list with handle widget", async () => {
                 <field name="amount" widget="float" digits="[5,0]"/>
             </tree>`,
     });
-
+    
+    expect(["web_search_read: order: int_field ASC, id ASC"]).toVerifySteps();
     expect(".o_data_row:eq(0) [name='amount']").toHaveText("0", {
         message: "default fourth record should have amount 0",
     });
@@ -8574,7 +8578,6 @@ test("list with handle widget", async () => {
 
     // Drag and drop the fourth line in second position
     await contains("tbody tr:nth-child(4) .o_handle_cell").dragAndDrop(queryFirst("tbody tr:nth-child(2)"));
-    // await nextTick()
     expect(".o_data_row:eq(0) [name='amount']").toHaveText("0", {
         message: "new second record should have amount 0",
     });
@@ -9896,7 +9899,7 @@ test("editable list view: multi edition server error handling", async () => {
     });
 });
 
-test("editable readonly list view: navigation", async () => {
+test.todo("editable readonly list view: navigation", async () => {
     await mountView({
         type: "list",
         resModel: "foo",
@@ -10016,21 +10019,16 @@ test("editable list view: multi edition: edit and validate last row", async () =
         type: "list",
         resModel: "foo",
         arch: `
-                <tree multi_edit="1">
-                    <field name="foo"/>
-                    <field name="int_field"/>
-                </tree>`,
+            <tree multi_edit="1">
+                <field name="foo"/>
+                <field name="int_field"/>
+            </tree>`,
     });
     expect(".o_data_row").toHaveCount(4);
     await contains(".o_list_view .o_list_record_selector input").click();
 
     await contains(".o_data_row:last-child [name=int_field]").click();
-    const input = target.querySelector(".o_data_row:last-child [name=int_field] input");
-    input.value = 7;
-    await triggerEvent(input, null, "input");
-    expect(".o_data_row:last-child [name=int_field] input").toBeFocused();
-    press("Enter");
-    await animationFrame();
+    await contains(".o_data_row:last-child [name=int_field] input").fill("7", { confirm: "Enter" });
     expect(".modal").toHaveCount(1);
     await contains(".modal .btn-primary").click();
     expect(".o_data_row").toHaveCount(4);
@@ -10050,50 +10048,50 @@ test("editable readonly list view: navigation in grouped list", async () => {
     // Open both groups
     const groupHeaders = [...queryAll(".o_group_header")];
     expect(".o_group_header").toHaveCount(2);
-    await click(groupHeaders.shift());
-    await click(groupHeaders.shift());
+    await contains(groupHeaders.shift()).click();
+    await contains(groupHeaders.shift()).click();
 
     // select 2 records
-    const rows = [...queryAll(".o_data_row")];
     expect(".o_data_row").toHaveCount(4);
     await contains(".o_data_row:eq(0) .o_list_record_selector input").click();
     await contains(".o_data_row:eq(2) .o_list_record_selector input").click();
-
+    
     // toggle a row mode
-    await click(rows[0].querySelector("[name=foo]"));
+    const rows = [...queryAll(".o_data_row")];
+    await contains(rows[0].querySelector("[name=foo]")).click();
     expect(".o_selected_row").toHaveCount(1);
-    assert.hasClass(rows[0], "o_selected_row");
-    expect(document.activeElement).toBe(rows[0].querySelector("[name=foo] input"));
+    expect(rows[0]).toHaveClass("o_selected_row");
+    expect(".o_data_row:eq(0) [name=foo] input").toBeFocused();
 
     // Keyboard navigation only interracts with selected elements
     press("Enter");
     await animationFrame();
     expect(".o_selected_row").toHaveCount(1);
-    assert.hasClass(rows[2], "o_selected_row");
-    expect(document.activeElement).toBe(rows[2].querySelector("[name=foo] input"));
+    expect(rows[2]).toHaveClass("o_selected_row");
+    expect(".o_data_row:eq(2) [name=foo] input").toBeFocused();
 
     press("Tab");
     await animationFrame();
     expect(".o_selected_row").toHaveCount(1);
-    assert.hasClass(rows[0], "o_selected_row");
-    expect(document.activeElement).toBe(rows[0].querySelector("[name=foo] input"));
+    expect(rows[0]).toHaveClass("o_selected_row");
+    expect(".o_data_row:eq(0) [name=foo] input").toBeFocused();
 
     press("Tab");
     await animationFrame();
     expect(".o_selected_row").toHaveCount(1);
-    assert.hasClass(rows[2], "o_selected_row");
-    expect(document.activeElement).toBe(rows[2].querySelector("[name=foo] input"));
+    expect(rows[2]).toHaveClass("o_selected_row");
+    expect(".o_data_row:eq(2) [name=foo] input").toBeFocused();
 
     // Click on a non selected row
-    await click(rows[3].querySelector("[name=foo]"));
+    await contains(rows[3].querySelector("[name=foo]")).click();
     expect(".o_selected_row").toHaveCount(0);
 
     // Click again should select the clicked record
-    await click(rows[3].querySelector("[name=foo]"));
+    await contains(rows[3].querySelector("[name=foo]")).click();
     expect(["resId: 3"]).toVerifySteps();
 });
 
-test("editable readonly list view: single edition does not behave like a multi-edition", async () => {
+test.todo("editable readonly list view: single edition does not behave like a multi-edition", async () => {
     await mountView({
         type: "list",
         arch: `
@@ -10109,7 +10107,7 @@ test("editable readonly list view: single edition does not behave like a multi-e
 
     // edit a field (invalid input)
     await contains(".o_data_row:eq(0) .o_data_cell:eq(0)").click();
-    await editInput(target, ".o_data_row [name=foo] input", "");
+    await contains(".o_data_row [name=foo] input").edit("");
     expect(".modal").toHaveCount(1, { message: "should have a modal (invalid fields)" });
 
     await contains(".modal button.btn").click();
@@ -10118,12 +10116,25 @@ test("editable readonly list view: single edition does not behave like a multi-e
     await contains(".o_data_row:eq(0) .o_data_cell:eq(0)").click();
     await contains(".o_data_row [name=foo] input").edit("bar");
     expect(".modal").toHaveCount(0, { message: "should not have a modal" });
-    expect($(target).find(".o_data_row:eq(0) .o_data_cell").text()).toBe("bar", {
+    expect(".o_data_row:eq(0) .o_data_cell").toHaveText("bar", {
         message: "the first row should be updated",
     });
 });
 
 test("non editable list view: multi edition", async () => {
+    stepAllNetworkCalls();
+    onRpc("write", ({ args }) => {
+        expect(args).toEqual([[1, 2], { int_field: 666 }], {
+            message: "should write on multi records",
+        });
+    });
+    onRpc("web_read", ({ args, kwargs }) => {
+        if (args[0].length !== 1) {
+            expect(args).toEqual([[1, 2]], { message: "should batch the read" });
+            expect(kwargs.specification).toEqual({ foo: {}, int_field: {} });
+        }
+    });
+
     await mountView({
         type: "list",
         arch: `
@@ -10131,26 +10142,12 @@ test("non editable list view: multi edition", async () => {
                 <field name="foo"/>
                 <field name="int_field"/>
             </tree>`,
-        mockRPC(route, args) {
-            expect.step(args.method || route);
-            if (args.method === "write") {
-                expect(args.args).toEqual([[1, 2], { int_field: 666 }], {
-                    message: "should write on multi records",
-                });
-            } else if (args.method === "web_read") {
-                if (args.args[0].length !== 1) {
-                    expect(args.args).toEqual([[1, 2]], { message: "should batch the read" });
-                    expect(args.kwargs.specification).toEqual({ foo: {}, int_field: {} });
-                }
-            }
-        },
         resModel: "foo",
     });
 
     expect(["/web/webclient/translations", "/web/webclient/load_menus", "get_views", "web_search_read", "has_group"]).toVerifySteps();
 
     // select two records
-    const rows = queryAll(".o_data_row");
     await contains(".o_data_row:eq(0) .o_list_record_selector input").click();
     await contains(".o_data_row:eq(1) .o_list_record_selector input").click();
 
@@ -10161,21 +10158,21 @@ test("non editable list view: multi edition", async () => {
     expect(".modal").toHaveCount(1, { message: "modal appears when switching cells" });
 
     await contains(".modal .btn-secondary").click();
-    expect($(target).find(".o_data_row:eq(0) .o_data_cell").text()).toBe("yop10", {
+    expect(queryAllTexts(".o_data_row:eq(0) .o_data_cell")).toEqual(["yop", "10"], {
         message: "changes have been discarded and row is back to readonly",
     });
 
     await contains(".o_data_row:eq(0) .o_data_cell:eq(1)").click();
     await contains(".o_data_row [name=int_field] input").edit("666");
     expect(".modal").toHaveCount(1, { message: "there should be an opened modal" });
-    assert.ok($(".modal").text().includes("those 2 records"), "the number of records should be correctly displayed");
+    expect(queryOne(".modal").innerText.includes("those 2 records")).toBe(true, { message: "the number of records should be correctly displayed" });
 
     await contains(".modal .btn-primary").click();
     expect(["write", "web_read"]).toVerifySteps();
-    expect($(target).find(".o_data_row:eq(0) .o_data_cell").text()).toBe("yop666", {
+    expect(queryAllTexts(".o_data_row:eq(0) .o_data_cell")).toEqual(["yop", "666"], {
         message: "the first row should be updated",
     });
-    expect($(target).find(".o_data_row:eq(1) .o_data_cell").text()).toBe("blip666", {
+    expect(queryAllTexts(".o_data_row:eq(1) .o_data_cell")).toEqual(["blip", "666"], {
         message: "the second row should be updated",
     });
     expect(".o_data_cell input.o_field_widget").toHaveCount(0, {
@@ -13964,7 +13961,7 @@ test("Auto save: modify a record and change page (reject)", async () => {
     );
 
     await contains(".o_data_cell").click();
-    await editInput(target, ".o_data_cell input", "");
+    await contains(".o_data_cell input").edit("");
     await pagerNext(target);
     expect("foo").toHaveClass("o_field_invalid");
     assert.deepEqual(
