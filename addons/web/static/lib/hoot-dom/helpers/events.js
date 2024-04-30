@@ -207,10 +207,10 @@ const getEventConstructor = (eventType) => {
         case "mousemove":
         case "mouseover":
         case "mouseout":
-            return [MouseEvent, mapBubblingPointerEvent];
+            return [MouseEvent, mapBubblingMouseEvent];
         case "mouseenter":
         case "mouseleave":
-            return [MouseEvent, mapNonBubblingPointerEvent];
+            return [MouseEvent, mapNonBubblingMouseEvent];
 
         // Pointer events
         case "click":
@@ -1394,9 +1394,9 @@ const mapNonBubblingEvent = (eventInit) => ({
 // -----------------------------
 
 /**
- * @param {PointerEventInit} [eventInit]
+ * @param {MouseEventInit} [eventInit]
  */
-const mapBubblingPointerEvent = (eventInit) => ({
+const mapBubblingMouseEvent = (eventInit) => ({
     clientX: eventInit?.clientX ?? eventInit?.pageX ?? 0,
     clientY: eventInit?.clientY ?? eventInit?.pageY ?? 0,
     view: getWindow(),
@@ -1405,13 +1405,29 @@ const mapBubblingPointerEvent = (eventInit) => ({
 });
 
 /**
+ * @param {MouseEventInit} [eventInit]
+ */
+const mapNonBubblingMouseEvent = (eventInit) => ({
+    ...specialKeys,
+    ...mapBubblingMouseEvent(eventInit),
+    bubbles: false,
+    cancelable: false,
+});
+
+/**
+ * @param {PointerEventInit} [eventInit]
+ */
+const mapBubblingPointerEvent = (eventInit) => ({
+    ...mapBubblingMouseEvent(eventInit),
+    pointerType: hasTouch() ? "touch" : "mouse",
+});
+
+/**
  * @param {PointerEventInit} [eventInit]
  */
 const mapNonBubblingPointerEvent = (eventInit) => ({
-    ...specialKeys,
-    ...mapBubblingPointerEvent(eventInit),
-    bubbles: false,
-    cancelable: false,
+    ...mapNonBubblingMouseEvent(eventInit),
+    pointerType: hasTouch() ? "touch" : "mouse",
 });
 
 /**
