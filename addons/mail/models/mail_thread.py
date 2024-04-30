@@ -104,16 +104,10 @@ class MailThread(models.AbstractModel):
         'Action Needed',
         compute='_compute_message_needaction', search='_search_message_needaction',
         help="If checked, new messages require your attention.")
-    message_needaction_counter = fields.Integer(
-        'Number of Actions', compute='_compute_message_needaction',
-        help="Number of messages requiring action")
     message_has_error = fields.Boolean(
         'Message Delivery error',
         compute='_compute_message_has_error', search='_search_message_has_error',
         help="If checked, some messages have a delivery error.")
-    message_has_error_counter = fields.Integer(
-        'Number of errors', compute='_compute_message_has_error',
-        help="Number of messages with delivery error")
     message_attachment_count = fields.Integer('Attachment Count', compute='_compute_message_attachment_count', groups="base.group_user")
 
     @api.depends('message_follower_ids')
@@ -200,8 +194,7 @@ class MailThread(models.AbstractModel):
                 res[result[0]] += 1
 
         for record in self:
-            record.message_needaction_counter = res.get(record._origin.id, 0)
-            record.message_needaction = bool(record.message_needaction_counter)
+            record.message_needaction = bool(res.get(record._origin.id, 0))
 
     @api.model
     def _search_message_needaction(self, operator, operand):
@@ -225,8 +218,7 @@ class MailThread(models.AbstractModel):
             res.update(self._cr.fetchall())
 
         for record in self:
-            record.message_has_error_counter = res.get(record._origin.id, 0)
-            record.message_has_error = bool(record.message_has_error_counter)
+            record.message_has_error = bool(res.get(record._origin.id, 0))
 
     @api.model
     def _search_message_has_error(self, operator, operand):
