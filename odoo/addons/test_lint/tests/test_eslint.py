@@ -48,4 +48,4 @@ stderr: {process.stderr}
         for module in get_modules():
             strict_test.append(module) if re.search('^point_of_sale$|^pos_.*$|^.*_pos$|^.*_pos_.*$', module) else basic_test.append(module)
         self._test_eslint(basic_test, file_path('test_lint/tests/eslintrc'))
-        self._test_eslint(strict_test, file_path('web/tooling/_eslintrc.json'))
+        self._test_eslint(strict_test, file_path('web/tooling/_eslint.config.js'))

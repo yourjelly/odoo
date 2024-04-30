@@ -39,6 +39,7 @@ tsconfig.json
 package-lock.json
 package.json
 .husky
+eslint.config.js
 
 # various virtualenv
 /bin/
