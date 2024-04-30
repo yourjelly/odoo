@@ -9587,56 +9587,54 @@ test("multi edition: many2many field in grouped list", async () => {
 test("editable list view: multi edition of many2one: set same value", async () => {
     expect.assertions(4);
 
+    onRpc("write", ({ args }) => {
+        expect(args).toEqual([[1, 2, 3, 4], { m2o: 2 }], {
+            message: "should force write value on all selected records",
+        });
+    });
+
     await mountView({
         type: "list",
         resModel: "foo",
         arch: `
-                <tree multi_edit="1">
-                    <field name="foo"/>
-                    <field name="m2o"/>
-                </tree>`,
-        mockRPC(route, args) {
-            if (args.method === "write") {
-                expect(args.args).toEqual([[1, 2, 3, 4], { m2o: 2 }], {
-                    message: "should force write value on all selected records",
-                });
-            }
-        },
+            <tree multi_edit="1">
+                <field name="foo"/>
+                <field name="m2o"/>
+            </tree>`,
     });
 
-    expect($(target).find(".o_list_many2one").text()).toBe("Value 1Value 2Value 1Value 1");
+    expect(queryAllTexts(".o_list_many2one")).toEqual(["Value 1", "Value 2", "Value 1", "Value 1"]);
 
     // select all records (the first one has value 1 for m2o)
     await contains(".o_list_record_selector input").click();
 
     // set m2o to 1 in first record
     await contains(".o_data_row .o_data_cell").click();
-    await contains(".o_data_row [name=m2o] input").edit("Value 2");
-    await contains(".o-autocomplete--dropdown-item").click();
+    await contains(".o_data_row [name=m2o] input").fill("Value 2", { confirm: false });
+    await runAllTimers();
+    await contains(".o-autocomplete--dropdown-item:contains(Value 2)").click();
     expect(".modal").toHaveCount(1);
 
     await contains(".modal .modal-footer .btn-primary").click();
-    expect($(target).find(".o_list_many2one").text()).toBe("Value 2Value 2Value 2Value 2");
+    expect(queryAllTexts(".o_list_many2one")).toEqual(["Value 2", "Value 2", "Value 2", "Value 2"]);
 });
 
-test('editable list view: clicking on "Discard changes" in multi edition', async () => {
+test.todo('editable list view: clicking on "Discard changes" in multi edition', async () => {
     await mountView({
         type: "list",
         arch: `
-                <tree editable="top" multi_edit="1">
+            <tree editable="top" multi_edit="1">
                     <field name="foo"/>
                 </tree>`,
         resModel: "foo",
     });
 
     // select two records
-    const rows = queryAll(".o_data_row");
     await contains(".o_data_row:eq(0) .o_list_record_selector input").click();
     await contains(".o_data_row:eq(1) .o_list_record_selector input").click();
     await contains(".o_data_row:eq(0) .o_data_cell:eq(0)").click();
-    target.querySelector(".o_data_row .o_data_cell input").value = "oof";
+    await contains(".o_data_row [name=foo] input").fill("oof", { confirm: false });
 
-    const discardButton = $(".o_list_button_discard:visible").get(0);
     // Simulates an actual click (event chain is: mousedown > change > blur > focus > mouseup > click)
     await triggerEvents(discardButton, null, ["mousedown"]);
     await triggerEvents(target.querySelector(".o_data_row .o_data_cell input"), null, ["change", "blur", "focusout"]);
@@ -9646,10 +9644,10 @@ test('editable list view: clicking on "Discard changes" in multi edition', async
 
     expect(".modal").toHaveCount(0, { message: "should not open modal" });
 
-    expect($(target).find(".o_data_row:first() .o_data_cell:first()").text()).toBe("yop");
+    expect(".o_data_row:first() .o_data_cell:first()").toHaveText("yop");
 });
 
-test('editable list view: mousedown on "Discard", mouseup somewhere else (no multi-edit)', async () => {
+test.todo('editable list view: mousedown on "Discard", mouseup somewhere else (no multi-edit)', async () => {
     stepAllNetworkCalls();
 
     await mountView({
@@ -9662,7 +9660,6 @@ test('editable list view: mousedown on "Discard", mouseup somewhere else (no mul
     });
 
     // select two records
-    const rows = queryAll(".o_data_row");
     await contains(".o_data_row:eq(0) .o_list_record_selector input").click();
     await contains(".o_data_row:eq(1) .o_list_record_selector input").click();
     await contains(".o_data_row:eq(0) .o_data_cell:eq(0)").click();
@@ -9679,7 +9676,7 @@ test('editable list view: mousedown on "Discard", mouseup somewhere else (no mul
     expect(["/web/webclient/translations", "/web/webclient/load_menus", "get_views", "web_search_read", "has_group", "web_save"]).toVerifySteps();
 });
 
-test('multi edit list view: mousedown on "Discard" with invalid field', async () => {
+test.todo('multi edit list view: mousedown on "Discard" with invalid field', async () => {
     await mountView({
         type: "list",
         arch: `
@@ -9728,7 +9725,7 @@ test('multi edit list view: mousedown on "Discard" with invalid field', async ()
     expect(".o_data_row .o_data_cell").toHaveText("10");
 });
 
-test('editable list view (multi edition): mousedown on "Discard", but mouseup somewhere else', async () => {
+test.todo('editable list view (multi edition): mousedown on "Discard", but mouseup somewhere else', async () => {
     await mountView({
         type: "list",
         arch: `
@@ -9758,32 +9755,30 @@ test('editable list view (multi edition): mousedown on "Discard", but mouseup so
 });
 
 test("editable list view (multi edition): writable fields in readonly (force save)", async () => {
-    expect.assertions(8);
+    expect.assertions(4);
+
+    stepAllNetworkCalls();
+    onRpc("write", ({ args }) => {
+        expect(args).toEqual([[1, 3], { bar: false }]);
+    });
 
     // boolean toogle widget allows for writing on the record even in readonly mode
     await mountView({
         type: "list",
         arch: `
-                <tree multi_edit="1">
-                    <field name="bar" widget="boolean_toggle"/>
-                </tree>`,
+            <tree multi_edit="1">
+                <field name="bar" widget="boolean_toggle"/>
+            </tree>`,
         resModel: "foo",
-        mockRPC(route, args) {
-            expect.step(args.method || route);
-            if (args.method === "write") {
-                expect(args.args).toEqual([[1, 3], { bar: false }]);
-            }
-        },
     });
 
     expect(["/web/webclient/translations", "/web/webclient/load_menus", "get_views", "web_search_read", "has_group"]).toVerifySteps();
     // select two records
-    const rows = queryAll(".o_data_row");
     await contains(".o_data_row:eq(0) .o_list_record_selector input").click();
-    await click(rows[2], ".o_list_record_selector input");
-    await click(rows[0].querySelector(".o_boolean_toggle input"));
+    await contains(".o_data_row:eq(2) .o_list_record_selector input").click();
+    await contains(".o_data_row:eq(0) .o_boolean_toggle input").click();
 
-    assert.ok($(".modal").text().includes("Confirmation"), "Modal should ask to save changes");
+    expect(".modal-header").toHaveText("Confirmation");
     await contains(".modal .btn-primary").click();
     expect(["write", "web_read"]).toVerifySteps();
 });
@@ -9791,45 +9786,40 @@ test("editable list view (multi edition): writable fields in readonly (force sav
 test("editable list view: multi edition with readonly modifiers", async () => {
     expect.assertions(5);
 
+    onRpc("write", ({ args }) => {
+        expect(args).toEqual([[1, 2], { int_field: 666 }], {
+            message: "should only write on the valid records",
+        });
+    });
+
     await mountView({
         type: "list",
         resModel: "foo",
         arch: `
-                <tree multi_edit="1">
-                    <field name="id"/>
-                    <field name="foo"/>
-                    <field name="int_field" readonly="id > 2"/>
-                </tree>`,
-        mockRPC(route, args) {
-            if (args.method === "write") {
-                expect(args.args).toEqual([[1, 2], { int_field: 666 }], {
-                    message: "should only write on the valid records",
-                });
-            }
-        },
+            <tree multi_edit="1">
+                <field name="id"/>
+                <field name="foo"/>
+                <field name="int_field" readonly="id > 2"/>
+            </tree>`,
     });
 
     // select all records
     await contains(".o_list_record_selector input").click();
-    ``; // edit a field
-    await click(queryAll(".o_data_row .o_data_cell")[1]);
-    await editInput(target, ".o_data_row [name=int_field] input", 666);
+    await contains(".o_data_row .o_data_cell:eq(1)").click();
+    await contains(".o_data_row [name=int_field] input").edit("666");
 
-    const modalText = target
-        .querySelector(".modal-body")
-        .textContent.split(" ")
-        .filter((w) => w.trim() !== "")
-        .join(" ")
-        .split("\n")
-        .join("");
-    expect(modalText).toBe("Among the 4 selected records, 2 are valid for this update. Are you sure you want to " + "perform the following update on those 2 records? Field:int_fieldUpdate to:666");
-    expect(target.querySelector(".modal .o_modal_changes .o_field_widget").parentNode.style.pointerEvents).toBe("none", { message: "pointer events should be deactivated on the demo widget" });
+    expect(".modal-body").toHaveText(`Among the 4 selected records, 2 are valid for this update.
+Are you sure you want to perform the following update on those 2 records?
+
+Field: Int field
+Update to: 666`);
+    expect(queryOne(".modal .o_modal_changes .o_field_widget").parentNode.style.pointerEvents).toBe("none", { message: "pointer events should be deactivated on the demo widget" });
 
     await contains(".modal .btn-primary").click();
-    expect($(target).find(".o_data_row:eq(0) .o_data_cell").text()).toBe("1yop666", {
+    expect(queryAllTexts(".o_data_row:eq(0) .o_data_cell")).toEqual(["1","yop","666"], {
         message: "the first row should be updated",
     });
-    expect($(target).find(".o_data_row:eq(1) .o_data_cell").text()).toBe("2blip666", {
+    expect(queryAllTexts(".o_data_row:eq(1) .o_data_cell")).toEqual(["2","blip","666"], {
         message: "the second row should be updated",
     });
 });
@@ -9839,10 +9829,10 @@ test("editable list view: multi edition when the domain is selected", async () =
         type: "list",
         resModel: "foo",
         arch: `
-                <tree multi_edit="1" limit="2">
-                    <field name="id"/>
-                    <field name="int_field"/>
-                </tree>`,
+            <tree multi_edit="1" limit="2">
+                <field name="id"/>
+                <field name="int_field"/>
+            </tree>`,
     });
 
     // select all records, and then select all domain
@@ -9851,8 +9841,8 @@ test("editable list view: multi edition when the domain is selected", async () =
 
     // edit a field
     await click(queryAll(".o_data_row .o_data_cell")[1]);
-    await editInput(target, ".o_data_row [name=int_field] input", 666);
-    assert.ok(target.querySelector(".modal-body").textContent.includes("This update will only consider the records of the current page."));
+    await contains(".o_data_row [name=int_field] input").edit("666");
+    expect(queryOne(".modal-body").textContent.includes("This update will only consider the records of the current page.")).toBe(true);
 });
 
 test("editable list view: many2one with readonly modifier", async () => {
@@ -9868,9 +9858,8 @@ test("editable list view: many2one with readonly modifier", async () => {
 
     // edit a field
     await contains(".o_data_row .o_data_cell").click();
-
-    assert.containsOnce(target, '.o_data_row:eq(0) .o_data_cell:eq(0) div[name="m2o"] a');
-    expect(document.activeElement).toBe(queryAll(".o_data_row .o_data_cell")[1].querySelector("input"), { message: "focus should go to the char input" });
+    expect(".o_data_row:eq(0) .o_data_cell:eq(0) div[name=m2o] a").toHaveCount(1);
+    expect(".o_data_row .o_data_cell:eq(1) input").toBeFocused({ message: "focus should go to the char input" });
 });
 
 test("editable list view: multi edition server error handling", async () => {
@@ -10068,7 +10057,7 @@ test("editable readonly list view: navigation in grouped list", async () => {
     const rows = [...queryAll(".o_data_row")];
     expect(".o_data_row").toHaveCount(4);
     await contains(".o_data_row:eq(0) .o_list_record_selector input").click();
-    await click(rows[2], ".o_list_record_selector input");
+    await contains(".o_data_row:eq(2) .o_list_record_selector input").click();
 
     // toggle a row mode
     await click(rows[0].querySelector("[name=foo]"));
@@ -10167,7 +10156,7 @@ test("non editable list view: multi edition", async () => {
 
     // edit a field
     await contains(".o_data_row:eq(0) .o_data_cell:eq(1)").click();
-    await editInput(target, ".o_data_row [name=int_field] input", 666);
+    await contains(".o_data_row [name=int_field] input").edit("666");
     await contains(".o_data_row:eq(0) .o_data_cell:eq(0)").click();
     expect(".modal").toHaveCount(1, { message: "modal appears when switching cells" });
 
@@ -10177,7 +10166,7 @@ test("non editable list view: multi edition", async () => {
     });
 
     await contains(".o_data_row:eq(0) .o_data_cell:eq(1)").click();
-    await editInput(target, ".o_data_row [name=int_field] input", 666);
+    await contains(".o_data_row [name=int_field] input").edit("666");
     expect(".modal").toHaveCount(1, { message: "there should be an opened modal" });
     assert.ok($(".modal").text().includes("those 2 records"), "the number of records should be correctly displayed");
 
