@@ -9863,19 +9863,19 @@ test("editable list view: many2one with readonly modifier", async () => {
 });
 
 test("editable list view: multi edition server error handling", async () => {
+    expect.errors(1);
+
+    onRpc("write", () => {
+        throw makeServerError();
+    });
+
     await mountView({
         type: "list",
         resModel: "foo",
         arch: '<tree multi_edit="1"><field name="foo" required="1"/></tree>',
-        mockRPC(route, args) {
-            if (args.method === "write") {
-                return Promise.reject();
-            }
-        },
     });
 
     // select two records
-    const rows = queryAll(".o_data_row");
     await contains(".o_data_row:eq(0) .o_list_record_selector input").click();
     await contains(".o_data_row:eq(1) .o_list_record_selector input").click();
 
@@ -9885,10 +9885,10 @@ test("editable list view: multi edition server error handling", async () => {
     await contains(".o_list_view").click();
     await contains(".modal .btn-primary").click();
     // Server error: if there was a crash manager, there would be an open error at this point...
-    expect($(target).find(".o_data_row:eq(0) .o_data_cell").text()).toBe("yop", {
+    expect(".o_data_row:eq(0) .o_data_cell").toHaveText("yop", {
         message: "first cell should have discarded any change",
     });
-    expect($(target).find(".o_data_row:eq(1) .o_data_cell").text()).toBe("blip", {
+    expect(".o_data_row:eq(1) .o_data_cell").toHaveText("blip", {
         message: "second selected record should not have changed",
     });
     expect(".o_data_cell input.o_field_widget").toHaveCount(0, {
