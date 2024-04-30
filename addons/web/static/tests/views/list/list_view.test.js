@@ -7841,9 +7841,13 @@ test("grouped list on selection field at level 2", async () => {
     expect(".o_group_header").toHaveCount(5, {
         message: "should contain 2 groups at first level and 3 groups at second level",
     });
-    expect(queryAllTexts(".o_group_header .o_group_name")).toEqual(
-        ["Value 1 (5)", "Low (3)", "Medium (1)", "High (1)", "Value 2 (1)"]
-    );
+    expect(queryAllTexts(".o_group_header .o_group_name")).toEqual([
+        "Value 1 (5)",
+        "Low (3)",
+        "Medium (1)",
+        "High (1)",
+        "Value 2 (1)",
+    ]);
 });
 
 test("grouped list with a pager in a group", async () => {
@@ -8037,15 +8041,15 @@ test("modifiers of other x2many rows a re-evaluated when a subrecord is updated"
                 </form>`,
         resId: 1,
     });
-    expect(queryAllTexts(".o_field_widget[name=o2m] .o_data_row .o_data_cell:first-child")).toEqual([
-        "Value 1", ""]
+    expect(queryAllTexts(".o_field_widget[name=o2m] .o_data_row .o_data_cell:first-child")).toEqual(
+        ["Value 1", ""]
     );
 
     // Make a change in the list to trigger the onchange
     await contains(".o_field_widget[name=o2m] .o_data_row .o_data_cell:nth-child(2)").click();
     await contains(".o_field_widget[name=o2m] .o_data_row [name=stage] select").select(`"open"`);
-    expect(queryAllTexts(".o_field_widget[name=o2m] .o_data_row .o_data_cell:first-child")).toEqual([
-        "", "Value 2"]
+    expect(queryAllTexts(".o_field_widget[name=o2m] .o_data_row .o_data_cell:first-child")).toEqual(
+        ["", "Value 2"]
     );
     expect(".o_data_row:eq(1)").toHaveText("Value 2 Draft", {
         message: "the onchange should have been applied",
@@ -8086,9 +8090,9 @@ test("leaving unvalid rows in edition", async () => {
         message: "first line should still be in edition as invalid",
     });
     expect(".o_selected_row").toHaveCount(1, { message: "no other line should be in edition" });
-    expect(".o_data_row:eq(0) .o_field_invalid input").toHaveCount(1,
-        { message: "the required field should be marked as invalid" }
-    );
+    expect(".o_data_row:eq(0) .o_field_invalid input").toHaveCount(1, {
+        message: "the required field should be marked as invalid",
+    });
     expect(warnings).toBe(1, { message: "a warning should have been displayed" });
 });
 
@@ -8153,12 +8157,12 @@ test("pressing tab on last cell of editable list view", async () => {
     expect("[name=foo] input").toBeFocused();
     expect([
         "/web/webclient/translations",
-"/web/webclient/load_menus",
-"get_views",
-"web_search_read",
-"has_group",
-"web_save",
-"onchange",
+        "/web/webclient/load_menus",
+        "get_views",
+        "web_search_read",
+        "has_group",
+        "web_save",
+        "onchange",
     ]).toVerifySteps();
 });
 
@@ -8571,7 +8575,7 @@ test("navigation with tab and readonly field (with modification)", async () => {
     expect(".o_data_row:first [name=foo] input").toBeFocused();
 
     // Modity the cell content, validate with tab
-    await contains(".o_data_row:first [name=foo] input").edit("blip-changed", { confirm: "tab"});
+    await contains(".o_data_row:first [name=foo] input").edit("blip-changed", { confirm: "tab" });
     expect(".o_selected_row").toHaveCount(1);
     expect(".o_data_row:eq(1)").toHaveClass("o_selected_row");
     expect(".o_data_row:eq(1) [name=foo] input").toBeFocused();
@@ -8639,9 +8643,7 @@ test('navigation with tab on a one2many list with create="0"', async () => {
 
     expect(".o_field_widget[name=o2m] .o_data_row").toHaveCount(2);
 
-    await contains(
-        ".o_field_widget[name=o2m] .o_data_row:first .o_data_cell[name=name]"
-    ).click();
+    await contains(".o_field_widget[name=o2m] .o_data_row:first .o_data_cell[name=name]").click();
     expect(".o_field_widget[name=o2m] .o_data_row:first").toHaveClass("o_selected_row");
     expect(".o_selected_row").toHaveCount(1);
     expect(".o_selected_row [name=name] input").toBeFocused();
@@ -8701,49 +8703,42 @@ test("edition, then navigation with tab (with a readonly field and onchange)", a
     // case the keyboard navigation move over it and there a unsaved changes
     // (which will trigger an onchange), the focus of the next activable
     // field will not crash
-    serverData.models.bar.onchanges = {
+    Bar._fields.o2m = fields.One2many({
+        relation: "foo",
+    });
+    Bar._onChanges = {
         o2m: function () {},
     };
-    serverData.models.bar.fields.o2m = {
-        string: "O2M field",
-        type: "one2many",
-        relation: "foo",
-    };
-    serverData.models.bar.records[0].o2m = [1, 4];
+    Bar._records[0].o2m = [1, 4];
+
+    onRpc("onchange", ({ model }) => {
+        expect.step(`onchange:${model}`);
+    });
 
     await mountView({
         type: "form",
         resModel: "bar",
         resId: 1,
         arch: `
-                <form>
-                    <group>
-                        <field name="display_name"/>
-                        <field name="o2m">
-                            <tree editable="bottom">
-                                <field name="foo"/>
-                                <field name="date" readonly="1"/>
-                                <field name="int_field"/>
-                            </tree>
-                        </field>
-                    </group>
-                </form>`,
-        mockRPC(route, args) {
-            if (args.method === "onchange") {
-                expect.step(`onchange:${args.model}`);
-            }
-        },
+            <form>
+                <group>
+                    <field name="display_name"/>
+                    <field name="o2m">
+                        <tree editable="bottom">
+                            <field name="foo"/>
+                            <field name="date" readonly="1"/>
+                            <field name="int_field"/>
+                        </tree>
+                    </field>
+                </group>
+            </form>`,
     });
 
     await contains(".o_data_cell").click();
     expect(".o_data_cell[name=foo] input").toBeFocused();
-    await contains(".o_data_cell[name=foo] input").edit("new value");
 
-    press("Tab");
-    await animationFrame();
-
+    await contains(".o_data_cell[name=foo] input").edit("new value", { confirm: "tab" });
     expect(".o_data_cell[name=int_field] input").toBeFocused();
-
     expect(["onchange:bar"]).toVerifySteps();
 });
 
@@ -8894,32 +8889,36 @@ test("navigation: not moving down with keydown", async () => {
 });
 
 test("navigation: moving right with keydown from text field does not move the focus", async () => {
-    serverData.models.foo.fields.foo.type = "text";
+    Foo._fields.foo = fields.Text();
+
     await mountView({
         type: "list",
         resModel: "foo",
         arch: `
-                <tree editable="bottom">
-                    <field name="foo"/>
-                    <field name="bar"/>
-                </tree>`,
+            <tree editable="bottom">
+                <field name="foo"/>
+                <field name="bar"/>
+            </tree>`,
     });
 
     await contains(".o_field_cell[name=foo]").click();
 
-    const textarea = target.querySelector(".o_field_widget[name=foo] textarea");
-    expect(document.activeElement).toBe(textarea);
+    expect(".o_field_widget[name=foo] textarea").toBeFocused();
+    const textarea = queryOne(".o_field_widget[name=foo] textarea");
     expect(textarea.selectionStart).toBe(0);
     expect(textarea.selectionEnd).toBe(3);
-    textarea.selectionStart = 3; // Simulate browser keyboard right behavior (unselect)
-
-    expect(document.activeElement).toBe(textarea);
-    assert.ok(textarea.selectionStart === 3 && textarea.selectionEnd === 3);
 
     press("arrowright");
     await animationFrame();
+    expect(".o_field_widget[name=foo] textarea").toBeFocused();
+    expect(textarea.selectionStart).toBe(3);
+    expect(textarea.selectionEnd).toBe(3);
 
-    expect(document.activeElement).toBe(textarea);
+    press("arrowright");
+    await animationFrame();
+    expect(".o_field_widget[name=foo] textarea").toBeFocused();
+    expect(textarea.selectionStart).toBe(3);
+    expect(textarea.selectionEnd).toBe(3);
 });
 
 test("discarding changes in a row properly updates the rendering", async () => {
@@ -8932,20 +8931,21 @@ test("discarding changes in a row properly updates the rendering", async () => {
     expect(".o_field_cell:first").toHaveText("yop", { message: "first cell should contain 'yop'" });
 
     await contains(".o_field_cell").click();
-    await contains(".o_field_widget[name=foo] input").edit("hello");
+    await contains(".o_field_widget[name=foo] input").edit("hello", { confirm: false });
     await contains(".o_list_button_discard:not(.dropdown-item)").click();
     expect(".modal").toHaveCount(0, { message: "should be no modal to ask for discard" });
-
     expect(".o_field_cell:first").toHaveText("yop", {
         message: "first cell should still contain 'yop'",
     });
 });
 
 test("numbers in list are right-aligned", async () => {
-    const currencies = {};
-    serverData.models.res_currency.records.forEach((currency) => {
-        currencies[currency.id] = currency;
-    });
+    const mockedCurrencies = {};
+    for (const record of Currency._records) {
+        mockedCurrencies[record.id] = record;
+    }
+    patchWithCleanup(currencies, mockedCurrencies);
+
     await mountView({
         type: "list",
         resModel: "foo",
@@ -8957,7 +8957,7 @@ test("numbers in list are right-aligned", async () => {
                 <field name="currency_id" column_invisible="1"/>
             </tree>`,
     });
-    patchWithCleanup(session, { currencies });
+
     const nbCellRight = [...queryAll(".o_data_row:first-child > .o_data_cell")].filter(
         (el) => window.getComputedStyle(el).textAlign === "right"
     ).length;
@@ -8971,26 +8971,22 @@ test("numbers in list are right-aligned", async () => {
 });
 
 test("grouped list with another grouped list parent, click unfold", async () => {
-    serverData.models.bar.fields = {
-        ...serverData.models.bar.fields,
-        cornichon: { string: "cornichon", type: "char" },
-    };
-
-    const rec = serverData.models.bar.records[0];
+    Bar._fields.cornichon = fields.Char();
+    const rec = Bar._records[0];
     // create records to have the search more button
     const newRecs = [];
     for (let i = 0; i < 8; i++) {
-        const newRec = Object.assign({}, rec);
-        newRec.id = 1 + i;
-        newRec.cornichon = "extra fin";
-        newRecs.push(newRec);
+        newRecs.push({ ...rec, id: i + 1, cornichon: "extra fin" });
     }
-    serverData.models.bar.records = newRecs;
-    serverData.views = {
-        "bar,false,list": '<tree><field name="cornichon"/></tree>',
-        "bar,false,search":
-            "<search><filter context=\"{'group_by': 'cornichon'}\" string=\"cornichon\"/></search>",
+    Bar._records = newRecs;
+    Bar._views = {
+        "list,false": '<tree><field name="cornichon"/></tree>',
+        "search,false": `
+            <search>
+                <filter context="{'group_by': 'cornichon'}" string="cornichon"/>
+            </search>`,
     };
+
     await mountView({
         type: "list",
         resModel: "foo",
@@ -9005,13 +9001,12 @@ test("grouped list with another grouped list parent, click unfold", async () => 
     await toggleMenuItem("bar");
 
     await contains(".o_data_cell").click();
-    await clickOpenM2ODropdown(target, "m2o");
-    await clickOpenedDropdownItem(target, "m2o", "Search More...");
+    await contains(".o_field_widget[name=m2o] input").click();
+    await contains(".o-autocomplete--dropdown-item:contains(Search More...)").click();
     expect(".modal-content").toHaveCount(1);
     expect(".modal-content .o_group_name").toHaveCount(0, { message: "list in modal not grouped" });
 
-    const modal = target.querySelector(".modal");
-    await toggleSearchBarMenu(modal);
+    await contains(".modal .o_searchview_dropdown_toggler").click();
     await toggleMenuItem("cornichon");
     await contains(".o_group_header").click();
     expect(".modal-content .o_group_open").toHaveCount(1);
@@ -9028,7 +9023,7 @@ test("field values are escaped", async () => {
         arch: '<tree editable="top"><field name="foo"/></tree>',
     });
 
-    expect(target.querySelector(".o_data_cell").textContent).toBe(value, {
+    expect(".o_data_cell:first").toHaveText(value, {
         message: "value should have been escaped",
     });
 });
@@ -9043,7 +9038,8 @@ test("pressing ESC discard the current line changes", async () => {
     await contains(".o_list_button_add:visible").click();
     expect("tr.o_data_row").toHaveCount(5, { message: "should currently adding a 5th data row" });
 
-    await triggerEvent(target, '[name="foo"] input', "keydown", { key: "escape" });
+    press("escape");
+    await animationFrame();
     expect("tr.o_data_row").toHaveCount(4, { message: "should have only 4 data row after escape" });
     expect("tr.o_data_row.o_selected_row").toHaveCount(0, {
         message: "no rows should be selected",
@@ -9061,7 +9057,8 @@ test("pressing ESC discard the current line changes (with required)", async () =
     await contains(".o_list_button_add:visible").click();
     expect("tr.o_data_row").toHaveCount(5, { message: "should currently adding a 5th data row" });
 
-    await triggerEvent(target, '[name="foo"] input', "keydown", { key: "escape" });
+    press("escape");
+    await animationFrame();
     expect("tr.o_data_row").toHaveCount(4, { message: "should have only 4 data row after escape" });
     expect("tr.o_data_row.o_selected_row").toHaveCount(0, {
         message: "no rows should be selected",
@@ -9075,14 +9072,25 @@ test("field with password attribute", async () => {
         resModel: "foo",
         arch: '<tree><field name="foo" password="True"/></tree>',
     });
-    assert.deepEqual(
-        [...queryAll(".o_data_row .o_data_cell")].map((el) => el.textContent),
-        ["***", "****", "****", "****"]
-    );
+    expect(queryAllTexts(".o_data_row .o_data_cell")).toEqual(["***", "****", "****", "****"]);
 });
 
 test("list with handle widget", async () => {
     expect.assertions(11);
+
+    onRpc("/web/dataset/resequence", async (request) => {
+        const { params } = await request.json();
+        expect(params.offset).toBe(9, {
+            message: "should write the sequence starting from the lowest current one",
+        });
+        expect(params.field).toBe("int_field", {
+            message: "should write the right field as sequence",
+        });
+        expect(params.ids).toEqual([3, 2, 1], {
+            message: "should write the sequence in correct order",
+        });
+        return Promise.resolve();
+    });
 
     await mountView({
         type: "list",
@@ -9092,33 +9100,18 @@ test("list with handle widget", async () => {
                 <field name="int_field" widget="handle"/>
                 <field name="amount" widget="float" digits="[5,0]"/>
             </tree>`,
-        mockRPC(route, args) {
-            if (route === "/web/dataset/resequence") {
-                expect(args.offset).toBe(9, {
-                    message: "should write the sequence starting from the lowest current one",
-                });
-                expect(args.field).toBe("int_field", {
-                    message: "should write the right field as sequence",
-                });
-                expect(args.ids).toEqual([3, 2, 1], {
-                    message: "should write the sequence in correct order",
-                });
-                return Promise.resolve();
-            }
-        },
     });
 
-    let rows = queryAll(".o_data_row");
-    expect(rows[0].querySelector("[name='amount']").textContent).toBe("0", {
+    expect(".o_data_row:eq(0) [name='amount']").toHaveText("0", {
         message: "default fourth record should have amount 0",
     });
-    expect(rows[1].querySelector("[name='amount']").textContent).toBe("500", {
+    expect(".o_data_row:eq(1) [name='amount']").toHaveText("500", {
         message: "default second record should have amount 500",
     });
-    expect(rows[2].querySelector("[name='amount']").textContent).toBe("1200", {
-        message: "default first record should have amount 1200",
+    expect(".o_data_row:eq(2) [name='amount']").toHaveText("1,200", {
+        message: "default first record should have amount 1,200",
     });
-    expect(rows[3].querySelector("[name='amount']").textContent).toBe("300", {
+    expect(".o_data_row:eq(3) [name='amount']").toHaveText("300", {
         message: "default third record should have amount 300",
     });
 
@@ -9127,124 +9120,122 @@ test("list with handle widget", async () => {
         queryFirst("tbody tr:nth-child(2)")
     );
     // await nextTick()
-    rows = queryAll(".o_data_row");
-    expect(rows[0].querySelector("[name='amount']").textContent).toBe("0", {
+    expect(".o_data_row:eq(0) [name='amount']").toHaveText("0", {
         message: "new second record should have amount 0",
     });
-    expect(rows[1].querySelector("[name='amount']").textContent).toBe("300", {
+    expect(".o_data_row:eq(1) [name='amount']").toHaveText("300", {
         message: "new fourth record should have amount 300",
     });
-    expect(rows[2].querySelector("[name='amount']").textContent).toBe("500", {
+    expect(".o_data_row:eq(2) [name='amount']").toHaveText("500", {
         message: "new third record should have amount 500",
     });
-    expect(rows[3].querySelector("[name='amount']").textContent).toBe("1200", {
-        message: "new first record should have amount 1200",
+    expect(".o_data_row:eq(3) [name='amount']").toHaveText("1,200", {
+        message: "new first record should have amount 1,200",
     });
 });
 
 test("result of consecutive resequences is correctly sorted", async () => {
     expect.assertions(9);
-    serverData.models = {
-        // we want the data to be minimal to have a minimal test
-        foo: {
-            fields: { int_field: { string: "int_field", type: "integer", sortable: true } },
-            records: [
-                { id: 1, int_field: 11 },
-                { id: 2, int_field: 12 },
-                { id: 3, int_field: 13 },
-                { id: 4, int_field: 14 },
-            ],
-        },
-    };
+
+    // we want the data to be minimal to have a minimal test
+    class MyFoo extends models.Model {
+        int_field = fields.Integer();
+
+        _records = [
+            { id: 1, int_field: 11 },
+            { id: 2, int_field: 12 },
+            { id: 3, int_field: 13 },
+            { id: 4, int_field: 14 },
+        ];
+    }
+    defineModels([MyFoo]);
+
     let moves = 0;
     const context = {
         lang: "en",
         tz: "taht",
         uid: 7,
+        allowed_company_ids: [1],
     };
+    onRpc("/web/dataset/resequence", async (request) => {
+        const { params } = await request.json();
+        if (moves === 0) {
+            expect(params).toEqual({
+                context,
+                model: "myfoo",
+                ids: [4, 3],
+                offset: 13,
+                field: "int_field",
+            });
+        }
+        if (moves === 1) {
+            expect(params).toEqual({
+                context,
+                model: "myfoo",
+                ids: [4, 2],
+                offset: 12,
+                field: "int_field",
+            });
+        }
+        if (moves === 2) {
+            expect(params).toEqual({
+                context,
+                model: "myfoo",
+                ids: [2, 4],
+                offset: 12,
+                field: "int_field",
+            });
+        }
+        if (moves === 3) {
+            expect(params).toEqual({
+                context,
+                model: "myfoo",
+                ids: [4, 2],
+                offset: 12,
+                field: "int_field",
+            });
+        }
+        moves += 1;
+    });
+
     await mountView({
         type: "list",
-        resModel: "foo",
+        resModel: "myfoo",
         arch: `
             <tree>
                 <field name="int_field" widget="handle"/>
                 <field name="id"/>
             </tree>`,
-        mockRPC(route, args) {
-            if (route === "/web/dataset/resequence") {
-                if (moves === 0) {
-                    assert.deepEqual(args, {
-                        context,
-                        model: "foo",
-                        ids: [4, 3],
-                        offset: 13,
-                        field: "int_field",
-                    });
-                }
-                if (moves === 1) {
-                    assert.deepEqual(args, {
-                        context,
-                        model: "foo",
-                        ids: [4, 2],
-                        offset: 12,
-                        field: "int_field",
-                    });
-                }
-                if (moves === 2) {
-                    assert.deepEqual(args, {
-                        context,
-                        model: "foo",
-                        ids: [2, 4],
-                        offset: 12,
-                        field: "int_field",
-                    });
-                }
-                if (moves === 3) {
-                    assert.deepEqual(args, {
-                        context,
-                        model: "foo",
-                        ids: [4, 2],
-                        offset: 12,
-                        field: "int_field",
-                    });
-                }
-                moves += 1;
-            }
-        },
     });
-    expect($(target).find("tbody tr td.o_list_number").text()).toBe("1234", {
+    expect(queryAllTexts("tbody tr td[name=id]")).toEqual(["1", "2", "3", "4"], {
         message: "default should be sorted by id",
     });
 
     await contains(".o_list_view tbody tr:nth-child(4) .o_handle_cell").dragAndDrop(
         queryFirst(".o_list_view tbody tr:nth-child(3)")
     );
-    expect($(target).find("tbody tr td.o_list_number").text()).toBe("1243", {
+    expect(queryAllTexts("tbody tr td[name=id]")).toEqual(["1", "2", "4", "3"], {
         message: "the int_field (sequence) should have been correctly updated",
     });
 
     await contains(".o_list_view tbody tr:nth-child(3) .o_handle_cell").dragAndDrop(
         queryFirst(".o_list_view tbody tr:nth-child(2)")
     );
-    expect($(target).find("tbody tr td.o_list_number").text()).toEqual("1423", {
+    expect(queryAllTexts("tbody tr td[name=id]")).toEqual(["1", "4", "2", "3"], {
         message: "the int_field (sequence) should have been correctly updated",
     });
 
-    await dragAndDrop(
-        ".o_list_view tbody tr:nth-child(2) .o_handle_cell",
-        ".o_list_view tbody tr:nth-child(3)",
-        "top"
+    await contains(".o_list_view tbody tr:nth-child(2) .o_handle_cell").dragAndDrop(
+        ".o_list_view tbody tr:nth-child(3)"
     );
-    expect($(target).find("tbody tr td.o_list_number").text()).toEqual("1243", {
+    expect(queryAllTexts("tbody tr td[name=id]")).toEqual(["1", "2", "4", "3"], {
         message: "the int_field (sequence) should have been correctly updated",
     });
 
-    await dragAndDrop(
-        ".o_list_view tbody tr:nth-child(3) .o_handle_cell",
-        ".o_list_view tbody tr:nth-child(2)",
-        "top"
+    await contains(".o_list_view tbody tr:nth-child(3) .o_handle_cell").dragAndDrop(
+        ".o_list_view tbody tr:nth-child(2)"
     );
-    expect($(target).find("tbody tr td.o_list_number").text()).toEqual("1423", {
+    expect(queryAllTexts("tbody tr td[name=id]")).toEqual(["1", "4", "2", "3"], {
         message: "the int_field (sequence) should have been correctly updated",
     });
 });
@@ -9258,6 +9249,19 @@ test("editable list with handle widget", async () => {
     Foo._records[2].int_field = 2;
     Foo._records[3].int_field = 3;
 
+    onRpc("/web/dataset/resequence", async (request) => {
+        const { params } = await request.json();
+        expect(params.offset).toBe(1, {
+            message: "should write the sequence starting from the lowest current one",
+        });
+        expect(params.field).toBe("int_field", {
+            message: "should write the right field as sequence",
+        });
+        expect(params.ids).toEqual([4, 2, 3], {
+            message: "should write the sequence in correct order",
+        });
+    });
+
     await mountView({
         type: "list",
         resModel: "foo",
@@ -9266,31 +9270,18 @@ test("editable list with handle widget", async () => {
                 <field name="int_field" widget="handle"/>
                 <field name="amount" widget="float" digits="[5,0]"/>
             </tree>`,
-        mockRPC(route, args) {
-            if (route === "/web/dataset/resequence") {
-                expect(args.offset).toBe(1, {
-                    message: "should write the sequence starting from the lowest current one",
-                });
-                expect(args.field).toBe("int_field", {
-                    message: "should write the right field as sequence",
-                });
-                expect(args.ids).toEqual([4, 2, 3], {
-                    message: "should write the sequence in correct order",
-                });
-            }
-        },
     });
 
-    expect($(target).find("tbody tr:eq(0) td:last").text()).toBe("1200", {
-        message: "default first record should have amount 1200",
+    expect("tbody tr:eq(0) td:last").toHaveText("1,200", {
+        message: "default first record should have amount 1,200",
     });
-    expect($(target).find("tbody tr:eq(1) td:last").text()).toBe("500", {
+    expect("tbody tr:eq(1) td:last").toHaveText("500", {
         message: "default second record should have amount 500",
     });
-    expect($(target).find("tbody tr:eq(2) td:last").text()).toBe("300", {
+    expect("tbody tr:eq(2) td:last").toHaveText("300", {
         message: "default third record should have amount 300",
     });
-    expect($(target).find("tbody tr:eq(3) td:last").text()).toBe("0", {
+    expect("tbody tr:eq(3) td:last").toHaveText("0", {
         message: "default fourth record should have amount 0",
     });
 
@@ -9298,30 +9289,26 @@ test("editable list with handle widget", async () => {
     await contains("tbody tr:nth-child(4) .o_handle_cell").dragAndDrop(
         queryFirst("tbody tr:nth-child(2)")
     );
-
-    expect($(target).find("tbody tr:eq(0) td:last").text()).toBe("1200", {
-        message: "new first record should have amount 1200",
+    expect("tbody tr:eq(0) td:last").toHaveText("1,200", {
+        message: "new first record should have amount 1,200",
     });
-    expect($(target).find("tbody tr:eq(1) td:last").text()).toBe("0", {
+    expect("tbody tr:eq(1) td:last").toHaveText("0", {
         message: "new second record should have amount 0",
     });
-    expect($(target).find("tbody tr:eq(2) td:last").text()).toBe("500", {
+    expect("tbody tr:eq(2) td:last").toHaveText("500", {
         message: "new third record should have amount 500",
     });
-    expect($(target).find("tbody tr:eq(3) td:last").text()).toBe("300", {
+    expect("tbody tr:eq(3) td:last").toHaveText("300", {
         message: "new fourth record should have amount 300",
     });
 
     await contains("tbody tr:nth-child(2) div[name='amount']").click();
-
-    expect($(target).find("tbody tr:eq(1) td:last input").val()).toBe("0", {
+    expect("tbody tr:eq(1) td:last input").toHaveValue("0", {
         message: "the edited record should be the good one",
     });
 });
 
 test("editable target, handle widget locks and unlocks on sort", async () => {
-    // we need another sortable field to lock/unlock the handle
-    serverData.models.foo.fields.amount.sortable = true;
     // resequence makes sense on a sequence field, not on arbitrary fields
     Foo._records[0].int_field = 0;
     Foo._records[1].int_field = 1;
@@ -9338,51 +9325,68 @@ test("editable target, handle widget locks and unlocks on sort", async () => {
             </tree>`,
     });
 
-    expect($(target).find('tbody div[name="amount"]').text()).toBe("1200.00500.00300.000.00", {
-        message: "default should be sorted by int_field",
-    });
+    expect(queryAllTexts("tbody div[name=amount]")).toEqual(
+        ["1,200.00", "500.00", "300.00", "0.00"],
+        {
+            message: "default should be sorted by int_field",
+        }
+    );
 
     // Drag and drop the fourth line in second position
     await contains("tbody tr:nth-child(4) .o_row_handle").dragAndDrop(
         queryFirst("tbody tr:nth-child(2)")
     );
-
     // Handle should be unlocked at this point
-    expect($(target).find('tbody div[name="amount"]').text()).toBe("1200.000.00500.00300.00", {
-        message: "drag and drop should have succeeded, as the handle is unlocked",
-    });
+    expect(queryAllTexts("tbody div[name=amount]")).toEqual(
+        ["1,200.00", "0.00", "500.00", "300.00"],
+        {
+            message: "drag and drop should have succeeded, as the handle is unlocked",
+        }
+    );
 
     // Sorting by a field different for int_field should lock the handle
-    await click(queryAll(".o_column_sortable")[1]);
-    expect($(target).find('tbody div[name="amount"]').text()).toBe("0.00300.00500.001200.00", {
-        message: "should have been sorted by amount",
-    });
+    await contains(".o_column_sortable:eq(1)").click();
+    expect(queryAllTexts("tbody div[name=amount]")).toEqual(
+        ["0.00", "300.00", "500.00", "1,200.00"],
+        {
+            message: "should have been sorted by amount",
+        }
+    );
 
     // Drag and drop the fourth line in second position (not)
     await contains("tbody tr:nth-child(4) .o_row_handle").dragAndDrop(
         queryFirst("tbody tr:nth-child(2)")
     );
-    expect($(target).find('tbody div[name="amount"]').text()).toBe("0.00300.00500.001200.00", {
-        message: "drag and drop should have failed as the handle is locked",
-    });
+    expect(queryAllTexts("tbody div[name=amount]")).toEqual(
+        ["0.00", "300.00", "500.00", "1,200.00"],
+        {
+            message: "drag and drop should have failed as the handle is locked",
+        }
+    );
 
     // Sorting by int_field should unlock the handle
-    await click(queryFirst(".o_column_sortable"));
-    expect($(target).find('tbody div[name="amount"]').text()).toBe("1200.000.00500.00300.00", {
-        message: "records should be ordered as per the previous resequence",
-    });
+    await contains(".o_column_sortable").click();
+    expect(queryAllTexts("tbody div[name=amount]")).toEqual(
+        ["1,200.00", "0.00", "500.00", "300.00"],
+        {
+            message: "records should be ordered as per the previous resequence",
+        }
+    );
 
     // Drag and drop the fourth line in second position
     await contains("tbody tr:nth-child(4) .o_row_handle").dragAndDrop(
         queryFirst("tbody tr:nth-child(2)")
     );
-    expect($(target).find('tbody div[name="amount"]').text()).toBe("1200.00300.000.00500.00", {
-        message: "drag and drop should have worked as the handle is unlocked",
-    });
+    expect(queryAllTexts("tbody div[name=amount]")).toEqual(
+        ["1,200.00", "300.00", "0.00", "500.00"],
+        {
+            message: "drag and drop should have worked as the handle is unlocked",
+        }
+    );
 });
 
 test("editable list with handle widget with slow network", async () => {
-    expect.assertions(15);
+    expect.assertions(9);
 
     // resequence makes sense on a sequence field, not on arbitrary fields
     Foo._records[0].int_field = 0;
@@ -9390,7 +9394,20 @@ test("editable list with handle widget with slow network", async () => {
     Foo._records[2].int_field = 2;
     Foo._records[3].int_field = 3;
 
-    const prom = new Deferred();
+    const def = new Deferred();
+    onRpc("/web/dataset/resequence", async (request) => {
+        const { params } = await request.json();
+        expect(params.offset).toBe(1, {
+            message: "should write the sequence starting from the lowest current one",
+        });
+        expect(params.field).toBe("int_field", {
+            message: "should write the right field as sequence",
+        });
+        expect(params.ids).toEqual([4, 2, 3], {
+            message: "should write the sequence in correct order",
+        });
+        await def;
+    });
 
     await mountView({
         type: "list",
@@ -9400,77 +9417,36 @@ test("editable list with handle widget with slow network", async () => {
                 <field name="int_field" widget="handle" />
                 <field name="amount" widget="float" digits="[5,0]" />
             </tree>`,
-        mockRPC: async function (route, { field, ids, offset }) {
-            if (route === "/web/dataset/resequence") {
-                expect(offset).toBe(1, {
-                    message: "should write the sequence starting from the lowest current one",
-                });
-                expect(field).toBe("int_field", {
-                    message: "should write the right field as sequence",
-                });
-                expect(ids).toEqual([4, 2, 3], {
-                    message: "should write the sequence in correct order",
-                });
-                await prom;
-            }
-        },
     });
-    expect(target.querySelector("tbody tr:nth-child(1) td:nth-child(3)").textContent).toBe("1200", {
-        message: "default first record should have amount 1200",
-    });
-    expect(target.querySelector("tbody tr:nth-child(2) td:nth-child(3)").textContent).toBe("500", {
-        message: "default second record should have amount 500",
-    });
-    expect(target.querySelector("tbody tr:nth-child(3) td:nth-child(3)").textContent).toBe("300", {
-        message: "default third record should have amount 300",
-    });
-    expect(target.querySelector("tbody tr:nth-child(4) td:nth-child(3)").textContent).toBe("0", {
-        message: "default fourth record should have amount 0",
-    });
+    expect(queryAllTexts(".o_data_cell[name=amount]")).toEqual(["1,200",    "500",    "300", "0"]);
+
     // drag and drop the fourth line in second position
     await contains("tbody tr:nth-child(4) .o_handle_cell").dragAndDrop(
         queryFirst("tbody tr:nth-child(2)")
     );
-
     // edit moved row before the end of resequence
     await contains("tbody tr:nth-child(4) .o_field_widget[name='amount']").click();
     await animationFrame();
-
     expect("tbody tr:nth-child(4) td:nth-child(3) input").toHaveCount(0, {
         message: "shouldn't edit the line before resequence",
     });
 
-    prom.resolve();
+    def.resolve();
     await animationFrame();
-
     expect("tbody tr:nth-child(4) td:nth-child(3) input").toHaveCount(1, {
         message: "should edit the line after resequence",
     });
-
-    expect(target.querySelector("tbody tr:nth-child(4) td:nth-child(3) input").value).toBe("300", {
+    expect("tbody tr:nth-child(4) td:nth-child(3) input").toHaveValue("300", {
         message: "fourth record should have amount 300",
     });
 
-    await editInput(target, ".o_data_row [name='amount'] input", 301);
+    await contains(".o_data_row [name='amount'] input").edit("301", { confirm: false });
     await contains("tbody tr:nth-child(1) .o_field_widget[name='amount']").click();
     await contains(".o_list_button_save:visible").click();
-
-    expect(target.querySelector("tbody tr:nth-child(1) td:nth-child(3)").textContent).toBe("1200", {
-        message: "first record should have amount 1200",
-    });
-    expect(target.querySelector("tbody tr:nth-child(2) td:nth-child(3)").textContent).toBe("0", {
-        message: "second record should have amount 1",
-    });
-    expect(target.querySelector("tbody tr:nth-child(3) td:nth-child(3)").textContent).toBe("500", {
-        message: "third record should have amount 500",
-    });
-    expect(target.querySelector("tbody tr:nth-child(4) td:nth-child(3)").textContent).toBe("301", {
-        message: "fourth record should have amount 301",
-    });
+    expect(queryAllTexts(".o_data_cell[name=amount]")).toEqual(["1,200",    "0",    "500", "301"]);
 
     await contains("tbody tr:nth-child(4) .o_field_widget[name='amount']").click();
-
-    expect(target.querySelector("tbody tr:nth-child(4) td:nth-child(3) input").value).toBe("301", {
+    expect("tbody tr:nth-child(4) td:nth-child(3) input").toHaveValue("301", {
         message: "fourth record should have amount 301",
     });
 });
@@ -10243,7 +10219,7 @@ test("editable list view: multi edition error and cancellation handling", async 
 
 test("multi edition: many2many_tags in many2many field", async () => {
     for (let i = 4; i <= 10; i++) {
-        serverData.models.bar.records.push({ id: i, display_name: "Value" + i });
+        Bar._records.push({ id: i, display_name: "Value" + i });
     }
 
     serverData.views = {
@@ -11069,7 +11045,7 @@ test("editable list with fields with readonly modifier", async () => {
 });
 
 test("editable form with many2one: click out does not discard the row", async () => {
-    serverData.models.bar.fields.m2o = {
+    Bar._fields.m2o = {
         string: "M2O field",
         type: "many2one",
         relation: "foo",
@@ -14488,7 +14464,7 @@ test("resize column with several x2many lists in form group", async () => {
     const getTableWidth = (index) =>
         Math.floor(queryAll(".o_field_x2many_list table")[index].offsetWidth);
 
-    serverData.models.bar.fields.text = { string: "Text field", type: "char" };
+    Bar._fields.text = { string: "Text field", type: "char" };
     Foo._records[0].o2m = [1, 2];
 
     await mountView({
@@ -15122,12 +15098,12 @@ test("edition, then navigation with tab (with a readonly re-evaluated field and 
     serverData.models.bar.onchanges = {
         o2m: function () {},
     };
-    serverData.models.bar.fields.o2m = {
+    Bar._fields.o2m = {
         string: "O2M field",
         type: "one2many",
         relation: "foo",
     };
-    serverData.models.bar.records[0].o2m = [1, 4];
+    Bar._records[0].o2m = [1, 4];
 
     await mountView({
         type: "form",
@@ -16150,7 +16126,7 @@ test("Properties: char", async () => {
         name: "property_char",
         string: "Property char",
     };
-    serverData.models.bar.records[0].definitions = [definition];
+    Bar._records[0].definitions = [definition];
     for (const record of Foo._records) {
         if (record.m2o === 1) {
             record.properties = [{ ...definition, value: "CHAR" }];
@@ -16201,7 +16177,7 @@ test("Properties: boolean", async () => {
         name: "property_boolean",
         string: "Property boolean",
     };
-    serverData.models.bar.records[0].definitions = [definition];
+    Bar._records[0].definitions = [definition];
     for (const record of Foo._records) {
         if (record.m2o === 1) {
             record.properties = [{ ...definition, value: true }];
@@ -16247,7 +16223,7 @@ test("Properties: integer", async () => {
         name: "property_integer",
         string: "Property integer",
     };
-    serverData.models.bar.records[0].definitions = [definition];
+    Bar._records[0].definitions = [definition];
     for (const record of Foo._records) {
         if (record.m2o === 1) {
             record.properties = [{ ...definition, value: 123 }];
@@ -16297,7 +16273,7 @@ test("Properties: float", async () => {
         name: "property_float",
         string: "Property float",
     };
-    serverData.models.bar.records[0].definitions = [definition];
+    Bar._records[0].definitions = [definition];
     for (const record of Foo._records) {
         if (record.m2o === 1) {
             record.properties = [{ ...definition, value: record.id === 4 ? false : 123.45 }];
@@ -16347,7 +16323,7 @@ test("Properties: date", async () => {
         name: "property_date",
         string: "Property date",
     };
-    serverData.models.bar.records[0].definitions = [definition];
+    Bar._records[0].definitions = [definition];
     for (const record of Foo._records) {
         if (record.m2o === 1) {
             record.properties = [{ ...definition, value: "2022-12-12" }];
@@ -16398,7 +16374,7 @@ test("Properties: datetime", async () => {
         name: "property_datetime",
         string: "Property datetime",
     };
-    serverData.models.bar.records[0].definitions = [definition];
+    Bar._records[0].definitions = [definition];
     for (const record of Foo._records) {
         if (record.m2o === 1) {
             record.properties = [{ ...definition, value: "2022-12-12 12:12:00" }];
@@ -16455,7 +16431,7 @@ test("Properties: selection", async () => {
             ["c", "C"],
         ],
     };
-    serverData.models.bar.records[0].definitions = [definition];
+    Bar._records[0].definitions = [definition];
     for (const record of Foo._records) {
         if (record.m2o === 1) {
             record.properties = [{ ...definition, value: "b" }];
@@ -16506,7 +16482,7 @@ test("Properties: tags", async () => {
             ["c", "C", 3],
         ],
     };
-    serverData.models.bar.records[0].definitions = [definition];
+    Bar._records[0].definitions = [definition];
     for (const record of Foo._records) {
         if (record.m2o === 1) {
             record.properties = [{ ...definition, value: ["a", "c"] }];
@@ -16567,7 +16543,7 @@ test("Properties: many2one", async () => {
         comodel: "res_currency",
         domain: "[]",
     };
-    serverData.models.bar.records[0].definitions = [definition];
+    Bar._records[0].definitions = [definition];
     for (const record of Foo._records) {
         if (record.m2o === 1) {
             record.properties = [{ ...definition, value: [1, "USD"] }];
@@ -16615,7 +16591,7 @@ test("Properties: many2many", async () => {
         comodel: "res_currency",
         domain: "[]",
     };
-    serverData.models.bar.records[0].definitions = [definition];
+    Bar._records[0].definitions = [definition];
     for (const record of Foo._records) {
         if (record.m2o === 1) {
             record.properties = [{ ...definition, value: [[1, "USD"]] }];
@@ -16660,8 +16636,8 @@ test("multiple sources of properties definitions", async () => {
         name: "property_boolean",
         string: "Property boolean",
     };
-    serverData.models.bar.records[0].definitions = [definition0];
-    serverData.models.bar.records[1].definitions = [definition1];
+    Bar._records[0].definitions = [definition0];
+    Bar._records[1].definitions = [definition1];
     for (const record of Foo._records) {
         if (record.m2o === 1) {
             record.properties = [{ ...definition0, value: "0" }];
@@ -16703,8 +16679,8 @@ test("toggle properties", async () => {
         name: "property_boolean",
         string: "Property boolean",
     };
-    serverData.models.bar.records[0].definitions = [definition0];
-    serverData.models.bar.records[1].definitions = [definition1];
+    Bar._records[0].definitions = [definition0];
+    Bar._records[1].definitions = [definition1];
     for (const record of Foo._records) {
         if (record.m2o === 1) {
             record.properties = [{ ...definition0, value: "0" }];
@@ -16749,7 +16725,7 @@ test("properties: optional show/hide (no config in local storage)", async () => 
         name: "property_char",
         string: "Property char",
     };
-    serverData.models.bar.records[0].definitions = [definition];
+    Bar._records[0].definitions = [definition];
     for (const record of Foo._records) {
         if (record.m2o === 1) {
             record.properties = [{ ...definition, value: "0" }];
@@ -16778,7 +16754,7 @@ test("properties: optional show/hide (config from local storage)", async () => {
         name: "property_char",
         string: "Property char",
     };
-    serverData.models.bar.records[0].definitions = [definition];
+    Bar._records[0].definitions = [definition];
     for (const record of Foo._records) {
         if (record.m2o === 1) {
             record.properties = [{ ...definition, value: "0" }];
@@ -16814,7 +16790,7 @@ test("properties: optional show/hide (at reload, config from local storage)", as
         name: "property_char",
         string: "Property char",
     };
-    serverData.models.bar.records[0].definitions = [definition];
+    Bar._records[0].definitions = [definition];
     for (const record of Foo._records) {
         if (record.m2o === 1) {
             record.properties = [{ ...definition, value: "0" }];
@@ -16862,7 +16838,7 @@ test("reload properties definitions when domain change", async () => {
         name: "property_char",
         string: "Property char",
     };
-    serverData.models.bar.records[0].definitions = [definition0];
+    Bar._records[0].definitions = [definition0];
     for (const record of Foo._records) {
         if (record.m2o === 1) {
             record.properties = [{ ...definition0, value: "AA" }];
@@ -16910,7 +16886,7 @@ test("do not reload properties definitions when page change", async () => {
         name: "property_char",
         string: "Property char",
     };
-    serverData.models.bar.records[0].definitions = [definition0];
+    Bar._records[0].definitions = [definition0];
     for (const record of Foo._records) {
         if (record.m2o === 1) {
             record.properties = [{ ...definition0, value: "0" }];
@@ -16947,7 +16923,7 @@ test("load properties definitions only once when grouped", async () => {
         name: "property_char",
         string: "Property char",
     };
-    serverData.models.bar.records[0].definitions = [definition0];
+    Bar._records[0].definitions = [definition0];
     for (const record of Foo._records) {
         if (record.m2o === 1) {
             record.properties = [{ ...definition0, value: "0" }];
@@ -16984,7 +16960,7 @@ test("Invisible Properties", async () => {
         name: "property_integer",
         string: "Property integer",
     };
-    serverData.models.bar.records[0].definitions = [definition];
+    Bar._records[0].definitions = [definition];
     for (const record of Foo._records) {
         if (record.m2o === 1) {
             record.properties = [{ ...definition, value: 123 }];
@@ -17191,7 +17167,7 @@ test("context keys not passed down the stack and not to fields", async () => {
             display_name: `Value ${i}`,
         });
     }
-    serverData.models.bar.records = barRecs;
+    Bar._records = barRecs;
 
     const mockRPC = (route, args) => {
         if (args.method) {
@@ -17387,13 +17363,13 @@ test("list: remove a record from sorted recordlist", async () => {
     expect.assertions(7);
 
     Foo._records = [{ id: 1, o2m: [1, 2, 3, 4, 5, 6] }];
-    serverData.models.bar.fields = {
-        ...serverData.models.bar.fields,
+    Bar._fields = {
+        ...Bar._fields,
         name: { string: "Name", type: "char", sortable: true },
         city: { string: "City", type: "boolean", default: false },
     };
 
-    serverData.models.bar.records = [
+    Bar._records = [
         { id: 1, name: "a", city: true },
         { id: 2, name: "b" },
         { id: 3, name: "c" },
