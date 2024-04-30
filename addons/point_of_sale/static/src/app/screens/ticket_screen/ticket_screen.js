@@ -68,7 +68,7 @@ export class TicketScreen extends Component {
             nbrPage: 1,
             filter: null,
             search: this.pos.getDefaultSearchDetails(),
-            selectedOrder: this.pos.get_order() || null,
+            selectedOrderId: this.pos.get_order()?.id || null,
             selectedOrderlineIds: {},
         });
         Object.assign(this.state, this.props.stateOverride || {});
@@ -84,6 +84,9 @@ export class TicketScreen extends Component {
                 }
             }
         });
+    }
+    get selectedOrder() {
+        return this.pos.models["pos.order"].get(this.state.selectedOrderId);
     }
     async onFilterSelected(selectedFilter) {
         this.state.filter = selectedFilter;
@@ -117,11 +120,11 @@ export class TicketScreen extends Component {
                 2
             )
         );
-        this.state.selectedOrder = clickedOrder;
+        this.state.selectedOrderId = clickedOrder?.id;
         this.numberBuffer.reset();
         if ((!clickedOrder || clickedOrder.uiState.locked) && !this.getSelectedOrderlineId()) {
             // Automatically select the first orderline of the selected order.
-            const firstLine = this.state.selectedOrder.get_orderlines()[0];
+            const firstLine = this.selectedOrder?.get_orderlines()[0];
             if (firstLine) {
                 this.state.selectedOrderlineIds[clickedOrder.id] = firstLine.id;
             }
@@ -154,8 +157,8 @@ export class TicketScreen extends Component {
             if (!confirmed) {
                 return false;
             }
-            if (this.state.selectedOrder === order) {
-                this.state.selectedOrder = null;
+            if (this.selectedOrder === order) {
+                this.state.selectedOrderId = null;
             }
         }
         order.uiState.displayed = false;
@@ -173,7 +176,7 @@ export class TicketScreen extends Component {
             }
 
             if (this.pos.get_order_list().length > 0) {
-                this.state.selectedOrder = this.pos.get_order_list()[0];
+                this.state.selectedOrderId = this.pos.get_order_list()[0].id;
             }
         }
         return true;
@@ -192,10 +195,10 @@ export class TicketScreen extends Component {
     }
     async onInvoiceOrder(orderId) {
         const order = this.pos.models["pos.order"].get(orderId);
-        this.state.selectedOrder = order;
+        this.state.selectedOrderId = order.id;
     }
     onClickOrderline(orderline) {
-        if (this.state.selectedOrder.uiState.locked) {
+        if (this.selectedOrder.uiState.locked) {
             const order = this.getSelectedOrder();
             this.state.selectedOrderlineIds[order.id] = orderline.id;
             this.numberBuffer.reset();
@@ -339,11 +342,11 @@ export class TicketScreen extends Component {
         }
     }
     getSelectedOrder() {
-        return this.state.selectedOrder;
+        return this.selectedOrder;
     }
     getSelectedOrderlineId() {
-        if (this.state.selectedOrder) {
-            return this.state.selectedOrderlineIds[this.state.selectedOrder.id];
+        if (this.selectedOrder) {
+            return this.state.selectedOrderlineIds[this.selectedOrder.id];
         }
     }
     /**
@@ -357,9 +360,8 @@ export class TicketScreen extends Component {
     }
     get isOrderSynced() {
         return (
-            this.state.selectedOrder?.uiState.locked &&
-            (this.state.selectedOrder.get_screen_data().name === "" ||
-                this.state.filter === "SYNCED")
+            this.selectedOrder?.uiState.locked &&
+            (this.selectedOrder.get_screen_data().name === "" || this.state.filter === "SYNCED")
         );
     }
     activeOrderFilter(o) {
@@ -463,7 +465,7 @@ export class TicketScreen extends Component {
      */
     shouldHideDeleteButton(order) {
         return (
-            (this.ui.isSmall && order != this.state.selectedOrder) ||
+            (this.ui.isSmall && order != this.selectedOrder) ||
             this.isDefaultOrderEmpty(order) ||
             order.payment_ids.some(
                 (payment) => payment.is_electronic() && payment.get_payment_status() === "done"
