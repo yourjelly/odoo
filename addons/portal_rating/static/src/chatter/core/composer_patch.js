@@ -9,8 +9,8 @@ patch(Composer.prototype, {
         super.setup(...arguments);
         this.state = useState({
             ...this.state,
-            ratingValue: 4,
-            starValue: 4,
+            ratingValue: this.props.composer.message?.rating_value ?? 4,
+            starValue: this.props.composer.message?.rating_value ?? 4,
         });
     },
 
@@ -42,9 +42,16 @@ patch(Composer.prototype, {
 
     postData(composer) {
         const postData = super.postData(composer);
-        if (this.env.displayRating && !this.message) {
+        if (this.env.displayRating && !this.props.composer.portalComment) {
             postData.options.rating_value = this.state.ratingValue;
         }
         return postData;
+    },
+
+    async sendMessage() {
+        if (!this.env.ratingOptions?.messageId) {
+            return super.sendMessage(...arguments);
+        }
+        this.editMessage();
     },
 });

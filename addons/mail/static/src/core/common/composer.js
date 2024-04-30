@@ -563,7 +563,8 @@ export class Composer extends Component {
         if (
             this.props.composer.text.trim() ||
             (attachments.length > 0 && attachments.every(({ uploading }) => !uploading)) ||
-            (this.message && this.message.attachments.length > 0)
+            (this.message && (this.message.attachments.length > 0 || this.message.rating_value)) ||
+            (!this.message && this.state.ratingValue)
         ) {
             if (!this.state.active) {
                 return;
@@ -633,11 +634,12 @@ export class Composer extends Component {
 
     async editMessage() {
         const composer = toRaw(this.props.composer);
-        if (composer.text || composer.message.attachments.length > 0) {
+        if (composer.text || composer.message.attachments.length > 0 || this.message.rating_value) {
             await this.processMessage(async (value) =>
                 composer.message.edit(value, composer.attachments, {
                     mentionedChannels: composer.mentionedChannels,
                     mentionedPartners: composer.mentionedPartners,
+                    rating_value: this.state.ratingValue,
                 })
             );
         } else {

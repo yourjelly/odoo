@@ -347,7 +347,8 @@ export class Message extends Record {
         });
     }
 
-    async edit(body, attachments = [], { mentionedChannels = [], mentionedPartners = [] } = {}) {
+    async edit(body, attachments = [], data = {}) {
+        const { mentionedChannels = [], mentionedPartners = [], ...extraData } = data;
         if (convertBrToLineBreak(this.body) === body && attachments.length === 0) {
             return;
         }
@@ -363,6 +364,7 @@ export class Message extends Record {
             body: await prettifyMessageContent(body, validMentions),
             message_id: this.id,
             partner_ids: validMentions?.partners?.map((partner) => partner.id),
+            ...extraData,
         });
         this.store.Message.insert(messageData, { html: true });
         if (this.hasLink && this.store.hasLinkPreviewFeature) {

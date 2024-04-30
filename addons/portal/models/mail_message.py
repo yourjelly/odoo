@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import models
@@ -109,7 +108,8 @@ class MailMessage(models.Model):
             values.update({
                 'reactions': self._reaction_groups(message.sudo()),
                 'author': {'id': message.author_id.id, 'name': message.author_id.name, 'type': 'partner'},
-                'thread': {'model': values['model'], 'id': values['res_id']}
+                'thread': {'model': values['model'], 'id': values['res_id']},
+                'linkPreviews': message.sudo().link_preview_ids._link_preview_format()
             })
         return vals_list
 
