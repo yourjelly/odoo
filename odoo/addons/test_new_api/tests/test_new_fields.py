@@ -2777,6 +2777,13 @@ class TestFields(TransactionCaseWithUserDemo):
         self.assertEqual(record_no_bin_size.binary_computed, expected_value)
         self.assertEqual(record_bin_size.binary_computed, expected_value)
 
+    def test_binary_coucou(self):
+        binary_value = base64.b64encode(b'content')
+        record = self.env['test_new_api.model_binary'].create({})
+        self.assertEqual(record.computed_from_binary, 'no')
+        record.binary = binary_value
+        self.assertEqual(record.computed_from_binary, 'yes')
+
     def test_96_order_m2o(self):
         belgium, congo = self.env['test_new_api.country'].create([
             {'name': "Duchy of Brabant"},

@@ -951,12 +951,20 @@ class ModelBinary(models.Model):
     binary_related_store = fields.Binary("Binary Related Store", related='binary', store=True, readonly=False)
     binary_related_no_store = fields.Binary("Binary Related No Store", related='binary', store=False, readonly=False)
     binary_computed = fields.Binary(compute='_compute_binary')
+    computed_from_binary = fields.Char(compute='_compute_computed_from_binary')
 
     @api.depends('binary')
     def _compute_binary(self):
         # arbitrary value: 'bin_size' must have no effect
         for record in self:
             record.binary_computed = [(record.id, bool(record.binary))]
+
+    @api.depends('binary')
+    def _compute_computed_from_binary(self):
+        for record in self.with_context(bin_size=False):
+            # record.binary is always False here, even after setting a value
+            # (invalidating the cache manually fixes the issue)
+            record.computed_from_binary = 'yes' if record.binary else 'no'
 
 
 class ModelImage(models.Model):
