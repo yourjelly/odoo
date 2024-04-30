@@ -95,6 +95,7 @@ import { ListController } from "@web/views/list/list_controller";
 import { FloatField, floatField } from "@web/views/fields/float/float_field";
 import { session } from "@web/session";
 import { Domain } from "@web/core/domain";
+import { getNextTabableElement } from "@web/core/utils/ui";
 
 const { ResCompany, ResPartner, ResUsers } = webModels;
 
@@ -422,9 +423,9 @@ test.todo("select record range with shift+space", async () => {
     press("ArrowDown");
     press("ArrowDown");
     await animationFrame();
-    expect(".o_data_row:nth-child(1) .o_list_record_selector input").toBeFocused();
-    await contains(".o_data_row:nth-child(1) .o_list_record_selector input").click();
-    expect(".o_data_row:nth-child(1) .o_list_record_selector input").toBeChecked();
+    expect(".o_data_row:first .o_list_record_selector input").toBeFocused();
+    await contains(".o_data_row:first .o_list_record_selector input").click();
+    expect(".o_data_row:first .o_list_record_selector input").toBeChecked();
 
     // Go to the fourth checkbox and shift+space
     press("ArrowDown");
@@ -439,8 +440,8 @@ test.todo("select record range with shift+space", async () => {
     expect(document.activeElement.tagName).toBe("INPUT");
 
     // Check that all checkbox is checked
-    expect(".o_data_row:nth-child(1) .o_list_record_selector input").toBeChecked();
-    expect(".o_data_row:nth-child(2) .o_list_record_selector input").toBeChecked();
+    expect(".o_data_row:first .o_list_record_selector input").toBeChecked();
+    expect(".o_data_row:eq(1) .o_list_record_selector input").toBeChecked();
     expect(".o_data_row:nth-child(3) .o_list_record_selector input").toBeChecked();
     expect(".o_data_row:nth-child(4) .o_list_record_selector input").toBeChecked();
 });
@@ -456,9 +457,9 @@ test.todo("expand range of checkbox with shift+arrow", async () => {
     press("ArrowDown");
     press("ArrowDown");
     await animationFrame();
-    expect(".o_data_row:nth-child(1) .o_list_record_selector input").toBeFocused();
-    await contains(".o_data_row:nth-child(1) .o_list_record_selector input").click();
-    expect(".o_data_row:nth-child(1) .o_list_record_selector input").toBeChecked();
+    expect(".o_data_row:first .o_list_record_selector input").toBeFocused();
+    await contains(".o_data_row:first .o_list_record_selector input").click();
+    expect(".o_data_row:first .o_list_record_selector input").toBeChecked();
 
     // expand the checkbox with arrowdown
     press("shift+ArrowDown");
@@ -470,7 +471,7 @@ test.todo("expand range of checkbox with shift+arrow", async () => {
     expect(".o_data_row:nth-child(3) .o_list_record_selector input").toBeChecked();
 
     // Check that the three checkbox are checked
-    expect(".o_data_row:nth-child(2) .o_list_record_selector input").toBeChecked();
+    expect(".o_data_row:eq(1) .o_list_record_selector input").toBeChecked();
     expect(".o_data_row:nth-child(3) .o_list_record_selector input").toBeChecked();
     expect(".o_data_row:nth-child(4) .o_list_record_selector input").toBeChecked();
 });
@@ -487,11 +488,11 @@ test.todo("multiple interactions to change the range of checked boxes", async ()
     });
 
     press("ArrowDown");
-    expect(".o_data_row:nth-child(1) .o_list_record_selector input").not.toBeFocused();
+    expect(".o_data_row:first .o_list_record_selector input").not.toBeFocused();
 
     keyDown("shift");
     press("shift+ArrowDown");
-    expect(".o_data_row:nth-child(1) .o_list_record_selector input").toBeFocused();
+    expect(".o_data_row:first .o_list_record_selector input").toBeFocused();
     await animationFrame();
     press("shift+ArrowDown");
     await animationFrame();
@@ -512,8 +513,8 @@ test.todo("multiple interactions to change the range of checked boxes", async ()
     await contains(".o_data_row:nth-child(8) .o_list_record_selector .o-checkbox").click();
     press("shift+ArrowDown");
 
-    expect(".o_data_row:nth-child(1) .o_list_record_selector input").toBeChecked();
-    expect(".o_data_row:nth-child(2) .o_list_record_selector input").toBeChecked();
+    expect(".o_data_row:first .o_list_record_selector input").toBeChecked();
+    expect(".o_data_row:eq(1) .o_list_record_selector input").toBeChecked();
     expect(".o_data_row:nth-child(3) .o_list_record_selector input").toBeChecked();
     expect(".o_data_row:nth-child(4) .o_list_record_selector input").not.toBeChecked();
     expect(".o_data_row:nth-child(5) .o_list_record_selector input").toBeChecked();
@@ -4585,7 +4586,7 @@ test("column widths are kept when editing a record", async () => {
 
     var width = queryAll('th[data-name="datetime"]')[0].offsetWidth;
 
-    await contains(".o_data_row:nth-child(1) > .o_data_cell:nth-child(2)").click();
+    await contains(".o_data_row:first > .o_data_cell:nth-child(2)").click();
     expect(".o_selected_row").toHaveCount(1);
 
     var longVal =
@@ -4612,14 +4613,14 @@ test("column widths are kept when switching records in edition", async () => {
 
     const width = queryAll('th[data-name="m2o"]')[0].offsetWidth;
 
-    await contains(".o_data_row:nth-child(1) > .o_data_cell:nth-child(2)").click();
+    await contains(".o_data_row:first > .o_data_cell:nth-child(2)").click();
 
-    expect(".o_data_row:nth-child(1)").toHaveClass("o_selected_row");
+    expect(".o_data_row:first").toHaveClass("o_selected_row");
     expect(queryAll('th[data-name="m2o"]')[0].offsetWidth).toBe(width);
 
-    await contains(".o_data_row:nth-child(2) > .o_data_cell:nth-child(2)").click();
+    await contains(".o_data_row:eq(1) > .o_data_cell:nth-child(2)").click();
 
-    expect(".o_data_row:nth-child(2)").toHaveClass("o_selected_row");
+    expect(".o_data_row:eq(1)").toHaveClass("o_selected_row");
     expect(queryAll('th[data-name="m2o"]')[0].offsetWidth).toBe(width);
 });
 
@@ -7653,7 +7654,7 @@ test("monetary fields are properly rendered", async () => {
     expect("tbody .o_data_row:first-child .o_data_cell:nth-child(3)").toHaveText("1,200.00 €", {
         message: "currency_id column should not be in the table",
     });
-    expect("tbody .o_data_row:nth-child(2) .o_data_cell:nth-child(3)").toHaveText("$ 500.00", {
+    expect("tbody .o_data_row:eq(1) .o_data_cell:nth-child(3)").toHaveText("$ 500.00", {
         message: "currency_id column should not be in the table",
     });
 });
@@ -7803,16 +7804,14 @@ test("list view with nested groups", async () => {
 });
 
 test("grouped list on selection field at level 2", async () => {
-    serverData.models.foo.fields.priority = {
-        string: "Priority",
-        type: "selection",
+    Foo._fields.priority = fields.Selection({
         selection: [
             [1, "Low"],
             [2, "Medium"],
             [3, "High"],
         ],
         default: 1,
-    };
+    });
     Foo._records.push({
         id: 5,
         foo: "blip",
@@ -7842,8 +7841,7 @@ test("grouped list on selection field at level 2", async () => {
     expect(".o_group_header").toHaveCount(5, {
         message: "should contain 2 groups at first level and 3 groups at second level",
     });
-    assert.deepEqual(
-        [...queryAll(".o_group_header .o_group_name")].map((el) => el.innerText),
+    expect(queryAllTexts(".o_group_header .o_group_name")).toEqual(
         ["Value 1 (5)", "Low (3)", "Medium (1)", "High (1)", "Value 2 (1)"]
     );
 });
@@ -7858,21 +7856,21 @@ test("grouped list with a pager in a group", async () => {
         groupBy: ["bar"],
         limit: 3,
     });
-    const headerHeight = target.querySelector(".o_group_header").offsetHeight;
+    const headerHeight = queryFirst(".o_group_header").offsetHeight;
     // basic rendering checks
     await contains(".o_group_header").click();
-    expect(target.querySelector(".o_group_header").offsetHeight).toBe(headerHeight, {
+    expect(queryFirst(".o_group_header").offsetHeight).toBe(headerHeight, {
         message: "height of group header shouldn't have changed",
     });
     expect(".o_group_header th nav").toHaveClass("o_pager", {
         message: "last cell of open group header should have classname 'o_pager'",
     });
-    expect(getPagerValue(target.querySelector(".o_group_header"))).toEqual([1, 3]);
+    expect(".o_group_header .o_pager .o_pager_value").toHaveText("1-3");
     expect(".o_data_row").toHaveCount(3);
 
     // go to next page
-    await pagerNext(target.querySelector(".o_group_header"));
-    expect(getPagerValue(target.querySelector(".o_group_header"))).toEqual([4, 4]);
+    await contains(".o_group_header .o_pager button.o_pager_next").click();
+    expect(".o_group_header .o_pager .o_pager_value").toHaveText("4-4");
     expect(".o_data_row").toHaveCount(1);
 });
 
@@ -7909,17 +7907,13 @@ test("invisible attrs on fields are re-evaluated on field change", async () => {
         type: "list",
         resModel: "foo",
         arch: `
-                <tree editable="top">
-                    <field name="foo" invisible="bar"/>
-                    <field name="bar"/>
-                </tree>`,
+            <tree editable="top">
+                <field name="foo" invisible="bar"/>
+                <field name="bar"/>
+            </tree>`,
     });
 
-    let fooCells = queryAll(".o_data_cell.o_list_char");
-    assert.deepEqual(
-        [...fooCells].map((c) => c.innerText),
-        ["", "", "", "blip"]
-    );
+    expect(queryAllTexts(".o_data_cell.o_list_char")).toEqual(["", "", "", "blip"]);
 
     // Make first line editable
     await contains(".o_field_cell").click();
@@ -7927,30 +7921,17 @@ test("invisible attrs on fields are re-evaluated on field change", async () => {
 
     await contains(".o_field_widget[name=bar] input").click();
     expect(".o_selected_row .o_list_char .o_field_widget[name=foo]").toHaveCount(1);
-    expect(target.querySelector(".o_list_char input").value).toBe("yop");
-    fooCells = queryAll(".o_data_cell.o_list_char");
-    assert.deepEqual(
-        [...fooCells].map((c) => c.innerText),
-        ["", "", "", "blip"]
-    );
+    expect(".o_list_char input").toHaveValue("yop");
+    expect(queryAllTexts(".o_data_cell.o_list_char")).toEqual(["", "", "", "blip"]);
 
     await contains(".o_field_widget[name=bar] input").click();
     expect(".o_selected_row .o_list_char .o_field_widget[name=foo]").toHaveCount(0);
-    fooCells = queryAll(".o_data_cell.o_list_char");
-    assert.deepEqual(
-        [...fooCells].map((c) => c.innerText),
-        ["", "", "", "blip"]
-    );
+    expect(queryAllTexts(".o_data_cell.o_list_char")).toEqual(["", "", "", "blip"]);
 
     // Reswitch the field to visible and save the row
     await contains(".o_field_widget[name=bar] input").click();
-    await click($(".o_list_button_save:visible").get(0));
-
-    queryAll(".o_data_cell.o_list_char");
-    assert.deepEqual(
-        [...fooCells].map((c) => c.innerText),
-        ["yop", "", "", "blip"]
-    );
+    await contains(".o_list_button_save:visible").click();
+    expect(queryAllTexts(".o_data_cell.o_list_char")).toEqual(["yop", "", "", "blip"]);
 });
 
 test("readonly attrs on fields are re-evaluated on field change", async () => {
@@ -7983,7 +7964,7 @@ test("readonly attrs on fields are re-evaluated on field change", async () => {
     expect(".o_selected_row .o_field_widget[name=foo]").not.toHaveClass("o_readonly_modifier");
 
     // Click outside to leave edition mode and make first line editable again
-    await click(target);
+    await contains(".o_control_panel").click();
     expect(".o_selected_row").toHaveCount(0);
     await contains(".o_field_cell").click();
     expect(".o_selected_row").toHaveCount(1);
@@ -8032,19 +8013,15 @@ test("modifiers of other x2many rows a re-evaluated when a subrecord is updated"
             ];
         },
     };
-
-    serverData.models.bar.fields.stage = {
-        string: "Stage",
-        type: "selection",
+    Foo._records[0].o2m = [1, 2];
+    Bar._fields.stage = fields.Selection({
         selection: [
             ["draft", "Draft"],
             ["open", "Open"],
         ],
-    };
-
-    Foo._records[0].o2m = [1, 2];
-    serverData.models.bar.records[0].stage = "draft";
-    serverData.models.bar.records[1].stage = "open";
+    });
+    Bar._records[0].stage = "draft";
+    Bar._records[1].stage = "open";
 
     await mountView({
         type: "form",
@@ -8060,33 +8037,33 @@ test("modifiers of other x2many rows a re-evaluated when a subrecord is updated"
                 </form>`,
         resId: 1,
     });
-    assert.deepEqual(
-        [...queryAll(".o_field_widget[name=o2m] .o_data_row .o_data_cell:first-child")].map(
-            (el) => el.innerText
-        ),
-        ["Value 1", ""]
+    expect(queryAllTexts(".o_field_widget[name=o2m] .o_data_row .o_data_cell:first-child")).toEqual([
+        "Value 1", ""]
     );
 
     // Make a change in the list to trigger the onchange
     await contains(".o_field_widget[name=o2m] .o_data_row .o_data_cell:nth-child(2)").click();
-    await editSelect(
-        target,
-        '.o_field_widget[name=o2m] .o_data_row [name="stage"] select',
-        '"open"'
+    await contains(".o_field_widget[name=o2m] .o_data_row [name=stage] select").select(`"open"`);
+    expect(queryAllTexts(".o_field_widget[name=o2m] .o_data_row .o_data_cell:first-child")).toEqual([
+        "", "Value 2"]
     );
-    assert.deepEqual(
-        [...queryAll(".o_field_widget[name=o2m] .o_data_row .o_data_cell:first-child")].map(
-            (el) => el.innerText
-        ),
-        ["", "Value 2"]
-    );
-    expect(target.querySelector(".o_data_row:nth-child(2)").textContent).toBe("Value 2Draft", {
+    expect(".o_data_row:eq(1)").toHaveText("Value 2 Draft", {
         message: "the onchange should have been applied",
     });
 });
 
 test("leaving unvalid rows in edition", async () => {
     let warnings = 0;
+    mockService("notification", () => {
+        return {
+            add: (message, { type }) => {
+                if (type === "danger") {
+                    warnings++;
+                }
+            },
+        };
+    });
+
     await mountView({
         type: "list",
         resModel: "foo",
@@ -8096,19 +8073,12 @@ test("leaving unvalid rows in edition", async () => {
                 <field name="bar"/>
             </tree>`,
     });
-    patchWithCleanup(list.env.services.notification, {
-        add: (message, { type }) => {
-            if (type === "danger") {
-                warnings++;
-            }
-        },
-    });
 
     // Start first line edition
     await contains(".o_data_cell").click();
 
     // Remove required foo field value
-    await editInput(target, ".o_selected_row .o_field_widget[name=foo] input", "");
+    await contains(".o_selected_row .o_field_widget[name=foo] input").edit("", { confirm: false });
 
     // Try starting other line edition
     await contains(".o_data_row:eq(1) .o_data_cell").click();
@@ -8116,35 +8086,19 @@ test("leaving unvalid rows in edition", async () => {
         message: "first line should still be in edition as invalid",
     });
     expect(".o_selected_row").toHaveCount(1, { message: "no other line should be in edition" });
-    assert.containsOnce(
-        queryFirst(".o_data_row"),
-        ".o_field_invalid input",
-        "the required field should be marked as invalid"
+    expect(".o_data_row:eq(0) .o_field_invalid input").toHaveCount(1,
+        { message: "the required field should be marked as invalid" }
     );
     expect(warnings).toBe(1, { message: "a warning should have been displayed" });
 });
 
-test("open a virtual id", async () => {
-    await mountView({
-        type: "list",
-        resModel: "event",
-        arch: '<tree><field name="name"/></tree>',
-        selectRecord: (resId, options) => {
-            expect.step(`switch to form - resId: ${resId}`);
-        },
-    });
-    await contains(".o_data_row .o_data_cell").click();
-    assert.verifySteps([`switch to form - resId: 2-20170808020000`]);
-});
-
 test("pressing enter on last line of editable list view", async () => {
+    stepAllNetworkCalls();
+
     await mountView({
         type: "list",
         resModel: "foo",
         arch: `<tree editable="bottom"><field name="foo"/></tree>`,
-        mockRPC(route, args) {
-            expect.step(args.method);
-        },
     });
 
     expect([
@@ -8159,13 +8113,13 @@ test("pressing enter on last line of editable list view", async () => {
     // click on 3rd line
     await contains("tr.o_data_row:nth-child(3) .o_field_cell[name=foo]").click();
     expect("tr.o_data_row:nth-child(3)").toHaveClass("o_selected_row");
-    expect(document.activeElement).toBe(target.querySelector(".o_selected_row [name=foo] input"));
+    expect(".o_selected_row [name=foo] input").toBeFocused();
 
     // press enter in input
     press("Enter");
     await animationFrame();
     expect("tr.o_data_row:nth-child(4)").toHaveClass("o_selected_row");
-    expect(document.activeElement).toBe(target.querySelector(".o_selected_row [name=foo] input"));
+    expect(".o_selected_row [name=foo] input").toBeFocused();
 
     // press enter on last row
     press("Enter");
@@ -8177,84 +8131,60 @@ test("pressing enter on last line of editable list view", async () => {
 });
 
 test("pressing tab on last cell of editable list view", async () => {
+    stepAllNetworkCalls();
+
     await mountView({
         type: "list",
         resModel: "foo",
         arch: '<tree editable="bottom"><field name="foo"/><field name="int_field"/></tree>',
-        mockRPC(route) {
-            expect.step(route);
-        },
     });
-    const rows = queryAll(".o_data_row");
-    await click(rows[3].querySelector(".o_data_cell"));
-    expect(document.activeElement.parentNode.getAttribute("name")).toBe("foo", {
-        message: "focus should be on an input with name = foo",
-    });
+    await contains(".o_data_row:eq(3) .o_data_cell").click();
+    expect("[name=foo] input").toBeFocused();
 
     //it will not create a new line unless a modification is made
-    await editInput(document.activeElement, null, "blip-changed");
-    press("Tab");
-    await animationFrame();
-    expect(document.activeElement.parentNode.getAttribute("name")).toBe("int_field", {
-        message: "focus should be on an input with name = int_field",
-    });
-
+    await contains("[name=foo] input").fill("blip-changed", { confirm: "tab" });
+    expect("[name=int_field] input").toBeFocused();
     press("Tab");
     await animationFrame();
     expect("tr.o_data_row:eq(4)").toHaveClass("o_selected_row", {
         message: "5th row should be selected",
     });
-    expect(document.activeElement.parentNode.getAttribute("name")).toBe("foo", {
-        message: "focus should be on an input with name = foo",
-    });
-
+    await contains("[name=foo] input").fill("blip-changed", { confirm: false });
+    expect("[name=foo] input").toBeFocused();
     expect([
-        "/web/dataset/call_kw/foo/get_views",
-        "/web/dataset/call_kw/foo/web_search_read",
-        "/web/dataset/call_kw/foo/web_save",
-        "/web/dataset/call_kw/foo/onchange",
+        "/web/webclient/translations",
+"/web/webclient/load_menus",
+"get_views",
+"web_search_read",
+"has_group",
+"web_save",
+"onchange",
     ]).toVerifySteps();
 });
 
 test("navigation with tab and read completes after default_get", async () => {
-    const onchangeGetPromise = new Deferred();
+    stepAllNetworkCalls();
+    const onchangePromise = new Deferred();
     const readPromise = new Deferred();
+    onRpc("onchange", () => onchangePromise);
+    onRpc("web_save", () => readPromise);
 
     await mountView({
         type: "list",
         resModel: "foo",
         arch: '<tree editable="bottom"><field name="foo"/><field name="int_field"/></tree>',
-        mockRPC(route, args, performRPC) {
-            expect.step(args.method);
-            const result = performRPC(route, args);
-            if (args.method === "web_save") {
-                return readPromise.then(function () {
-                    return result;
-                });
-            }
-            if (args.method === "onchange") {
-                return onchangeGetPromise.then(function () {
-                    return result;
-                });
-            }
-            return result;
-        },
     });
 
-    const rows = queryAll(".o_data_row");
-    await click(rows[3].querySelectorAll(".o_data_cell")[1]);
-
+    await contains(".o_data_row:eq(3) .o_data_cell").click();
     await contains(".o_selected_row [name='int_field'] input").edit("1234");
-    press("Tab");
-    await animationFrame();
 
-    onchangeGetPromise.resolve();
+    onchangePromise.resolve();
     expect("tbody tr.o_data_row").toHaveCount(4, { message: "should have 4 data rows" });
 
     readPromise.resolve();
     await animationFrame();
     expect("tbody tr.o_data_row").toHaveCount(5, { message: "should have 5 data rows" });
-    expect("td:contains(1234)").toHaveCount(1, { message: "should have a cell with new value" });
+    expect("td:contains(1,234)").toHaveCount(1, { message: "should have a cell with new value" });
 
     // we trigger a tab to move to the second cell in the current row. this
     // operation requires that this.currentRow is properly set in the
@@ -8279,8 +8209,8 @@ test("navigation with tab and read completes after default_get", async () => {
 test("display toolbar", async () => {
     await mountView({
         type: "list",
-        resModel: "event",
-        arch: '<tree><field name="name"/></tree>',
+        resModel: "foo",
+        arch: '<tree><field name="foo"/></tree>',
         info: {
             actionMenus: {
                 action: [
@@ -8306,15 +8236,15 @@ test("display toolbar", async () => {
 });
 
 test("execute ActionMenus actions", async () => {
-    patchWithCleanup(actionService, {
-        start() {
-            return {
-                doAction(id, { additionalContext, onClose }) {
-                    expect.step(JSON.stringify({ action_id: id, context: additionalContext }));
-                    onClose(); // simulate closing of target new action's dialog
-                },
-            };
-        },
+    stepAllNetworkCalls();
+
+    mockService("action", () => {
+        return {
+            doAction(id, { additionalContext, onClose }) {
+                expect.step(JSON.stringify({ action_id: id, context: additionalContext }));
+                onClose(); // simulate closing of target new action's dialog
+            },
+        };
     });
 
     await mountView({
@@ -8335,9 +8265,6 @@ test("execute ActionMenus actions", async () => {
             },
         },
         actionMenus: {},
-        mockRPC(route, args) {
-            expect.step(args.method);
-        },
     });
 
     expect("div.o_control_panel .o_cp_action_menus").toHaveCount(1);
@@ -8350,28 +8277,24 @@ test("execute ActionMenus actions", async () => {
     await contains(".o_cp_action_menus .dropdown-toggle").click();
     await toggleMenuItem("Custom Action");
 
-    assert.verifySteps([
+    expect([
+        "/web/webclient/translations",
+        "/web/webclient/load_menus",
         "get_views",
         "web_search_read",
         "has_group",
-        `{"action_id":44,"context":{"lang":"en","tz":"taht","uid":7,"active_id":1,"active_ids":[1,2,3,4],"active_model":"foo","active_domain":[]}}`,
+        `{"action_id":44,"context":{"lang":"en","tz":"taht","uid":7,"allowed_company_ids":[1],"active_id":1,"active_ids":[1,2,3,4],"active_model":"foo","active_domain":[]}}`,
         "web_search_read",
-    ]);
+    ]).toVerifySteps();
 });
 
 test("execute ActionMenus actions with correct params (single page)", async () => {
-    expect.assertions(12);
-
-    patchWithCleanup(actionService, {
-        start() {
-            const result = super.start(...arguments);
-            return {
-                ...result,
-                doAction(id, { additionalContext }) {
-                    expect.step(JSON.stringify({ action_id: id, context: additionalContext }));
-                },
-            };
-        },
+    mockService("action", () => {
+        return {
+            doAction(id, { additionalContext }) {
+                expect.step(JSON.stringify({ action_id: id, context: additionalContext }));
+            },
+        };
     });
 
     await mountView({
@@ -8392,9 +8315,9 @@ test("execute ActionMenus actions with correct params (single page)", async () =
         },
         actionMenus: {},
         searchViewArch: `
-                <search>
-                    <filter name="bar" domain="[('bar', '=', true)]"/>
-                </search>`,
+            <search>
+                <filter name="bar" domain="[('bar', '=', true)]"/>
+            </search>`,
     });
 
     expect("div.o_control_panel .o_cp_action_menus").toHaveCount(1);
@@ -8423,32 +8346,27 @@ test("execute ActionMenus actions with correct params (single page)", async () =
     expect(".o_data_row").toHaveCount(3);
     expect(".o_list_record_selector input:checked").toHaveCount(0);
 
-    const rows = queryAll(".o_data_row");
-    await click(rows[0], ".o_list_record_selector input");
-    await click(rows[1], ".o_list_record_selector input");
+    await contains(".o_data_row:eq(0) .o_list_record_selector input").click();
+    await contains(".o_data_row:eq(1) .o_list_record_selector input").click();
     expect(".o_list_record_selector input:checked").toHaveCount(2);
 
     await contains(".o_cp_action_menus .dropdown-toggle").click();
     await toggleMenuItem("Custom Action");
 
-    assert.verifySteps([
-        '{"action_id":44,"context":{"lang":"en","tz":"taht","uid":7,"active_id":1,"active_ids":[1,2,3,4],"active_model":"foo","active_domain":[]}}',
-        '{"action_id":44,"context":{"lang":"en","tz":"taht","uid":7,"active_id":2,"active_ids":[2,3,4],"active_model":"foo","active_domain":[]}}',
-        '{"action_id":44,"context":{"lang":"en","tz":"taht","uid":7,"active_id":1,"active_ids":[1,2],"active_model":"foo","active_domain":[["bar","=",true]]}}',
-    ]);
+    expect([
+        '{"action_id":44,"context":{"lang":"en","tz":"taht","uid":7,"allowed_company_ids":[1],"active_id":1,"active_ids":[1,2,3,4],"active_model":"foo","active_domain":[]}}',
+        '{"action_id":44,"context":{"lang":"en","tz":"taht","uid":7,"allowed_company_ids":[1],"active_id":2,"active_ids":[2,3,4],"active_model":"foo","active_domain":[]}}',
+        '{"action_id":44,"context":{"lang":"en","tz":"taht","uid":7,"allowed_company_ids":[1],"active_id":1,"active_ids":[1,2],"active_model":"foo","active_domain":[["bar","=",true]]}}',
+    ]).toVerifySteps();
 });
 
 test("execute ActionMenus actions with correct params (multi pages)", async () => {
-    patchWithCleanup(actionService, {
-        start() {
-            const result = super.start(...arguments);
-            return {
-                ...result,
-                doAction(id, { additionalContext }) {
-                    expect.step(JSON.stringify({ action_id: id, context: additionalContext }));
-                },
-            };
-        },
+    mockService("action", () => {
+        return {
+            doAction(id, { additionalContext }) {
+                expect.step(JSON.stringify({ action_id: id, context: additionalContext }));
+            },
+        };
     });
 
     await mountView({
@@ -8469,9 +8387,9 @@ test("execute ActionMenus actions with correct params (multi pages)", async () =
         },
         actionMenus: {},
         searchViewArch: `
-                <search>
-                    <filter name="bar" domain="[('bar', '=', true)]"/>
-                </search>`,
+            <search>
+                <filter name="bar" domain="[('bar', '=', true)]"/>
+            </search>`,
     });
 
     expect("div.o_control_panel .o_cp_action_menus").toHaveCount(1);
@@ -8508,11 +8426,11 @@ test("execute ActionMenus actions with correct params (multi pages)", async () =
     await contains(".o_cp_action_menus .dropdown-toggle").click();
     await toggleMenuItem("Custom Action");
 
-    assert.verifySteps([
-        '{"action_id":44,"context":{"lang":"en","tz":"taht","uid":7,"active_id":1,"active_ids":[1,2],"active_model":"foo","active_domain":[]}}',
-        '{"action_id":44,"context":{"lang":"en","tz":"taht","uid":7,"active_id":1,"active_ids":[1,2,3,4],"active_model":"foo","active_domain":[]}}',
-        '{"action_id":44,"context":{"lang":"en","tz":"taht","uid":7,"active_id":1,"active_ids":[1,2,3],"active_model":"foo","active_domain":[["bar","=",true]]}}',
-    ]);
+    expect([
+        '{"action_id":44,"context":{"lang":"en","tz":"taht","uid":7,"allowed_company_ids":[1],"active_id":1,"active_ids":[1,2],"active_model":"foo","active_domain":[]}}',
+        '{"action_id":44,"context":{"lang":"en","tz":"taht","uid":7,"allowed_company_ids":[1],"active_id":1,"active_ids":[1,2,3,4],"active_model":"foo","active_domain":[]}}',
+        '{"action_id":44,"context":{"lang":"en","tz":"taht","uid":7,"allowed_company_ids":[1],"active_id":1,"active_ids":[1,2,3],"active_model":"foo","active_domain":[["bar","=",true]]}}',
+    ]).toVerifySteps();
 });
 
 test("edit list line after line deletion", async () => {
@@ -8522,28 +8440,18 @@ test("edit list line after line deletion", async () => {
         arch: '<tree editable="top"><field name="foo"/><field name="int_field"/></tree>',
     });
 
-    const rows = queryAll(".o_data_row");
-    await click(rows[2].querySelector(".o_data_cell"));
-    assert.ok(
-        $(target).find(".o_data_row:nth(2)").is(".o_selected_row"),
-        "third row should be in edition"
-    );
+    await contains(".o_data_row:eq(2) .o_data_cell").click();
+    expect(".o_data_row:eq(2)").toHaveClass("o_selected_row");
 
-    await clickDiscard(target);
+    await contains(".o_list_button_discard").click();
     await contains(".o_list_button_add:visible").click();
-    assert.ok(
-        $(target).find(".o_data_row:nth(0)").is(".o_selected_row"),
-        "first row should be in edition (creation)"
-    );
+    expect(".o_data_row:eq(0)").toHaveClass("o_selected_row");
 
-    await clickDiscard(target);
+    await contains(".o_list_button_discard").click();
     expect(".o_selected_row").toHaveCount(0, { message: "no row should be selected" });
 
-    await click(rows[2].querySelector(".o_data_cell"));
-    assert.ok(
-        $(target).find(".o_data_row:nth(2)").is(".o_selected_row"),
-        "third row should be in edition"
-    );
+    await contains(".o_data_row:eq(2) .o_data_cell").click();
+    expect(".o_data_row:eq(2)").toHaveClass("o_selected_row");
     expect(".o_selected_row").toHaveCount(1, { message: "no other row should be selected" });
 });
 
@@ -8560,25 +8468,21 @@ test("pressing TAB in editable list with several fields [REQUIRE FOCUS]", async 
 
     await contains(".o_data_cell").click();
     expect(".o_data_row:first").toHaveClass("o_selected_row");
-    expect(document.activeElement).toBe(target.querySelector(".o_data_row .o_data_cell input"));
+    expect(".o_data_row:first .o_data_cell:first input").toBeFocused();
 
     // Press 'Tab' -> should go to next cell (still in first row)
     press("Tab");
     await animationFrame();
 
     expect(".o_data_row:first").toHaveClass("o_selected_row");
-    expect(document.activeElement).toBe(
-        target.querySelector(".o_data_row .o_data_cell:nth-child(3) input")
-    );
+    expect(".o_data_row:first .o_data_cell:eq(1) input").toBeFocused();
 
     // Press 'Tab' -> should go to next line (first cell)
     press("Tab");
     await animationFrame();
 
-    expect(".o_data_row:nth-child(2)").toHaveClass("o_selected_row");
-    expect(document.activeElement).toBe(
-        target.querySelector(".o_data_row:nth-child(2) .o_data_cell input")
-    );
+    expect(".o_data_row:eq(1)").toHaveClass("o_selected_row");
+    expect(".o_data_row:eq(1) .o_data_cell:first input").toBeFocused();
 });
 
 test("pressing SHIFT-TAB in editable list with several fields [REQUIRE FOCUS]", async () => {
@@ -8592,25 +8496,21 @@ test("pressing SHIFT-TAB in editable list with several fields [REQUIRE FOCUS]", 
                 </tree>`,
     });
 
-    await contains(".o_data_row:nth-child(2) .o_data_cell").click();
-    expect(".o_data_row:nth-child(2)").toHaveClass("o_selected_row");
-    expect(document.activeElement).toBe(
-        target.querySelector(".o_data_row:nth-child(2) .o_data_cell input")
-    );
+    await contains(".o_data_row:eq(1) .o_data_cell").click();
+    expect(".o_data_row:eq(1)").toHaveClass("o_selected_row");
+    expect(".o_data_row:eq(1) .o_data_cell:first input").toBeFocused();
 
     press("shift+Tab");
     await animationFrame();
 
     expect(".o_data_row:first").toHaveClass("o_selected_row");
-    expect(document.activeElement).toBe(
-        target.querySelector(".o_data_row .o_data_cell:nth-child(3) input")
-    );
+    expect(".o_data_row:first .o_data_cell:eq(1) input").toBeFocused();
 
     press("shift+Tab");
     await animationFrame();
 
     expect(".o_data_row:first").toHaveClass("o_selected_row");
-    expect(document.activeElement).toBe(target.querySelector(".o_data_row .o_data_cell input"));
+    expect(".o_data_row:first .o_data_cell:first input").toBeFocused();
 });
 
 test("navigation with tab and readonly field (no modification)", async () => {
@@ -8629,30 +8529,24 @@ test("navigation with tab and readonly field (no modification)", async () => {
     });
 
     // Pass the first row in edition.
-    await contains(".o_data_row:nth-child(1) [name=foo]").click();
+    await contains(".o_data_row:first [name=foo]").click();
     expect(".o_selected_row").toHaveCount(1);
-    expect(".o_data_row:nth-child(1)").toHaveClass("o_selected_row");
-    expect(document.activeElement).toBe(
-        target.querySelector(".o_data_row:nth-child(1) [name=foo] input")
-    );
+    expect(".o_data_row:first").toHaveClass("o_selected_row");
+    expect(".o_data_row:first [name=foo] input").toBeFocused();
 
     // Pressing Tab should skip the readonly field and directly go to the next row.
     press("Tab");
     await animationFrame();
     expect(".o_selected_row").toHaveCount(1);
-    expect(".o_data_row:nth-child(2)").toHaveClass("o_selected_row");
-    expect(document.activeElement).toBe(
-        target.querySelector(".o_data_row:nth-child(2) [name=foo] input")
-    );
+    expect(".o_data_row:eq(1)").toHaveClass("o_selected_row");
+    expect(".o_data_row:eq(1) [name=foo] input").toBeFocused();
 
     // We do it again.
     press("Tab");
     await animationFrame();
     expect(".o_selected_row").toHaveCount(1);
-    expect(".o_data_row:nth-child(3)").toHaveClass("o_selected_row");
-    expect(document.activeElement).toBe(
-        target.querySelector(".o_data_row:nth-child(3) [name=foo] input")
-    );
+    expect(".o_data_row:eq(2)").toHaveClass("o_selected_row");
+    expect(".o_data_row:eq(2) [name=foo] input").toBeFocused();
 });
 
 test("navigation with tab and readonly field (with modification)", async () => {
@@ -8664,40 +8558,30 @@ test("navigation with tab and readonly field (with modification)", async () => {
         type: "list",
         resModel: "foo",
         arch: `
-                <tree editable="bottom">
-                    <field name="foo"/>
-                    <field name="int_field" readonly="1"/>
-                </tree>`,
+            <tree editable="bottom">
+                <field name="foo"/>
+                <field name="int_field" readonly="1"/>
+            </tree>`,
     });
 
     // Pass the first row in edition.
-    await contains(".o_data_row:nth-child(1) [name=foo]").click();
+    await contains(".o_data_row:first [name=foo]").click();
     expect(".o_selected_row").toHaveCount(1);
-    expect(".o_data_row:nth-child(1)").toHaveClass("o_selected_row");
-    expect(document.activeElement).toBe(
-        target.querySelector(".o_data_row:nth-child(1) [name=foo] input")
-    );
+    expect(".o_data_row:first").toHaveClass("o_selected_row");
+    expect(".o_data_row:first [name=foo] input").toBeFocused();
 
-    // Modity the cell content
-    await editInput(document.activeElement, null, "blip-changed");
+    // Modity the cell content, validate with tab
+    await contains(".o_data_row:first [name=foo] input").edit("blip-changed", { confirm: "tab"});
+    expect(".o_selected_row").toHaveCount(1);
+    expect(".o_data_row:eq(1)").toHaveClass("o_selected_row");
+    expect(".o_data_row:eq(1) [name=foo] input").toBeFocused();
 
-    // Pressing Tab should skip the readonly field and directly go to the next row.
+    // Press tab again.
     press("Tab");
     await animationFrame();
     expect(".o_selected_row").toHaveCount(1);
-    expect(".o_data_row:nth-child(2)").toHaveClass("o_selected_row");
-    expect(document.activeElement).toBe(
-        target.querySelector(".o_data_row:nth-child(2) [name=foo] input")
-    );
-
-    // We do it again.
-    press("Tab");
-    await animationFrame();
-    expect(".o_selected_row").toHaveCount(1);
-    expect(".o_data_row:nth-child(3)").toHaveClass("o_selected_row");
-    expect(document.activeElement).toBe(
-        target.querySelector(".o_data_row:nth-child(3) [name=foo] input")
-    );
+    expect(".o_data_row:eq(2)").toHaveClass("o_selected_row");
+    expect(".o_data_row:eq(2) [name=foo] input").toBeFocused();
 });
 
 test('navigation with tab on a list with create="0"', async () => {
@@ -8706,29 +8590,24 @@ test('navigation with tab on a list with create="0"', async () => {
         resModel: "foo",
         arch: `
             <tree editable="bottom" create="0">
-                <field name="display_name"/>
+                <field name="foo"/>
             </tree>`,
     });
 
     expect(".o_data_row").toHaveCount(4, { message: "the list should contain 4 rows" });
 
-    const rows = queryAll(".o_data_row");
-    await click(rows[2].querySelector(".o_data_cell"));
-    expect(".o_data_row:nth(2)").toHaveClass("o_selected_row", {
+    await contains(".o_data_row:eq(2) .o_data_cell").click();
+    expect(".o_data_row:eq(2)").toHaveClass("o_selected_row", {
         message: "third row should be in edition",
     });
 
-    // Press 'Tab' -> should go to next line
-    // add a value in the cell because the Tab on an empty first cell would activate the next widget in the view
-    await editInput(target, ".o_selected_row .o_data_cell input", 11);
-    press("Tab");
-    await animationFrame();
-    expect(".o_data_row:nth(3)").toHaveClass("o_selected_row", {
+    // Fill the cell and press tab
+    await contains(".o_selected_row .o_data_cell input").edit("11", { confirm: "tab" });
+    expect(".o_data_row:eq(3)").toHaveClass("o_selected_row", {
         message: "fourth row should be in edition",
     });
 
     // Press 'Tab' -> should go back to first line as the create action isn't available
-    await editInput(target, ".o_selected_row .o_data_cell input", 11);
     press("Tab");
     await animationFrame();
     expect(".o_data_row:first").toHaveClass("o_selected_row", {
@@ -8738,6 +8617,8 @@ test('navigation with tab on a list with create="0"', async () => {
 
 test('navigation with tab on a one2many list with create="0"', async () => {
     Foo._records[0].o2m = [1, 2];
+    Bar._fields.name = fields.Char();
+
     await mountView({
         type: "form",
         resModel: "foo",
@@ -8745,11 +8626,11 @@ test('navigation with tab on a one2many list with create="0"', async () => {
             <form>
                 <sheet>
                     <field name="o2m">
-                    <tree editable="bottom" create="0">
-                        <field name="display_name"/>
-                    </tree>
+                        <tree editable="bottom" create="0">
+                            <field name="name"/>
+                        </tree>
                     </field>
-                    <field name="foo"/>
+                    <field name="int_field"/>
                 </sheet>
             </form>`,
         resId: 1,
@@ -8759,38 +8640,24 @@ test('navigation with tab on a one2many list with create="0"', async () => {
     expect(".o_field_widget[name=o2m] .o_data_row").toHaveCount(2);
 
     await contains(
-        ".o_field_widget[name=o2m] .o_data_row:nth-child(1) .o_data_cell[name=display_name]"
+        ".o_field_widget[name=o2m] .o_data_row:first .o_data_cell[name=name]"
     ).click();
-    expect(".o_field_widget[name=o2m] .o_data_row:nth-child(1)").toHaveClass("o_selected_row");
+    expect(".o_field_widget[name=o2m] .o_data_row:first").toHaveClass("o_selected_row");
     expect(".o_selected_row").toHaveCount(1);
-    expect(document.activeElement).toBe(
-        target.querySelector(".o_selected_row [name=display_name] input")
-    );
+    expect(".o_selected_row [name=name] input").toBeFocused();
 
     // Press 'Tab' -> should go to next line
     press("Tab");
     await animationFrame();
-    expect(".o_field_widget[name=o2m] .o_data_row:nth-child(2)").toHaveClass("o_selected_row");
+    expect(".o_field_widget[name=o2m] .o_data_row:eq(1)").toHaveClass("o_selected_row");
     expect(".o_selected_row").toHaveCount(1);
-    expect(document.activeElement).toBe(
-        target.querySelector(".o_selected_row [name=display_name] input")
-    );
+    expect(".o_selected_row [name=name] input").toBeFocused();
 
     // Pressing 'Tab' -> should use default behavior and thus get out of
     // the one to many and go to the next field of the form
-    const nextInput = target.querySelector("[name=foo] input");
-    const event = triggerEvent(
-        document.activeElement,
-        null,
-        "keydown",
-        { key: "Tab" },
-        { sync: true }
-    );
-    expect(getNextTabableElement(target)).toBe(nextInput);
-    assert.ok(!event.defaultPrevented);
-    nextInput.focus();
+    press("Tab");
     await animationFrame();
-    expect(document.activeElement).toBe(nextInput);
+    expect(".o_field_widget[name=int_field] input").toBeFocused();
 });
 
 test("edition, then navigation with tab (with a readonly field)", async () => {
@@ -8798,6 +8665,7 @@ test("edition, then navigation with tab (with a readonly field)", async () => {
     // edit mode, and the second one readonly, then if we edit and press TAB,
     // (before debounce), the save operation is properly done (before
     // selecting the next row)
+    stepAllNetworkCalls();
 
     await mountView({
         type: "list",
@@ -8807,9 +8675,6 @@ test("edition, then navigation with tab (with a readonly field)", async () => {
                     <field name="foo"/>
                     <field name="int_field" readonly="1"/>
                 </tree>`,
-        mockRPC(route, args) {
-            expect.step(args.method);
-        },
     });
 
     // click on first dataRow and press TAB
@@ -8871,13 +8736,13 @@ test("edition, then navigation with tab (with a readonly field and onchange)", a
     });
 
     await contains(".o_data_cell").click();
-    expect(document.activeElement).toBe(target.querySelector(".o_data_cell[name=foo] input"));
+    expect(".o_data_cell[name=foo] input").toBeFocused();
     await contains(".o_data_cell[name=foo] input").edit("new value");
 
     press("Tab");
     await animationFrame();
 
-    expect(document.activeElement).toBe(target.querySelector(".o_data_cell[name=int_field] input"));
+    expect(".o_data_cell[name=int_field] input").toBeFocused();
 
     expect(["onchange:bar"]).toVerifySteps();
 });
@@ -8894,20 +8759,16 @@ test("pressing SHIFT-TAB in editable list with a readonly field [REQUIRE FOCUS]"
                 </tree>`,
     });
 
-    await contains(".o_data_row:nth-child(2) [name=qux]").click();
+    await contains(".o_data_row:eq(1) [name=qux]").click();
 
-    expect(".o_data_row:nth-child(2)").toHaveClass("o_selected_row");
-    expect(document.activeElement).toBe(
-        target.querySelector(".o_data_row:nth-child(2) [name=qux] input")
-    );
+    expect(".o_data_row:eq(1)").toHaveClass("o_selected_row");
+    expect(".o_data_row:eq(1) [name=qux] input").toBeFocused();
 
     await press("shift+Tab");
     await animationFrame();
 
-    expect(".o_data_row:nth-child(2)").toHaveClass("o_selected_row");
-    expect(document.activeElement).toBe(
-        target.querySelector(".o_data_row:nth-child(2) [name=foo] input")
-    );
+    expect(".o_data_row:eq(1)").toHaveClass("o_selected_row");
+    expect(".o_data_row:eq(1) [name=foo] input").toBeFocused();
 });
 
 test("pressing SHIFT-TAB in editable list with a readonly field in first column [REQUIRE FOCUS]", async () => {
@@ -8922,18 +8783,16 @@ test("pressing SHIFT-TAB in editable list with a readonly field in first column 
                 </tree>`,
     });
 
-    await contains(".o_data_row:nth-child(2) .o_data_cell").click();
+    await contains(".o_data_row:eq(1) .o_data_cell").click();
 
-    expect(".o_data_row:nth-child(2)").toHaveClass("o_selected_row");
-    expect(document.activeElement).toBe(
-        target.querySelector(".o_data_row:nth-child(2) [name=foo] input")
-    );
+    expect(".o_data_row:eq(1)").toHaveClass("o_selected_row");
+    expect(".o_data_row:eq(1) [name=foo] input").toBeFocused();
 
     press("shift+Tab");
     await animationFrame();
 
     expect(".o_data_row:first").toHaveClass("o_selected_row");
-    expect(document.activeElement).toBe(target.querySelector(".o_data_row [name=qux] input"));
+    expect(".o_data_row [name=qux] input").toBeFocused();
 });
 
 test("pressing SHIFT-TAB in editable list with a readonly field in last column [REQUIRE FOCUS]", async () => {
@@ -8948,18 +8807,16 @@ test("pressing SHIFT-TAB in editable list with a readonly field in last column [
                 </tree>`,
     });
 
-    await contains(".o_data_row:nth-child(2) .o_data_cell").click();
+    await contains(".o_data_row:eq(1) .o_data_cell").click();
 
-    expect(".o_data_row:nth-child(2)").toHaveClass("o_selected_row");
-    expect(document.activeElement).toBe(
-        target.querySelector(".o_data_row:nth-child(2) [name=int_field] input")
-    );
+    expect(".o_data_row:eq(1)").toHaveClass("o_selected_row");
+    expect(".o_data_row:eq(1) [name=int_field] input").toBeFocused();
 
     press("shift+Tab");
     await animationFrame();
 
     expect(".o_data_row:first").toHaveClass("o_selected_row");
-    expect(document.activeElement).toBe(target.querySelector(".o_data_row [name=foo] input"));
+    expect(".o_data_row [name=foo] input").toBeFocused();
 });
 
 test("skip invisible fields when navigating list view with TAB", async () => {
@@ -8975,15 +8832,11 @@ test("skip invisible fields when navigating list view with TAB", async () => {
         resId: 1,
     });
 
-    await contains(".o_data_row:nth-child(1) .o_field_cell[name=foo]").click();
-    expect(document.activeElement).toBe(
-        target.querySelector(".o_data_row:nth-child(1) .o_field_cell[name=foo] input")
-    );
+    await contains(".o_data_row:first .o_field_cell[name=foo]").click();
+    expect(".o_data_row:first .o_field_cell[name=foo] input").toBeFocused();
     press("Tab");
     await animationFrame();
-    expect(document.activeElement).toBe(
-        target.querySelector(".o_data_row:nth-child(1) .o_field_cell[name=int_field] input")
-    );
+    expect(".o_data_row:first .o_field_cell[name=int_field] input").toBeFocused();
 });
 
 test("skip buttons when navigating list view with TAB (end)", async () => {
@@ -8999,14 +8852,10 @@ test("skip buttons when navigating list view with TAB (end)", async () => {
     });
 
     await contains(".o_data_row:nth-child(3) [name=foo]").click();
-    expect(document.activeElement).toBe(
-        target.querySelector(".o_data_row:nth-child(3) [name=foo] input")
-    );
+    expect(".o_data_row:nth-child(3) [name=foo] input").toBeFocused();
     press("Tab");
     await animationFrame();
-    expect(document.activeElement).toBe(
-        target.querySelector(".o_data_row:nth-child(4) [name=foo] input")
-    );
+    expect(".o_data_row:nth-child(4) [name=foo] input").toBeFocused();
 });
 
 test("skip buttons when navigating list view with TAB (middle)", async () => {
@@ -9024,14 +8873,10 @@ test("skip buttons when navigating list view with TAB (middle)", async () => {
     });
 
     await contains(".o_data_row:nth-child(3) [name=foo]").click();
-    expect(document.activeElement).toBe(
-        target.querySelector(".o_data_row:nth-child(3) [name=foo] input")
-    );
+    expect(".o_data_row:nth-child(3) [name=foo] input").toBeFocused();
     press("Tab");
     await animationFrame();
-    expect(document.activeElement).toBe(
-        target.querySelector(".o_data_row:nth-child(3) [name=int_field] input")
-    );
+    expect(".o_data_row:nth-child(3) [name=int_field] input").toBeFocused();
 });
 
 test("navigation: not moving down with keydown", async () => {
@@ -9691,6 +9536,9 @@ test("reference field batched in grouped list", async () => {
         { id: 4, foo: "2", reference: "bar,2" },
         { id: 5, foo: "2", reference: "bar,3" },
     ];
+
+    stepAllNetworkCalls();
+
     await mountView({
         type: "list",
         resModel: "foo",
@@ -9700,9 +9548,6 @@ test("reference field batched in grouped list", async () => {
                 <field name="reference"/>
             </tree>`,
         groupBy: ["foo"],
-        mockRPC(route, args) {
-            expect.step(args.method || route);
-        },
     });
     expect([
         "/web/webclient/translations",
@@ -10531,15 +10376,14 @@ test('editable list view: clicking on "Discard changes" in multi edition', async
 });
 
 test('editable list view: mousedown on "Discard", mouseup somewhere else (no multi-edit)', async () => {
+    stepAllNetworkCalls();
+
     await mountView({
         type: "list",
         arch: `
                 <tree editable="top">
                     <field name="foo"/>
                 </tree>`,
-        mockRPC(route, args) {
-            expect.step(args.method);
-        },
         resModel: "foo",
     });
 
@@ -10572,13 +10416,13 @@ test('multi edit list view: mousedown on "Discard" with invalid field', async ()
     await mountView({
         type: "list",
         arch: `
-                <tree multi_edit="1">
-                    <field name="int_field"/>
-                </tree>`,
+            <tree multi_edit="1">
+                <field name="int_field"/>
+            </tree>`,
         resModel: "foo",
     });
 
-    expect(target.querySelector(".o_data_row .o_data_cell").innerText).toBe("10");
+    expect(".o_data_row:eq(0) .o_data_cell").toHaveText("10");
 
     // select two records
     const rows = queryAll(".o_data_row");
@@ -10598,7 +10442,7 @@ test('multi edit list view: mousedown on "Discard" with invalid field', async ()
     await triggerEvents($(".o_list_button_discard:visible").get(0), null, ["mouseup"]);
     await contains(".o_list_button_discard:not(.dropdown-item)").click();
     expect(".o_dialog").toHaveCount(0, { message: "should not display an invalid field dialog" });
-    expect(target.querySelector(".o_data_row .o_data_cell").innerText).toBe("10");
+    expect(".o_data_row .o_data_cell").toHaveText("10");
 
     // edit again with an invalid value
     await click(rows[0].querySelector(".o_data_cell"));
@@ -10614,7 +10458,7 @@ test('multi edit list view: mousedown on "Discard" with invalid field', async ()
     await click(target);
     expect(".o_dialog").toHaveCount(1, { message: "should display an invalid field dialog" });
     await contains(".o_dialog .modal-footer .btn-primary").click(); // click OK
-    expect(target.querySelector(".o_data_row .o_data_cell").innerText).toBe("10");
+    expect(".o_data_row .o_data_cell").toHaveText("10");
 });
 
 test('editable list view (multi edition): mousedown on "Discard", but mouseup somewhere else', async () => {
@@ -10833,20 +10677,18 @@ test("editable readonly list view: navigation", async () => {
         },
     });
 
-    expect(document.activeElement).toBe(target.querySelector(".o_searchview_input"));
+    expect(".o_searchview_input").toBeFocused();
 
     // ArrowDown two times must get to the checkbox selector of first data row
     press("ArrowDown");
     press("ArrowDown");
     await animationFrame();
-    expect(document.activeElement).toBe(
-        target.querySelector(".o_data_row:first-child .o_list_record_selector input")
-    );
+    expect(".o_data_row:first-child .o_list_record_selector input").toBeFocused();
 
     // select the second record
     press("ArrowDown");
     await animationFrame();
-    let checkbox = target.querySelector(".o_data_row:nth-child(2) .o_list_record_selector input");
+    let checkbox = target.querySelector(".o_data_row:eq(1) .o_list_record_selector input");
     expect(document.activeElement).toBe(checkbox);
     assert.ok(!checkbox.checked);
     let event = triggerEvent(checkbox, null, "keydown", { key: "Space" }, { sync: true });
@@ -10885,60 +10727,46 @@ test("editable readonly list view: navigation", async () => {
     press("ArrowUp");
     press("ArrowRight");
     await animationFrame();
-    expect(document.activeElement).toBe(
-        target.querySelector(".o_data_row:nth-child(2) [name=foo]")
-    );
+    expect(".o_data_row:eq(1) [name=foo]").toBeFocused();
     press("Enter");
     await animationFrame();
     expect(".o_selected_row").toHaveCount(1);
-    expect(".o_data_row:nth-child(2)").toHaveClass("o_selected_row");
-    expect(document.activeElement).toBe(
-        target.querySelector(".o_data_row:nth-child(2) [name=foo] input")
-    );
+    expect(".o_data_row:eq(1)").toHaveClass("o_selected_row");
+    expect(".o_data_row:eq(1) [name=foo] input").toBeFocused();
 
     // Keyboard navigation only interracts with selected elements
     press("Enter");
     await animationFrame();
     expect(".o_selected_row").toHaveCount(1);
     expect(".o_data_row:nth-child(4)").toHaveClass("o_selected_row");
-    expect(document.activeElement).toBe(
-        target.querySelector(".o_data_row:nth-child(4) [name=foo] input")
-    );
+    expect(".o_data_row:nth-child(4) [name=foo] input").toBeFocused();
 
     press("Tab"); // go to 4th row int_field
     press("Tab"); // go to 2nd row foo field
     await animationFrame();
     expect(".o_selected_row").toHaveCount(1);
-    expect(".o_data_row:nth-child(2)").toHaveClass("o_selected_row");
-    expect(document.activeElement).toBe(
-        target.querySelector(".o_data_row:nth-child(2) [name=foo] input")
-    );
+    expect(".o_data_row:eq(1)").toHaveClass("o_selected_row");
+    expect(".o_data_row:eq(1) [name=foo] input").toBeFocused();
 
     press("Tab"); // go to 2nd row int_field
     press("Tab"); // go to 4th row foo field
     await animationFrame();
     expect(".o_selected_row").toHaveCount(1);
     expect(".o_data_row:nth-child(4)").toHaveClass("o_selected_row");
-    expect(document.activeElement).toBe(
-        target.querySelector(".o_data_row:nth-child(4) [name=foo] input")
-    );
+    expect(".o_data_row:nth-child(4) [name=foo] input").toBeFocused();
 
     press("Shift+Tab"); // go to 2nd row int_field
     await animationFrame();
     expect(".o_selected_row").toHaveCount(1);
-    expect(".o_data_row:nth-child(2)").toHaveClass("o_selected_row");
-    expect(document.activeElement).toBe(
-        target.querySelector(".o_data_row:nth-child(2) [name=int_field] input")
-    );
+    expect(".o_data_row:eq(1)").toHaveClass("o_selected_row");
+    expect(".o_data_row:eq(1) [name=int_field] input").toBeFocused();
 
     press("Shift+Tab"); // go to 2nd row foo field
     press("Shift+Tab"); // go to 4th row int_field field
     await animationFrame();
     expect(".o_selected_row").toHaveCount(1);
     expect(".o_data_row:nth-child(4)").toHaveClass("o_selected_row");
-    expect(document.activeElement).toBe(
-        target.querySelector(".o_data_row:nth-child(4) [name=int_field] input")
-    );
+    expect(".o_data_row:nth-child(4) [name=int_field] input").toBeFocused();
 
     // Clicking on an unselected row while a row is being edited will leave the edition
     await contains(".o_data_row:nth-child(3) [name=foo]").click();
@@ -10947,7 +10775,7 @@ test("editable readonly list view: navigation", async () => {
     // Clicking on an unselected record while no row is being edited will open the record
     expect([]).toVerifySteps();
     await contains(".o_data_row:nth-child(3) [name=foo]").click();
-    assert.verifySteps([`resId: 3`]);
+    expect([`resId: 3`]).toVerifySteps();
 });
 
 test("editable list view: multi edition: edit and validate last row", async () => {
@@ -10967,9 +10795,7 @@ test("editable list view: multi edition: edit and validate last row", async () =
     const input = target.querySelector(".o_data_row:last-child [name=int_field] input");
     input.value = 7;
     await triggerEvent(input, null, "input");
-    expect(document.activeElement).toBe(
-        target.querySelector(".o_data_row:last-child [name=int_field] input")
-    );
+    expect(".o_data_row:last-child [name=int_field] input").toBeFocused();
     press("Enter");
     await animationFrame();
     expect(".modal").toHaveCount(1);
@@ -11239,9 +11065,7 @@ test("editable list with fields with readonly modifier", async () => {
     expect(".o_selected_row .o_field_many2one").not.toHaveClass("o_readonly_modifier");
 
     await contains(".o_selected_row .o_field_many2one").click();
-    expect(document.activeElement).toBe(
-        target.querySelector(".o_selected_row .o_field_many2one input")
-    );
+    expect(".o_selected_row .o_field_many2one input").toBeFocused();
 });
 
 test("editable form with many2one: click out does not discard the row", async () => {
@@ -11835,14 +11659,13 @@ test("readonly boolean in editable list is readonly", async () => {
 });
 
 test("grouped list with groups_limit attribute", async () => {
+    stepAllNetworkCalls();
+
     await mountView({
         type: "list",
         resModel: "foo",
         arch: '<tree groups_limit="3"><field name="foo"/></tree>',
         groupBy: ["int_field"],
-        mockRPC(route, args) {
-            expect.step(args.method || route);
-        },
     });
 
     expect(".o_group_header").toHaveCount(3); // page 1
@@ -11853,11 +11676,13 @@ test("grouped list with groups_limit attribute", async () => {
     expect(".o_group_header").toHaveCount(1); // page 2
     expect(".o_data_row").toHaveCount(0);
 
-    assert.verifySteps([
+    expect([
+        "/web/webclient/translations",
+        "/web/webclient/load_menus",
         "get_views",
         "web_read_group", // read_group page 1
         "web_read_group", // read_group page 2
-    ]);
+    ]).toVerifySteps();
 });
 
 test("ungrouped list with groups_limit attribute, then group", async () => {
@@ -11947,14 +11772,13 @@ test("multi level grouped list with groups_limit attribute", async () => {
 });
 
 test("grouped list with expand attribute", async () => {
+    stepAllNetworkCalls();
+
     await mountView({
         type: "list",
         resModel: "foo",
         arch: '<tree expand="1"><field name="foo"/></tree>',
         groupBy: ["bar"],
-        mockRPC(route, args) {
-            expect.step(args.method || route);
-        },
     });
 
     expect(".o_group_header").toHaveCount(2);
@@ -12005,25 +11829,25 @@ test("grouped list with dynamic expand attribute (eval false)", async () => {
 });
 
 test("grouped list (two levels) with expand attribute", async () => {
+    stepAllNetworkCalls();
+
     // the expand attribute only opens the first level groups
     await mountView({
         type: "list",
         resModel: "foo",
         arch: '<tree expand="1"><field name="foo"/></tree>',
         groupBy: ["bar", "int_field"],
-        mockRPC(route, args) {
-            expect.step(args.method || route);
-        },
     });
 
     expect(".o_group_header").toHaveCount(6);
-
-    assert.verifySteps([
+    expect([
+        "/web/webclient/translations",
+        "/web/webclient/load_menus",
         "get_views",
         "web_read_group", // global
         "web_read_group", // first group
         "web_read_group", // second group
-    ]);
+    ]).toVerifySteps();
 });
 
 test("grouped lists with expand attribute and a lot of groups", async () => {
@@ -12061,10 +11885,10 @@ test("grouped lists with expand attribute and a lot of groups", async () => {
         ["9 (2)", "10 (2)", "11 (1)", "12 (1)", "13 (1)", "14 (1)", "17 (1)"]
     );
 
-    assert.verifySteps([
+    expect([
         "web_read_group", // read_group page 1
         "web_read_group", // read_group page 2
-    ]);
+    ]).toVerifySteps();
 });
 
 test("add filter in a grouped list with a pager", async () => {
@@ -12110,7 +11934,7 @@ test("add filter in a grouped list with a pager", async () => {
     expect(getPagerValue(target)).toEqual([1, 1]);
     expect(".o_group_header").toHaveCount(1); // page 1
 
-    assert.verifySteps(["[], 0", "[], 3", '[["bar","=",false]], 0']);
+    expect(["[], 0", "[], 3", '[["bar","=",false]], 0']).toVerifySteps();
 });
 
 test("grouped list: have a group with pager, then apply filter", async () => {
@@ -12336,7 +12160,7 @@ test("add and discard a record in a multi-level grouped list view", async () => 
     expect(".o_data_row").toHaveCount(2);
 
     // discard
-    await clickDiscard(target);
+    await contains(".o_list_button_discard").click();
     expect(".o_data_row").toHaveCount(1);
 });
 
@@ -12355,7 +12179,7 @@ test("pressing ESC in editable grouped list should discard the current line chan
 
     // update foo field of edited row
     await contains(".o_data_cell [name=foo] input").edit("new_value");
-    expect(document.activeElement).toBe(target.querySelector(".o_data_cell [name=foo] input"));
+    expect(".o_data_cell [name=foo] input").toBeFocused();
     // discard by pressing ESC
     press("Escape");
     await animationFrame();
@@ -12598,13 +12422,12 @@ test('pressing SHIFT-TAB in editable grouped list with create="0"', async () => 
 });
 
 test("editing then pressing TAB in editable grouped list", async () => {
+    stepAllNetworkCalls();
+
     await mountView({
         type: "list",
         resModel: "foo",
         arch: '<tree editable="bottom"><field name="foo"/></tree>',
-        mockRPC(route, args) {
-            expect.step(args.method || route);
-        },
         groupBy: ["bar"],
     });
 
@@ -12655,6 +12478,8 @@ test("editing then pressing TAB in editable grouped list", async () => {
 });
 
 test("editing then pressing TAB (with a readonly field) in grouped list", async () => {
+    stepAllNetworkCalls();
+
     Foo._records[0].bar = false;
     await mountView({
         type: "list",
@@ -12664,9 +12489,6 @@ test("editing then pressing TAB (with a readonly field) in grouped list", async 
                     <field name="foo"/>
                     <field name="int_field" readonly="1"/>
                 </tree>`,
-        mockRPC(route, args) {
-            expect.step(args.method);
-        },
         groupBy: ["bar"],
     });
 
@@ -12696,13 +12518,12 @@ test("editing then pressing TAB (with a readonly field) in grouped list", async 
 });
 
 test('pressing ENTER in editable="bottom" grouped list view', async () => {
+    stepAllNetworkCalls();
+
     await mountView({
         type: "list",
         resModel: "foo",
         arch: '<tree editable="bottom"><field name="foo"/></tree>',
-        mockRPC(route, args) {
-            expect.step(args.method || route);
-        },
         groupBy: ["bar"],
     });
 
@@ -12711,7 +12532,7 @@ test('pressing ENTER in editable="bottom" grouped list view', async () => {
     expect("tr.o_data_row").toHaveCount(4);
 
     const rows = queryAll(".o_data_row");
-    await click(rows[2].querySelector(".o_data_cell"));
+    await contains(".o_data_row:eq(2) .o_data_cell").click();
     expect("tr.o_data_row:eq(2)").toHaveClass("o_selected_row");
 
     // press enter in input should move to next record
@@ -12740,6 +12561,8 @@ test('pressing ENTER in editable="bottom" grouped list view', async () => {
 });
 
 test('pressing ENTER in editable="top" grouped list view', async () => {
+    stepAllNetworkCalls();
+
     Foo._records[2].bar = false;
     await mountView({
         type: "list",
@@ -12748,9 +12571,6 @@ test('pressing ENTER in editable="top" grouped list view', async () => {
             <tree editable="top">
                 <field name="foo"/>
             </tree>`,
-        mockRPC(route, args) {
-            expect.step(args.method);
-        },
         groupBy: ["bar"],
     });
 
@@ -12861,91 +12681,67 @@ test("cell-level keyboard navigation in non-editable list", async () => {
         },
     });
 
-    expect(document.activeElement).toBe(target.querySelector(".o_searchview_input"));
+    expect(".o_searchview_input").toBeFocused();
 
     press("ArrowDown");
     await animationFrame();
-    expect(document.activeElement).toBe(
-        target.querySelector("thead .o_list_record_selector input")
-    );
+    expect("thead .o_list_record_selector input").toBeFocused();
 
     press("ArrowUp");
     await animationFrame();
-    expect(document.activeElement).toBe(target.querySelector(".o_searchview_input"));
+    expect(".o_searchview_input").toBeFocused();
 
     press("ArrowDown");
     press("ArrowDown");
     await animationFrame();
-    expect(document.activeElement).toBe(
-        target.querySelector("tbody tr:first-child .o_list_record_selector input")
-    );
+    expect("tbody tr:first-child .o_list_record_selector input").toBeFocused();
 
     press("ArrowRight");
     await animationFrame();
-    expect(document.activeElement).toBe(
-        target.querySelector("tbody tr:first-child .o_field_cell[name=foo]")
-    );
+    expect("tbody tr:first-child .o_field_cell[name=foo]").toBeFocused();
     expect(document.activeElement.textContent).toBe("yop");
 
     press("ArrowRight");
     await animationFrame();
-    expect(document.activeElement).toBe(
-        target.querySelector("tbody tr:first-child .o_field_cell[name=foo]")
-    );
+    expect("tbody tr:first-child .o_field_cell[name=foo]").toBeFocused();
 
     press("ArrowDown");
     await animationFrame();
-    expect(document.activeElement).toBe(
-        target.querySelector("tbody tr:nth-child(2) .o_field_cell[name=foo]")
-    );
+    expect("tbody tr:nth-child(2) .o_field_cell[name=foo]").toBeFocused();
     expect(document.activeElement.textContent).toBe("blip");
 
     press("ArrowDown");
     await animationFrame();
-    expect(document.activeElement).toBe(
-        target.querySelector("tbody tr:nth-child(3) .o_field_cell[name=foo]")
-    );
+    expect("tbody tr:nth-child(3) .o_field_cell[name=foo]").toBeFocused();
     expect(document.activeElement.textContent).toBe("gnap");
 
     press("ArrowDown");
     await animationFrame();
-    expect(document.activeElement).toBe(
-        target.querySelector("tbody tr:nth-child(4) .o_field_cell[name=foo]")
-    );
+    expect("tbody tr:nth-child(4) .o_field_cell[name=foo]").toBeFocused();
     expect(document.activeElement.textContent).toBe("blip");
 
     press("ArrowDown");
     await animationFrame();
-    expect(document.activeElement).toBe(
-        target.querySelector("tbody tr:nth-child(4) .o_field_cell[name=foo]")
-    );
+    expect("tbody tr:nth-child(4) .o_field_cell[name=foo]").toBeFocused();
     expect(document.activeElement.textContent).toBe("blip");
 
     press("ArrowRight");
     await animationFrame();
-    expect(document.activeElement).toBe(
-        target.querySelector("tbody tr:nth-child(4) .o_field_cell[name=foo]")
-    );
+    expect("tbody tr:nth-child(4) .o_field_cell[name=foo]").toBeFocused();
     expect(document.activeElement.textContent).toBe("blip");
 
     press("ArrowLeft");
     await animationFrame();
-    expect(document.activeElement).toBe(
-        target.querySelector("tbody tr:nth-child(4) .o_list_record_selector input")
-    );
+    expect("tbody tr:nth-child(4) .o_list_record_selector input").toBeFocused();
 
     press("ArrowLeft");
     await animationFrame();
-    expect(document.activeElement).toBe(
-        target.querySelector("tbody tr:nth-child(4) .o_list_record_selector input")
-    );
+    expect("tbody tr:nth-child(4) .o_list_record_selector input").toBeFocused();
 
     press("ArrowUp");
     press("ArrowRight");
     await animationFrame();
-    expect(document.activeElement).toBe(
-        target.querySelector("tbody tr:nth-child(3) .o_field_cell[name=foo]")
-    );
+    expect("tbody tr:nth-child(3) .o_field_cell[name=foo]").toBeFocused();
     expect(document.activeElement.textContent).toBe("gnap");
 
     press("Enter");
@@ -12967,46 +12763,34 @@ test("keyboard navigation from last cell in editable list", async () => {
 
     // Click on last cell
     await contains(".o_data_row:last-child [name=int_field]").click();
-    expect(document.activeElement).toBe(
-        target.querySelector(".o_data_row:last-child [name=int_field] input")
-    );
+    expect(".o_data_row:last-child [name=int_field] input").toBeFocused();
 
     // Tab should focus the first field of first row
     press("Tab");
     await animationFrame();
-    expect(document.activeElement).toBe(
-        target.querySelector(".o_data_row:first-child [name=foo] input")
-    );
+    expect(".o_data_row:first-child [name=foo] input").toBeFocused();
 
     // Shift+Tab should focus back the last field of last row
     press("Shift+Tab");
     await animationFrame();
-    expect(document.activeElement).toBe(
-        target.querySelector(".o_data_row:last-child [name=int_field] input")
-    );
+    expect(".o_data_row:last-child [name=int_field] input").toBeFocused();
 
     // Enter should add a new row at the bottom
     expect(".o_data_row").toHaveCount(4);
     press("Enter");
     await animationFrame();
     expect(".o_data_row").toHaveCount(5);
-    expect(document.activeElement).toBe(
-        target.querySelector(".o_data_row:last-child [name=foo] input")
-    );
+    expect(".o_data_row:last-child [name=foo] input").toBeFocused();
 
     // Enter should discard the edited row as it is pristine + get to first row
     press("Enter");
     await animationFrame();
     expect(".o_data_row").toHaveCount(4);
-    expect(document.activeElement).toBe(
-        target.querySelector(".o_data_row:first-child [name=foo] input")
-    );
+    expect(".o_data_row:first-child [name=foo] input").toBeFocused();
 
     // Click on last cell
     await contains(".o_data_row:last-child [name=int_field]").click();
-    expect(document.activeElement).toBe(
-        target.querySelector(".o_data_row:last-child [name=int_field] input")
-    );
+    expect(".o_data_row:last-child [name=int_field] input").toBeFocused();
 
     // Enter should add a new row at the bottom
     press("Enter");
@@ -13021,9 +12805,7 @@ test("keyboard navigation from last cell in editable list", async () => {
     press("Enter");
     await triggerEvent(input, null, "change");
     expect(".o_data_row").toHaveCount(6);
-    expect(document.activeElement).toBe(
-        target.querySelector(".o_data_row:last-child [name=foo] input")
-    );
+    expect(".o_data_row:last-child [name=foo] input").toBeFocused();
 
     // Escape should discard the added row as it is pristine + view should go into readonly mode
     press("Escape");
@@ -13276,9 +13058,7 @@ test("keyboard navigation with date range", async () => {
 
     await contains(".o_data_row:first-child [name=foo]").click();
 
-    expect(document.activeElement).toBe(
-        target.querySelector(".o_data_row:first-child [name=foo] input")
-    );
+    expect(".o_data_row:first-child [name=foo] input").toBeFocused();
 
     press("Tab");
     await animationFrame();
@@ -13301,9 +13081,7 @@ test("keyboard navigation with date range", async () => {
     press("Tab");
     await animationFrame();
 
-    expect(document.activeElement).toBe(
-        target.querySelector(".o_data_row:first-child [name=int_field] input")
-    );
+    expect(".o_data_row:first-child [name=int_field] input").toBeFocused();
 });
 
 test("keyboard navigation with Many2One field", async () => {
@@ -13321,23 +13099,17 @@ test("keyboard navigation with Many2One field", async () => {
 
     await contains(".o_data_row:first-child [name=foo]").click();
 
-    expect(document.activeElement).toBe(
-        target.querySelector(".o_data_row:first-child [name=foo] input")
-    );
+    expect(".o_data_row:first-child [name=foo] input").toBeFocused();
 
     press("Tab");
     await animationFrame();
 
-    expect(document.activeElement).toBe(
-        target.querySelector(".o_data_row:first-child [name=m2o] input")
-    );
+    expect(".o_data_row:first-child [name=m2o] input").toBeFocused();
 
     press("Tab");
     await animationFrame();
 
-    expect(document.activeElement).toBe(
-        target.querySelector(".o_data_row:first-child [name=int_field] input")
-    );
+    expect(".o_data_row:first-child [name=int_field] input").toBeFocused();
 });
 
 test("multi-edit records with ENTER does not crash", async () => {
@@ -13532,7 +13304,7 @@ test("cell-level keyboard navigation in editable grouped list", async () => {
     press("ArrowDown");
     press("ArrowDown");
 
-    expect(document.activeElement).toBe(target.querySelector(".o_group_field_row_add a"));
+    expect(".o_group_field_row_add a").toBeFocused();
 
     press("ArrowDown");
 
@@ -13590,13 +13362,11 @@ test("cell-level keyboard navigation in editable grouped list", async () => {
         press("ArrowUp");
     }
 
-    expect(document.activeElement).toBe(target.querySelector("thead th:nth-child(2)"));
+    expect("thead th:nth-child(2)").toBeFocused();
 
     press("ArrowLeft");
 
-    expect(document.activeElement).toBe(
-        target.querySelector("thead th.o_list_record_selector input")
-    );
+    expect("thead th.o_list_record_selector input").toBeFocused();
 
     press("ArrowDown");
     press("ArrowDown");
@@ -13606,9 +13376,7 @@ test("cell-level keyboard navigation in editable grouped list", async () => {
 
     press("ArrowUp");
 
-    expect(document.activeElement).toBe(
-        target.querySelector(".o_group_header:nth-child(1) .o_group_name")
-    );
+    expect(".o_group_header:nth-child(1) .o_group_name").toBeFocused();
 
     expect(".o_data_row").toHaveCount(5);
 
@@ -13617,50 +13385,38 @@ test("cell-level keyboard navigation in editable grouped list", async () => {
 
     expect(".o_data_row").toHaveCount(2);
 
-    expect(document.activeElement).toBe(
-        target.querySelector(".o_group_header:nth-child(1) .o_group_name")
-    );
+    expect(".o_group_header:nth-child(1) .o_group_name").toBeFocused();
 
     press("ArrowRight");
     await animationFrame();
 
     expect(".o_data_row").toHaveCount(5);
 
-    expect(document.activeElement).toBe(
-        target.querySelector(".o_group_header:nth-child(1) .o_group_name")
-    );
+    expect(".o_group_header:nth-child(1) .o_group_name").toBeFocused();
 
     press("ArrowRight");
     await animationFrame();
 
     expect(".o_data_row").toHaveCount(5);
 
-    expect(document.activeElement).toBe(
-        target.querySelector(".o_group_header:nth-child(1) .o_group_name")
-    );
+    expect(".o_group_header:nth-child(1) .o_group_name").toBeFocused();
 
     press("ArrowLeft");
     await animationFrame();
 
     expect(".o_data_row").toHaveCount(2);
 
-    expect(document.activeElement).toBe(
-        target.querySelector(".o_group_header:nth-child(1) .o_group_name")
-    );
+    expect(".o_group_header:nth-child(1) .o_group_name").toBeFocused();
 
     press("ArrowLeft");
     await animationFrame();
 
     expect(".o_data_row").toHaveCount(2);
-    expect(document.activeElement).toBe(
-        target.querySelector(".o_group_header:nth-child(1) .o_group_name")
-    );
+    expect(".o_group_header:nth-child(1) .o_group_name").toBeFocused();
 
     press("ArrowDown");
 
-    expect(document.activeElement).toBe(
-        target.querySelector(".o_group_header:nth-child(2) .o_group_name")
-    );
+    expect(".o_group_header:nth-child(2) .o_group_name").toBeFocused();
 
     press("ArrowDown");
 
@@ -13674,7 +13430,7 @@ test("cell-level keyboard navigation in editable grouped list", async () => {
 
     press("ArrowDown");
 
-    expect(document.activeElement).toBe(target.querySelector(".o_group_field_row_add a"));
+    expect(".o_group_field_row_add a").toBeFocused();
 
     press("ArrowUp");
 
@@ -13718,58 +13474,44 @@ test("execute group header button with keyboard navigation", async () => {
     press("ArrowDown");
     await animationFrame();
 
-    expect(document.activeElement).toBe(
-        target.querySelector("thead th.o_list_record_selector input")
-    );
+    expect("thead th.o_list_record_selector input").toBeFocused();
 
     press("ArrowDown");
     await animationFrame();
-    expect(document.activeElement).toBe(
-        target.querySelector(".o_group_header:nth-child(1) .o_group_name")
-    );
+    expect(".o_group_header:nth-child(1) .o_group_name").toBeFocused();
 
     // unfold first group
     press("Enter");
     await animationFrame();
     expect(".o_data_row").toHaveCount(3);
-    expect(document.activeElement).toBe(
-        target.querySelector(".o_group_header:nth-child(1) .o_group_name")
-    );
+    expect(".o_group_header:nth-child(1) .o_group_name").toBeFocused();
 
     // move to first record of opened group
     press("ArrowDown");
     await animationFrame();
-    expect(document.activeElement).toBe(target.querySelector("tbody .o_data_row td[name=foo]"));
+    expect("tbody .o_data_row td[name=foo]").toBeFocused();
 
     // move back to the group header
     press("ArrowUp");
     await animationFrame();
-    expect(document.activeElement).toBe(
-        target.querySelector(".o_group_header:nth-child(1) .o_group_name")
-    );
+    expect(".o_group_header:nth-child(1) .o_group_name").toBeFocused();
 
     // fold the group
     press("Enter");
     await animationFrame();
     expect(".o_data_row").toHaveCount(0);
-    expect(document.activeElement).toBe(
-        target.querySelector(".o_group_header:nth-child(1) .o_group_name")
-    );
+    expect(".o_group_header:nth-child(1) .o_group_name").toBeFocused();
 
     // unfold the group
     press("Enter");
     await animationFrame();
     expect(".o_data_row").toHaveCount(3);
-    expect(document.activeElement).toBe(
-        target.querySelector(".o_group_header:nth-child(1) .o_group_name")
-    );
+    expect(".o_group_header:nth-child(1) .o_group_name").toBeFocused();
 
     // tab to the group header button
     press("Tab");
     await animationFrame();
-    expect(document.activeElement).toBe(
-        target.querySelector(".o_group_header .o_group_buttons button:first-child")
-    );
+    expect(".o_group_header .o_group_buttons button:first-child").toBeFocused();
 
     // click on the button by pressing enter
     expect([]).toVerifySteps();
@@ -13795,7 +13537,7 @@ test('add a new row in grouped editable="top" list', async () => {
     });
     expect(".o_data_row").toHaveCount(2);
 
-    await clickDiscard(target);
+    await contains(".o_list_button_discard").click();
     await click(queryAll(".o_group_header")[1]); // open second group "Yes"
     expect(".o_data_row").toHaveCount(4);
 
@@ -13823,7 +13565,7 @@ test('add a new row in grouped editable="bottom" list', async () => {
     expect(".o_data_row:first").toHaveClass("o_selected_row");
     expect(".o_data_row").toHaveCount(2);
 
-    await clickDiscard(target);
+    await contains(".o_list_button_discard").click();
     await click(queryAll(".o_group_header")[1]); // open second group
     expect(".o_data_row").toHaveCount(4);
     await click(queryAll(".o_group_field_row_add a")[1]); // create row in second group "Yes"
@@ -13849,7 +13591,7 @@ test("add and discard a line through keyboard navigation without crashing", asyn
     // Can trigger ENTER on "Add a line" link ?
     expect(".o_group_field_row_add a").toHaveCount(1);
     target.querySelector(".o_group_field_row_add a").focus();
-    expect(document.activeElement).toBe(target.querySelector(".o_group_field_row_add a"));
+    expect(".o_group_field_row_add a").toBeFocused();
     const event = await triggerEvent(document.activeElement, null, "keydown", {
         key: "Enter",
     });
@@ -13880,7 +13622,7 @@ test("discard an invalid row in a list", async () => {
     expect(".o_selected_row").toHaveCount(1);
     expect(target.querySelector("[name=foo] input").value).toBe("");
 
-    await clickDiscard(target);
+    await contains(".o_list_button_discard").click();
     expect(".o_field_invalid").toHaveCount(0);
     expect(".o_selected_row").toHaveCount(0);
     expect(target.querySelector("[name='foo']").textContent).toBe("yop");
@@ -14416,7 +14158,7 @@ test("list view with optional fields rendering and local storage mock", async ()
 
     const localStorageKey = "optional_fields,foo,list,42,foo,m2o,reference";
 
-    assert.verifySteps(["getItem " + localStorageKey]);
+    expect(["getItem " + localStorageKey]).toVerifySteps();
 
     expect("th").toHaveCount(4, {
         message: "should have 4 th, 1 for selector, 2 for columns, 1 for optional columns",
@@ -14444,10 +14186,10 @@ test("list view with optional fields rendering and local storage mock", async ()
 
     // Only a setItem since the list view maintains its own internal state of toggled
     // optional columns.
-    assert.verifySteps([
+    expect([
         "setItem " + localStorageKey + ' to "m2o,reference"',
         "getItem optional_fields,foo,list,42,foo,m2o,reference",
-    ]);
+    ]).toVerifySteps();
 
     // 5 th (1 for checkbox, 3 for columns, 1 for optional columns)
     expect("th").toHaveCount(5, { message: "should have 5 th" });
@@ -14517,7 +14259,7 @@ test("list view with optional fields from local storage being the empty array", 
     await getService("action").doAction(1);
 
     // verify initialization
-    assert.verifySteps(["getItem " + localStorageKey]);
+    expect(["getItem " + localStorageKey]).toVerifySteps();
     verifyHeaders(["foo", "reference"]);
     // open optional columns headers dropdown
     await contains("table .o_optional_columns_dropdown button").click();
@@ -14526,14 +14268,14 @@ test("list view with optional fields from local storage being the empty array", 
     });
     // disable optional field "reference" (no optional column enabled)
     await click(queryAll(".o-dropdown--menu span.dropdown-item input")[1]);
-    assert.verifySteps([
+    expect([
         "setItem " + localStorageKey + ' to ""',
         "getItem optional_fields,foo,list,42,foo,m2o,reference",
-    ]);
+    ]).toVerifySteps();
     verifyHeaders(["foo"]);
     // mount again to ensure that active optional columns will not be reset while empty
     await getService("action").doAction(1);
-    assert.verifySteps(["getItem " + localStorageKey]);
+    expect(["getItem " + localStorageKey]).toVerifySteps();
     verifyHeaders(["foo"]);
 });
 
@@ -15135,7 +14877,7 @@ test("Auto save: modify a record and leave action (reject)", async () => {
     expect("foo").toHaveClass("o_field_invalid");
     expect(".o_data_row").toHaveCount(4);
 
-    assert.verifySteps(["Invalid fields: ", "<ul><li>Foo</li></ul>"]);
+    expect(["Invalid fields: ", "<ul><li>Foo</li></ul>"]).toVerifySteps();
 });
 
 test("Auto save: add a record and change page", async () => {
@@ -15412,13 +15154,13 @@ test("edition, then navigation with tab (with a readonly re-evaluated field and 
     });
 
     await contains(".o_data_cell").click();
-    expect(document.activeElement).toBe(target.querySelector(".o_data_cell[name=foo] input"));
+    expect(".o_data_cell[name=foo] input").toBeFocused();
     await contains(".o_data_cell[name=foo] input").edit("new value");
 
     press("Tab");
     await animationFrame();
 
-    expect(document.activeElement).toBe(target.querySelector(".o_data_cell[name=int_field] input"));
+    expect(".o_data_cell[name=int_field] input").toBeFocused();
 
     expect(["onchange:bar"]).toVerifySteps();
 });
@@ -16296,7 +16038,7 @@ test("Search more in a many2one", async () => {
         ["Value 1", "Value 2", "Value 1", "Value 1"]
     );
 
-    await contains(".o_data_row:nth-child(1) td.o_list_many2one").click();
+    await contains(".o_data_row:first td.o_list_many2one").click();
     await contains(".o_field_many2one_selection .o-autocomplete--input").click();
     await clickOpenedDropdownItem(target, "m2o", "Search More...");
 
@@ -16334,7 +16076,7 @@ test("view's context is passed down as evalContext", async () => {
         },
     });
 
-    await contains(".o_data_row:nth-child(1) td.o_list_many2one").click();
+    await contains(".o_data_row:first td.o_list_many2one").click();
     await contains(".o_field_many2one_selection .o-autocomplete--input").click();
     expect(["name_search"]).toVerifySteps();
 });
@@ -17342,11 +17084,11 @@ test("restore orderBy from state when using default order", async () => {
     await contains(".o_data_row .o_data_cell").click(); // switch to the form view
     await contains(".breadcrumb-item").click(); // go back to the list view
 
-    assert.verifySteps([
+    expect([
         "order:foo ASC", // initial list view
         "order:amount ASC, foo ASC", // order by amount
         "order:amount ASC, foo ASC", // go back to the list view, it should still be ordered by amount
-    ]);
+    ]).toVerifySteps();
 });
 
 test("x2many onchange, check result", async () => {
@@ -17458,10 +17200,10 @@ test("context keys not passed down the stack and not to fields", async () => {
     };
     const wc = await createWebClient({ serverData, mockRPC });
     await doAction(wc, 1);
-    assert.verifySteps([
+    expect([
         `foo: get_views: {"lang":"en","tz":"taht","uid":7,"tree_view_ref":"foo_view_ref"}`,
         `foo: web_search_read: {"lang":"en","tz":"taht","uid":7,"bin_size":true,"tree_view_ref":"foo_view_ref"}`,
-    ]);
+    ]).toVerifySteps();
 
     await click(queryAll(".o_data_row .o_data_cell")[1]);
 
@@ -17469,14 +17211,14 @@ test("context keys not passed down the stack and not to fields", async () => {
     await triggerEvent(input, null, "focus");
     await click(input);
     await animationFrame();
-    assert.verifySteps([`bar: name_search: {"lang":"en","tz":"taht","uid":7}`]);
+    expect([`bar: name_search: {"lang":"en","tz":"taht","uid":7}`]).toVerifySteps();
 
     const items = Array.from(queryAll(".o_selected_row .o_field_many2many_tags .dropdown-item"));
     await click(items.find((el) => el.textContent.trim() === "Search More..."));
-    assert.verifySteps([
+    expect([
         `bar: get_views: {"lang":"en","tz":"taht","uid":7}`,
         `bar: web_search_read: {"lang":"en","tz":"taht","uid":7,"bin_size":true}`,
-    ]);
+    ]).toVerifySteps();
     expect(".modal").toHaveCount(1);
     expect(target.querySelector(".modal .modal-header .modal-title").textContent).toBe(
         "Search: M2M field"
