@@ -13,7 +13,7 @@ from odoo.tests import HttpCase, tagged, users
 from odoo.tools import html_escape, mute_logger
 
 
-@tagged("post_install", "-at_install")
+@tagged("post_install", "-at_install", "discuss_channel")
 class TestChannelInternals(MailCommon, HttpCase):
 
     @classmethod

@@ -5,7 +5,7 @@ from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.tests.common import new_test_user, tagged
 
 
-@tagged("post_install", "-at_install")
+@tagged("post_install", "-at_install", "discuss_channel")
 class TestDiscussChannelMember(MailCommon):
     @classmethod
     def setUpClass(cls):

@@ -9,7 +9,7 @@ from odoo.tests.common import tagged
 from odoo.tools import mute_logger
 
 
-@tagged("post_install", "-at_install")
+@tagged("post_install", "-at_install", "discuss_channel")
 class TestDiscussChannelAccess(MailCommon):
     def test_01_discuss_channel_access(self):
         """Exhaustive list of operations on channel that would make sense in various setup and check
