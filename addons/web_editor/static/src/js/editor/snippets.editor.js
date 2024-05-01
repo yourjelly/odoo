@@ -1875,6 +1875,8 @@ class SnippetsMenu extends Component {
             // text will load it). The colorpalette itself will do the actual
             // waiting of the loading completion.
             this.options.wysiwyg.getColorpickerTemplate();
+            // Avoid preloading snippet menu before editor is mounted.
+            this.props.mountedProm.resolve();
         });
 
         onMounted(async () => {
@@ -1888,10 +1890,6 @@ class SnippetsMenu extends Component {
             // Get table container and bind commands to Odoo Editor.
             const customizeTableBlock = this.customizePanel.querySelector('#o-we-editor-table-container');
             this.options.wysiwyg.odooEditor.bindExecCommand(customizeTableBlock);
-            // TODO: Remove this and instead, use a callback once the editor is
-            // ready, or make the parent component independent of SnippetsMenu
-            // being mounted.
-            this.props.mountedProm.resolve();
             this.el.classList.add("o_loaded");
             this.el.ownerDocument.body.classList.toggle('editor_has_snippets', !this.folded);
         });
