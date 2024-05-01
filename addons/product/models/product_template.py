@@ -126,6 +126,7 @@ class ProductTemplate(models.Model):
 
     # related to display product product information if is_product_variant
     barcode = fields.Char('Barcode', compute='_compute_barcode', inverse='_set_barcode', search='_search_barcode')
+    is_barcode_visible = fields.Boolean('Is Barcode Visible', compute='_compute_is_barcode_visible')
     default_code = fields.Char(
         'Internal Reference', compute='_compute_default_code',
         inverse='_set_default_code', store=True)
@@ -743,6 +744,13 @@ class ProductTemplate(models.Model):
         """
         self.ensure_one()
         return any(a.create_variant == 'dynamic' for a in self.valid_product_template_attribute_line_ids.attribute_id)
+
+    @api.depends('product_variant_ids.product_tmpl_id')
+    def _compute_is_barcode_visible(self):
+        for record in self:
+            record.is_barcode_visible = any(
+                len(al.value_ids) > 1 or al.attribute_id.create_variant == 'dynamic' for al in record.valid_product_template_attribute_line_ids
+            )
 
     @api.depends('attribute_line_ids.value_ids')
     def _compute_valid_product_template_attribute_line_ids(self):
