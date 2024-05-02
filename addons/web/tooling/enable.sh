@@ -11,7 +11,7 @@ enableInDir () {
     cd "$1" || exit
     hooksPath="$(realpath --relative-to=. "$tooling/hooks")"
     git config core.hooksPath "$hooksPath"
-    cp "$tooling/_eslint.config.js" eslint.config.js
+    sed "s/preprocess\/me/$(echo "$tooling/eslint_rules/eslint_odoo_plugin" | sed 's/\//\\\//g')/g" "$tooling/_eslint.config.js" > eslint.config.js
     cp "$tooling/_jsconfig.json" jsconfig.json
     cp "$tooling/_package.json" package.json
     if [[ $2 == "copy" ]]; then

@@ -1,8 +1,10 @@
+/* global require */
 "use strict";
 
-const js = require("@eslint/js"); // eslint-disable-line no-undef
-const eslintPluginPrettierRecommended = require("eslint-plugin-prettier/recommended"); // eslint-disable-line no-undef
-const globals = require("globals"); // eslint-disable-line no-undef
+const js = require("@eslint/js");
+const eslintPluginPrettierRecommended = require("eslint-plugin-prettier/recommended");
+const globals = require("globals");
+const odooPlugin = require("preprocess/me");
 
 module.exports = [
     js.configs.recommended,
@@ -44,7 +46,11 @@ module.exports = [
                 Tooltip: "readonly",
             },
         },
+        plugins: {
+            odoo: odooPlugin,
+        },
         rules: {
+            "odoo/static-gettext-argument": "error",
             "prettier/prettier": [
                 "error",
                 {
