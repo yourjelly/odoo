@@ -527,6 +527,93 @@ class PurchaseOrder(models.Model):
             'delay': 0,
         }
 
+    def action_merge(self):
+        rfq_to_merge = self.filtered(lambda r: r.state == 'draft')
+        if len(rfq_to_merge) < 2:
+            raise UserError(_("Please select at least two purchase orders to merge."))
+
+        # Group RFQs by vendor
+        rfqs_grouped = {}
+        for rfq in rfq_to_merge:
+            module_install = bool(self.env['ir.module.module'].search([('name', '=', 'purchase_requisition'), ('state', '=', 'installed')], limit=1))
+            key = (rfq.partner_id.id, rfq.requisition_id.id) if module_install else (rfq.partner_id.id)
+            if key not in rfqs_grouped:
+                rfqs_grouped[key] = rfq
+            else:
+                rfqs_grouped[key] += rfq
+
+
+        # Merge RFQs for each vendor group
+        for rfqs in rfqs_grouped.values():
+
+            # Check if all RFQs have the same vendor, currency, deliver to, and dropship address
+            vendors = rfqs.mapped('partner_id')
+            currencies = rfqs.mapped('currency_id')
+            # deliver_to = rfqs.mapped('picking_type_id')
+            # dropship_addresses = rfqs.mapped('dropship_address_id')
+
+            if len(vendors) != 1:
+                raise UserError(_("All RFQs for vendor %s must have the same vendor.") % vendors[0].name)
+            if len(currencies) != 1:
+                raise UserError(_("All RFQs for vendor %s must have the same currency.") % vendors[0].name)
+            # if len(deliver_to) != 1:
+            #     raise UserError(_("All RFQs for vendor %s must have the same delivery address.") % vendors[0].name)
+            # if len(dropship_addresses) != 1:
+            #     raise UserError(_("All RFQs for vendor %s must have the same dropship address.") % vendors[0].name)
+
+            oldest_rfq = min(rfqs, key=lambda r: r.date_order)
+            if oldest_rfq:
+                # Merge RFQs into the oldest purchase order
+                rfqs -= oldest_rfq
+                for rfq in rfqs:
+                    for rfq_line in rfq.order_line:
+                        existing_line = oldest_rfq.order_line.filtered(lambda l: l.product_id == rfq_line.product_id and
+                                                                                 l.product_uom == rfq_line.product_uom and
+                                                                                 l.product_packaging_id == rfq_line.product_packaging_id and
+                                                                                 l.analytic_distribution == rfq_line.analytic_distribution and
+                                                                                 (l.date_planned - rfq_line.date_planned).total_seconds() <= 86400   #24 hours in seconds
+                                                                       )
+                        if len(existing_line) > 1:
+                            existing_line[0].product_qty += sum(existing_line[1:].mapped('product_qty'))
+                            existing_line[1:].unlink()
+                            existing_line = existing_line[0]
+
+                        if existing_line:
+                            existing_line.product_qty += rfq_line.product_qty
+                        else:
+                            oldest_rfq.order_line += rfq_line
+
+                    if self.env['ir.module.module'].search([('name', '=', 'purchase_requisition'), (
+                            'state', '=', 'installed')]) and rfq.alternative_po_ids:
+                        oldest_rfq.alternative_po_ids += (rfq.alternative_po_ids)
+                        rfq.alternative_po_ids.filtered(lambda po: po.state == 'cancel').unlink()
+
+                    # Merge source documents and vendor references
+                    oldest_rfq_origin = oldest_rfq.origin or ''
+                    mergable_rfqs_origin = list(rfqs.mapped('origin') if rfqs.mapped('origin')[0] != False else '')
+                    all_origins = ', '.join([oldest_rfq_origin] + mergable_rfqs_origin)
+
+                    oldest_vendor_references = oldest_rfq.partner_ref or ''
+                    mergable_rfqs_vendor_references = list(rfqs.mapped('partner_ref') if rfqs.mapped('partner_ref')[0] != False else '')
+                    all_vendor_references = ', '.join([oldest_vendor_references] + mergable_rfqs_vendor_references)
+
+                    oldest_rfq.write({
+                        'origin': all_origins,
+                        'partner_ref': all_vendor_references,
+                    })
+                rfqs.state = 'cancel'
+
+
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'type': 'success',
+                'message': _('purchase order has been merged'),
+                'next': {'type': 'ir.actions.act_window_close'},
+            }
+        }
+
     def _add_supplier_to_product(self):
         # Add the partner in the supplier list of the product if the supplier is not registered for
         # this product. We limit to 10 the number of suppliers for a product to avoid the mess that
