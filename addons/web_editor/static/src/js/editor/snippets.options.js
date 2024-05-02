@@ -2840,37 +2840,30 @@ const ListUserValueWidget = UserValueWidget.extend({
     },
 });
 
-const RangeUserValueWidget = UnitUserValueWidget.extend({
-    tagName: 'we-range',
-    events: {
-        'change input': '_onInputChange',
-        'input input': '_onInputInput',
-    },
-
+class RangeUserValue extends UnitUserValue {
+    constructor() {
+        super(...arguments);
+        this._state.max = undefined;
+        this._state.displayValue = false;
+    }
     /**
-     * @override
+     * @type {number}
      */
-    async start() {
-        await this._super(...arguments);
-        this.input = document.createElement('input');
-        this.input.type = "range";
-        let min = this.el.dataset.min && parseFloat(this.el.dataset.min) || 0;
-        let max = this.el.dataset.max && parseFloat(this.el.dataset.max) || 100;
-        const step = this.el.dataset.step && parseFloat(this.el.dataset.step) || 1;
-        this.displayValue = this.el.dataset.displayRangeValue;
-        if (min > max) {
-            [min, max] = [max, min];
-            this.input.classList.add('o_we_inverted_range');
-        }
-        this._setInputAttributes(min, max, step);
-        this.containerEl.appendChild(this.input);
-        if (this.displayValue) {
-            this.outputEl = document.createElement('output');
-            this.outputEl.classList.add('ms-2');
-            this.containerEl.appendChild(this.outputEl);
-        }
-        this._onInputChange = debounce(this._onInputChange, 100);
-    },
+    get max() {
+        return this._state.max;
+    }
+    set max(value) {
+        this._state.max = value;
+    }
+    /**
+     * @type {string|number}
+     */
+    get displayValue() {
+        return this._state.displayValue;
+    }
+    set displayValue(value) {
+        this._state.displayValue = value;
+    }
 
     //--------------------------------------------------------------------------
     // Public
@@ -2880,35 +2873,85 @@ const RangeUserValueWidget = UnitUserValueWidget.extend({
      * @override
      */
     loadMethodsData(validMethodNames) {
-        this._super(...arguments);
+        super.loadMethodsData(...arguments);
         for (const methodName of this._methodsNames) {
             const possibleValues = this._methodsParams.optionsPossibleValues[methodName];
             if (possibleValues.length > 1) {
-                this._setInputAttributes(0, possibleValues.length - 1, 1);
+                this.max = possibleValues.length - 1;
                 break;
             }
         }
-    },
+    }
     /**
      * @override
      */
     async setValue(value, methodName) {
-        await this._super(...arguments);
+        await super.setValue(value, methodName);
         const possibleValues = this._methodsParams.optionsPossibleValues[methodName];
-        const inputValue = possibleValues.length > 1 ? possibleValues.indexOf(value) : this._value;
-        this.input.value = inputValue;
-        if (this.displayValue) {
+        const inputValue = possibleValues.length > 1 ? possibleValues.indexOf(value) : this.value;
+        if (this._data.displayRangeValue) {
             this._computeDisplayValue(inputValue);
         }
-    },
+    }
     /**
      * @override
      */
     getValue(methodName) {
-        const value = this._super(...arguments);
+        const value = super.getValue(...arguments);
         const possibleValues = this._methodsParams.optionsPossibleValues[methodName];
         return possibleValues.length > 1 ? possibleValues[+value] : value;
-    },
+    }
+    /**
+     * @private
+     * @param {string} inputValue 
+     */
+    _computeDisplayValue(inputValue) {
+        if (this.toRatio) {
+            const inputValueAsNumber = Number(inputValue);
+            const ratio = inputValueAsNumber >= 0 ? 1 + inputValueAsNumber : 1 / (1 - inputValueAsNumber);
+            this.displayValue = `${ratio.toFixed(2)}x`;
+        } else if (this._data.displayRangeValueUnit) {
+            this.displayValue = inputValue + this._data.displayRangeValueUnit;
+        } else {
+            this.displayValue = inputValue;
+        }
+    }
+}
+
+const RangeUserValueWidget = UnitUserValueWidget.extend({});
+class WeRange extends WeInput {
+    static template = "web_editor.WeRange";
+    static StateModel = RangeUserValue;
+    static props = {
+        ...WeInput.props,
+        min: { type: String, optional: true },
+        max: { type: String, optional: true },
+        step: { type: String, optional: true },
+        toRatio: { type: String, optional: true },
+        displayRangeValue: { type: String, optional: true },
+    };
+    static defaultProps = {
+        min: "0",
+        max: "100",
+        step: "1",
+        toRatio: "",
+        displayRangeValue: "",
+        unit: "",
+    };
+    setup() {
+        this._onInputChange = debounce(this._onInputChange, 100);
+        super.setup();
+        this.state.toRatio = this.props.toRatio;
+        if (Number(this.props.min) > Number(this.props.max)) {
+            this.state.max = this.props.min;
+            this.min = this.props.max;
+            this.inverted = true;
+        } else {
+            this.min = this.props.min;
+            this.state.max ||= this.props.max;
+            this.inverted = false;
+        }
+    }
 
     //--------------------------------------------------------------------------
     // Handlers
@@ -2918,44 +2961,22 @@ const RangeUserValueWidget = UnitUserValueWidget.extend({
      * @private
      */
     _onInputChange(ev) {
-        this._value = ev.target.value;
+        this.state.value = ev.target.value;
         this._onUserValueChange(ev);
-    },
-    /**
-     * @private
-     * @param {string} inputValue 
-     */
-    _computeDisplayValue(inputValue) {
-        if (this.el.dataset.toRatio) {
-            const inputValueAsNumber = Number(inputValue);
-            const ratio = inputValueAsNumber >= 0 ? 1 + inputValueAsNumber : 1 / (1 - inputValueAsNumber);
-            this.outputEl.value = `${ratio.toFixed(2)}x`;
-        } else if (this.el.dataset.displayRangeValueUnit) {
-            this.outputEl.value = inputValue + this.el.dataset.displayRangeValueUnit;
-        } else {
-            this.outputEl.value = inputValue;
-        }
-    },
+    }
     /**
      * @private
      * @param {Event} ev
      */
     _onInputInput(ev) {
-        this._value = ev.target.value;
-        if (this.displayValue) {
-            this._computeDisplayValue(this._value);
+        this.state.value = ev.target.value;
+        if (this.props.displayRangeValue) {
+            this.state._computeDisplayValue(this.state.value);
         }
         this._onUserValuePreview(ev);
-    },
-    /**
-     * @private
-     */
-    _setInputAttributes(min, max, step) {
-        this.input.setAttribute('min', min);
-        this.input.setAttribute('max', max);
-        this.input.setAttribute('step', step);
-    },
-});
+    }
+}
+registry.category("snippet_widgets").add("WeRange", WeRange);
 
 const SelectPagerUserValueWidget = SelectUserValueWidget.extend({
     className: (SelectUserValueWidget.prototype.className || '') + ' o_we_select_pager',
