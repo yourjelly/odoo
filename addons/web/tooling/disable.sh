@@ -5,7 +5,7 @@ disableInDir () {
     cd "$1" || exit
     git config --unset core.hooksPath
     rm .eslintignore
-    rm .eslintrc.json
+    rm .eslintrc.js
     rm jsconfig.json
     rm package.json
     rm package-lock.json
@@ -14,6 +14,7 @@ disableInDir () {
     # to support old versions
     rm -f .prettierignore
     rm -r .prettierrc.json
+    rm -f .eslintrc.json
 
     cd - &> /dev/null
 }
