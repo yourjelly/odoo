@@ -4,6 +4,7 @@ import * as hoot from "@odoo/hoot-dom";
 import { markup } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { utils } from "@web/core/ui/ui_service";
+import { getTag } from "@web/core/utils/xml";
 
 /**
  * @typedef {string | (actions: RunningTourActionHelper) => void | Promise<void>} RunCommand
@@ -281,7 +282,7 @@ export class RunningTourActionHelper {
     edit(text, selector) {
         const element = this._get_action_element(selector);
         hoot.click(element);
-        hoot.edit(text);
+        hoot.edit(text, { confirm: this._get_confirm_action(element) });
     }
 
     /**
@@ -415,6 +416,11 @@ export class RunningTourActionHelper {
         }
         return this.anchor;
     }
+
+    /**
+     * @param {Node} node
+     */
+    _get_confirm_action = (node) => (getTag(node, true) === "input" ? "enter" : "blur");
 
     // Useful for wysiwyg editor.
     _set_range(element, start_or_stop) {
