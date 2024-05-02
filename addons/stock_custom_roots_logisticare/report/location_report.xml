@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<data>
+
+<template id="report_generic_barcode_1">
+    <t t-call="web.basic_layout">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <div class="text-center">
+                    <table class="table table-sm table-borderless">
+                        <tr>
+                            <td>
+                                <div class="o_label_full" style="width:80mm;height:60mm;border: 1px solid black;">
+                                    <div class="o_label_name text-center">
+                                        <strong><span style="font-size: 30px;" t-field="o.name">WH/Stock</span></strong>
+                                    </div>
+                                    <div class="text-center mt-5">
+                                        <span t-if="o.barcode" t-field="o.barcode" style="padding:0"
+                                                t-options="{'widget': 'barcode', 'humanreadable': 1, 'symbology': 'auto', 'img_style': 'width:77mm;height:20mm'}">1234567890</span>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </t>
+        </t>
+    </t>
+</template>  
+
+<template id="report_generic_barcode_2">
+    <t t-call="web.basic_layout">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <div class="text-center">
+                    <table class="table table-sm table-borderless">
+                        <tr>
+                            <td>
+                                <div class="o_label_name text-center">
+                                    <strong><span style="font-size: 20px;" t-field="o.name">WH/Stock</span></strong>
+                                </div>
+                                <div class="text-center mt-1">
+                                    <span t-if="o.barcode" t-field="o.barcode" style="padding:0"
+                                            t-options="{'widget': 'barcode', 'humanreadable': 1, 'symbology': 'auto', 'img_style': 'width: 100%; height: 15mm;'}">1234567890</span>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </t>
+        </t>
+    </t>
+</template>
+
+<template id="report_location_barcode_1">
+    <t t-set="title">Locations</t>
+    <t t-call="stock_custom_roots_logisticare.report_generic_barcode_1"/>
+</template>
+<template id="report_location_barcode_2">
+    <t t-set="title">Locations</t>
+    <t t-call="stock_custom_roots_logisticare.report_generic_barcode_2"/>
+</template>
+</data>
+</odoo>

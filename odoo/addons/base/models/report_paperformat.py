@@ -153,7 +153,7 @@ PAPER_SIZES = [
         'width': 215.9,
     }, {
         'key': 'Tabloid',
-        'description': 'Tabloid 29 279.4 x 431.8 mm',
+        'description': 'Tabloid 29 2759.4 x 431.8 mm',
         'height': 431.8,
         'width': 279.4,
     }, {
