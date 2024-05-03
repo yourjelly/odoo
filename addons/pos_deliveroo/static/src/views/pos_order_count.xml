@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<templates>
+    <t t-name="pos_deliveroo.PosOrderCount">
+        <div class="oe_status btn btn-light rounded-0 pos_order_count">
+            <div class="js_connected oe_icon text-dark d-flex mb-1" t-on-click="openMenu">
+                <i class="fa fa-fw fa-bell align-self-end" role="img" aria-label="Notification" title="Notification"></i>
+                <span if="props.orderCount" class="o-pos-order-counter badge rounded-pill p-0"><t t-out="props.orderCount"/></span>
+            </div>
+            <div t-if="isBurgerMenuClosed()">
+                <ul>
+                    <li class="menu-item position-relative d-flex">
+                        <ul class="dropdown-menu sub-menu position-absolute d-flex flex-column align-items-stretch bg-white shadow-lg z-index-1">
+                            <li class="ticket-button">
+                                <a class="dropdown-item with-badge py-2">
+                                    Orders
+                                </a>
+                            </li>
+                            <li class="menu-item navbar-button">
+                                <a class="dropdown-item py-2">
+                                    Cash In/Out
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </t>
+</templates>

@@ -14,6 +14,7 @@
                     <ProxyStatus t-if="pos.config.use_proxy" />
                     <CustomerFacingDisplayButton t-if="customerFacingDisplayButtonIsShown" />
                     <SyncNotification />
+                    <PosOrderCount orderCount="state.posOrderCount" />
                 </div>
                 <div t-if="isBurgerMenuClosed()" class="navbar-button menu-button btn btn-light rounded-0 d-flex align-items-center px-3 cursor-pointer" t-on-click="openMenu">
                     <i class="fa fa-bars" aria-hidden="true"></i>

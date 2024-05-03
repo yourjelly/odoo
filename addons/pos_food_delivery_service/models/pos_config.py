@@ -23,5 +23,5 @@ class PosConfig(models.Model):
     
     def _send_delivery_order_count(self, order_id):
         order_count = self.get_delivery_order_count()
-        if self.current_session_id:
-            self._notify('DELIVERY_ORDER_COUNT', order_count, private=False)
+        # if self.current_session_id:
+        self._notify('DELIVERY_ORDER_COUNT', order_count, private=False)

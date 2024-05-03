@@ -3,6 +3,7 @@
 import { usePos } from "@point_of_sale/app/store/pos_hook";
 import { useService } from "@web/core/utils/hooks";
 
+
 import { CashierName } from "@point_of_sale/app/navbar/cashier_name/cashier_name";
 import { CustomerFacingDisplayButton } from "@point_of_sale/app/navbar/customer_facing_display_button/customer_facing_display_button";
 import { ProxyStatus } from "@point_of_sale/app/navbar/proxy_status/proxy_status";
@@ -11,6 +12,7 @@ import { SyncNotification } from "@point_of_sale/app/navbar/sync_notification/sy
 import { CashMovePopup } from "@point_of_sale/app/navbar/cash_move_popup/cash_move_popup";
 import { TicketScreen } from "@point_of_sale/app/screens/ticket_screen/ticket_screen";
 import { BackButton } from "@point_of_sale/app/navbar/back_button/back_button";
+import { PosOrderCount } from "../../../../../pos_deliveroo/static/src/components/pos_order_count";
 import { Component, useState, useExternalListener } from "@odoo/owl";
 import { ClosePosPopup } from "@point_of_sale/app/navbar/closing_popup/closing_popup";
 import { _t } from "@web/core/l10n/translation";
@@ -26,6 +28,7 @@ export class Navbar extends Component {
         SaleDetailsButton,
         SyncNotification,
         BackButton,
+        PosOrderCount,
     };
     static props = {};
     setup() {
@@ -35,9 +38,22 @@ export class Navbar extends Component {
         this.dialog = useService("dialog");
         this.notification = useService("notification");
         this.hardwareProxy = useService("hardware_proxy");
-        this.state = useState({ isMenuOpened: false });
+        this.state = useState({ isMenuOpened: false, posOrderCount: 1 });
         useExternalListener(window, "mouseup", this.onOutsideClick);
+        this.posOrderNotify = useService("pos_order_notify");
+        this.posOrderNotify.notify(this.onNotify.bind(this), this.pos.config.id);
     }
+
+    onNotify(count) {
+        this.state.posOrderCount = count;
+        this.notification.add(
+            "Order arrived",
+                {
+                    type: "info",
+                }
+        );
+    }
+
     onOutsideClick() {
         if (this.state.isMenuOpened) {
             this.state.isMenuOpened = false;
