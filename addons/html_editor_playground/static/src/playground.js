@@ -1,4 +1,4 @@
-import { Component, onWillStart, useState, xml } from "@odoo/owl";
+import { Component, onWillStart, useState, useSubEnv, xml } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { Wysiwyg, useWysiwyg } from "@html_editor/wysiwyg";
 import { loadBundle } from "@web/core/assets";
@@ -62,6 +62,7 @@ class WysiwygWrapper extends Component {
     static props = ["config", "slots"];
     setup() {
         this.editor = useWysiwyg(this.props.config);
+        this.env.playground.editor = this.editor;
     }
 }
 
@@ -98,15 +99,20 @@ export class Playground extends Component {
         this.state = useState({
             showWysiwyg: false,
             showContent: false,
+            content: ""
         });
         this.config = useState({
             showToolbar: false,
             inIframe: false,
             pluginSet: "base",
         });
+        // give a obj in env so wysiwygwrapper can write to it
+        useSubEnv({ playground: {}})
+
     }
 
     getEditorConfig() {
+        this.state.content = testHtml;
         return {
             content: testHtml,
             Plugins: PluginSets[this.config.pluginSet],
@@ -114,11 +120,20 @@ export class Playground extends Component {
             resources: {
                 inlineComponents: [counter, card],
             },
+            onChange: () => {
+                if (this.state.showContent) {
+                    this.state.content = this.getContent();
+                }
+            }
         };
     }
 
     get classList() {
         return this.config.pluginSet === "extras" ? ["odoo-editor-qweb"] : [];
+    }
+
+    getContent() {
+        return this.env.playground.editor?.getContent();
     }
 }
 
