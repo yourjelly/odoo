@@ -169,6 +169,16 @@ export class FontPlugin extends Plugin {
                 },
                 isDisabled: selection => !isSelectionInBlockRoot(selection),
             },
+            {
+                name: _t("Text"),
+                description: _t("Paragraph block"),
+                category: "format",
+                fontawesome: "fa-paragraph",
+                action(dispatch) {
+                    dispatch("SET_TAG", { tagName: "P" });
+                },
+                isDisabled: selection => !isSelectionInBlockRoot(selection),
+            },
         ],
         emptyBlockHints: [
             { selector: "H1", hint: _t("Heading 1") },
