@@ -9,7 +9,7 @@ export class PosOrderCount extends Component {
         useExternalListener(window, "mouseup", this.onOutsideClick);
     }
 
-    isBurgerMenuClosed() {
+    isOrderCountMenuClosed() {
         return !this.state.isMenuOpened;
     }
 

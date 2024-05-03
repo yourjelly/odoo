@@ -2,14 +2,52 @@
 
 <templates>
     <t t-name="pos_deliveroo.PosOrderCount">
-        <div class="oe_status btn btn-light rounded-0 pos_order_count">
-            <div class="js_connected oe_icon text-dark d-flex mb-1" t-on-click="openMenu">
-                <i class="fa fa-fw fa-bell align-self-end" role="img" aria-label="Notification" title="Notification"></i>
+        <div t-if="isOrderCountMenuClosed()" class="navbar-button menu-button btn btn-light rounded-0 d-flex align-items-center p-3 cursor-pointer" t-on-click="openMenu">
+            <i class="fa fa-fw fa-bell align-self-end" role="img" aria-label="Notification" title="Notification" aria-hidden="true"></i>
+            <span if="props.orderCount" class="o-pos-order-counter badge rounded-pill p-0"><t t-out="props.orderCount"/></span>
+        </div>
+        <div t-else="" class="navbar-button menu menu-button btn btn-light rounded-0 d-flex align-items-center px-3 cursor-pointer" t-on-click="closeMenu">
+            <ul>
+                <li class="menu-item position-relative d-flex">
+                    <i class="fa fa-fw fa-bell align-self-end" role="img" aria-label="Notification" title="Notification" aria-hidden="true"></i>
+                    <span if="props.orderCount" class="o-pos-order-counter badge rounded-pill p-0"><t t-out="props.orderCount"/></span>
+                    <ul class="dropdown-menu sub-menu position-absolute d-flex flex-column align-items-stretch bg-white shadow-lg z-index-1">
+                        <ul>
+                            <li class="dropdown-item px-3 py-2">
+                                <div class="font-bold mb-1 fw-bolder"><a>Swiggy</a></div>
+                                <ul class="d-flex justify-content-between gap-4">
+                                    <li><a><span>1</span> Awaiting</a></li>
+                                    <li><a><span>1</span> Pending</a></li>
+                                    <li><a><span>1</span> Finished</a></li>
+                                </ul>
+                            </li>
+                            <li class="dropdown-item px-3 py-2">
+                                <div class="font-bold mb-1 fw-bolder"><a>Zomato</a></div>
+                                <ul class="d-flex justify-content-between gap-4">
+                                    <li><a><span>3</span> Awaiting</a></li>
+                                    <li><a><span>2</span> Pending</a></li>
+                                    <li><a><span>4</span> Finished</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                        <!-- <div class="d-flex">
+                            <a class="dropdown-item with-badge py-2">
+                                Orders
+                            </a>
+                        </div> -->
+                    </ul>
+                </li>
+            </ul>
+        </div>
+            <!-- <div t-if="isOrderCountMenuClosed()" class="navbar-button menu-button btn btn-light rounded-0 d-flex align-items-center px-3 cursor-pointer" t-on-click="openMenu">
+                <i class="fa fa-fw fa-bell align-self-end" role="img" aria-label="Notification" title="Notification" aria-hidden="true"></i>
                 <span if="props.orderCount" class="o-pos-order-counter badge rounded-pill p-0"><t t-out="props.orderCount"/></span>
             </div>
-            <div t-if="isBurgerMenuClosed()">
+            <div t-else="" class="navbar-button menu menu-button btn btn-light rounded-0 d-flex align-items-center px-3 cursor-pointer" t-on-click="closeMenu">
                 <ul>
                     <li class="menu-item position-relative d-flex">
+                        <i class="fa fa-fw fa-bell align-self-end" role="img" aria-label="Notification" title="Notification" aria-hidden="true"></i>
+                        <span if="props.orderCount" class="o-pos-order-counter badge rounded-pill p-0"><t t-out="props.orderCount"/></span>
                         <ul class="dropdown-menu sub-menu position-absolute d-flex flex-column align-items-stretch bg-white shadow-lg z-index-1">
                             <li class="ticket-button">
                                 <a class="dropdown-item with-badge py-2">
@@ -24,7 +62,6 @@
                         </ul>
                     </li>
                 </ul>
-            </div>
-        </div>
+            </div> -->
     </t>
 </templates>
