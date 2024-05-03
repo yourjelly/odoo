@@ -21,7 +21,7 @@ class ChannelMember(models.Model):
 
     # identity
     partner_id = fields.Many2one("res.partner", "Partner", ondelete="cascade", index=True)
-    guest_id = fields.Many2one("mail.guest", "Guest", ondelete="cascade", index=True)
+    guest_id = fields.Many2one("mail.guest", "Guest", ondelete="cascade", index='btree_not_null')
     is_self = fields.Boolean(compute="_compute_is_self", search="_search_is_self")
     # channel
     channel_id = fields.Many2one("discuss.channel", "Channel", ondelete="cascade", required=True)

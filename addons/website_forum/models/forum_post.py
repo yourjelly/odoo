@@ -26,7 +26,7 @@ class Post(models.Model):
     _order = "is_correct DESC, vote_count DESC, last_activity_date DESC"
 
     name = fields.Char('Title')
-    forum_id = fields.Many2one('forum.forum', string='Forum', required=True)
+    forum_id = fields.Many2one('forum.forum', string='Forum', required=True, index=True)
     content = fields.Html('Content', strip_style=True)
     plain_content = fields.Text(
         'Plain Content',
@@ -70,7 +70,7 @@ class Post(models.Model):
     is_correct = fields.Boolean('Correct', help='Correct answer or answer accepted')
     parent_id = fields.Many2one(
         'forum.post', string='Question',
-        ondelete='cascade', readonly=True, index=True)
+        ondelete='cascade', readonly=True, index='btree_not_null')
     self_reply = fields.Boolean('Reply to own question', compute='_compute_self_reply', store=True)
     child_ids = fields.One2many(
         'forum.post', 'parent_id', string='Post Answers',
@@ -87,7 +87,7 @@ class Post(models.Model):
 
     # closing
     closed_reason_id = fields.Many2one('forum.post.reason', string='Reason', copy=False)
-    closed_uid = fields.Many2one('res.users', string='Closed by', readonly=True, copy=False)
+    closed_uid = fields.Many2one('res.users', string='Closed by', readonly=True, copy=False, index='btree_not_null')
     closed_date = fields.Datetime('Closed on', readonly=True, copy=False)
 
     # karma calculation and access

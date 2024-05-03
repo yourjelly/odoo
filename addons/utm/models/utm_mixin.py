@@ -17,7 +17,7 @@ class UtmMixin(models.AbstractModel):
     campaign_id = fields.Many2one('utm.campaign', 'Campaign',
                                   help="This is a name that helps you keep track of your different campaign efforts, e.g. Fall_Drive, Christmas_Special")
     source_id = fields.Many2one('utm.source', 'Source',
-                                help="This is the source of the link, e.g. Search Engine, another domain, or name of email list")
+                                help="This is the source of the link, e.g. Search Engine, another domain, or name of email list", index='btree_not_null')
     medium_id = fields.Many2one('utm.medium', 'Medium',
                                 help="This is the method of delivery, e.g. Postcard, Email, or Banner Ad")
 

@@ -13,7 +13,7 @@ class LinkTracker(models.Model):
 class LinkTrackerClick(models.Model):
     _inherit = "link.tracker.click"
 
-    mailing_trace_id = fields.Many2one('mailing.trace', string='Mail Statistics')
+    mailing_trace_id = fields.Many2one('mailing.trace', string='Mail Statistics', index='btree_not_null')
     mass_mailing_id = fields.Many2one('mailing.mailing', string='Mass Mailing')
 
     def _prepare_click_values_from_route(self, **route_values):

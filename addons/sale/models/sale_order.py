@@ -72,7 +72,7 @@ class SaleOrder(models.Model):
         default='draft')
     locked = fields.Boolean(default=False, copy=False, help="Locked orders cannot be modified.")
 
-    client_order_ref = fields.Char(string="Customer Reference", copy=False)
+    client_order_ref = fields.Char(string="Customer Reference", copy=False, index='btree_not_null')
     create_date = fields.Datetime(  # Override of default create_date field from ORM
         string="Creation Date", index=True, readonly=True)
     commitment_date = fields.Datetime(
@@ -251,7 +251,8 @@ class SaleOrder(models.Model):
         comodel_name='account.analytic.account',
         string="Analytic Account",
         copy=False, check_company=True,  # Unrequired company
-        domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]")
+        domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]",
+        index='btree_not_null')
     tag_ids = fields.Many2many(
         comodel_name='crm.tag',
         relation='sale_order_tag_rel', column1='order_id', column2='tag_id',

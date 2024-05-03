@@ -8,7 +8,7 @@ class EventRegistration(models.Model):
     _name = 'event.registration'
     _inherit = ['event.registration']
 
-    visitor_id = fields.Many2one('website.visitor', string='Visitor', ondelete='set null')
+    visitor_id = fields.Many2one('website.visitor', string='Visitor', ondelete='set null', index='btree_not_null')
     registration_answer_ids = fields.One2many('event.registration.answer', 'registration_id', string='Attendee Answers')
     registration_answer_choice_ids = fields.One2many('event.registration.answer', 'registration_id', string='Attendee Selection Answers',
         domain=[('question_type', '=', 'simple_choice')])

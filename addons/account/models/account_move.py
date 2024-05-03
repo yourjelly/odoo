@@ -258,7 +258,7 @@ class AccountMove(models.Model):
 
     # === Hash Fields === #
     restrict_mode_hash_table = fields.Boolean(related='journal_id.restrict_mode_hash_table')
-    secure_sequence_number = fields.Integer(string="Inalteralbility No Gap Sequence #", readonly=True, copy=False, index=True)
+    secure_sequence_number = fields.Integer(string="Inalteralbility No Gap Sequence #", readonly=True, copy=False, index='btree_not_null')
     inalterable_hash = fields.Char(string="Inalterability Hash", readonly=True, copy=False)
     string_to_hash = fields.Char(compute='_compute_string_to_hash', readonly=True)
 
@@ -277,13 +277,13 @@ class AccountMove(models.Model):
     # === Date fields === #
     invoice_date = fields.Date(
         string='Invoice/Bill Date',
-        index=True,
+        index='btree_not_null',
         copy=False,
     )
     invoice_date_due = fields.Date(
         string='Due Date',
         compute='_compute_invoice_date_due', store=True, readonly=False,
-        index=True,
+        index='btree_not_null',
         copy=False,
     )
     delivery_date = fields.Date(

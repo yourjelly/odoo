@@ -28,6 +28,7 @@ class KarmaTracking(models.Model):
         string='Source',
         selection=lambda self: self._get_origin_selection_values(),
         default=lambda self: f'res.users,{self.env.user.id}',
+        index='btree_not_null',
     )
     origin_ref_model_name = fields.Selection(
         string='Source Type', selection=lambda self: self._get_origin_selection_values(),

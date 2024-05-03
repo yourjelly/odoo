@@ -17,7 +17,7 @@ class Channel(models.Model):
         ('payment', 'On payment')
     ], ondelete={'payment': lambda recs: recs.write({'enroll': 'invite'})})
     product_id = fields.Many2one('product.product', 'Product', domain=[('detailed_type', '=', 'course')],
-                                 default=_get_default_product_id)
+                                 default=_get_default_product_id, index='btree_not_null')
     product_sale_revenues = fields.Monetary(
         string='Total revenues', compute='_compute_product_sale_revenues',
         groups="sales_team.group_sale_salesman")

@@ -10,7 +10,7 @@ class EventRegistration(models.Model):
 
     # TDE FIXME: maybe add an onchange on sale_order_id
     sale_order_id = fields.Many2one('sale.order', string='Sales Order', ondelete='cascade', copy=False)
-    sale_order_line_id = fields.Many2one('sale.order.line', string='Sales Order Line', ondelete='cascade', copy=False)
+    sale_order_line_id = fields.Many2one('sale.order.line', string='Sales Order Line', ondelete='cascade', copy=False, index='btree_not_null')
     sale_status = fields.Selection(string="Sale Status", selection=[
             ('to_pay', 'Not Sold'),
             ('sold', 'Sold'),
