@@ -16,6 +16,7 @@ import { DIRECTIONS } from "@html_editor/utils/position";
 import { _t } from "@web/core/l10n/translation";
 import { FontSelector } from "./font_selector";
 import { isSelectionInBlockRoot } from "@html_editor/utils/selection";
+import { closestBlock } from "@html_editor/utils/blocks";
 
 const fontItems = [
     {
@@ -147,7 +148,10 @@ export class FontPlugin extends Plugin {
                 action(dispatch) {
                     dispatch("SET_TAG", { tagName: "H1" });
                 },
-                isDisabled: selection => !isSelectionInBlockRoot(selection),
+                isDisabled: selection => (
+                    !isSelectionInBlockRoot(selection) ||
+                    closestBlock(selection.anchorNode)?.nodeName === 'H1'
+                ),
             },
             {
                 name: _t("Heading 2"),
@@ -157,7 +161,10 @@ export class FontPlugin extends Plugin {
                 action(dispatch) {
                     dispatch("SET_TAG", { tagName: "H2" });
                 },
-                isDisabled: selection => !isSelectionInBlockRoot(selection),
+                isDisabled: selection => (
+                    !isSelectionInBlockRoot(selection) ||
+                    closestBlock(selection.anchorNode)?.nodeName === 'H2'
+                ),
             },
             {
                 name: _t("Heading 3"),
@@ -167,7 +174,10 @@ export class FontPlugin extends Plugin {
                 action(dispatch) {
                     dispatch("SET_TAG", { tagName: "H3" });
                 },
-                isDisabled: selection => !isSelectionInBlockRoot(selection),
+                isDisabled: selection => (
+                    !isSelectionInBlockRoot(selection) ||
+                    closestBlock(selection.anchorNode)?.nodeName === 'H3'
+                ),
             },
             {
                 name: _t("Text"),
@@ -177,7 +187,10 @@ export class FontPlugin extends Plugin {
                 action(dispatch) {
                     dispatch("SET_TAG", { tagName: "P" });
                 },
-                isDisabled: selection => !isSelectionInBlockRoot(selection),
+                isDisabled: selection => (
+                    !isSelectionInBlockRoot(selection) ||
+                    closestBlock(selection.anchorNode)?.nodeName === 'P'
+                ),
             },
         ],
         emptyBlockHints: [
