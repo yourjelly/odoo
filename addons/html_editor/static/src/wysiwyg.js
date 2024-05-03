@@ -20,55 +20,14 @@ function copyCssRules(sourceDoc, targetDoc) {
 }
 
 /**
- * @param {string | Function} target
  * @param {EditorConfig} config
  * @returns Editor
  */
-export function useWysiwyg(target, config = {}, copyCss = false) {
+export function useWysiwyg(config = {}) {
     const comp = useComponent();
     const env = comp.env;
-    /** @type { EditorConfig } */
-    const _config = Object.assign(Object.create(config), {
-        // grab app and env for inline component plugin, if needed
-        inlineComponentInfo: { app: comp.__owl__.app, env },
-    });
-    const editor = new Editor(_config, env.services);
+    const editor = new Editor(config, env.services);
 
-    const ref = typeof target === "string" ? useRef(target) : null;
-    onMounted(() => {
-        const el = typeof target === "string" ? ref.el : target();
-        if (el.tagName === "IFRAME") {
-            // grab the inner body instead
-            const attachEditor = () => {
-                if (!editor.isDestroyed) {
-                    if (copyCss) {
-                        copyCssRules(document, el.contentDocument);
-                    }
-                    const additionalClasses = el.dataset.class?.split(" ");
-                    for (const c of additionalClasses) {
-                        el.contentDocument.body.classList.add(c);
-                    }
-                    editor.attachTo(el.contentDocument.body);
-                }
-            };
-            if (el.contentDocument.readyState === "complete") {
-                attachEditor();
-            } else {
-                // in firefox, iframe is not immediately available. we need to wait
-                // for it to be ready before mounting editor
-                el.addEventListener(
-                    "load",
-                    () => {
-                        attachEditor();
-                        comp.render();
-                    },
-                    { once: true }
-                );
-            }
-        } else {
-            editor.attachTo(el);
-        }
-    });
     onWillDestroy(() => editor.destroy(true));
     return editor;
 }
@@ -77,7 +36,7 @@ export class Wysiwyg extends Component {
     static template = "html_editor.Wysiwyg";
     static components = { Toolbar };
     static props = {
-        config: { type: Object, optional: true },
+        editor: Editor,
         class: { type: String, optional: true },
         style: { type: String, optional: true },
         toolbar: { type: Boolean, optional: true },
@@ -90,16 +49,50 @@ export class Wysiwyg extends Component {
             showToolbar: false,
         });
         const overlayRef = useRef("localOverlay");
-        const config = Object.assign(this.props.config || {}, {
+        const contentRef = useRef("content");
+        this.editor = this.props.editor;
+        this.editor.updateConfig({
+            inlineComponentInfo: { app: this.__owl__.app, env: this.env },
             getLocalOverlayContainer: () => overlayRef?.el,
             disableFloatingToolbar: this.props.toolbar,
         });
-        this.editor = useWysiwyg("content", config, this.props.copyCss);
 
         onMounted(() => {
             // now that component is mounted, editor is attached to el, and
             // plugins are started, so we can allow the toolbar to be displayed
             this.state.showToolbar = true;
+            const el = contentRef.el;
+            if (el.tagName === "IFRAME") {
+                // grab the inner body instead
+                const attachEditor = () => {
+                    if (!this.editor.isDestroyed) {
+                        if (this.props.copyCss) {
+                            copyCssRules(document, el.contentDocument);
+                        }
+                        const additionalClasses = el.dataset.class?.split(" ");
+                        for (const c of additionalClasses) {
+                            el.contentDocument.body.classList.add(c);
+                        }
+                        this.editor.attachTo(el.contentDocument.body);
+                    }
+                };
+                if (el.contentDocument.readyState === "complete") {
+                    attachEditor();
+                } else {
+                    // in firefox, iframe is not immediately available. we need to wait
+                    // for it to be ready before mounting editor
+                    el.addEventListener(
+                        "load",
+                        () => {
+                            attachEditor();
+                            this.render();
+                        },
+                        { once: true }
+                    );
+                }
+            } else {
+                this.editor.attachTo(el);
+            }
         });
     }
 }

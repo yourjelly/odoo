@@ -90,6 +90,10 @@ export class Editor {
         this.startPlugins();
     }
 
+    updateConfig(obj) {
+        this.config = Object.assign({}, this.config, obj);
+    }
+
     startPlugins() {
         const Plugins = sortPlugins(this.config.Plugins || MAIN_PLUGINS);
         const plugins = new Map();
@@ -177,9 +181,8 @@ export class Editor {
 
     getContent() {
         const el = this.editable.cloneNode(true);
-        this.dispatch("CLEAN_NODE", { root: el});
+        this.dispatch("CLEAN_NODE", { root: el });
         return el.innerHTML;
-
     }
 
     destroy(willBeRemoved) {

@@ -1,6 +1,6 @@
 import { Component, onWillStart, useState, xml } from "@odoo/owl";
 import { registry } from "@web/core/registry";
-import { Wysiwyg } from "@html_editor/wysiwyg";
+import { Wysiwyg, useWysiwyg } from "@html_editor/wysiwyg";
 import { loadBundle } from "@web/core/assets";
 import { MAIN_PLUGINS, CORE_PLUGINS, EXTRA_PLUGINS } from "@html_editor/plugin_sets";
 import { counter } from "./counter";
@@ -57,6 +57,14 @@ const PluginSets = {
     extras: EXTRA_PLUGINS,
 };
 
+class WysiwygWrapper extends Component {
+    static template = xml`<t t-slot="default" editor="editor" />`
+    static props = ["config", "slots"];
+    setup() {
+        this.editor = useWysiwyg(this.props.config);
+    }
+}
+
 class WysiwygLoader extends Component {
     static template = xml`
         <CurrentWysiwyg options="this.wysiwygOptions" startWysiwyg="startWysiwyg" />
@@ -83,12 +91,13 @@ class WysiwygLoader extends Component {
 
 export class Playground extends Component {
     static template = "html_editor.Playground";
-    static components = { Wysiwyg, WysiwygLoader };
+    static components = { WysiwygWrapper, Wysiwyg, WysiwygLoader };
     static props = ["*"];
 
     setup() {
         this.state = useState({
             showWysiwyg: false,
+            showContent: false,
         });
         this.config = useState({
             showToolbar: false,
@@ -97,7 +106,7 @@ export class Playground extends Component {
         });
     }
 
-    getConfig() {
+    getEditorConfig() {
         return {
             content: testHtml,
             Plugins: PluginSets[this.config.pluginSet],
