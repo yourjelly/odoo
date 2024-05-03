@@ -4,6 +4,7 @@ import { reactive } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { TableMenu } from "./table_menu";
 import { TablePicker } from "./table_picker";
+import { isSelectionInBlockRoot } from "@html_editor/utils/selection";
 
 /**
  * This plugin only contains the table ui feature (table picker, menus, ...).
@@ -23,6 +24,7 @@ export class TableUIPlugin extends Plugin {
                 action(dispatch) {
                     dispatch("OPEN_TABLE_PICKER");
                 },
+                isDisabled: selection => !isSelectionInBlockRoot(selection),
             },
         ],
     });

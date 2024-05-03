@@ -1,5 +1,5 @@
 import { DIRECTIONS } from "@html_editor/utils/position";
-import { ensureFocus, getCursorDirection } from "@html_editor/utils/selection";
+import { ensureFocus, getCursorDirection, isSelectionInBlockRoot } from "@html_editor/utils/selection";
 import { describe, expect, test } from "@odoo/hoot";
 import { dispatch } from "@odoo/hoot-dom";
 import { insertText, setupEditor, testEditor } from "../_helpers/editor";
@@ -678,5 +678,20 @@ describe("getSelectedNodes", () => {
                 expect(result).toEqual([cd, b, e]);
             },
         });
+    });
+});
+
+describe("isSelectionInBlockRoot", () => {
+    test("should return true if the selection is in a paragraph", async () => {
+        const { editor } = await setupEditor("<p>ab[]cd</p>", { config: { allowInlineAtRoot: true } });
+        expect(isSelectionInBlockRoot(editor.shared.getEditableSelection())).toBe(true);
+    });
+    test("should return false if the selection is directly in the editable", async () => {
+        const { editor } = await setupEditor("ab[]cd", { config: { allowInlineAtRoot: true } });
+        expect(isSelectionInBlockRoot(editor.shared.getEditableSelection())).toBe(false);
+    });
+    test("should return false if the selection is in a span directly in the editable", async () => {
+        const { editor } = await setupEditor("<span>ab[]cd</span>", { config: { allowInlineAtRoot: true } });
+        expect(isSelectionInBlockRoot(editor.shared.getEditableSelection())).toBe(false);
     });
 });

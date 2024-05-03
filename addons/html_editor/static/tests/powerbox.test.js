@@ -13,6 +13,7 @@ import {
 import { setupEditor } from "./_helpers/editor";
 import { getContent } from "./_helpers/selection";
 import { insertText } from "./_helpers/user_actions";
+import { closestElement } from "@html_editor/utils/dom_traversal";
 
 function commandNames() {
     return queryAllTexts(".o-we-command-name");
@@ -54,7 +55,7 @@ describe("search", () => {
         const { el, editor } = await setupEditor("<p>ab[]</p>");
         insertText(editor, "/");
         await animationFrame();
-        expect(commandNames(el).length).toBe(17);
+        expect(commandNames(el).length).toBe(16);
         insertText(editor, "head");
         await animationFrame();
         expect(commandNames(el)).toEqual(["Heading 1", "Heading 2", "Heading 3"]);
@@ -64,7 +65,7 @@ describe("search", () => {
         const { el, editor } = await setupEditor("<p>ab[]</p>");
         insertText(editor, "/");
         await animationFrame();
-        expect(commandNames(el).length).toBe(17);
+        expect(commandNames(el).length).toBe(16);
         expect(".o-we-category").toHaveCount(4);
         expect(queryAllTexts(".o-we-category")).toEqual([
             "STRUCTURE",
@@ -83,7 +84,7 @@ describe("search", () => {
         const { el, editor } = await setupEditor("<p>ab[]</p>", { inIFrame: true });
         insertText(editor, "/");
         await animationFrame();
-        expect(commandNames(el).length).toBe(17);
+        expect(commandNames(el).length).toBe(16);
         insertText(editor, "head");
         await animationFrame();
         expect(commandNames(el)).toEqual(["Heading 1", "Heading 2", "Heading 3"]);
@@ -132,7 +133,7 @@ describe("search", () => {
         insertText(editor, "/");
         await animationFrame();
         expect(".o-we-powerbox").toHaveCount(1);
-        expect(commandNames(el).length).toBe(17);
+        expect(commandNames(el).length).toBe(16);
 
         insertText(editor, "headx");
         await animationFrame();
@@ -381,6 +382,9 @@ class NoOpPlugin extends Plugin {
                 action(dispatch) {
                     dispatch("NO_OP");
                 },
+                isDisabled(selection) {
+                    return closestElement(selection.anchorNode, 'p.no-no-op');
+                },
             },
         ],
     });
@@ -547,4 +551,30 @@ test("click on a command", async () => {
 
     click(".o-we-command-name:last");
     expect(getContent(el)).toBe("<h3>ab[]</h3>");
+});
+
+test("hide contextually disabled command", async () => {
+    const { editor, el } = await setupEditor(
+        `<p>ab[]cd</p><p class="no-no-op">efgh</p>`,
+        { config: { Plugins: [...MAIN_PLUGINS, NoOpPlugin] }},
+    );
+    // First check that the command does appear in a paragraph.
+    insertText(editor, "/no-op");
+    await animationFrame();
+    expect(commandNames(el)).toEqual(["No-op"]);
+
+    // Close the Powerbox.
+    press("Enter");
+    await animationFrame();
+    expect(".o-we-powerbox").toHaveCount(0);
+
+    // Move the selection to the no-no-op element.
+    editor.shared.setSelection({ anchorNode: el.children[1].firstChild, anchorOffset: 2 });
+    expect(getContent(el)).toBe(`<p>abcd</p><p class="no-no-op">ef[]gh</p>`);
+
+    // Check that the command doesn't appear in the no-no-op element.
+    insertText(editor, "/no-op");
+    await animationFrame();
+    expect(commandNames(el)).toEqual([]);
+    expect(".o-we-powerbox").toHaveCount(0);
 });

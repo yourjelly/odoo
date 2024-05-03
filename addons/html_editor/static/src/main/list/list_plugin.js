@@ -19,7 +19,7 @@ import {
     insertListAfter,
     isListItem,
 } from "./utils";
-import { callbacksForCursorUpdate } from "@html_editor/utils/selection";
+import { callbacksForCursorUpdate, isSelectionInBlockRoot } from "@html_editor/utils/selection";
 
 function isListActive(listMode) {
     return (selection) => {
@@ -77,6 +77,7 @@ export class ListPlugin extends Plugin {
                 action(dispatch) {
                     dispatch("TOGGLE_LIST", { mode: "UL" });
                 },
+                isDisabled: selection => !isSelectionInBlockRoot(selection),
             },
             {
                 name: _t("Numbered list"),
@@ -86,16 +87,17 @@ export class ListPlugin extends Plugin {
                 action(dispatch) {
                     dispatch("TOGGLE_LIST", { mode: "OL" });
                 },
+                isDisabled: selection => !isSelectionInBlockRoot(selection),
             },
             {
                 name: _t("Checklist"),
                 description: _t("Track tasks with a checklist"),
                 category: "structure",
-
                 fontawesome: "fa-check-square-o",
                 action(dispatch) {
                     dispatch("TOGGLE_LIST", { mode: "CL" });
                 },
+                isDisabled: selection => !isSelectionInBlockRoot(selection),
             },
         ],
         emptyBlockHints: [

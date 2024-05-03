@@ -2,6 +2,7 @@ import { isBlock } from "./blocks";
 import { isNotEditableNode, isSelfClosingElement } from "./dom_info";
 import { isFakeLineBreak } from "./dom_state";
 import { closestElement, createDOMPathGenerator } from "./dom_traversal";
+import { closestBlock } from "./blocks";
 import {
     DIRECTIONS,
     childNodeIndex,
@@ -182,6 +183,24 @@ function updateCursorBeforeUnwrap(node, cursor) {
     } else if (cursor.node === node.parentNode && cursor.offset > childNodeIndex(node)) {
         cursor.offset += nodeSize(node) - 1;
     }
+}
+
+/**
+ * Returns true if the current selection is in at least one block Element
+ * relative to the current contentEditable root.
+ *
+ * @returns {boolean}
+ */
+export function isSelectionInBlockRoot(selection) {
+    const editableSelector = ".o_editable, .odoo-editor-editable";
+    const editable = selection && closestElement(selection.anchorNode, editableSelector);
+    const block = selection && closestBlock(selection.anchorNode);
+    return (
+        !!block &&
+        editable?.contains(block) &&
+        !block.matches(editableSelector) &&
+        !block.querySelector(editableSelector)
+    );
 }
 
 /** @typedef {import("@html_editor/core/selection_plugin").Cursor} Cursor */

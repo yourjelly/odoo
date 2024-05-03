@@ -15,6 +15,7 @@ import {
 import { DIRECTIONS } from "@html_editor/utils/position";
 import { _t } from "@web/core/l10n/translation";
 import { FontSelector } from "./font_selector";
+import { isSelectionInBlockRoot } from "@html_editor/utils/selection";
 
 const fontItems = [
     {
@@ -146,6 +147,7 @@ export class FontPlugin extends Plugin {
                 action(dispatch) {
                     dispatch("SET_TAG", { tagName: "H1" });
                 },
+                isDisabled: selection => !isSelectionInBlockRoot(selection),
             },
             {
                 name: _t("Heading 2"),
@@ -155,16 +157,17 @@ export class FontPlugin extends Plugin {
                 action(dispatch) {
                     dispatch("SET_TAG", { tagName: "H2" });
                 },
+                isDisabled: selection => !isSelectionInBlockRoot(selection),
             },
             {
                 name: _t("Heading 3"),
                 description: _t("Small section heading"),
                 category: "format",
-
                 fontawesome: "fa-header",
                 action(dispatch) {
                     dispatch("SET_TAG", { tagName: "H3" });
                 },
+                isDisabled: selection => !isSelectionInBlockRoot(selection),
             },
         ],
         emptyBlockHints: [

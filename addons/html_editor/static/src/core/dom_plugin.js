@@ -15,6 +15,7 @@ import {
 import { closestElement, descendants } from "../utils/dom_traversal";
 import { FONT_SIZE_CLASSES, TEXT_STYLE_CLASSES } from "../utils/formatting";
 import { DIRECTIONS, childNodeIndex, rightPos, startPos } from "../utils/position";
+import { isSelectionInBlockRoot } from "@html_editor/utils/selection";
 
 export class DomPlugin extends Plugin {
     static name = "dom";
@@ -29,6 +30,7 @@ export class DomPlugin extends Plugin {
             action(dispatch) {
                 dispatch("INSERT_SEPARATOR");
             },
+            isDisabled: selection => !isSelectionInBlockRoot(selection),
         },
     });
     contentEditableToRemove = new Set();

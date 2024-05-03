@@ -69,9 +69,10 @@ export class SearchPowerboxPlugin extends Plugin {
      * @param {string} searchTerm
      */
     filterCommands(searchTerm) {
+        const selection = this.shared.getEditableSelection();
         return fuzzyLookup(searchTerm.toLowerCase(), this.commands, (cmd) =>
             (cmd.name + cmd.description + cmd.categoryName).toLowerCase()
-        );
+        ).filter(command => !command.isDisabled?.(selection));
     }
     /**
      * @param {EditorSelection} selection

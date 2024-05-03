@@ -1,6 +1,7 @@
 import { _t } from "@web/core/l10n/translation";
 import { Plugin } from "@html_editor/plugin";
 import { closestElement } from "../utils/dom_traversal";
+import { isSelectionInBlockRoot } from "../utils/selection";
 import { ChatGPTPromptDialog } from "./chatgpt_prompt_dialog"
 import { ChatGPTAlternativesDialog } from "./chatgpt_alternatives_dialog";
 
@@ -30,7 +31,7 @@ export class ChatGPTPlugin extends Plugin {
             action(dispatch) {
                 dispatch("OPEN_CHATGPT_DIALOG");
             },
-            // isDisabled: () => !this.odooEditor.isSelectionInBlockRoot(), // TODO!
+            isDisabled: selection => !isSelectionInBlockRoot(selection),
         },
     });
 

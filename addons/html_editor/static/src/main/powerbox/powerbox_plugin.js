@@ -16,6 +16,7 @@ import { Powerbox } from "./powerbox";
  * @property {string} category
  * @property {string} fontawesome
  * @property {Function} action
+ * @property {Function} [isDisabled]
  *
  * @typedef {Object} CommandGroup
  * @property {string} id
@@ -77,14 +78,16 @@ export class PowerboxPlugin extends Plugin {
      * @param {Category[]?} categories
      */
     updatePowerbox(commands, categories) {
+        const selection = this.shared.getEditableSelection();
+        commands = commands.filter(command => !command.isDisabled?.(selection));
+        if (!commands.length) {
+            this.closePowerbox();
+            return;
+        }
         if (categories) {
-            const orderCommands = [];
-            for (const category of categories) {
-                orderCommands.push(
-                    ...commands.filter((command) => command.category === category.id)
-                );
-            }
-            commands = orderCommands;
+            commands = categories.flatMap(category => (
+                commands.filter(command => command.category === category.id)
+            ));
         }
         Object.assign(this.state, {
             showCategories: !!categories,

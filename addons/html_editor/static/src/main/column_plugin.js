@@ -3,6 +3,7 @@ import { Plugin } from "@html_editor/plugin";
 import { closestBlock } from "@html_editor/utils/blocks";
 import { unwrapContents } from "@html_editor/utils/dom";
 import { closestElement } from "@html_editor/utils/dom_traversal";
+import { isSelectionInBlockRoot } from "@html_editor/utils/selection";
 
 const REGEX_BOOTSTRAP_COLUMN = /(?:^| )col(-[a-zA-Z]+)?(-\d+)?(?:$| )/;
 
@@ -35,6 +36,10 @@ export class ColumnPlugin extends Plugin {
                 action(dispatch) {
                     dispatch("COLUMNIZE", { numberOfColumns: 2 });
                 },
+                isDisabled: selection => (
+                    !isSelectionInBlockRoot(selection) ||
+                    closestElement(selection.anchorNode, '.o_text_columns .row')?.childElementCount === 2
+                ),
             },
             {
                 name: _t("3 columns"),
@@ -44,6 +49,10 @@ export class ColumnPlugin extends Plugin {
                 action(dispatch) {
                     dispatch("COLUMNIZE", { numberOfColumns: 3 });
                 },
+                isDisabled: selection => (
+                    !isSelectionInBlockRoot(selection) ||
+                    closestElement(selection.anchorNode, '.o_text_columns .row')?.childElementCount === 3
+                ),
             },
             {
                 name: _t("4 columns"),
@@ -53,6 +62,10 @@ export class ColumnPlugin extends Plugin {
                 action(dispatch) {
                     dispatch("COLUMNIZE", { numberOfColumns: 4 });
                 },
+                isDisabled: selection => (
+                    !isSelectionInBlockRoot(selection) ||
+                    closestElement(selection.anchorNode, '.o_text_columns .row')?.childElementCount === 4
+                ),
             },
             {
                 name: _t("Remove columns"),
@@ -62,6 +75,10 @@ export class ColumnPlugin extends Plugin {
                 action(dispatch) {
                     dispatch("COLUMNIZE", { numberOfColumns: 0 });
                 },
+                isDisabled: selection => (
+                    !isSelectionInBlockRoot(selection) ||
+                    !closestElement(selection.anchorNode, '.o_text_columns .row')
+                ),
             },
         ],
         emptyBlockHints: [
