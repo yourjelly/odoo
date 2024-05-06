@@ -60,6 +60,8 @@
                 <tree string="Task Stage" delete="0" sample="1" multi_edit="1" editable="bottom" open_form_view="True">
                     <field name="sequence" widget="handle" optional="show"/>
                     <field name="name" placeholder="e.g. To Do"/>
+                    <field name="mail_template_id" optional="hide"/>
+                    <field name="project_ids" required="1" optional="hide" widget="many2many_tags" options="{'color_field': 'color'}"/>
                     <field name="fold" optional="show"/>
                 </tree>
             </field>
@@ -75,9 +77,7 @@
                     <attribute name="default_group_by">project_ids</attribute>
                 </xpath>
                 <xpath expr="//field[@name='name']" position="after">
-                    <field name="mail_template_id" optional="hide"/>
                     <field name="rating_template_id" optional="hide" groups="project.group_project_rating"/>
-                    <field name="project_ids" required="1" optional="show" widget="many2many_tags" options="{'color_field': 'color'}"/>
                 </xpath>
             </field>
         </record>
