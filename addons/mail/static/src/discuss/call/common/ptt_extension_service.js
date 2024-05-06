@@ -10,9 +10,15 @@ export const pttExtensionHookService = {
         let isEnabled = false;
         let voiceActivated = false;
 
-        browser.addEventListener("message", ({ data }) => {
+        function sendToExtension(eventType, value) {
+            window.postMessage({ from: "discuss", type: eventType, value }, location.origin);
+        }
+
+        browser.addEventListener("message", ({ data, origin, source }) => {
             const rtc = env.services["discuss.rtc"];
             if (
+                origin !== location.origin ||
+                source !== window ||
                 data.from !== "discuss-push-to-talk" ||
                 (!rtc && data.type !== "answer-is-enabled")
             ) {
@@ -48,18 +54,18 @@ export const pttExtensionHookService = {
                     break;
             }
         });
-        window.postMessage({ from: "discuss", type: "ask-is-enabled" });
+        sendToExtension("ask-is-enabled");
 
         return {
             notifyIsTalking(isTalking) {
-                window.postMessage({ from: "discuss", type: "is-talking", value: isTalking });
+                sendToExtension("is-talking", isTalking);
             },
             subscribe() {
-                window.postMessage({ from: "discuss", type: "subscribe" });
+                sendToExtension("subscribe");
             },
             unsubscribe() {
                 voiceActivated = false;
-                window.postMessage({ from: "discuss", type: "unsubscribe" });
+                sendToExtension("unsubscribe");
             },
             get isEnabled() {
                 return isEnabled;
