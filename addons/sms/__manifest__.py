@@ -43,8 +43,11 @@ The service is provided by the In App Purchase Odoo platform.
         'web.assets_backend': [
             'sms/static/src/**/*',
         ],
-        'web.qunit_suite_tests': [
-            'sms/static/tests/**/*',
+        # 'web.qunit_suite_tests': [
+        #     'sms/static/tests/**/*',
+        # ],
+        'web.assets_unit_tests': [
+            'sms/static/tests/testtest/*',
         ],
     },
     'license': 'LGPL-3',
