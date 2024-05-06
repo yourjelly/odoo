@@ -2,9 +2,9 @@ import { Component, useState } from "@odoo/owl";
 
 import { useService } from "@web/core/utils/hooks";
 
-export class ProjectList extends Component {
+export class LanguageList extends Component {
     static props = {};
-    static template = "t9n.ProjectList";
+    static template = "t9n.LanguageList";
 
     setup() {
         this.action = useService("action");
@@ -18,33 +18,31 @@ export class ProjectList extends Component {
             },
         });
         this.store = useState(useService("t9n.store"));
-        this.store.fetchProjects();
+        this.store.fetchLanguages();
     }
 
-    get projects() {
+    get languages() {
         const searchTerms = this.state.filters.searchText.trim().toUpperCase();
-        const projects = searchTerms
-            ? this.store.projects.filter((p) => p.name.toUpperCase().includes(searchTerms))
-            : [...this.store.projects];
+        const languages = searchTerms
+            ? this.store.languages.filter((l) => l.name.toUpperCase().includes(searchTerms))
+            : [...this.store.languages];
 
-        projects.sort((p1, p2) => {
-            let p1Col = p1[this.state.sorting.column];
-            let p2Col = p2[this.state.sorting.column];
+        languages.sort((l1, l2) => {
+            let l1Col = l1[this.state.sorting.column];
+            let l2Col = l2[this.state.sorting.column];
 
-            if (this.state.sorting.column !== "resource_count") {
-                p1Col = p1Col.toLowerCase();
-                p2Col = p2Col.toLowerCase();
-            }
+            l1Col = l1Col.toLowerCase();
+            l2Col = l2Col.toLowerCase();
 
-            if (p1Col < p2Col) {
+            if (l1Col < l2Col) {
                 return this.state.sorting.order === "asc" ? -1 : 1;
             }
-            if (p1Col > p2Col) {
+            if (l1Col > l2Col) {
                 return this.state.sorting.order === "asc" ? 1 : -1;
             }
             return 0;
         });
-        return projects;
+        return languages;
     }
 
     onClickColumnName(column) {
@@ -56,15 +54,12 @@ export class ProjectList extends Component {
         }
     }
 
-    onClickProject(id) {
-        this.store.setProjectId(id);
+    onClickLanguage(id) {
+        this.store.setTargetLangId(id);
         this.action.doAction({
             type: "ir.actions.client",
-            tag: "t9n.open_target_langs",
+            tag: "t9n.open_resource_list",
             target: "current",
-            context: {
-                project_id: id,
-            },
         });
     }
 }

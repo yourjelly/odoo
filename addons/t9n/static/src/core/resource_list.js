@@ -2,9 +2,9 @@ import { Component, useState } from "@odoo/owl";
 
 import { useService } from "@web/core/utils/hooks";
 
-export class ProjectList extends Component {
+export class ResourceList extends Component {
     static props = {};
-    static template = "t9n.ProjectList";
+    static template = "t9n.ResourceList";
 
     setup() {
         this.action = useService("action");
@@ -13,38 +13,36 @@ export class ProjectList extends Component {
                 searchText: "",
             },
             sorting: {
-                column: "name",
+                column: "fileName",
                 order: "asc",
             },
         });
         this.store = useState(useService("t9n.store"));
-        this.store.fetchProjects();
+        this.store.fetchResources();
     }
 
-    get projects() {
+    get resources() {
         const searchTerms = this.state.filters.searchText.trim().toUpperCase();
-        const projects = searchTerms
-            ? this.store.projects.filter((p) => p.name.toUpperCase().includes(searchTerms))
-            : [...this.store.projects];
+        const resources = searchTerms
+            ? this.store.resources.filter((r) => r.fileName.toUpperCase().includes(searchTerms))
+            : [...this.store.resources];
 
-        projects.sort((p1, p2) => {
-            let p1Col = p1[this.state.sorting.column];
-            let p2Col = p2[this.state.sorting.column];
+        resources.sort((r1, r2) => {
+            let r1Col = r1[this.state.sorting.column];
+            let r2Col = r2[this.state.sorting.column];
 
-            if (this.state.sorting.column !== "resource_count") {
-                p1Col = p1Col.toLowerCase();
-                p2Col = p2Col.toLowerCase();
-            }
+            r1Col = r1Col.toLowerCase();
+            r2Col = r2Col.toLowerCase();
 
-            if (p1Col < p2Col) {
+            if (r1Col < r2Col) {
                 return this.state.sorting.order === "asc" ? -1 : 1;
             }
-            if (p1Col > p2Col) {
+            if (r1Col > r2Col) {
                 return this.state.sorting.order === "asc" ? 1 : -1;
             }
             return 0;
         });
-        return projects;
+        return resources;
     }
 
     onClickColumnName(column) {
@@ -56,15 +54,12 @@ export class ProjectList extends Component {
         }
     }
 
-    onClickProject(id) {
-        this.store.setProjectId(id);
+    onClickResource(id) {
+        this.store.setResourceId(id);
         this.action.doAction({
             type: "ir.actions.client",
-            tag: "t9n.open_target_langs",
+            tag: "t9n.open_resource_page",
             target: "current",
-            context: {
-                project_id: id,
-            },
         });
     }
 }

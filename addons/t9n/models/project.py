@@ -36,19 +36,42 @@ class Project(models.Model):
     @api.model
     def get_projects(self):
         projects_records = self.search([])
-        return [{
+        return [
+            {
                 "id": record.id,
                 "name": record.name,
                 "src_lang": {
                     "id": record.src_lang_id.id,
                     "name": record.src_lang_id.name if record.src_lang_id.name else "",
                 },
-                "resources": [{
-                    "id": resource.id,
-                    "file_name": resource.file_name,
-                } for resource in record.resource_ids],
-                "target_langs": [{
+                "resources": [
+                    {
+                        "id": resource.id,
+                    }
+                    for resource in record.resource_ids
+                ],
+                "target_langs": [
+                    {
                         "id": lang.id,
                         "name": lang.name,
-                    } for lang in record.target_lang_ids],
-            } for record in projects_records]
+                    }
+                    for lang in record.target_lang_ids
+                ],
+            }
+            for record in projects_records
+        ]
+
+    @api.model
+    def get_target_langs(self, id):
+        project_records = self.browse([id])
+        project_records.ensure_one()
+        project_record = next(iter(project_records))
+        return [
+            {
+                "id": lang.id,
+                "name": lang.name,
+                "code": lang.code,
+                "native_name": lang.native_name,
+            }
+            for lang in project_record.target_lang_ids
+        ]

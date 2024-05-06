@@ -1,4 +1,4 @@
-from odoo import fields, models
+from odoo import api, fields, models
 
 
 class Message(models.Model):
@@ -41,3 +41,25 @@ class Message(models.Model):
             "The combination of a text to translate and its context must be unique within the same resource!",
         ),
     ]
+
+    @api.model
+    def get_message(self, message_id, target_lang_id):
+        message_records = self.browse([message_id])
+        message_records.ensure_one()
+        message_record = next(iter(message_records))
+        return {
+            "id": message_record.id,
+            "body": message_record.body,
+            "context": message_record.context,
+            "translator_comments": message_record.translator_comments,
+            "extracted_comments": message_record.extracted_comments,
+            "references": message_record.references,
+            "translations": [
+                {
+                    "id": record.id,
+                    "body": record.body,
+                }
+                for record in message_record.translation_ids
+                if record.lang_id.id == target_lang_id
+            ],
+        }

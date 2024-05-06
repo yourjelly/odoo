@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<templates>
+
+    <t t-name="t9n.ResourcePage">
+        <div class="d-flex vh-100">
+                <t t-if="this.state.isLoading">
+                    <div class="justify-content-center">
+                        <div class="spinner-border" role="status">
+                            <span class="sr-only"></span>
+                        </div>
+                    </div>
+                </t>
+                <t t-else="">
+                    <div class="overflow-auto">
+                        <div class="list-group">
+                            <t t-foreach="this.messages" t-as="message" t-key="message.id">
+                                <a href="#" class="list-group-item list-group-item-action" t-att-class="{'active': message.id === this.store.active_message.id}" t-on-click="() => this.onClickMessage(message)">
+                                    <t t-esc="message.body"/>
+                                </a>
+                            </t>
+                        </div>
+                    </div>
+                        <div>
+                            <MessageForm/>
+                        </div>
+                </t>
+        </div>
+
+    </t>
+
+</templates>

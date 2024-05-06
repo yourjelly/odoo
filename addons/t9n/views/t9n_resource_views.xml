@@ -4,11 +4,11 @@
         <field name="name">t9n.resource.form</field>
         <field name="model">t9n.resource</field>
         <field name="arch" type="xml">
-            <form string="Resource Form">
+            <form>
                 <sheet>
                     <group>
                         <group>
-                            <field name="file_name" readonly="True"/>
+                            <field name="file_name" readonly="1"/>
                         </group>
                         <group>
                             <field name="file" filename="file_name" options="{'accepted_file_extensions': '.po,.pot'}"/>
@@ -18,6 +18,16 @@
                 </sheet>
             </form>
         </field>
+    </record>
+
+    <record model="ir.actions.client" id="t9n.open_resource_list">
+        <field name="name">Open Resource List</field>
+        <field name="tag">t9n.open_resource_list</field>
+    </record>
+
+    <record model="ir.actions.client" id="t9n.open_resource_page">
+        <field name="name">Open Resource Page</field>
+        <field name="tag">t9n.open_resource_page</field>
     </record>
 
     <record id="t9n.resource_view_list" model="ir.ui.view">

@@ -92,3 +92,44 @@ class Resource(models.Model):
             + [Command.update(id, vals) for id, vals in to_update]
         )
         return super().write(vals)
+
+    @api.model
+    def get_resources(self, project_id):
+        resources_records = self.search([("project_id.id", "=", project_id)])
+        return [
+            {
+                "id": record.id,
+                "file_name": record.file_name,
+            }
+            for record in resources_records
+        ]
+
+    @api.model
+    def get_resource(self, id, target_lang_id):
+        resource_records = self.browse([id])
+        resource_records.ensure_one()
+        resource_record = next(iter(resource_records))
+        return {
+            "id": resource_record.id,
+            "file_name": resource_record.file_name,
+            "project_id": resource_record.project_id.id,
+            "messages": [
+                {
+                    "id": message.id,
+                    "body": message.body,
+                    "context": message.context,
+                    "translator_comments": message.translator_comments,
+                    "extracted_comments": message.extracted_comments,
+                    "references": message.references,
+                    "translations": [
+                        {
+                            "id": lang.id,
+                            "body": lang.body,
+                        }
+                        for lang in message.translation_ids
+                        if lang.lang_id.id == target_lang_id
+                    ],
+                }
+                for message in resource_record.message_ids
+            ],
+        }
