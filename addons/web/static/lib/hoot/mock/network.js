@@ -110,7 +110,7 @@ export function cleanupNetwork() {
     mockWebSocketConnection = null;
 
     // Workers
-    for (const worker of openWorkers) {
+    for (const worker of openWorkers.keys()) {
         if ("port" in worker) {
             worker.port.close();
         } else {
@@ -628,7 +628,9 @@ export class MockSharedWorker extends EventTarget {
      */
     constructor(scriptURL, options) {
         if (!mockWorkerConnection) {
-            return new SharedWorker(...arguments);
+            const worker = new SharedWorker(...arguments);
+            openWorkers.set(worker, Promise.resolve());
+            return worker;
         }
 
         super();
@@ -711,7 +713,9 @@ export class MockWorker extends EventTarget {
      */
     constructor(scriptURL, options) {
         if (!mockWorkerConnection) {
-            return new Worker(...arguments);
+            const worker = new Worker(...arguments);
+            openWorkers.set(worker, Promise.resolve());
+            return worker;
         }
 
         super();

@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { models } from "@web/../tests/web_test_helpers";
+import { MockServer, models } from "@web/../tests/web_test_helpers";
 import { registry } from "@web/core/registry";
 import { patchWebsocketWorkerWithCleanup } from "../../mock_websocket";
 
@@ -37,6 +37,12 @@ export class BusBus extends models.Model {
 
     constructor() {
         super(...arguments);
+        if (MockServer.current) {
+            this.___spawnWS();
+        }
+    }
+
+    ___spawnWS() {
         const self = this;
         this.wsWorker = patchWebsocketWorkerWithCleanup({
             _sendToServer(message) {
@@ -84,6 +90,9 @@ export class BusBus extends models.Model {
         for (const notification of notifications) {
             const [type, payload] = notification.slice(1, notification.length);
             values.push({ id: ++this.lastBusNotificationId, message: { payload, type } });
+        }
+        if (!this.wsWorker) {
+            this.___spawnWS();
         }
         this.wsWorker.broadcast("notification", values);
     }
