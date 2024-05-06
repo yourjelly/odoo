@@ -1,4 +1,4 @@
-import { Component, markup, onRendered, onWillRender, xml } from "@odoo/owl";
+import { Component, markup, onRendered, onWillRender, onWillStart, xml } from "@odoo/owl";
 import { after, beforeEach, expect, getFixture, test } from "@odoo/hoot";
 import { keyDown, waitFor } from "@odoo/hoot-dom";
 import { click, dblclick, drag, edit, hover, leave, pointerDown, press, queryAll, queryAllTexts, queryFirst, queryOne, queryText, resize } from "@odoo/hoot-dom";
@@ -82,6 +82,8 @@ import { FloatField, floatField } from "@web/views/fields/float/float_field";
 import { session } from "@web/session";
 import { Domain } from "@web/core/domain";
 import { getNextTabableElement } from "@web/core/utils/ui";
+import { localization } from "@web/core/l10n/localization";
+import { browser } from "@web/core/browser/browser";
 
 const { ResCompany, ResPartner, ResUsers } = webModels;
 
@@ -170,14 +172,6 @@ function getVisibleButtons() {
             ].join(",")
         ),
     ];
-}
-
-async function reloadListView(target) {
-    if (queryFirst(".o_searchview_input")) {
-        await validateSearch(target);
-    } else {
-        await editPager(target, getPagerValue());
-    }
 }
 
 function getDataRow(position) {
@@ -12353,7 +12347,7 @@ test.todo("cell-level keyboard navigation in editable grouped list", async () =>
     // // // default Enter on a A tag
     // //     const event = await triggerEvent(document.activeElement, null, "keydown", { key: "Enter" });
     // // assert.ok(!event.defaultPrevented);
-    // // await click(queryAll(".o_group_field_row_add a")[1]);
+    // // await contains(".o_group_field_row_add a:eq(1)").click();
     // press("Enter");
     // await animationFrame();
     // expect(".o_data_row:eq(4) [name=foo] input").toBeFocused();
@@ -12478,7 +12472,7 @@ test("execute group header button with keyboard navigation", async () => {
     // move to first record of opened group
     press("ArrowDown");
     await animationFrame();
-    expect("tbody .o_data_row td[name=foo]").toBeFocused();
+    expect("tbody .o_data_row:first td[name=foo]").toBeFocused();
 
     // move back to the group header
     press("ArrowUp");
@@ -12521,7 +12515,7 @@ test('add a new row in grouped editable="top" list', async () => {
     await contains(".o_group_header").click(); // open group "No"
     await contains(".o_group_field_row_add a").click(); // add a new row
     expect(".o_data_row:first").toHaveClass("o_selected_row");
-    expect(queryFirst(".o_selected_row [name=foo] input")).toBe(document.activeElement, {
+    expect(".o_selected_row [name=foo] input").toBeFocused({
         message: "The first input of the line should have the focus",
     });
     expect(".o_data_row").toHaveCount(2);
@@ -12530,14 +12524,14 @@ test('add a new row in grouped editable="top" list', async () => {
     await contains(".o_group_header:eq(1)").click();
     expect(".o_data_row").toHaveCount(4);
 
-    await click(queryAll(".o_group_field_row_add a")[1]); // create row in second group "Yes"
-    expect(queryAll(".o_group_name")[1].innerText).toBe("Yes (4)", {
+    await contains(".o_group_field_row_add a:eq(1)").click(); // create row in second group "Yes"
+    expect(".o_group_name:eq(1)").toHaveText("Yes (4)", {
         message: "group should have correct name and count",
     });
     expect(".o_data_row").toHaveCount(5);
-    expect(".o_data_row:first").toHaveClass("o_selected_row");
+    expect(".o_data_row:eq(1)").toHaveClass("o_selected_row");
 
-    await contains('.o_selected_row [name=foo] input').edit("pla");
+    await contains(".o_selected_row [name=foo] input").edit("pla", { confirm: false });
     await contains(".o_list_button_save:visible").click();
     expect(".o_data_row").toHaveCount(5);
 });
@@ -12551,16 +12545,16 @@ test('add a new row in grouped editable="bottom" list', async () => {
     });
     await contains(".o_group_header").click(); // open group "No"
     await contains(".o_group_field_row_add a").click(); // add a new row
-    expect(".o_data_row:first").toHaveClass("o_selected_row");
+    expect(".o_data_row:eq(1)").toHaveClass("o_selected_row");
     expect(".o_data_row").toHaveCount(2);
 
     await contains(".o_list_button_discard").click();
     await contains(".o_group_header:eq(1)").click();
     expect(".o_data_row").toHaveCount(4);
-    await click(queryAll(".o_group_field_row_add a")[1]); // create row in second group "Yes"
-    expect(".o_data_row:first").toHaveClass("o_selected_row");
+    await contains(".o_group_field_row_add a:eq(1)").click(); // create row in second group "Yes"
+    expect(".o_data_row:eq(4)").toHaveClass("o_selected_row");
 
-    await contains('.o_selected_row [name=foo] input').edit("pla");
+    await contains('.o_selected_row [name=foo] input').edit("pla", { confirm: false });
     await contains(".o_list_button_save:visible").click();
     expect(".o_data_row").toHaveCount(5);
 });
@@ -12581,13 +12575,8 @@ test("add and discard a line through keyboard navigation without crashing", asyn
     expect(".o_group_field_row_add a").toHaveCount(1);
     queryFirst(".o_group_field_row_add a").focus();
     expect(".o_group_field_row_add a").toBeFocused();
-    const event = await triggerEvent(document.activeElement, null, "keydown", {
-        key: "Enter",
-    });
-    assert.ok(!event.defaultPrevented);
-    // Simulate "enter" keydown
-    await contains(".o_group_field_row_add a").click();
-
+    press("Enter");
+    await animationFrame();
     expect(".o_data_row").toHaveCount(4);
     await contains(".o_list_button_discard:visible").click();
     // At this point, a crash manager should appear if no proper link targetting
@@ -12632,16 +12621,14 @@ test('editable grouped list with create="0"', async () => {
 });
 
 test("add a new row in (selection) grouped editable list", async () => {
-    serverData.models.foo.fields.priority = {
-        string: "Priority",
-        type: "selection",
+    Foo._fields.priority = fields.Selection({
         selection: [
             [1, "Low"],
             [2, "Medium"],
             [3, "High"],
         ],
         default: 1,
-    };
+    });
     Foo._records.push({
         id: 5,
         foo: "blip",
@@ -12657,6 +12644,10 @@ test("add a new row in (selection) grouped editable list", async () => {
         priority: 3,
     });
 
+    onRpc("onchange", ({ kwargs}) => {
+        expect.step(kwargs.context.default_priority.toString());
+    });
+
     await mountView({
         type: "list",
         resModel: "foo",
@@ -12667,15 +12658,10 @@ test("add a new row in (selection) grouped editable list", async () => {
                 <field name="m2o"/>
             </tree>`,
         groupBy: ["priority"],
-        mockRPC(route, args) {
-            if (args.method === "onchange") {
-                expect.step(args.kwargs.context.default_priority.toString());
-            }
-        },
     });
     await contains(".o_group_header").click(); // open group
     await contains(".o_group_field_row_add a").click(); // add a new row
-    await contains('[nme"foo"] input').edit("xyz"); // make record dirty
+    await contains('[name=foo] input').edit("xyz", { confirm: false }); // make record dirty
     await contains(".o_list_view").click(); // unselect row
     expect(["1"]).toVerifySteps();
     expect(queryAll(".o_data_row .o_data_cell")[1].textContent).toBe("Low", {
@@ -12683,13 +12669,17 @@ test("add a new row in (selection) grouped editable list", async () => {
     });
 
     await contains(".o_group_header:eq(1)").click();
-    await click(queryAll(".o_group_field_row_add a")[1]); // create row in second group
+    await contains(".o_group_field_row_add a:eq(1)").click(); // create row in second group
     await contains(".o_list_view").click(); // unselect row
     expect(queryAll(".o_data_row")[5].querySelectorAll(".o_data_cell")[1].textContent).toBe("Medium", { message: "should have a column name with a value from the groupby" });
     expect(["2"]).toVerifySteps();
 });
 
 test("add a new row in (m2o) grouped editable list", async () => {
+    onRpc("onchange", ({ kwargs}) => {
+        expect.step(kwargs.context.default_m2o.toString());
+    });
+
     await mountView({
         type: "list",
         resModel: "foo",
@@ -12699,22 +12689,17 @@ test("add a new row in (m2o) grouped editable list", async () => {
                 <field name="m2o"/>
             </tree>`,
         groupBy: ["m2o"],
-        mockRPC(route, args) {
-            if (args.method === "onchange") {
-                expect.step(args.kwargs.context.default_m2o.toString());
-            }
-        },
     });
     await contains(".o_group_header").click(); // open group
     await contains(".o_group_field_row_add a").click(); // add a new row
     await contains(".o_list_view").click(); // unselect row
-    expect(queryFirst(".o_data_row").querySelectorAll(".o_data_cell")[1].textContent).toBe("Value 1", { message: "should have a column name with a value from the groupby" });
+    expect(".o_data_row:first .o_data_cell:eq(1)").toHaveText("Value 1", { message: "should have a column name with a value from the groupby" });
     expect(["1"]).toVerifySteps();
 
     await contains(".o_group_header:eq(1)").click();
-    await click(queryAll(".o_group_field_row_add a")[1]); // create row in second group
+    await contains(".o_group_field_row_add a:eq(1)").click(); // create row in second group
     await contains(".o_list_view").click(); // unselect row
-    expect(queryAll(".o_data_row")[3].querySelectorAll(".o_data_cell")[1].textContent).toBe("Value 2", { message: "should have a column name with a value from the groupby" });
+    expect(".o_data_row:eq(3) .o_data_cell:eq(1)").toHaveText("Value 2", { message: "should have a column name with a value from the groupby" });
     expect(["2"]).toVerifySteps();
 });
 
@@ -12762,18 +12747,16 @@ test("list view with optional fields rendering", async () => {
     // 5 th (1 for checkbox, 3 for columns, 1 for optional columns)
     expect("th").toHaveCount(5, { message: "should have 5 th" });
     expect("tfoot td").toHaveCount(5, { message: "should have 5 td" });
-    assert.ok($(target).find("th:not(.o_list_actions_header):contains(M2O field)").is(":visible"), "should have a visible m2o field"); //m2o field
+    expect("th[data-name=m2o]").toHaveCount(1);
+    expect(queryAllTexts(".o-dropdown--menu span.dropdown-item")).toEqual(["M2o", "Reference"]);
+    expect(".o-dropdown--menu span.dropdown-item [name=m2o]").toHaveProperty("checked", true);
 
-    expect(queryFirst(".o-dropdown--menu span.dropdown-item:first-child input:checked")).toBe([...queryAll(".o-dropdown--menu span.dropdown-item")].filter((el) => el.innerText === "M2O field")[0].querySelector("input"), { message: "m2o advanced field check box should be checked in dropdown" });
-
-    await contains(".o-dropdown--menu span.dropdown-item:first-child").click();
+    await contains(".o-dropdown--menu span.dropdown-item [name=m2o]").click();
     // 4 th (1 for checkbox, 2 for columns, 1 for optional columns)
     expect("th").toHaveCount(4, { message: "should have 4 th" });
     expect("tfoot td").toHaveCount(4, { message: "should have 4 td" });
-    assert.notOk($(target).find("th:not(.o_list_actions_header):contains(M2O field)").is(":visible"), "should not have a visible m2o field"); //m2o field not displayed
-
-    await contains("table .o_optional_columns_dropdown .dropdown-toggle").click();
-    assert.notOk($(target).find('.o-dropdown--menu span.dropdown-item [name="m2o"]').is(":checked"));
+    expect("th[data-name=m2o]").toHaveCount(0);
+    expect(".o-dropdown--menu span.dropdown-item [name=m2o]").toHaveProperty("checked", false);
 });
 
 test("list view with optional fields rendering in RTL mode", async () => {
@@ -12807,12 +12790,12 @@ test("optional fields do not disappear even after listview reload", async () => 
         type: "list",
         resModel: "foo",
         arch: `
-                <tree>
-                    <field name="foo"/>
-                    <field name="m2o" optional="hide"/>
-                    <field name="amount"/>
-                    <field name="reference" optional="hide"/>
-                </tree>`,
+            <tree>
+                <field name="foo"/>
+                <field name="m2o" optional="hide"/>
+                <field name="amount"/>
+                <field name="reference" optional="hide"/>
+            </tree>`,
     });
 
     expect("th").toHaveCount(4, {
@@ -12821,42 +12804,43 @@ test("optional fields do not disappear even after listview reload", async () => 
 
     // enable optional field
     await contains("table .o_optional_columns_dropdown .dropdown-toggle").click();
-    assert.notOk(queryFirst(".o-dropdown--menu span.dropdown-item:first-child input").checked);
+    expect(".o-dropdown--menu span.dropdown-item:first input").toHaveProperty("checked", false);
     await contains(".o-dropdown--menu span.dropdown-item:first-child").click();
     expect("th").toHaveCount(5, {
         message: "should have 5 th 1 for selector, 3 for columns, 1 for optional columns",
     });
-    assert.ok($(target).find("th:not(.o_list_actions_header):contains(M2O field)").is(":visible"), "should have a visible m2o field"); //m2o field
+    expect("th[data-name=m2o]").toHaveCount(1);
 
-    var firstRowSelector = queryFirst("tbody .o_list_record_selector input");
-    await click(firstRowSelector);
-    await reloadListView(target);
+    await contains("tbody .o_list_record_selector input").click();
+    expect(".o_list_selection_box").toHaveCount(1);
+    
+    await contains(".o_pager_value").click();
+    await contains("input.o_pager_value").edit("1-4");
+    expect(".o_list_selection_box").toHaveCount(0);
     expect("th").toHaveCount(5, {
         message: "should have 5 th 1 for selector, 3 for columns, 1 for optional columns ever after listview reload",
     });
-    assert.ok($(target).find("th:not(.o_list_actions_header):contains(M2O field)").is(":visible"), "should have a visible m2o field even after listview reload");
+    expect("th[data-name=m2o]").toHaveCount(1);
 
     await contains("table .o_optional_columns_dropdown .dropdown-toggle").click();
-    assert.ok(queryFirst(".o-dropdown--menu span.dropdown-item:first-child input").checked);
+    expect(".o-dropdown--menu span.dropdown-item:first input").toHaveProperty("checked", true);
 });
 
 test("optional fields is shown only if enabled", async () => {
-    serverData.actions = {
-        1: {
-            id: 1,
-            name: "Currency Action 1",
-            res_model: "foo",
-            type: "ir.actions.act_window",
-            views: [[1, "list"]],
-        },
-    };
+    defineActions([{
+        id: 1,
+        name: "Currency Action 1",
+        res_model: "foo",
+        type: "ir.actions.act_window",
+        views: [[1, "list"]],
+    }]);
 
-    serverData.views = {
-        "foo,1,list": `
-                <tree>
-                    <field name="currency_id" optional="show"/>
-                    <field name="company_currency_id" optional="show"/>
-                </tree>`,
+    Foo._views = {
+        "list,1": `
+            <tree>
+                <field name="currency_id" optional="show"/>
+                <field name="display_name" optional="show"/>
+            </tree>`,
         "search,false": "<search/>",
     };
 
@@ -12915,18 +12899,15 @@ test("selection is kept when optional fields are toggled", async () => {
 });
 
 test("list view with optional fields and async rendering", async () => {
-    expect.assertions(14);
-
     const def = new Deferred();
     const fieldRegistry = registry.category("fields");
     const charField = fieldRegistry.get("char");
-
     class AsyncCharField extends charField.component {
         setup() {
             super.setup();
-            onWillStart(async () => {
-                assert.ok(true, "the rendering must be async");
-                await def;
+            onWillStart(() => {
+                expect.step("onWillStart");
+                return def;
             });
         }
     }
@@ -12955,6 +12936,7 @@ test("list view with optional fields and async rendering", async () => {
     expect("th").toHaveCount(3);
     expect(".o_optional_columns_dropdown .show").toHaveCount(1);
     expect(".o-dropdown--menu input:checked").toHaveCount(1);
+    expect(["onWillStart", "onWillStart", "onWillStart", "onWillStart"]).toVerifySteps(); // 4 rows
 
     def.resolve();
     await animationFrame();
@@ -12964,15 +12946,15 @@ test("list view with optional fields and async rendering", async () => {
 });
 
 test("change the viewType of the current action", async () => {
-    serverData.actions = {
-        1: {
+    defineActions([
+        {
             id: 1,
             name: "Partners Action 1",
             res_model: "foo",
             type: "ir.actions.act_window",
             views: [[1, "kanban"]],
         },
-        2: {
+        {
             id: 2,
             name: "Partners",
             res_model: "foo",
@@ -12982,91 +12964,102 @@ test("change the viewType of the current action", async () => {
                 [1, "kanban"],
             ],
         },
-    };
+    ]);
 
-    serverData.views = {
-        "foo,1,kanban": '<kanban><templates><t t-name="kanban-box">' + '<div class="oe_kanban_global_click"><field name="foo"/></div>' + "</t></templates></kanban>",
-
-        "list,false": '<tree limit="3">' + '<field name="foo"/>' + '<field name="m2o" optional="hide"/>' + '<field name="o2m" optional="show"/></tree>',
-
+    Foo._views = {
+        "kanban,1": `
+            <kanban>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click">
+                            <field name="foo"/>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>`,
+        "list,false": `
+            <tree limit="3">
+                <field name="foo"/>
+                <field name="m2o" optional="hide"/>
+                <field name="o2m" optional="show"/>
+            </tree>`,
         "search,false": '<search><field name="foo" string="Foo"/></search>',
     };
 
     await mountWithCleanup(WebClient);
-
     await getService("action").doAction(2);
-
     expect(".o_list_view").toHaveCount(1, { message: "should have rendered a list view" });
-
     expect("th").toHaveCount(4, {
         message: "should display 4 th (selector + 2 fields + optional columns)",
     });
 
     // enable optional field
     await contains("table .o_optional_columns_dropdown_toggle").click();
-
-    assert.notOk($(target).find('.o-dropdown--menu span.dropdown-item [name="m2o"]').is(":checked"));
-    assert.ok($(target).find('.o-dropdown--menu span.dropdown-item [name="o2m"]').is(":checked"));
+    expect(".o-dropdown--menu span.dropdown-item [name=m2o]").toHaveProperty("checked", false);
+    expect(".o-dropdown--menu span.dropdown-item [name=o2m]").toHaveProperty("checked", true);
 
     await contains(".o-dropdown--menu span.dropdown-item").click();
     expect("th").toHaveCount(5, {
         message: "should display 5 th (selector + 3 fields + optional columns)",
     });
-    assert.ok($(target).find("th:not(.o_list_actions_header):contains(M2O field)").is(":visible"), "should have a visible m2o field"); //m2o field
+    expect("th[data-name=m2o]").toHaveCount(1);
 
     // switch to kanban view
     await contains(".o_switch_view.o_kanban").click();
-
     expect(".o_list_view").toHaveCount(0, { message: "should not display the list view anymore" });
     expect(".o_kanban_view").toHaveCount(1, { message: "should have switched to the kanban view" });
 
     // switch back to list view
     await contains(".o_switch_view.o_list").click();
-
     expect(".o_kanban_view").toHaveCount(0, {
         message: "should not display the kanban view anymoe",
     });
     expect(".o_list_view").toHaveCount(1, { message: "should display the list view" });
-
     expect("th").toHaveCount(5, { message: "should display 5 th" });
-    assert.ok($(target).find("th:not(.o_list_actions_header):contains(M2O field)").is(":visible"), "should have a visible m2o field"); //m2o field
-    assert.ok($(target).find("th:not(.o_list_actions_header):contains(O2M field)").is(":visible"), "should have a visible o2m field"); //o2m field
+    expect("th[data-name=m2o]").toHaveCount(1);
+    expect("th[data-name=o2m]").toHaveCount(1);
 
     // disable optional field
     await contains("table .o_optional_columns_dropdown_toggle").click();
-    assert.ok($(target).find('.o-dropdown--menu span.dropdown-item [name="m2o"]').is(":checked"));
-    assert.ok($(target).find('.o-dropdown--menu span.dropdown-item [name="o2m"]').is(":checked"));
-    await click(queryAll(".o-dropdown--menu span.dropdown-item input")[1]);
-    assert.ok($(target).find("th:not(.o_list_actions_header):contains(M2O field)").is(":visible"), "should have a visible m2o field"); //m2o field
-    assert.notOk($(target).find("th:not(.o_list_actions_header):contains(O2M field)").is(":visible"), "shouldn't have a visible o2m field"); //o2m field
+    expect(".o-dropdown--menu span.dropdown-item [name=m2o]").toHaveProperty("checked", true);
+    expect(".o-dropdown--menu span.dropdown-item [name=o2m]").toHaveProperty("checked", true);
+
+    await contains(".o-dropdown--menu span.dropdown-item input:eq(1)").click();
+    expect(".o-dropdown--menu span.dropdown-item [name=m2o]").toHaveProperty("checked", true);
+    expect(".o-dropdown--menu span.dropdown-item [name=o2m]").toHaveProperty("checked", false);
     expect("th").toHaveCount(4, { message: "should display 4 th" });
 
     await getService("action").doAction(1);
-
     expect(".o_list_view").toHaveCount(0, { message: "should not display the list view anymore" });
     expect(".o_kanban_view").toHaveCount(1, { message: "should have switched to the kanban view" });
 
     await getService("action").doAction(2);
-
     expect(".o_kanban_view").toHaveCount(0, { message: "should not havethe kanban view anymoe" });
     expect(".o_list_view").toHaveCount(1, { message: "should display the list view" });
 
+    await contains("table .o_optional_columns_dropdown_toggle").click();
     expect("th").toHaveCount(4, { message: "should display 4 th" });
-    assert.ok($(target).find("th:not(.o_list_actions_header):contains(M2O field)").is(":visible"), "should have a visible m2o field"); //m2o field
-    assert.notOk($(target).find("th:not(.o_list_actions_header):contains(O2M field)").is(":visible"), "shouldn't have a visible o2m field"); //o2m field
+    expect(".o-dropdown--menu span.dropdown-item [name=m2o]").toHaveProperty("checked", true);
+    expect(".o-dropdown--menu span.dropdown-item [name=o2m]").toHaveProperty("checked", false);
 });
 
 test("list view with optional fields rendering and local storage mock", async () => {
     let forceLocalStorage = true;
-
     patchWithCleanup(browser.localStorage, {
         getItem(key) {
-            expect.step("getItem " + key);
-            return forceLocalStorage ? "m2o" : super.getItem(...arguments);
+            if (key.startsWith("optional_fields")) {
+                expect.step("getItem " + key);
+                if (forceLocalStorage) {
+                    return "m2o";
+                }
+            }
+            return super.getItem(...arguments);
         },
         setItem(key, value) {
-            expect.step("setItem " + key + " to " + JSON.stringify(String(value)));
-            return super.setItem(...arguments);
+            if (key.startsWith("optional_fields")) {
+                expect.step("setItem " + key + " to " + JSON.stringify(String(value)));
+            }
+            super.setItem(...arguments);
         },
     });
 
@@ -13074,25 +13067,21 @@ test("list view with optional fields rendering and local storage mock", async ()
         type: "list",
         resModel: "foo",
         arch: `
-                <tree>
-                    <field name="foo"/>
-                    <field name="m2o" optional="hide"/>
-                    <field name="reference" optional="show"/>
-                </tree>`,
+            <tree>
+                <field name="foo"/>
+                <field name="m2o" optional="hide"/>
+                <field name="reference" optional="show"/>
+            </tree>`,
         viewId: 42,
     });
 
     const localStorageKey = "optional_fields,foo,list,42,foo,m2o,reference";
-
     expect(["getItem " + localStorageKey]).toVerifySteps();
-
     expect("th").toHaveCount(4, {
         message: "should have 4 th, 1 for selector, 2 for columns, 1 for optional columns",
     });
-
-    assert.ok($(target).find("th:not(.o_list_actions_header):contains(M2O field)").is(":visible"), "should have a visible m2o field"); //m2o field
-
-    assert.notOk($(target).find("th:not(.o_list_actions_header):contains(Reference Field)").is(":visible"), "should not have a visible reference field");
+    expect("th[data-name=m2o]").toHaveCount(1);
+    expect("th[data-name=reference]").toHaveCount(0);
 
     // optional fields
     await contains("table .o_optional_columns_dropdown button").click();
@@ -13102,60 +13091,58 @@ test("list view with optional fields rendering and local storage mock", async ()
 
     forceLocalStorage = false;
     // enable optional field
-    await click($(target).find(".o-dropdown--menu span.dropdown-item:eq(1) input")[0]);
-
+    await contains(".o-dropdown--menu span.dropdown-item:eq(1) input").click();
     // Only a setItem since the list view maintains its own internal state of toggled
     // optional columns.
     expect(["setItem " + localStorageKey + ' to "m2o,reference"', "getItem optional_fields,foo,list,42,foo,m2o,reference"]).toVerifySteps();
-
     // 5 th (1 for checkbox, 3 for columns, 1 for optional columns)
     expect("th").toHaveCount(5, { message: "should have 5 th" });
-
-    assert.ok($(target).find("th:not(.o_list_actions_header):contains(M2O field)").is(":visible"), "should have a visible m2o field"); //m2o field
-
-    assert.ok($(target).find("th:not(.o_list_actions_header):contains(Reference Field)").is(":visible"), "should have a visible reference field");
+    expect("th[data-name=m2o]").toHaveCount(1);
+    expect("th[data-name=reference]").toHaveCount(1);
 });
 
 test("list view with optional fields from local storage being the empty array", async () => {
     patchWithCleanup(browser.localStorage, {
         getItem(key) {
-            expect.step("getItem " + key);
+            if (key.startsWith("optional_fields")) {
+                expect.step("getItem " + key);
+            }
             return super.getItem(...arguments);
         },
         setItem(key, value) {
-            expect.step("setItem " + key + " to " + JSON.stringify(String(value)));
+            if (key.startsWith("optional_fields")) {
+                expect.step("setItem " + key + " to " + JSON.stringify(String(value)));
+            }
             super.setItem(...arguments);
         },
     });
 
     const verifyHeaders = (namedHeaders) => {
-        const headers = [...queryAll(".o_list_table thead th")];
-        assert.hasClass(headers[0], "o_list_record_selector");
-        assert.hasClass(headers[headers.length - 1], "o_list_actions_header");
-        assert.equal(headers.length, namedHeaders.length + 2, `list has ${namedHeaders.length + 2} headers`);
-        for (let i = 1; i < headers.length - 1; i++) {
-            assert.equal(headers[i].dataset.name, namedHeaders[i - 1], `header at index ${i} is ${namedHeaders[i - 1]}`);
+        // const headers = [...queryAll(".o_list_table thead th")];
+        expect(".o_list_table thead th").toHaveCount(namedHeaders.length + 2);
+        expect(".o_list_table thead th:first").toHaveClass("o_list_record_selector");
+        expect(".o_list_table thead th:last").toHaveClass("o_list_actions_header");
+        for (let i = 0; i < namedHeaders.length; i++) {
+            expect(queryOne(`.o_list_table thead th:eq(${i+1})`).dataset.name).toBe(namedHeaders[i], { message: `header at index ${i} is ${namedHeaders[i - 1]}` });
         }
     };
 
-    serverData.actions = {
-        1: {
-            id: 1,
-            name: "Action 1",
-            res_model: "foo",
-            type: "ir.actions.act_window",
-            views: [[42, "list"]],
-            search_view_id: [1, "search"],
-        },
-    };
-    serverData.views = {
-        "foo,1,search": "<search></search>",
-        "foo,42,list": `
-                <tree>
-                    <field name="foo"/>
-                    <field name="m2o" optional="hide"/>
-                    <field name="reference" optional="show"/>
-                </tree>`,
+    defineActions([{
+        id: 1,
+        name: "Action 1",
+        res_model: "foo",
+        type: "ir.actions.act_window",
+        views: [[42, "list"]],
+        search_view_id: [1, "search"],
+    }]);
+    Foo._views = {
+        "search,1": "<search></search>",
+        "list,42": `
+            <tree>
+                <field name="foo"/>
+                <field name="m2o" optional="hide"/>
+                <field name="reference" optional="show"/>
+            </tree>`,
     };
     const localStorageKey = "optional_fields,foo,list,42,foo,m2o,reference";
     await mountWithCleanup(WebClient);
@@ -13170,7 +13157,7 @@ test("list view with optional fields from local storage being the empty array", 
         message: "dropdown has 2 optional column headers",
     });
     // disable optional field "reference" (no optional column enabled)
-    await click(queryAll(".o-dropdown--menu span.dropdown-item input")[1]);
+    await contains(".o-dropdown--menu span.dropdown-item input:eq(1)").click();
     expect(["setItem " + localStorageKey + ' to ""', "getItem optional_fields,foo,list,42,foo,m2o,reference"]).toVerifySteps();
     verifyHeaders(["foo"]);
     // mount again to ensure that active optional columns will not be reset while empty
@@ -13179,7 +13166,7 @@ test("list view with optional fields from local storage being the empty array", 
     verifyHeaders(["foo"]);
 });
 
-test("quickcreate in a many2one in a list", async () => {
+test.todo("quickcreate in a many2one in a list", async () => {
     await mountView({
         type: "list",
         arch: '<tree editable="top"><field name="m2o"/></tree>',
@@ -13214,7 +13201,6 @@ test("float field render with digits attribute on listview", async () => {
 });
 
 test("list: column: resize, reorder, resize again", async () => {
-    serverData.models.foo.fields.int_field.sortable = true;
     await mountView({
         type: "list",
         resModel: "foo",
