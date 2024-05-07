@@ -359,9 +359,8 @@ $line-height-truncate: 1.25em;
     }
 
     .breadcrumb-item {
-        --max-lines: 2;
         position: relative;
-        max-height: calc(1.4rem * var(--max-lines));
+        max-height: 1.4rem;
         overflow: hidden;
         text-overflow: ellipsis;
 
