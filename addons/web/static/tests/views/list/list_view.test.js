@@ -271,7 +271,7 @@ test("select record range with shift click", async () => {
     expect(".o_data_row .o_list_record_selector input:checked").toHaveCount(1);
 
     // shift click the 4th record to have 0-1-2-3 toggled
-    press("shift");
+    keyDown("shift");
     await contains(".o_data_row .o_list_record_selector input:eq(3)").click();
     keyUp("shift");
 
@@ -279,20 +279,20 @@ test("select record range with shift click", async () => {
     expect(".o_data_row .o_list_record_selector input:checked").toHaveCount(4);
 
     // shift click the 3rd record to untoggle 2-3
-    press("shift");
+    keyDown("shift");
     await contains(".o_data_row .o_list_record_selector input:eq(2)").click();
     keyUp("shift");
     expect(".o_list_selection_box").toHaveText("2\nselected");
     expect(".o_data_row .o_list_record_selector input:checked").toHaveCount(2);
 
     // shift click the 1st record to untoggle 0-1
-    press("shift");
+    keyDown("shift");
     await contains(".o_data_row .o_list_record_selector input:first").click();
     keyUp("shift");
     expect(".o_data_row .o_list_record_selector input:checked").toHaveCount(0);
 });
 
-test.todo("select record range with shift+space", async () => {
+test("select record range with shift+space", async () => {
     await mountView({
         type: "list",
         resModel: "foo",
@@ -312,21 +312,23 @@ test.todo("select record range with shift+space", async () => {
     press("ArrowDown");
     press("ArrowDown");
     await animationFrame();
-    expect(".o_data_row:nth-child(4) .o_list_record_selector input").toBeFocused();
-    expect(".o_data_row:nth-child(4) .o_list_record_selector input").not.toBeChecked();
-    press("shift+space");
+    expect(".o_data_row:eq(3) .o_list_record_selector input").toBeFocused();
+    expect(".o_data_row:eq(3) .o_list_record_selector input").not.toBeChecked();
+    keyDown("shift");
+    press("space");
+    keyUp("shift");
     await animationFrame();
     // focus is on the input and not in the td cell
-    expect(document.activeElement.tagName).toBe("INPUT");
+    expect(".o_data_row:eq(3) .o_list_record_selector input").toBeFocused();
 
     // Check that all checkbox is checked
-    expect(".o_data_row:first .o_list_record_selector input").toBeChecked();
+    expect(".o_data_row:eq(0) .o_list_record_selector input").toBeChecked();
     expect(".o_data_row:eq(1) .o_list_record_selector input").toBeChecked();
-    expect(".o_data_row:nth-child(3) .o_list_record_selector input").toBeChecked();
-    expect(".o_data_row:nth-child(4) .o_list_record_selector input").toBeChecked();
+    expect(".o_data_row:eq(2) .o_list_record_selector input").toBeChecked();
+    expect(".o_data_row:eq(3) .o_list_record_selector input").toBeChecked();
 });
 
-test.todo("expand range of checkbox with shift+arrow", async () => {
+test("expand range of checkbox with shift+arrow", async () => {
     await mountView({
         type: "list",
         resModel: "foo",
@@ -342,21 +344,23 @@ test.todo("expand range of checkbox with shift+arrow", async () => {
     expect(".o_data_row:first .o_list_record_selector input").toBeChecked();
 
     // expand the checkbox with arrowdown
-    press("shift+ArrowDown");
-    press("shift+ArrowDown");
-    press("shift+ArrowDown");
-    press("shift+ArrowUp");
+    keyDown("shift");
+    press("ArrowDown");
+    press("ArrowDown");
+    press("ArrowDown");
+    press("ArrowUp");
+    keyUp("shift");
     await animationFrame();
-    expect(".o_data_row:nth-child(3) .o_list_record_selector input").toBeFocused();
-    expect(".o_data_row:nth-child(3) .o_list_record_selector input").toBeChecked();
+    expect(".o_data_row:eq(2) .o_list_record_selector input").toBeFocused();
+    expect(".o_data_row:eq(2) .o_list_record_selector input").toBeChecked();
 
     // Check that the three checkbox are checked
+    expect(".o_data_row:eq(0) .o_list_record_selector input").toBeChecked();
     expect(".o_data_row:eq(1) .o_list_record_selector input").toBeChecked();
-    expect(".o_data_row:nth-child(3) .o_list_record_selector input").toBeChecked();
-    expect(".o_data_row:nth-child(4) .o_list_record_selector input").toBeChecked();
+    expect(".o_data_row:eq(2) .o_list_record_selector input").toBeChecked();
 });
 
-test.todo("multiple interactions to change the range of checked boxes", async () => {
+test("multiple interactions to change the range of checked boxes", async () => {
     for (let i = 0; i < 5; i++) {
         Foo._records.push({ id: 5 + i, bar: true, foo: "foo" + i });
     }
@@ -371,37 +375,40 @@ test.todo("multiple interactions to change the range of checked boxes", async ()
     expect(".o_data_row:first .o_list_record_selector input").not.toBeFocused();
 
     keyDown("shift");
-    press("shift+ArrowDown");
+    press("ArrowDown");
     expect(".o_data_row:first .o_list_record_selector input").toBeFocused();
     await animationFrame();
-    press("shift+ArrowDown");
+    press("ArrowDown");
     await animationFrame();
-    press("shift+ArrowDown");
+    press("ArrowDown");
     await animationFrame();
-    press("shift+ArrowDown");
+    press("ArrowDown");
     await animationFrame();
-    press("shift+ArrowUp");
+    press("ArrowUp");
     await animationFrame();
     keyUp("shift");
     press("ArrowDown");
     await animationFrame();
     press("ArrowDown");
     await animationFrame();
-    press("shift+ArrowDown");
+    keyDown("shift");
+    press("ArrowDown");
     await animationFrame();
 
     await contains(".o_data_row:nth-child(8) .o_list_record_selector .o-checkbox").click();
-    press("shift+ArrowDown");
+    press("ArrowDown");
+    keyUp("shift");
+    await animationFrame();
 
-    expect(".o_data_row:first .o_list_record_selector input").toBeChecked();
+    expect(".o_data_row:eq(0) .o_list_record_selector input").toBeChecked();
     expect(".o_data_row:eq(1) .o_list_record_selector input").toBeChecked();
-    expect(".o_data_row:nth-child(3) .o_list_record_selector input").toBeChecked();
-    expect(".o_data_row:nth-child(4) .o_list_record_selector input").not.toBeChecked();
-    expect(".o_data_row:nth-child(5) .o_list_record_selector input").toBeChecked();
-    expect(".o_data_row:nth-child(6) .o_list_record_selector input").toBeChecked();
-    expect(".o_data_row:nth-child(7) .o_list_record_selector input").not.toBeChecked();
-    expect(".o_data_row:nth-child(8) .o_list_record_selector input").toBeChecked();
-    expect(".o_data_row:nth-child(9) .o_list_record_selector input").toBeChecked();
+    expect(".o_data_row:eq(2) .o_list_record_selector input").toBeChecked();
+    expect(".o_data_row:eq(3) .o_list_record_selector input").not.toBeChecked();
+    expect(".o_data_row:eq(4) .o_list_record_selector input").toBeChecked();
+    expect(".o_data_row:eq(5) .o_list_record_selector input").toBeChecked();
+    expect(".o_data_row:eq(6) .o_list_record_selector input").not.toBeChecked();
+    expect(".o_data_row:eq(7) .o_list_record_selector input").toBeChecked();
+    expect(".o_data_row:eq(8) .o_list_record_selector input").toBeChecked();
 });
 
 test("list with class and style attributes", async () => {
