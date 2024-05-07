@@ -68,6 +68,7 @@ const fieldRegistry = registry.category("fields");
 
 // TO FIX
 // prob 1: edit + escape to discard
+// prob 2: twice invalid dialog
 
 // TO CHECK
 // shift-click, e.g. select record range with shift click
@@ -1303,6 +1304,7 @@ test("save a record with an invisible required field", async () => {
 });
 
 test.todo("multi_edit: edit a required field with an invalid value", async () => {
+    // prob 2
     Foo._fields.foo = fields.Char({ required: true });
 
     stepAllNetworkCalls();
@@ -1327,7 +1329,7 @@ test.todo("multi_edit: edit a required field with an invalid value", async () =>
 
     await contains(".o_list_record_selector input").click();
     await contains(".o_data_cell").click();
-    await contains("[name=foo] input").clear("");
+    await contains("[name=foo] input").clear({ confirm: "tab" });
     // await contains(".o_list_view").click();
     expect(".modal").toHaveCount(1);
     expect(".modal .btn").toHaveText("Ok");
@@ -6237,7 +6239,7 @@ test("can display a list with a many2many field", async () => {
     ]);
 });
 
-test.todo("display a tooltip on a field", async () => {
+test("display a tooltip on a field (debug=0)", async () => {
     serverState.debug = false;
 
     await mountView({
@@ -6245,41 +6247,43 @@ test.todo("display a tooltip on a field", async () => {
         resModel: "foo",
         arch: `
             <tree>
-                <field name="foo"/>
                 <field name="bar" widget="boolean_favorite"/>
             </tree>`,
     });
 
-    await mouseEnter(queryFirst("th[data-name=foo]"));
-    await animationFrame(); // GES: see next nextTick comment
-    expect(queryAll(".o-tooltip .o-tooltip--technical").length).toBe(0, {
+    await contains("th[data-name=bar]").hover();
+    await runAllTimers();
+    expect(".o-tooltip .o-tooltip--technical").toHaveCount(0, {
         message: "should not have rendered a tooltip",
     });
+});
 
-    patchWithCleanup(odoo, {
-        debug: true,
+test("display a tooltip on a field (debug=1)", async () => {
+    serverState.debug = true;
+
+    await mountView({
+        type: "list",
+        resModel: "foo",
+        arch: `
+            <tree>
+                <field name="bar" widget="boolean_favorite"/>
+            </tree>`,
     });
 
-    // it is necessary to rerender the list so tooltips can be properly created
-    await reloadListView(target);
-    await mouseEnter(queryFirst("th[data-name=bar]"));
-    await animationFrame(); // GES: I had once an indetermist failure because of no tooltip, so for safety I add a nextTick.
-
-    expect(queryAll(".o-tooltip .o-tooltip--technical").length).toBe(1, {
+    await contains("th[data-name=bar]").hover();
+    await runAllTimers();
+    expect(".o-tooltip .o-tooltip--technical").toHaveCount(1, {
         message: "should have rendered a tooltip",
     });
-
-    assert.containsOnce(
-        target,
-        '.o-tooltip--technical>li[data-item="widget"]',
-        "widget should be present for this field"
-    );
-
-    expect(
-        getNodesTextContent([queryFirst('.o-tooltip--technical>li[data-item="widget"]')])
-    ).toEqual(["Widget:Favorite (boolean_favorite) "], {
-        message: "widget description should be correct",
+    expect(".o-tooltip--technical>li[data-item=widget]").toHaveCount(1, {
+        message: "widget should be present for this field",
     });
+    expect(".o-tooltip--technical>li[data-item=widget]").toHaveText(
+        "Widget:Favorite (boolean_favorite)",
+        {
+            message: "widget description should be correct",
+        }
+    );
 });
 
 test("support row decoration", async () => {
