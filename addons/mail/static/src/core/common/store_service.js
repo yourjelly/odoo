@@ -626,14 +626,15 @@ export class Store extends BaseStore {
      * @param {Thread} thread
      * @param {number|false} [before]
      */
-    async search(searchTerm, thread, before = false) {
-        const { messages, count } = await rpc(thread.getFetchRoute(), {
+    async search(searchTerm, thread, before = false, searchParams = {}) {
+        const { messages } = await rpc(thread.getFetchRoute(), {
             ...thread.getFetchParams(),
             search_term: await prettifyMessageContent(searchTerm), // formatted like message_post
             before,
+            search_params: searchParams,
         });
         return {
-            count,
+            count: messages.length,
             loadMore: messages.length === this.FETCH_LIMIT,
             messages: this.Message.insert(messages, { html: true }),
         };

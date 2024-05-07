@@ -7,7 +7,7 @@ from werkzeug.exceptions import NotFound
 from odoo import http
 from odoo.http import request
 from odoo.addons.mail.models.discuss.mail_guest import add_guest_to_context
-
+from odoo.addons.mail.tools.search_params_to_domain import search_params_to_domain
 
 class ThreadController(http.Controller):
     @http.route("/mail/thread/data", methods=["POST"], type="json", auth="user")
@@ -16,12 +16,13 @@ class ThreadController(http.Controller):
         return thread._get_mail_thread_data(request_list)
 
     @http.route("/mail/thread/messages", methods=["POST"], type="json", auth="user")
-    def mail_thread_messages(self, thread_model, thread_id, search_term=None, before=None, after=None, around=None, limit=30):
+    def mail_thread_messages(self, thread_model, thread_id, search_term=None, before=None, after=None, around=None, limit=30, search_params={}):
         domain = [
             ("res_id", "=", int(thread_id)),
             ("model", "=", thread_model),
             ("message_type", "!=", "user_notification"),
         ]
+        domain.extend(search_params_to_domain(search_params))
         res = request.env["mail.message"]._message_fetch(domain, search_term=search_term, before=before, after=after, around=around, limit=limit)
         if not request.env.user._is_public():
             res["messages"].set_message_done()

@@ -8,6 +8,7 @@ from odoo import fields, http
 from odoo.http import request
 from odoo.exceptions import UserError
 from odoo.tools import replace_exceptions
+from odoo.addons.mail.tools.search_params_to_domain import search_params_to_domain
 from odoo.addons.mail.controllers.webclient import WebclientController
 from odoo.addons.mail.models.discuss.mail_guest import add_guest_to_context
 
@@ -50,7 +51,7 @@ class ChannelController(http.Controller):
 
     @http.route("/discuss/channel/messages", methods=["POST"], type="json", auth="public")
     @add_guest_to_context
-    def discuss_channel_messages(self, channel_id, search_term=None, before=None, after=None, limit=30, around=None):
+    def discuss_channel_messages(self, channel_id, search_term=None, before=None, after=None, limit=30, around=None, search_params={}):
         channel = request.env["discuss.channel"].search([("id", "=", channel_id)])
         if not channel:
             raise NotFound()
@@ -59,9 +60,14 @@ class ChannelController(http.Controller):
             ("model", "=", "discuss.channel"),
             ("message_type", "!=", "user_notification"),
         ]
+
+        domain.extend(search_params_to_domain(search_params))
+
         res = request.env["mail.message"]._message_fetch(
             domain, search_term=search_term, before=before, after=after, around=around, limit=limit
         )
+        for message in res["messages"]:
+            print(message._message_format())
         if not request.env.user._is_public() and not around:
             res["messages"].set_message_done()
         return {**res, "messages": res["messages"]._message_format(for_current_user=True)}

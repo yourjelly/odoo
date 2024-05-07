@@ -39,7 +39,8 @@ export class NavigableList extends Component {
             await new Promise(setTimeout);
             if (
                 isEventHandled(ev, "composer.onClickTextarea") ||
-                isEventHandled(ev, "channelSelector.onClickInput")
+                isEventHandled(ev, "channelSelector.onClickInput") ||
+                isEventHandled(ev, "searchMessagesPanel.onClickInput")
             ) {
                 return;
             }

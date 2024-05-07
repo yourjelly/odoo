@@ -68,10 +68,10 @@ export function useMessageSearch(thread) {
     const state = useState({
         thread,
         async search(before = false) {
-            if (this.searchTerm) {
+            if (this.searchTerm || Object.keys(this.searchParams).length) {
                 this.searching = true;
                 const { count, loadMore, messages } = await sequential(() =>
-                    store.search(this.searchTerm, this.thread, before)
+                    store.search(this.searchTerm, this.thread, before, this.searchParams)
                 );
                 this.searched = true;
                 this.searching = false;
@@ -100,6 +100,8 @@ export function useMessageSearch(thread) {
         searchTerm: undefined,
         searched: false,
         searching: false,
+        /** @type {Object} */
+        searchParams: {},
         /** @param {string} target */
         highlight: (target) => searchHighlight(state.searchTerm, target),
     });

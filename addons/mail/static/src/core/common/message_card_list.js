@@ -64,4 +64,8 @@ export class MessageCardList extends Component {
     get emptyText() {
         return this.props.emptyText ?? _t("No messages found");
     }
+
+    get nonEmptyMessages() {
+        return this.props.messages.filter((message) => !message.isEmpty);
+    }
 }
