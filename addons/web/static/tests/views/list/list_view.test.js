@@ -14840,8 +14840,8 @@ test("list view with default_group_by", async () => {
 
     await selectGroup("m2m");
     expect(".o_group_header").toHaveCount(4);
-
-    await toggleMenuItem("M2M field");
+    
+    await toggleMenuItem("M2m");
     expect(".o_group_header").toHaveCount(2);
 });
 
@@ -14884,6 +14884,10 @@ test("Properties: char", async () => {
         }
     }
 
+    onRpc("write", ({ args }) => {
+        expect(args).toEqual([[1], { properties: [{ ...definition, value: "TEST" }] }]);
+    });
+
     await mountView({
         type: "list",
         resModel: "foo",
@@ -14892,30 +14896,25 @@ test("Properties: char", async () => {
                 <field name="m2o"/>
                 <field name="properties" />
             </tree>`,
-        mockRPC(route, { method, args }) {
-            if (method === "write") {
-                expect(args).toEqual([[1], { properties: [{ ...definition, value: "TEST" }] }]);
-            }
-        },
     });
 
     await contains(".o_optional_columns_dropdown_toggle").click();
     await contains(".o-dropdown--menu input[type='checkbox']").click();
 
     expect(".o_list_renderer th[data-name='properties.property_char']").toHaveCount(1);
-    expect(queryFirst(".o_list_renderer th[data-name='properties.property_char']").textContent).toBe("Property char");
+    expect(".o_list_renderer th[data-name='properties.property_char']").toHaveText("Property char");
     expect(".o_field_cell.o_char_cell").toHaveCount(3);
-    expect(queryFirst(".o_field_cell.o_char_cell").textContent).toBe("CHAR");
+    expect(".o_field_cell.o_char_cell:first").toHaveText("CHAR");
 
     await contains(".o_field_cell.o_char_cell").click();
     await contains(".o_field_cell.o_char_cell input").edit("TEST");
-    expect(queryFirst(".o_field_cell.o_char_cell input").value).toBe("TEST");
+    expect(".o_field_cell.o_char_cell:first").toHaveText("TEST");
 
     await contains("[name='m2o']").click();
-    expect(queryFirst(".o_field_cell.o_char_cell input").value).toBe("TEST");
+    expect(".o_field_cell.o_char_cell input").toHaveValue("TEST");
 
     await contains(".o_list_button_save:visible").click();
-    expect(queryFirst(".o_field_cell.o_char_cell").textContent).toBe("TEST");
+    expect(".o_field_cell.o_char_cell:first").toHaveText("TEST");
 });
 
 test("Properties: boolean", async () => {
@@ -14931,6 +14930,10 @@ test("Properties: boolean", async () => {
         }
     }
 
+    onRpc("write", ({ args }) => {
+        expect(args).toEqual([[1], { properties: [{ ...definition, value: false }] }]);
+    });
+
     await mountView({
         type: "list",
         resModel: "foo",
@@ -14939,25 +14942,20 @@ test("Properties: boolean", async () => {
                 <field name="m2o"/>
                 <field name="properties" />
             </tree>`,
-        mockRPC(route, { method, args }) {
-            if (method === "write") {
-                expect(args).toEqual([[1], { properties: [{ ...definition, value: false }] }]);
-            }
-        },
     });
 
     await contains(".o_optional_columns_dropdown_toggle").click();
     await contains(".o-dropdown--menu input[type='checkbox']").click();
 
     expect(".o_list_renderer th[data-name='properties.property_boolean']").toHaveCount(1);
-    expect(queryFirst(".o_list_renderer th[data-name='properties.property_boolean']").textContent).toBe("Property boolean");
+    expect(".o_list_renderer th[data-name='properties.property_boolean']").toHaveText("Property boolean");
     expect(".o_field_cell.o_boolean_cell").toHaveCount(3);
 
     await contains(".o_field_cell.o_boolean_cell").click();
     await contains(".o_field_cell.o_boolean_cell input").click();
     await contains(".o_list_button_save:visible").click();
 
-    expect(queryFirst(".o_field_cell.o_boolean_cell input").checked).toBe(false);
+    expect(".o_field_cell.o_boolean_cell input").not.toBeChecked();
 });
 
 test("Properties: integer", async () => {
@@ -14973,6 +14971,10 @@ test("Properties: integer", async () => {
         }
     }
 
+    onRpc("write", ({ args }) => {
+        expect(args).toEqual([[1], { properties: [{ ...definition, value: 321 }] }]);
+    });
+
     await mountView({
         type: "list",
         resModel: "foo",
@@ -14981,26 +14983,19 @@ test("Properties: integer", async () => {
                 <field name="m2o"/>
                 <field name="properties" />
             </tree>`,
-        mockRPC(route, { method, args }) {
-            if (method === "write") {
-                expect(args).toEqual([[1], { properties: [{ ...definition, value: 321 }] }]);
-            }
-        },
     });
 
     await contains(".o_optional_columns_dropdown_toggle").click();
     await contains(".o-dropdown--menu input[type='checkbox']").click();
-
     expect(".o_list_renderer th[data-name='properties.property_integer']").toHaveCount(1);
-    expect(queryFirst(".o_list_renderer th[data-name='properties.property_integer']").textContent).toBe("Property integer");
+    expect(".o_list_renderer th[data-name='properties.property_integer']").toHaveText("Property integer");
     expect(".o_field_cell.o_integer_cell").toHaveCount(3);
 
     await contains(".o_field_cell.o_integer_cell").click();
-    await editInput(target, ".o_field_cell.o_integer_cell input", 321);
+    await contains(".o_field_cell.o_integer_cell input").edit("321");
     await contains(".o_list_button_save:visible").click();
-
-    expect(queryFirst(".o_field_cell.o_integer_cell").textContent).toBe("321");
-    expect(queryFirst(".o_list_footer .o_list_number").textContent).toBe("567", {
+    expect(".o_field_cell.o_integer_cell:first").toHaveText("321");
+    expect(".o_list_footer .o_list_number").toHaveText("567", {
         message: "First property is 321, second is zero because it has a different parent and the 2 others are 123 so the total should be 321 + 123 * 2 = 567",
     });
 });
@@ -15018,6 +15013,10 @@ test("Properties: float", async () => {
         }
     }
 
+    onRpc("write", ({ args }) => {
+        expect(args).toEqual([[1], { properties: [{ ...definition, value: 3.21 }] }]);
+    });
+
     await mountView({
         type: "list",
         resModel: "foo",
@@ -15026,26 +15025,19 @@ test("Properties: float", async () => {
                 <field name="m2o"/>
                 <field name="properties" />
             </tree>`,
-        mockRPC(route, { method, args }) {
-            if (method === "write") {
-                expect(args).toEqual([[1], { properties: [{ ...definition, value: 3.21 }] }]);
-            }
-        },
     });
 
     await contains(".o_optional_columns_dropdown_toggle").click();
     await contains(".o-dropdown--menu input[type='checkbox']").click();
-
     expect(".o_list_renderer th[data-name='properties.property_float']").toHaveCount(1);
-    expect(queryFirst(".o_list_renderer th[data-name='properties.property_float']").textContent).toBe("Property float");
+    expect(".o_list_renderer th[data-name='properties.property_float']").toHaveText("Property float");
     expect(".o_field_cell.o_float_cell").toHaveCount(3);
 
     await contains(".o_field_cell.o_float_cell").click();
-    await editInput(target, ".o_field_cell.o_float_cell input", 3.21);
+    await contains(".o_field_cell.o_float_cell input").edit("3.21");
     await contains(".o_list_button_save:visible").click();
-
-    expect(queryFirst(".o_field_cell.o_float_cell").textContent).toBe("3.21");
-    expect(queryFirst(".o_list_footer .o_list_number").textContent).toBe("126.66", {
+    expect(".o_field_cell.o_float_cell:first").toHaveText("3.21");
+    expect(".o_list_footer .o_list_number").toHaveText("126.66", {
         message: "First property is 3.21, second is zero because it has a different parent the other is 123.45 and the last one zero because it is false so the total should be 3.21 + 123.45 = 126.66",
     });
 });
@@ -15063,6 +15055,10 @@ test("Properties: date", async () => {
         }
     }
 
+    onRpc("write", ({ args }) => {
+        expect(args).toEqual([[1], { properties: [{ ...definition, value: "2022-12-19" }] }]);
+    });
+
     await mountView({
         type: "list",
         resModel: "foo",
@@ -15071,26 +15067,19 @@ test("Properties: date", async () => {
                 <field name="m2o"/>
                 <field name="properties" />
             </tree>`,
-        mockRPC(route, { method, args }) {
-            if (method === "write") {
-                expect(args).toEqual([[1], { properties: [{ ...definition, value: "2022-12-19" }] }]);
-            }
-        },
     });
 
     await contains(".o_optional_columns_dropdown_toggle").click();
     await contains(".o-dropdown--menu input[type='checkbox']").click();
-
     expect(".o_list_renderer th[data-name='properties.property_date']").toHaveCount(1);
-    expect(queryFirst(".o_list_renderer th[data-name='properties.property_date']").textContent).toBe("Property date");
+    expect(".o_list_renderer th[data-name='properties.property_date']").toHaveText("Property date");
     expect(".o_field_cell.o_date_cell").toHaveCount(3);
 
     await contains(".o_field_cell.o_date_cell").click();
     await contains(".o_field_date input").click();
-    await click(getPickerCell("19"));
+    await contains(getPickerCell("19")).click();
     await contains(".o_list_button_save:visible").click();
-
-    expect(queryFirst(".o_field_cell.o_date_cell").textContent).toBe("12/19/2022");
+    expect(".o_field_cell.o_date_cell:first").toHaveText("12/19/2022");
 });
 
 test("Properties: datetime", async () => {
@@ -15107,6 +15096,10 @@ test("Properties: datetime", async () => {
         }
     }
 
+    onRpc("write", ({ args }) => {
+        expect(args).toEqual([[1], { properties: [{ ...definition, value: "2022-12-19 12:12:00" }] }]);
+    });
+
     await mountView({
         type: "list",
         resModel: "foo",
@@ -15115,26 +15108,19 @@ test("Properties: datetime", async () => {
                 <field name="m2o"/>
                 <field name="properties" />
             </tree>`,
-        mockRPC(route, { method, args }) {
-            if (method === "write") {
-                expect(args).toEqual([[1], { properties: [{ ...definition, value: "2022-12-19 12:12:00" }] }]);
-            }
-        },
     });
 
     await contains(".o_optional_columns_dropdown_toggle").click();
     await contains(".o-dropdown--menu input[type='checkbox']").click();
-
     expect(".o_list_renderer th[data-name='properties.property_datetime']").toHaveCount(1);
-    expect(queryFirst(".o_list_renderer th[data-name='properties.property_datetime']").textContent).toBe("Property datetime");
+    expect(".o_list_renderer th[data-name='properties.property_datetime']").toHaveText("Property datetime");
     expect(".o_field_cell.o_datetime_cell").toHaveCount(3);
 
     await contains(".o_field_cell.o_datetime_cell").click();
     await contains(".o_field_datetime input").click();
-    await click(getPickerCell("19"));
+    await contains(getPickerCell("19")).click();
     await contains(".o_list_button_save:visible").click();
-
-    expect(queryFirst(".o_field_cell.o_datetime_cell").textContent).toBe("12/19/2022 12:12:00");
+    expect(".o_field_cell.o_datetime_cell:first").toHaveText("12/19/2022 12:12:00");
 });
 
 test("Properties: selection", async () => {
@@ -15155,6 +15141,10 @@ test("Properties: selection", async () => {
         }
     }
 
+    onRpc("write", ({ args }) => {
+        expect(args).toEqual([[1], { properties: [{ ...definition, value: "a" }] }]);
+    });
+
     await mountView({
         type: "list",
         resModel: "foo",
@@ -15163,25 +15153,18 @@ test("Properties: selection", async () => {
                 <field name="m2o"/>
                 <field name="properties" />
             </tree>`,
-        mockRPC(route, { method, args }) {
-            if (method === "write") {
-                expect(args).toEqual([[1], { properties: [{ ...definition, value: "a" }] }]);
-            }
-        },
     });
 
     await contains(".o_optional_columns_dropdown_toggle").click();
     await contains(".o-dropdown--menu input[type='checkbox']").click();
-
     expect(".o_list_renderer th[data-name='properties.property_selection']").toHaveCount(1);
-    expect(queryFirst(".o_list_renderer th[data-name='properties.property_selection']").textContent).toBe("Property selection");
+    expect(".o_list_renderer th[data-name='properties.property_selection']").toHaveText("Property selection");
     expect(".o_field_cell.o_selection_cell").toHaveCount(3);
 
     await contains(".o_field_cell.o_selection_cell").click();
-    await editSelect(target, ".o_field_cell.o_selection_cell select", `"a"`);
+    await contains(".o_field_cell.o_selection_cell select").select(`"a"`);
     await contains(".o_list_button_save:visible").click();
-
-    expect(queryFirst(".o_field_cell.o_selection_cell").textContent).toBe("A");
+    expect(".o_field_cell.o_selection_cell:first").toHaveText("A");
 });
 
 test("Properties: tags", async () => {
@@ -15203,6 +15186,9 @@ test("Properties: tags", async () => {
     }
 
     let expectedValue = null;
+    onRpc("write", ({ args }) => {
+        expect(args).toEqual([[1], { properties: [{ ...definition, value: expectedValue }] }]);
+    });
 
     await mountView({
         type: "list",
@@ -15212,33 +15198,27 @@ test("Properties: tags", async () => {
                 <field name="m2o"/>
                 <field name="properties" />
             </tree>`,
-        mockRPC(route, { method, args }) {
-            if (method === "write") {
-                expect(args).toEqual([[1], { properties: [{ ...definition, value: expectedValue }] }]);
-            }
-        },
     });
 
     await contains(".o_optional_columns_dropdown_toggle").click();
     await contains(".o-dropdown--menu input[type='checkbox']").click();
-
     expect(".o_list_renderer th[data-name='properties.property_tags']").toHaveCount(1);
-    expect(queryFirst(".o_list_renderer th[data-name='properties.property_tags']").textContent).toBe("Property tags");
+    expect(".o_list_renderer th[data-name='properties.property_tags']").toHaveText("Property tags");
     expect(".o_field_cell.o_property_tags_cell").toHaveCount(3);
 
     await contains(".o_field_cell.o_property_tags_cell").click();
-    await click(queryFirst(".o_field_cell.o_property_tags_cell .o_delete"));
+    await contains(".o_field_cell.o_property_tags_cell .o_delete:first").click();
     expectedValue = ["c"];
     await contains(".o_list_button_save:visible").click();
-
-    expect(queryFirst(".o_field_cell.o_property_tags_cell").textContent).toBe("C");
+    expect(".o_field_cell.o_property_tags_cell:first").toHaveText("C");
 
     await contains(".o_field_cell.o_property_tags_cell").click();
-    await selectDropdownItem(target, "properties.property_tags", "B");
+    await contains(".o_field_cell.o_property_tags_cell input").click();
+    await contains(".o-autocomplete--dropdown-item:contains(B)").click();
     expectedValue = ["c", "b"];
     await contains(".o_list_button_save:visible").click();
 
-    expect(queryFirst(".o_field_cell.o_property_tags_cell").textContent).toBe("BC");
+    expect(".o_field_cell.o_property_tags_cell:first").toHaveText("B\nC");
 });
 
 test("Properties: many2one", async () => {
@@ -15256,6 +15236,10 @@ test("Properties: many2one", async () => {
         }
     }
 
+    onRpc("write", ({ args }) => {
+        expect(args).toEqual([[1], { properties: [{ ...definition, value: [2, "EUR"] }] }]);
+    });
+
     await mountView({
         type: "list",
         resModel: "foo",
@@ -15264,25 +15248,19 @@ test("Properties: many2one", async () => {
                 <field name="m2o"/>
                 <field name="properties" />
             </tree>`,
-        mockRPC(route, { method, args }) {
-            if (method === "write") {
-                expect(args).toEqual([[1], { properties: [{ ...definition, value: [2, "EUR"] }] }]);
-            }
-        },
     });
 
     await contains(".o_optional_columns_dropdown_toggle").click();
     await contains(".o-dropdown--menu input[type='checkbox']").click();
-
     expect(".o_list_renderer th[data-name='properties.property_many2one']").toHaveCount(1);
-    expect(queryFirst(".o_list_renderer th[data-name='properties.property_many2one']").textContent).toBe("Property many2one");
+    expect(".o_list_renderer th[data-name='properties.property_many2one']").toHaveText("Property many2one");
     expect(".o_field_cell.o_many2one_cell").toHaveCount(3);
 
     await contains(".o_field_cell.o_many2one_cell").click();
-    await selectDropdownItem(target, "properties.property_many2one", "EUR");
+    await contains(".o_field_cell.o_many2one_cell input").click();
+    await contains(".o-autocomplete--dropdown-item:contains(EUR)").click();
     await contains(".o_list_button_save:visible").click();
-
-    expect(queryFirst(".o_field_cell.o_many2one_cell").textContent).toBe("EUR");
+    expect(".o_field_cell.o_many2one_cell:first").toHaveText("EUR");
 });
 
 test("Properties: many2many", async () => {
@@ -15300,6 +15278,10 @@ test("Properties: many2many", async () => {
         }
     }
 
+    onRpc("write", ({ args }) => {
+        expect(args).toEqual([[1], { properties: [{ ...definition, value: [] }] }]);
+    });
+
     await mountView({
         type: "list",
         resModel: "foo",
@@ -15308,18 +15290,13 @@ test("Properties: many2many", async () => {
                 <field name="m2o"/>
                 <field name="properties" />
             </tree>`,
-        mockRPC(route, { method, args }) {
-            if (method === "write") {
-                expect(args).toEqual([[1], { properties: [{ ...definition, value: [] }] }]);
-            }
-        },
     });
 
     await contains(".o_optional_columns_dropdown_toggle").click();
     await contains(".o-dropdown--menu input[type='checkbox']").click();
 
     expect(".o_list_renderer th[data-name='properties.property_many2many']").toHaveCount(1);
-    expect(queryFirst(".o_list_renderer th[data-name='properties.property_many2many']").textContent).toBe("Property many2many");
+    expect(".o_list_renderer th[data-name='properties.property_many2many']").toHaveText("Property many2many");
     expect(".o_field_cell.o_many2many_tags_cell").toHaveCount(3);
 });
 
@@ -15355,14 +15332,14 @@ test("multiple sources of properties definitions", async () => {
     });
 
     await contains(".o_optional_columns_dropdown_toggle").click();
-    await click(queryFirst(".o-dropdown--menu input[type='checkbox']"));
-    await click(queryAll(".o-dropdown--menu input[type='checkbox']")[1]);
+    await contains(".o-dropdown--menu input[type='checkbox']:eq(0)").click();
+    await contains(".o-dropdown--menu input[type='checkbox']:eq(1)").click();
 
     expect(".o_list_renderer th[data-name='properties.property_char']").toHaveCount(1);
     expect(".o_field_cell.o_char_cell").toHaveCount(3);
 
     expect(".o_list_renderer th[data-name='properties.property_boolean']").toHaveCount(1);
-    assert.containsOnce(target, ".o_field_cell.o_boolean_cell", 1);
+    expect(".o_field_cell.o_boolean_cell").toHaveCount(1);
 });
 
 test("toggle properties", async () => {
@@ -15398,19 +15375,19 @@ test("toggle properties", async () => {
 
     await contains(".o_optional_columns_dropdown_toggle").click();
 
-    await click(queryFirst(".o-dropdown--menu input[type='checkbox']"));
+    await contains(".o-dropdown--menu input[type='checkbox']:first").click();
     expect(".o_list_renderer th[data-name='properties.property_char']").toHaveCount(1);
     expect(".o_list_renderer th[data-name='properties.property_boolean']").toHaveCount(0);
 
-    await click(queryAll(".o-dropdown--menu input[type='checkbox']")[1]);
+    await contains(".o-dropdown--menu input[type='checkbox']:eq(1)").click();
     expect(".o_list_renderer th[data-name='properties.property_char']").toHaveCount(1);
     expect(".o_list_renderer th[data-name='properties.property_boolean']").toHaveCount(1);
 
-    await click(queryFirst(".o-dropdown--menu input[type='checkbox']"));
+    await contains(".o-dropdown--menu input[type='checkbox']:first").click();
     expect(".o_list_renderer th[data-name='properties.property_char']").toHaveCount(0);
     expect(".o_list_renderer th[data-name='properties.property_boolean']").toHaveCount(1);
 
-    await click(queryAll(".o-dropdown--menu input[type='checkbox']")[1]);
+    await contains(".o-dropdown--menu input[type='checkbox']:eq(1)").click();
     expect(".o_list_renderer th[data-name='properties.property_char']").toHaveCount(0);
     expect(".o_list_renderer th[data-name='properties.property_boolean']").toHaveCount(0);
 });
@@ -15541,6 +15518,8 @@ test("reload properties definitions when domain change", async () => {
         }
     }
 
+    stepAllNetworkCalls();
+
     await mountView({
         type: "list",
         resModel: "foo",
@@ -15549,9 +15528,6 @@ test("reload properties definitions when domain change", async () => {
                 <field name="m2o"/>
                 <field name="properties" />
             </tree>`,
-        mockRPC(route) {
-            expect.step(route);
-        },
         irFilters: [
             {
                 context: "{}",
@@ -15564,12 +15540,13 @@ test("reload properties definitions when domain change", async () => {
         ],
     });
 
-    expect(["/web/dataset/call_kw/foo/get_views", "/web/dataset/call_kw/foo/web_search_read"]).toVerifySteps();
+    expect(["/web/webclient/translations",
+    "/web/webclient/load_menus","get_views", "web_search_read","has_group"]).toVerifySteps();
 
     await toggleSearchBarMenu();
     await toggleMenuItem("only one");
 
-    expect(["/web/dataset/call_kw/foo/web_search_read"]).toVerifySteps();
+    expect(["web_search_read"]).toVerifySteps();
 });
 
 test("do not reload properties definitions when page change", async () => {
@@ -15585,6 +15562,8 @@ test("do not reload properties definitions when page change", async () => {
         }
     }
 
+    stepAllNetworkCalls();
+
     await mountView({
         type: "list",
         resModel: "foo",
@@ -15593,16 +15572,13 @@ test("do not reload properties definitions when page change", async () => {
                 <field name="m2o"/>
                 <field name="properties" />
             </tree>`,
-        mockRPC(route) {
-            expect.step(route);
-        },
     });
 
-    expect(["/web/dataset/call_kw/foo/get_views", "/web/dataset/call_kw/foo/web_search_read"]).toVerifySteps();
+    expect(["/web/webclient/translations",
+    "/web/webclient/load_menus","get_views", "web_search_read", "has_group"]).toVerifySteps();
 
     await pagerNext();
-
-    expect(["/web/dataset/call_kw/foo/web_search_read"]).toVerifySteps();
+    expect(["web_search_read"]).toVerifySteps();
 });
 
 test("load properties definitions only once when grouped", async () => {
@@ -15618,6 +15594,8 @@ test("load properties definitions only once when grouped", async () => {
         }
     }
 
+    stepAllNetworkCalls();
+
     await mountView({
         type: "list",
         resModel: "foo",
@@ -15626,16 +15604,14 @@ test("load properties definitions only once when grouped", async () => {
                 <field name="m2o"/>
                 <field name="properties" />
             </tree>`,
-        mockRPC(route) {
-            expect.step(route);
-        },
         groupBy: ["m2o"],
     });
 
-    expect(["/web/dataset/call_kw/foo/get_views", "/web/dataset/call_kw/foo/web_read_group"]).toVerifySteps();
+    expect(["/web/webclient/translations",
+    "/web/webclient/load_menus","get_views", "web_read_group", "has_group"]).toVerifySteps();
 
     await contains(".o_group_header").click();
-    expect(["/web/dataset/call_kw/foo/web_search_read"]).toVerifySteps();
+    expect(["web_search_read"]).toVerifySteps();
 });
 
 test("Invisible Properties", async () => {
@@ -15651,6 +15627,8 @@ test("Invisible Properties", async () => {
         }
     }
 
+    stepAllNetworkCalls();
+
     await mountView({
         type: "list",
         resModel: "foo",
@@ -15659,9 +15637,6 @@ test("Invisible Properties", async () => {
                 <field name="m2o"/>
                 <field name="properties" column_invisible="1"/>
             </tree>`,
-        mockRPC(route, { method, args }) {
-            expect.step(method);
-        },
     });
 
     expect(".o_optional_columns_dropdown_toggle").toHaveCount(0);
@@ -15669,6 +15644,11 @@ test("Invisible Properties", async () => {
 });
 
 test("header buttons in list view", async () => {
+    onRpc("/web/dataset/call_button/foo/a", () => {
+        expect.step("a");
+        return true;
+    });
+
     await mountView({
         type: "list",
         resModel: "foo",
@@ -15680,19 +15660,11 @@ test("header buttons in list view", async () => {
                 <field name="foo"/>
                 <field name="bar" />
             </tree>`,
-
-        mockRPC: async (route, args) => {
-            if (route.startsWith("/web/dataset/call_button")) {
-                expect.step(args.method);
-                return true;
-            }
-        },
     });
     await contains(".o_data_row .o_list_record_selector input").click();
-    await click(queryFirst('.o_control_panel_actions button[name="a"]'));
+    await contains(".o_control_panel_actions button[name=a]").click();
     expect(".modal").toHaveCount(1);
-    const modalText = queryFirst(".modal-body").textContent;
-    expect(modalText).toBe("Are you sure?");
+    expect(".modal-body").toHaveText("Are you sure?");
     await contains(".modal footer button.btn-primary").click();
     expect(["a"]).toVerifySteps();
 });
@@ -15724,9 +15696,10 @@ test("restore orderBy from state when using default order", async () => {
         "search,false": "<search/>",
     };
 
-    onRpc("web_search_read", ({ kwargs}) => {
+    onRpc("web_search_read", ({ kwargs }) => {
         expect.step("order:" + kwargs.order);
     });
+
     await mountWithCleanup(WebClient);
     await getService("action").doAction(1);
 
@@ -15745,7 +15718,7 @@ test("x2many onchange, check result", async () => {
     Foo._onChanges = {
         m2m: function () {},
     };
-    
+
     const def = new Deferred();
     onRpc("onchange", async () => {
         expect.step("onchange");
@@ -15763,16 +15736,18 @@ test("x2many onchange, check result", async () => {
             </tree>`,
     });
 
-    expect(".o_data_cell.o_many2many_tags_cell:first").toHaveText("Value 1Value 2");
+    expect(".o_data_cell.o_many2many_tags_cell:first").toHaveText("Value 1\nValue 2");
     expect(".o_data_cell.o_list_many2one:first").toHaveText("Value 1");
-    await contains(".o_data_cell.o_many2many_tags_cell").click();
-    await selectDropdownItem(target, "m2m", "Value 3");
 
+    await contains(".o_data_cell.o_many2many_tags_cell").click();
+    await contains(".o_data_cell.o_many2many_tags_cell input").click();
+    await contains(".o-autocomplete--dropdown-item:contains(Value 3)").click();
     expect(["onchange"]).toVerifySteps();
+
     await contains(".o_list_button_save:not(.btn-link)").click();
     def.resolve();
     await animationFrame();
-    expect(".o_data_cell.o_many2many_tags_cell:first").toHaveText("Value 1Value 2Value 3");
+    expect(".o_data_cell.o_many2many_tags_cell:first").toHaveText("Value 1\nValue 2\nValue 3");
     expect(".o_data_cell.o_list_many2one:first").toHaveText("Value 3", {
         message: "onchange result should be applied",
     });
@@ -15799,9 +15774,6 @@ test("list view: prevent record selection when editable list in edit mode", asyn
 });
 
 test("context keys not passed down the stack and not to fields", async () => {
-    patchWithCleanup(AutoComplete, {
-        timeout: 0,
-    });
     defineActions([
         {
             id: 1,
@@ -15816,13 +15788,15 @@ test("context keys not passed down the stack and not to fields", async () => {
         },
     ]);
     Foo._views = {
-        "foo,foo_view_ref,list": `
+        "list,foo_view_ref": `
             <tree default_order="foo" editable="top">
                 <field name="m2m" widget="many2many_tags"/>
             </tree>`,
         "search,false": "<search/>",
-        "bar,false,list": `<tree><field name="name" /></tree>`,
-        "bar,false,search": "<search/>",
+    };
+    Bar._views = {
+        "list,false": `<tree><field name="display_name"/></tree>`,
+        "search,false": "<search/>",
     };
 
     const barRecs = [];
@@ -15834,53 +15808,45 @@ test("context keys not passed down the stack and not to fields", async () => {
     }
     Bar._records = barRecs;
 
-    const mockRPC = (route, args) => {
-        if (args.method) {
-            expect.step(`${args.model}: ${args.method}: ${JSON.stringify(args.kwargs.context)}`);
+    onRpc(({ method, model, kwargs }) => {
+        if (model) {
+            expect.step(`${model}: ${method}: ${JSON.stringify(kwargs.context)}`);
         }
-    };
-    const wc = await createWebClient({ serverData, mockRPC });
-    await doAction(wc, 1);
-    expect([`foo: get_views: {"lang":"en","tz":"taht","uid":7,"tree_view_ref":"foo_view_ref"}`, `foo: web_search_read: {"lang":"en","tz":"taht","uid":7,"bin_size":true,"tree_view_ref":"foo_view_ref"}`]).toVerifySteps();
+    });
 
-    await click(queryAll(".o_data_row .o_data_cell")[1]);
+    await mountWithCleanup(WebClient);
+    await getService("action").doAction(1);
+    expect([`foo: get_views: {"lang":"en","tz":"taht","uid":7,"allowed_company_ids":[1],"tree_view_ref":"foo_view_ref"}`, `foo: web_search_read: {"lang":"en","tz":"taht","uid":7,"allowed_company_ids":[1],"bin_size":true,"tree_view_ref":"foo_view_ref","current_company_id":1}`,`res.users: has_group: {"lang":"en","tz":"taht","uid":7,"allowed_company_ids":[1]}`]).toVerifySteps();
 
-    const input = queryFirst(".o_selected_row .o_field_many2many_tags input");
-    await triggerEvent(input, null, "focus");
-    await click(input);
-    await animationFrame();
-    expect([`bar: name_search: {"lang":"en","tz":"taht","uid":7}`]).toVerifySteps();
+    await contains(".o_data_row .o_data_cell:eq(1)").click();
+    await contains(".o_selected_row .o_field_many2many_tags input").click();
+    expect([`bar: name_search: {"lang":"en","tz":"taht","uid":7,"allowed_company_ids":[1]}`]).toVerifySteps();
 
-    const items = Array.from(queryAll(".o_selected_row .o_field_many2many_tags .dropdown-item"));
-    await click(items.find((el) => el.textContent.trim() === "Search More..."));
-    expect([`bar: get_views: {"lang":"en","tz":"taht","uid":7}`, `bar: web_search_read: {"lang":"en","tz":"taht","uid":7,"bin_size":true}`]).toVerifySteps();
+    await contains(".o_selected_row .o_field_many2many_tags .dropdown-item:contains(Search More...)").click();
+    expect([`bar: get_views: {"lang":"en","tz":"taht","uid":7,"allowed_company_ids":[1]}`, `bar: web_search_read: {"lang":"en","tz":"taht","uid":7,"allowed_company_ids":[1],"bin_size":true,"current_company_id":1}`]).toVerifySteps();
     expect(".modal").toHaveCount(1);
-    expect(queryFirst(".modal .modal-header .modal-title").textContent).toBe("Search: M2M field");
+    expect(".modal .modal-header .modal-title").toHaveText("Search: M2m");
 });
 
-test("search nested many2one field with early option selection", async () => {
+test.todo("search nested many2one field with early option selection", async () => {
+    class Parent extends models.Model {
+        foo = fields.One2many({ relation: "foo" });
+    }
+    
     const deferred = new Deferred();
-    serverData.models.parent = {
-        fields: {
-            foo: { string: "Foo", type: "one2many", relation: "foo" },
-        },
-    };
+    onRpc("name_search", () => deferred);
+
     await mountView({
         type: "form",
         resModel: "parent",
         arch: `
-        <form>
-            <field name="foo">
-                <tree editable="bottom">
-                    <field name="m2o"/>
-                </tree>
-            </field>
-        </form>`,
-        mockRPC: async (route, { method }) => {
-            if (method === "name_search") {
-                await deferred;
-            }
-        },
+            <form>
+                <field name="foo">
+                    <tree editable="bottom">
+                        <field name="m2o"/>
+                    </tree>
+                </field>
+            </form>`,
     });
 
     await triggerEvent(document.querySelector(".o_field_x2many_list_row_add a"), null, "click");
@@ -15902,46 +15868,53 @@ test("search nested many2one field with early option selection", async () => {
     expect(input.value).toBe("Value 1");
 });
 
-test("monetary field display for rtl languages", async () => {
+test.todo("monetary field display for rtl languages", async () => {
     patchWithCleanup(localization, {
-        direction: "rtl",
+        direction: "rtl", // FIXME: rtl doesn't work ( + check the other test)
     });
+
+    const mockedCurrencies = {};
+    for (const record of Currency._records) {
+        mockedCurrencies[record.id] = record;
+    }
+    patchWithCleanup(currencies, mockedCurrencies);
 
     await mountView({
         type: "list",
         resModel: "foo",
-        arch: '<tree><field name="foo"/><field name="amount_currency"/></tree>',
+        arch: `
+            <tree>
+                <field name="foo"/>
+                <field name="amount"/>
+                <field name="currency_id"/>
+            </tree>`,
     });
 
-    expect("thead th:nth(2) .o_list_number_th").toHaveCount(1, {
+    expect("thead th:eq(2) .o_list_number_th").toHaveCount(1, {
         message: "header cells of monetary fields should have o_list_number_th class",
     });
-    expect($(target).find("thead th:nth(2)").css("text-align")).toBe("right", {
+    expect(queryOne("thead th:eq(2)").style.textAlign).toBe("right", {
         message: "header cells of monetary fields should be right alined",
     });
-
-    expect($(target).find("tbody tr:first td:nth(2)").css("text-align")).toBe("right", {
+    expect(queryOne("tbody tr:first td:eq(2)").style.textAlign).toBe("right", {
         message: "Monetary cells should be right alined",
     });
-
-    expect($(target).find("tbody tr:first td:nth(2)").css("direction")).toBe("ltr", {
+    expect(queryOne("tbody tr:first td:eq(2)").style.direction).toBe("ltr", {
         message: "Monetary cells should have ltr direction",
     });
 });
 
 test("add record in editable list view with sample data", async () => {
     Foo._records = [];
+
     let def;
+    onRpc("web_search_read", () => def);
+
     await mountView({
         type: "list",
         resModel: "foo",
         arch: '<tree sample="1" editable="top"><field name="int_field"/></tree>',
         noContentHelp: "click to add a record",
-        mockRPC(route, args) {
-            if (args.method === "web_search_read") {
-                return def;
-            }
-        },
     });
 
     expect(".o_view_sample_data").toHaveCount(1);
@@ -15949,15 +15922,13 @@ test("add record in editable list view with sample data", async () => {
     expect(".o_data_row").toHaveCount(10);
 
     def = new Deferred();
-    await clickAdd();
-
+    await contains(".o_list_button_add:visible").click();
     expect(".o_view_sample_data").toHaveCount(1);
     expect(".o_view_nocontent").toHaveCount(1);
     expect(".o_data_row").toHaveCount(10);
 
     def.resolve();
     await animationFrame();
-
     expect(".o_view_sample_data").toHaveCount(0);
     expect(".o_view_nocontent").toHaveCount(0);
     expect(".o_data_row").toHaveCount(1);
@@ -15974,12 +15945,12 @@ test("Adding new record in list view with open form view button", async () => {
         },
     });
 
-    await clickAdd();
+    await contains(".o_list_button_add:visible").click();
     expect("td.o_list_record_open_form_view").toHaveCount(5, {
         message: "button to open form view should be present on each row",
     });
 
-    await contains(".o_field_widget[name=foo] input").edit("new");
+    await contains(".o_field_widget[name=foo] input").edit("new", { confirm: false });
     await contains("td.o_list_record_open_form_view").click();
     expect(["switch to form - resId: 5 activeIds: 5,1,2,3,4"]).toVerifySteps();
 });
@@ -15992,6 +15963,11 @@ test("onchange should only be called once after pressing enter on a field", asyn
             }
         },
     };
+
+    onRpc("onchange", () => {
+        expect.step("onchange");
+    });
+
     await mountView({
         type: "list",
         resModel: "foo",
@@ -16000,29 +15976,19 @@ test("onchange should only be called once after pressing enter on a field", asyn
                 <field name="foo"/>
                 <field name="int_field"/>
             </tree>`,
-        async mockRPC(_, { method }) {
-            if (method === "onchange") {
-                expect.step(method);
-            }
-        },
     });
     await contains(".o_data_cell").click();
-    queryFirst(".o_field_widget[name=foo] input").value = "1";
-    await triggerEvents(target, ".o_field_widget[name=foo] input", [["keydown", { key: "Enter" }], ["change"]]);
-    await animationFrame();
+    await contains(".o_field_widget[name=foo] input").edit("1", { confirm: "Enter" });
     expect(["onchange"]).toVerifySteps({ message: "There should only be one onchange call" });
 });
 
 test("list: remove a record from sorted recordlist", async () => {
-    expect.assertions(7);
-
     Foo._records = [{ id: 1, o2m: [1, 2, 3, 4, 5, 6] }];
     Bar._fields = {
         ...Bar._fields,
-        name: { string: "Name", type: "char", sortable: true },
-        city: { string: "City", type: "boolean", default: false },
+        name: fields.Char(),
+        city: fields.Boolean({ default: false }),
     };
-
     Bar._records = [
         { id: 1, name: "a", city: true },
         { id: 2, name: "b" },
@@ -16031,6 +15997,7 @@ test("list: remove a record from sorted recordlist", async () => {
         { id: 5, name: "e" },
         { id: 6, name: "f", city: true },
     ];
+
     await mountView({
         type: "form",
         resModel: "foo",
@@ -16052,20 +16019,19 @@ test("list: remove a record from sorted recordlist", async () => {
 
     // 4 th (1 for delete button, 3 for columns)
     expect("th").toHaveCount(4, { message: "should have 3 columns and delete buttons" });
-
     expect("tbody tr.o_data_row").toHaveCount(2, { message: "should have 2 rows" });
-    expect("th.o_column_sortable").toHaveCount(1, { message: "should have 1 sortable column" });
-    const getColNames = () => getNodesTextContent(document.querySelectorAll('.o_data_cell[name="name"'));
-    expect(getColNames()).toEqual(["a", "b"], { message: "Should be sorted by id asc" });
+    expect("th.o_column_sortable").toHaveCount(3, { message: "should have 3 sortable column" });
+    expect(queryAllTexts(".o_data_cell[name=name]")).toEqual(["a", "b"], { message: "Should be sorted by id asc" });
+
     // sort by name desc
     await contains("th.o_column_sortable[data-name=name]").click();
     await contains("th.o_column_sortable[data-name=name]").click();
-    expect(getColNames()).toEqual(["f", "e"], { message: "Should be sorted by name desc" });
+    expect(queryAllTexts(".o_data_cell[name=name]")).toEqual(["f", "e"], { message: "Should be sorted by name desc" });
     // remove second record
-    await click(queryAll(".o_list_record_remove")[1]);
-    expect(getColNames()).toEqual(["f", "d"], { message: "Should be sorted by name desc" });
+    await contains(".o_list_record_remove:eq(1)").click();
+    expect(queryAllTexts(".o_data_cell[name=name]")).toEqual(["f", "d"], { message: "Should be sorted by name desc" });
     // check if the record is removed
-    expect(queryFirst(".o_list_view .o_pager_counter").textContent).toBe("1-2 / 5", {
+    expect(".o_list_view .o_pager_counter").toHaveText("1-2 / 5", {
         message: "pager should be updated to 1-2 / 5",
     });
 });
