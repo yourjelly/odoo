@@ -12762,8 +12762,10 @@ test("list view with optional fields rendering", async () => {
 });
 
 test("list view with optional fields rendering in RTL mode", async () => {
-    patchWithCleanup(localization, {
-        direction: "rtl",
+    defineParams({
+        lang_parameters: {
+            direction: "rtl",
+        },
     });
 
     await mountView({
@@ -12781,7 +12783,6 @@ test("list view with optional fields rendering in RTL mode", async () => {
     expect("table .o_optional_columns_dropdown").toHaveCount(1, {
         message: "should have the optional columns dropdown toggle inside the table",
     });
-
     expect("table > thead > tr > th:last-child .o_optional_columns_dropdown").toHaveCount(1, {
         message: "The optional fields toggler is in the last header column",
     });
@@ -15828,10 +15829,11 @@ test("context keys not passed down the stack and not to fields", async () => {
     expect(".modal .modal-header .modal-title").toHaveText("Search: M2m");
 });
 
-test.todo("search nested many2one field with early option selection", async () => {
+test("search nested many2one field with early option selection", async () => {
     class Parent extends models.Model {
         foo = fields.One2many({ relation: "foo" });
     }
+    defineModels([Parent]);
     
     const deferred = new Deferred();
     onRpc("name_search", () => deferred);
@@ -15849,28 +15851,22 @@ test.todo("search nested many2one field with early option selection", async () =
             </form>`,
     });
 
-    await triggerEvent(document.querySelector(".o_field_x2many_list_row_add a"), null, "click");
-
-    const input = document.activeElement;
-    input.value = "alu";
-    triggerEvent(document.activeElement, null, "input");
-    await animationFrame();
-
-    input.value = "alue";
-    triggerEvent(document.activeElement, null, "input");
-    press("Enter");
-    await animationFrame();
-
+    await contains(".o_field_x2many_list_row_add a").click();
+    await contains(".o_selected_row .o_field_many2one input").fill("alu", { confirm: false });
+    await runAllTimers();
+    await contains(".o_selected_row .o_field_many2one input").fill("e", { confirm: "Enter" });
+    await runAllTimers();
     deferred.resolve();
     await animationFrame();
-
-    expect(input).toBe(document.activeElement);
-    expect(input.value).toBe("Value 1");
+    expect(".o_selected_row .o_field_many2one input").toBeFocused();
+    expect(".o_selected_row .o_field_many2one input").toHaveValue("Value 1");
 });
 
-test.todo("monetary field display for rtl languages", async () => {
-    patchWithCleanup(localization, {
-        direction: "rtl", // FIXME: rtl doesn't work ( + check the other test)
+test("monetary field display for rtl languages", async () => {
+    defineParams({
+        lang_parameters: {
+            direction: "rtl",
+        },
     });
 
     const mockedCurrencies = {};
@@ -15893,13 +15889,13 @@ test.todo("monetary field display for rtl languages", async () => {
     expect("thead th:eq(2) .o_list_number_th").toHaveCount(1, {
         message: "header cells of monetary fields should have o_list_number_th class",
     });
-    expect(queryOne("thead th:eq(2)").style.textAlign).toBe("right", {
+    expect("thead th:eq(2)").toHaveStyle({ "text-align": "right" }, {
         message: "header cells of monetary fields should be right alined",
     });
-    expect(queryOne("tbody tr:first td:eq(2)").style.textAlign).toBe("right", {
+    expect("tbody tr:first td:eq(2)").toHaveStyle({ "text-align": "right" }, {
         message: "Monetary cells should be right alined",
     });
-    expect(queryOne("tbody tr:first td:eq(2)").style.direction).toBe("ltr", {
+    expect("tbody tr:first td:eq(2)").toHaveStyle({ "direction": "ltr" }, {
         message: "Monetary cells should have ltr direction",
     });
 });
