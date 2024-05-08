@@ -1464,6 +1464,15 @@ class WeSelect extends UserValueComponent {
 }
 registry.category("snippet_widgets").add("WeSelect", WeSelect);
 
+class WeButtonGroup extends UserValueComponent {
+    static template = "web_editor.WeButtonGroup";
+    static isContainer = true;
+    static components = { WeTitle };
+    static StateModel = BaseSelectionUserValue;
+}
+
+registry.category("snippet_widgets").add("WeButtonGroup", WeButtonGroup);
+
 const ButtonGroupUserValueWidget = BaseSelectionUserValueWidget.extend({
     tagName: 'we-button-group',
 });
