@@ -24,6 +24,20 @@
     </WeButtonGroup>
 </t>
 
+<t t-name="web_editor.container_width">
+    <WeButtonGroup title.translate="Content Width">
+        <WeButton selectClass="'o_container_small'"
+                  tooltip.translate="Small"
+                  img="'/website/static/src/img/snippets_options/content_width_small.svg'"/>
+        <WeButton selectClass="'container'"
+                  img="'/website/static/src/img/snippets_options/content_width_normal.svg'"
+                  tooltip.translate="Regular"/>
+        <WeButton selectClass="'container-fluid'"
+                  img="'/website/static/src/img/snippets_options/content_width_full.svg'"
+                  tooltip.translate="Full"/>
+    </WeButtonGroup>
+</t>
+
 <t t-name="web_editor.WeButton">
     <!-- 
          TODO: @owl-options tooltips are not automatically translated. To Check
