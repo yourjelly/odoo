@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="0">
+    <record id="pos_online_delivery_provider_urban_piper" model="pos.online.delivery.provider">
+        <field name="code">urban_piper</field>
+        <field name="name">Urban Piper</field>
+        <field name="sequence">1</field>
+        <field name="image_128" type="base64" file="pos_urban_piper/static/src/img/urbanpiper.jpeg"/>
+        <!-- <field name="module_id" ref="base.module_pos_deliveroo"/> -->
+    </record>
+</odoo>

@@ -32,6 +32,16 @@ class PosOrder(models.Model):
         taxes = taxes.compute_all(price, line.order_id.currency_id, line.qty, product=line.product_id, partner=line.order_id.partner_id or False)['taxes']
         return sum(tax.get('amount', 0.0) for tax in taxes)
 
+    @api.model
+    def _generate_unique_id(self, *args, config_id=None, prefix="Order"):
+        """
+        param: args: tuple of (session)id, login_number, sequence_number)
+        """
+        if config_id:
+            session_id = config_id.current_session_id
+            return f"{prefix} {session_id.name}-{str(session_id.login_number % 1000).zfill(3)}-{str(session_id.sequence_number % 10000).zfill(4)}"
+        return f"{prefix} {args[0]:0>5}-{args[1]:0>3}-{args[2]:0>4}"
+
     # This deals with orders that belong to a closed session. In order
     # to recover from this situation we create a new rescue session,
     # making it obvious that something went wrong.

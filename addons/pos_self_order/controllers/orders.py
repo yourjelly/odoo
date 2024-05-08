@@ -309,19 +309,6 @@ class PosSelfOrderController(http.Controller):
         amount_total = sum([line.get('price_subtotal_incl') for line in lines])
         return amount_total, amount_untaxed
 
-    # The first part will be the session_id of the order.
-    # The second part will be the table_id of the order.
-    # Last part the sequence number of the order.
-    # INFO: This is allow a maximum of 999 tables and 9999 orders per table, so about ~1M orders per session.
-    # Example: 'Self-Order 00001-001-0001'
-    def _generate_unique_id(self, pos_session_id, config_id, sequence_number, device_type):
-        first_part = "{:05d}".format(int(pos_session_id))
-        second_part = "{:03d}".format(int(config_id))
-        third_part = "{:04d}".format(int(sequence_number))
-
-        device = "Kiosk" if device_type == "kiosk" else "Self-Order"
-        return f"{device} {first_part}-{second_part}-{third_part}"
-
     def _verify_pos_config(self, access_token):
         """
         Finds the pos.config with the given access_token and returns a record with reduced privileges.

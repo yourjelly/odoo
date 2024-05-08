@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<templates>
+    <t t-name="pos_deliveroo.PosOrderCount">
+        <div t-if="isOrderCountMenuClosed()" class="navbar-button menu-button btn btn-light rounded-0 d-flex align-items-center p-3 cursor-pointer" t-on-click="openMenu">
+            <i class="fa fa-fw fa-bell align-self-end" role="img" aria-label="Notification" title="Notification" aria-hidden="true"></i>
+            <span if="props.orderCount" class="o-pos-order-counter badge rounded-pill p-0"><t t-out="props.orderCount"/></span>
+        </div>
+        <div t-else="" class="navbar-button menu menu-button btn btn-light rounded-0 d-flex align-items-center px-3 cursor-pointer" t-on-click="closeMenu">
+            <ul>
+                <li class="menu-item position-relative d-flex">
+                    <i class="fa fa-fw fa-bell align-self-end" role="img" aria-label="Notification" title="Notification" aria-hidden="true"></i>
+                    <span if="props.orderCount" class="o-pos-order-counter badge rounded-pill p-0"><t t-out="props.orderCount"/></span>
+                    <ul class="dropdown-menu sub-menu position-absolute d-flex flex-column align-items-stretch bg-white shadow-lg z-index-1">
+                        <ul>
+                            <li class="dropdown-item px-3 py-2" t-on-click="onTicketButtonClick">
+                                <div class="font-bold mb-1 fw-bolder"><a>Swiggy</a></div>
+                                <ul class="d-flex justify-content-between gap-4">
+                                    <li><a><span>1</span> Order</a></li>
+                                    <li><a><span>1</span> Ongoing</a></li>
+                                    <li><a><span>1</span> Done</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </t>
+</templates>
