@@ -661,6 +661,11 @@ export class TicketScreen extends Component {
                 displayName: _t("Customer"),
                 modelField: "partner_id.complete_name",
             },
+            BRAND: {
+                repr: (order) => order.brand_id,
+                displayName: _t("Brand"),
+                modelField: "brand_id",
+            },
         };
 
         if (this.showCardholderName()) {

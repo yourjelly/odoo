@@ -989,6 +989,7 @@ export class Order extends PosModel {
         this.finalized = false; // if true, cannot be modified.
         this.shippingDate = null;
         this.combos = [];
+        this.brand_id = options.json?.brand_id || "";
 
         this.partner = null;
 
@@ -1197,6 +1198,7 @@ export class Order extends PosModel {
             access_token: this.access_token || "",
             last_order_preparation_change: JSON.stringify(this.lastOrderPrepaChange),
             ticket_code: this.ticketCode || "",
+            brand_id: this.brand_id || "",
         };
         if (!this.is_paid && this.user_id) {
             json.user_id = this.user_id;

@@ -353,6 +353,7 @@ class PosOrder(models.Model):
     has_refundable_lines = fields.Boolean('Has Refundable Lines', compute='_compute_has_refundable_lines')
     ticket_code = fields.Char(help='5 digits alphanumeric code to be used by portal user to request an invoice')
     tracking_number = fields.Char(string="Order Number", compute='_compute_tracking_number', search='_search_tracking_number')
+    brand_id = fields.Char(string="Brand")
 
     def _search_tracking_number(self, operator, value):
         #search is made over the pos_reference field
@@ -1197,6 +1198,7 @@ class PosOrder(models.Model):
             'account_move': order.account_move.id,
             'id': order.id,
             'is_tipped': order.is_tipped,
+            'brand_id': order.brand_id,
             'tip_amount': order.tip_amount,
             'access_token': order.access_token,
             'ticket_code': order.ticket_code,

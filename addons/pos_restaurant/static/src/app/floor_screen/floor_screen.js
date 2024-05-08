@@ -288,6 +288,7 @@ export class FloorScreen extends Component {
         } else {
             try {
                 await this.pos.setTable(table);
+                // debugger;
             } catch (e) {
                 if (!(e instanceof ConnectionLostError)) {
                     throw e;

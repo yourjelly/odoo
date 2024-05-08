@@ -788,10 +788,9 @@ export function createRelatedModels(modelDefs, modelClasses = {}, indexes = {}) 
             const event = valuesToAdd.length > 0 ? "create" : "update";
             models[model].triggerEvents(event, values);
         }
-
         return { results, missingRecords };
     }
-
+    
     models.loadData = loadData;
     return [models, records, indexedRecords];
 }

@@ -13,28 +13,15 @@
                     <span if="props.orderCount" class="o-pos-order-counter badge rounded-pill p-0"><t t-out="props.orderCount"/></span>
                     <ul class="dropdown-menu sub-menu position-absolute d-flex flex-column align-items-stretch bg-white shadow-lg z-index-1">
                         <ul>
-                            <li class="dropdown-item px-3 py-2">
+                            <li class="dropdown-item px-3 py-2" t-on-click="onTicketButtonClick">
                                 <div class="font-bold mb-1 fw-bolder"><a>Swiggy</a></div>
                                 <ul class="d-flex justify-content-between gap-4">
-                                    <li><a><span>1</span> Awaiting</a></li>
-                                    <li><a><span>1</span> Pending</a></li>
-                                    <li><a><span>1</span> Finished</a></li>
-                                </ul>
-                            </li>
-                            <li class="dropdown-item px-3 py-2">
-                                <div class="font-bold mb-1 fw-bolder"><a>Zomato</a></div>
-                                <ul class="d-flex justify-content-between gap-4">
-                                    <li><a><span>3</span> Awaiting</a></li>
-                                    <li><a><span>2</span> Pending</a></li>
-                                    <li><a><span>4</span> Finished</a></li>
+                                    <li><a><span>1</span> Order</a></li>
+                                    <li><a><span>1</span> Ongoing</a></li>
+                                    <li><a><span>1</span> Done</a></li>
                                 </ul>
                             </li>
                         </ul>
-                        <!-- <div class="d-flex">
-                            <a class="dropdown-item with-badge py-2">
-                                Orders
-                            </a>
-                        </div> -->
                     </ul>
                 </li>
             </ul>

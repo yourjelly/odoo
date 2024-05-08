@@ -250,12 +250,19 @@ patch(PosStore.prototype, {
         return super._createOrder(...arguments);
     },
     getDefaultSearchDetails() {
-        if (this.selectedTable && this.selectedTable.id) {
-            return {
-                fieldName: "TABLE",
-                searchTerm: this.selectedTable.name,
-            };
+        debugger;
+        // TODO - if brand in this.brand
+        return {
+            fieldName: "BRAND",
+            searchTerm: 'zomato',
         }
+        // if (this.selectedTable && this.selectedTable.id) {
+        //     return {
+        //         fieldName: "TABLE",
+        //         searchTerm: this.selectedTable.name,
+        //     };
+        // }
+        this.selectedTable.name = 'zomato';
         return super.getDefaultSearchDetails();
     },
     async setTable(table, orderUid = null) {

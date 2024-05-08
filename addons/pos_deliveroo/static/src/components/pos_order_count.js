@@ -1,3 +1,5 @@
+import { usePos } from "@point_of_sale/app/store/pos_hook";
+
 import { Component, useState, useExternalListener } from "@odoo/owl";
 
 export class PosOrderCount extends Component {
@@ -5,12 +7,17 @@ export class PosOrderCount extends Component {
     static components = {};
     static props = {};
     setup() {
+        this.pos = usePos();
         this.state = useState({ isMenuOpened: false });
         useExternalListener(window, "mouseup", this.onOutsideClick);
     }
 
     isOrderCountMenuClosed() {
         return !this.state.isMenuOpened;
+    }
+
+    async onTicketButtonClick() {
+        this.pos.showScreen("TicketScreen");
     }
 
     openMenu() {
