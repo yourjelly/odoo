@@ -23,7 +23,7 @@ class Contract(models.Model):
 
     name = fields.Char('Contract Reference', required=True)
     active = fields.Boolean(default=True)
-    structure_type_id = fields.Many2one('hr.payroll.structure.type', string="Salary Structure Type", compute="_compute_structure_type_id", readonly=False, store=True, tracking=True)
+    structure_type_id = fields.Many2one('hr.payroll.structure.type', string="Salary Structure Type", compute="_compute_structure_type_id", precompute=True, readonly=False, store=True, tracking=True)
     employee_id = fields.Many2one('hr.employee', string='Employee', tracking=True, domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]", index=True)
     department_id = fields.Many2one('hr.department', compute='_compute_employee_contract', store=True, readonly=False,
         domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]", string="Department")
@@ -77,6 +77,10 @@ class Contract(models.Model):
         help='Person responsible for validating the employee\'s contracts.', domain=_get_hr_responsible_domain)
     calendar_mismatch = fields.Boolean(compute='_compute_calendar_mismatch', compute_sudo=True)
     first_contract_date = fields.Date(related='employee_id.first_contract_date')
+
+    properties = fields.Properties(
+        'Contract Properties', definition='structure_type_id.structure_properties',
+        copy=True)
 
     @api.depends('employee_id.resource_calendar_id', 'resource_calendar_id')
     def _compute_calendar_mismatch(self):
