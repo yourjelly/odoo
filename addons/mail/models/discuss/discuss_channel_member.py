@@ -264,7 +264,6 @@ class ChannelMember(models.Model):
 
         :param state: the new status of the session for the current member.
         """
-        self.ensure_one()
         if self.fold_state == state:
             return
         self.fold_state = state
