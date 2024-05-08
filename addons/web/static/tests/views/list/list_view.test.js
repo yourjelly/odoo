@@ -1,6 +1,6 @@
 import { Component, markup, onRendered, onWillStart, xml } from "@odoo/owl";
 import { expect, getFixture, test } from "@odoo/hoot";
-import { keyDown, waitFor } from "@odoo/hoot-dom";
+import { keyDown, pointerUp, waitFor } from "@odoo/hoot-dom";
 import {
     click,
     drag,
@@ -69,9 +69,14 @@ const fieldRegistry = registry.category("fields");
 // TO FIX
 // prob 1: edit + escape to discard
 // prob 2: twice invalid dialog
+// prob 3: bounce button, feature broken on large screen (because 2 buttons) => fix or drop?
+// prob 4: in real, "click" is triggered even if mousedown/up targets are different (?)
+// prob 5: display_name is readonly
+// prob 6: FIXME: input field hook calls update, but in a mutex -> .dirty is not set when we call applyCellKeydownEditModeGroup
 
 // TO CHECK
 // shift-click, e.g. select record range with shift click
+// tocheck 3: pointerDown/Up on discard
 
 function getVisibleButtons() {
     return [
@@ -6438,9 +6443,7 @@ test("support field decoration (decoration-it)", async () => {
 });
 
 test.todo("bounce create button when no data and click on empty area", async () => {
-    // patchWithCleanup(browser, {
-    //     setTimeout: () => {},
-    // });
+    // prob 3
     await mountView({
         type: "list",
         resModel: "foo",
@@ -6460,7 +6463,7 @@ test.todo("bounce create button when no data and click on empty area", async () 
     await toggleMenuItem("Empty List");
     expect(".o_view_nocontent").toHaveCount(1);
 
-    await contains(".o_list_renderer").click();
+    await contains(".o_nocontent_help").click();
     await runAllTimers();
     expect(queryFirst(".o_list_button_add")).toHaveClass("o_catch_attention");
 });
@@ -10016,6 +10019,7 @@ test("editable list view: multi edition cannot call onchanges", async () => {
 });
 
 test.todo("editable list view: multi edition error and cancellation handling", async () => {
+    // prob 2
     await mountView({
         type: "list",
         resModel: "foo",
@@ -10168,14 +10172,15 @@ test("editable list view: multi edition of many2one: set same value", async () =
     expect(queryAllTexts(".o_list_many2one")).toEqual(["Value 2", "Value 2", "Value 2", "Value 2"]);
 });
 
-test.todo('editable list view: clicking on "Discard changes" in multi edition', async () => {
+test('editable list view: clicking on "Discard changes" in multi edition', async () => {
+    // to check 3
     await mountView({
         type: "list",
+        resModel: "foo",
         arch: `
             <tree editable="top" multi_edit="1">
-                    <field name="foo"/>
-                </tree>`,
-        resModel: "foo",
+                <field name="foo"/>
+            </tree>`,
     });
 
     // select two records
@@ -10183,26 +10188,19 @@ test.todo('editable list view: clicking on "Discard changes" in multi edition', 
     await contains(".o_data_row:eq(1) .o_list_record_selector input").click();
     await contains(".o_data_row:eq(0) .o_data_cell:eq(0)").click();
     await contains(".o_data_row [name=foo] input").fill("oof", { confirm: false });
-
-    // Simulates an actual click (event chain is: mousedown > change > blur > focus > mouseup > click)
-    await triggerEvents(discardButton, null, ["mousedown"]);
-    await triggerEvents(queryFirst(".o_data_row .o_data_cell input"), null, [
-        "change",
-        "blur",
-        "focusout",
-    ]);
-    await triggerEvents(discardButton, null, ["focus"]);
-    await triggerEvents(discardButton, null, ["mouseup"]);
-    await click(discardButton);
+    pointerDown(".o_list_button_discard");
+    await animationFrame();
+    pointerUp(".o_list_button_discard");
+    await animationFrame();
 
     expect(".modal").toHaveCount(0, { message: "should not open modal" });
-
     expect(".o_data_row:first() .o_data_cell:first()").toHaveText("yop");
 });
 
 test.todo(
     'editable list view: mousedown on "Discard", mouseup somewhere else (no multi-edit)',
     async () => {
+        // prob 4
         stepAllNetworkCalls();
 
         await mountView({
@@ -10218,17 +10216,11 @@ test.todo(
         await contains(".o_data_row:eq(0) .o_list_record_selector input").click();
         await contains(".o_data_row:eq(1) .o_list_record_selector input").click();
         await contains(".o_data_row:eq(0) .o_data_cell:eq(0)").click();
-        queryFirst(".o_data_row .o_data_cell input").value = "oof";
-
-        await triggerEvents($(".o_list_button_discard:visible").get(0), null, ["mousedown"]);
-        await triggerEvents(target, ".o_data_row .o_data_cell input", [
-            "change",
-            "blur",
-            "focusout",
-        ]);
-        await triggerEvents(target, null, ["focus"]);
-        await triggerEvents(target, null, ["mouseup"]);
-        await click(target);
+        await contains(".o_data_row [name=foo] input").fill("oof", { confirm: false });
+        pointerDown(".o_list_button_discard");
+        await animationFrame();
+        pointerUp(".o_control_panel");
+        await animationFrame();
 
         expect(".modal").toHaveCount(0, { message: "should not open modal" });
         expect(queryAllTexts(".o_data_cell")).toEqual(["oof", "blip", "gnap", "blip"]);
@@ -10244,6 +10236,7 @@ test.todo(
 );
 
 test.todo('multi edit list view: mousedown on "Discard" with invalid field', async () => {
+    // prob 4
     await mountView({
         type: "list",
         arch: `
@@ -10256,77 +10249,61 @@ test.todo('multi edit list view: mousedown on "Discard" with invalid field', asy
     expect(".o_data_row:eq(0) .o_data_cell").toHaveText("10");
 
     // select two records
-    const rows = queryAll(".o_data_row");
     await contains(".o_data_row:eq(0) .o_list_record_selector input").click();
     await contains(".o_data_row:eq(1) .o_list_record_selector input").click();
 
     // edit the numeric field with an invalid value
     await contains(".o_data_row:eq(0) .o_data_cell:eq(0)").click();
-    queryFirst(".o_data_row .o_data_cell input").value = "oof";
-    await triggerEvents(target, ".o_data_row .o_data_cell input", ["input"]);
+    await contains(".o_data_row .o_data_cell input").edit("oof", { confirm: false });
 
     // mousedown on Discard and then mouseup also on Discard
-    await triggerEvents($(".o_list_button_discard:visible").get(0), null, ["mousedown"]);
-    await triggerEvents(target, ".o_data_row .o_data_cell input", ["change", "blur", "focusout"]);
-    await triggerEvents($(".o_list_button_discard:visible").get(0), null, ["focus"]);
+    pointerDown(".o_list_button_discard");
+    await animationFrame();
     expect(".o_dialog").toHaveCount(0, { message: "should not display an invalid field dialog" });
-    await triggerEvents($(".o_list_button_discard:visible").get(0), null, ["mouseup"]);
-    await contains(".o_list_button_discard:not(.dropdown-item)").click();
+    pointerUp(".o_list_button_discard");
+    await animationFrame();
     expect(".o_dialog").toHaveCount(0, { message: "should not display an invalid field dialog" });
     expect(".o_data_row .o_data_cell").toHaveText("10");
 
     // edit again with an invalid value
     await contains(".o_data_row:eq(0) .o_data_cell:eq(0)").click();
-    queryFirst(".o_data_row .o_data_cell input").value = "oof2";
-    await triggerEvents(target, ".o_data_row .o_data_cell input", ["input"]);
+    await contains(".o_data_row .o_data_cell input").edit("oof2", { confirm: false });
 
     // mousedown on Discard (simulate a mousemove) and mouseup somewhere else
-    await triggerEvents($(".o_list_button_discard:visible").get(0), null, ["mousedown"]);
-    await triggerEvents(target, ".o_data_row .o_data_cell input", ["change", "blur", "focusout"]);
-    await triggerEvents(target, null, ["focus"]);
+    pointerDown(".o_list_button_discard");
+    await animationFrame();
     expect(".o_dialog").toHaveCount(0, { message: "should not display an invalid field dialog" });
-    await triggerEvents(target, null, ["mouseup"]);
-    await click(target);
+    pointerUp(".o_control_panel");
+    await animationFrame();
     expect(".o_dialog").toHaveCount(1, { message: "should display an invalid field dialog" });
     await contains(".o_dialog .modal-footer .btn-primary").click(); // click OK
     expect(".o_data_row .o_data_cell").toHaveText("10");
 });
 
-test.todo(
-    'editable list view (multi edition): mousedown on "Discard", but mouseup somewhere else',
-    async () => {
-        await mountView({
-            type: "list",
-            arch: `
-                <tree multi_edit="1">
-                    <field name="foo"/>
-                </tree>`,
-            resModel: "foo",
-        });
+test("editable list view (multi edition): mousedown on 'Discard', but mouseup somewhere else", async () => {
+    await mountView({
+        type: "list",
+        arch: `
+            <tree multi_edit="1">
+                <field name="foo"/>
+            </tree>`,
+        resModel: "foo",
+    });
 
-        // select two records
-        const rows = queryAll(".o_data_row");
-        await contains(".o_data_row:eq(0) .o_list_record_selector input").click();
-        await contains(".o_data_row:eq(1) .o_list_record_selector input").click();
-        await contains(".o_data_row:eq(0) .o_data_cell:eq(0)").click();
-        queryFirst(".o_data_row .o_data_cell input").value = "oof";
-
-        const discardButton = $(".o_list_button_discard:visible").get(0);
-        // Simulates an actual click (event chain is: mousedown > change > blur > focus > mouseup > click)
-        await triggerEvents(discardButton, null, ["mousedown"]);
-        await triggerEvents(queryFirst(".o_data_row .o_data_cell input"), null, [
-            "change",
-            "blur",
-            "focusout",
-        ]);
-        await triggerEvents(discardButton, null, ["focus"]);
-        await triggerEvents(document.body, null, ["mouseup"]);
-        await triggerEvents(document.body, null, ["click"]);
-
-        assert.ok($(".modal").text().includes("Confirmation"), "Modal should ask to save changes");
-        await contains(".modal .btn-primary").click();
-    }
-);
+    // select two records
+    await contains(".o_data_row:eq(0) .o_list_record_selector input").click();
+    await contains(".o_data_row:eq(1) .o_list_record_selector input").click();
+    await contains(".o_data_row:eq(0) .o_data_cell").click();
+    await contains(".o_data_row [name=foo] input").fill("oof", { confirm: false });
+    pointerDown(".o_list_button_discard");
+    await animationFrame();
+    pointerUp(".o_control_panel");
+    await animationFrame();
+    expect(".modal-header").toHaveText("Confirmation", {
+        message: "Modal should ask to save changes",
+    });
+    await contains(".modal .btn-primary").click();
+});
 
 test("editable list view (multi edition): writable fields in readonly (force save)", async () => {
     expect.assertions(4);
@@ -10679,7 +10656,7 @@ test("editable readonly list view: navigation in grouped list", async () => {
 
 test.todo(
     "editable readonly list view: single edition does not behave like a multi-edition",
-    async () => {
+    async () => { // prob 2
         await mountView({
             type: "list",
             arch: `
@@ -10690,7 +10667,6 @@ test.todo(
         });
 
         // select a record
-        const rows = queryAll(".o_data_row");
         await contains(".o_data_row:eq(0) .o_list_record_selector input").click();
 
         // edit a field (invalid input)
@@ -10804,9 +10780,9 @@ test("editable list view: m2m tags in grouped list", async () => {
     expect(queryAllTexts("td.o_many2many_tags_cell")).toEqual(["Value 2", "Value 2\nValue 3", ""]);
 });
 
-test.todo("editable list: edit many2one from external link", async () => {
+test.todo("editable list: edit many2one from external link", async () => { // prob 5
     Bar._views = {
-        "form,false": `<form><field name="display_name"/></form>`,
+        "form,false": `<form><field name="name"/></form>`,
     };
 
     onRpc("get_formview_id", () => false);
@@ -12138,7 +12114,7 @@ test('pressing SHIFT-TAB in editable grouped list with create="0"', async () => 
     expect(".o_data_row:eq(1)").toHaveClass("o_selected_row");
 });
 
-test.todo("editing then pressing TAB in editable grouped list", async () => {
+test.todo("editing then pressing TAB in editable grouped list", async () => { // prob 6
     stepAllNetworkCalls();
 
     await mountView({
@@ -12449,7 +12425,7 @@ test("cell-level keyboard navigation in non-editable list", async () => {
     expect(["resId: 3"]).toVerifySteps();
 });
 
-test.todo("keyboard navigation from last cell in editable list", async () => {
+test("keyboard navigation from last cell in editable list", async () => {
     await mountView({
         type: "list",
         resModel: "foo",
@@ -12497,12 +12473,7 @@ test.todo("keyboard navigation from last cell in editable list", async () => {
     expect(".o_data_row").toHaveCount(5);
 
     // Edit the row and press enter: should add a new row
-    const input = queryFirst(".o_data_row:last-child [name=foo] input");
-    expect(document.activeElement).toBe(input);
-    input.value = "blork";
-    await triggerEvent(input, null, "input");
-    press("Enter");
-    await triggerEvent(input, null, "change");
+    await contains(".o_data_row:last-child [name=foo] input").edit("blork", { confirm: "Enter" });
     expect(".o_data_row").toHaveCount(6);
     expect(".o_data_row:last-child [name=foo] input").toBeFocused();
 
@@ -12513,7 +12484,7 @@ test.todo("keyboard navigation from last cell in editable list", async () => {
     expect(".o_selected_row").toHaveCount(0);
 });
 
-test.todo("keyboard navigation from last cell in editable grouped list", async () => {
+test("keyboard navigation from last cell in editable grouped list", async () => {
     await mountView({
         type: "list",
         resModel: "foo",
@@ -12534,34 +12505,34 @@ test.todo("keyboard navigation from last cell in editable grouped list", async (
     expect(".o_data_row").toHaveCount(4);
 
     // Click on last cell
-    await click(getDataRow(4).querySelector("[name=int_field]"));
-    expect(".o_data_row:eq(4) [name=int_field] input").toBeFocused();
+    await contains(".o_data_row:eq(3) [name=int_field]").click();
+    expect(".o_data_row:eq(3) [name=int_field] input").toBeFocused();
 
     // Tab should focus the first field of first data row
     press("Tab");
     await animationFrame();
-    expect(".o_data_row:eq(1) [name=foo] input").toBeFocused();
+    expect(".o_data_row:eq(0) [name=foo] input").toBeFocused();
 
     // Shift+Tab should focus back the last field of last row
     press("Shift+Tab");
     await animationFrame();
-    expect(".o_data_row:eq(4) [name=int_field] input").toBeFocused();
+    expect(".o_data_row:eq(3) [name=int_field] input").toBeFocused();
 
     // Enter should add a new row at the bottom
     press("Enter");
     await animationFrame();
     expect(".o_data_row").toHaveCount(5);
-    expect(".o_data_row:eq(5) [name=foo] input").toBeFocused();
+    expect(".o_data_row:eq(4) [name=foo] input").toBeFocused();
 
     // Enter should discard the edited row as it is pristine + get to first row
     press("Enter");
     await animationFrame();
     expect(".o_data_row").toHaveCount(4);
-    expect(".o_data_row:eq(1) [name=foo] input").toBeFocused();
+    expect(".o_data_row:eq(0) [name=foo] input").toBeFocused();
 
     // Click on last cell
-    await click(getDataRow(4).querySelector("[name=int_field]"));
-    expect(".o_data_row:eq(4) [name=int_field] input").toBeFocused();
+    await contains(".o_data_row:eq(3) [name=int_field]").click();
+    expect(".o_data_row:eq(3) [name=int_field] input").toBeFocused();
 
     // Enter should add a new row at the bottom
     press("Enter");
@@ -12569,14 +12540,9 @@ test.todo("keyboard navigation from last cell in editable grouped list", async (
     expect(".o_data_row").toHaveCount(5);
 
     // Edit the row and press enter: should add a new row
-    let input = getDataRow(5).querySelector("[name=foo] input");
-    expect(document.activeElement).toBe(input);
-    input.value = "blork";
-    await triggerEvent(input, null, "input");
-    press("Enter");
-    await triggerEvent(input, null, "change");
+    await contains(".o_data_row:eq(4) [name=foo] input").edit("blork", { confirm: "Enter" });
     expect(".o_data_row").toHaveCount(6);
-    expect(".o_data_row:eq(6) [name=foo] input").toBeFocused();
+    expect(".o_data_row:eq(5) [name=foo] input").toBeFocused();
 
     // Escape should discard the added row as it is pristine + view should go into readonly mode
     press("Escape");
@@ -12585,44 +12551,40 @@ test.todo("keyboard navigation from last cell in editable grouped list", async (
     expect(".o_selected_row").toHaveCount(0);
 
     // Click on last data row of first group
-    assert.equal(getGroup(1).innerText.replace(/[\s\n]+/g, " "), "No (1) -4");
-    await click(getDataRow(1).querySelector("[name=foo]"));
-    expect(".o_data_row:eq(1) [name=foo] input").toBeFocused();
+    expect(".o_group_header:first").toHaveText("No (1)\n -4");
+    await contains(".o_data_row:eq(0) [name=foo]").click();
+    expect(".o_data_row:eq(0) [name=foo] input").toBeFocused();
 
     // Enter should add a new row in the first group
     press("Enter");
     await animationFrame();
     expect(".o_data_row").toHaveCount(6);
-    assert.equal(getGroup(1).innerText.replace(/[\s\n]+/g, " "), "No (2) -4");
+    expect(".o_group_header:first").toHaveText("No (2)\n -4");
 
     // Enter should discard the edited row as it is pristine + get to next data row
     press("Enter");
     await animationFrame();
     expect(".o_data_row").toHaveCount(5);
-    assert.equal(getGroup(1).innerText.replace(/[\s\n]+/g, " "), "No (1) -4");
-    expect(".o_data_row:eq(2) [name=foo] input").toBeFocused();
+    expect(".o_group_header:first").toHaveText("No (1)\n -4");
+    expect(".o_data_row:eq(1) [name=foo] input").toBeFocused();
 
     // Shift+Tab should focus back the last field of first row
     press("Shift+Tab");
     await animationFrame();
-    expect(".o_data_row:eq(1) [name=int_field] input").toBeFocused();
+    expect(".o_data_row:eq(0) [name=int_field] input").toBeFocused();
 
     // Enter should add a new row in the first group
     press("Enter");
     await animationFrame();
     expect(".o_data_row").toHaveCount(6);
-    assert.equal(getGroup(1).innerText.replace(/[\s\n]+/g, " "), "No (2) -4");
+    expect(".o_group_header:first").toHaveText("No (2)\n -4");
+    expect(".o_data_row:eq(1) [name=foo] input").toBeFocused();
 
     // Edit the row and press enter: should add a new row
-    input = getDataRow(2).querySelector("[name=foo] input");
-    expect(document.activeElement).toBe(input);
-    input.value = "zzapp";
-    await triggerEvent(input, null, "input");
-    press("Enter");
-    await triggerEvent(input, null, "change");
+    await contains(".o_data_row:eq(1) [name=foo] input").edit("zzapp", { confirm: "Enter" });
     expect(".o_data_row").toHaveCount(7);
-    assert.equal(getGroup(1).innerText.replace(/[\s\n]+/g, " "), "No (3) -4");
-    expect(".o_data_row:eq(3) [name=foo] input").toBeFocused();
+    expect(".o_group_header:first").toHaveText("No (3)\n -4");
+    expect(".o_data_row:eq(2) [name=foo] input").toBeFocused();
 });
 
 test.todo("keyboard navigation from last cell in multi-edit list", async () => {
