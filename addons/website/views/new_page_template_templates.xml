@@ -401,14 +401,14 @@ overridden by modules), because:
     <xpath expr="//section" position="attributes">
         <attribute name="class" add="o_colored_level" separator=" "/>
     </xpath>
-    <xpath expr="//h1|//h2" position="replace"/>
+    <xpath expr="//h1|//h3" position="replace"/>
 </template>
 
 <template id="new_page_template_about_s_picture" inherit_id="website.new_page_template_s_picture" primary="True">
     <xpath expr="//section" position="attributes">
         <attribute name="class" add="o_colored_level" separator=" "/>
     </xpath>
-    <xpath expr="//h1|//h2" position="replace">
+    <xpath expr="//h1|//h3" position="replace">
         <h2 style="text-align: center;">Our Team</h2>
     </xpath>
     <xpath expr="//p" position="replace"/>
@@ -430,7 +430,7 @@ overridden by modules), because:
         <attribute name="data-snippet">s_picture</attribute>
         <attribute name="class" add="o_colored_level" separator=" "/>
     </xpath>
-    <xpath expr="//h1|//h2" position="replace"/>
+    <xpath expr="//h1|//h3" position="replace"/>
     <xpath expr="//p" position="replace"/>
 </template>
 
