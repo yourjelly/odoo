@@ -926,7 +926,8 @@ class Task(models.Model):
                     project_id
                 ).company_id.id
             if not project_id and ("stage_id" in vals or self.env.context.get('default_stage_id')):
-                vals["stage_id"] = False
+                if not is_portal_user:
+                    vals["stage_id"] = False
 
             if project_id and "stage_id" not in vals:
                 # 1) Allows keeping the batch creation of tasks
