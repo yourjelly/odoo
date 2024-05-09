@@ -76,3 +76,14 @@ class AccountAccountTag(models.Model):
             master_tag = self.env.ref(f"account.{master_xmlid}", raise_if_not_found=False)
             if master_tag and master_tag in self:
                 raise UserError(_("You cannot delete this account tag (%s), it is used on the chart of account definition.", master_tag.name))
+
+        #Check whether the current account tag is related to any report expression
+        expressions = self._get_related_tax_report_expressions()
+        if expressions and self.name[1:] in expressions.mapped('formula'):
+            raise UserError(_("You cannot modify this account tag, it is used on the account reports"))
+
+    def write(self, vals):
+        related_tax_report_expressions = self._get_related_tax_report_expressions()
+        if related_tax_report_expressions and self.name[1:] in related_tax_report_expressions.mapped('formula'):
+            raise UserError(_("You cannot modify this account tag, it is used on the account reports"))
+        return super().write(vals)
