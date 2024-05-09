@@ -21,12 +21,12 @@ class PosOrder(models.Model):
         self._post_delivery_accept_order()
 
     def _post_delivery_accept_order(self):
-        if not self.delivery_asap:
-            if self.delivery_status == 'awaiting':
-                self.change_order_delivery_status('scheduled')
-            elif self.delivery_status == 'scheduled':
-                self.change_order_delivery_status('confirmed')
-        else:
+        # if not self.delivery_asap:
+        #     if self.delivery_status == 'awaiting':
+        #         self.change_order_delivery_status('scheduled')
+        #     elif self.delivery_status == 'scheduled':
+        #         self.change_order_delivery_status('confirmed')
+        # else:
             self.change_order_delivery_status('preparing')
 
     def reject_delivery_order(self, reject_reason):

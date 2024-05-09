@@ -1,4 +1,5 @@
 from odoo import api, fields, models
+from collections import defaultdict
 
 
 class PosConfig(models.Model):
@@ -13,6 +14,24 @@ class PosConfig(models.Model):
             self._notify('DELIVERY_ORDER_COUNT', order_count, private=False)
 
     def get_delivery_order_count(self):
+        records = self.env['pos.order'].search([('brand_id', '!=', False)])
+        brand_stages = defaultdict(lambda: defaultdict(int))
+        for record in records:
+            brand_id = record.brand_id
+            delivery_status = record.delivery_status.lower()  # Convert status to lowercase for consistency
+            brand_stages[brand_id][delivery_status] += 1
+
+        # Prepare the final output
+        output = []
+
+        # Iterate through the defaultdict to create the desired format
+        for brand, delivery_status in brand_stages.items():
+            # Convert the delivery_status defaultdict to a regular dictionary
+            delivery_status_dict = dict(delivery_status)
+            # Capitalize brand name and append to output
+            output.append({brand.capitalize(): delivery_status_dict})
+
+        print(output)
         # overriden by delivery_provider modules
         # should return a dict with the count of delivery orders for each delivery service
         # like
@@ -30,20 +49,19 @@ class PosConfig(models.Model):
         return res
 
     def get_urbanpiper_order_count(self):
-        if not self.current_session_id:
-            return {
-                'awaiting': 0,
-                'preparing': 0,
+        brand_ids = set(self.env['pos.order'].search([('brand_id', '!=', False)]).mapped('brand_id'))
+        order_count = defaultdict(lambda: defaultdict(int))
+
+        for brand_id in brand_ids:
+            orders = self.env['pos.order'].search([
+                # ('session_id', '=', self.current_session_id.id),
+                ('delivery_id', '!=', False),
+                ('brand_id', '=', brand_id)
+            ])
+            order_count[brand_id] = {
+                'awaiting': len(orders.filtered(lambda r: r.delivery_status == 'awaiting')),
+                'scheduled': len(orders.filtered(lambda r: r.delivery_status in ['scheduled', 'confirmed'])),
+                'preparing': len(orders.filtered(lambda r: r.delivery_status == 'preparing'))
             }
-        order_count = {
-            'awaiting': self.env['pos.order'].search_count(
-                [('session_id', '=', self.current_session_id.id), ('delivery_id', '!=', False),
-                 ('delivery_status', '=', 'awaiting')]),
-            'scheduled': self.env['pos.order'].search_count(
-                [('session_id', '=', self.current_session_id.id), ('delivery_id', '!=', False),
-                 ('delivery_status', 'in', ['scheduled', 'confirmed'])]),
-            'preparing': self.env['pos.order'].search_count(
-                [('session_id', '=', self.current_session_id.id), ('delivery_id', '!=', False),
-                 ('delivery_status', '=', 'preparing')]),
-        }
+
         return order_count

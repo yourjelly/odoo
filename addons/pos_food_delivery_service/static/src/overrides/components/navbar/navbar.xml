@@ -3,7 +3,7 @@
 
     <t t-name="pos_food_delivery_service.Navbar" t-inherit="point_of_sale.Navbar" t-inherit-mode="extension">
         <xpath expr="//Input" position="after">
-            <PosOrderCount orderCount="state.posOrderCount" />
+            <PosUrbanPiperServices orderCount="state.posOrderCount" orderData="state.posOrderData" />
         </xpath>
     </t>
 

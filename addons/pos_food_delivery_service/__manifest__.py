@@ -7,7 +7,7 @@
     'category': 'Sales/Point of Sale',
     'sequence': 6,
     'summary': 'Integratation of food delivery services with your Point of Sale',
-    'depends': ['point_of_sale'],
+    'depends': ['point_of_sale', 'pos_preparation_display'],
     'data': [
         # 'security/ir.model.access.csv',
         'views/pos_online_delivery_provider.xml',

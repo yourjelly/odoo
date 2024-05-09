@@ -53,6 +53,7 @@
                                 <div class="col wide p-2">Receipt Number</div>
                                 <div class="col wide p-2">Order number</div>
                                 <div class="col p-2">Customer</div>
+                                <div class="col p-2">Delivery partner</div>
                                 <div class="col wide p-2" t-if="showCardholderName()">Cardholder Name</div>
                                 <div class="col p-2">Cashier</div>
                                 <div class="col end p-2">Total</div>
@@ -74,6 +75,9 @@
                                     <div class="col p-2">
                                     <!-- <t t-debug="order" /> -->
                                         <div><t t-esc="order.partner_id?.name"></t></div>
+                                    </div>
+                                    <div class="col p-2">
+                                        <div><t t-esc="order.brand_id"></t></div>
                                     </div>
                                     <div t-if="showCardholderName()" class="col p-2">
                                         <div><t t-esc="getCardholderName(order)"></t></div>

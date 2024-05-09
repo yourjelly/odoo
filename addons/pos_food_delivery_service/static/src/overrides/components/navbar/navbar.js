@@ -1,11 +1,11 @@
 import { Navbar } from "@point_of_sale/app/navbar/navbar";
 import { patch } from "@web/core/utils/patch";
-import { PosOrderCount } from "@pos_food_delivery_service/components/pos_order_count";
-import { useState } from "@odoo/owl";
+import { PosUrbanPiperServices } from "../../../components/pos_urban_piper_services";
+import { onWillStart, useState } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 
 patch(Navbar, {
-    components: { ...Navbar.components, PosOrderCount },
+    components: { ...Navbar.components, PosUrbanPiperServices },
 });
 
 patch(Navbar.prototype, {
@@ -15,19 +15,25 @@ patch(Navbar.prototype, {
     setup() {
         super.setup();
         this.state = useState({
-            posOrderCount: 1,
+            posOrderCount: 0,
+            posOrderData: [],
         });
         this.posOrderNotify = useService("pos_order_notify");
         this.posOrderNotify.notify(this.onNotify.bind(this), this.pos.config.id);
+        this.state.posOrderCount = this.pos.models["pos.order"].filter((o) => !o.finalized && o.brand_id).length;
     },
 
-    onNotify(count) {
-        this.state.posOrderCount = count;
+    onNotify(count, brandName) {
+        this.state.posOrderCount += count;
+        this.state.posOrderData.push({
+            id: Math.random(),
+            name: brandName,
+        });
         this.notification.add(
             "Order arrived",
-                {
-                    type: "info",
-                }
+            {
+                type: "info",
+            }
         );
     },
 })
