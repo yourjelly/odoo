@@ -8,6 +8,8 @@ from odoo import api, models, fields
 class ChannelMember(models.Model):
     _inherit = 'discuss.channel.member'
 
+    fold_state = fields.Selection(selection_add=[('feedback', 'Feedback')])
+
     @api.autovacuum
     def _gc_unpin_livechat_sessions(self):
         """ Unpin read livechat sessions with no activity for at least one day to
@@ -42,3 +44,13 @@ class ChannelMember(models.Model):
                 } if self.partner_id.country_id else False
             return data
         return super()._get_partner_data(fields=fields)
+
+    def _open_feedback_panel(self):
+        self.ensure_one()
+        self.fold_state = "feedback"
+        target = self.partner_id or self.guest_id
+        self.env["bus.bus"]._sendone(target, "mail.record/insert", {"Thread": {
+            "id": self.channel_id.id,
+            "model": "discuss.channel",
+            "state": "feedback",
+        }})

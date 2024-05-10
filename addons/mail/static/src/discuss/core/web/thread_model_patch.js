@@ -40,10 +40,6 @@ patch(Thread, {
 });
 
 patch(Thread.prototype, {
-    setup() {
-        super.setup(...arguments);
-        this.foldStateCount = 0;
-    },
     incrementUnreadCounter() {
         super.incrementUnreadCounter();
         if (this.model === "discuss.channel") {

@@ -246,10 +246,12 @@ class LivechatController(http.Controller):
 
     @http.route("/im_livechat/visitor_leave_session", type="json", auth="public")
     @add_guest_to_context
-    def visitor_leave_session(self, channel_id):
+    def visitor_leave_session(self, channel_id, open_feedback_panel=False):
         """Called when the livechat visitor leaves the conversation.
         This will clean the chat request and warn the operator that the conversation is over.
         This allows also to re-send a new chat request to the visitor, as while the visitor is
         in conversation with an operator, it's not possible to send the visitor a chat request."""
         if channel := request.env["discuss.channel"].search([("id", "=", channel_id)]):
+            self_member = request.env["discuss.channel.member"].search([("channel_id", "=", channel_id), ("is_self", "=", True)])
+            self_member._open_feedback_panel()
             channel._close_livechat_session()

@@ -15,6 +15,7 @@ const commandRegistry = registry.category("discuss.channel_commands");
 const threadPatch = {
     setup() {
         super.setup();
+        this.foldStateCount = 0;
         this.fetchChannelMutex = new Mutex();
         this.fetchChannelInfoDeferred = undefined;
         this.fetchChannelInfoState = "not_fetched";

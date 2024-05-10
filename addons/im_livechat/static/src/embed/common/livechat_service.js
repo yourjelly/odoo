@@ -142,10 +142,13 @@ export class LivechatService {
      * `visitor_leave_session` route. Note that this route will never be called
      * if the session was not persisted.
      */
-    async leave({ notifyServer = true } = {}) {
+    async leave({ notifyServer = true, openFeedbackPanel = false } = {}) {
         try {
             if (this.thread && this.state === SESSION_STATE.PERSISTED && notifyServer) {
-                await rpc("/im_livechat/visitor_leave_session", { channel_id: this.thread.id });
+                await rpc("/im_livechat/visitor_leave_session", {
+                    channel_id: this.thread.id,
+                    open_feedback_panel: openFeedbackPanel,
+                });
             }
         } finally {
             browser.localStorage.removeItem(SAVED_STATE_STORAGE_KEY);
