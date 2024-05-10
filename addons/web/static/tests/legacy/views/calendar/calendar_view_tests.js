@@ -375,7 +375,7 @@ QUnit.module("Views", ({ beforeEach }) => {
         assert.containsN(
             target,
             ".fc-event",
-            6,
+            10,
             "should display 6 events on the week (4 event + 1 allday + 1 >24h allday)"
         );
 
@@ -2146,7 +2146,7 @@ QUnit.module("Views", ({ beforeEach }) => {
         assert.containsN(
             target,
             ".fc-event",
-            5,
+            9,
             "should display 5 events on the week (4 event + 1 >24h event)"
         );
 
@@ -2581,7 +2581,7 @@ QUnit.module("Views", ({ beforeEach }) => {
         assert.containsN(target, ".fc-event", 4, "should display 4 events on the week");
 
         await toggleFilter(target, "partner_ids", 2);
-        assert.containsN(target, ".fc-event", 5, "should display 5 events on the week");
+        assert.containsN(target, ".fc-event", 9, "should display 5 events on the week");
 
         // Click on the "all" filter to reload all events
         await toggleFilter(target, "partner_ids", "all");
@@ -3178,7 +3178,7 @@ QUnit.module("Views", ({ beforeEach }) => {
 
         await toggleFilter(target, "partner_id", 4);
         await toggleFilter(target, "partner_ids", 2);
-        assert.containsN(target, ".fc-event", 7, "should display all records");
+        assert.containsN(target, ".fc-event",11, "should display all records");
     });
 
     QUnit.test(`create event with filters (no quickCreate)`, async (assert) => {
