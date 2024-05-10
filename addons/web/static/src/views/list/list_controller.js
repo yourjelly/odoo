@@ -300,12 +300,15 @@ export class ListController extends Component {
     }
 
     onMouseDownDiscard(mouseDownEvent) {
+        console.log("onMouseDownDiscard");
         this.hasMousedownDiscard = true;
         document.addEventListener(
             "mouseup",
             (mouseUpEvent) => {
+                console.log("onMouseUp");
                 this.hasMousedownDiscard = false;
                 if (mouseUpEvent.target !== mouseDownEvent.target) {
+                    console.log("DIFFERENT TARGET");
                     if (this.nextActionAfterMouseup) {
                         this.nextActionAfterMouseup();
                     }
@@ -585,7 +588,9 @@ export class ListController extends Component {
     async afterExecuteActionButton(clickParams) {}
 
     onWillSaveMulti(editedRecord, changes, validSelectedRecords) {
+        console.log("onWillSaveMulti");
         if (this.hasMousedownDiscard) {
+            console.log("hasMouseDownDiscard");
             this.nextActionAfterMouseup = () => this.model.root.multiSave(editedRecord);
             return false;
         }

@@ -55,6 +55,7 @@ export function useInputField(params) {
      * However, if the field is invalid, the new value will not be committed to the model.
      */
     async function onChange(ev) {
+        console.log("onChange");
         if (isDirty) {
             isDirty = false;
             let isInvalid = false;

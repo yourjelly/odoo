@@ -10172,8 +10172,8 @@ test("editable list view: multi edition of many2one: set same value", async () =
     expect(queryAllTexts(".o_list_many2one")).toEqual(["Value 2", "Value 2", "Value 2", "Value 2"]);
 });
 
-test('editable list view: clicking on "Discard changes" in multi edition', async () => {
-    // to check 3
+test.todo('editable list view: clicking on "Discard changes" in multi edition', async () => {
+    // prob: change event doesn't seem to be triggered by the pointerDown
     await mountView({
         type: "list",
         resModel: "foo",
@@ -10188,8 +10188,31 @@ test('editable list view: clicking on "Discard changes" in multi edition', async
     await contains(".o_data_row:eq(1) .o_list_record_selector input").click();
     await contains(".o_data_row:eq(0) .o_data_cell:eq(0)").click();
     await contains(".o_data_row [name=foo] input").fill("oof", { confirm: false });
+    // await contains(".o_list_button_discard").click();
+    console.log("will pointerDOwn");
     pointerDown(".o_list_button_discard");
     await animationFrame();
+    console.log("wait");
+    await animationFrame();
+    console.log("wait");
+    await animationFrame();
+    console.log("wait");
+    await animationFrame();
+    console.log("wait");
+    await animationFrame();
+    console.log("wait");
+    await animationFrame();
+    console.log("wait");
+    await animationFrame();
+    console.log("wait");
+    await animationFrame();
+    console.log("wait");
+    await animationFrame();
+    console.log("wait");
+    await animationFrame();
+    console.log("wait");
+    await animationFrame();
+    console.log("will pointerUp");
     pointerUp(".o_list_button_discard");
     await animationFrame();
 
@@ -10827,6 +10850,7 @@ test.todo("editable list: edit many2one from external link", async () => { // pr
 });
 
 test("editable list with fields with readonly modifier", async () => {
+    // prob: lol, breaks because of an assertion of the previous (todo) test
     await mountView({
         type: "list",
         resModel: "foo",
