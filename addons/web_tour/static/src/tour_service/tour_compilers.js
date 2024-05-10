@@ -279,12 +279,17 @@ function setupListeners({
 /** @type {TourStepCompiler} */
 export function compileStepManual(stepIndex, step, options) {
     const { tour, pointer, onStepConsummed } = options;
+    const debugMode = tourState.get(tour.name, "debug");
     let proceedWith = null;
     let removeListeners = () => {};
 
     return [
         {
-            action: () => console.log(step.trigger),
+            action: () => {
+                if (debugMode !== false) {
+                    console.log(step.trigger);
+                }
+            }
         },
         {
             trigger: () => {
