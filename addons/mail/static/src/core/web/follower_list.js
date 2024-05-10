@@ -1,6 +1,7 @@
 import { Component, useState } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
+import { FormViewDialog } from "@web/views/view_dialogs/form_view_dialog";
 import { FollowerSubtypeDialog } from "./follower_subtype_dialog";
 import { useVisible } from "@mail/utils/common/hooks";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
@@ -27,26 +28,28 @@ export class FollowerList extends Component {
                 this.props.thread.loadMoreFollowers();
             }
         });
+        this.dialogService = useService("dialog");
     }
 
     onClickAddFollowers() {
-        const action = {
-            type: "ir.actions.act_window",
-            res_model: "mail.wizard.invite",
-            view_mode: "form",
-            views: [[false, "form"]],
-            name: _t("Invite Follower"),
-            target: "new",
+        const options = {
+            resModel: "mail.wizard.invite",
+            title: _t("Add Followers to this document"),
             context: {
                 default_res_model: this.props.thread.model,
                 default_res_id: this.props.thread.id,
             },
         };
-        this.action.doAction(action, {
+        this.dialogService.add(FormViewDialog, options, {
             onClose: () => {
                 this.props.onAddFollowers?.();
             },
-        });
+        })
+        // this.action.doAction(action, {
+        //     onClose: () => {
+        //         this.props.onAddFollowers?.();
+        //     },
+        // });
     }
 
     /**
