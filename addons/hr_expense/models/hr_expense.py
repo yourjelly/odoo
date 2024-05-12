@@ -108,6 +108,7 @@ class HrExpense(models.Model):
     approved_by = fields.Many2one(comodel_name='res.users', string="Approved By", related='sheet_id.user_id', tracking=False)
     approved_on = fields.Datetime(string="Approved On", related='sheet_id.approval_date')
     duplicate_expense_ids = fields.Many2many(comodel_name='hr.expense', compute='_compute_duplicate_expense_ids')  # Used to trigger warnings
+    same_receipt_expense_ids = fields.Many2many(comodel_name='hr.expense', compute='_compute_same_receipt_expense_ids')  # Used to trigger warnings
 
     # Amount fields
     tax_amount_currency = fields.Monetary(
@@ -435,6 +436,28 @@ class HrExpense(models.Model):
             for expense in self:
                 expense.employee_id = self.env.user.with_company(expense.company_id).employee_id
 
+    @api.depends('attachment_ids')
+    def _compute_same_receipt_expense_ids(self):
+        self.same_receipt_expense_ids = [Command.clear()]
+
+        expenses = self.filtered(lambda expense: expense.attachment_ids)
+        if expenses.ids:
+            duplicates_query = """
+            SELECT ARRAY_AGG(hr.id)
+            FROM hr_expense as hr
+            RIGHT JOIN ir_attachment as att ON att.res_id = hr.id
+            WHERE hr.id NOT IN %(expense_ids)s AND att.res_model = 'hr.expense'
+            AND checksum IN (
+                SELECT checksum
+                FROM hr_expense AS hr
+                RIGHT JOIN ir_attachment AS att ON att.res_id = hr.id
+                WHERE hr.id IN %(expense_ids)s AND att.res_model = 'hr.expense'
+            )
+            """
+            self.env.cr.execute(duplicates_query, {'expense_ids': tuple(expenses.ids)})
+            for duplicates_ids in (x[0] for x in self.env.cr.fetchall()):
+                expenses.same_receipt_expense_ids = [Command.set(duplicates_ids)] if duplicates_ids else False
+
     @api.depends('employee_id', 'product_id', 'total_amount_currency')
     def _compute_duplicate_expense_ids(self):
         self.duplicate_expense_ids = [Command.clear()]
@@ -529,7 +552,7 @@ class HrExpense(models.Model):
             vals = {
                 'name': attachment_name,
                 'price_unit': 0,
-                'product_id': self.env.company.expense_product_id.id or product.id,
+                'product_id': product.id,
             }
             if product.property_account_expense_id:
                 vals['account_id'] = product.property_account_expense_id.id
@@ -543,7 +566,7 @@ class HrExpense(models.Model):
             'res_model': 'hr.expense',
             'type': 'ir.actions.act_window',
             'views': [[False, view_type], [False, "form"]],
-            'context': {'search_default_my_expenses': 1, 'search_default_no_report': 1},
+            'domain': [('id', 'in', expenses.ids)],
         }
 
     # ----------------------------------------
@@ -642,17 +665,47 @@ class HrExpense(models.Model):
             # encode, but force %20 encoding for space instead of a + (URL / mailto difference)
             params = werkzeug.urls.url_encode({'subject': _("Lunch with customer $12.32")}).replace('+', '%20')
             return Markup(
-                """<p>%(send_string)s <a href="mailto:%(alias_email)s?%(params)s">%(alias_email)s</a></p>"""
+                """<div class="text-muted mt-4">%(send_string)s <a class="text-body" href="mailto:%(alias_email)s?%(params)s">%(alias_email)s</a></div>"""
             ) % {
                 'alias_email': expense_alias.display_name,
                 'params': params,
-                'send_string': _("Or send your receipts at"),
+                'send_string': _("Tip: try sending receipts by email"),
             }
         return ""
+
+    @api.model
+    def get_expense_attachments(self, expense_id):
+        expense = self.env['hr.expense'].search([('id', '=', expense_id)])
+        attachments = [attachment.image_src for attachment in expense.attachment_ids]
+        return attachments
 
     # ----------------------------------------
     # Actions
     # ----------------------------------------
+
+    def action_show_same_receipt_expense_ids(self):
+        self.ensure_one()
+        same_receipt_expense_ids = self.same_receipt_expense_ids
+        if len(same_receipt_expense_ids) == 1:
+            return {
+                'type': 'ir.actions.act_window',
+                'view_mode': 'form',
+                'views': [[False, "form"]],
+                'res_model': 'hr.expense',
+                'res_id': self.same_receipt_expense_ids[0].id,
+            }
+        else:
+            return {
+                'type': 'ir.actions.act_window',
+                'name': _("Expenses with a similar receipt to %s") % self.name,
+                'view_mode': 'tree,form',
+                'views': [
+                    [False, "tree"],
+                    [False, "form"],
+                ],
+                'res_model': 'hr.expense',
+                'domain': [('id', 'in', same_receipt_expense_ids.ids)],
+            }
 
     def action_view_sheet(self):
         self.ensure_one()

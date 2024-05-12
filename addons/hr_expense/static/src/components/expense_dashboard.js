@@ -11,6 +11,7 @@ export class ExpenseDashboard extends Component {
     setup() {
         super.setup();
         this.orm = useService('orm');
+        this.actionService = useService("action");
 
         this.state = useState({
             expenses: {}
@@ -33,5 +34,16 @@ export class ExpenseDashboard extends Component {
             }
         }
         return value;
+    }
+
+    async applyFilter(filterName) {
+        const { actionId } = this.env.config;
+        const action = actionId ? await this.actionService.loadAction(actionId) : {};
+
+        let context = {};
+        context[`search_default_${filterName}`] = 1;
+        action['context'] = context;
+        action['tag'] = 'menu';
+        return this.actionService.doAction(action);
     }
 }
