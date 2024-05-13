@@ -9,7 +9,7 @@ from markupsafe import Markup
 from odoo import fields, _
 from odoo.addons.iap import jsonrpc
 from odoo.exceptions import AccessError
-from odoo.addons.l10n_in_edi.models.account_edi_format import DEFAULT_IAP_ENDPOINT, DEFAULT_IAP_TEST_ENDPOINT
+from odoo.addons.l10n_in.const import DEFAULT_IAP_ENDPOINT, DEFAULT_IAP_TEST_ENDPOINT, IAP_SERVICE_NAME
 from odoo.addons.l10n_in_edi_ewaybill.models.error_codes import ERROR_CODES
 
 
@@ -58,7 +58,7 @@ class EWayBillApi:
         self.env = self.company.env
 
     def _ewaybill_jsonrpc_to_server(self, url_path, params):
-        user_token = self.env["iap.account"].get("l10n_in_edi")
+        user_token = self.env["iap.account"].get(IAP_SERVICE_NAME)
         params.update({
             "account_token": user_token.account_token,
             "dbuuid": self.env["ir.config_parameter"].sudo().get_param("database.uuid"),

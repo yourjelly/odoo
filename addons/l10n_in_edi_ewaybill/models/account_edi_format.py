@@ -10,7 +10,7 @@ from odoo import models, fields, api, _
 from odoo.tools import html_escape
 from odoo.exceptions import AccessError
 from odoo.addons.iap import jsonrpc
-from odoo.addons.l10n_in_edi.models.account_edi_format import DEFAULT_IAP_ENDPOINT, DEFAULT_IAP_TEST_ENDPOINT
+from odoo.addons.l10n_in_edi.models.account_edi_format import DEFAULT_IAP_ENDPOINT, DEFAULT_IAP_TEST_ENDPOINT, IAP_SERVICE_NAME
 
 from .error_codes import ERROR_CODES
 
@@ -586,7 +586,7 @@ class AccountEdiFormat(models.Model):
 
     @api.model
     def _l10n_in_edi_ewaybill_connect_to_server(self, company, url_path, params):
-        user_token = self.env["iap.account"].get("l10n_in_edi")
+        user_token = self.env["iap.account"].get(IAP_SERVICE_NAME)
         params.update({
             "account_token": user_token.account_token,
             "dbuuid": self.env["ir.config_parameter"].sudo().get_param("database.uuid"),
