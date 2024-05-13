@@ -25959,7 +25959,7 @@
     function matchReference(tokens) {
         let head = 0;
         let transitions = machine[State.LeftRef];
-        const matchedTokens = [];
+        let matchedTokens = "";
         while (transitions !== undefined) {
             const token = tokens[head++];
             if (!token) {
@@ -25971,15 +25971,15 @@
                 case undefined:
                     return null;
                 case State.Found:
-                    matchedTokens.push(token);
+                    matchedTokens += token.value;
                     tokens.splice(0, head);
                     return {
                         type: "REFERENCE",
-                        value: concat(matchedTokens.map((token) => token.value)),
+                        value: matchedTokens,
                     };
                 default:
                     transitions = machine[nextState];
-                    matchedTokens.push(token);
+                    matchedTokens += token.value;
                     break;
             }
         }
@@ -31895,7 +31895,12 @@
          * if they have at least a common cell
          */
         doesIntersectMerge(sheetId, zone) {
-            return positions(zone).some(({ col, row }) => this.getMerge({ sheetId, col, row }) !== undefined);
+            for (const merge of this.getMerges(sheetId)) {
+                if (overlap(zone, merge)) {
+                    return true;
+                }
+            }
+            return false;
         }
         /**
          * Returns true if two columns have at least one merge in common
@@ -48093,8 +48098,8 @@
 
 
     __info__.version = '16.3.34';
-    __info__.date = '2024-04-26T07:57:35.342Z';
-    __info__.hash = '196324c';
+    __info__.date = '2024-05-14T11:37:33.009Z';
+    __info__.hash = 'fd9c651';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
