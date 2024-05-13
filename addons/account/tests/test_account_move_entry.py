@@ -962,6 +962,25 @@ class TestAccountMove(AccountTestInvoicingCommon):
             move_form.journal_id, journal = journal, move_form.journal_id
             self.assertEqual(move_form.name, 'AJ/2021/10/0001')
 
+    def test_change_journal_posted_before(self):
+        """ Changes to a move posted before can only de done if move name is '/' or empty (False) """
+        journal = self.env['account.journal'].create({
+            'name': 'awesome journal',
+            'type': 'general',
+            'code': 'AJ',
+        })
+        self.test_move.action_post()
+        self.test_move.button_draft()  # move has posted_before == True
+        self.assertEqual(self.test_move.journal_id, self.company_data['default_journal_misc'])
+        self.assertEqual(self.test_move.name, 'MISC/2016/01/0001')
+        with self.assertRaisesRegex(UserError, 'You cannot edit the journal of an account move if it has been posted once, unless the name is removed or set to "/". This might create a gap in the sequence.'), self.env.cr.savepoint():
+            self.test_move.write({'journal_id': journal})
+        # Once move name in draft is changed to '/', changing the journal is allowed
+        self.test_move.name = '/'
+        self.test_move.journal_id = journal
+        self.assertEqual(self.test_move.name, 'AJ/2016/01/0001')
+        self.assertEqual(self.test_move.journal_id, journal)
+
     def test_manually_modifying_taxes(self):
         """Manually modifying taxes on a move should not automatically recompute them"""
         move = self.env['account.move'].create({
@@ -1125,3 +1144,40 @@ class TestAccountMove(AccountTestInvoicingCommon):
             move.line_ids.mapped(lambda x: (x.debit, x.credit)),
             "Quantities should have been rounded according to the currency."
         )
+
+    def test_change_journal_entry(self):
+        self.test_move.action_post()
+
+        # Set the lock date after the journal entry date.
+        self.test_move.company_id.fiscalyear_lock_date = fields.Date.from_string('2017-01-01')
+
+        # lines[0] = 'counterpart line'
+        # lines[1] = 'tax line'
+        # lines[2] = 'revenue line 1'
+        # lines[3] = 'revenue line 2'
+        lines = self.test_move.line_ids.sorted('debit')
+
+        # Editing the reference should be allowed.
+        self.test_move.ref = 'whatever'
+
+        # Try to edit the account of a line.
+        with self.assertRaises(UserError), self.cr.savepoint():
+            self.test_move.line_ids[0].write({'account_id': self.test_move.line_ids[0].account_id.copy().id})
+
+        # You can't remove the journal entry from a locked period.
+        with self.assertRaises(UserError), self.cr.savepoint():
+            self.test_move.date = fields.Date.from_string('2018-01-01')
+
+        with self.assertRaises(UserError), self.cr.savepoint():
+            self.test_move.name = "Othername"
+
+        with self.assertRaises(UserError), self.cr.savepoint():
+            self.test_move.unlink()
+
+        with self.assertRaises(UserError), self.cr.savepoint():
+            self.test_move.button_draft()
+
+        # Try to add a new journal entry prior to the lock date.
+        copy_move = self.test_move.copy({'date': '2017-01-01'})
+        # The date has been changed to the first valid date.
+        self.assertEqual(copy_move.date, copy_move.company_id.fiscalyear_lock_date + relativedelta(days=1))
