@@ -45,7 +45,7 @@ class KanbanImage extends Component {
     static template = "web.KanbanImage";
     static props = {
         ...standardWidgetProps,
-        imgFieldName: { type: String },
+        imgFieldName: { type: String, optional: true },
         innerImgField: { type: String, optional: true },
         imgClass: { type: String, optional: true },
     };
@@ -69,6 +69,7 @@ class KanbanImage extends Component {
 
 export const kanbanImageWidget = {
     component: KanbanImage,
+    displayName: _t("Image"),
     fieldDependencies: [{ name: "write_date", type: "datetime" }],
     extractProps: ({ attrs, options }) => {
         return {
@@ -84,6 +85,12 @@ export const kanbanImageWidget = {
             label: _t("Field"),
             name: "field",
             type: "field",
+            availableTypes: ["binary"],
+        },
+        {
+            label: _t("Class"),
+            name: "class",
+            type: "string",
         },
         {
             label: _t("Inner"),

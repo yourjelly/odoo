@@ -42,6 +42,7 @@ class RibbonWidget extends Component {
 
 export const ribbonWidget = {
     component: RibbonWidget,
+    displayName: _t("Ribbon"),
     extractProps: ({ attrs }) => {
         return {
             text: attrs.title || attrs.text,
