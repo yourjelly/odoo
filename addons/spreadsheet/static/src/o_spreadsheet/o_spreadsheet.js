@@ -21085,7 +21085,7 @@
             Enter: this.processEnterKey,
             Escape: this.processEscapeKey,
             F2: () => console.warn("Not implemented"),
-            F4: this.processF4Key,
+            F4: (ev) => this.processF4Key(ev),
             Tab: (ev) => this.processTabKey(ev),
         };
         setup() {
@@ -21202,9 +21202,10 @@
         processEscapeKey() {
             this.env.model.dispatch("STOP_EDITION", { cancel: true });
         }
-        processF4Key() {
+        processF4Key(ev) {
             this.env.model.dispatch("CYCLE_EDITION_REFERENCES");
             this.processContent();
+            ev.stopPropagation();
         }
         onCompositionStart() {
             this.compositionActive = true;
@@ -48093,8 +48094,8 @@
 
 
     __info__.version = '16.3.34';
-    __info__.date = '2024-04-26T07:57:35.342Z';
-    __info__.hash = '196324c';
+    __info__.date = '2024-05-13T07:37:35.459Z';
+    __info__.hash = '70283a7';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
