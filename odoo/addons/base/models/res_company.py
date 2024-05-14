@@ -232,6 +232,12 @@ class Company(models.Model):
         for f in arch.iter("field"):
             if f.get('name') in delegated_fnames:
                 f.set('readonly', "parent_id != False")
+        if vat_label := self.env.company.country_id.vat_label:
+            for node in arch.iterfind(".//field[@name='vat']"):
+                node.set("string", vat_label)
+            # In some module vat field is replaced and so above string change is not working
+            for node in arch.iterfind(".//label[@for='vat']"):
+                node.set("string", vat_label)
         return arch, view
 
     @api.model
