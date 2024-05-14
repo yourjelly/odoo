@@ -679,7 +679,7 @@ class Environment(Mapping):
         #   - when printing a report for several records from several companies
         #   - when accessing to a record from the notification email template
         #   - when loading an binary image on a template
-        return self['res.company'].browse(user_company_ids)
+        return self['res.company'].browse(user_company_ids) | self.user.company_id
 
     @property
     def lang(self):
