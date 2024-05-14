@@ -1,12 +1,16 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import re
+
 from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError
 from odoo.osv import expression
 
 
 from odoo.tools import float_compare, float_round
+
+CODE_128_BARCODE_REGEX = re.compile(r'^[\x00-\x7F]+$')
 
 
 class ProductPackaging(models.Model):
@@ -20,6 +24,7 @@ class ProductPackaging(models.Model):
     product_id = fields.Many2one('product.product', string='Product', check_company=True, required=True, ondelete="cascade")
     qty = fields.Float('Contained Quantity', default=1, digits='Product Unit of Measure', help="Quantity of products contained in the packaging.")
     barcode = fields.Char('Barcode', copy=False, help="Barcode used for packaging identification. Scan this packaging barcode from a transfer in the Barcode app to move all the contained units")
+    valid_code_128 = fields.Boolean(string="Is Barcode Coded in Code 128", compute='_compute_valid_code_128')
     product_uom_id = fields.Many2one('uom.uom', related='product_id.uom_id', readonly=True)
     company_id = fields.Many2one('res.company', 'Company', index=True)
 
@@ -78,3 +83,9 @@ class ProductPackaging(models.Model):
         if qty_uom:
             qty = qty_uom._compute_quantity(qty, self.product_uom_id)
         return float_round(qty / self.qty, precision_rounding=self.product_uom_id.rounding)
+
+    @api.depends('barcode')
+    def _compute_valid_code_128(self):
+        for record in self:
+            if record.barcode:
+                record.valid_code_128 = bool(re.match(CODE_128_BARCODE_REGEX, record.barcode))

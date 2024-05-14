@@ -23,7 +23,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div t-else="" class="col-6 d-flex flex-column justify-content-center align-item-center text-center">
+                        <div t-elif="o.valid_code_128" class="col-6 d-flex flex-column justify-content-center align-item-center text-center">
                             <div t-field="o.name" t-options="{'widget': 'barcode', 'width': 600, 'height': 100, 'img_style': 'width:300px;height:50px;'}">
                                 <div class="bg-light border-1 rounded d-flex flex-column align-items-center justify-content-center px-1 py-2 opacity-75 text-muted text-center">
                                     (package barcode)
@@ -127,7 +127,7 @@
                     <t t-else="">
                         <div class="row">
                             <div class="text-center col-12">
-                                <span t-field="o.name" t-options="{'widget': 'barcode', 'width': 600, 'height': 100, 'img_style': 'width:600px;height:100px;'}">Name Demo</span>
+                                <span t-if="o.valid_code_128" t-field="o.name" t-options="{'widget': 'barcode', 'width': 600, 'height': 100, 'img_style': 'width:600px;height:100px;'}">Name Demo</span>
                                 <span t-field="o.name" style="font-size:20px; margin:100px;">Name Demo</span>
                             </div>
                         </div>

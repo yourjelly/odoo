@@ -11,6 +11,8 @@ from odoo.osv import expression
 from odoo.tools import float_compare, groupby
 from odoo.tools.misc import unique
 
+CODE_128_BARCODE_REGEX = re.compile(r'^[\x00-\x7F]+$')
+
 
 class ProductProduct(models.Model):
     _name = "product.product"
@@ -44,6 +46,7 @@ class ProductProduct(models.Model):
     barcode = fields.Char(
         'Barcode', copy=False, index='btree_not_null',
         help="International Article Number used for product identification.")
+    valid_code_128 = fields.Boolean(string="Is Barcode Coded in Code 128", compute='_compute_valid_code_128')
     product_template_attribute_value_ids = fields.Many2many('product.template.attribute.value', relation='product_variant_combination', string="Attribute Values", ondelete='restrict')
     product_template_variant_value_ids = fields.Many2many('product.template.attribute.value', relation='product_variant_combination',
                                                           domain=[('attribute_line_id.value_count', '>', 1)], string="Variant Values", ondelete='restrict')
@@ -184,6 +187,12 @@ class ProductProduct(models.Model):
         """Get the image from the template if no image is set on the variant."""
         for record in self:
             record.can_image_1024_be_zoomed = record.can_image_variant_1024_be_zoomed if record.image_variant_1920 else record.product_tmpl_id.can_image_1024_be_zoomed
+
+    @api.depends('barcode')
+    def _compute_valid_code_128(self):
+        for record in self:
+            if record.barcode:
+                record.valid_code_128 = bool(re.match(CODE_128_BARCODE_REGEX, record.barcode))
 
     def _get_placeholder_filename(self, field):
         image_fields = ['image_%s' % size for size in [1920, 1024, 512, 256, 128]]

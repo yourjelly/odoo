@@ -2,6 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import calendar
+import re
 
 from collections import defaultdict, OrderedDict
 from datetime import timedelta
@@ -11,6 +12,7 @@ from odoo.exceptions import UserError, ValidationError
 from odoo.osv import expression
 from odoo.tools.float_utils import float_compare
 
+CODE_128_BARCODE_REGEX = re.compile(r'^[\x00-\x7F]+$')
 
 class Location(models.Model):
     _name = "stock.location"
@@ -85,6 +87,7 @@ class Location(models.Model):
              "(the availability of this method depends on the \"Expiration Dates\" setting).")
     putaway_rule_ids = fields.One2many('stock.putaway.rule', 'location_in_id', 'Putaway Rules')
     barcode = fields.Char('Barcode', copy=False)
+    valid_code_128 = fields.Boolean(string="Is Barcode Coded in Code 128", compute='_compute_valid_code_128')
     quant_ids = fields.One2many('stock.quant', 'location_id')
     cyclic_inventory_frequency = fields.Integer("Inventory Frequency (Days)", default=0, help=" When different than 0, inventory count date for products stored at this location will be automatically set at the defined frequency.")
     last_inventory_date = fields.Date("Last Effective Inventory", readonly=True, help="Date of the last inventory at this location.")
@@ -176,6 +179,12 @@ class Location(models.Model):
         # batch reading optimization is not possible because the field has recursive=True
         for loc in self:
             loc.child_internal_location_ids = self.search([('id', 'child_of', loc.id), ('usage', '=', 'internal')])
+
+    @api.depends('barcode')
+    def _compute_valid_code_128(self):
+        for record in self:
+            if record.barcode:
+                record.valid_code_128 = bool(re.match(CODE_128_BARCODE_REGEX, record.barcode))
 
     @api.onchange('usage')
     def _onchange_usage(self):

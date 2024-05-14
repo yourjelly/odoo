@@ -2,6 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import heapq
 import logging
+import re
 from collections import namedtuple
 
 from ast import literal_eval
@@ -15,6 +16,8 @@ from odoo.tools import check_barcode_encoding, groupby, SQL
 from odoo.tools.float_utils import float_compare, float_is_zero
 
 _logger = logging.getLogger(__name__)
+
+CODE_128_BARCODE_REGEX = re.compile(r'^[\x00-\x7F]+$')
 
 
 class StockQuant(models.Model):
@@ -1432,6 +1435,7 @@ class QuantPackage(models.Model):
         Disposable boxes aren't reused, when scanning a disposable box in the barcode application, the contained products are added to the transfer.""")
     valid_sscc = fields.Boolean('Package name is valid SSCC', compute='_compute_valid_sscc')
     pack_date = fields.Date('Pack Date', default=fields.Date.today)
+    valid_code_128 = fields.Boolean(string="Is Package Name in Code 128", compute='_compute_valid_code_128')
 
     @api.depends('quant_ids.location_id', 'quant_ids.company_id')
     def _compute_package_info(self):
@@ -1458,6 +1462,12 @@ class QuantPackage(models.Model):
         for package in self:
             if package.name:
                 package.valid_sscc = check_barcode_encoding(package.name, 'sscc')
+
+    @api.depends('name')
+    def _compute_valid_code_128(self):
+        for record in self:
+            if record.name:
+                record.valid_code_128 = bool(re.match(CODE_128_BARCODE_REGEX, record.name))
 
     def _search_owner(self, operator, value):
         if value:

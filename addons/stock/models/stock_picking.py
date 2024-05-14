@@ -4,6 +4,7 @@
 import json
 import math
 import time
+import re
 from ast import literal_eval
 from datetime import date, timedelta
 from collections import defaultdict
@@ -15,6 +16,8 @@ from odoo.exceptions import UserError, ValidationError
 from odoo.osv import expression
 from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT, format_datetime, format_date, groupby
 from odoo.tools.float_utils import float_compare, float_is_zero, float_round
+
+CODE_128_BARCODE_REGEX = re.compile(r'^[\x00-\x7F]+$')
 
 
 class PickingType(models.Model):
@@ -127,6 +130,7 @@ class PickingType(models.Model):
     count_picking_backorders = fields.Integer(compute='_compute_picking_count')
     hide_reservation_method = fields.Boolean(compute='_compute_hide_reservation_method')
     barcode = fields.Char('Barcode', copy=False)
+    valid_code_128 = fields.Boolean(string="Is Barcode Coded in Code 128", compute='_compute_valid_code_128')
     company_id = fields.Many2one(
         'res.company', 'Company', required=True,
         default=lambda s: s.env.company.id, index=True)
@@ -288,6 +292,12 @@ class PickingType(models.Model):
                 picking_type.warehouse_id = warehouse
             else:
                 picking_type.warehouse_id = False
+
+    @api.depends('barcode')
+    def _compute_valid_code_128(self):
+        for record in self:
+            if record.barcode:
+                record.valid_code_128 = bool(re.match(CODE_128_BARCODE_REGEX, record.barcode))
 
     @api.onchange('sequence_code')
     def _onchange_sequence_code(self):
