@@ -48,7 +48,7 @@ export function getConsumeEventType(element, runCommand) {
     if (!element) {
         return "click";
     }
-    const { classList, tagName, type } = element;
+    const { classList, tagName, type, attributes } = element;
     const tag = tagName.toLowerCase();
 
     // Many2one
@@ -84,7 +84,7 @@ export function getConsumeEventType(element, runCommand) {
         }
         if (
             (/^drag_and_drop_native/.test(runCommand) && classList.contains("o_draggable")) ||
-            element.closest(".o_draggable")
+            element.closest(".o_draggable") || JSON.parse(attributes.draggable.nodeValue)
         ) {
             return "pointerdown";
         }
