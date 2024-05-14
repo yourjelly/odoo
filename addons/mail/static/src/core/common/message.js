@@ -397,12 +397,12 @@ export class Message extends Component {
     onClickMarkAsUnread() {
         const message = toRaw(this.message);
         const thread = toRaw(this.props.thread);
-        if (!thread.selfMember || thread.selfMember?.new_message_separator === message.id) {
+        if (!thread.selfMember || thread.selfMember?.new_message_separator === message.id - 1) {
             return;
         }
         return rpc("/discuss/channel/set_new_message_separator", {
             channel_id: message.thread.id,
-            message_id: message.id,
+            message_id: message.id - 1,
         });
     }
 

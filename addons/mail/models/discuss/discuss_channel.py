@@ -1067,7 +1067,7 @@ class Channel(models.Model):
             'seen_message_id': last_message.id,
             'last_seen_dt': fields.Datetime.now(),
         })
-        member._set_new_message_separator(last_message.id + 1)
+        member._set_new_message_separator(last_message.id)
         if notify:
             target = current_partner or current_guest
             if self.channel_type in self._types_allowing_seen_infos():

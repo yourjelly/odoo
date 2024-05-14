@@ -995,10 +995,7 @@ export class DiscussChannel extends models.ServerModel {
 
         const memberOfCurrentUser = this._find_or_create_member_for_self(ids[0]);
         if (memberOfCurrentUser) {
-            DiscussChannelMember._set_new_message_separator(
-                [memberOfCurrentUser.id],
-                message_id + 1
-            );
+            DiscussChannelMember._set_new_message_separator([memberOfCurrentUser.id], message_id);
             DiscussChannelMember.write([memberOfCurrentUser.id], {
                 fetched_message_id: message_id,
                 seen_message_id: message_id,
