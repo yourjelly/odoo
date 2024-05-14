@@ -52,6 +52,7 @@
                     <h1>
                         <field name="name"/>
                     </h1>
+                    <field name="valid_code_128" invisible="1"/>
                     <group>
                         <field name="id" invisible='1'/>
                         <field name="company_id" invisible="1"/>

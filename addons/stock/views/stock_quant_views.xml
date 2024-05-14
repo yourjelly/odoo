@@ -279,6 +279,7 @@
                     <button name="unpack" string="Unpack" type="object"/>
                 </header>
                 <sheet>
+                    <field name="valid_code_128" invisible="1"/>
                     <div class="oe_button_box" name="button_box">
                         <button class="oe_stat_button" name="action_view_picking"
                         string="Package Transfers" type="object"
