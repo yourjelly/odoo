@@ -59,7 +59,7 @@ export class Navbar extends Component {
         if (this.isTicketScreenShown) {
             this.pos.closeScreen();
         } else {
-            if (this.pos.shouldLoadOrders()) {
+            // if (this.pos.shouldLoadOrders()) {
                 try {
                     this.pos.setLoadingOrderState(true);
                     const message = await this.pos._syncAllOrdersFromServer();
@@ -70,9 +70,9 @@ export class Navbar extends Component {
                     this.pos.setLoadingOrderState(false);
                     this.pos.showScreen("TicketScreen");
                 }
-            } else {
-                this.pos.showScreen("TicketScreen");
-            }
+            // } else {
+            //     this.pos.showScreen("TicketScreen");
+            // }
         }
     }
 

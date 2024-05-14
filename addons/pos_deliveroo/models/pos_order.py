@@ -32,3 +32,45 @@ class PosOrder(models.Model):
                     self.delivery_provider_id._send_preparation_status(self.delivery_id, 'collected')
                 case _:
                     pass
+
+    def call_deliveroo_controller(self):
+        return {
+            'type': 'ir.actions.act_url',
+            'url': '/pos_deliveroo/order',
+        }
+
+    # def test(self):
+    #     dummy_order_data = {
+    #         "body": {
+    #             "order": {
+    #                 "id": "123456789",
+    #                 "location_id": "987654321",
+    #                 "status": "pending",  # Order status
+    #                 "asap": True,  # Whether the order is as soon as possible
+    #                 "confirm_at": "2024-05-14T12:00:00",  # Confirmation time
+    #                 "start_preparing_at": "2024-05-14T11:45:00",  # Time when preparation starts
+    #                 "prepare_for": "2024-05-14T12:30:00",  # Time to prepare for
+    #                 "partner_order_total": 25.99,  # Total order amount
+    #                 "cash_due": 0.0,  # Amount due in cash
+    #                 "display_id": "ROO123456",  # Order display ID
+    #                 "order_notes": "Extra sauce, no onions",  # Additional notes for the order
+    #                 "cutlery_notes": "No cutlery required",  # Notes regarding cutlery
+    #                 "items": [  # List of items in the order
+    #                     {
+    #                         "pos_item_id": 1,  # ID of the item in the POS system
+    #                         "quantity": 2,  # Quantity of the item
+    #                         "unit_price": 8.99,  # Unit price of the item
+    #                         "menu_unit_price": 9.99  # Unit price of the item as per the menu
+    #                         # Add more items if required
+    #                     },
+    #                     {
+    #                         "pos_item_id": 2,
+    #                         "quantity": 1,
+    #                         "unit_price": 6.99,
+    #                         "menu_unit_price": 7.99
+    #                     }
+    #                     # Add more items if required
+    #                 ]
+    #             }
+    #         }
+    #     }

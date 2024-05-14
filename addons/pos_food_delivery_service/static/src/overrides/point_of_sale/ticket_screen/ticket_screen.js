@@ -2,7 +2,7 @@
 import { patch } from "@web/core/utils/patch";
 import { TicketScreen } from "@point_of_sale/app/screens/ticket_screen/ticket_screen";
 import { _t } from "@web/core/l10n/translation";
-import { ask } from "@point_of_sale/app/store/make_awaitable_dialog";
+// import { ask } from "@point_of_sale/app/store/make_awaitable_dialog";
 
 patch(TicketScreen.prototype, {
     setup() {
@@ -125,15 +125,15 @@ patch(TicketScreen.prototype, {
             : "confirmed";
     },
     async _rejectDeliveryOrder(order) {
-        const confirmed = await ask(this.dialog, {
-            title: _t("Reject order"),
-            body: _t("Are you sure you want to reject this order?"),
-            confirmLabel: _t("Confirm"),
-            cancelLabel: _t("Discard"),
-        });
-        if (!confirmed) {
-            return false;
-        }
+        // const confirmed = await ask(this.dialog, {
+        //     title: _t("Reject order"),
+        //     body: _t("Are you sure you want to reject this order?"),
+        //     confirmLabel: _t("Confirm"),
+        //     cancelLabel: _t("Discard"),
+        // });
+        // if (!confirmed) {
+        //     return false;
+        // }
         this._state.ui.acceptDeliveryOrderLoading = true;
         await this.pos.data.call("pos.order", "reject_delivery_order", [order.server_id, "busy"]);
         this._state.ui.acceptDeliveryOrderLoading = false;

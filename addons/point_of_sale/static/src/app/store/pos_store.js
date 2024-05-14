@@ -1012,7 +1012,7 @@ export class PosStore extends Reactive {
         return message;
     }
     async _getOrdersJson(domain = []) {
-        return await this.data.call("pos.order", "export_for_ui_shared_order", [], {
+        return await this.orm.call("pos.order", "export_for_ui_shared_order", [], {
             config_id: this.config.id,
         });
     }

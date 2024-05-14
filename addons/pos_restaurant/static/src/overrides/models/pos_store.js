@@ -147,7 +147,7 @@ patch(PosStore.prototype, {
         return order;
     },
     async _getTableOrdersFromServer(tableIds, domain = []) {
-        const orders = await this.data.call("pos.order", "export_for_ui_table_draft", [
+        const orders = await this.orm.call("pos.order", "export_for_ui_table_draft", [
             tableIds,
             domain,
         ]);

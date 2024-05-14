@@ -7,11 +7,11 @@ import { getHoursAndMinutesFromDatetimeString } from "@point_of_sale/utils";
 patch(PosStore.prototype, {
     async setup() {
         await super.setup(...arguments);
-        this.bus.subscribe("DELIVERY_ORDER_COUNT", (payload) => {
-            if (this.config.raw.delivery_provider_ids) {
-                this.ws_syncDeliveryCount(payload);
-            }
-        });
+        // this.bus.subscribe("DELIVERY_ORDER_COUNT", (payload) => {
+        //     if (this.config.raw.delivery_provider_ids) {
+        //         this.ws_syncDeliveryCount(payload);
+        //     }
+        // });
     },
     async _fetchDeliverooOrderCount() {
         this.delivery_order_count.deliveroo = await this.data.call(
