@@ -189,8 +189,7 @@ class PaymentTransaction(models.Model):
     def _xendit_tokenize_from_notification_data(self, notification_data):
         """ Create a new token based on the notification data.
 
-        :param dict notification_data: The notification data built with Xendit objects.
-                                       See `_process_notification_data`.
+        :param dict notification_data: Xendit's response to our charge API request
         :return: None
         """
         card_info = notification_data['masked_card_number'][-4:]  # Xendit pads details with X's.

@@ -36,9 +36,9 @@
                             <input
                                 id="o_xendit_year"
                                 type="number"
-                                placeholder="YY"
-                                min="00"
-                                max="99"
+                                placeholder="YYYY"
+                                min="1000"
+                                max="9999"
                                 autocomplete="cc-exp-year"
                                 required=""
                                 class="form-control"
@@ -52,6 +52,7 @@
                             type="number"
                             max="9999"
                             autocomplete="cc-csc"
+                            required=""
                             class="form-control"
                         />
                     </div>

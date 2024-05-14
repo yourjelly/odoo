@@ -101,7 +101,7 @@ paymentForm.include({
     },
 
     /**
-     * Process the direct payment flow by creating a token, then initiating a token payment.
+     * Process the direct payment flow by creating a toke, and then proceed the payment flow as token
      *
      * @override method from @payment/js/payment_form
      * @private
@@ -194,7 +194,7 @@ paymentForm.include({
         return {
             card_number: inputs.card.value.replace(/ /g, ''),
             card_exp_month: inputs.month.value,
-            card_exp_year: '20' + inputs.year.value,
+            card_exp_year: inputs.year.value,
             card_cvn: inputs.cvn.value,
         };
     },
