@@ -45,8 +45,14 @@ class TestAccountPaymentRegister(AccountTestInvoicingCommon):
 
         # Payment Terms
         cls.payment_term_1 = cls.env['account.payment.term'].create({
-            'name': 'My Custom',
+            'name': 'Late',
             'late_payment_charges': False,
+        })
+        cls.payment_term_2 = cls.env['account.payment.term'].create({
+            'name': 'Late with Installments',
+            'late_payment_charges': False,
+            'line_ids': [Command.create({"value": 'percent', "value_amount": 50, "delay_type": 'days_after', "nb_days": 0}),
+                         Command.create({"value": 'percent', "value_amount": 50, "delay_type": 'days_after', "nb_days": 5})]
         })
 
         # Customer invoices sharing the same batch.
@@ -98,7 +104,15 @@ class TestAccountPaymentRegister(AccountTestInvoicingCommon):
             'invoice_line_ids': [(0, 0, {'product_id': cls.product_a.id, 'price_unit': 1000.00})],
             'invoice_payment_term_id': cls.payment_term_1.id,
         })
-        (cls.out_invoice_1 + cls.out_invoice_2 + cls.out_invoice_3 + cls.out_invoice_4 + cls.out_invoice_5 + cls.out_invoice_6).action_post()
+        cls.out_invoice_7 = cls.env['account.move'].create({
+            'move_type': 'out_invoice',
+            'date': '2024-04-10',
+            'invoice_date': '2024-04-10',
+            'partner_id': cls.partner_a.id,
+            'invoice_line_ids': [(0, 0, {'product_id': cls.product_a.id, 'price_unit': 200.00, 'tax_ids': []})],
+            'invoice_payment_term_id': cls.payment_term_2.id,
+        })
+        (cls.out_invoice_1 + cls.out_invoice_2 + cls.out_invoice_3 + cls.out_invoice_4 + cls.out_invoice_5 + cls.out_invoice_6 + cls.out_invoice_7).action_post()
 
         # Vendor bills, in_invoice_1 + in_invoice_2 are sharing the same batch but not in_invoice_3.
         cls.in_invoice_1 = cls.env['account.move'].create({
@@ -138,24 +152,17 @@ class TestAccountPaymentRegister(AccountTestInvoicingCommon):
 
     def test_before_lpc_enabled(self):
         active_id = self.out_invoice_5
-        initial_invoices = len(self.env['account.move'].search([('move_type', '=', active_id.move_type)]))
-        payments = self.env['account.payment.register'].with_context(active_model='account.move', active_ids=active_id.id).create({
+        self.env['account.payment.register'].with_context(active_model='account.move', active_ids=active_id.id).create({
             'payment_difference_handling': 'reconcile',
             'payment_method_line_id': self.inbound_payment_method_line.id,
         })._create_payments()
-        # test if no extra late payment charges are paid
-        self.assertRecordValues(payments, [{
-            'ref': 'INV/2024/00001',
-            'amount': active_id.amount_total,
-            'payment_method_line_id': self.inbound_payment_method_line.id,
-        }])
-        # test if no extra invoice is generated
-        self.assertEqual(initial_invoices, len(self.env['account.move'].search([('move_type', '=', active_id.move_type)])))
+        # test if no debit note is generated
+        self.assertTrue(len(active_id.debit_note_ids) == 0)
 
     # method for facilitating late payment charges tests
     def _test_lpc_for_given_vals(self, vals):
         # update payment terms
-        self.payment_term_1.write({
+        vals['payment_term'].write({
             'late_payment_charges': True,
             'late_payment_charges_type': vals['lpc_type'],
             'late_payment_charges_value': vals['lpc_value'],
@@ -163,7 +170,6 @@ class TestAccountPaymentRegister(AccountTestInvoicingCommon):
             'late_payment_charges_computation': vals['lpc_computation']
         })
         active_id = vals['active_id']
-        initial_invoices = len(self.env['account.move'].search([('move_type', '=', active_id.move_type)]))
         register_payment = self.env['account.payment.register'].with_context(active_model='account.move', active_ids=active_id.id).create({
             'payment_method_line_id': self.inbound_payment_method_line.id,
             'payment_date': vals['payment_date']
@@ -172,48 +178,29 @@ class TestAccountPaymentRegister(AccountTestInvoicingCommon):
             register_payment.write({
                 'amount': vals['amount']
             })
-        amount = [active_id.amount_residual, active_id.amount_tax]
-        payments = register_payment._create_payments()
-        amount_dict = self.payment_term_1 \
-            ._get_amount_due_after_charges(amount[0], amount[1], active_id.invoice_date, payments.date, register_payment.company_id)
-        bill_amount = sum(value for value in amount_dict.values()) + amount[0]
-        percentage_paid = min(1, register_payment.amount / bill_amount)
+        lpc_penalty = register_payment._get_lpc_penalty_and_label(active_id, True, register_payment.amount)[0]
+        register_payment._create_payments()
         # test if late payment charges are calculated correctly
-        self.assertEqual(float_compare(vals['expected_lpc'], sum(value * percentage_paid for value in amount_dict.values()), 2), 0)
-        # test for late payment charges have been added to payments
-        self.assertRecordValues(payments, [{
-            'ref': vals['ref'],
-            'amount': register_payment.total_amount_before_lpc + register_payment.lpc_penalty,
-            'payment_method_line_id': self.inbound_payment_method_line.id,
+        self.assertEqual(float_compare(vals['expected_lpc'], lpc_penalty, 2), 0)
+        # test to check if new debit note for late payment has been created or not
+        self.assertTrue(len(active_id.debit_note_ids) > 0)
+        debit_note = self.env['account.move'].search([('id', '=', active_id.debit_note_ids[vals['index']].id)])
+        # test to check if new debit has been correctly made or not
+        self.assertRecordValues(debit_note, [{
+            'ref': active_id.name + ', Late Pay Charges',
+            'debit_origin_id': active_id.id,
+            'journal_id': active_id.journal_id.id,
+            'amount_total': lpc_penalty
         }])
-        # test to check if new invoice for late payment has been created or not
-        self.assertEqual(initial_invoices + 1, len(self.env['account.move'].search([('move_type', '=', active_id.move_type)])))
-        register_payment.action_create_payments()
-        # test to check if new invoice has been correctly made or not
-        self.assertRecordValues(register_payment.lpc_invoice_id, [{
-            'invoice_date': register_payment.payment_date,
-            'partner_id': active_id.partner_id.id,
-            'move_type': active_id.move_type,
-        }])
-        self.assertTrue(register_payment.lpc_invoice_id.payment_state in ['in_payment', 'paid'])
-        # testing if invoice line has been created correctly or not in new invoice
-        self.assertRecordValues(register_payment.lpc_invoice_id.invoice_line_ids, [{
+        self.assertTrue(debit_note.state == 'draft')
+        # testing if line has been created correctly or not in new debit note
+        self.assertRecordValues(debit_note.invoice_line_ids, [{
             "product_id": register_payment.lpc_product_id.id,
             "quantity": 1,
-            "price_unit": register_payment.lpc_penalty
+            "price_unit": lpc_penalty
         }])
-        # testing if journal items has been created correctly or not in new invoice
-        self.assertEqual(len(register_payment.lpc_invoice_id.line_ids), len(amount_dict) + 1)
-        for line in register_payment.lpc_invoice_id.line_ids:
-            if line.display_type == 'payment_term':
-                self.assertTrue(line.name in amount_dict)
-                self.assertEqual(float_compare(line.debit, percentage_paid * amount_dict[line.name], 2), 0)
-            else:
-                self.assertEqual(line.name, register_payment.lpc_product_id.name)
-                self.assertEqual(float_compare(line.credit, sum(value * percentage_paid for value in amount_dict.values()), 2), 0)
-        return register_payment.lpc_invoice_id.id  # for comparing invoice of different partial payments
 
-    def _create_vals_for_lpc(self, lpc_type, lpc_computation, lpc_value, lpc_days, active_id, payment_date, expected_lpc, ref, amount=None):
+    def _create_vals_for_lpc(self, lpc_type, lpc_computation, lpc_value, lpc_days, active_id, payment_date, expected_lpc):
         return {
             'lpc_type': lpc_type,
             'lpc_computation': lpc_computation,
@@ -222,51 +209,125 @@ class TestAccountPaymentRegister(AccountTestInvoicingCommon):
             'active_id': active_id,
             'payment_date': payment_date,
             'expected_lpc': expected_lpc,
-            'ref': ref,
-            'amount': amount
+            'amount': None,
+            'index': 0,
+            'payment_term': self.payment_term_1,
         }
 
+    def test_fixed_amount_lpc(self):
+        vals = self._create_vals_for_lpc('flat', 'on_total', 100.00, 2, self.out_invoice_5, '2024-04-27', 100.00)
+        self._test_lpc_for_given_vals(vals)
+
     def test_fixed_lpc(self):
-        vals = self._create_vals_for_lpc('fixed', 'on_total', 100.00, 2, self.out_invoice_5, '2024-04-27', 100.00, 'INV/2024/00001')
+        vals = self._create_vals_for_lpc('fixed', 'on_total', 10.00, 2, self.out_invoice_5, '2024-04-27', 5.00)
         self._test_lpc_for_given_vals(vals)
 
     def test_monthly_lpc(self):
-        vals = self._create_vals_for_lpc('monthly', 'on_total', 10.00, 2, self.out_invoice_5, '2024-04-30', 1.00, 'INV/2024/00001')
+        vals = self._create_vals_for_lpc('monthly', 'on_total', 10.00, 2, self.out_invoice_5, '2024-04-30', 1.00)
         self._test_lpc_for_given_vals(vals)
 
     def test_quarterly_lpc(self):
-        vals = self._create_vals_for_lpc('quarterly', 'on_total', 10.00, 1, self.out_invoice_6, '2024-05-15', 36.65, 'INV/2024/00002')
+        vals = self._create_vals_for_lpc('quarterly', 'on_total', 10.00, 1, self.out_invoice_6, '2024-05-15', 36.65)
         self._test_lpc_for_given_vals(vals)
 
     def test_half_yearly_lpc(self):
-        vals = self._create_vals_for_lpc('half_yearly', 'on_total', 10.00, 2, self.out_invoice_5, '2024-06-15', 1.43, 'INV/2024/00001')
+        vals = self._create_vals_for_lpc('half_yearly', 'on_total', 10.00, 2, self.out_invoice_5, '2024-06-15', 1.43)
         self._test_lpc_for_given_vals(vals)
 
     def test_yearly_lpc(self):
-        vals = self._create_vals_for_lpc('yearly', 'on_total', 10.00, 2, self.out_invoice_5, '2024-06-30', 0.92, 'INV/2024/00001')
+        vals = self._create_vals_for_lpc('yearly', 'on_total', 10.00, 2, self.out_invoice_5, '2024-06-30', 0.92)
         self._test_lpc_for_given_vals(vals)
 
     def test_monthly_lpc_on_taxable(self):
-        vals = self._create_vals_for_lpc('monthly', 'on_taxable', 10.00, 2, self.out_invoice_6, '2024-04-22', 16.67, 'INV/2024/00002')
+        vals = self._create_vals_for_lpc('monthly', 'on_taxable', 10.00, 2, self.out_invoice_6, '2024-04-22', 16.67)
         self._test_lpc_for_given_vals(vals)
 
     def test_partial_payment_in_monthly_lpc(self):
-        vals = self._create_vals_for_lpc('monthly', 'on_total', 10.00, 2, self.out_invoice_6, '2024-04-22', 8.20, 'INV/2024/00002', 500)
-        invoice_id_1 = self._test_lpc_for_given_vals(vals)     # Payment 1
-        vals['amount'] = None
-        vals['payment_date'] = '2024-05-15'
-        vals['expected_lpc'] = 14.51
-        invoice_id_2 = self._test_lpc_for_given_vals(vals)     # Payment 2
-        self.assertNotEqual(invoice_id_1, invoice_id_2)
+        vals = self._create_vals_for_lpc('monthly', 'on_total', 10.00, 2, self.out_invoice_6, '2024-04-22', 8.33)
+        vals['amount'] = 500
+        self._test_lpc_for_given_vals(vals)     # Payment 1
+        vals['amount'], vals['payment_date'], vals['expected_lpc'], vals['index'] = None, '2024-05-15', 59.62, 1     # update vals
+        self._test_lpc_for_given_vals(vals)     # Payment 2
 
     def test_partial_payment_in_monthly_lpc_on_taxable(self):
-        vals = self._create_vals_for_lpc('monthly', 'on_taxable', 10.00, 2, self.out_invoice_6, '2024-04-22', 7.14, 'INV/2024/00002', 500)
-        invoice_id_1 = self._test_lpc_for_given_vals(vals)     # Payment 1
-        vals['amount'] = None
-        vals['payment_date'] = '2024-05-15'
-        vals['expected_lpc'] = 0.65
-        invoice_id_2 = self._test_lpc_for_given_vals(vals)     # Payment 2
-        self.assertNotEqual(invoice_id_1, invoice_id_2)
+        vals = self._create_vals_for_lpc('monthly', 'on_taxable', 10.00, 2, self.out_invoice_6, '2024-04-22', 8.33)
+        vals['amount'] = 575
+        self._test_lpc_for_given_vals(vals)     # Payment 1
+        vals['amount'], vals['payment_date'], vals['expected_lpc'], vals['index'] = None, '2024-05-15', 45.86, 1     # update vals
+        self._test_lpc_for_given_vals(vals)     # Payment 2
+
+    def test_lpc_with_installments_for_late_inst1(self):
+        vals = self._create_vals_for_lpc('monthly', 'on_total', 10.00, 0, self.out_invoice_7, '2024-04-11', 0.33)
+        vals['amount'], vals['payment_term'] = 100, self.payment_term_2     # update vals
+        self._test_lpc_for_given_vals(vals)
+
+    def test_lpc_with_installments_for_late_partial_inst1(self):
+        vals = self._create_vals_for_lpc('monthly', 'on_total', 10.00, 0, self.out_invoice_7, '2024-04-13', 0.90)
+        vals['amount'], vals['payment_term'] = 90, self.payment_term_2     # update vals
+        self._test_lpc_for_given_vals(vals)
+
+    def test_lpc_with_installments_for_late_inst1_and_inst2(self):
+        vals = self._create_vals_for_lpc('monthly', 'on_total', 10.00, 0, self.out_invoice_7, '2024-04-17', 3.00)
+        vals['payment_term'] = self.payment_term_2     # update vals
+        self._test_lpc_for_given_vals(vals)
+
+    def test_lpc_with_installments_for_late_inst1_and_partial_inst2(self):
+        vals = self._create_vals_for_lpc('monthly', 'on_total', 10.00, 0, self.out_invoice_7, '2024-04-17', 2.66)
+        vals['amount'], vals['payment_term'] = 150, self.payment_term_2     # update vals
+        self._test_lpc_for_given_vals(vals)
+
+    def test_lpc_with_installments_for_late_inst1_and_inst2_with_exceeded_amount(self):
+        vals = self._create_vals_for_lpc('monthly', 'on_total', 10.00, 0, self.out_invoice_7, '2024-04-17', 3.00)
+        vals['amount'], vals['payment_term'] = 250, self.payment_term_2     # update vals
+        self._test_lpc_for_given_vals(vals)
+
+    def test_lpc_with_installments_for_multiple_partial_payments(self):
+        vals = self._create_vals_for_lpc('monthly', 'on_total', 10.00, 0, self.out_invoice_7, '2024-04-16', 1.50)
+        vals['amount'], vals['payment_term'] = 75, self.payment_term_2     # update vals
+        self._test_lpc_for_given_vals(vals)
+        vals['amount'], vals['payment_date'], vals['expected_lpc'], vals['index'] = None, '2024-04-17', 1.25, 1     # update vals
+        self._test_lpc_for_given_vals(vals)     # Payment 2
+
+    def test_lpc_for_batch(self):
+        # update payment terms
+        self.payment_term_1.write({
+            'late_payment_charges': True,
+            'late_payment_charges_type': 'monthly',
+            'late_payment_charges_value': 10,
+            'late_payment_charges_days': 0.0,
+            'late_payment_charges_computation': 'on_total'
+        })
+        register_payment = self.env['account.payment.register'].with_context(active_model='account.move', active_ids=[self.out_invoice_5.id, self.out_invoice_6.id]).create({
+            'payment_method_line_id': self.inbound_payment_method_line.id,
+            'payment_date': '2024-04-30'
+        })
+        lpc_penalty = {}
+        for batch in register_payment._get_batches():
+            moves = batch['lines'].mapped('move_id')
+            for move in moves:
+                lpc_penalty.update({move.id: register_payment._get_lpc_penalty_and_label(move, True, move.amount_residual)[0]})
+        register_payment._create_payments()
+        # test if late payment charges are calculated correctly
+        self.assertTrue(list(lpc_penalty.values()) == [1.33, 57.5])
+        moves = self.env['account.move'].browse(lpc_penalty.keys())
+        for move in moves:
+            # test to check if new debit note for late payment has been created or not
+            self.assertTrue(len(move.debit_note_ids) > 0)
+            debit_note = self.env['account.move'].search([('id', '=', move.debit_note_ids[0].id)])
+            # test to check if new debit has been correctly made or not
+            self.assertRecordValues(debit_note, [{
+                'ref': move.name + ', Late Pay Charges',
+                'debit_origin_id': move.id,
+                'journal_id': move.journal_id.id,
+                'amount_total': lpc_penalty[move.id]
+            }])
+            self.assertTrue(debit_note.state == 'draft')
+            # testing if line has been created correctly or not in new debit note
+            self.assertRecordValues(debit_note.invoice_line_ids, [{
+                "product_id": register_payment.lpc_product_id.id,
+                "quantity": 1,
+                "price_unit": lpc_penalty[move.id]
+            }])
 
     def test_register_payment_single_batch_grouped_keep_open_lower_amount(self):
         ''' Pay 800.0 with 'open' as payment difference handling on two customer invoices (1000 + 2000). '''

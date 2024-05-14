@@ -28,6 +28,7 @@ class AccountPaymentTerm(models.Model):
     fiscal_country_codes = fields.Char(compute='_compute_fiscal_country_codes')
     sequence = fields.Integer(required=True, default=10)
     currency_id = fields.Many2one('res.currency', compute="_compute_currency_id")
+    currency_symbol = fields.Char(compute='_compute_currency_symbol', default='')
 
     display_on_invoice = fields.Boolean(string='Show installment dates', default=True)
     example_amount = fields.Monetary(currency_field='currency_id', default=1000, store=False, readonly=True)
@@ -53,11 +54,12 @@ class AccountPaymentTerm(models.Model):
         ('quarterly', 'Quarterly'),
         ('half_yearly', 'Half-Yearly'),
         ('yearly', 'Yearly'),
-        ('fixed', 'Fixed')
+        ('fixed', 'Fixed'),
+        ('flat', 'Flat')
     ], default='yearly')
     late_payment_charges_computation = fields.Selection([
-        ('on_taxable', 'At the rate of Product'),
-        ('on_total', 'At the rate of Invoice')
+        ('on_total', 'Total Amount'),
+        ('on_taxable', 'Taxable Amount')
     ], string='Late Payment Charges Tax Reduction', readonly=False, default='on_total')
 
     @api.depends('company_id')
@@ -73,6 +75,11 @@ class AccountPaymentTerm(models.Model):
         for payment_term in self:
             payment_term.currency_id = payment_term.company_id.currency_id or self.env.company.currency_id
 
+    @api.depends('currency_id')
+    def _compute_currency_symbol(self):
+        for payment_term in self:
+            payment_term.currency_symbol = payment_term.currency_id.symbol
+
     def _get_amount_due_after_discount(self, total_amount, untaxed_amount):
         self.ensure_one()
         if self.early_discount:
@@ -84,37 +91,51 @@ class AccountPaymentTerm(models.Model):
             return self.currency_id.round(total_amount - discount_amount_currency)
         return total_amount
 
-    def _get_amount_due_after_charges(self, total_amount, taxed_amount, invoice_date, payment_date, company):
+    def _get_amount_due_after_charges(self, amount, due_date, payment_date, company):
         self.ensure_one()
         amount_dict = {}
-        due_date = self._get_latest_late_charges_date(invoice_date)
         if self.late_payment_charges:
-            if self.late_payment_charges_type == 'fixed':
-                amount_dict.update({'Fixed Late Pay Charges': self.late_payment_charges_value})
+            if self.late_payment_charges_type == 'flat':
+                amount_dict.update({'Fixed late penalty amount of ': self.late_payment_charges_value})
             else:
                 percentage = self.late_payment_charges_value / 100.0
-                if self.late_payment_charges_computation in ('on_taxable'):
-                    late_payment_charges_amount_currency = self.currency_id.round((total_amount - taxed_amount) * percentage)
+                late_payment_charges_amount_currency = self.currency_id.round(amount * percentage)
+                if self.late_payment_charges_type == 'fixed':
+                    amount_dict.update({f"Fixed late penalty @{self.late_payment_charges_value} on {'{:,.2f}'.format(amount)} is ": late_payment_charges_amount_currency})
                 else:
-                    late_payment_charges_amount_currency = self.currency_id.round(total_amount * percentage)
-                amount_dict = self._compute_interest(due_date, payment_date, late_payment_charges_amount_currency, self.late_payment_charges_type, company)
+                    amount_dict = self._compute_interest(amount, due_date, payment_date, late_payment_charges_amount_currency, self.late_payment_charges_type, company)
         return amount_dict
 
-    def _compute_interest(self, due_date, payment_date, periodic_interest, lpc_type, company):
+    def _compute_interest(self, base, due_date, payment_date, periodic_interest, lpc_type, company):
+        period_dict = {'monthly': ['months', 1], 'quarterly': ['quarters', 3], 'half_yearly': ['half-years', 6], 'yearly': ['years', 12]}
         amount_dict = {}
         current_date = due_date
+        recurrent_interest = 0
         period_start, period_end = self._get_fiscal_dates(current_date, lpc_type, company)
-        while not (period_start <= payment_date and payment_date <= period_end):
-            days_in_period = (period_end - period_start).days + 1
-            if days_in_period != 0:
-                key = 'Late Pay Charges from {} to {}'.format(current_date.strftime('%Y-%m-%d'), period_end.strftime('%Y-%m-%d'))
-                amount_dict[key] = float_round((((period_end - current_date).days + 1) / days_in_period) * periodic_interest, 2)
+        while payment_date >= period_end:
+            if period_start < current_date:
+                days_in_period = (period_end - period_start).days + 1
+                if days_in_period != 0:
+                    key = 'Penalty from {} to {} for {} days on {} @{}% {}: '.format(current_date.strftime('%Y-%m-%d'), period_end.strftime('%Y-%m-%d'), (period_end - current_date).days + 1,
+                                                                    '{:,.2f}'.format(base), self.late_payment_charges_value, self.late_payment_charges_type)
+                    amount_dict[key] = float_round((((period_end - current_date).days + 1) / days_in_period) * periodic_interest, 2)
+            else:
+                recurrent_interest += periodic_interest
             period_start, period_end = self._get_next_dates(period_start, period_end, lpc_type)
             current_date = period_start
-        days_in_period = (period_end - period_start).days + 1
-        if days_in_period != 0:
-            key = 'Late Pay Charges from {} to {}'.format(current_date.strftime('%Y-%m-%d'), period_end.strftime('%Y-%m-%d'))
-            amount_dict[key] = float_round((((payment_date - current_date).days + 1) / days_in_period) * periodic_interest, 2)
+        if recurrent_interest > 0:
+            num_period = int(recurrent_interest / periodic_interest)
+            period_label = period_dict[self.late_payment_charges_type][0] if num_period > 1 else period_dict[self.late_payment_charges_type][0][:-1]
+            key = 'Penalty from {} to {} for {} {} on {} @{}% {}: '.format((period_start - relativedelta(months=(num_period * period_dict[self.late_payment_charges_type][1]))).strftime('%Y-%m-%d'),
+                                                                    (period_start - relativedelta(days=1)).strftime('%Y-%m-%d'), '{:,.2f}'.format(base),
+                                                                    num_period, period_label, self.late_payment_charges_value, self.late_payment_charges_type)
+            amount_dict[key] = float_round(recurrent_interest, 2)
+        if payment_date != (period_start - relativedelta(days=1)):
+            days_in_period = (period_end - period_start).days + 1
+            if days_in_period != 0:
+                key = 'Penalty from {} to {} for {} days on {} @{}% {}:  '.format(current_date.strftime('%Y-%m-%d'), payment_date.strftime('%Y-%m-%d'), (payment_date - current_date).days + 1,
+                                                                    '{:,.2f}'.format(base), self.late_payment_charges_value, self.late_payment_charges_type)
+                amount_dict[key] = float_round((((payment_date - current_date).days + 1) / days_in_period) * periodic_interest, 2)
         return amount_dict
 
     def _get_fiscal_dates(self, current_date, lpc_type, company):
@@ -226,9 +247,6 @@ class AccountPaymentTerm(models.Model):
                 raise ValidationError(_("The Early Payment Discount must be strictly positive."))
             if terms.early_discount and terms.discount_days <= 0:
                 raise ValidationError(_("The Early Payment Discount days must be strictly positive."))
-            if len(terms.line_ids) > 1 and terms.late_payment_charges:
-                raise ValidationError(
-                    _("The Late Payment Charges functionality can only be used with payment terms using a single 100% line. "))
             if terms.late_payment_charges and terms.late_payment_charges_value <= 0.0:
                 raise ValidationError(_("The Late Payment Charges must be strictly positive."))
             if terms.late_payment_charges and terms.late_payment_charges_days < 0:
@@ -323,10 +341,6 @@ class AccountPaymentTerm(models.Model):
         if not date_ref:
             return None
         return format_date(self.env, self._get_last_discount_date(date_ref))
-
-    def _get_latest_late_charges_date(self, date_ref):
-        self.ensure_one()
-        return self.line_ids._get_due_date(date_ref) + relativedelta(days=(self.late_payment_charges_days + 1) or 0) if self.late_payment_charges and not len(self.line_ids) > 1 else False
 
 class AccountPaymentTermLine(models.Model):
     _name = "account.payment.term.line"
