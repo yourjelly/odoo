@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+        <!-- Search -->
+    <!-- <record id="fitter_expandable_register_view_search" model="ir.ui.view">
+        <field name="name">fitter_expandable.register.search</field>
+        <field name="model">fitter_expandable.register</field>
+        <field name="arch" type="xml">
+            <search string="search property">
+                <field name="general_number"></field>
+                <field name="fitter_expandable_letter_no"/>
+                <field name="from_whome_recieved"/>
+            </search>
+        </field>
+    </record> -->
+
+    <!-- View -->
+    <record id="fitter_expandable_register_view_tree" model="ir.ui.view">
+        <field name="name">fitter_expandable.register.tree</field>
+        <field name="model">fitter_expandable.register</field>
+        <field name="arch" type="xml">
+            <tree editable="top" create="1" delete="1" string="Channel" default_order="name desc">
+                <field name ="name"/>
+                <field name="referance_no"/>
+                <field name="date_of_receipt"/>
+                <field name="opening_balance"/>
+                <field name="received_quantity"/>
+                <field name="total_quantity"/>
+                <field name="rate"/>
+                <field name="sign_of_storekeeper_1" optional="1"/>
+                <field name="signature_head_1"  optional="1"/>
+                <field name="date_of_despatch"/>
+                <field name="indent_no"/>
+                <field name="indent_date"/>
+                <field name="in_which_section_given"/>
+                <field name="quantity_issued"/>
+                <field name="sign_of_receiving_employee" optional="1"/>
+                <field name="closing_balance"/>
+                <field name="sign_of_storekeeper_2" optional="1"/>
+                <field name="sign_of_principal" optional="1"/>
+                <field name="remark"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="wireman_expandable_register_view_tree" model="ir.ui.view">
+        <field name="name">wireman_expandable.register.tree</field>
+        <field name="model">wireman_expandable.register</field>
+        <field name="arch" type="xml">
+            <tree editable="top" create="1" delete="1" string="Channel" default_order="name desc">
+                <field name ="name"/>
+                <field name="referance_no"/>
+                <field name="date_of_receipt"/>
+                <field name="opening_balance"/>
+                <field name="received_quantity"/>
+                <field name="total_quantity"/>
+                <field name="rate"/>
+                <field name="sign_of_storekeeper_1" optional="1"/>
+                <field name="signature_head_1"  optional="1"/>
+                <field name="date_of_despatch"/>
+                <field name="indent_no"/>
+                <field name="indent_date"/>
+                <field name="in_which_section_given"/>
+                <field name="quantity_issued"/>
+                <field name="sign_of_receiving_employee" optional="1"/>
+                <field name="closing_balance"/>
+                <field name="sign_of_storekeeper_2" optional="1"/>
+                <field name="sign_of_principal" optional="1"/>
+                <field name="remark"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="mechanic_diesel_expandable_register_view_tree" model="ir.ui.view">
+        <field name="name">mechanic_diesel_expandable.register.tree</field>
+        <field name="model">mechanic_diesel_expandable.register</field>
+        <field name="arch" type="xml">
+            <tree editable="top" create="1" delete="1" string="Channel" default_order="name desc">
+                <field name ="name"/>
+                <field name="referance_no"/>
+                <field name="date_of_receipt"/>
+                <field name="opening_balance"/>
+                <field name="received_quantity"/>
+                <field name="total_quantity"/>
+                <field name="rate"/>
+                <field name="sign_of_storekeeper_1" optional="1"/>
+                <field name="signature_head_1"  optional="1"/>
+                <field name="date_of_despatch"/>
+                <field name="indent_no"/>
+                <field name="indent_date"/>
+                <field name="in_which_section_given"/>
+                <field name="quantity_issued"/>
+                <field name="sign_of_receiving_employee" optional="1"/>
+                <field name="closing_balance"/>
+                <field name="sign_of_storekeeper_2" optional="1"/>
+                <field name="sign_of_principal" optional="1"/>
+                <field name="remark"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="armature_motor_rewinding_expandable_register_view_tree" model="ir.ui.view">
+        <field name="name">armature_motor_rewinding_expandable.register.tree</field>
+        <field name="model">armature_motor_rewinding_expandable.register</field>
+        <field name="arch" type="xml">
+            <tree editable="top" create="1" delete="1" string="Channel" default_order="name desc">
+                <field name ="name"/>
+                <field name="referance_no"/>
+                <field name="date_of_receipt"/>
+                <field name="opening_balance"/>
+                <field name="received_quantity"/>
+                <field name="total_quantity"/>
+                <field name="rate"/>
+                <field name="sign_of_storekeeper_1" optional="1"/>
+                <field name="signature_head_1"  optional="1"/>
+                <field name="date_of_despatch"/>
+                <field name="indent_no"/>
+                <field name="indent_date"/>
+                <field name="in_which_section_given"/>
+                <field name="quantity_issued"/>
+                <field name="sign_of_receiving_employee" optional="1"/>
+                <field name="closing_balance"/>
+                <field name="sign_of_storekeeper_2" optional="1"/>
+                <field name="sign_of_principal" optional="1"/>
+                <field name="remark"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="sewing_technology_expandable_register_view_tree" model="ir.ui.view">
+        <field name="name">sewing_technology_expandable.register.tree</field>
+        <field name="model">sewing_technology_expandable.register</field>
+        <field name="arch" type="xml">
+            <tree editable="top" create="1" delete="1" string="Channel" default_order="name desc">
+                <field name ="name"/>
+                <field name="referance_no"/>
+                <field name="date_of_receipt"/>
+                <field name="opening_balance"/>
+                <field name="received_quantity"/>
+                <field name="total_quantity"/>
+                <field name="rate"/>
+                <field name="sign_of_storekeeper_1" optional="1"/>
+                <field name="signature_head_1"  optional="1"/>
+                <field name="date_of_despatch"/>
+                <field name="indent_no"/>
+                <field name="indent_date"/>
+                <field name="in_which_section_given"/>
+                <field name="quantity_issued"/>
+                <field name="sign_of_receiving_employee" optional="1"/>
+                <field name="closing_balance"/>
+                <field name="sign_of_storekeeper_2" optional="1"/>
+                <field name="sign_of_principal" optional="1"/>
+                <field name="remark"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="fitter_expandable_register_view_tree" model="ir.ui.view">
+        <field name="name">fitter_expandable.register.tree</field>
+        <field name="model">fitter_expandable.register</field>
+        <field name="arch" type="xml">
+            <tree editable="top" create="1" delete="1" string="Channel" default_order="name desc">
+                <field name ="name"/>
+                <field name="referance_no"/>
+                <field name="date_of_receipt"/>
+                <field name="opening_balance"/>
+                <field name="received_quantity"/>
+                <field name="total_quantity"/>
+                <field name="rate"/>
+                <field name="sign_of_storekeeper_1" optional="1"/>
+                <field name="signature_head_1"  optional="1"/>
+                <field name="date_of_despatch"/>
+                <field name="indent_no"/>
+                <field name="indent_date"/>
+                <field name="in_which_section_given"/>
+                <field name="quantity_issued"/>
+                <field name="sign_of_receiving_employee" optional="1"/>
+                <field name="closing_balance"/>
+                <field name="sign_of_storekeeper_2" optional="1"/>
+                <field name="sign_of_principal" optional="1"/>
+                <field name="remark"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form -->
+    <!-- <record id="fitter_expandable_register_form" model="ir.ui.view">
+        <field name="name">fitter_expandable.register.form</field>
+        <field name="model">fitter_expandable.register</field>
+        <field name="arch" type="xml">
+            <form string="test">
+                <sheet>
+                    <h1 class="my-3">
+                        <field name ="name" placeholder="Sr. No. 001" />
+                    </h1>
+                    <group col="2">
+                        <group>
+                            <field name="referance_no"/>
+                            <field name="date_of_receipt"/>
+                            <field name="opening_balance"/>
+                        </group>
+                        <group>
+                            <field name="received_quantity"/>
+                            <field name="total_quantity"/>
+                            <field name="rate"/>
+                        </group>
+                    </group>
+                    <group col="2" string="Indent Details">
+                        <group>
+                            <field name="date_of_despatch"/>
+                            <field name="indent_no"/>
+                            <field name="indent_date"/>
+                        </group>
+                        <group >
+                            <field name="in_which_section_given"/>
+                            <field name="quantity_issued"/>
+                            <field name="closing_balance"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Remark" name="remark">
+                            <group>
+                                <field name="remark"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record> -->
+
+    <!-- Records -->
+    <record id="fitter_expandable_register_action" model="ir.actions.act_window">
+        <field name="name"> Fitter Expandable Register </field>
+        <field name="res_model">fitter_expandable.register</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <record id="wireman_expandable_register_action" model="ir.actions.act_window">
+        <field name="name"> wireman_expandable Register </field>
+        <field name="res_model">wireman_expandable.register</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <record id="mechanic_diesel_expandable_register_action" model="ir.actions.act_window">
+        <field name="name"> Mechanic Diesel Register </field>
+        <field name="res_model">mechanic_diesel_expandable.register</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <record id="armature_motor_rewinding_expandable_register_action" model="ir.actions.act_window">
+        <field name="name"> Armature Motor Rewinding Register </field>
+        <field name="res_model">armature_motor_rewinding_expandable.register</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <record id="sewing_technology_expandable_register_action" model="ir.actions.act_window">
+        <field name="name"> Sewing Technology Register </field>
+        <field name="res_model">sewing_technology_expandable.register</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="first_level_menu_students_4" name="Expandable Register" parent="student_menu_root" />
+    <menuitem id="first_level_menu_fitter_expandable" action="fitter_expandable_register_action" name="Fitter Register" parent="first_level_menu_students_4" />
+    <menuitem id="first_level_menu_wireman_expandable" action="wireman_expandable_register_action" name="Wireman Register" parent="first_level_menu_students_4" />
+    <menuitem id="first_level_menu_mechanic_diesel_expandable" action="mechanic_diesel_expandable_register_action" name="Mechanic Diesel Register" parent="first_level_menu_students_4" />
+    <menuitem id="first_level_menu_armature_motor_rewinding_expandable" action="armature_motor_rewinding_expandable_register_action" name="Armature Motor Rewinding Register" parent="first_level_menu_students_4" />
+    <menuitem id="first_level_menu_sewing_technology_expandable" action="sewing_technology_expandable_register_action" name="Sewing Technology Register" parent="first_level_menu_students_4" />
+
+</odoo>

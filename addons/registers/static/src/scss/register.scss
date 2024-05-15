@@ -1,0 +1,12 @@
+.o_list_table {
+    th {
+        .text-truncate {
+            white-space: unset !important;
+        }
+    }
+    .o_data_cell {
+        word-wrap: break-word !important;
+        text-overflow: unset !important;
+        white-space: unset !important;
+    }
+}

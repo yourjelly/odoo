@@ -26,17 +26,17 @@ from odoo.tools.mimetypes import guess_mimetype
 _logger = logging.getLogger(__name__)
 
 BAD_X_SENDFILE_ERROR = """\
-Odoo is running with --x-sendfile but is receiving /web/filestore requests.
+Odoo is running with --x-sendfile but is receiving /registers/filestore requests.
 
 With --x-sendfile enabled, NGINX should be serving the
-/web/filestore route, however Odoo is receiving the
+/registers/filestore route, however Odoo is receiving the
 request.
 
 This usually indicates that NGINX is badly configured,
-please make sure the /web/filestore location block exists
+please make sure the /registers/filestore location block exists
 in your configuration file and that it is similar to:
 
-    location /web/filestore {{
+    location /registers/filestore {{
         internal;
         alias {data_dir}/filestore;
     }}
@@ -49,7 +49,7 @@ def clean(name):
 
 class Binary(http.Controller):
 
-    @http.route('/web/filestore/<path:_path>', type='http', auth='none')
+    @http.route('/registers/filestore/<path:_path>', type='http', auth='none')
     def content_filestore(self, _path):
         if odoo.tools.config['x_sendfile']:
             # pylint: disable=logging-format-interpolation

@@ -63,6 +63,9 @@
                 <button type="button" class="btn btn-primary o_form_button_save" data-hotkey="s" t-on-click.stop="() => this.saveButtonClicked({closable: true})">
                     Save
                 </button>
+                <button type="button" t-if="this.props.resModel=='general_purchase.register'" class="btn btn-primary o_form_button_save" data-hotkey="s" t-on-click.stop="() => this.saveAndOpenConsumerButtonClicked({closable: true})">
+                    Save And Open Consumber Entry
+                </button>
                 <button type="button" class="btn btn-secondary o_form_button_cancel" data-hotkey="j" t-on-click.stop="discard">
                     Discard
                 </button>

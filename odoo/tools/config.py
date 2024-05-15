@@ -733,6 +733,7 @@ class configmanager(object):
         return os.path.join(self['data_dir'], 'filestore', dbname)
 
     def set_admin_password(self, new_password):
+        breakpoint()
         hash_password = crypt_context.hash if hasattr(crypt_context, 'hash') else crypt_context.encrypt
         self.options['admin_passwd'] = hash_password(new_password)
 

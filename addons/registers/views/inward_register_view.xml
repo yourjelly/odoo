@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Search -->
+    <record id="inward_register_view_search" model="ir.ui.view">
+        <field name="name">inward.register.search</field>
+        <field name="model">inward.register</field>
+        <field name="arch" type="xml">
+            <search string="search property">
+                <!-- Search -->
+                <field name="general_number"></field>
+                <field name="inward_letter_no"/>
+                <field name="from_whome_recieved"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- View -->
+    <record id="inward_register_view_tree" model="ir.ui.view">
+        <field name="name">inward.register.tree</field>
+        <field name="model">inward.register</field>
+        <field name="arch" type="xml">
+            <tree string="Channel" default_order="general_number desc" editable="top" create="1" delete="1">
+                <field name="general_number"/>
+                <field name="inward_letter_no" string="Inward Letter No."/>
+                <field name="inward_letter_date" string="Inward Letter Date"/>
+                <!-- <field name="inward_letter"/> -->
+                <field name="from_whome_recieved"/>
+                <field name="reply_to_out_no" string="Reply to out no."/>
+                <field name="reply_to_out_date" string="Reply to out date"/>
+                <field name="subject"/>
+                <field name="date_of_reciept"/>
+                <field name="reply_no" string="Reply No."/>
+                <field name="reply_date" string="Reply Date"/>
+                <field name="number_of_compliment"/>
+                <!-- <field name="attachment" optional="1"/> -->
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form -->
+    <record id="inward_register_form" model="ir.ui.view">
+        <field name="name">inward.register.form</field>
+        <field name="model">inward.register</field>
+        <field name="arch" type="xml">
+            <form string="test">
+                <sheet>
+                    <h1 class="my-3">
+                        <field name="general_number" placeholder="E.g. 001" />
+                    </h1>
+                    <group col="3">
+                        <group string="Inward letter">
+                            <field name="inward_letter_date"/>
+                            <field name="inward_letter_no"/>
+                        </group>
+                        <group string="Reply to out which letter">
+                            <field name="reply_to_out_no" />
+                            <field name="reply_to_out_date" />
+                        </group>
+                        <group string="Reply">
+                            <field name="reply_no" />
+                            <field name="reply_date"/>
+                        </group>
+                    </group>
+                    <group col="1">
+                        <group string="Other">
+                            <field name="from_whome_recieved"/> 
+                            <field name="subject" />
+                            <field name="date_of_reciept" />
+                            <field name="number_of_compliment"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Remark" name="remark">
+                            <group>
+                                <field name="remark"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Records -->
+    <record id="inward_register_action" model="ir.actions.act_window">
+        <field name="name"> inward Register </field>
+        <field name="res_model">inward.register</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="first_level_menu_students_2" action="inward_register_action" name="inward Register" parent="student_model_menu_action" />
+</odoo>

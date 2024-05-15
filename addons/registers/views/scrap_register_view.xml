@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Search -->
+    <!-- <record id="scrap_register_view_search" model="ir.ui.view">
+        <field name="name">scrap.register.search</field>
+        <field name="model">scrap.register</field>
+        <field name="arch" type="xml">
+            <search string="search property">
+                <field name="general_number"></field>
+                <field name="scrap_letter_no"/>
+                <field name="from_whome_recieved"/>
+            </search>
+        </field>
+    </record> -->
+
+    <!-- View -->
+    <record id="scrap_register_view_tree" model="ir.ui.view">
+        <field name="name">scrap.register.tree</field>
+        <field name="model">scrap.register</field>
+        <field name="arch" type="xml">
+            <tree string="Channel" default_order="name desc" editable="top" create="1" delete="1">
+                    <field name ="name"/>
+                    <field name="date"/>
+                    <field name="opening_balance"/>
+                    <field name="incoming_quantity"/>
+                    <field name="from_where_recieved"/>
+                    <field name="total_quantity"/>
+                    <field name="signature_of_depositor"/>
+                    <field name="sign_of_storekeeper_1" optional="1"/>
+                    <field name="principal_signature_1" optional="1"/>
+                    <field name="indent_no"/>
+                    <field name="indent_date"/>
+                    <field name="dispatch_date"/>
+                    <field name="dispatch_quantity"/>
+                    <field name="to_whom_issued"/>
+                    <field name="closing_balance"/>
+                    <field name="sign_of_storekeeper_2" optional="1"/>
+                    <field name="principal_signature_2" optional="1"/>
+                    <field name="receipt_no"/>
+                    <field name="date_of_credit"/>
+                    <field name="remark"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form -->
+    <record id="scrap_register_form" model="ir.ui.view">
+        <field name="name">scrap.register.form</field>
+        <field name="model">scrap.register</field>
+        <field name="arch" type="xml">
+            <form string="test">
+                <sheet>
+                    <h1 class="my-3">
+                        <field name ="name" placeholder="Sr. No. 001" />
+                    </h1>
+                    <group>
+                        <field name="date"/>
+                        <field name="opening_balance"/>
+                        <field name="incoming_quantity"/>
+                        <field name="from_where_recieved"/>
+                        <field name="total_quantity"/>
+                    </group>
+                    <group col="2">
+                        <group string="Indent Details">
+                            <field name="indent_no"/>
+                            <field name="indent_date"/>
+                            <field name="dispatch_date"/>
+                            <field name="dispatch_quantity"/>
+                            <field name="to_whom_issued"/>
+                            <field name="closing_balance"/>
+                        </group>
+                        <group string="If Sold By Auction">
+                            <field name="receipt_no"/>
+                            <field name="date_of_credit"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Remark" name="remark">
+                            <group>
+                                <field name="remark"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Records -->
+    <record id="scrap_register_action" model="ir.actions.act_window">
+        <field name="name"> Scrap Register </field>
+        <field name="res_model">scrap.register</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="first_level_menu_scrap" action="scrap_register_action" name="Scrap Register" parent="student_model_menu_action" />
+</odoo>

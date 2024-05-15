@@ -543,6 +543,23 @@ export class FormController extends Component {
 
     saveButtonClicked(params = {}) {
         return executeButtonCallback(this.ui.activeElement, () => this.save(params));
+        
+    }
+    async saveAndOpenConsumerButtonClicked(params = {}) {
+        const data = await executeButtonCallback(this.ui.activeElement, () => this.save(params));
+        const res_id = await this.env.services.orm.search('consumable.register',[])
+        this.env.services.action.doAction({
+            name: "consumable.Entry",
+            res_model: 'consumable.register',
+            views: [[false, 'form']],
+            type: 'ir.actions.act_window',
+            view_mode: 'form',
+            res_id: parseInt(res_id[res_id.length-1]),
+            // context: {
+            //     default_active_id: active_id,
+            // },
+            target: 'new'
+        });
     }
 
     async discard() {

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Search -->
+    <!-- <record id="consumable_register_view_search" model="ir.ui.view">
+        <field name="name">consumable.register.search</field>
+        <field name="model">consumable.register</field>
+        <field name="arch" type="xml">
+            <search string="search property">
+                <field name="general_number"></field>
+                <field name="consumable_letter_no"/>
+                <field name="from_whome_recieved"/>
+            </search>
+        </field>
+    </record> -->
+
+    <!-- View -->
+    <record id="consumable_register_view_tree" model="ir.ui.view">
+        <field name="name">consumable.register.tree</field>
+        <field name="model">consumable.register</field>
+        <field name="arch" type="xml">
+            <tree string="Channel" editable="top" create="1" delete="1" default_order="name desc" >
+                <field name="name"/>
+                <field name="reference_of_gpr"/>
+                <field name="date_of_receipt"/>
+                <field name="opening_balance"/>
+                <field name="qty_received"/>
+                <field name="total_qty"/>
+                <field name="rate"/>
+                <field name="sign_of_storekeeper_1" optional="1"/>
+                <field name="sign_of_hod_1" optional="1"/>
+                <field name="despatch_date"/>
+                <field name="indent_no"/>
+                <field name="indent_date"/>
+                <field name="in_which_trade_this_material_given"/>
+                <field name="qty_issued"/>
+                <field name="closing_balance"/>
+                <field name="sign_of_storekeeper_2" optional="1"/>
+                <field name="sign_of_hod_2" optional="1"/>
+                <field name="remark"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form -->
+    <record id="consumable_register_form" model="ir.ui.view">
+        <field name="name">consumable.register.form</field>
+        <field name="model">consumable.register</field>
+        <field name="arch" type="xml">
+            <form string="test">
+                <sheet>
+                    <h1 class="my-3">
+                        <field name ="name" placeholder="Sr. No. 001" />
+                    </h1>
+                    <group col="2">
+                        <group string="">
+                            <field name="reference_of_gpr"/>
+                            <field name="date_of_receipt"/>
+                            <field name="opening_balance"/>
+                        </group>
+                        <group string="Indent Details">
+                            <field name="despatch_date"/>
+                            <field name="indent_no"/>
+                            <field name="indent_date"/>
+                            <field name="in_which_trade_this_material_given"/>
+                            <field name="qty_issued"/>
+                            <field name="closing_balance"/>
+                        </group>
+                    </group>
+                    <group string="Cost">
+                        <field name="qty_received"/>
+                        <field name="total_qty"/>
+                        <field name="rate"/>
+                    </group>
+                    <notebook>
+                        <page string="Remark" name="remark">
+                            <group>
+                                <field name="remark"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Records -->
+    <record id="consumable_register_action" model="ir.actions.act_window">
+        <field name="name"> Consumable Register </field>
+        <field name="res_model">consumable.register</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="first_level_menu_consumable" action="consumable_register_action" name="Consumable Register" parent="student_model_menu_action" />
+</odoo>

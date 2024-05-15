@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!--    template for export pdf with group by-->
+    <template id="export_in_pdf_group_by">
+        <t t-call="web.html_container">
+            <t t-call="web.internal_layout">
+                <div class="page">
+                    <h3 class="text-center my-4"><t t-out="record['description']"/></h3>
+                    <t t-foreach="record['other']" t-as="object">
+                        <div style="background-color:grey;">
+                            <t t-if="object[1]">
+                                <t t-if="record['type'][0]=='many2one'">
+                                    <span t-out="object[1][1]"/>
+                                </t>
+                                <t t-else="">
+                                    <span t-out="object[1]"/>
+                                </t>
+                                <span>(</span>
+                                <span t-out="object[0]['count']"/>
+                                <span>)</span>
+                            </t>
+                        </div>
+                        <table class="table table-striped" style="table-layout: fixed">
+                            <t t-foreach="length" t-as="le">
+                                <th>
+                                    <span t-out="record['header'][le]"/>
+                                </th>
+                            </t>
+                            <t t-foreach="object[2][0]" t-as="info">
+                                <tr>
+                                    <t t-foreach="length" t-as="leng">
+                                        <td>
+                                            <span t-out="info[leng]"/>
+                                        </td>
+                                    </t>
+                                </tr>
+                            </t>
+                        </table>
+                    </t>
+
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <!--    template for export pdf with group by-->
+    <template id="export_in_pdf_rojmel">
+        <t t-call="web.html_container">
+            <t t-call="web.internal_layout">
+                <div class="page">
+                    <h3 class="text-center my-4">Rojmel Register</h3>
+                    <table>
+                        <tr>
+                            <td class="pe-5">
+                                <table class="table table-borderless" style="table-layout: fixed">
+                                    <th class="border border-1">
+                                        Date
+                                    </th>
+                                    <t t-foreach="length" t-as="le">
+                                        <t t-if="le not in [2, 3, 6, 7]">
+                                            <th class="border border-1"><span t-out="record['header'][le]"/></th>
+                                        </t>
+                                    </t>
+                                    <th class="border border-1">
+                                        <span>Total Balance</span>
+                                    </th>
+                                    <t t-foreach="record['group_1']" t-as="rec">
+                                        <tr class="border border-1">
+                                            <td t-att-rowspan="rec[2]+4" class="border border-1"><span t-out="rec[0]"/></td>
+                                            <td colspan="3">Opening Balance</td>
+                                            <td><span t-out="rec[1][0][2][0][0][8]"/></td>
+                                            <td></td>
+                                            <!-- <td></td> -->
+                                        </tr>
+                                        <t t-set="total_sum" t-value="0"/>
+                                        <t t-foreach="rec[1]" t-as="object">
+                                            <t t-if="len([x for x in object[2][0] if x[5] != 0])">
+                                                <tr class="border border-1">
+                                                    <td><span class="fw-bold" t-out="object[2][0][0][2]"/></td>
+                                                    <!-- <td></td> -->
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                </tr>
+                                            </t>
+                                            <t t-foreach="object[2][0]" t-as="info">
+                                                <t t-if="info[5]!=0">
+                                                    <tr class="border border-1">
+                                                        <td><span t-out="info[0]"/></td>
+                                                        <td><span t-out="info[1]"/></td>
+                                                        <!-- <td><span t-out="info[2]"/></td> -->
+                                                        <td><span t-out="info[3]"/></td>
+                                                        <td><span t-out="info[5]"/></td>
+                                                        <td><span t-out="info[5]"/></td>
+                                                    </tr>
+                                                    <t t-set="total_sum" t-value="total_sum+info[5]"/>
+                                                </t>
+                                            </t>
+                                        </t>
+                                        <!-- Hidden Entires -->
+                                        <t t-foreach="rec[1]" t-as="object">
+                                            <t t-if="not len([x for x in object[2][0] if x[5] != 0])">
+                                                <tr style="color:white;" class="border border-1">
+                                                    <td><span class="fw-bold" t-out="object[2][0][0][2]"/></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <!-- <td></td> -->
+                                                    <td></td>
+                                                </tr>
+                                            </t>
+                                            <t t-foreach="object[2][0]" t-as="info">
+                                                <t t-if="info[5]==0">
+                                                    <tr class="border border-end border-1" style="color:white; border-bottom:none">
+                                                        <td><span t-out="info[0]"/></td>
+                                                        <td><span t-out="info[1]"/></td>
+                                                        <!-- <td><span t-out="info[2]"/></td> -->
+                                                        <td><span t-out="info[3]"/></td>
+                                                        <td><span t-out="info[5]"/></td>
+                                                        <td><span t-out="info[5]"/></td>
+                                                    </tr>
+                                                    <t t-set="total_sum" t-value="total_sum+info[5]"/>
+                                                </t>
+                                            </t>
+                                        </t>
+                                        <tr class="border border-1">
+                                            <td colspan="3" class="fw-bold">Total Credit</td>
+                                            <td><t t-esc="total_sum"/></td>
+                                            <td><t t-esc="total_sum"/></td>
+                                        </tr>
+                                        <tr class="border border-1">
+                                            <td colspan="3"></td>
+                                            <td><t t-esc="rec[1][0][2][0][0][8]"/></td>
+                                            <td><t t-esc="rec[1][0][2][0][0][8]"/></td>
+                                        </tr>
+                                        <tr class="border border-1">
+                                            <td class="fw-bold" colspan="3">Total</td>
+                                            <td><t t-esc="rec[1][0][2][0][0][8]+total_sum"/></td>
+                                            <td><t t-esc="rec[1][0][2][0][0][8]+total_sum"/></td>
+                                        </tr>
+                                    </t>
+
+                                </table>
+                            </td>
+                            <td class="pe-5">
+                                <table class="table table-borderless" style="table-layout: fixed">
+                                    <th class="border border-1">
+                                        Date
+                                    </th>
+                                    <t t-foreach="length" t-as="le">
+                                        <t t-if="le not in [2, 3, 5, 7]">
+                                            <th class="border border-1"><span t-out="record['header'][le]"/></th>
+                                        </t>
+                                    </t>
+                                    <th class="border border-1">
+                                        <span>Total Balance</span>
+                                    </th>
+                                    <t t-foreach="record['group_1']" t-as="rec">
+                                        <tr class="border border-1">
+                                            <td t-att-rowspan="rec[2]+4" class="border border-1"><span t-out="rec[0]"/></td>
+                                            <td colspan="3">Opening Balance</td>
+                                            <td><span t-out="rec[1][0][2][0][0][8]"/></td>
+                                            <!-- <td></td> -->
+                                            <td></td>
+                                        </tr>
+                                        <t t-set="total_sum" t-value="0"/>
+                                        <t t-set="closing_balance" t-value="rec[1][0][2][0][0][8]"/>
+                                        <t t-foreach="rec[1]" t-as="object">
+                                            <t t-if="len([x for x in object[2][0] if x[6] != 0])">
+                                                <tr class="border border-1">
+                                                    <td><span class="fw-bold" t-out="object[2][0][0][2]"/></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <!-- <td></td> -->
+                                                    <td></td>
+                                                    <td></td>
+                                                </tr>
+                                            </t>
+                                            <!-- <t t-else="">
+                                                <tr style="color:white;">
+                                                    <td><span class="fw-bold" t-out="object[2][0][0][2]"/></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                </tr>
+                                            </t> -->
+                                            <t t-foreach="object[2][0]" t-as="info">
+                                                <t t-if="info[6]!=0">
+                                                    <tr class="border border-1">
+                                                        <td><span t-out="info[0]"/></td>
+                                                        <td><span t-out="info[1]"/></td>
+                                                        <!-- <td><span t-out="info[2]"/></td> -->
+                                                        <td><span t-out="info[3]"/></td>
+                                                        <td><span t-out="info[6]"/></td>
+                                                        <td><span t-out="info[6]"/></td>
+                                                    </tr>
+                                                    <t t-set="total_sum" t-value="total_sum+info[6]"/>
+                                                </t>
+                                                <t t-set="closing_balance" t-value="closing_balance+info[5]-info[6]"/>
+                                            </t>
+                                        </t>
+                                        <t t-foreach="rec[1]" t-as="object">
+                                            <!-- Hidden Entries -->
+                                            <t t-if="not len([x for x in object[2][0] if x[6] != 0])">
+                                                <tr style="color:white;" class="border border-1">
+                                                    <td><span class="fw-bold" t-out="object[2][0][0][2]"/></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <!-- <td></td> -->
+                                                    <td></td>
+                                                    <td></td>
+                                                </tr>
+                                            </t>
+                                            <t t-foreach="object[2][0]" t-as="info">
+                                                <t t-if="info[6]==0">
+                                                    <tr class="border border-end border-1" style="color:white; border-bottom:none">
+                                                        <td><span t-out="info[0]"/></td>
+                                                        <td><span t-out="info[1]"/></td>
+                                                        <!-- <td><span t-out="info[2]"/></td> -->
+                                                        <td><span t-out="info[3]"/></td>
+                                                        <td><span t-out="info[6]"/></td>
+                                                        <td><span t-out="info[6]"/></td>
+                                                    </tr>
+                                                    <t t-set="total_sum" t-value="total_sum+info[6]"/>
+                                                </t>
+                                            </t>
+                                        </t>
+                                        <tr class="border border-1">
+                                            <td colspan="3">Total Credit</td>
+                                            <td><t t-esc="total_sum"/></td>
+                                            <td><t t-esc="total_sum"/></td>
+                                        </tr>
+                                        <tr class="border border-1">
+                                            <td colspan="3"></td>
+                                            <td><t t-esc="closing_balance"/></td>
+                                            <td><t t-esc="closing_balance"/></td>
+                                        </tr>
+                                        <tr class="border border-1">
+                                            <td class="fw-bold" colspan="3">Total</td>
+                                            <td><t t-esc="closing_balance+total_sum"/></td>
+                                            <td><t t-esc="closing_balance+total_sum"/></td>
+                                        </tr>
+                                    </t>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                    <!-- </t> -->
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <!--    template for export pdf with group by-->
+    <template id="export_in_pdf_khatavahi">
+        <t t-call="web.html_container">
+            <t t-call="web.internal_layout">
+                <div class="page">
+                    <h3 class="text-center my-4">General Ledger</h3>
+                    <t t-foreach="record['other']" t-as="object">
+                        <div class="px-3" style="background-color:grey">
+                            <t t-if="object[1]">
+                                <t t-if="record['type'][0]=='many2one'">
+                                    <span t-out="object[1][1]"/>
+                                </t>
+                                <t t-else="">
+                                    <span t-out="object[1]"/>
+                                </t>
+                            </t>
+                        </div>
+                        <table class="table table-striped" style="table-layout: fixed">
+                            <t t-foreach="length" t-as="le">
+                                <th t-if="le not in [3, 7]">
+                                    <span t-out="record['header'][le]"/>
+                                </th>
+                                </t>
+                            <th>Total Balance</th>
+                            <t t-set="total_balance" t-value="0"></t>
+                            <t t-foreach="object[2][0]" t-as="info">
+                                <tr>
+                                    <t t-set="total_balance" t-value="total_balance+info[5]-info[6]"></t>
+                                    <t t-foreach="length" t-as="leng">
+                                        <td t-if="leng not in [3, 7]">
+                                            <span t-out="info[leng]"/>
+                                        </td>                                        
+                                    </t>
+                                    <td><t t-out="total_balance"></t></td>
+                                </tr>
+                            </t>
+                        </table>
+                    </t>
+
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

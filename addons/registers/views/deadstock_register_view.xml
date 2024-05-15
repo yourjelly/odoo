@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Search -->
+    <!-- <record id="deadstock_register_view_search" model="ir.ui.view">
+        <field name="name">deadstock.register.search</field>
+        <field name="model">deadstock.register</field>
+        <field name="arch" type="xml">
+            <search string="search property">
+                <field name="general_number"></field>
+                <field name="deadstock_letter_no"/>
+                <field name="from_whome_recieved"/>
+            </search>
+        </field>
+    </record> -->
+
+    <!-- View -->
+    <record id="deadstock_register_view_tree" model="ir.ui.view">
+        <field name="name">deadstock.register.tree</field>
+        <field name="model">deadstock.register</field>
+        <field name="arch" type="xml">
+            <tree editable="top" create="1" delete="1" string="Channel" default_order="name desc">
+                <field name ="name"/>
+                <field name="description_of_item"/>
+                <field name="detail_of_purchase"/>
+                <field name="details"/>
+                <field name="price"/>
+                <field name="sign_of_storekeeper_1"  optional="1"/>
+                <field name="sign_of_HOD"  optional="1"/>
+                <field name="date_of_issue"/>
+                <field name="indent_no"/>
+                <field name="indent_date"/>
+                <field name="quantity_issued"/>
+                <field name="sign_of_receiving_employee"  optional="1"/>
+                <field name="closing_balance"/>
+                <field name="sign_of_storekeeper_2"  optional="1"/>
+                <field name="sign_of_principal_2"  optional="1"/>
+                <field name="remark"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="fitter_deadstock_register_view_tree" model="ir.ui.view">
+        <field name="name">fitter_deadstock.register.tree</field>
+        <field name="model">fitter_deadstock.register</field>
+        <field name="arch" type="xml">
+            <tree editable="top" create="1" delete="1" string="Channel" default_order="name desc">
+                <field name ="name"/>
+                <field name="description_of_item"/>
+                <field name="detail_of_purchase"/>
+                <field name="details"/>
+                <field name="price"/>
+                <field name="sign_of_storekeeper_1"  optional="1"/>
+                <field name="sign_of_HOD"  optional="1"/>
+                <field name="date_of_issue"/>
+                <field name="indent_no"/>
+                <field name="indent_date"/>
+                <field name="quantity_issued"/>
+                <field name="sign_of_receiving_employee"  optional="1"/>
+                <field name="closing_balance"/>
+                <field name="sign_of_storekeeper_2"  optional="1"/>
+                <field name="sign_of_principal_2"  optional="1"/>
+                <field name="remark"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="wireman_deadstock_register_view_tree" model="ir.ui.view">
+        <field name="name">wireman_deadstock.register.tree</field>
+        <field name="model">wireman_deadstock.register</field>
+        <field name="arch" type="xml">
+            <tree editable="top" create="1" delete="1" string="Channel" default_order="name desc">
+                <field name ="name"/>
+                <field name="description_of_item"/>
+                <field name="detail_of_purchase"/>
+                <field name="details"/>
+                <field name="price"/>
+                <field name="sign_of_storekeeper_1"  optional="1"/>
+                <field name="sign_of_HOD"  optional="1"/>
+                <field name="date_of_issue"/>
+                <field name="indent_no"/>
+                <field name="indent_date"/>
+                <field name="quantity_issued"/>
+                <field name="sign_of_receiving_employee"  optional="1"/>
+                <field name="closing_balance"/>
+                <field name="sign_of_storekeeper_2"  optional="1"/>
+                <field name="sign_of_principal_2"  optional="1"/>
+                <field name="remark"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="mechanic_diesel_deadstock_register_view_tree" model="ir.ui.view">
+        <field name="name">mechanic_diesel_deadstock.register.tree</field>
+        <field name="model">mechanic_diesel_deadstock.register</field>
+        <field name="arch" type="xml">
+            <tree editable="top" create="1" delete="1" string="Channel" default_order="name desc">
+                <field name ="name"/>
+                <field name="description_of_item"/>
+                <field name="detail_of_purchase"/>
+                <field name="details"/>
+                <field name="price"/>
+                <field name="sign_of_storekeeper_1"  optional="1"/>
+                <field name="sign_of_HOD"  optional="1"/>
+                <field name="date_of_issue"/>
+                <field name="indent_no"/>
+                <field name="indent_date"/>
+                <field name="quantity_issued"/>
+                <field name="sign_of_receiving_employee"  optional="1"/>
+                <field name="closing_balance"/>
+                <field name="sign_of_storekeeper_2"  optional="1"/>
+                <field name="sign_of_principal_2"  optional="1"/>
+                <field name="remark"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="armature_motor_rewinding_deadstock_register_view_tree" model="ir.ui.view">
+        <field name="name">armature_motor_rewinding_deadstock.register.tree</field>
+        <field name="model">armature_motor_rewinding_deadstock.register</field>
+        <field name="arch" type="xml">
+            <tree editable="top" create="1" delete="1" string="Channel" default_order="name desc">
+                <field name ="name"/>
+                <field name="description_of_item"/>
+                <field name="detail_of_purchase"/>
+                <field name="details"/>
+                <field name="price"/>
+                <field name="sign_of_storekeeper_1"  optional="1"/>
+                <field name="sign_of_HOD"  optional="1"/>
+                <field name="date_of_issue"/>
+                <field name="indent_no"/>
+                <field name="indent_date"/>
+                <field name="quantity_issued"/>
+                <field name="sign_of_receiving_employee"  optional="1"/>
+                <field name="closing_balance"/>
+                <field name="sign_of_storekeeper_2"  optional="1"/>
+                <field name="sign_of_principal_2"  optional="1"/>
+                <field name="remark"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form -->
+    <!-- <record id="deadstock_register_form" model="ir.ui.view">
+        <field name="name">deadstock.register.form</field>
+        <field name="model">deadstock.register</field>
+        <field name="arch" type="xml">
+            <form string="test">
+                <sheet>
+                    <h1 class="my-3">
+                        <field name ="name" placeholder="E.g. 001" />
+                    </h1>
+                    <group col="2">
+                        <group>
+                            <field name="description_of_item"/>
+                            <field name="detail_of_purchase"/>
+                            <field name="details"/>
+                            <field name="price"/>
+                            <field name="date_of_issue"/>
+                        </group>
+                        <group>
+                            <field name="indent_no"/>
+                            <field name="indent_date"/>
+                            <field name="quantity_issued"/>
+                            <field name="sign_of_receiving_employee"/>
+                            <field name="closing_balance"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Remark" name="remark">
+                            <group>
+                                <field name="remark"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record> -->
+
+    <!-- Records -->
+    <record id="deadstock_register_action" model="ir.actions.act_window">
+        <field name="name"> Deadstock Register </field>
+        <field name="res_model">deadstock.register</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- Records -->
+    <record id="fitter_deadstock_register_action" model="ir.actions.act_window">
+        <field name="name"> Fitter Deadstock Register </field>
+        <field name="res_model">fitter_deadstock.register</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <record id="wireman_deadstock_register_action" model="ir.actions.act_window">
+        <field name="name"> Wireman Deadstock Register </field>
+        <field name="res_model">wireman_deadstock.register</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <record id="mechanic_diesel_deadstock_register_action" model="ir.actions.act_window">
+        <field name="name"> Mechanic Diesel Register </field>
+        <field name="res_model">mechanic_diesel_deadstock.register</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <record id="armature_motor_rewinding_deadstock_register_action" model="ir.actions.act_window">
+        <field name="name"> Armature Motor Rewinding Register </field>
+        <field name="res_model">armature_motor_rewinding_deadstock.register</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <record id="sewing_technology_deadstock_register_action" model="ir.actions.act_window">
+        <field name="name"> Sewing Technology Register </field>
+        <field name="res_model">sewing_technology_deadstock.register</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="first_level_menu_deadstock" name="Deadstock Register" parent="student_menu_root" />
+    <menuitem id="first_level_menu_fitter_deadstock" action="fitter_deadstock_register_action" name="Fitter Register" parent="first_level_menu_deadstock" />
+    <menuitem id="first_level_menu_wireman_deadstock" action="wireman_deadstock_register_action" name="Wireman Register" parent="first_level_menu_deadstock" />
+    <menuitem id="first_level_menu_mechanic_diesel_deadstock" action="mechanic_diesel_deadstock_register_action" name="Mechanic Diesel Register" parent="first_level_menu_deadstock" />
+    <menuitem id="first_level_menu_armature_motor_rewinding_deadstock" action="armature_motor_rewinding_deadstock_register_action" name="Armature Motor Rewinding Register" parent="first_level_menu_deadstock" />
+    <menuitem id="first_level_menu_sewing_technology_deadstock" action="sewing_technology_deadstock_register_action" name="Sewing Technology Register" parent="first_level_menu_deadstock" />
+
+    </odoo>

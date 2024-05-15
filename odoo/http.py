@@ -593,7 +593,7 @@ class Stream:
         if config['x_sendfile']:
             with contextlib.suppress(ValueError):  # outside of the filestore
                 fspath = Path(self.path).relative_to(opj(config['data_dir'], 'filestore'))
-                x_accel_redirect = f'/web/filestore/{fspath}'
+                x_accel_redirect = f'/registers/filestore/{fspath}'
                 send_file_kwargs['use_x_sendfile'] = True
 
         res = _send_file(self.path, **send_file_kwargs)

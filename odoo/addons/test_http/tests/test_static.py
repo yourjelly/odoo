@@ -49,7 +49,7 @@ class TestHttpStaticCommon(TestHttpBase):
         if x_sendfile:
             sha = basename(x_sendfile)
             headers['X-Sendfile'] = x_sendfile
-            headers['X-Accel-Redirect'] = f'/web/filestore/{self.cr.dbname}/{sha[:2]}/{sha}'
+            headers['X-Accel-Redirect'] = f'/registers/filestore/{self.cr.dbname}/{sha[:2]}/{sha}'
             headers['Content-Length'] = '0'
 
         return self.assertDownload(url, {}, 200, headers, b'' if x_sendfile else self.gizeh_data)

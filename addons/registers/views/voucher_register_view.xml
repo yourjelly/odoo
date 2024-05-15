@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Search -->
+    <record id="voucher_register_view_search" model="ir.ui.view">
+        <field name="name">voucher.register.search</field>
+        <field name="model">voucher.register</field>
+        <field name="arch" type="xml">
+            <search string="search property">
+                <field name="voucher_no"></field>
+                <field name="account_name"/>
+
+                <group expand="0" string="Group By">
+                    <filter name="group_date" string="Date" domain="[]"
+                       context="{'group_by':'date:day'}"/>
+                       <filter name="group_account_name" string="Account Name" domain="[]"
+                       context="{'group_by':'account_name'}"/>
+                 </group>
+            </search>
+        </field>
+    </record>
+    
+    <!-- Records -->
+    <record id="gpr_register_action" model="ir.actions.act_window">
+        <field name="name"> GPR Register </field>
+        <field name="res_model">general_purchase.register</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">
+            {
+                'default_active_id':active_id,
+            }
+        </field>
+    </record>
+
+    <!-- View -->
+    <record id="voucher_register_view_tree" model="ir.ui.view">
+        <field name="name">voucher.register.tree</field>
+        <field name="model">voucher.register</field>
+        <field name="arch" type="xml">
+            <tree string="Channel" default_order="voucher_no desc" editable="top" create="1" delete="1">
+                <header>
+                    <button name="open_rojmel" type="object" string="Print Rojmel" class="oe_highlight"/>
+                    <button name="open_rojmel" type="object" string="Print Khatavahi" class="oe_highlight"/>
+                </header>
+                <field name="voucher_no"/>
+                <field name="date"/>
+                <field name="account_name"/>
+                <field name="name_of_firm"/>
+                <field name="details"/>
+                <field name="credit" sum="Credit Sum"/>
+                <field name="debit" sum="debit sum"/>
+                <field name="opening_balance" optional="1"/>
+                <button name="%(gpr_register_action)d" string="GPR Entry" type="action" class="oe_highlight"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Records -->
+    <record id="voucher_register_action" model="ir.actions.act_window">
+        <field name="name"> voucher Register </field>
+        <field name="res_model">voucher.register</field>
+        <field name="view_mode">tree</field>
+    </record>
+    <record id="base.lang_en" model="res.lang">
+        <field name="date_format">%d-%m-%Y</field> 
+     </record>   
+    <menuitem id="first_level_menu_voucher_register" action="voucher_register_action" name="Voucher Register" parent="student_model_menu_action" />
+</odoo>
