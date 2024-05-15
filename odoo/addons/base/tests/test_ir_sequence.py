@@ -7,8 +7,9 @@ import psycopg2
 import psycopg2.errorcodes
 
 import odoo
+from odoo.exceptions import UserError
 from odoo.tests import common
-from odoo.tests.common import BaseCase
+from odoo.tests.common import BaseCase, TransactionCase
 
 ADMIN_USER_ID = common.ADMIN_USER_ID
 
@@ -173,6 +174,20 @@ class TestIrSequenceGenerate(BaseCase):
             for i in range(1, 10):
                 n = env['ir.sequence'].next_by_code('test_sequence_type_6')
                 self.assertEqual(n, str(i))
+
+    def test_ir_sequence_prefix(self):
+        """ Try to create a sequence object. """
+        with environment() as env:
+            seq = env['ir.sequence'].create({
+                'code': 'test_sequence_type_wrong',
+                'name': 'Test sequence',
+                'prefix': '%default_code-%(month)s%(y)s-',
+                'suffix': '',
+            })
+            self.assertTrue(seq)
+
+            with self.assertRaises(UserError):
+                env['ir.sequence'].next_by_code('test_sequence_type_wrong')
 
     @classmethod
     def tearDownClass(cls):
