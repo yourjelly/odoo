@@ -36,25 +36,6 @@ crypt_context = CryptContext(schemes=['pbkdf2_sha512'])
 
 
 class EtaUsbController(http.Controller):
-
-
-
-    def run(self, cmdargs):
-        parser = argparse.ArgumentParser(
-            prog=f'{Path(sys.argv[0]).name} {self.name}',
-            description=self.__doc__.strip()
-        )
-        parser.add_argument('-c', '--config', type=str, help="Specify an alternate config file")
-        parser.add_argument('--token-length', type=int, help="Token Length", default=16)
-        args, _ = parser.parse_known_args()
-        if args.config:
-            config.rcfile = args.config
-        token = self.generate_token(length=args.token_length)
-        config['proxy_access_token'] = pbkdf2_sha512.hash(token)
-        config.save()
-        sys.stdout.write(f'{token}\n')
-
-
     def _is_access_token_valid(self, access_token):
         stored_hash = config.get('proxy_access_token')
         if not stored_hash:
@@ -62,11 +43,28 @@ class EtaUsbController(http.Controller):
             return False
         return crypt_context.verify(access_token, stored_hash)
 
-    @http.route('/hw_l10n_eg_eta/generate_token', type='http', auth='none', csrf=False, methods=['POST'])
     def generate_token(self, length=16):
         token = secrets.token_hex(int(length / 2))
         split_size = int(length / 4)
         return '-'.join(textwrap.wrap(token, split_size))
+
+    @http.route('/hw_l10n_eg_eta/proxy_access_token', type='http', auth='none', csrf=False)
+    def proxy_access_token(self):
+        stored_hash = config.get('proxy_access_token')
+        if not stored_hash:
+            parser = argparse.ArgumentParser(
+                prog=f'{Path(sys.argv[0]).name} {self.name}',
+                description=self.__doc__.strip()
+            )
+            parser.add_argument('-c', '--config', type=str, help="Specify an alternate config file")
+            parser.add_argument('--token-length', type=int, help="Token Length", default=16)
+            args, _ = parser.parse_known_args()
+            if args.config:
+                config.rcfile = args.config
+            token = self.generate_token(length=args.token_length)
+            config['proxy_access_token'] = pbkdf2_sha512.hash(token)
+            config.save()
+            return f'{token}'
 
     @http.route('/hw_l10n_eg_eta/certificate', type='http', auth='none', cors='*', csrf=False, save_session=False, methods=['POST'])
     def eta_certificate(self, pin, access_token):
