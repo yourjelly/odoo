@@ -1,13 +1,35 @@
 import { DIRECTIONS } from "@html_editor/utils/position";
-import { ensureFocus, getCursorDirection } from "@html_editor/utils/selection";
+import { getCursorDirection } from "@html_editor/utils/selection";
 import { describe, expect, test } from "@odoo/hoot";
-import { dispatch } from "@odoo/hoot-dom";
-import { insertText, setupEditor, testEditor } from "../_helpers/editor";
+import { manuallyDispatchProgrammaticEvent as dispatch } from "@odoo/hoot-dom";
+import { setupEditor, testEditor } from "../_helpers/editor";
 import { unformat } from "../_helpers/format";
+import { insertText } from "../_helpers/user_actions";
 
 function getProcessSelection(selection) {
     const { anchorNode, anchorOffset, focusNode, focusOffset } = selection;
     return [anchorNode, anchorOffset, focusNode, focusOffset];
+}
+/**
+ * Guarantee that the focus is on element or one of its children.
+ *
+ * A simple call to element.focus will change the editable context
+ * if one of the parents of the current activeElement is not editable,
+ * and the caret position will not be preserved, even if activeElement is
+ * one of the subchildren of element. This is why the (re)focus is
+ * only called when the current activeElement is not one of the
+ * (sub)children of element.
+ *
+ * @param {Element} element should have the focus or a child with the focus
+ */
+export function ensureFocus(element) {
+    const activeElement = element.ownerDocument.activeElement;
+    if (
+        activeElement !== element &&
+        (!element.contains(activeElement) || !activeElement.isContentEditable)
+    ) {
+        element.focus();
+    }
 }
 
 describe("getTraversedNodes", () => {
@@ -100,104 +122,89 @@ describe("getTraversedNodes", () => {
 
 describe("ensureFocus", () => {
     // TODO @phoenix: unskipped when ensureFocus is add in the code base
-    test.todo(
-        "should preserve the focus on the child of this.editable when executing a powerbox command even if it is enclosed in a contenteditable=false",
-        async () => {
-            await testEditor({
-                contentBefore: unformat(`
+    test("should preserve the focus on the child of this.editable when executing a powerbox command even if it is enclosed in a contenteditable=false", async () => {
+        await testEditor({
+            contentBefore: unformat(`
                 <div contenteditable="false"><div contenteditable="true">
                     <p>[]<br></p>
                 </div></div>
                 <p><br></p>`),
-                stepFunction: async (editor) => {
-                    const sel = document.getSelection();
-                    const element = sel.anchorNode;
-                    await dispatch(editor.editable, "keydown", { key: "/" });
-                    insertText(editor, "/");
-                    await dispatch(editor.editable, "keyup", { key: "/" });
-                    insertText(editor, "h2");
-                    await dispatch(element, "keyup", { key: "2" });
-                    await dispatch(editor.editable, "keydown", { key: "Enter" });
-                    const activeElement = document.activeElement;
-                    editor.shared.setCursorStart(activeElement.lastElementChild);
-                    // TODO @phoenix still need it ?
-                    // await nextTickFrame();
-                },
-                contentAfter: unformat(`
+            stepFunction: async (editor) => {
+                const sel = document.getSelection();
+                const element = sel.anchorNode;
+                await dispatch(editor.editable, "keydown", { key: "/" });
+                insertText(editor, "/");
+                await dispatch(editor.editable, "keyup", { key: "/" });
+                insertText(editor, "h2");
+                await dispatch(element, "keyup", { key: "2" });
+                await dispatch(editor.editable, "keydown", { key: "Enter" });
+                const activeElement = document.activeElement;
+                editor.shared.setCursorStart(activeElement.lastElementChild);
+                // TODO @phoenix still need it ?
+                // await nextTickFrame();
+            },
+            contentAfter: unformat(`
                 <div contenteditable="false"><div contenteditable="true">
                     <h2>[]<br></h2>
                 </div></div>
                 <p><br></p>`),
-            });
-        }
-    );
+        });
+    });
 
-    test.todo(
-        "should preserve the focus on the child of this.editable even if it is enclosed in a contenteditable=false",
-        async () => {
-            await testEditor({
-                contentBefore: unformat(`
+    test("should preserve the focus on the child of this.editable even if it is enclosed in a contenteditable=false", async () => {
+        await testEditor({
+            contentBefore: unformat(`
                 <div contenteditable="false"><div contenteditable="true">
                     <p>[]<br></p>
                 </div></div>
                 <p><br></p>`),
-                stepFunction: async (editor) => {
-                    ensureFocus(editor.editable);
-                    // TODO @phoenix still need it ?
-                    // await nextTickFrame();
-                    let activeElement = document.activeElement;
-                    editor.shared.setCursorStart(activeElement.lastElementChild);
-                    insertText(editor, "focusWasConserved");
-                    // Proof that a simple call to Element.focus would change
-                    // the focus in this case.
-                    editor.editable.focus();
-                    // TODO @phoenix still need it ?
-                    // await nextTickFrame();
-                    activeElement = document.activeElement;
-                    editor.shared.setCursorStart(activeElement.lastElementChild);
-                    // TODO @phoenix still need it ?
-                    // await nextTickFrame();
-                },
-                contentAfter: unformat(`
+            stepFunction: async (editor) => {
+                ensureFocus(editor.editable);
+                let activeElement = document.activeElement;
+                editor.shared.setCursorStart(activeElement.lastElementChild);
+                insertText(editor, "focusWasConserved");
+                // Proof that a simple call to Element.focus would change
+                // the focus in this case.
+                editor.editable.focus();
+                activeElement = document.activeElement;
+                editor.shared.setCursorStart(activeElement.lastElementChild);
+            },
+            contentAfter: unformat(`
                 <div contenteditable="false"><div contenteditable="true">
                     <p>focusWasConserved</p>
                 </div></div>
                 <p>[]<br></p>`),
-            });
-        }
-    );
+        });
+    });
 
-    test.todo(
-        "should update the focus when the active element is not the focus target",
-        async () => {
-            await testEditor({
-                contentBefore: unformat(`
+    test("should update the focus when the active element is not the focus target", async () => {
+        await testEditor({
+            contentBefore: unformat(`
                 <div contenteditable="false"><div contenteditable="true">
                     <p>[]<br></p>
                 </div></div>
                 <div contenteditable="false"><div id="target" contenteditable="true">
                     <p><br></p>
                 </div></div>`),
-                stepFunction: async (editor) => {
-                    const element = editor.editable.querySelector("#target");
-                    ensureFocus(element);
-                    // TODO @phoenix still need it ?
-                    // await nextTickFrame();
-                    const activeElement = document.activeElement;
-                    editor.shared.setCursorStart(activeElement.lastElementChild);
-                    // TODO @phoenix still need it ?
-                    // await nextTickFrame();
-                },
-                contentAfter: unformat(`
+            stepFunction: async (editor) => {
+                const element = editor.editable.querySelector("#target");
+                ensureFocus(element);
+                // TODO @phoenix still need it ?
+                // await nextTickFrame();
+                const activeElement = document.activeElement;
+                editor.shared.setCursorStart(activeElement.lastElementChild);
+                // TODO @phoenix still need it ?
+                // await nextTickFrame();
+            },
+            contentAfter: unformat(`
                 <div contenteditable="false"><div contenteditable="true">
                     <p><br></p>
                 </div></div>
                 <div contenteditable="false"><div id="target" contenteditable="true">
                     <p>[]<br></p>
                 </div></div>`),
-            });
-        }
-    );
+        });
+    });
 });
 
 describe("setSelection", () => {
