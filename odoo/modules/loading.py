@@ -235,6 +235,20 @@ def load_module_graph(env, graph, status=None, perform_checks=True,
             overwrite = odoo.tools.config["overwrite_existing_translations"]
             module._update_translations(overwrite=overwrite)
 
+            processed_modules.append(package.name)
+
+            ver = adapt_version(package.data['version'])
+            # Set new modules and dependencies
+            module.write({'state': 'installed', 'latest_version': ver})
+
+            package.load_state = package.state
+            package.load_version = package.installed_version
+            package.state = 'installed'
+            for kind in ('init', 'demo', 'update'):
+                if hasattr(package, kind):
+                    delattr(package, kind)
+            module.env.flush_all()
+
         if package.name is not None:
             registry._init_modules.add(package.name)
 
@@ -284,24 +298,6 @@ def load_module_graph(env, graph, status=None, perform_checks=True,
                 report.update(test_results)
                 test_time = time.time() - tests_t0
                 test_queries = odoo.sql_db.sql_counter - tests_q0
-
-                # tests may have reset the environment
-                module = env['ir.module.module'].browse(module_id)
-
-        if needs_update:
-            processed_modules.append(package.name)
-
-            ver = adapt_version(package.data['version'])
-            # Set new modules and dependencies
-            module.write({'state': 'installed', 'latest_version': ver})
-
-            package.load_state = package.state
-            package.load_version = package.installed_version
-            package.state = 'installed'
-            for kind in ('init', 'demo', 'update'):
-                if hasattr(package, kind):
-                    delattr(package, kind)
-            module.env.flush_all()
 
         extra_queries = odoo.sql_db.sql_counter - module_extra_query_count - test_queries
         extras = []
