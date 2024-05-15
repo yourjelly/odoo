@@ -11,10 +11,8 @@ export class PosUrbanPiperServicesItem extends Component {
         this.pos = usePos();
     }
 
-    goToOrders(delieveryProvider) {
-        const delieveryProviderHasActiveOrders = this.pos
-            .get_order_list()
-            .some((order) => order.brand_id?.name === delieveryProvider);
+    async goToOrders(delieveryProvider) {
+        const delieveryProviderHasActiveOrders = await this.pos.getServerOrders()
         const stateOverride = {
             search: {
                 fieldName: "BRAND",

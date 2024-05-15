@@ -2,7 +2,7 @@
 
 <templates>
     <t t-name="pos_food_delivery_service.PosUrbanPiperServices">
-        <div t-if="isOrderCountMenuClosed()" class="navbar-button menu-button btn btn-light rounded-0 d-flex align-items-center p-3 cursor-pointer" t-on-click="openMenu">
+        <div t-if="isOrderCountMenuClosed()" class="navbar-button menu-button btn btn-light rounded-0 d-flex align-items-center p-3 cursor-pointer" t-att-class="props.orderCount == 0 ? 'disabled' : ''" t-on-click="openMenu">
             <i class="fa fa-fw fa-bell align-self-end" role="img" aria-label="Notification" title="Notification" aria-hidden="true"></i>
             <span class="o-pos-order-counter badge rounded-pill p-0"><t t-out="props.orderCount"/></span>
         </div>
