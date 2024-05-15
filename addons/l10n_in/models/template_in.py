@@ -96,3 +96,14 @@ class AccountChartTemplate(models.AbstractModel):
             for tax_type in ["sale", "purchase"]
             for rate in [1, 2, 5, 12, 18, 28]  # Available existing GST Rates
         ]
+
+    @template('in', 'account.journal')
+    def _get_l10n_in_account_journal(self):
+        return {
+            "pos": {
+                'name': _('Point of Sale'),
+                'type': 'sale',
+                'code': _('POSS'),
+                'sequence': 11,
+            },
+        }
