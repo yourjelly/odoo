@@ -17,7 +17,7 @@ import { OrderWidget } from "@point_of_sale/app/generic_components/order_widget/
 import { CenteredIcon } from "@point_of_sale/app/generic_components/centered_icon/centered_icon";
 import { ReprintReceiptButton } from "@point_of_sale/app/screens/ticket_screen/reprint_receipt_button/reprint_receipt_button";
 import { SearchBar } from "@point_of_sale/app/screens/ticket_screen/search_bar/search_bar";
-// import { SelectPartnerButton } from "@point_of_sale/app/screens/product_screen/control_buttons/select_partner_button/select_partner_button";
+import { SelectPartnerButton } from "@point_of_sale/app/screens/product_screen/control_buttons/select_partner_button/select_partner_button";
 import { usePos } from "@point_of_sale/app/store/pos_hook";
 import { Component, onMounted, useState } from "@odoo/owl";
 import { Numpad } from "@point_of_sale/app/generic_components/numpad/numpad";
@@ -36,7 +36,7 @@ export class TicketScreen extends Component {
         ReprintReceiptButton,
         SearchBar,
         Numpad,
-        // SelectPartnerButton,
+        SelectPartnerButton,
     };
     static defaultProps = {
         destinationOrder: null,

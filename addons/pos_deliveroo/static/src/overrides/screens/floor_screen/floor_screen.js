@@ -14,7 +14,8 @@ patch(FloorScreen.prototype, {
             ui: { filter: "DELIVERY", searchDetails },
         });
     },
-    // get deliverooOrderCount() {
+    // deliverooOrderCount() {
+    //     debugger;
     //     return this.pos.delivery_order_count.deliveroo.awaiting > 0
     //         ? this.pos.delivery_order_count.deliveroo.awaiting
     //         : this.pos.delivery_order_count.deliveroo.preparing > 0

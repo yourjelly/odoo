@@ -12,6 +12,7 @@ from odoo.exceptions import AccessError, ValidationError, UserError
 
 class PosConfig(models.Model):
     _name = 'pos.config'
+    _inherit = ['pos.bus.mixin']
     _description = 'Point of Sale Configuration'
     _check_company_auto = True
 

@@ -8,13 +8,13 @@ patch(PosStore.prototype, {
     async setup() {
         await super.setup(...arguments);
         // this.bus.subscribe("DELIVERY_ORDER_COUNT", (payload) => {
-        //     if (this.config.raw.delivery_provider_ids) {
+        //     if (this.config.delivery_provider_ids) {
         //         this.ws_syncDeliveryCount(payload);
         //     }
         // });
     },
     async _fetchDeliverooOrderCount() {
-        this.delivery_order_count.deliveroo = await this.data.call(
+        this.delivery_order_count.deliveroo = await this.orm.call(
             "pos.config",
             "get_deliveroo_order_count",
             [this.config.id],

@@ -18,7 +18,7 @@ patch(TicketScreen.prototype, {
     async onSearch(search) {
         super.onSearch(...arguments);
         if (this._state.ui.filter == "DELIVERY") {
-            this._state.deliveryOrders.currentPage = 1;
+            this._state.syncedOrders.currentPage = 1;
             await this._fetchDeliveryOrders();
         }
     },
@@ -116,7 +116,7 @@ patch(TicketScreen.prototype, {
     },
     async _acceptDeliveryOrder(order) {
         this._state.ui.acceptDeliveryOrderLoading = true;
-        await this.pos.data.call("pos.order", "accept_delivery_order", [order.server_id]);
+        await this.pos.orm.call("pos.order", "accept_delivery_order", [order.server_id]);
         this._state.ui.acceptDeliveryOrderLoading = false;
         order.delivery_status = order.delivery_asap
             ? "preparing"
@@ -135,17 +135,17 @@ patch(TicketScreen.prototype, {
         //     return false;
         // }
         this._state.ui.acceptDeliveryOrderLoading = true;
-        await this.pos.data.call("pos.order", "reject_delivery_order", [order.server_id, "busy"]);
+        await this.pos.orm.call("pos.order", "reject_delivery_order", [order.server_id, "busy"]);
         this._state.ui.acceptDeliveryOrderLoading = false;
         order.delivery_status = "cancelled";
         return true;
     },
     _markAsPreparedDeliveryOrder(order) {
-        this.pos.data.ormWrite("pos.order", [order.server_id], { delivery_status: "ready" });
+        this.pos.orm.write("pos.order", [order.server_id], { delivery_status: "ready" });
         order.delivery_status = "ready";
     },
     _markAsDeliveredDeliveryOrder(order) {
-        this.pos.data.ormWrite("pos.order", [order.server_id], { delivery_status: "delivered" });
+        this.pos.orm.write("pos.order", [order.server_id], { delivery_status: "delivered" });
         order.delivery_status = "delivered";
     },
 });

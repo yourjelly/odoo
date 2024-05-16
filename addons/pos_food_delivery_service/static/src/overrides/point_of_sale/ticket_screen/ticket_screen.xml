@@ -8,7 +8,6 @@
                 <t t-else="">Status</t>
             </div>
         </xpath>
-
         <xpath expr="//div[hasclass('status-col-value')]" position="replace">
             <div class="status-col-value col narrow p-2">
                 <div>

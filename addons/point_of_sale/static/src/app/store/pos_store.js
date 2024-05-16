@@ -77,6 +77,7 @@ export class PosStore extends Reactive {
     tempScreen = null;
 
     static serviceDependencies = [
+        "bus_service",
         "popup",
         "orm",
         "number_buffer",
@@ -89,13 +90,14 @@ export class PosStore extends Reactive {
         this.ready = this.setup(...arguments).then(() => this);
     }
     // use setup instead of constructor because setup can be patched.
-    async setup(env, { popup, orm, number_buffer, hardware_proxy, barcode_reader, ui }) {
+    async setup(env, { popup, orm, number_buffer, hardware_proxy, barcode_reader, ui, bus_service }) {
         this.env = env;
         this.orm = orm;
         this.popup = popup;
         this.numberBuffer = number_buffer;
         this.barcodeReader = barcode_reader;
         this.ui = ui;
+        this.bus = bus_service;
 
         this.db = new PosDB(); // a local database used to search trough products and categories & store pending orders
         this.unwatched = markRaw({});
@@ -2187,7 +2189,7 @@ export class PosStore extends Reactive {
     }
 
     shouldLoadOrders() {
-        return this.config.raw.trusted_config_ids.length > 0;
+        return this.config.trusted_config_ids.length > 0;
     }
 
     isChildPartner(partner) {

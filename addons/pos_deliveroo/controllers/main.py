@@ -48,7 +48,7 @@ class PosDeliverooController(http.Controller):
         #         break
         # if not deliveroo_provider:
         #     return exceptions.BadRequest()
-        pos_config_sudo = deliveroo_provider.config_ids[0] if deliveroo_provider.config_ids else request.env['pos.config'].search([('company_id', '=', deliveroo_provider.company_id.id)])[0]
+        pos_config_sudo = deliveroo_provider.config_ids[0] if deliveroo_provider.config_ids else request.env['pos.config'].search([('company_id', '=', deliveroo_provider.company_id.id)])[1]
         order = data['body']['order']
         if not pos_config_sudo.has_active_session:
             deliveroo_provider._reject_order(order['id'], "closing_early")
@@ -56,7 +56,8 @@ class PosDeliverooController(http.Controller):
             pos_order = request.env['pos.order'].sudo().search([('delivery_id', '=', order['id'])])
             if pos_order:
                 pos_order._post_delivery_reject_order()
-        if not request.env['pos.order'].sudo().search([('delivery_id', '=', order['id'])]):
+        # if not request.env['pos.order'].sudo().search([('delivery_id', '=', order['id'])]):
+        if True:
             # order_prepare_for = order['prepare_for'].replace('T', ' ')[:-1]
             order_prepare_for = str(fields.Datetime.now())
             notes = ''
@@ -87,21 +88,31 @@ class PosDeliverooController(http.Controller):
                 'pos_reference': request.env['pos.order'].sudo()._generate_unique_id(config_id=pos_config_sudo, prefix="Deliveroo"),
                 # the creation of lines should be more precise (taxes and other fields)
                 'lines': [
-                    (0,0,{
-                        'product_id':   int(line['pos_item_id']),
-                        'qty':          line['quantity'],
-                        # 'price_unit':   formatPrice(line['unit_price']),
-                        'price_unit':   120,
-                        'price_extra':  5,
-                        # 'price_extra':  formatPrice(line['menu_unit_price']) - formatPrice(line['unit_price']), # Price per unit according to the menu (can be different from Unit Price in case of more expensive substitutions, for example)
-                        'discount': 0,
-                        'price_subtotal': 120,
-                        'price_subtotal_incl': 120,
-                        # 'price_subtotal': formatPrice(line['menu_unit_price']) * line['quantity'],
-                        # 'price_subtotal_incl': formatPrice(line['menu_unit_price']) * line['quantity'],
-                    })
-                    for line in order['items']
+                    (0, 0, {
+                        'product_id': 64,
+                        'qty': 1.00,
+                        'price_unit': 1.98,
+                        'discount': 0.0,
+                        'price_subtotal': 1.98,
+                        'price_subtotal_incl': 1.98,
+                    }),
                 ],
+                # 'lines': [
+                #     (0,0,{
+                #         'product_id':   int(line['pos_item_id']),
+                #         'qty':          line['quantity'],
+                #         # 'price_unit':   formatPrice(line['unit_price']),
+                #         'price_unit':   120,
+                #         'price_extra':  5,
+                #         # 'price_extra':  formatPrice(line['menu_unit_price']) - formatPrice(line['unit_price']), # Price per unit according to the menu (can be different from Unit Price in case of more expensive substitutions, for example)
+                #         'discount': 0,
+                #         'price_subtotal': 120,
+                #         'price_subtotal_incl': 120,
+                #         # 'price_subtotal': formatPrice(line['menu_unit_price']) * line['quantity'],
+                #         # 'price_subtotal_incl': formatPrice(line['menu_unit_price']) * line['quantity'],
+                #     })
+                #     for line in order['items']
+                # ],
                 # should take into account the "child lines"
                 # 'partner_id': False,
                 'date_order': date_order,
@@ -110,7 +121,7 @@ class PosDeliverooController(http.Controller):
                 'amount_total':  312.00,
                 'amount_tax': 0,
                 'amount_return': 0,
-                'state': 'draft',
+                'state': 'paid',
                 'delivery_note': notes,
                 'payment_ids': [(0,0,{
                     'amount': amount_paid,

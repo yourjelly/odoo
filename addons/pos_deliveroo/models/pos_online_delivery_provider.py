@@ -58,7 +58,7 @@ class PosOnlineDeliveryProvider(models.Model):
                 return "https://api.developers.deliveroo.com" + suffix
             if self.state == "test":
                 return "https://api-sandbox.developers.deliveroo.com" + suffix
-        return super()._get_api_url()
+        return
             
     #ORDERS API
 
