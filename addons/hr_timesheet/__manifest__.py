@@ -52,6 +52,12 @@ up a management by affair.
     'assets': {
         'web.assets_backend': [
             'hr_timesheet/static/src/**/*',
+            ('remove', 'hr_timesheet/static/src/js/**/*')
+        ],
+        'web.assets_frontend': [
+            'hr_timesheet/static/src/js/portal.js',
+            'hr_timesheet/static/src/js/portal_table.xml',
+            'web/static/src/views/fields/formatters.js',
         ],
         'web.qunit_suite_tests': [
             'hr_timesheet/static/tests/**/*',

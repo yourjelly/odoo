@@ -14,8 +14,10 @@
     <template id="portal_tasks_list" name="Tasks List">
         <t t-if="grouped_tasks">
             <t t-call="portal.portal_table">
+                <t t-set="module_groupby" t-value="'task'"/>
                 <thead>
                     <tr>
+                        <t t-set="status_map" t-value="dict(request.env['project.task'].sudo().fields_get(allfields=['state'])['state']['selection'])"/>
                         <!-- Allows overrides in modules -->
                         <t t-set="group_by_in_header_list" t-value="['priority', 'state', 'project_id', 'stage_id', 'milestone_id']"></t>
                         <t t-set="number_of_header" t-value="8"></t>
@@ -32,41 +34,63 @@
                     </tr>
                 </thead>
                 <t t-foreach="grouped_tasks" t-as="tasks">
-                    <tbody t-if="tasks">
-                        <tr t-if="not groupby == 'none'" class="table-light">
-                            <th t-if="groupby == 'project_id' and multiple_projects" t-attf-colspan="{{grouped_tasks_colspan}}">
+                    <tbody
+                    t-if="not groupby == 'none' and tasks"
+                    class="group_header"
+                    t-att-data-domain="tasks['task_ids']"
+                    t-att-data-groupby="groupby"
+                    t-att-data-multiple-projects="multiple_projects"
+                    >
+                        <tr class="table-light">
+                        <th t-if="groupby == 'project_id' and multiple_projects" t-attf-colspan="{{grouped_tasks_colspan}}">
                                 <!-- This div is necessary for documents_project_sale -->
                                 <div name="project_name" class="d-flex w-100 align-items-center">
-                                    <span t-if="tasks[0].sudo().project_id" t-field="tasks[0].sudo().project_id.name"/>
+                                    <i class="fa fa-fw fa-caret-right" role="img"/>
+                                    <i class="fa fa-fw fa-caret-down " role="img"/>
+                                    <span t-if="tasks['record']" t-field="tasks['record'].name"/>
                                     <span t-else="">No Project</span>
+                                    (<span class="text-truncate" t-out="tasks['count']"/>)
                                 </div>
                             </th>
                             <th t-if="groupby == 'milestone_id'" t-attf-colspan="{{grouped_tasks_colspan}}">
-                                <span t-if="tasks[0].sudo().milestone_id and tasks[0].sudo().allow_milestones"
-                                      class="text-truncate"
-                                      t-field="tasks[0].sudo().milestone_id.name"/>
+                                <i class="fa fa-fw fa-caret-right" role="img"/>
+                                <i class="fa fa-fw fa-caret-down " role="img"/>
+                                <span t-if="tasks['record']" class="text-truncate" t-field="tasks['record'].name"/>
                                 <span t-else="">No Milestone</span>
+                                (<span t-out="tasks['count']"/>)
                             </th>
                             <th t-if="groupby == 'stage_id'" t-attf-colspan="{{grouped_tasks_colspan}}">
                                 <!-- This div is necessary for documents_project_sale -->
                                 <div name="stage_name" class="d-flex w-100 align-items-center">
-                                    <span class="text-truncate" t-field="tasks[0].sudo().stage_id.name"/>
+                                    <i class="fa fa-fw fa-caret-right" role="img"/>
+                                    <i class="fa fa-fw fa-caret-down " role="img"/>
+                                    <span class="text-truncate" t-field="tasks['record'].name"/>
+                                    (<span class="text-truncate" t-out="tasks['count']"/>)
                                 </div>
                             </th>
                             <th t-if="groupby == 'priority'" t-attf-colspan="{{grouped_tasks_colspan}}">
-                                <span class="text-truncate" t-field="tasks[0].sudo().priority"/></th>
+                                <i class="fa fa-fw fa-caret-right" role="img"/>
+                                <i class="fa fa-fw fa-caret-down " role="img"/>
+                                <span class="text-truncate" t-esc="'Low' if tasks['record'] == '0' else 'High'"/>
+                                (<span class="text-truncate" t-out="tasks['count']"/>)
+                            </th>
                             <th t-if="groupby == 'state'" t-attf-colspan="{{grouped_tasks_colspan}}">
-                                <span class="text-truncate" t-field="tasks[0].sudo().state"/></th>
+                                <i class="fa fa-fw fa-caret-right" role="img"/>
+                                <i class="fa fa-fw fa-caret-down " role="img"/>
+                                <span class="text-truncate" t-esc="status_map[tasks['record']]"/>
+                                (<span class="text-truncate" t-out="tasks['count']"/>)
+                            </th>
                             <th t-if="groupby == 'partner_id'" t-attf-colspan="{{grouped_tasks_colspan}}">
-                                <span t-if="tasks[0].sudo().partner_id"
-                                      class="text-truncate"
-                                      t-field="tasks[0].sudo().partner_id.name"/>
+                                <i class="fa fa-fw fa-caret-right" role="img"/>
+                                <i class="fa fa-fw fa-caret-down " role="img"/>
+                                <span t-if="tasks['record']" class="text-truncate" t-field="tasks['record'].name"/>
                                 <span t-else="">No Customer</span>
+                                (<span class="text-truncate" t-out="tasks['count']"/>)
                             </th>
                         </tr>
                     </tbody>
-                    <tbody t-if="tasks">
-                        <t t-foreach="tasks" t-as="task">
+                    <tbody t-if="tasks" class="group_list">
+                        <t t-if="groupby == 'none'" t-foreach="tasks" t-as="task">
                             <tr>
                                 <td class="text-start">
                                     #<span t-esc="task.id"/>

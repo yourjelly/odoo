@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<template>
+    <t t-name="project.portal_task_list">
+        <t t-foreach="records" t-key="task.id" t-as="task">
+            <tr>
+                <td class="text-start">
+                    #<span t-esc="task.id"/>
+                </td>
+                <td t-if="groupby != 'priority'" class="text-end">
+                    <span t-att-class="'o_priority_star fa fa-star' +(task.priority === '1'? ' text-warning' : '-o')" t-att-title="'Priority:  ' + (task.priority === '1'? 'Important' : 'Normal')"/>
+                </td>
+                <td>
+                    <a t-att-href="'tasks/'+(task.id+'?'+searchParams)"><span t-att-title="task.name" t-esc="task.name"/></a>
+                </td>
+                <td>
+                    <div class="flex-nowrap ps-3">
+                        <span t-att-title="task.assignees">
+                            <span t-esc="task.assignees"/>
+                        </span>
+                    </div>
+                </td>
+                <td t-if="groupby != 'milestone_id' and task.allow_milestones" name="project_portal_milestones">
+                    <span t-esc="task.milestone" />
+                </td>
+                <td t-if="groupby != 'project_id' and multipleProject === 'True'">
+                    <span title="Current project of the task" t-esc="task.project" />
+                </td>
+                <td t-if="groupby != 'state'" align="right" class="align-middle">
+                    <span t-attf-class="{{getStatusClass(task.state)}}"/>
+                </td>
+                <td t-if="groupby != 'stage_id'" class="text-end lh-1">
+                    <span t-att-class="'badge fw-normal o_text_overflow '+ (task.stage.isfold?'text-bg-success':'text-bg-primary')" t-attf-title="task.stage.name" t-esc="task.stage.name"/>
+                </td>
+            </tr>
+        </t>
+    </t>
+</template>

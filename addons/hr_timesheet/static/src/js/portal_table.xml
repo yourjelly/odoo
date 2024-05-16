@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<template>
+    <t t-name="hr_timesheet.portal_task_list" t-inherit="project.portal_task_list" t-inherit-mode="extension">
+    <xpath expr="//td[@name='project_portal_milestones']" position="after">
+        <td class="text-end">
+            <t t-if="task.allow_milestones">
+                <t t-if="task.is_uom_day">
+                    <t t-out="task.total_days_spent"/>
+                    <span t-if="task.allocated_hours > 0"> / <t t-out="task.allocated_days_hours"/></span>
+                </t>
+                <t t-else="">
+                    <span t-out="formatFloatTime(task.total_hours_spent)" />
+                    <t t-if="task.allocated_hours > 0">
+                        /
+                    <span t-out="formatFloatTime(task.allocated_hours)" />
+                    </t>
+                </t>
+            </t>
+        </td>
+    </xpath>
+    </t>
+</template>

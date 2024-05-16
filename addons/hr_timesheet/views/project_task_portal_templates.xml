@@ -39,7 +39,8 @@
 
     <template id="portal_tasks_list_inherit" inherit_id="project.portal_tasks_list" name="Portal: My Tasks with Timesheets">
         <xpath expr="//thead" position="before">
-            <t t-set="allow_timesheets" t-value="any(task.allow_timesheets for group in grouped_tasks for task in group)"/>
+            <t t-if="groupby == 'none'" t-set="allow_timesheets" t-value="any(task.allow_timesheets for group in grouped_tasks for task in group)"/>
+            <t t-else="" t-set="allow_timesheets" t-value="any(project.allow_timesheets for group in grouped_tasks for project in group['project_ids'])"/>
         </xpath>
         <xpath expr="//t[@t-foreach='tasks']/tr" position="before">
             <t t-set="timesheet_ids" t-value="task.sudo().timesheet_ids"/>

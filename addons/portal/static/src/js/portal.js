@@ -2,6 +2,7 @@
 
 import publicWidget from "@web/legacy/js/public/public_widget";
 import { rpc } from "@web/core/network/rpc";
+import { renderToFragment } from "@web/core/utils/render";
 
 publicWidget.registry.portalDetails = publicWidget.Widget.extend({
     selector: '.o_portal_details',
@@ -169,3 +170,61 @@ publicWidget.registry.portalSearchPanel = publicWidget.Widget.extend({
         this._search();
     },
 });
+export const PortalGroupBy = publicWidget.Widget.extend({
+    selector: '.o_portal_my_doc_table',
+    events: {
+        "click .group_header": "_clickGroup",
+        "click .group_header_ungroup": "_clickUnGroup",
+    },
+
+    init() {
+        this._super(...arguments);
+    },
+
+    /**
+     * @override
+     */
+    start: function () {
+        return this._super(...arguments).then(() => {
+        this.model = $("input[name='group_by_model']").val();
+        });
+    },
+
+    _clickGroup: async function (ev) {
+        if (ev.target.href){
+            ev.stopPropagation();
+            return
+        }
+        const { route, template, ...othervals } = this.getModuleVals(ev);
+        const groupby = ev.currentTarget.dataset.groupby;
+        const result = await rpc(route, { domain: ev.currentTarget.dataset.domain });
+        const records = JSON.parse(result);
+        const searchParams = new URLSearchParams(window.location.search);
+        if (records.length) {
+            ev.currentTarget.nextElementSibling.append(
+                renderToFragment(template, {
+                    records,
+                    searchParams: searchParams.toString(),
+                    groupby,
+                    ...othervals,
+                })
+            );
+        }
+        ev.currentTarget.classList.remove("group_header");
+        ev.currentTarget.classList.add("group_header_ungroup");
+    },
+    _clickUnGroup: async function (ev) {
+        if (ev.target.href){
+            ev.stopPropagation();
+            return
+        }
+        ev.currentTarget.nextElementSibling.innerHTML = "";
+        ev.currentTarget.classList.remove("group_header_ungroup");
+        ev.currentTarget.classList.add("group_header");
+    },
+    getModuleVals: function (ev){
+        return {}
+    }
+});
+
+publicWidget.registry.PortalGroupBy = PortalGroupBy;

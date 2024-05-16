@@ -272,7 +272,12 @@ img, .media_iframe_video, .o_image {
             padding-bottom: $o-portal-table-th-pb;
             max-width: 500px;
         }
-
+        .group_header_ungroup i.fa-caret-right{
+            display: none;
+        }
+        .group_header i.fa-caret-down{
+            display: none;
+        }
         td {
             padding-top: $o-portal-table-td-pt;
             padding-bottom: $o-portal-table-td-pb;

@@ -1963,3 +1963,19 @@ class Task(models.Model):
                 group['personal_stage_type_id_count'] = group.pop('personal_stage_type_ids_count', 0)
             return result
         return super().read_group(domain, fields, groupby, offset, limit, orderby, lazy)
+
+    def portal_task_vals(self):
+        vals = {
+            "id": self.id,
+            "priority": self.priority,
+            "name": self.name,
+            "project": self.project_id.name,
+            "state": self.state,
+            "stage": {"name": self.stage_id.name, "isfold": self.stage_id.fold},
+            "allow_milestones": self.allow_milestones
+        }
+        if self.user_ids:
+            vals['assignees'] = self.user_ids[:1].name
+        if self.milestone_id:
+            vals['milestone'] = self.milestone_id.name
+        return vals

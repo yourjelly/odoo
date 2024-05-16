@@ -268,3 +268,16 @@ class Task(models.Model):
         uom_hour = self.env.ref('uom.product_uom_hour')
         uom_day = self.env.ref('uom.product_uom_day')
         return round(uom_hour._compute_quantity(time, uom_day, raise_if_failure=False), 2)
+    
+    def portal_task_vals(self):
+        vals = super().portal_task_vals()
+        vals.update({
+            'is_uom_day': self.timesheet_ids._is_timesheet_encode_uom_day()
+        })
+        if self.allow_timesheets:
+            vals.update({
+                'total_hours_spent': self.total_hours_spent,
+                'allocated_hours': self.allocated_hours,
+                'total_days_spent': self.timesheet_ids._convert_hours_to_days(self.total_hours_spent),
+                'allocated_days_hours': self.timesheet_ids._convert_hours_to_days(self.allocated_hours) })
+        return vals

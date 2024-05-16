@@ -79,6 +79,8 @@
             'project/static/src/scss/portal_rating.scss',
             'project/static/src/scss/project_sharing_frontend.scss',
             'project/static/src/js/portal_rating.js',
+            'project/static/src/js/portal.js',
+            'project/static/src/js/portal_table.xml',
         ],
         'web.assets_unit_tests': [
             'project/static/src/project_sharing/components/portal_file_input/portal_file_input.js',

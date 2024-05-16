@@ -1,8 +1,12 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import ast
+import json
+
 from collections import OrderedDict
 from operator import itemgetter
 from markupsafe import Markup
+
 
 from odoo import conf, http, _
 from odoo.exceptions import AccessError, MissingError
@@ -400,7 +404,7 @@ class ProjectCustomerPortal(CustomerPortal):
             sortby = 'create_date desc'
 
         # default group by value
-        if not groupby or (groupby == 'milestone_id' and not milestones_allowed):
+        if not groupby or (groupby == '' and not milestones_allowed):
             groupby = 'project_id'
 
         if date_begin and date_end:
@@ -418,28 +422,22 @@ class ProjectCustomerPortal(CustomerPortal):
         order = '%s, %s' % (group_field, sortby) if group_field else sortby
 
         def get_grouped_tasks(pager_offset):
-            tasks = Task_sudo.search(domain, order=order, limit=self._items_per_page, offset=pager_offset)
-            request.session['my_project_tasks_history' if url.startswith('/my/projects') else 'my_tasks_history'] = tasks.ids[:100]
-
-            tasks_project_allow_milestone = tasks.filtered(lambda t: t.allow_milestones)
-            tasks_no_milestone = tasks - tasks_project_allow_milestone
-
             if groupby != 'none':
-                if groupby == 'milestone_id':
-                    grouped_tasks = [Task_sudo.concat(*g) for k, g in groupbyelem(tasks_project_allow_milestone, itemgetter(groupby))]
+                grouped_tasks = Task._read_group(domain, [group_field], ['id:array_agg', 'project_id:recordset'])
+                grouped_tasks = [{
+                    "record": grouped[0],
+                    "count": len(grouped[1]),
+                    "task_ids" :[('id', 'in', grouped[1])],
+                    "project_ids":grouped[2],
+                    } for grouped in grouped_tasks]
 
-                    if not grouped_tasks:
-                        if tasks_no_milestone:
-                            grouped_tasks = [tasks_no_milestone]
-                    else:
-                        if grouped_tasks[len(grouped_tasks) - 1][0].milestone_id and tasks_no_milestone:
-                            grouped_tasks.append(tasks_no_milestone)
-                        else:
-                            grouped_tasks[len(grouped_tasks) - 1] |= tasks_no_milestone
-
-                else:
-                    grouped_tasks = [Task_sudo.concat(*g) for k, g in groupbyelem(tasks, itemgetter(groupby))]
+                return grouped_tasks
             else:
+                tasks = Task_sudo.search(domain, order=order, limit=self._items_per_page, offset=pager_offset)
+                request.session['my_project_tasks_history' if url.startswith('/my/projects') else 'my_tasks_history'] = tasks.ids[:100]
+
+                # tasks_project_allow_milestone = tasks.filtered(lambda t: t.allow_milestones)
+                # tasks_no_milestone = tasks - tasks_project_allow_milestone
                 grouped_tasks = [tasks] if tasks else []
 
 
@@ -524,6 +522,13 @@ class ProjectCustomerPortal(CustomerPortal):
             'filterby': filterby,
         })
         return request.render("project.portal_my_tasks", values)
+
+    @http.route(['/my/grouptasks'], type='json', auth='user' ,website=True)
+    def portal_group_task(self,domain):
+        domain = ast.literal_eval(domain)
+        tasks = request.env['project.task'].sudo().search(domain)
+        task_list = tasks.mapped(lambda t: t.sudo().portal_task_vals())
+        return json.dumps(task_list)
 
     def _show_task_report(self, task_sudo, report_type, download):
         # This method is to be overriden to report timesheets if the module is installed.
