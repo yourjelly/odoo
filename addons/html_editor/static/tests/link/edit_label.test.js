@@ -103,16 +103,19 @@ describe("range collapsed", () => {
         });
     });
 
-    test.todo("should not change the url when the label change", async () => {
+    test("should not change the url when the label change (1)", async () => {
         await testEditor({
-            contentBefore: '<p>a<a href="https://google.com">google.com[]</a>b</p>',
+            contentBefore: "<p>a<b>google.com[]</b>b</p>",
             stepFunction: async (editor) => {
                 insertText(editor, "u");
             },
             contentAfter: '<p>a<a href="https://google.com">google.comu[]</a>b</p>',
         });
+    });
+
+    test("should not change the url when the label change (2)", async () => {
         await testEditor({
-            contentBefore: '<p>a<a href="https://google.com">google.com[]</a></p>',
+            contentBefore: '<p>a<a href="https://google.com">google.com[]</a>x</p>',
             stepFunction: async (editor) => {
                 await animationFrame();
                 await insertLineBreak(editor);
