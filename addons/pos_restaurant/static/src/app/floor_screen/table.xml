@@ -2,7 +2,9 @@
 <templates id="template" xml:space="preserve">
     <t t-name="pos_restaurant.Table">
         <div class="table position-absolute d-flex flex-column align-items-center justify-content-between cursor-pointer" 
-            t-on-click.stop="(ev) => props.onClick(props.table, ev)" 
+            t-on-mousedown.stop="(ev) => props.onClick(props.table, ev)"
+            t-on-touchstart.stop="(ev) => props.onClick(props.table, ev)"
+            t-on-click.stop="(ev) => props.onClick(props.table, ev)"
             t-att-style="style">
             <div class="infos d-flex align-items-center flex-grow-1">
                 <span class="label fw-bolder fs-4"

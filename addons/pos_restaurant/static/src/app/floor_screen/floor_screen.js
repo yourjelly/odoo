@@ -43,6 +43,7 @@ export class FloorScreen extends Component {
             floorBackground: floor ? floor.background_color : null,
             floorMapScrollTop: 0,
             isColorPicker: false,
+            mousePosition: null,
         });
         const ui = useState(useService("ui"));
         const mode = localStorage.getItem("floorPlanStyle");
@@ -349,14 +350,17 @@ export class FloorScreen extends Component {
         this.state.selectedTableIds = [];
     }
     async onSelectTable(table, ev) {
-        if (this.pos.isEditMode) {
+        if (this.pos.isEditMode && (ev.type == "mousedown" || ev.type == "touchstart")) {
+            if (ev.type == "mousedown") {
+                this.state.mousePosition = { x: ev.clientX, y: ev.clientY };
+            }
             if (ev.ctrlKey || ev.metaKey) {
                 this.state.selectedTableIds.push(table.id);
             } else {
                 this.state.selectedTableIds = [];
                 this.state.selectedTableIds.push(table.id);
             }
-        } else {
+        } else if (!this.pos.isEditMode && ev.type == "click") {
             if (this.pos.orderToTransfer && table.order_count > 0) {
                 const { confirmed } = await this.popup.add(ConfirmPopup, {
                     title: _t("Table is not empty"),

@@ -50,12 +50,44 @@ export function getLimits(el, limitEl) {
  * @param {({dx, dy}: {dx: number, dy: number}) => unknown} param0.onMove
  */
 export function useMovable({ ref, onMoveStart, onMove }) {
-    let startPosition;
-    function registerMovingMethod({ startEv, moveEv, endEv, getPos }) {
-        const moveHandler = (ev) => {
-            const { x, y } = getPos(ev);
-            onMove({ dx: x - startPosition.x, dy: y - startPosition.y });
-        };
+    registerMovingMethod({
+        ref: ref,
+        onMoveStart: onMoveStart,
+        onMove: onMove,
+        startEv: "mousedown",
+        moveEv: "mousemove",
+        endEv: "mouseup",
+        getPos: (ev) => ({ x: ev.clientX, y: ev.clientY }),
+    });
+    registerMovingMethod({
+        ref: ref,
+        onMoveStart: onMoveStart,
+        onMove: onMove,
+        startEv: "touchstart",
+        moveEv: "touchmove",
+        endEv: "touchend",
+        getPos: (ev) => ({ x: ev.touches[0].clientX, y: ev.touches[0].clientY }),
+    });
+}
+
+export function registerMovingMethod({
+    ref,
+    onMoveStart,
+    onMove,
+    startEv = null,
+    moveEv,
+    endEv,
+    getPos,
+    startPosition = null,
+}) {
+    const moveHandler = (ev) => {
+        if (startPosition === null) {
+            return;
+        }
+        const { x, y } = getPos(ev);
+        onMove({ dx: x - startPosition.x, dy: y - startPosition.y });
+    };
+    if (startEv) {
         useRefListener(ref, startEv, (ev) => {
             ev.stopImmediatePropagation();
             startPosition = getPos(ev);
@@ -63,22 +95,29 @@ export function useMovable({ ref, onMoveStart, onMove }) {
             document.addEventListener(moveEv, moveHandler);
             document.addEventListener(
                 endEv,
-                () => document.removeEventListener(moveEv, moveHandler),
-                { once: true, capture: true }
+                () => {
+                    document.removeEventListener(moveEv, moveHandler);
+                },
+                {
+                    once: true,
+                    capture: true,
+                }
             );
         });
-        onWillUnmount(() => document.removeEventListener(moveEv, moveHandler));
+    } else {
+        onMoveStart();
+        document.addEventListener(moveEv, moveHandler);
+        document.addEventListener(
+            endEv,
+            () => {
+                document.removeEventListener(moveEv, moveHandler);
+            },
+            {
+                once: true,
+                capture: true,
+            }
+        );
     }
-    registerMovingMethod({
-        startEv: "mousedown",
-        moveEv: "mousemove",
-        endEv: "mouseup",
-        getPos: (ev) => ({ x: ev.clientX, y: ev.clientY }),
-    });
-    registerMovingMethod({
-        startEv: "touchstart",
-        moveEv: "touchmove",
-        endEv: "touchend",
-        getPos: (ev) => ({ x: ev.touches[0].clientX, y: ev.touches[0].clientY }),
-    });
+
+    onWillUnmount(() => document.removeEventListener(moveEv, moveHandler));
 }

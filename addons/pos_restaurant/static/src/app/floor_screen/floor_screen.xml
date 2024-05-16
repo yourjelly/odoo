@@ -38,7 +38,7 @@
                     <div t-else="" t-ref="map">
                         <t t-foreach="activeTables" t-as="table" t-key="table.id">
                             <Table t-if="!state.selectedTableIds.includes(table.id)" onClick.bind="onSelectTable" table="table" />
-                            <EditableTable t-else="" table="table" selectedTables="selectedTables" onSaveTable.bind="onSaveTable" limit="floorMapRef" />
+                            <EditableTable t-else="" table="table" selectedTables="selectedTables" onSaveTable.bind="onSaveTable" limit="floorMapRef" mousePosition="state.mousePosition" />
                         </t>
                     </div>
                 </t>

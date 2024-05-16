@@ -1,6 +1,11 @@
 /** @odoo-module */
 
-import { getLimits, useMovable, constrain } from "@point_of_sale/app/utils/movable_hook";
+import {
+    getLimits,
+    useMovable,
+    constrain,
+    registerMovingMethod,
+} from "@point_of_sale/app/utils/movable_hook";
 import { onWillUnmount, useEffect, useRef, Component } from "@odoo/owl";
 import { Table } from "@pos_restaurant/app/floor_screen/table";
 import { usePos } from "@point_of_sale/app/store/pos_hook";
@@ -14,6 +19,7 @@ export class EditableTable extends Component {
         limit: { type: Object, shape: { el: [HTMLElement, { value: null }] } },
         table: Table.props.table,
         selectedTables: Array,
+        mousePosition: { type: [Object, { value: null }] },
     };
 
     setup() {
@@ -26,6 +32,18 @@ export class EditableTable extends Component {
             "bottom left": ["minX", "maxY"],
             "bottom right": ["maxX", "maxY"],
         };
+
+        //handle the drag of the table when selecting the table (instant drag and drop)
+        registerMovingMethod({
+            ref: this.root,
+            onMoveStart: () => this.onMoveStart(false),
+            onMove: (delta) => this.onMove(delta),
+            moveEv: "mousemove",
+            endEv: "mouseup",
+            getPos: (ev) => ({ x: ev.clientX, y: ev.clientY }),
+            startPosition: this.props.mousePosition,
+        });
+
         // make table draggable
         useMovable({
             ref: this.root,
@@ -43,7 +61,7 @@ export class EditableTable extends Component {
         onWillUnmount(() => this.props.onSaveTable(this.props.table));
     }
 
-    onMoveStart() {
+    onMoveStart(stopPropagation = true) {
         if (this.pos.floorPlanStyle == "kanban") {
             return;
         }
@@ -53,14 +71,21 @@ export class EditableTable extends Component {
             this.selectedTablesCopy[i] = { ...this.props.selectedTables[i] };
         }
         // stop the next click event from the touch/click release from unselecting the table
-        document.addEventListener("click", (ev) => ev.stopPropagation(), {
-            capture: true,
-            once: true,
-        });
+        if (stopPropagation) {
+            document.addEventListener("click", (ev) => ev.stopPropagation(), {
+                capture: true,
+                once: true,
+            });
+        }
     }
 
     onMove({ dx, dy }) {
-        if (this.pos.floorPlanStyle == "kanban") {
+        if (
+            this.pos.floorPlanStyle == "kanban" ||
+            (typeof dx !== "number" && !isNaN(dx)) ||
+            (typeof dy !== "number" && !isNaN(dy)) ||
+            !this.root.el
+        ) {
             return;
         }
         const { minX, minY, maxX, maxY } = getLimits(this.root.el, this.props.limit.el);
