@@ -11,7 +11,7 @@
                             invisible="state != 'paid'"/>
                     <button name="refund" string="Return Products" type="object"
                         invisible="state == 'draft' or not has_refundable_lines"/>
-                    <field name="state" widget="statusbar" statusbar_visible="draft,paid,done" />
+                    <field name="state" widget="statusbar"/>
                     <field name="has_refundable_lines" invisible="1" />
                 </header>
                 <sheet>
