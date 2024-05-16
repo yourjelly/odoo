@@ -11,6 +11,21 @@ export function delay(wait) {
 }
 
 /**
+ * Deferred is basically a resolvable/rejectable extension of Promise.
+ */
+export class Deferred extends Promise {
+    constructor() {
+        let resolve;
+        let reject;
+        const prom = new Promise((res, rej) => {
+            resolve = res;
+            reject = rej;
+        });
+        return Object.assign(prom, { resolve, reject });
+    }
+}
+
+/**
  * KeepLast is a concurrency primitive that manages a list of tasks, and only
  * keeps the last task active.
  *
@@ -18,30 +33,24 @@ export function delay(wait) {
  */
 export class KeepLast {
     constructor() {
-        this._id = 0;
+        this._def = null;
     }
+
     /**
      * Register a new task
      *
      * @param {Promise<T>} promise
      * @returns {Promise<T>}
      */
-    add(promise) {
-        this._id++;
-        const currentId = this._id;
-        return new Promise((resolve, reject) => {
-            promise
-                .then((value) => {
-                    if (this._id === currentId) {
-                        resolve(value);
-                    }
-                })
-                .catch((reason) => {
-                    // not sure about this part
-                    if (this._id === currentId) {
-                        reject(reason);
-                    }
-                });
+    async add(promise) {
+        const def = new Deferred();
+        this._def = def;
+
+        return promise.finally(() => {
+            if (this._def === def) {
+                def.resolve();
+            }
+            return def;
         });
     }
 }
@@ -81,11 +90,10 @@ export class KeepLast {
  */
 export class Mutex {
     constructor() {
-        this._lock = Promise.resolve();
-        this._queueSize = 0;
-        this._unlockedProm = undefined;
-        this._unlock = undefined;
+        this._def = null;
+        this._unlockDef = null;
     }
+
     /**
      * Add a computation to the queue, it will be executed as soon as the
      * previous computations are completed.
@@ -94,31 +102,30 @@ export class Mutex {
      * @returns {Promise<void>}
      */
     async exec(action) {
-        this._queueSize++;
-        if (!this._unlockedProm) {
-            this._unlockedProm = new Promise((resolve) => {
-                this._unlock = () => {
-                    resolve();
-                    this._unlockedProm = undefined;
-                };
-            });
+        const previousDef = this._def;
+        const def = new Deferred();
+        this._def = def;
+        await previousDef;
+
+        if (!this._unlockDef) {
+            this._unlockDef = new Deferred();
         }
-        const always = () => {
-            return Promise.resolve(action()).finally(() => {
-                if (--this._queueSize === 0) {
-                    this._unlock();
-                }
-            });
-        };
-        this._lock = this._lock.then(always, always);
-        return this._lock;
+
+        return Promise.resolve(action()).finally(() => {
+            def.resolve();
+
+            if (def === this._def) {
+                this._unlockDef.resolve();
+                this._unlockDef = null;
+            }
+        });
     }
     /**
      * @returns {Promise<void>} resolved as soon as the Mutex is unlocked
      *   (directly if it is currently idle)
      */
     getUnlockedDef() {
-        return this._unlockedProm || Promise.resolve();
+        return this._unlockDef ?? Promise.resolve();
     }
 }
 
@@ -134,9 +141,7 @@ export class Mutex {
  */
 export class Race {
     constructor() {
-        this.currentProm = null;
-        this.currentPromResolver = null;
-        this.currentPromRejecter = null;
+        this._def = null;
     }
     /**
      * Register a new promise. If there is an ongoing race, the promise is added
@@ -148,45 +153,21 @@ export class Race {
      * @returns {Promise<T>}
      */
     add(promise) {
-        if (!this.currentProm) {
-            this.currentProm = new Promise((resolve, reject) => {
-                this.currentPromResolver = (value) => {
-                    this.currentProm = null;
-                    this.currentPromResolver = null;
-                    this.currentPromRejecter = null;
-                    resolve(value);
-                };
-                this.currentPromRejecter = (error) => {
-                    this.currentProm = null;
-                    this.currentPromResolver = null;
-                    this.currentPromRejecter = null;
-                    reject(error);
-                };
-            });
+        if (!this._def) {
+            this._def = new Deferred();
         }
-        promise.then(this.currentPromResolver).catch(this.currentPromRejecter);
-        return this.currentProm;
+
+        promise.then(this._def.resolve, this._def.reject).finally(() => {
+            this._def = null;
+        });
+
+        return this._def;
     }
     /**
      * @returns {Promise<T>|null} promise resolved as soon as the race is over, or
      *   null if there is no race ongoing)
      */
     getCurrentProm() {
-        return this.currentProm;
-    }
-}
-
-/**
- * Deferred is basically a resolvable/rejectable extension of Promise.
- */
-export class Deferred extends Promise {
-    constructor() {
-        let resolve;
-        let reject;
-        const prom = new Promise((res, rej) => {
-            resolve = res;
-            reject = rej;
-        });
-        return Object.assign(prom, { resolve, reject });
+        return this._def;
     }
 }
