@@ -146,6 +146,7 @@ export class AutoComplete extends Component {
         this.sources = [];
         this.state.activeSourceOption = null;
         const proms = [];
+        debugger;
         for (const pSource of this.props.sources) {
             const source = this.makeSource(pSource);
             this.sources.push(source);

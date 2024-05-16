@@ -1205,7 +1205,6 @@ export class Record extends DataPoint {
             this._applyChanges(changes);
             return this.model.root._multiSave(this);
         }
-
         let onchangeServerValues = {};
         if (!this.model._urgentSave && !withoutOnchange) {
             onchangeServerValues = await this._getOnchangeValues(changes);

@@ -925,6 +925,5 @@ export function createRelatedModels(modelDefs, modelClasses = {}, indexes = {}) 
     }
 
     models.loadData = loadData;
-
     return { models, records, indexedRecords, orderedRecords };
 }

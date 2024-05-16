@@ -503,7 +503,7 @@ export class PosData extends Reactive {
 export const PosDataService = {
     dependencies: PosData.serviceDependencies,
     async start(env, deps) {
-        return new PosData(env, deps).ready;
+        return await new PosData(env, deps).ready;;
     },
 };
 
