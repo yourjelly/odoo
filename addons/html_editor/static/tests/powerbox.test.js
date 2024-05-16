@@ -338,13 +338,16 @@ test("should insert a 3x3 table on type `/table`", async () => {
     );
 });
 
-test.todo.tags("mobile")("should insert a 3x3 table on type `/table` in mobile view", async () => {
+test.tags("mobile")("should insert a 3x3 table on type `/table` in mobile view", async () => {
     const { el, editor } = await setupEditor("<p>[]<br></p>");
     insertText(editor, "/table");
     await animationFrame();
     press("Enter");
+    await animationFrame();
+    press("Enter");
+    await animationFrame();
     expect(getContent(el)).toBe(
-        `<table class="table table-bordered o_table"><tbody><tr><td>[]<p><br></p></td><td><p><br></p></td><td><p><br></p></td></tr><tr><td><p><br></p></td><td><p><br></p></td><td><p><br></p></td></tr><tr><td><p><br></p></td><td><p><br></p></td><td><p><br></p></td></tr></tbody></table><p><br></p>`
+        `<table class="table table-bordered o_table"><tbody><tr><td><p placeholder="Type "/" for commands" class="o-we-hint">[]<br></p></td><td><p><br></p></td><td><p><br></p></td></tr><tr><td><p><br></p></td><td><p><br></p></td><td><p><br></p></td></tr><tr><td><p><br></p></td><td><p><br></p></td><td><p><br></p></td></tr></tbody></table><p><br></p>`
     );
 });
 
