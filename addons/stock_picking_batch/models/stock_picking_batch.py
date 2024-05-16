@@ -194,14 +194,11 @@ class StockPickingBatch(models.Model):
 
     def action_done(self):
         def has_no_quantity(picking):
-            return all(not m.picked or float_is_zero(m.quantity, precision_rounding=m.product_uom.rounding) for m in picking.move_ids if m.state not in ('done', 'cancel'))
+            return all(float_is_zero(m.quantity, precision_rounding=m.product_uom.rounding) for m in picking.move_ids if m.state not in ('done', 'cancel'))
 
         self.ensure_one()
         self._check_company()
-        # Empty 'waiting for another operation' pickings will be removed from the batch when it is validated.
         pickings = self.mapped('picking_ids').filtered(lambda picking: picking.state not in ('cancel', 'done'))
-        empty_waiting_pickings = self.mapped('picking_ids').filtered(lambda p: p.state == 'waiting' and has_no_quantity(p))
-        pickings = pickings - empty_waiting_pickings
 
         empty_pickings = set()
         for picking in pickings:
@@ -214,17 +211,17 @@ class StockPickingBatch(models.Model):
                     picking.batch_id.id,
                     picking.batch_id.name))
 
-        # Run sanity_check as a batch and ignore the one in button_validate() since it is done here.
-        pickings._sanity_check(separate_pickings=False)
-        # Skip sanity_check in pickings button_validate() & remove 'waiting' pickings from the batch
-        context = {'skip_sanity_check': True, 'pickings_to_detach': empty_waiting_pickings.ids}
+        context = {'skip_sanity_check': True}
         if len(empty_pickings) == len(pickings):
+            # All pickings are empty, the sanity check should be triggering an error.
+            pickings._sanity_check(separate_pickings=False)
             return pickings.with_context(**context).button_validate()
         else:
             # If some pickings are at least partially done, other pickings (empty & waiting) will be removed from batch without being cancelled in case of no backorder
             pickings = pickings - self.env['stock.picking'].browse(empty_pickings)
-            context['pickings_to_detach'] = context['pickings_to_detach'] + list(empty_pickings)
-            return pickings.with_context(skip_immediate=True, **context).button_validate()
+            pickings._sanity_check(separate_pickings=False)
+            context['pickings_to_detach'] = list(empty_pickings)
+            return pickings.with_context(**context).button_validate()
 
     def action_assign(self):
         self.ensure_one()

@@ -1080,10 +1080,14 @@ class Picking(models.Model):
         precision_digits = self.env['decimal.precision'].precision_get('Product Unit of Measure')
 
         no_quantities_done_ids = set()
-        pickings_without_quantities = self.env['stock.picking']
-        for picking in self:
-            if all(float_is_zero(move.quantity, precision_digits=precision_digits) for move in picking.move_ids.filtered(lambda m: m.state not in ('done', 'cancel'))):
-                pickings_without_quantities |= picking
+        pickings_without_quantities = False
+        if separate_pickings:
+            for picking in self:
+                if all(float_is_zero(move.quantity, precision_digits=precision_digits) for move in picking.move_ids.filtered(lambda m: m.state not in ('done', 'cancel'))):
+                    pickings_without_quantities = True
+                    break
+        elif not separate_pickings and all(float_is_zero(move.quantity, precision_digits=precision_digits) for move in self.move_ids.filtered(lambda m: m.state not in ('done', 'cancel'))):
+            pickings_without_quantities = True
 
         pickings_using_lots = self.filtered(lambda p: p.picking_type_id.use_create_lots or p.picking_type_id.use_existing_lots)
         if pickings_using_lots:

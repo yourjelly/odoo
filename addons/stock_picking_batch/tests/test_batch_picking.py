@@ -3,6 +3,7 @@
 
 from datetime import datetime, timedelta
 
+from odoo import Command
 from odoo.exceptions import UserError
 from odoo.tests import Form, tagged
 from odoo.tests.common import TransactionCase
@@ -306,7 +307,8 @@ class TestBatchPicking(TransactionCase):
         self.assertEqual(self.picking_client_1.state, 'assigned', 'Picking 1 should be ready')
         self.assertEqual(self.picking_client_2.state, 'assigned', 'Picking 2 should be ready')
 
-        self.picking_client_1.move_ids.write({'quantity': 5, 'picked': True})
+        # Set the quantity of picking 0 so we only process the partially available picking
+        self.picking_client_2.move_ids.write({'quantity': 0})
         # There should be a wizard asking to make a backorder
         back_order_wizard_dict = self.batch.action_done()
         self.assertTrue(back_order_wizard_dict)
@@ -676,6 +678,54 @@ class TestBatchPicking(TransactionCase):
         })
         receipt03.action_confirm()
         self.assertEqual(batch.picking_ids, backorder | receipt02 | receipt03)
+
+    def test_validatation_of_partially_empty_picking(self):
+        """
+            Check that you can validate a batch transfer containing an empty picking,
+            that the picking stays unchanged and is removed from the transfer
+        """
+        self.productA.tracking = 'none'
+        self.productB.tracking = 'none'
+        picking_1, picking_2 = self.env['stock.picking'].create([
+            {
+            'picking_type_id': self.picking_type_in,
+            },
+            {
+            'picking_type_id': self.picking_type_in,
+            },
+        ])
+        self.env['stock.move'].create([
+            {
+            'name': self.productA.name,
+            'product_id': self.productA.id,
+            'product_uom_qty': 2,
+            'product_uom': self.productA.uom_id.id,
+            'picking_id': picking_1.id,
+            'location_id': picking_1.location_id.id,
+            'location_dest_id': picking_1.location_dest_id.id,
+            },
+            {
+            'name': self.productB.name,
+            'product_id': self.productB.id,
+            'product_uom_qty': 3,
+            'product_uom': self.productB.uom_id.id,
+            'picking_id': picking_2.id,
+            'location_id': picking_2.location_id.id,
+            'location_dest_id': picking_2.location_dest_id.id,
+            },
+        ])
+        (picking_1 | picking_2).action_confirm()
+        batch = self.env['stock.picking.batch'].create({
+            'name': 'NEW BATCH',
+            'picking_ids': [Command.link(picking_1.id), Command.link(picking_2.id)],
+        })
+        batch.move_ids.filtered(lambda m: m.product_id == self.productB).quantity = 0.0
+        batch.action_done()
+        self.assertEqual(batch.state, 'done')
+        self.assertEqual(batch.picking_ids, picking_1)
+        self.assertEqual([picking_1.state, picking_1.move_ids.quantity, picking_1.move_ids.picked], ['done', 2.0, True])
+        self.assertEqual([picking_2.state, picking_2.move_ids.quantity, picking_2.move_ids.picked], ['assigned', 0.0, False])
+
 
 @tagged('-at_install', 'post_install')
 class TestBatchPicking02(TransactionCase):
