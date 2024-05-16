@@ -1962,7 +1962,7 @@ class TestSaleStock(TestSaleStockCommon, ValuationReconciliationTestCommon):
             ],
         })
         so.action_confirm()
-        self.assertEqual(so.delivery_status, 'pending')
+        self.assertEqual(so.delivery_status, 'preparation')
 
         pick01 = so.picking_ids
         pick01.move_ids.write({'quantity': 10, 'picked': True})
