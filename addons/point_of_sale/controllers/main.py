@@ -259,5 +259,6 @@ class PosController(PortalAccount):
         for field in additional_invoice_fields:
             with_context.update({f'default_{field.name}': invoice_values.get(field.name)})
         # Allowing default values for moves is important for some localizations that would need specific fields to be set on the invoice, such as Mexico.
+        breakpoint()
         pos_order.with_context(with_context).action_pos_order_invoice()
         return request.redirect('/my/invoices/%s?access_token=%s' % (pos_order.account_move.id, pos_order.account_move._portal_ensure_token()))

@@ -4,3 +4,4 @@
 from . import pos_order
 from . import pos_order_line
 from . import product_product
+from . import res_country_state
